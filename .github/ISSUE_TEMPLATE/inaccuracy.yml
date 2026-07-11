@@ -33,6 +33,10 @@ body:
         - Scaleway Generative APIs
         - NVIDIA NIM
         - Vercel AI Gateway
+        - SiliconFlow
+        - Z.ai (Zhipu AI / GLM)
+        - IBM watsonx.ai (Lite plan)
+        - OVHcloud AI Endpoints
         - Other / not listed
     validations:
       required: true
