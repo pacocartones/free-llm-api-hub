@@ -1,0 +1,68 @@
+name: 🔧 Report an outdated or incorrect entry
+description: A provider's free tier, limits, or link changed and this list is behind.
+title: "[outdated] "
+labels: ["maintenance"]
+body:
+  - type: dropdown
+    id: provider
+    attributes:
+      label: Which provider entry is affected?
+      description: Pick the provider from the list, or choose "Other / not listed" if you're proposing a brand-new entry.
+      options:
+        - Google Gemini API (AI Studio)
+        - Groq
+        - OpenRouter
+        - Cloudflare Workers AI
+        - GitHub Models
+        - Cohere
+        - Cerebras
+        - Mistral (La Plateforme)
+        - HuggingFace
+        - Fireworks AI
+        - Baseten
+        - Nebius AI Studio
+        - Novita AI
+        - AI21 Labs
+        - Upstage
+        - NLP Cloud
+        - Alibaba Cloud (Model Studio)
+        - Modal
+        - Inference.net
+        - Hyperbolic
+        - SambaNova Cloud
+        - Scaleway Generative APIs
+        - NVIDIA NIM
+        - Vercel AI Gateway
+        - Other / not listed
+    validations:
+      required: true
+  - type: textarea
+    id: whats-wrong
+    attributes:
+      label: What's wrong with the current entry?
+      placeholder: e.g. "The free tier no longer exists" / "The rate limit is now 60 req/min, not 30" / "The docs link 404s"
+    validations:
+      required: true
+  - type: textarea
+    id: correct-info
+    attributes:
+      label: What's the correct information?
+      placeholder: The accurate free tier / limit / credit amount, as best you know it.
+    validations:
+      required: false
+  - type: input
+    id: source
+    attributes:
+      label: Link to the provider's own official docs confirming this
+      description: Please link the primary source, not a third-party summary — see CONTRIBUTING.md.
+      placeholder: "https://..."
+    validations:
+      required: true
+  - type: input
+    id: checked-date
+    attributes:
+      label: Date you checked this
+      description: "Format: YYYY-MM-DD — used to set the Last verified column."
+      placeholder: "2026-07-11"
+    validations:
+      required: true
