@@ -1,0 +1,6 @@
+{
+  "schemaVersion": 1,
+  "label": "freshness",
+  "message": "6/24 verified <90d",
+  "color": "red"
+}
