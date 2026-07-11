@@ -1,12 +1,15 @@
 # Free LLM API Hub
 
 ![Link check](https://github.com/pacocartones/free-llm-api-hub/actions/workflows/check-freshness.yml/badge.svg)
+![Freshness](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/pacocartones/free-llm-api-hub/main/badge-freshness.json)
 ![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)
 ![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)
 
 A curated, actively-verified list of LLM API providers offering a free tier, free trial credits, or a generous no-cost quota — for developers who want to build, prototype, or run side projects without paying up front.
 
-**What makes this list different:** every entry carries a `Last verified` date, and a [scheduled GitHub Action](.github/workflows/check-freshness.yml) checks the documentation links referenced below on a weekly basis and opens an issue automatically if something breaks. Free-tier terms change constantly and most curated lists in this space go stale within months — this one is built to surface that drift instead of hiding it. See [How we keep this updated](#how-we-keep-this-updated).
+**🔎 [Open the interactive explorer](https://pacocartones.github.io/free-llm-api-hub/)** — filter by "no phone required," "no card required," "commercial use OK," or sort by any column. Same data as below, easier to slice. Prefer to consume it programmatically? Grab [`providers.json`](providers.json), the machine-readable source of truth this page and the README are both generated from.
+
+**What makes this list different:** every entry carries a `Last verified` date, and a [scheduled GitHub Action](.github/workflows/check-freshness.yml) checks the documentation links referenced below on a weekly basis and opens an issue automatically if something breaks. The **Freshness** badge above is computed the same way, straight from `providers.json` — no one has to take our word for how current this is. Free-tier terms change constantly and most curated lists in this space go stale within months — this one is built to surface that drift instead of hiding it. See [How we keep this updated](#how-we-keep-this-updated).
 
 > ⚠️ **Disclaimer:** this is an independent, community-maintained list. It is not affiliated with, endorsed by, or sponsored by any of the providers below. Terms, limits, and pricing can and do change without notice — always confirm against the provider's own docs (linked in each row) before relying on a free tier for anything important. Entries marked ⚠️ have not yet been independently re-verified against the provider's official docs and are sourced from community tracking; treat their numbers as indicative, not authoritative, until confirmed.
 
@@ -85,17 +88,28 @@ Free-tier terms in this space change fast, and most curated lists like this one 
 
 1. **Every entry carries a `Last verified` date.** No date, no entry.
 2. **A weekly GitHub Action** ([`.github/workflows/check-freshness.yml`](.github/workflows/check-freshness.yml)) checks every documentation link in this README and automatically opens (or updates) a tracking issue if any of them return an error — a strong signal that the provider changed something.
-3. **Entries marked ⚠️** are known to need direct re-verification and are called out honestly rather than presented with false confidence.
+3. **The same Action computes the Freshness badge** at the top of this README directly from [`providers.json`](providers.json) — it counts how many entries are `verified: true` with a `Last verified` date inside the last 90 days, so the badge is a real, auditable number, not a claim.
+4. **Entries marked ⚠️** are known to need direct re-verification and are called out honestly rather than presented with false confidence.
+5. **[Reporting an outdated entry](../../issues/new?template=inaccuracy.yml) takes under a minute** — a structured form asks for the provider, what changed, and a source link, so anyone can help keep this accurate without writing a full issue from scratch.
 
-Planned next step: extend the automation to flag entries whose `Last verified` date is more than ~90 days old, not just broken links, so silent numeric drift (a limit that quietly changed, not just a dead link) gets caught too.
+## Embed the freshness badge
+
+Building something on top of this list, or just want to vouch for it from your own README? Drop this in:
+
+```markdown
+[![Free LLM API Hub](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/pacocartones/free-llm-api-hub/main/badge-freshness.json)](https://github.com/pacocartones/free-llm-api-hub)
+```
+
+It renders the same live, auditable freshness count shown above — not a static "as of some date I forgot to update" badge.
 
 ## Contributing
 
-Found an outdated limit, a broken link, or a provider that should be on this list? Please open an issue or a pull request. When submitting a new entry or updating an existing one, please:
+Found an outdated limit, a broken link, or a provider that should be on this list? The fastest way is the [structured issue form](../../issues/new?template=inaccuracy.yml) — or open a pull request directly. When submitting a new entry or updating an existing one, please:
 
 - Link directly to the provider's own official pricing/rate-limit docs (not a third-party summary)
 - Include the date you checked it, so we can keep the `Last verified` column honest
 - Note any catch — phone verification requirements, "evaluation only" clauses, data-training opt-ins, restrictions on commercial use — the fine print is often the most useful part of an entry
+- If you're updating README.md, please mirror the same change in [`providers.json`](providers.json) so the interactive explorer and the freshness badge stay in sync
 
 ## License
 
