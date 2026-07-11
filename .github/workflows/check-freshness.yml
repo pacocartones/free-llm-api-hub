@@ -4,10 +4,14 @@ on:
   schedule:
     - cron: '0 6 * * 1' # every Monday at 06:00 UTC
   workflow_dispatch: {}
+  push:
+    branches: [main]
+    paths:
+      - 'providers.json'
 
 permissions:
   issues: write
-  contents: read
+  contents: write
 
 jobs:
   check-links:
@@ -55,4 +59,68 @@ jobs:
             gh issue comment "$existing" --body-file /tmp/body.txt
           else
             gh issue create --title "🔗 Broken link report" --body-file /tmp/body.txt --label "maintenance"
+          fi
+
+  update-badge:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Compute freshness stats and write badge JSON
+        run: |
+          python3 - <<'PYEOF'
+          import json
+          from datetime import datetime, timezone
+
+          with open('providers.json') as f:
+              data = json.load(f)
+
+          providers = data['providers']
+          total = len(providers)
+          now = datetime.now(timezone.utc)
+
+          def is_recent(p):
+              if not p.get('verified') or not p.get('last_verified'):
+                  return False
+              try:
+                  d = datetime.strptime(p['last_verified'], '%Y-%m-%d').replace(tzinfo=timezone.utc)
+              except ValueError:
+                  return False
+              return (now - d).days <= 90
+
+          fresh = sum(1 for p in providers if is_recent(p))
+          ratio = fresh / total if total else 0
+
+          if ratio >= 0.7:
+              color = 'brightgreen'
+          elif ratio >= 0.4:
+              color = 'yellow'
+          else:
+              color = 'red'
+
+          badge = {
+              'schemaVersion': 1,
+              'label': 'freshness',
+              'message': f'{fresh}/{total} verified <90d',
+              'color': color,
+          }
+
+          with open('badge-freshness.json', 'w') as f:
+              json.dump(badge, f, indent=2)
+              f.write('\n')
+
+          print(badge)
+          PYEOF
+
+      - name: Commit badge if changed
+        run: |
+          if ! git diff --quiet -- badge-freshness.json; then
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add badge-freshness.json
+            git commit -m "chore: update freshness badge [skip ci]"
+            git push
+          else
+            echo "Badge unchanged, nothing to commit."
           fi
