@@ -1,13 +1,34 @@
 # Free LLM API Hub
 
+![Link check](https://github.com/pacocartones/free-llm-api-hub/actions/workflows/check-freshness.yml/badge.svg)
+![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)
+![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)
+
 A curated, actively-verified list of LLM API providers offering a free tier, free trial credits, or a generous no-cost quota — for developers who want to build, prototype, or run side projects without paying up front.
 
 **What makes this list different:** every entry carries a `Last verified` date, and a [scheduled GitHub Action](.github/workflows/check-freshness.yml) checks the documentation links referenced below on a weekly basis and opens an issue automatically if something breaks. Free-tier terms change constantly and most curated lists in this space go stale within months — this one is built to surface that drift instead of hiding it. See [How we keep this updated](#how-we-keep-this-updated).
 
 > ⚠️ **Disclaimer:** this is an independent, community-maintained list. It is not affiliated with, endorsed by, or sponsored by any of the providers below. Terms, limits, and pricing can and do change without notice — always confirm against the provider's own docs (linked in each row) before relying on a free tier for anything important. Entries marked ⚠️ have not yet been independently re-verified against the provider's official docs and are sourced from community tracking; treat their numbers as indicative, not authoritative, until confirmed.
 
+## Quick picks by use case
+
+Not sure where to start? Here's the fast answer for the most common asks — each links down to the full row for the exact limits and fine print.
+
+| I want... | Go with | Why |
+|---|---|---|
+| The smartest model, free | **[Google Gemini API](#ongoing-free-tiers)** (2.5 Pro, limited) | The only entry here with genuinely frontier-class model access, not just open-weight models |
+| The fastest inference, free | **[Groq](#ongoing-free-tiers)** or **[Cerebras](#ongoing-free-tiers)** | Both run on purpose-built inference chips — dramatically faster than typical GPU-served APIs |
+| The highest daily volume, free | **[Cloudflare Workers AI](#ongoing-free-tiers)** (10,000 Neurons/day) or **[OpenRouter](#ongoing-free-tiers)** (1,000 req/day with a $10 one-time topup) | Best ceiling here for a side project with real traffic |
+| No credit card and no phone number, just an API key | **[OpenRouter](#ongoing-free-tiers)** or **[Google Gemini API](#ongoing-free-tiers)** | Groq, Mistral, and NLP Cloud all gate signup behind phone verification |
+| To try open-weight models (Llama, DeepSeek, Qwen, Gemma) | **[OpenRouter](#ongoing-free-tiers)** or **[Cloudflare Workers AI](#ongoing-free-tiers)** | Widest model selection among the ongoing-free-tier providers |
+| A larger one-time credit to build something bigger | **[Baseten](#one-time-trial-credits)** ($30) | Largest trial credit in this list |
+| Something safe to build a commercial side project on | **[Cloudflare Workers AI](#ongoing-free-tiers)** or **[Groq](#ongoing-free-tiers)** | Neither restricts the free tier to personal/evaluation use the way Cohere's trial keys or NVIDIA NIM do |
+
+These are starting points, not guarantees — always check the full row before you build on top of any of these.
+
 ## Contents
 
+- [Quick picks by use case](#quick-picks-by-use-case)
 - [Ongoing free tiers](#ongoing-free-tiers)
 - [One-time trial credits](#one-time-trial-credits)
 - [Notably NOT free](#notably-not-free)
