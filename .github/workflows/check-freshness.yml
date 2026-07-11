@@ -1,0 +1,58 @@
+name: Check link freshness
+
+on:
+  schedule:
+    - cron: '0 6 * * 1' # every Monday at 06:00 UTC
+  workflow_dispatch: {}
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  check-links:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Extract and check links from README
+        id: check
+        run: |
+          set -e
+          grep -oE '\(https?://[^)]+\)' README.md | tr -d '()' | sort -u > /tmp/urls.txt
+          echo "Checking $(wc -l < /tmp/urls.txt) unique URLs..."
+
+          : > /tmp/failed.txt
+          while IFS= read -r url; do
+            code=$(curl -s -o /dev/null -w "%{http_code}" -L --max-time 15 -A "Mozilla/5.0 (compatible; free-llm-api-hub-linkcheck/1.0)" "$url" || echo "000")
+            if [ "$code" -ge 400 ] || [ "$code" = "000" ]; then
+              echo "- $url (HTTP $code)" >> /tmp/failed.txt
+            fi
+          done < /tmp/urls.txt
+
+          if [ -s /tmp/failed.txt ]; then
+            echo "has_failures=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_failures=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Open or update tracking issue
+        if: steps.check.outputs.has_failures == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          {
+            echo "The following links referenced in README.md returned an error during the automated weekly check on $(date -u +%Y-%m-%d):"
+            echo ""
+            cat /tmp/failed.txt
+            echo ""
+            echo "Please verify whether the provider moved their docs or changed their terms, then update the corresponding entry (including its \`Last verified\` date) or fix/remove the link."
+          } > /tmp/body.txt
+
+          existing=$(gh issue list --search "Broken link report in:title" --state open --json number --jq '.[0].number // empty')
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --body-file /tmp/body.txt
+          else
+            gh issue create --title "🔗 Broken link report" --body-file /tmp/body.txt --label "maintenance"
+          fi
