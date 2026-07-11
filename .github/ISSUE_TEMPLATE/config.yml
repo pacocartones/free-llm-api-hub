@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: 💬 Suggest a new provider
+    url: https://github.com/pacocartones/free-llm-api-hub/issues/new?title=%5Bnew+provider%5D+&labels=new-provider
+    about: Propose a free-tier or trial-credit LLM API provider that isn't on the list yet.
