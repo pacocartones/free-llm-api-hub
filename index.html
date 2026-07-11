@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Free LLM API Hub — interactive explorer</title>
+<meta name="description" content="Filter and sort a curated, actively-verified list of LLM API providers with a free tier or free trial credits.">
+<style>
+  :root {
+    --bg: #0d1117;
+    --panel: #161b22;
+    --border: #30363d;
+    --text: #e6edf3;
+    --muted: #8b949e;
+    --accent: #58a6ff;
+    --green: #3fb950;
+    --yellow: #d29922;
+    --red: #f85149;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+  }
+  header {
+    padding: 32px 24px 20px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+  h1 { font-size: 1.6rem; margin: 0 0 8px; }
+  header p { color: var(--muted); margin: 4px 0; max-width: 70ch; }
+  header a { color: var(--accent); }
+  .controls {
+    max-width: 1100px;
+    margin: 0 auto 16px;
+    padding: 16px 24px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    align-items: center;
+  }
+  .controls input[type="search"] {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    min-width: 220px;
+  }
+  .toggle-group { display: flex; gap: 6px; }
+  .toggle-group button {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.85rem;
+  }
+  .toggle-group button.active {
+    background: var(--accent);
+    color: #04101f;
+    border-color: var(--accent);
+    font-weight: 600;
+  }
+  .filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+  }
+  .filters label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.85rem;
+    color: var(--muted);
+    cursor: pointer;
+    user-select: none;
+  }
+  .filters input[type="checkbox"] { accent-color: var(--accent); }
+  #count {
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin-left: auto;
+  }
+  main { max-width: 1100px; margin: 0 auto; padding: 0 24px 60px; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+  thead th {
+    text-align: left;
+    padding: 10px 12px;
+    border-bottom: 2px solid var(--border);
+    color: var(--muted);
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    position: sticky;
+    top: 0;
+    background: var(--bg);
+  }
+  thead th:hover { color: var(--text); }
+  thead th.sorted::after { content: " \25BE"; color: var(--accent); }
+  tbody td { padding: 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tbody tr:hover { background: var(--panel); }
+  .name { font-weight: 600; }
+  .name a { color: var(--text); text-decoration: none; }
+  .name a:hover { text-decoration: underline; color: var(--accent); }
+  .badge {
+    display: inline-block;
+    font-size: 0.72rem;
+    padding: 2px 7px;
+    border-radius: 999px;
+    margin: 0 4px 4px 0;
+    white-space: nowrap;
+  }
+  .badge.verified { background: rgba(63,185,80,.15); color: var(--green); border: 1px solid rgba(63,185,80,.4); }
+  .badge.unverified { background: rgba(210,153,34,.15); color: var(--yellow); border: 1px solid rgba(210,153,34,.4); }
+  .badge.category-ongoing { background: rgba(88,166,255,.15); color: var(--accent); border: 1px solid rgba(88,166,255,.4); }
+  .badge.category-trial { background: rgba(139,148,158,.15); color: var(--muted); border: 1px solid rgba(139,148,158,.4); }
+  .flags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+  .flag { font-size: 0.72rem; color: var(--muted); }
+  .notes { color: var(--muted); font-size: 0.85rem; }
+  .empty { text-align: center; color: var(--muted); padding: 40px 0; }
+  footer {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 20px 24px 60px;
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+  footer a { color: var(--accent); }
+</style>
+</head>
+<body>
+<header>
+  <h1>Free LLM API Hub — interactive explorer</h1>
+  <p>Filter and sort the same data as the <a href="https://github.com/pacocartones/free-llm-api-hub">README</a> — live from <a href="providers.json">providers.json</a>, the machine-readable source of truth for this list.</p>
+  <p>⚠️ = not yet independently re-verified against the provider's own docs. See the <a href="https://github.com/pacocartones/free-llm-api-hub#how-we-keep-this-updated">freshness policy</a>.</p>
+</header>
+
+<div class="controls">
+  <input type="search" id="search" placeholder="Search providers…">
+  <div class="toggle-group" id="categoryToggle">
+    <button data-cat="all" class="active">All</button>
+    <button data-cat="ongoing">Ongoing free tier</button>
+    <button data-cat="trial">Trial credit</button>
+  </div>
+  <div class="filters">
+    <label><input type="checkbox" id="f-nophone"> No phone required</label>
+    <label><input type="checkbox" id="f-nocard"> No card required</label>
+    <label><input type="checkbox" id="f-commercial"> Commercial use OK</label>
+    <label><input type="checkbox" id="f-verified"> Verified only</label>
+  </div>
+  <span id="count"></span>
+</div>
+
+<main>
+  <table id="table">
+    <thead>
+      <tr>
+        <th data-key="name">Provider</th>
+        <th data-key="category">Type</th>
+        <th data-key="free_tier">Free tier / credit</th>
+        <th data-key="notes">Notes</th>
+        <th data-key="verified">Status</th>
+      </tr>
+    </thead>
+    <tbody id="tbody"></tbody>
+  </table>
+  <div class="empty" id="empty" style="display:none;">No providers match these filters.</div>
+</main>
+
+<footer>
+  Independent, community-maintained list — not affiliated with any provider listed. Data via <a href="providers.json">providers.json</a>. Source and contribution guide: <a href="https://github.com/pacocartones/free-llm-api-hub">github.com/pacocartones/free-llm-api-hub</a>.
+</footer>
+
+<script>
+let DATA = [];
+let sortKey = 'name';
+let sortDir = 1;
+let category = 'all';
+
+function flagLine(p) {
+  const parts = [];
+  if (p.phone_required === false) parts.push('📵 no phone');
+  if (p.phone_required === true) parts.push('📱 phone required');
+  if (p.card_required === false) parts.push('🚫💳 no card');
+  if (p.card_required === true) parts.push('📳 card required');
+  if (p.commercial_ok === true) parts.push('🏢 commercial OK');
+  if (p.commercial_ok === false) parts.push('🔬 eval only');
+  return parts.join(' · ');
+}
+
+function render() {
+  const q = document.getElementById('search').value.trim().toLowerCase();
+  const nophone = document.getElementById('f-nophone').checked;
+  const nocard = document.getElementById('f-nocard').checked;
+  const commercial = document.getElementById('f-commercial').checked;
+  const verifiedOnly = document.getElementById('f-verified').checked;
+
+  let rows = DATA.filter(p => {
+    if (category !== 'all' && p.category !== category) return false;
+    if (q && !(p.name.toLowerCase().includes(q) || (p.free_tier||'').toLowerCase().includes(q) || (p.notes||'').toLowerCase().includes(q))) return false;
+    if (nophone && p.phone_required !== false) return false;
+    if (nocard && p.card_required !== false) return false;
+    if (commercial && p.commercial_ok !== true) return false;
+    if (verifiedOnly && p.verified !== true) return false;
+    return true;
+  });
+
+  rows.sort((a, b) => {
+    let av = a[sortKey], bv = b[sortKey];
+    if (typeof av === 'boolean') { av = av ? 1 : 0; bv = bv ? 1 : 0; }
+    av = (av === null || av === undefined) ? '' : av;
+    bv = (bv === null || bv === undefined) ? '' : bv;
+    if (av < bv) return -1 * sortDir;
+    if (av > bv) return 1 * sortDir;
+    return 0;
+  });
+
+  const tbody = document.getElementById('tbody');
+  tbody.innerHTML = '';
+  document.getElementById('empty').style.display = rows.length ? 'none' : 'block';
+  document.getElementById('count').textContent = rows.length + ' / ' + DATA.length + ' providers';
+
+  for (const p of rows) {
+    const tr = document.createElement('tr');
+    const nameCell = p.docs_url
+      ? `<a href="${p.docs_url}" target="_blank" rel="noopener">${p.name}</a>`
+      : p.name;
+    tr.innerHTML = `
+      <td class="name">${nameCell}</td>
+      <td><span class="badge category-${p.category}">${p.category === 'ongoing' ? 'Ongoing' : 'Trial credit'}</span></td>
+      <td>${p.free_tier || ''}<div class="flags"><span class="flag">${flagLine(p)}</span></div></td>
+      <td class="notes">${p.notes || ''}</td>
+      <td>
+        <span class="badge ${p.verified ? 'verified' : 'unverified'}">${p.verified ? '✓ verified ' + (p.last_verified || '') : '⚠️ unverified'}</span>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  }
+}
+
+document.querySelectorAll('#categoryToggle button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('#categoryToggle button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    category = btn.dataset.cat;
+    render();
+  });
+});
+
+document.querySelectorAll('thead th[data-key]').forEach(th => {
+  th.addEventListener('click', () => {
+    const key = th.dataset.key;
+    if (sortKey === key) { sortDir *= -1; } else { sortKey = key; sortDir = 1; }
+    document.querySelectorAll('thead th').forEach(h => h.classList.remove('sorted'));
+    th.classList.add('sorted');
+    render();
+  });
+});
+
+['search', 'f-nophone', 'f-nocard', 'f-commercial', 'f-verified'].forEach(id => {
+  document.getElementById(id).addEventListener('input', render);
+});
+
+fetch('providers.json')
+  .then(r => r.json())
+  .then(json => { DATA = json.providers; render(); })
+  .catch(err => {
+    document.getElementById('empty').style.display = 'block';
+    document.getElementById('empty').textContent = 'Could not load providers.json: ' + err;
+  });
+</script>
+</body>
+</html>
