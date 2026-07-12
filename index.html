@@ -25,6 +25,31 @@
     color: var(--text);
     line-height: 1.5;
   }
+  .sr-only {
+    position: absolute;
+    width: 1px; height: 1px;
+    padding: 0; margin: -1px;
+    overflow: hidden;
+    clip: rect(0,0,0,0);
+    white-space: nowrap;
+    border: 0;
+  }
+  .skip-link {
+    position: absolute;
+    left: 8px;
+    top: -48px;
+    background: var(--accent);
+    color: #04101f;
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: top .15s ease-in-out;
+    z-index: 100;
+  }
+  .skip-link:focus {
+    top: 8px;
+  }
   header {
     padding: 32px 24px 20px;
     max-width: 1100px;
@@ -67,6 +92,14 @@
     border-color: var(--accent);
     font-weight: 600;
   }
+  .toggle-group button:focus-visible,
+  .export-group button:focus-visible,
+  thead th[tabindex]:focus-visible,
+  .controls input[type="search"]:focus-visible,
+  .skip-link:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
   .filters {
     display: flex;
     flex-wrap: wrap;
@@ -82,6 +115,17 @@
     user-select: none;
   }
   .filters input[type="checkbox"] { accent-color: var(--accent); }
+  .export-group { display: flex; gap: 6px; }
+  .export-group button {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.85rem;
+  }
+  .export-group button:hover { border-color: var(--accent); color: var(--accent); }
   #count {
     font-size: 0.85rem;
     color: var(--muted);
@@ -89,6 +133,7 @@
   }
   main { max-width: 1100px; margin: 0 auto; padding: 0 24px 60px; }
   table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+  caption { text-align: left; }
   thead th {
     text-align: left;
     padding: 10px 12px;
@@ -135,18 +180,20 @@
 </style>
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to provider table</a>
 <header>
   <h1>Free LLM API Hub — interactive explorer</h1>
   <p>Filter and sort the same data as the <a href="https://github.com/pacocartones/free-llm-api-hub">README</a> — live from <a href="providers.json">providers.json</a>, the machine-readable source of truth for this list.</p>
   <p>⚠️ = not yet independently re-verified against the provider's own docs. See the <a href="https://github.com/pacocartones/free-llm-api-hub#how-we-keep-this-updated">freshness policy</a>.</p>
 </header>
 
-<div class="controls">
-  <input type="search" id="search" placeholder="Search providers…">
-  <div class="toggle-group" id="categoryToggle">
-    <button data-cat="all" class="active">All</button>
-    <button data-cat="ongoing">Ongoing free tier</button>
-    <button data-cat="trial">Trial credit</button>
+<div class="controls" role="search">
+  <label class="sr-only" for="search">Search providers</label>
+  <input type="search" id="search" placeholder="Search providers…" aria-label="Search providers by name, free tier, or notes">
+  <div class="toggle-group" id="categoryToggle" role="group" aria-label="Filter by provider type">
+    <button data-cat="all" class="active" aria-pressed="true">All</button>
+    <button data-cat="ongoing" aria-pressed="false">Ongoing free tier</button>
+    <button data-cat="trial" aria-pressed="false">Trial credit</button>
   </div>
   <div class="filters">
     <label><input type="checkbox" id="f-nophone"> No phone required</label>
@@ -154,31 +201,48 @@
     <label><input type="checkbox" id="f-commercial"> Commercial use OK</label>
     <label><input type="checkbox" id="f-verified"> Verified only</label>
   </div>
-  <span id="count"></span>
+  <div class="export-group" role="group" aria-label="Export currently filtered providers">
+    <button type="button" id="exportCsv" aria-label="Export currently filtered providers as CSV">Export CSV</button>
+    <button type="button" id="exportYaml" aria-label="Export currently filtered providers as YAML">Export YAML</button>
+  </div>
+  <span id="count" role="status" aria-live="polite"></span>
 </div>
 
-<main>
+<main id="main">
   <table id="table">
+    <caption class="sr-only">Free-tier and trial-credit LLM API providers. Column headers are sortable buttons.</caption>
     <thead>
       <tr>
-        <th data-key="name">Provider</th>
-        <th data-key="category">Type</th>
-        <th data-key="free_tier">Free tier / credit</th>
-        <th data-key="notes">Notes</th>
-        <th data-key="verified">Status</th>
+        <th data-key="name" scope="col" tabindex="0" role="button" aria-sort="ascending">Provider</th>
+        <th data-key="category" scope="col" tabindex="0" role="button" aria-sort="none">Type</th>
+        <th data-key="free_tier" scope="col" tabindex="0" role="button" aria-sort="none">Free tier / credit</th>
+        <th data-key="notes" scope="col" tabindex="0" role="button" aria-sort="none">Notes</th>
+        <th data-key="verified" scope="col" tabindex="0" role="button" aria-sort="none">Status</th>
       </tr>
     </thead>
     <tbody id="tbody"></tbody>
   </table>
-  <div class="empty" id="empty" style="display:none;">No providers match these filters.</div>
+  <div class="empty" id="empty" style="display:none;" role="status"></div>
 </main>
 
 <footer>
   Independent, community-maintained list — not affiliated with any provider listed. Data via <a href="providers.json">providers.json</a>. Source and contribution guide: <a href="https://github.com/pacocartones/free-llm-api-hub">github.com/pacocartones/free-llm-api-hub</a>.
 </footer>
 
+<!--
+  Optional privacy-friendly analytics (disabled by default, no tracking is active as shipped):
+  GoatCounter (https://www.goatcounter.com) is a lightweight, no-cookie, no-personal-data
+  page-view counter with a free tier for open-source/personal sites. To enable it:
+    1. Create a free account at https://www.goatcounter.com/ (this has to be done by the
+       site owner — a bot/agent should not sign up on your behalf).
+    2. Replace MYCODE below with your GoatCounter site code and uncomment the script tag.
+  <script data-goatcounter="https://MYCODE.goatcounter.com/count"
+          async src="//gc.zgo.at/count.js"></script>
+-->
+
 <script>
 let DATA = [];
+let lastRows = [];
 let sortKey = 'name';
 let sortDir = 1;
 let category = 'all';
@@ -188,7 +252,7 @@ function flagLine(p) {
   if (p.phone_required === false) parts.push('📵 no phone');
   if (p.phone_required === true) parts.push('📱 phone required');
   if (p.card_required === false) parts.push('🚫💳 no card');
-  if (p.card_required === true) parts.push('📳 card required');
+  if (p.card_required === true) parts.push('💳 card required');
   if (p.commercial_ok === true) parts.push('🏢 commercial OK');
   if (p.commercial_ok === false) parts.push('🔬 eval only');
   return parts.join(' · ');
@@ -221,9 +285,13 @@ function render() {
     return 0;
   });
 
+  lastRows = rows;
+
   const tbody = document.getElementById('tbody');
   tbody.innerHTML = '';
-  document.getElementById('empty').style.display = rows.length ? 'none' : 'block';
+  const emptyEl = document.getElementById('empty');
+  emptyEl.style.display = rows.length ? 'none' : 'block';
+  emptyEl.textContent = rows.length ? '' : 'No providers match these filters.';
   document.getElementById('count').textContent = rows.length + ' / ' + DATA.length + ' providers';
 
   for (const p of rows) {
@@ -244,27 +312,85 @@ function render() {
   }
 }
 
+function applySort(th) {
+  const key = th.dataset.key;
+  if (sortKey === key) { sortDir *= -1; } else { sortKey = key; sortDir = 1; }
+  document.querySelectorAll('thead th').forEach(h => { h.classList.remove('sorted'); h.setAttribute('aria-sort', 'none'); });
+  th.classList.add('sorted');
+  th.setAttribute('aria-sort', sortDir === 1 ? 'ascending' : 'descending');
+  render();
+}
+
 document.querySelectorAll('#categoryToggle button').forEach(btn => {
   btn.addEventListener('click', () => {
-    document.querySelectorAll('#categoryToggle button').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('#categoryToggle button').forEach(b => { b.classList.remove('active'); b.setAttribute('aria-pressed', 'false'); });
     btn.classList.add('active');
+    btn.setAttribute('aria-pressed', 'true');
     category = btn.dataset.cat;
     render();
   });
 });
 
 document.querySelectorAll('thead th[data-key]').forEach(th => {
-  th.addEventListener('click', () => {
-    const key = th.dataset.key;
-    if (sortKey === key) { sortDir *= -1; } else { sortKey = key; sortDir = 1; }
-    document.querySelectorAll('thead th').forEach(h => h.classList.remove('sorted'));
-    th.classList.add('sorted');
-    render();
+  th.addEventListener('click', () => applySort(th));
+  th.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      applySort(th);
+    }
   });
 });
 
 ['search', 'f-nophone', 'f-nocard', 'f-commercial', 'f-verified'].forEach(id => {
   document.getElementById(id).addEventListener('input', render);
+});
+
+function csvEscape(v) {
+  if (v === null || v === undefined) v = '';
+  v = String(v);
+  if (/[",\n]/.test(v)) v = '"' + v.replace(/"/g, '""') + '"';
+  return v;
+}
+
+function toCSV(rows) {
+  const cols = ['name', 'category', 'free_tier', 'notes', 'docs_url', 'phone_required', 'card_required', 'commercial_ok', 'verified', 'last_verified'];
+  const lines = [cols.join(',')];
+  for (const p of rows) lines.push(cols.map(c => csvEscape(p[c])).join(','));
+  return lines.join('\n');
+}
+
+function yamlScalar(v) {
+  if (v === null || v === undefined) return 'null';
+  if (typeof v === 'boolean' || typeof v === 'number') return String(v);
+  return JSON.stringify(String(v));
+}
+
+function toYAML(rows) {
+  const cols = ['name', 'category', 'free_tier', 'notes', 'docs_url', 'phone_required', 'card_required', 'commercial_ok', 'verified', 'last_verified'];
+  let out = 'providers:\n';
+  for (const p of rows) {
+    out += cols.map((c, i) => (i === 0 ? '  - ' : '    ') + c + ': ' + yamlScalar(p[c])).join('\n') + '\n';
+  }
+  return out;
+}
+
+function download(filename, text, mime) {
+  const blob = new Blob([text], { type: mime });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+document.getElementById('exportCsv').addEventListener('click', () => {
+  download('free-llm-api-providers.csv', toCSV(lastRows), 'text/csv');
+});
+document.getElementById('exportYaml').addEventListener('click', () => {
+  download('free-llm-api-providers.yaml', toYAML(lastRows), 'text/yaml');
 });
 
 fetch('providers.json')
