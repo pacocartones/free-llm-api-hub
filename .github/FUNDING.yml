@@ -1,0 +1,6 @@
+# GitHub Sponsors button config for this repo.
+# This makes a "Sponsor" button appear on the repo page, but it only actually
+# shows once the account below has a GitHub Sponsors profile enabled at
+# https://github.com/sponsors — if it's not enabled yet, this file is inert
+# until you turn it on yourself.
+github: [pacocartones]
