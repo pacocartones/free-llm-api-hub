@@ -1,6 +1,6 @@
 {
   "$schema": "https://github.com/pacocartones/free-llm-api-hub",
-  "generated": "2026-07-11",
+  "generated": "2026-07-12",
   "source": "https://github.com/pacocartones/free-llm-api-hub",
   "note": "Machine-readable mirror of README.md. `verified: true` means independently confirmed against the provider's own official docs on `last_verified`. `verified: false` means sourced from community tracking and not yet independently re-verified in this repo — treat those numbers as indicative, not authoritative.",
   "providers": [
@@ -101,9 +101,9 @@
       "free_tier": "\"Restrictive\" free tier explicitly for \"try and explore\" — official docs say to upgrade for \"actual projects and production use\"",
       "rate_limits": "Not published publicly; exact caps only visible in-console after login (admin.mistral.ai)",
       "notes": "Phone verification required to activate; free tier is opt-in for data training",
-      "docs_url": "https://docs.mistral.ai/deployment/ai-studio/tier",
+      "docs_url": "https://docs.mistral.ai/admin/billing-usage/usage-limits",
       "verified": true,
-      "last_verified": "2026-07-11",
+      "last_verified": "2026-07-12",
       "phone_required": true,
       "card_required": null,
       "commercial_ok": false
