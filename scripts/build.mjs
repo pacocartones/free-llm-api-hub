@@ -261,9 +261,11 @@ function htmlPage({ title, desc, canonical, main, jsonld, prefix = '../' }) {
 <meta property="og:description" content="${htmlEsc(desc)}">
 <meta property="og:type" content="website">
 <meta property="og:url" content="${htmlEsc(canonical)}">
-<meta property="og:image" content="${SITE}/og.svg">
+<meta property="og:image" content="${SITE}/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="${SITE}/og.svg">
+<meta name="twitter:image" content="${SITE}/og.png">
 <link rel="stylesheet" href="${prefix}styles.css">
 ${jsonld ? `<script type="application/ld+json">${jsonld}</script>` : ''}
 </head>

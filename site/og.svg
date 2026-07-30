@@ -26,13 +26,13 @@
   <text x="80" y="248" fill="#e8edf5" font-size="74" font-weight="800" letter-spacing="-2">Free LLM APIs you can</text>
   <text x="80" y="336" fill="#e8edf5" font-size="74" font-weight="800" letter-spacing="-2">actually <tspan fill="url(#g)">build on</tspan>.</text>
 
-  <text x="82" y="404" fill="#9aa4b5" font-size="30">A continuously-verified dataset — dated, sourced, machine-readable.</text>
+  <text x="82" y="404" fill="#9aa4b5" font-size="29">LLM · image · speech · embeddings · OCR — verified, dated, machine-readable.</text>
 
   <!-- stat chips -->
   <g font-size="26" font-weight="700">
     <rect x="80" y="470" width="300" height="72" rx="14" fill="#141926" stroke="#232b3a"/>
-    <text x="104" y="506" fill="url(#g)" font-size="34">31</text>
-    <text x="104" y="530" fill="#9aa4b5" font-size="18" font-weight="500">providers tracked</text>
+    <text x="104" y="506" fill="url(#g)" font-size="34">47</text>
+    <text x="104" y="530" fill="#9aa4b5" font-size="18" font-weight="500">model APIs tracked</text>
 
     <rect x="400" y="470" width="300" height="72" rx="14" fill="#141926" stroke="#232b3a"/>
     <text x="424" y="506" fill="#46c265" font-size="34">100%</text>

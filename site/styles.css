@@ -161,6 +161,10 @@ input[type="search"]::placeholder { color: var(--faint); }
 .export { display: flex; gap: 6px; margin-left: auto; }
 .export button { background: var(--panel-2); border: 1px solid var(--border); color: var(--text); padding: 6px 11px; border-radius: 8px; cursor: pointer; font-size: .82rem; }
 .export button:hover { border-color: var(--accent); color: var(--accent); }
+.sel { background: var(--panel-2); border: 1px solid var(--border); color: var(--text); padding: 8px 11px; border-radius: 9px; font-size: .86rem; cursor: pointer; }
+.sel:hover { border-color: var(--border-strong); }
+.clear-btn { background: transparent; border: 1px solid var(--border); color: var(--muted); padding: 7px 12px; border-radius: 8px; cursor: pointer; font-size: .82rem; font-weight: 600; }
+.clear-btn:hover { border-color: var(--red); color: var(--red); }
 
 /* ---------- table ---------- */
 main { padding: 24px 0 80px; }
@@ -253,5 +257,16 @@ pre code { color: var(--text); }
 /* ---------- responsive ---------- */
 @media (max-width: 860px) { .footer-top { grid-template-columns: 1fr 1fr; } }
 @media (max-width: 760px) { .nav { display: none; } }
+/* Explorer table → cards on small screens (uses each <td>'s data-label). */
+@media (max-width: 720px) {
+  #table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  #table, #table tbody, #table tr, #table td { display: block; width: 100%; }
+  #table tr { border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 12px; padding: 6px 2px 10px; background: var(--panel); box-shadow: var(--shadow-sm); }
+  #table td { border: 0; padding: 7px 14px; display: flex; gap: 12px; align-items: baseline; }
+  #table td::before { content: attr(data-label); flex: 0 0 40%; color: var(--faint); font-weight: 600; font-size: .72rem; text-transform: uppercase; letter-spacing: .04em; }
+  #table td.name { display: block; padding: 12px 14px 8px; border-bottom: 1px solid var(--border); margin-bottom: 4px; }
+  #table td.name::before { content: none; }
+  #table td.notes { max-width: none; }
+}
 @media (max-width: 640px) { .stats { grid-template-columns: repeat(2, 1fr); } .footer-top { grid-template-columns: 1fr; } .notes { max-width: none; } }
 @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto; transition: none !important; } }

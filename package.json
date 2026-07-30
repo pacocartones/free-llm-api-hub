@@ -8,12 +8,17 @@
     "build": "node scripts/build.mjs",
     "validate": "node scripts/validate.mjs",
     "worklist": "node scripts/staleness.mjs",
+    "og": "node scripts/og.mjs",
     "test": "node scripts/validate.mjs",
     "check": "node scripts/validate.mjs && node scripts/build.mjs && git diff --exit-code -- README.md data/providers.csv data/providers.yaml collections"
   },
   "engines": {
     "node": ">=18"
   },
+  "devDependencies": {
+    "@resvg/resvg-js": "^2.6.2"
+  },
+  "comment": "devDependencies are used only by `npm run og` (social image). The shipped site and CI have zero runtime dependencies.",
   "license": "MIT",
   "repository": {
     "type": "git",

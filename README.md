@@ -2,9 +2,9 @@
 
 # Free LLM API Hub
 
-**A continuously-verified dataset of LLM APIs you can build on for free.**
+**A continuously-verified dataset of free LLM & AI-model APIs you can build on.**
 
-Free tiers, trial credits and no-cost quotas — every entry dated, sourced, and machine-readable.
+Free LLM APIs plus adjacent model APIs — image, speech, embeddings, rerank and OCR. Free tiers, trial credits and no-cost quotas, every entry dated, sourced, and machine-readable.
 No hype, no dead links, no "generous limits" hand-waving. Just what's actually free, and the fine print that bites.
 
 [![Verify](https://github.com/pacocartones/free-llm-api-hub/actions/workflows/verify.yml/badge.svg)](https://github.com/pacocartones/free-llm-api-hub/actions/workflows/verify.yml)

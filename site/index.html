@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Free LLM API Hub — verified free LLM APIs & trial credits for developers</title>
-<meta name="description" content="A continuously-verified dataset of LLM API providers with a free tier or trial credits. Filter by no-card, no-phone, commercial-use, OpenAI-compatible. Dated, sourced, machine-readable.">
+<title>Free LLM API Hub — verified free LLM & AI-model APIs for developers</title>
+<meta name="description" content="A continuously-verified dataset of free LLM APIs plus adjacent AI-model APIs — image, speech, embeddings, rerank, OCR, vision. Filter by no-card, no-phone, commercial-use, OpenAI-compatible. Dated, sourced, machine-readable.">
 <script>(function(){try{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: light)').matches?'light':'dark');document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
 <link rel="canonical" href="https://pacocartones.github.io/free-llm-api-hub/">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
@@ -13,11 +13,13 @@
 <meta property="og:description" content="A continuously-verified dataset of free LLM APIs and trial credits for developers.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://pacocartones.github.io/free-llm-api-hub/">
-<meta property="og:image" content="https://pacocartones.github.io/free-llm-api-hub/og.svg">
+<meta property="og:image" content="https://pacocartones.github.io/free-llm-api-hub/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Free LLM API Hub">
-<meta name="twitter:description" content="A continuously-verified dataset of free LLM APIs and trial credits for developers.">
-<meta name="twitter:image" content="https://pacocartones.github.io/free-llm-api-hub/og.svg">
+<meta name="twitter:description" content="A continuously-verified dataset of free LLM & AI-model APIs (image, speech, embeddings, OCR) for developers.">
+<meta name="twitter:image" content="https://pacocartones.github.io/free-llm-api-hub/og.png">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -25,7 +27,7 @@
   "name": "Free LLM API Hub",
   "description": "A continuously-verified dataset of LLM API providers with a free tier or trial credits. Every entry dated, sourced to the provider's own docs, and machine-readable.",
   "url": "https://pacocartones.github.io/free-llm-api-hub/",
-  "keywords": ["free llm api", "llm api", "free tier", "trial credits", "openai-compatible", "ai api"],
+  "keywords": ["free llm api", "llm api", "free tier", "trial credits", "openai-compatible", "ai api", "free image api", "free speech api", "free embeddings api", "free ocr api"],
   "license": "https://opensource.org/licenses/MIT",
   "isAccessibleForFree": true,
   "creator": { "@type": "Person", "name": "pacocartones", "url": "https://github.com/pacocartones" },
@@ -98,7 +100,7 @@
     </div>
     <p class="eyebrow">Open dataset · continuously verified</p>
     <h1>Free LLM APIs you can actually build on.</h1>
-    <p class="lede">A continuously-verified dataset of LLM API providers with a free tier or trial credits — every entry dated, sourced, and machine-readable. Filter by no-card, no-phone, commercial-use or OpenAI-compatible. No hype, no dead links.</p>
+    <p class="lede">A continuously-verified dataset of free LLM APIs — plus adjacent AI-model APIs for image, speech, embeddings, rerank and OCR. Every entry dated, sourced, and machine-readable. Filter by no-card, no-phone, commercial-use or OpenAI-compatible. No hype, no dead links.</p>
     <div class="cta">
       <a class="btn primary" href="#explorer">Browse providers ↓</a>
       <a class="btn ghost" href="collections/">Browse by need →</a>
@@ -126,6 +128,17 @@
       <button data-cat="ongoing" aria-pressed="false">Ongoing</button>
       <button data-cat="trial" aria-pressed="false">Trial credit</button>
     </div>
+    <label class="sr-only" for="modality">Filter by modality</label>
+    <select id="modality" class="sel" aria-label="Filter by modality">
+      <option value="all">All modalities</option>
+      <option value="text">💬 Text / LLM</option>
+      <option value="image">🎨 Image generation</option>
+      <option value="audio">🔊 Speech (STT/TTS)</option>
+      <option value="embeddings">🧬 Embeddings</option>
+      <option value="rerank">📊 Rerank</option>
+      <option value="ocr">📄 OCR / documents</option>
+      <option value="vision">👁 Vision</option>
+    </select>
     <div class="chips" id="chips">
       <label class="chip"><input type="checkbox" id="f-nocard"> 💳 No card</label>
       <label class="chip"><input type="checkbox" id="f-nophone"> 📵 No phone</label>
@@ -133,6 +146,7 @@
       <label class="chip"><input type="checkbox" id="f-openai"> 🔌 OpenAI-compat</label>
       <label class="chip"><input type="checkbox" id="f-verified"> ✅ Verified only</label>
     </div>
+    <button type="button" id="clearFilters" class="clear-btn" hidden>✕ Clear filters</button>
     <div class="export" role="group" aria-label="Export filtered providers">
       <button type="button" id="exportCsv">Export CSV</button>
       <button type="button" id="exportJson">Export JSON</button>
@@ -199,7 +213,7 @@
 
 <script src="site.js"></script>
 <script>
-let DATA = [], lastRows = [], sortKey = 'name', sortDir = 1, category = 'all';
+let DATA = [], lastRows = [], sortKey = 'name', sortDir = 1, category = 'all', modality = 'all';
 
 const FLAGS = [
   ['card_required', false, '💳 no card'], ['card_required', true, '💳 card'],
@@ -221,6 +235,7 @@ function render() {
 
   let rows = DATA.filter(p => {
     if (category !== 'all' && p.category !== category) return false;
+    if (modality !== 'all' && !(p.modalities || []).includes(modality)) return false;
     if (q && !(p.name.toLowerCase().includes(q) || (p.free_tier||'').toLowerCase().includes(q) || (p.notes||'').toLowerCase().includes(q) || (p.rate_limits||'').toLowerCase().includes(q) || (p.openai_base_url||'').toLowerCase().includes(q) || (p.modalities||[]).join(' ').includes(q))) return false;
     if (nocard && p.card_required !== false) return false;
     if (nophone && p.phone_required !== false) return false;
@@ -243,7 +258,11 @@ function render() {
   const emptyEl = document.getElementById('empty');
   emptyEl.style.display = rows.length ? 'none' : 'block';
   emptyEl.textContent = rows.length ? '' : 'No providers match these filters.';
-  document.getElementById('count').textContent = `${rows.length} of ${DATA.length} providers`;
+  const activeCount = (q ? 1 : 0) + (category !== 'all' ? 1 : 0) + (modality !== 'all' ? 1 : 0) +
+    [nocard, nophone, commercial, openai, verifiedOnly].filter(Boolean).length;
+  document.getElementById('count').textContent =
+    `${rows.length} of ${DATA.length} providers` + (activeCount ? ` · ${activeCount} filter${activeCount > 1 ? 's' : ''} active` : '');
+  document.getElementById('clearFilters').hidden = activeCount === 0;
 
   for (const p of rows) {
     const nameCell = `<a href="p/${p.slug}.html">${p.name}</a>`;
@@ -256,11 +275,11 @@ function render() {
     ].filter(Boolean).join('');
     const tr = document.createElement('tr');
     tr.innerHTML = `
-      <td class="name">${nameCell}${best}${baseurl}<div class="flags">${flagLine(p)}</div>${mods}${actions ? `<div class="row-actions">${actions}</div>` : ''}</td>
-      <td><span class="badge ${p.category === 'ongoing' ? 'b-ongoing' : 'b-trial'}">${p.category === 'ongoing' ? 'Ongoing' : 'Trial'}</span></td>
-      <td>${p.free_tier || ''}</td>
-      <td class="notes">${p.notes || ''}</td>
-      <td>${p.verified ? `<span class="badge b-ok">✅ ${p.last_verified}</span>` : '<span class="badge b-warn">⚠️ unverified</span>'}</td>`;
+      <td class="name" data-label="Provider">${nameCell}${best}${baseurl}<div class="flags">${flagLine(p)}</div>${mods}${actions ? `<div class="row-actions">${actions}</div>` : ''}</td>
+      <td data-label="Type"><span class="badge ${p.category === 'ongoing' ? 'b-ongoing' : 'b-trial'}">${p.category === 'ongoing' ? 'Ongoing' : 'Trial'}</span></td>
+      <td data-label="What's free">${p.free_tier || ''}</td>
+      <td class="notes" data-label="The catch">${p.notes || ''}</td>
+      <td data-label="Verified">${p.verified ? `<span class="badge b-ok">✅ ${p.last_verified}</span>` : '<span class="badge b-warn">⚠️ unverified</span>'}</td>`;
     tbody.appendChild(tr);
   }
   syncURL();
@@ -338,6 +357,7 @@ function syncURL() {
   const q = document.getElementById('search').value.trim();
   if (q) params.set('q', q);
   if (category !== 'all') params.set('cat', category);
+  if (modality !== 'all') params.set('mod', modality);
   URL_FLAGS.forEach(([k, id]) => { if (document.getElementById(id).checked) params.set(k, '1'); });
   const qs = params.toString();
   history.replaceState(null, '', qs ? '?' + qs : location.pathname);
@@ -352,11 +372,24 @@ function applyURL() {
       const on = b.dataset.cat === cat; b.classList.toggle('active', on); b.setAttribute('aria-pressed', String(on));
     });
   }
+  const mod = params.get('mod');
+  const modSel = document.getElementById('modality');
+  if (mod && [...modSel.options].some(o => o.value === mod)) { modality = mod; modSel.value = mod; }
   URL_FLAGS.forEach(([k, id]) => {
     if (params.get(k) === '1') { const el = document.getElementById(id); el.checked = true; const chip = el.closest('.chip'); if (chip) chip.classList.add('on'); }
   });
 }
 applyURL();
+
+document.getElementById('modality').addEventListener('change', e => { modality = e.target.value; render(); });
+document.getElementById('clearFilters').addEventListener('click', () => {
+  document.getElementById('search').value = '';
+  category = 'all';
+  document.querySelectorAll('#cat button').forEach(b => { const on = b.dataset.cat === 'all'; b.classList.toggle('active', on); b.setAttribute('aria-pressed', String(on)); });
+  modality = 'all'; document.getElementById('modality').value = 'all';
+  URL_FLAGS.forEach(([, id]) => { const el = document.getElementById(id); el.checked = false; const chip = el.closest('.chip'); if (chip) chip.classList.remove('on'); });
+  render();
+});
 
 function download(name, text, mime) {
   const a = document.createElement('a');
