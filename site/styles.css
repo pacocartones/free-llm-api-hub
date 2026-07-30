@@ -237,8 +237,12 @@ tbody tr:hover { background: var(--panel); }
 .colls a:hover { border-color: var(--accent); color: var(--accent); text-decoration: none; }
 .colls a.active { border-color: var(--accent); color: var(--accent); background: color-mix(in srgb, var(--accent) 11%, transparent); }
 .prose h2 { margin-top: 40px; }
-pre { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; overflow: auto; font-size: .84rem; box-shadow: var(--shadow-sm); }
+pre { position: relative; background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; overflow: auto; font-size: .84rem; box-shadow: var(--shadow-sm); }
 pre code { color: var(--text); }
+.pre-copy { position: absolute; top: 8px; right: 8px; background: var(--panel-2); border: 1px solid var(--border); color: var(--muted); padding: 3px 9px; border-radius: 6px; cursor: pointer; font-size: .72rem; font-weight: 600; font-family: var(--font-mono); opacity: 0; transition: opacity .15s, border-color .15s, color .15s; }
+pre:hover .pre-copy, .pre-copy:focus-visible { opacity: 1; }
+.pre-copy:hover { border-color: var(--accent); color: var(--accent); }
+.pre-copy.copied { border-color: var(--green); color: var(--green); opacity: 1; }
 :not(pre) > code { background: var(--panel-2); border: 1px solid var(--border); border-radius: 5px; padding: 1px 5px; font-size: .85em; }
 
 .coll-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; margin-top: 8px; }

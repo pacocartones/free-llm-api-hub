@@ -390,7 +390,7 @@ const collNavMd = COLLECTIONS.map((c) => `[${c.title}](${c.slug}.md)`).join(' ·
 for (const c of COLLECTIONS) {
   const rows = collRows(c);
   const nav = COLLECTIONS.map(
-    (o) => `<a href="${o.slug}.html"${o.slug === c.slug ? ' class="active"' : ''}>${htmlEsc(o.title)}</a>`
+    (o) => `<a href="${o.slug}.html"${o.slug === c.slug ? ' class="active" aria-current="page"' : ''}>${htmlEsc(o.title)}</a>`
   ).join('');
 
   // --- repo markdown ---
@@ -407,16 +407,23 @@ for (const c of COLLECTIONS) {
   // --- live HTML page ---
   const jsonld = JSON.stringify({
     '@context': 'https://schema.org',
-    '@type': 'ItemList',
-    name: c.h1,
-    description: c.desc,
-    numberOfItems: rows.length,
-    itemListElement: rows.map((p, i) => ({
-      '@type': 'ListItem',
-      position: i + 1,
-      name: p.name,
-      url: p.docs_url || undefined,
-    })),
+    '@graph': [
+      {
+        '@type': 'ItemList',
+        name: c.h1,
+        description: c.desc,
+        numberOfItems: rows.length,
+        itemListElement: rows.map((p, i) => ({ '@type': 'ListItem', position: i + 1, name: p.name, url: p.docs_url || undefined })),
+      },
+      {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Free LLM API Hub', item: `${SITE}/` },
+          { '@type': 'ListItem', position: 2, name: 'Collections', item: `${SITE}/collections/` },
+          { '@type': 'ListItem', position: 3, name: c.title, item: `${SITE}/collections/${c.slug}.html` },
+        ],
+      },
+    ],
   });
   const introHtml = htmlEsc(c.intro).replace(/`([^`]+)`/g, '<code>$1</code>').replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
   const main =
@@ -530,9 +537,21 @@ print(resp.choices[0].message.content)</code></pre>`
     `<p><a href="../#explorer">← Back to all providers</a></p>` +
     `</div></main>`;
   const jsonld = JSON.stringify({
-    '@context': 'https://schema.org', '@type': 'WebPage',
-    name: `${p.name} — free LLM API`, description: p.free_tier, url: `${SITE}/p/${p.slug}.html`,
-    isPartOf: { '@type': 'Dataset', name: 'Free LLM API Hub', url: `${SITE}/` },
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'WebPage', name: `${p.name} — free LLM API`, description: p.free_tier, url: `${SITE}/p/${p.slug}.html`,
+        isPartOf: { '@type': 'Dataset', name: 'Free LLM API Hub', url: `${SITE}/` },
+      },
+      {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Free LLM API Hub', item: `${SITE}/` },
+          { '@type': 'ListItem', position: 2, name: 'Providers', item: `${SITE}/#explorer` },
+          { '@type': 'ListItem', position: 3, name: p.name, item: `${SITE}/p/${p.slug}.html` },
+        ],
+      },
+    ],
   });
   writeFileSync(
     join(ROOT, `site/p/${p.slug}.html`),

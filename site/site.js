@@ -44,4 +44,20 @@
     var s = document.getElementById('search');
     if (s) { e.preventDefault(); s.focus(); }
   });
+
+  // --- copy button on every code block (quickstarts, embed snippets) ---
+  document.querySelectorAll('pre').forEach(function (pre) {
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'pre-copy';
+    btn.textContent = 'Copy';
+    btn.setAttribute('aria-label', 'Copy code to clipboard');
+    btn.addEventListener('click', function () {
+      var code = pre.querySelector('code') || pre;
+      var text = code.innerText;
+      var done = function () { btn.textContent = 'Copied'; btn.classList.add('copied'); setTimeout(function () { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 1300); };
+      if (navigator.clipboard) navigator.clipboard.writeText(text).then(done).catch(done); else done();
+    });
+    pre.appendChild(btn);
+  });
 })();
