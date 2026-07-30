@@ -45,6 +45,31 @@ node scripts/probe.mjs --only=groq,cerebras
 
 Footprint is one `/models` call + one 1-token inference per provider. A provider is probed **only if its key is present in the environment**, so running with no keys is a safe no-op. Coverage today is the generic OpenAI-compatible path; provider-specific adapters (Gemini native, Cohere, Deepgram, …) are on the [backlog](backlog.md).
 
+## Setup checklist — resume here
+
+Everything on the code side is built, tested and committed (harness, fields, badge, docs). What remains is a one-time setup on the secrets/VPS side and two small decisions. Work top-down:
+
+**Two decisions to make first** (both were deliberately left open; the code is agnostic to either):
+- [ ] **Infisical reachability** — localhost-only on the VPS (everything runs there) *or* a public HTTPS domain (lets probes also be piloted from a laptop session).
+- [ ] **Zero-Actions deploy** — VPS builds and pushes to a `gh-pages` branch (GitHub serves it, 0 Actions minutes) *or* the VPS serves the site via nginx *or* keep the light `pages.yml`. This unblocks the commented publish step in `scripts/probe-cron.sh`.
+
+**Infisical setup (on the VPS):**
+- [ ] Create a project folder, e.g. `/free-llm-api-hub`, environment `prod`.
+- [ ] Add each provider's key under the exact name the repo expects (its `env_key`). Print the full slug → env-var mapping straight from the data (stays current automatically):
+  ```bash
+  node -e "for(const p of require('./data/providers.json').providers) if(p.env_key) console.log(p.slug.padEnd(24), p.env_key)"
+  ```
+  You don't need all of them at once — any subset works; only providers whose key is present get probed.
+- [ ] Create a **read-only Machine Identity** scoped to that folder/env; note its Client ID + Secret (or a service token).
+- [ ] On the VPS, put the identity creds in a root-only file (not the repo): `/etc/free-llm-api-hub.env` with `INFISICAL_API_URL`, `INFISICAL_PROJECT_ID`, `INFISICAL_ENV`, `INFISICAL_PATH`, and the token/creds. With Infisical on `127.0.0.1`, secrets never leave the box.
+
+**First real run:**
+- [ ] Dry run to see who's reachable: `infisical run --projectId <id> --env prod --path /free-llm-api-hub -- npm run probe`
+- [ ] Persist it: same command with `node scripts/probe.mjs --write`, then `npm run build`, review the diff, commit.
+- [ ] Wire the cron (see `scripts/probe-cron.sh`) once the deploy decision is made.
+
+**Then (phase 2, all in [backlog.md](backlog.md)):** provider-specific adapters for the non-OpenAI APIs; render `data/probe-report.json` as a "live-tested N/51" badge + a *measured* "fastest free APIs" collection; auto-flag `tier-ended` results onto the re-verification worklist.
+
 ---
 
 _[← Docs index](README.md) · [Main README](../README.md)_
