@@ -90,6 +90,10 @@
         "card_required": { "$ref": "#/$defs/tristate" },
         "commercial_ok": { "$ref": "#/$defs/tristate" },
         "openai_compatible": { "$ref": "#/$defs/tristate" },
+        "openai_base_url": {
+          "type": ["string", "null"],
+          "description": "OpenAI-compatible base URL for a drop-in SDK swap, when confirmed. null until backfilled."
+        },
         "verified": {
           "type": "boolean",
           "description": "true = core facts independently confirmed against the provider's own docs on last_verified. false = sourced from community tracking, flagged for follow-up."

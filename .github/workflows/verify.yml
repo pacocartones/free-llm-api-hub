@@ -31,13 +31,13 @@ jobs:
           node-version: 20
       - name: Validate dataset against integrity rules
         run: node scripts/validate.mjs
-      - name: Assert README + exports are freshly generated from the data
+      - name: Assert README + exports + collections are freshly generated from the data
         run: |
           node scripts/build.mjs
-          if ! git diff --quiet -- README.md data/providers.csv data/providers.yaml; then
+          if ! git diff --quiet -- README.md data/providers.csv data/providers.yaml collections; then
             echo "::error::Generated files are out of sync with data/providers.json."
             echo "Run 'npm run build' locally and commit the result. Diff:"
-            git --no-pager diff -- README.md data/providers.csv data/providers.yaml
+            git --no-pager diff -- README.md data/providers.csv data/providers.yaml collections
             exit 1
           fi
 

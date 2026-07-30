@@ -59,8 +59,22 @@ Each pick links to the full row, where the real limits and catches live.
 
 Starting points, not guarantees — read the full row before you build on it.
 
+## Browse by need
+
+Focused, always-current collections — each is generated from the dataset and has a live web page too.
+
+<!-- AUTOGEN:collections:start -->
+- **[Free LLM APIs with no credit card](collections/no-credit-card.md)** (10) — start without a payment method · [live page ↗](https://pacocartones.github.io/free-llm-api-hub/collections/no-credit-card.html)
+- **[Free LLM APIs with no phone verification](collections/no-phone.md)** (7) — no SMS/phone verification · [live page ↗](https://pacocartones.github.io/free-llm-api-hub/collections/no-phone.html)
+- **[Free LLM APIs for commercial use](collections/commercial-use.md)** (5) — safe to ship, not eval-only · [live page ↗](https://pacocartones.github.io/free-llm-api-hub/collections/commercial-use.html)
+- **[OpenAI-compatible free LLM APIs](collections/openai-compatible.md)** (19) — drop-in OpenAI SDK swap · [live page ↗](https://pacocartones.github.io/free-llm-api-hub/collections/openai-compatible.html)
+- **[Permanently free LLM APIs](collections/always-free.md)** (3) — $0 models, no trial clock · [live page ↗](https://pacocartones.github.io/free-llm-api-hub/collections/always-free.html)
+- **[Free multimodal LLM APIs](collections/multimodal.md)** (9) — vision, audio, embeddings · [live page ↗](https://pacocartones.github.io/free-llm-api-hub/collections/multimodal.html)
+<!-- AUTOGEN:collections:end -->
+
 ## Contents
 
+- [Browse by need](#browse-by-need) — curated collections by constraint
 - [Ongoing free tiers](#ongoing-free-tiers) — recurring quotas that renew
 - [One-time trial credits](#one-time-trial-credits) — a fixed balance, then pay-as-you-go
 - [Notably NOT free](#notably-not-free) — so this list doesn't waste your time

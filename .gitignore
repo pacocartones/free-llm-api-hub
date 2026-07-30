@@ -2,10 +2,11 @@
 free-llm-api-hub-brief.md
 *.brief.md
 
-# Generated site payload (build.mjs copies the dataset in during the Pages build)
+# Generated site payload (build.mjs regenerates these during the Pages build)
 site/providers.json
 site/providers.csv
 site/providers.yaml
+site/collections/
 
 # Local tooling
 .claude/settings.local.json
