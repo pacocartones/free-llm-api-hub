@@ -277,7 +277,9 @@ function htmlPage({ title, desc, canonical, main, jsonld, prefix = '../', noinde
 <link rel="canonical" href="${htmlEsc(canonical)}">
 <link rel="icon" href="${prefix}favicon.svg" type="image/svg+xml">
 <link rel="preload" href="${prefix}fonts/jetbrains-mono-700.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preconnect" href="https://api.github.com" crossorigin>
 <meta name="theme-color" content="#0a0d0b">
+<meta name="color-scheme" content="dark light">
 <meta property="og:title" content="${htmlEsc(title)}">
 <meta property="og:description" content="${htmlEsc(desc)}">
 <meta property="og:type" content="website">

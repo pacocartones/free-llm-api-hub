@@ -6,10 +6,13 @@
   // --- theme toggle (initial value already applied inline in <head>) ---
   var toggle = document.getElementById('themeToggle');
   if (toggle) {
+    var syncPressed = function () { toggle.setAttribute('aria-pressed', root.getAttribute('data-theme') === 'light' ? 'true' : 'false'); };
+    syncPressed();
     toggle.addEventListener('click', function () {
       var next = root.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
       root.setAttribute('data-theme', next);
       try { localStorage.setItem('theme', next); } catch (e) {}
+      syncPressed();
     });
   }
 
