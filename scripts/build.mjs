@@ -259,7 +259,7 @@ const siteHeader = (p) => `<header class="site-header"><div class="wrap header-i
 
 const siteFooter = (p) => `<footer class="site-footer"><div class="wrap footer-top">
 <div class="footer-brand"><a class="star-btn" href="${REPO}" target="_blank" rel="noopener" aria-label="Star free-llm-api-hub on GitHub"><span class="sb-label">${GH_ICON} Star on GitHub</span><span class="sb-count" data-stars>★</span></a><p>A continuously-verified, machine-readable dataset of free LLM &amp; AI-model APIs and trial credits for developers.</p></div>
-<div class="footer-col"><h4>Explore</h4><a href="${p}#explorer">Interactive explorer</a><a href="${p}models/">Free model index</a><a href="${p}collections/">Collections</a><a href="${p}programs/startups.html">Startup credits</a><a href="${p}programs/research.html">Student &amp; research credits</a><a href="${p}updates.html">Updates</a><a href="${REPO}#notably-not-free">Notably NOT free</a></div>
+<div class="footer-col"><h4>Explore</h4><a href="${p}#explorer">Interactive explorer</a><a href="${p}models/">Free model index</a><a href="${p}guides/">Guides</a><a href="${p}collections/">Collections</a><a href="${p}programs/startups.html">Startup credits</a><a href="${p}programs/research.html">Student &amp; research credits</a><a href="${p}updates.html">Updates</a><a href="${REPO}#notably-not-free">Notably NOT free</a></div>
 <div class="footer-col"><h4>Data</h4><a href="${p}providers.json">providers.json</a><a href="${p}providers.csv">CSV export</a><a href="${p}providers.yaml">YAML export</a><a href="${REPO}/blob/main/data/schema.json">JSON Schema</a></div>
 <div class="footer-col"><h4>Project</h4><a href="${REPO}/blob/main/docs/methodology.md">Methodology</a><a href="${REPO}/blob/main/CONTRIBUTING.md">Contributing</a><a href="${REPO}/blob/main/CHANGELOG.md">Changelog</a><a href="${REPO}">GitHub ★</a></div>
 </div><div class="wrap footer-bottom"><a class="foot-logo" href="${p}" aria-label="Free LLM API Hub — home"><svg class="logo-mark"><use href="#logo"/></svg></a><p>Independent, community-maintained — not affiliated with any provider listed. Terms change without notice; always confirm against each provider's own docs. MIT licensed.</p><p class="foot-legal"><a href="${p}legal/privacy.html">Privacy</a> · <a href="${p}legal/terms.html">Terms</a> · Tweakeo, Inc.</p></div></footer>`;
@@ -824,13 +824,126 @@ writeFileSync(join(ROOT, 'site/models/index.html'), htmlPage({
   main: modelsMain,
 }));
 
+// ---------- SEO guides: intent-matched landing pages, generated from the data ----------
+mkdirSync(join(ROOT, 'site/guides'), { recursive: true });
+const GUIDES = [
+  {
+    slug: 'free-llm-api-without-credit-card',
+    card: 'No credit card',
+    blurb: 'Production-grade free tiers that never ask for a card.',
+    h1: 'Free LLM APIs with no credit card required',
+    title: 'Free LLM API — no credit card required · Free LLM API Hub',
+    desc: 'Verified LLM APIs with a genuinely free tier that requires no credit card at signup. Rate limits and commercial-use terms compared.',
+    lede: 'Yes — several production-grade LLM APIs give you a free tier without ever asking for a card.',
+    intro: `<p>The fastest way to start building is an API that doesn't gate its free tier behind a payment method. Every provider below was verified to require <strong>no credit card</strong> at signup for its free access — so there's no risk of a surprise charge when you cross a limit; you simply get rate-limited.</p><p>Watch two things as you choose: the per-minute / per-day <em>rate limits</em> (fine for prototypes, tight for production) and whether <em>commercial use</em> is allowed on the free tier. Both are in the table.</p>`,
+    filter: (p) => p.card_required === false && p.category === 'ongoing',
+    query: '?cat=ongoing&nocard=1#explorer',
+  },
+  {
+    slug: 'openai-compatible-free-apis',
+    card: 'OpenAI-compatible',
+    blurb: 'Keep your code — just swap base_url and key.',
+    h1: 'Free OpenAI-compatible APIs (drop-in base_url)',
+    title: 'Free OpenAI-compatible APIs — drop-in base_url · Free LLM API Hub',
+    desc: 'Free LLM APIs that expose an OpenAI-compatible endpoint, so you only change base_url and the API key. Confirmed against each provider’s docs.',
+    lede: 'Point the OpenAI SDK at a different base_url and keep all of your existing code.',
+    intro: `<p>An OpenAI-compatible API exposes the same <code>/chat/completions</code> shape, so switching is usually a one-line change: swap <code>base_url</code> and the key. That makes these the lowest-friction way to move side projects off paid OpenAI usage, or to add a free fallback behind the same SDK.</p><p>Each provider's exact base URL is on its page, and the free models you can pass as <code>model</code> are in the <a href="../models/">model index</a>.</p>`,
+    filter: (p) => p.openai_compatible === true,
+    query: '#explorer',
+  },
+  {
+    slug: 'free-llm-api-no-signup',
+    card: 'No card, no phone',
+    blurb: 'The lowest-friction keys: no card, no phone number.',
+    h1: 'Free LLM APIs with no phone number (and no card)',
+    title: 'Free LLM API — no phone, no credit card · Free LLM API Hub',
+    desc: 'The lowest-friction free LLM APIs: no credit card and no phone verification. A couple need no account at all.',
+    lede: 'The lowest-friction free APIs: no card, and no phone number either.',
+    intro: `<p>Some free tiers add phone verification on top of the signup form. The providers here ask for <strong>neither a credit card nor a phone number</strong>, so you can go from zero to a working key in a couple of minutes.</p><p>A few — like Pollinations and AI Horde — don't even need an account for basic use. The trade-off is predictable: the fewer the gates, the tighter the rate limits.</p>`,
+    filter: (p) => p.card_required === false && p.phone_required === false && p.category === 'ongoing',
+    query: '?cat=ongoing&nocard=1&nophone=1#explorer',
+  },
+  {
+    slug: 'free-embeddings-apis',
+    card: 'Embeddings / RAG',
+    blurb: 'Free vector embeddings for search and RAG.',
+    h1: 'Free embeddings APIs for search and RAG',
+    title: 'Free embeddings APIs for RAG · Free LLM API Hub',
+    desc: 'Verified APIs that expose embedding models on a free tier — for semantic search, RAG and clustering. Token allowances compared.',
+    lede: 'Free vector embeddings for semantic search, RAG and clustering.',
+    intro: `<p>Embeddings power semantic search, RAG and clustering — and you rarely need to pay for them at prototype scale. The providers below expose <strong>embedding models on a free tier</strong>, several with generous monthly token allowances.</p><p>Building RAG? Pair one of these with a free chat model (see the <a href="../models/">model index</a>), ideally behind the same OpenAI-compatible base URL.</p>`,
+    filter: (p) => (p.modalities || []).includes('embeddings'),
+    query: '#explorer',
+    pick: 'jina-ai',
+  },
+  {
+    slug: 'free-speech-to-text-apis',
+    card: 'Speech (STT/TTS)',
+    blurb: 'Free transcription and text-to-speech tiers.',
+    h1: 'Free speech APIs — transcription and text-to-speech',
+    title: 'Free speech-to-text & TTS APIs · Free LLM API Hub',
+    desc: 'Verified speech APIs with a free tier or sizeable starting credit — transcription (STT) and synthesis (TTS). Limits and catches compared.',
+    lede: 'Free speech-to-text and text-to-speech APIs, from free monthly minutes to hundreds in credit.',
+    intro: `<p>Audio APIs — transcription (STT) and synthesis (TTS) — often ship a real free tier or a sizeable one-time credit. The providers below offer <strong>free audio/speech access</strong>, from a few free hours a month to hundreds of dollars in starting balance.</p><p>Check the "catch" on each provider's page: some free speech tiers forbid commercial use or watermark the output.</p>`,
+    filter: (p) => (p.modalities || []).includes('audio'),
+    query: '#explorer',
+    pick: 'groq',
+  },
+];
+const guideRow = (p) =>
+  `<tr><td class="name"><a href="../p/${p.slug}.html">${htmlEsc(p.name)}</a></td>` +
+  `<td>${htmlEsc(p.free_tier)}</td>` +
+  `<td class="notes">${htmlEsc(p.rate_limits)}</td>` +
+  `<td>${provFlagsHtml(p)}</td></tr>`;
+for (const g of GUIDES) {
+  const list = providers.filter(g.filter);
+  const top = (g.pick && list.find((x) => x.slug === g.pick)) ||
+    [...list].sort((a, b) => recScore(b) - recScore(a) || (a.name < b.name ? -1 : 1))[0];
+  const related = GUIDES.filter((x) => x.slug !== g.slug)
+    .map((x) => `<a href="${x.slug}.html">${htmlEsc(x.card)}</a>`).join('');
+  const main =
+    `<section class="page-hero"><div class="wrap"><nav class="crumbs"><a href="../">Home</a> / <a href="./">Guides</a> / ${htmlEsc(g.h1)}</nav>` +
+    `<h1>${htmlEsc(g.h1)}</h1><p class="lede">${htmlEsc(g.lede)}</p></div></section>` +
+    `<main id="main"><div class="wrap prose">` +
+    g.intro +
+    (top ? `<div class="prov-summary"><h3>Top pick — ${htmlEsc(top.name)}</h3><p>${htmlEsc(top.best_for || top.free_tier)} <a href="../p/${top.slug}.html">Details →</a></p></div>` : '') +
+    `<p class="count"><strong>${list.length}</strong> verified providers</p>` +
+    `<table class="model-table"><thead><tr><th>Provider</th><th>Free tier</th><th>Rate limits</th><th>Gotchas</th></tr></thead><tbody>\n` +
+    list.map(guideRow).join('\n') +
+    `\n</tbody></table>` +
+    `<div class="prov-actions" style="margin-top:22px"><a class="btn primary" href="../${g.query}">Open in the explorer →</a></div>` +
+    `<h2>More guides</h2><nav class="colls">${related}</nav>` +
+    `<p class="prov-back"><a href="./">← All guides</a></p>` +
+    `</div></main>`;
+  const jsonld = JSON.stringify({
+    '@context': 'https://schema.org', '@type': 'Article', headline: g.h1, description: g.desc,
+    url: `${SITE}/guides/${g.slug}.html`, isPartOf: { '@type': 'WebSite', name: 'Free LLM API Hub', url: `${SITE}/` },
+  });
+  writeFileSync(join(ROOT, `site/guides/${g.slug}.html`), htmlPage({
+    title: g.title, desc: g.desc, canonical: `${SITE}/guides/${g.slug}.html`, main, jsonld,
+  }));
+}
+const guidesHubMain =
+  `<section class="page-hero"><div class="wrap"><nav class="crumbs"><a href="../">Home</a> / Guides</nav>` +
+  `<h1>Guides</h1><p class="lede">Short, data-backed answers to the most common "is there a free API for…" questions. Every list is generated from the verified dataset, so it stays current.</p></div></section>` +
+  `<main id="main"><div class="wrap"><div class="coll-grid">` +
+  GUIDES.map((g) => `<a class="coll-card" href="${g.slug}.html"><div class="coll-card-head"><strong>${htmlEsc(g.card)}</strong><span class="count">${providers.filter(g.filter).length}</span></div><p>${htmlEsc(g.blurb)}</p></a>`).join('') +
+  `</div></div></main>`;
+writeFileSync(join(ROOT, 'site/guides/index.html'), htmlPage({
+  title: 'Guides — free LLM & AI API how-tos · Free LLM API Hub',
+  desc: 'Data-backed guides to free LLM and AI-model APIs: no credit card, OpenAI-compatible, no signup, embeddings, speech.',
+  canonical: `${SITE}/guides/`, main: guidesHubMain,
+}));
+
 // ---------- sitemap.xml (site SEO) ----------
 const sitemapUrls = [
   `${SITE}/`,
   `${SITE}/models/`,
+  `${SITE}/guides/`,
   `${SITE}/collections/`,
   `${SITE}/programs/startups.html`,
   `${SITE}/programs/research.html`,
+  ...GUIDES.map((g) => `${SITE}/guides/${g.slug}.html`),
   ...(commits.length ? [`${SITE}/updates.html`] : []),
   ...COLLECTIONS.map((c) => `${SITE}/collections/${c.slug}.html`),
   ...providers.map((p) => `${SITE}/p/${p.slug}.html`),

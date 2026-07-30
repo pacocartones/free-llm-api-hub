@@ -13,6 +13,9 @@ Notable changes to the dataset and the project. Format based on [Keep a Changelo
 - **Per-page social images** for collections, and a **credit-programs data source** (`data/programs.json`) driving the new `/programs/` pages and the companion doc; credit programs are now linked from the primary site nav.
 
 ### Site
+- **Free model index** (`/models/`) — a searchable model → provider table built from every `models_free` entry, answering "which free API serves model X". Server-rendered (works without JS).
+- **Guides** (`/guides/`) — five intent-matched, data-generated landing pages (no credit card, OpenAI-compatible, no phone/no signup, embeddings, speech) with an editorial top pick and a live comparison table, for long-tail search.
+- **Consistent sticky header** — bumped the header background to ~97% opacity so the navbar reads identically on every page (it previously picked up the tint of the content behind its translucent blur). Added `Models` to the primary nav; `Guides` and the model index to the footer.
 - **Credit programs split into two standalone pages** — "Startup credits" and "Student credits" are now separate top-nav destinations; the umbrella `/programs/` hub that enumerated both is gone.
 - **Richer provider pages** (`/p/<slug>`) — a prominent **Free models** block (real sampled IDs + how to pull the live `/models` list), a **modality-aware quickstart** (chat or embeddings) that uses the provider's real base URL and an actual free model instead of a placeholder, a curl variant alongside Python, and a freshness read-out (`verified <date> · N days ago`, with a re-verification-due flag past the 90-day SLA).
 - **Server-rendered homepage** — the explorer table (51 rows) and the dataset are now inlined into the landing page at build time, so it's fully indexable, paints instantly, and works without JS (previously the flagship page was an empty client-rendered shell).
