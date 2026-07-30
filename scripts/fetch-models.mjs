@@ -71,6 +71,12 @@ async function getJson(url, headers) {
   }
 }
 
+// A standard OpenAI-shaped /models list that needs no key.
+const openaiPublic = (url) => async () => {
+  const d = await getJson(url);
+  return sample((d.data || []).map((m) => m.id));
+};
+
 // Public endpoints — no API key required.
 const PUBLIC = {
   openrouter: async () => {
@@ -86,6 +92,13 @@ const PUBLIC = {
   pollinations: async () => {
     const d = await getJson('https://text.pollinations.ai/models');
     return sample(d.filter((m) => m.tier === 'anonymous').map((m) => m.name));
+  },
+  // Free credit / free-inference tiers with public OpenAI-shaped catalogs.
+  'nvidia-nim': openaiPublic('https://integrate.api.nvidia.com/v1/models'),
+  modelscope: openaiPublic('https://api-inference.modelscope.cn/v1/models'),
+  'ollama-cloud': async () => {
+    const d = await getJson('https://ollama.com/api/tags');
+    return sample((d.models || []).map((m) => m.name));
   },
 };
 

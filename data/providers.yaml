@@ -446,7 +446,7 @@ providers:
     notes: "\"Evaluation only, not production\" per NVIDIA's own Trial Terms of Service — NVIDIA may discontinue the trial at any time with no continuity obligation"
     best_for: "Trialling NVIDIA-optimized models (evaluation only)"
     modalities: ["text"]
-    models_free: null
+    models_free: ["01-ai/yi-large", "adept/fuyu-8b", "ai21labs/jamba-1.5-large-instruct", "aisingapore/sea-lion-7b-instruct", "baai/bge-m3", "bigcode/starcoder2-15b", "databricks/dbrx-instruct", "deepseek-ai/deepseek-coder-6.7b-instruct"]
     expires: null
     docs_url: "https://build.nvidia.com/"
     phone_required: true
@@ -598,7 +598,7 @@ providers:
     notes: "First-party — Ollama hosts the cloud models. Requires an ollama.com account + API key (`ollama signin`); the free plan is for light usage, Pro ($20/mo) raises limits. No card required."
     best_for: "Cloud-hosted open models with the Ollama workflow, no card"
     modalities: ["text", "vision"]
-    models_free: null
+    models_free: ["deepseek-v4-flash", "deepseek-v4-pro", "gemma4:31b", "glm-5.1", "glm-5.2", "gpt-oss:120b", "gpt-oss:20b", "kimi-k2.5"]
     expires: null
     docs_url: "https://docs.ollama.com/cloud"
     phone_required: false
@@ -636,7 +636,7 @@ providers:
     notes: "Alibaba's model hub — a different product from Alibaba Model Studio. Requires a ModelScope account bound to an Alibaba Cloud account with real-name (ID) verification — a practical barrier for non-China users. Explicitly non-commercial (\"for developers to experience\"). No card."
     best_for: "Free daily calls to many open models (real-name verification required)"
     modalities: ["text", "vision"]
-    models_free: null
+    models_free: ["LLM-Research/Llama-4-Maverick-17B-128E-Instruct", "MedAIBase/AntAngelMed", "MiniMax/MiniMax-M1-80k", "MusePublic/Qwen-Image-Edit", "OpenGVLab/InternVL3_5-241B-A28B", "PaddlePaddle/ERNIE-4.5-0.3B-PT", "Qwen/Qwen-Image-Edit", "Shanghai_AI_Laboratory/Intern-S1"]
     expires: null
     docs_url: "https://www.modelscope.cn/docs/model-service/API-Inference/intro"
     phone_required: null
