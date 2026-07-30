@@ -190,6 +190,7 @@ Full guidelines, including what counts as an acceptable source: **[CONTRIBUTING.
 | [Update playbook](docs/update-playbook.md) | The weekly routine that keeps the badge green |
 | [Inclusion criteria](docs/inclusion-criteria.md) | What earns a spot — and what gets rejected |
 | [Comparison dimensions](docs/comparison-dimensions.md) | Every field and flag in the dataset, defined |
+| [Self-hosting on free compute](docs/self-hosting-on-free-compute.md) | Adjacent: free GPU/compute when no hosted API fits |
 | [Roadmap](docs/roadmap.md) | Where this is going next |
 | [Changelog](CHANGELOG.md) | What changed, when |
 | [Governance](GOVERNANCE.md) | How decisions get made |
