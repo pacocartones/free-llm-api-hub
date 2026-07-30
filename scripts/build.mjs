@@ -567,17 +567,45 @@ const provFlagsHtml = (p) => {
 
 for (const p of providers) {
   const inColls = COLLECTIONS.filter((c) => collRows(c).some((x) => x.slug === p.slug));
-  const model = p.slug === 'groq' ? 'llama-3.1-8b-instant' : '<a-free-model>';
-  const quick = p.openai_base_url
-    ? `<h2>Quickstart — OpenAI SDK</h2><pre><code>from openai import OpenAI
+  // Concrete free model for snippets: prefer a real sampled ID, else a sensible default.
+  const DEFAULT_MODEL = { groq: 'llama-3.1-8b-instant' };
+  const model = (p.models_free && p.models_free[0]) || DEFAULT_MODEL[p.slug] || '<a-free-model>';
+  const mods = p.modalities || [];
+  const embeddingsFirst = mods.includes('embeddings') && !mods.includes('text');
 
-client = OpenAI(base_url="${htmlEsc(p.openai_base_url)}", api_key="&lt;YOUR_FREE_API_KEY&gt;")
+  // Quickstart — modality-aware, using the provider's real base URL and a real free model.
+  let quick = '';
+  if (p.openai_base_url) {
+    const base = htmlEsc(p.openai_base_url);
+    const m = htmlEsc(model);
+    quick = embeddingsFirst
+      ? `<h2>Quickstart — embeddings</h2><pre><code>from openai import OpenAI
+
+client = OpenAI(base_url="${base}", api_key="&lt;YOUR_FREE_API_KEY&gt;")
+resp = client.embeddings.create(model="${m}", input="Hello world")
+print(len(resp.data[0].embedding))</code></pre>`
+      : `<h2>Quickstart — chat completions</h2><pre><code>from openai import OpenAI
+
+client = OpenAI(base_url="${base}", api_key="&lt;YOUR_FREE_API_KEY&gt;")
 resp = client.chat.completions.create(
-    model="${htmlEsc(model)}",
+    model="${m}",
     messages=[{"role": "user", "content": "Hello!"}],
 )
-print(resp.choices[0].message.content)</code></pre>`
+print(resp.choices[0].message.content)</code></pre><p class="muted">…or with curl:</p><pre><code>curl ${base}/chat/completions \\
+  -H "Authorization: Bearer $API_KEY" \\
+  -H "Content-Type: application/json" \\
+  -d '{"model":"${m}","messages":[{"role":"user","content":"Hello!"}]}'</code></pre>`;
+  }
+
+  // Free models — a prominent block when we have a sample, with a way to pull the live list.
+  const modelsBlock = (p.models_free && p.models_free.length)
+    ? `<h2>Free models <span class="muted">· sample</span></h2>` +
+      `<div class="model-chips">${p.models_free.map((mm) => `<code>${htmlEsc(mm)}</code>`).join('')}</div>` +
+      `<p class="muted">A sample of models reachable on the free tier — the live catalog changes.` +
+      (p.openai_base_url ? ` Pull the current set with <code>GET ${htmlEsc(p.openai_base_url)}/models</code>.` : '') +
+      `</p>`
     : '';
+
   const summary = `<div class="prov-summary"><h3>What's free</h3><p>${htmlEsc(p.free_tier)}</p></div>`;
   const bigCards = [
     ['Rate limits', htmlEsc(p.rate_limits)],
@@ -587,12 +615,16 @@ print(resp.choices[0].message.content)</code></pre>`
     ['Type', typeLabel(p) + (p.category === 'ongoing' ? ' free tier' : ' credit')],
     ['Free type', htmlEsc(p.free_type)],
     ['Expires', htmlEsc(p.expires) || 'no expiry'],
-    ['Modalities', (p.modalities || []).join(', ') || '—'],
+    ['Modalities', mods.join(', ') || '—'],
     ['OpenAI base URL', p.openai_base_url ? `<code>${htmlEsc(p.openai_base_url)}</code>` : '—'],
-    ...(p.models_free && p.models_free.length ? [['Sample free models', p.models_free.map((m) => `<code>${htmlEsc(m)}</code>`).join(' ')]] : []),
   ].map(([k, v]) => `<div class="meta-row"><span class="meta-k">${k}</span><span class="meta-v">${v}</span></div>`).join('');
+  // Freshness relative to the current day (provider pages are regenerated on deploy, not diff-gated).
+  const daysAgo = p.verified && p.last_verified
+    ? Math.floor((today - new Date(p.last_verified + 'T00:00:00Z')) / 86400000)
+    : null;
   const verifiedLine = p.verified
-    ? `<span class="v ok">${IC('ic-check')} verified ${htmlEsc(p.last_verified)}</span>`
+    ? `<span class="v ok">${IC('ic-check')} verified ${htmlEsc(p.last_verified)}${daysAgo != null ? ` · ${daysAgo}d ago` : ''}</span>` +
+      (daysAgo != null && daysAgo > FRESH_DAYS ? ` <span class="v warn">${IC('ic-warn')} re-verification due</span>` : '')
     : `<span class="v warn">${IC('ic-warn')} unverified</span>`;
   const docsBtn = p.docs_url ? `<a class="btn primary" href="${htmlEsc(p.docs_url)}" target="_blank" rel="noopener">Official docs ↗</a>` : '';
   const collChips = inColls.length ? `<div class="colls">${inColls.map((c) => `<a href="../collections/${c.slug}.html">${htmlEsc(c.title)}</a>`).join('')}</div>` : '';
@@ -608,6 +640,7 @@ print(resp.choices[0].message.content)</code></pre>`
     summary +
     (bigCards ? `<div class="prov-grid">${bigCards}</div>` : '') +
     `<div class="prov-meta">${metaRows}</div>` +
+    modelsBlock +
     quick +
     (collChips ? `<h2>Appears in</h2>${collChips}` : '') +
     `<p class="prov-back"><a href="../#explorer">← All providers</a></p>` +

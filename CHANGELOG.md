@@ -13,6 +13,8 @@ Notable changes to the dataset and the project. Format based on [Keep a Changelo
 - **Per-page social images** for collections, and a **credit-programs data source** (`data/programs.json`) driving the new `/programs/` pages and the companion doc; credit programs are now linked from the primary site nav.
 
 ### Site
+- **Credit programs split into two standalone pages** — "Startup credits" and "Student credits" are now separate top-nav destinations; the umbrella `/programs/` hub that enumerated both is gone.
+- **Richer provider pages** (`/p/<slug>`) — a prominent **Free models** block (real sampled IDs + how to pull the live `/models` list), a **modality-aware quickstart** (chat or embeddings) that uses the provider's real base URL and an actual free model instead of a placeholder, a curl variant alongside Python, and a freshness read-out (`verified <date> · N days ago`, with a re-verification-due flag past the 90-day SLA).
 - **Server-rendered homepage** — the explorer table (51 rows) and the dataset are now inlined into the landing page at build time, so it's fully indexable, paints instantly, and works without JS (previously the flagship page was an empty client-rendered shell).
 - **Recommended default order** (no-card + no-phone + commercial + ongoing + OpenAI-compatible first) and **one-click filter presets** (Side-project starter, OpenAI drop-in, Speech, Embeddings/RAG, Zero signup, Ship commercial), all shareable via the URL.
 - **Updates page + RSS feed** (`/updates.html`, `/feed.xml`) generated from git history, plus an **embeddable widget** (`widget.js`) for other sites to show a live top-list that links back.

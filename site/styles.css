@@ -300,6 +300,9 @@ pre:hover .pre-copy, .pre-copy:focus-visible { opacity: 1; }
 .meta-v code { word-break: break-all; color: var(--accent); }
 .prov-back { margin-top: 30px; font-family: var(--font-mono); font-size: .85rem; }
 @media (max-width: 560px) { .meta-row { grid-template-columns: 1fr; gap: 3px; } }
+.muted { color: var(--muted); }
+.model-chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0 6px; }
+.model-chips code { background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 4px 9px; font-size: .82rem; color: var(--accent); word-break: break-all; }
 
 /* ---------- credit programs ---------- */
 .funds { display: inline-block; font-size: .74rem; font-family: var(--font-mono); white-space: nowrap; }
