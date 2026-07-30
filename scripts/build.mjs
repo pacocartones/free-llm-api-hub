@@ -265,7 +265,7 @@ const siteFooter = (p) => `<footer class="site-footer"><div class="wrap footer-t
 </div><div class="wrap footer-bottom"><a class="foot-logo" href="${p}" aria-label="Free LLM API Hub — home"><svg class="logo-mark"><use href="#logo"/></svg></a><p>Independent, community-maintained — not affiliated with any provider listed. Terms change without notice; always confirm against each provider's own docs. MIT licensed.</p><p class="foot-legal"><a href="${p}legal/privacy.html">Privacy</a> · <a href="${p}legal/terms.html">Terms</a> · Tweakeo, Inc.</p></div></footer>`;
 
 // Full page wrapper for generated (collection) pages. `p` is the path prefix to the site root.
-function htmlPage({ title, desc, canonical, main, jsonld, prefix = '../', noindex = false }) {
+function htmlPage({ title, desc, canonical, main, jsonld, prefix = '../', noindex = false, ogImage = `${SITE}/og.png` }) {
   return `<!DOCTYPE html>
 <html lang="en" data-theme="dark">
 <head>
@@ -284,11 +284,11 @@ function htmlPage({ title, desc, canonical, main, jsonld, prefix = '../', noinde
 <meta property="og:description" content="${htmlEsc(desc)}">
 <meta property="og:type" content="website">
 <meta property="og:url" content="${htmlEsc(canonical)}">
-<meta property="og:image" content="${SITE}/og.png">
+<meta property="og:image" content="${ogImage}">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="${SITE}/og.png">
+<meta name="twitter:image" content="${ogImage}">
 <link rel="alternate" type="application/rss+xml" title="Free LLM API Hub — updates" href="${prefix}feed.xml">
 <link rel="stylesheet" href="${prefix}styles.css">
 ${jsonld ? `<script type="application/ld+json">${jsonld}</script>` : ''}
@@ -524,7 +524,7 @@ print(resp.choices[0].message.content)</code></pre><pre><code>curl ${htmlEsc(QS_
     `</div></main>`;
   writeFileSync(
     join(ROOT, `site/collections/${c.slug}.html`),
-    htmlPage({ title: `${c.title} · Free LLM API Hub`, desc: c.desc, canonical: `${SITE}/collections/${c.slug}.html`, main, jsonld })
+    htmlPage({ title: `${c.title} · Free LLM API Hub`, desc: c.desc, canonical: `${SITE}/collections/${c.slug}.html`, main, jsonld, ogImage: `${SITE}/og/collections/${c.slug}.png` })
   );
 }
 
