@@ -5,13 +5,25 @@ Notable changes to the dataset and the project. Format based on [Keep a Changelo
 - **Data changes** (a provider's limits/terms) are recorded here when notable; every change is also visible in the git history of `data/providers.json`.
 - **Schema changes** (a new field, a changed meaning) bump the dataset version and are always recorded.
 
-## [Unreleased]
+## [2.2.0] — 2026-07-30
 
-### Data
-- **Attribute backfill (Phase 1):** filled `best_for` for every entry and confirmed additional tri-states against official docs (e.g. Cohere & IBM watsonx `openai_compatible`, HuggingFace & Alibaba `card_required: false`, NLP Cloud & Nebius policies). Fields that providers don't publish are left `null` rather than guessed.
-- **SambaNova corrected** to a rate-limited ongoing free tier (its former "$5 / 3-month" trial is no longer documented).
-- **Two new verified providers** mined from the major "free LLM API" aggregator lists: **Ollama Cloud** (cloud-hosted open models, $0 plan, OpenAI-compatible) and **AI Horde** (anonymous, crowdsourced, no card/phone). 33 providers, still 100% verified.
-- **Cliff mitigation:** re-verified 10 entries today to stagger the 2026-07-11 cluster, and `staleness.mjs` now warns when a same-date cluster nears the 90-day SLA.
+Schema minor bump (added the `ocr` modality) and a big multimodal expansion — the dataset now spans free LLM **and adjacent AI-model** APIs (image, speech, embeddings, rerank, OCR, vision) while text/LLM stays the core.
+
+### Added
+- **Round 2 discovery (15 new verified providers), by category:**
+  - Image: **Pollinations.ai** (no-signup), **Runware** ($2, no card).
+  - Embeddings/rerank: **Pinecone Inference** (5M tokens/mo), **Twelve Labs** (multimodal embeddings).
+  - OCR/document: **OCR.space** (25k/mo), **LlamaParse** (~10k pages/mo), **Nanonets** ($50).
+  - Vision: **Moondream** (OpenAI-compatible).
+  - Speech: **Speechmatics** (50 hrs/mo STT), **Speechify**, **Hume AI**, **Unreal Speech**, **ElevenLabs**.
+  - Plus **Ollama Cloud** and **AI Horde** (from aggregator mining). 47 providers, 100% verified.
+- New `ocr` modality in the schema/validator.
+
+### Data (Phase 1 backfill)
+- Filled `best_for` for every entry; confirmed more tri-states against official docs (Cohere & IBM watsonx `openai_compatible`, HuggingFace & Alibaba `card_required: false`, NLP Cloud & Nebius policies). Unpublished fields left `null` rather than guessed.
+- **SambaNova** corrected to a rate-limited ongoing free tier (its "$5 / 3-month" trial is no longer documented).
+- **Cliff mitigation:** re-verified entries to stagger the 2026-07-11 cluster; `staleness.mjs` now warns when a same-date cluster nears the 90-day SLA.
+- Held for review (not added): Chinese real-name-ID LLMs (iFlytek, Tencent Hunyuan, Baidu, ByteDance, StepFun), plus medium-confidence or card-gated-cloud offers (Google/Azure/IBM cloud tiers, Civitai, Roboflow, Cartesia, LMNT, etc.).
 
 ### Site
 - **Full visual redesign** into one cohesive system (shared `styles.css`) across the landing page and every generated page: sticky header with logo + nav, a redesigned hero (hub logo + a live GitHub star count right below it), and a structured footer. Light/dark theme toggle (persisted).

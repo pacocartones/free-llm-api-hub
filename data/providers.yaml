@@ -594,3 +594,255 @@ providers:
     openai_base_url: null
     verified: true
     last_verified: "2026-07-30"
+  - slug: "modelscope"
+    name: "ModelScope (API-Inference)"
+    category: "ongoing"
+    free_type: "renewing-quota"
+    free_tier: "~2,000 free API calls/day across open-weight models (Qwen3, DeepSeek, GLM, Llama, etc.) via API-Inference"
+    rate_limits: "~2,000 calls/day; concurrency/QPS caps applied and dynamically adjusted"
+    notes: "Alibaba's model hub — a different product from Alibaba Model Studio. Requires a ModelScope account bound to an Alibaba Cloud account with real-name (ID) verification — a practical barrier for non-China users. Explicitly non-commercial (\"for developers to experience\"). No card."
+    best_for: "Free daily calls to many open models (real-name verification required)"
+    modalities: ["text", "vision"]
+    expires: null
+    docs_url: "https://www.modelscope.cn/docs/model-service/API-Inference/intro"
+    phone_required: null
+    card_required: false
+    commercial_ok: false
+    openai_compatible: true
+    openai_base_url: "https://api-inference.modelscope.cn/v1"
+    verified: true
+    last_verified: "2026-07-30"
+  - slug: "pollinations"
+    name: "Pollinations.ai"
+    category: "ongoing"
+    free_type: "perpetual"
+    free_tier: "Free hosted image models (Flux, Turbo, Stable Diffusion) via a simple GET URL; also text and audio. No signup required to start"
+    rate_limits: "Anonymous ~1 request / 15s; free registration (Seed tier) ~1 request / 5s"
+    notes: "Anonymous free images may carry a watermark (since 2025); free registration removes it via the nologo parameter. No card, no phone. Commercial use is not explicitly guaranteed in the docs."
+    best_for: "No-signup free image generation (Flux/SD)"
+    modalities: ["image", "text", "audio"]
+    expires: null
+    docs_url: "https://github.com/pollinations/pollinations/blob/master/APIDOCS.md"
+    phone_required: false
+    card_required: false
+    commercial_ok: null
+    openai_compatible: false
+    openai_base_url: null
+    verified: true
+    last_verified: "2026-07-30"
+  - slug: "runware"
+    name: "Runware"
+    category: "trial"
+    free_type: "trial-credit"
+    free_tier: "$2 in signup credits across first-party image models (FLUX.1/FLUX.2, Stable Diffusion 3, SDXL) on the Sonic Inference Engine — hundreds to thousands of generations"
+    rate_limits: "Not publicly specified; per-account concurrency applies"
+    notes: "The $2 requires signup with a business email (personal/free-mail domains may be rejected); one-time, non-renewing. No watermark, no card, commercial use allowed. The OpenAI-compatible endpoint is chat-only, not for images."
+    best_for: "Fast image models with a $2 no-card credit"
+    modalities: ["image"]
+    expires: null
+    docs_url: "https://runware.ai/pricing"
+    phone_required: false
+    card_required: false
+    commercial_ok: true
+    openai_compatible: false
+    openai_base_url: null
+    verified: true
+    last_verified: "2026-07-30"
+  - slug: "pinecone-inference"
+    name: "Pinecone Inference"
+    category: "ongoing"
+    free_type: "renewing-quota"
+    free_tier: "Starter (free) plan: 5M tokens/mo for embedding models (llama-text-embed-v2, multilingual-e5-large) and 500 requests/mo for the bge-reranker-v2-m3 rerank model"
+    rate_limits: "5M embedding tokens/mo; 500 rerank requests/mo on Starter"
+    notes: "Free rerank limited to bge-reranker-v2-m3; overages are pay-as-you-go. Not OpenAI-compatible. No card required."
+    best_for: "Free embeddings + rerank for RAG (5M tokens/mo)"
+    modalities: ["embeddings", "rerank"]
+    expires: null
+    docs_url: "https://www.pinecone.io/pricing/"
+    phone_required: null
+    card_required: false
+    commercial_ok: null
+    openai_compatible: false
+    openai_base_url: null
+    verified: true
+    last_verified: "2026-07-30"
+  - slug: "twelve-labs"
+    name: "Twelve Labs (Marengo Embed)"
+    category: "ongoing"
+    free_type: "renewing-quota"
+    free_tier: "Free plan: the Marengo Embed API for all input types (video, audio, image, text) at no cost, plus ~600 min indexing"
+    rate_limits: "Embed video/audio: 3,000 RPD, 25 RPM; embed text/image: 3,000 RPD, 600 RPM"
+    notes: "No credit card for the Free plan, but indexed data expires after 90 days unless upgraded. Marengo produces multimodal embeddings. Not OpenAI-compatible."
+    best_for: "Free multimodal (video/audio/image/text) embeddings"
+    modalities: ["embeddings", "vision", "audio", "text"]
+    expires: null
+    docs_url: "https://www.twelvelabs.io/pricing"
+    phone_required: null
+    card_required: false
+    commercial_ok: null
+    openai_compatible: false
+    openai_base_url: null
+    verified: true
+    last_verified: "2026-07-30"
+  - slug: "ocr-space"
+    name: "OCR.space"
+    category: "ongoing"
+    free_type: "renewing-quota"
+    free_tier: "25,000 conversions/month (Engine 1 & 2) plus 2,500 Engine 3 conversions/month; max 1 MB file, PDFs up to 3 pages"
+    rate_limits: "500 requests per day per IP address"
+    notes: "Free searchable-PDF output carries a watermark (raw text extraction is unrestricted); the free key needs only an email, no card. Commercial use permitted."
+    best_for: "Classic free OCR (25k conversions/mo, no card)"
+    modalities: ["ocr", "text"]
+    expires: null
+    docs_url: "https://ocr.space/OCRAPI"
+    phone_required: false
+    card_required: false
+    commercial_ok: true
+    openai_compatible: false
+    openai_base_url: null
+    verified: true
+    last_verified: "2026-07-30"
+  - slug: "llamaparse"
+    name: "LlamaParse (LlamaCloud)"
+    category: "ongoing"
+    free_type: "renewing-quota"
+    free_tier: "Free plan: 10,000 credits/month (~10,000 pages in balanced parse mode at 1 credit/page)"
+    rate_limits: "5 concurrent jobs; 1 project; 5 indexes on the free plan"
+    notes: "Credit-based (1,000 credits = $1.25); premium parse modes consume more credits per page. No card required. Document parsing for RAG (LlamaIndex)."
+    best_for: "Free document parsing for RAG (~10k pages/mo)"
+    modalities: ["ocr", "text"]
+    expires: null
+    docs_url: "https://www.llamaindex.ai/pricing"
+    phone_required: false
+    card_required: false
+    commercial_ok: true
+    openai_compatible: false
+    openai_base_url: null
+    verified: true
+    last_verified: "2026-07-30"
+  - slug: "nanonets"
+    name: "Nanonets"
+    category: "trial"
+    free_type: "trial-credit"
+    free_tier: "$50 in free credits on signup (one-time) across data-extraction / OCR workflows"
+    rate_limits: "Up to 3 users on the free credit"
+    notes: "One-time signup credit, not renewing; no credit card required to start. Paid plans start at $100/month afterwards."
+    best_for: "Document extraction on a $50 no-card credit"
+    modalities: ["ocr", "text"]
+    expires: null
+    docs_url: "https://nanonets.com/pricing"
+    phone_required: false
+    card_required: false
+    commercial_ok: true
+    openai_compatible: false
+    openai_base_url: null
+    verified: true
+    last_verified: "2026-07-30"
+  - slug: "moondream"
+    name: "Moondream Cloud"
+    category: "ongoing"
+    free_type: "recurring-credit"
+    free_tier: "$5/month usage credits in every workspace (Free plan) for the Moondream vision model — caption, query (VQA), detect, point"
+    rate_limits: "Bounded by the $5/month credit"
+    notes: "Recurring $5/month credit; card requirement not stated on the pricing page; commercial terms not specified. OpenAI-compatible endpoint."
+    best_for: "Tiny vision model, OpenAI-compatible, monthly free credit"
+    modalities: ["vision"]
+    expires: null
+    docs_url: "https://moondream.ai/pricing"
+    phone_required: null
+    card_required: null
+    commercial_ok: null
+    openai_compatible: true
+    openai_base_url: "https://api.moondream.ai/v1"
+    verified: true
+    last_verified: "2026-07-30"
+  - slug: "speechmatics"
+    name: "Speechmatics"
+    category: "ongoing"
+    free_type: "renewing-quota"
+    free_tier: "3,000 minutes (50 hours)/month speech-to-text + 1,000,000 characters (~20 hrs)/month text-to-speech"
+    rate_limits: "2 concurrent real-time sessions on the free plan"
+    notes: "No credit card required to start; add a card only when you exceed the free limit. Recurring monthly allowance covering both STT and TTS. Commercial-use permission not explicitly stated on the pricing page."
+    best_for: "Best free STT tier (50 hrs/mo, no card)"
+    modalities: ["audio"]
+    expires: null
+    docs_url: "https://www.speechmatics.com/pricing"
+    phone_required: null
+    card_required: false
+    commercial_ok: null
+    openai_compatible: false
+    openai_base_url: null
+    verified: true
+    last_verified: "2026-07-30"
+  - slug: "speechify"
+    name: "Speechify API"
+    category: "ongoing"
+    free_type: "renewing-quota"
+    free_tier: "50,000 characters/month TTS (hard cap) + 60 min/month voice agents"
+    rate_limits: "3 concurrent calls; hard cap pauses at the limit (no overages)"
+    notes: "Commercial use is allowed on the free tier. No credit card required. Hard monthly cap that pauses at the limit."
+    best_for: "Free commercial TTS (50k chars/mo)"
+    modalities: ["audio"]
+    expires: null
+    docs_url: "https://speechify.ai/pricing"
+    phone_required: false
+    card_required: false
+    commercial_ok: true
+    openai_compatible: null
+    openai_base_url: null
+    verified: true
+    last_verified: "2026-07-30"
+  - slug: "hume-ai"
+    name: "Hume AI (Octave TTS)"
+    category: "ongoing"
+    free_type: "renewing-quota"
+    free_tier: "10,000 characters/month TTS (~10 minutes) on the Free plan"
+    rate_limits: "15 requests per minute"
+    notes: "The free plan includes a commercial license; overage billed at $0.15/1,000 chars. No card stated as required to start. Not OpenAI-compatible."
+    best_for: "Expressive TTS with a commercial free tier"
+    modalities: ["audio"]
+    expires: null
+    docs_url: "https://www.hume.ai/pricing"
+    phone_required: null
+    card_required: false
+    commercial_ok: true
+    openai_compatible: false
+    openai_base_url: null
+    verified: true
+    last_verified: "2026-07-30"
+  - slug: "unreal-speech"
+    name: "Unreal Speech"
+    category: "ongoing"
+    free_type: "renewing-quota"
+    free_tier: "250,000 characters/month TTS (~6 hours of audio)"
+    rate_limits: "Tiered endpoints for different text lengths; specific caps not documented"
+    notes: "Commercial use allowed, but free-plan users must attribute Unreal Speech with a link when publishing audio. First-party REST endpoints. Card requirement not stated."
+    best_for: "Largest free TTS (250k chars/mo, attribution)"
+    modalities: ["audio"]
+    expires: null
+    docs_url: "https://unrealspeech.com/pricing"
+    phone_required: null
+    card_required: null
+    commercial_ok: true
+    openai_compatible: false
+    openai_base_url: null
+    verified: true
+    last_verified: "2026-07-30"
+  - slug: "elevenlabs"
+    name: "ElevenLabs"
+    category: "ongoing"
+    free_type: "renewing-quota"
+    free_tier: "10,000 credits/month shared across Text-to-Speech, Speech-to-Text and more (~10 min TTS/month)"
+    rate_limits: "Concurrency tied to the Free plan (not numerically published)"
+    notes: "The free tier is NON-COMMERCIAL only per the Terms of Use (a commercial license begins on paid Starter, $6/mo), and historically required attribution. API access is available on the free plan. No credit card to sign up."
+    best_for: "Best-known TTS voices (free tier is non-commercial)"
+    modalities: ["audio"]
+    expires: null
+    docs_url: "https://elevenlabs.io/pricing"
+    phone_required: false
+    card_required: false
+    commercial_ok: false
+    openai_compatible: false
+    openai_base_url: null
+    verified: true
+    last_verified: "2026-07-30"

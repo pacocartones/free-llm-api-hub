@@ -74,7 +74,7 @@
           "description": "Modalities reachable on the free tier.",
           "items": {
             "type": "string",
-            "enum": ["text", "vision", "image", "audio", "embeddings", "rerank"]
+            "enum": ["text", "vision", "image", "audio", "embeddings", "rerank", "ocr"]
           },
           "uniqueItems": true
         },

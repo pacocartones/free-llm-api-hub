@@ -8,7 +8,7 @@ Free LLM API tiers that permit production/commercial use — not restricted to e
 
 Free tiers that **allow commercial/production use** (`commercial_ok: true`). Eval-only tiers (Cohere trial keys, NVIDIA NIM, GitHub Models) are deliberately excluded — read their rows in the main list for the restriction.
 
-**13 of 33 tracked providers** match.
+**20 of 47 tracked providers** match.
 
 | Provider | Type | What's free | The catch | Verified |
 |---|---|---|---|---|
@@ -25,6 +25,13 @@ Free tiers that **allow commercial/production use** (`commercial_ok: true`). Eva
 | **[AssemblyAI](https://www.assemblyai.com/pricing)**<br><sub>💳 no card · 📵 no phone · 🏢 commercial OK · 🔌 OpenAI-compat</sub> | Trial | $50 free credit on signup (no card) — pre-recorded & streaming speech-to-text, Speech Understanding, and an OpenAI-compatible LLM Gateway (25+ models) | One-time credit, not renewing. Catch: the default model differs between free and paid accounts — set speech_models explicitly to avoid cost jumps on upgrade. Only the LLM Gateway is OpenAI-compatible. | ✅ 2026-07-30 |
 | **[Mixedbread](https://www.mixedbread.com/pricing)**<br><sub>💳 no card · 📵 no phone · 🏢 commercial OK</sub> | Trial | Starter plan: $5 one-time credit (no card) — embeddings (mxbai-embed-large-v1), reranking, and multimodal search over PDF/image/doc/code | Free credit is usage-based and non-renewing; usage-based pricing applies afterward. Native REST API, not documented as OpenAI-compatible. No card required. | ✅ 2026-07-30 |
 | **[Ollama Cloud](https://docs.ollama.com/cloud)**<br><sub>💳 no card · 📵 no phone · 🏢 commercial OK · 🔌 OpenAI-compat</sub> | Ongoing | $0 Free plan: access to cloud-hosted open models (Qwen, GPT-OSS, DeepSeek, etc.) via API | First-party — Ollama hosts the cloud models. Requires an ollama.com account + API key (`ollama signin`); the free plan is for light usage, Pro ($20/mo) raises limits. No card required. | ✅ 2026-07-30 |
+| **[Runware](https://runware.ai/pricing)**<br><sub>💳 no card · 📵 no phone · 🏢 commercial OK</sub> | Trial | $2 in signup credits across first-party image models (FLUX.1/FLUX.2, Stable Diffusion 3, SDXL) on the Sonic Inference Engine — hundreds to thousands of generations | The $2 requires signup with a business email (personal/free-mail domains may be rejected); one-time, non-renewing. No watermark, no card, commercial use allowed. The OpenAI-compatible endpoint is chat-only, not for images. | ✅ 2026-07-30 |
+| **[OCR.space](https://ocr.space/OCRAPI)**<br><sub>💳 no card · 📵 no phone · 🏢 commercial OK</sub> | Ongoing | 25,000 conversions/month (Engine 1 & 2) plus 2,500 Engine 3 conversions/month; max 1 MB file, PDFs up to 3 pages | Free searchable-PDF output carries a watermark (raw text extraction is unrestricted); the free key needs only an email, no card. Commercial use permitted. | ✅ 2026-07-30 |
+| **[LlamaParse (LlamaCloud)](https://www.llamaindex.ai/pricing)**<br><sub>💳 no card · 📵 no phone · 🏢 commercial OK</sub> | Ongoing | Free plan: 10,000 credits/month (~10,000 pages in balanced parse mode at 1 credit/page) | Credit-based (1,000 credits = $1.25); premium parse modes consume more credits per page. No card required. Document parsing for RAG (LlamaIndex). | ✅ 2026-07-30 |
+| **[Nanonets](https://nanonets.com/pricing)**<br><sub>💳 no card · 📵 no phone · 🏢 commercial OK</sub> | Trial | $50 in free credits on signup (one-time) across data-extraction / OCR workflows | One-time signup credit, not renewing; no credit card required to start. Paid plans start at $100/month afterwards. | ✅ 2026-07-30 |
+| **[Speechify API](https://speechify.ai/pricing)**<br><sub>💳 no card · 📵 no phone · 🏢 commercial OK</sub> | Ongoing | 50,000 characters/month TTS (hard cap) + 60 min/month voice agents | Commercial use is allowed on the free tier. No credit card required. Hard monthly cap that pauses at the limit. | ✅ 2026-07-30 |
+| **[Hume AI (Octave TTS)](https://www.hume.ai/pricing)**<br><sub>💳 no card · 🏢 commercial OK</sub> | Ongoing | 10,000 characters/month TTS (~10 minutes) on the Free plan | The free plan includes a commercial license; overage billed at $0.15/1,000 chars. No card stated as required to start. Not OpenAI-compatible. | ✅ 2026-07-30 |
+| **[Unreal Speech](https://unrealspeech.com/pricing)**<br><sub>🏢 commercial OK</sub> | Ongoing | 250,000 characters/month TTS (~6 hours of audio) | Commercial use allowed, but free-plan users must attribute Unreal Speech with a link when publishing audio. First-party REST endpoints. Card requirement not stated. | ✅ 2026-07-30 |
 
 ---
 

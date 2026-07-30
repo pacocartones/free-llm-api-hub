@@ -12,7 +12,7 @@ const data = JSON.parse(readFileSync(join(ROOT, 'data/providers.json'), 'utf8'))
 
 const CATEGORIES = ['ongoing', 'trial'];
 const FREE_TYPES = ['perpetual', 'renewing-quota', 'recurring-credit', 'trial-credit'];
-const MODALITIES = ['text', 'vision', 'image', 'audio', 'embeddings', 'rerank'];
+const MODALITIES = ['text', 'vision', 'image', 'audio', 'embeddings', 'rerank', 'ocr'];
 const TRISTATE = [true, false, null];
 const SLUG_RE = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;

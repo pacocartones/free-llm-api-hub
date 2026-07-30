@@ -8,7 +8,7 @@ Free LLM APIs that expose an OpenAI-compatible endpoint — point the OpenAI SDK
 
 These providers expose an **OpenAI-compatible endpoint** (`openai_compatible: true`), so migrating is usually a one-line change: keep the OpenAI SDK, swap `base_url` and `api_key`. Grab each provider’s exact base URL from its linked docs.
 
-**26 of 33 tracked providers** match.
+**28 of 47 tracked providers** match.
 
 | Provider | OpenAI base URL | What's free | The catch | Verified |
 |---|---|---|---|---|
@@ -38,6 +38,8 @@ These providers expose an **OpenAI-compatible endpoint** (`openai_compatible: tr
 | **[Clarifai](https://docs.clarifai.com/control/account-billing/)**<br><sub>💳 no card · 📱 phone · 🔌 OpenAI-compat</sub> | `https://api.clarifai.com/v2/ext/openai/v1` | One-time $5 credit across serverless models (GPT-OSS-120B, Claude, Llama), vision, embeddings and image generation | Catch: SMS phone verification is required to claim the $5. Credit is one-time and expires 30 days after grant; a card is required to recharge afterward. | ✅ 2026-07-30 |
 | **[Arli AI](https://www.arliai.com/pricing)**<br><sub>🔌 OpenAI-compat</sub> | `https://api.arliai.com/v1` | Free plan ($0): access to all text LLMs (Gemma, Qwen, etc.), capped at ~5 requests per 2-day window, 12K context, 1 request at a time | Free tier is for testing only — very restrictive. Provider advertises zero-log / no data retention. Card requirement for the free tier is not stated on the pricing page. | ✅ 2026-07-30 |
 | **[Ollama Cloud](https://docs.ollama.com/cloud)**<br><sub>💳 no card · 📵 no phone · 🏢 commercial OK · 🔌 OpenAI-compat</sub> | `https://ollama.com/v1` | $0 Free plan: access to cloud-hosted open models (Qwen, GPT-OSS, DeepSeek, etc.) via API | First-party — Ollama hosts the cloud models. Requires an ollama.com account + API key (`ollama signin`); the free plan is for light usage, Pro ($20/mo) raises limits. No card required. | ✅ 2026-07-30 |
+| **[ModelScope (API-Inference)](https://www.modelscope.cn/docs/model-service/API-Inference/intro)**<br><sub>💳 no card · 🔬 eval only · 🔌 OpenAI-compat</sub> | `https://api-inference.modelscope.cn/v1` | ~2,000 free API calls/day across open-weight models (Qwen3, DeepSeek, GLM, Llama, etc.) via API-Inference | Alibaba's model hub — a different product from Alibaba Model Studio. Requires a ModelScope account bound to an Alibaba Cloud account with real-name (ID) verification — a practical barrier for non-China users. Explicitly non-commercial ("for developers to experience"). No card. | ✅ 2026-07-30 |
+| **[Moondream Cloud](https://moondream.ai/pricing)**<br><sub>🔌 OpenAI-compat</sub> | `https://api.moondream.ai/v1` | $5/month usage credits in every workspace (Free plan) for the Moondream vision model — caption, query (VQA), detect, point | Recurring $5/month credit; card requirement not stated on the pricing page; commercial terms not specified. OpenAI-compatible endpoint. | ✅ 2026-07-30 |
 
 ## Quickstart — reuse the OpenAI SDK
 
