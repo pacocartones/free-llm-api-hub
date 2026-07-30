@@ -310,6 +310,13 @@ pre:hover .pre-copy, .pre-copy:focus-visible { opacity: 1; }
 .model-table thead th { position: sticky; top: var(--header-h); background: var(--bg); font-family: var(--font-mono); font-size: .74rem; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); z-index: 1; }
 .model-table td.name code { color: var(--accent); word-break: break-all; }
 .model-table tbody tr:hover { background: var(--panel); }
+.hero-links { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 20px; }
+.hero-links .hl-label { color: var(--faint); font-family: var(--font-mono); font-size: .78rem; text-transform: uppercase; letter-spacing: .05em; }
+.hero-links a { font-family: var(--font-mono); font-size: .82rem; color: var(--muted); padding: 5px 11px; border: 1px solid var(--border); border-radius: 20px; }
+.hero-links a:hover { color: var(--accent); border-color: var(--accent); text-decoration: none; }
+.faq-item { margin: 14px 0; }
+.faq-item h3 { margin: 0 0 4px; font-size: 1rem; }
+.faq-item p { margin: 0; color: var(--muted); }
 
 /* ---------- credit programs ---------- */
 .funds { display: inline-block; font-size: .74rem; font-family: var(--font-mono); white-space: nowrap; }

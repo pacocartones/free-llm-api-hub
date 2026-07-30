@@ -22,12 +22,13 @@ Direction, not dated promises. The north star: stay the **most trustworthy, curr
 - ✅ Shipped editorial [collections](../collections/README.md) generated from the data: no-card, no-phone, commercial-use, OpenAI-compatible, permanently-free, multimodal.
 - ✅ Per-provider OpenAI base URLs + a runnable quickstart (curl + OpenAI SDK) on the OpenAI-compatible page.
 - ✅ Broadened adjacent coverage: embeddings/rerank (Jina, Mixedbread) and speech (Deepgram, AssemblyAI).
+- ✅ **`models_free`** sampled model IDs with an automated live refresh from providers' own `/models` endpoints, a searchable [model index](../../models/), and intent-matched [SEO guides](../../guides/).
 
 ## Next
 
 - **A stable release tag per dataset version** so downstream consumers can pin a snapshot.
 - **A "fastest free LLM APIs" collection**, once a defensible speed dimension exists in the data.
-- **Per-provider model lists** (a sampled `models_free` field) for the highest-traffic providers.
+- **Complete the `models_free` backfill** for the key-gated providers — see the [backlog](backlog.md) for the concrete checklist.
 
 ## Later (under consideration)
 

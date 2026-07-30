@@ -16,6 +16,7 @@ How **Free LLM API Hub** works — how entries are verified, what earns a spot, 
 |---|---|
 | [Update playbook](update-playbook.md) | The weekly routine that keeps the freshness badge green |
 | [Roadmap](roadmap.md) | Where the project is going next |
+| [Backlog](backlog.md) | The living, actionable to-do checklist |
 
 ## Adjacent references
 

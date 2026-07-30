@@ -136,6 +136,95 @@ const COLLECTIONS = [
   },
 ];
 
+// SEO guides — intent-matched landing pages generated from the data. Declared
+// here (before the provider loop) so provider pages can cross-link to them.
+const GUIDES = [
+  {
+    slug: 'free-llm-api-without-credit-card',
+    card: 'No credit card',
+    blurb: 'Production-grade free tiers that never ask for a card.',
+    h1: 'Free LLM APIs with no credit card required',
+    title: 'Free LLM API — no credit card required · Free LLM API Hub',
+    desc: 'Verified LLM APIs with a genuinely free tier that requires no credit card at signup. Rate limits and commercial-use terms compared.',
+    lede: 'Yes — several production-grade LLM APIs give you a free tier without ever asking for a card.',
+    intro: `<p>The fastest way to start building is an API that doesn't gate its free tier behind a payment method. Every provider below was verified to require <strong>no credit card</strong> at signup for its free access — so there's no risk of a surprise charge when you cross a limit; you simply get rate-limited.</p><p>Watch two things as you choose: the per-minute / per-day <em>rate limits</em> (fine for prototypes, tight for production) and whether <em>commercial use</em> is allowed on the free tier. Both are in the table.</p>`,
+    filter: (p) => p.card_required === false && p.category === 'ongoing',
+    query: '?cat=ongoing&nocard=1#explorer',
+    faq: [
+      { q: 'Can I use an LLM API for free without a credit card?', a: 'Yes. Providers such as Google Gemini, Groq, Cloudflare Workers AI and OpenRouter give a free tier with no card required — you are limited by rate, not billing, so you cannot be charged by surprise.' },
+      { q: 'Will I be charged if I exceed the free limits?', a: 'No. On a no-card free tier you get rate-limited (HTTP 429) rather than billed. You would have to explicitly add a payment method before any spend is possible.' },
+      { q: 'Are these free tiers okay for commercial use?', a: 'Some are, some are not — each row shows a commercial-use flag, confirmed against the provider’s own terms.' },
+    ],
+  },
+  {
+    slug: 'openai-compatible-free-apis',
+    card: 'OpenAI-compatible',
+    blurb: 'Keep your code — just swap base_url and key.',
+    h1: 'Free OpenAI-compatible APIs (drop-in base_url)',
+    title: 'Free OpenAI-compatible APIs — drop-in base_url · Free LLM API Hub',
+    desc: 'Free LLM APIs that expose an OpenAI-compatible endpoint, so you only change base_url and the API key. Confirmed against each provider’s docs.',
+    lede: 'Point the OpenAI SDK at a different base_url and keep all of your existing code.',
+    intro: `<p>An OpenAI-compatible API exposes the same <code>/chat/completions</code> shape, so switching is usually a one-line change: swap <code>base_url</code> and the key. That makes these the lowest-friction way to move side projects off paid OpenAI usage, or to add a free fallback behind the same SDK.</p><p>Each provider's exact base URL is on its page, and the free models you can pass as <code>model</code> are in the <a href="../models/">model index</a>.</p>`,
+    filter: (p) => p.openai_compatible === true,
+    query: '#explorer',
+    faq: [
+      { q: 'What does OpenAI-compatible mean?', a: 'The API accepts the same request and response format as OpenAI’s <code>/chat/completions</code>, so the official OpenAI SDKs work by changing only <code>base_url</code> and the API key.' },
+      { q: 'How do I switch my code to a free OpenAI-compatible API?', a: 'Set <code>base_url</code> to the provider’s endpoint (listed on each provider page), use its free API key, and pass one of its free model IDs as <code>model</code>.' },
+      { q: 'Do all free LLM APIs support the OpenAI format?', a: 'No — this list is only the providers confirmed to expose an OpenAI-compatible endpoint against their own documentation.' },
+    ],
+  },
+  {
+    slug: 'free-llm-api-no-signup',
+    card: 'No card, no phone',
+    blurb: 'The lowest-friction keys: no card, no phone number.',
+    h1: 'Free LLM APIs with no phone number (and no card)',
+    title: 'Free LLM API — no phone, no credit card · Free LLM API Hub',
+    desc: 'The lowest-friction free LLM APIs: no credit card and no phone verification. A couple need no account at all.',
+    lede: 'The lowest-friction free APIs: no card, and no phone number either.',
+    intro: `<p>Some free tiers add phone verification on top of the signup form. The providers here ask for <strong>neither a credit card nor a phone number</strong>, so you can go from zero to a working key in a couple of minutes.</p><p>A few — like Pollinations and AI Horde — don't even need an account for basic use. The trade-off is predictable: the fewer the gates, the tighter the rate limits.</p>`,
+    filter: (p) => p.card_required === false && p.phone_required === false && p.category === 'ongoing',
+    query: '?cat=ongoing&nocard=1&nophone=1#explorer',
+    faq: [
+      { q: 'Is there a free LLM API with no phone verification?', a: 'Yes — every provider here requires neither a credit card nor a phone number to obtain a key.' },
+      { q: 'Can I call an LLM API with no account at all?', a: 'A few, such as Pollinations and AI Horde, allow anonymous or account-free use for basic requests, with tighter rate limits.' },
+    ],
+  },
+  {
+    slug: 'free-embeddings-apis',
+    card: 'Embeddings / RAG',
+    blurb: 'Free vector embeddings for search and RAG.',
+    h1: 'Free embeddings APIs for search and RAG',
+    title: 'Free embeddings APIs for RAG · Free LLM API Hub',
+    desc: 'Verified APIs that expose embedding models on a free tier — for semantic search, RAG and clustering. Token allowances compared.',
+    lede: 'Free vector embeddings for semantic search, RAG and clustering.',
+    intro: `<p>Embeddings power semantic search, RAG and clustering — and you rarely need to pay for them at prototype scale. The providers below expose <strong>embedding models on a free tier</strong>, several with generous monthly token allowances.</p><p>Building RAG? Pair one of these with a free chat model (see the <a href="../models/">model index</a>), ideally behind the same OpenAI-compatible base URL.</p>`,
+    filter: (p) => (p.modalities || []).includes('embeddings'),
+    query: '#explorer',
+    pick: 'jina-ai',
+    faq: [
+      { q: 'Is there a free embeddings API?', a: 'Yes — providers such as Jina AI, Cohere, Google Gemini and Cloudflare offer embedding models on a free tier, several with large monthly token allowances.' },
+      { q: 'Can I build RAG for free?', a: 'For prototypes, yes: pair a free embeddings API with a free chat model, ideally behind the same OpenAI-compatible base URL.' },
+    ],
+  },
+  {
+    slug: 'free-speech-to-text-apis',
+    card: 'Speech (STT/TTS)',
+    blurb: 'Free transcription and text-to-speech tiers.',
+    h1: 'Free speech APIs — transcription and text-to-speech',
+    title: 'Free speech-to-text & TTS APIs · Free LLM API Hub',
+    desc: 'Verified speech APIs with a free tier or sizeable starting credit — transcription (STT) and synthesis (TTS). Limits and catches compared.',
+    lede: 'Free speech-to-text and text-to-speech APIs, from free monthly minutes to hundreds in credit.',
+    intro: `<p>Audio APIs — transcription (STT) and synthesis (TTS) — often ship a real free tier or a sizeable one-time credit. The providers below offer <strong>free audio/speech access</strong>, from a few free hours a month to hundreds of dollars in starting balance.</p><p>Check the "catch" on each provider's page: some free speech tiers forbid commercial use or watermark the output.</p>`,
+    filter: (p) => (p.modalities || []).includes('audio'),
+    query: '#explorer',
+    pick: 'groq',
+    faq: [
+      { q: 'Is there a free speech-to-text API?', a: 'Yes — Groq (Whisper), Cloudflare Workers AI and others offer free STT; several dedicated speech providers also grant a sizeable one-time credit.' },
+      { q: 'Which free speech API is best for production?', a: 'Check each provider’s rate limits and whether commercial use is allowed — some free speech tiers are evaluation-only or watermark their output.' },
+    ],
+  },
+];
+
 const collRows = (c) => providers.filter(c.filter);
 const typeLabel = (p) => (p.category === 'ongoing' ? 'Ongoing' : 'Trial');
 
@@ -567,6 +656,7 @@ const provFlagsHtml = (p) => {
 
 for (const p of providers) {
   const inColls = COLLECTIONS.filter((c) => collRows(c).some((x) => x.slug === p.slug));
+  const inGuides = GUIDES.filter((g) => g.filter(p));
   // Concrete free model for snippets: prefer a real sampled ID, else a sensible default.
   const DEFAULT_MODEL = { groq: 'llama-3.1-8b-instant' };
   const model = (p.models_free && p.models_free[0]) || DEFAULT_MODEL[p.slug] || '<a-free-model>';
@@ -627,7 +717,10 @@ print(resp.choices[0].message.content)</code></pre><p class="muted">…or with c
       (daysAgo != null && daysAgo > FRESH_DAYS ? ` <span class="v warn">${IC('ic-warn')} re-verification due</span>` : '')
     : `<span class="v warn">${IC('ic-warn')} unverified</span>`;
   const docsBtn = p.docs_url ? `<a class="btn primary" href="${htmlEsc(p.docs_url)}" target="_blank" rel="noopener">Official docs ↗</a>` : '';
-  const collChips = inColls.length ? `<div class="colls">${inColls.map((c) => `<a href="../collections/${c.slug}.html">${htmlEsc(c.title)}</a>`).join('')}</div>` : '';
+  const crossChips = [
+    ...inColls.map((c) => `<a href="../collections/${c.slug}.html">${htmlEsc(c.title)}</a>`),
+    ...inGuides.map((g) => `<a href="../guides/${g.slug}.html">${htmlEsc(g.card)}</a>`),
+  ].join('');
   const main =
     `<section class="page-hero"><div class="wrap">` +
     `<nav class="crumbs"><a href="../">Home</a> / <a href="../#explorer">Providers</a> / ${htmlEsc(p.name)}</nav>` +
@@ -642,7 +735,7 @@ print(resp.choices[0].message.content)</code></pre><p class="muted">…or with c
     `<div class="prov-meta">${metaRows}</div>` +
     modelsBlock +
     quick +
-    (collChips ? `<h2>Appears in</h2>${collChips}` : '') +
+    (crossChips ? `<h2>Appears in</h2><div class="colls">${crossChips}</div>` : '') +
     `<p class="prov-back"><a href="../#explorer">← All providers</a></p>` +
     `</div></main>`;
   const jsonld = JSON.stringify({
@@ -826,70 +919,6 @@ writeFileSync(join(ROOT, 'site/models/index.html'), htmlPage({
 
 // ---------- SEO guides: intent-matched landing pages, generated from the data ----------
 mkdirSync(join(ROOT, 'site/guides'), { recursive: true });
-const GUIDES = [
-  {
-    slug: 'free-llm-api-without-credit-card',
-    card: 'No credit card',
-    blurb: 'Production-grade free tiers that never ask for a card.',
-    h1: 'Free LLM APIs with no credit card required',
-    title: 'Free LLM API — no credit card required · Free LLM API Hub',
-    desc: 'Verified LLM APIs with a genuinely free tier that requires no credit card at signup. Rate limits and commercial-use terms compared.',
-    lede: 'Yes — several production-grade LLM APIs give you a free tier without ever asking for a card.',
-    intro: `<p>The fastest way to start building is an API that doesn't gate its free tier behind a payment method. Every provider below was verified to require <strong>no credit card</strong> at signup for its free access — so there's no risk of a surprise charge when you cross a limit; you simply get rate-limited.</p><p>Watch two things as you choose: the per-minute / per-day <em>rate limits</em> (fine for prototypes, tight for production) and whether <em>commercial use</em> is allowed on the free tier. Both are in the table.</p>`,
-    filter: (p) => p.card_required === false && p.category === 'ongoing',
-    query: '?cat=ongoing&nocard=1#explorer',
-  },
-  {
-    slug: 'openai-compatible-free-apis',
-    card: 'OpenAI-compatible',
-    blurb: 'Keep your code — just swap base_url and key.',
-    h1: 'Free OpenAI-compatible APIs (drop-in base_url)',
-    title: 'Free OpenAI-compatible APIs — drop-in base_url · Free LLM API Hub',
-    desc: 'Free LLM APIs that expose an OpenAI-compatible endpoint, so you only change base_url and the API key. Confirmed against each provider’s docs.',
-    lede: 'Point the OpenAI SDK at a different base_url and keep all of your existing code.',
-    intro: `<p>An OpenAI-compatible API exposes the same <code>/chat/completions</code> shape, so switching is usually a one-line change: swap <code>base_url</code> and the key. That makes these the lowest-friction way to move side projects off paid OpenAI usage, or to add a free fallback behind the same SDK.</p><p>Each provider's exact base URL is on its page, and the free models you can pass as <code>model</code> are in the <a href="../models/">model index</a>.</p>`,
-    filter: (p) => p.openai_compatible === true,
-    query: '#explorer',
-  },
-  {
-    slug: 'free-llm-api-no-signup',
-    card: 'No card, no phone',
-    blurb: 'The lowest-friction keys: no card, no phone number.',
-    h1: 'Free LLM APIs with no phone number (and no card)',
-    title: 'Free LLM API — no phone, no credit card · Free LLM API Hub',
-    desc: 'The lowest-friction free LLM APIs: no credit card and no phone verification. A couple need no account at all.',
-    lede: 'The lowest-friction free APIs: no card, and no phone number either.',
-    intro: `<p>Some free tiers add phone verification on top of the signup form. The providers here ask for <strong>neither a credit card nor a phone number</strong>, so you can go from zero to a working key in a couple of minutes.</p><p>A few — like Pollinations and AI Horde — don't even need an account for basic use. The trade-off is predictable: the fewer the gates, the tighter the rate limits.</p>`,
-    filter: (p) => p.card_required === false && p.phone_required === false && p.category === 'ongoing',
-    query: '?cat=ongoing&nocard=1&nophone=1#explorer',
-  },
-  {
-    slug: 'free-embeddings-apis',
-    card: 'Embeddings / RAG',
-    blurb: 'Free vector embeddings for search and RAG.',
-    h1: 'Free embeddings APIs for search and RAG',
-    title: 'Free embeddings APIs for RAG · Free LLM API Hub',
-    desc: 'Verified APIs that expose embedding models on a free tier — for semantic search, RAG and clustering. Token allowances compared.',
-    lede: 'Free vector embeddings for semantic search, RAG and clustering.',
-    intro: `<p>Embeddings power semantic search, RAG and clustering — and you rarely need to pay for them at prototype scale. The providers below expose <strong>embedding models on a free tier</strong>, several with generous monthly token allowances.</p><p>Building RAG? Pair one of these with a free chat model (see the <a href="../models/">model index</a>), ideally behind the same OpenAI-compatible base URL.</p>`,
-    filter: (p) => (p.modalities || []).includes('embeddings'),
-    query: '#explorer',
-    pick: 'jina-ai',
-  },
-  {
-    slug: 'free-speech-to-text-apis',
-    card: 'Speech (STT/TTS)',
-    blurb: 'Free transcription and text-to-speech tiers.',
-    h1: 'Free speech APIs — transcription and text-to-speech',
-    title: 'Free speech-to-text & TTS APIs · Free LLM API Hub',
-    desc: 'Verified speech APIs with a free tier or sizeable starting credit — transcription (STT) and synthesis (TTS). Limits and catches compared.',
-    lede: 'Free speech-to-text and text-to-speech APIs, from free monthly minutes to hundreds in credit.',
-    intro: `<p>Audio APIs — transcription (STT) and synthesis (TTS) — often ship a real free tier or a sizeable one-time credit. The providers below offer <strong>free audio/speech access</strong>, from a few free hours a month to hundreds of dollars in starting balance.</p><p>Check the "catch" on each provider's page: some free speech tiers forbid commercial use or watermark the output.</p>`,
-    filter: (p) => (p.modalities || []).includes('audio'),
-    query: '#explorer',
-    pick: 'groq',
-  },
-];
 const guideRow = (p) =>
   `<tr><td class="name"><a href="../p/${p.slug}.html">${htmlEsc(p.name)}</a></td>` +
   `<td>${htmlEsc(p.free_tier)}</td>` +
@@ -901,6 +930,9 @@ for (const g of GUIDES) {
     [...list].sort((a, b) => recScore(b) - recScore(a) || (a.name < b.name ? -1 : 1))[0];
   const related = GUIDES.filter((x) => x.slug !== g.slug)
     .map((x) => `<a href="${x.slug}.html">${htmlEsc(x.card)}</a>`).join('');
+  const faqHtml = (g.faq && g.faq.length)
+    ? `<h2>FAQ</h2>` + g.faq.map((f) => `<div class="faq-item"><h3>${htmlEsc(f.q)}</h3><p>${f.a}</p></div>`).join('')
+    : '';
   const main =
     `<section class="page-hero"><div class="wrap"><nav class="crumbs"><a href="../">Home</a> / <a href="./">Guides</a> / ${htmlEsc(g.h1)}</nav>` +
     `<h1>${htmlEsc(g.h1)}</h1><p class="lede">${htmlEsc(g.lede)}</p></div></section>` +
@@ -912,12 +944,25 @@ for (const g of GUIDES) {
     list.map(guideRow).join('\n') +
     `\n</tbody></table>` +
     `<div class="prov-actions" style="margin-top:22px"><a class="btn primary" href="../${g.query}">Open in the explorer →</a></div>` +
+    faqHtml +
     `<h2>More guides</h2><nav class="colls">${related}</nav>` +
     `<p class="prov-back"><a href="./">← All guides</a></p>` +
     `</div></main>`;
   const jsonld = JSON.stringify({
-    '@context': 'https://schema.org', '@type': 'Article', headline: g.h1, description: g.desc,
-    url: `${SITE}/guides/${g.slug}.html`, isPartOf: { '@type': 'WebSite', name: 'Free LLM API Hub', url: `${SITE}/` },
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'Article', headline: g.h1, description: g.desc,
+        url: `${SITE}/guides/${g.slug}.html`, isPartOf: { '@type': 'WebSite', name: 'Free LLM API Hub', url: `${SITE}/` },
+      },
+      ...(g.faq && g.faq.length ? [{
+        '@type': 'FAQPage',
+        mainEntity: g.faq.map((f) => ({
+          '@type': 'Question', name: f.q,
+          acceptedAnswer: { '@type': 'Answer', text: f.a.replace(/<[^>]+>/g, '') },
+        })),
+      }] : []),
+    ],
   });
   writeFileSync(join(ROOT, `site/guides/${g.slug}.html`), htmlPage({
     title: g.title, desc: g.desc, canonical: `${SITE}/guides/${g.slug}.html`, main, jsonld,
