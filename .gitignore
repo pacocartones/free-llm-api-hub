@@ -7,6 +7,8 @@ site/providers.json
 site/providers.csv
 site/providers.yaml
 site/collections/
+site/p/
+site/badges/
 site/sitemap.xml
 
 # Local tooling

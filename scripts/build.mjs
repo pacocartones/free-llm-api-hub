@@ -261,7 +261,9 @@ function htmlPage({ title, desc, canonical, main, jsonld, prefix = '../' }) {
 <meta property="og:description" content="${htmlEsc(desc)}">
 <meta property="og:type" content="website">
 <meta property="og:url" content="${htmlEsc(canonical)}">
-<meta name="twitter:card" content="summary">
+<meta property="og:image" content="${SITE}/og.svg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="${SITE}/og.svg">
 <link rel="stylesheet" href="${prefix}styles.css">
 ${jsonld ? `<script type="application/ld+json">${jsonld}</script>` : ''}
 </head>
@@ -455,11 +457,86 @@ writeFileSync(
   htmlPage({ title: 'Collections · Free LLM API Hub', desc: 'Curated, always-current collections of free LLM APIs by constraint: no card, no phone, commercial use, OpenAI-compatible, permanently free, multimodal.', canonical: `${SITE}/collections/`, main: hubMain })
 );
 
+// ---------- per-provider detail pages + embeddable badges ----------
+mkdirSync(join(ROOT, 'site/p'), { recursive: true });
+mkdirSync(join(ROOT, 'site/badges'), { recursive: true });
+
+const provFlagsHtml = (p) => {
+  const parts = [];
+  const add = (cond, txt) => { if (cond) parts.push(`<span class="flag-badge">${txt}</span>`); };
+  add(p.card_required === false, '💳 no card'); add(p.card_required === true, '💳 card required');
+  add(p.phone_required === false, '📵 no phone'); add(p.phone_required === true, '📱 phone required');
+  add(p.commercial_ok === true, '🏢 commercial OK'); add(p.commercial_ok === false, '🔬 eval only');
+  add(p.openai_compatible === true, '🔌 OpenAI-compatible');
+  return parts.join('');
+};
+
+for (const p of providers) {
+  const inColls = COLLECTIONS.filter((c) => collRows(c).some((x) => x.slug === p.slug));
+  const badgeUrl = `https://img.shields.io/endpoint?url=${SITE}/badges/${p.slug}.json`;
+  const embed = `[![${p.name} — free tier, tracked by Free LLM API Hub](${badgeUrl})](${SITE}/p/${p.slug}.html)`;
+  const model = p.slug === 'groq' ? 'llama-3.1-8b-instant' : '<a-free-model>';
+  const quick = p.openai_base_url
+    ? `<h2>Quickstart — OpenAI SDK</h2><pre><code>from openai import OpenAI
+
+client = OpenAI(base_url="${htmlEsc(p.openai_base_url)}", api_key="&lt;YOUR_FREE_API_KEY&gt;")
+resp = client.chat.completions.create(
+    model="${htmlEsc(model)}",
+    messages=[{"role": "user", "content": "Hello!"}],
+)
+print(resp.choices[0].message.content)</code></pre>`
+    : '';
+  const fields = [
+    ["What's free", htmlEsc(p.free_tier)],
+    ['Rate limits', htmlEsc(p.rate_limits)],
+    ['The catch', htmlEsc(p.notes)],
+    ['Modalities', (p.modalities || []).join(', ')],
+    ['Free type', htmlEsc(p.free_type)],
+    ['Expires', htmlEsc(p.expires)],
+    ['OpenAI base URL', p.openai_base_url ? `<code>${htmlEsc(p.openai_base_url)}</code>` : ''],
+  ].filter(([, v]) => v);
+  const cards = fields.map(([k, v]) => `<div class="prov-card"><h3>${k}</h3><p>${v}</p></div>`).join('');
+  const verifiedLine = p.verified
+    ? `<span class="v ok">✅ verified ${htmlEsc(p.last_verified)}</span>`
+    : '<span class="v warn">⚠️ unverified</span>';
+  const collLinks = inColls.map((c) => `<a href="../collections/${c.slug}.html">${htmlEsc(c.title)}</a>`).join(' · ') || '—';
+  const main =
+    `<section class="page-hero"><div class="wrap">` +
+    `<nav class="crumbs"><a href="../">Home</a> / <a href="../#explorer">Providers</a> / ${htmlEsc(p.name)}</nav>` +
+    `<h1>${htmlEsc(p.name)}</h1>` +
+    `<div class="prov-badges"><span class="type">${typeLabel(p)}</span> ${verifiedLine} ${provFlagsHtml(p)}</div>` +
+    (p.best_for ? `<p class="lede">${htmlEsc(p.best_for)}</p>` : '') +
+    `</div></section>` +
+    `<main id="main"><div class="wrap prose">` +
+    `<div class="prov-grid">${cards}</div>` +
+    quick +
+    `<h2>Source &amp; embed</h2>` +
+    `<p><a href="${htmlEsc(p.docs_url)}" target="_blank" rel="noopener">Official docs ↗</a> &nbsp;·&nbsp; Appears in: ${collLinks}</p>` +
+    `<p class="count">Embed this provider's freshness badge in your README:</p><pre><code>${htmlEsc(embed)}</code></pre>` +
+    `<p><a href="../#explorer">← Back to all providers</a></p>` +
+    `</div></main>`;
+  const jsonld = JSON.stringify({
+    '@context': 'https://schema.org', '@type': 'WebPage',
+    name: `${p.name} — free LLM API`, description: p.free_tier, url: `${SITE}/p/${p.slug}.html`,
+    isPartOf: { '@type': 'Dataset', name: 'Free LLM API Hub', url: `${SITE}/` },
+  });
+  writeFileSync(
+    join(ROOT, `site/p/${p.slug}.html`),
+    htmlPage({ title: `${p.name} — free tier & limits · Free LLM API Hub`, desc: `${p.name}: ${p.free_tier}`.slice(0, 180), canonical: `${SITE}/p/${p.slug}.html`, main, jsonld })
+  );
+
+  writeFileSync(
+    join(ROOT, `site/badges/${p.slug}.json`),
+    JSON.stringify({ schemaVersion: 1, label: 'free-llm-api-hub', message: p.verified ? `verified ${p.last_verified}` : 'unverified', color: p.verified ? 'brightgreen' : 'yellow' }) + '\n'
+  );
+}
+
 // ---------- sitemap.xml (site SEO) ----------
 const sitemapUrls = [
   `${SITE}/`,
   `${SITE}/collections/`,
   ...COLLECTIONS.map((c) => `${SITE}/collections/${c.slug}.html`),
+  ...providers.map((p) => `${SITE}/p/${p.slug}.html`),
 ];
 const sitemap =
   `<?xml version="1.0" encoding="UTF-8"?>\n` +
@@ -473,5 +550,5 @@ writeFileSync(join(ROOT, 'site/sitemap.xml'), sitemap);
 console.log(
   `Built: ${total} providers (${ongoing.length} ongoing, ${trial.length} trial), ` +
   `${verifiedCount} verified, ${freshCount} fresh <${FRESH_DAYS}d → badge ${color}. ` +
-  `${COLLECTIONS.length} collections + sitemap generated.`
+  `${COLLECTIONS.length} collections, ${providers.length} provider pages + badges + sitemap generated.`
 );

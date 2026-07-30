@@ -5,6 +5,16 @@ Notable changes to the dataset and the project. Format based on [Keep a Changelo
 - **Data changes** (a provider's limits/terms) are recorded here when notable; every change is also visible in the git history of `data/providers.json`.
 - **Schema changes** (a new field, a changed meaning) bump the dataset version and are always recorded.
 
+## [Unreleased]
+
+### Site
+- **Full visual redesign** into one cohesive system (shared `styles.css`) across the landing page and every generated page: sticky header with logo + nav, a redesigned hero (hub logo + a live GitHub star count right below it), and a structured footer. Light/dark theme toggle (persisted).
+- **Per-provider detail pages** (`/p/<slug>.html`) generated from the data — free tier, limits, the catch, modalities, a copy-ready quickstart, and links — a large, indexable SEO surface. Linked from the explorer and the sitemap.
+- **Copy-ready OpenAI snippet** button per provider in the explorer; **click-to-copy** base URLs.
+- **Shareable filter state** — the explorer reflects search/category/flags in the URL (`?cat=ongoing&nocard=1`), so a filtered view is a link.
+- **Embeddable per-provider badges** (`/badges/<slug>.json`, shields endpoint) with a copy-paste snippet on each detail page.
+- **Social preview image** (`og.svg`) plus OG/Twitter tags; sitemap now covers provider pages.
+
 ## [2.1.0] — 2026-07-30
 
 Dataset schema minor bump (added `openai_base_url`), a verification sweep, and broader adjacent coverage.

@@ -223,6 +223,22 @@ pre code { color: var(--text); }
 .coll-card .count { background: color-mix(in srgb, var(--accent) 14%, transparent); color: var(--accent); border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent); border-radius: 999px; padding: 1px 9px; font-size: .75rem; font-weight: 600; }
 .coll-card p { margin: 0; color: var(--muted); font-size: .88rem; }
 
+/* provider detail page */
+.prov-badges { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 6px 0 4px; }
+.flag-badge { font-size: .74rem; color: var(--muted); background: var(--panel-2); border: 1px solid var(--border); border-radius: 999px; padding: 2px 9px; }
+.prov-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin: 20px 0; }
+.prov-card { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 18px; box-shadow: var(--shadow-sm); }
+.prov-card h3 { margin: 0 0 6px; font-size: .74rem; text-transform: uppercase; letter-spacing: .08em; color: var(--faint); font-weight: 700; }
+.prov-card p { margin: 0; font-size: .92rem; }
+.prov-card code { word-break: break-all; }
+
+/* copy button (snippets / base URLs) */
+.copy-btn { display: inline-flex; align-items: center; gap: 6px; background: var(--panel-2); border: 1px solid var(--border); color: var(--muted); padding: 3px 9px; border-radius: 7px; cursor: pointer; font-size: .74rem; font-weight: 600; }
+.copy-btn:hover { border-color: var(--accent); color: var(--accent); }
+.copy-btn.copied { border-color: var(--green); color: var(--green); }
+.row-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 8px; }
+.row-actions a.docs-link { font-size: .74rem; color: var(--muted); }
+
 /* ---------- footer ---------- */
 .site-footer { border-top: 1px solid var(--border); background: var(--bg-elev); color: var(--muted); font-size: .88rem; }
 .footer-top { display: grid; grid-template-columns: 1.6fr 1fr 1fr 1fr; gap: 28px; padding: 40px 0 28px; }

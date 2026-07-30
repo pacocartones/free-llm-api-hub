@@ -13,9 +13,11 @@
 <meta property="og:description" content="A continuously-verified dataset of free LLM APIs and trial credits for developers.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://pacocartones.github.io/free-llm-api-hub/">
-<meta name="twitter:card" content="summary">
+<meta property="og:image" content="https://pacocartones.github.io/free-llm-api-hub/og.svg">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Free LLM API Hub">
 <meta name="twitter:description" content="A continuously-verified dataset of free LLM APIs and trial credits for developers.">
+<meta name="twitter:image" content="https://pacocartones.github.io/free-llm-api-hub/og.svg">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -244,19 +246,24 @@ function render() {
   document.getElementById('count').textContent = `${rows.length} of ${DATA.length} providers`;
 
   for (const p of rows) {
-    const nameCell = p.docs_url ? `<a href="${p.docs_url}" target="_blank" rel="noopener">${p.name}</a>` : `<span>${p.name}</span>`;
+    const nameCell = `<a href="p/${p.slug}.html">${p.name}</a>`;
     const best = p.best_for ? `<div class="best">${p.best_for}</div>` : '';
     const mods = (p.modalities && p.modalities.length) ? `<div class="mods">${p.modalities.map(m => `<span>${m}</span>`).join('')}</div>` : '';
     const baseurl = p.openai_base_url ? `<div class="baseurl" title="OpenAI-compatible base URL — click to copy" tabindex="0" role="button" data-copy="${p.openai_base_url}"><code>${p.openai_base_url}</code></div>` : '';
+    const actions = [
+      p.docs_url ? `<a class="docs-link" href="${p.docs_url}" target="_blank" rel="noopener">docs ↗</a>` : '',
+      p.openai_base_url ? `<button type="button" class="copy-btn" data-snippet="${p.openai_base_url}">Copy OpenAI snippet</button>` : '',
+    ].filter(Boolean).join('');
     const tr = document.createElement('tr');
     tr.innerHTML = `
-      <td class="name">${nameCell}${best}${baseurl}<div class="flags">${flagLine(p)}</div>${mods}</td>
+      <td class="name">${nameCell}${best}${baseurl}<div class="flags">${flagLine(p)}</div>${mods}${actions ? `<div class="row-actions">${actions}</div>` : ''}</td>
       <td><span class="badge ${p.category === 'ongoing' ? 'b-ongoing' : 'b-trial'}">${p.category === 'ongoing' ? 'Ongoing' : 'Trial'}</span></td>
       <td>${p.free_tier || ''}</td>
       <td class="notes">${p.notes || ''}</td>
       <td>${p.verified ? `<span class="badge b-ok">✅ ${p.last_verified}</span>` : '<span class="badge b-warn">⚠️ unverified</span>'}</td>`;
     tbody.appendChild(tr);
   }
+  syncURL();
 }
 
 function renderStats() {
@@ -299,19 +306,57 @@ document.querySelectorAll('thead th[data-key]').forEach(th => {
     render();
   }));
 
-// Click (or Enter) a base URL to copy it.
-function copyBaseUrl(el) {
-  const val = el.getAttribute('data-copy');
-  const done = () => { el.classList.add('copied'); setTimeout(() => el.classList.remove('copied'), 1200); };
-  if (navigator.clipboard) navigator.clipboard.writeText(val).then(done).catch(done); else done();
+// Copy helpers: base URLs and ready-to-paste OpenAI snippets.
+function flashCopied(el, label) {
+  if (label != null) { const prev = el.dataset.prev || el.textContent; el.dataset.prev = prev; el.textContent = label; }
+  el.classList.add('copied');
+  setTimeout(() => { el.classList.remove('copied'); if (label != null) el.textContent = el.dataset.prev; }, 1300);
+}
+function copyText(text, el, label) {
+  const done = () => flashCopied(el, label);
+  if (navigator.clipboard) navigator.clipboard.writeText(text).then(done).catch(done); else done();
+}
+function openaiSnippet(base) {
+  const model = base.includes('groq') ? 'llama-3.1-8b-instant' : '<a-free-model>';
+  return `from openai import OpenAI\n\nclient = OpenAI(base_url="${base}", api_key="<YOUR_FREE_API_KEY>")\nresp = client.chat.completions.create(\n    model="${model}",\n    messages=[{"role": "user", "content": "Hello!"}],\n)\nprint(resp.choices[0].message.content)`;
 }
 document.getElementById('tbody').addEventListener('click', e => {
-  const el = e.target.closest('.baseurl'); if (el) copyBaseUrl(el);
+  const bu = e.target.closest('.baseurl');
+  if (bu) { copyText(bu.getAttribute('data-copy'), bu); return; }
+  const snip = e.target.closest('.copy-btn[data-snippet]');
+  if (snip) { copyText(openaiSnippet(snip.getAttribute('data-snippet')), snip, '✓ Copied'); }
 });
 document.getElementById('tbody').addEventListener('keydown', e => {
   if (e.key !== 'Enter' && e.key !== ' ') return;
-  const el = e.target.closest('.baseurl'); if (el) { e.preventDefault(); copyBaseUrl(el); }
+  const el = e.target.closest('.baseurl'); if (el) { e.preventDefault(); copyText(el.getAttribute('data-copy'), el); }
 });
+
+// --- shareable state: sync filters to the URL and restore them on load ---
+const URL_FLAGS = [['nocard', 'f-nocard'], ['nophone', 'f-nophone'], ['commercial', 'f-commercial'], ['openai', 'f-openai'], ['verified', 'f-verified']];
+function syncURL() {
+  const params = new URLSearchParams();
+  const q = document.getElementById('search').value.trim();
+  if (q) params.set('q', q);
+  if (category !== 'all') params.set('cat', category);
+  URL_FLAGS.forEach(([k, id]) => { if (document.getElementById(id).checked) params.set(k, '1'); });
+  const qs = params.toString();
+  history.replaceState(null, '', qs ? '?' + qs : location.pathname);
+}
+function applyURL() {
+  const params = new URLSearchParams(location.search);
+  if (params.get('q')) document.getElementById('search').value = params.get('q');
+  const cat = params.get('cat');
+  if (cat && ['all', 'ongoing', 'trial'].includes(cat)) {
+    category = cat;
+    document.querySelectorAll('#cat button').forEach(b => {
+      const on = b.dataset.cat === cat; b.classList.toggle('active', on); b.setAttribute('aria-pressed', String(on));
+    });
+  }
+  URL_FLAGS.forEach(([k, id]) => {
+    if (params.get(k) === '1') { const el = document.getElementById(id); el.checked = true; const chip = el.closest('.chip'); if (chip) chip.classList.add('on'); }
+  });
+}
+applyURL();
 
 function download(name, text, mime) {
   const a = document.createElement('a');
