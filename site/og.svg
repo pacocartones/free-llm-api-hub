@@ -1,47 +1,45 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, Helvetica, Arial, sans-serif">
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" font-family="'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace">
   <defs>
-    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#6ea8fe"/><stop offset="1" stop-color="#bc8cff"/>
-    </linearGradient>
     <radialGradient id="glow" cx="50%" cy="0%" r="70%">
-      <stop offset="0" stop-color="#6ea8fe" stop-opacity="0.22"/><stop offset="1" stop-color="#6ea8fe" stop-opacity="0"/>
+      <stop offset="0" stop-color="#3fce8f" stop-opacity="0.16"/><stop offset="1" stop-color="#3fce8f" stop-opacity="0"/>
     </radialGradient>
+    <pattern id="dots" width="24" height="24" patternUnits="userSpaceOnUse">
+      <circle cx="1" cy="1" r="1" fill="#1d2a22"/>
+    </pattern>
   </defs>
-  <rect width="1200" height="630" fill="#0a0d13"/>
+  <rect width="1200" height="630" fill="#0a0d0b"/>
+  <rect width="1200" height="630" fill="url(#dots)"/>
   <rect width="1200" height="630" fill="url(#glow)"/>
-  <rect x="0.5" y="0.5" width="1199" height="629" fill="none" stroke="#232b3a"/>
+  <rect x="0.5" y="0.5" width="1199" height="629" fill="none" stroke="#1d2a22"/>
 
-  <!-- logo mark -->
-  <g transform="translate(80,74) scale(2.1)">
-    <g stroke="url(#g)" stroke-width="1.7" opacity="0.55" stroke-linecap="round" fill="none">
-      <path d="M16 16 L7 9"/><path d="M16 16 L25 9.5"/><path d="M16 16 L9.5 24.5"/><path d="M16 16 L24.5 24"/>
-    </g>
-    <circle cx="16" cy="16" r="4.8" fill="url(#g)"/>
-    <circle cx="7" cy="9" r="2.4" fill="#6ea8fe"/><circle cx="25" cy="9.5" r="2.4" fill="#bc8cff"/>
-    <circle cx="9.5" cy="24.5" r="2.4" fill="#6ea8fe"/><circle cx="24.5" cy="24" r="2.4" fill="#bc8cff"/>
+  <!-- logo mark: terminal prompt -->
+  <g transform="translate(80,72)">
+    <rect x="1" y="1" width="52" height="52" rx="14" fill="none" stroke="#3fce8f" stroke-width="2.4" stroke-opacity="0.35"/>
+    <path d="M16 19 L25 27 L16 35" fill="none" stroke="#3fce8f" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+    <rect x="29" y="33" width="12" height="4" rx="2" fill="#3fce8f"/>
   </g>
-  <text x="152" y="103" fill="#e8edf5" font-size="30" font-weight="700">Free LLM API <tspan fill="url(#g)">Hub</tspan></text>
+  <text x="152" y="107" fill="#d8e2dc" font-size="29" font-weight="700">free-llm-api-hub</text>
 
   <!-- headline -->
-  <text x="80" y="248" fill="#e8edf5" font-size="74" font-weight="800" letter-spacing="-2">Free LLM APIs you can</text>
-  <text x="80" y="336" fill="#e8edf5" font-size="74" font-weight="800" letter-spacing="-2">actually <tspan fill="url(#g)">build on</tspan>.</text>
+  <text x="80" y="252" fill="#d8e2dc" font-size="72" font-weight="700" letter-spacing="-2">Free LLM APIs you can</text>
+  <text x="80" y="338" fill="#d8e2dc" font-size="72" font-weight="700" letter-spacing="-2">actually <tspan fill="#3fce8f">build on</tspan>.</text>
 
-  <text x="82" y="404" fill="#9aa4b5" font-size="29">LLM · image · speech · embeddings · OCR — verified, dated, machine-readable.</text>
+  <text x="82" y="404" fill="#808f87" font-size="27">LLM · image · speech · embeddings · OCR — verified, dated, machine-readable.</text>
 
   <!-- stat chips -->
-  <g font-size="26" font-weight="700">
-    <rect x="80" y="470" width="300" height="72" rx="14" fill="#141926" stroke="#232b3a"/>
-    <text x="104" y="506" fill="url(#g)" font-size="34">47</text>
-    <text x="104" y="530" fill="#9aa4b5" font-size="18" font-weight="500">model APIs tracked</text>
+  <g font-weight="700">
+    <rect x="80" y="470" width="290" height="72" rx="12" fill="#0f1512" stroke="#1d2a22"/>
+    <text x="104" y="507" fill="#3fce8f" font-size="34">47</text>
+    <text x="104" y="530" fill="#808f87" font-size="17" font-weight="400">model APIs tracked</text>
 
-    <rect x="400" y="470" width="300" height="72" rx="14" fill="#141926" stroke="#232b3a"/>
-    <text x="424" y="506" fill="#46c265" font-size="34">100%</text>
-    <text x="424" y="530" fill="#9aa4b5" font-size="18" font-weight="500">independently verified</text>
+    <rect x="392" y="470" width="290" height="72" rx="12" fill="#0f1512" stroke="#1d2a22"/>
+    <text x="416" y="507" fill="#3fce8f" font-size="34">100%</text>
+    <text x="416" y="530" fill="#808f87" font-size="17" font-weight="400">independently verified</text>
 
-    <rect x="720" y="470" width="400" height="72" rx="14" fill="#141926" stroke="#232b3a"/>
-    <text x="744" y="506" fill="#6ea8fe" font-size="24">no card · no phone · OpenAI-compat</text>
-    <text x="744" y="530" fill="#9aa4b5" font-size="18" font-weight="500">filter by what you actually need</text>
+    <rect x="704" y="470" width="416" height="72" rx="12" fill="#0f1512" stroke="#1d2a22"/>
+    <text x="728" y="505" fill="#d8e2dc" font-size="22">no card · no phone · OpenAI-compat</text>
+    <text x="728" y="530" fill="#808f87" font-size="17" font-weight="400">filter by what you actually need</text>
   </g>
 
-  <text x="80" y="588" fill="#626d80" font-size="22">github.com/pacocartones/free-llm-api-hub</text>
+  <text x="80" y="590" fill="#56655c" font-size="21">github.com/pacocartones/free-llm-api-hub</text>
 </svg>

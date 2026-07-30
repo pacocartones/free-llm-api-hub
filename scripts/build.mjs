@@ -196,12 +196,13 @@ function collectionTableHtml(rows, opts = {}) {
   const bu = opts.baseUrl;
   const flagsHtml = (p) => {
     const parts = [];
-    if (p.card_required === false) parts.push('💳 no card');
-    if (p.phone_required === false) parts.push('📵 no phone');
-    if (p.phone_required === true) parts.push('📱 phone');
-    if (p.commercial_ok === true) parts.push('🏢 commercial OK');
-    if (p.commercial_ok === false) parts.push('🔬 eval only');
-    if (p.openai_compatible === true) parts.push('🔌 OpenAI-compat');
+    if (p.card_required === false) parts.push(`${IC('ic-nocard')}no card`);
+    if (p.card_required === true) parts.push(`${IC('ic-card')}card`);
+    if (p.phone_required === false) parts.push(`${IC('ic-nophone')}no phone`);
+    if (p.phone_required === true) parts.push(`${IC('ic-phone')}phone`);
+    if (p.commercial_ok === true) parts.push(`${IC('ic-building')}commercial OK`);
+    if (p.commercial_ok === false) parts.push(`${IC('ic-flask')}eval only`);
+    if (p.openai_compatible === true) parts.push(`${IC('ic-code')}OpenAI-compat`);
     return parts.length ? `<div class="flags">${parts.map((t) => `<span>${t}</span>`).join('')}</div>` : '';
   };
   const col2Head = bu ? 'OpenAI base URL' : 'Type';
@@ -211,8 +212,8 @@ function collectionTableHtml(rows, opts = {}) {
         ? `<a href="${htmlEsc(p.docs_url)}" target="_blank" rel="noopener">${htmlEsc(p.name)}</a>`
         : htmlEsc(p.name);
       const v = p.verified
-        ? `<span class="v ok">✅ ${htmlEsc(p.last_verified)}</span>`
-        : '<span class="v warn">⚠️ unverified</span>';
+        ? `<span class="v ok">${IC('ic-check')} ${htmlEsc(p.last_verified)}</span>`
+        : `<span class="v warn">${IC('ic-warn')} unverified</span>`;
       const col2 = bu
         ? (p.openai_base_url ? `<code>${htmlEsc(p.openai_base_url)}</code>` : '<span class="notes">see docs</span>')
         : `<span class="type">${typeLabel(p)}</span>`;
@@ -226,8 +227,18 @@ function collectionTableHtml(rows, opts = {}) {
 const GH_ICON = '<svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.6 7.6 0 014 0c1.53-1.03 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>';
 const REPO = 'https://github.com/pacocartones/free-llm-api-hub';
 const SPRITE = `<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
-<linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6ea8fe"/><stop offset="1" stop-color="#bc8cff"/></linearGradient>
-<symbol id="logo" viewBox="0 0 32 32"><g stroke="url(#g)" stroke-width="1.7" opacity=".55" stroke-linecap="round" fill="none"><path d="M16 16 L7 9"/><path d="M16 16 L25 9.5"/><path d="M16 16 L9.5 24.5"/><path d="M16 16 L24.5 24"/></g><circle cx="16" cy="16" r="4.8" fill="url(#g)"/><circle cx="7" cy="9" r="2.4" fill="#6ea8fe"/><circle cx="25" cy="9.5" r="2.4" fill="#bc8cff"/><circle cx="9.5" cy="24.5" r="2.4" fill="#6ea8fe"/><circle cx="24.5" cy="24" r="2.4" fill="#bc8cff"/></symbol></defs></svg>`;
+<symbol id="logo" viewBox="0 0 32 32" fill="none"><rect x="2" y="2" width="28" height="28" rx="8" stroke="currentColor" stroke-width="2" stroke-opacity=".35"/><path d="M9 11 L14 16 L9 21" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><rect x="16.5" y="19.4" width="7" height="2.4" rx="1.2" fill="currentColor"/></symbol>
+<symbol id="ic-card" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="1.5" y="3.5" width="13" height="9" rx="2"/><path d="M1.5 6.5H14.5"/></symbol>
+<symbol id="ic-nocard" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="1.5" y="3.5" width="13" height="9" rx="2"/><path d="M1.5 6.5H14.5"/><path d="M2.6 2 L13.4 14"/></symbol>
+<symbol id="ic-phone" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="4.5" y="1.5" width="7" height="13" rx="1.6"/><path d="M7 12.3H9"/></symbol>
+<symbol id="ic-nophone" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="4.5" y="1.5" width="7" height="13" rx="1.6"/><path d="M7 12.3H9"/><path d="M2.6 2 L13.4 14"/></symbol>
+<symbol id="ic-building" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><rect x="3" y="2" width="10" height="12" rx="1"/><path d="M6 5H6.01M10 5H10.01M6 8H6.01M10 8H10.01M6.5 14V11.5H9.5V14"/></symbol>
+<symbol id="ic-flask" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"><path d="M6.2 2V6L3.2 12.2A1 1 0 0 0 4.1 13.7H11.9A1 1 0 0 0 12.8 12.2L9.8 6V2"/><path d="M5 2H11M5.2 9H10.8"/></symbol>
+<symbol id="ic-code" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 4 2 8l3.5 4M10.5 4 14 8l-3.5 4"/></symbol>
+<symbol id="ic-check" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 8.5 6 12l7.5-8"/></symbol>
+<symbol id="ic-warn" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2.5 15 14H1z"/><path d="M8 6.5V9.5M8 11.6V11.7"/></symbol>
+</defs></svg>`;
+const IC = (id) => `<svg class="i" aria-hidden="true"><use href="#${id}"/></svg>`;
 
 const siteHeader = (p) => `<header class="site-header"><div class="wrap header-inner">
 <a class="brand" href="${p}" aria-label="Free LLM API Hub — home"><svg class="logo-mark"><use href="#logo"/></svg><span class="brand-name">Free LLM API <span class="grad">Hub</span></span></a>
@@ -256,7 +267,8 @@ function htmlPage({ title, desc, canonical, main, jsonld, prefix = '../' }) {
 <script>(function(){try{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: light)').matches?'light':'dark');document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
 <link rel="canonical" href="${htmlEsc(canonical)}">
 <link rel="icon" href="${prefix}favicon.svg" type="image/svg+xml">
-<meta name="theme-color" content="#0a0d13">
+<link rel="preload" href="${prefix}fonts/jetbrains-mono-700.woff2" as="font" type="font/woff2" crossorigin>
+<meta name="theme-color" content="#0a0d0b">
 <meta property="og:title" content="${htmlEsc(title)}">
 <meta property="og:description" content="${htmlEsc(desc)}">
 <meta property="og:type" content="website">
@@ -465,11 +477,11 @@ mkdirSync(join(ROOT, 'site/badges'), { recursive: true });
 
 const provFlagsHtml = (p) => {
   const parts = [];
-  const add = (cond, txt) => { if (cond) parts.push(`<span class="flag-badge">${txt}</span>`); };
-  add(p.card_required === false, '💳 no card'); add(p.card_required === true, '💳 card required');
-  add(p.phone_required === false, '📵 no phone'); add(p.phone_required === true, '📱 phone required');
-  add(p.commercial_ok === true, '🏢 commercial OK'); add(p.commercial_ok === false, '🔬 eval only');
-  add(p.openai_compatible === true, '🔌 OpenAI-compatible');
+  const add = (cond, ic, txt) => { if (cond) parts.push(`<span class="flag-badge">${IC(ic)}${txt}</span>`); };
+  add(p.card_required === false, 'ic-nocard', 'no card'); add(p.card_required === true, 'ic-card', 'card required');
+  add(p.phone_required === false, 'ic-nophone', 'no phone'); add(p.phone_required === true, 'ic-phone', 'phone required');
+  add(p.commercial_ok === true, 'ic-building', 'commercial OK'); add(p.commercial_ok === false, 'ic-flask', 'eval only');
+  add(p.openai_compatible === true, 'ic-code', 'OpenAI-compatible');
   return parts.join('');
 };
 
@@ -499,8 +511,8 @@ print(resp.choices[0].message.content)</code></pre>`
   ].filter(([, v]) => v);
   const cards = fields.map(([k, v]) => `<div class="prov-card"><h3>${k}</h3><p>${v}</p></div>`).join('');
   const verifiedLine = p.verified
-    ? `<span class="v ok">✅ verified ${htmlEsc(p.last_verified)}</span>`
-    : '<span class="v warn">⚠️ unverified</span>';
+    ? `<span class="v ok">${IC('ic-check')} verified ${htmlEsc(p.last_verified)}</span>`
+    : `<span class="v warn">${IC('ic-warn')} unverified</span>`;
   const collLinks = inColls.map((c) => `<a href="../collections/${c.slug}.html">${htmlEsc(c.title)}</a>`).join(' · ') || '—';
   const main =
     `<section class="page-hero"><div class="wrap">` +
