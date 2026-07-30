@@ -2,7 +2,7 @@
 
 ## What changed
 
-<!-- e.g. "Update Groq daily limit"; "Add Acme Inference"; "Mark Upstage re-verified" -->
+<!-- e.g. "Update Groq daily limit"; "Add Acme Inference"; "Mark Cohere re-verified" -->
 
 ## Source
 
