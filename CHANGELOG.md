@@ -8,8 +8,9 @@ Notable changes to the dataset and the project. Format based on [Keep a Changelo
 ## [Unreleased]
 
 ### Data
-- **`models_free`** — a new optional, nullable attribute field with a *sampled* list of free model IDs per provider (schema bump to 2.3.0). Populated for 10 high-confidence providers (Groq, OpenRouter, Cloudflare, Cerebras, Z.ai, GitHub Models, Scaleway, Cohere, Gemini, SambaNova); left `null` elsewhere. Verified conservatively — the research surfaced summarizer hallucinations, so dubious/future-dated IDs were dropped and only credible IDs (or ones matching the already-verified `free_tier`) were kept. Shown on provider pages and searchable in the explorer.
-- **Per-page social images** for collections, and a **credit-programs data source** (`data/programs.json`) driving the new `/programs/` pages and the companion doc.
+- **`models_free`** — a new optional, nullable attribute field with a *sampled* list of free model IDs per provider (schema bump to 2.3.0), shown on provider pages and searchable in the explorer.
+- **Automated model-sample refresh** — [`scripts/fetch-models.mjs`](scripts/fetch-models.mjs) (`npm run models`) pulls `models_free` straight from each provider's **own `/models` endpoint**: public ones (OpenRouter, GitHub Models, Pollinations) with no key, plus key-gated OpenAI-compatible ones (Groq, Cerebras, SambaNova, Scaleway) when a secret is set. Real IDs only, publisher-diverse sample, deterministic; a fetch failure leaves the field untouched. Wired into the weekly maintenance job. This replaces hand-curation for the volatile lists — OpenRouter, for instance, had rotated its *entire* free line-up since the manual pass. Providers without a reachable endpoint keep a conservative hand-picked sample or `null`.
+- **Per-page social images** for collections, and a **credit-programs data source** (`data/programs.json`) driving the new `/programs/` pages and the companion doc; credit programs are now linked from the primary site nav.
 
 ### Site
 - **Server-rendered homepage** — the explorer table (51 rows) and the dataset are now inlined into the landing page at build time, so it's fully indexable, paints instantly, and works without JS (previously the flagship page was an empty client-rendered shell).

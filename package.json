@@ -9,6 +9,7 @@
     "validate": "node scripts/validate.mjs",
     "links": "node scripts/check-links.mjs",
     "worklist": "node scripts/staleness.mjs",
+    "models": "node scripts/fetch-models.mjs",
     "og": "node scripts/og.mjs",
     "test": "node scripts/validate.mjs && node scripts/check-links.mjs",
     "check": "node scripts/validate.mjs && node scripts/build.mjs && git diff --exit-code -- README.md data/providers.csv data/providers.yaml collections site/index.html docs/credit-programs.md"

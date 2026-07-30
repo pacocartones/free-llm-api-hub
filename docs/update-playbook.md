@@ -13,7 +13,8 @@ Runs every Monday via [`.github/workflows/maintenance.yml`](../.github/workflows
 
 1. **Link re-check** — every `docs_url` is fetched. A genuine failure (not a 401/403/405/429 bot-block) opens or updates the `🔗 Broken source link report` issue.
 2. **Badge refresh** — recomputes `badge-freshness.json` from the data and commits it if the fresh-count changed (e.g. entries aged past 90 days). This is why the badge decays on its own.
-3. **Re-verification worklist** — [`scripts/staleness.mjs`](../scripts/staleness.mjs) generates a checklist of entries that are 🔴 overdue (>90d), 🟡 due soon (60–90d), or ⚠️ never verified, and posts it to the self-updating `🕝 Weekly re-verification worklist` issue.
+3. **Free model samples** — [`scripts/fetch-models.mjs`](../scripts/fetch-models.mjs) refreshes each provider's `models_free` from its **own `/models` endpoint**. Public endpoints (OpenRouter, GitHub Models, Pollinations) need no key; the key-gated OpenAI-compatible ones (Groq, Cerebras, SambaNova, Scaleway) refresh only if the matching repo secret is set. Real IDs only — a fetch failure leaves the field untouched, never blanked. Changes are rebuilt and committed automatically. This keeps the volatile lists (OpenRouter rotates its free models constantly) accurate without hand-curation or hallucination.
+4. **Re-verification worklist** — [`scripts/staleness.mjs`](../scripts/staleness.mjs) generates a checklist of entries that are 🔴 overdue (>90d), 🟡 due soon (60–90d), or ⚠️ never verified, and posts it to the self-updating `🕝 Weekly re-verification worklist` issue.
 
 On every push/PR, [`verify.yml`](../.github/workflows/verify.yml) also validates the dataset and asserts the generated files are in sync — so bad data never merges.
 
@@ -39,7 +40,7 @@ Open the **`🕝 Weekly re-verification worklist`** issue and work top-down. For
 ### Also scan for what's new (monthly is enough)
 
 - New providers or promos worth adding? Check the [inclusion criteria](inclusion-criteria.md), then add via a PR or the [new-provider form](../../issues/new?template=new-provider.yml).
-- Watch the usual movers: OpenRouter free models, Gemini limits, Groq/Cerebras model lists, Cloudflare Neuron pricing, and any "trial credit" amounts (these change most often).
+- Watch the usual movers: Gemini limits, Cloudflare Neuron pricing, and any "trial credit" amounts (these change most often). The model *lists* (OpenRouter, Groq, Cerebras, etc.) are refreshed automatically by `npm run models` / the weekly job — you only need to eyeball its diff.
 - Backfill attribute fields still `null`: `openai_base_url`, and any missing `openai_compatible` / `modalities`.
 
 ## Optional Layer 3 — agentic re-verification

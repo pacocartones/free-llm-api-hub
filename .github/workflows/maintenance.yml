@@ -67,6 +67,31 @@ jobs:
             echo "Badge unchanged."
           fi
 
+      # 2b. Refresh `models_free` samples from providers' own /models endpoints.
+      #     Public endpoints need no key; the key-gated ones refresh only if the
+      #     matching secret is set. Failures leave the field untouched (never blanked).
+      - name: Refresh free model samples
+        continue-on-error: true
+        env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          CEREBRAS_API_KEY: ${{ secrets.CEREBRAS_API_KEY }}
+          SAMBANOVA_API_KEY: ${{ secrets.SAMBANOVA_API_KEY }}
+          SCALEWAY_API_KEY: ${{ secrets.SCALEWAY_API_KEY }}
+        run: |
+          node scripts/fetch-models.mjs --write
+          node scripts/build.mjs
+      - name: Commit refreshed model samples if changed
+        run: |
+          if ! git diff --quiet; then
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add -A
+            git commit -m "data: refresh free model samples from provider APIs [skip ci]"
+            git push
+          else
+            echo "Model samples unchanged."
+          fi
+
       # 3. Publish the re-verification worklist as a single, self-updating issue.
       - name: Build re-verification worklist
         run: node scripts/staleness.mjs > /tmp/stale.md
