@@ -8,7 +8,7 @@ Free LLM API tiers that permit production/commercial use — not restricted to e
 
 Free tiers that **allow commercial/production use** (`commercial_ok: true`). Eval-only tiers (Cohere trial keys, NVIDIA NIM, GitHub Models) are deliberately excluded — read their rows in the main list for the restriction.
 
-**20 of 47 tracked providers** match.
+**20 of 51 tracked providers** match.
 
 | Provider | Type | What's free | The catch | Verified |
 |---|---|---|---|---|

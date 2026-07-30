@@ -8,7 +8,7 @@ LLM APIs with models priced at $0 on an ongoing basis — no trial window counti
 
 Providers with models that are **free on a permanent basis** (`free_type: perpetual`) — not a trial credit that runs out. Rate limits still apply; check each row.
 
-**5 of 47 tracked providers** match.
+**5 of 51 tracked providers** match.
 
 | Provider | Type | What's free | The catch | Verified |
 |---|---|---|---|---|

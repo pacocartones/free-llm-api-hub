@@ -32,7 +32,7 @@ Direction, not dated promises. The north star: stay the **most trustworthy, curr
 ## Later (under consideration)
 
 - **History / diffs:** track how a provider's free tier changed over time, not just its current state.
-- **Sibling scope, kept separate:** free AI coding tools, and startup credit programs — valuable but volatile, so they'd live as clearly-separated sections or a sibling repo rather than diluting the core list. (The [self-hosting on free compute](self-hosting-on-free-compute.md) companion reference is a first example of this pattern.)
+- **Sibling scope, kept separate:** free AI coding tools — valuable but volatile, so it would live as a clearly-separated section rather than diluting the core list. (The [self-hosting on free compute](self-hosting-on-free-compute.md) and [credit programs](credit-programs.md) companion references already follow this pattern: apply-to-get and compute offers are documented adjacent to, but outside, the verified self-serve dataset.)
 - **A small, documented public API** over the dataset (a hosted JSON endpoint with query params).
 
 ## Explicitly out of scope

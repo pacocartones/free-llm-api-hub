@@ -8,7 +8,7 @@ Free API tiers that go beyond text: vision, image, audio/speech, embeddings and 
 
 Free tiers that reach **beyond plain text** — vision, image, audio/speech, embeddings or rerank on the free plan.
 
-**30 of 47 tracked providers** match.
+**34 of 51 tracked providers** match.
 
 | Provider | Type | What's free | The catch | Verified |
 |---|---|---|---|---|
@@ -42,6 +42,10 @@ Free tiers that reach **beyond plain text** — vision, image, audio/speech, emb
 | **[Hume AI (Octave TTS)](https://www.hume.ai/pricing)**<br><sub>💳 no card · 🏢 commercial OK</sub> | Ongoing | 10,000 characters/month TTS (~10 minutes) on the Free plan | The free plan includes a commercial license; overage billed at $0.15/1,000 chars. No card stated as required to start. Not OpenAI-compatible. | ✅ 2026-07-30 |
 | **[Unreal Speech](https://unrealspeech.com/pricing)**<br><sub>🏢 commercial OK</sub> | Ongoing | 250,000 characters/month TTS (~6 hours of audio) | Commercial use allowed, but free-plan users must attribute Unreal Speech with a link when publishing audio. First-party REST endpoints. Card requirement not stated. | ✅ 2026-07-30 |
 | **[ElevenLabs](https://elevenlabs.io/pricing)**<br><sub>💳 no card · 📵 no phone · 🔬 eval only</sub> | Ongoing | 10,000 credits/month shared across Text-to-Speech, Speech-to-Text and more (~10 min TTS/month) | The free tier is NON-COMMERCIAL only per the Terms of Use (a commercial license begins on paid Starter, $6/mo), and historically required attribution. API access is available on the free plan. No credit card to sign up. | ✅ 2026-07-30 |
+| **[Sarvam AI](https://docs.sarvam.ai/api/getting-started/pricing)**<br><sub>🔌 OpenAI-compat</sub> | Trial | ₹100 in free credits on signup, usable across all APIs including the Sarvam-M chat/LLM API and speech (STT/TTS) | One-time signup credit shared across all APIs; card/phone requirement not stated on the docs. India-focused provider (pricing in INR), strong Indic-language models. | ✅ 2026-07-30 |
+| **[Gladia](https://www.gladia.io/pricing)** | Trial | €50 in free credits on signup for speech-to-text (~80+ hrs pre-recorded or 60+ hrs real-time at current rates) | One-time grant with no monthly reset; prepaid model — top up once the credit is consumed. Card requirement not explicitly stated on the pricing page. | ✅ 2026-07-30 |
+| **[Rime](https://rime.ai/pricing)** | Trial | 3,000 free TTS minutes for every new account (Starter plan) | One-time allotment on signup; card requirement and commercial-use terms for the free minutes are not stated on the pricing page. | ✅ 2026-07-30 |
+| **[Tencent Hunyuan](https://cloud.tencent.com/document/product/1729/97731)**<br><sub>🔌 OpenAI-compat</sub> | Trial | 1,000,000 free tokens for Hunyuan text LLMs (hunyuan-a13b, turbos, translation & vision models), plus a separate 1,000,000-token allotment for hunyuan-embedding | Free resource package valid 1 year from activation; unused tokens expire. Tencent Cloud generally requires mainland-China real-name ID verification to activate — a practical barrier for non-China users. Commercial-use terms not stated on the free-quota page. | ✅ 2026-07-30 |
 
 ---
 

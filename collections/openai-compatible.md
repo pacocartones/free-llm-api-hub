@@ -8,7 +8,7 @@ Free LLM APIs that expose an OpenAI-compatible endpoint — point the OpenAI SDK
 
 These providers expose an **OpenAI-compatible endpoint** (`openai_compatible: true`), so migrating is usually a one-line change: keep the OpenAI SDK, swap `base_url` and `api_key`. Grab each provider’s exact base URL from its linked docs.
 
-**28 of 47 tracked providers** match.
+**30 of 51 tracked providers** match.
 
 | Provider | OpenAI base URL | What's free | The catch | Verified |
 |---|---|---|---|---|
@@ -40,6 +40,8 @@ These providers expose an **OpenAI-compatible endpoint** (`openai_compatible: tr
 | **[Ollama Cloud](https://docs.ollama.com/cloud)**<br><sub>💳 no card · 📵 no phone · 🏢 commercial OK · 🔌 OpenAI-compat</sub> | `https://ollama.com/v1` | $0 Free plan: access to cloud-hosted open models (Qwen, GPT-OSS, DeepSeek, etc.) via API | First-party — Ollama hosts the cloud models. Requires an ollama.com account + API key (`ollama signin`); the free plan is for light usage, Pro ($20/mo) raises limits. No card required. | ✅ 2026-07-30 |
 | **[ModelScope (API-Inference)](https://www.modelscope.cn/docs/model-service/API-Inference/intro)**<br><sub>💳 no card · 🔬 eval only · 🔌 OpenAI-compat</sub> | `https://api-inference.modelscope.cn/v1` | ~2,000 free API calls/day across open-weight models (Qwen3, DeepSeek, GLM, Llama, etc.) via API-Inference | Alibaba's model hub — a different product from Alibaba Model Studio. Requires a ModelScope account bound to an Alibaba Cloud account with real-name (ID) verification — a practical barrier for non-China users. Explicitly non-commercial ("for developers to experience"). No card. | ✅ 2026-07-30 |
 | **[Moondream Cloud](https://moondream.ai/pricing)**<br><sub>🔌 OpenAI-compat</sub> | `https://api.moondream.ai/v1` | $5/month usage credits in every workspace (Free plan) for the Moondream vision model — caption, query (VQA), detect, point | Recurring $5/month credit; card requirement not stated on the pricing page; commercial terms not specified. OpenAI-compatible endpoint. | ✅ 2026-07-30 |
+| **[Sarvam AI](https://docs.sarvam.ai/api/getting-started/pricing)**<br><sub>🔌 OpenAI-compat</sub> | `https://api.sarvam.ai/v1` | ₹100 in free credits on signup, usable across all APIs including the Sarvam-M chat/LLM API and speech (STT/TTS) | One-time signup credit shared across all APIs; card/phone requirement not stated on the docs. India-focused provider (pricing in INR), strong Indic-language models. | ✅ 2026-07-30 |
+| **[Tencent Hunyuan](https://cloud.tencent.com/document/product/1729/97731)**<br><sub>🔌 OpenAI-compat</sub> | `https://api.hunyuan.cloud.tencent.com/v1` | 1,000,000 free tokens for Hunyuan text LLMs (hunyuan-a13b, turbos, translation & vision models), plus a separate 1,000,000-token allotment for hunyuan-embedding | Free resource package valid 1 year from activation; unused tokens expire. Tencent Cloud generally requires mainland-China real-name ID verification to activate — a practical barrier for non-China users. Commercial-use terms not stated on the free-quota page. | ✅ 2026-07-30 |
 
 ## Quickstart — reuse the OpenAI SDK
 

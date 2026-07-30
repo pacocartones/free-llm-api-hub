@@ -7,6 +7,10 @@ Notable changes to the dataset and the project. Format based on [Keep a Changelo
 
 ## [Unreleased]
 
+### Data
+- **Verified top-up (4 providers → 51):** Sarvam AI (Indic chat + speech, OpenAI-compatible), Gladia (€50 STT), Rime (3,000 free TTS min), and Tencent Hunyuan (1M tokens/1yr, OpenAI-compatible, real-name-ID caveat). All re-verified against official docs.
+- **New companion doc — [credit programs](docs/credit-programs.md):** startup and student/research credit programs you *apply* for (AWS Activate, Microsoft/Google for Startups, Anthropic/OpenAI/Together/Baseten startup credits; Azure for Students, Cohere Labs, Google TPU Research Cloud, etc.). Kept deliberately **out** of the self-serve dataset — different access model, high volatility — with a "funds LLM API?" legend and per-program eligibility.
+
 ### Docs & SEO
 - README gains a data-generated **"What's covered"** table (modality breakdown) and links to per-provider pages, surfacing the multimodal coverage while keeping "free LLM API" primary.
 - New **[docs index](docs/README.md)** and a consistent nav footer on every doc, so the documentation is properly interlinked.

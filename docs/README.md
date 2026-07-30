@@ -22,6 +22,7 @@ How **Free LLM API Hub** works — how entries are verified, what earns a spot, 
 | Doc | What it covers |
 |---|---|
 | [Self-hosting on free compute](self-hosting-on-free-compute.md) | Free GPU/compute for running your own model when no hosted API fits |
+| [Credit programs (apply to get)](credit-programs.md) | Startup and student/research credit programs — the "free" you apply for |
 
 ## Project & community
 

@@ -8,7 +8,7 @@ LLM APIs whose signup needs no SMS/phone verification — a live slice of a cont
 
 Providers you can sign up for **without phone verification** (`phone_required: false`). Groq, Mistral, SiliconFlow and NVIDIA are excluded here because they gate signup behind a phone number.
 
-**21 of 47 tracked providers** match.
+**21 of 51 tracked providers** match.
 
 | Provider | Type | What's free | The catch | Verified |
 |---|---|---|---|---|

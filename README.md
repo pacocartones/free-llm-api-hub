@@ -16,7 +16,7 @@ No hype, no dead links, no "generous limits" hand-waving. Just what's actually f
 **[🔎 Interactive explorer](https://pacocartones.github.io/free-llm-api-hub/)** &nbsp;·&nbsp; **[📊 Dataset](data/providers.json)** &nbsp;·&nbsp; **[🧪 How we verify](docs/methodology.md)** &nbsp;·&nbsp; **[➕ Add a provider](CONTRIBUTING.md)**
 
 <!-- AUTOGEN:stats:start -->
-**47 providers** tracked · 29 ongoing free tiers · 18 trial credits · **47/47** independently verified against the provider's own docs
+**51 providers** tracked · 29 ongoing free tiers · 22 trial credits · **51/51** independently verified against the provider's own docs
 <!-- AUTOGEN:stats:end -->
 
 </div>
@@ -47,11 +47,11 @@ Primarily **free LLM (text) APIs** — plus the adjacent model APIs a builder re
 <!-- AUTOGEN:coverage:start -->
 | Category | Providers | Examples |
 |---|---|---|
-| **Text / LLM** | 38 | Google Gemini API, Groq, OpenRouter |
-| **Speech (STT / TTS)** | 14 | Google Gemini API, Groq, Cloudflare Workers AI |
-| **Embeddings** | 10 | Google Gemini API, Cloudflare Workers AI, Cohere |
+| **Text / LLM** | 40 | Google Gemini API, Groq, OpenRouter |
+| **Speech (STT / TTS)** | 17 | Google Gemini API, Groq, Cloudflare Workers AI |
+| **Embeddings** | 11 | Google Gemini API, Cloudflare Workers AI, Cohere |
+| **Vision** | 9 | Google Gemini API, OpenRouter, Z.ai |
 | **Image generation** | 8 | Cloudflare Workers AI, HuggingFace, Jina AI |
-| **Vision** | 8 | Google Gemini API, OpenRouter, Z.ai |
 | **Rerank** | 4 | Cohere, Jina AI, Mixedbread |
 | **OCR / documents** | 3 | OCR.space, LlamaParse, Nanonets |
 <!-- AUTOGEN:coverage:end -->
@@ -87,9 +87,9 @@ Focused, always-current collections — each is generated from the dataset and h
 - **[Free LLM APIs with no credit card](collections/no-credit-card.md)** (31) — start without a payment method · [live page ↗](https://pacocartones.github.io/free-llm-api-hub/collections/no-credit-card.html)
 - **[Free LLM APIs with no phone verification](collections/no-phone.md)** (21) — no SMS/phone verification · [live page ↗](https://pacocartones.github.io/free-llm-api-hub/collections/no-phone.html)
 - **[Free LLM APIs for commercial use](collections/commercial-use.md)** (20) — safe to ship, not eval-only · [live page ↗](https://pacocartones.github.io/free-llm-api-hub/collections/commercial-use.html)
-- **[OpenAI-compatible free LLM APIs](collections/openai-compatible.md)** (28) — drop-in OpenAI SDK swap · [live page ↗](https://pacocartones.github.io/free-llm-api-hub/collections/openai-compatible.html)
+- **[OpenAI-compatible free LLM APIs](collections/openai-compatible.md)** (30) — drop-in OpenAI SDK swap · [live page ↗](https://pacocartones.github.io/free-llm-api-hub/collections/openai-compatible.html)
 - **[Permanently free LLM APIs](collections/always-free.md)** (5) — $0 models, no trial clock · [live page ↗](https://pacocartones.github.io/free-llm-api-hub/collections/always-free.html)
-- **[Free multimodal LLM APIs](collections/multimodal.md)** (30) — vision, audio, embeddings · [live page ↗](https://pacocartones.github.io/free-llm-api-hub/collections/multimodal.html)
+- **[Free multimodal LLM APIs](collections/multimodal.md)** (34) — vision, audio, embeddings · [live page ↗](https://pacocartones.github.io/free-llm-api-hub/collections/multimodal.html)
 <!-- AUTOGEN:collections:end -->
 
 Every provider also has its own page with the full details and a copy-ready quickstart — e.g. [Groq](https://pacocartones.github.io/free-llm-api-hub/p/groq.html), [Deepgram](https://pacocartones.github.io/free-llm-api-hub/p/deepgram.html), [Jina AI](https://pacocartones.github.io/free-llm-api-hub/p/jina-ai.html).
@@ -172,6 +172,10 @@ A fixed credit balance on signup. Once it's spent (or the clock runs out), you'r
 | **[Clarifai](https://docs.clarifai.com/control/account-billing/)**<br><sub>💳 no card · 📱 phone · 🔌 OpenAI-compat</sub> | One-time $5 credit across serverless models (GPT-OSS-120B, Claude, Llama), vision, embeddings and image generation | Catch: SMS phone verification is required to claim the $5. Credit is one-time and expires 30 days after grant; a card is required to recharge afterward. | 30 days | ✅ 2026-07-30 |
 | **[Runware](https://runware.ai/pricing)**<br><sub>💳 no card · 📵 no phone · 🏢 commercial OK</sub> | $2 in signup credits across first-party image models (FLUX.1/FLUX.2, Stable Diffusion 3, SDXL) on the Sonic Inference Engine — hundreds to thousands of generations | The $2 requires signup with a business email (personal/free-mail domains may be rejected); one-time, non-renewing. No watermark, no card, commercial use allowed. The OpenAI-compatible endpoint is chat-only, not for images. | — | ✅ 2026-07-30 |
 | **[Nanonets](https://nanonets.com/pricing)**<br><sub>💳 no card · 📵 no phone · 🏢 commercial OK</sub> | $50 in free credits on signup (one-time) across data-extraction / OCR workflows | One-time signup credit, not renewing; no credit card required to start. Paid plans start at $100/month afterwards. | — | ✅ 2026-07-30 |
+| **[Sarvam AI](https://docs.sarvam.ai/api/getting-started/pricing)**<br><sub>🔌 OpenAI-compat</sub> | ₹100 in free credits on signup, usable across all APIs including the Sarvam-M chat/LLM API and speech (STT/TTS) | One-time signup credit shared across all APIs; card/phone requirement not stated on the docs. India-focused provider (pricing in INR), strong Indic-language models. | — | ✅ 2026-07-30 |
+| **[Gladia](https://www.gladia.io/pricing)** | €50 in free credits on signup for speech-to-text (~80+ hrs pre-recorded or 60+ hrs real-time at current rates) | One-time grant with no monthly reset; prepaid model — top up once the credit is consumed. Card requirement not explicitly stated on the pricing page. | — | ✅ 2026-07-30 |
+| **[Rime](https://rime.ai/pricing)** | 3,000 free TTS minutes for every new account (Starter plan) | One-time allotment on signup; card requirement and commercial-use terms for the free minutes are not stated on the pricing page. | — | ✅ 2026-07-30 |
+| **[Tencent Hunyuan](https://cloud.tencent.com/document/product/1729/97731)**<br><sub>🔌 OpenAI-compat</sub> | 1,000,000 free tokens for Hunyuan text LLMs (hunyuan-a13b, turbos, translation & vision models), plus a separate 1,000,000-token allotment for hunyuan-embedding | Free resource package valid 1 year from activation; unused tokens expire. Tencent Cloud generally requires mainland-China real-name ID verification to activate — a practical barrier for non-China users. Commercial-use terms not stated on the free-quota page. | 1 year | ✅ 2026-07-30 |
 <!-- AUTOGEN:trial:end -->
 
 ## Notably NOT free
@@ -235,6 +239,7 @@ Full guidelines, including what counts as an acceptable source: **[CONTRIBUTING.
 | [Inclusion criteria](docs/inclusion-criteria.md) | What earns a spot — and what gets rejected |
 | [Comparison dimensions](docs/comparison-dimensions.md) | Every field and flag in the dataset, defined |
 | [Self-hosting on free compute](docs/self-hosting-on-free-compute.md) | Adjacent: free GPU/compute when no hosted API fits |
+| [Credit programs (apply to get)](docs/credit-programs.md) | Adjacent: startup & student/research credit programs |
 | [Roadmap](docs/roadmap.md) | Where this is going next |
 | [Changelog](CHANGELOG.md) | What changed, when |
 | [Governance](GOVERNANCE.md) | How decisions get made |
