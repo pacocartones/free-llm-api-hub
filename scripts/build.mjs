@@ -418,7 +418,7 @@ writeFileSync(
 // ---------- exports (CSV / YAML) ----------
 const COLS = [
   'slug', 'name', 'category', 'free_type', 'free_tier', 'rate_limits', 'notes',
-  'best_for', 'modalities', 'expires', 'docs_url', 'phone_required',
+  'best_for', 'modalities', 'models_free', 'expires', 'docs_url', 'phone_required',
   'card_required', 'commercial_ok', 'openai_compatible', 'openai_base_url', 'verified', 'last_verified',
 ];
 
@@ -439,7 +439,7 @@ let yaml = `# Generated from data/providers.json — do not edit by hand.\nprovi
 for (const p of providers) {
   yaml += COLS.map((c, i) => {
     const prefix = i === 0 ? '  - ' : '    ';
-    if (c === 'modalities') return `${prefix}${c}: [${(p.modalities || []).map((m) => JSON.stringify(m)).join(', ')}]`;
+    if (Array.isArray(p[c])) return `${prefix}${c}: [${p[c].map((m) => JSON.stringify(m)).join(', ')}]`;
     return `${prefix}${c}: ${yamlScalar(p[c])}`;
   }).join('\n') + '\n';
 }
@@ -589,6 +589,7 @@ print(resp.choices[0].message.content)</code></pre>`
     ['Expires', htmlEsc(p.expires) || 'no expiry'],
     ['Modalities', (p.modalities || []).join(', ') || '—'],
     ['OpenAI base URL', p.openai_base_url ? `<code>${htmlEsc(p.openai_base_url)}</code>` : '—'],
+    ...(p.models_free && p.models_free.length ? [['Sample free models', p.models_free.map((m) => `<code>${htmlEsc(m)}</code>`).join(' ')]] : []),
   ].map(([k, v]) => `<div class="meta-row"><span class="meta-k">${k}</span><span class="meta-v">${v}</span></div>`).join('');
   const verifiedLine = p.verified
     ? `<span class="v ok">${IC('ic-check')} verified ${htmlEsc(p.last_verified)}</span>`

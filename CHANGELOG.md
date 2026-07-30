@@ -7,6 +7,10 @@ Notable changes to the dataset and the project. Format based on [Keep a Changelo
 
 ## [Unreleased]
 
+### Data
+- **`models_free`** — a new optional, nullable attribute field with a *sampled* list of free model IDs per provider (schema bump to 2.3.0). Populated for 10 high-confidence providers (Groq, OpenRouter, Cloudflare, Cerebras, Z.ai, GitHub Models, Scaleway, Cohere, Gemini, SambaNova); left `null` elsewhere. Verified conservatively — the research surfaced summarizer hallucinations, so dubious/future-dated IDs were dropped and only credible IDs (or ones matching the already-verified `free_tier`) were kept. Shown on provider pages and searchable in the explorer.
+- **Per-page social images** for collections, and a **credit-programs data source** (`data/programs.json`) driving the new `/programs/` pages and the companion doc.
+
 ### Site
 - **Server-rendered homepage** — the explorer table (51 rows) and the dataset are now inlined into the landing page at build time, so it's fully indexable, paints instantly, and works without JS (previously the flagship page was an empty client-rendered shell).
 - **Recommended default order** (no-card + no-phone + commercial + ongoing + OpenAI-compatible first) and **one-click filter presets** (Side-project starter, OpenAI drop-in, Speech, Embeddings/RAG, Zero signup, Ship commercial), all shareable via the URL.

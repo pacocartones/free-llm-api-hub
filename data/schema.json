@@ -94,6 +94,12 @@
           "type": ["string", "null"],
           "description": "OpenAI-compatible base URL for a drop-in SDK swap, when confirmed. null until backfilled."
         },
+        "models_free": {
+          "type": ["array", "null"],
+          "description": "Sample of model IDs available on the free tier (attribute; sampled and may change — not part of the verified core claim).",
+          "items": { "type": "string" },
+          "uniqueItems": true
+        },
         "verified": {
           "type": "boolean",
           "description": "true = core facts independently confirmed against the provider's own docs on last_verified. false = sourced from community tracking, flagged for follow-up."
