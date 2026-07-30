@@ -40,6 +40,24 @@ If you're picking an API to prototype on this afternoon, you want the fine print
 > [!WARNING]
 > Independent, community-maintained list — **not affiliated with, endorsed by, or sponsored by any provider below.** Free-tier terms change without notice. Always confirm against the provider's own docs (linked in every row) before you rely on anything here. Entries marked ⚠️ are sourced from community tracking and not yet independently re-confirmed — treat them as indicative.
 
+## What's covered
+
+Primarily **free LLM (text) APIs** — plus the adjacent model APIs a builder reaches for next: **image generation, speech (STT/TTS), embeddings, rerank and OCR**. Every category is held to the same verification bar. Breakdown is generated from the data:
+
+<!-- AUTOGEN:coverage:start -->
+| Category | Providers | Examples |
+|---|---|---|
+| **Text / LLM** | 38 | Google Gemini API, Groq, OpenRouter |
+| **Speech (STT / TTS)** | 14 | Google Gemini API, Groq, Cloudflare Workers AI |
+| **Embeddings** | 10 | Google Gemini API, Cloudflare Workers AI, Cohere |
+| **Image generation** | 8 | Cloudflare Workers AI, HuggingFace, Jina AI |
+| **Vision** | 8 | Google Gemini API, OpenRouter, Z.ai |
+| **Rerank** | 4 | Cohere, Jina AI, Mixedbread |
+| **OCR / documents** | 3 | OCR.space, LlamaParse, Nanonets |
+<!-- AUTOGEN:coverage:end -->
+
+Filter any category live in the [interactive explorer](https://pacocartones.github.io/free-llm-api-hub/) or the [multimodal collection](collections/multimodal.md).
+
 ## TL;DR — pick by what you actually need
 
 Each pick links to the full row, where the real limits and catches live.
@@ -74,8 +92,11 @@ Focused, always-current collections — each is generated from the dataset and h
 - **[Free multimodal LLM APIs](collections/multimodal.md)** (30) — vision, audio, embeddings · [live page ↗](https://pacocartones.github.io/free-llm-api-hub/collections/multimodal.html)
 <!-- AUTOGEN:collections:end -->
 
+Every provider also has its own page with the full details and a copy-ready quickstart — e.g. [Groq](https://pacocartones.github.io/free-llm-api-hub/p/groq.html), [Deepgram](https://pacocartones.github.io/free-llm-api-hub/p/deepgram.html), [Jina AI](https://pacocartones.github.io/free-llm-api-hub/p/jina-ai.html).
+
 ## Contents
 
+- [What's covered](#whats-covered) — the categories, by the numbers
 - [Browse by need](#browse-by-need) — curated collections by constraint
 - [Ongoing free tiers](#ongoing-free-tiers) — recurring quotas that renew
 - [One-time trial credits](#one-time-trial-credits) — a fixed balance, then pay-as-you-go

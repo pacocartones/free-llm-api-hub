@@ -26,7 +26,7 @@ Filters treat `null` conservatively: "No card required" matches only `card_requi
 | `rate_limits` | string | Published limits — RPM/RPD/TPM/TPD, or an explicit "not published publicly." |
 | `notes` | string | **The catch.** The fine print a builder needs before relying on it. |
 | `best_for` | string \| null | Editorial one-liner: when this is the right pick. Optional. |
-| `modalities` | string[] | Modalities reachable on the free tier: `text`, `vision`, `image`, `audio`, `embeddings`, `rerank`. |
+| `modalities` | string[] | Modalities reachable on the free tier: `text`, `vision`, `image`, `audio`, `embeddings`, `rerank`, `ocr`. |
 | `expires` | string \| null | Validity window for time-limited offers, e.g. `"30 days"`. `null` for perpetual/renewing tiers. |
 | `docs_url` | string | Primary source — the provider's own pricing/rate-limit page. Empty only for ⚠️ unverified entries. |
 | `phone_required` | tri-state | Does signup require phone verification? |
@@ -49,3 +49,7 @@ Filters treat `null` conservatively: "No card required" matches only `card_requi
 ## Attribute fields vs. the verified claim
 
 `verified` attests to the **core facts** (tier, limits, key catch, live source link) — see [methodology.md](methodology.md). The softer attribute fields (`openai_compatible`, `modalities`, `best_for`) are convenience metadata, progressively backfilled, and may be `null` even on a fully verified entry. They are not part of what `verified: true` guarantees.
+
+---
+
+_[← Docs index](README.md) · [Main README](../README.md)_

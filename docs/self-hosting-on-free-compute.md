@@ -36,3 +36,7 @@ These grant a large credit but come with a critical, easy-to-miss restriction: *
 ---
 
 Want a hosted, ready-to-call endpoint instead of running your own? See the [main list of free LLM APIs](../README.md) and the [collections](../collections/README.md).
+
+---
+
+_[← Docs index](README.md) · [Main README](../README.md)_

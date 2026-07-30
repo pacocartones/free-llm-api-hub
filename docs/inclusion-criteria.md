@@ -5,7 +5,7 @@ What earns a spot in the dataset — and what gets rejected. The scope is delibe
 ## A provider qualifies if it meets all of these
 
 1. **It exposes a programmatic API.** A REST/HTTP or SDK endpoint you can call from code. A chat website or IDE plugin with no API does not qualify.
-2. **It serves LLMs or directly adjacent model APIs** — text generation, plus vision, embeddings, rerank, speech-to-text, TTS and image generation *when offered through the same developer API surface.*
+2. **It serves LLMs or directly adjacent model APIs** — text generation (the core), plus vision, embeddings, rerank, speech-to-text, TTS, image generation and OCR / document AI *when offered as a developer API that runs a model.* (Content/data APIs that don't run a model — stock photos, weather, dictionaries — are out of scope.)
 3. **There is genuine no-cost access:** an ongoing free tier (a quota that renews), a permanently-free model, or a trial credit you can activate to make real API calls.
 4. **The offer is documented by the provider.** We can point to the provider's own pricing or rate-limit page. Dashboard-only figures with no public doc are flagged ⚠️, not presented as fact.
 
@@ -35,3 +35,7 @@ What earns a spot in the dataset — and what gets rejected. The scope is delibe
 ## Removal
 
 An entry is removed (not silently left to rot) when the provider ends the free access entirely. Notable removals are recorded in [CHANGELOG.md](../CHANGELOG.md) so the history stays honest. Providers that people *assume* are free but aren't live in the README's "Notably NOT free" section, on purpose — saying what isn't free saves builders time too.
+
+---
+
+_[← Docs index](README.md) · [Main README](../README.md)_

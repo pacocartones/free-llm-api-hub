@@ -32,6 +32,8 @@ jobs:
           node-version: 20
       - name: Validate dataset against integrity rules
         run: node scripts/validate.mjs
+      - name: Check internal documentation links
+        run: node scripts/check-links.mjs
       - name: Assert README + exports + collections are freshly generated from the data
         run: |
           node scripts/build.mjs

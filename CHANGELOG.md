@@ -5,6 +5,15 @@ Notable changes to the dataset and the project. Format based on [Keep a Changelo
 - **Data changes** (a provider's limits/terms) are recorded here when notable; every change is also visible in the git history of `data/providers.json`.
 - **Schema changes** (a new field, a changed meaning) bump the dataset version and are always recorded.
 
+## [Unreleased]
+
+### Docs & SEO
+- README gains a data-generated **"What's covered"** table (modality breakdown) and links to per-provider pages, surfacing the multimodal coverage while keeping "free LLM API" primary.
+- New **[docs index](docs/README.md)** and a consistent nav footer on every doc, so the documentation is properly interlinked.
+- Updated inclusion-criteria, comparison-dimensions (`ocr` modality) and CONTRIBUTING (full list of generated artifacts) to match the multimodal dataset.
+- New **internal-link checker** (`scripts/check-links.mjs`, in CI + `npm test`) so doc cross-links can't silently rot.
+- Repo topics expanded with `image-generation`, `speech-to-text`, `embeddings`.
+
 ## [2.2.0] — 2026-07-30
 
 Schema minor bump (added the `ocr` modality) and a big multimodal expansion — the dataset now spans free LLM **and adjacent AI-model** APIs (image, speech, embeddings, rerank, OCR, vision) while text/LLM stays the core.

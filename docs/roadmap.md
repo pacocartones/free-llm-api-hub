@@ -42,3 +42,7 @@ Direction, not dated promises. The north star: stay the **most trustworthy, curr
 - Listing anything we can't cite to a provider's own docs.
 
 Have an idea? Open a [discussion](https://github.com/pacocartones/free-llm-api-hub/discussions) or see [CONTRIBUTING.md](../CONTRIBUTING.md).
+
+---
+
+_[← Docs index](README.md) · [Main README](../README.md)_

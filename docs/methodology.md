@@ -43,3 +43,7 @@ When a claim can't be confirmed against an accessible official source — the co
 ## Corrections
 
 Found something wrong or stale? The [inaccuracy form](../../issues/new?template=inaccuracy.yml) is the fastest path, and PRs editing `data/providers.json` are welcome. See [CONTRIBUTING.md](../CONTRIBUTING.md).
+
+---
+
+_[← Docs index](README.md) · [Main README](../README.md)_

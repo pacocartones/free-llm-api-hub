@@ -6,7 +6,7 @@ Thanks for helping. Here's how it works.
 
 ## The one rule that matters
 
-> **Edit the data, not the docs.** The single source of truth is [`data/providers.json`](data/providers.json). The README tables, the freshness badge, the CSV/YAML exports and the interactive site are all *generated* from it. If you hand-edit a generated file, your change is overwritten on the next build.
+> **Edit the data, not the docs.** The single source of truth is [`data/providers.json`](data/providers.json). The README tables, the freshness badge, the CSV/YAML exports, the `collections/` markdown, and the whole interactive site (explorer, per-provider pages, collection pages, badges, sitemap) are all *generated* from it. If you hand-edit a generated file, your change is overwritten on the next build.
 
 ## Quick start
 

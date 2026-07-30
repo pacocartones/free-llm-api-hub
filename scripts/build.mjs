@@ -331,8 +331,25 @@ const collectionsIndexMd = COLLECTIONS.map((c) => {
   return `- **[${c.title}](collections/${c.slug}.md)** (${n}) — ${BLURB[c.slug]} · [live page ↗](${SITE}/collections/${c.slug}.html)`;
 }).join('\n');
 
+// "What's covered" — modality breakdown, generated from the data so it never goes stale.
+const MODALITY_LABELS = {
+  text: 'Text / LLM', audio: 'Speech (STT / TTS)', image: 'Image generation',
+  vision: 'Vision', embeddings: 'Embeddings', rerank: 'Rerank', ocr: 'OCR / documents',
+};
+const coverageRows = Object.entries(MODALITY_LABELS)
+  .map(([m, label]) => {
+    const ps = providers.filter((p) => (p.modalities || []).includes(m));
+    return { label, count: ps.length, ex: ps.slice(0, 3).map((p) => p.name.replace(/\s*\(.*\)/, '')) };
+  })
+  .filter((r) => r.count > 0)
+  .sort((a, b) => b.count - a.count);
+const coverageTable =
+  '| Category | Providers | Examples |\n|---|---|---|\n' +
+  coverageRows.map((r) => `| **${r.label}** | ${r.count} | ${r.ex.join(', ')} |`).join('\n');
+
 let readme = readFileSync(join(ROOT, 'README.md'), 'utf8');
 readme = inject(readme, 'stats', statsLine);
+readme = inject(readme, 'coverage', coverageTable);
 readme = inject(readme, 'collections', collectionsIndexMd);
 readme = inject(readme, 'ongoing', ongoingTable(ongoing));
 readme = inject(readme, 'trial', trialTable(trial));

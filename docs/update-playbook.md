@@ -52,3 +52,7 @@ The human pass can be accelerated by an agent (e.g. a scheduled Claude Code task
 - No open `🔗 Broken source link` issue.
 - Badge is green (`≥70%` verified within 90 days).
 - `npm test` passes and generated files are in sync.
+
+---
+
+_[← Docs index](README.md) · [Main README](../README.md)_
