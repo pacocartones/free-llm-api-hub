@@ -558,3 +558,39 @@ providers:
     openai_base_url: "https://api.arliai.com/v1"
     verified: true
     last_verified: "2026-07-30"
+  - slug: "ollama-cloud"
+    name: "Ollama Cloud"
+    category: "ongoing"
+    free_type: "renewing-quota"
+    free_tier: "$0 Free plan: access to cloud-hosted open models (Qwen, GPT-OSS, DeepSeek, etc.) via API"
+    rate_limits: "Session limits reset every 5 hours and weekly limits every 7 days; 1 concurrent cloud model on the free plan (exact token caps not published)"
+    notes: "First-party — Ollama hosts the cloud models. Requires an ollama.com account + API key (`ollama signin`); the free plan is for light usage, Pro ($20/mo) raises limits. No card required."
+    best_for: "Cloud-hosted open models with the Ollama workflow, no card"
+    modalities: ["text", "vision"]
+    expires: null
+    docs_url: "https://docs.ollama.com/cloud"
+    phone_required: false
+    card_required: false
+    commercial_ok: true
+    openai_compatible: true
+    openai_base_url: "https://ollama.com/v1"
+    verified: true
+    last_verified: "2026-07-30"
+  - slug: "ai-horde"
+    name: "AI Horde"
+    category: "ongoing"
+    free_type: "perpetual"
+    free_tier: "Free crowdsourced text & image generation; anonymous API key '0000000000' (no registration), or register to earn kudos for priority"
+    rate_limits: "Queue-based priority via kudos (no fixed quota); anonymous requests get lowest priority under load"
+    notes: "Community-powered volunteer network — model availability and speed vary with worker supply, so it is not a fixed-SLA service. No card, no phone. Kudos never expire and cannot be sold."
+    best_for: "Anonymous, no-signup free generation (variable speed)"
+    modalities: ["text", "image"]
+    expires: null
+    docs_url: "https://aihorde.net/"
+    phone_required: false
+    card_required: false
+    commercial_ok: null
+    openai_compatible: false
+    openai_base_url: null
+    verified: true
+    last_verified: "2026-07-30"

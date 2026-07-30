@@ -7,6 +7,12 @@ Notable changes to the dataset and the project. Format based on [Keep a Changelo
 
 ## [Unreleased]
 
+### Data
+- **Attribute backfill (Phase 1):** filled `best_for` for every entry and confirmed additional tri-states against official docs (e.g. Cohere & IBM watsonx `openai_compatible`, HuggingFace & Alibaba `card_required: false`, NLP Cloud & Nebius policies). Fields that providers don't publish are left `null` rather than guessed.
+- **SambaNova corrected** to a rate-limited ongoing free tier (its former "$5 / 3-month" trial is no longer documented).
+- **Two new verified providers** mined from the major "free LLM API" aggregator lists: **Ollama Cloud** (cloud-hosted open models, $0 plan, OpenAI-compatible) and **AI Horde** (anonymous, crowdsourced, no card/phone). 33 providers, still 100% verified.
+- **Cliff mitigation:** re-verified 10 entries today to stagger the 2026-07-11 cluster, and `staleness.mjs` now warns when a same-date cluster nears the 90-day SLA.
+
 ### Site
 - **Full visual redesign** into one cohesive system (shared `styles.css`) across the landing page and every generated page: sticky header with logo + nav, a redesigned hero (hub logo + a live GitHub star count right below it), and a structured footer. Light/dark theme toggle (persisted).
 - **Per-provider detail pages** (`/p/<slug>.html`) generated from the data — free tier, limits, the catch, modalities, a copy-ready quickstart, and links — a large, indexable SEO surface. Linked from the explorer and the sitemap.
