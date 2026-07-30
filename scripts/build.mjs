@@ -222,47 +222,56 @@ function collectionTableHtml(rows, opts = {}) {
   return `<table><thead><tr><th>Provider</th><th>${col2Head}</th><th>What's free</th><th>The catch</th><th>Verified</th></tr></thead><tbody>\n${rowsHtml}\n</tbody></table>`;
 }
 
-function htmlPage({ title, desc, canonical, bodyHtml, jsonld }) {
+// Shared chrome for generated pages (collection pages live one level below site root → '../').
+const GH_ICON = '<svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.6 7.6 0 014 0c1.53-1.03 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>';
+const REPO = 'https://github.com/pacocartones/free-llm-api-hub';
+const SPRITE = `<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
+<linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6ea8fe"/><stop offset="1" stop-color="#bc8cff"/></linearGradient>
+<symbol id="logo" viewBox="0 0 32 32"><g stroke="url(#g)" stroke-width="1.7" opacity=".55" stroke-linecap="round" fill="none"><path d="M16 16 L7 9"/><path d="M16 16 L25 9.5"/><path d="M16 16 L9.5 24.5"/><path d="M16 16 L24.5 24"/></g><circle cx="16" cy="16" r="4.8" fill="url(#g)"/><circle cx="7" cy="9" r="2.4" fill="#6ea8fe"/><circle cx="25" cy="9.5" r="2.4" fill="#bc8cff"/><circle cx="9.5" cy="24.5" r="2.4" fill="#6ea8fe"/><circle cx="24.5" cy="24" r="2.4" fill="#bc8cff"/></symbol></defs></svg>`;
+
+const siteHeader = (p) => `<header class="site-header"><div class="wrap header-inner">
+<a class="brand" href="${p}" aria-label="Free LLM API Hub — home"><svg class="logo-mark"><use href="#logo"/></svg><span class="brand-name">Free LLM API <span class="grad">Hub</span></span></a>
+<nav class="nav" aria-label="Primary"><a href="${p}#explorer">Explorer</a><a href="${p}collections/">Collections</a><a href="${REPO}/blob/main/docs/methodology.md">Methodology</a><a href="${p}providers.json">Dataset</a></nav>
+<div class="header-actions">
+<a class="icon-btn" href="${REPO}" target="_blank" rel="noopener" aria-label="Star on GitHub">${GH_ICON}<span class="star-count" data-stars>★</span></a>
+<button class="icon-btn theme-toggle" id="themeToggle" aria-label="Toggle light and dark theme" title="Toggle theme"><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><svg class="moon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/></svg></button>
+</div></div></header>`;
+
+const siteFooter = (p) => `<footer class="site-footer"><div class="wrap footer-top">
+<div class="footer-brand"><a class="brand" href="${p}"><svg class="logo-mark"><use href="#logo"/></svg><span class="brand-name">Free LLM API <span class="grad">Hub</span></span></a><p>A continuously-verified, machine-readable dataset of free LLM APIs and trial credits for developers.</p></div>
+<div class="footer-col"><h4>Explore</h4><a href="${p}#explorer">Interactive explorer</a><a href="${p}collections/">Collections</a><a href="${REPO}#notably-not-free">Notably NOT free</a></div>
+<div class="footer-col"><h4>Data</h4><a href="${p}providers.json">providers.json</a><a href="${p}providers.csv">CSV export</a><a href="${p}providers.yaml">YAML export</a><a href="${REPO}/blob/main/data/schema.json">JSON Schema</a></div>
+<div class="footer-col"><h4>Project</h4><a href="${REPO}/blob/main/docs/methodology.md">Methodology</a><a href="${REPO}/blob/main/CONTRIBUTING.md">Contributing</a><a href="${REPO}/blob/main/CHANGELOG.md">Changelog</a><a href="${REPO}">GitHub ★</a></div>
+</div><div class="wrap footer-bottom">Independent, community-maintained — not affiliated with any provider listed. Terms change without notice; always confirm against each provider's own docs. <a href="${REPO}/blob/main/LICENSE">MIT licensed</a>.</div></footer>`;
+
+// Full page wrapper for generated (collection) pages. `p` is the path prefix to the site root.
+function htmlPage({ title, desc, canonical, main, jsonld, prefix = '../' }) {
   return `<!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>${htmlEsc(title)}</title>
 <meta name="description" content="${htmlEsc(desc)}">
+<script>(function(){try{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: light)').matches?'light':'dark');document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
 <link rel="canonical" href="${htmlEsc(canonical)}">
+<link rel="icon" href="${prefix}favicon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#0a0d13">
 <meta property="og:title" content="${htmlEsc(title)}">
 <meta property="og:description" content="${htmlEsc(desc)}">
 <meta property="og:type" content="website">
 <meta property="og:url" content="${htmlEsc(canonical)}">
-<style>
-  :root{--bg:#0b0e14;--panel:#12161f;--border:#262c38;--text:#e6edf3;--muted:#8b95a5;--accent:#6ea8fe;--green:#3fb950;--yellow:#d29922;--purple:#bc8cff}
-  *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Helvetica,Arial,sans-serif;line-height:1.55}
-  a{color:var(--accent)}.wrap{max-width:1080px;margin:0 auto;padding:0 24px}
-  header{border-bottom:1px solid var(--border);background:radial-gradient(1000px 320px at 50% -120px,rgba(110,168,254,.14),transparent 70%);padding:40px 0 26px}
-  h1{font-size:clamp(1.6rem,3.5vw,2.4rem);margin:0 0 12px;letter-spacing:-.02em}
-  .lede{color:var(--muted);max-width:70ch;margin:0 0 18px}
-  nav.crumbs{font-size:.9rem;margin-bottom:8px}nav.crumbs a{color:var(--muted)}
-  nav.colls{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 0}
-  nav.colls a{font-size:.85rem;padding:5px 11px;border:1px solid var(--border);border-radius:999px;background:var(--panel);text-decoration:none}
-  nav.colls a.active{border-color:var(--accent);color:var(--accent)}
-  main{padding:24px 0 60px}
-  table{width:100%;border-collapse:collapse;font-size:.9rem}
-  thead th{text-align:left;padding:10px 12px;border-bottom:2px solid var(--border);color:var(--muted);font-weight:600;white-space:nowrap}
-  tbody td{padding:13px 12px;border-bottom:1px solid var(--border);vertical-align:top}
-  tbody tr:hover{background:var(--panel)}.name a{color:var(--text);font-weight:600;text-decoration:none}.name a:hover{color:var(--accent)}
-  .flags{display:flex;flex-wrap:wrap;gap:6px;margin-top:7px}.flags span{font-size:.72rem;color:#5b6472}
-  .type{font-size:.72rem;padding:2px 8px;border-radius:999px;background:rgba(110,168,254,.14);color:var(--accent);border:1px solid rgba(110,168,254,.35)}
-  .notes{color:var(--muted);font-size:.85rem;max-width:44ch}
-  .v{font-size:.72rem;padding:2px 8px;border-radius:999px;white-space:nowrap}.v.ok{background:rgba(63,185,80,.14);color:var(--green);border:1px solid rgba(63,185,80,.35)}.v.warn{background:rgba(210,153,34,.14);color:var(--yellow);border:1px solid rgba(210,153,34,.35)}
-  pre{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:16px;overflow:auto;font-size:.85rem}
-  h2{margin-top:36px}.count{color:var(--muted);font-size:.85rem;margin:6px 0 16px}
-  footer{border-top:1px solid var(--border);color:var(--muted);font-size:.85rem;padding:24px 0 60px}
-</style>
+<meta name="twitter:card" content="summary">
+<link rel="stylesheet" href="${prefix}styles.css">
 ${jsonld ? `<script type="application/ld+json">${jsonld}</script>` : ''}
 </head>
 <body>
-${bodyHtml}
+<a class="skip-link" href="#main">Skip to content</a>
+${SPRITE}
+${siteHeader(prefix)}
+${main}
+${siteFooter(prefix)}
+<script src="${prefix}site.js"></script>
 </body>
 </html>
 `;
@@ -393,13 +402,14 @@ for (const c of COLLECTIONS) {
       url: p.docs_url || undefined,
     })),
   });
-  const body =
-    `<header><div class="wrap">` +
-    `<nav class="crumbs"><a href="../">Free LLM API Hub</a> / <a href="index.html">Collections</a> / ${htmlEsc(c.title)}</nav>` +
+  const introHtml = htmlEsc(c.intro).replace(/`([^`]+)`/g, '<code>$1</code>').replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+  const main =
+    `<section class="page-hero"><div class="wrap">` +
+    `<nav class="crumbs"><a href="../">Home</a> / <a href="./">Collections</a> / ${htmlEsc(c.title)}</nav>` +
     `<h1>${htmlEsc(c.h1)}</h1><p class="lede">${htmlEsc(c.desc)}</p>` +
-    `<nav class="colls">${nav}</nav></div></header>` +
-    `<main><div class="wrap">` +
-    `<p>${htmlEsc(c.intro).replace(/`([^`]+)`/g, '<code>$1</code>').replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')}</p>` +
+    `<nav class="colls">${nav}</nav></div></section>` +
+    `<main id="main"><div class="wrap prose">` +
+    `<p>${introHtml}</p>` +
     `<p class="count"><strong>${rows.length} of ${total}</strong> tracked providers match.</p>` +
     `${collectionTableHtml(rows, { baseUrl: c.quickstart })}` +
     (c.quickstart
@@ -415,11 +425,10 @@ print(resp.choices[0].message.content)</code></pre><pre><code>curl ${htmlEsc(QS_
   -H "Content-Type: application/json" \\
   -d '{"model": "${htmlEsc(QS_MODEL)}", "messages": [{"role": "user", "content": "Hello!"}]}'</code></pre>`
       : '') +
-    `</div></main>` +
-    `<footer><div class="wrap">Generated from <a href="../providers.json">providers.json</a>. Independent, community-maintained — not affiliated with any provider. Source & methodology on <a href="https://github.com/pacocartones/free-llm-api-hub">GitHub</a>.</div></footer>`;
+    `</div></main>`;
   writeFileSync(
     join(ROOT, `site/collections/${c.slug}.html`),
-    htmlPage({ title: `${c.title} · Free LLM API Hub`, desc: c.desc, canonical: `${SITE}/collections/${c.slug}.html`, bodyHtml: body, jsonld })
+    htmlPage({ title: `${c.title} · Free LLM API Hub`, desc: c.desc, canonical: `${SITE}/collections/${c.slug}.html`, main, jsonld })
   );
 }
 
@@ -432,17 +441,18 @@ const hubMd =
 writeFileSync(join(ROOT, 'collections/README.md'), hubMd);
 
 // --- collections hub (live HTML) ---
-const hubBody =
-  `<header><div class="wrap">` +
-  `<nav class="crumbs"><a href="../">Free LLM API Hub</a> / Collections</nav>` +
-  `<h1>Collections</h1><p class="lede">Curated, always-current slices of the dataset — filter the list by a single constraint you actually have.</p>` +
-  `<nav class="colls">${COLLECTIONS.map((c) => `<a href="${c.slug}.html">${htmlEsc(c.title)}</a>`).join('')}</nav>` +
-  `</div></header><main><div class="wrap"><ul>` +
-  COLLECTIONS.map((c) => `<li style="margin:12px 0"><a href="${c.slug}.html"><strong>${htmlEsc(c.title)}</strong></a> — ${htmlEsc(c.desc)} <span class="count">(${collRows(c).length})</span></li>`).join('') +
-  `</ul></div></main><footer><div class="wrap"><a href="../">← Interactive explorer</a> · <a href="https://github.com/pacocartones/free-llm-api-hub">GitHub</a></div></footer>`;
+const hubCards = COLLECTIONS.map((c) =>
+  `<a class="coll-card" href="${c.slug}.html"><div class="coll-card-head"><strong>${htmlEsc(c.title)}</strong><span class="count">${collRows(c).length}</span></div><p>${htmlEsc(c.desc)}</p></a>`
+).join('');
+const hubMain =
+  `<section class="page-hero"><div class="wrap">` +
+  `<nav class="crumbs"><a href="../">Home</a> / Collections</nav>` +
+  `<h1>Collections</h1><p class="lede">Curated, always-current slices of the dataset — filter the list by a single constraint you actually have. Every collection is generated from the data and updates automatically.</p>` +
+  `</div></section>` +
+  `<main id="main"><div class="wrap"><div class="coll-grid">${hubCards}</div></div></main>`;
 writeFileSync(
   join(ROOT, 'site/collections/index.html'),
-  htmlPage({ title: 'Collections · Free LLM API Hub', desc: 'Curated, always-current collections of free LLM APIs by constraint: no card, no phone, commercial use, OpenAI-compatible, permanently free, multimodal.', canonical: `${SITE}/collections/`, bodyHtml: hubBody })
+  htmlPage({ title: 'Collections · Free LLM API Hub', desc: 'Curated, always-current collections of free LLM APIs by constraint: no card, no phone, commercial use, OpenAI-compatible, permanently free, multimodal.', canonical: `${SITE}/collections/`, main: hubMain })
 );
 
 // ---------- sitemap.xml (site SEO) ----------

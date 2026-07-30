@@ -1,15 +1,21 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Free LLM API Hub — verified free LLM APIs & trial credits for developers</title>
 <meta name="description" content="A continuously-verified dataset of LLM API providers with a free tier or trial credits. Filter by no-card, no-phone, commercial-use, OpenAI-compatible. Dated, sourced, machine-readable.">
+<script>(function(){try{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: light)').matches?'light':'dark');document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
 <link rel="canonical" href="https://pacocartones.github.io/free-llm-api-hub/">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#0a0d13">
 <meta property="og:title" content="Free LLM API Hub">
 <meta property="og:description" content="A continuously-verified dataset of free LLM APIs and trial credits for developers.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://pacocartones.github.io/free-llm-api-hub/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Free LLM API Hub">
+<meta name="twitter:description" content="A continuously-verified dataset of free LLM APIs and trial credits for developers.">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -27,120 +33,83 @@
   ]
 }
 </script>
-<style>
-  :root {
-    --bg: #0b0e14; --panel: #12161f; --panel-2: #161b26; --border: #262c38;
-    --text: #e6edf3; --muted: #8b95a5; --faint: #5b6472;
-    --accent: #6ea8fe; --accent-ink: #04101f;
-    --green: #3fb950; --yellow: #d29922; --red: #f85149; --purple: #bc8cff;
-  }
-  * { box-sizing: border-box; }
-  html { scroll-behavior: smooth; }
-  body {
-    margin: 0; background: var(--bg); color: var(--text);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Helvetica, Arial, sans-serif;
-    line-height: 1.55; -webkit-font-smoothing: antialiased;
-  }
-  a { color: var(--accent); }
-  .wrap { max-width: 1180px; margin: 0 auto; padding: 0 24px; }
-  .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
-  .skip-link { position: absolute; left: 8px; top: -48px; background: var(--accent); color: var(--accent-ink); padding: 8px 14px; border-radius: 8px; font-weight: 600; text-decoration: none; transition: top .15s; z-index: 100; }
-  .skip-link:focus { top: 8px; }
-
-  /* hero */
-  header.hero { border-bottom: 1px solid var(--border); background: radial-gradient(1200px 400px at 50% -120px, rgba(110,168,254,.14), transparent 70%); }
-  .hero-inner { padding: 56px 0 40px; }
-  .eyebrow { color: var(--accent); font-weight: 600; font-size: .8rem; letter-spacing: .12em; text-transform: uppercase; margin: 0 0 14px; }
-  h1 { font-size: clamp(1.9rem, 4vw, 3rem); line-height: 1.1; margin: 0 0 16px; letter-spacing: -.02em; }
-  .lede { color: var(--muted); font-size: 1.12rem; max-width: 64ch; margin: 0 0 26px; }
-  .cta { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 34px; }
-  .btn { display: inline-flex; align-items: center; gap: 8px; padding: 11px 18px; border-radius: 10px; text-decoration: none; font-weight: 600; font-size: .95rem; border: 1px solid var(--border); }
-  .btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
-  .btn.ghost { background: var(--panel); color: var(--text); }
-  .btn.ghost:hover { border-color: var(--accent); color: var(--accent); }
-
-  /* stat tiles */
-  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
-  .stat { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px; }
-  .stat .num { font-size: 1.9rem; font-weight: 700; letter-spacing: -.02em; }
-  .stat .lbl { color: var(--muted); font-size: .82rem; margin-top: 2px; }
-  .stat.fresh .num { color: var(--green); }
-  @media (max-width: 720px) { .stats { grid-template-columns: repeat(2, 1fr); } }
-
-  /* trust strip */
-  .trust { border-bottom: 1px solid var(--border); background: var(--panel); }
-  .trust-inner { display: flex; flex-wrap: wrap; gap: 10px 26px; padding: 16px 0; color: var(--muted); font-size: .9rem; }
-  .trust-inner b { color: var(--text); }
-
-  /* controls */
-  .controls { position: sticky; top: 0; z-index: 20; background: rgba(11,14,20,.9); backdrop-filter: blur(8px); border-bottom: 1px solid var(--border); padding: 14px 0; }
-  .controls-inner { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
-  input[type="search"] { background: var(--panel-2); border: 1px solid var(--border); color: var(--text); padding: 9px 13px; border-radius: 9px; font-size: .95rem; min-width: 220px; flex: 1 1 220px; }
-  .seg { display: flex; gap: 4px; background: var(--panel-2); border: 1px solid var(--border); border-radius: 10px; padding: 3px; }
-  .seg button { background: transparent; border: 0; color: var(--muted); padding: 6px 13px; border-radius: 7px; cursor: pointer; font-size: .86rem; font-weight: 500; }
-  .seg button.active { background: var(--accent); color: var(--accent-ink); font-weight: 600; }
-  .chips { display: flex; flex-wrap: wrap; gap: 7px; }
-  .chip { display: inline-flex; align-items: center; gap: 6px; background: var(--panel-2); border: 1px solid var(--border); color: var(--muted); padding: 6px 11px; border-radius: 999px; cursor: pointer; font-size: .82rem; user-select: none; }
-  .chip input { display: none; }
-  .chip.on { background: rgba(110,168,254,.16); border-color: var(--accent); color: var(--accent); }
-  .export { display: flex; gap: 6px; margin-left: auto; }
-  .export button { background: var(--panel-2); border: 1px solid var(--border); color: var(--text); padding: 6px 11px; border-radius: 8px; cursor: pointer; font-size: .82rem; }
-  .export button:hover { border-color: var(--accent); color: var(--accent); }
-  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-
-  /* table */
-  main { padding: 22px 0 70px; }
-  #count { color: var(--muted); font-size: .85rem; margin: 4px 0 14px; }
-  table { width: 100%; border-collapse: collapse; font-size: .9rem; }
-  thead th { text-align: left; padding: 10px 12px; border-bottom: 2px solid var(--border); color: var(--muted); font-weight: 600; white-space: nowrap; cursor: pointer; position: sticky; top: 63px; background: var(--bg); }
-  thead th:hover { color: var(--text); }
-  thead th.sorted::after { content: " ▾"; color: var(--accent); }
-  thead th.sorted.asc::after { content: " ▴"; }
-  tbody td { padding: 13px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
-  tbody tr:hover { background: var(--panel); }
-  .name a { color: var(--text); text-decoration: none; font-weight: 600; }
-  .name a:hover { color: var(--accent); text-decoration: underline; }
-  .best { color: var(--purple); font-size: .8rem; margin-top: 3px; }
-  .mods { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
-  .mods span { font-size: .68rem; color: var(--muted); background: var(--panel-2); border: 1px solid var(--border); border-radius: 4px; padding: 1px 6px; }
-  .baseurl { margin-top: 6px; cursor: copy; }
-  .baseurl code { font-size: .72rem; color: var(--accent); background: rgba(110,168,254,.08); border: 1px solid var(--border); border-radius: 5px; padding: 2px 6px; word-break: break-all; }
-  .baseurl.copied code { color: var(--green); border-color: var(--green); }
-  .badge { display: inline-block; font-size: .72rem; padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
-  .b-ongoing { background: rgba(110,168,254,.14); color: var(--accent); border: 1px solid rgba(110,168,254,.35); }
-  .b-trial { background: rgba(139,148,158,.14); color: var(--muted); border: 1px solid rgba(139,148,158,.35); }
-  .b-ok { background: rgba(63,185,80,.14); color: var(--green); border: 1px solid rgba(63,185,80,.35); }
-  .b-warn { background: rgba(210,153,34,.14); color: var(--yellow); border: 1px solid rgba(210,153,34,.35); }
-  .flags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 7px; }
-  .flag { font-size: .72rem; color: var(--faint); }
-  .notes { color: var(--muted); font-size: .85rem; max-width: 44ch; }
-  .empty { text-align: center; color: var(--muted); padding: 48px 0; }
-  footer { border-top: 1px solid var(--border); color: var(--muted); font-size: .85rem; }
-  .foot-inner { padding: 26px 0 60px; }
-</style>
+<link rel="stylesheet" href="styles.css">
 </head>
 <body>
 <a class="skip-link" href="#explorer">Skip to the explorer</a>
 
-<header class="hero">
+<!-- logo sprite -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#6ea8fe"/><stop offset="1" stop-color="#bc8cff"/>
+    </linearGradient>
+    <symbol id="logo" viewBox="0 0 32 32">
+      <g stroke="url(#g)" stroke-width="1.7" opacity=".55" stroke-linecap="round" fill="none">
+        <path d="M16 16 L7 9"/><path d="M16 16 L25 9.5"/><path d="M16 16 L9.5 24.5"/><path d="M16 16 L24.5 24"/>
+      </g>
+      <circle cx="16" cy="16" r="4.8" fill="url(#g)"/>
+      <circle cx="7" cy="9" r="2.4" fill="#6ea8fe"/>
+      <circle cx="25" cy="9.5" r="2.4" fill="#bc8cff"/>
+      <circle cx="9.5" cy="24.5" r="2.4" fill="#6ea8fe"/>
+      <circle cx="24.5" cy="24" r="2.4" fill="#bc8cff"/>
+    </symbol>
+  </defs>
+</svg>
+
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="./" aria-label="Free LLM API Hub — home">
+      <svg class="logo-mark"><use href="#logo"/></svg>
+      <span class="brand-name">Free LLM API <span class="grad">Hub</span></span>
+    </a>
+    <nav class="nav" aria-label="Primary">
+      <a href="#explorer">Explorer</a>
+      <a href="collections/">Collections</a>
+      <a href="https://github.com/pacocartones/free-llm-api-hub/blob/main/docs/methodology.md">Methodology</a>
+      <a href="providers.json">Dataset</a>
+    </nav>
+    <div class="header-actions">
+      <a class="icon-btn" href="https://github.com/pacocartones/free-llm-api-hub" target="_blank" rel="noopener" aria-label="Star on GitHub">
+        <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.6 7.6 0 014 0c1.53-1.03 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+        <span class="star-count" data-stars>★</span>
+      </a>
+      <button class="icon-btn theme-toggle" id="themeToggle" aria-label="Toggle light and dark theme" title="Toggle theme">
+        <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+        <svg class="moon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<section class="hero">
   <div class="wrap hero-inner">
+    <span class="hero-logo"><svg class="logo-mark lg"><use href="#logo"/></svg></span>
+    <div class="hero-star">
+      <a class="star-btn" href="https://github.com/pacocartones/free-llm-api-hub" target="_blank" rel="noopener" aria-label="Star free-llm-api-hub on GitHub">
+        <span class="sb-label">
+          <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.6 7.6 0 014 0c1.53-1.03 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+          Star on GitHub
+        </span>
+        <span class="sb-count" data-stars>★</span>
+      </a>
+    </div>
     <p class="eyebrow">Open dataset · continuously verified</p>
     <h1>Free LLM APIs you can actually build on.</h1>
     <p class="lede">A continuously-verified dataset of LLM API providers with a free tier or trial credits — every entry dated, sourced, and machine-readable. Filter by no-card, no-phone, commercial-use or OpenAI-compatible. No hype, no dead links.</p>
     <div class="cta">
       <a class="btn primary" href="#explorer">Browse providers ↓</a>
       <a class="btn ghost" href="collections/">Browse by need →</a>
-      <a class="btn ghost" href="https://github.com/pacocartones/free-llm-api-hub" target="_blank" rel="noopener">★ Star on GitHub</a>
       <a class="btn ghost" href="providers.json">Get the dataset (JSON)</a>
     </div>
     <div class="stats" id="stats" aria-live="polite"></div>
   </div>
-</header>
+</section>
 
 <section class="trust">
   <div class="wrap trust-inner">
-    <span><b>Every entry dated & sourced</b> to the provider's own docs</span>
-    <span><b>Links auto-checked weekly</b> — breakage opens an issue</span>
+    <span><b>Every entry dated &amp; sourced</b> to the provider's own docs</span>
+    <span><b>Links auto-checked weekly</b></span>
     <span><b>Freshness measured, not claimed</b></span>
     <span><b>⚠️ = unconfirmed</b>, flagged honestly</span>
   </div>
@@ -149,7 +118,7 @@
 <div class="controls">
   <div class="wrap controls-inner" role="search">
     <label class="sr-only" for="search">Search providers</label>
-    <input type="search" id="search" placeholder="Search providers, models, notes…" aria-label="Search providers by name, free tier, or notes">
+    <input type="search" id="search" placeholder="Search providers, models, notes…  ( / to focus )" aria-label="Search providers by name, free tier, or notes">
     <div class="seg" id="cat" role="group" aria-label="Filter by type">
       <button data-cat="all" class="active" aria-pressed="true">All</button>
       <button data-cat="ongoing" aria-pressed="false">Ongoing</button>
@@ -171,8 +140,10 @@
 
 <main id="explorer">
   <div class="wrap">
-    <div id="count" role="status" aria-live="polite"></div>
-    <table id="table">
+    <div class="section-head">
+      <div id="count" role="status" aria-live="polite"></div>
+    </div>
+    <table id="table" class="sortable">
       <caption class="sr-only">Free-tier and trial-credit LLM API providers. Column headers are sortable buttons.</caption>
       <thead>
         <tr>
@@ -189,16 +160,42 @@
   </div>
 </main>
 
-<footer>
-  <div class="wrap foot-inner">
-    Independent, community-maintained — not affiliated with any provider listed. Data:
-    <a href="providers.json">providers.json</a> · <a href="providers.csv">CSV</a> · <a href="providers.yaml">YAML</a>.
-    Source, methodology & contribution guide on
-    <a href="https://github.com/pacocartones/free-llm-api-hub" target="_blank" rel="noopener">GitHub</a>.
-    Terms change without notice — always confirm against each provider's own docs.
+<footer class="site-footer">
+  <div class="wrap footer-top">
+    <div class="footer-brand">
+      <a class="brand" href="./" aria-label="Free LLM API Hub — home">
+        <svg class="logo-mark"><use href="#logo"/></svg>
+        <span class="brand-name">Free LLM API <span class="grad">Hub</span></span>
+      </a>
+      <p>A continuously-verified, machine-readable dataset of free LLM APIs and trial credits for developers.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Explore</h4>
+      <a href="#explorer">Interactive explorer</a>
+      <a href="collections/">Collections</a>
+      <a href="https://github.com/pacocartones/free-llm-api-hub#notably-not-free">Notably NOT free</a>
+    </div>
+    <div class="footer-col">
+      <h4>Data</h4>
+      <a href="providers.json">providers.json</a>
+      <a href="providers.csv">CSV export</a>
+      <a href="providers.yaml">YAML export</a>
+      <a href="https://github.com/pacocartones/free-llm-api-hub/blob/main/data/schema.json">JSON Schema</a>
+    </div>
+    <div class="footer-col">
+      <h4>Project</h4>
+      <a href="https://github.com/pacocartones/free-llm-api-hub/blob/main/docs/methodology.md">Methodology</a>
+      <a href="https://github.com/pacocartones/free-llm-api-hub/blob/main/CONTRIBUTING.md">Contributing</a>
+      <a href="https://github.com/pacocartones/free-llm-api-hub/blob/main/CHANGELOG.md">Changelog</a>
+      <a href="https://github.com/pacocartones/free-llm-api-hub">GitHub ★</a>
+    </div>
+  </div>
+  <div class="wrap footer-bottom">
+    Independent, community-maintained — not affiliated with any provider listed. Terms change without notice; always confirm against each provider's own docs. <a href="https://github.com/pacocartones/free-llm-api-hub/blob/main/LICENSE">MIT licensed</a>.
   </div>
 </footer>
 
+<script src="site.js"></script>
 <script>
 let DATA = [], lastRows = [], sortKey = 'name', sortDir = 1, category = 'all';
 
@@ -324,7 +321,7 @@ function download(name, text, mime) {
 document.getElementById('exportJson').addEventListener('click', () =>
   download('free-llm-apis.json', JSON.stringify(lastRows, null, 2), 'application/json'));
 document.getElementById('exportCsv').addEventListener('click', () => {
-  const cols = ['name','category','free_type','free_tier','notes','docs_url','phone_required','card_required','commercial_ok','openai_compatible','verified','last_verified'];
+  const cols = ['name','category','free_type','free_tier','notes','docs_url','phone_required','card_required','commercial_ok','openai_compatible','openai_base_url','verified','last_verified'];
   const esc = v => { v = v == null ? '' : String(v); return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; };
   const csv = [cols.join(','), ...lastRows.map(p => cols.map(c => esc(p[c])).join(','))].join('\n');
   download('free-llm-apis.csv', csv, 'text/csv');
