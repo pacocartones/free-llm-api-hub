@@ -67,10 +67,27 @@ for (const p of data.providers ?? []) {
   }
 }
 
+// ---------- programs.json (credit programs) ----------
+let programCount = 0;
+try {
+  const prog = JSON.parse(readFileSync(join(ROOT, 'data/programs.json'), 'utf8'));
+  for (const group of ['startups', 'research']) {
+    if (!Array.isArray(prog[group]) || !prog[group].length) { errors.push(`programs.json: "${group}" must be a non-empty array`); continue; }
+    for (const r of prog[group]) {
+      const id = r.name || '(unknown program)';
+      programCount++;
+      check(!!(r.name && r.what && r.who), `programs/${id}: name, what and who are required`);
+      check(URL_RE.test(r.url || ''), `programs/${id}: url must be http(s)`);
+      check(['yes', 'partial', 'no'].includes(r.funds), `programs/${id}: funds must be yes/partial/no`);
+      if (group === 'research') check(!!r.audience, `programs/${id}: research entries need an audience`);
+    }
+  }
+} catch (e) { errors.push('programs.json: ' + e.message); }
+
 if (errors.length) {
-  console.error(`✗ providers.json failed validation (${errors.length} issue${errors.length > 1 ? 's' : ''}):`);
+  console.error(`✗ validation failed (${errors.length} issue${errors.length > 1 ? 's' : ''}):`);
   for (const e of errors) console.error('  - ' + e);
   process.exit(1);
 }
 
-console.log(`✓ providers.json is valid — ${data.providers.length} providers, schema v${data.version}.`);
+console.log(`✓ valid — ${data.providers.length} providers (schema v${data.version}) + ${programCount} credit programs.`);

@@ -259,7 +259,7 @@ const siteHeader = (p) => `<header class="site-header"><div class="wrap header-i
 
 const siteFooter = (p) => `<footer class="site-footer"><div class="wrap footer-top">
 <div class="footer-brand"><a class="star-btn" href="${REPO}" target="_blank" rel="noopener" aria-label="Star free-llm-api-hub on GitHub"><span class="sb-label">${GH_ICON} Star on GitHub</span><span class="sb-count" data-stars>★</span></a><p>A continuously-verified, machine-readable dataset of free LLM &amp; AI-model APIs and trial credits for developers.</p></div>
-<div class="footer-col"><h4>Explore</h4><a href="${p}#explorer">Interactive explorer</a><a href="${p}collections/">Collections</a><a href="${p}updates.html">Updates</a><a href="${REPO}#notably-not-free">Notably NOT free</a></div>
+<div class="footer-col"><h4>Explore</h4><a href="${p}#explorer">Interactive explorer</a><a href="${p}collections/">Collections</a><a href="${p}programs/">Credit programs</a><a href="${p}updates.html">Updates</a><a href="${REPO}#notably-not-free">Notably NOT free</a></div>
 <div class="footer-col"><h4>Data</h4><a href="${p}providers.json">providers.json</a><a href="${p}providers.csv">CSV export</a><a href="${p}providers.yaml">YAML export</a><a href="${REPO}/blob/main/data/schema.json">JSON Schema</a></div>
 <div class="footer-col"><h4>Project</h4><a href="${REPO}/blob/main/docs/methodology.md">Methodology</a><a href="${REPO}/blob/main/CONTRIBUTING.md">Contributing</a><a href="${REPO}/blob/main/CHANGELOG.md">Changelog</a><a href="${REPO}">GitHub ★</a></div>
 </div><div class="wrap footer-bottom"><a class="foot-logo" href="${p}" aria-label="Free LLM API Hub — home"><svg class="logo-mark"><use href="#logo"/></svg></a><p>Independent, community-maintained — not affiliated with any provider listed. Terms change without notice; always confirm against each provider's own docs. MIT licensed.</p><p class="foot-legal"><a href="${p}legal/privacy.html">Privacy</a> · <a href="${p}legal/terms.html">Terms</a> · Tweakeo, Inc.</p></div></footer>`;
@@ -714,10 +714,70 @@ if (commits.length) {
   writeFileSync(join(ROOT, 'site/feed.xml'), rss);
 }
 
+// ---------- credit programs: site pages + doc, from data/programs.json ----------
+const programs = JSON.parse(readFileSync(join(ROOT, 'data/programs.json'), 'utf8'));
+mkdirSync(join(ROOT, 'site/programs'), { recursive: true });
+const FUNDS_HTML = {
+  yes: '<span class="funds yes">✅ LLM API</span>',
+  partial: '<span class="funds partial">◐ via cloud</span>',
+  no: '<span class="funds no">✖ perks only</span>',
+};
+const FUNDS_MD = { yes: '✅ LLM API', partial: '◐ via cloud', no: '✖ perks only' };
+const LEGEND = 'Funds LLM API? — ✅ first-party LLM-API credits · ◐ cloud/compute usable for managed LLM APIs (Bedrock, Vertex AI, Azure OpenAI) · ✖ training / perks only.';
+const programsNav = (active) => `<nav class="colls"><a href="startups.html"${active === 'startups' ? ' class="active"' : ''}>For startups</a><a href="research.html"${active === 'research' ? ' class="active"' : ''}>For students &amp; researchers</a></nav>`;
+
+const startupsRowHtml = (r) => `<tr><td class="name"><a href="${htmlEsc(r.url)}" target="_blank" rel="noopener">${htmlEsc(r.name)}</a></td><td>${htmlEsc(r.what)}</td><td>${FUNDS_HTML[r.funds]}</td><td class="notes">${htmlEsc(r.who)}</td></tr>`;
+const researchRowHtml = (r) => `<tr><td class="name"><a href="${htmlEsc(r.url)}" target="_blank" rel="noopener">${htmlEsc(r.name)}</a></td><td><span class="type">${htmlEsc(r.audience)}</span></td><td>${htmlEsc(r.what)}</td><td>${FUNDS_HTML[r.funds]}</td><td class="notes">${htmlEsc(r.who)}</td></tr>`;
+
+const programPage = (slug, active, h1, lede, tableHead, rowsHtml, extra = '') =>
+  htmlPage({
+    title: `${h1} · Free LLM API Hub`, desc: lede.replace(/<[^>]+>/g, ''), canonical: `${SITE}/programs/${slug}.html`,
+    main:
+      `<section class="page-hero"><div class="wrap"><nav class="crumbs"><a href="../">Home</a> / Credit programs / ${htmlEsc(h1)}</nav>` +
+      `<h1>${htmlEsc(h1)}</h1><p class="lede">${lede}</p>${programsNav(active)}</div></section>` +
+      `<main id="main"><div class="wrap prose"><p class="count"><strong>${LEGEND}</strong></p>` +
+      `<table><thead>${tableHead}</thead><tbody>\n${rowsHtml}\n</tbody></table>` +
+      `<p style="margin-top:24px">Looking for a key to use right now with no application? See the <a href="../#explorer">verified self-serve list</a>.</p>${extra}</div></main>`,
+  });
+
+writeFileSync(join(ROOT, 'site/programs/startups.html'), programPage(
+  'startups', 'startups', 'Free credits for startups',
+  'Apply-to-get credit programs that can fund LLM / AI-model API usage — volatile, so confirm the current terms before you rely on one.',
+  '<tr><th>Program</th><th>What you get</th><th>Funds LLM API?</th><th>Who qualifies</th></tr>',
+  programs.startups.map(startupsRowHtml).join('\n')));
+
+writeFileSync(join(ROOT, 'site/programs/research.html'), programPage(
+  'research', 'research', 'Free credits for students & researchers',
+  'Student and academic/research programs that give credits or access usable for LLM / AI-model APIs.',
+  '<tr><th>Program</th><th>Audience</th><th>What you get</th><th>Funds LLM API?</th><th>Who qualifies</th></tr>',
+  programs.research.map(researchRowHtml).join('\n')));
+
+const programsHubMain =
+  `<section class="page-hero"><div class="wrap"><nav class="crumbs"><a href="../">Home</a> / Credit programs</nav>` +
+  `<h1>Credit programs — apply to get</h1><p class="lede">The other kind of "free": credit programs you <em>apply</em> for. Kept separate from the <a href="../#explorer">self-serve dataset</a> because they need eligibility and change often.</p></div></section>` +
+  `<main id="main"><div class="wrap"><div class="coll-grid">` +
+  `<a class="coll-card" href="startups.html"><div class="coll-card-head"><strong>For startups</strong><span class="count">${programs.startups.length}</span></div><p>AWS Activate, Microsoft/Google for Startups, Anthropic, OpenAI, Together, Baseten and more.</p></a>` +
+  `<a class="coll-card" href="research.html"><div class="coll-card-head"><strong>For students &amp; researchers</strong><span class="count">${programs.research.length}</span></div><p>Azure for Students, Cohere Labs, Google TPU Research Cloud, NVIDIA/Lambda grants and more.</p></a>` +
+  `</div></div></main>`;
+writeFileSync(join(ROOT, 'site/programs/index.html'), htmlPage({ title: 'Credit programs · Free LLM API Hub', desc: 'Startup and student/research credit programs that fund LLM / AI-model API usage.', canonical: `${SITE}/programs/`, main: programsHubMain }));
+
+// regenerate the companion doc tables from the same source (data-first)
+const startupsMd = '| Program | What you get | Funds LLM API? | Who qualifies |\n|---|---|---|---|\n' +
+  programs.startups.map((r) => `| **[${esc(r.name)}](${r.url})** | ${esc(r.what)} | ${FUNDS_MD[r.funds]} | ${esc(r.who)} |`).join('\n');
+const researchMd = '| Program | Audience | What you get | Funds LLM API? | Who qualifies |\n|---|---|---|---|---|\n' +
+  programs.research.map((r) => `| **[${esc(r.name)}](${r.url})** | ${esc(r.audience)} | ${esc(r.what)} | ${FUNDS_MD[r.funds]} | ${esc(r.who)} |`).join('\n');
+let creditDoc = readFileSync(join(ROOT, 'docs/credit-programs.md'), 'utf8');
+creditDoc = inject(creditDoc, 'startups', startupsMd);
+creditDoc = inject(creditDoc, 'research', researchMd);
+writeFileSync(join(ROOT, 'docs/credit-programs.md'), creditDoc);
+
 // ---------- sitemap.xml (site SEO) ----------
 const sitemapUrls = [
   `${SITE}/`,
   `${SITE}/collections/`,
+  `${SITE}/programs/`,
+  `${SITE}/programs/startups.html`,
+  `${SITE}/programs/research.html`,
   ...(commits.length ? [`${SITE}/updates.html`] : []),
   ...COLLECTIONS.map((c) => `${SITE}/collections/${c.slug}.html`),
   ...providers.map((p) => `${SITE}/p/${p.slug}.html`),

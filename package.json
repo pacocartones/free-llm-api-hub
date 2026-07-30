@@ -11,7 +11,7 @@
     "worklist": "node scripts/staleness.mjs",
     "og": "node scripts/og.mjs",
     "test": "node scripts/validate.mjs && node scripts/check-links.mjs",
-    "check": "node scripts/validate.mjs && node scripts/build.mjs && git diff --exit-code -- README.md data/providers.csv data/providers.yaml collections site/index.html"
+    "check": "node scripts/validate.mjs && node scripts/build.mjs && git diff --exit-code -- README.md data/providers.csv data/providers.yaml collections site/index.html docs/credit-programs.md"
   },
   "engines": {
     "node": ">=18"
