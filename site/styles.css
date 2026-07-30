@@ -303,6 +303,13 @@ pre:hover .pre-copy, .pre-copy:focus-visible { opacity: 1; }
 .muted { color: var(--muted); }
 .model-chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0 6px; }
 .model-chips code { background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 4px 9px; font-size: .82rem; color: var(--accent); word-break: break-all; }
+.model-search { width: 100%; max-width: 520px; margin: 6px 0 2px; padding: 10px 14px; font-family: var(--font-mono); font-size: .9rem; color: var(--text); background: var(--panel); border: 1px solid var(--border); border-radius: 9px; }
+.model-search:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent); }
+.model-table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+.model-table th, .model-table td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+.model-table thead th { position: sticky; top: var(--header-h); background: var(--bg); font-family: var(--font-mono); font-size: .74rem; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); z-index: 1; }
+.model-table td.name code { color: var(--accent); word-break: break-all; }
+.model-table tbody tr:hover { background: var(--panel); }
 
 /* ---------- credit programs ---------- */
 .funds { display: inline-block; font-size: .74rem; font-family: var(--font-mono); white-space: nowrap; }

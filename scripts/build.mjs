@@ -251,7 +251,7 @@ const IC = (id) => `<svg class="i" aria-hidden="true"><use href="#${id}"/></svg>
 
 const siteHeader = (p) => `<header class="site-header"><div class="wrap header-inner">
 <a class="brand" href="${p}" aria-label="Free LLM API Hub — home"><svg class="logo-mark"><use href="#logo"/></svg><span class="brand-name">Free LLM API <span class="grad">Hub</span></span></a>
-<nav class="nav" aria-label="Primary"><a href="${p}#explorer">Explorer</a><a href="${p}collections/">Collections</a><a href="${p}programs/startups.html">Startup credits</a><a href="${p}programs/research.html">Student credits</a></nav>
+<nav class="nav" aria-label="Primary"><a href="${p}#explorer">Explorer</a><a href="${p}models/">Models</a><a href="${p}collections/">Collections</a><a href="${p}programs/startups.html">Startup credits</a><a href="${p}programs/research.html">Student credits</a></nav>
 <div class="header-actions">
 <a class="icon-btn" href="${REPO}" target="_blank" rel="noopener" aria-label="Star on GitHub">${GH_ICON}<span class="star-count" data-stars>★</span></a>
 <button class="icon-btn theme-toggle" id="themeToggle" aria-label="Toggle light and dark theme" title="Toggle theme"><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><svg class="moon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/></svg></button>
@@ -259,7 +259,7 @@ const siteHeader = (p) => `<header class="site-header"><div class="wrap header-i
 
 const siteFooter = (p) => `<footer class="site-footer"><div class="wrap footer-top">
 <div class="footer-brand"><a class="star-btn" href="${REPO}" target="_blank" rel="noopener" aria-label="Star free-llm-api-hub on GitHub"><span class="sb-label">${GH_ICON} Star on GitHub</span><span class="sb-count" data-stars>★</span></a><p>A continuously-verified, machine-readable dataset of free LLM &amp; AI-model APIs and trial credits for developers.</p></div>
-<div class="footer-col"><h4>Explore</h4><a href="${p}#explorer">Interactive explorer</a><a href="${p}collections/">Collections</a><a href="${p}programs/startups.html">Startup credits</a><a href="${p}programs/research.html">Student &amp; research credits</a><a href="${p}updates.html">Updates</a><a href="${REPO}#notably-not-free">Notably NOT free</a></div>
+<div class="footer-col"><h4>Explore</h4><a href="${p}#explorer">Interactive explorer</a><a href="${p}models/">Free model index</a><a href="${p}collections/">Collections</a><a href="${p}programs/startups.html">Startup credits</a><a href="${p}programs/research.html">Student &amp; research credits</a><a href="${p}updates.html">Updates</a><a href="${REPO}#notably-not-free">Notably NOT free</a></div>
 <div class="footer-col"><h4>Data</h4><a href="${p}providers.json">providers.json</a><a href="${p}providers.csv">CSV export</a><a href="${p}providers.yaml">YAML export</a><a href="${REPO}/blob/main/data/schema.json">JSON Schema</a></div>
 <div class="footer-col"><h4>Project</h4><a href="${REPO}/blob/main/docs/methodology.md">Methodology</a><a href="${REPO}/blob/main/CONTRIBUTING.md">Contributing</a><a href="${REPO}/blob/main/CHANGELOG.md">Changelog</a><a href="${REPO}">GitHub ★</a></div>
 </div><div class="wrap footer-bottom"><a class="foot-logo" href="${p}" aria-label="Free LLM API Hub — home"><svg class="logo-mark"><use href="#logo"/></svg></a><p>Independent, community-maintained — not affiliated with any provider listed. Terms change without notice; always confirm against each provider's own docs. MIT licensed.</p><p class="foot-legal"><a href="${p}legal/privacy.html">Privacy</a> · <a href="${p}legal/terms.html">Terms</a> · Tweakeo, Inc.</p></div></footer>`;
@@ -796,9 +796,38 @@ creditDoc = inject(creditDoc, 'startups', startupsMd);
 creditDoc = inject(creditDoc, 'research', researchMd);
 writeFileSync(join(ROOT, 'docs/credit-programs.md'), creditDoc);
 
+// ---------- free model index: model -> provider, searchable ----------
+mkdirSync(join(ROOT, 'site/models'), { recursive: true });
+const modelIndex = [];
+for (const p of providers) for (const m of (p.models_free || [])) modelIndex.push({ m, p });
+modelIndex.sort((a, b) => a.m.toLowerCase().localeCompare(b.m.toLowerCase()) || a.p.name.localeCompare(b.p.name));
+const modelProviderCount = providers.filter((p) => p.models_free && p.models_free.length).length;
+const modelRowHtml = ({ m, p }) =>
+  `<tr data-s="${htmlEsc((m + ' ' + p.name + ' ' + (p.modalities || []).join(' ')).toLowerCase())}">` +
+  `<td class="name"><code>${htmlEsc(m)}</code></td>` +
+  `<td><a href="../p/${p.slug}.html">${htmlEsc(p.name)}</a></td>` +
+  `<td>${htmlEsc(p.free_type)}</td>` +
+  `<td class="notes">${(p.modalities || []).join(', ') || '—'}</td></tr>`;
+const modelsMain =
+  `<section class="page-hero"><div class="wrap"><nav class="crumbs"><a href="../">Home</a> / Free model index</nav>` +
+  `<h1>Free model index</h1><p class="lede">Every model our verified providers expose on a free tier — <strong>${modelIndex.length}</strong> entries across <strong>${modelProviderCount}</strong> providers, pulled from each provider's own <code>/models</code> endpoint where possible. The same model can appear under more than one provider.</p>` +
+  `<input id="mq" class="model-search" type="search" placeholder="Filter by model or provider — e.g. llama, deepseek, whisper, gpt-oss" aria-label="Filter models">` +
+  `<p class="count"><span id="mshown">${modelIndex.length}</span> shown</p></div></section>` +
+  `<main id="main"><div class="wrap"><table class="model-table"><thead><tr><th>Model</th><th>Provider</th><th>Free type</th><th>Modalities</th></tr></thead><tbody>\n` +
+  modelIndex.map(modelRowHtml).join('\n') +
+  `\n</tbody></table><p class="muted" style="margin-top:18px">Model lists are a live sample and change often — always confirm against the provider. A provider missing here usually needs an API key to list its models; <a href="${REPO}/blob/main/docs/update-playbook.md">see how the list is refreshed</a>.</p></div></main>` +
+  `<script>(function(){var q=document.getElementById('mq'),c=document.getElementById('mshown'),rows=[].slice.call(document.querySelectorAll('.model-table tbody tr'));if(!q)return;q.addEventListener('input',function(){var v=q.value.toLowerCase().trim(),n=0;for(var i=0;i<rows.length;i++){var ok=!v||rows[i].getAttribute('data-s').indexOf(v)>-1;rows[i].hidden=!ok;if(ok)n++;}c.textContent=n;});})();</script>`;
+writeFileSync(join(ROOT, 'site/models/index.html'), htmlPage({
+  title: 'Free model index — which free API serves which model · Free LLM API Hub',
+  desc: `Searchable index of ${modelIndex.length} models available on free LLM & AI-model API tiers, and which provider serves each.`,
+  canonical: `${SITE}/models/`,
+  main: modelsMain,
+}));
+
 // ---------- sitemap.xml (site SEO) ----------
 const sitemapUrls = [
   `${SITE}/`,
+  `${SITE}/models/`,
   `${SITE}/collections/`,
   `${SITE}/programs/startups.html`,
   `${SITE}/programs/research.html`,
