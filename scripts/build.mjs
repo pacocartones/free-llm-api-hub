@@ -237,33 +237,41 @@ const SPRITE = `<svg width="0" height="0" style="position:absolute" aria-hidden=
 <symbol id="ic-code" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 4 2 8l3.5 4M10.5 4 14 8l-3.5 4"/></symbol>
 <symbol id="ic-check" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 8.5 6 12l7.5-8"/></symbol>
 <symbol id="ic-warn" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2.5 15 14H1z"/><path d="M8 6.5V9.5M8 11.6V11.7"/></symbol>
+<symbol id="ic-doc" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 1.5h5l3 3v10H4z"/><path d="M9 1.5V5h3M6 8.5h4M6 11h3"/></symbol>
+<symbol id="ic-link" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6.6 9.4 9.4 6.6"/><path d="M7 4.6 8.4 3.2a2.4 2.4 0 0 1 3.4 3.4L10.4 8"/><path d="M9 11.4 7.6 12.8a2.4 2.4 0 0 1-3.4-3.4L5.6 8"/></symbol>
+<symbol id="ic-gauge" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 12a5.5 5.5 0 1 1 11 0"/><path d="M8 12l3-3.2"/></symbol>
+<symbol id="ic-flag" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14.5V2"/><path d="M4 2.6h7.5L10 5.3l1.5 2.7H4"/></symbol>
+<symbol id="ic-database" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M13 3.5c0 1.1-2.2 2-5 2s-5-.9-5-2 2.2-2 5-2 5 .9 5 2z"/><path d="M3 3.5v9c0 1.1 2.2 2 5 2s5-.9 5-2v-9"/><path d="M3 8c0 1.1 2.2 2 5 2s5-.9 5-2"/></symbol>
+<symbol id="ic-refresh" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M13.2 7.2a5.3 5.3 0 1 0-.3 3"/><path d="M13.5 2.4V5.5H10.4"/></symbol>
+<symbol id="ic-clock" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6"/><path d="M8 4.6V8l2.4 1.5"/></symbol>
+<symbol id="ic-shield" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M8 1.5 13 3.4v4c0 3.4-2.1 5.7-5 7-2.9-1.3-5-3.6-5-7v-4z"/><path d="M5.6 8 7.4 9.8 10.5 6.2"/></symbol>
 </defs></svg>`;
 const IC = (id) => `<svg class="i" aria-hidden="true"><use href="#${id}"/></svg>`;
 
 const siteHeader = (p) => `<header class="site-header"><div class="wrap header-inner">
 <a class="brand" href="${p}" aria-label="Free LLM API Hub — home"><svg class="logo-mark"><use href="#logo"/></svg><span class="brand-name">Free LLM API <span class="grad">Hub</span></span></a>
-<nav class="nav" aria-label="Primary"><a href="${p}#explorer">Explorer</a><a href="${p}collections/">Collections</a><a href="${REPO}/blob/main/docs/methodology.md">Methodology</a><a href="${p}providers.json">Dataset</a></nav>
+<nav class="nav" aria-label="Primary"><a href="${p}#explorer">Explorer</a><a href="${p}collections/">Collections</a></nav>
 <div class="header-actions">
 <a class="icon-btn" href="${REPO}" target="_blank" rel="noopener" aria-label="Star on GitHub">${GH_ICON}<span class="star-count" data-stars>★</span></a>
 <button class="icon-btn theme-toggle" id="themeToggle" aria-label="Toggle light and dark theme" title="Toggle theme"><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><svg class="moon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/></svg></button>
 </div></div></header>`;
 
 const siteFooter = (p) => `<footer class="site-footer"><div class="wrap footer-top">
-<div class="footer-brand"><a class="brand" href="${p}"><svg class="logo-mark"><use href="#logo"/></svg><span class="brand-name">Free LLM API <span class="grad">Hub</span></span></a><p>A continuously-verified, machine-readable dataset of free LLM APIs and trial credits for developers.</p></div>
+<div class="footer-brand"><a class="star-btn" href="${REPO}" target="_blank" rel="noopener" aria-label="Star free-llm-api-hub on GitHub"><span class="sb-label">${GH_ICON} Star on GitHub</span><span class="sb-count" data-stars>★</span></a><p>A continuously-verified, machine-readable dataset of free LLM &amp; AI-model APIs and trial credits for developers.</p></div>
 <div class="footer-col"><h4>Explore</h4><a href="${p}#explorer">Interactive explorer</a><a href="${p}collections/">Collections</a><a href="${REPO}#notably-not-free">Notably NOT free</a></div>
 <div class="footer-col"><h4>Data</h4><a href="${p}providers.json">providers.json</a><a href="${p}providers.csv">CSV export</a><a href="${p}providers.yaml">YAML export</a><a href="${REPO}/blob/main/data/schema.json">JSON Schema</a></div>
 <div class="footer-col"><h4>Project</h4><a href="${REPO}/blob/main/docs/methodology.md">Methodology</a><a href="${REPO}/blob/main/CONTRIBUTING.md">Contributing</a><a href="${REPO}/blob/main/CHANGELOG.md">Changelog</a><a href="${REPO}">GitHub ★</a></div>
-</div><div class="wrap footer-bottom">Independent, community-maintained — not affiliated with any provider listed. Terms change without notice; always confirm against each provider's own docs. <a href="${REPO}/blob/main/LICENSE">MIT licensed</a>.</div></footer>`;
+</div><div class="wrap footer-bottom"><a class="foot-logo" href="${p}" aria-label="Free LLM API Hub — home"><svg class="logo-mark"><use href="#logo"/></svg></a><p>Independent, community-maintained — not affiliated with any provider listed. Terms change without notice; always confirm against each provider's own docs. MIT licensed.</p><p class="foot-legal"><a href="${p}legal/privacy.html">Privacy</a> · <a href="${p}legal/terms.html">Terms</a> · Tweakeo, Inc.</p></div></footer>`;
 
 // Full page wrapper for generated (collection) pages. `p` is the path prefix to the site root.
-function htmlPage({ title, desc, canonical, main, jsonld, prefix = '../' }) {
+function htmlPage({ title, desc, canonical, main, jsonld, prefix = '../', noindex = false }) {
   return `<!DOCTYPE html>
 <html lang="en" data-theme="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>${htmlEsc(title)}</title>
-<meta name="description" content="${htmlEsc(desc)}">
+<meta name="description" content="${htmlEsc(desc)}">${noindex ? '\n<meta name="robots" content="noindex">' : ''}
 <script>(function(){try{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: light)').matches?'light':'dark');document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
 <link rel="canonical" href="${htmlEsc(canonical)}">
 <link rel="icon" href="${prefix}favicon.svg" type="image/svg+xml">
@@ -494,8 +502,6 @@ const provFlagsHtml = (p) => {
 
 for (const p of providers) {
   const inColls = COLLECTIONS.filter((c) => collRows(c).some((x) => x.slug === p.slug));
-  const badgeUrl = `https://img.shields.io/endpoint?url=${SITE}/badges/${p.slug}.json`;
-  const embed = `[![${p.name} — free tier, tracked by Free LLM API Hub](${badgeUrl})](${SITE}/p/${p.slug}.html)`;
   const model = p.slug === 'groq' ? 'llama-3.1-8b-instant' : '<a-free-model>';
   const quick = p.openai_base_url
     ? `<h2>Quickstart — OpenAI SDK</h2><pre><code>from openai import OpenAI
@@ -507,34 +513,38 @@ resp = client.chat.completions.create(
 )
 print(resp.choices[0].message.content)</code></pre>`
     : '';
-  const fields = [
-    ["What's free", htmlEsc(p.free_tier)],
+  const summary = `<div class="prov-summary"><h3>What's free</h3><p>${htmlEsc(p.free_tier)}</p></div>`;
+  const bigCards = [
     ['Rate limits', htmlEsc(p.rate_limits)],
     ['The catch', htmlEsc(p.notes)],
-    ['Modalities', (p.modalities || []).join(', ')],
+  ].filter(([, v]) => v).map(([k, v]) => `<div class="prov-card"><h3>${k}</h3><p>${v}</p></div>`).join('');
+  const metaRows = [
+    ['Type', typeLabel(p) + (p.category === 'ongoing' ? ' free tier' : ' credit')],
     ['Free type', htmlEsc(p.free_type)],
-    ['Expires', htmlEsc(p.expires)],
-    ['OpenAI base URL', p.openai_base_url ? `<code>${htmlEsc(p.openai_base_url)}</code>` : ''],
-  ].filter(([, v]) => v);
-  const cards = fields.map(([k, v]) => `<div class="prov-card"><h3>${k}</h3><p>${v}</p></div>`).join('');
+    ['Expires', htmlEsc(p.expires) || 'no expiry'],
+    ['Modalities', (p.modalities || []).join(', ') || '—'],
+    ['OpenAI base URL', p.openai_base_url ? `<code>${htmlEsc(p.openai_base_url)}</code>` : '—'],
+  ].map(([k, v]) => `<div class="meta-row"><span class="meta-k">${k}</span><span class="meta-v">${v}</span></div>`).join('');
   const verifiedLine = p.verified
     ? `<span class="v ok">${IC('ic-check')} verified ${htmlEsc(p.last_verified)}</span>`
     : `<span class="v warn">${IC('ic-warn')} unverified</span>`;
-  const collLinks = inColls.map((c) => `<a href="../collections/${c.slug}.html">${htmlEsc(c.title)}</a>`).join(' · ') || '—';
+  const docsBtn = p.docs_url ? `<a class="btn primary" href="${htmlEsc(p.docs_url)}" target="_blank" rel="noopener">Official docs ↗</a>` : '';
+  const collChips = inColls.length ? `<div class="colls">${inColls.map((c) => `<a href="../collections/${c.slug}.html">${htmlEsc(c.title)}</a>`).join('')}</div>` : '';
   const main =
     `<section class="page-hero"><div class="wrap">` +
     `<nav class="crumbs"><a href="../">Home</a> / <a href="../#explorer">Providers</a> / ${htmlEsc(p.name)}</nav>` +
     `<h1>${htmlEsc(p.name)}</h1>` +
     `<div class="prov-badges"><span class="type">${typeLabel(p)}</span> ${verifiedLine} ${provFlagsHtml(p)}</div>` +
     (p.best_for ? `<p class="lede">${htmlEsc(p.best_for)}</p>` : '') +
+    (docsBtn ? `<div class="prov-actions">${docsBtn}</div>` : '') +
     `</div></section>` +
     `<main id="main"><div class="wrap prose">` +
-    `<div class="prov-grid">${cards}</div>` +
+    summary +
+    (bigCards ? `<div class="prov-grid">${bigCards}</div>` : '') +
+    `<div class="prov-meta">${metaRows}</div>` +
     quick +
-    `<h2>Source &amp; embed</h2>` +
-    `<p><a href="${htmlEsc(p.docs_url)}" target="_blank" rel="noopener">Official docs ↗</a> &nbsp;·&nbsp; Appears in: ${collLinks}</p>` +
-    `<p class="count">Embed this provider's freshness badge in your README:</p><pre><code>${htmlEsc(embed)}</code></pre>` +
-    `<p><a href="../#explorer">← Back to all providers</a></p>` +
+    (collChips ? `<h2>Appears in</h2>${collChips}` : '') +
+    `<p class="prov-back"><a href="../#explorer">← All providers</a></p>` +
     `</div></main>`;
   const jsonld = JSON.stringify({
     '@context': 'https://schema.org',
@@ -563,6 +573,51 @@ print(resp.choices[0].message.content)</code></pre>`
     JSON.stringify({ schemaVersion: 1, label: 'free-llm-api-hub', message: p.verified ? `verified ${p.last_verified}` : 'unverified', color: p.verified ? 'brightgreen' : 'yellow' }) + '\n'
   );
 }
+
+// ---------- legal pages (minimal, noindex) ----------
+mkdirSync(join(ROOT, 'site/legal'), { recursive: true });
+const ORG = 'Tweakeo, Inc.';
+const ADDRESS = 'Tweakeo, Inc., 2093 Philadelphia Pike, Suite #4108, Claymont, DE 19703';
+const legalPage = (slug, title, bodyHtml) => {
+  const main =
+    `<section class="page-hero"><div class="wrap">` +
+    `<nav class="crumbs"><a href="../">Home</a> / ${htmlEsc(title)}</nav>` +
+    `<h1>${htmlEsc(title)}</h1>` +
+    `</div></section>` +
+    `<main id="main"><div class="wrap prose legal">${bodyHtml}` +
+    `<p class="legal-org">${ADDRESS} · <a href="mailto:admin@tweakeo.com">admin@tweakeo.com</a></p>` +
+    `</div></main>`;
+  writeFileSync(
+    join(ROOT, `site/legal/${slug}.html`),
+    htmlPage({ title: `${title} · Free LLM API Hub`, desc: `${title} for Free LLM API Hub, operated by ${ORG}.`, canonical: `${SITE}/legal/${slug}.html`, main, noindex: true })
+  );
+};
+
+legalPage('privacy', 'Privacy', `
+<p>This site is a static, open-source reference operated by ${ORG}. It has no user accounts, no ads, and no third-party analytics or tracking.</p>
+<h2>What we store</h2>
+<ul>
+<li><strong>Nothing on a server.</strong> The site is served as static files by GitHub Pages; there is no backend and no cookies are set.</li>
+<li><strong>Your theme choice</strong> (light/dark) is saved only in your browser's local storage and never leaves your device.</li>
+<li><strong>The GitHub star count</strong> is fetched directly from GitHub's public API when a page loads; that request is governed by GitHub's own privacy policy.</li>
+</ul>
+<h2>Hosting</h2>
+<p>Pages, fonts and assets are delivered by GitHub Pages (GitHub, Inc.), which may process standard request metadata (such as your IP address) to serve content, per GitHub's privacy statement.</p>
+<h2>Contact</h2>
+<p>Questions about privacy? Email <a href="mailto:admin@tweakeo.com">admin@tweakeo.com</a>.</p>
+`);
+
+legalPage('terms', 'Terms of Use', `
+<p>The Free LLM API Hub dataset and website are provided by ${ORG} for informational purposes under the <a href="${REPO}/blob/main/LICENSE">MIT License</a>.</p>
+<h2>No warranty</h2>
+<p>The information is provided "as is", without warranty of any kind. Free-tier terms, limits and pricing change frequently and may be inaccurate or out of date. Always confirm details against each provider's own official documentation before relying on them.</p>
+<h2>No affiliation</h2>
+<p>This is an independent, community-maintained project. It is not affiliated with, endorsed by, or sponsored by any provider listed. All product names and trademarks are the property of their respective owners.</p>
+<h2>Liability</h2>
+<p>To the maximum extent permitted by law, ${ORG} and the project's contributors are not liable for any loss or damage arising from use of this site or dataset.</p>
+<h2>Contact</h2>
+<p>Email <a href="mailto:admin@tweakeo.com">admin@tweakeo.com</a>.</p>
+`);
 
 // ---------- sitemap.xml (site SEO) ----------
 const sitemapUrls = [
