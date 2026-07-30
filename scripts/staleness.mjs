@@ -33,6 +33,18 @@ for (const p of providers) {
 overdue.sort((a, b) => b.age - a.age);
 dueSoon.sort((a, b) => b.age - a.age);
 
+// Cliff watch: many entries sharing one verification date cross the 90-day SLA together.
+const CLIFF_MIN = 8;
+const byDate = {};
+for (const p of providers) if (p.verified && p.last_verified) byDate[p.last_verified] = (byDate[p.last_verified] || 0) + 1;
+let cliff = null;
+for (const [d, n] of Object.entries(byDate)) {
+  if (n < CLIFF_MIN) continue;
+  const crossIn = OVERDUE - ageDays(d); // days until this cluster crosses the SLA
+  const crossOn = new Date(new Date(d + 'T00:00:00Z').getTime() + OVERDUE * 86400000).toISOString().slice(0, 10);
+  if (!cliff || n > cliff.n) cliff = { d, n, crossIn, crossOn };
+}
+
 const line = ({ p, age }) =>
   `- [ ] **${p.name}** (\`${p.slug}\`) — last verified ${p.last_verified} (${age} days ago)` +
   (p.docs_url ? ` · [docs](${p.docs_url})` : '');
@@ -45,6 +57,10 @@ out.push(`_Generated from \`data/providers.json\`. Freshness SLA: every verified
 out.push('');
 out.push(`**Summary:** 🔴 ${overdue.length} overdue · 🟡 ${dueSoon.length} due soon · ⚠️ ${unverified.length} never verified · ✅ ${providers.length - overdue.length - dueSoon.length - unverified.length} fresh.`);
 out.push('');
+if (cliff && cliff.crossIn <= 45) {
+  out.push(`> ⛰️ **Cliff watch:** ${cliff.n} entries were all verified on ${cliff.d} and cross the ${OVERDUE}-day SLA together around **${cliff.crossOn}** (~${cliff.crossIn} days). Re-verify a few of them early each week to spread the load instead of taking the hit all at once.`);
+  out.push('');
+}
 
 out.push(`### 🔴 Overdue (>${OVERDUE} days) — ${overdue.length}`);
 out.push(overdue.length ? overdue.map(line).join('\n') : '_None — the list is within SLA._');
