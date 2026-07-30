@@ -1,0 +1,26 @@
+cff-version: 1.2.0
+title: "Free LLM API Hub — a continuously-verified dataset of free-tier and trial-credit LLM APIs"
+message: "If you use this dataset, please cite it and link back to the repository."
+type: dataset
+authors:
+  - alias: pacocartones
+    website: "https://github.com/pacocartones"
+repository-code: "https://github.com/pacocartones/free-llm-api-hub"
+url: "https://pacocartones.github.io/free-llm-api-hub/"
+abstract: >-
+  A curated, continuously-verified dataset of LLM API providers offering a free
+  tier, permanently-free models, or trial credits for developers. Every entry is
+  dated, sourced to the provider's own documentation, and machine-readable via a
+  JSON dataset validated against a published schema.
+keywords:
+  - free llm api
+  - llm api
+  - free tier
+  - trial credits
+  - ai api
+  - developer tools
+  - openai-compatible
+  - dataset
+license: MIT
+version: "2.0.0"
+date-released: "2026-07-30"

@@ -1,0 +1,116 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/pacocartones/free-llm-api-hub/blob/main/data/schema.json",
+  "title": "free-llm-api-hub dataset",
+  "description": "Schema for the canonical dataset of free-tier and trial-credit LLM API providers. README tables, the freshness badge, and the interactive site are all generated from this file.",
+  "type": "object",
+  "required": ["version", "generated", "providers"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "version": {
+      "type": "string",
+      "description": "Dataset schema version (semver).",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "generated": {
+      "type": "string",
+      "description": "Date the dataset was last built/serialised (YYYY-MM-DD).",
+      "format": "date"
+    },
+    "source": { "type": "string", "format": "uri" },
+    "note": { "type": "string" },
+    "providers": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/provider" }
+    }
+  },
+  "$defs": {
+    "tristate": {
+      "description": "true / false / null, where null means 'not yet confirmed'.",
+      "type": ["boolean", "null"]
+    },
+    "provider": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "slug", "name", "category", "free_type", "free_tier",
+        "docs_url", "verified"
+      ],
+      "properties": {
+        "slug": {
+          "type": "string",
+          "description": "Stable, unique, kebab-case identifier. Never reused or renamed.",
+          "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+        },
+        "name": { "type": "string", "minLength": 1 },
+        "category": {
+          "description": "Primary bucket used to split the README and the site.",
+          "type": "string",
+          "enum": ["ongoing", "trial"]
+        },
+        "free_type": {
+          "description": "Finer-grained shape of the free access.",
+          "type": "string",
+          "enum": ["perpetual", "renewing-quota", "recurring-credit", "trial-credit"]
+        },
+        "free_tier": {
+          "type": "string",
+          "description": "What you actually get for free, in concrete terms.",
+          "minLength": 1
+        },
+        "rate_limits": { "type": "string" },
+        "notes": {
+          "type": "string",
+          "description": "The catch: fine print a builder needs before relying on this."
+        },
+        "best_for": {
+          "type": ["string", "null"],
+          "description": "Editorial one-liner: when this is the right pick."
+        },
+        "modalities": {
+          "type": "array",
+          "description": "Modalities reachable on the free tier.",
+          "items": {
+            "type": "string",
+            "enum": ["text", "vision", "image", "audio", "embeddings", "rerank"]
+          },
+          "uniqueItems": true
+        },
+        "expires": {
+          "type": ["string", "null"],
+          "description": "Validity window for time-limited offers, e.g. '30 days'. null for perpetual/renewing tiers."
+        },
+        "docs_url": {
+          "type": "string",
+          "description": "Primary source: the provider's own pricing/rate-limit docs. Empty string only for flagged-unverified entries."
+        },
+        "phone_required": { "$ref": "#/$defs/tristate" },
+        "card_required": { "$ref": "#/$defs/tristate" },
+        "commercial_ok": { "$ref": "#/$defs/tristate" },
+        "openai_compatible": { "$ref": "#/$defs/tristate" },
+        "verified": {
+          "type": "boolean",
+          "description": "true = core facts independently confirmed against the provider's own docs on last_verified. false = sourced from community tracking, flagged for follow-up."
+        },
+        "last_verified": {
+          "type": ["string", "null"],
+          "description": "Date of the last independent confirmation (YYYY-MM-DD). Must be null when verified is false."
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "verified": { "const": true } } },
+          "then": {
+            "required": ["last_verified", "docs_url"],
+            "properties": {
+              "last_verified": { "type": "string", "format": "date" },
+              "docs_url": { "minLength": 1, "format": "uri" }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,50 +1,26 @@
 name: 🔧 Report an outdated or incorrect entry
-description: A provider's free tier, limits, or link changed and this list is behind.
+description: A provider's free tier, limits, or link changed and the dataset is behind.
 title: "[outdated] "
 labels: ["maintenance"]
 body:
-  - type: dropdown
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for keeping this accurate — that's the entire value of the project.
+        Please point to the provider's **own official docs**, not a third-party summary. See [CONTRIBUTING.md](../blob/main/CONTRIBUTING.md).
+  - type: input
     id: provider
     attributes:
-      label: Which provider entry is affected?
-      description: Pick the provider from the list, or choose "Other / not listed" if you're proposing a brand-new entry.
-      options:
-        - Google Gemini API (AI Studio)
-        - Groq
-        - OpenRouter
-        - Cloudflare Workers AI
-        - GitHub Models
-        - Cohere
-        - Cerebras
-        - Mistral (La Plateforme)
-        - HuggingFace
-        - Fireworks AI
-        - Baseten
-        - Nebius AI Studio
-        - Novita AI
-        - AI21 Labs
-        - Upstage
-        - NLP Cloud
-        - Alibaba Cloud (Model Studio)
-        - Modal
-        - Inference.net
-        - Hyperbolic
-        - SambaNova Cloud
-        - Scaleway Generative APIs
-        - NVIDIA NIM
-        - Vercel AI Gateway
-        - SiliconFlow
-        - Z.ai (Zhipu AI / GLM)
-        - IBM watsonx.ai (Lite plan)
-        - OVHcloud AI Endpoints
-        - Other / not listed
+      label: Which provider?
+      description: The provider name or its `slug` from data/providers.json (e.g. `groq`, `cloudflare-workers-ai`).
+      placeholder: "e.g. Groq"
     validations:
       required: true
   - type: textarea
     id: whats-wrong
     attributes:
       label: What's wrong with the current entry?
-      placeholder: e.g. "The free tier no longer exists" / "The rate limit is now 60 req/min, not 30" / "The docs link 404s"
+      placeholder: 'e.g. "The free tier no longer exists" / "Rate limit is now 60 req/min, not 30" / "The docs link 404s"'
     validations:
       required: true
   - type: textarea
@@ -58,15 +34,15 @@ body:
     id: source
     attributes:
       label: Link to the provider's own official docs confirming this
-      description: Please link the primary source, not a third-party summary — see CONTRIBUTING.md.
+      description: The primary source, not a third-party summary.
       placeholder: "https://..."
     validations:
       required: true
   - type: input
     id: checked-date
     attributes:
-      label: Date you checked this
-      description: "Format: YYYY-MM-DD — used to set the Last verified column."
-      placeholder: "2026-07-11"
+      label: Date you checked this (YYYY-MM-DD)
+      description: Used to set the entry's last_verified date.
+      placeholder: "2026-07-30"
     validations:
       required: true

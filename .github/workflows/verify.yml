@@ -1,0 +1,104 @@
+name: Verify
+
+on:
+  pull_request:
+    paths:
+      - 'data/**'
+      - 'scripts/**'
+      - 'README.md'
+      - '.github/workflows/verify.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'data/**'
+      - 'scripts/**'
+  schedule:
+    - cron: '0 6 * * 1' # every Monday 06:00 UTC — refresh badge + re-check links
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  # 1. Dataset integrity + generated files are in sync with the data.
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Validate dataset against integrity rules
+        run: node scripts/validate.mjs
+      - name: Assert README + exports are freshly generated from the data
+        run: |
+          node scripts/build.mjs
+          if ! git diff --quiet -- README.md data/providers.csv data/providers.yaml; then
+            echo "::error::Generated files are out of sync with data/providers.json."
+            echo "Run 'npm run build' locally and commit the result. Diff:"
+            git --no-pager diff -- README.md data/providers.csv data/providers.yaml
+            exit 1
+          fi
+
+  # 2. Re-check every source link; open/update a tracking issue on breakage.
+  links:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check every docs_url in the dataset
+        id: check
+        run: |
+          set -e
+          node -e "const d=require('./data/providers.json');for(const p of d.providers){if(p.docs_url)console.log(p.docs_url)}" | sort -u > /tmp/urls.txt
+          echo "Checking $(wc -l < /tmp/urls.txt) unique source URLs..."
+          : > /tmp/failed.txt
+          while IFS= read -r url; do
+            code=$(curl -s -o /dev/null -w "%{http_code}" -L --max-time 20 \
+              -A "Mozilla/5.0 (compatible; free-llm-api-hub-linkcheck/2.0)" "$url" || echo "000")
+            if [ "$code" -ge 400 ] || [ "$code" = "000" ]; then
+              echo "- $url (HTTP $code)" >> /tmp/failed.txt
+            fi
+          done < /tmp/urls.txt
+          if [ -s /tmp/failed.txt ]; then echo "failed=true" >> "$GITHUB_OUTPUT"; else echo "failed=false" >> "$GITHUB_OUTPUT"; fi
+      - name: Open or update tracking issue
+        if: steps.check.outputs.failed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          {
+            echo "The following source links in \`data/providers.json\` returned an error during the automated check on $(date -u +%Y-%m-%d):"
+            echo ""
+            cat /tmp/failed.txt
+            echo ""
+            echo "A broken link usually means the provider moved their docs or changed their terms. Please re-verify the affected entry, update its \`last_verified\` date (or set \`verified: false\`), and fix the link."
+          } > /tmp/body.txt
+          existing=$(gh issue list --search "Broken source link in:title" --state open --json number --jq '.[0].number // empty')
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --body-file /tmp/body.txt
+          else
+            gh issue create --title "🔗 Broken source link report" --body-file /tmp/body.txt --label "maintenance"
+          fi
+
+  # 3. Recompute the freshness badge from the data and commit it if it changed.
+  badge:
+    if: github.event_name == 'schedule' || github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Rebuild badge from the dataset
+        run: node scripts/build.mjs
+      - name: Commit badge if changed
+        run: |
+          if ! git diff --quiet -- badge-freshness.json; then
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add badge-freshness.json
+            git commit -m "chore: refresh freshness badge [skip ci]"
+            git push
+          else
+            echo "Badge unchanged."
+          fi

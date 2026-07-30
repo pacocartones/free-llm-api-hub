@@ -1,0 +1,46 @@
+name: ➕ Propose a new provider
+description: Suggest a free-tier or trial-credit LLM API that isn't tracked yet.
+title: "[new provider] "
+labels: ["new-provider"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Before proposing, please skim [docs/inclusion-criteria.md](../blob/main/docs/inclusion-criteria.md) — it explains what earns a spot and what gets rejected (consumer chat UIs, "free with a card on file", vaporware, etc.).
+  - type: input
+    id: name
+    attributes:
+      label: Provider name
+      placeholder: "e.g. Acme Inference"
+    validations:
+      required: true
+  - type: dropdown
+    id: category
+    attributes:
+      label: Which bucket does it fit?
+      options:
+        - Ongoing free tier (a quota that renews)
+        - One-time trial credit (a fixed balance, then pay-as-you-go)
+    validations:
+      required: true
+  - type: textarea
+    id: whats-free
+    attributes:
+      label: What exactly is free?
+      description: Concrete numbers — models, rate limits (req/min, tokens/day), credit amount, validity window.
+    validations:
+      required: true
+  - type: textarea
+    id: the-catch
+    attributes:
+      label: The catch
+      description: Phone/card required? Commercial use allowed? Data-training opt-in? Region-locked? OpenAI-compatible endpoint?
+    validations:
+      required: false
+  - type: input
+    id: source
+    attributes:
+      label: Link to the provider's own official pricing / rate-limit docs
+      placeholder: "https://..."
+    validations:
+      required: true

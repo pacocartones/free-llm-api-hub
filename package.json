@@ -1,0 +1,21 @@
+{
+  "name": "free-llm-api-hub",
+  "version": "2.0.0",
+  "private": true,
+  "description": "A continuously-verified dataset of free-tier and trial-credit LLM API providers for developers.",
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "validate": "node scripts/validate.mjs",
+    "test": "node scripts/validate.mjs",
+    "check": "node scripts/validate.mjs && node scripts/build.mjs && git diff --exit-code -- README.md data/providers.csv data/providers.yaml"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pacocartones/free-llm-api-hub"
+  }
+}

@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Free LLM API Hub — verified free LLM APIs & trial credits for developers</title>
+<meta name="description" content="A continuously-verified dataset of LLM API providers with a free tier or trial credits. Filter by no-card, no-phone, commercial-use, OpenAI-compatible. Dated, sourced, machine-readable.">
+<link rel="canonical" href="https://pacocartones.github.io/free-llm-api-hub/">
+<meta property="og:title" content="Free LLM API Hub">
+<meta property="og:description" content="A continuously-verified dataset of free LLM APIs and trial credits for developers.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://pacocartones.github.io/free-llm-api-hub/">
+<style>
+  :root {
+    --bg: #0b0e14; --panel: #12161f; --panel-2: #161b26; --border: #262c38;
+    --text: #e6edf3; --muted: #8b95a5; --faint: #5b6472;
+    --accent: #6ea8fe; --accent-ink: #04101f;
+    --green: #3fb950; --yellow: #d29922; --red: #f85149; --purple: #bc8cff;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Helvetica, Arial, sans-serif;
+    line-height: 1.55; -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--accent); }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 0 24px; }
+  .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+  .skip-link { position: absolute; left: 8px; top: -48px; background: var(--accent); color: var(--accent-ink); padding: 8px 14px; border-radius: 8px; font-weight: 600; text-decoration: none; transition: top .15s; z-index: 100; }
+  .skip-link:focus { top: 8px; }
+
+  /* hero */
+  header.hero { border-bottom: 1px solid var(--border); background: radial-gradient(1200px 400px at 50% -120px, rgba(110,168,254,.14), transparent 70%); }
+  .hero-inner { padding: 56px 0 40px; }
+  .eyebrow { color: var(--accent); font-weight: 600; font-size: .8rem; letter-spacing: .12em; text-transform: uppercase; margin: 0 0 14px; }
+  h1 { font-size: clamp(1.9rem, 4vw, 3rem); line-height: 1.1; margin: 0 0 16px; letter-spacing: -.02em; }
+  .lede { color: var(--muted); font-size: 1.12rem; max-width: 64ch; margin: 0 0 26px; }
+  .cta { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 34px; }
+  .btn { display: inline-flex; align-items: center; gap: 8px; padding: 11px 18px; border-radius: 10px; text-decoration: none; font-weight: 600; font-size: .95rem; border: 1px solid var(--border); }
+  .btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+  .btn.ghost { background: var(--panel); color: var(--text); }
+  .btn.ghost:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* stat tiles */
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  .stat { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px; }
+  .stat .num { font-size: 1.9rem; font-weight: 700; letter-spacing: -.02em; }
+  .stat .lbl { color: var(--muted); font-size: .82rem; margin-top: 2px; }
+  .stat.fresh .num { color: var(--green); }
+  @media (max-width: 720px) { .stats { grid-template-columns: repeat(2, 1fr); } }
+
+  /* trust strip */
+  .trust { border-bottom: 1px solid var(--border); background: var(--panel); }
+  .trust-inner { display: flex; flex-wrap: wrap; gap: 10px 26px; padding: 16px 0; color: var(--muted); font-size: .9rem; }
+  .trust-inner b { color: var(--text); }
+
+  /* controls */
+  .controls { position: sticky; top: 0; z-index: 20; background: rgba(11,14,20,.9); backdrop-filter: blur(8px); border-bottom: 1px solid var(--border); padding: 14px 0; }
+  .controls-inner { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+  input[type="search"] { background: var(--panel-2); border: 1px solid var(--border); color: var(--text); padding: 9px 13px; border-radius: 9px; font-size: .95rem; min-width: 220px; flex: 1 1 220px; }
+  .seg { display: flex; gap: 4px; background: var(--panel-2); border: 1px solid var(--border); border-radius: 10px; padding: 3px; }
+  .seg button { background: transparent; border: 0; color: var(--muted); padding: 6px 13px; border-radius: 7px; cursor: pointer; font-size: .86rem; font-weight: 500; }
+  .seg button.active { background: var(--accent); color: var(--accent-ink); font-weight: 600; }
+  .chips { display: flex; flex-wrap: wrap; gap: 7px; }
+  .chip { display: inline-flex; align-items: center; gap: 6px; background: var(--panel-2); border: 1px solid var(--border); color: var(--muted); padding: 6px 11px; border-radius: 999px; cursor: pointer; font-size: .82rem; user-select: none; }
+  .chip input { display: none; }
+  .chip.on { background: rgba(110,168,254,.16); border-color: var(--accent); color: var(--accent); }
+  .export { display: flex; gap: 6px; margin-left: auto; }
+  .export button { background: var(--panel-2); border: 1px solid var(--border); color: var(--text); padding: 6px 11px; border-radius: 8px; cursor: pointer; font-size: .82rem; }
+  .export button:hover { border-color: var(--accent); color: var(--accent); }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  /* table */
+  main { padding: 22px 0 70px; }
+  #count { color: var(--muted); font-size: .85rem; margin: 4px 0 14px; }
+  table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+  thead th { text-align: left; padding: 10px 12px; border-bottom: 2px solid var(--border); color: var(--muted); font-weight: 600; white-space: nowrap; cursor: pointer; position: sticky; top: 63px; background: var(--bg); }
+  thead th:hover { color: var(--text); }
+  thead th.sorted::after { content: " ▾"; color: var(--accent); }
+  thead th.sorted.asc::after { content: " ▴"; }
+  tbody td { padding: 13px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tbody tr:hover { background: var(--panel); }
+  .name a { color: var(--text); text-decoration: none; font-weight: 600; }
+  .name a:hover { color: var(--accent); text-decoration: underline; }
+  .best { color: var(--purple); font-size: .8rem; margin-top: 3px; }
+  .badge { display: inline-block; font-size: .72rem; padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
+  .b-ongoing { background: rgba(110,168,254,.14); color: var(--accent); border: 1px solid rgba(110,168,254,.35); }
+  .b-trial { background: rgba(139,148,158,.14); color: var(--muted); border: 1px solid rgba(139,148,158,.35); }
+  .b-ok { background: rgba(63,185,80,.14); color: var(--green); border: 1px solid rgba(63,185,80,.35); }
+  .b-warn { background: rgba(210,153,34,.14); color: var(--yellow); border: 1px solid rgba(210,153,34,.35); }
+  .flags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 7px; }
+  .flag { font-size: .72rem; color: var(--faint); }
+  .notes { color: var(--muted); font-size: .85rem; max-width: 44ch; }
+  .empty { text-align: center; color: var(--muted); padding: 48px 0; }
+  footer { border-top: 1px solid var(--border); color: var(--muted); font-size: .85rem; }
+  .foot-inner { padding: 26px 0 60px; }
+</style>
+</head>
+<body>
+<a class="skip-link" href="#explorer">Skip to the explorer</a>
+
+<header class="hero">
+  <div class="wrap hero-inner">
+    <p class="eyebrow">Open dataset · continuously verified</p>
+    <h1>Free LLM APIs you can actually build on.</h1>
+    <p class="lede">A continuously-verified dataset of LLM API providers with a free tier or trial credits — every entry dated, sourced, and machine-readable. Filter by no-card, no-phone, commercial-use or OpenAI-compatible. No hype, no dead links.</p>
+    <div class="cta">
+      <a class="btn primary" href="#explorer">Browse providers ↓</a>
+      <a class="btn ghost" href="https://github.com/pacocartones/free-llm-api-hub" target="_blank" rel="noopener">★ Star on GitHub</a>
+      <a class="btn ghost" href="providers.json">Get the dataset (JSON)</a>
+    </div>
+    <div class="stats" id="stats" aria-live="polite"></div>
+  </div>
+</header>
+
+<section class="trust">
+  <div class="wrap trust-inner">
+    <span><b>Every entry dated & sourced</b> to the provider's own docs</span>
+    <span><b>Links auto-checked weekly</b> — breakage opens an issue</span>
+    <span><b>Freshness measured, not claimed</b></span>
+    <span><b>⚠️ = unconfirmed</b>, flagged honestly</span>
+  </div>
+</section>
+
+<div class="controls">
+  <div class="wrap controls-inner" role="search">
+    <label class="sr-only" for="search">Search providers</label>
+    <input type="search" id="search" placeholder="Search providers, models, notes…" aria-label="Search providers by name, free tier, or notes">
+    <div class="seg" id="cat" role="group" aria-label="Filter by type">
+      <button data-cat="all" class="active" aria-pressed="true">All</button>
+      <button data-cat="ongoing" aria-pressed="false">Ongoing</button>
+      <button data-cat="trial" aria-pressed="false">Trial credit</button>
+    </div>
+    <div class="chips" id="chips">
+      <label class="chip"><input type="checkbox" id="f-nocard"> 💳 No card</label>
+      <label class="chip"><input type="checkbox" id="f-nophone"> 📵 No phone</label>
+      <label class="chip"><input type="checkbox" id="f-commercial"> 🏢 Commercial OK</label>
+      <label class="chip"><input type="checkbox" id="f-openai"> 🔌 OpenAI-compat</label>
+      <label class="chip"><input type="checkbox" id="f-verified"> ✅ Verified only</label>
+    </div>
+    <div class="export" role="group" aria-label="Export filtered providers">
+      <button type="button" id="exportCsv">Export CSV</button>
+      <button type="button" id="exportJson">Export JSON</button>
+    </div>
+  </div>
+</div>
+
+<main id="explorer">
+  <div class="wrap">
+    <div id="count" role="status" aria-live="polite"></div>
+    <table id="table">
+      <caption class="sr-only">Free-tier and trial-credit LLM API providers. Column headers are sortable buttons.</caption>
+      <thead>
+        <tr>
+          <th data-key="name" tabindex="0" role="button" aria-sort="ascending">Provider</th>
+          <th data-key="category" tabindex="0" role="button" aria-sort="none">Type</th>
+          <th data-key="free_tier" tabindex="0" role="button" aria-sort="none">What's free</th>
+          <th data-key="notes" tabindex="0" role="button" aria-sort="none">The catch</th>
+          <th data-key="verified" tabindex="0" role="button" aria-sort="none">Verified</th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+    <div class="empty" id="empty" style="display:none;" role="status"></div>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap foot-inner">
+    Independent, community-maintained — not affiliated with any provider listed. Data:
+    <a href="providers.json">providers.json</a> · <a href="providers.csv">CSV</a> · <a href="providers.yaml">YAML</a>.
+    Source, methodology & contribution guide on
+    <a href="https://github.com/pacocartones/free-llm-api-hub" target="_blank" rel="noopener">GitHub</a>.
+    Terms change without notice — always confirm against each provider's own docs.
+  </div>
+</footer>
+
+<script>
+let DATA = [], lastRows = [], sortKey = 'name', sortDir = 1, category = 'all';
+
+const FLAGS = [
+  ['card_required', false, '💳 no card'], ['card_required', true, '💳 card'],
+  ['phone_required', false, '📵 no phone'], ['phone_required', true, '📱 phone'],
+  ['commercial_ok', true, '🏢 commercial'], ['commercial_ok', false, '🔬 eval only'],
+  ['openai_compatible', true, '🔌 OpenAI-compat'],
+];
+function flagLine(p) {
+  return FLAGS.filter(([k, v]) => p[k] === v).map(([, , t]) => `<span class="flag">${t}</span>`).join('');
+}
+
+function render() {
+  const q = document.getElementById('search').value.trim().toLowerCase();
+  const nocard = document.getElementById('f-nocard').checked;
+  const nophone = document.getElementById('f-nophone').checked;
+  const commercial = document.getElementById('f-commercial').checked;
+  const openai = document.getElementById('f-openai').checked;
+  const verifiedOnly = document.getElementById('f-verified').checked;
+
+  let rows = DATA.filter(p => {
+    if (category !== 'all' && p.category !== category) return false;
+    if (q && !(p.name.toLowerCase().includes(q) || (p.free_tier||'').toLowerCase().includes(q) || (p.notes||'').toLowerCase().includes(q) || (p.rate_limits||'').toLowerCase().includes(q))) return false;
+    if (nocard && p.card_required !== false) return false;
+    if (nophone && p.phone_required !== false) return false;
+    if (commercial && p.commercial_ok !== true) return false;
+    if (openai && p.openai_compatible !== true) return false;
+    if (verifiedOnly && p.verified !== true) return false;
+    return true;
+  });
+
+  rows.sort((a, b) => {
+    let av = a[sortKey], bv = b[sortKey];
+    if (typeof av === 'boolean') { av = av ? 1 : 0; bv = bv ? 1 : 0; }
+    av = (av ?? ''); bv = (bv ?? '');
+    return av < bv ? -sortDir : av > bv ? sortDir : 0;
+  });
+
+  lastRows = rows;
+  const tbody = document.getElementById('tbody');
+  tbody.innerHTML = '';
+  const emptyEl = document.getElementById('empty');
+  emptyEl.style.display = rows.length ? 'none' : 'block';
+  emptyEl.textContent = rows.length ? '' : 'No providers match these filters.';
+  document.getElementById('count').textContent = `${rows.length} of ${DATA.length} providers`;
+
+  for (const p of rows) {
+    const nameCell = p.docs_url ? `<a href="${p.docs_url}" target="_blank" rel="noopener">${p.name}</a>` : `<span>${p.name}</span>`;
+    const best = p.best_for ? `<div class="best">${p.best_for}</div>` : '';
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="name">${nameCell}${best}<div class="flags">${flagLine(p)}</div></td>
+      <td><span class="badge ${p.category === 'ongoing' ? 'b-ongoing' : 'b-trial'}">${p.category === 'ongoing' ? 'Ongoing' : 'Trial'}</span></td>
+      <td>${p.free_tier || ''}</td>
+      <td class="notes">${p.notes || ''}</td>
+      <td>${p.verified ? `<span class="badge b-ok">✅ ${p.last_verified}</span>` : '<span class="badge b-warn">⚠️ unverified</span>'}</td>`;
+    tbody.appendChild(tr);
+  }
+}
+
+function renderStats() {
+  const total = DATA.length;
+  const ongoing = DATA.filter(p => p.category === 'ongoing').length;
+  const trial = DATA.filter(p => p.category === 'trial').length;
+  const now = Date.now();
+  const fresh = DATA.filter(p => p.verified && p.last_verified && (now - Date.parse(p.last_verified + 'T00:00:00Z')) / 86400000 <= 90).length;
+  const tiles = [
+    [total, 'providers tracked', ''],
+    [ongoing, 'ongoing free tiers', ''],
+    [trial, 'trial credits', ''],
+    [`${fresh}/${total}`, 'verified in last 90 days', 'fresh'],
+  ];
+  document.getElementById('stats').innerHTML = tiles.map(([n, l, c]) =>
+    `<div class="stat ${c}"><div class="num">${n}</div><div class="lbl">${l}</div></div>`).join('');
+}
+
+function applySort(th) {
+  const key = th.dataset.key;
+  if (sortKey === key) sortDir *= -1; else { sortKey = key; sortDir = 1; }
+  document.querySelectorAll('thead th').forEach(h => { h.classList.remove('sorted', 'asc'); h.setAttribute('aria-sort', 'none'); });
+  th.classList.add('sorted'); if (sortDir === 1) th.classList.add('asc');
+  th.setAttribute('aria-sort', sortDir === 1 ? 'ascending' : 'descending');
+  render();
+}
+
+document.querySelectorAll('#cat button').forEach(btn => btn.addEventListener('click', () => {
+  document.querySelectorAll('#cat button').forEach(b => { b.classList.remove('active'); b.setAttribute('aria-pressed', 'false'); });
+  btn.classList.add('active'); btn.setAttribute('aria-pressed', 'true');
+  category = btn.dataset.cat; render();
+}));
+document.querySelectorAll('thead th[data-key]').forEach(th => {
+  th.addEventListener('click', () => applySort(th));
+  th.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); applySort(th); } });
+});
+['search', 'f-nocard', 'f-nophone', 'f-commercial', 'f-openai', 'f-verified'].forEach(id =>
+  document.getElementById(id).addEventListener('input', e => {
+    const chip = e.target.closest('.chip'); if (chip) chip.classList.toggle('on', e.target.checked);
+    render();
+  }));
+
+function download(name, text, mime) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([text], { type: mime }));
+  a.download = name; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(a.href);
+}
+document.getElementById('exportJson').addEventListener('click', () =>
+  download('free-llm-apis.json', JSON.stringify(lastRows, null, 2), 'application/json'));
+document.getElementById('exportCsv').addEventListener('click', () => {
+  const cols = ['name','category','free_type','free_tier','notes','docs_url','phone_required','card_required','commercial_ok','openai_compatible','verified','last_verified'];
+  const esc = v => { v = v == null ? '' : String(v); return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; };
+  const csv = [cols.join(','), ...lastRows.map(p => cols.map(c => esc(p[c])).join(','))].join('\n');
+  download('free-llm-apis.csv', csv, 'text/csv');
+});
+
+// Load the dataset shipped alongside this page; fall back to the raw repo copy for local dev.
+const SOURCES = ['providers.json', 'https://raw.githubusercontent.com/pacocartones/free-llm-api-hub/main/data/providers.json'];
+(async () => {
+  for (const url of SOURCES) {
+    try {
+      const r = await fetch(url); if (!r.ok) continue;
+      DATA = (await r.json()).providers;
+      renderStats(); render(); return;
+    } catch (_) { /* try next */ }
+  }
+  document.getElementById('empty').style.display = 'block';
+  document.getElementById('empty').textContent = 'Could not load providers.json.';
+})();
+</script>
+</body>
+</html>
