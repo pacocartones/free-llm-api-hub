@@ -56,9 +56,12 @@ jobs:
           while IFS= read -r url; do
             code=$(curl -s -o /dev/null -w "%{http_code}" -L --max-time 20 \
               -A "Mozilla/5.0 (compatible; free-llm-api-hub-linkcheck/2.0)" "$url" || echo "000")
-            if [ "$code" -ge 400 ] || [ "$code" = "000" ]; then
-              echo "- $url (HTTP $code)" >> /tmp/failed.txt
-            fi
+            # 401/403/405/429 mean the server is alive but refusing our bot/method/rate — not a broken link.
+            case "$code" in
+              401|403|405|429) echo "OK (alive, bot-blocked $code): $url" ;;
+              000|4*|5*) echo "- $url (HTTP $code)" >> /tmp/failed.txt ;;
+              *) : ;;
+            esac
           done < /tmp/urls.txt
           if [ -s /tmp/failed.txt ]; then echo "failed=true" >> "$GITHUB_OUTPUT"; else echo "failed=false" >> "$GITHUB_OUTPUT"; fi
       - name: Open or update tracking issue

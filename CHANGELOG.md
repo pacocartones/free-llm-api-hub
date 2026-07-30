@@ -5,6 +5,16 @@ Notable changes to the dataset and the project. Format based on [Keep a Changelo
 - **Data changes** (a provider's limits/terms) are recorded here when notable; every change is also visible in the git history of `data/providers.json`.
 - **Schema changes** (a new field, a changed meaning) bump the dataset version and are always recorded.
 
+## [2.0.1] — 2026-07-30
+
+### Data
+- Re-verified against official docs. **Vercel AI Gateway** is now confirmed (a free tier with a monthly credit; the "$5/month" figure circulating in community posts is *not* in Vercel's own docs, so it's stated honestly instead). 25/28 entries now verified.
+- **Upstage** and **Inference.net** corrected: the trial credits previously attributed to them couldn't be found on the providers' current pricing pages. Both remain flagged ⚠️ with exactly what was found instead.
+- **Hyperbolic** remains ⚠️ — pricing not confirmable on public pages.
+
+### Changed
+- Link-checker no longer flags `401/403/405/429` as broken — those mean the server is alive but refusing the bot (fixes a recurring NLP Cloud false positive).
+
 ## [2.0.0] — 2026-07-30
 
 Ground-up redesign into a data-first, continuously-verified open dataset.

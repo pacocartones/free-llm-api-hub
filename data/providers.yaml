@@ -310,13 +310,13 @@ providers:
     name: "Upstage"
     category: "trial"
     free_type: "trial-credit"
-    free_tier: "$10 trial credit, ~3 months"
+    free_tier: "Unconfirmed: current pricing page shows only 10 free document-agent runs (no card); no Solar LLM API trial credit is listed"
     rate_limits: "Solar Pro / Solar Mini"
-    notes: "$10 credit confirmed via the official pricing page; the \"3 months\" validity window could not be confirmed in accessible official sources (console is robots.txt-blocked) — flagged for re-verification"
+    notes: "A previously-listed \"$10 / 3 months\" Solar API trial credit could not be found on the current official pricing page (re-checked 2026-07-30), which advertises only \"10 free runs\" for document agents. Flagged for correction or removal."
     best_for: null
     modalities: ["text"]
-    expires: "3 months"
-    docs_url: ""
+    expires: null
+    docs_url: "https://www.upstage.ai/pricing"
     phone_required: null
     card_required: null
     commercial_ok: null
@@ -378,13 +378,13 @@ providers:
     name: "Inference.net"
     category: "trial"
     free_type: "trial-credit"
-    free_tier: "$1 (up to $25 after completing a survey)"
-    rate_limits: "30 req/min mentioned in the pricing table"
-    notes: "Could not verify the \"$1, up to $25 after a survey\" credit mechanism against docs.inference.net, pricing, or registration pages. A separate \"Grants Program\" exists (up to $10,000 in compute for open-source projects) but is a different offer — flagged for re-verification"
+    free_tier: "Free pay-as-you-go tier listed (1M gateway requests, 30 req/min); a model-inference credit is unconfirmed"
+    rate_limits: "30 req/min on the free tier (per the current pricing page)"
+    notes: "The current pricing page (re-checked 2026-07-30) shows a free tier with 1M gateway requests and 30 req/min, but no confirmable \"$1, up to $25 after a survey\" inference credit. A separate open-source Grants Program (up to $10,000 in compute) exists but is a different offer — flagged for re-verification."
     best_for: null
     modalities: ["text"]
     expires: null
-    docs_url: ""
+    docs_url: "https://inference.net/pricing"
     phone_required: null
     card_required: null
     commercial_ok: null
@@ -463,16 +463,16 @@ providers:
     name: "Vercel AI Gateway"
     category: "trial"
     free_type: "recurring-credit"
-    free_tier: "$5/month allocation (unconfirmed)"
-    rate_limits: "Routes to multiple supported providers rather than being a model host itself"
-    notes: "The \"$5/month\" figure doesn't appear in official reference docs, only in the community forum. Free tier confirmed but covers \"a subset of models\" with reduced limits; moving to a paid tier means \"the monthly free credit no longer applies\" — suggests a one-time benefit, not a recurring monthly one. Flagged for re-verification"
+    free_tier: "Free tier with a monthly free credit covering a subset of models at lower rate limits"
+    rate_limits: "Free tier is rate-limited per model (HTTP 429 on exceed), lower than paid; routes to many providers rather than hosting models itself"
+    notes: "Free tier and its monthly-credit behaviour are confirmed in Vercel's own docs; the specific \"$5/month\" figure circulating in community posts is not stated there. Once you purchase credits, your account moves to the paid tier and the monthly free credit no longer applies."
     best_for: null
     modalities: ["text"]
     expires: null
-    docs_url: ""
+    docs_url: "https://vercel.com/docs/ai-gateway/pricing"
     phone_required: null
     card_required: false
     commercial_ok: null
     openai_compatible: true
-    verified: false
-    last_verified: null
+    verified: true
+    last_verified: "2026-07-30"
