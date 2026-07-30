@@ -1,23 +1,24 @@
 name: Verify
 
+# Fast integrity gate on every change. Scheduled upkeep (badge refresh, weekly
+# link re-check, re-verification worklist) lives in maintenance.yml.
 on:
   pull_request:
     paths:
       - 'data/**'
       - 'scripts/**'
       - 'README.md'
+      - 'collections/**'
       - '.github/workflows/verify.yml'
   push:
     branches: [main]
     paths:
       - 'data/**'
       - 'scripts/**'
-  schedule:
-    - cron: '0 6 * * 1' # every Monday 06:00 UTC — refresh badge + re-check links
   workflow_dispatch: {}
 
 permissions:
-  contents: write
+  contents: read
   issues: write
 
 jobs:
@@ -81,27 +82,4 @@ jobs:
             gh issue comment "$existing" --body-file /tmp/body.txt
           else
             gh issue create --title "🔗 Broken source link report" --body-file /tmp/body.txt --label "maintenance"
-          fi
-
-  # 3. Recompute the freshness badge from the data and commit it if it changed.
-  badge:
-    if: github.event_name == 'schedule' || github.event_name == 'push' || github.event_name == 'workflow_dispatch'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-      - name: Rebuild badge from the dataset
-        run: node scripts/build.mjs
-      - name: Commit badge if changed
-        run: |
-          if ! git diff --quiet -- badge-freshness.json; then
-            git config user.name "github-actions[bot]"
-            git config user.email "github-actions[bot]@users.noreply.github.com"
-            git add badge-freshness.json
-            git commit -m "chore: refresh freshness badge [skip ci]"
-            git push
-          else
-            echo "Badge unchanged."
           fi

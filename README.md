@@ -187,6 +187,7 @@ Full guidelines, including what counts as an acceptable source: **[CONTRIBUTING.
 | Doc | What it covers |
 |---|---|
 | [Methodology](docs/methodology.md) | How each entry is verified; what "verified" does and doesn't mean |
+| [Update playbook](docs/update-playbook.md) | The weekly routine that keeps the badge green |
 | [Inclusion criteria](docs/inclusion-criteria.md) | What earns a spot — and what gets rejected |
 | [Comparison dimensions](docs/comparison-dimensions.md) | Every field and flag in the dataset, defined |
 | [Roadmap](docs/roadmap.md) | Where this is going next |

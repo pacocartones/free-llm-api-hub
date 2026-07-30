@@ -1,0 +1,84 @@
+name: Weekly maintenance
+
+# The routine upkeep ritual. Runs Mondays 08:00 UTC — ~10:00 Europe/Madrid in summer
+# (CEST), ~09:00 in winter (CET), since GitHub cron does not observe DST.
+# Backbone is automated here; the human steps live in docs/update-playbook.md.
+on:
+  schedule:
+    - cron: '0 8 * * 1'
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # 1. Re-check every source link; open/update a tracking issue on breakage.
+      - name: Check source links
+        id: links
+        run: |
+          set -e
+          node -e "const d=require('./data/providers.json');for(const p of d.providers){if(p.docs_url)console.log(p.docs_url)}" | sort -u > /tmp/urls.txt
+          : > /tmp/failed.txt
+          while IFS= read -r url; do
+            code=$(curl -s -o /dev/null -w "%{http_code}" -L --max-time 20 \
+              -A "Mozilla/5.0 (compatible; free-llm-api-hub-linkcheck/2.0)" "$url" || echo "000")
+            case "$code" in
+              401|403|405|429) : ;;                                   # alive but bot-blocked
+              000|4*|5*) echo "- $url (HTTP $code)" >> /tmp/failed.txt ;;
+              *) : ;;
+            esac
+          done < /tmp/urls.txt
+          if [ -s /tmp/failed.txt ]; then echo "failed=true" >> "$GITHUB_OUTPUT"; else echo "failed=false" >> "$GITHUB_OUTPUT"; fi
+      - name: Report broken links
+        if: steps.links.outputs.failed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          {
+            echo "These source links returned an error during the weekly check on $(date -u +%Y-%m-%d):"; echo
+            cat /tmp/failed.txt; echo
+            echo "Re-verify the affected entry, update its \`last_verified\` (or set \`verified: false\`), and fix the link."
+          } > /tmp/links.txt
+          existing=$(gh issue list --search "Broken source link in:title" --state open --json number --jq '.[0].number // empty')
+          if [ -n "$existing" ]; then gh issue comment "$existing" --body-file /tmp/links.txt;
+          else gh issue create --title "🔗 Broken source link report" --body-file /tmp/links.txt --label maintenance; fi
+
+      # 2. Recompute the freshness badge from the data and commit it if it changed.
+      - name: Refresh badge
+        run: node scripts/build.mjs
+      - name: Commit badge if changed
+        run: |
+          if ! git diff --quiet -- badge-freshness.json; then
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add badge-freshness.json
+            git commit -m "chore: refresh freshness badge [skip ci]"
+            git push
+          else
+            echo "Badge unchanged."
+          fi
+
+      # 3. Publish the re-verification worklist as a single, self-updating issue.
+      - name: Build re-verification worklist
+        run: node scripts/staleness.mjs > /tmp/stale.md
+      - name: Open or update the weekly worklist issue
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          title="🕝 Weekly re-verification worklist"
+          existing=$(gh issue list --search "$title in:title" --state open --json number --jq '.[0].number // empty')
+          if [ -n "$existing" ]; then
+            gh issue edit "$existing" --body-file /tmp/stale.md
+            gh issue comment "$existing" --body "Refreshed on $(date -u +%Y-%m-%d). See the updated checklist above."
+          else
+            gh issue create --title "$title" --body-file /tmp/stale.md --label maintenance
+          fi
