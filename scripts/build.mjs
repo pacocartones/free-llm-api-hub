@@ -355,6 +355,39 @@ readme = inject(readme, 'ongoing', ongoingTable(ongoing));
 readme = inject(readme, 'trial', trialTable(trial));
 writeFileSync(join(ROOT, 'README.md'), readme);
 
+// ---------- server-render the homepage explorer (SEO + no-JS + instant paint) ----------
+const explorerFlagPairs = [
+  ['card_required', false, 'ic-nocard', 'no card'], ['card_required', true, 'ic-card', 'card'],
+  ['phone_required', false, 'ic-nophone', 'no phone'], ['phone_required', true, 'ic-phone', 'phone'],
+  ['commercial_ok', true, 'ic-building', 'commercial'], ['commercial_ok', false, 'ic-flask', 'eval only'],
+  ['openai_compatible', true, 'ic-code', 'OpenAI-compat'],
+];
+const explorerRowsHtml = (rows) => rows.map((p) => {
+  const name = `<a href="p/${p.slug}.html">${htmlEsc(p.name)}</a>`;
+  const best = p.best_for ? `<div class="best">${htmlEsc(p.best_for)}</div>` : '';
+  const mods = (p.modalities || []).length ? `<div class="mods">${p.modalities.map((m) => `<span>${htmlEsc(m)}</span>`).join('')}</div>` : '';
+  const baseurl = p.openai_base_url ? `<div class="baseurl" title="OpenAI-compatible base URL — click to copy" tabindex="0" role="button" data-copy="${htmlEsc(p.openai_base_url)}"><code>${htmlEsc(p.openai_base_url)}</code></div>` : '';
+  const actions = [
+    p.docs_url ? `<a class="docs-link" href="${htmlEsc(p.docs_url)}" target="_blank" rel="noopener">docs ↗</a>` : '',
+    p.openai_base_url ? `<button type="button" class="copy-btn" data-snippet="${htmlEsc(p.openai_base_url)}">Copy OpenAI snippet</button>` : '',
+  ].filter(Boolean).join('');
+  const flags = explorerFlagPairs.filter(([k, v]) => p[k] === v).map(([, , ic, t]) => `<span class="flag">${IC(ic)}${t}</span>`).join('');
+  const v = p.verified ? `<span class="badge b-ok">${IC('ic-check')} ${htmlEsc(p.last_verified)}</span>` : `<span class="badge b-warn">${IC('ic-warn')} unverified</span>`;
+  return `<tr>` +
+    `<td class="name" data-label="Provider">${name}${best}${baseurl}<div class="flags">${flags}</div>${mods}${actions ? `<div class="row-actions">${actions}</div>` : ''}</td>` +
+    `<td data-label="Type"><span class="badge ${p.category === 'ongoing' ? 'b-ongoing' : 'b-trial'}">${p.category === 'ongoing' ? 'Ongoing' : 'Trial'}</span></td>` +
+    `<td data-label="What's free">${htmlEsc(p.free_tier)}</td>` +
+    `<td class="notes" data-label="The catch">${htmlEsc(p.notes || '')}</td>` +
+    `<td data-label="Verified">${v}</td></tr>`;
+}).join('\n');
+
+const homeRows = explorerRowsHtml([...providers].sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0)));
+const inlineData = `<script type="application/json" id="providers-data">${JSON.stringify({ providers }).replace(/</g, '\\u003c')}</script>`;
+let indexHtml = readFileSync(join(ROOT, 'site/index.html'), 'utf8');
+indexHtml = inject(indexHtml, 'rows', homeRows);
+indexHtml = inject(indexHtml, 'data', inlineData);
+writeFileSync(join(ROOT, 'site/index.html'), indexHtml);
+
 // ---------- badge ----------
 const ratio = total ? freshCount / total : 0;
 const color = ratio >= 0.7 ? 'brightgreen' : ratio >= 0.4 ? 'yellow' : 'red';
