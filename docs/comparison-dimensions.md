@@ -33,6 +33,7 @@ Filters treat `null` conservatively: "No card required" matches only `card_requi
 | `card_required` | tri-state | Is a payment method required to use the free access? |
 | `commercial_ok` | tri-state | Is production/commercial use permitted on the free tier? |
 | `openai_compatible` | tri-state | Does it expose an OpenAI-compatible endpoint (drop-in `base_url`)? |
+| `openai_base_url` | string \| null | The OpenAI-compatible base URL to pass to the SDK, when confirmed against official docs. Placeholders like `{account_id}` mark per-account path segments. `null` until backfilled. |
 | `verified` | boolean | Core facts independently confirmed against the provider's docs on `last_verified`. |
 | `last_verified` | string \| null | Date (YYYY-MM-DD) of the last confirmation. `null` iff `verified: false`. |
 

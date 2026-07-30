@@ -5,6 +5,24 @@ Notable changes to the dataset and the project. Format based on [Keep a Changelo
 - **Data changes** (a provider's limits/terms) are recorded here when notable; every change is also visible in the git history of `data/providers.json`.
 - **Schema changes** (a new field, a changed meaning) bump the dataset version and are always recorded.
 
+## [2.1.0] — 2026-07-30
+
+Dataset schema minor bump (added `openai_base_url`), a verification sweep, and broader adjacent coverage.
+
+### Added
+- **`openai_base_url`** field — the drop-in OpenAI-compatible base URL, confirmed against official docs for **18** providers (via a parallel research + spot-check pass).
+- **Runnable quickstart** on the OpenAI-compatible collection (Python + curl, using a real base URL and free model), plus an "OpenAI base URL" column on that page.
+- **Six new verified providers**, broadening adjacent coverage: **Jina AI** and **Mixedbread** (embeddings/rerank), **Deepgram** ($200, speech) and **AssemblyAI** ($50, speech + OpenAI-compatible LLM gateway), **Clarifai**, and **Arli AI**.
+- SEO: generated **`sitemap.xml`**, a static **`robots.txt`**, and **JSON-LD `Dataset`** structured data on the site.
+- Interactive explorer now shows each provider's **modalities** and a **click-to-copy OpenAI base URL**; search matches base URLs and modalities.
+- Validator enforces `openai_base_url` shape and that it's only set when `openai_compatible` isn't `false`.
+
+### Removed
+- **Upstage**, **Inference.net**, **Hyperbolic** — a deep re-verification confirmed none offer genuinely free *API* access (Solar API is pay-as-you-go; Inference.net's free tier is gateway-only, not model tokens; Hyperbolic requires a $5 minimum deposit). Removing them makes the list **100% verified** — trust over coverage.
+
+### Changed
+- TL;DR decision table gains embeddings, rerank and speech rows; the "biggest credit" row now reflects Deepgram's $200.
+
 ## [2.0.1] — 2026-07-30
 
 ### Added

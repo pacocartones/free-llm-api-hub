@@ -8,7 +8,7 @@ LLM APIs you can start calling without entering a payment method — filtered li
 
 Every provider below offers free API access with **no card required** to get started (`card_required: false`, confirmed against their own docs). Rows where the requirement is unknown are excluded rather than assumed.
 
-**10 of 28 tracked providers** match.
+**15 of 31 tracked providers** match.
 
 | Provider | Type | What's free | The catch | Verified |
 |---|---|---|---|---|
@@ -22,6 +22,11 @@ Every provider below offers free API access with **no card required** to get sta
 | **[AI21 Labs](https://docs.ai21.com/docs/usage-cost)**<br><sub>💳 no card</sub> | Trial | $10 trial credit, valid 3 months | Card not required for the trial credit itself, required once it expires | ✅ 2026-07-11 |
 | **[SambaNova Cloud](https://cloud.sambanova.ai/plans)**<br><sub>💳 no card · 🔌 OpenAI-compat</sub> | Trial | $5 trial credit, 3 months, plus a rate-limited free tier | Confirmed models: DeepSeek, Llama-3.3-70B, Gemma-3-31B, gpt-oss-120b | ✅ 2026-07-11 |
 | **[Vercel AI Gateway](https://vercel.com/docs/ai-gateway/pricing)**<br><sub>💳 no card · 🔌 OpenAI-compat</sub> | Trial | Free tier with a monthly free credit covering a subset of models at lower rate limits | Free tier and its monthly-credit behaviour are confirmed in Vercel's own docs; the specific "$5/month" figure circulating in community posts is not stated there. Once you purchase credits, your account moves to the paid tier and the monthly free credit no longer applies. | ✅ 2026-07-30 |
+| **[Jina AI](https://jina.ai/embeddings/)**<br><sub>💳 no card · 📵 no phone · 🏢 commercial OK · 🔌 OpenAI-compat</sub> | Trial | 10M free tokens (one-time) across all models — embeddings (v3/v4), rerankers, classifier; plus a keyless Reader (r.jina.ai) for basic use | The 10M-token balance is a one-time grant that does not replenish; the keyless Reader is genuinely ongoing. Hosted API is commercial-OK and data is not used for training. No card required. | ✅ 2026-07-30 |
+| **[Deepgram](https://deepgram.com/pricing)**<br><sub>💳 no card · 📵 no phone · 🏢 commercial OK</sub> | Trial | $200 free credit on signup (no card, no expiration) — Nova speech-to-text and Aura text-to-speech at pay-as-you-go rates | No card and no expiration on the credit. Data catch: the Model Improvement Program is opt-OUT — send mip_opt_out=true per request to keep your data out of training. Native REST/WebSocket API, not OpenAI-compatible. | ✅ 2026-07-30 |
+| **[AssemblyAI](https://www.assemblyai.com/pricing)**<br><sub>💳 no card · 📵 no phone · 🏢 commercial OK · 🔌 OpenAI-compat</sub> | Trial | $50 free credit on signup (no card) — pre-recorded & streaming speech-to-text, Speech Understanding, and an OpenAI-compatible LLM Gateway (25+ models) | One-time credit, not renewing. Catch: the default model differs between free and paid accounts — set speech_models explicitly to avoid cost jumps on upgrade. Only the LLM Gateway is OpenAI-compatible. | ✅ 2026-07-30 |
+| **[Mixedbread](https://www.mixedbread.com/pricing)**<br><sub>💳 no card · 📵 no phone · 🏢 commercial OK</sub> | Trial | Starter plan: $5 one-time credit (no card) — embeddings (mxbai-embed-large-v1), reranking, and multimodal search over PDF/image/doc/code | Free credit is usage-based and non-renewing; usage-based pricing applies afterward. Native REST API, not documented as OpenAI-compatible. No card required. | ✅ 2026-07-30 |
+| **[Clarifai](https://docs.clarifai.com/control/account-billing/)**<br><sub>💳 no card · 📱 phone · 🔌 OpenAI-compat</sub> | Trial | One-time $5 credit across serverless models (GPT-OSS-120B, Claude, Llama), vision, embeddings and image generation | Catch: SMS phone verification is required to claim the $5. Credit is one-time and expires 30 days after grant; a card is required to recharge afterward. | ✅ 2026-07-30 |
 
 ---
 

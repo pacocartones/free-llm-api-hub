@@ -52,6 +52,12 @@ for (const p of data.providers ?? []) {
   if (Array.isArray(p.modalities))
     for (const m of p.modalities) check(MODALITIES.includes(m), `${id}: unknown modality "${m}"`);
 
+  // openai_base_url: null, or an http(s) URL; and it only makes sense when the API is OpenAI-compatible.
+  if (p.openai_base_url !== undefined && p.openai_base_url !== null) {
+    check(typeof p.openai_base_url === 'string' && URL_RE.test(p.openai_base_url), `${id}: openai_base_url must be an http(s) URL or null`);
+    check(p.openai_compatible !== false, `${id}: openai_base_url is set but openai_compatible is false`);
+  }
+
   // Integrity core: a verified entry must carry a dated, real source link.
   if (p.verified) {
     check(DATE_RE.test(p.last_verified || ''), `${id}: verified entry needs a YYYY-MM-DD last_verified`);

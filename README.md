@@ -16,7 +16,7 @@ No hype, no dead links, no "generous limits" hand-waving. Just what's actually f
 **[🔎 Interactive explorer](https://pacocartones.github.io/free-llm-api-hub/)** &nbsp;·&nbsp; **[📊 Dataset](data/providers.json)** &nbsp;·&nbsp; **[🧪 How we verify](docs/methodology.md)** &nbsp;·&nbsp; **[➕ Add a provider](CONTRIBUTING.md)**
 
 <!-- AUTOGEN:stats:start -->
-**28 providers** tracked · 13 ongoing free tiers · 15 trial credits · **25/28** independently verified against the provider's own docs
+**31 providers** tracked · 14 ongoing free tiers · 17 trial credits · **31/31** independently verified against the provider's own docs
 <!-- AUTOGEN:stats:end -->
 
 </div>
@@ -54,7 +54,9 @@ Each pick links to the full row, where the real limits and catches live.
 | **Permanently free, no trial clock** | [Z.ai (GLM)](#ongoing-free-tiers) or [SiliconFlow](#ongoing-free-tiers) | Several models priced at $0 indefinitely, not just for a trial window |
 | **An OpenAI-compatible endpoint** | [Groq](#ongoing-free-tiers), [Cerebras](#ongoing-free-tiers), [OpenRouter](#ongoing-free-tiers) | Point the OpenAI SDK at a new `base_url` and you're done |
 | **EU / data-sovereignty hosting** | [OVHcloud](#ongoing-free-tiers) or [Scaleway](#one-time-trial-credits) | French/EU providers; OVHcloud even has an anonymous, no-account tier |
-| **A bigger one-time credit** | [Baseten](#one-time-trial-credits) ($30) | Largest trial credit in the list |
+| **Free embeddings & rerank** | [Jina AI](#one-time-trial-credits) or [Cohere](#ongoing-free-tiers) | 10M free tokens (Jina, OpenAI-compatible) or 1,000 calls/mo (Cohere) |
+| **Free speech-to-text / TTS** | [Deepgram](#one-time-trial-credits) or [AssemblyAI](#one-time-trial-credits) | $200 / $50 in no-card credit for Whisper-class STT and TTS |
+| **A bigger one-time credit** | [Deepgram](#one-time-trial-credits) ($200, speech) or [Baseten](#one-time-trial-credits) ($30, LLMs) | Largest credits in the list |
 | **Something safe to ship commercially** | [Cloudflare Workers AI](#ongoing-free-tiers) or [Groq](#ongoing-free-tiers) | Don't restrict the free tier to personal/eval use, the way Cohere and NVIDIA do |
 
 Starting points, not guarantees — read the full row before you build on it.
@@ -64,12 +66,12 @@ Starting points, not guarantees — read the full row before you build on it.
 Focused, always-current collections — each is generated from the dataset and has a live web page too.
 
 <!-- AUTOGEN:collections:start -->
-- **[Free LLM APIs with no credit card](collections/no-credit-card.md)** (10) — start without a payment method · [live page ↗](https://pacocartones.github.io/free-llm-api-hub/collections/no-credit-card.html)
-- **[Free LLM APIs with no phone verification](collections/no-phone.md)** (7) — no SMS/phone verification · [live page ↗](https://pacocartones.github.io/free-llm-api-hub/collections/no-phone.html)
-- **[Free LLM APIs for commercial use](collections/commercial-use.md)** (5) — safe to ship, not eval-only · [live page ↗](https://pacocartones.github.io/free-llm-api-hub/collections/commercial-use.html)
-- **[OpenAI-compatible free LLM APIs](collections/openai-compatible.md)** (19) — drop-in OpenAI SDK swap · [live page ↗](https://pacocartones.github.io/free-llm-api-hub/collections/openai-compatible.html)
+- **[Free LLM APIs with no credit card](collections/no-credit-card.md)** (15) — start without a payment method · [live page ↗](https://pacocartones.github.io/free-llm-api-hub/collections/no-credit-card.html)
+- **[Free LLM APIs with no phone verification](collections/no-phone.md)** (11) — no SMS/phone verification · [live page ↗](https://pacocartones.github.io/free-llm-api-hub/collections/no-phone.html)
+- **[Free LLM APIs for commercial use](collections/commercial-use.md)** (9) — safe to ship, not eval-only · [live page ↗](https://pacocartones.github.io/free-llm-api-hub/collections/commercial-use.html)
+- **[OpenAI-compatible free LLM APIs](collections/openai-compatible.md)** (23) — drop-in OpenAI SDK swap · [live page ↗](https://pacocartones.github.io/free-llm-api-hub/collections/openai-compatible.html)
 - **[Permanently free LLM APIs](collections/always-free.md)** (3) — $0 models, no trial clock · [live page ↗](https://pacocartones.github.io/free-llm-api-hub/collections/always-free.html)
-- **[Free multimodal LLM APIs](collections/multimodal.md)** (9) — vision, audio, embeddings · [live page ↗](https://pacocartones.github.io/free-llm-api-hub/collections/multimodal.html)
+- **[Free multimodal LLM APIs](collections/multimodal.md)** (14) — vision, audio, embeddings · [live page ↗](https://pacocartones.github.io/free-llm-api-hub/collections/multimodal.html)
 <!-- AUTOGEN:collections:end -->
 
 ## Contents
@@ -106,6 +108,7 @@ Recurring (daily/monthly) quotas that renew — no expiry, but usually rate-limi
 | **[Z.ai (Zhipu AI / GLM)](https://docs.z.ai/guides/overview/pricing)**<br><sub>📵 no phone · 🏢 commercial OK · 🔌 OpenAI-compat</sub> | GLM-4.5-Flash, GLM-4.7-Flash (text), and GLM-4.6V-Flash (vision) are officially listed as $0 cost (input, cached input, and output) on a permanent basis | Not specified with concrete RPM/TPM figures in public docs | Terms of Use prohibit using the service to "develop, train, or improve" competing algorithms or models — otherwise general use, including commercial, isn't restricted | ✅ 2026-07-11 |
 | **[IBM watsonx.ai (Lite plan)](https://www.ibm.com/docs/en/watsonx/saas?topic=cloud-watsonxai-runtime-plans)** | Lite plan: 300,000 tokens/month for foundation model inference, 20 CUH/month for ML tooling, 100 pages/month of document text extraction | 2 inference requests per second (explicitly documented for the Lite plan) | Lite plan doesn't support fine-tuning of foundation or custom models; 1-day idle deployment timeout. Never expires or bills while inside quota, but a payment method (with a nominal ~$1 authorization hold) is required at signup | ✅ 2026-07-11 |
 | **[OVHcloud AI Endpoints](https://www.ovhcloud.com/en/public-cloud/ai-endpoints/catalog/)**<br><sub>🔌 OpenAI-compat</sub> | Several open-weight models in the catalog (e.g. Qwen3Guard) listed as $0 per token, permanently, via two access modes: anonymous (no account) and authenticated (API key tied to a Public Cloud project) | Anonymous access: 2 requests/min per IP per model. Authenticated (API key): 400 requests/min per project per model. Exceeding either returns HTTP 429 | European provider (France), relevant for EU data-sovereignty/GDPR-conscious use. The authenticated tier needs a valid payment method on the project (though "Free" models themselves don't charge); anonymous access needs neither an account nor a card. A separate general $200 Public Cloud trial voucher also exists but is unrelated to this permanent free-model tier | ✅ 2026-07-11 |
+| **[Arli AI](https://www.arliai.com/pricing)**<br><sub>🔌 OpenAI-compat</sub> | Free plan ($0): access to all text LLMs (Gemma, Qwen, etc.), capped at ~5 requests per 2-day window, 12K context, 1 request at a time | 1 request at a time; ~5 requests per 2 days across all models; max 12K context; delayed responses | Free tier is for testing only — very restrictive. Provider advertises zero-log / no data retention. Card requirement for the free tier is not stated on the pricing page. | ✅ 2026-07-30 |
 <!-- AUTOGEN:ongoing:end -->
 
 ## One-time trial credits
@@ -120,16 +123,18 @@ A fixed credit balance on signup. Once it's spent (or the clock runs out), you'r
 | **[Nebius AI Studio](https://docs.tokenfactory.nebius.com)**<br><sub>🔌 OpenAI-compat</sub> | $1 trial credit, valid for 30 days | Product renamed to "Nebius Token Factory"; a bank card is required to set up billing | 30 days | ✅ 2026-07-11 |
 | **[Novita AI](https://novita.ai/pricing)**<br><sub>🔌 OpenAI-compat</sub> | $1 free credit on signup | Corrected from a previously listed "$0.50/year" figure, which does not appear on any official Novita domain; a separate referral program ("Give $10, Earn $10") also exists | — | ✅ 2026-07-11 |
 | **[AI21 Labs](https://docs.ai21.com/docs/usage-cost)**<br><sub>💳 no card</sub> | $10 trial credit, valid 3 months | Card not required for the trial credit itself, required once it expires | 3 months | ✅ 2026-07-11 |
-| **[Upstage](https://www.upstage.ai/pricing)** | Unconfirmed: current pricing page shows only 10 free document-agent runs (no card); no Solar LLM API trial credit is listed | A previously-listed "$10 / 3 months" Solar API trial credit could not be found on the current official pricing page (re-checked 2026-07-30), which advertises only "10 free runs" for document agents. Flagged for correction or removal. | — | ⚠️ unverified |
 | **[NLP Cloud](https://nlpcloud.com/pricing.html)**<br><sub>📵 no phone</sub> | $15 trial credit | Corrected: the official registration page does not ask for a phone number, contradicting the earlier listing | — | ✅ 2026-07-11 |
 | **[Alibaba Cloud (Model Studio)](https://www.alibabacloud.com/help/en/model-studio/new-free-quota)**<br><sub>🔌 OpenAI-compat</sub> | 1,000,000 tokens (example figure, varies by model), international/Singapore region only | Excludes batch processing, context caching, fine-tuning, and dedicated deployment | 30-90 days | ✅ 2026-07-11 |
 | **[Modal](https://modal.com/pricing)** | $30/month recurring credit (Starter plan) | Corrected from a previously listed "$5-30/month" range; this is a recurring monthly credit, not a one-time trial. Modal is serverless compute you deploy models on, not a hosted model API | — | ✅ 2026-07-11 |
-| **[Inference.net](https://inference.net/pricing)** | Free pay-as-you-go tier listed (1M gateway requests, 30 req/min); a model-inference credit is unconfirmed | The current pricing page (re-checked 2026-07-30) shows a free tier with 1M gateway requests and 30 req/min, but no confirmable "$1, up to $25 after a survey" inference credit. A separate open-source Grants Program (up to $10,000 in compute) exists but is a different offer — flagged for re-verification. | — | ⚠️ unverified |
-| **[Hyperbolic](https://docs.hyperbolic.xyz/docs/hyperbolic-pricing)** | $1 trial credit | Could not confirm the "$1" trial amount on public pages (likely dashboard-only after signup). A historical separate $15 promo for .edu emails exists, suggesting the amount has changed over time — flagged for re-verification | — | ⚠️ unverified |
 | **[SambaNova Cloud](https://cloud.sambanova.ai/plans)**<br><sub>💳 no card · 🔌 OpenAI-compat</sub> | $5 trial credit, 3 months, plus a rate-limited free tier | Confirmed models: DeepSeek, Llama-3.3-70B, Gemma-3-31B, gpt-oss-120b | 3 months | ✅ 2026-07-11 |
 | **[Scaleway Generative APIs](https://www.scaleway.com/en/pricing/model-as-a-service/)**<br><sub>🔌 OpenAI-compat</sub> | 1,000,000 tokens free + 60 min Whisper transcription; billing starts at token 1,000,001 | European provider (France). Free allowance is a one-time token bucket, not time-limited | — | ✅ 2026-07-11 |
 | **[NVIDIA NIM](https://build.nvidia.com/)**<br><sub>📱 phone · 🔬 eval only · 🔌 OpenAI-compat</sub> | Trial credit, phone verification required | "Evaluation only, not production" per NVIDIA's own Trial Terms of Service — NVIDIA may discontinue the trial at any time with no continuity obligation | — | ✅ 2026-07-11 |
 | **[Vercel AI Gateway](https://vercel.com/docs/ai-gateway/pricing)**<br><sub>💳 no card · 🔌 OpenAI-compat</sub> | Free tier with a monthly free credit covering a subset of models at lower rate limits | Free tier and its monthly-credit behaviour are confirmed in Vercel's own docs; the specific "$5/month" figure circulating in community posts is not stated there. Once you purchase credits, your account moves to the paid tier and the monthly free credit no longer applies. | — | ✅ 2026-07-30 |
+| **[Jina AI](https://jina.ai/embeddings/)**<br><sub>💳 no card · 📵 no phone · 🏢 commercial OK · 🔌 OpenAI-compat</sub> | 10M free tokens (one-time) across all models — embeddings (v3/v4), rerankers, classifier; plus a keyless Reader (r.jina.ai) for basic use | The 10M-token balance is a one-time grant that does not replenish; the keyless Reader is genuinely ongoing. Hosted API is commercial-OK and data is not used for training. No card required. | — | ✅ 2026-07-30 |
+| **[Deepgram](https://deepgram.com/pricing)**<br><sub>💳 no card · 📵 no phone · 🏢 commercial OK</sub> | $200 free credit on signup (no card, no expiration) — Nova speech-to-text and Aura text-to-speech at pay-as-you-go rates | No card and no expiration on the credit. Data catch: the Model Improvement Program is opt-OUT — send mip_opt_out=true per request to keep your data out of training. Native REST/WebSocket API, not OpenAI-compatible. | — | ✅ 2026-07-30 |
+| **[AssemblyAI](https://www.assemblyai.com/pricing)**<br><sub>💳 no card · 📵 no phone · 🏢 commercial OK · 🔌 OpenAI-compat</sub> | $50 free credit on signup (no card) — pre-recorded & streaming speech-to-text, Speech Understanding, and an OpenAI-compatible LLM Gateway (25+ models) | One-time credit, not renewing. Catch: the default model differs between free and paid accounts — set speech_models explicitly to avoid cost jumps on upgrade. Only the LLM Gateway is OpenAI-compatible. | — | ✅ 2026-07-30 |
+| **[Mixedbread](https://www.mixedbread.com/pricing)**<br><sub>💳 no card · 📵 no phone · 🏢 commercial OK</sub> | Starter plan: $5 one-time credit (no card) — embeddings (mxbai-embed-large-v1), reranking, and multimodal search over PDF/image/doc/code | Free credit is usage-based and non-renewing; usage-based pricing applies afterward. Native REST API, not documented as OpenAI-compatible. No card required. | — | ✅ 2026-07-30 |
+| **[Clarifai](https://docs.clarifai.com/control/account-billing/)**<br><sub>💳 no card · 📱 phone · 🔌 OpenAI-compat</sub> | One-time $5 credit across serverless models (GPT-OSS-120B, Claude, Llama), vision, embeddings and image generation | Catch: SMS phone verification is required to claim the $5. Credit is one-time and expires 30 days after grant; a card is required to recharge afterward. | 30 days | ✅ 2026-07-30 |
 <!-- AUTOGEN:trial:end -->
 
 ## Notably NOT free
@@ -137,6 +142,8 @@ A fixed credit balance on signup. Once it's spent (or the clock runs out), you'r
 Worth saying plainly. As of the last verification pass, **OpenAI, Anthropic and xAI do not offer an ongoing free API tier.** Several providers people *assume* are free — **Together AI, DeepInfra, Perplexity's API, Replicate, Featherless AI** — currently require a card or prepayment before any API use, per their own docs. Some have handed out small one-time trial credits at various points, but that's changed repeatedly; check each provider's billing page before assuming anything.
 
 For genuinely free access to strong models, your best bets here are **Gemini** (frontier-class) and the free open-weight models on **Groq, Cerebras, OpenRouter, Cloudflare, SiliconFlow and Z.ai**.
+
+Removed after re-verification (their free *API* access couldn't be confirmed): **Upstage** (Solar API is pay-as-you-go; the "free runs" are for document agents), **Inference.net** (the free tier is gateway/observability only, not free model tokens), and **Hyperbolic** (requires a $5 minimum deposit before any use).
 
 ## How verification works
 

@@ -10,6 +10,23 @@
 <meta property="og:description" content="A continuously-verified dataset of free LLM APIs and trial credits for developers.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://pacocartones.github.io/free-llm-api-hub/">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Dataset",
+  "name": "Free LLM API Hub",
+  "description": "A continuously-verified dataset of LLM API providers with a free tier or trial credits. Every entry dated, sourced to the provider's own docs, and machine-readable.",
+  "url": "https://pacocartones.github.io/free-llm-api-hub/",
+  "keywords": ["free llm api", "llm api", "free tier", "trial credits", "openai-compatible", "ai api"],
+  "license": "https://opensource.org/licenses/MIT",
+  "isAccessibleForFree": true,
+  "creator": { "@type": "Person", "name": "pacocartones", "url": "https://github.com/pacocartones" },
+  "distribution": [
+    { "@type": "DataDownload", "encodingFormat": "application/json", "contentUrl": "https://pacocartones.github.io/free-llm-api-hub/providers.json" },
+    { "@type": "DataDownload", "encodingFormat": "text/csv", "contentUrl": "https://pacocartones.github.io/free-llm-api-hub/providers.csv" }
+  ]
+}
+</script>
 <style>
   :root {
     --bg: #0b0e14; --panel: #12161f; --panel-2: #161b26; --border: #262c38;
@@ -84,6 +101,11 @@
   .name a { color: var(--text); text-decoration: none; font-weight: 600; }
   .name a:hover { color: var(--accent); text-decoration: underline; }
   .best { color: var(--purple); font-size: .8rem; margin-top: 3px; }
+  .mods { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+  .mods span { font-size: .68rem; color: var(--muted); background: var(--panel-2); border: 1px solid var(--border); border-radius: 4px; padding: 1px 6px; }
+  .baseurl { margin-top: 6px; cursor: copy; }
+  .baseurl code { font-size: .72rem; color: var(--accent); background: rgba(110,168,254,.08); border: 1px solid var(--border); border-radius: 5px; padding: 2px 6px; word-break: break-all; }
+  .baseurl.copied code { color: var(--green); border-color: var(--green); }
   .badge { display: inline-block; font-size: .72rem; padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
   .b-ongoing { background: rgba(110,168,254,.14); color: var(--accent); border: 1px solid rgba(110,168,254,.35); }
   .b-trial { background: rgba(139,148,158,.14); color: var(--muted); border: 1px solid rgba(139,148,158,.35); }
@@ -200,7 +222,7 @@ function render() {
 
   let rows = DATA.filter(p => {
     if (category !== 'all' && p.category !== category) return false;
-    if (q && !(p.name.toLowerCase().includes(q) || (p.free_tier||'').toLowerCase().includes(q) || (p.notes||'').toLowerCase().includes(q) || (p.rate_limits||'').toLowerCase().includes(q))) return false;
+    if (q && !(p.name.toLowerCase().includes(q) || (p.free_tier||'').toLowerCase().includes(q) || (p.notes||'').toLowerCase().includes(q) || (p.rate_limits||'').toLowerCase().includes(q) || (p.openai_base_url||'').toLowerCase().includes(q) || (p.modalities||[]).join(' ').includes(q))) return false;
     if (nocard && p.card_required !== false) return false;
     if (nophone && p.phone_required !== false) return false;
     if (commercial && p.commercial_ok !== true) return false;
@@ -227,9 +249,11 @@ function render() {
   for (const p of rows) {
     const nameCell = p.docs_url ? `<a href="${p.docs_url}" target="_blank" rel="noopener">${p.name}</a>` : `<span>${p.name}</span>`;
     const best = p.best_for ? `<div class="best">${p.best_for}</div>` : '';
+    const mods = (p.modalities && p.modalities.length) ? `<div class="mods">${p.modalities.map(m => `<span>${m}</span>`).join('')}</div>` : '';
+    const baseurl = p.openai_base_url ? `<div class="baseurl" title="OpenAI-compatible base URL — click to copy" tabindex="0" role="button" data-copy="${p.openai_base_url}"><code>${p.openai_base_url}</code></div>` : '';
     const tr = document.createElement('tr');
     tr.innerHTML = `
-      <td class="name">${nameCell}${best}<div class="flags">${flagLine(p)}</div></td>
+      <td class="name">${nameCell}${best}${baseurl}<div class="flags">${flagLine(p)}</div>${mods}</td>
       <td><span class="badge ${p.category === 'ongoing' ? 'b-ongoing' : 'b-trial'}">${p.category === 'ongoing' ? 'Ongoing' : 'Trial'}</span></td>
       <td>${p.free_tier || ''}</td>
       <td class="notes">${p.notes || ''}</td>
@@ -277,6 +301,20 @@ document.querySelectorAll('thead th[data-key]').forEach(th => {
     const chip = e.target.closest('.chip'); if (chip) chip.classList.toggle('on', e.target.checked);
     render();
   }));
+
+// Click (or Enter) a base URL to copy it.
+function copyBaseUrl(el) {
+  const val = el.getAttribute('data-copy');
+  const done = () => { el.classList.add('copied'); setTimeout(() => el.classList.remove('copied'), 1200); };
+  if (navigator.clipboard) navigator.clipboard.writeText(val).then(done).catch(done); else done();
+}
+document.getElementById('tbody').addEventListener('click', e => {
+  const el = e.target.closest('.baseurl'); if (el) copyBaseUrl(el);
+});
+document.getElementById('tbody').addEventListener('keydown', e => {
+  if (e.key !== 'Enter' && e.key !== ' ') return;
+  const el = e.target.closest('.baseurl'); if (el) { e.preventDefault(); copyBaseUrl(el); }
+});
 
 function download(name, text, mime) {
   const a = document.createElement('a');

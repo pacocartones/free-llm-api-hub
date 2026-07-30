@@ -138,40 +138,62 @@ const COLLECTIONS = [
 const collRows = (c) => providers.filter(c.filter);
 const typeLabel = (p) => (p.category === 'ongoing' ? 'Ongoing' : 'Trial');
 
-// Markdown table for a collection (adds a Type column vs the main tables).
-function collectionTableMd(rows) {
-  const head =
-    '| Provider | Type | What\'s free | The catch | Verified |\n' +
-    '|---|---|---|---|---|';
+// Markdown table for a collection. With opts.baseUrl, the 2nd column shows the
+// OpenAI base URL instead of the tier type (used on the openai-compatible page).
+function collectionTableMd(rows, opts = {}) {
+  const bu = opts.baseUrl;
+  const head = bu
+    ? "| Provider | OpenAI base URL | What's free | The catch | Verified |\n|---|---|---|---|---|"
+    : "| Provider | Type | What's free | The catch | Verified |\n|---|---|---|---|---|";
   const body = rows
-    .map((p) => `| ${nameCell(p)} | ${typeLabel(p)} | ${esc(p.free_tier)} | ${esc(p.notes)} | ${verifiedCell(p)} |`)
+    .map((p) => {
+      const col2 = bu ? (p.openai_base_url ? `\`${esc(p.openai_base_url)}\`` : '_see docs_') : typeLabel(p);
+      return `| ${nameCell(p)} | ${col2} | ${esc(p.free_tier)} | ${esc(p.notes)} | ${verifiedCell(p)} |`;
+    })
     .join('\n');
   return `${head}\n${body}`;
 }
 
+// Concrete, runnable example drawn from the data (Groq: verified, no card, well-known free models).
+const QUICKSTART_EXAMPLE = providers.find((p) => p.slug === 'groq' && p.openai_base_url) || providers.find((p) => p.openai_base_url);
+const QS_BASE = QUICKSTART_EXAMPLE ? QUICKSTART_EXAMPLE.openai_base_url : 'https://<provider-base-url>/v1';
+const QS_NAME = QUICKSTART_EXAMPLE ? QUICKSTART_EXAMPLE.name : 'the provider';
+const QS_MODEL = QUICKSTART_EXAMPLE && QUICKSTART_EXAMPLE.slug === 'groq' ? 'llama-3.1-8b-instant' : '<a-free-model>';
+
 const QUICKSTART_MD = `## Quickstart — reuse the OpenAI SDK
 
-Most of these accept the OpenAI SDK with two changes: point \`base_url\` at the provider and use its key. Get the exact base URL from the provider's linked docs.
+Most of these accept the OpenAI SDK with two changes: point \`base_url\` at the provider and use its free key. The base URLs are in the table above; grab a key from each provider's console.
+
+### Python — example: ${QS_NAME}
 
 \`\`\`python
 from openai import OpenAI
 
-client = OpenAI(
-    base_url="https://<provider-base-url>/v1",  # from the provider's docs
-    api_key="<YOUR_FREE_API_KEY>",
-)
+client = OpenAI(base_url="${QS_BASE}", api_key="<YOUR_FREE_API_KEY>")
 resp = client.chat.completions.create(
-    model="<a-free-model>",
+    model="${QS_MODEL}",
     messages=[{"role": "user", "content": "Hello!"}],
 )
 print(resp.choices[0].message.content)
 \`\`\`
+
+### curl
+
+\`\`\`bash
+curl ${QS_BASE}/chat/completions \\
+  -H "Authorization: Bearer $YOUR_FREE_API_KEY" \\
+  -H "Content-Type: application/json" \\
+  -d '{"model": "${QS_MODEL}", "messages": [{"role": "user", "content": "Hello!"}]}'
+\`\`\`
+
+Swap the \`base_url\` (and a model that provider offers free) for any row above.
 `;
 
 // ---------- HTML page shell (shared by collection pages) ----------
 const htmlEsc = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
-function collectionTableHtml(rows) {
+function collectionTableHtml(rows, opts = {}) {
+  const bu = opts.baseUrl;
   const flagsHtml = (p) => {
     const parts = [];
     if (p.card_required === false) parts.push('💳 no card');
@@ -182,6 +204,7 @@ function collectionTableHtml(rows) {
     if (p.openai_compatible === true) parts.push('🔌 OpenAI-compat');
     return parts.length ? `<div class="flags">${parts.map((t) => `<span>${t}</span>`).join('')}</div>` : '';
   };
+  const col2Head = bu ? 'OpenAI base URL' : 'Type';
   const rowsHtml = rows
     .map((p) => {
       const name = p.docs_url
@@ -190,10 +213,13 @@ function collectionTableHtml(rows) {
       const v = p.verified
         ? `<span class="v ok">✅ ${htmlEsc(p.last_verified)}</span>`
         : '<span class="v warn">⚠️ unverified</span>';
-      return `<tr><td class="name">${name}${flagsHtml(p)}</td><td><span class="type">${typeLabel(p)}</span></td><td>${htmlEsc(p.free_tier)}</td><td class="notes">${htmlEsc(p.notes)}</td><td>${v}</td></tr>`;
+      const col2 = bu
+        ? (p.openai_base_url ? `<code>${htmlEsc(p.openai_base_url)}</code>` : '<span class="notes">see docs</span>')
+        : `<span class="type">${typeLabel(p)}</span>`;
+      return `<tr><td class="name">${name}${flagsHtml(p)}</td><td>${col2}</td><td>${htmlEsc(p.free_tier)}</td><td class="notes">${htmlEsc(p.notes)}</td><td>${v}</td></tr>`;
     })
     .join('\n');
-  return `<table><thead><tr><th>Provider</th><th>Type</th><th>What's free</th><th>The catch</th><th>Verified</th></tr></thead><tbody>\n${rowsHtml}\n</tbody></table>`;
+  return `<table><thead><tr><th>Provider</th><th>${col2Head}</th><th>What's free</th><th>The catch</th><th>Verified</th></tr></thead><tbody>\n${rowsHtml}\n</tbody></table>`;
 }
 
 function htmlPage({ title, desc, canonical, bodyHtml, jsonld }) {
@@ -295,7 +321,7 @@ writeFileSync(
 const COLS = [
   'slug', 'name', 'category', 'free_type', 'free_tier', 'rate_limits', 'notes',
   'best_for', 'modalities', 'expires', 'docs_url', 'phone_required',
-  'card_required', 'commercial_ok', 'openai_compatible', 'verified', 'last_verified',
+  'card_required', 'commercial_ok', 'openai_compatible', 'openai_base_url', 'verified', 'last_verified',
 ];
 
 const csvCell = (v) => {
@@ -347,7 +373,7 @@ for (const c of COLLECTIONS) {
     `${GEN_NOTE}\n\n# ${c.h1}\n\n${c.desc}\n\n` +
     `[← All collections](README.md) · [Interactive explorer ↗](${SITE}/) · [Main list](../README.md)\n\n` +
     `${c.intro}\n\n**${rows.length} of ${total} tracked providers** match.\n\n` +
-    `${collectionTableMd(rows)}\n\n` +
+    `${collectionTableMd(rows, { baseUrl: c.quickstart })}\n\n` +
     (c.quickstart ? `${QUICKSTART_MD}\n` : '') +
     `---\n\nOther collections: ${collNavMd}\n\n` +
     `_Generated from [providers.json](../data/providers.json). Terms change without notice — always confirm against each provider's own docs._\n`;
@@ -375,19 +401,19 @@ for (const c of COLLECTIONS) {
     `<main><div class="wrap">` +
     `<p>${htmlEsc(c.intro).replace(/`([^`]+)`/g, '<code>$1</code>').replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')}</p>` +
     `<p class="count"><strong>${rows.length} of ${total}</strong> tracked providers match.</p>` +
-    `${collectionTableHtml(rows)}` +
+    `${collectionTableHtml(rows, { baseUrl: c.quickstart })}` +
     (c.quickstart
-      ? `<h2>Quickstart — reuse the OpenAI SDK</h2><p class="count">Point <code>base_url</code> at the provider and use its key; get the exact URL from the provider's docs.</p><pre><code>from openai import OpenAI
+      ? `<h2>Quickstart — reuse the OpenAI SDK</h2><p class="count">Point <code>base_url</code> at the provider (URLs in the table above) and use its free key. Example: ${htmlEsc(QS_NAME)}.</p><pre><code>from openai import OpenAI
 
-client = OpenAI(
-    base_url="https://&lt;provider-base-url&gt;/v1",  # from the provider's docs
-    api_key="&lt;YOUR_FREE_API_KEY&gt;",
-)
+client = OpenAI(base_url="${htmlEsc(QS_BASE)}", api_key="&lt;YOUR_FREE_API_KEY&gt;")
 resp = client.chat.completions.create(
-    model="&lt;a-free-model&gt;",
+    model="${htmlEsc(QS_MODEL)}",
     messages=[{"role": "user", "content": "Hello!"}],
 )
-print(resp.choices[0].message.content)</code></pre>`
+print(resp.choices[0].message.content)</code></pre><pre><code>curl ${htmlEsc(QS_BASE)}/chat/completions \\
+  -H "Authorization: Bearer $YOUR_FREE_API_KEY" \\
+  -H "Content-Type: application/json" \\
+  -d '{"model": "${htmlEsc(QS_MODEL)}", "messages": [{"role": "user", "content": "Hello!"}]}'</code></pre>`
       : '') +
     `</div></main>` +
     `<footer><div class="wrap">Generated from <a href="../providers.json">providers.json</a>. Independent, community-maintained — not affiliated with any provider. Source & methodology on <a href="https://github.com/pacocartones/free-llm-api-hub">GitHub</a>.</div></footer>`;
@@ -419,8 +445,23 @@ writeFileSync(
   htmlPage({ title: 'Collections · Free LLM API Hub', desc: 'Curated, always-current collections of free LLM APIs by constraint: no card, no phone, commercial use, OpenAI-compatible, permanently free, multimodal.', canonical: `${SITE}/collections/`, bodyHtml: hubBody })
 );
 
+// ---------- sitemap.xml (site SEO) ----------
+const sitemapUrls = [
+  `${SITE}/`,
+  `${SITE}/collections/`,
+  ...COLLECTIONS.map((c) => `${SITE}/collections/${c.slug}.html`),
+];
+const sitemap =
+  `<?xml version="1.0" encoding="UTF-8"?>\n` +
+  `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +
+  sitemapUrls
+    .map((u) => `  <url><loc>${u}</loc><lastmod>${data.generated}</lastmod></url>`)
+    .join('\n') +
+  `\n</urlset>\n`;
+writeFileSync(join(ROOT, 'site/sitemap.xml'), sitemap);
+
 console.log(
   `Built: ${total} providers (${ongoing.length} ongoing, ${trial.length} trial), ` +
   `${verifiedCount} verified, ${freshCount} fresh <${FRESH_DAYS}d → badge ${color}. ` +
-  `${COLLECTIONS.length} collections generated.`
+  `${COLLECTIONS.length} collections + sitemap generated.`
 );

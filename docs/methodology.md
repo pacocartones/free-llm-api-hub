@@ -20,7 +20,7 @@ The dataset validator (`scripts/validate.mjs`, run in CI) **rejects** any `verif
 ## What "verified" does *not* mean
 
 - It is **not** a real-time guarantee. Terms can change the day after a check. Always confirm against the linked docs before you rely on a tier.
-- It does **not** cover the softer attribute fields (`openai_compatible`, `modalities`, `best_for`). These are progressively backfilled, may be `null`, and are convenience metadata — not part of the verified claim.
+- It does **not** cover the softer attribute fields (`openai_compatible`, `openai_base_url`, `modalities`, `best_for`). These are progressively backfilled, may be `null`, and are convenience metadata — not part of the verified claim.
 - It is **not** an endorsement. This is an independent list with no affiliation to any provider.
 
 ## The ⚠️ (unverified) state

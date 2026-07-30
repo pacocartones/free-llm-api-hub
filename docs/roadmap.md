@@ -12,20 +12,22 @@ Direction, not dated promises. The north star: stay the **most trustworthy, curr
 ## Now
 
 - Keep the 90-day freshness bar green; re-verify entries as their dates age.
-- Clear the ⚠️ backlog — confirm or correct the currently-unverified entries.
-- Backfill `openai_compatible` and `modalities` across all entries.
+- Backfill `openai_base_url` for the remaining OpenAI-compatible entries (most done).
+- Consider a `speed_tier` field so a "fastest free APIs" collection can be generated honestly from data.
+
+## Done recently
+
+- ✅ Cleared the ⚠️ backlog — the three entries whose free API access couldn't be confirmed were removed (see the changelog); the list is now 100% verified.
+- ✅ Backfilled `openai_compatible`, `modalities`, and `openai_base_url` (18 confirmed base URLs).
+- ✅ Shipped editorial [collections](../collections/README.md) generated from the data: no-card, no-phone, commercial-use, OpenAI-compatible, permanently-free, multimodal.
+- ✅ Per-provider OpenAI base URLs + a runnable quickstart (curl + OpenAI SDK) on the OpenAI-compatible page.
+- ✅ Broadened adjacent coverage: embeddings/rerank (Jina, Mixedbread) and speech (Deepgram, AssemblyAI).
 
 ## Next
 
-- **Editorial cuts** as their own linkable pages, generated from the data — each expands practical utility and search surface:
-  - Free LLM APIs with no credit card
-  - Free LLM APIs with no phone verification
-  - Free LLM APIs for commercial use
-  - Fastest free LLM APIs
-  - OpenAI-compatible free LLM APIs
-  - Free multimodal APIs (vision, speech, embeddings)
-- **Per-provider quickstart snippets** (curl + OpenAI SDK `base_url`) for OpenAI-compatible entries.
 - **A stable release tag per dataset version** so downstream consumers can pin a snapshot.
+- **A "fastest free LLM APIs" collection**, once a defensible speed dimension exists in the data.
+- **Per-provider model lists** (a sampled `models_free` field) for the highest-traffic providers.
 
 ## Later (under consideration)
 
