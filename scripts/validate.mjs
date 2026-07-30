@@ -62,6 +62,19 @@ for (const p of data.providers ?? []) {
     check(p.openai_compatible !== false, `${id}: openai_base_url is set but openai_compatible is false`);
   }
 
+  // env_key: the name of the env var holding the API key (never the value).
+  if (p.env_key !== undefined) {
+    check(typeof p.env_key === 'string' && /^[A-Z][A-Z0-9_]*$/.test(p.env_key), `${id}: env_key must be an UPPER_SNAKE env var name`);
+  }
+  // Live-probe fields (independent of docs `verified`).
+  if (p.last_probed !== undefined && p.last_probed !== null) {
+    check(DATE_RE.test(p.last_probed), `${id}: last_probed must be YYYY-MM-DD or null`);
+  }
+  if (p.probe_status !== undefined && p.probe_status !== null) {
+    check(['live', 'auth-failed', 'tier-ended', 'rate-limited', 'error'].includes(p.probe_status), `${id}: invalid probe_status`);
+    check(DATE_RE.test(p.last_probed || ''), `${id}: probe_status set but last_probed missing`);
+  }
+
   // Integrity core: a verified entry must carry a dated, real source link.
   if (p.verified) {
     check(DATE_RE.test(p.last_verified || ''), `${id}: verified entry needs a YYYY-MM-DD last_verified`);

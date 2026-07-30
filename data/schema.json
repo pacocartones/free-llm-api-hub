@@ -94,6 +94,10 @@
           "type": ["string", "null"],
           "description": "OpenAI-compatible base URL for a drop-in SDK swap, when confirmed. null until backfilled."
         },
+        "env_key": {
+          "type": "string",
+          "description": "Name of the environment variable holding this provider's API key, used by scripts/probe.mjs (and fetch-models) for live testing. Its presence marks a provider as probeable; the value itself lives only in the secrets store, never here."
+        },
         "models_free": {
           "type": ["array", "null"],
           "description": "Sample of model IDs available on the free tier (attribute; sampled and may change — not part of the verified core claim).",
@@ -107,6 +111,15 @@
         "last_verified": {
           "type": ["string", "null"],
           "description": "Date of the last independent confirmation (YYYY-MM-DD). Must be null when verified is false."
+        },
+        "last_probed": {
+          "type": ["string", "null"],
+          "description": "Date (YYYY-MM-DD) the provider's API was last called live with a real key by scripts/probe.mjs. Independent of `verified` (which is docs-based)."
+        },
+        "probe_status": {
+          "type": ["string", "null"],
+          "enum": ["live", "auth-failed", "tier-ended", "rate-limited", "error", null],
+          "description": "Outcome of the last live probe. `live` = a real free-tier call succeeded. `tier-ended` = the key authenticated but the free tier appears gone (e.g. 402)."
         }
       },
       "allOf": [

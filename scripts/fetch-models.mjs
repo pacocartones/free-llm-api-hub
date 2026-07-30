@@ -14,30 +14,11 @@
 // blanked. Fetched IDs are real; nothing here is guessed.
 
 import { readFileSync, writeFileSync } from 'node:fs';
+import { serialize, roundTripError } from './_serialize.mjs';
 
 const FILE = new URL('../data/providers.json', import.meta.url);
 const SAMPLE = 8; // cap: models_free is a *sample*, not the full catalog
 const TIMEOUT = 20000;
-
-// Canonical key order — must match data/providers.json exactly.
-const ORDER = [
-  'slug', 'name', 'category', 'free_type', 'free_tier', 'rate_limits', 'notes',
-  'best_for', 'modalities', 'models_free', 'expires', 'docs_url', 'phone_required',
-  'card_required', 'commercial_ok', 'openai_compatible', 'openai_base_url',
-  'verified', 'last_verified',
-];
-const TOP = ['$schema', 'version', 'generated', 'source', 'note'];
-
-function serialize(data) {
-  const val = (v) =>
-    Array.isArray(v) ? `[${v.map((x) => JSON.stringify(x)).join(', ')}]` : JSON.stringify(v);
-  const provs = data.providers.map((p) => {
-    const inner = ORDER.map((k) => `      ${JSON.stringify(k)}: ${val(p[k])}`).join(',\n');
-    return `    {\n${inner}\n    }`;
-  });
-  const top = TOP.map((k) => `  ${JSON.stringify(k)}: ${JSON.stringify(data[k])},`);
-  return `{\n${top.join('\n')}\n  "providers": [\n${provs.join(',\n')}\n  ]\n}\n`;
-}
 
 // --- extractors: each returns a de-duped, sorted sample of real model IDs -----
 
@@ -121,14 +102,9 @@ async function openaiModels(baseUrl, key) {
 // --- self-test: serializer must round-trip the file byte-for-byte -----------
 
 function selfTest() {
-  const raw = readFileSync(FILE, 'utf8');
-  const out = serialize(JSON.parse(raw));
-  if (out !== raw) {
-    let i = 0;
-    while (i < raw.length && raw[i] === out[i]) i++;
-    console.error('✗ serializer does not round-trip. First diff near byte', i);
-    console.error('  orig:', JSON.stringify(raw.slice(i, i + 60)));
-    console.error('  ours:', JSON.stringify(out.slice(i, i + 60)));
+  const err = roundTripError(readFileSync(FILE, 'utf8'));
+  if (err) {
+    console.error('✗ serializer does not round-trip.\n  ' + err);
     process.exit(1);
   }
   console.log('✓ serializer round-trips data/providers.json exactly');

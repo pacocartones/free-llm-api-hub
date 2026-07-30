@@ -35,6 +35,9 @@ Filters treat `null` conservatively: "No card required" matches only `card_requi
 | `openai_compatible` | tri-state | Does it expose an OpenAI-compatible endpoint (drop-in `base_url`)? |
 | `openai_base_url` | string \| null | The OpenAI-compatible base URL to pass to the SDK, when confirmed against official docs. Placeholders like `{account_id}` mark per-account path segments. `null` until backfilled. |
 | `models_free` | string[] \| null | A **sample** of model IDs available on the free tier. Attribute field — sampled and may change; not part of the verified core claim. `null` where not populated. |
+| `env_key` | string | Name of the env var holding this provider's API key, used by the [live-testing](live-testing.md) probe. Presence marks a provider as probeable; the value lives only in the secrets store, never in the dataset. |
+| `last_probed` | string \| null | Date (YYYY-MM-DD) the API was last called live with a real key. Independent of `verified` (docs-based). |
+| `probe_status` | enum \| null | Outcome of the last live call: `live`, `auth-failed`, `tier-ended`, `rate-limited`, `error`. `live` earns the "live-tested" badge. |
 | `verified` | boolean | Core facts independently confirmed against the provider's docs on `last_verified`. |
 | `last_verified` | string \| null | Date (YYYY-MM-DD) of the last confirmation. `null` iff `verified: false`. |
 

@@ -6,7 +6,7 @@
 //   - site/providers.json (+ csv/yaml) so the interactive site ships the data
 // Zero dependencies. Run with: node scripts/build.mjs   (or `npm run build`)
 
-import { readFileSync, writeFileSync, mkdirSync, copyFileSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { execSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
@@ -486,7 +486,9 @@ const recScore = (p) => {
   return s;
 };
 const homeRows = explorerRowsHtml([...providers].sort((a, b) => recScore(b) - recScore(a) || (a.name < b.name ? -1 : a.name > b.name ? 1 : 0)));
-const inlineData = `<script type="application/json" id="providers-data">${JSON.stringify({ providers }).replace(/</g, '\\u003c')}</script>`;
+// env_key is operational (which secret to use) — strip it from anything public.
+const publicProviders = providers.map(({ env_key, ...rest }) => rest);
+const inlineData = `<script type="application/json" id="providers-data">${JSON.stringify({ providers: publicProviders }).replace(/</g, '\\u003c')}</script>`;
 let indexHtml = readFileSync(join(ROOT, 'site/index.html'), 'utf8');
 indexHtml = inject(indexHtml, 'rows', homeRows);
 indexHtml = inject(indexHtml, 'data', inlineData);
@@ -538,7 +540,7 @@ writeFileSync(join(ROOT, 'data/providers.yaml'), yaml);
 
 // ---------- ship data with the site ----------
 mkdirSync(join(ROOT, 'site'), { recursive: true });
-copyFileSync(join(ROOT, 'data/providers.json'), join(ROOT, 'site/providers.json'));
+writeFileSync(join(ROOT, 'site/providers.json'), JSON.stringify({ ...data, providers: publicProviders }, null, 2) + '\n');
 writeFileSync(join(ROOT, 'site/providers.csv'), csv);
 writeFileSync(join(ROOT, 'site/providers.yaml'), yaml);
 
@@ -716,6 +718,12 @@ print(resp.choices[0].message.content)</code></pre><p class="muted">…or with c
     ? `<span class="v ok">${IC('ic-check')} verified ${htmlEsc(p.last_verified)}${daysAgo != null ? ` · ${daysAgo}d ago` : ''}</span>` +
       (daysAgo != null && daysAgo > FRESH_DAYS ? ` <span class="v warn">${IC('ic-warn')} re-verification due</span>` : '')
     : `<span class="v warn">${IC('ic-warn')} unverified</span>`;
+  // Live-test badge: an actual successful API call, separate from the docs-based `verified`.
+  const probedLine = p.probe_status === 'live'
+    ? ` <span class="v live" title="A real free-tier API call succeeded on this date">${IC('ic-check')} live-tested ${htmlEsc(p.last_probed || '')}</span>`
+    : (p.probe_status === 'tier-ended'
+        ? ` <span class="v warn" title="The key authenticated but the free tier appears gone">${IC('ic-warn')} free tier unconfirmed live</span>`
+        : '');
   const docsBtn = p.docs_url ? `<a class="btn primary" href="${htmlEsc(p.docs_url)}" target="_blank" rel="noopener">Official docs ↗</a>` : '';
   const crossChips = [
     ...inColls.map((c) => `<a href="../collections/${c.slug}.html">${htmlEsc(c.title)}</a>`),
@@ -725,7 +733,7 @@ print(resp.choices[0].message.content)</code></pre><p class="muted">…or with c
     `<section class="page-hero"><div class="wrap">` +
     `<nav class="crumbs"><a href="../">Home</a> / <a href="../#explorer">Providers</a> / ${htmlEsc(p.name)}</nav>` +
     `<h1>${htmlEsc(p.name)}</h1>` +
-    `<div class="prov-badges"><span class="type">${typeLabel(p)}</span> ${verifiedLine} ${provFlagsHtml(p)}</div>` +
+    `<div class="prov-badges"><span class="type">${typeLabel(p)}</span> ${verifiedLine}${probedLine} ${provFlagsHtml(p)}</div>` +
     (p.best_for ? `<p class="lede">${htmlEsc(p.best_for)}</p>` : '') +
     (docsBtn ? `<div class="prov-actions">${docsBtn}</div>` : '') +
     `</div></section>` +
