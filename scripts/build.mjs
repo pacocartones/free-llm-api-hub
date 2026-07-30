@@ -381,7 +381,18 @@ const explorerRowsHtml = (rows) => rows.map((p) => {
     `<td data-label="Verified">${v}</td></tr>`;
 }).join('\n');
 
-const homeRows = explorerRowsHtml([...providers].sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0)));
+// Same "recommended" scoring as the client, so SSR order matches the default view.
+const recScore = (p) => {
+  let s = 0;
+  if (p.card_required === false) s += 3;
+  if (p.phone_required === false) s += 2;
+  if (p.commercial_ok === true) s += 2; else if (p.commercial_ok === false) s -= 2;
+  if (p.openai_compatible === true) s += 1;
+  if (p.category === 'ongoing') s += 1;
+  if (p.free_type === 'perpetual') s += 1;
+  return s;
+};
+const homeRows = explorerRowsHtml([...providers].sort((a, b) => recScore(b) - recScore(a) || (a.name < b.name ? -1 : a.name > b.name ? 1 : 0)));
 const inlineData = `<script type="application/json" id="providers-data">${JSON.stringify({ providers }).replace(/</g, '\\u003c')}</script>`;
 let indexHtml = readFileSync(join(ROOT, 'site/index.html'), 'utf8');
 indexHtml = inject(indexHtml, 'rows', homeRows);
