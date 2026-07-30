@@ -7,6 +7,12 @@ Notable changes to the dataset and the project. Format based on [Keep a Changelo
 
 ## [Unreleased]
 
+### Site
+- **Server-rendered homepage** — the explorer table (51 rows) and the dataset are now inlined into the landing page at build time, so it's fully indexable, paints instantly, and works without JS (previously the flagship page was an empty client-rendered shell).
+- **Recommended default order** (no-card + no-phone + commercial + ongoing + OpenAI-compatible first) and **one-click filter presets** (Side-project starter, OpenAI drop-in, Speech, Embeddings/RAG, Zero signup, Ship commercial), all shareable via the URL.
+- **Updates page + RSS feed** (`/updates.html`, `/feed.xml`) generated from git history, plus an **embeddable widget** (`widget.js`) for other sites to show a live top-list that links back.
+- Freshness summary line above the explorer.
+
 ### Data
 - **Verified top-up (4 providers → 51):** Sarvam AI (Indic chat + speech, OpenAI-compatible), Gladia (€50 STT), Rime (3,000 free TTS min), and Tencent Hunyuan (1M tokens/1yr, OpenAI-compatible, real-name-ID caveat). All re-verified against official docs.
 - **New companion doc — [credit programs](docs/credit-programs.md):** startup and student/research credit programs you *apply* for (AWS Activate, Microsoft/Google for Startups, Anthropic/OpenAI/Together/Baseten startup credits; Azure for Students, Cohere Labs, Google TPU Research Cloud, etc.). Kept deliberately **out** of the self-serve dataset — different access model, high volatility — with a "funds LLM API?" legend and per-program eligibility.

@@ -10,6 +10,8 @@ site/collections/
 site/p/
 site/badges/
 site/legal/
+site/updates.html
+site/feed.xml
 site/sitemap.xml
 
 # Local tooling

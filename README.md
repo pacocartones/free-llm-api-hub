@@ -221,6 +221,17 @@ curl -s https://raw.githubusercontent.com/pacocartones/free-llm-api-hub/main/dat
 
 It renders the real, auditable freshness count — not a static "as of some date I forgot to update" number.
 
+**Embed a live widget** on any site — a compact, always-current list of the top verified free APIs:
+
+```html
+<div id="flh-widget" data-count="6" data-modality="text"></div>
+<script src="https://pacocartones.github.io/free-llm-api-hub/widget.js" async></script>
+```
+
+Self-contained (inline styles, no CSS conflicts). `data-modality` is optional (`text`, `audio`, `embeddings`, `image`, `vision`, `ocr`, `rerank`).
+
+**Follow changes** — [updates page](https://pacocartones.github.io/free-llm-api-hub/updates.html) or the [RSS feed](https://pacocartones.github.io/free-llm-api-hub/feed.xml).
+
 ## Contributing
 
 Found an outdated limit, a dead link, or a provider that belongs here? You'll keep this useful for everyone.

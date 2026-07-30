@@ -7,6 +7,7 @@
 // Zero dependencies. Run with: node scripts/build.mjs   (or `npm run build`)
 
 import { readFileSync, writeFileSync, mkdirSync, copyFileSync } from 'node:fs';
+import { execSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
@@ -258,7 +259,7 @@ const siteHeader = (p) => `<header class="site-header"><div class="wrap header-i
 
 const siteFooter = (p) => `<footer class="site-footer"><div class="wrap footer-top">
 <div class="footer-brand"><a class="star-btn" href="${REPO}" target="_blank" rel="noopener" aria-label="Star free-llm-api-hub on GitHub"><span class="sb-label">${GH_ICON} Star on GitHub</span><span class="sb-count" data-stars>★</span></a><p>A continuously-verified, machine-readable dataset of free LLM &amp; AI-model APIs and trial credits for developers.</p></div>
-<div class="footer-col"><h4>Explore</h4><a href="${p}#explorer">Interactive explorer</a><a href="${p}collections/">Collections</a><a href="${REPO}#notably-not-free">Notably NOT free</a></div>
+<div class="footer-col"><h4>Explore</h4><a href="${p}#explorer">Interactive explorer</a><a href="${p}collections/">Collections</a><a href="${p}updates.html">Updates</a><a href="${REPO}#notably-not-free">Notably NOT free</a></div>
 <div class="footer-col"><h4>Data</h4><a href="${p}providers.json">providers.json</a><a href="${p}providers.csv">CSV export</a><a href="${p}providers.yaml">YAML export</a><a href="${REPO}/blob/main/data/schema.json">JSON Schema</a></div>
 <div class="footer-col"><h4>Project</h4><a href="${REPO}/blob/main/docs/methodology.md">Methodology</a><a href="${REPO}/blob/main/CONTRIBUTING.md">Contributing</a><a href="${REPO}/blob/main/CHANGELOG.md">Changelog</a><a href="${REPO}">GitHub ★</a></div>
 </div><div class="wrap footer-bottom"><a class="foot-logo" href="${p}" aria-label="Free LLM API Hub — home"><svg class="logo-mark"><use href="#logo"/></svg></a><p>Independent, community-maintained — not affiliated with any provider listed. Terms change without notice; always confirm against each provider's own docs. MIT licensed.</p><p class="foot-legal"><a href="${p}legal/privacy.html">Privacy</a> · <a href="${p}legal/terms.html">Terms</a> · Tweakeo, Inc.</p></div></footer>`;
@@ -286,6 +287,7 @@ function htmlPage({ title, desc, canonical, main, jsonld, prefix = '../', noinde
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="${SITE}/og.png">
+<link rel="alternate" type="application/rss+xml" title="Free LLM API Hub — updates" href="${prefix}feed.xml">
 <link rel="stylesheet" href="${prefix}styles.css">
 ${jsonld ? `<script type="application/ld+json">${jsonld}</script>` : ''}
 </head>
@@ -680,10 +682,41 @@ legalPage('terms', 'Terms of Use', `
 <p>Email <a href="mailto:admin@tweakeo.com">admin@tweakeo.com</a>.</p>
 `);
 
+// ---------- updates page + RSS feed (from git history; graceful if git is absent) ----------
+let commits = [];
+try {
+  const raw = execSync('git log -n 40 --date=short --pretty=format:%h%x1f%ad%x1f%s -- data README.md docs collections scripts site', { cwd: ROOT, encoding: 'utf8' });
+  commits = raw.split('\n')
+    .map((l) => { const [hash, date, subject] = l.split('\x1f'); return { hash, date, subject }; })
+    .filter((c) => c.subject && !/\[skip ci\]|refresh freshness badge/i.test(c.subject))
+    .slice(0, 25);
+} catch (_) { /* no git available — skip the feed */ }
+
+if (commits.length) {
+  const updItems = commits
+    .map((c) => `<li class="upd"><span class="upd-date">${c.date}</span> <a href="${REPO}/commit/${c.hash}" target="_blank" rel="noopener">${htmlEsc(c.subject)}</a></li>`)
+    .join('\n');
+  const updMain =
+    `<section class="page-hero"><div class="wrap"><nav class="crumbs"><a href="./">Home</a> / Updates</nav>` +
+    `<h1>Updates</h1><p class="lede">Every recent change to the dataset and site, newest first. Subscribe via <a href="feed.xml">RSS</a>.</p></div></section>` +
+    `<main id="main"><div class="wrap"><ul class="upd-list">${updItems}</ul></div></main>`;
+  writeFileSync(join(ROOT, 'site/updates.html'), htmlPage({ title: 'Updates · Free LLM API Hub', desc: 'Recent changes to the Free LLM API Hub dataset and site.', canonical: `${SITE}/updates.html`, main: updMain, prefix: '' }));
+
+  const rssItems = commits
+    .map((c) => `    <item><title>${htmlEsc(c.subject)}</title><link>${REPO}/commit/${c.hash}</link><guid isPermaLink="true">${REPO}/commit/${c.hash}</guid><pubDate>${new Date(c.date + 'T00:00:00Z').toUTCString()}</pubDate></item>`)
+    .join('\n');
+  const rss =
+    `<?xml version="1.0" encoding="UTF-8"?>\n<rss version="2.0"><channel>\n` +
+    `    <title>Free LLM API Hub — updates</title>\n    <link>${SITE}/</link>\n    <description>Changes to the continuously-verified free LLM &amp; AI-model API dataset.</description>\n` +
+    `${rssItems}\n</channel></rss>\n`;
+  writeFileSync(join(ROOT, 'site/feed.xml'), rss);
+}
+
 // ---------- sitemap.xml (site SEO) ----------
 const sitemapUrls = [
   `${SITE}/`,
   `${SITE}/collections/`,
+  ...(commits.length ? [`${SITE}/updates.html`] : []),
   ...COLLECTIONS.map((c) => `${SITE}/collections/${c.slug}.html`),
   ...providers.map((p) => `${SITE}/p/${p.slug}.html`),
 ];
