@@ -1,0 +1,24 @@
+# Line endings are normalized on commit and checked out as LF everywhere.
+#
+# Without this, a Windows editor can rewrite a whole file as CRLF and produce a
+# diff that touches every line while changing nothing — `scripts/build.mjs`
+# showed up once as 1247 insertions / 1247 deletions of identical content.
+# `text=auto` stores LF in the repository regardless of the platform.
+* text=auto eol=lf
+
+# Never normalize binaries.
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.ico  binary
+*.woff  binary
+*.woff2 binary
+*.pdf  binary
+
+# Generated artifacts: collapse them in PR diffs so a data change stays readable.
+README.md            linguist-generated=false
+data/providers.csv   linguist-generated=true
+data/providers.yaml  linguist-generated=true
+collections/*.md     linguist-generated=true
+site/**              linguist-generated=true
