@@ -2,7 +2,7 @@
 
 # Credit programs — apply to get (adjacent reference)
 
-The [main list](../README.md) is **self-serve** free APIs you can call today. This companion reference covers the other kind of "free": **credit programs you apply for** — startup programs and student/research programs. There are live web pages too: **[for startups](https://pacocartones.github.io/free-llm-api-hub/programs/startups.html)** · **[for students & researchers](https://pacocartones.github.io/free-llm-api-hub/programs/research.html)**.
+The [main list](../README.md) is **self-serve** free APIs you can call today. This companion reference covers the other kind of "free": **credit programs you apply for** — startup programs and student/research programs. There are live web pages too: **[for startups](https://freellmapihub.com/programs/startups.html)** · **[for students & researchers](https://freellmapihub.com/programs/research.html)**.
 
 They're genuinely valuable, but different enough that they're kept **out of the [main dataset](../data/providers.json)** on purpose (so it stays verified, self-serve and start-now):
 

@@ -4,7 +4,7 @@
 
 Free LLM API tiers that permit production/commercial use — not restricted to evaluation. Verified against each provider’s terms.
 
-[← All collections](README.md) · [Interactive explorer ↗](https://pacocartones.github.io/free-llm-api-hub/) · [Main list](../README.md)
+[← All collections](README.md) · [Interactive explorer ↗](https://freellmapihub.com/) · [Main list](../README.md)
 
 Free tiers that **allow commercial/production use** (`commercial_ok: true`). Eval-only tiers (Cohere trial keys, NVIDIA NIM, GitHub Models) are deliberately excluded — read their rows in the main list for the restriction.
 

@@ -4,7 +4,7 @@
 
 LLM APIs whose signup needs no SMS/phone verification — a live slice of a continuously-verified dataset.
 
-[← All collections](README.md) · [Interactive explorer ↗](https://pacocartones.github.io/free-llm-api-hub/) · [Main list](../README.md)
+[← All collections](README.md) · [Interactive explorer ↗](https://freellmapihub.com/) · [Main list](../README.md)
 
 Providers you can sign up for **without phone verification** (`phone_required: false`). Groq, Mistral, SiliconFlow and NVIDIA are excluded here because they gate signup behind a phone number.
 

@@ -82,7 +82,7 @@ function trialTable(rows) {
 }
 
 // ---------- editorial collections (generated from the data) ----------
-const SITE = 'https://pacocartones.github.io/free-llm-api-hub';
+const SITE = 'https://freellmapihub.com';
 
 const COLLECTIONS = [
   {

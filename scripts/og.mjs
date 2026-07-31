@@ -69,7 +69,7 @@ function tagSvg(label, title, subtitle) {
   <text x="80" y="180" fill="#3fce8f" font-size="24" font-weight="700" letter-spacing="6">&gt; ${esc(label)}</text>
   ${titleSvg}
   <text x="82" y="470" fill="#808f87" font-size="27">${esc(subtitle)}</text>
-  <text x="80" y="588" fill="#56655c" font-size="21">github.com/pacocartones/free-llm-api-hub</text>
+  <text x="80" y="588" fill="#56655c" font-size="21">freellmapihub.com</text>
 </svg>`;
 }
 

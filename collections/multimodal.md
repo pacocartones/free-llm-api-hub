@@ -4,7 +4,7 @@
 
 Free API tiers that go beyond text: vision, image, audio/speech, embeddings and rerank. A live slice of a verified dataset.
 
-[← All collections](README.md) · [Interactive explorer ↗](https://pacocartones.github.io/free-llm-api-hub/) · [Main list](../README.md)
+[← All collections](README.md) · [Interactive explorer ↗](https://freellmapihub.com/) · [Main list](../README.md)
 
 Free tiers that reach **beyond plain text** — vision, image, audio/speech, embeddings or rerank on the free plan.
 

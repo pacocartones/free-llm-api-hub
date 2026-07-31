@@ -4,7 +4,7 @@
 
 LLM APIs with models priced at $0 on an ongoing basis — no trial window counting down. Verified from a live dataset.
 
-[← All collections](README.md) · [Interactive explorer ↗](https://pacocartones.github.io/free-llm-api-hub/) · [Main list](../README.md)
+[← All collections](README.md) · [Interactive explorer ↗](https://freellmapihub.com/) · [Main list](../README.md)
 
 Providers with models that are **free on a permanent basis** (`free_type: perpetual`) — not a trial credit that runs out. Rate limits still apply; check each row.
 

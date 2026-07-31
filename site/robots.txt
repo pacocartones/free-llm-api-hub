@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://pacocartones.github.io/free-llm-api-hub/sitemap.xml
+Sitemap: https://freellmapihub.com/sitemap.xml

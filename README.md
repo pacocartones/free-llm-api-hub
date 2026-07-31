@@ -13,7 +13,7 @@ No hype, no dead links, no "generous limits" hand-waving. Just what's actually f
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
-**[🔎 Interactive explorer](https://pacocartones.github.io/free-llm-api-hub/)** &nbsp;·&nbsp; **[📊 Dataset](data/providers.json)** &nbsp;·&nbsp; **[🧪 How we verify](docs/methodology.md)** &nbsp;·&nbsp; **[➕ Add a provider](CONTRIBUTING.md)**
+**[🔎 Interactive explorer](https://freellmapihub.com/)** &nbsp;·&nbsp; **[📊 Dataset](data/providers.json)** &nbsp;·&nbsp; **[🧪 How we verify](docs/methodology.md)** &nbsp;·&nbsp; **[➕ Add a provider](CONTRIBUTING.md)**
 
 <!-- AUTOGEN:stats:start -->
 **61 providers** tracked · 36 ongoing free tiers · 25 trial credits · **61/61** independently verified against the provider's own docs
@@ -56,7 +56,7 @@ Primarily **free LLM (text) APIs** — plus the adjacent model APIs a builder re
 | **OCR / documents** | 5 | OCR.space, LlamaParse, Nanonets |
 <!-- AUTOGEN:coverage:end -->
 
-Filter any category live in the [interactive explorer](https://pacocartones.github.io/free-llm-api-hub/) or the [multimodal collection](collections/multimodal.md).
+Filter any category live in the [interactive explorer](https://freellmapihub.com/) or the [multimodal collection](collections/multimodal.md).
 
 ## TL;DR — pick by what you actually need
 
@@ -84,15 +84,15 @@ Starting points, not guarantees — read the full row before you build on it.
 Focused, always-current collections — each is generated from the dataset and has a live web page too.
 
 <!-- AUTOGEN:collections:start -->
-- **[Free LLM APIs with no credit card](collections/no-credit-card.md)** (36) — start without a payment method · [live page ↗](https://pacocartones.github.io/free-llm-api-hub/collections/no-credit-card.html)
-- **[Free LLM APIs with no phone verification](collections/no-phone.md)** (21) — no SMS/phone verification · [live page ↗](https://pacocartones.github.io/free-llm-api-hub/collections/no-phone.html)
-- **[Free LLM APIs for commercial use](collections/commercial-use.md)** (20) — safe to ship, not eval-only · [live page ↗](https://pacocartones.github.io/free-llm-api-hub/collections/commercial-use.html)
-- **[OpenAI-compatible free LLM APIs](collections/openai-compatible.md)** (30) — drop-in OpenAI SDK swap · [live page ↗](https://pacocartones.github.io/free-llm-api-hub/collections/openai-compatible.html)
-- **[Permanently free LLM APIs](collections/always-free.md)** (5) — $0 models, no trial clock · [live page ↗](https://pacocartones.github.io/free-llm-api-hub/collections/always-free.html)
-- **[Free multimodal LLM APIs](collections/multimodal.md)** (44) — vision, audio, embeddings · [live page ↗](https://pacocartones.github.io/free-llm-api-hub/collections/multimodal.html)
+- **[Free LLM APIs with no credit card](collections/no-credit-card.md)** (36) — start without a payment method · [live page ↗](https://freellmapihub.com/collections/no-credit-card.html)
+- **[Free LLM APIs with no phone verification](collections/no-phone.md)** (21) — no SMS/phone verification · [live page ↗](https://freellmapihub.com/collections/no-phone.html)
+- **[Free LLM APIs for commercial use](collections/commercial-use.md)** (20) — safe to ship, not eval-only · [live page ↗](https://freellmapihub.com/collections/commercial-use.html)
+- **[OpenAI-compatible free LLM APIs](collections/openai-compatible.md)** (30) — drop-in OpenAI SDK swap · [live page ↗](https://freellmapihub.com/collections/openai-compatible.html)
+- **[Permanently free LLM APIs](collections/always-free.md)** (5) — $0 models, no trial clock · [live page ↗](https://freellmapihub.com/collections/always-free.html)
+- **[Free multimodal LLM APIs](collections/multimodal.md)** (44) — vision, audio, embeddings · [live page ↗](https://freellmapihub.com/collections/multimodal.html)
 <!-- AUTOGEN:collections:end -->
 
-Every provider also has its own page with the full details and a copy-ready quickstart — e.g. [Groq](https://pacocartones.github.io/free-llm-api-hub/p/groq.html), [Deepgram](https://pacocartones.github.io/free-llm-api-hub/p/deepgram.html), [Jina AI](https://pacocartones.github.io/free-llm-api-hub/p/jina-ai.html).
+Every provider also has its own page with the full details and a copy-ready quickstart — e.g. [Groq](https://freellmapihub.com/p/groq.html), [Deepgram](https://freellmapihub.com/p/deepgram.html), [Jina AI](https://freellmapihub.com/p/jina-ai.html).
 
 ## Contents
 
@@ -213,7 +213,7 @@ What "verified" covers and where its limits are: [docs/methodology.md](docs/meth
 This is meant to be consumed by machines as much as by humans.
 
 - **[`data/providers.json`](data/providers.json)** — canonical dataset, validated against [`data/schema.json`](data/schema.json). Every field explained in [docs/comparison-dimensions.md](docs/comparison-dimensions.md).
-- **Portable exports** — [`providers.csv`](data/providers.csv) and [`providers.yaml`](data/providers.yaml), regenerated on every change. The [explorer](https://pacocartones.github.io/free-llm-api-hub/) can also export your current filter.
+- **Portable exports** — [`providers.csv`](data/providers.csv) and [`providers.yaml`](data/providers.yaml), regenerated on every change. The [explorer](https://freellmapihub.com/) can also export your current filter.
 
 ```bash
 # Every ongoing free tier that needs neither a card nor a phone number:
@@ -235,12 +235,12 @@ It renders the real, auditable freshness count — not a static "as of some date
 
 ```html
 <div id="flh-widget" data-count="6" data-modality="text"></div>
-<script src="https://pacocartones.github.io/free-llm-api-hub/widget.js" async></script>
+<script src="https://freellmapihub.com/widget.js" async></script>
 ```
 
 Self-contained (inline styles, no CSS conflicts). `data-modality` is optional (`text`, `audio`, `embeddings`, `image`, `vision`, `ocr`, `rerank`).
 
-**Follow changes** — [updates page](https://pacocartones.github.io/free-llm-api-hub/updates.html) or the [RSS feed](https://pacocartones.github.io/free-llm-api-hub/feed.xml).
+**Follow changes** — [updates page](https://freellmapihub.com/updates.html) or the [RSS feed](https://freellmapihub.com/feed.xml).
 
 ## Contributing
 

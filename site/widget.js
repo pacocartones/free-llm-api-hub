@@ -1,13 +1,13 @@
 /* Free LLM API Hub — embeddable widget.
    Drop this on any page:
      <div id="flh-widget" data-count="6" data-modality="text"></div>
-     <script src="https://pacocartones.github.io/free-llm-api-hub/widget.js" async></script>
+     <script src="https://freellmapihub.com/widget.js" async></script>
    Renders a compact, always-current list of top verified free APIs, linking back.
    Self-contained: inline styles only, no dependency on the host page's CSS. */
 (function () {
   var el = document.getElementById('flh-widget') || document.querySelector('[data-flh-widget]');
   if (!el) return;
-  var SITE = 'https://pacocartones.github.io/free-llm-api-hub';
+  var SITE = 'https://freellmapihub.com';
   var count = Math.max(1, Math.min(20, parseInt(el.getAttribute('data-count') || '6', 10)));
   var modality = el.getAttribute('data-modality');
   var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };

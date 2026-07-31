@@ -33,4 +33,4 @@ How **Free LLM API Hub** works — how entries are verified, what earns a spot, 
 
 ---
 
-← [Back to the main README](../README.md) &nbsp;·&nbsp; [Interactive explorer ↗](https://pacocartones.github.io/free-llm-api-hub/)
+← [Back to the main README](../README.md) &nbsp;·&nbsp; [Interactive explorer ↗](https://freellmapihub.com/)

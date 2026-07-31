@@ -96,8 +96,8 @@ only what confirms.
 ## Recently shipped
 
 - ✅ `models_free` with an automated live refresh (`scripts/fetch-models.mjs`); 14/51 providers on real `/models` data (OpenRouter, GitHub Models, Pollinations, NVIDIA NIM, ModelScope, Ollama Cloud).
-- ✅ Searchable [free model index](https://pacocartones.github.io/free-llm-api-hub/models/) (`/models/`).
-- ✅ Five data-generated [SEO guides](https://pacocartones.github.io/free-llm-api-hub/guides/) with editorial top picks + `FAQPage` structured data.
+- ✅ Searchable [free model index](https://freellmapihub.com/models/) (`/models/`).
+- ✅ Five data-generated [SEO guides](https://freellmapihub.com/guides/) with editorial top picks + `FAQPage` structured data.
 - ✅ Credit programs split into two standalone pages (startups / students & research).
 - ✅ Provider pages: prominent free-models block, modality-aware quickstart with a real model, freshness read-out, cross-links to guides & collections.
 
