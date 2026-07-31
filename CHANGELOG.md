@@ -8,6 +8,8 @@ Notable changes to the dataset and the project. Format based on [Keep a Changelo
 ## [Unreleased]
 
 ### Site
+- **UI redesign (from user feedback).** Navbar: "Home" + a per-tab icon. Hero: mono terminal H1 with a fail-safe reveal animation + centered popular links. Home explorer **table rebuilt** — name-only left column linking to each provider's card, access flags as compact icons, no external docs links or base-URL clutter, no Export buttons, filters + quick-picks merged into one row, bigger headers, wider table. **Footer** redesigned with the contact email under Privacy · Terms. **Provider cards**: centered header + a "Visit website" button (distinct green) alongside "Official docs".
+- **Animated terminal-demo SVG** in the README (`assets/demo.svg`) — types a live `curl` to `/api/v1`.
 - **Custom domain — [freellmapihub.com](https://freellmapihub.com/).** All absolute URLs (canonical, OG, sitemap, JSON-LD, RSS) now point at the apex domain; `site/CNAME` added for GitHub Pages.
 - **Static JSON API** ([`/api/v1/`](https://freellmapihub.com/api/)) — the dataset as versioned, machine-readable JSON at stable URLs: full providers + programs, plus pre-filtered slices by category, constraint and modality. No server, no auth, no rate limits, CORS-open.
 - **`llms.txt` + `llms-full.txt`** ([llmstxt.org](https://llmstxt.org/)) so AI agents can consume the hub directly — a concise index and the full provider list expanded as markdown.
@@ -18,6 +20,8 @@ Notable changes to the dataset and the project. Format based on [Keep a Changelo
 - **Explorer table polish** — desktop zebra striping, a sortable-column affordance, a width cap on the widest column; and a client-side **NEW** marker on recently-added providers.
 
 ### Data
+- **7 more verified providers → 68 (schema → 2.6.0).** poolside (coding LLMs, OpenAI-compatible), Upstage (Solar LLM + document OCR, $10 no-card credit), Veryfi (free-forever document OCR), Voicegain ($50 no-card STT), Smallest.ai ($10 TTS + voice cloning), Retell AI ($10 voice agents), Datalab/Marker-Surya ($5 OCR). Held for lack of a citable/quantifiable free tier: MiniMax, Replicate.
+- **Per-provider change history** mined from the git log of `providers.json`, on each `/p/` page and at `/api/v1/history.json`.
 - **`added` provenance field (schema → 2.5.0).** Optional `YYYY-MM-DD` date recording when a provider first entered the dataset; drives the client-side "new" marker on the explorer and an "Added to the hub" line on provider pages. Backfilled for the 10 providers added this cycle.
 - **10 new verified providers → 61.** Net-new free tiers, each cited to the provider's own docs and confirmed activatable without a credit card blocking access: **Voyage AI** (embeddings + rerank, 200M free tokens), **Contextual AI** ($25 credits, reranker), **Cartesia** / **LMNT** / **Fish Audio** / **Camb.ai** (TTS/STT free tiers), **Rev AI** (5h free speech-to-text), **Unstructured** & **Nutrient** (document parsing / OCR, renewing monthly), **Photoroom** (background removal / image editing). Commercial/card catches recorded honestly via flags (e.g. the Cartesia/LMNT/Fish free tiers are non-commercial). Balanced across modalities to broaden adjacent coverage without diluting the LLM-first scope.
 - **5 new apply-to-get credit programs → 28.** Startups: Perplexity for Startups ($5k Sonar credits), DigitalOcean Hatch, Pinecone Startup, Weaviate Startup Deal. Students: Perplexity for Students. Vector-DB programs flagged `funds: no` (RAG infra, not model inference).
