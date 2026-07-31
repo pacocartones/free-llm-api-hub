@@ -1,0 +1,28 @@
+# The repo has zero runtime dependencies, so the surface here is small on
+# purpose: pinned GitHub Actions (the real supply-chain risk in a workflow-heavy
+# repo) and the single devDependency used to render social images.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    commit-message:
+      prefix: "chore(ci)"
+    labels:
+      - maintenance
+    groups:
+      actions:
+        patterns:
+          - "*"
+
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    commit-message:
+      prefix: "chore(deps)"
+    labels:
+      - maintenance
