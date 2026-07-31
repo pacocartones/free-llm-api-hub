@@ -19,10 +19,13 @@ A living, maintainer-facing checklist of concrete follow-ups. Direction and prin
 
 ## Site & SEO
 
-- [ ] **Per-page OG images for `/models/` and `/guides/`** (they currently fall back to the generic `og.png`). Extend `scripts/og.mjs` the way collections already do.
+- ✅ **Per-page OG images for `/models/` and `/guides/`.** `og.mjs` generalized (`tagSvg`) to render one per guide + one for the model index; wired via `ogImage` in build.mjs.
 - ✅ **Mobile navigation.** Added an accessible hamburger toggle (in the shared `site.js`, so identical on the homepage and every generated page) that drops the nav down as a panel below 900px; closes on link-follow / Escape / outside-click. Also surfaced **Guides** in the primary nav (was footer/hero-only).
-- [ ] Link guides contextually from collection pages (and vice-versa) where the slice overlaps.
-- [ ] FAQ blocks on the highest-traffic collection pages too (guides already have `FAQPage` JSON-LD).
+- ✅ **Guides ↔ collections cross-links** and ✅ **FAQ blocks** (with `FAQPage` JSON-LD) on the higher-traffic collections.
+- ✅ **Two new modality guides** — image generation + OCR/document-AI (7 guides total), mapping onto the new providers.
+- ✅ **Explorer table polish** — desktop zebra striping, sortable-column affordance, width cap on the widest column, and a client-side **NEW** marker (via the new `added` field).
+- [ ] Consider a per-provider OG image (currently provider pages use the generic `og.png`).
+- [ ] Optional: export `added` in the CSV/YAML column set (currently JSON-only).
 
 ## Dataset / schema
 
