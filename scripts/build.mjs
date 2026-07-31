@@ -417,6 +417,10 @@ const siteFooter = (p) => `<footer class="site-footer"><div class="wrap footer-t
 </div><div class="wrap footer-bottom"><p>Independent, community-maintained — not affiliated with any provider listed. Terms change without notice; always confirm against each provider's own docs. MIT licensed.</p><p class="foot-legal"><a href="${p}legal/privacy.html">Privacy</a> · <a href="${p}legal/terms.html">Terms</a></p><p class="foot-email"><a href="mailto:admin@freellmapihub.com">admin@freellmapihub.com</a></p></div></footer>`;
 
 // Full page wrapper for generated (collection) pages. `p` is the path prefix to the site root.
+// Theme guard — runs before first paint to avoid the white flash. ONE source, shared by
+// htmlPage() (every generated page) and site/index.html (injected via AUTOGEN:themeguard).
+const THEME_GUARD = `<script>(function(){try{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: light)').matches?'light':'dark');document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>`;
+
 function htmlPage({ title, desc, canonical, main, jsonld, prefix = '../', noindex = false, ogImage = `${SITE}/og.png` }) {
   return `<!DOCTYPE html>
 <html lang="en" data-theme="dark">
@@ -425,7 +429,7 @@ function htmlPage({ title, desc, canonical, main, jsonld, prefix = '../', noinde
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>${htmlEsc(title)}</title>
 <meta name="description" content="${htmlEsc(desc)}">${noindex ? '\n<meta name="robots" content="noindex">' : ''}
-<script>(function(){try{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: light)').matches?'light':'dark');document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+${THEME_GUARD}
 <link rel="canonical" href="${htmlEsc(canonical)}">
 <link rel="icon" href="${prefix}favicon.svg" type="image/svg+xml">
 <link rel="preload" href="${prefix}fonts/jetbrains-mono-700.woff2" as="font" type="font/woff2" crossorigin>
@@ -550,6 +554,7 @@ const homeRows = explorerRowsHtml([...providers].sort((a, b) => recScore(b) - re
 const publicProviders = providers.map(({ env_key, ...rest }) => rest);
 const inlineData = `<script type="application/json" id="providers-data">${JSON.stringify({ providers: publicProviders }).replace(/</g, '\\u003c')}</script>`;
 let indexHtml = readFileSync(join(ROOT, 'site/index.html'), 'utf8');
+indexHtml = inject(indexHtml, 'themeguard', THEME_GUARD);
 indexHtml = inject(indexHtml, 'rows', homeRows);
 indexHtml = inject(indexHtml, 'data', inlineData);
 writeFileSync(join(ROOT, 'site/index.html'), indexHtml);
