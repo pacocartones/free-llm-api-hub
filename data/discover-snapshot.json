@@ -1,0 +1,29 @@
+{
+  "note": "Snapshot of OpenRouter :free model IDs and publishers, written by scripts/discover.mjs. Used only to diff what is NEW between runs; not part of the build. Safe to delete (re-baselines on next run).",
+  "generated": "2026-07-31",
+  "free_model_count": 14,
+  "publishers": [
+    "cohere",
+    "google",
+    "inclusionai",
+    "nvidia",
+    "openai",
+    "poolside"
+  ],
+  "free_model_ids": [
+    "cohere/north-mini-code:free",
+    "google/gemma-4-26b-a4b-it:free",
+    "google/gemma-4-31b-it:free",
+    "inclusionai/ling-3.0-flash:free",
+    "nvidia/nemotron-3-nano-30b-a3b:free",
+    "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
+    "nvidia/nemotron-3-super-120b-a12b:free",
+    "nvidia/nemotron-3-ultra-550b-a55b:free",
+    "nvidia/nemotron-3.5-content-safety:free",
+    "nvidia/nemotron-nano-12b-v2-vl:free",
+    "nvidia/nemotron-nano-9b-v2:free",
+    "openai/gpt-oss-20b:free",
+    "poolside/laguna-s-2.1:free",
+    "poolside/laguna-xs-2.1:free"
+  ]
+}

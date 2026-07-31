@@ -23,8 +23,10 @@ Run these on the monthly "what's new" scan (see the
 [update playbook](update-playbook.md)):
 
 1. **OpenRouter `/api/v1/models`** — unauthenticated JSON with `:free` variants
-   that rotate ~weekly. The single best _automatable_ discovery diff; already
-   partly consumed by [`scripts/fetch-models.mjs`](../scripts/fetch-models.mjs).
+   that rotate ~weekly. The single best _automatable_ discovery diff.
+   **`npm run discover`** ([`scripts/discover.mjs`](../scripts/discover.mjs))
+   reports what's new since the last snapshot and which publishers with free
+   models we don't yet list as a first-party provider.
 2. **[cheahjs/free-llm-api-resources](https://github.com/cheahjs/free-llm-api-resources)**
    — the incumbent, high-trust (cites official docs, excludes proxies,
    bot-updated). Benchmark our coverage and freshness against it.

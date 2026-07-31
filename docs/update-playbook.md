@@ -39,6 +39,7 @@ Open the **`🕝 Weekly re-verification worklist`** issue and work top-down. For
 
 ### Also scan for what's new (monthly is enough)
 
+- **Run `npm run discover`** — diffs OpenRouter's live `:free` catalog against the last snapshot and flags new free models plus publishers we don't list as a first-party provider (leads). Triage each lead against the [inclusion criteria](inclusion-criteria.md); `npm run discover -- --write` re-baselines the snapshot. See [sources.md](sources.md) for the wider source map.
 - New providers or promos worth adding? Check the [inclusion criteria](inclusion-criteria.md), then add via a PR or the [new-provider form](../../issues/new?template=new-provider.yml).
 - Watch the usual movers: Gemini limits, Cloudflare Neuron pricing, and any "trial credit" amounts (these change most often). The model *lists* (OpenRouter, Groq, Cerebras, etc.) are refreshed automatically by `npm run models` / the weekly job — you only need to eyeball its diff.
 - Backfill attribute fields still `null`: `openai_base_url`, and any missing `openai_compatible` / `modalities`.

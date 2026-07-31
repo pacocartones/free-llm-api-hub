@@ -60,6 +60,10 @@ only what confirms.
   appears.
 - [ ] **Speech tail:** Voicegain ($50 STT credits, no card), Smallest.ai ($10),
   Retell AI ($10 voice-agent), Camb.ai already added.
+- [ ] **From `npm run discover` (2026-07-31):** `inclusionai` (InclusionAI /
+  Ant Group — Ling/Bailing models appear free on OpenRouter) and `poolside` show
+  free models we don't cover — check whether either lab exposes its OWN direct
+  free API tier before adding.
 - [ ] **Chinese labs (region-gated):** Baidu Qianfan / ERNIE (1M free tokens per
   model, big catalog), ByteDance Volcengine/Doubao, StepFun, SenseNova — real free
   tiers but mainland phone/ID gates make them poor fits for an international
@@ -71,13 +75,15 @@ only what confirms.
 
 ## Discovery & research infrastructure
 
-- [ ] **Automate the OpenRouter `:free` diff.** `openrouter.ai/api/v1/models` is
-  unauthenticated JSON whose `:free` variants rotate weekly — diff it on a
-  schedule to surface new free models/publishers onto the new-provider worklist
-  (extends `fetch-models.mjs` or a new `scripts/discover.mjs`). No hallucination
-  risk: it's the provider's own live catalog.
+- ✅ **Automated the OpenRouter `:free` diff** — [`scripts/discover.mjs`](../scripts/discover.mjs)
+  (`npm run discover`, `--write` to snapshot, `--json` for machine output). Reads
+  OpenRouter's unauthenticated `/api/v1/models`, keeps `:free` variants, and
+  reports what's NEW since the last snapshot plus **publishers with free models
+  we don't list as a first-party provider** (leads). Never edits the dataset.
 - [ ] Track the competitive/lead sources in [sources.md](sources.md) on the
   monthly scan; benchmark our freshness against cheahjs.
+- [ ] Consider a second discovery feed (models.dev or the Portkey pricing
+  dataset) behind the same `discover.mjs` report, for cross-checking.
 
 ## Bigger bets (under consideration)
 
