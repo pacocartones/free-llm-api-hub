@@ -361,8 +361,11 @@ pre:hover .pre-copy, .pre-copy:focus-visible { opacity: 1; }
 /* ---------- footer ---------- */
 .site-footer { border-top: 1px solid var(--border); background: var(--bg-elev); color: var(--muted); font-size: .87rem; }
 .footer-top { display: grid; grid-template-columns: 1.6fr 1fr 1fr 1fr; gap: 28px; padding: 40px 0 30px; }
-.footer-brand .star-btn { margin-bottom: 16px; }
-.footer-brand p { max-width: 34ch; margin: 0; color: var(--muted); line-height: 1.55; }
+.foot-brand-link { display: inline-flex; align-items: center; gap: 10px; margin-bottom: 14px; color: var(--text); font-family: var(--font-mono); font-weight: 700; font-size: 1.02rem; }
+.foot-brand-link .logo-mark { width: 26px; height: 26px; }
+.foot-brand-link:hover { text-decoration: none; }
+.footer-brand p { max-width: 36ch; margin: 0; color: var(--muted); line-height: 1.55; }
+.footer-brand .star-btn { margin-top: 18px; }
 .footer-col h4 { position: relative; display: inline-block; font-size: .78rem; text-transform: uppercase; letter-spacing: .09em; color: var(--text); margin: 2px 0 16px; padding-bottom: 8px; font-family: var(--font-mono); font-weight: 700; }
 .footer-col h4::after { content: ""; position: absolute; left: 0; bottom: 0; width: 22px; height: 2px; background: var(--accent); border-radius: 2px; }
 .footer-col a { display: block; color: var(--muted); padding: 4px 0; }
@@ -372,6 +375,9 @@ pre:hover .pre-copy, .pre-copy:focus-visible { opacity: 1; }
 .footer-bottom .foot-logo .logo-mark { width: 26px; height: 26px; }
 .footer-bottom p { margin: 0; max-width: 72ch; line-height: 1.6; }
 .footer-bottom .foot-legal { color: var(--faint); }
+.footer-bottom .foot-email { margin: 2px 0 0; font-family: var(--font-mono); font-size: .82rem; }
+.footer-bottom .foot-email a { color: var(--muted); }
+.footer-bottom .foot-email a:hover { color: var(--accent); }
 .footer-bottom a { color: var(--muted); }
 
 /* ---------- micro-interactions ---------- */
