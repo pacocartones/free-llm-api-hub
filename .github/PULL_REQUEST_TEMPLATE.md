@@ -10,8 +10,15 @@
 
 ## Checklist
 
-- [ ] I edited **`data/providers.json`** only — not the generated README tables, badge, or exports.
-- [ ] I ran `npm run build` and committed the regenerated files.
-- [ ] I ran `npm test` (dataset validation) and it passed.
+- [ ] I edited **`data/providers.json`** and nothing else.
+- [ ] I ran `npm test` and the dataset validation passed.
 - [ ] For a verified change, I set `verified: true` **with** a `last_verified` date (today) **and** a real `docs_url`.
 - [ ] For anything I couldn't confirm against the provider's own docs, I left it `verified: false` and explained what's unconfirmed.
+
+<!--
+You do NOT need to run the build or commit any generated file. The README tables,
+the freshness badge, the CSV/YAML exports, the collections and the site payload are
+rebuilt automatically once this lands on main (.github/workflows/regenerate.yml).
+
+If CI reports that generated files are out of sync, that's expected and informational.
+-->
