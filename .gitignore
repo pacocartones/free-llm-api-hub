@@ -1,6 +1,7 @@
 # Internal working docs — never publish
 free-llm-api-hub-brief.md
 *.brief.md
+_internal-docs/
 
 # Generated site payload (build.mjs regenerates these during the Pages build)
 site/providers.json
