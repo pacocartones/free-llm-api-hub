@@ -1,0 +1,6 @@
+# Every path in this repository is owned by the maintainer, so every pull request
+# requests their review automatically. The dataset is the product here: a change to
+# a rate limit or an honesty flag is reviewed for its source, not just its syntax.
+#
+# See GOVERNANCE.md for how that review works and how someone becomes a maintainer.
+* @pacocartones
