@@ -30,7 +30,7 @@ A living, maintainer-facing checklist of concrete follow-ups. Direction and prin
 ## Dataset / schema
 
 - [ ] `speed_tier` (or tokens/sec) as a defensible, sourced field → enables an honest "fastest free LLM APIs" collection.
-- [ ] **Stable release tag per dataset `version`** so downstream consumers can pin a snapshot.
+- ✅ **Stable release tag per dataset `version`** — tagging `vX.Y.Z` at each schema/dataset version so downstream consumers can pin a snapshot (e.g. `v2.5.0`). Tag each future version bump.
 - [ ] History / diffs: track how a provider's free tier changed over time (a generated changelog per provider from git history of `data/providers.json`).
 
 ## Provider leads — verify before adding
@@ -90,7 +90,7 @@ only what confirms.
 
 ## Bigger bets (under consideration)
 
-- [ ] A small documented public JSON API over the dataset (hosted endpoint with query params).
+- ✅ **Small documented public JSON API over the dataset** — shipped as a *static* versioned API at [`/api/v1/`](https://freellmapihub.com/api/) (full + slices by category/constraint/modality) plus `llms.txt`/`llms-full.txt` for agents. No query params (static hosting); slices cover the common filters.
 - [ ] Free AI **coding tools** as a clearly-separated sibling section (volatile — kept out of the verified self-serve dataset, like the credit-programs and self-hosting companions).
 
 ## Recently shipped

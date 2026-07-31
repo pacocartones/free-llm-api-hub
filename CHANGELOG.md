@@ -8,6 +8,9 @@ Notable changes to the dataset and the project. Format based on [Keep a Changelo
 ## [Unreleased]
 
 ### Site
+- **Custom domain — [freellmapihub.com](https://freellmapihub.com/).** All absolute URLs (canonical, OG, sitemap, JSON-LD, RSS) now point at the apex domain; `site/CNAME` added for GitHub Pages.
+- **Static JSON API** ([`/api/v1/`](https://freellmapihub.com/api/)) — the dataset as versioned, machine-readable JSON at stable URLs: full providers + programs, plus pre-filtered slices by category, constraint and modality. No server, no auth, no rate limits, CORS-open.
+- **`llms.txt` + `llms-full.txt`** ([llmstxt.org](https://llmstxt.org/)) so AI agents can consume the hub directly — a concise index and the full provider list expanded as markdown.
 - **Mobile navigation** — the primary nav was `display:none` on phones with no replacement; added an accessible hamburger menu (in the shared `site.js`, identical on every page) that closes on link-follow / Escape / outside-click. **Guides** surfaced in the primary nav.
 - **Two new modality guides** — `free-image-generation-apis` and `free-ocr-document-ai-apis` (7 guides total), with `FAQPage` structured data, mapping onto the newly-added image/OCR providers.
 - **Collection ↔ guide cross-links and FAQ blocks** (with `FAQPage` JSON-LD) on the higher-traffic collections.
