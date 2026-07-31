@@ -363,7 +363,7 @@ pre:hover .pre-copy, .pre-copy:focus-visible { opacity: 1; }
 
 /* ---------- responsive ---------- */
 @media (max-width: 860px) { .footer-top { grid-template-columns: 1fr 1fr; } }
-@media (max-width: 760px) {
+@media (max-width: 900px) {
   .nav-toggle { display: inline-flex; }
   .nav {
     position: absolute; top: var(--header-h); left: 0; right: 0;

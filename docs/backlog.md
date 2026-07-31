@@ -20,7 +20,7 @@ A living, maintainer-facing checklist of concrete follow-ups. Direction and prin
 ## Site & SEO
 
 - [ ] **Per-page OG images for `/models/` and `/guides/`** (they currently fall back to the generic `og.png`). Extend `scripts/og.mjs` the way collections already do.
-- [ ] **Mobile navigation.** `.nav` is `display:none` below 760px with no replacement, so the header links are unreachable on phones. Add a compact menu (details/summary or a small toggle) — same markup on every page.
+- ✅ **Mobile navigation.** Added an accessible hamburger toggle (in the shared `site.js`, so identical on the homepage and every generated page) that drops the nav down as a panel below 900px; closes on link-follow / Escape / outside-click. Also surfaced **Guides** in the primary nav (was footer/hero-only).
 - [ ] Link guides contextually from collection pages (and vice-versa) where the slice overlaps.
 - [ ] FAQ blocks on the highest-traffic collection pages too (guides already have `FAQPage` JSON-LD).
 
