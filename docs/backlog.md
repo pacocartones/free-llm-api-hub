@@ -30,6 +30,55 @@ A living, maintainer-facing checklist of concrete follow-ups. Direction and prin
 - [ ] **Stable release tag per dataset `version`** so downstream consumers can pin a snapshot.
 - [ ] History / diffs: track how a provider's free tier changed over time (a generated changelog per provider from git history of `data/providers.json`).
 
+## Provider leads — verify before adding
+
+Researched 2026-07-31 but held out of the dataset because the free access could
+not be cleanly cited to the provider's own page _today_, or is card/region-gated.
+Re-check each against the [inclusion criteria](inclusion-criteria.md); promote
+only what confirms.
+
+- [ ] **MiniMax** (LLM) — OpenAI-compatible confirmed (`https://api.minimax.io/v1`,
+  also an Anthropic-compatible path), internationally reachable email signup, but
+  **no free-trial credit is documented** on its pricing/docs pages (campaign-
+  dependent). The most-wanted net-new LLM — confirm a citable free tier (or probe
+  a fresh signup) before adding. Also Anthropic-compatible worth noting.
+- [ ] **Upstage** (Solar LLM + Document Parse/OCR) — high-value LLM+OCR combo, but
+  the free amount is fuzzy on the pricing page ("10 free runs" on Studio) and the
+  Solar base URL/OpenAI-compat wasn't confirmable on-page. Verify via
+  `console.upstage.ai/docs`.
+- [ ] **Veryfi** (OCR) — pricing page shows both "Free Forever 100 docs/mo" and a
+  "14-day trial, no card" — contradictory; resolve which is current.
+- [ ] **Replicate** (image/video) — "run select models for free… after a bit
+  you'll be asked to set up billing"; no card to start but the free amount isn't
+  quantified. Add only if a concrete allowance can be cited.
+- [ ] **Alibaba Cloud (Catalyst) Startup** program — page is JS-rendered/blank to
+  fetch; agent-sourced ~$120k credits + Qwen Model Studio. Confirm the page and
+  terms, then add to [programs](credit-programs.md).
+- [ ] **OCR / doc-AI tail** (each has a real free/trial tier per research, held to
+  avoid tilting the dataset into an OCR directory): Datalab, Reducto, ABBYY Cloud
+  OCR SDK, Parsio, Airparser, Extracta.ai, Pen-to-Print. Add selectively if a gap
+  appears.
+- [ ] **Speech tail:** Voicegain ($50 STT credits, no card), Smallest.ai ($10),
+  Retell AI ($10 voice-agent), Camb.ai already added.
+- [ ] **Chinese labs (region-gated):** Baidu Qianfan / ERNIE (1M free tokens per
+  model, big catalog), ByteDance Volcengine/Doubao, StepFun, SenseNova — real free
+  tiers but mainland phone/ID gates make them poor fits for an international
+  builder audience. Revisit if any drops the ID wall for overseas devs.
+- [ ] **Explicitly NOT free (do not add; leave in "Notably NOT free" thinking):**
+  Moonshot/Kimi intl (needs ≥$1 recharge), DeepInfra, Chutes, Together AI &
+  Hyperbolic (historic signup credit no longer documented — recheck later),
+  Parasail, GMICloud, Inference.net, Lepton (folded into NVIDIA), Nomic (pivoted).
+
+## Discovery & research infrastructure
+
+- [ ] **Automate the OpenRouter `:free` diff.** `openrouter.ai/api/v1/models` is
+  unauthenticated JSON whose `:free` variants rotate weekly — diff it on a
+  schedule to surface new free models/publishers onto the new-provider worklist
+  (extends `fetch-models.mjs` or a new `scripts/discover.mjs`). No hallucination
+  risk: it's the provider's own live catalog.
+- [ ] Track the competitive/lead sources in [sources.md](sources.md) on the
+  monthly scan; benchmark our freshness against cheahjs.
+
 ## Bigger bets (under consideration)
 
 - [ ] A small documented public JSON API over the dataset (hosted endpoint with query params).

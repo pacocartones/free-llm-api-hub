@@ -15,6 +15,7 @@ How **Free LLM API Hub** works — how entries are verified, what earns a spot, 
 | Doc | What it covers |
 |---|---|
 | [Update playbook](update-playbook.md) | The weekly routine that keeps the freshness badge green |
+| [Discovery sources & competitive map](sources.md) | Where new providers are found, which lists to trust, and how we differ from rivals |
 | [Live testing](live-testing.md) | Probing each free tier with a real key — `last_probed`, and the Infisical setup |
 | [Roadmap](roadmap.md) | Where the project is going next |
 | [Backlog](backlog.md) | The living, actionable to-do checklist |
