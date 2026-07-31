@@ -325,6 +325,14 @@ pre:hover .pre-copy, .pre-copy:focus-visible { opacity: 1; }
 .prov-summary h3 { margin: 0 0 6px; font-size: .74rem; text-transform: uppercase; letter-spacing: .06em; color: var(--accent); font-weight: 700; }
 .prov-summary p { margin: 0; font-size: 1.04rem; line-height: 1.55; }
 .prov-actions { margin-top: 18px; display: flex; flex-wrap: wrap; gap: 10px; }
+/* Provider card hero — centered header, breadcrumbs, badges and actions. */
+.prov-hero { text-align: center; }
+.prov-hero .crumbs, .prov-hero h1 { text-align: center; }
+.prov-hero h1 { max-width: none; }
+.prov-hero .prov-badges, .prov-hero .prov-actions { justify-content: center; }
+.prov-hero .lede { text-align: center; margin: 10px auto 0; max-width: 62ch; }
+.btn.website { background: transparent; color: var(--green); border-color: color-mix(in srgb, var(--green) 50%, var(--border)); }
+.btn.website:hover { color: var(--green); border-color: var(--green); background: color-mix(in srgb, var(--green) 12%, transparent); }
 .prov-meta { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin: 20px 0; }
 .meta-row { display: grid; grid-template-columns: 190px 1fr; gap: 12px; padding: 11px 16px; border-bottom: 1px solid var(--border); align-items: baseline; }
 .meta-row:last-child { border-bottom: 0; }

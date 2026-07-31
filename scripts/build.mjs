@@ -835,17 +835,25 @@ print(resp.choices[0].message.content)</code></pre><p class="muted">…or with c
         ? ` <span class="v warn" title="The key authenticated but the free tier appears gone">${IC('ic-warn')} free tier unconfirmed live</span>`
         : '');
   const docsBtn = p.docs_url ? `<a class="btn primary" href="${htmlEsc(p.docs_url)}" target="_blank" rel="noopener">Official docs ↗</a>` : '';
+  // "Visit website": the provider's main site, derived from the docs URL by stripping
+  // common docs/console/api subdomains so it points at the marketing homepage.
+  let websiteBtn = '';
+  try {
+    const u = new URL(p.docs_url);
+    const host = u.hostname.replace(/^(docs|console|platform|developer|developers|api|dashboard|cloud|build|support|help|inference-docs)\./, '');
+    websiteBtn = `<a class="btn website" href="${u.protocol}//${host}" target="_blank" rel="noopener">Visit website ↗</a>`;
+  } catch (_) { /* no/invalid docs URL — skip the website button */ }
   const crossChips = [
     ...inColls.map((c) => `<a href="../collections/${c.slug}.html">${htmlEsc(c.title)}</a>`),
     ...inGuides.map((g) => `<a href="../guides/${g.slug}.html">${htmlEsc(g.card)}</a>`),
   ].join('');
   const main =
-    `<section class="page-hero"><div class="wrap">` +
+    `<section class="page-hero prov-hero"><div class="wrap">` +
     `<nav class="crumbs"><a href="../">Home</a> / <a href="../#explorer">Providers</a> / ${htmlEsc(p.name)}</nav>` +
     `<h1>${htmlEsc(p.name)}</h1>` +
     `<div class="prov-badges"><span class="type">${typeLabel(p)}</span> ${verifiedLine}${probedLine} ${provFlagsHtml(p)}</div>` +
     (p.best_for ? `<p class="lede">${htmlEsc(p.best_for)}</p>` : '') +
-    (docsBtn ? `<div class="prov-actions">${docsBtn}</div>` : '') +
+    (docsBtn || websiteBtn ? `<div class="prov-actions">${docsBtn}${websiteBtn}</div>` : '') +
     `</div></section>` +
     `<main id="main"><div class="wrap prose">` +
     summary +
