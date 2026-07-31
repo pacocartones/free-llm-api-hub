@@ -1,3 +1,5 @@
+# `version` and `date-released` are kept in sync with data/providers.json by
+# scripts/build.mjs — edit the dataset, not this file.
 cff-version: 1.2.0
 title: "Free LLM API Hub — a continuously-verified dataset of free-tier and trial-credit LLM APIs"
 message: "If you use this dataset, please cite it and link back to the repository."
@@ -22,5 +24,5 @@ keywords:
   - openai-compatible
   - dataset
 license: MIT
-version: "2.3.0"
-date-released: "2026-07-30"
+version: "2.6.0"
+date-released: "2026-07-31"

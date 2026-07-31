@@ -510,6 +510,15 @@ readme = inject(readme, 'ongoing', ongoingTable(ongoing));
 readme = inject(readme, 'trial', trialTable(trial));
 writeFileSync(join(ROOT, 'README.md'), readme);
 
+// ---------- keep CITATION.cff pinned to the dataset it describes ----------
+// The citation metadata is derived, not hand-maintained: it drifted to 2.3.0
+// while the dataset shipped 2.6.0. Same rule as everything else here.
+const citationPath = join(ROOT, 'CITATION.cff');
+const citation = readFileSync(citationPath, 'utf8')
+  .replace(/^version: .*$/m, `version: "${data.version}"`)
+  .replace(/^date-released: .*$/m, `date-released: "${data.generated}"`);
+writeFileSync(citationPath, citation);
+
 // ---------- server-render the homepage explorer (SEO + no-JS + instant paint) ----------
 const explorerFlagPairs = [
   ['card_required', false, 'ic-nocard', 'no card'], ['card_required', true, 'ic-card', 'card'],
