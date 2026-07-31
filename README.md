@@ -210,7 +210,7 @@ Removed after re-verification (their free *API* access couldn't be confirmed): *
 Free-tier terms move fast, and most lists go stale silently. This one is built to surface drift instead of hiding it. Full details in **[docs/methodology.md](docs/methodology.md)**; the short version:
 
 1. **Every verified entry carries a `last_verified` date** and a link to the provider's *own* docs. No date + primary source → it ships as ⚠️ unverified, not as fact.
-2. **A scheduled GitHub Action** ([`verify.yml`](.github/workflows/verify.yml)) re-checks every source link weekly and opens/updates a tracking issue if any break — an early warning that a provider changed something.
+2. **A scheduled GitHub Action** ([`maintenance.yml`](.github/workflows/maintenance.yml)) re-checks every source link weekly and opens/updates a tracking issue if any break — an early warning that a provider changed something.
 3. **The freshness badge is computed from the data,** not written by hand: the share of entries re-confirmed within 90 days, straight from [`providers.json`](data/providers.json). When it decays, it's visible.
 4. **The dataset is schema-validated in CI.** A verified entry that's missing its date or source link fails the build — the honesty rule is enforced by machine, not by good intentions.
 5. **Reporting a stale entry takes under a minute** via a [structured form](../../issues/new?template=inaccuracy.yml) that asks for the provider, what changed and a source link.

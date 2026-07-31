@@ -30,7 +30,7 @@ When a claim can't be confirmed against an accessible official source — the co
 ## The freshness engine
 
 1. **Every verified entry is dated.** No date + primary source → it can't be `verified: true`.
-2. **Links are re-checked on a schedule.** The [`verify.yml`](../.github/workflows/verify.yml) workflow runs weekly, checks every `docs_url`, and opens or updates a tracking issue if any return an error — the earliest machine-detectable signal that a provider changed something.
+2. **Links are re-checked on a schedule.** The [`maintenance.yml`](../.github/workflows/maintenance.yml) workflow runs weekly, checks every `docs_url`, and opens or updates a tracking issue if any return an error — the earliest machine-detectable signal that a provider changed something. ([`verify.yml`](../.github/workflows/verify.yml) is the per-change integrity gate; it does not run on a schedule.)
 3. **The freshness badge is computed, not written.** It reports the share of entries re-confirmed within the last 90 days, straight from the data. As entries age past 90 days without re-verification, the badge decays visibly (green → yellow → red). It cannot lie about how current the list is.
 4. **Re-verification is continuous.** Reported changes and link-check issues drive re-checks; each updates the entry's `last_verified`.
 
