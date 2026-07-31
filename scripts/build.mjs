@@ -717,6 +717,44 @@ writeFileSync(
 mkdirSync(join(ROOT, 'site/p'), { recursive: true });
 mkdirSync(join(ROOT, 'site/badges'), { recursive: true });
 
+// Per-provider change history, mined from the git log of data/providers.json.
+// Deterministic given the history; graceful if git is unavailable (tarball build).
+const HISTORY_FIELDS = {
+  free_tier: 'free tier', rate_limits: 'rate limits', notes: 'the catch',
+  free_type: 'free type', commercial_ok: 'commercial-use terms',
+  card_required: 'card requirement', phone_required: 'phone requirement',
+  openai_compatible: 'OpenAI compatibility',
+};
+const historyBySlug = {};
+try {
+  const log = execSync('git log --reverse --date=short --format=%H%x1f%ad -- data/providers.json', { cwd: ROOT, encoding: 'utf8', maxBuffer: 1024 * 1024 * 40 }).trim();
+  const revs = log ? log.split('\n').map((l) => { const [hash, date] = l.split('\x1f'); return { hash, date }; }) : [];
+  const prevSnap = {};
+  for (const { hash, date } of revs) {
+    let parsed;
+    try { parsed = JSON.parse(execSync(`git show ${hash}:data/providers.json`, { cwd: ROOT, encoding: 'utf8', maxBuffer: 1024 * 1024 * 40 })); }
+    catch { continue; }
+    for (const pp of parsed.providers || []) {
+      const prior = prevSnap[pp.slug];
+      if (!prior) {
+        (historyBySlug[pp.slug] ||= []).push({ date, kind: 'added', text: 'Added to the hub' });
+      } else {
+        const changed = Object.keys(HISTORY_FIELDS).filter((k) => JSON.stringify(prior[k]) !== JSON.stringify(pp[k]));
+        if (changed.length) (historyBySlug[pp.slug] ||= []).push({ date, kind: 'changed', fields: changed, text: `Updated ${changed.map((k) => HISTORY_FIELDS[k]).join(', ')}` });
+      }
+      prevSnap[pp.slug] = pp;
+    }
+  }
+} catch (_) { /* no git — provider pages simply omit the history section */ }
+const historyHtml = (slug) => {
+  const all = historyBySlug[slug] || [];
+  if (!all.length) return '';
+  const items = all.slice().reverse().map((e) => `<li class="upd"><span class="upd-date">${e.date}</span> <span>${htmlEsc(e.text)}</span></li>`).join('');
+  return `<h2>Change history</h2>` +
+    `<p class="muted">How this free tier has changed since we started tracking it (${all[0].date}) — generated from the git history of <a href="${REPO}/commits/main/data/providers.json">providers.json</a>.</p>` +
+    `<ul class="upd-list">${items}</ul>`;
+};
+
 const provFlagsHtml = (p) => {
   const parts = [];
   const add = (cond, ic, txt) => { if (cond) parts.push(`<span class="flag-badge">${IC(ic)}${txt}</span>`); };
@@ -816,6 +854,7 @@ print(resp.choices[0].message.content)</code></pre><p class="muted">…or with c
     modelsBlock +
     quick +
     (crossChips ? `<h2>Appears in</h2><div class="colls">${crossChips}</div>` : '') +
+    historyHtml(p.slug) +
     `<p class="prov-back"><a href="../#explorer">← All providers</a></p>` +
     `</div></main>`;
   const jsonld = JSON.stringify({
@@ -1071,6 +1110,7 @@ const apiBase = { dataset: 'free-llm-api-hub', version: data.version, generated:
 const writeApi = (rel, obj) => writeFileSync(join(ROOT, `site/api/v1/${rel}`), JSON.stringify(obj, null, 2) + '\n');
 writeApi('providers.json', { ...apiBase, count: publicProviders.length, providers: publicProviders });
 writeApi('programs.json', { ...apiBase, startups: programs.startups, research: programs.research });
+writeApi('history.json', { ...apiBase, description: 'Per-provider change history mined from the git log of providers.json.', history: historyBySlug });
 const API_SLICES = {
   ongoing: (p) => p.category === 'ongoing',
   trial: (p) => p.category === 'trial',
@@ -1092,6 +1132,7 @@ for (const m of API_MODS) {
 const apiEndpoints = {
   providers: 'v1/providers.json',
   programs: 'v1/programs.json',
+  history: 'v1/history.json',
   slices: Object.fromEntries(Object.keys(API_SLICES).map((s) => [s, `v1/${s}.json`])),
   modality: Object.fromEntries(API_MODS.map((m) => [m, `v1/modality/${m}.json`])),
 };
