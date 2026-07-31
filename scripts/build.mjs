@@ -92,6 +92,11 @@ const COLLECTIONS = [
     desc: 'LLM APIs you can start calling without entering a payment method — filtered live from a continuously-verified dataset.',
     intro: 'Every provider below offers free API access with **no card required** to get started (`card_required: false`, confirmed against their own docs). Rows where the requirement is unknown are excluded rather than assumed.',
     filter: (p) => p.card_required === false,
+    guides: ['free-llm-api-without-credit-card', 'free-llm-api-no-signup'],
+    faq: [
+      { q: 'Can I use an LLM API for free without a credit card?', a: 'Yes — every provider on this page offers a free tier with no card required, confirmed against its own docs. You are limited by rate, not billing.' },
+      { q: 'Will I be charged if I go over the free limit?', a: 'No. Without a payment method on file you get rate-limited (HTTP 429) rather than billed — you would have to add a card before any spend is possible.' },
+    ],
   },
   {
     slug: 'no-phone',
@@ -100,6 +105,7 @@ const COLLECTIONS = [
     desc: 'LLM APIs whose signup needs no SMS/phone verification — a live slice of a continuously-verified dataset.',
     intro: 'Providers you can sign up for **without phone verification** (`phone_required: false`). Groq, Mistral, SiliconFlow and NVIDIA are excluded here because they gate signup behind a phone number.',
     filter: (p) => p.phone_required === false,
+    guides: ['free-llm-api-no-signup'],
   },
   {
     slug: 'commercial-use',
@@ -108,6 +114,11 @@ const COLLECTIONS = [
     desc: 'Free LLM API tiers that permit production/commercial use — not restricted to evaluation. Verified against each provider’s terms.',
     intro: 'Free tiers that **allow commercial/production use** (`commercial_ok: true`). Eval-only tiers (Cohere trial keys, NVIDIA NIM, GitHub Models) are deliberately excluded — read their rows in the main list for the restriction.',
     filter: (p) => p.commercial_ok === true,
+    guides: ['openai-compatible-free-apis', 'free-llm-api-without-credit-card'],
+    faq: [
+      { q: 'Which free LLM APIs allow commercial use?', a: 'Every provider on this page permits commercial/production use on its free tier (`commercial_ok: true`), confirmed against its own terms. Evaluation-only tiers are excluded.' },
+      { q: 'Is a free tier safe to ship to production?', a: 'Check the rate limits and whether the free tier is renewing or a one-time credit — both are on each provider’s row. For steady load, a renewing free tier or a paid plan is safer than a trial credit.' },
+    ],
   },
   {
     slug: 'openai-compatible',
@@ -117,6 +128,7 @@ const COLLECTIONS = [
     intro: 'These providers expose an **OpenAI-compatible endpoint** (`openai_compatible: true`), so migrating is usually a one-line change: keep the OpenAI SDK, swap `base_url` and `api_key`. Grab each provider’s exact base URL from its linked docs.',
     filter: (p) => p.openai_compatible === true,
     quickstart: true,
+    guides: ['openai-compatible-free-apis'],
   },
   {
     slug: 'always-free',
@@ -133,6 +145,11 @@ const COLLECTIONS = [
     desc: 'Free API tiers that go beyond text: vision, image, audio/speech, embeddings and rerank. A live slice of a verified dataset.',
     intro: 'Free tiers that reach **beyond plain text** — vision, image, audio/speech, embeddings or rerank on the free plan.',
     filter: (p) => (p.modalities || []).some((m) => m !== 'text'),
+    guides: ['free-embeddings-apis', 'free-speech-to-text-apis', 'free-image-generation-apis', 'free-ocr-document-ai-apis'],
+    faq: [
+      { q: 'Are there free APIs for images, speech and embeddings — not just text?', a: 'Yes — the providers here reach beyond text on their free tier: vision, image generation, speech (STT/TTS), embeddings or rerank. See the modality-specific guides linked above.' },
+      { q: 'Can one free API cover several modalities?', a: 'Some do — Google Gemini and Cloudflare Workers AI, for example, span text, vision, embeddings and more on a single free key. Each row lists the modalities that provider offers free.' },
+    ],
   },
 ];
 
@@ -221,6 +238,42 @@ const GUIDES = [
     faq: [
       { q: 'Is there a free speech-to-text API?', a: 'Yes — Groq (Whisper), Cloudflare Workers AI and others offer free STT; several dedicated speech providers also grant a sizeable one-time credit.' },
       { q: 'Which free speech API is best for production?', a: 'Check each provider’s rate limits and whether commercial use is allowed — some free speech tiers are evaluation-only or watermark their output.' },
+    ],
+  },
+  {
+    slug: 'free-image-generation-apis',
+    card: 'Image generation',
+    blurb: 'Free text-to-image APIs — Flux, SDXL and more.',
+    h1: 'Free image generation APIs',
+    title: 'Free image generation APIs (Flux, SDXL) · Free LLM API Hub',
+    desc: 'Verified APIs that generate images on a free tier or starting credit — Flux, Stable Diffusion, SDXL and more. Watermarks and commercial terms compared.',
+    lede: 'Free text-to-image APIs, from no-signup endpoints to first-party models on a starting credit.',
+    intro: `<p>Text-to-image is one of the easiest modalities to try for free: several providers host <strong>Flux, Stable Diffusion and SDXL</strong> behind a simple API — some with no signup at all, others with a small starting credit. Every provider below was verified to offer free image generation against its own docs.</p><p>Watch two catches on each provider's page: whether the free output is <em>watermarked</em>, and whether <em>commercial use</em> is allowed — both vary a lot across free image tiers.</p>`,
+    filter: (p) => (p.modalities || []).includes('image'),
+    query: '#explorer',
+    pick: 'pollinations',
+    faq: [
+      { q: 'Is there a free image generation API?', a: 'Yes — Pollinations and AI Horde offer free, no-signup image generation, while Runware, Photoroom and others give a starting credit for first-party Flux/SDXL models.' },
+      { q: 'Can I use free AI-generated images commercially?', a: 'Sometimes — it depends on the provider and whether the output is watermarked. Each row flags commercial use, confirmed against the provider’s terms.' },
+      { q: 'Which free image API has no watermark?', a: 'Free registration removes the watermark on Pollinations, and providers such as Runware return unwatermarked output on their starting credit. Check the catch on each provider page.' },
+    ],
+  },
+  {
+    slug: 'free-ocr-document-ai-apis',
+    card: 'OCR / document AI',
+    blurb: 'Free OCR and document-parsing APIs for RAG.',
+    h1: 'Free OCR and document-parsing APIs',
+    title: 'Free OCR & document AI APIs · Free LLM API Hub',
+    desc: 'Verified APIs that do OCR and document parsing on a free tier — extract text, tables and key-values from PDFs and images for RAG. Page limits compared.',
+    lede: 'Free OCR and document-AI APIs to turn PDFs and images into structured, LLM-ready text.',
+    intro: `<p>Before a document can go into a RAG pipeline it has to be parsed — OCR, layout, tables and key-values. The providers below offer <strong>document AI on a free tier</strong>, several with thousands of free pages a month that renew.</p><p>Pair one of these with a <a href="free-embeddings-apis.html">free embeddings API</a> and a free chat model to build a full document-QA stack at zero cost for prototypes.</p>`,
+    filter: (p) => (p.modalities || []).includes('ocr'),
+    query: '#explorer',
+    pick: 'unstructured',
+    faq: [
+      { q: 'Is there a free OCR API?', a: 'Yes — OCR.space, Unstructured, Nutrient and LlamaParse all offer free OCR / document parsing, several with thousands of pages a month.' },
+      { q: 'What’s the best free API to parse PDFs for RAG?', a: 'Unstructured and LlamaParse are built specifically to turn documents into clean, chunked text for RAG, both on a renewing monthly free tier.' },
+      { q: 'Can free OCR handle tables and handwriting?', a: 'Some do — providers such as Nutrient extract tables, key-values and handwriting. Check each provider page for the exact free-tier capabilities.' },
     ],
   },
 ];
@@ -559,6 +612,12 @@ for (const c of COLLECTIONS) {
   const nav = COLLECTIONS.map(
     (o) => `<a href="${o.slug}.html"${o.slug === c.slug ? ' class="active" aria-current="page"' : ''}>${htmlEsc(o.title)}</a>`
   ).join('');
+  const guideLinks = (c.guides || [])
+    .map((s) => { const gx = GUIDES.find((x) => x.slug === s); return gx ? `<a href="../guides/${gx.slug}.html">${htmlEsc(gx.card)}</a>` : ''; })
+    .filter(Boolean).join('');
+  const collFaqHtml = (c.faq && c.faq.length)
+    ? `<h2>FAQ</h2>` + c.faq.map((f) => `<div class="faq-item"><h3>${htmlEsc(f.q)}</h3><p>${f.a}</p></div>`).join('')
+    : '';
 
   // --- repo markdown ---
   const md =
@@ -590,6 +649,13 @@ for (const c of COLLECTIONS) {
           { '@type': 'ListItem', position: 3, name: c.title, item: `${SITE}/collections/${c.slug}.html` },
         ],
       },
+      ...(c.faq && c.faq.length ? [{
+        '@type': 'FAQPage',
+        mainEntity: c.faq.map((f) => ({
+          '@type': 'Question', name: f.q,
+          acceptedAnswer: { '@type': 'Answer', text: f.a.replace(/<[^>]+>/g, '') },
+        })),
+      }] : []),
     ],
   });
   const introHtml = htmlEsc(c.intro).replace(/`([^`]+)`/g, '<code>$1</code>').replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
@@ -615,6 +681,8 @@ print(resp.choices[0].message.content)</code></pre><pre><code>curl ${htmlEsc(QS_
   -H "Content-Type: application/json" \\
   -d '{"model": "${htmlEsc(QS_MODEL)}", "messages": [{"role": "user", "content": "Hello!"}]}'</code></pre>`
       : '') +
+    collFaqHtml +
+    (guideLinks ? `<h2>Related guides</h2><nav class="colls">${guideLinks}</nav>` : '') +
     `</div></main>`;
   writeFileSync(
     join(ROOT, `site/collections/${c.slug}.html`),
@@ -987,7 +1055,7 @@ const guidesHubMain =
   `</div></div></main>`;
 writeFileSync(join(ROOT, 'site/guides/index.html'), htmlPage({
   title: 'Guides — free LLM & AI API how-tos · Free LLM API Hub',
-  desc: 'Data-backed guides to free LLM and AI-model APIs: no credit card, OpenAI-compatible, no signup, embeddings, speech.',
+  desc: 'Data-backed guides to free LLM and AI-model APIs: no credit card, OpenAI-compatible, no signup, embeddings, speech, image generation, OCR / document AI.',
   canonical: `${SITE}/guides/`, main: guidesHubMain,
 }));
 
