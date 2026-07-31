@@ -143,16 +143,6 @@ svg.i { width: 15px; height: 15px; flex: none; vertical-align: -2px; }
   pointer-events: none;
 }
 .hero-inner { position: relative; z-index: 1; padding: 58px 0 46px; text-align: center; }
-.hero-h1 { font-family: var(--font-mono); font-size: clamp(1.4rem, 5.2vw, 1.95rem); letter-spacing: -.02em; line-height: 1.3; }
-.hero-h1 .prompt { color: var(--accent); margin-right: .35ch; }
-/* Text is fully visible by default; the reveal only *uncovers* it, so it can never
-   get stuck hidden if the animation or a webfont fails to load. */
-.hero-h1 .typed { display: inline-block; }
-@media (min-width: 900px) { .hero-h1 { white-space: nowrap; } }
-@media (prefers-reduced-motion: no-preference) {
-  .hero-h1 .typed { animation: reveal 1.5s steps(38, end) .2s both; }
-}
-@keyframes reveal { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
 .hero-logo { display: inline-flex; margin-bottom: 16px; }
 .hero-star { margin-bottom: 22px; }
 .eyebrow { color: var(--accent); font-weight: 700; font-size: .74rem; letter-spacing: .18em; text-transform: uppercase; margin: 0 0 14px; font-family: var(--font-mono); }
