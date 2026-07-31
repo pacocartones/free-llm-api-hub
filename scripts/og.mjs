@@ -92,3 +92,17 @@ const modelCount = providers.reduce((n, p) => n + ((p.models_free || []).length)
 const modelProviders = providers.filter((p) => p.models_free && p.models_free.length).length;
 render(tagSvg('INDEX', 'Free model index', `${modelCount} free models across ${modelProviders} providers`), join(ROOT, 'site/og/models.png'));
 console.log('model-index OG: 1 rendered.');
+
+// per-provider OG
+mkdirSync(join(ROOT, 'site/og/p'), { recursive: true });
+const provSub = (p) => {
+  const bits = [p.category === 'ongoing' ? 'Ongoing free tier' : 'Trial credit'];
+  if (p.card_required === false) bits.push('no card');
+  if (p.commercial_ok === true) bits.push('commercial OK');
+  if (p.openai_compatible === true) bits.push('OpenAI-compatible');
+  return bits.join(' · ');
+};
+for (const p of providers) {
+  render(tagSvg('PROVIDER', p.name, provSub(p)), join(ROOT, `site/og/p/${p.slug}.png`));
+}
+console.log(`per-provider OG: ${providers.length} rendered.`);

@@ -876,7 +876,7 @@ print(resp.choices[0].message.content)</code></pre><p class="muted">…or with c
   });
   writeFileSync(
     join(ROOT, `site/p/${p.slug}.html`),
-    htmlPage({ title: `${p.name} — free tier & limits · Free LLM API Hub`, desc: `${p.name}: ${p.free_tier}`.slice(0, 180), canonical: `${SITE}/p/${p.slug}.html`, main, jsonld })
+    htmlPage({ title: `${p.name} — free tier & limits · Free LLM API Hub`, desc: `${p.name}: ${p.free_tier}`.slice(0, 180), canonical: `${SITE}/p/${p.slug}.html`, main, jsonld, ogImage: `${SITE}/og/p/${p.slug}.png` })
   );
 
   writeFileSync(
