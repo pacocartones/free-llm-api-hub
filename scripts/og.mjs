@@ -37,7 +37,20 @@ const wrap = (t) => {
   return lines.slice(0, 2);
 };
 
-function collSvg(title, count) {
+// Guides and the model index share the same OG template, differing only by the
+// eyebrow label and the subtitle line. Keep titles/filters in sync with
+// GUIDES in scripts/build.mjs.
+const GUIDES = [
+  { slug: 'free-llm-api-without-credit-card', title: 'Free LLM APIs · no credit card', filter: (p) => p.card_required === false && p.category === 'ongoing' },
+  { slug: 'openai-compatible-free-apis', title: 'Free OpenAI-compatible APIs', filter: (p) => p.openai_compatible === true },
+  { slug: 'free-llm-api-no-signup', title: 'Free APIs · no phone, no card', filter: (p) => p.card_required === false && p.phone_required === false && p.category === 'ongoing' },
+  { slug: 'free-embeddings-apis', title: 'Free embeddings APIs for RAG', filter: (p) => (p.modalities || []).includes('embeddings') },
+  { slug: 'free-speech-to-text-apis', title: 'Free speech APIs · STT & TTS', filter: (p) => (p.modalities || []).includes('audio') },
+  { slug: 'free-image-generation-apis', title: 'Free image generation APIs', filter: (p) => (p.modalities || []).includes('image') },
+  { slug: 'free-ocr-document-ai-apis', title: 'Free OCR & document AI APIs', filter: (p) => (p.modalities || []).includes('ocr') },
+];
+
+function tagSvg(label, title, subtitle) {
   const lines = wrap(title);
   const titleSvg = lines.map((l, i) => `<text x="80" y="${262 + i * 84}" fill="#d8e2dc" font-size="70" font-weight="700" letter-spacing="-2">${esc(l)}</text>`).join('');
   return `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" font-family="'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace">
@@ -53,9 +66,9 @@ function collSvg(title, count) {
     <rect x="29" y="33" width="12" height="4" rx="2" fill="#3fce8f"/>
   </g>
   <text x="152" y="107" fill="#d8e2dc" font-size="29" font-weight="700">free-llm-api-hub</text>
-  <text x="80" y="180" fill="#3fce8f" font-size="24" font-weight="700" letter-spacing="6">&gt; COLLECTION</text>
+  <text x="80" y="180" fill="#3fce8f" font-size="24" font-weight="700" letter-spacing="6">&gt; ${esc(label)}</text>
   ${titleSvg}
-  <text x="82" y="470" fill="#808f87" font-size="27">${count} verified free APIs · dated · sourced · machine-readable</text>
+  <text x="82" y="470" fill="#808f87" font-size="27">${esc(subtitle)}</text>
   <text x="80" y="588" fill="#56655c" font-size="21">github.com/pacocartones/free-llm-api-hub</text>
 </svg>`;
 }
@@ -63,6 +76,19 @@ function collSvg(title, count) {
 mkdirSync(join(ROOT, 'site/og/collections'), { recursive: true });
 for (const c of COLLS) {
   const count = providers.filter(c.filter).length;
-  render(collSvg(c.title, count), join(ROOT, `site/og/collections/${c.slug}.png`));
+  render(tagSvg('COLLECTION', c.title, `${count} verified free APIs · dated · sourced · machine-readable`), join(ROOT, `site/og/collections/${c.slug}.png`));
 }
 console.log(`per-collection OG: ${COLLS.length} rendered.`);
+
+mkdirSync(join(ROOT, 'site/og/guides'), { recursive: true });
+for (const g of GUIDES) {
+  const count = providers.filter(g.filter).length;
+  render(tagSvg('GUIDE', g.title, `${count} verified providers · pick one and build`), join(ROOT, `site/og/guides/${g.slug}.png`));
+}
+console.log(`per-guide OG: ${GUIDES.length} rendered.`);
+
+// model index OG
+const modelCount = providers.reduce((n, p) => n + ((p.models_free || []).length), 0);
+const modelProviders = providers.filter((p) => p.models_free && p.models_free.length).length;
+render(tagSvg('INDEX', 'Free model index', `${modelCount} free models across ${modelProviders} providers`), join(ROOT, 'site/og/models.png'));
+console.log('model-index OG: 1 rendered.');

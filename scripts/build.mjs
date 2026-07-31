@@ -994,6 +994,7 @@ writeFileSync(join(ROOT, 'site/models/index.html'), htmlPage({
   desc: `Searchable index of ${modelIndex.length} models available on free LLM & AI-model API tiers, and which provider serves each.`,
   canonical: `${SITE}/models/`,
   main: modelsMain,
+  ogImage: `${SITE}/og/models.png`,
 }));
 
 // ---------- SEO guides: intent-matched landing pages, generated from the data ----------
@@ -1045,6 +1046,7 @@ for (const g of GUIDES) {
   });
   writeFileSync(join(ROOT, `site/guides/${g.slug}.html`), htmlPage({
     title: g.title, desc: g.desc, canonical: `${SITE}/guides/${g.slug}.html`, main, jsonld,
+    ogImage: `${SITE}/og/guides/${g.slug}.png`,
   }));
 }
 const guidesHubMain =
