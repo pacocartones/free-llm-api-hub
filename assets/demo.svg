@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="860" height="392" viewBox="0 0 860 392" role="img" aria-label="Terminal demo — querying the Free LLM API Hub static API: curl freellmapihub.com/api/v1/no-card.json returns Google Gemini, Groq, Cloudflare Workers AI, OpenRouter, Mistral AI">
+  <style>
+    text { font-family: ui-monospace, "SF Mono", "Cascadia Code", "JetBrains Mono", Menlo, Consolas, monospace; font-size: 17px; }
+    .fg { fill: #d8e2dc; } .accent { fill: #3fce8f; } .muted { fill: #8a998f; } .dim { fill: #5b6a61; }
+    .line { opacity: 0; animation: rise .45s ease forwards; }
+    @keyframes rise { to { opacity: 1; } }
+    .d1 { animation-delay: .25s } .d2 { animation-delay: .55s } .d3 { animation-delay: 1.05s }
+    .d4 { animation-delay: 1.30s } .d5 { animation-delay: 1.55s } .d6 { animation-delay: 1.80s }
+    .d7 { animation-delay: 2.05s } .d8 { animation-delay: 2.45s } .d9 { animation-delay: 2.80s }
+    .caret { fill: #3fce8f; animation: blink 1.05s step-end infinite; }
+    @keyframes blink { 50% { opacity: 0; } }
+    @media (prefers-reduced-motion: reduce) { .line { opacity: 1; animation: none; } .caret { animation: none; } }
+  </style>
+  <rect x="1" y="1" width="858" height="390" rx="14" fill="#0a0d0b" stroke="#1d2a22"/>
+  <rect x="1" y="1" width="858" height="44" rx="14" fill="#0d110f"/>
+  <rect x="1" y="30" width="858" height="15" fill="#0d110f"/>
+  <line x1="1" y1="45" x2="859" y2="45" stroke="#1d2a22"/>
+  <circle cx="26" cy="23" r="6" fill="#2a3a30" stroke="#3fce8f" stroke-opacity=".5"/>
+  <circle cx="46" cy="23" r="6" fill="#2a3a30"/>
+  <circle cx="66" cy="23" r="6" fill="#2a3a30"/>
+  <text x="430" y="28" text-anchor="middle" class="dim" style="font-size:14px">freellmapihub.com — free LLM API hub</text>
+
+  <text x="30" y="92"  class="line d1"><tspan class="accent">$</tspan> <tspan class="fg">curl -s freellmapihub.com/api/v1/no-card.json \</tspan></text>
+  <text x="30" y="122" class="line d2"><tspan class="fg">    | jq -r '.providers[].name' | head -5</tspan></text>
+
+  <text x="30" y="164" class="line d3 fg">Google Gemini API (AI Studio)</text>
+  <text x="30" y="194" class="line d4 fg">Groq</text>
+  <text x="30" y="224" class="line d5 fg">Cloudflare Workers AI</text>
+  <text x="30" y="254" class="line d6 fg">OpenRouter</text>
+  <text x="30" y="284" class="line d7 fg">Mistral AI</text>
+
+  <text x="30" y="326" class="line d8 dim"># 60+ verified free tiers · dated · sourced · machine-readable</text>
+  <text x="30" y="360" class="line d9"><tspan class="accent">$</tspan> <tspan class="caret">▋</tspan></text>
+</svg>
