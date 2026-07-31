@@ -1,0 +1,23 @@
+language: en-US
+reviews:
+  profile: chill
+  request_changes_workflow: false
+  high_level_summary: true
+  poem: false
+  review_status: true
+  auto_review:
+    enabled: true
+    drafts: false
+  path_filters:
+    - "!data/**"
+    - "!dist/**"
+    - "!**/*.min.js"
+  path_instructions:
+    - path: "**/*.mjs"
+      instructions: >
+        This project derives the site and docs from data/ via build.mjs (single-source
+        doctrine). Flag any hand-maintained value that duplicates something derivable
+        from the data, and any change to generated output that should instead change
+        the generator or the source data.
+chat:
+  auto_reply: true
