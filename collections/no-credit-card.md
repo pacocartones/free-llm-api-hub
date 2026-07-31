@@ -8,7 +8,7 @@ LLM APIs you can start calling without entering a payment method — filtered li
 
 Every provider below offers free API access with **no card required** to get started (`card_required: false`, confirmed against their own docs). Rows where the requirement is unknown are excluded rather than assumed.
 
-**31 of 51 tracked providers** match.
+**36 of 61 tracked providers** match.
 
 | Provider | Type | What's free | The catch | Verified |
 |---|---|---|---|---|
@@ -43,6 +43,11 @@ Every provider below offers free API access with **no card required** to get sta
 | **[Speechify API](https://speechify.ai/pricing)**<br><sub>💳 no card · 📵 no phone · 🏢 commercial OK</sub> | Ongoing | 50,000 characters/month TTS (hard cap) + 60 min/month voice agents | Commercial use is allowed on the free tier. No credit card required. Hard monthly cap that pauses at the limit. | ✅ 2026-07-30 |
 | **[Hume AI (Octave TTS)](https://www.hume.ai/pricing)**<br><sub>💳 no card · 🏢 commercial OK</sub> | Ongoing | 10,000 characters/month TTS (~10 minutes) on the Free plan | The free plan includes a commercial license; overage billed at $0.15/1,000 chars. No card stated as required to start. Not OpenAI-compatible. | ✅ 2026-07-30 |
 | **[ElevenLabs](https://elevenlabs.io/pricing)**<br><sub>💳 no card · 📵 no phone · 🔬 eval only</sub> | Ongoing | 10,000 credits/month shared across Text-to-Speech, Speech-to-Text and more (~10 min TTS/month) | The free tier is NON-COMMERCIAL only per the Terms of Use (a commercial license begins on paid Starter, $6/mo), and historically required attribution. API access is available on the free plan. No credit card to sign up. | ✅ 2026-07-30 |
+| **[Voyage AI](https://docs.voyageai.com/docs/pricing)**<br><sub>💳 no card</sub> | Trial | 200M free tokens on current embedding models (voyage-4, voyage-4-lite, voyage-context-4, voyage-code-3) and on rerankers (rerank-2.5 family); voyage-multimodal-3.5 gets 200M text tokens + 150B pixels — a large one-time complimentary allotment per model | The allotment is a one-time complimentary balance per model, not a renewing monthly quota. No credit card required to claim. Owned by MongoDB — a first-party model provider, not a proxy. | ✅ 2026-07-31 |
+| **[Fish Audio](https://fish.audio/plan/)**<br><sub>💳 no card · 🔬 eval only</sub> | Ongoing | 8,000 credits/month (~7 min of generation, up to 500 characters per generation); TTS, STT and voice cloning | Free plan is personal, non-commercial only (commercial use requires a Premium subscription). No credit card required to sign up. | ✅ 2026-07-31 |
+| **[Unstructured](https://unstructured.io/pricing)**<br><sub>💳 no card</sub> | Ongoing | 15,000 pages/month, resets monthly — document parsing/OCR across 50+ file types (layout, tables, generative OCR enrichment) | No credit card required. Purpose-built to turn documents into clean, structured input for RAG/LLM pipelines. Commercial terms not stated on the pricing page. | ✅ 2026-07-31 |
+| **[Nutrient (Data Extraction API)](https://www.nutrient.io/api/pricing/)**<br><sub>💳 no card</sub> | Ongoing | 5,000 credits/month (renews; no rollover) — ~5,000 text-parse pages, fewer for OCR-heavy 'Understand'/'Agentic' parsing (9-18 credits/page) | No credit card required. Formerly PSPDFKit. Extraction/OCR with tables, key-value and handwriting. Commercial terms not stated on the pricing page. | ✅ 2026-07-31 |
+| **[Photoroom](https://www.photoroom.com/api/pricing)**<br><sub>💳 no card</sub> | Ongoing | 10 free production calls on the Remove Background API (one-time) plus 1,000 sandbox calls/month on the Image Editing API (watermarked) | No credit card required. Sandbox output is watermarked (for testing); the 10 production calls return clean output. Image editing/generation (AI backgrounds, relighting, shadows). | ✅ 2026-07-31 |
 
 ---
 

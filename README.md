@@ -16,7 +16,7 @@ No hype, no dead links, no "generous limits" hand-waving. Just what's actually f
 **[🔎 Interactive explorer](https://pacocartones.github.io/free-llm-api-hub/)** &nbsp;·&nbsp; **[📊 Dataset](data/providers.json)** &nbsp;·&nbsp; **[🧪 How we verify](docs/methodology.md)** &nbsp;·&nbsp; **[➕ Add a provider](CONTRIBUTING.md)**
 
 <!-- AUTOGEN:stats:start -->
-**51 providers** tracked · 29 ongoing free tiers · 22 trial credits · **51/51** independently verified against the provider's own docs
+**61 providers** tracked · 36 ongoing free tiers · 25 trial credits · **61/61** independently verified against the provider's own docs
 <!-- AUTOGEN:stats:end -->
 
 </div>
@@ -47,13 +47,13 @@ Primarily **free LLM (text) APIs** — plus the adjacent model APIs a builder re
 <!-- AUTOGEN:coverage:start -->
 | Category | Providers | Examples |
 |---|---|---|
-| **Text / LLM** | 40 | Google Gemini API, Groq, OpenRouter |
-| **Speech (STT / TTS)** | 17 | Google Gemini API, Groq, Cloudflare Workers AI |
-| **Embeddings** | 11 | Google Gemini API, Cloudflare Workers AI, Cohere |
+| **Text / LLM** | 42 | Google Gemini API, Groq, OpenRouter |
+| **Speech (STT / TTS)** | 22 | Google Gemini API, Groq, Cloudflare Workers AI |
+| **Embeddings** | 12 | Google Gemini API, Cloudflare Workers AI, Cohere |
+| **Image generation** | 10 | Cloudflare Workers AI, HuggingFace, Jina AI |
 | **Vision** | 9 | Google Gemini API, OpenRouter, Z.ai |
-| **Image generation** | 8 | Cloudflare Workers AI, HuggingFace, Jina AI |
-| **Rerank** | 4 | Cohere, Jina AI, Mixedbread |
-| **OCR / documents** | 3 | OCR.space, LlamaParse, Nanonets |
+| **Rerank** | 6 | Cohere, Jina AI, Mixedbread |
+| **OCR / documents** | 5 | OCR.space, LlamaParse, Nanonets |
 <!-- AUTOGEN:coverage:end -->
 
 Filter any category live in the [interactive explorer](https://pacocartones.github.io/free-llm-api-hub/) or the [multimodal collection](collections/multimodal.md).
@@ -84,12 +84,12 @@ Starting points, not guarantees — read the full row before you build on it.
 Focused, always-current collections — each is generated from the dataset and has a live web page too.
 
 <!-- AUTOGEN:collections:start -->
-- **[Free LLM APIs with no credit card](collections/no-credit-card.md)** (31) — start without a payment method · [live page ↗](https://pacocartones.github.io/free-llm-api-hub/collections/no-credit-card.html)
+- **[Free LLM APIs with no credit card](collections/no-credit-card.md)** (36) — start without a payment method · [live page ↗](https://pacocartones.github.io/free-llm-api-hub/collections/no-credit-card.html)
 - **[Free LLM APIs with no phone verification](collections/no-phone.md)** (21) — no SMS/phone verification · [live page ↗](https://pacocartones.github.io/free-llm-api-hub/collections/no-phone.html)
 - **[Free LLM APIs for commercial use](collections/commercial-use.md)** (20) — safe to ship, not eval-only · [live page ↗](https://pacocartones.github.io/free-llm-api-hub/collections/commercial-use.html)
 - **[OpenAI-compatible free LLM APIs](collections/openai-compatible.md)** (30) — drop-in OpenAI SDK swap · [live page ↗](https://pacocartones.github.io/free-llm-api-hub/collections/openai-compatible.html)
 - **[Permanently free LLM APIs](collections/always-free.md)** (5) — $0 models, no trial clock · [live page ↗](https://pacocartones.github.io/free-llm-api-hub/collections/always-free.html)
-- **[Free multimodal LLM APIs](collections/multimodal.md)** (34) — vision, audio, embeddings · [live page ↗](https://pacocartones.github.io/free-llm-api-hub/collections/multimodal.html)
+- **[Free multimodal LLM APIs](collections/multimodal.md)** (44) — vision, audio, embeddings · [live page ↗](https://pacocartones.github.io/free-llm-api-hub/collections/multimodal.html)
 <!-- AUTOGEN:collections:end -->
 
 Every provider also has its own page with the full details and a copy-ready quickstart — e.g. [Groq](https://pacocartones.github.io/free-llm-api-hub/p/groq.html), [Deepgram](https://pacocartones.github.io/free-llm-api-hub/p/deepgram.html), [Jina AI](https://pacocartones.github.io/free-llm-api-hub/p/jina-ai.html).
@@ -145,6 +145,13 @@ Recurring (daily/monthly) quotas that renew — no expiry, but usually rate-limi
 | **[Hume AI (Octave TTS)](https://www.hume.ai/pricing)**<br><sub>💳 no card · 🏢 commercial OK</sub> | 10,000 characters/month TTS (~10 minutes) on the Free plan | 15 requests per minute | The free plan includes a commercial license; overage billed at $0.15/1,000 chars. No card stated as required to start. Not OpenAI-compatible. | ✅ 2026-07-30 |
 | **[Unreal Speech](https://unrealspeech.com/pricing)**<br><sub>🏢 commercial OK</sub> | 250,000 characters/month TTS (~6 hours of audio) | Tiered endpoints for different text lengths; specific caps not documented | Commercial use allowed, but free-plan users must attribute Unreal Speech with a link when publishing audio. First-party REST endpoints. Card requirement not stated. | ✅ 2026-07-30 |
 | **[ElevenLabs](https://elevenlabs.io/pricing)**<br><sub>💳 no card · 📵 no phone · 🔬 eval only</sub> | 10,000 credits/month shared across Text-to-Speech, Speech-to-Text and more (~10 min TTS/month) | Concurrency tied to the Free plan (not numerically published) | The free tier is NON-COMMERCIAL only per the Terms of Use (a commercial license begins on paid Starter, $6/mo), and historically required attribution. API access is available on the free plan. No credit card to sign up. | ✅ 2026-07-30 |
+| **[Cartesia](https://cartesia.ai/pricing)**<br><sub>🔬 eval only</sub> | 20,000 credits/month (~27 min of Sonic TTS or ~1h51 of Ink speech-to-text) | 2 concurrent TTS requests, 8 concurrent STT; 20,000 credits/month | Commercial use is NOT allowed on the free plan (the $5/mo Pro plan adds a commercial licence). Low-latency streaming voice over WebSocket/REST; own API (not OpenAI-shaped). | ✅ 2026-07-31 |
+| **[LMNT](https://www.lmnt.com/pricing)**<br><sub>🔬 eval only</sub> | 15,000 characters/month of TTS, with unlimited voice clones | 15,000 characters/month | Commercial use is not included on the free tier (the paid Indie plan and above add a commercial licence). Real-time streaming speech API. | ✅ 2026-07-31 |
+| **[Fish Audio](https://fish.audio/plan/)**<br><sub>💳 no card · 🔬 eval only</sub> | 8,000 credits/month (~7 min of generation, up to 500 characters per generation); TTS, STT and voice cloning | 500 characters per generation; 8,000 credits/month | Free plan is personal, non-commercial only (commercial use requires a Premium subscription). No credit card required to sign up. | ✅ 2026-07-31 |
+| **[Camb.ai](https://www.camb.ai/pricing)** | 2,000 credits/month covering ~25K characters of MARS TTS, 125 min of STT, plus limited watermarked dubbing and translation (incl. 5 OCR pages) | 500 chars/generation TTS, 15 min/generation STT; 2,000 credits/month | Uses its own MARS8 voice models (not OpenAI-compatible). Dubbing output on the free tier is watermarked. Card and commercial terms not stated on the pricing page. | ✅ 2026-07-31 |
+| **[Unstructured](https://unstructured.io/pricing)**<br><sub>💳 no card</sub> | 15,000 pages/month, resets monthly — document parsing/OCR across 50+ file types (layout, tables, generative OCR enrichment) | 15,000 pages/month | No credit card required. Purpose-built to turn documents into clean, structured input for RAG/LLM pipelines. Commercial terms not stated on the pricing page. | ✅ 2026-07-31 |
+| **[Nutrient (Data Extraction API)](https://www.nutrient.io/api/pricing/)**<br><sub>💳 no card</sub> | 5,000 credits/month (renews; no rollover) — ~5,000 text-parse pages, fewer for OCR-heavy 'Understand'/'Agentic' parsing (9-18 credits/page) | 5,000 credits/month; per-page cost varies by parse mode (1-18 credits) | No credit card required. Formerly PSPDFKit. Extraction/OCR with tables, key-value and handwriting. Commercial terms not stated on the pricing page. | ✅ 2026-07-31 |
+| **[Photoroom](https://www.photoroom.com/api/pricing)**<br><sub>💳 no card</sub> | 10 free production calls on the Remove Background API (one-time) plus 1,000 sandbox calls/month on the Image Editing API (watermarked) | 1,000 sandbox calls/month; 10 one-time production calls | No credit card required. Sandbox output is watermarked (for testing); the 10 production calls return clean output. Image editing/generation (AI backgrounds, relighting, shadows). | ✅ 2026-07-31 |
 <!-- AUTOGEN:ongoing:end -->
 
 ## One-time trial credits
@@ -176,6 +183,9 @@ A fixed credit balance on signup. Once it's spent (or the clock runs out), you'r
 | **[Gladia](https://www.gladia.io/pricing)** | €50 in free credits on signup for speech-to-text (~80+ hrs pre-recorded or 60+ hrs real-time at current rates) | One-time grant with no monthly reset; prepaid model — top up once the credit is consumed. Card requirement not explicitly stated on the pricing page. | — | ✅ 2026-07-30 |
 | **[Rime](https://rime.ai/pricing)** | 3,000 free TTS minutes for every new account (Starter plan) | One-time allotment on signup; card requirement and commercial-use terms for the free minutes are not stated on the pricing page. | — | ✅ 2026-07-30 |
 | **[Tencent Hunyuan](https://cloud.tencent.com/document/product/1729/97731)**<br><sub>🔌 OpenAI-compat</sub> | 1,000,000 free tokens for Hunyuan text LLMs (hunyuan-a13b, turbos, translation & vision models), plus a separate 1,000,000-token allotment for hunyuan-embedding | Free resource package valid 1 year from activation; unused tokens expire. Tencent Cloud generally requires mainland-China real-name ID verification to activate — a practical barrier for non-China users. Commercial-use terms not stated on the free-quota page. | 1 year | ✅ 2026-07-30 |
+| **[Voyage AI](https://docs.voyageai.com/docs/pricing)**<br><sub>💳 no card</sub> | 200M free tokens on current embedding models (voyage-4, voyage-4-lite, voyage-context-4, voyage-code-3) and on rerankers (rerank-2.5 family); voyage-multimodal-3.5 gets 200M text tokens + 150B pixels — a large one-time complimentary allotment per model | The allotment is a one-time complimentary balance per model, not a renewing monthly quota. No credit card required to claim. Owned by MongoDB — a first-party model provider, not a proxy. | — | ✅ 2026-07-31 |
+| **[Contextual AI](https://contextual.ai/pricing/)** | $25 in free credits on the on-demand plan, usable on the Rerank (rerank-v2) and Generate APIs | One-time signup credit (does not renew); the instruction-following reranker is the standout free capability. Commercial-use terms not stated on the pricing page. | — | ✅ 2026-07-31 |
+| **[Rev AI](https://www.rev.ai/pricing)** | Free credits equivalent to 5 hours of Reverb ASR (speech-to-text), usable across all Rev AI products | One-time signup grant (does not renew). High-accuracy English ASR. Card and commercial terms not stated on the pricing page. | — | ✅ 2026-07-31 |
 <!-- AUTOGEN:trial:end -->
 
 ## Notably NOT free
