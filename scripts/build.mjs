@@ -405,7 +405,7 @@ const siteHeader = (p) => `<header class="site-header"><div class="wrap header-i
 const siteFooter = (p) => `<footer class="site-footer"><div class="wrap footer-top">
 <div class="footer-brand"><a class="star-btn" href="${REPO}" target="_blank" rel="noopener" aria-label="Star free-llm-api-hub on GitHub"><span class="sb-label">${GH_ICON} Star on GitHub</span><span class="sb-count" data-stars>★</span></a><p>A continuously-verified, machine-readable dataset of free LLM &amp; AI-model APIs and trial credits for developers.</p></div>
 <div class="footer-col"><h4>Explore</h4><a href="${p}#explorer">Interactive explorer</a><a href="${p}models/">Free model index</a><a href="${p}guides/">Guides</a><a href="${p}collections/">Collections</a><a href="${p}programs/startups.html">Startup credits</a><a href="${p}programs/research.html">Student &amp; research credits</a><a href="${p}updates.html">Updates</a><a href="${REPO}#notably-not-free">Notably NOT free</a></div>
-<div class="footer-col"><h4>Data</h4><a href="${p}providers.json">providers.json</a><a href="${p}providers.csv">CSV export</a><a href="${p}providers.yaml">YAML export</a><a href="${REPO}/blob/main/data/schema.json">JSON Schema</a></div>
+<div class="footer-col"><h4>Data</h4><a href="${p}providers.json">providers.json</a><a href="${p}api/">JSON API</a><a href="${p}llms.txt">llms.txt</a><a href="${p}providers.csv">CSV export</a><a href="${p}providers.yaml">YAML export</a><a href="${REPO}/blob/main/data/schema.json">JSON Schema</a></div>
 <div class="footer-col"><h4>Project</h4><a href="${REPO}/blob/main/docs/methodology.md">Methodology</a><a href="${REPO}/blob/main/CONTRIBUTING.md">Contributing</a><a href="${REPO}/blob/main/CHANGELOG.md">Changelog</a><a href="${REPO}">GitHub ★</a></div>
 </div><div class="wrap footer-bottom"><a class="foot-logo" href="${p}" aria-label="Free LLM API Hub — home"><svg class="logo-mark"><use href="#logo"/></svg></a><p>Independent, community-maintained — not affiliated with any provider listed. Terms change without notice; always confirm against each provider's own docs. MIT licensed.</p><p class="foot-legal"><a href="${p}legal/privacy.html">Privacy</a> · <a href="${p}legal/terms.html">Terms</a> · Tweakeo, Inc.</p></div></footer>`;
 
@@ -1062,12 +1062,119 @@ writeFileSync(join(ROOT, 'site/guides/index.html'), htmlPage({
   canonical: `${SITE}/guides/`, main: guidesHubMain,
 }));
 
+// ---------- machine-readable: static JSON API (/api/v1) + llms.txt ----------
+// Deterministic slices of the dataset at stable, versioned URLs — a "public API"
+// that works on static hosting (no server, no query params, CORS-open). Plus
+// llms.txt / llms-full.txt (llmstxt.org) so AI agents can consume the hub directly.
+mkdirSync(join(ROOT, 'site/api/v1/modality'), { recursive: true });
+const apiBase = { dataset: 'free-llm-api-hub', version: data.version, generated: data.generated, license: 'MIT', homepage: `${SITE}/`, docs: `${SITE}/api/` };
+const writeApi = (rel, obj) => writeFileSync(join(ROOT, `site/api/v1/${rel}`), JSON.stringify(obj, null, 2) + '\n');
+writeApi('providers.json', { ...apiBase, count: publicProviders.length, providers: publicProviders });
+writeApi('programs.json', { ...apiBase, startups: programs.startups, research: programs.research });
+const API_SLICES = {
+  ongoing: (p) => p.category === 'ongoing',
+  trial: (p) => p.category === 'trial',
+  perpetual: (p) => p.free_type === 'perpetual',
+  'no-card': (p) => p.card_required === false,
+  'no-phone': (p) => p.phone_required === false,
+  commercial: (p) => p.commercial_ok === true,
+  'openai-compatible': (p) => p.openai_compatible === true,
+};
+for (const [name, fn] of Object.entries(API_SLICES)) {
+  const list = publicProviders.filter(fn);
+  writeApi(`${name}.json`, { ...apiBase, slice: name, count: list.length, providers: list });
+}
+const API_MODS = ['text', 'vision', 'image', 'audio', 'embeddings', 'rerank', 'ocr'];
+for (const m of API_MODS) {
+  const list = publicProviders.filter((p) => (p.modalities || []).includes(m));
+  writeApi(`modality/${m}.json`, { ...apiBase, modality: m, count: list.length, providers: list });
+}
+const apiEndpoints = {
+  providers: 'v1/providers.json',
+  programs: 'v1/programs.json',
+  slices: Object.fromEntries(Object.keys(API_SLICES).map((s) => [s, `v1/${s}.json`])),
+  modality: Object.fromEntries(API_MODS.map((m) => [m, `v1/modality/${m}.json`])),
+};
+writeApi('index.json', { ...apiBase, description: 'Static, versioned JSON over the free-llm-api-hub dataset. Paths are relative to /api/v1/. Regenerated on every dataset change; no query params, no auth, no rate limits.', counts: { providers: publicProviders.length, ongoing: ongoing.length, trial: trial.length, programs: programs.startups.length + programs.research.length }, endpoints: apiEndpoints });
+
+// human-facing API docs page
+const apiRow = (label, path, count) => `<tr><td class="name"><a href="v1/${path}"><code>/api/v1/${path}</code></a></td><td>${htmlEsc(label)}</td><td>${count != null ? count : ''}</td></tr>`;
+const apiDocMain =
+  `<section class="page-hero"><div class="wrap"><nav class="crumbs"><a href="../">Home</a> / API</nav>` +
+  `<h1>Static JSON API</h1><p class="lede">The whole dataset as versioned, machine-readable JSON at stable URLs — no server, no query params, no auth, no rate limits. CORS-open, so you can <code>fetch()</code> it straight from the browser. Regenerated on every dataset change (currently v${data.version}).</p></div></section>` +
+  `<main id="main"><div class="wrap prose">` +
+  `<h2>Everything</h2><table class="model-table"><thead><tr><th>Endpoint</th><th>Contents</th><th>Count</th></tr></thead><tbody>` +
+  apiRow('Full provider dataset (all fields)', 'providers.json', publicProviders.length) +
+  apiRow('Apply-to-get credit programs', 'programs.json', programs.startups.length + programs.research.length) +
+  apiRow('Endpoint manifest', 'index.json', null) +
+  `</tbody></table>` +
+  `<h2>Slices (by constraint)</h2><table class="model-table"><thead><tr><th>Endpoint</th><th>Contents</th><th>Count</th></tr></thead><tbody>` +
+  Object.entries(API_SLICES).map(([n, fn]) => apiRow(`Providers where ${n.replace(/-/g, ' ')}`, `${n}.json`, publicProviders.filter(fn).length)).join('') +
+  `</tbody></table>` +
+  `<h2>Slices (by modality)</h2><table class="model-table"><thead><tr><th>Endpoint</th><th>Contents</th><th>Count</th></tr></thead><tbody>` +
+  API_MODS.map((m) => apiRow(`Providers with a free ${m} modality`, `modality/${m}.json`, publicProviders.filter((p) => (p.modalities || []).includes(m)).length)).join('') +
+  `</tbody></table>` +
+  `<h2>Example</h2><pre><code>curl -s ${SITE}/api/v1/no-card.json | jq '.providers[].name'</code></pre>` +
+  `<p class="muted">Every object carries the dataset <code>version</code> and <code>generated</code> date. Prefer a stable snapshot? Pin a Git tag of <a href="${REPO}">the repo</a>. For AI agents, see <a href="../llms.txt">llms.txt</a>.</p>` +
+  `</div></main>`;
+mkdirSync(join(ROOT, 'site/api'), { recursive: true });
+writeFileSync(join(ROOT, 'site/api/index.html'), htmlPage({
+  title: 'Static JSON API · Free LLM API Hub',
+  desc: 'The free-llm-api-hub dataset as versioned, machine-readable JSON at stable URLs — full dataset plus pre-filtered slices by category, constraint and modality. No auth, no rate limits.',
+  canonical: `${SITE}/api/`, main: apiDocMain, prefix: '../',
+}));
+
+// llms.txt (concise index) + llms-full.txt (every provider expanded) — llmstxt.org
+const programCount = programs.startups.length + programs.research.length;
+const llmsSummary = `A continuously-verified, machine-readable dataset of free-tier and trial-credit LLM (and adjacent AI-model) APIs for developers. Every entry is dated and sourced to the provider's own docs.`;
+const llmsTxt =
+  `# Free LLM API Hub\n\n> ${llmsSummary}\n\n` +
+  `${total} providers (${ongoing.length} ongoing free tiers, ${trial.length} trial credits) and ${programCount} apply-to-get credit programs. Schema v${data.version}. Terms change often — always confirm against each provider's own docs, linked from every entry. This whole site is static and machine-readable.\n\n` +
+  `## Dataset\n` +
+  `- [Full dataset, JSON](${SITE}/api/v1/providers.json): every provider, all fields\n` +
+  `- [CSV export](${SITE}/providers.csv)\n` +
+  `- [JSON Schema](${REPO}/blob/main/data/schema.json)\n` +
+  `- [Static JSON API](${SITE}/api/): versioned endpoints + pre-filtered slices (category, modality, no-card, commercial, OpenAI-compatible, …)\n` +
+  `- [Full provider list expanded, markdown](${SITE}/llms-full.txt)\n\n` +
+  `## Guides\n` +
+  GUIDES.map((g) => `- [${g.h1}](${SITE}/guides/${g.slug}.html): ${g.blurb}`).join('\n') + `\n\n` +
+  `## Collections\n` +
+  COLLECTIONS.map((c) => `- [${c.title}](${SITE}/collections/${c.slug}.html)`).join('\n') + `\n\n` +
+  `## Credit programs\n` +
+  `- [Startup credits](${SITE}/programs/startups.html)\n- [Student & research credits](${SITE}/programs/research.html)\n`;
+writeFileSync(join(ROOT, 'site/llms.txt'), llmsTxt);
+
+const yn = (v, yes, no) => v === true ? yes : v === false ? no : 'unknown';
+const provBlock = (p) => {
+  const gates = [
+    `card required: ${yn(p.card_required, 'yes', 'no')}`,
+    `phone required: ${yn(p.phone_required, 'yes', 'no')}`,
+    `commercial use: ${yn(p.commercial_ok, 'allowed', 'not allowed')}`,
+    `OpenAI-compatible: ${yn(p.openai_compatible, 'yes', 'no')}${p.openai_base_url ? ` (base ${p.openai_base_url})` : ''}`,
+  ].join('; ');
+  return `### ${p.name} — ${p.category === 'ongoing' ? 'ongoing free tier' : 'trial credit'}\n` +
+    `- Free: ${p.free_tier}\n` +
+    `- Rate limits: ${p.rate_limits || 'not specified'}\n` +
+    `- The catch: ${p.notes || '—'}\n` +
+    `- Modalities: ${(p.modalities || ['text']).join(', ')}\n` +
+    `- Gates: ${gates}\n` +
+    `- Docs: ${p.docs_url}\n` +
+    `- Page: ${SITE}/p/${p.slug}.html\n`;
+};
+const llmsFull =
+  `# Free LLM API Hub — full provider list\n\n> ${llmsSummary}\n\n` +
+  `${total} providers, schema v${data.version}, generated ${data.generated}. Confirm every figure against the linked docs.\n\n` +
+  `## Providers\n\n` +
+  providers.map(provBlock).join('\n') + `\n`;
+writeFileSync(join(ROOT, 'site/llms-full.txt'), llmsFull);
+
 // ---------- sitemap.xml (site SEO) ----------
 const sitemapUrls = [
   `${SITE}/`,
   `${SITE}/models/`,
   `${SITE}/guides/`,
   `${SITE}/collections/`,
+  `${SITE}/api/`,
   `${SITE}/programs/startups.html`,
   `${SITE}/programs/research.html`,
   ...GUIDES.map((g) => `${SITE}/guides/${g.slug}.html`),

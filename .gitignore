@@ -16,6 +16,9 @@ site/programs/
 site/updates.html
 site/feed.xml
 site/sitemap.xml
+site/api/
+site/llms.txt
+site/llms-full.txt
 
 # Local tooling
 .claude/settings.local.json
