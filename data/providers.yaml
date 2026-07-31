@@ -1159,3 +1159,136 @@ providers:
     openai_base_url: null
     verified: true
     last_verified: "2026-07-31"
+  - slug: "poolside"
+    name: "Poolside"
+    category: "ongoing"
+    free_type: "perpetual"
+    free_tier: "Laguna XS 2.1 (33B) and Laguna S 2.1 (118B) are free in Preview via a self-serve developer API key"
+    rate_limits: "Preview rate limits not published"
+    notes: "Coding-focused models. Free access is Preview-stage and may change at general availability. Self-serve: create a free API key at platform.poolside.ai. OpenRouter is offered only as an alternative route."
+    best_for: "Free coding-focused LLMs behind an OpenAI-compatible key"
+    modalities: ["text"]
+    models_free: null
+    expires: null
+    docs_url: "https://docs.poolside.ai/api/overview"
+    phone_required: null
+    card_required: null
+    commercial_ok: null
+    openai_compatible: true
+    openai_base_url: "https://inference.poolside.ai/v1"
+    verified: true
+    last_verified: "2026-07-31"
+  - slug: "upstage"
+    name: "Upstage"
+    category: "trial"
+    free_type: "trial-credit"
+    free_tier: "$10 in free credit on signup (no card) — Solar LLM (chat + embeddings) plus Document Parse / OCR / information extraction"
+    rate_limits: "Document Parse billed $0.01/page (+$0.03 for extract), drawn from the $10 credit"
+    notes: "No credit card required to receive the $10 credit; Studio agents also include 10 free runs. A separate institutional grant (up to 1 year of free Solar + Document Parse) exists for eligible organizations only. Credit validity period not stated."
+    best_for: "Solar LLM + document OCR behind one OpenAI-compatible key"
+    modalities: ["text", "ocr", "embeddings"]
+    models_free: null
+    expires: null
+    docs_url: "https://console.upstage.ai/docs/getting-started"
+    phone_required: null
+    card_required: false
+    commercial_ok: true
+    openai_compatible: true
+    openai_base_url: "https://api.upstage.ai/v1"
+    verified: true
+    last_verified: "2026-07-31"
+  - slug: "veryfi"
+    name: "Veryfi"
+    category: "ongoing"
+    free_type: "renewing-quota"
+    free_tier: "Free Forever plan: up to 100 documents/month — OCR plus structured data extraction (receipts, invoices, and 100+ document types)"
+    rate_limits: "100 documents/month on the free plan"
+    notes: "No credit card required. The 'Free Forever' 100 docs/mo tier is the standing free tier (a separate 14-day trial unlocks paid features). Proprietary OCR / document-intelligence REST API."
+    best_for: "Free-forever document OCR (100 docs/mo, no card)"
+    modalities: ["ocr"]
+    models_free: null
+    expires: null
+    docs_url: "https://www.veryfi.com/pricing/"
+    phone_required: null
+    card_required: false
+    commercial_ok: true
+    openai_compatible: false
+    openai_base_url: null
+    verified: true
+    last_verified: "2026-07-31"
+  - slug: "voicegain"
+    name: "Voicegain"
+    category: "trial"
+    free_type: "trial-credit"
+    free_tier: "$50 in free credits on signup (no credit card) — speech-to-text"
+    rate_limits: "Bounded by the $50 credit; pay-as-you-go afterward"
+    notes: "No credit card required to start — an explicit $50 developer credit. Commercial terms not stated on the pricing page. Native STT REST API."
+    best_for: "Largest no-card speech-to-text credit ($50)"
+    modalities: ["audio"]
+    models_free: null
+    expires: null
+    docs_url: "https://www.voicegain.ai/pricing"
+    phone_required: null
+    card_required: false
+    commercial_ok: null
+    openai_compatible: false
+    openai_base_url: null
+    verified: true
+    last_verified: "2026-07-31"
+  - slug: "smallest-ai"
+    name: "Smallest.ai (Waves)"
+    category: "trial"
+    free_type: "trial-credit"
+    free_tier: "$10 in free credits with full access — TTS, STT, speech-to-speech and voice cloning"
+    rate_limits: "Bounded by the $10 credit"
+    notes: "$10 signup credit with full access. Fast TTS plus voice cloning. Card and commercial terms not stated on the pricing page."
+    best_for: "Fast TTS + voice cloning on a $10 credit"
+    modalities: ["audio"]
+    models_free: null
+    expires: null
+    docs_url: "https://smallest.ai/pricing"
+    phone_required: null
+    card_required: null
+    commercial_ok: null
+    openai_compatible: false
+    openai_base_url: null
+    verified: true
+    last_verified: "2026-07-31"
+  - slug: "retell-ai"
+    name: "Retell AI"
+    category: "trial"
+    free_type: "trial-credit"
+    free_tier: "$10 in free credits plus 20 free concurrent calls — voice-agent orchestration (STT + LLM + TTS)"
+    rate_limits: "20 free concurrent calls; voice agents ~$0.07-$0.31/min after the credit"
+    notes: "$10 signup credit with full platform access. A voice-agent builder (orchestration), not a raw model API. Card terms not stated on the pricing page."
+    best_for: "Build a voice agent on a $10 credit"
+    modalities: ["audio"]
+    models_free: null
+    expires: null
+    docs_url: "https://www.retellai.com/pricing"
+    phone_required: null
+    card_required: null
+    commercial_ok: null
+    openai_compatible: false
+    openai_base_url: null
+    verified: true
+    last_verified: "2026-07-31"
+  - slug: "datalab"
+    name: "Datalab (Marker / Surya)"
+    category: "trial"
+    free_type: "trial-credit"
+    free_tier: "$5 in free credits for new accounts — OCR in 90+ languages, PDF-to-markdown, tables, forms and structured extraction"
+    rate_limits: "Per-page pricing and rate limits not published"
+    notes: "$5 signup credit. The hosted API wraps the well-regarded open-source Marker/Surya OCR engine. Card and commercial terms not stated on the docs."
+    best_for: "Open-source-pedigree OCR (Marker/Surya) on a $5 credit"
+    modalities: ["ocr"]
+    models_free: null
+    expires: null
+    docs_url: "https://documentation.datalab.to/"
+    phone_required: null
+    card_required: null
+    commercial_ok: null
+    openai_compatible: false
+    openai_base_url: null
+    verified: true
+    last_verified: "2026-07-31"

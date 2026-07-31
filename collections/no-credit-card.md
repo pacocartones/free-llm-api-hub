@@ -8,7 +8,7 @@ LLM APIs you can start calling without entering a payment method — filtered li
 
 Every provider below offers free API access with **no card required** to get started (`card_required: false`, confirmed against their own docs). Rows where the requirement is unknown are excluded rather than assumed.
 
-**36 of 61 tracked providers** match.
+**39 of 68 tracked providers** match.
 
 | Provider | Type | What's free | The catch | Verified |
 |---|---|---|---|---|
@@ -48,6 +48,9 @@ Every provider below offers free API access with **no card required** to get sta
 | **[Unstructured](https://unstructured.io/pricing)**<br><sub>💳 no card</sub> | Ongoing | 15,000 pages/month, resets monthly — document parsing/OCR across 50+ file types (layout, tables, generative OCR enrichment) | No credit card required. Purpose-built to turn documents into clean, structured input for RAG/LLM pipelines. Commercial terms not stated on the pricing page. | ✅ 2026-07-31 |
 | **[Nutrient (Data Extraction API)](https://www.nutrient.io/api/pricing/)**<br><sub>💳 no card</sub> | Ongoing | 5,000 credits/month (renews; no rollover) — ~5,000 text-parse pages, fewer for OCR-heavy 'Understand'/'Agentic' parsing (9-18 credits/page) | No credit card required. Formerly PSPDFKit. Extraction/OCR with tables, key-value and handwriting. Commercial terms not stated on the pricing page. | ✅ 2026-07-31 |
 | **[Photoroom](https://www.photoroom.com/api/pricing)**<br><sub>💳 no card</sub> | Ongoing | 10 free production calls on the Remove Background API (one-time) plus 1,000 sandbox calls/month on the Image Editing API (watermarked) | No credit card required. Sandbox output is watermarked (for testing); the 10 production calls return clean output. Image editing/generation (AI backgrounds, relighting, shadows). | ✅ 2026-07-31 |
+| **[Upstage](https://console.upstage.ai/docs/getting-started)**<br><sub>💳 no card · 🏢 commercial OK · 🔌 OpenAI-compat</sub> | Trial | $10 in free credit on signup (no card) — Solar LLM (chat + embeddings) plus Document Parse / OCR / information extraction | No credit card required to receive the $10 credit; Studio agents also include 10 free runs. A separate institutional grant (up to 1 year of free Solar + Document Parse) exists for eligible organizations only. Credit validity period not stated. | ✅ 2026-07-31 |
+| **[Veryfi](https://www.veryfi.com/pricing/)**<br><sub>💳 no card · 🏢 commercial OK</sub> | Ongoing | Free Forever plan: up to 100 documents/month — OCR plus structured data extraction (receipts, invoices, and 100+ document types) | No credit card required. The 'Free Forever' 100 docs/mo tier is the standing free tier (a separate 14-day trial unlocks paid features). Proprietary OCR / document-intelligence REST API. | ✅ 2026-07-31 |
+| **[Voicegain](https://www.voicegain.ai/pricing)**<br><sub>💳 no card</sub> | Trial | $50 in free credits on signup (no credit card) — speech-to-text | No credit card required to start — an explicit $50 developer credit. Commercial terms not stated on the pricing page. Native STT REST API. | ✅ 2026-07-31 |
 
 ---
 

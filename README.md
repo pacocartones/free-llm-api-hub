@@ -18,7 +18,7 @@ No hype, no dead links, no "generous limits" hand-waving. Just what's actually f
 **[🔎 Interactive explorer](https://freellmapihub.com/)** &nbsp;·&nbsp; **[📊 Dataset](data/providers.json)** &nbsp;·&nbsp; **[🧪 How we verify](docs/methodology.md)** &nbsp;·&nbsp; **[➕ Add a provider](CONTRIBUTING.md)**
 
 <!-- AUTOGEN:stats:start -->
-**61 providers** tracked · 36 ongoing free tiers · 25 trial credits · **61/61** independently verified against the provider's own docs
+**68 providers** tracked · 38 ongoing free tiers · 30 trial credits · **68/68** independently verified against the provider's own docs
 <!-- AUTOGEN:stats:end -->
 
 </div>
@@ -49,13 +49,13 @@ Primarily **free LLM (text) APIs** — plus the adjacent model APIs a builder re
 <!-- AUTOGEN:coverage:start -->
 | Category | Providers | Examples |
 |---|---|---|
-| **Text / LLM** | 42 | Google Gemini API, Groq, OpenRouter |
-| **Speech (STT / TTS)** | 22 | Google Gemini API, Groq, Cloudflare Workers AI |
-| **Embeddings** | 12 | Google Gemini API, Cloudflare Workers AI, Cohere |
+| **Text / LLM** | 44 | Google Gemini API, Groq, OpenRouter |
+| **Speech (STT / TTS)** | 25 | Google Gemini API, Groq, Cloudflare Workers AI |
+| **Embeddings** | 13 | Google Gemini API, Cloudflare Workers AI, Cohere |
 | **Image generation** | 10 | Cloudflare Workers AI, HuggingFace, Jina AI |
 | **Vision** | 9 | Google Gemini API, OpenRouter, Z.ai |
+| **OCR / documents** | 8 | OCR.space, LlamaParse, Nanonets |
 | **Rerank** | 6 | Cohere, Jina AI, Mixedbread |
-| **OCR / documents** | 5 | OCR.space, LlamaParse, Nanonets |
 <!-- AUTOGEN:coverage:end -->
 
 Filter any category live in the [interactive explorer](https://freellmapihub.com/) or the [multimodal collection](collections/multimodal.md).
@@ -86,12 +86,12 @@ Starting points, not guarantees — read the full row before you build on it.
 Focused, always-current collections — each is generated from the dataset and has a live web page too.
 
 <!-- AUTOGEN:collections:start -->
-- **[Free LLM APIs with no credit card](collections/no-credit-card.md)** (36) — start without a payment method · [live page ↗](https://freellmapihub.com/collections/no-credit-card.html)
+- **[Free LLM APIs with no credit card](collections/no-credit-card.md)** (39) — start without a payment method · [live page ↗](https://freellmapihub.com/collections/no-credit-card.html)
 - **[Free LLM APIs with no phone verification](collections/no-phone.md)** (21) — no SMS/phone verification · [live page ↗](https://freellmapihub.com/collections/no-phone.html)
-- **[Free LLM APIs for commercial use](collections/commercial-use.md)** (20) — safe to ship, not eval-only · [live page ↗](https://freellmapihub.com/collections/commercial-use.html)
-- **[OpenAI-compatible free LLM APIs](collections/openai-compatible.md)** (30) — drop-in OpenAI SDK swap · [live page ↗](https://freellmapihub.com/collections/openai-compatible.html)
-- **[Permanently free LLM APIs](collections/always-free.md)** (5) — $0 models, no trial clock · [live page ↗](https://freellmapihub.com/collections/always-free.html)
-- **[Free multimodal LLM APIs](collections/multimodal.md)** (44) — vision, audio, embeddings · [live page ↗](https://freellmapihub.com/collections/multimodal.html)
+- **[Free LLM APIs for commercial use](collections/commercial-use.md)** (22) — safe to ship, not eval-only · [live page ↗](https://freellmapihub.com/collections/commercial-use.html)
+- **[OpenAI-compatible free LLM APIs](collections/openai-compatible.md)** (32) — drop-in OpenAI SDK swap · [live page ↗](https://freellmapihub.com/collections/openai-compatible.html)
+- **[Permanently free LLM APIs](collections/always-free.md)** (6) — $0 models, no trial clock · [live page ↗](https://freellmapihub.com/collections/always-free.html)
+- **[Free multimodal LLM APIs](collections/multimodal.md)** (50) — vision, audio, embeddings · [live page ↗](https://freellmapihub.com/collections/multimodal.html)
 <!-- AUTOGEN:collections:end -->
 
 Every provider also has its own page with the full details and a copy-ready quickstart — e.g. [Groq](https://freellmapihub.com/p/groq.html), [Deepgram](https://freellmapihub.com/p/deepgram.html), [Jina AI](https://freellmapihub.com/p/jina-ai.html).
@@ -154,6 +154,8 @@ Recurring (daily/monthly) quotas that renew — no expiry, but usually rate-limi
 | **[Unstructured](https://unstructured.io/pricing)**<br><sub>💳 no card</sub> | 15,000 pages/month, resets monthly — document parsing/OCR across 50+ file types (layout, tables, generative OCR enrichment) | 15,000 pages/month | No credit card required. Purpose-built to turn documents into clean, structured input for RAG/LLM pipelines. Commercial terms not stated on the pricing page. | ✅ 2026-07-31 |
 | **[Nutrient (Data Extraction API)](https://www.nutrient.io/api/pricing/)**<br><sub>💳 no card</sub> | 5,000 credits/month (renews; no rollover) — ~5,000 text-parse pages, fewer for OCR-heavy 'Understand'/'Agentic' parsing (9-18 credits/page) | 5,000 credits/month; per-page cost varies by parse mode (1-18 credits) | No credit card required. Formerly PSPDFKit. Extraction/OCR with tables, key-value and handwriting. Commercial terms not stated on the pricing page. | ✅ 2026-07-31 |
 | **[Photoroom](https://www.photoroom.com/api/pricing)**<br><sub>💳 no card</sub> | 10 free production calls on the Remove Background API (one-time) plus 1,000 sandbox calls/month on the Image Editing API (watermarked) | 1,000 sandbox calls/month; 10 one-time production calls | No credit card required. Sandbox output is watermarked (for testing); the 10 production calls return clean output. Image editing/generation (AI backgrounds, relighting, shadows). | ✅ 2026-07-31 |
+| **[Poolside](https://docs.poolside.ai/api/overview)**<br><sub>🔌 OpenAI-compat</sub> | Laguna XS 2.1 (33B) and Laguna S 2.1 (118B) are free in Preview via a self-serve developer API key | Preview rate limits not published | Coding-focused models. Free access is Preview-stage and may change at general availability. Self-serve: create a free API key at platform.poolside.ai. OpenRouter is offered only as an alternative route. | ✅ 2026-07-31 |
+| **[Veryfi](https://www.veryfi.com/pricing/)**<br><sub>💳 no card · 🏢 commercial OK</sub> | Free Forever plan: up to 100 documents/month — OCR plus structured data extraction (receipts, invoices, and 100+ document types) | 100 documents/month on the free plan | No credit card required. The 'Free Forever' 100 docs/mo tier is the standing free tier (a separate 14-day trial unlocks paid features). Proprietary OCR / document-intelligence REST API. | ✅ 2026-07-31 |
 <!-- AUTOGEN:ongoing:end -->
 
 ## One-time trial credits
@@ -188,6 +190,11 @@ A fixed credit balance on signup. Once it's spent (or the clock runs out), you'r
 | **[Voyage AI](https://docs.voyageai.com/docs/pricing)**<br><sub>💳 no card</sub> | 200M free tokens on current embedding models (voyage-4, voyage-4-lite, voyage-context-4, voyage-code-3) and on rerankers (rerank-2.5 family); voyage-multimodal-3.5 gets 200M text tokens + 150B pixels — a large one-time complimentary allotment per model | The allotment is a one-time complimentary balance per model, not a renewing monthly quota. No credit card required to claim. Owned by MongoDB — a first-party model provider, not a proxy. | — | ✅ 2026-07-31 |
 | **[Contextual AI](https://contextual.ai/pricing/)** | $25 in free credits on the on-demand plan, usable on the Rerank (rerank-v2) and Generate APIs | One-time signup credit (does not renew); the instruction-following reranker is the standout free capability. Commercial-use terms not stated on the pricing page. | — | ✅ 2026-07-31 |
 | **[Rev AI](https://www.rev.ai/pricing)** | Free credits equivalent to 5 hours of Reverb ASR (speech-to-text), usable across all Rev AI products | One-time signup grant (does not renew). High-accuracy English ASR. Card and commercial terms not stated on the pricing page. | — | ✅ 2026-07-31 |
+| **[Upstage](https://console.upstage.ai/docs/getting-started)**<br><sub>💳 no card · 🏢 commercial OK · 🔌 OpenAI-compat</sub> | $10 in free credit on signup (no card) — Solar LLM (chat + embeddings) plus Document Parse / OCR / information extraction | No credit card required to receive the $10 credit; Studio agents also include 10 free runs. A separate institutional grant (up to 1 year of free Solar + Document Parse) exists for eligible organizations only. Credit validity period not stated. | — | ✅ 2026-07-31 |
+| **[Voicegain](https://www.voicegain.ai/pricing)**<br><sub>💳 no card</sub> | $50 in free credits on signup (no credit card) — speech-to-text | No credit card required to start — an explicit $50 developer credit. Commercial terms not stated on the pricing page. Native STT REST API. | — | ✅ 2026-07-31 |
+| **[Smallest.ai (Waves)](https://smallest.ai/pricing)** | $10 in free credits with full access — TTS, STT, speech-to-speech and voice cloning | $10 signup credit with full access. Fast TTS plus voice cloning. Card and commercial terms not stated on the pricing page. | — | ✅ 2026-07-31 |
+| **[Retell AI](https://www.retellai.com/pricing)** | $10 in free credits plus 20 free concurrent calls — voice-agent orchestration (STT + LLM + TTS) | $10 signup credit with full platform access. A voice-agent builder (orchestration), not a raw model API. Card terms not stated on the pricing page. | — | ✅ 2026-07-31 |
+| **[Datalab (Marker / Surya)](https://documentation.datalab.to/)** | $5 in free credits for new accounts — OCR in 90+ languages, PDF-to-markdown, tables, forms and structured extraction | $5 signup credit. The hosted API wraps the well-regarded open-source Marker/Surya OCR engine. Card and commercial terms not stated on the docs. | — | ✅ 2026-07-31 |
 <!-- AUTOGEN:trial:end -->
 
 ## Notably NOT free
