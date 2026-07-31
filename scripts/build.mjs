@@ -421,6 +421,15 @@ const siteFooter = (p) => `<footer class="site-footer"><div class="wrap footer-t
 // htmlPage() (every generated page) and site/index.html (injected via AUTOGEN:themeguard).
 const THEME_GUARD = `<script>(function(){try{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: light)').matches?'light':'dark');document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>`;
 
+// Content-Security-Policy (all pages, injected into index.html via AUTOGEN:csp and hard-copied
+// in 404.html). script-src pins our two inline scripts by hash — the theme guard (every page)
+// and the path read-out (404.html only) — so no other inline or injected script can run;
+// everything else is 'self' (site.js, explorer.js, shared-rules.js, widget.js). connect-src
+// allows the star count (api.github.com) and explorer.js's data fallback (raw.githubusercontent).
+// No default-src/style-src on purpose: inline style="" attributes and the 404 <style> stay valid.
+// If you edit THEME_GUARD or 404.html's inline scripts, recompute these hashes or the page breaks silently.
+const CSP = `<meta http-equiv="Content-Security-Policy" content="script-src 'self' 'sha256-r3FnVnP9W/uaNhK9XkZqH3GIfK4TudOQGYTwoNIjGR4=' 'sha256-YzEhxvq2BwovGsg/RCjKkQdwf+LZmTjIkiQcjXCZMHc='; connect-src 'self' https://api.github.com https://raw.githubusercontent.com; object-src 'none'; base-uri 'self'">`;
+
 function htmlPage({ title, desc, canonical, main, jsonld, prefix = '../', noindex = false, ogImage = `${SITE}/og.png` }) {
   return `<!DOCTYPE html>
 <html lang="en" data-theme="dark">
@@ -429,6 +438,7 @@ function htmlPage({ title, desc, canonical, main, jsonld, prefix = '../', noinde
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>${htmlEsc(title)}</title>
 <meta name="description" content="${htmlEsc(desc)}">${noindex ? '\n<meta name="robots" content="noindex">' : ''}
+${CSP}
 ${THEME_GUARD}
 <link rel="canonical" href="${htmlEsc(canonical)}">
 <link rel="icon" href="${prefix}favicon.svg" type="image/svg+xml">
@@ -554,6 +564,7 @@ const homeRows = explorerRowsHtml([...providers].sort((a, b) => recScore(b) - re
 const publicProviders = providers.map(({ env_key, ...rest }) => rest);
 const inlineData = `<script type="application/json" id="providers-data">${JSON.stringify({ providers: publicProviders }).replace(/</g, '\\u003c')}</script>`;
 let indexHtml = readFileSync(join(ROOT, 'site/index.html'), 'utf8');
+indexHtml = inject(indexHtml, 'csp', CSP);
 indexHtml = inject(indexHtml, 'themeguard', THEME_GUARD);
 indexHtml = inject(indexHtml, 'rows', homeRows);
 indexHtml = inject(indexHtml, 'data', inlineData);
