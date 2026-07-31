@@ -33,6 +33,10 @@ They're genuinely valuable, but different enough that they're kept **out of the 
 | **[Modal for Startups](https://modal.com/startups)** | "Thousands" of free GPU credits (serverless compute) | ◐ via cloud | Seed–B+, VC-backed or >$1M raised, new customer |
 | **[NVIDIA Inception](https://www.nvidia.com/en-us/startups/)** | Preferred hardware pricing, partner cloud credits, training, ecosystem access | ◐ via cloud | Incorporated, <10 yr, ≥1 developer; pre-revenue OK |
 | **[Scaleway Startup Program](https://www.scaleway.com/en/startup-program/)** | €1k / €9k / €36k credits by tier; covers Generative APIs | ◐ via cloud | <5 yr, <50 employees, going to market, not yet a client (EU) |
+| **[Perplexity for Startups](https://www.perplexity.ai/startups)** | $5k Sonar API credits + 6 months Enterprise Pro (up to 50 seats) | ✅ LLM API | <5 yr old, raised <$20M, backed by an approved VC/accelerator partner |
+| **[DigitalOcean Hatch](https://www.digitalocean.com/hatch)** | Up to ~$10k/mo credit limit over 12 mo (amount varies); base credits exclude GPU Droplets — select startups invited to apply for separate GPU credits | ◐ via cloud | AI-native startups that raised ≤$10M; business email required |
+| **[Pinecone Startup Program](https://www.pinecone.io/startup-program/)** | Free Standard tier + Pro Support + usage credits (amount not published); vector DB / RAG infra, not model inference | ✖ perks only | <100 employees, Series A or earlier; no VC referral required |
+| **[Weaviate Startup Deal](https://weaviate.io/startup-deal)** | Discounted Weaviate Cloud access (terms not published); vector DB / RAG infra | ✖ perks only | Early-stage with a partner-program / VC affiliation (e.g. YC, Techstars) |
 <!-- AUTOGEN:startups:end -->
 
 ## For students & researchers
@@ -49,6 +53,7 @@ They're genuinely valuable, but different enough that they're kept **out of the 
 | **[NVIDIA Academic Grant](https://www.nvidia.com/en-us/industries/higher-education-research/academic-grant-program/)** | Researchers | GPU-hours / hardware grants (e.g. up to 30k H100-hrs) | ◐ via cloud | Full-time faculty at PhD-granting institutions |
 | **[Lambda Research Grants](https://lambda.ai/research)** | Researchers | Up to $5k Lambda GPU cloud credits | ◐ via cloud | Qualifying researchers; competitive |
 | **[AWS Educate](https://aws.amazon.com/education/awseducate/)** | Students | Free training, labs and badges (no spendable credits) | ✖ perks only | Anyone 13+, email only, no card |
+| **[Perplexity for Students](https://www.perplexity.ai/students)** | Students | Perplexity Pro for students — a free year unlocks when a campus reaches 500 signups; otherwise discounted Education Pro | ✖ perks only | Verified .edu students |
 <!-- AUTOGEN:research:end -->
 
 ---

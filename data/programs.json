@@ -1,6 +1,6 @@
 {
-  "generated": "2026-07-30",
-  "note": "Apply-to-get credit programs (startup + student/research). Kept separate from providers.json (which is self-serve, verified free APIs) because these need an application and are highly volatile. `funds`: 'yes' = first-party LLM-API credits, 'partial' = cloud/compute credits usable for managed LLM APIs, 'no' = training/perks only. Confirmed against each program's own page on 2026-07-30.",
+  "generated": "2026-07-31",
+  "note": "Apply-to-get credit programs (startup + student/research). Kept separate from providers.json (which is self-serve, verified free APIs) because these need an application and are highly volatile. `funds`: 'yes' = first-party LLM-API credits, 'partial' = cloud/compute credits usable for managed LLM APIs, 'no' = training/perks or adjacent infra only. Confirmed against each program's own page on 2026-07-30/31.",
   "startups": [
     { "name": "AWS Activate", "url": "https://aws.amazon.com/activate/", "what": "Up to $200k AWS credits (marketing max; self-serve tier far smaller); explicitly redeemable on Bedrock LLMs", "funds": "partial", "who": "Any stage; top tiers need a referral from an approved AWS Activate provider" },
     { "name": "Microsoft for Startups Founders Hub", "url": "https://www.microsoft.com/en-us/startups", "what": "Up to $150k Azure credits (unlocked across tiers); covers Azure OpenAI", "funds": "partial", "who": "Software startups; no stage/funding threshold; services-only firms excluded" },
@@ -15,7 +15,11 @@
     { "name": "Nebius for Startups", "url": "https://nebius.com/startups", "what": "$5k intro credits (~1,600 H100-hrs) + up to $100k discounts (GPU/compute)", "funds": "partial", "who": "AI-native, <7 yr, VC-backed, ~$5M+ raised; selective" },
     { "name": "Modal for Startups", "url": "https://modal.com/startups", "what": "\"Thousands\" of free GPU credits (serverless compute)", "funds": "partial", "who": "Seed–B+, VC-backed or >$1M raised, new customer" },
     { "name": "NVIDIA Inception", "url": "https://www.nvidia.com/en-us/startups/", "what": "Preferred hardware pricing, partner cloud credits, training, ecosystem access", "funds": "partial", "who": "Incorporated, <10 yr, ≥1 developer; pre-revenue OK" },
-    { "name": "Scaleway Startup Program", "url": "https://www.scaleway.com/en/startup-program/", "what": "€1k / €9k / €36k credits by tier; covers Generative APIs", "funds": "partial", "who": "<5 yr, <50 employees, going to market, not yet a client (EU)" }
+    { "name": "Scaleway Startup Program", "url": "https://www.scaleway.com/en/startup-program/", "what": "€1k / €9k / €36k credits by tier; covers Generative APIs", "funds": "partial", "who": "<5 yr, <50 employees, going to market, not yet a client (EU)" },
+    { "name": "Perplexity for Startups", "url": "https://www.perplexity.ai/startups", "what": "$5k Sonar API credits + 6 months Enterprise Pro (up to 50 seats)", "funds": "yes", "who": "<5 yr old, raised <$20M, backed by an approved VC/accelerator partner" },
+    { "name": "DigitalOcean Hatch", "url": "https://www.digitalocean.com/hatch", "what": "Up to ~$10k/mo credit limit over 12 mo (amount varies); base credits exclude GPU Droplets — select startups invited to apply for separate GPU credits", "funds": "partial", "who": "AI-native startups that raised ≤$10M; business email required" },
+    { "name": "Pinecone Startup Program", "url": "https://www.pinecone.io/startup-program/", "what": "Free Standard tier + Pro Support + usage credits (amount not published); vector DB / RAG infra, not model inference", "funds": "no", "who": "<100 employees, Series A or earlier; no VC referral required" },
+    { "name": "Weaviate Startup Deal", "url": "https://weaviate.io/startup-deal", "what": "Discounted Weaviate Cloud access (terms not published); vector DB / RAG infra", "funds": "no", "who": "Early-stage with a partner-program / VC affiliation (e.g. YC, Techstars)" }
   ],
   "research": [
     { "name": "Azure for Students", "url": "https://azure.microsoft.com/en-us/free/students/", "audience": "Students", "what": "$100 Azure credit / 12 mo, no card; covers Azure OpenAI", "funds": "partial", "who": "Full-time university students, verify with a school email" },
@@ -26,6 +30,7 @@
     { "name": "Google Cloud Research Credits", "url": "https://edu.google.com/programs/credits/research/", "audience": "Researchers", "what": "GCP credits (proposal-based); covers Vertex AI / Gemini; non-commercial", "funds": "partial", "who": "Faculty / PhD / postdoc at accredited institutions" },
     { "name": "NVIDIA Academic Grant", "url": "https://www.nvidia.com/en-us/industries/higher-education-research/academic-grant-program/", "audience": "Researchers", "what": "GPU-hours / hardware grants (e.g. up to 30k H100-hrs)", "funds": "partial", "who": "Full-time faculty at PhD-granting institutions" },
     { "name": "Lambda Research Grants", "url": "https://lambda.ai/research", "audience": "Researchers", "what": "Up to $5k Lambda GPU cloud credits", "funds": "partial", "who": "Qualifying researchers; competitive" },
-    { "name": "AWS Educate", "url": "https://aws.amazon.com/education/awseducate/", "audience": "Students", "what": "Free training, labs and badges (no spendable credits)", "funds": "no", "who": "Anyone 13+, email only, no card" }
+    { "name": "AWS Educate", "url": "https://aws.amazon.com/education/awseducate/", "audience": "Students", "what": "Free training, labs and badges (no spendable credits)", "funds": "no", "who": "Anyone 13+, email only, no card" },
+    { "name": "Perplexity for Students", "url": "https://www.perplexity.ai/students", "audience": "Students", "what": "Perplexity Pro for students — a free year unlocks when a campus reaches 500 signups; otherwise discounted Education Pro", "funds": "no", "who": "Verified .edu students" }
   ]
 }
