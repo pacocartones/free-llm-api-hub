@@ -22,6 +22,26 @@ Out of scope:
 - Vulnerabilities in the third-party **LLM providers** listed in the dataset — report those to the provider directly.
 - The accuracy of a provider's free-tier terms — that's a data correction, not a security issue. Use the [inaccuracy form](../../issues/new?template=inaccuracy.yml).
 
+## Automation and permissions
+
+Three workflows run against this repository. Two of them can write to `main`, so they are
+worth stating explicitly:
+
+| Workflow | Trigger | Token permissions |
+|---|---|---|
+| `verify.yml` | pull request, push to `main` | `contents: read` — cannot write anything |
+| `regenerate.yml` | push to `main` | `contents: write` — commits the rebuilt derived files |
+| `maintenance.yml` | weekly cron | `contents: write`, `issues: write` — commits the badge and model samples, opens the worklist issue |
+| `pages.yml` | push to `main` | `contents: read`, `pages: write` — publishes the site |
+
+A pull request from a fork therefore never runs with a token that can write to this
+repository, and never has access to repository secrets. The write-capable workflows only run
+on `main`, after a maintainer has merged.
+
+Both write-capable workflows execute `scripts/build.mjs`. That is deliberate — it is how the
+derived files stay in sync with the dataset — but it does mean a change to `scripts/` is
+reviewed as code, not as data.
+
 ## Notes for users of the data
 
 - The dataset contains **only links to public provider documentation**. It never contains API keys, secrets, or credentials — and it never should. Do not submit any.
