@@ -1,0 +1,55 @@
+name: Regenerate
+
+# The bot owns every generated artifact.
+#
+# This is what lets a contributor open a pull request that touches exactly one
+# file. They edit `data/providers.json`; once it lands on `main`, this job
+# rebuilds the README tables, the freshness badge, the CSV/YAML exports, the
+# `collections/` markdown and the site payload, and commits the result.
+#
+# The push uses GITHUB_TOKEN, so it does not re-trigger workflows and cannot
+# loop. The published site does not depend on this commit — `pages.yml` runs
+# its own build before every deploy.
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'data/**'
+      - 'scripts/**'
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: regenerate-main
+  cancel-in-progress: false
+
+jobs:
+  regenerate:
+    name: Rebuild generated files
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      # Integrity first: never commit artifacts built from an invalid dataset.
+      - name: Validate dataset before rebuilding
+        run: node scripts/validate.mjs
+
+      - name: Rebuild every generated artifact from the data
+        run: node scripts/build.mjs
+
+      - name: Commit regenerated files if they changed
+        run: |
+          if git diff --quiet; then
+            echo "Generated files already in sync — nothing to commit."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "chore: regenerate derived files from the dataset [skip ci]"
+          git push

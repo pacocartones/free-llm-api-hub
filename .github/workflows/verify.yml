@@ -1,7 +1,16 @@
 name: Verify
 
-# Fast integrity gate on every change. Scheduled upkeep (badge refresh, weekly
-# link re-check, re-verification worklist) lives in maintenance.yml.
+# Fast integrity gate on every change.
+#
+# What blocks: the dataset must satisfy the integrity rules, and internal doc
+# links must resolve. What does not block: the generated artifacts. Contributors
+# edit `data/providers.json` and nothing else — `regenerate.yml` rebuilds README
+# tables, exports, collections and the site payload on `main` and commits them.
+# The drift report below is informational so a one-line data fix stays a
+# one-line pull request.
+#
+# Scheduled upkeep (source-link re-check, badge refresh, re-verification
+# worklist) lives in maintenance.yml.
 on:
   pull_request:
     paths:
@@ -19,69 +28,41 @@ on:
 
 permissions:
   contents: read
-  issues: write
 
 jobs:
-  # 1. Dataset integrity + generated files are in sync with the data.
   validate:
+    name: Dataset integrity
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version-file: .nvmrc
+
       - name: Validate dataset against integrity rules
         run: node scripts/validate.mjs
+
       - name: Check internal documentation links
         run: node scripts/check-links.mjs
-      - name: Assert README + exports + collections are freshly generated from the data
+
+      # Informational only. A mismatch here is expected on a data-only pull
+      # request and is resolved by the bot after merge.
+      - name: Report generated-file drift
         run: |
           node scripts/build.mjs
-          if ! git diff --quiet -- README.md data/providers.csv data/providers.yaml collections site/index.html docs/credit-programs.md; then
-            echo "::error::Generated files are out of sync with the data."
-            echo "Run 'npm run build' locally and commit the result. Diff:"
-            git --no-pager diff --stat -- README.md data/providers.csv data/providers.yaml collections site/index.html docs/credit-programs.md
-            exit 1
-          fi
-
-  # 2. Re-check every source link; open/update a tracking issue on breakage.
-  links:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Check every docs_url in the dataset
-        id: check
-        run: |
-          set -e
-          node -e "const d=require('./data/providers.json');for(const p of d.providers){if(p.docs_url)console.log(p.docs_url)}" | sort -u > /tmp/urls.txt
-          echo "Checking $(wc -l < /tmp/urls.txt) unique source URLs..."
-          : > /tmp/failed.txt
-          while IFS= read -r url; do
-            code=$(curl -s -o /dev/null -w "%{http_code}" -L --max-time 20 \
-              -A "Mozilla/5.0 (compatible; free-llm-api-hub-linkcheck/2.0)" "$url" || echo "000")
-            # 401/403/405/429 mean the server is alive but refusing our bot/method/rate — not a broken link.
-            case "$code" in
-              401|403|405|429) echo "OK (alive, bot-blocked $code): $url" ;;
-              000|4*|5*) echo "- $url (HTTP $code)" >> /tmp/failed.txt ;;
-              *) : ;;
-            esac
-          done < /tmp/urls.txt
-          if [ -s /tmp/failed.txt ]; then echo "failed=true" >> "$GITHUB_OUTPUT"; else echo "failed=false" >> "$GITHUB_OUTPUT"; fi
-      - name: Open or update tracking issue
-        if: steps.check.outputs.failed == 'true'
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          {
-            echo "The following source links in \`data/providers.json\` returned an error during the automated check on $(date -u +%Y-%m-%d):"
-            echo ""
-            cat /tmp/failed.txt
-            echo ""
-            echo "A broken link usually means the provider moved their docs or changed their terms. Please re-verify the affected entry, update its \`last_verified\` date (or set \`verified: false\`), and fix the link."
-          } > /tmp/body.txt
-          existing=$(gh issue list --search "Broken source link in:title" --state open --json number --jq '.[0].number // empty')
-          if [ -n "$existing" ]; then
-            gh issue comment "$existing" --body-file /tmp/body.txt
+          targets="README.md data/providers.csv data/providers.yaml collections site/index.html docs/credit-programs.md"
+          if git diff --quiet -- $targets; then
+            echo "Generated files are already in sync with the data."
+            echo "Generated files are in sync." >> "$GITHUB_STEP_SUMMARY"
           else
-            gh issue create --title "🔗 Broken source link report" --body-file /tmp/body.txt --label "maintenance"
+            echo "::notice::Generated files will be rebuilt automatically after merge. No action needed."
+            {
+              echo "### Generated files will be rebuilt after merge"
+              echo ""
+              echo "You do not need to run \`npm run build\` or commit anything else."
+              echo ""
+              echo '```'
+              git --no-pager diff --stat -- $targets
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
           fi

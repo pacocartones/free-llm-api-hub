@@ -6,7 +6,11 @@ Thanks for helping. Here's how it works.
 
 ## The one rule that matters
 
-> **Edit the data, not the docs.** The single source of truth is [`data/providers.json`](data/providers.json). The README tables, the freshness badge, the CSV/YAML exports, the `collections/` markdown, and the whole interactive site (explorer, per-provider pages, collection pages, badges, sitemap) are all *generated* from it. If you hand-edit a generated file, your change is overwritten on the next build.
+> **Edit the data, not the docs.** The single source of truth is [`data/providers.json`](data/providers.json). The README tables, the freshness badge, the CSV/YAML exports, the `collections/` markdown, and the whole interactive site (explorer, per-provider pages, collection pages, badges, sitemap) are all *generated* from it.
+
+**Your pull request should touch `data/providers.json` and nothing else.** You do not need to run the build or commit any regenerated file — a bot rebuilds every derived artifact once your change lands on `main` ([`regenerate.yml`](.github/workflows/regenerate.yml)). If CI reports that generated files are out of sync, that's expected and informational; ignore it.
+
+Fixing a rate limit therefore means a one-line diff, not a four-thousand-line one.
 
 ## Quick start
 
@@ -15,11 +19,18 @@ git clone https://github.com/pacocartones/free-llm-api-hub
 cd free-llm-api-hub
 
 # edit data/providers.json, then:
-npm run build     # regenerate README tables, badge, exports, site payload
 npm test          # validate the dataset against the integrity rules
 ```
 
-No dependencies to install — the scripts are plain Node (≥18). Commit the regenerated files along with your data change.
+That's the whole loop. No dependencies to install — the scripts are plain Node (the version used in CI is pinned in [`.nvmrc`](.nvmrc); anything ≥18 works locally).
+
+If you want to preview how your entry renders on the site before opening the PR:
+
+```bash
+npm run build     # regenerates README tables, badge, exports and the site payload
+```
+
+Just don't commit what it produces.
 
 ## Adding or updating a provider
 
@@ -33,6 +44,10 @@ Fields are documented in **[docs/comparison-dimensions.md](docs/comparison-dimen
    - Couldn't fully confirm it? → `verified: false`, `last_verified: null`, and explain what's unconfirmed in `notes`. **An honestly-flagged uncertain entry is more valuable than a confident wrong one** — and the validator will reject a `verified: true` entry that lacks a date or source link.
 
 Slugs are permanent identifiers — never rename or reuse a `slug`.
+
+### Confirming a single unknown field
+
+The smallest useful contribution: many entries carry `null` in `card_required`, `phone_required` or `commercial_ok`, which means *nobody has confirmed it yet* — not that the answer is "no". Turning one `null` into a sourced `true`/`false` is a genuine improvement and takes minutes. Open a PR with the flag set, `last_verified` bumped, and the primary source in `docs_url` or `notes`.
 
 ## Reporting without a PR
 
