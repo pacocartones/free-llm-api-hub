@@ -219,6 +219,13 @@ thead th.sorted.asc::after { content: " ▴"; }
 tbody td { padding: 14px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
 tbody tr { transition: background .12s; }
 tbody tr:hover { background: var(--panel); }
+/* explorer table polish: zebra striping (desktop), sortable affordance, balanced columns */
+@media (min-width: 721px) {
+  #table tbody tr:nth-child(even) { background: color-mix(in srgb, var(--panel) 42%, transparent); }
+  #table tbody tr:hover { background: var(--panel); }
+}
+#table td:nth-child(3) { max-width: 42ch; }
+table.sortable thead th:not(.sorted)::after { content: " ⇅"; opacity: .28; font-weight: 400; }
 .name a { color: var(--text); font-weight: 700; font-family: var(--font-mono); font-size: .92rem; letter-spacing: -.01em; }
 .name a:hover { color: var(--accent); }
 .best { color: var(--accent); font-size: .8rem; margin-top: 3px; opacity: .85; }
