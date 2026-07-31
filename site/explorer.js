@@ -1,0 +1,252 @@
+let DATA = [], lastRows = [], sortKey = 'recommended', sortDir = 1, category = 'all', modality = 'all';
+
+// "Recommended" order: float the most accessible, ship-ready providers to the top.
+function recScore(p) {
+  let s = 0;
+  if (p.card_required === false) s += 3;
+  if (p.phone_required === false) s += 2;
+  if (p.commercial_ok === true) s += 2; else if (p.commercial_ok === false) s -= 2;
+  if (p.openai_compatible === true) s += 1;
+  if (p.category === 'ongoing') s += 1;
+  if (p.free_type === 'perpetual') s += 1;
+  return s;
+}
+
+const ICON = (id) => `<svg class="i" aria-hidden="true"><use href="#${id}"/></svg>`;
+const FLAGS = [
+  ['card_required', false, 'ic-nocard', 'no card'], ['card_required', true, 'ic-card', 'card'],
+  ['phone_required', false, 'ic-nophone', 'no phone'], ['phone_required', true, 'ic-phone', 'phone'],
+  ['commercial_ok', true, 'ic-building', 'commercial'], ['commercial_ok', false, 'ic-flask', 'eval only'],
+  ['openai_compatible', true, 'ic-code', 'OpenAI-compat'],
+];
+function flagLine(p) {
+  return FLAGS.filter(([k, v]) => p[k] === v).map(([, , ic, t]) => `<span class="flag">${ICON(ic)}${t}</span>`).join('');
+}
+function flagMini(p) {
+  return FLAGS.filter(([k, v]) => p[k] === v).map(([, , ic, t]) => `<span class="fmini-i" title="${t}" aria-label="${t}">${ICON(ic)}</span>`).join('');
+}
+
+// One-click filter presets (shareable via the URL like any other filter state).
+const PRESETS = {
+  starter: { nocard: 1, nophone: 1, commercial: 1 },
+  openai: { openai: 1, nocard: 1 },
+  speech: { mod: 'audio' },
+};
+const PRESET_FLAGS = { nocard: 'f-nocard', nophone: 'f-nophone', commercial: 'f-commercial', openai: 'f-openai', verified: 'f-verified' };
+function presetMatches(name) {
+  const pre = PRESETS[name]; if (!pre) return false;
+  if (category !== 'all' || document.getElementById('search').value.trim()) return false;
+  if ((pre.mod || 'all') !== modality) return false;
+  for (const k in PRESET_FLAGS) { if (!!pre[k] !== document.getElementById(PRESET_FLAGS[k]).checked) return false; }
+  return true;
+}
+function syncPresetActive() {
+  document.querySelectorAll('#presets button').forEach(b => b.classList.toggle('active', presetMatches(b.dataset.preset)));
+}
+function renderTrust() {
+  if (!DATA.length) return;
+  const now = Date.now();
+  const ages = DATA.filter(p => p.verified && p.last_verified).map(p => Math.floor((now - Date.parse(p.last_verified + 'T00:00:00Z')) / 86400000));
+  const oldest = ages.length ? Math.max(...ages) : 0;
+  const verified = DATA.filter(p => p.verified).length;
+  document.getElementById('trustSummary').textContent = `${verified}/${DATA.length} verified against official docs · re-checked weekly · oldest entry ${oldest}d ago`;
+}
+
+function render() {
+  const q = document.getElementById('search').value.trim().toLowerCase();
+  const nocard = document.getElementById('f-nocard').checked;
+  const nophone = document.getElementById('f-nophone').checked;
+  const commercial = document.getElementById('f-commercial').checked;
+  const openai = document.getElementById('f-openai').checked;
+  const verifiedOnly = document.getElementById('f-verified').checked;
+
+  let rows = DATA.filter(p => {
+    if (category !== 'all' && p.category !== category) return false;
+    if (modality !== 'all' && !(p.modalities || []).includes(modality)) return false;
+    if (q && !(p.name.toLowerCase().includes(q) || (p.free_tier||'').toLowerCase().includes(q) || (p.notes||'').toLowerCase().includes(q) || (p.rate_limits||'').toLowerCase().includes(q) || (p.openai_base_url||'').toLowerCase().includes(q) || (p.modalities||[]).join(' ').includes(q) || (p.models_free||[]).join(' ').toLowerCase().includes(q))) return false;
+    if (nocard && p.card_required !== false) return false;
+    if (nophone && p.phone_required !== false) return false;
+    if (commercial && p.commercial_ok !== true) return false;
+    if (openai && p.openai_compatible !== true) return false;
+    if (verifiedOnly && p.verified !== true) return false;
+    return true;
+  });
+
+  rows.sort((a, b) => {
+    if (sortKey === 'recommended') { const d = recScore(b) - recScore(a); return d !== 0 ? d : (a.name < b.name ? -1 : a.name > b.name ? 1 : 0); }
+    let av = a[sortKey], bv = b[sortKey];
+    if (typeof av === 'boolean') { av = av ? 1 : 0; bv = bv ? 1 : 0; }
+    av = (av ?? ''); bv = (bv ?? '');
+    return av < bv ? -sortDir : av > bv ? sortDir : 0;
+  });
+
+  lastRows = rows;
+  const tbody = document.getElementById('tbody');
+  tbody.innerHTML = '';
+  const emptyEl = document.getElementById('empty');
+  emptyEl.style.display = rows.length ? 'none' : 'block';
+  emptyEl.textContent = rows.length ? '' : 'No providers match these filters.';
+  const activeCount = (q ? 1 : 0) + (category !== 'all' ? 1 : 0) + (modality !== 'all' ? 1 : 0) +
+    [nocard, nophone, commercial, openai, verifiedOnly].filter(Boolean).length;
+  document.getElementById('count').textContent =
+    `${rows.length} of ${DATA.length} providers` + (activeCount ? ` · ${activeCount} filter${activeCount > 1 ? 's' : ''} active` : '');
+  document.getElementById('clearFilters').hidden = activeCount === 0;
+
+  for (const p of rows) {
+    const isNew = p.added && (Date.now() - Date.parse(p.added + 'T00:00:00Z')) / 86400000 <= 45;
+    const best = p.best_for ? `<div class="best">${p.best_for}</div>` : '';
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="name" data-label="API"><a href="p/${p.slug}.html">${p.name}</a>${isNew ? ' <span class="badge b-new" title="Recently added to the hub">NEW</span>' : ''}${best}</td>
+      <td data-label="Type"><span class="badge ${p.category === 'ongoing' ? 'b-ongoing' : 'b-trial'}">${p.category === 'ongoing' ? 'Ongoing' : 'Trial'}</span><div class="fmini">${flagMini(p)}</div></td>
+      <td data-label="What's free">${p.free_tier || ''}</td>
+      <td class="notes" data-label="The catch">${p.notes || ''}</td>
+      <td data-label="Verified">${p.verified ? `<span class="badge b-ok">${ICON('ic-check')} ${p.last_verified}</span>` : `<span class="badge b-warn">${ICON('ic-warn')} unverified</span>`}</td>`;
+    tbody.appendChild(tr);
+  }
+  syncURL();
+  syncPresetActive();
+}
+
+function renderStats() {
+  const total = DATA.length;
+  const ongoing = DATA.filter(p => p.category === 'ongoing').length;
+  const trial = DATA.filter(p => p.category === 'trial').length;
+  const now = Date.now();
+  const fresh = DATA.filter(p => p.verified && p.last_verified && (now - Date.parse(p.last_verified + 'T00:00:00Z')) / 86400000 <= 7).length;
+  const tiles = [
+    ['ic-database', total, 'providers tracked', ''],
+    ['ic-refresh', ongoing, 'ongoing free tiers', ''],
+    ['ic-clock', trial, 'trial credits', ''],
+    ['ic-shield', `${fresh}/${total}`, 'verified in last 7 days', 'fresh'],
+  ];
+  document.getElementById('stats').innerHTML = tiles.map(([ic, n, l, c]) =>
+    `<div class="stat ${c}"><svg class="si" aria-hidden="true"><use href="#${ic}"/></svg><div class="num">${n}</div><div class="lbl">${l}</div></div>`).join('');
+  renderTrust();
+}
+
+function applySort(th) {
+  const key = th.dataset.key;
+  if (sortKey === key) sortDir *= -1; else { sortKey = key; sortDir = 1; }
+  document.querySelectorAll('thead th').forEach(h => { h.classList.remove('sorted', 'asc'); h.setAttribute('aria-sort', 'none'); });
+  th.classList.add('sorted'); if (sortDir === 1) th.classList.add('asc');
+  th.setAttribute('aria-sort', sortDir === 1 ? 'ascending' : 'descending');
+  render();
+}
+
+document.querySelectorAll('#cat button').forEach(btn => btn.addEventListener('click', () => {
+  document.querySelectorAll('#cat button').forEach(b => { b.classList.remove('active'); b.setAttribute('aria-pressed', 'false'); });
+  btn.classList.add('active'); btn.setAttribute('aria-pressed', 'true');
+  category = btn.dataset.cat; render();
+}));
+document.querySelectorAll('thead th[data-key]').forEach(th => {
+  th.addEventListener('click', () => applySort(th));
+  th.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); applySort(th); } });
+});
+['search', 'f-nocard', 'f-nophone', 'f-commercial', 'f-openai', 'f-verified'].forEach(id =>
+  document.getElementById(id).addEventListener('input', e => {
+    const chip = e.target.closest('.chip'); if (chip) chip.classList.toggle('on', e.target.checked);
+    render();
+  }));
+
+// Copy helpers: base URLs and ready-to-paste OpenAI snippets.
+function flashCopied(el, label) {
+  if (label != null) { const prev = el.dataset.prev || el.textContent; el.dataset.prev = prev; el.textContent = label; }
+  el.classList.add('copied');
+  setTimeout(() => { el.classList.remove('copied'); if (label != null) el.textContent = el.dataset.prev; }, 1300);
+}
+function copyText(text, el, label) {
+  const done = () => flashCopied(el, label);
+  if (navigator.clipboard) navigator.clipboard.writeText(text).then(done).catch(done); else done();
+}
+function openaiSnippet(base) {
+  const model = base.includes('groq') ? 'llama-3.1-8b-instant' : '<a-free-model>';
+  return `from openai import OpenAI\n\nclient = OpenAI(base_url="${base}", api_key="<YOUR_FREE_API_KEY>")\nresp = client.chat.completions.create(\n    model="${model}",\n    messages=[{"role": "user", "content": "Hello!"}],\n)\nprint(resp.choices[0].message.content)`;
+}
+document.getElementById('tbody').addEventListener('click', e => {
+  const bu = e.target.closest('.baseurl');
+  if (bu) { copyText(bu.getAttribute('data-copy'), bu); return; }
+  const snip = e.target.closest('.copy-btn[data-snippet]');
+  if (snip) { copyText(openaiSnippet(snip.getAttribute('data-snippet')), snip, '✓ Copied'); }
+});
+document.getElementById('tbody').addEventListener('keydown', e => {
+  if (e.key !== 'Enter' && e.key !== ' ') return;
+  const el = e.target.closest('.baseurl'); if (el) { e.preventDefault(); copyText(el.getAttribute('data-copy'), el); }
+});
+
+// --- shareable state: sync filters to the URL and restore them on load ---
+const URL_FLAGS = [['nocard', 'f-nocard'], ['nophone', 'f-nophone'], ['commercial', 'f-commercial'], ['openai', 'f-openai'], ['verified', 'f-verified']];
+function syncURL() {
+  const params = new URLSearchParams();
+  const q = document.getElementById('search').value.trim();
+  if (q) params.set('q', q);
+  if (category !== 'all') params.set('cat', category);
+  if (modality !== 'all') params.set('mod', modality);
+  URL_FLAGS.forEach(([k, id]) => { if (document.getElementById(id).checked) params.set(k, '1'); });
+  const qs = params.toString();
+  history.replaceState(null, '', qs ? '?' + qs : location.pathname);
+}
+function applyURL() {
+  const params = new URLSearchParams(location.search);
+  if (params.get('q')) document.getElementById('search').value = params.get('q');
+  const cat = params.get('cat');
+  if (cat && ['all', 'ongoing', 'trial'].includes(cat)) {
+    category = cat;
+    document.querySelectorAll('#cat button').forEach(b => {
+      const on = b.dataset.cat === cat; b.classList.toggle('active', on); b.setAttribute('aria-pressed', String(on));
+    });
+  }
+  const mod = params.get('mod');
+  const modSel = document.getElementById('modality');
+  if (mod && [...modSel.options].some(o => o.value === mod)) { modality = mod; modSel.value = mod; }
+  URL_FLAGS.forEach(([k, id]) => {
+    if (params.get(k) === '1') { const el = document.getElementById(id); el.checked = true; const chip = el.closest('.chip'); if (chip) chip.classList.add('on'); }
+  });
+}
+applyURL();
+
+document.getElementById('modality').addEventListener('change', e => { modality = e.target.value; render(); });
+
+function resetControls() {
+  document.getElementById('search').value = '';
+  category = 'all';
+  document.querySelectorAll('#cat button').forEach(b => { const on = b.dataset.cat === 'all'; b.classList.toggle('active', on); b.setAttribute('aria-pressed', String(on)); });
+  modality = 'all'; document.getElementById('modality').value = 'all';
+  URL_FLAGS.forEach(([, id]) => { const el = document.getElementById(id); el.checked = false; const chip = el.closest('.chip'); if (chip) chip.classList.remove('on'); });
+}
+document.getElementById('clearFilters').addEventListener('click', () => {
+  resetControls();
+  sortKey = 'recommended'; sortDir = 1;
+  document.querySelectorAll('thead th').forEach(h => { h.classList.remove('sorted', 'asc'); h.setAttribute('aria-sort', 'none'); });
+  render();
+});
+document.querySelectorAll('#presets button').forEach(btn => btn.addEventListener('click', () => {
+  resetControls();
+  const pre = PRESETS[btn.dataset.preset] || {};
+  if (pre.mod) { modality = pre.mod; document.getElementById('modality').value = pre.mod; }
+  for (const k in PRESET_FLAGS) { if (pre[k]) { const el = document.getElementById(PRESET_FLAGS[k]); el.checked = true; const chip = el.closest('.chip'); if (chip) chip.classList.add('on'); } }
+  render();
+}));
+
+// Exports live on the dataset itself (providers.json / .csv / .yaml, linked in the footer)
+// and the static /api/v1 endpoints — the table stays focused on browsing.
+
+// The dataset is inlined at build time (see #providers-data) so the table is server-rendered
+// and the page needs no network round-trip. Fall back to fetch only if the inline data is absent.
+const SOURCES = ['providers.json', 'https://raw.githubusercontent.com/pacocartones/free-llm-api-hub/main/data/providers.json'];
+(async () => {
+  const inlineEl = document.getElementById('providers-data');
+  try {
+    const raw = inlineEl && inlineEl.textContent.trim();
+    if (raw) { DATA = JSON.parse(raw).providers; renderStats(); render(); return; }
+  } catch (_) { /* fall through to fetch */ }
+  for (const url of SOURCES) {
+    try {
+      const r = await fetch(url); if (!r.ok) continue;
+      DATA = (await r.json()).providers;
+      renderStats(); render(); return;
+    } catch (_) { /* try next */ }
+  }
+  document.getElementById('empty').style.display = 'block';
+  document.getElementById('empty').textContent = 'Could not load providers.json.';
+})();
