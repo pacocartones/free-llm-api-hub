@@ -115,6 +115,10 @@ svg.i { width: 15px; height: 15px; flex: none; vertical-align: -2px; }
 .theme-toggle { width: 34px; padding: 0; justify-content: center; }
 .theme-toggle .sun { display: none; } .theme-toggle .moon { display: block; }
 [data-theme="light"] .theme-toggle .sun { display: block; } [data-theme="light"] .theme-toggle .moon { display: none; }
+.nav-toggle { display: none; }
+.nav-toggle .close { display: none; }
+.site-header.nav-open .nav-toggle .menu { display: none; }
+.site-header.nav-open .nav-toggle .close { display: block; }
 
 /* ---------- buttons ---------- */
 .btn {
@@ -359,7 +363,19 @@ pre:hover .pre-copy, .pre-copy:focus-visible { opacity: 1; }
 
 /* ---------- responsive ---------- */
 @media (max-width: 860px) { .footer-top { grid-template-columns: 1fr 1fr; } }
-@media (max-width: 760px) { .nav { display: none; } }
+@media (max-width: 760px) {
+  .nav-toggle { display: inline-flex; }
+  .nav {
+    position: absolute; top: var(--header-h); left: 0; right: 0;
+    flex-direction: column; align-items: stretch; gap: 2px; margin: 0;
+    padding: 8px 16px 14px;
+    background: var(--header-bg); border-bottom: 1px solid var(--border);
+    box-shadow: var(--shadow-sm);
+    display: none;
+  }
+  .site-header.nav-open .nav { display: flex; }
+  .nav a { padding: 11px 12px; font-size: .95rem; border-radius: 8px; }
+}
 @media (max-width: 720px) {
   #table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
   #table, #table tbody, #table tr, #table td { display: block; width: 100%; }
