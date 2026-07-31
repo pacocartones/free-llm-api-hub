@@ -26,3 +26,6 @@ site/llms-full.txt
 node_modules/
 .DS_Store
 Thumbs.db
+
+# Shared rules for the browser, emitted by build.mjs from scripts/lib/rules.mjs
+site/shared-rules.js
