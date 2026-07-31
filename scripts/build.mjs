@@ -390,12 +390,18 @@ const SPRITE = `<svg width="0" height="0" style="position:absolute" aria-hidden=
 <symbol id="ic-shield" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M8 1.5 13 3.4v4c0 3.4-2.1 5.7-5 7-2.9-1.3-5-3.6-5-7v-4z"/><path d="M5.6 8 7.4 9.8 10.5 6.2"/></symbol>
 <symbol id="ic-menu" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M2.5 4.5h11M2.5 8h11M2.5 11.5h11"/></symbol>
 <symbol id="ic-close" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 4l8 8M12 4l-8 8"/></symbol>
+<symbol id="ic-home" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 7.3 8 2.8l5.5 4.5V13a.8.8 0 0 1-.8.8H3.3a.8.8 0 0 1-.8-.8z"/><path d="M6.4 13.8V9.4h3.2v4.4"/></symbol>
+<symbol id="ic-cube" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M8 1.9 13.6 5v6L8 14.1 2.4 11V5z"/><path d="M2.4 5 8 8.1 13.6 5M8 8.1V14.1"/></symbol>
+<symbol id="ic-book" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3.6C6.5 2.5 4 2.5 2.5 3.1v9.4C4 11.9 6.5 11.9 8 13c1.5-1.1 4-1.1 5.5-.5V3.1C12 2.5 9.5 2.5 8 3.6z"/><path d="M8 3.6v9.4"/></symbol>
+<symbol id="ic-grid" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"><rect x="2.3" y="2.3" width="4.6" height="4.6" rx="1"/><rect x="9.1" y="2.3" width="4.6" height="4.6" rx="1"/><rect x="2.3" y="9.1" width="4.6" height="4.6" rx="1"/><rect x="9.1" y="9.1" width="4.6" height="4.6" rx="1"/></symbol>
+<symbol id="ic-rocket" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9.6 11.4 6 7.8c.3-3.6 2.2-5.6 5.6-6.2.6 3.4-.4 5.7-3 7.4z"/><path d="M6 8.2C4 8.6 3 11 3 13c2 0 4.4-1 4.8-3"/><circle cx="9.8" cy="6.2" r="1"/></symbol>
+<symbol id="ic-cap" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2.8 1.6 5.8 8 8.8l6.4-3z"/><path d="M4.4 7.4v3.1c0 1 1.6 1.9 3.6 1.9s3.6-.9 3.6-1.9V7.4M14.4 5.8v3.4"/></symbol>
 </defs></svg>`;
 const IC = (id) => `<svg class="i" aria-hidden="true"><use href="#${id}"/></svg>`;
 
 const siteHeader = (p) => `<header class="site-header"><div class="wrap header-inner">
 <a class="brand" href="${p}" aria-label="Free LLM API Hub — home"><svg class="logo-mark"><use href="#logo"/></svg><span class="brand-name">Free LLM API <span class="grad">Hub</span></span></a>
-<nav class="nav" id="primary-nav" aria-label="Primary"><a href="${p}#explorer">Explorer</a><a href="${p}models/">Models</a><a href="${p}guides/">Guides</a><a href="${p}collections/">Collections</a><a href="${p}programs/startups.html">Startup credits</a><a href="${p}programs/research.html">Student credits</a></nav>
+<nav class="nav" id="primary-nav" aria-label="Primary"><a href="${p}">${IC('ic-home')}Home</a><a href="${p}models/">${IC('ic-cube')}Models</a><a href="${p}guides/">${IC('ic-book')}Guides</a><a href="${p}collections/">${IC('ic-grid')}Collections</a><a href="${p}programs/startups.html">${IC('ic-rocket')}Startup credits</a><a href="${p}programs/research.html">${IC('ic-cap')}Student credits</a></nav>
 <div class="header-actions">
 <button class="icon-btn nav-toggle" id="navToggle" aria-label="Open menu" aria-expanded="false" aria-controls="primary-nav"><svg class="i menu" aria-hidden="true"><use href="#ic-menu"/></svg><svg class="i close" aria-hidden="true"><use href="#ic-close"/></svg></button>
 <a class="icon-btn" href="${REPO}" target="_blank" rel="noopener" aria-label="Star on GitHub">${GH_ICON}<span class="star-count" data-stars>★</span></a>

@@ -100,7 +100,9 @@ svg.i { width: 15px; height: 15px; flex: none; vertical-align: -2px; }
 .brand:hover { text-decoration: none; }
 .brand-name { font-family: var(--font-mono); font-weight: 700; font-size: .98rem; white-space: nowrap; letter-spacing: -.02em; }
 .nav { display: flex; gap: 4px; margin-left: 6px; }
-.nav a { color: var(--muted); font-size: .88rem; font-family: var(--font-mono); font-weight: 500; padding: 6px 10px; border-radius: 7px; }
+.nav a { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-size: .88rem; font-family: var(--font-mono); font-weight: 500; padding: 6px 10px; border-radius: 7px; }
+.nav a svg.i { width: 14px; height: 14px; opacity: .8; }
+.nav a:hover svg.i { opacity: 1; }
 .nav a:hover { color: var(--text); background: var(--panel); text-decoration: none; }
 .header-actions { margin-left: auto; display: flex; align-items: center; gap: 8px; }
 .icon-btn {
@@ -141,6 +143,17 @@ svg.i { width: 15px; height: 15px; flex: none; vertical-align: -2px; }
   pointer-events: none;
 }
 .hero-inner { position: relative; z-index: 1; padding: 58px 0 46px; text-align: center; }
+.hero-h1 { font-family: var(--font-mono); font-size: clamp(1.45rem, 6vw, 1.9rem); letter-spacing: -.02em; line-height: 1.28; }
+.hero-h1 .prompt { color: var(--accent); margin-right: .35ch; }
+.hero-h1 .typed { display: inline; }
+@media (min-width: 900px) {
+  .hero-h1 { font-size: 1.95rem; white-space: nowrap; }
+  .hero-h1 .typed { display: inline-block; overflow: hidden; vertical-align: bottom; max-width: 100%; }
+}
+@media (min-width: 900px) and (prefers-reduced-motion: no-preference) {
+  .hero-h1 .typed { width: 0; animation: typing 1.9s steps(40, end) .25s forwards; }
+}
+@keyframes typing { to { width: 40ch; } }
 .hero-logo { display: inline-flex; margin-bottom: 16px; }
 .hero-star { margin-bottom: 22px; }
 .eyebrow { color: var(--accent); font-weight: 700; font-size: .74rem; letter-spacing: .18em; text-transform: uppercase; margin: 0 0 14px; font-family: var(--font-mono); }
@@ -323,7 +336,7 @@ pre:hover .pre-copy, .pre-copy:focus-visible { opacity: 1; }
 .model-table thead th { position: sticky; top: var(--header-h); background: var(--bg); font-family: var(--font-mono); font-size: .74rem; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); z-index: 1; }
 .model-table td.name code { color: var(--accent); word-break: break-all; }
 .model-table tbody tr:hover { background: var(--panel); }
-.hero-links { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 20px; }
+.hero-links { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px; margin-top: 20px; }
 .hero-links .hl-label { color: var(--faint); font-family: var(--font-mono); font-size: .78rem; text-transform: uppercase; letter-spacing: .05em; }
 .hero-links a { font-family: var(--font-mono); font-size: .82rem; color: var(--muted); padding: 5px 11px; border: 1px solid var(--border); border-radius: 20px; }
 .hero-links a:hover { color: var(--accent); border-color: var(--accent); text-decoration: none; }
