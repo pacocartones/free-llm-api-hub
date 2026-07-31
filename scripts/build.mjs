@@ -517,20 +517,14 @@ const explorerFlagPairs = [
   ['commercial_ok', true, 'ic-building', 'commercial'], ['commercial_ok', false, 'ic-flask', 'eval only'],
   ['openai_compatible', true, 'ic-code', 'OpenAI-compat'],
 ];
+const explorerFlagsMini = (p) => explorerFlagPairs.filter(([k, v]) => p[k] === v)
+  .map(([, , ic, t]) => `<span class="fmini-i" title="${t}" aria-label="${t}">${IC(ic)}</span>`).join('');
 const explorerRowsHtml = (rows) => rows.map((p) => {
-  const name = `<a href="p/${p.slug}.html">${htmlEsc(p.name)}</a>`;
   const best = p.best_for ? `<div class="best">${htmlEsc(p.best_for)}</div>` : '';
-  const mods = (p.modalities || []).length ? `<div class="mods">${p.modalities.map((m) => `<span>${htmlEsc(m)}</span>`).join('')}</div>` : '';
-  const baseurl = p.openai_base_url ? `<div class="baseurl" title="OpenAI-compatible base URL — click to copy" tabindex="0" role="button" data-copy="${htmlEsc(p.openai_base_url)}"><code>${htmlEsc(p.openai_base_url)}</code></div>` : '';
-  const actions = [
-    p.docs_url ? `<a class="docs-link" href="${htmlEsc(p.docs_url)}" target="_blank" rel="noopener">docs ↗</a>` : '',
-    p.openai_base_url ? `<button type="button" class="copy-btn" data-snippet="${htmlEsc(p.openai_base_url)}">Copy OpenAI snippet</button>` : '',
-  ].filter(Boolean).join('');
-  const flags = explorerFlagPairs.filter(([k, v]) => p[k] === v).map(([, , ic, t]) => `<span class="flag">${IC(ic)}${t}</span>`).join('');
   const v = p.verified ? `<span class="badge b-ok">${IC('ic-check')} ${htmlEsc(p.last_verified)}</span>` : `<span class="badge b-warn">${IC('ic-warn')} unverified</span>`;
   return `<tr>` +
-    `<td class="name" data-label="Provider">${name}${best}${baseurl}<div class="flags">${flags}</div>${mods}${actions ? `<div class="row-actions">${actions}</div>` : ''}</td>` +
-    `<td data-label="Type"><span class="badge ${p.category === 'ongoing' ? 'b-ongoing' : 'b-trial'}">${p.category === 'ongoing' ? 'Ongoing' : 'Trial'}</span></td>` +
+    `<td class="name" data-label="API"><a href="p/${p.slug}.html">${htmlEsc(p.name)}</a>${best}</td>` +
+    `<td data-label="Type"><span class="badge ${p.category === 'ongoing' ? 'b-ongoing' : 'b-trial'}">${p.category === 'ongoing' ? 'Ongoing' : 'Trial'}</span><div class="fmini">${explorerFlagsMini(p)}</div></td>` +
     `<td data-label="What's free">${htmlEsc(p.free_tier)}</td>` +
     `<td class="notes" data-label="The catch">${htmlEsc(p.notes || '')}</td>` +
     `<td data-label="Verified">${v}</td></tr>`;
