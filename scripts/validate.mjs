@@ -66,6 +66,10 @@ for (const p of data.providers ?? []) {
   if (p.env_key !== undefined) {
     check(typeof p.env_key === 'string' && /^[A-Z][A-Z0-9_]*$/.test(p.env_key), `${id}: env_key must be an UPPER_SNAKE env var name`);
   }
+  // added: optional provenance date (when the entry first entered the dataset).
+  if (p.added !== undefined) {
+    check(DATE_RE.test(p.added || ''), `${id}: added must be YYYY-MM-DD`);
+  }
   // Live-probe fields (independent of docs `verified`).
   if (p.last_probed !== undefined && p.last_probed !== null) {
     check(DATE_RE.test(p.last_probed), `${id}: last_probed must be YYYY-MM-DD or null`);

@@ -12,7 +12,7 @@ export const ORDER = [
   'slug', 'name', 'category', 'free_type', 'free_tier', 'rate_limits', 'notes',
   'best_for', 'modalities', 'models_free', 'expires', 'docs_url', 'phone_required',
   'card_required', 'commercial_ok', 'openai_compatible', 'openai_base_url', 'env_key',
-  'verified', 'last_verified', 'last_probed', 'probe_status',
+  'verified', 'last_verified', 'added', 'last_probed', 'probe_status',
 ];
 export const TOP = ['$schema', 'version', 'generated', 'source', 'note'];
 

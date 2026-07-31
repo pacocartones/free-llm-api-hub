@@ -112,6 +112,11 @@
           "type": ["string", "null"],
           "description": "Date of the last independent confirmation (YYYY-MM-DD). Must be null when verified is false."
         },
+        "added": {
+          "type": "string",
+          "description": "Date (YYYY-MM-DD) the provider first entered the dataset. Optional provenance field; drives a client-side \"new\" marker on the explorer. Never changes once set.",
+          "format": "date"
+        },
         "last_probed": {
           "type": ["string", "null"],
           "description": "Date (YYYY-MM-DD) the provider's API was last called live with a real key by scripts/probe.mjs. Independent of `verified` (which is docs-based)."

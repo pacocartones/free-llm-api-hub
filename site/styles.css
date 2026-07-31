@@ -240,6 +240,7 @@ table.sortable thead th:not(.sorted)::after { content: " ⇅"; opacity: .28; fon
 .b-ongoing, .type { background: color-mix(in srgb, var(--accent) 12%, transparent); color: var(--accent); border: 1px solid color-mix(in srgb, var(--accent) 32%, transparent); }
 .type { font-size: .72rem; padding: 2px 8px; border-radius: 6px; font-family: var(--font-mono); }
 .b-trial { background: color-mix(in srgb, var(--muted) 14%, transparent); color: var(--muted); border: 1px solid color-mix(in srgb, var(--muted) 32%, transparent); }
+.b-new { background: var(--accent); color: var(--accent-ink); border: 1px solid var(--accent); font-weight: 700; font-size: .62rem; letter-spacing: .07em; padding: 1px 6px; vertical-align: 2px; }
 .b-ok, .v.ok { background: color-mix(in srgb, var(--green) 13%, transparent); color: var(--green); border: 1px solid color-mix(in srgb, var(--green) 32%, transparent); }
 .b-warn, .v.warn { background: color-mix(in srgb, var(--warn) 15%, transparent); color: var(--warn); border: 1px solid color-mix(in srgb, var(--warn) 38%, transparent); }
 .v.live { background: var(--accent); color: #05130c; border: 1px solid var(--accent); font-weight: 600; }

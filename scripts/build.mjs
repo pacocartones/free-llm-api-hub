@@ -780,6 +780,7 @@ print(resp.choices[0].message.content)</code></pre><p class="muted">…or with c
     ['Expires', htmlEsc(p.expires) || 'no expiry'],
     ['Modalities', mods.join(', ') || '—'],
     ['OpenAI base URL', p.openai_base_url ? `<code>${htmlEsc(p.openai_base_url)}</code>` : '—'],
+    ...(p.added ? [['Added to the hub', htmlEsc(p.added)]] : []),
   ].map(([k, v]) => `<div class="meta-row"><span class="meta-k">${k}</span><span class="meta-v">${v}</span></div>`).join('');
   // Freshness relative to the current day (provider pages are regenerated on deploy, not diff-gated).
   const daysAgo = p.verified && p.last_verified
