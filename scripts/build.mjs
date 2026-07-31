@@ -1039,8 +1039,7 @@ const modelsMain =
   `<p class="count"><span id="mshown">${modelIndex.length}</span> shown</p></div></section>` +
   `<main id="main"><div class="wrap"><table class="model-table"><thead><tr><th>Model</th><th>Provider</th><th>Free type</th><th>Modalities</th></tr></thead><tbody>\n` +
   modelIndex.map(modelRowHtml).join('\n') +
-  `\n</tbody></table><p class="muted" style="margin-top:18px">Model lists are a live sample and change often — always confirm against the provider. A provider missing here usually needs an API key to list its models; <a href="${REPO}/blob/main/docs/update-playbook.md">see how the list is refreshed</a>.</p></div></main>` +
-  `<script>(function(){var q=document.getElementById('mq'),c=document.getElementById('mshown'),rows=[].slice.call(document.querySelectorAll('.model-table tbody tr'));if(!q)return;q.addEventListener('input',function(){var v=q.value.toLowerCase().trim(),n=0;for(var i=0;i<rows.length;i++){var ok=!v||rows[i].getAttribute('data-s').indexOf(v)>-1;rows[i].hidden=!ok;if(ok)n++;}c.textContent=n;});})();</script>`;
+  `\n</tbody></table><p class="muted" style="margin-top:18px">Model lists are a live sample and change often — always confirm against the provider. A provider missing here usually needs an API key to list its models; <a href="${REPO}/blob/main/docs/update-playbook.md">see how the list is refreshed</a>.</p></div></main>`;
 writeFileSync(join(ROOT, 'site/models/index.html'), htmlPage({
   title: 'Free model index — which free API serves which model · Free LLM API Hub',
   desc: `Searchable index of ${modelIndex.length} models available on free LLM & AI-model API tiers, and which provider serves each.`,
