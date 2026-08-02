@@ -113,7 +113,7 @@ const COLLECTIONS = [
     title: 'Free LLM APIs for commercial use',
     h1: 'Free LLM APIs you can use commercially',
     desc: 'Free LLM API tiers that permit production/commercial use — not restricted to evaluation. Verified against each provider’s terms.',
-    intro: 'Free tiers that **allow commercial/production use** (`commercial_ok: true`). Eval-only tiers (Cohere trial keys, NVIDIA NIM, GitHub Models) are deliberately excluded — read their rows in the main list for the restriction.',
+    intro: 'Free tiers that **allow commercial/production use** (`commercial_ok: true`). Eval-only tiers (Cohere trial keys, NVIDIA NIM) are deliberately excluded — read their rows in the main list for the restriction.',
     filter: (p) => p.commercial_ok === true,
     guides: ['openai-compatible-free-apis', 'free-llm-api-without-credit-card'],
     faq: [

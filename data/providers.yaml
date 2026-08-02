@@ -5,8 +5,8 @@ providers:
     category: "ongoing"
     free_type: "renewing-quota"
     free_tier: "Gemini 2.5 Flash, 2.5 Flash-Lite, 2.5 Pro (limited), embeddings, TTS models"
-    rate_limits: "Varies by model, roughly 5-30 req/min and 20-500 req/day depending on model"
-    notes: "Free-tier prompts/outputs may be used by Google to improve its products when used outside the UK/CH/EEA/EU"
+    rate_limits: "Varies by model: 5-30 RPM and 15-1,000 RPD (e.g. 2.5 Pro: 5 RPM/100 RPD; 2.5 Flash: 10/250; 2.5 Flash-Lite: 15/1,000; embeddings: 100 RPD; TTS: 15 RPD)"
+    notes: "Free-tier prompts/outputs may be used by Google to improve its products outside the UK/CH/EEA/EU. Since the 2026-03-23 terms, only Paid Services may serve API clients to end users in the EEA/CH/UK"
     best_for: "The only frontier-class model with a genuine free tier"
     modalities: ["text", "vision", "embeddings", "audio"]
     models_free: ["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-2.5-pro"]
@@ -18,13 +18,13 @@ providers:
     openai_compatible: true
     openai_base_url: "https://generativelanguage.googleapis.com/v1beta/openai/"
     verified: true
-    last_verified: "2026-07-11"
+    last_verified: "2026-08-02"
   - slug: "groq"
     name: "Groq"
     category: "ongoing"
     free_type: "renewing-quota"
     free_tier: "Open-weight models (Llama, Qwen, GPT-OSS) plus Whisper, no credit card required"
-    rate_limits: "e.g. llama-3.1-8b-instant: 30 RPM/14.4K RPD/6K TPM/500K TPD; llama-3.3-70b-versatile: 30 RPM/1K RPD/12K TPM/100K TPD; qwen3-32b: 60 RPM/1K RPD/6K TPM/500K TPD; similar for GPT-OSS and Whisper models"
+    rate_limits: "e.g. llama-3.1-8b-instant: 30 RPM/14.4K RPD/6K TPM/500K TPD; llama-3.3-70b-versatile: 30 RPM/1K RPD/12K TPM/100K TPD; qwen/qwen3.6-27b: 30 RPM/1K RPD/8K TPM/200K TPD; similar for GPT-OSS and Whisper models"
     notes: "Limits apply at the organization level, not per API key. Phone verification required at signup"
     best_for: "Lowest-latency inference for open-weight models"
     modalities: ["text", "audio"]
@@ -37,14 +37,14 @@ providers:
     openai_compatible: true
     openai_base_url: "https://api.groq.com/openai/v1"
     verified: true
-    last_verified: "2026-07-11"
+    last_verified: "2026-08-02"
   - slug: "openrouter"
     name: "OpenRouter"
     category: "ongoing"
     free_type: "renewing-quota"
-    free_tier: "20+ models with a :free suffix, single API across many providers"
+    free_tier: "A rotating set of models with a :free suffix (~14 today; count fluctuates), single API across many providers"
     rate_limits: "20 req/min; 50 req/day under 10 credits purchased lifetime, 1000 req/day once 10+ credits purchased (one-time, not a subscription)"
-    notes: "ToS (Apr 2026) prohibits resale or building a competing service on the free models; a private proxy for personal use is fine"
+    notes: "ToS (Jul 2026) prohibits reselling API access or building a competing service — platform-wide, not just the free models; per-model terms still apply"
     best_for: "Widest model selection behind one no-card key"
     modalities: ["text", "vision"]
     models_free: ["cohere/north-mini-code:free", "google/gemma-4-26b-a4b-it:free", "google/gemma-4-31b-it:free", "inclusionai/ling-3.0-flash:free", "nvidia/nemotron-3-nano-30b-a3b:free", "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free", "openai/gpt-oss-20b:free", "poolside/laguna-s-2.1:free"]
@@ -56,14 +56,14 @@ providers:
     openai_compatible: true
     openai_base_url: "https://openrouter.ai/api/v1"
     verified: true
-    last_verified: "2026-07-11"
+    last_verified: "2026-08-02"
   - slug: "cloudflare-workers-ai"
     name: "Cloudflare Workers AI"
     category: "ongoing"
     free_type: "renewing-quota"
     free_tier: "10,000 Neurons/day, all account plans"
     rate_limits: "30+ models: LLMs (Llama, Mistral, DeepSeek, Qwen...), embeddings, image, audio"
-    notes: "Resets daily at 00:00 UTC; overage on a Workers Paid plan bills at $0.011/1,000 Neurons"
+    notes: "Resets daily at 00:00 UTC; overage on a Workers Paid plan bills at $0.011/1,000 Neurons. A few models (e.g. Kimi K2.6/K2.7-code, GLM-5.2) now require a Workers Paid plan"
     best_for: "Highest free daily volume for a real side project"
     modalities: ["text", "embeddings", "image", "audio"]
     models_free: ["@cf/meta/llama-3.3-70b-instruct-fp8-fast", "@cf/meta/llama-3.1-8b-instruct", "@cf/mistralai/mistral-small-3.1-24b-instruct", "@cf/qwen/qwen2.5-coder-32b-instruct", "@cf/deepseek-ai/deepseek-r1-distill-qwen-32b", "@cf/google/gemma-3-12b-it"]
@@ -75,26 +75,7 @@ providers:
     openai_compatible: true
     openai_base_url: "https://api.cloudflare.com/client/v4/accounts/{account_id}/ai/v1"
     verified: true
-    last_verified: "2026-07-11"
-  - slug: "github-models"
-    name: "GitHub Models"
-    category: "ongoing"
-    free_type: "renewing-quota"
-    free_tier: "Included with any GitHub account via the Copilot tier"
-    rate_limits: "Copilot Free: ~15 RPM / 150 RPD on \"low\" tier models, 8K input / 4K output tokens per request. Higher Copilot tiers raise the ceiling"
-    notes: "Scoped by GitHub to experimentation/prototyping, not production traffic"
-    best_for: "Zero extra signup if you already have a GitHub account"
-    modalities: ["text"]
-    models_free: ["cohere/cohere-command-a", "deepseek/deepseek-r1", "deepseek/deepseek-r1-0528", "meta/llama-3.2-11b-vision-instruct", "meta/llama-3.2-90b-vision-instruct", "microsoft/phi-4", "mistral-ai/codestral-2501", "openai/gpt-4.1"]
-    expires: null
-    docs_url: "https://docs.github.com/en/github-models/prototyping-with-ai-models"
-    phone_required: false
-    card_required: false
-    commercial_ok: false
-    openai_compatible: true
-    openai_base_url: "https://models.github.ai/inference"
-    verified: true
-    last_verified: "2026-07-11"
+    last_verified: "2026-08-02"
   - slug: "cohere"
     name: "Cohere"
     category: "ongoing"
@@ -116,23 +97,23 @@ providers:
     last_verified: "2026-07-30"
   - slug: "cerebras"
     name: "Cerebras"
-    category: "ongoing"
-    free_type: "renewing-quota"
-    free_tier: "Access to all Cerebras-hosted models"
-    rate_limits: "Officially published per-model: 5 RPM / 30,000 TPM / 1,000,000 TPH / 1,000,000 TPD (e.g. gpt-oss-120b, zai-glm-4.7, gemma-4-31b); limits vary by model"
-    notes: "Free tier includes community support (Discord) only; paid Developer tier gives \"10x higher\" rate limits"
+    category: "trial"
+    free_type: "trial-credit"
+    free_tier: "$5 in free credits for new accounts, usable across all public models"
+    rate_limits: "Published Free Trial per-model limits: 5 RPM / 30,000 TPM / 1,000,000 TPH / 1,000,000 TPD (e.g. gpt-oss-120b, zai-glm-4.7, gemma-4-31b); limits vary by model"
+    notes: "A verified payment method is required to activate Playground/API access (no charge until you buy credits). Credits expire 30 days after grant; whether any free access persists past expiry is not stated"
     best_for: "Fastest tokens/sec on wafer-scale hardware"
     modalities: ["text"]
     models_free: ["gpt-oss-120b", "zai-glm-4.7", "gemma-4-31b"]
-    expires: null
+    expires: "30 days"
     docs_url: "https://inference-docs.cerebras.ai/support/rate-limits"
     phone_required: null
-    card_required: null
-    commercial_ok: null
+    card_required: true
+    commercial_ok: true
     openai_compatible: true
     openai_base_url: "https://api.cerebras.ai/v1"
     verified: true
-    last_verified: "2026-07-11"
+    last_verified: "2026-08-02"
   - slug: "mistral"
     name: "Mistral (La Plateforme)"
     category: "ongoing"
@@ -598,7 +579,7 @@ providers:
     notes: "First-party — Ollama hosts the cloud models. Requires an ollama.com account + API key (`ollama signin`); the free plan is for light usage, Pro ($20/mo) raises limits. No card required."
     best_for: "Cloud-hosted open models with the Ollama workflow, no card"
     modalities: ["text", "vision"]
-    models_free: ["deepseek-v4-flash", "deepseek-v4-pro", "gemma4:31b", "glm-5.1", "glm-5.2", "gpt-oss:120b", "gpt-oss:20b", "kimi-k2.5"]
+    models_free: ["deepseek-v4-flash", "deepseek-v4-flash:0731", "deepseek-v4-pro", "gemma4:31b", "glm-5.1", "glm-5.2", "gpt-oss:120b", "gpt-oss:20b"]
     expires: null
     docs_url: "https://docs.ollama.com/cloud"
     phone_required: false

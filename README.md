@@ -18,7 +18,7 @@ No hype, no dead links, no "generous limits" hand-waving. Just what's actually f
 **[🔎 Interactive explorer](https://freellmapihub.com/)** &nbsp;·&nbsp; **[📊 Dataset](data/providers.json)** &nbsp;·&nbsp; **[🧪 How we verify](docs/methodology.md)** &nbsp;·&nbsp; **[➕ Add a provider](CONTRIBUTING.md)**
 
 <!-- AUTOGEN:stats:start -->
-**68 providers** tracked · 38 ongoing free tiers · 30 trial credits · **68/68** independently verified against the provider's own docs
+**67 providers** tracked · 36 ongoing free tiers · 31 trial credits · **67/67** independently verified against the provider's own docs
 <!-- AUTOGEN:stats:end -->
 
 </div>
@@ -49,7 +49,7 @@ Primarily **free LLM (text) APIs** — plus the adjacent model APIs a builder re
 <!-- AUTOGEN:coverage:start -->
 | Category | Providers | Examples |
 |---|---|---|
-| **Text / LLM** | 44 | Google Gemini API, Groq, OpenRouter |
+| **Text / LLM** | 43 | Google Gemini API, Groq, OpenRouter |
 | **Speech (STT / TTS)** | 25 | Google Gemini API, Groq, Cloudflare Workers AI |
 | **Embeddings** | 13 | Google Gemini API, Cloudflare Workers AI, Cohere |
 | **Image generation** | 10 | Cloudflare Workers AI, HuggingFace, Jina AI |
@@ -67,12 +67,12 @@ Each pick links to the full row, where the real limits and catches live.
 | I want… | Start with | Why |
 |---|---|---|
 | **The smartest model, free** | [Google Gemini](#ongoing-free-tiers) | The only genuinely frontier-class model with a real free tier here — not just open weights |
-| **The fastest inference** | [Groq](#ongoing-free-tiers) or [Cerebras](#ongoing-free-tiers) | Purpose-built inference chips — far faster than typical GPU-served APIs |
+| **The fastest inference** | [Groq](#ongoing-free-tiers) or [SambaNova](#ongoing-free-tiers) | Purpose-built inference chips — far faster than typical GPU-served APIs |
 | **The most free volume/day** | [Cloudflare Workers AI](#ongoing-free-tiers) (10k Neurons) or [OpenRouter](#ongoing-free-tiers) (1k req/day) | Highest ceilings for a side project with real traffic |
 | **No card *and* no phone** | [OpenRouter](#ongoing-free-tiers) or [Google Gemini](#ongoing-free-tiers) | Groq, Mistral, SiliconFlow and NVIDIA all gate signup behind phone verification |
 | **Open weights** (Llama, DeepSeek, Qwen, GLM) | [OpenRouter](#ongoing-free-tiers) or [Cloudflare Workers AI](#ongoing-free-tiers) | Widest open-model selection on an ongoing free tier |
 | **Permanently free, no trial clock** | [Z.ai (GLM)](#ongoing-free-tiers) or [SiliconFlow](#ongoing-free-tiers) | Several models priced at $0 indefinitely, not just for a trial window |
-| **An OpenAI-compatible endpoint** | [Groq](#ongoing-free-tiers), [Cerebras](#ongoing-free-tiers), [OpenRouter](#ongoing-free-tiers) | Point the OpenAI SDK at a new `base_url` and you're done |
+| **An OpenAI-compatible endpoint** | [Groq](#ongoing-free-tiers), [OpenRouter](#ongoing-free-tiers), [Cloudflare Workers AI](#ongoing-free-tiers) | Point the OpenAI SDK at a new `base_url` and you're done |
 | **EU / data-sovereignty hosting** | [OVHcloud](#ongoing-free-tiers) or [Scaleway](#one-time-trial-credits) | French/EU providers; OVHcloud even has an anonymous, no-account tier |
 | **Free embeddings & rerank** | [Jina AI](#one-time-trial-credits) or [Cohere](#ongoing-free-tiers) | 10M free tokens (Jina, OpenAI-compatible) or 1,000 calls/mo (Cohere) |
 | **Free speech-to-text / TTS** | [Deepgram](#one-time-trial-credits) or [AssemblyAI](#one-time-trial-credits) | $200 / $50 in no-card credit for Whisper-class STT and TTS |
@@ -86,10 +86,10 @@ Starting points, not guarantees — read the full row before you build on it.
 Focused, always-current collections — each is generated from the dataset and has a live web page too.
 
 <!-- AUTOGEN:collections:start -->
-- **[Free LLM APIs with no credit card](collections/no-credit-card.md)** (39) — start without a payment method · [live page ↗](https://freellmapihub.com/collections/no-credit-card.html)
-- **[Free LLM APIs with no phone verification](collections/no-phone.md)** (21) — no SMS/phone verification · [live page ↗](https://freellmapihub.com/collections/no-phone.html)
-- **[Free LLM APIs for commercial use](collections/commercial-use.md)** (22) — safe to ship, not eval-only · [live page ↗](https://freellmapihub.com/collections/commercial-use.html)
-- **[OpenAI-compatible free LLM APIs](collections/openai-compatible.md)** (32) — drop-in OpenAI SDK swap · [live page ↗](https://freellmapihub.com/collections/openai-compatible.html)
+- **[Free LLM APIs with no credit card](collections/no-credit-card.md)** (38) — start without a payment method · [live page ↗](https://freellmapihub.com/collections/no-credit-card.html)
+- **[Free LLM APIs with no phone verification](collections/no-phone.md)** (20) — no SMS/phone verification · [live page ↗](https://freellmapihub.com/collections/no-phone.html)
+- **[Free LLM APIs for commercial use](collections/commercial-use.md)** (23) — safe to ship, not eval-only · [live page ↗](https://freellmapihub.com/collections/commercial-use.html)
+- **[OpenAI-compatible free LLM APIs](collections/openai-compatible.md)** (31) — drop-in OpenAI SDK swap · [live page ↗](https://freellmapihub.com/collections/openai-compatible.html)
 - **[Permanently free LLM APIs](collections/always-free.md)** (6) — $0 models, no trial clock · [live page ↗](https://freellmapihub.com/collections/always-free.html)
 - **[Free multimodal LLM APIs](collections/multimodal.md)** (50) — vision, audio, embeddings · [live page ↗](https://freellmapihub.com/collections/multimodal.html)
 <!-- AUTOGEN:collections:end -->
@@ -118,13 +118,11 @@ Recurring (daily/monthly) quotas that renew — no expiry, but usually rate-limi
 <!-- AUTOGEN:ongoing:start -->
 | Provider | What's free | Rate limits | The catch | Verified |
 |---|---|---|---|---|
-| **[Google Gemini API (AI Studio)](https://ai.google.dev/gemini-api/docs/rate-limits)**<br><sub>💳 no card · 📵 no phone · 🏢 commercial OK · 🔌 OpenAI-compat</sub> | Gemini 2.5 Flash, 2.5 Flash-Lite, 2.5 Pro (limited), embeddings, TTS models | Varies by model, roughly 5-30 req/min and 20-500 req/day depending on model | Free-tier prompts/outputs may be used by Google to improve its products when used outside the UK/CH/EEA/EU | ✅ 2026-07-11 |
-| **[Groq](https://console.groq.com/docs/rate-limits)**<br><sub>💳 no card · 📱 phone · 🏢 commercial OK · 🔌 OpenAI-compat</sub> | Open-weight models (Llama, Qwen, GPT-OSS) plus Whisper, no credit card required | e.g. llama-3.1-8b-instant: 30 RPM/14.4K RPD/6K TPM/500K TPD; llama-3.3-70b-versatile: 30 RPM/1K RPD/12K TPM/100K TPD; qwen3-32b: 60 RPM/1K RPD/6K TPM/500K TPD; similar for GPT-OSS and Whisper models | Limits apply at the organization level, not per API key. Phone verification required at signup | ✅ 2026-07-11 |
-| **[OpenRouter](https://openrouter.ai/docs/api-reference/limits)**<br><sub>💳 no card · 📵 no phone · 🏢 commercial OK · 🔌 OpenAI-compat</sub> | 20+ models with a :free suffix, single API across many providers | 20 req/min; 50 req/day under 10 credits purchased lifetime, 1000 req/day once 10+ credits purchased (one-time, not a subscription) | ToS (Apr 2026) prohibits resale or building a competing service on the free models; a private proxy for personal use is fine | ✅ 2026-07-11 |
-| **[Cloudflare Workers AI](https://developers.cloudflare.com/workers-ai/platform/pricing/)**<br><sub>💳 no card · 📵 no phone · 🏢 commercial OK · 🔌 OpenAI-compat</sub> | 10,000 Neurons/day, all account plans | 30+ models: LLMs (Llama, Mistral, DeepSeek, Qwen...), embeddings, image, audio | Resets daily at 00:00 UTC; overage on a Workers Paid plan bills at $0.011/1,000 Neurons | ✅ 2026-07-11 |
-| **[GitHub Models](https://docs.github.com/en/github-models/prototyping-with-ai-models)**<br><sub>💳 no card · 📵 no phone · 🔬 eval only · 🔌 OpenAI-compat</sub> | Included with any GitHub account via the Copilot tier | Copilot Free: ~15 RPM / 150 RPD on "low" tier models, 8K input / 4K output tokens per request. Higher Copilot tiers raise the ceiling | Scoped by GitHub to experimentation/prototyping, not production traffic | ✅ 2026-07-11 |
+| **[Google Gemini API (AI Studio)](https://ai.google.dev/gemini-api/docs/rate-limits)**<br><sub>💳 no card · 📵 no phone · 🏢 commercial OK · 🔌 OpenAI-compat</sub> | Gemini 2.5 Flash, 2.5 Flash-Lite, 2.5 Pro (limited), embeddings, TTS models | Varies by model: 5-30 RPM and 15-1,000 RPD (e.g. 2.5 Pro: 5 RPM/100 RPD; 2.5 Flash: 10/250; 2.5 Flash-Lite: 15/1,000; embeddings: 100 RPD; TTS: 15 RPD) | Free-tier prompts/outputs may be used by Google to improve its products outside the UK/CH/EEA/EU. Since the 2026-03-23 terms, only Paid Services may serve API clients to end users in the EEA/CH/UK | ✅ 2026-08-02 |
+| **[Groq](https://console.groq.com/docs/rate-limits)**<br><sub>💳 no card · 📱 phone · 🏢 commercial OK · 🔌 OpenAI-compat</sub> | Open-weight models (Llama, Qwen, GPT-OSS) plus Whisper, no credit card required | e.g. llama-3.1-8b-instant: 30 RPM/14.4K RPD/6K TPM/500K TPD; llama-3.3-70b-versatile: 30 RPM/1K RPD/12K TPM/100K TPD; qwen/qwen3.6-27b: 30 RPM/1K RPD/8K TPM/200K TPD; similar for GPT-OSS and Whisper models | Limits apply at the organization level, not per API key. Phone verification required at signup | ✅ 2026-08-02 |
+| **[OpenRouter](https://openrouter.ai/docs/api-reference/limits)**<br><sub>💳 no card · 📵 no phone · 🏢 commercial OK · 🔌 OpenAI-compat</sub> | A rotating set of models with a :free suffix (~14 today; count fluctuates), single API across many providers | 20 req/min; 50 req/day under 10 credits purchased lifetime, 1000 req/day once 10+ credits purchased (one-time, not a subscription) | ToS (Jul 2026) prohibits reselling API access or building a competing service — platform-wide, not just the free models; per-model terms still apply | ✅ 2026-08-02 |
+| **[Cloudflare Workers AI](https://developers.cloudflare.com/workers-ai/platform/pricing/)**<br><sub>💳 no card · 📵 no phone · 🏢 commercial OK · 🔌 OpenAI-compat</sub> | 10,000 Neurons/day, all account plans | 30+ models: LLMs (Llama, Mistral, DeepSeek, Qwen...), embeddings, image, audio | Resets daily at 00:00 UTC; overage on a Workers Paid plan bills at $0.011/1,000 Neurons. A few models (e.g. Kimi K2.6/K2.7-code, GLM-5.2) now require a Workers Paid plan | ✅ 2026-08-02 |
 | **[Cohere](https://docs.cohere.com/docs/rate-limits)**<br><sub>💳 no card · 📵 no phone · 🔬 eval only · 🔌 OpenAI-compat</sub> | Trial (evaluation) API keys covering chat, embed and rerank | 1,000 API calls/month total; 20 req/min chat; 2,000 inputs/min embed; 10 req/min rerank | Explicitly for evaluation only — Cohere's terms prohibit production/commercial use on a trial key | ✅ 2026-07-30 |
-| **[Cerebras](https://inference-docs.cerebras.ai/support/rate-limits)**<br><sub>🔌 OpenAI-compat</sub> | Access to all Cerebras-hosted models | Officially published per-model: 5 RPM / 30,000 TPM / 1,000,000 TPH / 1,000,000 TPD (e.g. gpt-oss-120b, zai-glm-4.7, gemma-4-31b); limits vary by model | Free tier includes community support (Discord) only; paid Developer tier gives "10x higher" rate limits | ✅ 2026-07-11 |
 | **[Mistral (La Plateforme)](https://docs.mistral.ai/admin/billing-usage/usage-limits)**<br><sub>📱 phone · 🔬 eval only</sub> | "Restrictive" free tier explicitly for "try and explore" — official docs say to upgrade for "actual projects and production use" | Not published publicly; exact caps only visible in-console after login (admin.mistral.ai) | Phone verification required to activate; free tier is opt-in for data training | ✅ 2026-07-12 |
 | **[HuggingFace](https://huggingface.co/docs/inference-providers/en/pricing)**<br><sub>💳 no card · 🔌 OpenAI-compat</sub> | Free CPU Basic + ZeroGPU for Spaces; Inference Providers has a monthly credit ($0.10/mo on Free plan, $2.00/mo on PRO/Team/Enterprise) | No RPM/TPM published, only credit amounts | Credits only apply with "Routed by Hugging Face" billing, not with a Custom Provider Key | ✅ 2026-07-30 |
 | **[SiliconFlow](https://docs.siliconflow.cn/en/userguide/rate-limits/rate-limit-and-upgradation)**<br><sub>📱 phone · 🔌 OpenAI-compat</sub> | Several models permanently free (e.g. Qwen2.5-7B-Instruct and others) at $0 cost, plus a $1 welcome credit for paid models | Fixed per-model limits for free models; generic docs cite ranges of 1,000-10,000 RPM and 50,000-5,000,000 TPM depending on model tier — exact limits shown in-account | Signup requires SMS phone verification. Full "real-name authentication" (needed for recharging/billing) requires a mainland China, Hong Kong/Macao, or Taiwan ID document — this may limit full access for users without one, though basic use of free models appears reachable with standard account verification | ✅ 2026-07-30 |
@@ -165,6 +163,7 @@ A fixed credit balance on signup. Once it's spent (or the clock runs out), you'r
 <!-- AUTOGEN:trial:start -->
 | Provider | Credit | Models / notes | Expires | Verified |
 |---|---|---|---|---|
+| **[Cerebras](https://inference-docs.cerebras.ai/support/rate-limits)**<br><sub>🏢 commercial OK · 🔌 OpenAI-compat</sub> | $5 in free credits for new accounts, usable across all public models | A verified payment method is required to activate Playground/API access (no charge until you buy credits). Credits expire 30 days after grant; whether any free access persists past expiry is not stated | 30 days | ✅ 2026-08-02 |
 | **[Fireworks AI](https://docs.fireworks.ai/faq-new/billing-pricing/)**<br><sub>💳 no card · 🔌 OpenAI-compat</sub> | $1 trial credit | Default monthly spend cap of $50 for new accounts; no card needed to activate the $1 credit, card needed once it's spent | — | ✅ 2026-07-11 |
 | **[Baseten](https://www.baseten.co/pricing/)**<br><sub>🔌 OpenAI-compat</sub> | $30 trial credit | No documented expiration date publicly | — | ✅ 2026-07-11 |
 | **[Nebius AI Studio](https://docs.tokenfactory.nebius.com)**<br><sub>📵 no phone · 🏢 commercial OK · 🔌 OpenAI-compat</sub> | $1 trial credit, valid for 30 days | Product renamed to "Nebius Token Factory"; a bank card is required to set up billing | 30 days | ✅ 2026-07-30 |
@@ -201,9 +200,9 @@ A fixed credit balance on signup. Once it's spent (or the clock runs out), you'r
 
 Worth saying plainly. As of the last verification pass, **OpenAI, Anthropic and xAI do not offer an ongoing free API tier.** Several providers people *assume* are free — **Together AI, DeepInfra, Perplexity's API, Replicate, Featherless AI** — currently require a card or prepayment before any API use, per their own docs. Some have handed out small one-time trial credits at various points, but that's changed repeatedly; check each provider's billing page before assuming anything.
 
-For genuinely free access to strong models, your best bets here are **Gemini** (frontier-class) and the free open-weight models on **Groq, Cerebras, OpenRouter, Cloudflare, SiliconFlow and Z.ai**.
+For genuinely free access to strong models, your best bets here are **Gemini** (frontier-class) and the free open-weight models on **Groq, OpenRouter, Cloudflare, SiliconFlow and Z.ai**.
 
-Removed after re-verification (their free *API* access couldn't be confirmed): **Upstage** (Solar API is pay-as-you-go; the "free runs" are for document agents), **Inference.net** (the free tier is gateway/observability only, not free model tokens), and **Hyperbolic** (requires a $5 minimum deposit before any use).
+Retired or removed after re-verification: **GitHub Models** (fully retired by GitHub on 2026-07-30 — playground, catalog and inference API shut down for all customers), **Cerebras** (moved to the trial-credit table: the ongoing free tier became a payment-method-gated $5/30-day trial), **Inference.net** (the free tier is gateway/observability only, not free model tokens), and **Hyperbolic** (requires a $5 minimum deposit before any use).
 
 ## How verification works
 

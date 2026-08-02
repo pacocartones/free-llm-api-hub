@@ -1,0 +1,397 @@
+{
+  "probed_at": "2026-08-02",
+  "auth_only": true,
+  "count": 65,
+  "results": [
+    {
+      "slug": "google-gemini",
+      "env_key": "GEMINI_API_KEY",
+      "key_present": false,
+      "status": "skipped-no-key"
+    },
+    {
+      "slug": "groq",
+      "env_key": "GROQ_API_KEY",
+      "key_present": false,
+      "status": "skipped-no-key"
+    },
+    {
+      "slug": "openrouter",
+      "env_key": "OPENROUTER_API_KEY",
+      "key_present": false,
+      "status": "skipped-no-key"
+    },
+    {
+      "slug": "cloudflare-workers-ai",
+      "env_key": "CLOUDFLARE_API_TOKEN",
+      "key_present": false,
+      "status": "skipped-no-key"
+    },
+    {
+      "slug": "github-models",
+      "env_key": "GITHUB_TOKEN",
+      "key_present": false,
+      "status": "skipped-no-key"
+    },
+    {
+      "slug": "cohere",
+      "env_key": "COHERE_API_KEY",
+      "key_present": false,
+      "status": "skipped-no-key"
+    },
+    {
+      "slug": "cerebras",
+      "env_key": "CEREBRAS_API_KEY",
+      "key_present": false,
+      "status": "skipped-no-key"
+    },
+    {
+      "slug": "mistral",
+      "env_key": "MISTRAL_API_KEY",
+      "key_present": false,
+      "status": "skipped-no-key"
+    },
+    {
+      "slug": "huggingface",
+      "env_key": "HF_TOKEN",
+      "key_present": false,
+      "status": "skipped-no-key"
+    },
+    {
+      "slug": "siliconflow",
+      "env_key": "SILICONFLOW_API_KEY",
+      "key_present": false,
+      "status": "skipped-no-key"
+    },
+    {
+      "slug": "zai-glm",
+      "env_key": "ZAI_API_KEY",
+      "key_present": false,
+      "status": "skipped-no-key"
+    },
+    {
+      "slug": "ibm-watsonx",
+      "env_key": "WATSONX_API_KEY",
+      "key_present": false,
+      "status": "skipped-no-key"
+    },
+    {
+      "slug": "ovhcloud-ai-endpoints",
+      "env_key": "OVHCLOUD_API_KEY",
+      "key_present": false,
+      "status": "skipped-no-key"
+    },
+    {
+      "slug": "fireworks-ai",
+      "env_key": "FIREWORKS_API_KEY",
+      "key_present": false,
+      "status": "skipped-no-key"
+    },
+    {
+      "slug": "baseten",
+      "env_key": "BASETEN_API_KEY",
+      "key_present": false,
+      "status": "skipped-no-key"
+    },
+    {
+      "slug": "nebius",
+      "env_key": "NEBIUS_API_KEY",
+      "key_present": false,
+      "status": "skipped-no-key"
+    },
+    {
+      "slug": "novita",
+      "env_key": "NOVITA_API_KEY",
+      "key_present": false,
+      "status": "skipped-no-key"
+    },
+    {
+      "slug": "ai21",
+      "env_key": "AI21_API_KEY",
+      "key_present": false,
+      "status": "skipped-no-key"
+    },
+    {
+      "slug": "nlpcloud",
+      "env_key": "NLPCLOUD_API_KEY",
+      "key_present": false,
+      "status": "skipped-no-key"
+    },
+    {
+      "slug": "alibaba-model-studio",
+      "env_key": "DASHSCOPE_API_KEY",
+      "key_present": false,
+      "status": "skipped-no-key"
+    },
+    {
+      "slug": "sambanova",
+      "env_key": "SAMBANOVA_API_KEY",
+      "key_present": false,
+      "status": "skipped-no-key"
+    },
+    {
+      "slug": "scaleway",
+      "env_key": "SCALEWAY_API_KEY",
+      "key_present": false,
+      "status": "skipped-no-key"
+    },
+    {
+      "slug": "nvidia-nim",
+      "env_key": "NVIDIA_API_KEY",
+      "key_present": false,
+      "status": "skipped-no-key"
+    },
+    {
+      "slug": "vercel-ai-gateway",
+      "env_key": "VERCEL_AI_GATEWAY_KEY",
+      "key_present": false,
+      "status": "skipped-no-key"
+    },
+    {
+      "slug": "jina-ai",
+      "env_key": "JINA_API_KEY",
+      "key_present": false,
+      "status": "skipped-no-key"
+    },
+    {
+      "slug": "deepgram",
+      "env_key": "DEEPGRAM_API_KEY",
+      "key_present": false,
+      "status": "skipped-no-key"
+    },
+    {
+      "slug": "assemblyai",
+      "env_key": "ASSEMBLYAI_API_KEY",
+      "key_present": false,
+      "status": "skipped-no-key"
+    },
+    {
+      "slug": "mixedbread",
+      "env_key": "MIXEDBREAD_API_KEY",
+      "key_present": false,
+      "status": "skipped-no-key"
+    },
+    {
+      "slug": "clarifai",
+      "env_key": "CLARIFAI_PAT",
+      "key_present": false,
+      "status": "skipped-no-key"
+    },
+    {
+      "slug": "arli-ai",
+      "env_key": "ARLI_API_KEY",
+      "key_present": false,
+      "status": "skipped-no-key"
+    },
+    {
+      "slug": "ollama-cloud",
+      "env_key": "OLLAMA_API_KEY",
+      "key_present": false,
+      "status": "skipped-no-key"
+    },
+    {
+      "slug": "modelscope",
+      "env_key": "MODELSCOPE_API_KEY",
+      "key_present": false,
+      "status": "skipped-no-key"
+    },
+    {
+      "slug": "runware",
+      "env_key": "RUNWARE_API_KEY",
+      "key_present": false,
+      "status": "skipped-no-key"
+    },
+    {
+      "slug": "pinecone-inference",
+      "env_key": "PINECONE_API_KEY",
+      "key_present": false,
+      "status": "skipped-no-key"
+    },
+    {
+      "slug": "twelve-labs",
+      "env_key": "TWELVELABS_API_KEY",
+      "key_present": false,
+      "status": "skipped-no-key"
+    },
+    {
+      "slug": "ocr-space",
+      "env_key": "OCRSPACE_API_KEY",
+      "key_present": false,
+      "status": "skipped-no-key"
+    },
+    {
+      "slug": "llamaparse",
+      "env_key": "LLAMACLOUD_API_KEY",
+      "key_present": false,
+      "status": "skipped-no-key"
+    },
+    {
+      "slug": "nanonets",
+      "env_key": "NANONETS_API_KEY",
+      "key_present": false,
+      "status": "skipped-no-key"
+    },
+    {
+      "slug": "moondream",
+      "env_key": "MOONDREAM_API_KEY",
+      "key_present": false,
+      "status": "skipped-no-key"
+    },
+    {
+      "slug": "speechmatics",
+      "env_key": "SPEECHMATICS_API_KEY",
+      "key_present": false,
+      "status": "skipped-no-key"
+    },
+    {
+      "slug": "speechify",
+      "env_key": "SPEECHIFY_API_KEY",
+      "key_present": false,
+      "status": "skipped-no-key"
+    },
+    {
+      "slug": "hume-ai",
+      "env_key": "HUME_API_KEY",
+      "key_present": false,
+      "status": "skipped-no-key"
+    },
+    {
+      "slug": "unreal-speech",
+      "env_key": "UNREALSPEECH_API_KEY",
+      "key_present": false,
+      "status": "skipped-no-key"
+    },
+    {
+      "slug": "elevenlabs",
+      "env_key": "ELEVENLABS_API_KEY",
+      "key_present": false,
+      "status": "skipped-no-key"
+    },
+    {
+      "slug": "sarvam-ai",
+      "env_key": "SARVAM_API_KEY",
+      "key_present": false,
+      "status": "skipped-no-key"
+    },
+    {
+      "slug": "gladia",
+      "env_key": "GLADIA_API_KEY",
+      "key_present": false,
+      "status": "skipped-no-key"
+    },
+    {
+      "slug": "rime",
+      "env_key": "RIME_API_KEY",
+      "key_present": false,
+      "status": "skipped-no-key"
+    },
+    {
+      "slug": "tencent-hunyuan",
+      "env_key": "HUNYUAN_API_KEY",
+      "key_present": false,
+      "status": "skipped-no-key"
+    },
+    {
+      "slug": "voyage-ai",
+      "env_key": "VOYAGE_API_KEY",
+      "key_present": false,
+      "status": "skipped-no-key"
+    },
+    {
+      "slug": "contextual-ai",
+      "env_key": "CONTEXTUAL_API_KEY",
+      "key_present": false,
+      "status": "skipped-no-key"
+    },
+    {
+      "slug": "cartesia",
+      "env_key": "CARTESIA_API_KEY",
+      "key_present": false,
+      "status": "skipped-no-key"
+    },
+    {
+      "slug": "lmnt",
+      "env_key": "LMNT_API_KEY",
+      "key_present": false,
+      "status": "skipped-no-key"
+    },
+    {
+      "slug": "fish-audio",
+      "env_key": "FISH_AUDIO_API_KEY",
+      "key_present": false,
+      "status": "skipped-no-key"
+    },
+    {
+      "slug": "camb-ai",
+      "env_key": "CAMB_API_KEY",
+      "key_present": false,
+      "status": "skipped-no-key"
+    },
+    {
+      "slug": "rev-ai",
+      "env_key": "REV_AI_API_KEY",
+      "key_present": false,
+      "status": "skipped-no-key"
+    },
+    {
+      "slug": "unstructured",
+      "env_key": "UNSTRUCTURED_API_KEY",
+      "key_present": false,
+      "status": "skipped-no-key"
+    },
+    {
+      "slug": "nutrient",
+      "env_key": "NUTRIENT_API_KEY",
+      "key_present": false,
+      "status": "skipped-no-key"
+    },
+    {
+      "slug": "photoroom",
+      "env_key": "PHOTOROOM_API_KEY",
+      "key_present": false,
+      "status": "skipped-no-key"
+    },
+    {
+      "slug": "poolside",
+      "env_key": "POOLSIDE_API_KEY",
+      "key_present": false,
+      "status": "skipped-no-key"
+    },
+    {
+      "slug": "upstage",
+      "env_key": "UPSTAGE_API_KEY",
+      "key_present": false,
+      "status": "skipped-no-key"
+    },
+    {
+      "slug": "veryfi",
+      "env_key": "VERYFI_API_KEY",
+      "key_present": false,
+      "status": "skipped-no-key"
+    },
+    {
+      "slug": "voicegain",
+      "env_key": "VOICEGAIN_API_KEY",
+      "key_present": false,
+      "status": "skipped-no-key"
+    },
+    {
+      "slug": "smallest-ai",
+      "env_key": "SMALLEST_API_KEY",
+      "key_present": false,
+      "status": "skipped-no-key"
+    },
+    {
+      "slug": "retell-ai",
+      "env_key": "RETELL_API_KEY",
+      "key_present": false,
+      "status": "skipped-no-key"
+    },
+    {
+      "slug": "datalab",
+      "env_key": "DATALAB_API_KEY",
+      "key_present": false,
+      "status": "skipped-no-key"
+    }
+  ]
+}

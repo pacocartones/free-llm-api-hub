@@ -65,11 +65,6 @@ const PUBLIC = {
     // Keep only genuinely-free models (the :free suffix), a diverse spread.
     return sample(d.data.map((m) => m.id).filter((id) => id.endsWith(':free')));
   },
-  'github-models': async () => {
-    const d = await getJson('https://models.github.ai/catalog/models');
-    // Whole catalog is usable on the free (rate-limited) tier.
-    return sample(d.map((m) => m.id));
-  },
   pollinations: async () => {
     const d = await getJson('https://text.pollinations.ai/models');
     return sample(d.filter((m) => m.tier === 'anonymous').map((m) => m.name));

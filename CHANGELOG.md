@@ -5,6 +5,25 @@ Notable changes to the dataset and the project. Format based on [Keep a Changelo
 - **Data changes** (a provider's limits/terms) are recorded here when notable; every change is also visible in the git history of `data/providers.json`.
 - **Schema changes** (a new field, a changed meaning) bump the dataset version and are always recorded.
 
+## [2.7.0] — 2026-08-02
+
+First paced re-verification cycle: the oldest six entries re-checked against their providers' own docs — and it caught a retirement.
+
+### Data
+- **GitHub Models removed → 67 providers.** GitHub fully retired the service on 2026-07-30 (playground, catalog, inference API and BYOK shut down for all customers). Recorded in the README's "Notably NOT free" section.
+- **Cerebras moved to trial credits.** The ongoing free tier is gone for new accounts: it's now a $5 credit that requires a verified payment method to activate and expires 30 days after grant. `card_required: true`, `commercial_ok: true` (per its ToS) — two long-standing `null`s resolved.
+- **Google Gemini** — rate-limit ranges corrected to the current docs (5-30 RPM, 15-1,000 RPD depending on model); the 2026-03-23 terms clause restricting free-tier API clients with EEA/CH/UK end users added to the catch.
+- **Groq** — the `qwen3-32b` example replaced by its successor `qwen/qwen3.6-27b` (30 RPM / 1K RPD / 8K TPM / 200K TPD).
+- **OpenRouter** — the "20+ free models" claim corrected: 14 `:free` variants today (volatile by nature); ToS reference updated to the 2026-07-27 revision (resale/competing-service ban is platform-wide).
+- **Cloudflare Workers AI** — re-confirmed unchanged; catch now notes the few models that require a Workers Paid plan (Kimi K2.6/K2.7-code, GLM-5.2).
+
+### Project
+- **`probe.yml` — the live probe runs in CI.** Weekly `--auth-only` pass over every provider whose key exists as a repo secret (any subset works; missing keys are skipped), committing `last_probed`/`probe_status`. No VPS or external secrets manager needed.
+- **Paced re-verification.** `staleness.mjs` now emits a **weekly batch** — the oldest verifications, sized to keep the 90-day SLA green without an end-of-quarter cliff — on top of the overdue/due-soon lists.
+- **[docs/architecture.md](docs/architecture.md) published** — the pipeline map for code contributors, linked from CONTRIBUTING.
+- **CI gap closed:** pull requests touching `site/**` now trigger `verify.yml` (previously deployable with no checks).
+- **Release tags backfilled:** `v2.3.0`, `v2.4.0`.
+
 ## [2.6.0] — 2026-07-31
 
 Custom domain, a machine-readable API surface, per-provider provenance, and a UI pass driven by user feedback.
