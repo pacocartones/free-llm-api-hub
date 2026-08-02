@@ -18,11 +18,13 @@ These collapse into **`probe_status`**: `live` · `auth-failed` · `tier-ended` 
 
 `live` results show a **live-tested** badge on the provider page.
 
-## Secrets — Infisical (self-hosted), transport-agnostic
+## Secrets — transport-agnostic by design
 
 The probe reads keys from `process.env[env_key]` (each provider declares its `env_key` in `data/providers.json`). It does **not** care how they got there — so any injector works. Keys are used only in `Authorization` headers; they are never logged, written to the dataset, or committed.
 
-Recommended: a **self-hosted Infisical on the same VPS** that runs the weekly job, so secrets never leave the box.
+**Active path: GitHub Actions secrets.** [`probe.yml`](../.github/workflows/probe.yml) runs the probe weekly (`--auth-only`) with whatever provider keys exist as repo secrets (*Settings → Secrets and variables → Actions*). Missing secrets are simply skipped, so any subset works — add a secret and that provider joins the next run, no code change needed.
+
+**Alternative: a self-hosted Infisical on the same VPS** that runs the weekly job, so secrets never leave the box and no Actions minutes are spent.
 
 1. In Infisical, create a folder (e.g. `/free-llm-api-hub`, env `prod`) and add each key under the canonical name the repo expects (the provider's `env_key`, e.g. `GROQ_API_KEY`, `CEREBRAS_API_KEY`, `GEMINI_API_KEY`, …).
 2. Create a **read-only Machine Identity** scoped to that folder/env. Store its creds in a root-only file on the VPS (`/etc/free-llm-api-hub.env`), never in the repo.
@@ -47,9 +49,9 @@ Footprint is one `/models` call + one 1-token inference per provider. A provider
 
 ## Setup checklist — resume here
 
-Everything on the code side is built, tested and committed (harness, fields, badge, docs). What remains is a one-time setup on the secrets/VPS side and two small decisions. Work top-down:
+Everything on the code side is built, tested and committed (harness, fields, badge, docs), and the GitHub Actions path (`probe.yml`) is live: **the only step left for basic coverage is adding provider keys as repo secrets** — any subset, under each provider's `env_key` name. The two decisions below only matter for the alternative zero-Actions VPS path.
 
-**Two decisions to make first** (both were deliberately left open; the code is agnostic to either):
+**Two decisions for the VPS path** (both were deliberately left open; the code is agnostic to either):
 - [ ] **Infisical reachability** — localhost-only on the VPS (everything runs there) *or* a public HTTPS domain (lets probes also be piloted from a laptop session).
 - [ ] **Zero-Actions deploy** — VPS builds and pushes to a `gh-pages` branch (GitHub serves it, 0 Actions minutes) *or* the VPS serves the site via nginx *or* keep the light `pages.yml`. This unblocks the commented publish step in `scripts/probe-cron.sh`.
 

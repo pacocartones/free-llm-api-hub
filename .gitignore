@@ -27,5 +27,11 @@ node_modules/
 .DS_Store
 Thumbs.db
 
+# Local secrets — API keys live in the environment, never in the repo
+# (probe.mjs / fetch-models.mjs read process.env[env_key]; see docs/live-testing.md)
+.env
+.env.*
+!.env.example
+
 # Shared rules for the browser, emitted by build.mjs from scripts/lib/rules.mjs
 site/shared-rules.js

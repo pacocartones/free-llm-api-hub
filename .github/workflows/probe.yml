@@ -1,0 +1,72 @@
+name: Live probe
+
+# The live half of verification: actually call each provider's API with a real
+# key and record that the free tier answered (probe_status + last_probed),
+# independent of the docs-based `verified`. Runs Mondays 09:00 UTC, one hour
+# after maintenance.yml, so the two never race on main.
+#
+# Mode: --auth-only. One /models call per provider, no inference — near-zero
+# footprint, burns no free quota. A full inference probe stays a local ritual:
+#   GROQ_API_KEY=... node scripts/probe.mjs --write
+#
+# Keys come from repo secrets (Settings → Secrets and variables → Actions).
+# probe.mjs reads process.env[env_key] and SKIPS any provider whose secret is
+# unset, so this workflow is a safe no-op until secrets exist. Add a secret,
+# and that provider joins the probe on the next run — no code change needed.
+# Keys are used only in Authorization headers; never logged, never written.
+on:
+  schedule:
+    - cron: '0 9 * * 1'
+  workflow_dispatch: {}
+
+permissions:
+  contents: write   # commit probe results to the dataset
+
+concurrency:
+  group: live-probe
+  cancel-in-progress: false
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0 # build.mjs derives per-provider history from git log
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+
+      - name: Probe providers whose key is present
+        env:
+          # Free-tier keys, all obtainable without a credit card. Create any
+          # subset; missing ones are simply skipped.
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          CEREBRAS_API_KEY: ${{ secrets.CEREBRAS_API_KEY }}
+          SAMBANOVA_API_KEY: ${{ secrets.SAMBANOVA_API_KEY }}
+          SCALEWAY_API_KEY: ${{ secrets.SCALEWAY_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          MISTRAL_API_KEY: ${{ secrets.MISTRAL_API_KEY }}
+          COHERE_API_KEY: ${{ secrets.COHERE_API_KEY }}
+          NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: node scripts/probe.mjs --auth-only --write
+
+      - name: Validate and rebuild derived files
+        run: |
+          node scripts/validate.mjs
+          node scripts/build.mjs
+
+      - name: Commit probe results if changed
+        run: |
+          if ! git diff --quiet; then
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git pull --rebase
+            git add -A
+            git commit -m "data: weekly live probe (auth-only) [skip ci]"
+            git push
+          else
+            echo "Probe results unchanged."
+          fi

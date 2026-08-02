@@ -61,6 +61,10 @@ The smallest useful contribution: many entries carry `null` in `card_required`, 
 - Prefer the primary number over the marketing framing.
 - Match the tone of the existing entries: precise, plain, no hype.
 
+## Contributing code
+
+Data PRs are the common case, but scripts and site changes are welcome too. Start with **[docs/architecture.md](docs/architecture.md)** — it maps the pipeline, what each script does, and the two-places rule (the homepage is hand-written; everything else is generated). The checks a code PR must pass: `npm test` (data integrity + internal links) and, if you touched anything the build consumes, `npm run check` (build idempotency + drift).
+
 ## What happens next
 
 A maintainer re-checks the source link and the claim, then merges. See [GOVERNANCE.md](GOVERNANCE.md) for how decisions are made and [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) for community norms. By contributing you agree to license your contribution under the repository's [MIT License](LICENSE).

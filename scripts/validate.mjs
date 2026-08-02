@@ -1,14 +1,16 @@
 #!/usr/bin/env node
 // Validates data/providers.json against the project's integrity rules.
 // Fails CI (exit 1) if the dataset would ship a claim it can't back up.
-// Zero dependencies. Run with: node scripts/validate.mjs   (or `npm test`)
+// Zero dependencies. Run with: node scripts/validate.mjs [path-to-providers.json]
+// (the optional path is used by the test suite to validate fixtures)
 
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { dirname, join } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
-const data = JSON.parse(readFileSync(join(ROOT, 'data/providers.json'), 'utf8'));
+const FILE = process.argv[2] ? resolve(process.argv[2]) : join(ROOT, 'data/providers.json');
+const data = JSON.parse(readFileSync(FILE, 'utf8'));
 
 const CATEGORIES = ['ongoing', 'trial'];
 const FREE_TYPES = ['perpetual', 'renewing-quota', 'recurring-credit', 'trial-credit'];

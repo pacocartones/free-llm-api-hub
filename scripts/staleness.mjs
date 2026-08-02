@@ -45,6 +45,18 @@ for (const [d, n] of Object.entries(byDate)) {
   if (!cliff || n > cliff.n) cliff = { d, n, crossIn, crossOn };
 }
 
+// Weekly batch: the pacing target that keeps the SLA green without cliffs.
+// Steady state = all verified entries spread over the SLA window; near a
+// cliff, spread the cluster over the weeks it has left, whichever is larger.
+const verifiedList = providers
+  .filter((p) => p.verified && p.last_verified)
+  .sort((a, b) => (a.last_verified < b.last_verified ? -1 : 1));
+let batchSize = Math.ceil(verifiedList.length / (OVERDUE / 7));
+if (cliff && cliff.crossIn > 0) {
+  batchSize = Math.max(batchSize, Math.ceil(cliff.n / Math.max(1, Math.floor(cliff.crossIn / 7))));
+}
+const batch = verifiedList.slice(0, batchSize);
+
 const line = ({ p, age }) =>
   `- [ ] **${p.name}** (\`${p.slug}\`) — last verified ${p.last_verified} (${age} days ago)` +
   (p.docs_url ? ` · [docs](${p.docs_url})` : '');
@@ -61,6 +73,11 @@ if (cliff && cliff.crossIn <= 45) {
   out.push(`> ⛰️ **Cliff watch:** ${cliff.n} entries were all verified on ${cliff.d} and cross the ${OVERDUE}-day SLA together around **${cliff.crossOn}** (~${cliff.crossIn} days). Re-verify a few of them early each week to spread the load instead of taking the hit all at once.`);
   out.push('');
 }
+
+out.push(`### 📅 This week's batch — ${batch.length}`);
+out.push(`_The ${batch.length} oldest verifications. Clearing one batch a week keeps the badge green without an end-of-quarter cliff._`);
+out.push(batch.map((p) => `- [ ] **${p.name}** (\`${p.slug}\`) — last verified ${p.last_verified} (${ageDays(p.last_verified)} days ago)` + (p.docs_url ? ` · [docs](${p.docs_url})` : '')).join('\n') || '_None._');
+out.push('');
 
 out.push(`### 🔴 Overdue (>${OVERDUE} days) — ${overdue.length}`);
 out.push(overdue.length ? overdue.map(line).join('\n') : '_None — the list is within SLA._');

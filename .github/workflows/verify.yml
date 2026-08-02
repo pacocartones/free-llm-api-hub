@@ -18,6 +18,7 @@ on:
       - 'scripts/**'
       - 'README.md'
       - 'collections/**'
+      - 'site/**'   # only the hand-written files are committable; the build step below catches broken AUTOGEN markers
       - '.github/workflows/verify.yml'
   push:
     branches: [main]
@@ -44,6 +45,9 @@ jobs:
 
       - name: Check internal documentation links
         run: node scripts/check-links.mjs
+
+      - name: Run the pipeline test suite
+        run: node --test scripts/build.test.mjs
 
       # Informational only. A mismatch here is expected on a data-only pull
       # request and is resolved by the bot after merge.
