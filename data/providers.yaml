@@ -213,9 +213,9 @@ providers:
     name: "OVHcloud AI Endpoints"
     category: "ongoing"
     free_type: "perpetual"
-    free_tier: "Several open-weight models in the catalog (e.g. Qwen3Guard) listed as $0 per token, permanently, via two access modes: anonymous (no account) and authenticated (API key tied to a Public Cloud project)"
+    free_tier: "Two Qwen3Guard models (Gen-8B and Gen-0.6B) are currently listed as Free in the catalog; access is available anonymously or with an API key tied to a Public Cloud project"
     rate_limits: "Anonymous access: 2 requests/min per IP per model. Authenticated (API key): 400 requests/min per project per model. Exceeding either returns HTTP 429"
-    notes: "European provider (France), relevant for EU data-sovereignty/GDPR-conscious use. The authenticated tier needs a valid payment method on the project (though \"Free\" models themselves don't charge); anonymous access needs neither an account nor a card. A separate general $200 Public Cloud trial voucher also exists but is unrelated to this permanent free-model tier"
+    notes: "European provider (France), relevant for EU data-sovereignty/GDPR-conscious use. The authenticated tier needs a valid payment method on the project (though \"Free\" models themselves don't charge); anonymous access needs neither an account nor a card. A separate general $200 Public Cloud trial voucher also exists but is unrelated to this free-model tier"
     best_for: "EU-hosted, no-account access to open models"
     modalities: ["text"]
     models_free: null
@@ -227,14 +227,14 @@ providers:
     openai_compatible: true
     openai_base_url: "https://oai.endpoints.kepler.ai.cloud.ovh.net/v1"
     verified: true
-    last_verified: "2026-07-11"
+    last_verified: "2026-08-03"
   - slug: "fireworks-ai"
     name: "Fireworks AI"
     category: "trial"
     free_type: "trial-credit"
     free_tier: "$1 trial credit"
     rate_limits: "Various open-weight models"
-    notes: "Default monthly spend cap of $50 for new accounts; no card needed to activate the $1 credit, card needed once it's spent"
+    notes: "Fireworks uses prepaid credits. After the $1 credit is exhausted, add a payment method and credits (or enable auto top-up) to continue; account limits can rise with spend"
     best_for: "Fast hosted open models to trial with $1"
     modalities: ["text"]
     models_free: null
@@ -246,15 +246,15 @@ providers:
     openai_compatible: true
     openai_base_url: "https://api.fireworks.ai/inference/v1"
     verified: true
-    last_verified: "2026-07-11"
+    last_verified: "2026-08-03"
   - slug: "baseten"
     name: "Baseten"
     category: "trial"
     free_type: "trial-credit"
-    free_tier: "$30 trial credit"
-    rate_limits: "Any supported model, compute-based pricing"
-    notes: "No documented expiration date publicly"
-    best_for: "Largest trial credit here for building something bigger"
+    free_tier: "New accounts receive free credits; Baseten's current pricing page does not state the amount"
+    rate_limits: "Model APIs are priced per token; dedicated deployments are priced by compute time (per minute)"
+    notes: "Basic is $0/month, pay as you go. Current pricing confirms new-account credits but does not publish an amount or expiration date"
+    best_for: "Free starter credits for evaluating hosted custom and open models"
     modalities: ["text"]
     models_free: null
     expires: null
@@ -265,7 +265,7 @@ providers:
     openai_compatible: true
     openai_base_url: "https://inference.baseten.co/v1"
     verified: true
-    last_verified: "2026-07-11"
+    last_verified: "2026-08-03"
   - slug: "nebius"
     name: "Nebius AI Studio"
     category: "trial"
@@ -289,21 +289,21 @@ providers:
     name: "Novita AI"
     category: "trial"
     free_type: "trial-credit"
-    free_tier: "$1 free credit on signup"
+    free_tier: "$100 Sandbox credits, valid for 90 days"
     rate_limits: "Various open-weight models"
-    notes: "Corrected from a previously listed \"$0.50/year\" figure, which does not appear on any official Novita domain; a separate referral program (\"Give $10, Earn $10\") also exists"
-    best_for: "A quick $1 to trial open-weight models"
+    notes: "Official signup advertises $100 Sandbox credits valid for 90 days; no credit card required"
+    best_for: "$100 Sandbox credits for trying Model APIs, GPUs, and agent workflows"
     modalities: ["text"]
     models_free: null
-    expires: null
+    expires: "90 days"
     docs_url: "https://novita.ai/pricing"
     phone_required: null
-    card_required: null
+    card_required: false
     commercial_ok: null
     openai_compatible: true
     openai_base_url: null
     verified: true
-    last_verified: "2026-07-11"
+    last_verified: "2026-08-03"
   - slug: "ai21"
     name: "AI21 Labs"
     category: "trial"
@@ -322,7 +322,7 @@ providers:
     openai_compatible: null
     openai_base_url: null
     verified: true
-    last_verified: "2026-07-11"
+    last_verified: "2026-08-03"
   - slug: "nlpcloud"
     name: "NLP Cloud"
     category: "trial"
