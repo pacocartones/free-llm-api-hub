@@ -617,7 +617,7 @@ providers:
     notes: "Alibaba's model hub — a different product from Alibaba Model Studio. Requires a ModelScope account bound to an Alibaba Cloud account with real-name (ID) verification — a practical barrier for non-China users. Explicitly non-commercial (\"for developers to experience\"). No card."
     best_for: "Free daily calls to many open models (real-name verification required)"
     modalities: ["text", "vision"]
-    models_free: ["LLM-Research/Llama-4-Maverick-17B-128E-Instruct", "MedAIBase/AntAngelMed", "MiniMax/MiniMax-M1-80k", "MusePublic/Qwen-Image-Edit", "OpenGVLab/InternVL3_5-241B-A28B", "PaddlePaddle/ERNIE-4.5-0.3B-PT", "Qwen/Qwen-Image-Edit", "Shanghai_AI_Laboratory/Intern-S1"]
+    models_free: ["MedAIBase/AntAngelMed", "MiniMax/MiniMax-M1-80k", "MusePublic/Qwen-Image-Edit", "OpenGVLab/InternVL3_5-241B-A28B", "PaddlePaddle/ERNIE-4.5-0.3B-PT", "Qwen/Qwen-Image-Edit", "Shanghai_AI_Laboratory/Intern-S1", "Tencent-Hunyuan/Hy3"]
     expires: null
     docs_url: "https://www.modelscope.cn/docs/model-service/API-Inference/intro"
     phone_required: null
