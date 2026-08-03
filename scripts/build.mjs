@@ -851,9 +851,11 @@ print(resp.choices[0].message.content)</code></pre><p class="muted">…or with c
   // Live-test badge: an actual successful API call, separate from the docs-based `verified`.
   const probedLine = p.probe_status === 'live'
     ? ` <span class="v live" title="A real free-tier API call succeeded on this date">${IC('ic-check')} live-tested ${htmlEsc(p.last_probed || '')}</span>`
-    : (p.probe_status === 'tier-ended'
+    : (p.probe_status === 'auth-ok'
+        ? ` <span class="v ok" title="Credentials accessed /models; no inference was attempted">${IC('ic-check')} credentials checked ${htmlEsc(p.last_probed || '')}</span>`
+        : (p.probe_status === 'tier-ended'
         ? ` <span class="v warn" title="The key authenticated but the free tier appears gone">${IC('ic-warn')} free tier unconfirmed live</span>`
-        : '');
+        : ''));
   const docsBtn = p.docs_url ? `<a class="btn primary" href="${htmlEsc(p.docs_url)}" target="_blank" rel="noopener">Official docs ↗</a>` : '';
   // "Visit website": the provider's main site, derived from the docs URL by stripping
   // common docs/console/api subdomains so it points at the marketing homepage.

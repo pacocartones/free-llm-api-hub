@@ -1,9 +1,10 @@
-name: Live probe
+name: Credential probe
 
-# The live half of verification: actually call each provider's API with a real
-# key and record that the free tier answered (probe_status + last_probed),
-# independent of the docs-based `verified`. Runs Mondays 09:00 UTC, one hour
-# after maintenance.yml, so the two never race on main.
+# The credential half of verification: call each provider's /models endpoint
+# with a real key and record the result (probe_status + last_probed), independent
+# of docs-based `verified`. A full inference probe remains a separate, explicit
+# operation, so the site never treats an auth check as proof that inference works.
+# Runs Mondays 09:00 UTC, one hour after maintenance.yml, so the two never race.
 #
 # Mode: --auth-only. One /models call per provider, no inference — near-zero
 # footprint, burns no free quota. A full inference probe stays a local ritual:
@@ -65,7 +66,7 @@ jobs:
             git config user.email "github-actions[bot]@users.noreply.github.com"
             git pull --rebase
             git add -A
-            git commit -m "data: weekly live probe (auth-only) [skip ci]"
+            git commit -m "data: weekly credential probe [skip ci]"
             git push
           else
             echo "Probe results unchanged."

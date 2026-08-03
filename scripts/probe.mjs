@@ -21,6 +21,7 @@
 // --auth-only).
 
 import { readFileSync, writeFileSync } from 'node:fs';
+import assert from 'node:assert/strict';
 import { serialize, roundTripError } from './_serialize.mjs';
 
 const FILE = new URL('../data/providers.json', import.meta.url);
@@ -90,6 +91,13 @@ function classify(status, json) {
   return 'error';
 }
 
+// An auth-only run proves that the supplied credential can access /models, but
+// deliberately does not make an inference request. Keep that useful evidence
+// distinct from a successful end-to-end free-tier call.
+function classifyAuthOnly(status, json) {
+  return status === 200 ? 'auth-ok' : classify(status, json);
+}
+
 async function probeOpenAI(p, key) {
   const base = p.openai_base_url.replace(/\/$/, '');
   const auth = { Authorization: `Bearer ${key}` };
@@ -100,7 +108,7 @@ async function probeOpenAI(p, key) {
   if (AUTH_ONLY) {
     return {
       authOk, models, model: null,
-      status: authOk ? (m.status === 200 ? 'live' : classify(m.status, m.json)) : 'auth-failed',
+      status: authOk ? classifyAuthOnly(m.status, m.json) : 'auth-failed',
       latency_ms: m.ms, tps: null, http: m.status, rate_limit: pickRateLimit(m.headers), inference: false,
     };
   }
@@ -130,8 +138,18 @@ async function probeOpenAI(p, key) {
 async function main() {
   if (args.includes('--self-test')) {
     const err = roundTripError(readFileSync(FILE, 'utf8'));
-    console.log(err ? '✗ ' + err : '✓ serializer round-trips data/providers.json exactly');
-    process.exit(err ? 1 : 0);
+    try {
+      assert.equal(classify(200, {}), 'live');
+      assert.equal(classifyAuthOnly(200, {}), 'auth-ok');
+      assert.equal(classifyAuthOnly(401, {}), 'auth-failed');
+      assert.equal(classifyAuthOnly(402, {}), 'tier-ended');
+      assert.equal(classifyAuthOnly(429, {}), 'rate-limited');
+      console.log(err ? '✗ ' + err : '✓ serializer round-trips data/providers.json exactly; probe classifications are honest');
+      process.exit(err ? 1 : 0);
+    } catch (e) {
+      console.error(`✗ probe classification self-test failed: ${e.message}`);
+      process.exit(1);
+    }
   }
 
   const data = JSON.parse(readFileSync(FILE, 'utf8'));

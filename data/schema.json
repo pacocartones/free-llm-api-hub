@@ -123,8 +123,8 @@
         },
         "probe_status": {
           "type": ["string", "null"],
-          "enum": ["live", "auth-failed", "tier-ended", "rate-limited", "error", null],
-          "description": "Outcome of the last live probe. `live` = a real free-tier call succeeded. `tier-ended` = the key authenticated but the free tier appears gone (e.g. 402)."
+          "enum": ["live", "auth-ok", "auth-failed", "tier-ended", "rate-limited", "error", null],
+          "description": "Outcome of the last probe. `live` = a real free-tier inference call succeeded; `auth-ok` = credentials accessed /models but no inference was attempted. `tier-ended` = the key authenticated but the free tier appears gone (e.g. 402)."
         }
       },
       "allOf": [

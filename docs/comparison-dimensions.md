@@ -37,7 +37,7 @@ Filters treat `null` conservatively: "No card required" matches only `card_requi
 | `models_free` | string[] \| null | A **sample** of model IDs available on the free tier. Attribute field — sampled and may change; not part of the verified core claim. `null` where not populated. |
 | `env_key` | string | Name of the env var holding this provider's API key, used by the [live-testing](live-testing.md) probe. Presence marks a provider as probeable; the value lives only in the secrets store, never in the dataset. |
 | `last_probed` | string \| null | Date (YYYY-MM-DD) the API was last called live with a real key. Independent of `verified` (docs-based). |
-| `probe_status` | enum \| null | Outcome of the last live call: `live`, `auth-failed`, `tier-ended`, `rate-limited`, `error`. `live` earns the "live-tested" badge. |
+| `probe_status` | enum \| null | Outcome of the last probe: `live`, `auth-ok`, `auth-failed`, `tier-ended`, `rate-limited`, `error`. `live` earns the "live-tested" badge; `auth-ok` confirms `/models` credentials only. |
 | `verified` | boolean | Core facts independently confirmed against the provider's docs on `last_verified`. |
 | `last_verified` | string \| null | Date (YYYY-MM-DD) of the last confirmation. `null` iff `verified: false`. |
 

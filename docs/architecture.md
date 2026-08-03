@@ -53,7 +53,7 @@ Per-provider fields (in serializer order):
 | `last_verified` | YYYY-MM-DD \| null | must be null when `verified:false` |
 | `added` | YYYY-MM-DD (optional) | provenance: when it entered the dataset. Drives the client-side NEW badge (<45d). Set once; never changes. |
 | `last_probed` | YYYY-MM-DD \| null | live-probe date (probe.mjs) |
-| `probe_status` | `live`/`auth-failed`/`tier-ended`/`rate-limited`/`error`/null | `live` → "live-tested" badge |
+| `probe_status` | `live`/`auth-ok`/`auth-failed`/`tier-ended`/`rate-limited`/`error`/null | `live` → "live-tested" badge; `auth-ok` → credentials checked, no inference |
 
 The serializer **skips absent keys**, so new optional fields only appear on providers that have them, and existing rows are untouched.
 

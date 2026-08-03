@@ -77,7 +77,7 @@ for (const p of data.providers ?? []) {
     check(DATE_RE.test(p.last_probed), `${id}: last_probed must be YYYY-MM-DD or null`);
   }
   if (p.probe_status !== undefined && p.probe_status !== null) {
-    check(['live', 'auth-failed', 'tier-ended', 'rate-limited', 'error'].includes(p.probe_status), `${id}: invalid probe_status`);
+    check(['live', 'auth-ok', 'auth-failed', 'tier-ended', 'rate-limited', 'error'].includes(p.probe_status), `${id}: invalid probe_status`);
     check(DATE_RE.test(p.last_probed || ''), `${id}: probe_status set but last_probed missing`);
   }
 
