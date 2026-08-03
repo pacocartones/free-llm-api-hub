@@ -78,3 +78,8 @@ test('a generated README row matches the data it was built from', () => {
   assert.ok(readme.includes(`[${p.name}](${p.docs_url})`), 'README links the provider docs');
   assert.ok(readme.includes(`✅ ${p.last_verified}`), 'README shows the verification date');
 });
+
+test('the explorer does not claim a column sort before the user chooses one', () => {
+  const explorer = readFileSync(join(ROOT, 'site/index.html'), 'utf8');
+  assert.match(explorer, /<th data-key="name" tabindex="0" role="button" aria-sort="none">API<\/th>/);
+});
