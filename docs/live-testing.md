@@ -14,15 +14,15 @@ Per provider (`scripts/probe.mjs`, `npm run probe`):
 - **latency & tokens/sec** — measured from the call + `usage`, feeding an honest (measured, not claimed) speed signal.
 - **rate-limit headers** — `x-ratelimit-*`, `retry-after` straight from the API — the real current limits, not scraped prose.
 
-These collapse into **`probe_status`**: `live` · `auth-failed` · `tier-ended` (key works but the free tier looks gone, e.g. `402`) · `rate-limited` · `error`. A `tier-ended` result is a strong signal to move the entry to "Notably NOT free". The full per-run detail is written to `data/probe-report.json`.
+These collapse into **`probe_status`**: `live` · `auth-ok` · `auth-failed` · `tier-ended` (key works but the free tier looks gone, e.g. `402`) · `rate-limited` · `error`. `auth-ok` means that `/models` accepted the credential but no inference was attempted; only `live` means a real free-tier inference call succeeded and earns the **live-tested** badge. A `tier-ended` result is a strong signal to move the entry to "Notably NOT free". The full per-run detail is written to `data/probe-report.json`.
 
-`live` results show a **live-tested** badge on the provider page.
+`live` results show a **live-tested** badge on the provider page. Auth-only CI results show the narrower **credentials checked** badge instead.
 
 ## Secrets — transport-agnostic by design
 
 The probe reads keys from `process.env[env_key]` (each provider declares its `env_key` in `data/providers.json`). It does **not** care how they got there — so any injector works. Keys are used only in `Authorization` headers; they are never logged, written to the dataset, or committed.
 
-**Active path: GitHub Actions secrets.** [`probe.yml`](../.github/workflows/probe.yml) runs the probe weekly (`--auth-only`) with whatever provider keys exist as repo secrets (*Settings → Secrets and variables → Actions*). Missing secrets are simply skipped, so any subset works — add a secret and that provider joins the next run, no code change needed.
+**Active path: GitHub Actions secrets.** [`probe.yml`](../.github/workflows/probe.yml) runs the credential check weekly (`--auth-only`) with whatever provider keys exist as repo secrets (*Settings → Secrets and variables → Actions*). Missing secrets are simply skipped, so any subset works — add a secret and that provider joins the next run, no code change needed. It deliberately records `auth-ok`, not `live`, because it does not perform inference.
 
 **Alternative: a self-hosted Infisical on the same VPS** that runs the weekly job, so secrets never leave the box and no Actions minutes are spent.
 

@@ -49,6 +49,15 @@ test('validate rejects an unverified entry that still carries a date', () => {
   assert.equal(exitOk(['scripts/validate.mjs', fixture]), false);
 });
 
+test('validate accepts a credential-only probe result', () => {
+  const data = JSON.parse(readFileSync(DATA, 'utf8'));
+  data.providers[0].last_probed = '2026-08-03';
+  data.providers[0].probe_status = 'auth-ok';
+  const fixture = join(mkdtempSync(join(tmpdir(), 'flah-')), 'providers.json');
+  writeFileSync(fixture, JSON.stringify(data));
+  assert.equal(exitOk(['scripts/validate.mjs', fixture]), true);
+});
+
 test('existing script self-tests pass (fetch-models, probe)', () => {
   run(['scripts/fetch-models.mjs', '--self-test']);
   run(['scripts/probe.mjs', '--self-test']);
