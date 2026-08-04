@@ -57,8 +57,7 @@ research or disclosure.
 
 1. Use only information that is already public and supported by the upstream advisory/release or
    fix, plus the existing GHSA/CVE record where available.
-2. Make one narrow, factual correction per PR; verify the introduced, last affected, and first
-   fixed versions against the advisory's structured range before changing prose or metadata.
+2. Make one narrow, factual correction per PR; verify every populated event in each advisory package range — `introduced`, `fixed`, `last_affected`, or `limit` — against the upstream advisory or fix before changing prose or metadata.
 3. Explain the discrepancy and cite the primary sources in the PR. Keep only one advisory PR open
    at a time and follow it through review.
 4. Stop if the evidence conflicts, is incomplete, or appears to reveal a new vulnerability. Report
