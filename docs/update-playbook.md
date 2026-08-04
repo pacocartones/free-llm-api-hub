@@ -49,6 +49,24 @@ Open the **`🕝 Weekly re-verification worklist`** issue and work top-down. For
 
 The human pass can be accelerated by an agent (e.g. a scheduled Claude Code task) that, for each item on the worklist, fetches the provider's docs, drafts the `data/providers.json` edit, and opens a PR for a human to approve. This is opt-in and runs on a machine you control — the two automated layers above are the portable, always-on backbone and don't depend on it. Ask a maintainer if you want this wired up.
 
+## Optional Layer 4 — public security-data stewardship
+
+Once a month, or when maintenance work exposes a clearly documented discrepancy, review **one**
+public GitHub Advisory Database record. The aim is data quality for the ecosystem, not vulnerability
+research or disclosure.
+
+1. Use only information that is already public and supported by the upstream advisory/release or
+   fix, plus the existing GHSA/CVE record where available.
+2. Make one narrow, factual correction per PR; verify every populated event in each advisory package range — `introduced`, `fixed`, `last_affected`, or `limit` — against the upstream advisory or fix before changing prose or metadata.
+3. Explain the discrepancy and cite the primary sources in the PR. Keep only one advisory PR open
+   at a time and follow it through review.
+4. Stop if the evidence conflicts, is incomplete, or appears to reveal a new vulnerability. Report
+   that privately to the affected project instead of submitting it to the public database.
+
+This keeps the contribution lane useful and auditable: accuracy and provenance matter more than
+volume. See GitHub's [advisory-database contribution guidance](https://github.com/github/advisory-database/blob/main/CONTRIBUTING.md)
+for its current requirements.
+
 ## Definition of done for a weekly pass
 
 - Worklist 🔴 overdue count is back to **0**.
