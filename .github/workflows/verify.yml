@@ -12,14 +12,14 @@ name: Verify
 # Scheduled upkeep (source-link re-check, badge refresh, re-verification
 # worklist) lives in maintenance.yml.
 on:
+  # No `paths:` filter on pull_request, deliberately. This job is the repository's
+  # required status check, and a required check that is filtered out never reports
+  # — so a pull request touching anything outside the filter (a workflow, a doc,
+  # an issue template) is blocked forever with no way for its author to unblock it.
+  # A maintainer does not notice, because admin bypass is one click away; an
+  # outside contributor just sees "Required statuses must pass" and gives up.
+  # The job is short. Running it on every pull request is much cheaper than that.
   pull_request:
-    paths:
-      - 'data/**'
-      - 'scripts/**'
-      - 'README.md'
-      - 'collections/**'
-      - 'site/**'   # only the hand-written files are committable; the build step below catches broken AUTOGEN markers
-      - '.github/workflows/verify.yml'
   push:
     branches: [main]
     paths:
