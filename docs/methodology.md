@@ -31,7 +31,9 @@ When a claim can't be confirmed against an accessible official source — the co
 
 1. **Every verified entry is dated.** No date + primary source → it can't be `verified: true`.
 2. **Links are re-checked on a schedule.** The [`maintenance.yml`](../.github/workflows/maintenance.yml) workflow runs weekly, checks every `docs_url`, and opens or updates a tracking issue if any return an error — the earliest machine-detectable signal that a provider changed something. ([`verify.yml`](../.github/workflows/verify.yml) is the per-change integrity gate; it does not run on a schedule.)
-3. **The freshness badge is computed, not written.** It reports the share of entries re-confirmed within the last 90 days, straight from the data. As entries age past 90 days without re-verification, the badge decays visibly (green → yellow → red). It cannot lie about how current the list is.
+3. **The freshness badge is computed, not written.** It reports the age of the **oldest** verification in the list, straight from the data, and is graded on the same three buckets as the re-verification worklist: green while every entry is under 60 days old, 🟡 amber once any entry is due soon (>60d), 🔴 red once any entry is overdue (>90d, the SLA). It cannot lie about how current the list is.
+
+   It used to report the *share* of entries inside the 90-day SLA, which sounds equivalent and is not. Because the list is re-verified in sweeps rather than one row at a time, that number could not leave bright green until roughly a third of the dataset had gone overdue — about four months of complete silence. It measured whether the project was still alive, not whether the data was fresh. The worst entry moves the day maintenance stops, and it is also the number a reader actually needs: the staleness of the row they are about to trust.
 4. **Re-verification is continuous.** Reported changes and link-check issues drive re-checks; each updates the entry's `last_verified`.
 
 ## Sourcing rules

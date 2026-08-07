@@ -5,14 +5,14 @@ How this list stays current — the routine that keeps the freshness badge green
 ## Cadence
 
 - **Weekly:** Mondays, **08:00 UTC**. That's ~**10:00 in Europe/Madrid** during summer (CEST) and ~**09:00** in winter (CET) — GitHub Actions cron runs in UTC and does not observe daylight saving, so the local time shifts by an hour across the year. To pin exactly 10:00 Madrid year-round you'd need two crons (`0 8` and `0 9`) gated by month; not worth the complexity for a maintenance job.
-- **Freshness SLA:** every verified entry is re-confirmed against the provider's own docs within **90 days**. The badge reflects this and decays visibly if it slips.
+- **Freshness SLA:** every verified entry is re-confirmed against the provider's own docs within **90 days**. The badge is graded on the *oldest* entry against that SLA, so it turns amber the moment one row goes past 60 days and red the moment one goes past 90 — it slips before the list does.
 
 ## Layer 1 — automated (no human needed)
 
 Runs every Monday via [`.github/workflows/maintenance.yml`](../.github/workflows/maintenance.yml):
 
 1. **Link re-check** — every `docs_url` is fetched. A genuine failure (not a 401/403/405/429 bot-block) opens or updates the `🔗 Broken source link report` issue.
-2. **Badge refresh** — recomputes `badge-freshness.json` from the data and commits it if the fresh-count changed (e.g. entries aged past 90 days). This is why the badge decays on its own.
+2. **Badge refresh** — recomputes `badge-freshness.json` from the data and commits it if the oldest entry got older. This is why the badge decays on its own: nobody has to touch the data for the number to move.
 3. **Free model samples** — [`scripts/fetch-models.mjs`](../scripts/fetch-models.mjs) refreshes each provider's `models_free` from its **own `/models` endpoint**. Public endpoints (OpenRouter, Pollinations, NVIDIA NIM, ModelScope, Ollama Cloud) need no key; the key-gated OpenAI-compatible ones (Groq, Cerebras, SambaNova, Scaleway) refresh only if the matching repo secret is set. Real IDs only — a fetch failure leaves the field untouched, never blanked. Changes are rebuilt and committed automatically. This keeps the volatile lists (OpenRouter rotates its free models constantly) accurate without hand-curation or hallucination.
 4. **Re-verification worklist** — [`scripts/staleness.mjs`](../scripts/staleness.mjs) generates a checklist with a paced **weekly batch** (the oldest verifications, sized to clear the 90-day SLA without a cliff) plus 🔴 overdue (>90d), 🟡 due soon (60–90d), and ⚠️ never verified, and posts it to the self-updating `🕝 Weekly re-verification worklist` issue.
 5. **Live probe** — [`probe.yml`](../.github/workflows/probe.yml) runs `probe.mjs --auth-only --write` with whatever provider keys exist as repo secrets, and commits the resulting `last_probed`/`probe_status`. Providers without a secret are skipped.

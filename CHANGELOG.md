@@ -5,6 +5,16 @@ Notable changes to the dataset and the project. Format based on [Keep a Changelo
 - **Data changes** (a provider's limits/terms) are recorded here when notable; every change is also visible in the git history of `data/providers.json`.
 - **Schema changes** (a new field, a changed meaning) bump the dataset version and are always recorded.
 
+## [Unreleased]
+
+### Fixed
+- **The freshness badge can now actually decay.** It was graded on the share of entries inside the 90-day SLA. Because the list is re-verified in sweeps, that share could not leave bright green until ~21 of 67 entries had gone overdue — roughly four months of total silence. It reported whether the project was alive, not whether the data was fresh. The badge is now graded on the **oldest verification in the list**, in the same three buckets the re-verification worklist already prints: green under 60 days, amber past 60 (due soon), red past 90 (SLA breached). One forgotten row moves it. Message goes from `67/67 verified <90d` to `67/67 verified · oldest 27d`, so the coverage number is still there.
+- **The per-provider embed badges (`/badges/<slug>.json`) decay too.** They were bright green for any verified entry regardless of age — an embed placed in someone else's README stayed green forever. Same colour rule as the repo badge now.
+
+### Changed
+- **One definition of the freshness SLA.** `SLA_DAYS`/`DUE_SOON_DAYS` moved into [`scripts/lib/rules.mjs`](scripts/lib/rules.mjs); `build.mjs` and `staleness.mjs` import them instead of each carrying a copy. The badge and the worklist can no longer disagree about what "overdue" means.
+- **Seven new pipeline tests** covering the badge's three colour states, its decay over time, the coverage floor and the internal consistency of the shipped badge file.
+
 ## [2.7.0] — 2026-08-02
 
 First paced re-verification cycle: the oldest six entries re-checked against their providers' own docs — and it caught a retirement.

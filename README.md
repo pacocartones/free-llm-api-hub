@@ -210,7 +210,7 @@ Free-tier terms move fast, and most lists go stale silently. This one is built t
 
 1. **Every verified entry carries a `last_verified` date** and a link to the provider's *own* docs. No date + primary source → it ships as ⚠️ unverified, not as fact.
 2. **A scheduled GitHub Action** ([`maintenance.yml`](.github/workflows/maintenance.yml)) re-checks every source link weekly and opens/updates a tracking issue if any break — an early warning that a provider changed something.
-3. **The freshness badge is computed from the data,** not written by hand: the share of entries re-confirmed within 90 days, straight from [`providers.json`](data/providers.json). When it decays, it's visible.
+3. **The freshness badge is computed from the data,** not written by hand: it is graded on the **oldest** verification in the list, straight from [`providers.json`](data/providers.json). Green while every entry is under 60 days old, amber once any entry is due for re-verification, red once any entry breaches the 90-day SLA. One forgotten row is enough to move it — which is the point.
 4. **The dataset is schema-validated in CI.** A verified entry that's missing its date or source link fails the build — the honesty rule is enforced by machine, not by good intentions.
 5. **Reporting a stale entry takes under a minute** via a [structured form](../../issues/new?template=inaccuracy.yml) that asks for the provider, what changed and a source link.
 
@@ -237,7 +237,7 @@ curl -s https://raw.githubusercontent.com/pacocartones/free-llm-api-hub/main/dat
 [![Free LLM API Hub](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/pacocartones/free-llm-api-hub/main/badge-freshness.json)](https://github.com/pacocartones/free-llm-api-hub)
 ```
 
-It renders the real, auditable freshness count — not a static "as of some date I forgot to update" number.
+It renders the real, auditable age of the oldest entry in the list — not a static "as of some date I forgot to update" number, and not a share that only moves after the project has been dead for a season.
 
 **Embed a live widget** on any site — a compact, always-current list of the top verified free APIs:
 
