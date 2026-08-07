@@ -59,15 +59,30 @@ jobs:
           node scripts/validate.mjs
           node scripts/build.mjs
 
-      - name: Commit probe results if changed
+      - name: Commit probe results if any provider was actually probed
         run: |
-          if ! git diff --quiet; then
-            git config user.name "github-actions[bot]"
-            git config user.email "github-actions[bot]@users.noreply.github.com"
-            git pull --rebase
-            git add -A
-            git commit -m "data: weekly credential probe [skip ci]"
-            git push
-          else
-            echo "Probe results unchanged."
+          # Guard first: with no secrets set, every provider comes back
+          # `skipped-no-key` and the only diff is the date bump in the report.
+          # Committing that weekly would dress a no-op up as a verification.
+          probed=$(node -p "JSON.parse(require('node:fs').readFileSync('data/probe-report.json','utf8')).results.filter(r => r.status !== 'skipped-no-key').length")
+          if [ "$probed" -eq 0 ]; then
+            echo "::warning title=Credential probe is a no-op::No API keys are configured as repository secrets, so all providers were skipped. probe_status stays null. See docs/live-testing.md."
+            exit 0
           fi
+
+          if git diff --quiet; then
+            echo "Probe results unchanged."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          # Commit BEFORE rebasing. `git pull --rebase` refuses to run with a dirty
+          # tree — and staging first does not help, it only changes the error from
+          # "You have unstaged changes" to "Your index contains uncommitted changes".
+          # The old order pulled first, so this step could only ever succeed when it
+          # had nothing to do. It failed on 2026-08-03, its first scheduled run.
+          git add -A
+          git commit -m "data: weekly credential probe ($probed provider(s)) [skip ci]"
+          git pull --rebase
+          git push
