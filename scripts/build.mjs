@@ -34,9 +34,15 @@ const verifiedCount = providers.filter((p) => p.verified).length;
 // ---------- markdown helpers ----------
 const esc = (s) => String(s ?? '').replace(/\|/g, '\\|').replace(/\n/g, ' ').trim();
 
+// Both sides of every tri-state that has a confirmed value get a pill, so absence
+// means "not confirmed" and nothing else. `card_required: true` used to render
+// nothing here — the one surface where it was silent, while the provider pages and
+// the explorer both showed it — making a confirmed card wall look identical to an
+// unknown one on the most-read table in the project.
 function flags(p) {
   const parts = [];
   if (p.card_required === false) parts.push('💳 no card');
+  if (p.card_required === true) parts.push('💳 card required');
   if (p.phone_required === false) parts.push('📵 no phone');
   if (p.phone_required === true) parts.push('📱 phone');
   if (p.commercial_ok === true) parts.push('🏢 commercial OK');

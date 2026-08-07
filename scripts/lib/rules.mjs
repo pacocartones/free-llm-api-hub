@@ -16,10 +16,16 @@
 // for the browser. Never hand-edit site/shared-rules.js.
 
 // "Recommended" order: float the most accessible, ship-ready providers to the top.
+//
+// Every flag scores symmetrically: a confirmed `false` earns points, a confirmed
+// `true` loses the same points, and `null` (not confirmed) scores zero and sits
+// between the two. An unknown must never be worth as much as a confirmed "no
+// card required", nor as little as a confirmed "card required" — the tri-state is
+// the product, so the ranking has to respect all three states.
 export function recScore(p) {
   let s = 0;
-  if (p.card_required === false) s += 3;
-  if (p.phone_required === false) s += 2;
+  if (p.card_required === false) s += 3; else if (p.card_required === true) s -= 3;
+  if (p.phone_required === false) s += 2; else if (p.phone_required === true) s -= 2;
   if (p.commercial_ok === true) s += 2; else if (p.commercial_ok === false) s -= 2;
   if (p.openai_compatible === true) s += 1;
   if (p.category === 'ongoing') s += 1;

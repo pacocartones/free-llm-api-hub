@@ -10,7 +10,7 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
 import { roundTripError } from './_serialize.mjs';
-import { freshnessBadge, freshnessColor, SLA_DAYS, DUE_SOON_DAYS } from './lib/rules.mjs';
+import { freshnessBadge, freshnessColor, recScore, SLA_DAYS, DUE_SOON_DAYS } from './lib/rules.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const DATA = join(ROOT, 'data/providers.json');
@@ -160,4 +160,25 @@ test('the shipped badge grades its own stated age by the rule', () => {
   const [, verified, total, oldest] = m.map(Number);
   const expected = freshnessColor(Number(oldest));
   assert.equal(onDisk.color, expected === 'brightgreen' && verified / total < 0.7 ? 'yellow' : expected);
+});
+
+// ---------- a confirmed "yes" must never look like an unknown ----------
+test('the README shows a card wall for every provider confirmed to have one', () => {
+  const { providers } = JSON.parse(readFileSync(DATA, 'utf8'));
+  const readme = readFileSync(join(ROOT, 'README.md'), 'utf8');
+  const walled = providers.filter((p) => p.card_required === true);
+  assert.ok(walled.length, 'dataset has at least one card-gated provider to check');
+  for (const p of walled) {
+    const row = readme.split('\n').find((l) => l.includes(`](${p.docs_url})`));
+    assert.ok(row, `${p.slug}: no README row found`);
+    assert.match(row, /💳 card required/, `${p.slug}: README row hides the card requirement`);
+  }
+});
+
+test('an unconfirmed flag ranks between a confirmed yes and a confirmed no', () => {
+  const base = { category: 'ongoing', free_type: 'perpetual' };
+  const no = recScore({ ...base, card_required: false });
+  const unknown = recScore({ ...base, card_required: null });
+  const yes = recScore({ ...base, card_required: true });
+  assert.ok(no > unknown && unknown > yes, `expected ${no} > ${unknown} > ${yes}`);
 });
