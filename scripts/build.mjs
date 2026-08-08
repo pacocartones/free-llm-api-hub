@@ -10,10 +10,10 @@ import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { execSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
-import { recScore, FLAG_PAIRS } from './lib/rules.mjs';
+import { recScore, FLAG_PAIRS, SLA_DAYS, ageInDays, freshnessColor, freshnessBadge } from './lib/rules.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
-const FRESH_DAYS = 90;
+const FRESH_DAYS = SLA_DAYS; // the freshness SLA, defined once in lib/rules.mjs
 
 const data = JSON.parse(readFileSync(join(ROOT, 'data/providers.json'), 'utf8'));
 const providers = data.providers;
@@ -22,9 +22,8 @@ const providers = data.providers;
 const today = new Date();
 const isFresh = (p) => {
   if (!p.verified || !p.last_verified) return false;
-  const d = new Date(p.last_verified + 'T00:00:00Z');
-  if (Number.isNaN(+d)) return false;
-  return (today - d) / 86400000 <= FRESH_DAYS;
+  const a = ageInDays(p.last_verified, today);
+  return a !== null && a <= FRESH_DAYS;
 };
 const total = providers.length;
 const ongoing = providers.filter((p) => p.category === 'ongoing');
@@ -35,9 +34,15 @@ const verifiedCount = providers.filter((p) => p.verified).length;
 // ---------- markdown helpers ----------
 const esc = (s) => String(s ?? '').replace(/\|/g, '\\|').replace(/\n/g, ' ').trim();
 
+// Both sides of every tri-state that has a confirmed value get a pill, so absence
+// means "not confirmed" and nothing else. `card_required: true` used to render
+// nothing here — the one surface where it was silent, while the provider pages and
+// the explorer both showed it — making a confirmed card wall look identical to an
+// unknown one on the most-read table in the project.
 function flags(p) {
   const parts = [];
   if (p.card_required === false) parts.push('💳 no card');
+  if (p.card_required === true) parts.push('💳 card required');
   if (p.phone_required === false) parts.push('📵 no phone');
   if (p.phone_required === true) parts.push('📱 phone');
   if (p.commercial_ok === true) parts.push('🏢 commercial OK');
@@ -571,16 +576,12 @@ indexHtml = inject(indexHtml, 'data', inlineData);
 writeFileSync(join(ROOT, 'site/index.html'), indexHtml);
 
 // ---------- badge ----------
-const ratio = total ? freshCount / total : 0;
-const color = ratio >= 0.7 ? 'brightgreen' : ratio >= 0.4 ? 'yellow' : 'red';
-writeFileSync(
-  join(ROOT, 'badge-freshness.json'),
-  JSON.stringify(
-    { schemaVersion: 1, label: 'freshness', message: `${freshCount}/${total} verified <${FRESH_DAYS}d`, color },
-    null,
-    2
-  ) + '\n'
-);
+// Graded on the oldest verified entry (see freshnessBadge in lib/rules.mjs):
+// the share-inside-the-SLA number it replaced could not reach amber or red
+// without months of total silence, so it reported liveness, not freshness.
+const { badge, oldest: oldestAge, median: medianAge } = freshnessBadge(providers, today);
+const color = badge.color;
+writeFileSync(join(ROOT, 'badge-freshness.json'), JSON.stringify(badge, null, 2) + '\n');
 
 // ---------- exports (CSV / YAML) ----------
 const COLS = [
@@ -841,9 +842,7 @@ print(resp.choices[0].message.content)</code></pre><p class="muted">…or with c
     ...(p.added ? [['Added to the hub', htmlEsc(p.added)]] : []),
   ].map(([k, v]) => `<div class="meta-row"><span class="meta-k">${k}</span><span class="meta-v">${v}</span></div>`).join('');
   // Freshness relative to the current day (provider pages are regenerated on deploy, not diff-gated).
-  const daysAgo = p.verified && p.last_verified
-    ? Math.floor((today - new Date(p.last_verified + 'T00:00:00Z')) / 86400000)
-    : null;
+  const daysAgo = p.verified && p.last_verified ? ageInDays(p.last_verified, today) : null;
   const verifiedLine = p.verified
     ? `<span class="v ok">${IC('ic-check')} verified ${htmlEsc(p.last_verified)}${daysAgo != null ? ` · ${daysAgo}d ago` : ''}</span>` +
       (daysAgo != null && daysAgo > FRESH_DAYS ? ` <span class="v warn">${IC('ic-warn')} re-verification due</span>` : '')
@@ -909,9 +908,17 @@ print(resp.choices[0].message.content)</code></pre><p class="muted">…or with c
     htmlPage({ title: `${p.name} — free tier & limits · Free LLM API Hub`, desc: `${p.name}: ${p.free_tier}`.slice(0, 180), canonical: `${SITE}/p/${p.slug}.html`, main, jsonld, ogImage: `${SITE}/og/p/${p.slug}.png` })
   );
 
+  // Embeddable per-provider badge. Same rule as the repo badge: the colour tracks
+  // the age of the verification, so an entry someone embedded and forgot goes amber
+  // past 60 days and red past the SLA instead of staying brightgreen forever.
   writeFileSync(
     join(ROOT, `site/badges/${p.slug}.json`),
-    JSON.stringify({ schemaVersion: 1, label: 'free-llm-api-hub', message: p.verified ? `verified ${p.last_verified}` : 'unverified', color: p.verified ? 'brightgreen' : 'yellow' }) + '\n'
+    JSON.stringify({
+      schemaVersion: 1,
+      label: 'free-llm-api-hub',
+      message: p.verified ? `verified ${p.last_verified}` : 'unverified',
+      color: p.verified ? freshnessColor(daysAgo) : 'yellow',
+    }) + '\n'
   );
 }
 
@@ -1263,6 +1270,7 @@ writeFileSync(join(ROOT, 'site/sitemap.xml'), sitemap);
 
 console.log(
   `Built: ${total} providers (${ongoing.length} ongoing, ${trial.length} trial), ` +
-  `${verifiedCount} verified, ${freshCount} fresh <${FRESH_DAYS}d → badge ${color}. ` +
+  `${verifiedCount} verified, ${freshCount} fresh <${FRESH_DAYS}d, ` +
+  `oldest ${oldestAge}d / median ${medianAge}d → badge ${color}. ` +
   `${COLLECTIONS.length} collections, ${providers.length} provider pages + badges + sitemap generated.`
 );

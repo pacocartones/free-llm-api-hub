@@ -7,14 +7,17 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
+import { SLA_DAYS, DUE_SOON_DAYS, ageInDays } from './lib/rules.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
-const DUE_SOON = 60; // days
-const OVERDUE = 90; // days — the freshness SLA
+// Same two numbers the freshness badge is graded on — imported, not re-declared,
+// so the badge can never call an entry fresh while this worklist calls it overdue.
+const DUE_SOON = DUE_SOON_DAYS;
+const OVERDUE = SLA_DAYS;
 
 const { providers } = JSON.parse(readFileSync(join(ROOT, 'data/providers.json'), 'utf8'));
 const today = new Date();
-const ageDays = (d) => Math.floor((today - new Date(d + 'T00:00:00Z')) / 86400000);
+const ageDays = (d) => ageInDays(d, today);
 const firstSentence = (s) => (s || '').split(/(?<=\.)\s/)[0].slice(0, 160);
 
 const overdue = [];

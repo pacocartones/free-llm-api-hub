@@ -14,6 +14,12 @@ Every field in [`data/providers.json`](../data/providers.json), defined. The dat
 
 Filters treat `null` conservatively: "No card required" matches only `card_required: false`, never `null`.
 
+Three consequences the rest of the project has to honour, or the tri-state is decorative:
+
+- **Both confirmed states get a pill.** Every surface that renders a flag — the README tables, the collection tables, the explorer, the provider pages — shows a badge for `true` *and* for `false`. Absence of a pill therefore means `null` and nothing else. A confirmed card wall must never render the same as an unknown one.
+- **`null` never scores as `false`.** In the "Recommended" ranking ([`scripts/lib/rules.mjs`](../scripts/lib/rules.mjs)) a confirmed `false` earns points, a confirmed `true` loses the same points, and `null` scores zero — it sits *between* the two, because that is what not knowing is worth.
+- **A `null` is a task, not a verdict.** Resolving one against a primary source is the highest-value contribution to this dataset. Current gaps: `phone_required` 42/67, `commercial_ok` 36/67, `card_required` 23/67.
+
 ## Fields
 
 | Field | Type | Meaning |

@@ -21,6 +21,8 @@ data/schema.json       │                              data/providers.csv, data
 - **`scripts/build.mjs`** reads the data and writes everything. It's **idempotent**: running it twice with the same data produces byte-identical output.
 - **CI:** `verify.yml` runs `validate` + `check-links` on every PR, plus an *informational* drift report. On merge to `main`, `regenerate.yml` rebuilds the derived files and commits them — so a contributor's PR only ever touches the data. **Corollary: nothing date-relative may appear in committed generated files** (the "NEW" badge is client-side only; provider `/p/` pages are gitignored precisely so they can use the current date).
 
+  **The one deliberate exception is `badge-freshness.json`.** It has to be date-relative — a freshness badge that only moves when the data moves is not measuring freshness — so it is committed *and* excluded from both diff-gates (`npm run check` and the drift report list it nowhere). It goes stale between refreshes by design; `maintenance.yml` recommits it weekly and `regenerate.yml` picks it up on any data or script push. Nothing may assert that the committed badge equals a freshly built one, because on any day but the last refresh it does not — the test in `build.test.mjs` checks the file is internally consistent instead.
+
 ## 2. Data model
 
 ### `data/providers.json`
