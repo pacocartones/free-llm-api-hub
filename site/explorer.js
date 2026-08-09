@@ -15,6 +15,16 @@ const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '
 // here because the fallback fetch path bypasses that guarantee.
 const SLUG_RE = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 const providerHref = (p) => (SLUG_RE.test(p.slug || '') ? `p/${p.slug}.html` : null);
+
+// Static row skeleton for the explorer table: provider data is assigned via
+// DOM APIs (textContent/createElement) after this is set, never interpolated
+// into innerHTML.
+const ROW_SKELETON =
+  '<td class="name" data-label="API"></td>' +
+  '<td data-label="Type"><span class="pcat"></span><div class="fmini"></div></td>' +
+  '<td data-label="What\'s free" class="pfree"></td>' +
+  '<td class="notes" data-label="The catch"></td>' +
+  '<td data-label="Verified" class="pver"></td>';
 function flagLine(p) {
   return FLAG_PAIRS.filter(([k, v]) => p[k] === v).map(([, , ic, t]) => `<span class="flag">${ICON(ic)}${t}</span>`).join('');
 }
@@ -90,16 +100,49 @@ function render() {
 
   for (const p of rows) {
     const isNew = p.added && (Date.now() - Date.parse(p.added + 'T00:00:00Z')) / 86400000 <= 45;
-    const best = p.best_for ? `<div class="best">${esc(p.best_for)}</div>` : '';
-    const href = providerHref(p);
-    const nameHtml = href ? `<a href="${href}">${esc(p.name)}</a>` : esc(p.name);
     const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td class="name" data-label="API">${nameHtml}${isNew ? ' <span class="badge b-new" title="Recently added to the hub">NEW</span>' : ''}${best}</td>
-      <td data-label="Type"><span class="badge ${p.category === 'ongoing' ? 'b-ongoing' : 'b-trial'}">${p.category === 'ongoing' ? 'Ongoing' : 'Trial'}</span><div class="fmini">${flagMini(p)}</div></td>
-      <td data-label="What's free">${esc(p.free_tier || '')}</td>
-      <td class="notes" data-label="The catch">${esc(p.notes || '')}</td>
-      <td data-label="Verified">${p.verified ? `<span class="badge b-ok">${ICON('ic-check')} ${esc(p.last_verified)}</span>` : `<span class="badge b-warn">${ICON('ic-warn')} unverified</span>`}</td>`;
+    // Static skeleton only. Provider data is assigned through DOM APIs below and
+    // never interpolated into innerHTML, so a crafted providers.json field cannot
+    // become markup (CodeQL js/xss-through-dom).
+    tr.innerHTML = ROW_SKELETON;
+    const nameCell = tr.querySelector('td.name');
+    const href = providerHref(p);
+    if (href) {
+      const a = document.createElement('a');
+      a.href = href;
+      a.textContent = p.name ?? '';
+      nameCell.appendChild(a);
+    } else {
+      nameCell.appendChild(document.createTextNode(p.name ?? ''));
+    }
+    if (isNew) {
+      const badge = document.createElement('span');
+      badge.className = 'badge b-new';
+      badge.title = 'Recently added to the hub';
+      badge.textContent = 'NEW';
+      nameCell.appendChild(document.createTextNode(' '));
+      nameCell.appendChild(badge);
+    }
+    if (p.best_for) {
+      const best = document.createElement('div');
+      best.className = 'best';
+      best.textContent = p.best_for;
+      nameCell.appendChild(best);
+    }
+    const cat = tr.querySelector('[data-label="Type"] .pcat');
+    cat.className = `badge ${p.category === 'ongoing' ? 'b-ongoing' : 'b-trial'}`;
+    cat.textContent = p.category === 'ongoing' ? 'Ongoing' : 'Trial';
+    // flagMini() output is static icon/title constants from FLAG_PAIRS.
+    tr.querySelector('[data-label="Type"] .fmini').innerHTML = flagMini(p);
+    tr.querySelector('[data-label="What\'s free"]').textContent = p.free_tier || '';
+    tr.querySelector('.notes').textContent = p.notes || '';
+    const verCell = tr.querySelector('.pver');
+    if (p.verified) {
+      verCell.innerHTML = `<span class="badge b-ok">${ICON('ic-check')}</span> `;
+      verCell.appendChild(document.createTextNode(p.last_verified || ''));
+    } else {
+      verCell.innerHTML = `<span class="badge b-warn">${ICON('ic-warn')} unverified</span>`;
+    }
     tbody.appendChild(tr);
   }
   syncURL();
