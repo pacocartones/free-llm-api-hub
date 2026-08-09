@@ -32,7 +32,20 @@ const freshCount = providers.filter(isFresh).length;
 const verifiedCount = providers.filter((p) => p.verified).length;
 
 // ---------- markdown helpers ----------
-const esc = (s) => String(s ?? '').replace(/\|/g, '\\|').replace(/\n/g, ' ').trim();
+// Escape a value for a GFM table cell. Backslashes first so we never
+// double-escape; then the cell-breaking `|` and newlines; then `<`/`>` and
+// brackets so a provider field coming from a community PR can inject neither
+// raw HTML nor link syntax into the generated markdown.
+const esc = (s) =>
+  String(s ?? '')
+    .replace(/\\/g, '\\\\')
+    .replace(/\|/g, '\\|')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/\[/g, '\\[')
+    .replace(/]/g, '\\]')
+    .replace(/\r?\n/g, ' ')
+    .trim();
 
 // Both sides of every tri-state that has a confirmed value get a pill, so absence
 // means "not confirmed" and nothing else. `card_required: true` used to render
@@ -341,6 +354,19 @@ Swap the \`base_url\` (and a model that provider offers free) for any row above.
 // ---------- HTML page shell (shared by collection pages) ----------
 const htmlEsc = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
+// Strip HTML tags for plain-text contexts (JSON-LD answers, meta descriptions).
+// A single pass of /<[^>]+>/ is incomplete — fragments like <<script> survive it —
+// so iterate until the string stops changing (fixed point).
+const stripTags = (s) => {
+  let out = String(s ?? '');
+  let prev;
+  do {
+    prev = out;
+    out = out.replace(/<[^>]*>/g, '');
+  } while (out !== prev);
+  return out;
+};
+
 function collectionTableHtml(rows, opts = {}) {
   const bu = opts.baseUrl;
   const flagsHtml = (p) => {
@@ -436,6 +462,9 @@ const THEME_GUARD = `<script>(function(){try{var t=localStorage.getItem('theme')
 const CSP = `<meta http-equiv="Content-Security-Policy" content="script-src 'self' 'sha256-r3FnVnP9W/uaNhK9XkZqH3GIfK4TudOQGYTwoNIjGR4=' 'sha256-YzEhxvq2BwovGsg/RCjKkQdwf+LZmTjIkiQcjXCZMHc='; connect-src 'self' https://api.github.com https://raw.githubusercontent.com; object-src 'none'; base-uri 'self'">`;
 
 function htmlPage({ title, desc, canonical, main, jsonld, prefix = '../', noindex = false, ogImage = `${SITE}/og.png` }) {
+  // jsonld carries provider names straight from the dataset; writing "<" as
+  // the JSON unicode escape (backslash-u-003c) keeps a "</script>" in the
+  // data from ever closing the block.
   return `<!DOCTYPE html>
 <html lang="en" data-theme="dark">
 <head>
@@ -462,7 +491,7 @@ ${THEME_GUARD}
 <meta name="twitter:image" content="${ogImage}">
 <link rel="alternate" type="application/rss+xml" title="Free LLM API Hub — updates" href="${prefix}feed.xml">
 <link rel="stylesheet" href="${prefix}styles.css">
-${jsonld ? `<script type="application/ld+json">${jsonld}</script>` : ''}
+${jsonld ? `<script type="application/ld+json">${jsonld.replace(/</g, '\\u003c')}</script>` : ''}
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
@@ -674,7 +703,7 @@ for (const c of COLLECTIONS) {
         '@type': 'FAQPage',
         mainEntity: c.faq.map((f) => ({
           '@type': 'Question', name: f.q,
-          acceptedAnswer: { '@type': 'Answer', text: f.a.replace(/<[^>]+>/g, '') },
+          acceptedAnswer: { '@type': 'Answer', text: stripTags(f.a) },
         })),
       }] : []),
     ],
@@ -1012,7 +1041,7 @@ const researchRowHtml = (r) => `<tr><td class="name"><a href="${htmlEsc(r.url)}"
 
 const programPage = (slug, h1, lede, tableHead, rowsHtml, extra = '') =>
   htmlPage({
-    title: `${h1} · Free LLM API Hub`, desc: lede.replace(/<[^>]+>/g, ''), canonical: `${SITE}/programs/${slug}.html`,
+    title: `${h1} · Free LLM API Hub`, desc: stripTags(lede), canonical: `${SITE}/programs/${slug}.html`,
     main:
       `<section class="page-hero"><div class="wrap"><nav class="crumbs"><a href="../">Home</a> / ${htmlEsc(h1)}</nav>` +
       `<h1>${htmlEsc(h1)}</h1><p class="lede">${lede}</p></div></section>` +
@@ -1115,7 +1144,7 @@ for (const g of GUIDES) {
         '@type': 'FAQPage',
         mainEntity: g.faq.map((f) => ({
           '@type': 'Question', name: f.q,
-          acceptedAnswer: { '@type': 'Answer', text: f.a.replace(/<[^>]+>/g, '') },
+          acceptedAnswer: { '@type': 'Answer', text: stripTags(f.a) },
         })),
       }] : []),
     ],

@@ -31,7 +31,7 @@
     html += '<div style="font-weight:700;font-size:12px;color:#3fce8f;letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px">Free LLM API Hub · top free APIs</div>';
     list.forEach(function (p) {
       html += '<div style="padding:7px 0;border-top:1px solid #1d2a22">' +
-        '<a href="' + SITE + '/p/' + p.slug + '.html" target="_blank" rel="noopener" style="color:#d8e2dc;text-decoration:none;font-weight:600">' + esc(p.name) + '</a>' +
+        '<a href="' + SITE + '/p/' + esc(p.slug) + '.html" target="_blank" rel="noopener" style="color:#d8e2dc;text-decoration:none;font-weight:600">' + esc(p.name) + '</a>' +
         '<div style="color:#808f87;font-size:12px">' + esc((p.free_tier || '').slice(0, 72)) + '</div></div>';
     });
     html += '<a href="' + SITE + '/" target="_blank" rel="noopener" style="display:inline-block;margin-top:10px;font-size:12px;color:#3fce8f;text-decoration:none">' + list.length + ' of ' + d.providers.length + ' verified · see all →</a>';
