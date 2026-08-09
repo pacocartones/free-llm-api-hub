@@ -8,10 +8,10 @@
 <!-- Content-Security-Policy — keep the hashes in sync with the CSP const in scripts/build.mjs. -->
 <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'sha256-r3FnVnP9W/uaNhK9XkZqH3GIfK4TudOQGYTwoNIjGR4=' 'sha256-YzEhxvq2BwovGsg/RCjKkQdwf+LZmTjIkiQcjXCZMHc='; connect-src 'self' https://api.github.com https://raw.githubusercontent.com; object-src 'none'; base-uri 'self'">
 <script>(function(){try{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: light)').matches?'light':'dark');document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
-<link rel="icon" href="/free-llm-api-hub/favicon.svg" type="image/svg+xml">
-<link rel="preload" href="/free-llm-api-hub/fonts/jetbrains-mono-700.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/fonts/jetbrains-mono-700.woff2" as="font" type="font/woff2" crossorigin>
 <meta name="theme-color" content="#0a0d0b">
-<link rel="stylesheet" href="/free-llm-api-hub/styles.css">
+<link rel="stylesheet" href="/styles.css">
 <style>
   .nf { min-height: 62vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 60px 0; }
   .nf .code { font-family: var(--font-mono); font-weight: 700; font-size: clamp(4rem, 16vw, 9rem); line-height: 1; color: var(--accent); letter-spacing: -.04em; }
@@ -27,7 +27,7 @@
 </defs></svg>
 
 <header class="site-header"><div class="wrap header-inner">
-  <a class="brand" href="/free-llm-api-hub/" aria-label="Free LLM API Hub — home">
+  <a class="brand" href="/" aria-label="Free LLM API Hub — home">
     <svg class="logo-mark"><use href="#logo"/></svg>
     <span class="brand-name">Free LLM API <span class="grad">Hub</span></span>
   </a>
@@ -44,9 +44,9 @@
   <p class="msg">&gt; command not found: <span class="path" id="path">/…</span><span class="caret" aria-hidden="true"></span></p>
   <p>That page isn't part of the dataset. It may have moved, or never existed. The data, though, is very much alive.</p>
   <div class="cta">
-    <a class="btn primary" href="/free-llm-api-hub/">← Back home</a>
-    <a class="btn ghost" href="/free-llm-api-hub/#explorer">Browse providers</a>
-    <a class="btn ghost" href="/free-llm-api-hub/collections/">Collections</a>
+    <a class="btn primary" href="/">← Back home</a>
+    <a class="btn ghost" href="/#explorer">Browse providers</a>
+    <a class="btn ghost" href="/collections/">Collections</a>
   </div>
 </main>
 
@@ -55,6 +55,6 @@
 </div></footer>
 
 <script>try{document.getElementById('path').textContent=location.pathname.replace('/free-llm-api-hub','')||'/';}catch(e){}</script>
-<script src="/free-llm-api-hub/site.js"></script>
+<script src="/site.js"></script>
 </body>
 </html>
