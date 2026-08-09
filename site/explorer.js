@@ -14,7 +14,6 @@ const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '
 // slugs are kebab-case identifiers, enforced by data/schema.json in CI; re-check
 // here because the fallback fetch path bypasses that guarantee.
 const SLUG_RE = /^[a-z0-9]+(-[a-z0-9]+)*$/;
-const providerHref = (p) => (SLUG_RE.test(p.slug || '') ? `p/${p.slug}.html` : null);
 
 // Static row skeleton for the explorer table: provider data is assigned via
 // DOM APIs (textContent/createElement) after this is set, never interpolated
@@ -106,10 +105,12 @@ function render() {
     // become markup (CodeQL js/xss-through-dom).
     tr.innerHTML = ROW_SKELETON;
     const nameCell = tr.querySelector('td.name');
-    const href = providerHref(p);
-    if (href) {
+    // Slug validated immediately before use: only kebab-case from data/schema.json
+    // ever reaches the href (the guard must dominate the sink in the same function).
+    const slug = String(p.slug || '');
+    if (SLUG_RE.test(slug)) {
       const a = document.createElement('a');
-      a.href = href;
+      a.href = `p/${slug}.html`;
       a.textContent = p.name ?? '';
       nameCell.appendChild(a);
     } else {
