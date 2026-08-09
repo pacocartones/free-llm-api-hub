@@ -24,6 +24,16 @@ npm test          # validate the dataset against the integrity rules
 
 That's the whole loop. No dependencies to install — the scripts are plain Node (the version used in CI is pinned in [`.nvmrc`](.nvmrc); anything ≥18 works locally).
 
+> **You need the full git history.** `npm test` and `npm run build` mine the per-provider change history from `git log` (see [docs/architecture.md](docs/architecture.md)), so they require a **full clone** — not a shallow clone (`git clone --depth 1`), not a tarball download, and `git` must be on your `PATH`. Without full history the suite fails with a message like:
+>
+> ```text
+> History integrity check failed: expected at least one "changed" event (the dataset evolved)
+> # or, when the log is completely empty:
+> expected >10 providers in the mined history, got 0
+> ```
+>
+> If you cloned shallow, fix it with `git fetch --unshallow`; otherwise just clone normally: `git clone https://github.com/pacocartones/free-llm-api-hub`. CI always checks out the full history (`fetch-depth: 0`), so this only bites local development.
+
 If you want to preview how your entry renders on the site before opening the PR:
 
 ```bash

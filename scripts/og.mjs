@@ -7,6 +7,9 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
+// Collection/guide filter lists and the data fingerprints live in lib/og.mjs,
+// shared with the CI check (scripts/check-og.mjs) so both always agree.
+import { COLLS, GUIDES, buildOgManifest } from './lib/og.mjs';
 const { Resvg } = await import('@resvg/resvg-js');
 const render = (svg, out) => {
   const png = new Resvg(Buffer.isBuffer(svg) ? svg : Buffer.from(svg), { fitTo: { mode: 'width', value: 1200 } }).render().asPng();
@@ -18,16 +21,8 @@ const render = (svg, out) => {
 let n = render(readFileSync(join(ROOT, 'site/og.svg')), join(ROOT, 'site/og.png'));
 console.log(`og.png: ${(n / 1024).toFixed(0)} KB`);
 
-// per-collection OG — keep filters in sync with COLLECTIONS in scripts/build.mjs
+// per-collection OG
 const { providers } = JSON.parse(readFileSync(join(ROOT, 'data/providers.json'), 'utf8'));
-const COLLS = [
-  { slug: 'no-credit-card', title: 'Free LLM APIs · no credit card', filter: (p) => p.card_required === false },
-  { slug: 'no-phone', title: 'Free LLM APIs · no phone', filter: (p) => p.phone_required === false },
-  { slug: 'commercial-use', title: 'Free LLM APIs · commercial use', filter: (p) => p.commercial_ok === true },
-  { slug: 'openai-compatible', title: 'OpenAI-compatible free APIs', filter: (p) => p.openai_compatible === true },
-  { slug: 'always-free', title: 'Permanently free LLM APIs', filter: (p) => p.free_type === 'perpetual' },
-  { slug: 'multimodal', title: 'Free multimodal AI APIs', filter: (p) => (p.modalities || []).some((m) => m !== 'text') },
-];
 
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 // Wrap a title onto up to two lines at ~26 chars.
@@ -37,19 +32,7 @@ const wrap = (t) => {
   return lines.slice(0, 2);
 };
 
-// Guides and the model index share the same OG template, differing only by the
-// eyebrow label and the subtitle line. Keep titles/filters in sync with
-// GUIDES in scripts/build.mjs.
-const GUIDES = [
-  { slug: 'free-llm-api-without-credit-card', title: 'Free LLM APIs · no credit card', filter: (p) => p.card_required === false && p.category === 'ongoing' },
-  { slug: 'openai-compatible-free-apis', title: 'Free OpenAI-compatible APIs', filter: (p) => p.openai_compatible === true },
-  { slug: 'free-llm-api-no-signup', title: 'Free APIs · no phone, no card', filter: (p) => p.card_required === false && p.phone_required === false && p.category === 'ongoing' },
-  { slug: 'free-embeddings-apis', title: 'Free embeddings APIs for RAG', filter: (p) => (p.modalities || []).includes('embeddings') },
-  { slug: 'free-speech-to-text-apis', title: 'Free speech APIs · STT & TTS', filter: (p) => (p.modalities || []).includes('audio') },
-  { slug: 'free-image-generation-apis', title: 'Free image generation APIs', filter: (p) => (p.modalities || []).includes('image') },
-  { slug: 'free-ocr-document-ai-apis', title: 'Free OCR & document AI APIs', filter: (p) => (p.modalities || []).includes('ocr') },
-];
-
+// Guides and the model index share the same OG template.
 function tagSvg(label, title, subtitle) {
   const lines = wrap(title);
   const titleSvg = lines.map((l, i) => `<text x="80" y="${262 + i * 84}" fill="#d8e2dc" font-size="70" font-weight="700" letter-spacing="-2">${esc(l)}</text>`).join('');
@@ -106,3 +89,8 @@ for (const p of providers) {
   render(tagSvg('PROVIDER', p.name, provSub(p)), join(ROOT, `site/og/p/${p.slug}.png`));
 }
 console.log(`per-provider OG: ${providers.length} rendered.`);
+
+// Data fingerprints of every image just rendered. Committed alongside the PNGs
+// so CI (scripts/check-og.mjs) can verify each one still matches the dataset.
+writeFileSync(join(ROOT, 'site/og/manifest.json'), JSON.stringify(buildOgManifest(providers), null, 2) + '\n');
+console.log(`manifest: ${Object.keys(buildOgManifest(providers)).length} fingerprints written.`);

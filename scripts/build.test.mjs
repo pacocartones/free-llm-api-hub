@@ -12,6 +12,8 @@ import { createHash } from 'node:crypto';
 import { roundTripError } from './_serialize.mjs';
 import { freshnessBadge, freshnessColor, recScore, SLA_DAYS, DUE_SOON_DAYS } from './lib/rules.mjs';
 import { esc, stripTags } from './lib/escape.mjs';
+import { mineProviderHistory, assertHistoryPlausible } from './lib/history.mjs';
+import { buildOgManifest } from './lib/og.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const DATA = join(ROOT, 'data/providers.json');
@@ -88,32 +90,37 @@ test('build is idempotent — a second run changes not a single byte', () => {
 // produces an empty history object — no provider pages would show a change
 // log, and `site/api/v1/history.json` would be nearly empty. Catch it.
 test('the git-mined provider history is not empty and events are plausible', () => {
-  // The idempotency test above already ran build.mjs, so history.json exists.
+  // Standalone-friendly: in the normal suite the idempotency test above has
+  // already run build.mjs, so history.json is fresh on disk. If this test runs
+  // in isolation (e.g. --test-name-pattern on a tree with no build artifacts)
+  // and the file is missing, run the build ourselves instead of depending on
+  // that declaration order.
   const p = join(ROOT, 'site/api/v1/history.json');
+  if (!existsSync(p)) run(['scripts/build.mjs']);
   assert.ok(existsSync(p), 'history.json should exist on disk after build');
   const payload = JSON.parse(readFileSync(p, 'utf8'));
   assert.ok(payload.history && typeof payload.history === 'object', 'history.json should carry a history object');
-  const slugs = Object.keys(payload.history);
-  assert.ok(slugs.length > 10, `expected >10 providers in the mined history, got ${slugs.length}`);
+  // Same invariants as scripts/check-history.mjs and the direct-miner test
+  // below — one shared source of truth in lib/history.mjs. These were inline
+  // here once; keeping them inline let them drift from the CI check.
+  assertHistoryPlausible(payload.history);
+});
 
-  let added = 0, changed = 0;
-  for (const s of slugs) {
-    const events = payload.history[s];
-    assert.ok(Array.isArray(events) && events.length > 0, `${s}: history should be a non-empty array`);
-    for (const e of events) {
-      assert.match(e.date, /^\d{4}-\d{2}-\d{2}$/, `${s}: invalid date "${e.date}"`);
-      assert.ok(e.kind === 'added' || e.kind === 'changed', `${s}: invalid kind "${e.kind}"`);
-      assert.ok(typeof e.text === 'string' && e.text.length > 0, `${s}: empty text`);
-      if (e.kind === 'added') added++;
-      if (e.kind === 'changed') changed++;
-    }
-  }
-  assert.ok(added >= slugs.length, `every tracked provider should have an 'added' event (got ${added})`);
-  assert.ok(changed > 0, 'expected at least one "changed" event (the dataset evolved)');
+test('the git-mined history miner is plausible directly (no build needed)', () => {
+  // Same invariants as the CI step scripts/check-history.mjs, exercised from
+  // the test suite without waiting for build.mjs to run (and without depending
+  // on the idempotency test above having generated history.json).
+  const history = mineProviderHistory({ cwd: ROOT });
+  assertHistoryPlausible(history);
+});
 
-  // Spot-check a provider present from near the beginning
-  const groq = payload.history['groq'];
-  assert.ok(groq && groq.some((e) => e.kind === 'added'), 'groq should be in the history with an added event');
+test('the committed OG manifest matches the current dataset', () => {
+  // The CI step scripts/check-og.mjs blocks stale OG images; this pins the
+  // same invariant in the local suite: site/og/manifest.json (written by
+  // `npm run og`) must equal the fingerprints recomputed from the data.
+  const { providers } = JSON.parse(readFileSync(DATA, 'utf8'));
+  const manifest = JSON.parse(readFileSync(join(ROOT, 'site/og/manifest.json'), 'utf8'));
+  assert.deepEqual(manifest, buildOgManifest(providers));
 });
 
 test('a generated README row matches the data it was built from', () => {
