@@ -6,6 +6,15 @@ let DATA = [], lastRows = [], sortKey = 'recommended', sortDir = 1, category = '
 const { recScore, FLAG_PAIRS } = window.FLLM_RULES;
 
 const ICON = (id) => `<svg class="i" aria-hidden="true"><use href="#${id}"/></svg>`;
+
+// Every provider field below comes from providers.json, which community PRs can
+// edit — treat it as untrusted: escape data before it goes anywhere near innerHTML.
+// Only our own markup (badges, ICON svg) is interpolated raw.
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+// slugs are kebab-case identifiers, enforced by data/schema.json in CI; re-check
+// here because the fallback fetch path bypasses that guarantee.
+const SLUG_RE = /^[a-z0-9]+(-[a-z0-9]+)*$/;
+const providerHref = (p) => (SLUG_RE.test(p.slug || '') ? `p/${p.slug}.html` : null);
 function flagLine(p) {
   return FLAG_PAIRS.filter(([k, v]) => p[k] === v).map(([, , ic, t]) => `<span class="flag">${ICON(ic)}${t}</span>`).join('');
 }
@@ -81,14 +90,16 @@ function render() {
 
   for (const p of rows) {
     const isNew = p.added && (Date.now() - Date.parse(p.added + 'T00:00:00Z')) / 86400000 <= 45;
-    const best = p.best_for ? `<div class="best">${p.best_for}</div>` : '';
+    const best = p.best_for ? `<div class="best">${esc(p.best_for)}</div>` : '';
+    const href = providerHref(p);
+    const nameHtml = href ? `<a href="${href}">${esc(p.name)}</a>` : esc(p.name);
     const tr = document.createElement('tr');
     tr.innerHTML = `
-      <td class="name" data-label="API"><a href="p/${p.slug}.html">${p.name}</a>${isNew ? ' <span class="badge b-new" title="Recently added to the hub">NEW</span>' : ''}${best}</td>
+      <td class="name" data-label="API">${nameHtml}${isNew ? ' <span class="badge b-new" title="Recently added to the hub">NEW</span>' : ''}${best}</td>
       <td data-label="Type"><span class="badge ${p.category === 'ongoing' ? 'b-ongoing' : 'b-trial'}">${p.category === 'ongoing' ? 'Ongoing' : 'Trial'}</span><div class="fmini">${flagMini(p)}</div></td>
-      <td data-label="What's free">${p.free_tier || ''}</td>
-      <td class="notes" data-label="The catch">${p.notes || ''}</td>
-      <td data-label="Verified">${p.verified ? `<span class="badge b-ok">${ICON('ic-check')} ${p.last_verified}</span>` : `<span class="badge b-warn">${ICON('ic-warn')} unverified</span>`}</td>`;
+      <td data-label="What's free">${esc(p.free_tier || '')}</td>
+      <td class="notes" data-label="The catch">${esc(p.notes || '')}</td>
+      <td data-label="Verified">${p.verified ? `<span class="badge b-ok">${ICON('ic-check')} ${esc(p.last_verified)}</span>` : `<span class="badge b-warn">${ICON('ic-warn')} unverified</span>`}</td>`;
     tbody.appendChild(tr);
   }
   syncURL();
