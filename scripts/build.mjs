@@ -11,6 +11,7 @@ import { execSync, spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { recScore, FLAG_PAIRS, SLA_DAYS, ageInDays, freshnessColor, freshnessBadge } from './lib/rules.mjs';
+import { esc, stripTags } from './lib/escape.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const FRESH_DAYS = SLA_DAYS; // the freshness SLA, defined once in lib/rules.mjs
@@ -32,26 +33,6 @@ const freshCount = providers.filter(isFresh).length;
 const verifiedCount = providers.filter((p) => p.verified).length;
 
 // ---------- markdown helpers ----------
-// Escape a value for a GFM table cell. Backslashes first so we never
-// double-escape; then the cell-breaking `|` and newlines; then `<`/`>` and
-// brackets so a provider field coming from a community PR can inject neither
-// raw HTML nor link syntax into the generated markdown.
-const esc = (s) =>
-  String(s ?? '')
-    .replace(/\\/g, '\\\\')
-    .replace(/\|/g, '\\|')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/\[/g, '\\[')
-    .replace(/]/g, '\\]')
-    .replace(/\r?\n/g, ' ')
-    .trim();
-
-// Both sides of every tri-state that has a confirmed value get a pill, so absence
-// means "not confirmed" and nothing else. `card_required: true` used to render
-// nothing here — the one surface where it was silent, while the provider pages and
-// the explorer both showed it — making a confirmed card wall look identical to an
-// unknown one on the most-read table in the project.
 function flags(p) {
   const parts = [];
   if (p.card_required === false) parts.push('💳 no card');
@@ -353,19 +334,6 @@ Swap the \`base_url\` (and a model that provider offers free) for any row above.
 
 // ---------- HTML page shell (shared by collection pages) ----------
 const htmlEsc = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-
-// Strip HTML tags for plain-text contexts (JSON-LD answers, meta descriptions).
-// A single pass of /<[^>]+>/ is incomplete — fragments like <<script> survive it —
-// so iterate until the string stops changing (fixed point).
-const stripTags = (s) => {
-  let out = String(s ?? '');
-  let prev;
-  do {
-    prev = out;
-    out = out.replace(/<[^>]*>/g, '');
-  } while (out !== prev);
-  return out;
-};
 
 function collectionTableHtml(rows, opts = {}) {
   const bu = opts.baseUrl;

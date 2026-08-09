@@ -4,13 +4,14 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { readFileSync, writeFileSync, mkdtempSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdtempSync, existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
 import { roundTripError } from './_serialize.mjs';
 import { freshnessBadge, freshnessColor, recScore, SLA_DAYS, DUE_SOON_DAYS } from './lib/rules.mjs';
+import { esc, stripTags } from './lib/escape.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const DATA = join(ROOT, 'data/providers.json');
@@ -81,6 +82,40 @@ test('build is idempotent — a second run changes not a single byte', () => {
   assert.equal(hashAll(), first);
 });
 
+// ---------- the git-mined provider history must be alive ----------
+// A silent regression in the history miner (e.g. the Buffer-vs-utf8-string
+// misalignment that was fixed alongside the git cat-file --batch change)
+// produces an empty history object — no provider pages would show a change
+// log, and `site/api/v1/history.json` would be nearly empty. Catch it.
+test('the git-mined provider history is not empty and events are plausible', () => {
+  // The idempotency test above already ran build.mjs, so history.json exists.
+  const p = join(ROOT, 'site/api/v1/history.json');
+  assert.ok(existsSync(p), 'history.json should exist on disk after build');
+  const payload = JSON.parse(readFileSync(p, 'utf8'));
+  assert.ok(payload.history && typeof payload.history === 'object', 'history.json should carry a history object');
+  const slugs = Object.keys(payload.history);
+  assert.ok(slugs.length > 10, `expected >10 providers in the mined history, got ${slugs.length}`);
+
+  let added = 0, changed = 0;
+  for (const s of slugs) {
+    const events = payload.history[s];
+    assert.ok(Array.isArray(events) && events.length > 0, `${s}: history should be a non-empty array`);
+    for (const e of events) {
+      assert.match(e.date, /^\d{4}-\d{2}-\d{2}$/, `${s}: invalid date "${e.date}"`);
+      assert.ok(e.kind === 'added' || e.kind === 'changed', `${s}: invalid kind "${e.kind}"`);
+      assert.ok(typeof e.text === 'string' && e.text.length > 0, `${s}: empty text`);
+      if (e.kind === 'added') added++;
+      if (e.kind === 'changed') changed++;
+    }
+  }
+  assert.ok(added >= slugs.length, `every tracked provider should have an 'added' event (got ${added})`);
+  assert.ok(changed > 0, 'expected at least one "changed" event (the dataset evolved)');
+
+  // Spot-check a provider present from near the beginning
+  const groq = payload.history['groq'];
+  assert.ok(groq && groq.some((e) => e.kind === 'added'), 'groq should be in the history with an added event');
+});
+
 test('a generated README row matches the data it was built from', () => {
   const data = JSON.parse(readFileSync(DATA, 'utf8'));
   const p = data.providers.find((x) => x.slug === 'groq');
@@ -92,6 +127,62 @@ test('a generated README row matches the data it was built from', () => {
 test('the explorer does not claim a column sort before the user chooses one', () => {
   const explorer = readFileSync(join(ROOT, 'site/index.html'), 'utf8');
   assert.match(explorer, /<th data-key="name" tabindex="0" role="button" aria-sort="none">API<\/th>/);
+});
+
+// ---------- output sanitizers (CodeQL js/incomplete-sanitization + multi-char) ----------
+
+test('esc handles null and undefined gracefully', () => {
+  assert.equal(esc(null), '');
+  assert.equal(esc(undefined), '');
+});
+
+test('esc does not double-escape an already-escaped backslash', () => {
+  // Backslash is escaped FIRST so subsequent passes never double up.
+  const once = esc('a\\b');
+  assert.equal(once, 'a\\\\b');
+  assert.equal(esc(once), 'a\\\\\\\\b'); // second pass → 4 backslashes (correct)
+});
+
+test('esc escapes angle brackets to HTML entities', () => {
+  assert.equal(esc('<x>'), '&lt;x&gt;');
+  assert.equal(esc('a < b && c > d'), 'a &lt; b && c &gt; d');
+});
+
+test('esc escapes pipe and markdown link brackets with backslash', () => {
+  assert.equal(esc('a|b'), 'a\\|b');        // backslash + pipe so GFM cell is safe
+  assert.equal(esc('[link](url)'), '\\[link\\](url)');
+});
+
+test('esc is safe when fields contain a mix of all special chars', () => {
+  const out = esc('check|<a>link[ref]');
+  assert.equal(out, 'check\\|&lt;a&gt;link\\[ref\\]');
+});
+
+test('esc replaces newlines with a space and trims', () => {
+  assert.equal(esc('\nhello\nworld\n'), 'hello world');
+  assert.equal(esc('\r\nwindows\r\n'), 'windows');
+});
+
+test('stripTags removes a normal HTML tag', () => {
+  assert.equal(stripTags('hello <b>world</b>'), 'hello world');
+});
+
+test('stripTags removes nested fragments with fixed-point iteration', () => {
+  // A single pass of /<[^>]*>/ leaves <<script>LANG> as <LANG> — not stripped.
+  // The fixed-point loop catches it on the second pass; a trailing `>` that
+  // was never opened survives (stripTags removes tag pairs, not stray angles).
+  assert.equal(stripTags('<<script>alert(1)<</script>>'), 'alert(1)>');
+  // Nested tags collapse in one match; the orphan `>` survives.
+  assert.equal(stripTags('<scr<script>ipt>'), 'ipt>');
+});
+
+test('stripTags passes clean text through unchanged', () => {
+  // stripTags is aggressive on purpose: bare < and > ARE treated as tag
+  // boundaries. In the build pipeline text reaches stripTags already escaped
+  // by htmlEsc/esc, so this is only reached with clean payloads or
+  // pre-stripped fragments.
+  assert.equal(stripTags('no tags here'), 'no tags here');
+  assert.equal(stripTags('&lt; &amp; &gt;'), '&lt; &amp; &gt;');
 });
 
 // ---------- the freshness badge has to be able to go amber and red ----------

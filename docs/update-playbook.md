@@ -34,8 +34,13 @@ Open the **`🕝 Weekly re-verification worklist`** issue and work top-down. For
    ```bash
    npm run build      # README, badge, exports, collections, site payload
    npm test           # dataset integrity gate
+   npm run og         # regenerate social preview PNGs (counts in subtitles drift)
    npm run worklist   # preview the updated worklist locally (optional)
    ```
+   `npm run og` needs `@resvg/resvg-js` (the only devDependency — `npm install`
+   before the first run). The CI gate checks that a PNG *exists* for every
+   provider, but only this pass regenerates them when counts, flags or provider
+   categories change.
 5. **Commit only `data/providers.json` + the regenerated files, and open a PR.** Tick the item off the worklist issue.
 
 ### Also scan for what's new (monthly is enough)
@@ -73,6 +78,7 @@ for its current requirements.
 - No open `🔗 Broken source link` issue.
 - Badge is green (`≥70%` verified within 90 days).
 - `npm test` passes and generated files are in sync.
+- `npm run og` produces zero diffs — provider, collection and guide OGs match the current data.
 
 ---
 
