@@ -49,25 +49,19 @@ jobs:
         run: node scripts/check-links.mjs
 
       # A provider added without running `npm run og` ships a provider page
-      # whose og:image tag silently 404s. Fail early — after the data is
-      # validated but before the test suite — with the exact slug(s) and the
-      # fix command.
-      - name: Check per-provider OG images are committed
-        run: |
-          node -e "
-            const { readFileSync, existsSync } = require('node:fs');
-            const { providers } = JSON.parse(readFileSync('data/providers.json', 'utf8'));
-            const missing = [];
-            for (const p of providers) {
-              if (!existsSync('site/og/p/' + p.slug + '.png')) missing.push(p.slug);
-            }
-            if (missing.length) {
-              console.error(missing.length + ' provider(s) are missing their OG image. Run: npm run og');
-              for (const s of missing) console.error('  site/og/p/' + s + '.png');
-              process.exit(1);
-            }
-            console.log('All ' + providers.length + ' provider OG images present.');
-          "
+      # whose og:image tag silently 404s — and a provider whose status, category
+      # or flags changed without regenerating ships a stale image. Both fail
+      # here, after the data is validated but before the test suite, with the
+      # exact file(s) and the fix command. Existence + data-fingerprint check.
+      - name: Check OG images are committed and match the dataset
+        run: node scripts/check-og.mjs
+
+      # The git-mined per-provider history is cheap to validate directly: two
+      # git processes, no build. A miner regression (broken cat-file parse,
+      # empty log) is caught here in seconds instead of after the full build
+      # in the test suite below. Same invariants as build.test.mjs.
+      - name: Check git-mined history integrity
+        run: node scripts/check-history.mjs
 
       # The explorer XSS regression suite (js/xss-through-dom) ships in
       # explorer.test.mjs and must gate pull requests exactly like npm test does
