@@ -291,7 +291,7 @@ providers:
     free_type: "trial-credit"
     free_tier: "$100 Sandbox credits, valid for 90 days"
     rate_limits: "Various open-weight models"
-    notes: "Official signup advertises $100 Sandbox credits valid for 90 days; no credit card required"
+    notes: "Official signup advertises $100 Sandbox credits valid for 90 days; no credit card required. Novita Terms of Service state that the Site and Marketplace Offerings may not be exploited for any commercial purpose without express prior written permission."
     best_for: "$100 Sandbox credits for trying Model APIs, GPUs, and agent workflows"
     modalities: ["text"]
     models_free: null
@@ -299,11 +299,11 @@ providers:
     docs_url: "https://novita.ai/pricing"
     phone_required: null
     card_required: false
-    commercial_ok: null
+    commercial_ok: false
     openai_compatible: true
     openai_base_url: null
     verified: true
-    last_verified: "2026-08-03"
+    last_verified: "2026-08-10"
   - slug: "ai21"
     name: "AI21 Labs"
     category: "trial"

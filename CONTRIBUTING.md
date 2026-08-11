@@ -78,3 +78,7 @@ Data PRs are the common case, but scripts and site changes are welcome too. Star
 ## What happens next
 
 A maintainer re-checks the source link and the claim, then merges. See [GOVERNANCE.md](GOVERNANCE.md) for how decisions are made and [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) for community norms. By contributing you agree to license your contribution under the repository's [MIT License](LICENSE).
+
+### Your first PR from a fork: the checks may wait
+
+GitHub holds workflow runs from a **first-time contributor** until a maintainer approves them (a safety default for code from new accounts). If your PR shows no checks, or the required "Dataset integrity" check stays grey at *Expected — Waiting for approval*, that's normal and says nothing about your change. Just leave a comment on your PR (e.g. "Could you approve the checks?") and a maintainer will approve the run. This only happens on the very first PR from your account.

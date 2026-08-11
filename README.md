@@ -18,7 +18,7 @@ No hype, no dead links, no "generous limits" hand-waving. Just what's actually f
 **[🔎 Interactive explorer](https://freellmapihub.com/)** &nbsp;·&nbsp; **[📊 Dataset](data/providers.json)** &nbsp;·&nbsp; **[🧪 How we verify](docs/methodology.md)** &nbsp;·&nbsp; **[➕ Add a provider](CONTRIBUTING.md)**
 
 <!-- AUTOGEN:stats:start -->
-**67 providers** tracked · 36 ongoing free tiers · 31 trial credits · **67/67** independently verified against the provider's own docs
+**67 providers** tracked · 36 ongoing free tiers · 31 trial credits · **67/67** independently verified against the provider's own docs · **1** external contributor
 <!-- AUTOGEN:stats:end -->
 
 </div>
@@ -167,7 +167,7 @@ A fixed credit balance on signup. Once it's spent (or the clock runs out), you'r
 | **[Fireworks AI](https://docs.fireworks.ai/faq-new/billing-pricing/)**<br><sub>💳 no card · 🔌 OpenAI-compat</sub> | $1 trial credit | Fireworks uses prepaid credits. After the $1 credit is exhausted, add a payment method and credits (or enable auto top-up) to continue; account limits can rise with spend | — | ✅ 2026-08-03 |
 | **[Baseten](https://www.baseten.co/pricing/)**<br><sub>🔌 OpenAI-compat</sub> | New accounts receive free credits; Baseten's current pricing page does not state the amount | Basic is $0/month, pay as you go. Current pricing confirms new-account credits but does not publish an amount or expiration date | — | ✅ 2026-08-03 |
 | **[Nebius AI Studio](https://docs.tokenfactory.nebius.com)**<br><sub>💳 card required · 📵 no phone · 🏢 commercial OK · 🔌 OpenAI-compat</sub> | $1 trial credit, valid for 30 days | Product renamed to "Nebius Token Factory"; a bank card is required to set up billing | 30 days | ✅ 2026-07-30 |
-| **[Novita AI](https://novita.ai/pricing)**<br><sub>💳 no card · 🔌 OpenAI-compat</sub> | $100 Sandbox credits, valid for 90 days | Official signup advertises $100 Sandbox credits valid for 90 days; no credit card required | 90 days | ✅ 2026-08-03 |
+| **[Novita AI](https://novita.ai/pricing)**<br><sub>💳 no card · 🔬 eval only · 🔌 OpenAI-compat</sub> | $100 Sandbox credits, valid for 90 days | Official signup advertises $100 Sandbox credits valid for 90 days; no credit card required. Novita Terms of Service state that the Site and Marketplace Offerings may not be exploited for any commercial purpose without express prior written permission. | 90 days | ✅ 2026-08-10 |
 | **[AI21 Labs](https://docs.ai21.com/docs/usage-cost)**<br><sub>💳 no card</sub> | $10 trial credit, valid 3 months | Card not required for the trial credit itself, required once it expires | 3 months | ✅ 2026-08-03 |
 | **[NLP Cloud](https://nlpcloud.com/pricing.html)**<br><sub>💳 card required · 📵 no phone · 🏢 commercial OK</sub> | $15 trial credit | Corrected: the official registration page does not ask for a phone number, contradicting the earlier listing | — | ✅ 2026-07-30 |
 | **[Alibaba Cloud (Model Studio)](https://www.alibabacloud.com/help/en/model-studio/new-free-quota)**<br><sub>💳 no card · 🔌 OpenAI-compat</sub> | 1,000,000 tokens (example figure, varies by model), international/Singapore region only | Excludes batch processing, context caching, fine-tuning, and dedicated deployment | 30-90 days | ✅ 2026-07-30 |
@@ -262,6 +262,12 @@ Full guidelines, including what counts as an acceptable source: **[CONTRIBUTING.
 ## 🙋 Contributions wanted right now
 
 This dataset is only as good as it is trustworthy, and right now there are `null` fields (= "nobody has confirmed it yet") waiting for a source. Three concrete ways to help, from smallest to biggest: **(1)** grab a [*good first issue*](https://github.com/pacocartones/free-llm-api-hub/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) and confirm **a single fact** about one provider — e.g. *"does Cerebras require a phone?"* — using its official site and today's date; it's a one-line diff in [`data/providers.json`](data/providers.json). **(2)** Tackle the umbrella issue [**confirm `phone_required`** (42 entries)](https://github.com/pacocartones/free-llm-api-hub/issues?q=is%3Aissue+is%3Aopen+label%3Amaintenance+phone_required) by claiming a provider from the checklist. **(3)** Do the same with [**confirm `commercial_ok`** (37 entries)](https://github.com/pacocartones/free-llm-api-hub/issues?q=is%3Aissue+is%3Aopen+label%3Amaintenance+commercial_ok), reading the provider's ToS. The rule is simple and honest: primary source (the provider's own docs) + `last_verified` with a real date, and if you're not sure, leave it `null` and say so. See [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## Contributors
+
+Thanks to everyone who has verified an entry, fixed a link, or improved the project:
+
+- [@JhansiOruganti-43](https://github.com/JhansiOruganti-43) — first external contribution: confirmed Novita AI's free tier does **not** allow commercial use ([PR #27](https://github.com/pacocartones/free-llm-api-hub/pull/27)).
 
 ## Project docs
 

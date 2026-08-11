@@ -476,9 +476,31 @@ ${siteFooter(prefix)}
 
 // Kept deterministic from the data (no time-sensitive term) so PR CI never flakes on date drift.
 // The decaying "verified in the last N days" number lives in the badge, which the scheduled job refreshes.
+//
+// External contributor count, mined from the git history of the dataset: every
+// human who touched data/providers.json who is not the maintainer and not a bot.
+// Deterministic per checkout (same history → same number), graceful when git is
+// unavailable (tarball build). Social proof, computed not claimed.
+const BOT_AUTHORS = new Set(['github-actions[bot]', 'dependabot[bot]', 'coderabbitai[bot]']);
+const MAINTAINER_EMAILS = new Set(['manusanchezhl@gmail.com', '253313177+pacocartones@users.noreply.github.com']);
+let externalContributors = 0;
+try {
+  const log = execSync(
+    'git log --pretty=format:%an%x1f%ae -- data/providers.json',
+    { cwd: ROOT, encoding: 'utf8', maxBuffer: 1024 * 1024 * 8 }
+  );
+  externalContributors = new Set(
+    log.split('\n')
+      .map((l) => l.split('\x1f'))
+      .filter(([name, email]) => name && email && !BOT_AUTHORS.has(name) && !MAINTAINER_EMAILS.has(email))
+      .map(([, email]) => email)
+  ).size;
+} catch (_) { /* no git available — keep 0 */ }
+
 const statsLine =
   `**${total} providers** tracked · ${ongoing.length} ongoing free tiers · ${trial.length} trial credits · ` +
-  `**${verifiedCount}/${total}** independently verified against the provider's own docs`;
+  `**${verifiedCount}/${total}** independently verified against the provider's own docs` +
+  (externalContributors ? ` · **${externalContributors}** external contributor${externalContributors === 1 ? '' : 's'}` : '');
 
 // ---------- inject into README ----------
 function inject(md, name, content) {
