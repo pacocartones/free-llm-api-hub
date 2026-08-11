@@ -1,7 +1,7 @@
 {
   "$schema": "./schema.json",
   "version": "2.7.0",
-  "generated": "2026-08-03",
+  "generated": "2026-08-11",
   "source": "https://github.com/pacocartones/free-llm-api-hub",
   "note": "Canonical dataset. README tables, badge-freshness.json and the interactive site are all generated from this file — do not hand-edit them. `verified: true` means the core facts (tier, limits, key catch, link) were independently confirmed against the provider's own docs on `last_verified`. `verified: false` means sourced from community tracking and not yet independently re-confirmed here — treat those as indicative. Attribute fields (openai_compatible, modalities, best_for) are progressively backfilled and may be null.",
   "providers": [
@@ -59,7 +59,7 @@
       "notes": "ToS (Jul 2026) prohibits reselling API access or building a competing service — platform-wide, not just the free models; per-model terms still apply",
       "best_for": "Widest model selection behind one no-card key",
       "modalities": ["text", "vision"],
-      "models_free": ["cohere/north-mini-code:free", "google/gemma-4-26b-a4b-it:free", "google/gemma-4-31b-it:free", "inclusionai/ling-3.0-flash:free", "nvidia/nemotron-3-nano-30b-a3b:free", "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free", "openai/gpt-oss-20b:free", "poolside/laguna-s-2.1:free"],
+      "models_free": ["cohere/north-mini-code:free", "google/gemma-4-26b-a4b-it:free", "google/gemma-4-31b-it:free", "inclusionai/ling-3.0-tiny:free", "nvidia/nemotron-3-nano-30b-a3b:free", "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free", "openai/gpt-oss-20b:free", "poolside/laguna-s-2.1:free"],
       "expires": null,
       "docs_url": "https://openrouter.ai/docs/api-reference/limits",
       "phone_required": false,
@@ -674,7 +674,7 @@
       "notes": "First-party — Ollama hosts the cloud models. Requires an ollama.com account + API key (`ollama signin`); the free plan is for light usage, Pro ($20/mo) raises limits. No card required.",
       "best_for": "Cloud-hosted open models with the Ollama workflow, no card",
       "modalities": ["text", "vision"],
-      "models_free": ["deepseek-v4-flash", "deepseek-v4-flash:0731", "deepseek-v4-pro", "gemma4:31b", "glm-5.1", "glm-5.2", "gpt-oss:120b", "gpt-oss:20b"],
+      "models_free": ["deepseek-v4-flash:0731", "deepseek-v4-flash:preview", "deepseek-v4-pro", "gemma4:31b", "glm-5.1", "glm-5.2", "gpt-oss:120b", "gpt-oss:20b"],
       "expires": null,
       "docs_url": "https://docs.ollama.com/cloud",
       "phone_required": false,
