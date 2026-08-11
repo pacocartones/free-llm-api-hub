@@ -63,6 +63,21 @@ test('validate accepts a credential-only probe result', () => {
   assert.equal(exitOk(['scripts/validate.mjs', fixture]), true);
 });
 
+test('validate rejects a probe report that references a removed provider', () => {
+  const data = JSON.parse(readFileSync(DATA, 'utf8'));
+  const fixture = join(mkdtempSync(join(tmpdir(), 'flah-')), 'providers.json');
+  writeFileSync(fixture, JSON.stringify(data));
+  // github-models was retired from the dataset on 2026-08-02; a report that
+  // still lists it must fail (this is the exact nine-day drift that hid until
+  // 2026-08-11).
+  const report = JSON.parse(readFileSync(join(ROOT, 'data/probe-report.json'), 'utf8'));
+  report.results.push({ slug: 'github-models', env_key: 'GITHUB_TOKEN', key_present: false, status: 'skipped-no-key' });
+  report.count = report.results.length;
+  const reportFixture = join(mkdtempSync(join(tmpdir(), 'flah-')), 'probe-report.json');
+  writeFileSync(reportFixture, JSON.stringify(report));
+  assert.equal(exitOk(['scripts/validate.mjs', fixture, reportFixture]), false);
+});
+
 test('existing script self-tests pass (fetch-models, probe)', () => {
   run(['scripts/fetch-models.mjs', '--self-test']);
   run(['scripts/probe.mjs', '--self-test']);
