@@ -210,3 +210,7 @@ Ground-up redesign into a data-first, continuously-verified open dataset.
 ## [1.0.0]
 
 - Initial curated list: README tables, a root `providers.json`, an interactive explorer, a freshness badge, and a weekly link-check workflow.
+
+[Unreleased]: https://github.com/pacocartones/free-llm-api-hub/compare/v2.8.0...HEAD
+[2.8.0]: https://github.com/pacocartones/free-llm-api-hub/compare/v2.7.0...v2.8.0
+[2.7.0]: https://github.com/pacocartones/free-llm-api-hub/compare/v2.6.0...v2.7.0
