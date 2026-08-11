@@ -7,6 +7,13 @@ Notable changes to the dataset and the project. Format based on [Keep a Changelo
 
 ## [Unreleased]
 
+## [2.8.0] — 2026-08-11
+
+First external contribution, and the plumbing that lets the project live past one person: Novita AI's commercial-use terms resolved by the first outside pull request, a computed contributor count on the README, and a CI pipeline that regenerates derived files without a maintainer in the loop.
+
+### Data
+- **Novita AI — `commercial_ok: false` (first external contribution).** The Novita Terms of Service clause covering commercial exploitation was found, quoted in `notes` and dated (verified 2026-08-10): the free tier is not commercial-use allowed. Sourced and submitted by the project's first external contributor, [@JhansiOruganti-43](https://github.com/JhansiOruganti-43) — see [#27](https://github.com/pacocartones/free-llm-api-hub/pull/27).
+
 ### Fixed
 - **The freshness badge can now actually decay.** It was graded on the share of entries inside the 90-day SLA. Because the list is re-verified in sweeps, that share could not leave bright green until ~21 of 67 entries had gone overdue — roughly four months of total silence. It reported whether the project was alive, not whether the data was fresh. The badge is now graded on the **oldest verification in the list**, in the same three buckets the re-verification worklist already prints: green under 60 days, amber past 60 (due soon), red past 90 (SLA breached). One forgotten row moves it. Message goes from `67/67 verified <90d` to `67/67 verified · oldest 27d`, so the coverage number is still there.
 - **The per-provider embed badges (`/badges/<slug>.json`) decay too.** They were bright green for any verified entry regardless of age — an embed placed in someone else's README stayed green forever. Same colour rule as the repo badge now.
@@ -16,9 +23,19 @@ Notable changes to the dataset and the project. Format based on [Keep a Changelo
 ### Changed
 - **One definition of the freshness SLA.** `SLA_DAYS`/`DUE_SOON_DAYS` moved into [`scripts/lib/rules.mjs`](scripts/lib/rules.mjs); `build.mjs` and `staleness.mjs` import them instead of each carrying a copy. The badge and the worklist can no longer disagree about what "overdue" means.
 - **Nine new pipeline tests** covering the badge's three colour states, its decay over time, the coverage floor, the internal consistency of the shipped badge file, the README card pill, and the tri-state ranking rule.
+- **The external-contributor count has one home and is covered by tests.** The counter moved into [`scripts/lib/contributors.mjs`](scripts/lib/contributors.mjs) (same single-source pattern as `lib/history.mjs`); three new pipeline tests pin the rule (maintainer + bots excluded, dedupe by email) and that the README stats line matches the real, stable count — [#107](https://github.com/pacocartones/free-llm-api-hub/pull/107).
+
+### Docs
+- **README: `## Contributors` + a computed contributor count.** The generated stats line now ends with `**1** external contributor`, mined from the git history of `data/providers.json` (humans other than the maintainer and bots) — social proof computed, not claimed — plus a Contributors section crediting the first PR. [#102](https://github.com/pacocartones/free-llm-api-hub/pull/102)
+- **CONTRIBUTING: "Your first PR from a fork: the checks may wait".** First-time contributors now know their workflow runs are held for maintainer approval and that a comment on the PR unblocks them — the exact friction the first external PR hit. [#102](https://github.com/pacocartones/free-llm-api-hub/pull/102)
+
+### Project
+- **OG images auto-heal on data pull requests.** A new workflow regenerates `site/og/` from the PR's `data/providers.json` and pushes it back to the PR branch, so the "Dataset integrity" check passes without a maintainer in the loop. Scripts run from the base branch, never the PR head — a data PR can't execute its own code with write permissions. [#103](https://github.com/pacocartones/free-llm-api-hub/pull/103)
+- **The regenerate bot delivers via PR instead of a direct push.** `main` requires the "Dataset integrity" status check, which a bot commit can't report before the push it would trigger — branch protection silently rejected its direct pushes and `main`'s derived files drifted. The bot now opens `bot/regenerate` → `main`, running the same checks as every other change. [#103](https://github.com/pacocartones/free-llm-api-hub/pull/103), [#104](https://github.com/pacocartones/free-llm-api-hub/pull/104), [#106](https://github.com/pacocartones/free-llm-api-hub/pull/106)
+- **CodeRabbit quiet on issues.** Issue enrichment (auto "Related PRs" / plan comments on new issues) disabled; PR reviews stay on. [#103](https://github.com/pacocartones/free-llm-api-hub/pull/103)
 
 ### Contributors
-- **First external contribution** — [@JhansiOruganti-43](https://github.com/JhansiOruganti-43) confirmed Novita AI's free tier is not commercial-use allowed (`commercial_ok: false`, source clause quoted in `notes`; [PR #27](https://github.com/pacocartones/free-llm-api-hub/pull/27)).
+- **First external contribution** — [@JhansiOruganti-43](https://github.com/JhansiOruganti-43) confirmed Novita AI's free tier is not commercial-use allowed (`commercial_ok: false`, source clause quoted in `notes`; [#27](https://github.com/pacocartones/free-llm-api-hub/pull/27)). The README Contributors section and the computed contributor count above exist because of it.
 
 ## [2.7.0] — 2026-08-02
 
@@ -193,3 +210,7 @@ Ground-up redesign into a data-first, continuously-verified open dataset.
 ## [1.0.0]
 
 - Initial curated list: README tables, a root `providers.json`, an interactive explorer, a freshness badge, and a weekly link-check workflow.
+
+[Unreleased]: https://github.com/pacocartones/free-llm-api-hub/compare/v2.8.0...HEAD
+[2.8.0]: https://github.com/pacocartones/free-llm-api-hub/compare/v2.7.0...v2.8.0
+[2.7.0]: https://github.com/pacocartones/free-llm-api-hub/compare/v2.6.0...v2.7.0
