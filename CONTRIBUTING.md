@@ -82,3 +82,8 @@ A maintainer re-checks the source link and the claim, then merges. See [GOVERNAN
 ### Your first PR from a fork: the checks may wait
 
 GitHub holds workflow runs from a **first-time contributor** until a maintainer approves them (a safety default for code from new accounts). If your PR shows no checks, or the required "Dataset integrity" check stays grey at *Expected — Waiting for approval*, that's normal and says nothing about your change. Just leave a comment on your PR (e.g. "Could you approve the checks?") and a maintainer will approve the run. This only happens on the very first PR from your account.
+
+## Maintainer notes
+
+- **The regenerate bot delivers its rebuild as a PR** (`bot/regenerate` → `main`), never a direct push: `main` requires the "Dataset integrity" status check, which a bot commit cannot report before the push it would trigger. If a `bot/regenerate` PR is open, review it (it should only contain regenerated files) and merge it when green.
+- **For full automation** (the bot opens its own PR), one manual step is required on the repository: Settings → Actions → General → enable *"Allow GitHub Actions to create and approve pull requests"*. GitHub does not expose this setting via API. Until then the bot still pushes `bot/regenerate` and a maintainer just opens the PR by hand; an actionable warning in the workflow run explains this. An alternative that needs no settings change is a `GH_PAT` secret with `repo` scope, which the workflow uses if present. Full details live in `_internal-docs/bot-maintenance.md` (not in this repository).

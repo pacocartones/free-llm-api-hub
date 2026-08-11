@@ -4,7 +4,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { readFileSync, writeFileSync, mkdtempSync, existsSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdtempSync, existsSync, readdirSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -314,4 +314,37 @@ test('an unconfirmed flag ranks between a confirmed yes and a confirmed no', () 
   const unknown = recScore({ ...base, card_required: null });
   const yes = recScore({ ...base, card_required: true });
   assert.ok(no > unknown && unknown > yes, `expected ${no} > ${unknown} > ${yes}`);
+});
+
+// ---------- the regenerate bot must never mistake a merged PR for an open one ----------
+// Regression guard for #109: `gh pr view bot/regenerate` returns the most recent PR
+// for that head regardless of state, so after the first regeneration PR is merged
+// the bot saw it as "already open" and silently never created the next one. Any
+// workflow deciding to skip PR creation must filter on the returned state (OPEN),
+// not on the mere existence of a PR.
+test('workflows only treat an OPEN gh pr view as an existing PR', () => {
+  const dir = join(ROOT, '.github/workflows');
+  const files = readdirSync(dir).filter((f) => f.endsWith('.yml') || f.endsWith('.yaml'));
+  assert.ok(files.length > 0, `no workflow files found in ${dir}`);
+  const offenders = [];
+  for (const file of files) {
+    const lines = readFileSync(join(dir, file), 'utf8').split('\n');
+    lines.forEach((line, i) => {
+      // Only care about executable lines that look at a PR to decide something.
+      const code = line.trim().replace(/^#.*$/, '');
+      if (!/gh pr view\s/.test(code)) return;
+      const msg = `${file}:${i + 1}`;
+      // The state must be requested explicitly so the caller can tell OPEN apart
+      // from MERGED/CLOSED.
+      if (!/--json\s+state\b/.test(line)) {
+        offenders.push(`${msg}: 'gh pr view' without --json state cannot distinguish a merged PR`);
+        return;
+      }
+      // And the guard must actually branch on it (not just fetch it).
+      if (!/grep -qx OPEN/.test(line)) {
+        offenders.push(`${msg}: 'gh pr view --json state' is fetched but never compared against OPEN`);
+      }
+    });
+  }
+  assert.deepEqual(offenders, [], offenders.join('\n'));
 });
