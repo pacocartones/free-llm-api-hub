@@ -1,0 +1,94 @@
+name: OG regenerate
+
+# Auto-heal for the "Check OG images are committed and match the dataset" step
+# of verify.yml on data pull requests. A data change (a note, a flag, a status)
+# changes the OG fingerprint even when the rendered PNG is byte-identical, so a
+# one-file data PR would otherwise fail CI until a maintainer regenerates and
+# pushes site/og/manifest.json by hand.
+#
+# This workflow does it for them: it takes the PR's data/providers.json, runs
+# the OG generator, and pushes the regenerated site/og/ files back to the PR
+# branch. It then terminates — the next Verify run finds no drift and nothing
+# is pushed again (concurrency prevents racing).
+#
+# Trust model: scripts run from the BASE branch (checked out explicitly), NOT
+# from the PR head, and only the PR's data/providers.json is overlaid — a data
+# PR can therefore never execute its own code with the workflow's write
+# permissions. (verify.yml, in contrast, already runs PR code with read-only
+# permissions — the repo's existing trust model.)
+#
+# Push capability:
+# - Same-repo PR branches: pushed with GITHUB_TOKEN (contents: write).
+# - Fork PR branches: GITHUB_TOKEN cannot write to a fork. If a `GH_PAT` secret
+#   (a personal access token with `repo` scope) exists, it is used and fork PRs
+#   are fully automated. Without it, the run posts a comment asking a
+#   maintainer to push — the PR is unblocked with one command instead of a
+#   manual regenerate.
+on:
+  pull_request:
+    types: [opened, synchronize]
+    paths:
+      - 'data/providers.json'
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: og-regenerate-${{ github.head_ref }}
+  cancel-in-progress: true
+
+jobs:
+  regenerate:
+    name: Regenerate OG images on the PR branch
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          # Base branch scripts (trusted); the PR's data is overlaid below.
+          ref: ${{ github.event.pull_request.base.ref }}
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+
+      - name: Overlay the PR's data/providers.json onto the base scripts
+        run: |
+          git fetch origin "pull/${{ github.event.pull_request.number }}/head:pr-head"
+          git checkout "pr-head" -- data/providers.json
+
+      - name: Validate the PR's dataset against the base integrity rules
+        run: node scripts/validate.mjs
+
+      - name: Regenerate OG images from the PR's data
+        run: |
+          npm install --no-audit --no-fund
+          npm run og
+
+      - name: Push regenerated OG files if they drifted
+        id: push
+        continue-on-error: true # a fork branch may reject the push; the comment
+                                # step below turns that into guidance, not a red X.
+        env:
+          GH_PAT: ${{ secrets.GH_PAT }}
+        run: |
+          if git diff --quiet -- site/og; then
+            echo "OG images already in sync — nothing to push."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add site/og
+          git commit -m "chore: regenerate OG images after the data change"
+          if [ -n "$GH_PAT" ]; then
+            git push "https://x-access-token:${GH_PAT}@github.com/${{ github.event.pull_request.head.repo.full_name }}.git" "HEAD:${{ github.event.pull_request.head.ref }}"
+          else
+            git push origin "HEAD:${{ github.event.pull_request.head.ref }}"
+          fi
+
+      - name: Comment when the push to the PR branch failed
+        if: steps.push.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh pr comment "${{ github.event.pull_request.number }}" --repo "$GITHUB_REPOSITORY" --body \
+            "The OG images drifted after your data change and I regenerated them, but I can't push to a branch in a fork. Ping a maintainer with \"please push the regenerated \`site/og/\` files\" (or add a \`GH_PAT\` secret to make this automatic) — the check then passes on its own."
