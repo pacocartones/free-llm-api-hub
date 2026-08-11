@@ -21,3 +21,11 @@ reviews:
         the generator or the source data.
 chat:
   auto_reply: true
+
+# No issue-enrichment comments ("Related PRs", "Similar issues", auto-plans)
+# on new issues: this tracker is organized as umbrellas + per-provider
+# good-first-issues that carry their own instructions, and the auto comments
+# are noise against 78 generated issues. PR reviews stay fully enabled.
+issue_enrichment:
+  auto_enrich:
+    enabled: false
