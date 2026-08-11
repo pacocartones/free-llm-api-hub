@@ -4,7 +4,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { readFileSync, writeFileSync, mkdtempSync, existsSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdtempSync, existsSync, readdirSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -314,4 +314,84 @@ test('an unconfirmed flag ranks between a confirmed yes and a confirmed no', () 
   const unknown = recScore({ ...base, card_required: null });
   const yes = recScore({ ...base, card_required: true });
   assert.ok(no > unknown && unknown > yes, `expected ${no} > ${unknown} > ${yes}`);
+});
+
+// ---------- the regenerate bot must never mistake a merged PR for an open one ----------
+// Regression guard for #109: `gh pr view bot/regenerate` returns the most recent PR
+// for that head regardless of state, so after the first regeneration PR is merged
+// the bot saw it as "already open" and silently never created the next one. Any
+// workflow deciding to skip PR creation must filter on the returned state (OPEN),
+// not on the mere existence of a PR.
+test('workflows only treat an OPEN gh pr view as an existing PR', () => {
+  const dir = join(ROOT, '.github/workflows');
+  const files = readdirSync(dir).filter((f) => f.endsWith('.yml') || f.endsWith('.yaml'));
+  assert.ok(files.length > 0, `no workflow files found in ${dir}`);
+  const offenders = [];
+
+  // Join shell continuation lines (a trailing `\`) into one logical line, so a
+  // `gh pr view` split across physical lines is judged as a single invocation
+  // and reported by the line where it starts.
+  const logical = (source) => {
+    const out = [];
+    for (const raw of source.split('\n')) {
+      const text = raw.trimEnd();
+      if (out.length && out[out.length - 1].text.endsWith('\\')) {
+        out[out.length - 1].text = out[out.length - 1].text.slice(0, -1) + ' ' + text.trim();
+      } else {
+        out.push({ text, line: out.length + 1 });
+      }
+    }
+    return out;
+  };
+
+  for (const file of files) {
+    const lines = logical(readFileSync(join(dir, file), 'utf8'));
+
+    // Pass 1: every `gh pr view` must request --json state explicitly —
+    // without it the caller cannot tell OPEN apart from MERGED/CLOSED.
+    for (const { text, line } of lines) {
+      const code = text.trim().replace(/^#.*$/, '');
+      if (!/gh pr view\s/.test(code)) continue;
+      if (!/--json\s+state\b/.test(code)) {
+        offenders.push(`${file}:${line}: 'gh pr view' without --json state cannot distinguish a merged PR`);
+      }
+    }
+
+    // Pass 2: a `gh pr view` that drives control flow must branch on OPEN —
+    // either inline (`| grep -qx OPEN`) or via a captured variable that is
+    // compared against OPEN on a later line.
+    for (const { text, line } of lines) {
+      const code = text.trim().replace(/^#.*$/, '');
+      if (!/gh pr view\s/.test(code)) continue;
+
+      // Captured form: STATE=$(gh pr view ... --json state ...) with the
+      // comparison elsewhere: `[ "$STATE" = OPEN ]`. Only look at the nearby
+      // lines — up to the next step or the next invocation — so a later step
+      // reusing the same variable name cannot satisfy this one.
+      const cap = code.match(/([A-Za-z_][A-Za-z0-9_]*)=\$\(\s*gh pr view/);
+      if (cap) {
+        const name = cap[1];
+        const start = lines.findIndex((l) => l.line === line);
+        let end = start + 1;
+        while (end < lines.length && end - start <= 6) {
+          const t = lines[end].text.trim().replace(/^#.*$/, '');
+          if (/\bgh pr view\s/.test(t) || /^- name:/.test(t)) break;
+          end += 1;
+        }
+        const compared = lines.slice(start + 1, end).some(
+          (l) => new RegExp(`\\$\\{?${name}\\}?`).test(l.text) && /\bOPEN\b/.test(l.text),
+        );
+        if (!compared) {
+          offenders.push(`${file}:${line}: 'gh pr view --json state' captured into \$${name} but never compared against OPEN`);
+        }
+        continue;
+      }
+
+      // Direct guard form: `if gh pr view ... ; then` must branch on OPEN.
+      if (/^(if|while|elif)\s+gh pr view/.test(code) && !/grep -qx OPEN/.test(code)) {
+        offenders.push(`${file}:${line}: 'gh pr view --json state' is used as a condition but never compared against OPEN`);
+      }
+    }
+  }
+  assert.deepEqual(offenders, [], offenders.join('\n'));
 });
