@@ -68,7 +68,10 @@ jobs:
           git add -A
           git commit -m "chore: regenerate derived files from the dataset"
           git push --force origin bot/regenerate
-          if gh pr view bot/regenerate --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+          # gh pr view does not filter by state: a previously merged bot/regenerate
+          # PR would make it look "already open". Ask for the state explicitly and
+          # only treat an OPEN PR as the branch's existing PR.
+          if gh pr view bot/regenerate --repo "$GITHUB_REPOSITORY" --json state --jq '.state' 2>/dev/null | grep -qx OPEN; then
             echo "Regeneration PR already open — branch updated."
           elif gh pr create --repo "$GITHUB_REPOSITORY" --base main --head bot/regenerate \
             --title "chore: regenerate derived files from the dataset" \
