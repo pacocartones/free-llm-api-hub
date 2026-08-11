@@ -13,6 +13,7 @@ import { dirname, join } from 'node:path';
 import { recScore, FLAG_PAIRS, SLA_DAYS, ageInDays, freshnessColor, freshnessBadge } from './lib/rules.mjs';
 import { esc, stripTags } from './lib/escape.mjs';
 import { mineProviderHistory } from './lib/history.mjs';
+import { countExternalContributors } from './lib/contributors.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const FRESH_DAYS = SLA_DAYS; // the freshness SLA, defined once in lib/rules.mjs
@@ -477,25 +478,10 @@ ${siteFooter(prefix)}
 // Kept deterministic from the data (no time-sensitive term) so PR CI never flakes on date drift.
 // The decaying "verified in the last N days" number lives in the badge, which the scheduled job refreshes.
 //
-// External contributor count, mined from the git history of the dataset: every
-// human who touched data/providers.json who is not the maintainer and not a bot.
-// Deterministic per checkout (same history → same number), graceful when git is
-// unavailable (tarball build). Social proof, computed not claimed.
-const BOT_AUTHORS = new Set(['github-actions[bot]', 'dependabot[bot]', 'coderabbitai[bot]']);
-const MAINTAINER_EMAILS = new Set(['manusanchezhl@gmail.com', '253313177+pacocartones@users.noreply.github.com']);
-let externalContributors = 0;
-try {
-  const log = execSync(
-    'git log --pretty=format:%an%x1f%ae -- data/providers.json',
-    { cwd: ROOT, encoding: 'utf8', maxBuffer: 1024 * 1024 * 8 }
-  );
-  externalContributors = new Set(
-    log.split('\n')
-      .map((l) => l.split('\x1f'))
-      .filter(([name, email]) => name && email && !BOT_AUTHORS.has(name) && !MAINTAINER_EMAILS.has(email))
-      .map(([, email]) => email)
-  ).size;
-} catch (_) { /* no git available — keep 0 */ }
+// External contributor count, mined from the git history of the dataset by
+// lib/contributors.mjs: humans who touched data/providers.json who are not the
+// maintainer or a bot. Social proof, computed not claimed.
+const externalContributors = countExternalContributors({ cwd: ROOT });
 
 const statsLine =
   `**${total} providers** tracked · ${ongoing.length} ongoing free tiers · ${trial.length} trial credits · ` +
