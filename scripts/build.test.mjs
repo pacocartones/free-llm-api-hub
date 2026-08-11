@@ -13,6 +13,7 @@ import { roundTripError } from './_serialize.mjs';
 import { freshnessBadge, freshnessColor, recScore, SLA_DAYS, DUE_SOON_DAYS } from './lib/rules.mjs';
 import { esc, stripTags } from './lib/escape.mjs';
 import { mineProviderHistory, assertHistoryPlausible } from './lib/history.mjs';
+import { countExternalContributors, countExternalContributorsFromLog } from './lib/contributors.mjs';
 import { buildOgManifest } from './lib/og.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -112,6 +113,40 @@ test('the git-mined history miner is plausible directly (no build needed)', () =
   // on the idempotency test above having generated history.json).
   const history = mineProviderHistory({ cwd: ROOT });
   assertHistoryPlausible(history);
+});
+
+test('external contributor count excludes maintainer and bots, dedupes by email', () => {
+  const log = [
+    'pacocartones\x1f253313177+pacocartones@users.noreply.github.com', // maintainer (noreply)
+    'pacocartones\x1fmanusanchezhl@gmail.com', // maintainer (personal email)
+    'github-actions[bot]\x1fgithub-actions[bot]@users.noreply.github.com', // bot
+    'dependabot[bot]\x1f49699333+dependabot[bot]@users.noreply.github.com', // bot
+    'coderabbitai[bot]\x1fcoderabbitai[bot]@users.noreply.github.com', // bot
+    'Jhansi Oruganti\x1fjhansi@example.com', // external, twice → one contributor
+    'Jhansi Oruganti\x1fjhansi@example.com',
+    'Another Dev\x1fanother@example.com', // external
+    '', // trailing newline from git output
+  ].join('\n');
+  assert.equal(countExternalContributorsFromLog(log), 2);
+});
+
+test('external contributor count tolerates empty and malformed history', () => {
+  assert.equal(countExternalContributorsFromLog(''), 0);
+  assert.equal(countExternalContributorsFromLog('\n'), 0);
+  assert.equal(countExternalContributorsFromLog('line without separator'), 0);
+  assert.equal(countExternalContributorsFromLog('Only Name\x1f'), 0); // empty email
+  assert.equal(countExternalContributorsFromLog('\x1fonly@email.com'), 0); // empty name
+});
+
+test('the README stats line reports the real external contributor count, stably', () => {
+  const once = countExternalContributors({ cwd: ROOT });
+  const twice = countExternalContributors({ cwd: ROOT });
+  assert.equal(once, twice, 'the count is stable across calls on the same checkout');
+  assert.ok(once >= 1, 'this repo has at least one external contributor (JhansiOruganti-43 via #27)');
+  const span = readFileSync(join(ROOT, 'README.md'), 'utf8')
+    .match(/<!-- AUTOGEN:stats:start -->\s*([\s\S]*?)\s*<!-- AUTOGEN:stats:end -->/)?.[1];
+  assert.ok(span, 'README should carry an AUTOGEN stats span');
+  assert.match(span, new RegExp(`\\*\\*${once}\\*\\* external contributor${once === 1 ? '' : 's'}\\s*$`));
 });
 
 test('the committed OG manifest matches the current dataset', () => {
