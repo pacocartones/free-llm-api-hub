@@ -17,6 +17,9 @@ Notable changes to the dataset and the project. Format based on [Keep a Changelo
 - **One definition of the freshness SLA.** `SLA_DAYS`/`DUE_SOON_DAYS` moved into [`scripts/lib/rules.mjs`](scripts/lib/rules.mjs); `build.mjs` and `staleness.mjs` import them instead of each carrying a copy. The badge and the worklist can no longer disagree about what "overdue" means.
 - **Nine new pipeline tests** covering the badge's three colour states, its decay over time, the coverage floor, the internal consistency of the shipped badge file, the README card pill, and the tri-state ranking rule.
 
+### Contributors
+- **First external contribution** — [@JhansiOruganti-43](https://github.com/JhansiOruganti-43) confirmed Novita AI's free tier is not commercial-use allowed (`commercial_ok: false`, source clause quoted in `notes`; [PR #27](https://github.com/pacocartones/free-llm-api-hub/pull/27)).
+
 ## [2.7.0] — 2026-08-02
 
 First paced re-verification cycle: the oldest six entries re-checked against their providers' own docs — and it caught a retirement.
