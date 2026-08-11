@@ -627,7 +627,7 @@
       "free_type": "trial-credit",
       "free_tier": "One-time $5 credit across serverless models (GPT-OSS-120B, Claude, Llama), vision, embeddings and image generation",
       "rate_limits": "15 requests/second global default (CONN_THROTTLED on exceed)",
-      "notes": "Catch: SMS phone verification is required to claim the $5. Credit is one-time and expires 30 days after grant; a card is required to recharge afterward.",
+      "notes": "Catch: SMS phone verification is required to claim the $5. Credit is one-time and expires 30 days after grant; a card is required to recharge afterward. Checked ToS (clarifai.com/company/terms, effective 2025-10-01) and billing docs (docs.clarifai.com/control/account-billing/) for commercial/production-use language. No clause restricts the $5 trial credit / Pay-As-You-Go tier to evaluation-only. The 'evaluation purposes only, not for production' language in \u00a77.3 applies specifically to Beta Releases, not this plan. No explicit statement either way, so left null per contribution guidelines.",
       "best_for": "Multimodal (LLM + vision) models on a $5 credit",
       "modalities": ["text", "vision", "embeddings", "image"],
       "models_free": null,
@@ -640,7 +640,7 @@
       "openai_base_url": "https://api.clarifai.com/v2/ext/openai/v1",
       "env_key": "CLARIFAI_PAT",
       "verified": true,
-      "last_verified": "2026-07-30"
+      "last_verified": "2026-08-11"
     },
     {
       "slug": "arli-ai",
