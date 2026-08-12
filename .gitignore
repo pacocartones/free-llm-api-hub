@@ -35,3 +35,6 @@ Thumbs.db
 
 # Shared rules for the browser, emitted by build.mjs from scripts/lib/rules.mjs
 site/shared-rules.js
+
+# Freebuff desktop data (local DB) — never publish
+.freebuff/
