@@ -37,6 +37,9 @@ First external contribution, and the plumbing that lets the project live past on
 ### Contributors
 - **First external contribution** — [@JhansiOruganti-43](https://github.com/JhansiOruganti-43) confirmed Novita AI's free tier is not commercial-use allowed (`commercial_ok: false`, source clause quoted in `notes`; [#27](https://github.com/pacocartones/free-llm-api-hub/pull/27)). The README Contributors section and the computed contributor count above exist because of it.
 
+### Versioning
+- **`data/providers.json#version` tracks the dataset snapshot in lockstep with the release tag** (2.6.0 → 2.7.0 → 2.8.0) — it is NOT the schema version (the provider field set has been unchanged since 2.6.0). v2.8.0 was tagged without the bump, so the API, `llms.txt` and the deployed site reported "Schema v2.7.0" under the new tag; corrected in `95f1c8a`. Rule: bump the field in the release PR, before tagging (plan #12).
+
 ## [2.7.0] — 2026-08-02
 
 First paced re-verification cycle: the oldest six entries re-checked against their providers' own docs — and it caught a retirement.

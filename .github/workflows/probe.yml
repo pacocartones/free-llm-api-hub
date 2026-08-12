@@ -15,13 +15,19 @@ name: Credential probe
 # unset, so this workflow is a safe no-op until secrets exist. Add a secret,
 # and that provider joins the probe on the next run — no code change needed.
 # Keys are used only in Authorization headers; never logged, never written.
+#
+# Delivery: probe results are delivered as a pull request (bot/probe → main),
+# never a direct push. main requires the "Dataset integrity" status check, and a
+# direct push with [skip ci] cannot report it (GH006) — same trust model as
+# maintenance.yml and regenerate.yml (fixed 2026-08-11).
 on:
   schedule:
     - cron: '0 9 * * 1'
   workflow_dispatch: {}
 
 permissions:
-  contents: write   # commit probe results to the dataset
+  contents: write   # commit probe results to bot/probe
+  pull-requests: write # gh pr create/view on bot/probe
 
 concurrency:
   group: live-probe
@@ -59,7 +65,15 @@ jobs:
           node scripts/validate.mjs
           node scripts/build.mjs
 
-      - name: Commit probe results if any provider was actually probed
+      # Deliver any probe results as a pull request (bot/probe → main).
+      - name: Open or update a probe pull request
+        env:
+          # A PAT bypasses GitHub's "Allow GitHub Actions to create and approve
+          # pull requests" restriction (off by default; Settings → Actions →
+          # General). Without one, GITHUB_TOKEN works only once that setting is
+          # enabled; otherwise the branch is pushed and an actionable warning
+          # explains what to do instead of failing cryptically.
+          GH_TOKEN: ${{ secrets.GH_PAT || github.token }}
         run: |
           # Guard first: with no secrets set, every provider comes back
           # `skipped-no-key` and the only diff is the date bump in the report.
@@ -77,12 +91,20 @@ jobs:
 
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          # Commit BEFORE rebasing. `git pull --rebase` refuses to run with a dirty
-          # tree — and staging first does not help, it only changes the error from
-          # "You have unstaged changes" to "Your index contains uncommitted changes".
-          # The old order pulled first, so this step could only ever succeed when it
-          # had nothing to do. It failed on 2026-08-03, its first scheduled run.
+          git checkout -b bot/probe
           git add -A
-          git commit -m "data: weekly credential probe ($probed provider(s)) [skip ci]"
-          git pull --rebase
-          git push
+          git commit -m "data: weekly credential probe ($probed provider(s))"
+          git push --force origin bot/probe
+          # gh pr view does not filter by state: a previously merged bot/probe
+          # PR would make it look "already open". Ask for the state explicitly and
+          # only treat an OPEN PR as the branch's existing PR.
+          if gh pr view bot/probe --repo "$GITHUB_REPOSITORY" --json state --jq '.state' 2>/dev/null | grep -qx OPEN; then
+            echo "Probe PR already open — branch updated."
+          elif gh pr create --repo "$GITHUB_REPOSITORY" --base main --head bot/probe \
+            --title "data: weekly credential probe ($probed provider(s))" \
+            --body "Weekly credential probe run (auth-only). The required checks run on this PR; merge when green."; then
+            echo "Probe PR created."
+          else
+            echo "::warning::bot/probe was pushed but the PR could not be created. Enable \"Allow GitHub Actions to create and approve pull requests\" (Settings → Actions → General) or add a GH_PAT secret (repo scope); either way the branch is ready to open manually."
+            exit 1
+          fi

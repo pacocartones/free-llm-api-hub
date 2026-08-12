@@ -2,7 +2,8 @@
 // Validates data/providers.json against the project's integrity rules.
 // Fails CI (exit 1) if the dataset would ship a claim it can't back up.
 // Zero dependencies. Run with: node scripts/validate.mjs [path-to-providers.json]
-// (the optional path is used by the test suite to validate fixtures)
+// [path-to-probe-report.json]
+// (the optional paths are used by the test suite to validate fixtures)
 
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
@@ -106,6 +107,27 @@ try {
     }
   }
 } catch (e) { errors.push('programs.json: ' + e.message); }
+
+// ---------- probe-report.json (consistency with the current dataset) ----------
+// The report is a probe artifact, not a build output, so the drift gate never
+// touches it — this is the only place that keeps it honest: every slug must be a
+// provider that exists TODAY (a stale entry, like the github-models one that
+// survived nine days after the provider was retired, fails here), count must
+// match results, and probed_at must be a date.
+const probeFile = process.argv[3] ? resolve(process.argv[3]) : join(ROOT, 'data/probe-report.json');
+try {
+  const report = JSON.parse(readFileSync(probeFile, 'utf8'));
+  const slugs = new Set((data.providers ?? []).map((p) => p.slug));
+  const seen = new Set();
+  check(DATE_RE.test(report.probed_at || ''), 'probe-report: probed_at must be YYYY-MM-DD');
+  check(Array.isArray(report.results), 'probe-report: results must be an array');
+  for (const r of report.results ?? []) {
+    check(slugs.has(r.slug), `probe-report: "${r.slug}" is not a current provider (stale entry)`);
+    check(!seen.has(r.slug), `probe-report: duplicate slug "${r.slug}"`);
+    seen.add(r.slug);
+  }
+  check(report.count === (report.results ?? []).length, `probe-report: count (${report.count}) must equal results.length (${(report.results ?? []).length})`);
+} catch (e) { errors.push('probe-report.json: ' + e.message); }
 
 if (errors.length) {
   console.error(`✗ validation failed (${errors.length} issue${errors.length > 1 ? 's' : ''}):`);

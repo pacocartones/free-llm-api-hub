@@ -72,10 +72,11 @@ jobs:
 
       # Informational only. A mismatch here is expected on a data-only pull
       # request and is resolved by the bot after merge.
+      # Keep this list in sync with the `check` script in package.json.
       - name: Report generated-file drift
         run: |
           node scripts/build.mjs
-          targets="README.md data/providers.csv data/providers.yaml collections site/index.html docs/credit-programs.md"
+          targets="README.md data/providers.csv data/providers.yaml collections site/index.html docs/credit-programs.md badge-freshness.json CITATION.cff data/probe-report.json"
           if git diff --quiet -- $targets; then
             echo "Generated files are already in sync with the data."
             echo "Generated files are in sync." >> "$GITHUB_STEP_SUMMARY"
