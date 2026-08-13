@@ -54,7 +54,8 @@ function renderTrust() {
   const ages = DATA.filter(p => p.verified && p.last_verified).map(p => Math.floor((now - Date.parse(p.last_verified + 'T00:00:00Z')) / 86400000));
   const oldest = ages.length ? Math.max(...ages) : 0;
   const verified = DATA.filter(p => p.verified).length;
-  document.getElementById('trustSummary').textContent = `${verified}/${DATA.length} verified against official docs · re-checked weekly · oldest entry ${oldest}d ago`;
+  const slaDays = SLA_DAYS || 90;
+  document.getElementById('trustSummary').textContent = `${verified}/${DATA.length} verified against official docs · oldest entry ${oldest}d · ${slaDays}-day re-verification SLA`;
 }
 
 function render() {
