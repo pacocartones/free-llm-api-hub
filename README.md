@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="site/favicon.svg" alt="Free LLM API Hub logo" width="96">
+
 # Free LLM API Hub
 
 **A continuously-verified dataset of free LLM & AI-model APIs you can build on.**
