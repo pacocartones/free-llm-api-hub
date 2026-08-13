@@ -34,6 +34,22 @@ if (!DATE_RE.test(data.generated || '')) errors.push('top-level: generated must 
 if (!Array.isArray(data.providers) || data.providers.length === 0)
   errors.push('top-level: providers must be a non-empty array');
 
+// `generated` must cover the newest verification or addition in the dataset.
+// Every consumer of it — sitemap <lastmod>, /api/v1 index, CITATION.cff and
+// llms.txt — would otherwise ship a date older than the data it describes.
+// Deterministic: compares data-internal dates only, never the wall clock, so
+// CI cannot flake on it. A data PR bumps `generated` alongside its edits.
+{
+  const newest = (data.providers ?? [])
+    .map((p) => [p.last_verified, p.added])
+    .flat()
+    .filter((d) => d && DATE_RE.test(d))
+    .sort()
+    .pop();
+  if (newest && data.generated < newest)
+    errors.push(`top-level: generated (${data.generated}) is older than the newest last_verified/added (${newest}) — bump it in data/providers.json`);
+}
+
 for (const p of data.providers ?? []) {
   const id = p.slug || p.name || '(unknown)';
 
