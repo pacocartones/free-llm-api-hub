@@ -2,7 +2,7 @@
 
 # Collections
 
-Curated, always-current slices of the [dataset](../data/providers.json) — each one filters the list by a single constraint a builder actually has. Generated on every change; each has a [live web page](https://freellmapihub.com/collections/).
+Curated, always-current slices of the [dataset](../data/providers.json) — each one filters the list by a single constraint a builder actually has. Generated on every change; each has a [live web page](https://freellmapihub.com/guides-and-collections/).
 
 - **[Free LLM APIs with no credit card](no-credit-card.md)** — LLM APIs you can start calling without entering a payment method — filtered live from a continuously-verified dataset. _(40 providers)_
 - **[Free LLM APIs with no phone verification](no-phone.md)** — LLM APIs whose signup needs no SMS/phone verification — a live slice of a continuously-verified dataset. _(20 providers)_

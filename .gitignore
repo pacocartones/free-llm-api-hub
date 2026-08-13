@@ -10,6 +10,7 @@ site/providers.yaml
 site/collections/
 site/models/
 site/guides/
+site/guides-and-collections/
 site/p/
 site/badges/
 site/legal/

@@ -402,7 +402,7 @@ const IC = (id) => `<svg class="i" aria-hidden="true"><use href="#${id}"/></svg>
 
 const siteHeader = (p) => `<header class="site-header"><div class="wrap header-inner">
 <a class="brand" href="${p}" aria-label="Free LLM API Hub — home"><svg class="logo-mark"><use href="#logo"/></svg><span class="brand-name">Free LLM API <span class="grad">Hub</span></span></a>
-<nav class="nav" id="primary-nav" aria-label="Primary"><a href="${p}">${IC('ic-home')}Home</a><a href="${p}models/">${IC('ic-cube')}Models</a><a href="${p}guides/">${IC('ic-book')}Guides</a><a href="${p}collections/">${IC('ic-grid')}Collections</a><a href="${p}programs/startups">${IC('ic-rocket')}Startup credits</a><a href="${p}programs/research">${IC('ic-cap')}Student credits</a></nav>
+<nav class="nav" id="primary-nav" aria-label="Primary"><a href="${p}">${IC('ic-home')}Home</a><a href="${p}models/">${IC('ic-cube')}Models</a><a href="${p}guides-and-collections/">${IC('ic-book')}Guides &amp; Collections</a><a href="${p}programs/startups">${IC('ic-rocket')}Startup credits</a><a href="${p}programs/research">${IC('ic-cap')}Student credits</a></nav>
 <div class="header-actions">
 <button class="icon-btn nav-toggle" id="navToggle" aria-label="Open menu" aria-expanded="false" aria-controls="primary-nav"><svg class="i menu" aria-hidden="true"><use href="#ic-menu"/></svg><svg class="i close" aria-hidden="true"><use href="#ic-close"/></svg></button>
 <a class="icon-btn" href="${REPO}" target="_blank" rel="noopener" aria-label="Star on GitHub">${GH_ICON}<span class="star-count" data-stars>★</span></a>
@@ -411,7 +411,7 @@ const siteHeader = (p) => `<header class="site-header"><div class="wrap header-i
 
 const siteFooter = (p) => `<footer class="site-footer"><div class="wrap footer-top">
 <div class="footer-brand"><a class="foot-brand-link" href="${p}" aria-label="Free LLM API Hub — home"><svg class="logo-mark"><use href="#logo"/></svg><span class="brand-name">Free LLM API <span class="grad">Hub</span></span></a><p>A continuously-verified, machine-readable dataset of free LLM &amp; AI-model APIs and trial credits for developers.</p><a class="star-btn" href="${REPO}" target="_blank" rel="noopener" aria-label="Star free-llm-api-hub on GitHub"><span class="sb-label">${GH_ICON} Star on GitHub</span><span class="sb-count" data-stars>★</span></a></div>
-<div class="footer-col"><h4>Explore</h4><a href="${p}#explorer">Interactive explorer</a><a href="${p}models/">Free model index</a><a href="${p}guides/">Guides</a><a href="${p}collections/">Collections</a><a href="${p}programs/startups">Startup credits</a><a href="${p}programs/research">Student &amp; research credits</a><a href="${p}updates">Updates</a><a href="${REPO}#notably-not-free">Notably NOT free</a></div>
+<div class="footer-col"><h4>Explore</h4><a href="${p}#explorer">Interactive explorer</a><a href="${p}models/">Free model index</a><a href="${p}guides-and-collections/">Guides &amp; Collections</a><a href="${p}programs/startups">Startup credits</a><a href="${p}programs/research">Student &amp; research credits</a><a href="${p}updates">Updates</a><a href="${REPO}#notably-not-free">Notably NOT free</a></div>
 <div class="footer-col"><h4>Data</h4><a href="${p}providers.json">providers.json</a><a href="${p}api/">JSON API</a><a href="${p}llms.txt">llms.txt</a><a href="${p}providers.csv">CSV export</a><a href="${p}providers.yaml">YAML export</a><a href="${REPO}/blob/main/data/schema.json">JSON Schema</a></div>
 <div class="footer-col"><h4>Project</h4><a href="${REPO}/blob/main/docs/methodology.md">Methodology</a><a href="${REPO}/blob/main/CONTRIBUTING.md">Contributing</a><a href="${REPO}/blob/main/CHANGELOG.md">Changelog</a><a href="${REPO}">GitHub ★</a></div>
 </div><div class="wrap footer-bottom"><p>Independent, community-maintained — not affiliated with any provider listed. Terms change without notice; always confirm against each provider's own docs. MIT licensed.</p><p class="foot-legal"><a href="${p}legal/privacy">Privacy</a> · <a href="${p}legal/terms">Terms</a></p><p class="foot-email"><a href="mailto:admin@freellmapihub.com">admin@freellmapihub.com</a></p></div></footer>`;
@@ -672,7 +672,7 @@ for (const c of COLLECTIONS) {
         '@type': 'BreadcrumbList',
         itemListElement: [
           { '@type': 'ListItem', position: 1, name: 'Free LLM API Hub', item: `${SITE}/` },
-          { '@type': 'ListItem', position: 2, name: 'Collections', item: `${SITE}/collections/` },
+          { '@type': 'ListItem', position: 2, name: 'Guides & Collections', item: `${SITE}/guides-and-collections/` },
           { '@type': 'ListItem', position: 3, name: c.title, item: `${SITE}/collections/${c.slug}` },
         ],
       },
@@ -688,7 +688,7 @@ for (const c of COLLECTIONS) {
   const introHtml = htmlEsc(c.intro).replace(/`([^`]+)`/g, '<code>$1</code>').replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
   const main =
     `<section class="page-hero"><div class="wrap">` +
-    `<nav class="crumbs"><a href="../">Home</a> / <a href="./">Collections</a> / ${htmlEsc(c.title)}</nav>` +
+    `<nav class="crumbs"><a href="../">Home</a> / <a href="../guides-and-collections/">Guides &amp; Collections</a> / ${htmlEsc(c.title)}</nav>` +
     `<h1>${htmlEsc(c.h1)}</h1><p class="lede">${htmlEsc(c.desc)}</p>` +
     `<nav class="colls">${nav}</nav></div></section>` +
     `<main id="main"><div class="wrap prose">` +
@@ -720,25 +720,36 @@ print(resp.choices[0].message.content)</code></pre><pre><code>curl ${htmlEsc(QS_
 // --- collections hub (repo markdown) ---
 const hubMd =
   `${GEN_NOTE}\n\n# Collections\n\n` +
-  `Curated, always-current slices of the [dataset](../data/providers.json) — each one filters the list by a single constraint a builder actually has. Generated on every change; each has a [live web page](${SITE}/collections/).\n\n` +
+  `Curated, always-current slices of the [dataset](../data/providers.json) — each one filters the list by a single constraint a builder actually has. Generated on every change; each has a [live web page](${SITE}/guides-and-collections/).\n\n` +
   COLLECTIONS.map((c) => `- **[${c.title}](${c.slug}.md)** — ${c.desc} _(${collRows(c).length} providers)_`).join('\n') +
   `\n\n[← Back to the main list](../README.md)\n`;
 writeFileSync(join(ROOT, 'collections/README.md'), hubMd);
 
-// --- collections hub (live HTML) ---
+// --- unified Guides & Collections hub (live HTML) ---
 const hubCards = COLLECTIONS.map((c) =>
-  `<a class="coll-card" href="${c.slug}"><div class="coll-card-head"><strong>${htmlEsc(c.title)}</strong><span class="count">${collRows(c).length}</span></div><p>${htmlEsc(c.desc)}</p></a>`
+  `<a class="coll-card" href="../collections/${c.slug}"><div class="coll-card-head"><strong>${htmlEsc(c.title)}</strong><span class="count">${collRows(c).length}</span></div><p>${htmlEsc(c.desc)}</p></a>`
+).join('');
+const guidesCards = GUIDES.map((g) =>
+  `<a class="coll-card" href="../guides/${g.slug}"><div class="coll-card-head"><strong>${htmlEsc(g.card)}</strong><span class="count">${providers.filter(g.filter).length}</span></div><p>${htmlEsc(g.blurb)}</p></a>`
 ).join('');
 const hubMain =
   `<section class="page-hero"><div class="wrap">` +
-  `<nav class="crumbs"><a href="../">Home</a> / Collections</nav>` +
-  `<h1>Collections</h1><p class="lede">Curated, always-current slices of the dataset — filter the list by a single constraint you actually have. Every collection is generated from the data and updates automatically.</p>` +
+  `<nav class="crumbs"><a href="../">Home</a> / Guides &amp; Collections</nav>` +
+  `<h1>Guides &amp; Collections</h1><p class="lede">Short, data-backed answers to the most common “is there a free API for…” questions, plus curated slices of the dataset by a single constraint — every card generated from the verified dataset so it stays current.</p>` +
   `</div></section>` +
-  `<main id="main"><div class="wrap"><div class="coll-grid">${hubCards}</div></div></main>`;
+  `<main id="main"><div class="wrap">` +
+  `<p class="eyebrow">Guides</p><div class="coll-grid">${guidesCards}</div>` +
+  `<p class="eyebrow" style="margin-top:26px">Collections</p><div class="coll-grid">${hubCards}</div>` +
+  `</div></main>`;
+mkdirSync(join(ROOT, 'site/guides-and-collections'), { recursive: true });
 writeFileSync(
-  join(ROOT, 'site/collections/index.html'),
-  htmlPage({ title: 'Collections · Free LLM API Hub', desc: 'Curated, always-current collections of free LLM APIs by constraint: no card, no phone, commercial use, OpenAI-compatible, permanently free, multimodal.', canonical: `${SITE}/collections/`, main: hubMain })
+  join(ROOT, 'site/guides-and-collections/index.html'),
+  htmlPage({ title: 'Guides & Collections · Free LLM API Hub', desc: 'Data-backed guides to free LLM and AI-model APIs, plus curated collections by constraint: no card, no phone, commercial use, OpenAI-compatible, permanently free, multimodal.', canonical: `${SITE}/guides-and-collections/`, main: hubMain })
 );
+// The old hubs redirect here so existing links and bookmarks keep working.
+const redirectPage = (to) => `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="robots" content="noindex"><meta http-equiv="refresh" content="0; url=${to}"><link rel="canonical" href="${to}"><title>Redirecting…</title></head><body><p>Moved to <a href="${to}">${to}</a>.</p></body></html>`;
+writeFileSync(join(ROOT, 'site/guides/index.html'), redirectPage('../guides-and-collections/'));
+writeFileSync(join(ROOT, 'site/collections/index.html'), redirectPage('../guides-and-collections/'));
 
 // ---------- per-provider detail pages + embeddable badges ----------
 mkdirSync(join(ROOT, 'site/p'), { recursive: true });
@@ -1072,7 +1083,7 @@ for (const g of GUIDES) {
     ? `<h2>FAQ</h2>` + g.faq.map((f) => `<div class="faq-item"><h3>${htmlEsc(f.q)}</h3><p>${f.a}</p></div>`).join('')
     : '';
   const main =
-    `<section class="page-hero"><div class="wrap"><nav class="crumbs"><a href="../">Home</a> / <a href="./">Guides</a> / ${htmlEsc(g.h1)}</nav>` +
+    `<section class="page-hero"><div class="wrap"><nav class="crumbs"><a href="../">Home</a> / <a href="../guides-and-collections/">Guides &amp; Collections</a> / ${htmlEsc(g.h1)}</nav>` +
     `<h1>${htmlEsc(g.h1)}</h1><p class="lede">${htmlEsc(g.lede)}</p></div></section>` +
     `<main id="main"><div class="wrap prose">` +
     g.intro +
@@ -1084,7 +1095,7 @@ for (const g of GUIDES) {
     `<div class="prov-actions" style="margin-top:22px"><a class="btn primary" href="../${g.query}">Open in the explorer →</a></div>` +
     faqHtml +
     `<h2>More guides</h2><nav class="colls">${related}</nav>` +
-    `<p class="prov-back"><a href="./">← All guides</a></p>` +
+    `<p class="prov-back"><a href="../guides-and-collections/">← All guides</a></p>` +
     `</div></main>`;
   const jsonld = JSON.stringify({
     '@context': 'https://schema.org',
@@ -1107,17 +1118,6 @@ for (const g of GUIDES) {
     ogImage: `${SITE}/og/guides/${g.slug}.png`,
   }));
 }
-const guidesHubMain =
-  `<section class="page-hero"><div class="wrap"><nav class="crumbs"><a href="../">Home</a> / Guides</nav>` +
-  `<h1>Guides</h1><p class="lede">Short, data-backed answers to the most common "is there a free API for…" questions. Every list is generated from the verified dataset, so it stays current.</p></div></section>` +
-  `<main id="main"><div class="wrap"><div class="coll-grid">` +
-  GUIDES.map((g) => `<a class="coll-card" href="${g.slug}"><div class="coll-card-head"><strong>${htmlEsc(g.card)}</strong><span class="count">${providers.filter(g.filter).length}</span></div><p>${htmlEsc(g.blurb)}</p></a>`).join('') +
-  `</div></div></main>`;
-writeFileSync(join(ROOT, 'site/guides/index.html'), htmlPage({
-  title: 'Guides — free LLM & AI API how-tos · Free LLM API Hub',
-  desc: 'Data-backed guides to free LLM and AI-model APIs: no credit card, OpenAI-compatible, no signup, embeddings, speech, image generation, OCR / document AI.',
-  canonical: `${SITE}/guides/`, main: guidesHubMain,
-}));
 
 // ---------- machine-readable: static JSON API (/api/v1) + llms.txt ----------
 // Deterministic slices of the dataset at stable, versioned URLs — a "public API"
@@ -1231,8 +1231,7 @@ writeFileSync(join(ROOT, 'site/llms-full.txt'), llmsFull);
 const sitemapUrls = [
   `${SITE}/`,
   `${SITE}/models/`,
-  `${SITE}/guides/`,
-  `${SITE}/collections/`,
+  `${SITE}/guides-and-collections/`,
   `${SITE}/api/`,
   `${SITE}/programs/startups`,
   `${SITE}/programs/research`,
