@@ -24,23 +24,19 @@ Out of scope:
 
 ## Automation and permissions
 
-Three workflows run against this repository. Two of them can write to `main`, so they are
-worth stating explicitly:
+Three workflows run against this repository; none of them can write to `main`:
 
 | Workflow | Trigger | Token permissions |
 |---|---|---|
 | `verify.yml` | pull request, push to `main` | `contents: read` — cannot write anything |
-| `regenerate.yml` | push to `main` | `contents: write` — commits the rebuilt derived files |
-| `maintenance.yml` | weekly cron | `contents: write`, `issues: write` — commits the badge and model samples, opens the worklist issue |
 | `pages.yml` | push to `main` | `contents: read`, `pages: write` — publishes the site |
+| `codeql.yml` | pull request, push to `main`, weekly | `contents: read` (job: `security-events: write`) — code scanning |
 
 A pull request from a fork therefore never runs with a token that can write to this
-repository, and never has access to repository secrets. The write-capable workflows only run
-on `main`, after a maintainer has merged.
+repository, and never has access to repository secrets.
 
-Both write-capable workflows execute `scripts/build.mjs`. That is deliberate — it is how the
-derived files stay in sync with the dataset — but it does mean a change to `scripts/` is
-reviewed as code, not as data.
+Derived files are regenerated locally and committed by the author in the same PR — there is
+no write-capable automation. A change to `scripts/` is reviewed as code, not as data.
 
 ## Notes for users of the data
 
