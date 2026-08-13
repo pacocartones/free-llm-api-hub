@@ -113,7 +113,7 @@
       "openai_base_url": null,
       "env_key": "COHERE_API_KEY",
       "verified": true,
-      "last_verified": "2026-07-30"
+      "last_verified": "2026-08-13"
     },
     {
       "slug": "cerebras",
@@ -157,7 +157,7 @@
       "openai_base_url": null,
       "env_key": "MISTRAL_API_KEY",
       "verified": true,
-      "last_verified": "2026-07-12"
+      "last_verified": "2026-08-13"
     },
     {
       "slug": "huggingface",
@@ -179,7 +179,7 @@
       "openai_base_url": "https://router.huggingface.co/v1",
       "env_key": "HF_TOKEN",
       "verified": true,
-      "last_verified": "2026-07-30"
+      "last_verified": "2026-08-13"
     },
     {
       "slug": "siliconflow",
@@ -201,7 +201,7 @@
       "openai_base_url": "https://api.siliconflow.com/v1",
       "env_key": "SILICONFLOW_API_KEY",
       "verified": true,
-      "last_verified": "2026-07-30"
+      "last_verified": "2026-08-13"
     },
     {
       "slug": "zai-glm",
@@ -245,7 +245,7 @@
       "openai_base_url": null,
       "env_key": "WATSONX_API_KEY",
       "verified": true,
-      "last_verified": "2026-07-11"
+      "last_verified": "2026-08-13"
     },
     {
       "slug": "ovhcloud-ai-endpoints",
@@ -508,7 +508,7 @@
       "openai_base_url": "https://integrate.api.nvidia.com/v1",
       "env_key": "NVIDIA_API_KEY",
       "verified": true,
-      "last_verified": "2026-07-11"
+      "last_verified": "2026-08-13"
     },
     {
       "slug": "vercel-ai-gateway",
