@@ -13,7 +13,6 @@ import { dirname, join } from 'node:path';
 import { recScore, FLAG_PAIRS, SLA_DAYS, DUE_SOON_DAYS, ageInDays, freshnessColor, freshnessBadge } from './lib/rules.mjs';
 import { esc, stripTags } from './lib/escape.mjs';
 import { mineProviderHistory } from './lib/history.mjs';
-import { countExternalContributors } from './lib/contributors.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const FRESH_DAYS = SLA_DAYS; // the freshness SLA, defined once in lib/rules.mjs
@@ -478,15 +477,14 @@ ${siteFooter(prefix)}
 // Kept deterministic from the data (no time-sensitive term) so PR CI never flakes on date drift.
 // The decaying freshness number lives in badge-freshness.json, refreshed on every build pass.
 //
-// External contributor count, mined from the git history of the dataset by
-// lib/contributors.mjs: humans who touched data/providers.json who are not the
-// maintainer or a bot. Social proof, computed not claimed.
-const externalContributors = countExternalContributors({ cwd: ROOT });
-
+// Contributor count is deliberately NOT part of the generated stats line: the
+// README shows a live shields.io badge (github/contributors) instead, so the
+// number can never go stale between build passes. lib/contributors.mjs still
+// mines the external (non-maintainer, non-bot) count for local reporting and
+// its tests pin the rule.
 const statsLine =
   `**${total} providers** tracked · ${ongoing.length} ongoing free tiers · ${trial.length} trial credits · ` +
-  `**${verifiedCount}/${total}** independently verified against the provider's own docs` +
-  (externalContributors ? ` · **${externalContributors}** external contributor${externalContributors === 1 ? '' : 's'}` : '');
+  `**${verifiedCount}/${total}** independently verified against the provider's own docs`;
 
 // ---------- inject into README ----------
 function inject(md, name, content) {
