@@ -184,9 +184,12 @@ h1 { font-size: clamp(1.9rem, 4.4vw, 3rem); line-height: 1.1; margin: 0 auto 18p
 .controls-inner { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
 .sel { background: var(--panel-2); border: 1px solid var(--border); color: var(--text); padding: 9px 12px; border-radius: 8px; font-size: .9rem; font-family: var(--font-mono); }
 
-/* Verified cell: the check and the date stack, matching the SSR row structure. */
-.pver { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
-.ver-date { font-size: .78rem; color: var(--muted); font-family: var(--font-mono); }
+/* Verified cell: check badge + date on ONE line, aligned with the provider name.
+   A stacked (check over date) layout was tried here, but the date always lands
+   on the same line as the `.best` subtitle — rows read as staggered. Inline keeps
+   the whole unit on the name line, like the type badge. */
+.pver { display: inline-flex; align-items: center; gap: 6px; }
+.ver-date { font-size: .72rem; color: var(--muted); font-family: var(--font-mono); }
 .sel { cursor: pointer; } .sel:hover { border-color: var(--border-strong); }
 .seg { display: flex; gap: 3px; background: var(--panel-2); border: 1px solid var(--border); border-radius: 9px; padding: 3px; }
 .seg button { background: transparent; border: 0; color: var(--muted); padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: .82rem; font-weight: 600; font-family: var(--font-mono); }
