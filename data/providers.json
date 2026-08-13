@@ -486,7 +486,7 @@
       "openai_base_url": "https://api.scaleway.ai/v1",
       "env_key": "SCALEWAY_API_KEY",
       "verified": true,
-      "last_verified": "2026-07-30"
+      "last_verified": "2026-08-13"
     },
     {
       "slug": "nvidia-nim",
