@@ -93,6 +93,20 @@ test('the freshness badge is described with the real thresholds and grading', ()
   assert.ok(bullet.includes(String(SLA_DAYS)), `the description must state the SLA (${SLA_DAYS})`);
 });
 
+// Audit A2: the widget used to embed its own copy of recScore, which drifted —
+// the card_required/phone_required true-penalties went missing, so a provider
+// with a required card/phone ranked HIGHER in the widget than in the explorer.
+// It must use the shared FLLM_RULES.recScore (generated from rules.mjs) and
+// keep no local scoring copy: tri-state arithmetic lives only in rules.mjs.
+test('the widget ranks with the shared recScore, not its own copy', () => {
+  const widget = readFileSync(join(ROOT, 'site/widget.js'), 'utf8');
+  assert.match(widget, /FLLM_RULES\.recScore/, 'widget must use the shared recScore');
+  assert.doesNotMatch(widget, /card_required\s*===/, 'widget must not re-implement flag scoring');
+  assert.doesNotMatch(widget, /phone_required\s*===/, 'widget must not re-implement flag scoring');
+  assert.doesNotMatch(widget, /commercial_ok\s*===/, 'widget must not re-implement flag scoring');
+  assert.doesNotMatch(widget, /free_type\s*===/, 'widget must not re-implement flag scoring');
+});
+
 test('validate accepts a credential-only probe result', () => {
   const data = JSON.parse(readFileSync(DATA, 'utf8'));
   data.providers[0].last_probed = '2026-08-03';
