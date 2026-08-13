@@ -51,11 +51,21 @@ export const ageInDays = (isoDate, now = new Date()) => {
   return Number.isNaN(+d) ? null : Math.floor((now - d) / 86400000);
 };
 
-/** The colour one age maps to. Same three buckets the worklist prints: fresh / due soon / overdue. */
+/** One age → one bucket: 'fresh' / 'due' / 'stale'. Single source that the badge
+ * colour and the worklist both grade on, so they can never disagree on an entry's
+ * state. A never-verified entry is treated as 'due' (it needs attention). */
+export function freshnessStatus(age) {
+  if (age === null || age === undefined) return 'due'; // never verified
+  if (age > SLA_DAYS) return 'stale';
+  if (age > DUE_SOON_DAYS) return 'due';
+  return 'fresh';
+}
+
+/** The colour one age maps to. Same three buckets as freshnessStatus. */
 export function freshnessColor(age) {
-  if (age === null || age === undefined) return 'yellow'; // never verified
-  if (age > SLA_DAYS) return 'red';
-  if (age > DUE_SOON_DAYS) return 'yellow';
+  const status = freshnessStatus(age);
+  if (status === 'stale') return 'red';
+  if (status === 'due') return 'yellow';
   return 'brightgreen';
 }
 

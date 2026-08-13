@@ -34,8 +34,8 @@ Most "free LLM API" lists are a snapshot someone took once and never touched aga
 This project treats the list as a **maintained open dataset**, not a blog post:
 
 - **Every entry is dated and sourced.** No `Last verified` date and a link to the provider's *own* docs? It doesn't ship as verified.
-- **Freshness is measured, not claimed.** The badge above is computed from the data — it counts how many entries were re-confirmed in the last 90 days. When it decays, you can see it.
-- **Links are checked automatically.** A scheduled job re-checks every source link and opens an issue the moment one breaks — the earliest signal a provider changed something.
+- **Freshness is measured, not claimed.** The badge above is computed from the data — it grades the *oldest* re-verification against the 90-day SLA, so it decays the moment maintenance stops. When it decays, you can see it.
+- **Links are checked, not scheduled.** Every change runs the integrity gate, and each re-verification pass opens the provider's own docs — a dead source link is the earliest signal a provider changed something.
 - **Uncertainty is labelled, not hidden.** Entries we couldn't independently confirm are marked ⚠️ and say exactly what's unconfirmed, instead of being dressed up as fact.
 - **The data is the source of truth.** [`data/providers.json`](data/providers.json) is validated against a [schema](data/schema.json); this README, the badge and the site are all *generated* from it, so they can never silently drift apart.
 

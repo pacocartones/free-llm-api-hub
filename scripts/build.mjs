@@ -476,7 +476,7 @@ ${siteFooter(prefix)}
 }
 
 // Kept deterministic from the data (no time-sensitive term) so PR CI never flakes on date drift.
-// The decaying "verified in the last N days" number lives in the badge, which the scheduled job refreshes.
+// The decaying freshness number lives in badge-freshness.json, refreshed on every build pass.
 //
 // External contributor count, mined from the git history of the dataset by
 // lib/contributors.mjs: humans who touched data/providers.json who are not the
