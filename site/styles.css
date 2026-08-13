@@ -165,6 +165,8 @@ h1 { font-size: clamp(1.9rem, 4.4vw, 3rem); line-height: 1.1; margin: 0 auto 18p
 .stat .si { width: 22px; height: 22px; color: var(--accent); margin-bottom: 8px; }
 .stat .num { font-family: var(--font-mono); font-size: 1.95rem; font-weight: 700; letter-spacing: -.03em; color: var(--accent); line-height: 1.1; }
 .stat.fresh .num, .stat.fresh .si { color: var(--green); }
+.stat.due .num, .stat.due .si { color: var(--warn); }
+.stat.stale .num, .stat.stale .si { color: var(--red); }
 .stat .lbl { color: var(--muted); font-size: .78rem; margin-top: 3px; }
 
 /* ---------- trust strip (4 cards) ---------- */
