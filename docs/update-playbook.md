@@ -30,6 +30,7 @@ For each provider on the worklist (`npm run worklist`, or just the reverify batc
    - Changed → correct the numbers, same as above.
    - Gone → remove the entry (note it in [CHANGELOG.md](../CHANGELOG.md)) or, if the free tier ended, move the note to the README's "Notably NOT free" section.
    - Couldn't confirm → `verified: false`, `last_verified: null`, explain in `notes`.
+   - **Bump `generated`** (top of `data/providers.json`) to today — the integrity gate rejects any `generated` older than the newest `last_verified`/`added`, so every consumer (sitemap, API, CITATION, llms.txt) ships an honest date.
 4. **Regenerate and check (same PR):**
    ```bash
    npm run build      # README, badge, exports, collections, site payload

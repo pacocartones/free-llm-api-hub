@@ -54,6 +54,21 @@ test('validate rejects an unverified entry that still carries a date', () => {
   assert.equal(exitOk(['scripts/validate.mjs', fixture]), false);
 });
 
+test('validate rejects a generated date older than the newest verification', () => {
+  const data = JSON.parse(readFileSync(DATA, 'utf8'));
+  const newest = data.providers
+    .map((p) => [p.last_verified, p.added])
+    .flat()
+    .filter((d) => d && /^\d{4}-\d{2}-\d{2}$/.test(d))
+    .sort()
+    .pop();
+  assert.ok(newest, 'fixture needs at least one dated entry to be meaningful');
+  data.generated = '2000-01-01'; // older than every real date in the dataset
+  const fixture = join(mkdtempSync(join(tmpdir(), 'flah-')), 'providers.json');
+  writeFileSync(fixture, JSON.stringify(data));
+  assert.equal(exitOk(['scripts/validate.mjs', fixture]), false);
+});
+
 test('validate accepts a credential-only probe result', () => {
   const data = JSON.parse(readFileSync(DATA, 'utf8'));
   data.providers[0].last_probed = '2026-08-03';
