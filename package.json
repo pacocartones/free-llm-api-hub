@@ -9,6 +9,7 @@
     "validate": "node scripts/validate.mjs",
     "links": "node scripts/check-links.mjs",
     "worklist": "node scripts/staleness.mjs",
+    "reverify": "node scripts/reverify.mjs",
     "models": "node scripts/fetch-models.mjs",
     "discover": "node scripts/discover.mjs",
     "probe": "node scripts/probe.mjs",

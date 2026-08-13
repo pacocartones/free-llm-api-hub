@@ -50,9 +50,9 @@ Open the **`🕝 Weekly re-verification worklist`** issue and work top-down. For
 - Watch the usual movers: Gemini limits, Cloudflare Neuron pricing, and any "trial credit" amounts (these change most often). The model *lists* (OpenRouter, Groq, Cerebras, etc.) are refreshed automatically by `npm run models` / the weekly job — you only need to eyeball its diff.
 - Backfill attribute fields still `null`: `openai_base_url`, and any missing `openai_compatible` / `modalities`.
 
-## Optional Layer 3 — agentic re-verification
+## Layer 3 — agentic re-verification (local, no GitHub Actions)
 
-The human pass can be accelerated by an agent (e.g. a scheduled Claude Code task) that, for each item on the worklist, fetches the provider's docs, drafts the `data/providers.json` edit, and opens a PR for a human to approve. This is opt-in and runs on a machine you control — the two automated layers above are the portable, always-on backbone and don't depend on it. Ask a maintainer if you want this wired up.
+The human pass can be accelerated by an agent on a machine you control. [`scripts/reverify.mjs`](../scripts/reverify.mjs) (`npm run reverify`) prints this week's batch and fetches each provider's own docs into local dossiers at `.freebuff/reverify/<slug>.md` (gitignored). An agent reads each dossier, compares the fetched docs against `data/providers.json`, and drafts the edit; a human then runs `npm run build && npm test` and opens the PR. The script never edits data by itself — the primary-source + real-date rule stays a human/agent judgment. This is deliberately **not** a GitHub Actions job (minutes budget), so nothing in the re-verification loop depends on Actions.
 
 ## Optional Layer 4 — public security-data stewardship
 
