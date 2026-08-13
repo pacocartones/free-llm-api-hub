@@ -172,8 +172,8 @@ h1 { font-size: clamp(1.9rem, 4.4vw, 3rem); line-height: 1.1; margin: 0 auto 18p
 /* ---------- trust strip (4 cards) ---------- */
 .trust { border-bottom: 1px solid var(--border); background: var(--bg-elev); }
 .trust-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; padding: 18px 0; }
-.trust-card { display: flex; gap: 11px; align-items: flex-start; background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 13px 15px; }
-.trust-card .ti { width: 18px; height: 18px; color: var(--accent); flex: none; margin-top: 1px; }
+.trust-card { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px; background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 15px; }
+.trust-card .ti { width: 26px; height: 26px; color: var(--accent); flex: none; }
 .trust-card b { display: block; color: var(--text); font-family: var(--font-mono); font-size: .82rem; font-weight: 700; letter-spacing: -.01em; }
 .trust-card span { display: block; color: var(--muted); font-size: .77rem; margin-top: 2px; line-height: 1.4; }
 @media (max-width: 760px) { .trust-grid { grid-template-columns: 1fr 1fr; } }
@@ -182,9 +182,11 @@ h1 { font-size: clamp(1.9rem, 4.4vw, 3rem); line-height: 1.1; margin: 0 auto 18p
 /* ---------- controls ---------- */
 .controls { position: sticky; top: var(--header-h); z-index: 30; background: color-mix(in srgb, var(--bg) 90%, transparent); backdrop-filter: blur(8px); border-bottom: 1px solid var(--border); padding: 13px 0; }
 .controls-inner { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
-input[type="search"], .sel { background: var(--panel-2); border: 1px solid var(--border); color: var(--text); padding: 9px 12px; border-radius: 8px; font-size: .9rem; font-family: var(--font-mono); }
-input[type="search"] { min-width: 210px; flex: 1 1 210px; }
-input[type="search"]::placeholder { color: var(--faint); }
+.sel { background: var(--panel-2); border: 1px solid var(--border); color: var(--text); padding: 9px 12px; border-radius: 8px; font-size: .9rem; font-family: var(--font-mono); }
+
+/* Verified cell: the check and the date stack, matching the SSR row structure. */
+.pver { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
+.ver-date { font-size: .78rem; color: var(--muted); font-family: var(--font-mono); }
 .sel { cursor: pointer; } .sel:hover { border-color: var(--border-strong); }
 .seg { display: flex; gap: 3px; background: var(--panel-2); border: 1px solid var(--border); border-radius: 9px; padding: 3px; }
 .seg button { background: transparent; border: 0; color: var(--muted); padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: .82rem; font-weight: 600; font-family: var(--font-mono); }

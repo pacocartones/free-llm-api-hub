@@ -40,7 +40,7 @@ const PRESETS = {
 const PRESET_FLAGS = { nocard: 'f-nocard', nophone: 'f-nophone', commercial: 'f-commercial', openai: 'f-openai', verified: 'f-verified' };
 function presetMatches(name) {
   const pre = PRESETS[name]; if (!pre) return false;
-  if (category !== 'all' || document.getElementById('search').value.trim()) return false;
+  if (category !== 'all') return false;
   if ((pre.mod || 'all') !== modality) return false;
   for (const k in PRESET_FLAGS) { if (!!pre[k] !== document.getElementById(PRESET_FLAGS[k]).checked) return false; }
   return true;
@@ -59,7 +59,6 @@ function renderTrust() {
 }
 
 function render() {
-  const q = document.getElementById('search').value.trim().toLowerCase();
   const nocard = document.getElementById('f-nocard').checked;
   const nophone = document.getElementById('f-nophone').checked;
   const commercial = document.getElementById('f-commercial').checked;
@@ -69,7 +68,6 @@ function render() {
   let rows = DATA.filter(p => {
     if (category !== 'all' && p.category !== category) return false;
     if (modality !== 'all' && !(p.modalities || []).includes(modality)) return false;
-    if (q && !(p.name.toLowerCase().includes(q) || (p.free_tier||'').toLowerCase().includes(q) || (p.notes||'').toLowerCase().includes(q) || (p.rate_limits||'').toLowerCase().includes(q) || (p.openai_base_url||'').toLowerCase().includes(q) || (p.modalities||[]).join(' ').includes(q) || (p.models_free||[]).join(' ').toLowerCase().includes(q))) return false;
     if (nocard && p.card_required !== false) return false;
     if (nophone && p.phone_required !== false) return false;
     if (commercial && p.commercial_ok !== true) return false;
@@ -92,10 +90,8 @@ function render() {
   const emptyEl = document.getElementById('empty');
   emptyEl.style.display = rows.length ? 'none' : 'block';
   emptyEl.textContent = rows.length ? '' : 'No providers match these filters.';
-  const activeCount = (q ? 1 : 0) + (category !== 'all' ? 1 : 0) + (modality !== 'all' ? 1 : 0) +
+  const activeCount = (category !== 'all' ? 1 : 0) + (modality !== 'all' ? 1 : 0) +
     [nocard, nophone, commercial, openai, verifiedOnly].filter(Boolean).length;
-  document.getElementById('count').textContent =
-    `${rows.length} of ${DATA.length} providers` + (activeCount ? ` · ${activeCount} filter${activeCount > 1 ? 's' : ''} active` : '');
   document.getElementById('clearFilters').hidden = activeCount === 0;
 
   for (const p of rows) {
@@ -140,8 +136,11 @@ function render() {
     tr.querySelector('.notes').textContent = p.notes || '';
     const verCell = tr.querySelector('.pver');
     if (p.verified) {
-      verCell.innerHTML = `<span class="badge b-ok">${ICON('ic-check')}</span> `;
-      verCell.appendChild(document.createTextNode(p.last_verified || ''));
+      verCell.innerHTML = `<span class="badge b-ok">${ICON('ic-check')}</span>`;
+      const vd = document.createElement('span');
+      vd.className = 'ver-date';
+      vd.textContent = p.last_verified || '';
+      verCell.appendChild(vd);
     } else {
       verCell.innerHTML = `<span class="badge b-warn">${ICON('ic-warn')} unverified</span>`;
     }
@@ -189,7 +188,7 @@ document.querySelectorAll('thead th[data-key]').forEach(th => {
   th.addEventListener('click', () => applySort(th));
   th.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); applySort(th); } });
 });
-['search', 'f-nocard', 'f-nophone', 'f-commercial', 'f-openai', 'f-verified'].forEach(id =>
+['f-nocard', 'f-nophone', 'f-commercial', 'f-openai', 'f-verified'].forEach(id =>
   document.getElementById(id).addEventListener('input', e => {
     const chip = e.target.closest('.chip'); if (chip) chip.classList.toggle('on', e.target.checked);
     render();
@@ -224,8 +223,6 @@ document.getElementById('tbody').addEventListener('keydown', e => {
 const URL_FLAGS = [['nocard', 'f-nocard'], ['nophone', 'f-nophone'], ['commercial', 'f-commercial'], ['openai', 'f-openai'], ['verified', 'f-verified']];
 function syncURL() {
   const params = new URLSearchParams();
-  const q = document.getElementById('search').value.trim();
-  if (q) params.set('q', q);
   if (category !== 'all') params.set('cat', category);
   if (modality !== 'all') params.set('mod', modality);
   URL_FLAGS.forEach(([k, id]) => { if (document.getElementById(id).checked) params.set(k, '1'); });
@@ -234,7 +231,6 @@ function syncURL() {
 }
 function applyURL() {
   const params = new URLSearchParams(location.search);
-  if (params.get('q')) document.getElementById('search').value = params.get('q');
   const cat = params.get('cat');
   if (cat && ['all', 'ongoing', 'trial'].includes(cat)) {
     category = cat;
@@ -254,7 +250,6 @@ applyURL();
 document.getElementById('modality').addEventListener('change', e => { modality = e.target.value; render(); });
 
 function resetControls() {
-  document.getElementById('search').value = '';
   category = 'all';
   document.querySelectorAll('#cat button').forEach(b => { const on = b.dataset.cat === 'all'; b.classList.toggle('active', on); b.setAttribute('aria-pressed', String(on)); });
   modality = 'all'; document.getElementById('modality').value = 'all';

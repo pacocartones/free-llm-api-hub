@@ -548,13 +548,13 @@ const explorerFlagsMini = (p) => FLAG_PAIRS.filter(([k, v]) => p[k] === v)
   .map(([, , ic, t]) => `<span class="fmini-i" title="${t}" aria-label="${t}">${IC(ic)}</span>`).join('');
 const explorerRowsHtml = (rows) => rows.map((p) => {
   const best = p.best_for ? `<div class="best">${htmlEsc(p.best_for)}</div>` : '';
-  const v = p.verified ? `<span class="badge b-ok">${IC('ic-check')} ${htmlEsc(p.last_verified)}</span>` : `<span class="badge b-warn">${IC('ic-warn')} unverified</span>`;
+  const v = p.verified ? `<span class="badge b-ok">${IC('ic-check')}</span><span class="ver-date">${htmlEsc(p.last_verified)}</span>` : `<span class="badge b-warn">${IC('ic-warn')} unverified</span>`;
   return `<tr>` +
     `<td class="name" data-label="API"><a href="p/${p.slug}.html">${htmlEsc(p.name)}</a>${best}</td>` +
     `<td data-label="Type"><span class="badge ${p.category === 'ongoing' ? 'b-ongoing' : 'b-trial'}">${p.category === 'ongoing' ? 'Ongoing' : 'Trial'}</span><div class="fmini">${explorerFlagsMini(p)}</div></td>` +
     `<td data-label="What's free">${htmlEsc(p.free_tier)}</td>` +
     `<td class="notes" data-label="The catch">${htmlEsc(p.notes || '')}</td>` +
-    `<td data-label="Verified">${v}</td></tr>`;
+    `<td class="pver" data-label="Verified">${v}</td></tr>`;
 }).join('\n');
 
 // Emit the browser's copy of the shared rules (recScore + FLAG_PAIRS) straight

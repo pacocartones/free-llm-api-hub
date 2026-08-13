@@ -39,15 +39,6 @@
     }
   }
 
-  // --- "/" focuses the search box (when present and not already typing) ---
-  document.addEventListener('keydown', function (e) {
-    if (e.key !== '/' || e.metaKey || e.ctrlKey || e.altKey) return;
-    var t = e.target, tag = (t && t.tagName || '').toLowerCase();
-    if (tag === 'input' || tag === 'textarea' || (t && t.isContentEditable)) return;
-    var s = document.getElementById('search');
-    if (s) { e.preventDefault(); s.focus(); }
-  });
-
   // --- copy button on every code block (quickstarts, embed snippets) ---
   document.querySelectorAll('pre').forEach(function (pre) {
     var btn = document.createElement('button');
