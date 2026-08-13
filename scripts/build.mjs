@@ -475,7 +475,7 @@ ${siteFooter(prefix)}
 }
 
 // Kept deterministic from the data (no time-sensitive term) so PR CI never flakes on date drift.
-// The decaying "verified in the last N days" number lives in the badge, which the scheduled job refreshes.
+// The decaying freshness number lives in badge-freshness.json, refreshed on every build pass.
 //
 // Contributor count is deliberately NOT part of the generated stats line: the
 // README shows a live shields.io badge (github/contributors) instead, so the

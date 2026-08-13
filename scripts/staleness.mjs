@@ -1,17 +1,17 @@
 #!/usr/bin/env node
 // Emits a Markdown re-verification worklist from data/providers.json.
-// The weekly maintenance workflow captures this and opens/updates a tracking issue,
-// turning the 90-day freshness policy into an actionable checklist. Report-only (never fails).
+// On-demand local tool (no scheduled workflow): turns the 90-day freshness policy
+// into an actionable checklist for the next re-verification pass. Report-only (never fails).
 // Run with: node scripts/staleness.mjs
 
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
-import { SLA_DAYS, DUE_SOON_DAYS, ageInDays } from './lib/rules.mjs';
+import { SLA_DAYS, DUE_SOON_DAYS, ageInDays, freshnessStatus } from './lib/rules.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
-// Same two numbers the freshness badge is graded on — imported, not re-declared,
-// so the badge can never call an entry fresh while this worklist calls it overdue.
+// Same bucketing the freshness badge is graded on — imported from rules.mjs, not
+// re-declared, so the worklist and the badge can never disagree on an entry.
 const DUE_SOON = DUE_SOON_DAYS;
 const OVERDUE = SLA_DAYS;
 
@@ -30,8 +30,9 @@ for (const p of providers) {
     continue;
   }
   const age = ageDays(p.last_verified);
-  if (age > OVERDUE) overdue.push({ p, age });
-  else if (age >= DUE_SOON) dueSoon.push({ p, age });
+  const status = freshnessStatus(age);
+  if (status === 'stale') overdue.push({ p, age });
+  else if (status === 'due') dueSoon.push({ p, age });
 }
 overdue.sort((a, b) => b.age - a.age);
 dueSoon.sort((a, b) => b.age - a.age);
@@ -85,7 +86,7 @@ out.push('');
 out.push(`### 🔴 Overdue (>${OVERDUE} days) — ${overdue.length}`);
 out.push(overdue.length ? overdue.map(line).join('\n') : '_None — the list is within SLA._');
 out.push('');
-out.push(`### 🟡 Due soon (${DUE_SOON}–${OVERDUE} days) — ${dueSoon.length}`);
+out.push(`### 🟡 Due soon (${DUE_SOON + 1}–${OVERDUE} days) — ${dueSoon.length}`);
 out.push(dueSoon.length ? dueSoon.map(line).join('\n') : '_None._');
 out.push('');
 out.push(`### ⚠️ Never independently verified — ${unverified.length}`);

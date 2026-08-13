@@ -417,7 +417,7 @@ providers:
     openai_compatible: true
     openai_base_url: "https://api.scaleway.ai/v1"
     verified: true
-    last_verified: "2026-07-30"
+    last_verified: "2026-08-13"
   - slug: "nvidia-nim"
     name: "NVIDIA NIM"
     category: "trial"
