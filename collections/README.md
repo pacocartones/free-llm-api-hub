@@ -4,7 +4,7 @@
 
 Curated, always-current slices of the [dataset](../data/providers.json) — each one filters the list by a single constraint a builder actually has. Generated on every change; each has a [live web page](https://freellmapihub.com/collections/).
 
-- **[Free LLM APIs with no credit card](no-credit-card.md)** — LLM APIs you can start calling without entering a payment method — filtered live from a continuously-verified dataset. _(39 providers)_
+- **[Free LLM APIs with no credit card](no-credit-card.md)** — LLM APIs you can start calling without entering a payment method — filtered live from a continuously-verified dataset. _(40 providers)_
 - **[Free LLM APIs with no phone verification](no-phone.md)** — LLM APIs whose signup needs no SMS/phone verification — a live slice of a continuously-verified dataset. _(20 providers)_
 - **[Free LLM APIs for commercial use](commercial-use.md)** — Free LLM API tiers that permit production/commercial use — not restricted to evaluation. Verified against each provider’s terms. _(23 providers)_
 - **[OpenAI-compatible free LLM APIs](openai-compatible.md)** — Free LLM APIs that expose an OpenAI-compatible endpoint — point the OpenAI SDK at a new base_url and you are done. _(31 providers)_
