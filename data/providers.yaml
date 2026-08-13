@@ -94,7 +94,7 @@ providers:
     openai_compatible: true
     openai_base_url: null
     verified: true
-    last_verified: "2026-07-30"
+    last_verified: "2026-08-13"
   - slug: "cerebras"
     name: "Cerebras"
     category: "trial"
@@ -132,7 +132,7 @@ providers:
     openai_compatible: null
     openai_base_url: null
     verified: true
-    last_verified: "2026-07-12"
+    last_verified: "2026-08-13"
   - slug: "huggingface"
     name: "HuggingFace"
     category: "ongoing"
@@ -151,7 +151,7 @@ providers:
     openai_compatible: true
     openai_base_url: "https://router.huggingface.co/v1"
     verified: true
-    last_verified: "2026-07-30"
+    last_verified: "2026-08-13"
   - slug: "siliconflow"
     name: "SiliconFlow"
     category: "ongoing"
@@ -170,7 +170,7 @@ providers:
     openai_compatible: true
     openai_base_url: "https://api.siliconflow.com/v1"
     verified: true
-    last_verified: "2026-07-30"
+    last_verified: "2026-08-13"
   - slug: "zai-glm"
     name: "Z.ai (Zhipu AI / GLM)"
     category: "ongoing"
@@ -208,7 +208,7 @@ providers:
     openai_compatible: true
     openai_base_url: null
     verified: true
-    last_verified: "2026-07-11"
+    last_verified: "2026-08-13"
   - slug: "ovhcloud-ai-endpoints"
     name: "OVHcloud AI Endpoints"
     category: "ongoing"
@@ -436,7 +436,7 @@ providers:
     openai_compatible: true
     openai_base_url: "https://integrate.api.nvidia.com/v1"
     verified: true
-    last_verified: "2026-07-11"
+    last_verified: "2026-08-13"
   - slug: "vercel-ai-gateway"
     name: "Vercel AI Gateway"
     category: "trial"
