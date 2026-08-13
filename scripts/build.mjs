@@ -267,7 +267,7 @@ const GUIDES = [
     title: 'Free OCR & document AI APIs · Free LLM API Hub',
     desc: 'Verified APIs that do OCR and document parsing on a free tier — extract text, tables and key-values from PDFs and images for RAG. Page limits compared.',
     lede: 'Free OCR and document-AI APIs to turn PDFs and images into structured, LLM-ready text.',
-    intro: `<p>Before a document can go into a RAG pipeline it has to be parsed — OCR, layout, tables and key-values. The providers below offer <strong>document AI on a free tier</strong>, several with thousands of free pages a month that renew.</p><p>Pair one of these with a <a href="free-embeddings-apis.html">free embeddings API</a> and a free chat model to build a full document-QA stack at zero cost for prototypes.</p>`,
+    intro: `<p>Before a document can go into a RAG pipeline it has to be parsed — OCR, layout, tables and key-values. The providers below offer <strong>document AI on a free tier</strong>, several with thousands of free pages a month that renew.</p><p>Pair one of these with a <a href="free-embeddings-apis">free embeddings API</a> and a free chat model to build a full document-QA stack at zero cost for prototypes.</p>`,
     filter: (p) => (p.modalities || []).includes('ocr'),
     query: '#explorer',
     pick: 'unstructured',
@@ -402,7 +402,7 @@ const IC = (id) => `<svg class="i" aria-hidden="true"><use href="#${id}"/></svg>
 
 const siteHeader = (p) => `<header class="site-header"><div class="wrap header-inner">
 <a class="brand" href="${p}" aria-label="Free LLM API Hub — home"><svg class="logo-mark"><use href="#logo"/></svg><span class="brand-name">Free LLM API <span class="grad">Hub</span></span></a>
-<nav class="nav" id="primary-nav" aria-label="Primary"><a href="${p}">${IC('ic-home')}Home</a><a href="${p}models/">${IC('ic-cube')}Models</a><a href="${p}guides/">${IC('ic-book')}Guides</a><a href="${p}collections/">${IC('ic-grid')}Collections</a><a href="${p}programs/startups.html">${IC('ic-rocket')}Startup credits</a><a href="${p}programs/research.html">${IC('ic-cap')}Student credits</a></nav>
+<nav class="nav" id="primary-nav" aria-label="Primary"><a href="${p}">${IC('ic-home')}Home</a><a href="${p}models/">${IC('ic-cube')}Models</a><a href="${p}guides/">${IC('ic-book')}Guides</a><a href="${p}collections/">${IC('ic-grid')}Collections</a><a href="${p}programs/startups">${IC('ic-rocket')}Startup credits</a><a href="${p}programs/research">${IC('ic-cap')}Student credits</a></nav>
 <div class="header-actions">
 <button class="icon-btn nav-toggle" id="navToggle" aria-label="Open menu" aria-expanded="false" aria-controls="primary-nav"><svg class="i menu" aria-hidden="true"><use href="#ic-menu"/></svg><svg class="i close" aria-hidden="true"><use href="#ic-close"/></svg></button>
 <a class="icon-btn" href="${REPO}" target="_blank" rel="noopener" aria-label="Star on GitHub">${GH_ICON}<span class="star-count" data-stars>★</span></a>
@@ -411,10 +411,10 @@ const siteHeader = (p) => `<header class="site-header"><div class="wrap header-i
 
 const siteFooter = (p) => `<footer class="site-footer"><div class="wrap footer-top">
 <div class="footer-brand"><a class="foot-brand-link" href="${p}" aria-label="Free LLM API Hub — home"><svg class="logo-mark"><use href="#logo"/></svg><span class="brand-name">Free LLM API <span class="grad">Hub</span></span></a><p>A continuously-verified, machine-readable dataset of free LLM &amp; AI-model APIs and trial credits for developers.</p><a class="star-btn" href="${REPO}" target="_blank" rel="noopener" aria-label="Star free-llm-api-hub on GitHub"><span class="sb-label">${GH_ICON} Star on GitHub</span><span class="sb-count" data-stars>★</span></a></div>
-<div class="footer-col"><h4>Explore</h4><a href="${p}#explorer">Interactive explorer</a><a href="${p}models/">Free model index</a><a href="${p}guides/">Guides</a><a href="${p}collections/">Collections</a><a href="${p}programs/startups.html">Startup credits</a><a href="${p}programs/research.html">Student &amp; research credits</a><a href="${p}updates.html">Updates</a><a href="${REPO}#notably-not-free">Notably NOT free</a></div>
+<div class="footer-col"><h4>Explore</h4><a href="${p}#explorer">Interactive explorer</a><a href="${p}models/">Free model index</a><a href="${p}guides/">Guides</a><a href="${p}collections/">Collections</a><a href="${p}programs/startups">Startup credits</a><a href="${p}programs/research">Student &amp; research credits</a><a href="${p}updates">Updates</a><a href="${REPO}#notably-not-free">Notably NOT free</a></div>
 <div class="footer-col"><h4>Data</h4><a href="${p}providers.json">providers.json</a><a href="${p}api/">JSON API</a><a href="${p}llms.txt">llms.txt</a><a href="${p}providers.csv">CSV export</a><a href="${p}providers.yaml">YAML export</a><a href="${REPO}/blob/main/data/schema.json">JSON Schema</a></div>
 <div class="footer-col"><h4>Project</h4><a href="${REPO}/blob/main/docs/methodology.md">Methodology</a><a href="${REPO}/blob/main/CONTRIBUTING.md">Contributing</a><a href="${REPO}/blob/main/CHANGELOG.md">Changelog</a><a href="${REPO}">GitHub ★</a></div>
-</div><div class="wrap footer-bottom"><p>Independent, community-maintained — not affiliated with any provider listed. Terms change without notice; always confirm against each provider's own docs. MIT licensed.</p><p class="foot-legal"><a href="${p}legal/privacy.html">Privacy</a> · <a href="${p}legal/terms.html">Terms</a></p><p class="foot-email"><a href="mailto:admin@freellmapihub.com">admin@freellmapihub.com</a></p></div></footer>`;
+</div><div class="wrap footer-bottom"><p>Independent, community-maintained — not affiliated with any provider listed. Terms change without notice; always confirm against each provider's own docs. MIT licensed.</p><p class="foot-legal"><a href="${p}legal/privacy">Privacy</a> · <a href="${p}legal/terms">Terms</a></p><p class="foot-email"><a href="mailto:admin@freellmapihub.com">admin@freellmapihub.com</a></p></div></footer>`;
 
 // Full page wrapper for generated (collection) pages. `p` is the path prefix to the site root.
 // Theme guard — runs before first paint to avoid the white flash. ONE source, shared by
@@ -507,7 +507,7 @@ const BLURB = {
 };
 const collectionsIndexMd = COLLECTIONS.map((c) => {
   const n = collRows(c).length;
-  return `- **[${c.title}](collections/${c.slug}.md)** (${n}) — ${BLURB[c.slug]} · [live page ↗](${SITE}/collections/${c.slug}.html)`;
+  return `- **[${c.title}](collections/${c.slug}.md)** (${n}) — ${BLURB[c.slug]} · [live page ↗](${SITE}/collections/${c.slug})`;
 }).join('\n');
 
 // "What's covered" — modality breakdown, generated from the data so it never goes stale.
@@ -550,7 +550,7 @@ const explorerRowsHtml = (rows) => rows.map((p) => {
   const best = p.best_for ? `<div class="best">${htmlEsc(p.best_for)}</div>` : '';
   const v = p.verified ? `<span class="badge b-ok">${IC('ic-check')}</span><span class="ver-date">${htmlEsc(p.last_verified)}</span>` : `<span class="badge b-warn">${IC('ic-warn')} unverified</span>`;
   return `<tr>` +
-    `<td class="name" data-label="API"><a href="p/${p.slug}.html">${htmlEsc(p.name)}</a>${best}</td>` +
+    `<td class="name" data-label="API"><a href="p/${p.slug}">${htmlEsc(p.name)}</a>${best}</td>` +
     `<td data-label="Type"><span class="badge ${p.category === 'ongoing' ? 'b-ongoing' : 'b-trial'}">${p.category === 'ongoing' ? 'Ongoing' : 'Trial'}</span><div class="fmini">${explorerFlagsMini(p)}</div></td>` +
     `<td data-label="What's free">${htmlEsc(p.free_tier)}</td>` +
     `<td class="notes" data-label="The catch">${htmlEsc(p.notes || '')}</td>` +
@@ -637,10 +637,10 @@ const collNavMd = COLLECTIONS.map((c) => `[${c.title}](${c.slug}.md)`).join(' ·
 for (const c of COLLECTIONS) {
   const rows = collRows(c);
   const nav = COLLECTIONS.map(
-    (o) => `<a href="${o.slug}.html"${o.slug === c.slug ? ' class="active" aria-current="page"' : ''}>${htmlEsc(o.title)}</a>`
+    (o) => `<a href="${o.slug}"${o.slug === c.slug ? ' class="active" aria-current="page"' : ''}>${htmlEsc(o.title)}</a>`
   ).join('');
   const guideLinks = (c.guides || [])
-    .map((s) => { const gx = GUIDES.find((x) => x.slug === s); return gx ? `<a href="../guides/${gx.slug}.html">${htmlEsc(gx.card)}</a>` : ''; })
+    .map((s) => { const gx = GUIDES.find((x) => x.slug === s); return gx ? `<a href="../guides/${gx.slug}">${htmlEsc(gx.card)}</a>` : ''; })
     .filter(Boolean).join('');
   const collFaqHtml = (c.faq && c.faq.length)
     ? `<h2>FAQ</h2>` + c.faq.map((f) => `<div class="faq-item"><h3>${htmlEsc(f.q)}</h3><p>${f.a}</p></div>`).join('')
@@ -673,7 +673,7 @@ for (const c of COLLECTIONS) {
         itemListElement: [
           { '@type': 'ListItem', position: 1, name: 'Free LLM API Hub', item: `${SITE}/` },
           { '@type': 'ListItem', position: 2, name: 'Collections', item: `${SITE}/collections/` },
-          { '@type': 'ListItem', position: 3, name: c.title, item: `${SITE}/collections/${c.slug}.html` },
+          { '@type': 'ListItem', position: 3, name: c.title, item: `${SITE}/collections/${c.slug}` },
         ],
       },
       ...(c.faq && c.faq.length ? [{
@@ -713,7 +713,7 @@ print(resp.choices[0].message.content)</code></pre><pre><code>curl ${htmlEsc(QS_
     `</div></main>`;
   writeFileSync(
     join(ROOT, `site/collections/${c.slug}.html`),
-    htmlPage({ title: `${c.title} · Free LLM API Hub`, desc: c.desc, canonical: `${SITE}/collections/${c.slug}.html`, main, jsonld, ogImage: `${SITE}/og/collections/${c.slug}.png` })
+    htmlPage({ title: `${c.title} · Free LLM API Hub`, desc: c.desc, canonical: `${SITE}/collections/${c.slug}`, main, jsonld, ogImage: `${SITE}/og/collections/${c.slug}.png` })
   );
 }
 
@@ -727,7 +727,7 @@ writeFileSync(join(ROOT, 'collections/README.md'), hubMd);
 
 // --- collections hub (live HTML) ---
 const hubCards = COLLECTIONS.map((c) =>
-  `<a class="coll-card" href="${c.slug}.html"><div class="coll-card-head"><strong>${htmlEsc(c.title)}</strong><span class="count">${collRows(c).length}</span></div><p>${htmlEsc(c.desc)}</p></a>`
+  `<a class="coll-card" href="${c.slug}"><div class="coll-card-head"><strong>${htmlEsc(c.title)}</strong><span class="count">${collRows(c).length}</span></div><p>${htmlEsc(c.desc)}</p></a>`
 ).join('');
 const hubMain =
   `<section class="page-hero"><div class="wrap">` +
@@ -847,8 +847,8 @@ print(resp.choices[0].message.content)</code></pre><p class="muted">…or with c
     websiteBtn = `<a class="btn website" href="${u.protocol}//${host}" target="_blank" rel="noopener">Visit website ↗</a>`;
   } catch (_) { /* no/invalid docs URL — skip the website button */ }
   const crossChips = [
-    ...inColls.map((c) => `<a href="../collections/${c.slug}.html">${htmlEsc(c.title)}</a>`),
-    ...inGuides.map((g) => `<a href="../guides/${g.slug}.html">${htmlEsc(g.card)}</a>`),
+    ...inColls.map((c) => `<a href="../collections/${c.slug}">${htmlEsc(c.title)}</a>`),
+    ...inGuides.map((g) => `<a href="../guides/${g.slug}">${htmlEsc(g.card)}</a>`),
   ].join('');
   const main =
     `<section class="page-hero prov-hero"><div class="wrap">` +
@@ -872,7 +872,7 @@ print(resp.choices[0].message.content)</code></pre><p class="muted">…or with c
     '@context': 'https://schema.org',
     '@graph': [
       {
-        '@type': 'WebPage', name: `${p.name} — free LLM API`, description: p.free_tier, url: `${SITE}/p/${p.slug}.html`,
+        '@type': 'WebPage', name: `${p.name} — free LLM API`, description: p.free_tier, url: `${SITE}/p/${p.slug}`,
         isPartOf: { '@type': 'Dataset', name: 'Free LLM API Hub', url: `${SITE}/` },
       },
       {
@@ -880,14 +880,14 @@ print(resp.choices[0].message.content)</code></pre><p class="muted">…or with c
         itemListElement: [
           { '@type': 'ListItem', position: 1, name: 'Free LLM API Hub', item: `${SITE}/` },
           { '@type': 'ListItem', position: 2, name: 'Providers', item: `${SITE}/#explorer` },
-          { '@type': 'ListItem', position: 3, name: p.name, item: `${SITE}/p/${p.slug}.html` },
+          { '@type': 'ListItem', position: 3, name: p.name, item: `${SITE}/p/${p.slug}` },
         ],
       },
     ],
   });
   writeFileSync(
     join(ROOT, `site/p/${p.slug}.html`),
-    htmlPage({ title: `${p.name} — free tier & limits · Free LLM API Hub`, desc: `${p.name}: ${p.free_tier}`.slice(0, 180), canonical: `${SITE}/p/${p.slug}.html`, main, jsonld, ogImage: `${SITE}/og/p/${p.slug}.png` })
+    htmlPage({ title: `${p.name} — free tier & limits · Free LLM API Hub`, desc: `${p.name}: ${p.free_tier}`.slice(0, 180), canonical: `${SITE}/p/${p.slug}`, main, jsonld, ogImage: `${SITE}/og/p/${p.slug}.png` })
   );
 
   // Embeddable per-provider badge. Same rule as the repo badge: the colour tracks
@@ -919,7 +919,7 @@ const legalPage = (slug, title, bodyHtml) => {
     `</div></main>`;
   writeFileSync(
     join(ROOT, `site/legal/${slug}.html`),
-    htmlPage({ title: `${title} · Free LLM API Hub`, desc: `${title} for Free LLM API Hub, operated by ${ORG}.`, canonical: `${SITE}/legal/${slug}.html`, main, noindex: true })
+    htmlPage({ title: `${title} · Free LLM API Hub`, desc: `${title} for Free LLM API Hub, operated by ${ORG}.`, canonical: `${SITE}/legal/${slug}`, main, noindex: true })
   );
 };
 
@@ -967,7 +967,7 @@ if (commits.length) {
     `<section class="page-hero"><div class="wrap"><nav class="crumbs"><a href="./">Home</a> / Updates</nav>` +
     `<h1>Updates</h1><p class="lede">Every recent change to the dataset and site, newest first. Subscribe via <a href="feed.xml">RSS</a>.</p></div></section>` +
     `<main id="main"><div class="wrap"><ul class="upd-list">${updItems}</ul></div></main>`;
-  writeFileSync(join(ROOT, 'site/updates.html'), htmlPage({ title: 'Updates · Free LLM API Hub', desc: 'Recent changes to the Free LLM API Hub dataset and site.', canonical: `${SITE}/updates.html`, main: updMain, prefix: '' }));
+  writeFileSync(join(ROOT, 'site/updates.html'), htmlPage({ title: 'Updates · Free LLM API Hub', desc: 'Recent changes to the Free LLM API Hub dataset and site.', canonical: `${SITE}/updates`, main: updMain, prefix: '' }));
 
   const rssItems = commits
     .map((c) => `    <item><title>${htmlEsc(c.subject)}</title><link>${REPO}/commit/${c.hash}</link><guid isPermaLink="true">${REPO}/commit/${c.hash}</guid><pubDate>${new Date(c.date + 'T00:00:00Z').toUTCString()}</pubDate></item>`)
@@ -994,7 +994,7 @@ const researchRowHtml = (r) => `<tr><td class="name"><a href="${htmlEsc(r.url)}"
 
 const programPage = (slug, h1, lede, tableHead, rowsHtml, extra = '') =>
   htmlPage({
-    title: `${h1} · Free LLM API Hub`, desc: stripTags(lede), canonical: `${SITE}/programs/${slug}.html`,
+    title: `${h1} · Free LLM API Hub`, desc: stripTags(lede), canonical: `${SITE}/programs/${slug}`,
     main:
       `<section class="page-hero"><div class="wrap"><nav class="crumbs"><a href="../">Home</a> / ${htmlEsc(h1)}</nav>` +
       `<h1>${htmlEsc(h1)}</h1><p class="lede">${lede}</p></div></section>` +
@@ -1008,14 +1008,14 @@ writeFileSync(join(ROOT, 'site/programs/startups.html'), programPage(
   'Apply-to-get credit programs that can fund LLM / AI-model API usage — volatile, so confirm the current terms before you rely on one. Different from the <a href="../#explorer">self-serve dataset</a>: these need eligibility and an application.',
   '<tr><th>Program</th><th>What you get</th><th>Funds LLM API?</th><th>Who qualifies</th></tr>',
   programs.startups.map(startupsRowHtml).join('\n'),
-  `<p style="margin-top:16px">A student or researcher instead? See <a href="research.html">free credits for students &amp; researchers</a>.</p>`));
+  `<p style="margin-top:16px">A student or researcher instead? See <a href="research">free credits for students &amp; researchers</a>.</p>`));
 
 writeFileSync(join(ROOT, 'site/programs/research.html'), programPage(
   'research', 'Free credits for students & researchers',
   'Student and academic/research programs that give credits or access usable for LLM / AI-model APIs. Different from the <a href="../#explorer">self-serve dataset</a>: these need eligibility and an application.',
   '<tr><th>Program</th><th>Audience</th><th>What you get</th><th>Funds LLM API?</th><th>Who qualifies</th></tr>',
   programs.research.map(researchRowHtml).join('\n'),
-  `<p style="margin-top:16px">Building a startup instead? See <a href="startups.html">free credits for startups</a>.</p>`));
+  `<p style="margin-top:16px">Building a startup instead? See <a href="startups">free credits for startups</a>.</p>`));
 
 // regenerate the companion doc tables from the same source (data-first)
 const startupsMd = '| Program | What you get | Funds LLM API? | Who qualifies |\n|---|---|---|---|\n' +
@@ -1036,7 +1036,7 @@ const modelProviderCount = providers.filter((p) => p.models_free && p.models_fre
 const modelRowHtml = ({ m, p }) =>
   `<tr data-s="${htmlEsc((m + ' ' + p.name + ' ' + (p.modalities || []).join(' ')).toLowerCase())}">` +
   `<td class="name"><code>${htmlEsc(m)}</code></td>` +
-  `<td><a href="../p/${p.slug}.html">${htmlEsc(p.name)}</a></td>` +
+  `<td><a href="../p/${p.slug}">${htmlEsc(p.name)}</a></td>` +
   `<td>${htmlEsc(p.free_type)}</td>` +
   `<td class="notes">${(p.modalities || []).join(', ') || '—'}</td></tr>`;
 const modelsMain =
@@ -1058,7 +1058,7 @@ writeFileSync(join(ROOT, 'site/models/index.html'), htmlPage({
 // ---------- SEO guides: intent-matched landing pages, generated from the data ----------
 mkdirSync(join(ROOT, 'site/guides'), { recursive: true });
 const guideRow = (p) =>
-  `<tr><td class="name"><a href="../p/${p.slug}.html">${htmlEsc(p.name)}</a></td>` +
+  `<tr><td class="name"><a href="../p/${p.slug}">${htmlEsc(p.name)}</a></td>` +
   `<td>${htmlEsc(p.free_tier)}</td>` +
   `<td class="notes">${htmlEsc(p.rate_limits)}</td>` +
   `<td>${provFlagsHtml(p)}</td></tr>`;
@@ -1067,7 +1067,7 @@ for (const g of GUIDES) {
   const top = (g.pick && list.find((x) => x.slug === g.pick)) ||
     [...list].sort((a, b) => recScore(b) - recScore(a) || (a.name < b.name ? -1 : 1))[0];
   const related = GUIDES.filter((x) => x.slug !== g.slug)
-    .map((x) => `<a href="${x.slug}.html">${htmlEsc(x.card)}</a>`).join('');
+    .map((x) => `<a href="${x.slug}">${htmlEsc(x.card)}</a>`).join('');
   const faqHtml = (g.faq && g.faq.length)
     ? `<h2>FAQ</h2>` + g.faq.map((f) => `<div class="faq-item"><h3>${htmlEsc(f.q)}</h3><p>${f.a}</p></div>`).join('')
     : '';
@@ -1076,7 +1076,7 @@ for (const g of GUIDES) {
     `<h1>${htmlEsc(g.h1)}</h1><p class="lede">${htmlEsc(g.lede)}</p></div></section>` +
     `<main id="main"><div class="wrap prose">` +
     g.intro +
-    (top ? `<div class="prov-summary"><h3>Top pick — ${htmlEsc(top.name)}</h3><p>${htmlEsc(top.best_for || top.free_tier)} <a href="../p/${top.slug}.html">Details →</a></p></div>` : '') +
+    (top ? `<div class="prov-summary"><h3>Top pick — ${htmlEsc(top.name)}</h3><p>${htmlEsc(top.best_for || top.free_tier)} <a href="../p/${top.slug}">Details →</a></p></div>` : '') +
     `<p class="count"><strong>${list.length}</strong> verified providers</p>` +
     `<table class="model-table"><thead><tr><th>Provider</th><th>Free tier</th><th>Rate limits</th><th>Gotchas</th></tr></thead><tbody>\n` +
     list.map(guideRow).join('\n') +
@@ -1091,7 +1091,7 @@ for (const g of GUIDES) {
     '@graph': [
       {
         '@type': 'Article', headline: g.h1, description: g.desc,
-        url: `${SITE}/guides/${g.slug}.html`, isPartOf: { '@type': 'WebSite', name: 'Free LLM API Hub', url: `${SITE}/` },
+        url: `${SITE}/guides/${g.slug}`, isPartOf: { '@type': 'WebSite', name: 'Free LLM API Hub', url: `${SITE}/` },
       },
       ...(g.faq && g.faq.length ? [{
         '@type': 'FAQPage',
@@ -1103,7 +1103,7 @@ for (const g of GUIDES) {
     ],
   });
   writeFileSync(join(ROOT, `site/guides/${g.slug}.html`), htmlPage({
-    title: g.title, desc: g.desc, canonical: `${SITE}/guides/${g.slug}.html`, main, jsonld,
+    title: g.title, desc: g.desc, canonical: `${SITE}/guides/${g.slug}`, main, jsonld,
     ogImage: `${SITE}/og/guides/${g.slug}.png`,
   }));
 }
@@ -1111,7 +1111,7 @@ const guidesHubMain =
   `<section class="page-hero"><div class="wrap"><nav class="crumbs"><a href="../">Home</a> / Guides</nav>` +
   `<h1>Guides</h1><p class="lede">Short, data-backed answers to the most common "is there a free API for…" questions. Every list is generated from the verified dataset, so it stays current.</p></div></section>` +
   `<main id="main"><div class="wrap"><div class="coll-grid">` +
-  GUIDES.map((g) => `<a class="coll-card" href="${g.slug}.html"><div class="coll-card-head"><strong>${htmlEsc(g.card)}</strong><span class="count">${providers.filter(g.filter).length}</span></div><p>${htmlEsc(g.blurb)}</p></a>`).join('') +
+  GUIDES.map((g) => `<a class="coll-card" href="${g.slug}"><div class="coll-card-head"><strong>${htmlEsc(g.card)}</strong><span class="count">${providers.filter(g.filter).length}</span></div><p>${htmlEsc(g.blurb)}</p></a>`).join('') +
   `</div></div></main>`;
 writeFileSync(join(ROOT, 'site/guides/index.html'), htmlPage({
   title: 'Guides — free LLM & AI API how-tos · Free LLM API Hub',
@@ -1196,11 +1196,11 @@ const llmsTxt =
   `- [Static JSON API](${SITE}/api/): versioned endpoints + pre-filtered slices (category, modality, no-card, commercial, OpenAI-compatible, …)\n` +
   `- [Full provider list expanded, markdown](${SITE}/llms-full.txt)\n\n` +
   `## Guides\n` +
-  GUIDES.map((g) => `- [${g.h1}](${SITE}/guides/${g.slug}.html): ${g.blurb}`).join('\n') + `\n\n` +
+  GUIDES.map((g) => `- [${g.h1}](${SITE}/guides/${g.slug}): ${g.blurb}`).join('\n') + `\n\n` +
   `## Collections\n` +
-  COLLECTIONS.map((c) => `- [${c.title}](${SITE}/collections/${c.slug}.html)`).join('\n') + `\n\n` +
+  COLLECTIONS.map((c) => `- [${c.title}](${SITE}/collections/${c.slug})`).join('\n') + `\n\n` +
   `## Credit programs\n` +
-  `- [Startup credits](${SITE}/programs/startups.html)\n- [Student & research credits](${SITE}/programs/research.html)\n`;
+  `- [Startup credits](${SITE}/programs/startups)\n- [Student & research credits](${SITE}/programs/research)\n`;
 writeFileSync(join(ROOT, 'site/llms.txt'), llmsTxt);
 
 const yn = (v, yes, no) => v === true ? yes : v === false ? no : 'unknown';
@@ -1218,7 +1218,7 @@ const provBlock = (p) => {
     `- Modalities: ${(p.modalities || ['text']).join(', ')}\n` +
     `- Gates: ${gates}\n` +
     `- Docs: ${p.docs_url}\n` +
-    `- Page: ${SITE}/p/${p.slug}.html\n`;
+    `- Page: ${SITE}/p/${p.slug}\n`;
 };
 const llmsFull =
   `# Free LLM API Hub — full provider list\n\n> ${llmsSummary}\n\n` +
@@ -1234,12 +1234,12 @@ const sitemapUrls = [
   `${SITE}/guides/`,
   `${SITE}/collections/`,
   `${SITE}/api/`,
-  `${SITE}/programs/startups.html`,
-  `${SITE}/programs/research.html`,
-  ...GUIDES.map((g) => `${SITE}/guides/${g.slug}.html`),
-  ...(commits.length ? [`${SITE}/updates.html`] : []),
-  ...COLLECTIONS.map((c) => `${SITE}/collections/${c.slug}.html`),
-  ...providers.map((p) => `${SITE}/p/${p.slug}.html`),
+  `${SITE}/programs/startups`,
+  `${SITE}/programs/research`,
+  ...GUIDES.map((g) => `${SITE}/guides/${g.slug}`),
+  ...(commits.length ? [`${SITE}/updates`] : []),
+  ...COLLECTIONS.map((c) => `${SITE}/collections/${c.slug}`),
+  ...providers.map((p) => `${SITE}/p/${p.slug}`),
 ];
 const sitemap =
   `<?xml version="1.0" encoding="UTF-8"?>\n` +
