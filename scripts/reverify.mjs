@@ -35,15 +35,19 @@ const verified = providers
 const n = batchSize ?? Math.ceil(verified.length / (SLA_DAYS / 7));
 const batch = verified.slice(0, n);
 
+// Single-pass entity decode: one regex + callback, so entities are never
+// double-unescaped (e.g. &amp;amp; -> &amp;, not &).
+const ENTITIES = { '&amp;': '&', '&lt;': '<', '&gt;': '>', '&quot;': '"', '&#39;': "'", '&nbsp;': ' ' };
+const decodeEntities = (s) => s.replace(/&(?:amp|lt|gt|quot|#39|nbsp);/g, (m) => ENTITIES[m] || m);
 const stripHtml = (html) => {
-  const s = html
-    .replace(/<script[\s\S]*?<\/script>/gi, ' ')
-    .replace(/<style[\s\S]*?<\/style>/gi, ' ')
-    .replace(/<[^>]+>/g, ' ')
-    .replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
-    .replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&nbsp;/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
+  // Tolerant of whitespace inside tags (e.g. <script >, </script >).
+  const s = decodeEntities(
+    html
+      .replace(/<script\b[^>]*>[\s\S]*?<\/script\s*>/gi, ' ')
+      .replace(/<style\b[^>]*>[\s\S]*?<\/style\s*>/gi, ' ')
+      .replace(/<[^>]+>/g, ' ')
+      .replace(/\s+/g, ' ')
+  ).trim();
   return s.length > 6000 ? s.slice(0, 6000) + '…' : s;
 };
 
