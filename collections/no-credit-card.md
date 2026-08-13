@@ -8,7 +8,7 @@ LLM APIs you can start calling without entering a payment method — filtered li
 
 Every provider below offers free API access with **no card required** to get started (`card_required: false`, confirmed against their own docs). Rows where the requirement is unknown are excluded rather than assumed.
 
-**39 of 67 tracked providers** match.
+**40 of 67 tracked providers** match.
 
 | Provider | Type | What's free | The catch | Verified |
 |---|---|---|---|---|
@@ -51,6 +51,7 @@ Every provider below offers free API access with **no card required** to get sta
 | **[Upstage](https://console.upstage.ai/docs/getting-started)**<br><sub>💳 no card · 🏢 commercial OK · 🔌 OpenAI-compat</sub> | Trial | $10 in free credit on signup (no card) — Solar LLM (chat + embeddings) plus Document Parse / OCR / information extraction | No credit card required to receive the $10 credit; Studio agents also include 10 free runs. A separate institutional grant (up to 1 year of free Solar + Document Parse) exists for eligible organizations only. Credit validity period not stated. | ✅ 2026-07-31 |
 | **[Veryfi](https://www.veryfi.com/pricing/)**<br><sub>💳 no card · 🏢 commercial OK</sub> | Ongoing | Free Forever plan: up to 100 documents/month — OCR plus structured data extraction (receipts, invoices, and 100+ document types) | No credit card required. The 'Free Forever' 100 docs/mo tier is the standing free tier (a separate 14-day trial unlocks paid features). Proprietary OCR / document-intelligence REST API. | ✅ 2026-07-31 |
 | **[Voicegain](https://www.voicegain.ai/pricing)**<br><sub>💳 no card</sub> | Trial | $50 in free credits on signup (no credit card) — speech-to-text | No credit card required to start — an explicit $50 developer credit. Commercial terms not stated on the pricing page. Native STT REST API. | ✅ 2026-07-31 |
+| **[Datalab (Marker / Surya)](https://documentation.datalab.to/)**<br><sub>💳 no card</sub> | Trial | $20/month (work email) or $10/month (personal email) free usage allowance — OCR in 90+ languages, PDF-to-markdown, tables, forms and structured extraction | Landing page still advertises a $5 signup credit, but the billing page describes the current free tier as a recurring monthly allowance ($20/mo work email, $10/mo personal, no card, 10 req/min) “designed to let you run a complete proof of concept before committing to a paid plan” — no explicit statement on commercial use of the hosted API. The self-hosted OSS weights carry a separate restriction (research/personal/startups under $2M ARR/funding). | ✅ 2026-08-13 |
 
 ---
 

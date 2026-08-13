@@ -1257,19 +1257,19 @@ providers:
   - slug: "datalab"
     name: "Datalab (Marker / Surya)"
     category: "trial"
-    free_type: "trial-credit"
-    free_tier: "$5 in free credits for new accounts — OCR in 90+ languages, PDF-to-markdown, tables, forms and structured extraction"
-    rate_limits: "Per-page pricing and rate limits not published"
-    notes: "$5 signup credit. The hosted API wraps the well-regarded open-source Marker/Surya OCR engine. Card and commercial terms not stated on the docs."
-    best_for: "Open-source-pedigree OCR (Marker/Surya) on a $5 credit"
+    free_type: "recurring-credit"
+    free_tier: "$20/month (work email) or $10/month (personal email) free usage allowance — OCR in 90+ languages, PDF-to-markdown, tables, forms and structured extraction"
+    rate_limits: "10 requests/min on the free tier; per-page pricing (see datalab.to/pricing)"
+    notes: "Landing page still advertises a $5 signup credit, but the billing page describes the current free tier as a recurring monthly allowance ($20/mo work email, $10/mo personal, no card, 10 req/min) “designed to let you run a complete proof of concept before committing to a paid plan” — no explicit statement on commercial use of the hosted API. The self-hosted OSS weights carry a separate restriction (research/personal/startups under $2M ARR/funding)."
+    best_for: "Open-source-pedigree OCR (Marker/Surya) on a free monthly allowance"
     modalities: ["ocr"]
     models_free: null
     expires: null
     docs_url: "https://documentation.datalab.to/"
     phone_required: null
-    card_required: null
+    card_required: false
     commercial_ok: null
     openai_compatible: false
     openai_base_url: null
     verified: true
-    last_verified: "2026-07-31"
+    last_verified: "2026-08-13"

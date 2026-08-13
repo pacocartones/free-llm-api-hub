@@ -18,7 +18,7 @@ No hype, no dead links, no "generous limits" hand-waving. Just what's actually f
 **[🔎 Interactive explorer](https://freellmapihub.com/)** &nbsp;·&nbsp; **[📊 Dataset](data/providers.json)** &nbsp;·&nbsp; **[🧪 How we verify](docs/methodology.md)** &nbsp;·&nbsp; **[➕ Add a provider](CONTRIBUTING.md)**
 
 <!-- AUTOGEN:stats:start -->
-**67 providers** tracked · 36 ongoing free tiers · 31 trial credits · **67/67** independently verified against the provider's own docs · **2** external contributors
+**67 providers** tracked · 36 ongoing free tiers · 31 trial credits · **67/67** independently verified against the provider's own docs · **3** external contributors
 <!-- AUTOGEN:stats:end -->
 
 </div>
@@ -86,7 +86,7 @@ Starting points, not guarantees — read the full row before you build on it.
 Focused, always-current collections — each is generated from the dataset and has a live web page too.
 
 <!-- AUTOGEN:collections:start -->
-- **[Free LLM APIs with no credit card](collections/no-credit-card.md)** (39) — start without a payment method · [live page ↗](https://freellmapihub.com/collections/no-credit-card.html)
+- **[Free LLM APIs with no credit card](collections/no-credit-card.md)** (40) — start without a payment method · [live page ↗](https://freellmapihub.com/collections/no-credit-card.html)
 - **[Free LLM APIs with no phone verification](collections/no-phone.md)** (20) — no SMS/phone verification · [live page ↗](https://freellmapihub.com/collections/no-phone.html)
 - **[Free LLM APIs for commercial use](collections/commercial-use.md)** (23) — safe to ship, not eval-only · [live page ↗](https://freellmapihub.com/collections/commercial-use.html)
 - **[OpenAI-compatible free LLM APIs](collections/openai-compatible.md)** (31) — drop-in OpenAI SDK swap · [live page ↗](https://freellmapihub.com/collections/openai-compatible.html)
@@ -193,7 +193,7 @@ A fixed credit balance on signup. Once it's spent (or the clock runs out), you'r
 | **[Voicegain](https://www.voicegain.ai/pricing)**<br><sub>💳 no card</sub> | $50 in free credits on signup (no credit card) — speech-to-text | No credit card required to start — an explicit $50 developer credit. Commercial terms not stated on the pricing page. Native STT REST API. | — | ✅ 2026-07-31 |
 | **[Smallest.ai (Waves)](https://smallest.ai/pricing)** | $10 in free credits with full access — TTS, STT, speech-to-speech and voice cloning | $10 signup credit with full access. Fast TTS plus voice cloning. Card and commercial terms not stated on the pricing page. | — | ✅ 2026-07-31 |
 | **[Retell AI](https://www.retellai.com/pricing)** | $10 in free credits plus 20 free concurrent calls — voice-agent orchestration (STT + LLM + TTS) | $10 signup credit with full platform access. A voice-agent builder (orchestration), not a raw model API. Card terms not stated on the pricing page. | — | ✅ 2026-07-31 |
-| **[Datalab (Marker / Surya)](https://documentation.datalab.to/)** | $5 in free credits for new accounts — OCR in 90+ languages, PDF-to-markdown, tables, forms and structured extraction | $5 signup credit. The hosted API wraps the well-regarded open-source Marker/Surya OCR engine. Card and commercial terms not stated on the docs. | — | ✅ 2026-07-31 |
+| **[Datalab (Marker / Surya)](https://documentation.datalab.to/)**<br><sub>💳 no card</sub> | $20/month (work email) or $10/month (personal email) free usage allowance — OCR in 90+ languages, PDF-to-markdown, tables, forms and structured extraction | Landing page still advertises a $5 signup credit, but the billing page describes the current free tier as a recurring monthly allowance ($20/mo work email, $10/mo personal, no card, 10 req/min) “designed to let you run a complete proof of concept before committing to a paid plan” — no explicit statement on commercial use of the hosted API. The self-hosted OSS weights carry a separate restriction (research/personal/startups under $2M ARR/funding). | — | ✅ 2026-08-13 |
 <!-- AUTOGEN:trial:end -->
 
 ## Notably NOT free
