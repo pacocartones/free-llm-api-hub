@@ -68,7 +68,7 @@ async function renderRows(provider) {
     createElement: () => makeRowEl(record),
     createTextNode: (t) => ({ nodeType: 3, textContent: String(t) }),
   };
-  const windowStub = { FLLM_RULES: { recScore: () => 0, FLAG_PAIRS: [] } };
+  const windowStub = { FLLM_RULES: { recScore: () => 0, FLAG_PAIRS: [], SLA_DAYS: 90, DUE_SOON_DAYS: 60 } };
   new Function('window', 'document', 'history', 'location', 'navigator', 'fetch', CODE)(
     windowStub, documentStub, { replaceState: noop }, { search: '', pathname: '/' }, {},
     () => Promise.reject(new Error('no network in tests')),
