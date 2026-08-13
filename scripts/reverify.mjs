@@ -40,11 +40,12 @@ const batch = verified.slice(0, n);
 const ENTITIES = { '&amp;': '&', '&lt;': '<', '&gt;': '>', '&quot;': '"', '&#39;': "'", '&nbsp;': ' ' };
 const decodeEntities = (s) => s.replace(/&(?:amp|lt|gt|quot|#39|nbsp);/g, (m) => ENTITIES[m] || m);
 const stripHtml = (html) => {
-  // Tolerant of whitespace inside tags (e.g. <script >, </script >).
+  // Tolerant of whitespace AND stray attributes inside tags (e.g. <script >,
+  // </script bar>), so a malformed end tag cannot leave script content behind.
   const s = decodeEntities(
     html
-      .replace(/<script\b[^>]*>[\s\S]*?<\/script\s*>/gi, ' ')
-      .replace(/<style\b[^>]*>[\s\S]*?<\/style\s*>/gi, ' ')
+      .replace(/<script\b[^>]*>[\s\S]*?<\/script[^>]*>/gi, ' ')
+      .replace(/<style\b[^>]*>[\s\S]*?<\/style[^>]*>/gi, ' ')
       .replace(/<[^>]+>/g, ' ')
       .replace(/\s+/g, ' ')
   ).trim();
