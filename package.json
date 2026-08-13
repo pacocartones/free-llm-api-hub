@@ -15,7 +15,7 @@
     "probe": "node scripts/probe.mjs",
     "og": "node scripts/og.mjs",
     "test": "node scripts/validate.mjs && node scripts/check-links.mjs && node --test scripts/build.test.mjs scripts/explorer.test.mjs",
-    "check": "node scripts/validate.mjs && node scripts/build.mjs && git diff --exit-code -- README.md data/providers.csv data/providers.yaml collections site/index.html docs/credit-programs.md badge-freshness.json CITATION.cff data/probe-report.json"
+    "check": "node scripts/validate.mjs && node scripts/build.mjs && git diff --exit-code -- README.md data/providers.csv data/providers.yaml collections site/index.html docs/credit-programs.md CITATION.cff data/probe-report.json"
   },
   "engines": {
     "node": ">=18"
@@ -23,7 +23,7 @@
   "devDependencies": {
     "@resvg/resvg-js": "^2.6.2"
   },
-  "comment": "devDependencies are used only by `npm run og` (social image). The shipped site and CI have zero runtime dependencies. The generated-file drift target list in `check` must stay in sync with the 'Report generated-file drift' step in verify.yml.",
+  "comment": "devDependencies are used only by `npm run og` (social image). The shipped site and CI have zero runtime dependencies. badge-freshness.json is deliberately NOT a diff-gate target (it is date-relative: the oldest age in days moves daily — see docs/architecture.md). The generated-file drift target list in `check` must stay in sync with the 'Generated files must be in sync with the data' step in verify.yml.",
   "license": "MIT",
   "repository": {
     "type": "git",

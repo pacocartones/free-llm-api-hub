@@ -16,9 +16,7 @@
 - [ ] For anything I couldn't confirm against the provider's own docs, I left it `verified: false` and explained what's unconfirmed.
 
 <!--
-You do NOT need to run the build or commit any generated file. The README tables,
-the freshness badge, the CSV/YAML exports, the collections and the site payload are
-rebuilt automatically once this lands on main (.github/workflows/regenerate.yml).
-
-If CI reports that generated files are out of sync, that's expected and informational.
+Please run `npm run build` (and `npm run og` if the OG check flags drift) and commit
+the regenerated files together with the data change — there is no regeneration bot,
+and the required "Dataset integrity" check fails until the derived files are in sync.
 -->
