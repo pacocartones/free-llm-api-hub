@@ -1,5 +1,5 @@
 {
-  "collections/no-credit-card.png": "0b918943df0962bc7a1824c0555a389347b4febdc7cf9d1254406d80ce44e3f9",
+  "collections/no-credit-card.png": "d59eced1ded07f84c145592f65bdf854358e009c5cd705f5215bf18697fed103",
   "collections/no-phone.png": "f5ca38f748a1d6eaf726b8a42fb575c3c71f1864a8143301782de13da2d9202b",
   "collections/commercial-use.png": "535fa30d7e25dd8a49f1536779734ec8286108d115da5045d77f3b4185d8f790",
   "collections/openai-compatible.png": "eb1e33e8a81b697b75855af6bfcdbcbf7cbbde9f94962ceaec1ed8af21f5a50f",
@@ -79,5 +79,5 @@
   "p/voicegain.png": "9ed89a1068f6635635bdc9afa2bada731c86599f363fa28caa4de7a71abde1f0",
   "p/smallest-ai.png": "1d1359e2d42eb4e91823125026b168a7a1e6ae68f44a56942d1274a3772f798f",
   "p/retell-ai.png": "460a870126df71612bfc228f5fcd1b6db565611688bcef9c9a5d07e5ac39f8ca",
-  "p/datalab.png": "9cb15517e9f5c41436096b26820114d87239af29f91aa48ecbad1cef6d6c5a60"
+  "p/datalab.png": "f2ddc69bbd1c3a179dbf760d785455164a2feab6e39ef39866997f3b31d8fb35"
 }
