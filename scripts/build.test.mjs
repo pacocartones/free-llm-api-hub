@@ -54,6 +54,30 @@ test('validate rejects an unverified entry that still carries a date', () => {
   assert.equal(exitOk(['scripts/validate.mjs', fixture]), false);
 });
 
+// Audit A5: comparison-dimensions.md claims the tri-state null gaps "against
+// the dataset", and methodology.md describes the freshness badge's buckets. Both
+// are prose in hand-written docs, so nothing stopped them drifting from the data
+// (they did: commercial 36→35, card 23→22 after #117) or the rules. These two
+// tests make the claims self-pinning: a data PR that resolves a null must update
+// the doc line, and a threshold change must update the description.
+test('comparison-dimensions.md reports the real tri-state null gaps', () => {
+  const { providers } = JSON.parse(readFileSync(DATA, 'utf8'));
+  const total = providers.length;
+  const nullCount = (f) => providers.filter((p) => p[f] === null).length;
+  const expected = `Current gaps: \`phone_required\` ${nullCount('phone_required')}/${total}, \`commercial_ok\` ${nullCount('commercial_ok')}/${total}, \`card_required\` ${nullCount('card_required')}/${total}.`;
+  const doc = readFileSync(join(ROOT, 'docs/comparison-dimensions.md'), 'utf8');
+  assert.ok(doc.includes(expected), `gap counts drifted:\n  doc says:     ${doc.match(/Current gaps:[^\n]*/)?.[0]}\n  data expects: ${expected}`);
+});
+
+test('the freshness badge is described with the real thresholds and grading', () => {
+  const methodology = readFileSync(join(ROOT, 'docs/methodology.md'), 'utf8');
+  const bullet = methodology.match(/The freshness badge is computed[^\n]*/)?.[0];
+  assert.ok(bullet, 'methodology.md should describe the freshness badge');
+  assert.ok(bullet.includes('oldest'), 'the description must say the badge grades the OLDEST entry');
+  assert.ok(bullet.includes(String(DUE_SOON_DAYS)), `the description must state the due-soon threshold (${DUE_SOON_DAYS})`);
+  assert.ok(bullet.includes(String(SLA_DAYS)), `the description must state the SLA (${SLA_DAYS})`);
+});
+
 test('validate accepts a credential-only probe result', () => {
   const data = JSON.parse(readFileSync(DATA, 'utf8'));
   data.providers[0].last_probed = '2026-08-03';
