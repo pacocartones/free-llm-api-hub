@@ -223,7 +223,7 @@
       "openai_base_url": "https://api.z.ai/api/paas/v4/",
       "env_key": "ZAI_API_KEY",
       "verified": true,
-      "last_verified": "2026-07-30"
+      "last_verified": "2026-08-13"
     },
     {
       "slug": "ibm-watsonx",
@@ -333,7 +333,7 @@
       "openai_base_url": "https://api.tokenfactory.nebius.com/v1",
       "env_key": "NEBIUS_API_KEY",
       "verified": true,
-      "last_verified": "2026-07-30"
+      "last_verified": "2026-08-13"
     },
     {
       "slug": "novita",
@@ -399,7 +399,7 @@
       "openai_base_url": null,
       "env_key": "NLPCLOUD_API_KEY",
       "verified": true,
-      "last_verified": "2026-07-30"
+      "last_verified": "2026-08-13"
     },
     {
       "slug": "alibaba-model-studio",
@@ -421,7 +421,7 @@
       "openai_base_url": "https://dashscope-intl.aliyuncs.com/compatible-mode/v1",
       "env_key": "DASHSCOPE_API_KEY",
       "verified": true,
-      "last_verified": "2026-07-30"
+      "last_verified": "2026-08-13"
     },
     {
       "slug": "modal",
@@ -442,7 +442,7 @@
       "openai_compatible": false,
       "openai_base_url": null,
       "verified": true,
-      "last_verified": "2026-07-30"
+      "last_verified": "2026-08-13"
     },
     {
       "slug": "sambanova",
@@ -464,7 +464,7 @@
       "openai_base_url": "https://api.sambanova.ai/v1",
       "env_key": "SAMBANOVA_API_KEY",
       "verified": true,
-      "last_verified": "2026-07-30"
+      "last_verified": "2026-08-13"
     },
     {
       "slug": "scaleway",
