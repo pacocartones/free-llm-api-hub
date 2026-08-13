@@ -189,7 +189,7 @@ providers:
     openai_compatible: true
     openai_base_url: "https://api.z.ai/api/paas/v4/"
     verified: true
-    last_verified: "2026-07-30"
+    last_verified: "2026-08-13"
   - slug: "ibm-watsonx"
     name: "IBM watsonx.ai (Lite plan)"
     category: "ongoing"
@@ -284,7 +284,7 @@ providers:
     openai_compatible: true
     openai_base_url: "https://api.tokenfactory.nebius.com/v1"
     verified: true
-    last_verified: "2026-07-30"
+    last_verified: "2026-08-13"
   - slug: "novita"
     name: "Novita AI"
     category: "trial"
@@ -341,7 +341,7 @@ providers:
     openai_compatible: false
     openai_base_url: null
     verified: true
-    last_verified: "2026-07-30"
+    last_verified: "2026-08-13"
   - slug: "alibaba-model-studio"
     name: "Alibaba Cloud (Model Studio)"
     category: "trial"
@@ -360,7 +360,7 @@ providers:
     openai_compatible: true
     openai_base_url: "https://dashscope-intl.aliyuncs.com/compatible-mode/v1"
     verified: true
-    last_verified: "2026-07-30"
+    last_verified: "2026-08-13"
   - slug: "modal"
     name: "Modal"
     category: "trial"
@@ -379,7 +379,7 @@ providers:
     openai_compatible: false
     openai_base_url: null
     verified: true
-    last_verified: "2026-07-30"
+    last_verified: "2026-08-13"
   - slug: "sambanova"
     name: "SambaNova Cloud"
     category: "ongoing"
@@ -398,7 +398,7 @@ providers:
     openai_compatible: true
     openai_base_url: "https://api.sambanova.ai/v1"
     verified: true
-    last_verified: "2026-07-30"
+    last_verified: "2026-08-13"
   - slug: "scaleway"
     name: "Scaleway Generative APIs"
     category: "trial"
