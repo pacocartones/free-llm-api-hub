@@ -748,6 +748,8 @@ writeFileSync(
 );
 // The old hubs redirect here so existing links and bookmarks keep working.
 const redirectPage = (to) => `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="robots" content="noindex"><meta http-equiv="refresh" content="0; url=${to}"><link rel="canonical" href="${to}"><title>Redirecting…</title></head><body><p>Moved to <a href="${to}">${to}</a>.</p></body></html>`;
+mkdirSync(join(ROOT, 'site/guides'), { recursive: true });
+mkdirSync(join(ROOT, 'site/collections'), { recursive: true });
 writeFileSync(join(ROOT, 'site/guides/index.html'), redirectPage('../guides-and-collections/'));
 writeFileSync(join(ROOT, 'site/collections/index.html'), redirectPage('../guides-and-collections/'));
 
