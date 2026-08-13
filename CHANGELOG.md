@@ -7,6 +7,10 @@ Notable changes to the dataset and the project. Format based on [Keep a Changelo
 
 ## [Unreleased]
 
+### Changed
+- **All maintenance is local — no GitHub Actions minutes.** `regenerate.yml`, `maintenance.yml`, `probe.yml` and `og-regenerate.yml` are deleted. Derived files are regenerated and committed in the same PR (`npm run build`, `npm run og`), and the weekly re-verification pass runs on demand via `scripts/reverify.mjs` (agentic Layer 3 of the [update playbook](docs/update-playbook.md)). `verify.yml` (the required "Dataset integrity" check) now fails a PR whose generated files are out of sync, and `badge-freshness.json` is excluded from the diff-gates because it is date-relative by design.
+- **The site's freshness card reports the 90-day SLA, not a 7-day window.** The hero stat read "verified in last 7 days" and was permanently near zero at the project's real cadence; it now shows the oldest verification against the 90-day SLA (green < 60d, amber 60–90d, red > 90d), with the thresholds shared from `scripts/lib/rules.mjs`. The trust line no longer claims a weekly re-check that nothing enforces.
+
 ## [2.8.0] — 2026-08-11
 
 First external contribution, and the plumbing that lets the project live past one person: Novita AI's commercial-use terms resolved by the first outside pull request, a computed contributor count on the README, and a CI pipeline that regenerates derived files without a maintainer in the loop.

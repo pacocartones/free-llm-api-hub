@@ -22,9 +22,9 @@ These collapse into **`probe_status`**: `live` · `auth-ok` · `auth-failed` · 
 
 The probe reads keys from `process.env[env_key]` (each provider declares its `env_key` in `data/providers.json`). It does **not** care how they got there — so any injector works. Keys are used only in `Authorization` headers; they are never logged, written to the dataset, or committed.
 
-**Active path: GitHub Actions secrets.** [`probe.yml`](../.github/workflows/probe.yml) runs the credential check weekly (`--auth-only`) with whatever provider keys exist as repo secrets (*Settings → Secrets and variables → Actions*). Missing secrets are simply skipped, so any subset works — add a secret and that provider joins the next run, no code change needed. It deliberately records `auth-ok`, not `live`, because it does not perform inference.
+**Active path: local environment.** Run `npm run probe -- --write --auth-only` whenever you have keys handy. The probe picks up whatever `process.env[env_key]` names are set — any subset works, so you can probe one provider at a time; missing keys are simply skipped. It deliberately records `auth-ok`, not `live`, because it does not perform inference.
 
-**Alternative: a self-hosted Infisical on the same VPS** that runs the weekly job, so secrets never leave the box and no Actions minutes are spent.
+**Alternative: a self-hosted Infisical on the same VPS** that runs the probe, so secrets never leave the box.
 
 1. In Infisical, create a folder (e.g. `/free-llm-api-hub`, env `prod`) and add each key under the canonical name the repo expects (the provider's `env_key`, e.g. `GROQ_API_KEY`, `CEREBRAS_API_KEY`, `GEMINI_API_KEY`, …).
 2. Create a **read-only Machine Identity** scoped to that folder/env. Store its creds in a root-only file on the VPS (`/etc/free-llm-api-hub.env`), never in the repo.
@@ -49,7 +49,7 @@ Footprint is one `/models` call + one 1-token inference per provider. A provider
 
 ## Setup checklist — resume here
 
-Everything on the code side is built, tested and committed (harness, fields, badge, docs), and the GitHub Actions path (`probe.yml`) is live: **the only step left for basic coverage is adding provider keys as repo secrets** — any subset, under each provider's `env_key` name. The two decisions below only matter for the alternative zero-Actions VPS path.
+Everything on the code side is built, tested and committed (harness, fields, badge, docs), and the probe is a plain local command — there is no GitHub Actions path: **the only step left for basic coverage is having provider keys in the environment** — any subset, under each provider's `env_key` name (via Infisical, a `.env` file, or your shell). The two decisions below only matter for the VPS path.
 
 **Two decisions for the VPS path** (both were deliberately left open; the code is agnostic to either):
 - [ ] **Infisical reachability** — localhost-only on the VPS (everything runs there) *or* a public HTTPS domain (lets probes also be piloted from a laptop session).

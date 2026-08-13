@@ -2,15 +2,12 @@ name: Verify
 
 # Fast integrity gate on every change.
 #
-# What blocks: the dataset must satisfy the integrity rules, and internal doc
-# links must resolve. What does not block: the generated artifacts. Contributors
-# edit `data/providers.json` and nothing else — `regenerate.yml` rebuilds README
-# tables, exports, collections and the site payload on `main` and commits them.
-# The drift report below is informational so a one-line data fix stays a
-# one-line pull request.
-#
-# Scheduled upkeep (source-link re-check, badge refresh, re-verification
-# worklist) lives in maintenance.yml.
+# What blocks: the dataset must satisfy the integrity rules, internal doc links
+# must resolve, and the generated artifacts must be in sync with the data. The
+# author regenerates them locally (`npm run build`, `npm run og`) and commits
+# them in the same PR — there is no regeneration bot. All scheduled upkeep
+# (re-verification, badge, models, probe) is local and on-demand, see
+# docs/update-playbook.md.
 on:
   # No `paths:` filter on pull_request, deliberately. This job is the repository's
   # required status check, and a required check that is filtered out never reports
@@ -70,25 +67,30 @@ jobs:
       - name: Run the pipeline test suite
         run: node --test scripts/build.test.mjs scripts/explorer.test.mjs
 
-      # Informational only. A mismatch here is expected on a data-only pull
-      # request and is resolved by the bot after merge.
+      # The PR must ship its own regenerated files — there is no regeneration
+      # bot anymore, so an out-of-sync main would otherwise stay broken.
+      # badge-freshness.json is the one deliberate exception: it is
+      # date-relative (the oldest age in days moves daily) and is refreshed on
+      # every data/build pass, so it is excluded from the diff below.
       # Keep this list in sync with the `check` script in package.json.
-      - name: Report generated-file drift
+      - name: Generated files must be in sync with the data
         run: |
           node scripts/build.mjs
-          targets="README.md data/providers.csv data/providers.yaml collections site/index.html docs/credit-programs.md badge-freshness.json CITATION.cff data/probe-report.json"
+          targets="README.md data/providers.csv data/providers.yaml collections site/index.html docs/credit-programs.md CITATION.cff data/probe-report.json"
           if git diff --quiet -- $targets; then
-            echo "Generated files are already in sync with the data."
+            echo "Generated files are in sync with the data."
             echo "Generated files are in sync." >> "$GITHUB_STEP_SUMMARY"
           else
-            echo "::notice::Generated files will be rebuilt automatically after merge. No action needed."
             {
-              echo "### Generated files will be rebuilt after merge"
+              echo "### Regenerate the derived files and commit them in this PR"
               echo ""
-              echo "You do not need to run \`npm run build\` or commit anything else."
+              echo "Run \`npm run build\` (and \`npm run og\` if the OG check flagged"
+              echo "drift), commit the regenerated files together with the data"
+              echo "change, then push again."
               echo ""
               echo '```'
               git --no-pager diff --stat -- $targets
               echo '```'
             } >> "$GITHUB_STEP_SUMMARY"
+            exit 1
           fi

@@ -1,27 +1,27 @@
 # Update playbook
 
-How this list stays current — the routine that keeps the freshness badge green. It has two layers: an **automated backbone** (GitHub Actions, runs without anyone present) and a **weekly human pass** (15–30 min) driven by a self-updating worklist.
+How this list stays current — the routine that keeps the freshness badge green. There is **no GitHub Actions** in this flow: everything below runs locally, on demand, on a machine you control. Nothing in this project depends on Actions minutes.
 
 ## Cadence
 
-- **Weekly:** Mondays, **08:00 UTC**. That's ~**10:00 in Europe/Madrid** during summer (CEST) and ~**09:00** in winter (CET) — GitHub Actions cron runs in UTC and does not observe daylight saving, so the local time shifts by an hour across the year. To pin exactly 10:00 Madrid year-round you'd need two crons (`0 8` and `0 9`) gated by month; not worth the complexity for a maintenance job.
+- **Weekly:** aim for one pass a week (Mondays ~10:00 Madrid works well), but nothing enforces it — the badge and the worklist only move when the data moves, and `npm run reverify` sizes its batch to clear the 90-day SLA without a cliff.
 - **Freshness SLA:** every verified entry is re-confirmed against the provider's own docs within **90 days**. The badge is graded on the *oldest* entry against that SLA, so it turns amber the moment one row goes past 60 days and red the moment one goes past 90 — it slips before the list does.
 
-## Layer 1 — automated (no human needed)
+## Layer 1 — the re-verification batch (local script)
 
-Runs every Monday via [`.github/workflows/maintenance.yml`](../.github/workflows/maintenance.yml):
+[`scripts/reverify.mjs`](../scripts/reverify.mjs) (`npm run reverify`) picks the oldest verifications (sized to clear the SLA), fetches each provider's own `docs_url`, and writes a review dossier per provider to `.freebuff/reverify/<slug>.md` (gitignored — local only):
 
-1. **Link re-check** — every `docs_url` is fetched. A genuine failure (not a 401/403/405/429 bot-block) opens or updates the `🔗 Broken source link report` issue.
-2. **Badge refresh** — recomputes `badge-freshness.json` from the data and commits it if the oldest entry got older. This is why the badge decays on its own: nobody has to touch the data for the number to move.
-3. **Free model samples** — [`scripts/fetch-models.mjs`](../scripts/fetch-models.mjs) refreshes each provider's `models_free` from its **own `/models` endpoint**. Public endpoints (OpenRouter, Pollinations, NVIDIA NIM, ModelScope, Ollama Cloud) need no key; the key-gated OpenAI-compatible ones (Groq, Cerebras, SambaNova, Scaleway) refresh only if the matching repo secret is set. Real IDs only — a fetch failure leaves the field untouched, never blanked. Changes are rebuilt and committed automatically. This keeps the volatile lists (OpenRouter rotates its free models constantly) accurate without hand-curation or hallucination.
-4. **Re-verification worklist** — [`scripts/staleness.mjs`](../scripts/staleness.mjs) generates a checklist with a paced **weekly batch** (the oldest verifications, sized to clear the 90-day SLA without a cliff) plus 🔴 overdue (>90d), 🟡 due soon (60–90d), and ⚠️ never verified, and posts it to the self-updating `🕝 Weekly re-verification worklist` issue.
-5. **Live probe** — [`probe.yml`](../.github/workflows/probe.yml) runs `probe.mjs --auth-only --write` with whatever provider keys exist as repo secrets, and commits the resulting `last_probed`/`probe_status`. Providers without a secret are skipped.
+```bash
+npm run reverify              # this week's batch (oldest first)
+npm run reverify -- --batch 12     # override the batch size
+npm run reverify -- --no-fetch     # offline: just print the batch
+```
 
-On every push/PR, [`verify.yml`](../.github/workflows/verify.yml) validates the dataset and reports (informationally) if generated files are out of sync; [`regenerate.yml`](../.github/workflows/regenerate.yml) rebuilds them after merge — so bad data never merges and data-only PRs stay one-line.
+The script never edits the data: an agent (or a human) reads each dossier, compares the fetched docs against `data/providers.json`, and drafts the edit. Fetch failures, SPAs and non-text bodies are flagged in the dossier — those are reviewed manually.
 
-## Layer 2 — the weekly human pass
+## Layer 2 — the weekly pass
 
-Open the **`🕝 Weekly re-verification worklist`** issue and work top-down. For each provider on it:
+For each provider on the worklist (`npm run worklist`, or just the reverify batch):
 
 1. **Open the provider's own docs** (the `docs` link in the item). Third-party summaries don't count.
 2. **Compare against `data/providers.json`:** free tier, rate limits, credit amount/expiry, and the catches (`card_required`, `phone_required`, `commercial_ok`, `openai_compatible`).
@@ -30,31 +30,38 @@ Open the **`🕝 Weekly re-verification worklist`** issue and work top-down. For
    - Changed → correct the numbers, same as above.
    - Gone → remove the entry (note it in [CHANGELOG.md](../CHANGELOG.md)) or, if the free tier ended, move the note to the README's "Notably NOT free" section.
    - Couldn't confirm → `verified: false`, `last_verified: null`, explain in `notes`.
-4. **Regenerate and check:**
+4. **Regenerate and check (same PR):**
    ```bash
    npm run build      # README, badge, exports, collections, site payload
    npm test           # dataset integrity gate
    npm run og         # regenerate social preview PNGs (counts in subtitles drift)
    npm run worklist   # preview the updated worklist locally (optional)
    ```
-   `npm run og` needs `@resvg/resvg-js` (the only devDependency — `npm install`
-   before the first run). The CI gate checks that a PNG *exists* for every
-   provider, but only this pass regenerates them when counts, flags or provider
-   categories change.
-5. **Commit only `data/providers.json` + the regenerated files, and open a PR.** Tick the item off the worklist issue.
+   `npm run og` needs `@resvg/resvg-js` (the only devDependency — `npm install` before the first run). The CI gate checks that a PNG *exists* for every provider, but only this pass regenerates them when counts, flags or provider categories change.
+5. **Commit `data/providers.json` + the regenerated files in one PR.** The required "Dataset integrity" check fails if the derived files are out of sync, so the PR is complete only when both ship together.
 
 ### Also scan for what's new (monthly is enough)
 
 - **Run `npm run discover`** — diffs OpenRouter's live `:free` catalog against the last snapshot and flags new free models plus publishers we don't list as a first-party provider (leads). Triage each lead against the [inclusion criteria](inclusion-criteria.md); `npm run discover -- --write` re-baselines the snapshot. See [sources.md](sources.md) for the wider source map.
 - New providers or promos worth adding? Check the [inclusion criteria](inclusion-criteria.md), then add via a PR or the [new-provider form](../../issues/new?template=new-provider.yml).
-- Watch the usual movers: Gemini limits, Cloudflare Neuron pricing, and any "trial credit" amounts (these change most often). The model *lists* (OpenRouter, Groq, Cerebras, etc.) are refreshed automatically by `npm run models` / the weekly job — you only need to eyeball its diff.
+- Watch the usual movers: Gemini limits, Cloudflare Neuron pricing, and any "trial credit" amounts (these change most often). The model *lists* (OpenRouter, Groq, Cerebras, etc.) are refreshed by `npm run models` — you only need to eyeball its diff.
 - Backfill attribute fields still `null`: `openai_base_url`, and any missing `openai_compatible` / `modalities`.
 
-## Layer 3 — agentic re-verification (local, no GitHub Actions)
+### Optional: live probe
 
-The human pass can be accelerated by an agent on a machine you control. [`scripts/reverify.mjs`](../scripts/reverify.mjs) (`npm run reverify`) prints this week's batch and fetches each provider's own docs into local dossiers at `.freebuff/reverify/<slug>.md` (gitignored). An agent reads each dossier, compares the fetched docs against `data/providers.json`, and drafts the edit; a human then runs `npm run build && npm test` and opens the PR. The script never edits data by itself — the primary-source + real-date rule stays a human/agent judgment. This is deliberately **not** a GitHub Actions job (minutes budget), so nothing in the re-verification loop depends on Actions.
+[`scripts/probe.mjs`](../scripts/probe.mjs) (`npm run probe`) live-tests each free tier with a real key from `process.env[env_key]` and writes `last_probed`/`probe_status`. Run it locally whenever you have keys handy (any subset; providers without a key are skipped):
 
-## Optional Layer 4 — public security-data stewardship
+```bash
+npm run probe -- --write --auth-only
+```
+
+See [live-testing.md](live-testing.md) for setup.
+
+## Layer 3 — agentic acceleration
+
+The weekly pass is designed to be driven by an agent (e.g. a scheduled Claude Code / Freebuff session): run `npm run reverify`, read the dossiers in `.freebuff/reverify/`, verify the claims against the fetched docs, draft the `data/providers.json` edit, run `npm run build && npm test`, and open the PR for a human to merge. The reverify script is the agent's entry point; everything it needs lands in the local dossiers.
+
+## Layer 4 — public security-data stewardship
 
 Once a month, or when maintenance work exposes a clearly documented discrepancy, review **one**
 public GitHub Advisory Database record. The aim is data quality for the ecosystem, not vulnerability
@@ -75,8 +82,8 @@ for its current requirements.
 ## Definition of done for a weekly pass
 
 - Worklist 🔴 overdue count is back to **0**.
-- No open `🔗 Broken source link` issue.
-- Badge is green (`≥70%` verified within 90 days).
+- No dead `docs_url` in the batch (re-verification opens them anyway).
+- Badge is green (oldest entry under 60 days).
 - `npm test` passes and generated files are in sync.
 - `npm run og` produces zero diffs — provider, collection and guide OGs match the current data.
 

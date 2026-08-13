@@ -8,9 +8,9 @@ Thanks for helping. Here's how it works.
 
 > **Edit the data, not the docs.** The single source of truth is [`data/providers.json`](data/providers.json). The README tables, the freshness badge, the CSV/YAML exports, the `collections/` markdown, and the whole interactive site (explorer, per-provider pages, collection pages, badges, sitemap) are all *generated* from it.
 
-**Your pull request should touch `data/providers.json` and nothing else.** You do not need to run the build or commit any regenerated file — a bot rebuilds every derived artifact once your change lands on `main` ([`regenerate.yml`](.github/workflows/regenerate.yml)). If CI reports that generated files are out of sync, that's expected and informational; ignore it.
+**Your pull request ships its own regenerated files.** After editing `data/providers.json`, run `npm run build` (and `npm run og` if the OG check flags drift) and commit the regenerated files together with the data change. There is no regeneration bot — the required "Dataset integrity" check fails until the derived files are in sync.
 
-Fixing a rate limit therefore means a one-line diff, not a four-thousand-line one.
+Fixing a rate limit means editing one field plus the files regenerated from it — still a small, reviewable diff.
 
 ## Quick start
 
@@ -85,5 +85,5 @@ GitHub holds workflow runs from a **first-time contributor** until a maintainer 
 
 ## Maintainer notes
 
-- **The regenerate bot delivers its rebuild as a PR** (`bot/regenerate` → `main`), never a direct push: `main` requires the "Dataset integrity" status check, which a bot commit cannot report before the push it would trigger. If a `bot/regenerate` PR is open, review it (it should only contain regenerated files) and merge it when green.
-- **For full automation** (the bot opens its own PR), one manual step is required on the repository: Settings → Actions → General → enable *"Allow GitHub Actions to create and approve pull requests"*. GitHub does not expose this setting via API. Until then the bot still pushes `bot/regenerate` and a maintainer just opens the PR by hand; an actionable warning in the workflow run explains this. An alternative that needs no settings change is a `GH_PAT` secret with `repo` scope, which the workflow uses if present. Full details live in `_internal-docs/bot-maintenance.md` (not in this repository).
+- **No regeneration bot — the author ships the derived files.** There is no `bot/regenerate`: `main` requires the "Dataset integrity" check, and a change is complete when its regenerated files are committed in the same PR. After editing `data/providers.json` (or `data/programs.json`), run `npm run build` (and `npm run og` if the OG check flags drift), commit the regenerated files together with the data change, and push. The "Dataset integrity" check fails until they are in sync.
+- **Nothing runs on a schedule.** Re-verification, badge refresh, model samples and the live probe are all local on-demand tasks — see [docs/update-playbook.md](docs/update-playbook.md). This project does not depend on GitHub Actions minutes.
