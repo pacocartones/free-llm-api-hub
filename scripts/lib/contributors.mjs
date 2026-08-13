@@ -1,5 +1,7 @@
-// contributors.mjs — the external-contributor count for the README stats line,
-// shared by build.mjs and its tests so the rule has ONE home.
+// contributors.mjs — the external-contributor count, mined from the git
+// history of data/providers.json. No longer rendered into the README (that is
+// a live shields.io badge now, so it cannot go stale); this remains the
+// canonical definition, used for local reporting and pinned by tests.
 //
 // "External" means a human who touched data/providers.json and is neither the
 // maintainer nor an automation account. Deterministic given the history, so a

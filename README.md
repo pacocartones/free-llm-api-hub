@@ -16,11 +16,12 @@ No hype, no dead links, no "generous limits" hand-waving. Just what's actually f
 [![Dataset: JSON](https://img.shields.io/badge/dataset-JSON%20%2B%20schema-blue.svg)](data/providers.json)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+[![Contributors](https://img.shields.io/github/contributors/pacocartones/free-llm-api-hub)](https://github.com/pacocartones/free-llm-api-hub/graphs/contributors)
 
 **[🔎 Interactive explorer](https://freellmapihub.com/)** &nbsp;·&nbsp; **[📊 Dataset](data/providers.json)** &nbsp;·&nbsp; **[🧪 How we verify](docs/methodology.md)** &nbsp;·&nbsp; **[➕ Add a provider](CONTRIBUTING.md)**
 
 <!-- AUTOGEN:stats:start -->
-**67 providers** tracked · 36 ongoing free tiers · 31 trial credits · **67/67** independently verified against the provider's own docs · **3** external contributors
+**67 providers** tracked · 36 ongoing free tiers · 31 trial credits · **67/67** independently verified against the provider's own docs
 <!-- AUTOGEN:stats:end -->
 
 </div>

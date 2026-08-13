@@ -153,15 +153,15 @@ test('external contributor count tolerates empty and malformed history', () => {
   assert.equal(countExternalContributorsFromLog('\x1fonly@email.com'), 0); // empty name
 });
 
-test('the README stats line reports the real external contributor count, stably', () => {
-  const once = countExternalContributors({ cwd: ROOT });
-  const twice = countExternalContributors({ cwd: ROOT });
-  assert.equal(once, twice, 'the count is stable across calls on the same checkout');
-  assert.ok(once >= 1, 'this repo has at least one external contributor (JhansiOruganti-43 via #27)');
-  const span = readFileSync(join(ROOT, 'README.md'), 'utf8')
-    .match(/<!-- AUTOGEN:stats:start -->\s*([\s\S]*?)\s*<!-- AUTOGEN:stats:end -->/)?.[1];
+test('the README shows a live contributors badge, not a computed number', () => {
+  // The contributor count used to be computed into the generated stats line and
+  // could go stale between build passes (it did: 2 while the real count was 3).
+  // It is now a shields.io badge that GitHub resolves live on every view.
+  const readme = readFileSync(join(ROOT, 'README.md'), 'utf8');
+  assert.match(readme, /img\.shields\.io\/github\/contributors\/pacocartones\/free-llm-api-hub/);
+  const span = readme.match(/<!-- AUTOGEN:stats:start -->\s*([\s\S]*?)\s*<!-- AUTOGEN:stats:end -->/)?.[1];
   assert.ok(span, 'README should carry an AUTOGEN stats span');
-  assert.match(span, new RegExp(`\\*\\*${once}\\*\\* external contributor${once === 1 ? '' : 's'}\\s*$`));
+  assert.doesNotMatch(span, /contributor/i, 'the stats line must not carry a computed contributor count');
 });
 
 test('the committed OG manifest matches the current dataset', () => {
