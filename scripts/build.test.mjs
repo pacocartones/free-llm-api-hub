@@ -10,7 +10,7 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
 import { roundTripError } from './_serialize.mjs';
-import { freshnessBadge, freshnessColor, recScore, SLA_DAYS, DUE_SOON_DAYS } from './lib/rules.mjs';
+import { freshnessBadge, freshnessColor, freshnessStatus, recScore, SLA_DAYS, DUE_SOON_DAYS } from './lib/rules.mjs';
 import { esc, stripTags } from './lib/escape.mjs';
 import { mineProviderHistory, assertHistoryPlausible } from './lib/history.mjs';
 import { countExternalContributors, countExternalContributorsFromLog } from './lib/contributors.mjs';
@@ -293,8 +293,25 @@ test('badge is red with nothing verified at all', () => {
   assert.equal(badge.message, '0/1 verified');
 });
 
+// The worklist and the badge must bucket an entry identically at every age — the
+// 60-day "due soon" threshold was once `>= 60` in one place and `> 60` in the
+// other, so an entry exactly 60 days old was "due soon" to the worklist but
+// brightgreen on the badge. Both now grade on freshnessStatus (rules.mjs).
+test('badge and worklist bucket identically at the 60-day threshold', () => {
+  assert.equal(freshnessStatus(59), 'fresh');
+  assert.equal(freshnessStatus(60), 'fresh');
+  assert.equal(freshnessStatus(61), 'due');
+  assert.equal(freshnessStatus(90), 'due');
+  assert.equal(freshnessStatus(91), 'stale');
+  assert.equal(freshnessStatus(null), 'due');
+  assert.equal(freshnessColor(60), 'brightgreen');
+  assert.equal(freshnessColor(61), 'yellow');
+  assert.equal(freshnessColor(91), 'red');
+  assert.equal(freshnessColor(null), 'yellow');
+});
+
 // Deliberately not compared against a freshly built badge: the committed file
-// ages a day at a time between the weekly refresh commits, and this suite is a
+// ages a day at a time between build passes, and this suite is a
 // blocking check on every pull request. What must always hold is that the file
 // is internally consistent — the colour is the one the rule gives to the age the
 // message itself states — which catches a hand-edited or half-migrated badge
