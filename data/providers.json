@@ -1463,7 +1463,7 @@
       "free_type": "trial-credit",
       "free_tier": "$5 in free credits for new accounts — OCR in 90+ languages, PDF-to-markdown, tables, forms and structured extraction",
       "rate_limits": "Per-page pricing and rate limits not published",
-      "notes": "$5 signup credit. The hosted API wraps the well-regarded open-source Marker/Surya OCR engine. Card and commercial terms not stated on the docs.",
+      "notes": "$5 signup credit. The hosted API wraps the well-regarded open-source Marker/Surya OCR engine. Pricing page describes the free-credit hosted API as the same production API/SDK used by paid tiers, with no stated personal-only or evaluation-only restriction, but no sentence explicitly confirms commercial use is allowed either. Separately, the self-hosted OSS model weights carry their own restriction (research/personal/startups under $2M funding or revenue, per a modified OpenRAIL-M license) - that restriction is about the weights, not the hosted API's free credits. Card and commercial terms for the hosted API itself remain unstated.",
       "best_for": "Open-source-pedigree OCR (Marker/Surya) on a $5 credit",
       "modalities": ["ocr"],
       "models_free": null,
@@ -1475,7 +1475,7 @@
       "openai_compatible": false,
       "env_key": "DATALAB_API_KEY",
       "verified": true,
-      "last_verified": "2026-07-31",
+      "last_verified": "2026-08-13",
       "added": "2026-07-31"
     }
   ]
