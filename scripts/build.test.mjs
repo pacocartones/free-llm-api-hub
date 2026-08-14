@@ -451,7 +451,7 @@ test('row fields are escaped before innerHTML (XSS)', () => {
   const evil = (field) => ({ slug: 'demo', name: 'Demo', category: 'ongoing', [field]: '<script>alert(1)</script>' });
   for (const field of ['name', 'free_tier', 'notes', 'best_for']) {
     const out = explorerRowHtml(evil(field), { now: '2026-08-13' });
-    assert.ok(!/<script>/.test(out), field + ' must not reach innerHTML raw');
+    assert.ok(!/<script>/i.test(out), field + ' must not reach innerHTML raw');
     assert.ok(out.includes('&lt;script&gt;'), field + ' must be escaped');
   }
 });

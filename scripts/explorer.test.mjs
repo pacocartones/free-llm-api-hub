@@ -63,7 +63,7 @@ test('an HTML payload in any provider field never becomes markup', () => {
   // The payload must survive as escaped TEXT. The escaped output legitimately
   // contains the substrings 'onerror=' and 'alert(' as text inside entities —
   // the attack only lands if a real tag opens, so assert on that.
-  assert.ok(!/<(img|script)[\s>]/.test(out), `payload became a real tag:\n${out}`);
+  assert.ok(!/<(img|script)[\s>]/i.test(out), `payload became a real tag:\n${out}`);
   assert.ok(out.includes('&lt;img'), 'payload must be escaped, not stripped');
   // the anchor survives with escaped text, not the payload as markup
   assert.match(out, /href="p\/groq"/);
