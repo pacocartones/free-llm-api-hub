@@ -918,26 +918,26 @@ providers:
     free_type: "trial-credit"
     free_tier: "3,000 free TTS minutes for every new account (Starter plan)"
     rate_limits: "Starter: 20 concurrent TTS generations"
-    notes: "One-time allotment on signup; card requirement and commercial-use terms for the free minutes are not stated on the pricing page."
+    notes: "One-time allotment on signup; no credit card required (stated on the pricing page). The pricing table shows ~800 free minutes (~800k characters) while the page’s own FAQ and the docs still say 3,000 — an internal inconsistency. Commercial-use terms not stated."
     best_for: "Low-latency conversational TTS to prototype"
     modalities: ["audio"]
     models_free: null
     expires: null
     docs_url: "https://rime.ai/pricing"
     phone_required: null
-    card_required: null
+    card_required: false
     commercial_ok: null
     openai_compatible: null
     openai_base_url: null
     verified: true
-    last_verified: "2026-07-30"
+    last_verified: "2026-08-14"
   - slug: "tencent-hunyuan"
     name: "Tencent Hunyuan"
     category: "trial"
     free_type: "trial-credit"
     free_tier: "1,000,000 free tokens for Hunyuan text LLMs (hunyuan-a13b, turbos, translation & vision models), plus a separate 1,000,000-token allotment for hunyuan-embedding"
     rate_limits: "Not published; bounded by the token package"
-    notes: "Free resource package valid 1 year from activation; unused tokens expire. Tencent Cloud generally requires mainland-China real-name ID verification to activate — a practical barrier for non-China users. Commercial-use terms not stated on the free-quota page."
+    notes: "Free resource package valid 1 year from activation; unused tokens expire. Tencent Cloud generally requires mainland-China real-name ID verification to activate — a practical barrier for non-China users. Hunyuan is gradually migrating to TokenHub (the legacy platform is no longer adding new models). Commercial-use terms not stated on the free-quota page."
     best_for: "Chinese-language LLM workloads via an OpenAI-compatible endpoint"
     modalities: ["text", "vision", "embeddings"]
     models_free: null
@@ -949,12 +949,12 @@ providers:
     openai_compatible: true
     openai_base_url: "https://api.hunyuan.cloud.tencent.com/v1"
     verified: true
-    last_verified: "2026-07-30"
+    last_verified: "2026-08-14"
   - slug: "voyage-ai"
     name: "Voyage AI"
     category: "trial"
     free_type: "trial-credit"
-    free_tier: "200M free tokens on current embedding models (voyage-4, voyage-4-lite, voyage-context-4, voyage-code-3) and on rerankers (rerank-2.5 family); voyage-multimodal-3.5 gets 200M text tokens + 150B pixels — a large one-time complimentary allotment per model"
+    free_tier: "200M free tokens on current embedding models (voyage-4-large, voyage-4, voyage-4-lite, voyage-context-4, voyage-code-4) and on rerankers (rerank-2.5 family); voyage-multimodal-3.5 and voyage-multimodal-3 get 200M text tokens + 150B pixels — a large one-time complimentary allotment per model"
     rate_limits: "Standard per-model RPM/TPM limits apply; the free-token allotment is the practical ceiling"
     notes: "The allotment is a one-time complimentary balance per model, not a renewing monthly quota. No credit card required to claim. Owned by MongoDB — a first-party model provider, not a proxy."
     best_for: "Best-in-class embeddings and reranking with a large free allotment"
@@ -968,7 +968,7 @@ providers:
     openai_compatible: false
     openai_base_url: null
     verified: true
-    last_verified: "2026-07-31"
+    last_verified: "2026-08-14"
   - slug: "contextual-ai"
     name: "Contextual AI"
     category: "trial"
@@ -987,7 +987,7 @@ providers:
     openai_compatible: false
     openai_base_url: null
     verified: true
-    last_verified: "2026-07-31"
+    last_verified: "2026-08-14"
   - slug: "cartesia"
     name: "Cartesia"
     category: "ongoing"
@@ -1006,7 +1006,7 @@ providers:
     openai_compatible: false
     openai_base_url: null
     verified: true
-    last_verified: "2026-07-31"
+    last_verified: "2026-08-14"
   - slug: "lmnt"
     name: "LMNT"
     category: "ongoing"
@@ -1025,7 +1025,7 @@ providers:
     openai_compatible: false
     openai_base_url: null
     verified: true
-    last_verified: "2026-07-31"
+    last_verified: "2026-08-14"
   - slug: "fish-audio"
     name: "Fish Audio"
     category: "ongoing"
