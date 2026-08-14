@@ -375,7 +375,7 @@ pre:hover .pre-copy, .pre-copy:focus-visible { opacity: 1; }
 .foot-brand-link:hover { text-decoration: none; }
 .footer-brand p { max-width: 38ch; margin: 0; color: color-mix(in srgb, var(--text) 74%, transparent); line-height: 1.6; }
 .footer-brand p strong { color: var(--accent); font-weight: 700; }
-.footer-brand .star-btn { margin-top: 18px; }
+.footer-brand .star-btn { display: flex; margin-top: 18px; } /* block-level so the badge and the button stack on separate lines (inline-flex made the margin inert) */
 .footer-col h4 { position: relative; display: inline-block; font-size: .78rem; text-transform: uppercase; letter-spacing: .09em; color: var(--text); margin: 2px 0 16px; padding-bottom: 8px; font-family: var(--font-mono); font-weight: 700; }
 .footer-col h4::after { content: ""; position: absolute; left: 0; bottom: 0; width: 22px; height: 2px; background: var(--accent); border-radius: 2px; }
 .footer-col a { display: block; color: var(--muted); padding: 4px 0; }
