@@ -142,10 +142,12 @@ npm run og
 Commit the data change **and** the regenerated files in the same commit — a data PR without its derived files fails CI by design, because there is no regeneration bot:
 
 ```bash
-git add data/providers.json data/providers.csv data/providers.yaml README.md badge-freshness.json site collections
+git add data/providers.json data/providers.csv data/providers.yaml README.md badge-freshness.json CITATION.cff site collections
 git commit -m "feat: add AI21 Labs free trial credit"
 git push -u fork add-ai21-labs
 ```
+
+`CITATION.cff` is in that list on purpose: it carries the dataset date, so bumping `generated` rewrites it — skip it and the drift gate fails.
 
 Open the pull request. Give it a title that says what changed (`feat: add AI21 Labs free trial credit`) and a body with the source link and what you confirmed.
 
