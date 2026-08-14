@@ -231,6 +231,14 @@ curl -s https://raw.githubusercontent.com/pacocartones/free-llm-api-hub/main/dat
       | .name'
 ```
 
+**Pin a snapshot for reproducible builds.** `main` moves; depend on an immutable tag instead:
+
+```bash
+curl -s https://raw.githubusercontent.com/pacocartones/free-llm-api-hub/v2.9.0/data/providers.json
+```
+
+Tags track the dataset `version` in [`data/providers.json`](data/providers.json) (see [CHANGELOG.md](CHANGELOG.md)) — pin `vX.Y.Z` and bump deliberately. The [live JSON API](https://freellmapihub.com/api/v1/providers.json) always serves the latest `main`.
+
 **Vouch for the data from your own README** — embed the live freshness badge:
 
 ```markdown
