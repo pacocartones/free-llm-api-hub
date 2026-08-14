@@ -85,6 +85,22 @@ function trialTable(rows) {
   return `${head}\n${body}`;
 }
 
+// The single README table: the editorial top 20, in rank order. The tag is the
+// short "why it's here"; the full editorial write-up lives on the /best page.
+function bestTable(entries) {
+  const head =
+    '| Provider | What\'s free | The catch | Verified |\n' +
+    '|---|---|---|---|';
+  const body = entries
+    .map(({ p, tag }) => {
+      const label = p.docs_url ? `**[${esc(p.name)}](${p.docs_url})**` : `**${esc(p.name)}**`;
+      const tagLine = tag ? `<br><sub>🏆 ${esc(tag)}</sub>` : '';
+      return `| ${label}${tagLine}${flags(p)} | ${esc(p.free_tier)} | ${esc(p.notes)} | ${verifiedCell(p)} |`;
+    })
+    .join('\n');
+  return `${head}\n${body}`;
+}
+
 // ---------- editorial collections (generated from the data) ----------
 const SITE = 'https://freellmapihub.com';
 
@@ -518,11 +534,35 @@ const coverageTable =
   '| Category | Providers | Examples |\n|---|---|---|\n' +
   coverageRows.map((r) => `| **${r.label}** | ${r.count} | ${r.ex.join(', ')} |`).join('\n');
 
+// ---------- editorial /best (data/best.json) ----------
+// Parsed once, up front, so the README table and the /best page render from the
+// same validated list. data/best.json declares the order and the "why" for each
+// pick; the build validates every slug against the dataset (a renamed/removed
+// provider fails the build). Edit data/best.json to re-rank.
+const BEST = JSON.parse(readFileSync(join(ROOT, 'data/best.json'), 'utf8'));
+if (!Array.isArray(BEST.entries) || BEST.entries.length === 0) {
+  throw new Error('data/best.json must contain a non-empty entries array');
+}
+const bestBySlug = new Map(providers.map((p) => [p.slug, p]));
+{
+  const seen = new Set();
+  for (const e of BEST.entries) {
+    if (!e.slug) throw new Error('data/best.json entry missing slug');
+    if (!e.why) throw new Error('data/best.json entry ' + e.slug + ' is missing its editorial "why"');
+    if (seen.has(e.slug)) throw new Error('data/best.json lists ' + e.slug + ' more than once — a provider can only rank once');
+    seen.add(e.slug);
+  }
+}
+const bestEntries = BEST.entries.map((e, i) => {
+  const p = bestBySlug.get(e.slug);
+  if (!p) throw new Error('data/best.json entry #' + (i + 1) + ' references unknown slug: ' + e.slug);
+  return { rank: i + 1, ...e, p };
+});
+
 let readme = readFileSync(join(ROOT, 'README.md'), 'utf8');
 readme = inject(readme, 'coverage', coverageTable);
 readme = inject(readme, 'collections', collectionsIndexMd);
-readme = inject(readme, 'ongoing', ongoingTable(ongoing));
-readme = inject(readme, 'trial', trialTable(trial));
+readme = inject(readme, 'best', bestTable(bestEntries));
 writeFileSync(join(ROOT, 'README.md'), readme);
 
 // ---------- keep CITATION.cff pinned to the dataset it describes ----------
@@ -1243,30 +1283,10 @@ const llmsFull =
 writeFileSync(join(ROOT, 'site/llms-full.txt'), llmsFull);
 
 
-// ---------- /best — editorial top 10 (data/best.json) ----------
-// The ranking is editorial, not a filter: data/best.json declares the order
-// and the "why" for each pick. The build validates every slug against the
-// dataset (a renamed/removed provider fails the build), then renders the page
-// with the provider's live verified data. Edit data/best.json to re-rank.
-const BEST = JSON.parse(readFileSync(join(ROOT, 'data/best.json'), 'utf8'));
-if (!Array.isArray(BEST.entries) || BEST.entries.length === 0) {
-  throw new Error('data/best.json must contain a non-empty entries array');
-}
-const bestBySlug = new Map(providers.map((p) => [p.slug, p]));
-{
-  const seen = new Set();
-  for (const e of BEST.entries) {
-    if (!e.slug) throw new Error('data/best.json entry missing slug');
-    if (!e.why) throw new Error('data/best.json entry ' + e.slug + ' is missing its editorial "why"');
-    if (seen.has(e.slug)) throw new Error('data/best.json lists ' + e.slug + ' more than once — a provider can only rank once');
-    seen.add(e.slug);
-  }
-}
-const bestEntries = BEST.entries.map((e, i) => {
-  const p = bestBySlug.get(e.slug);
-  if (!p) throw new Error('data/best.json entry #' + (i + 1) + ' references unknown slug: ' + e.slug);
-  return { rank: i + 1, ...e, p };
-});
+// ---------- /best — editorial top 20 page ----------
+// BEST and bestEntries are parsed and validated up front (before the README
+// injection), so the README table and this page share one source of truth.
+// Edit data/best.json to re-rank.
 const bestIntroHtml = htmlEsc(BEST.intro).replace(/`([^`]+)`/g, '<code>$1</code>').replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
 const bestItemsHtml = bestEntries.map(({ rank, p, why, tag }) => {
   const num = String(rank).padStart(2, '0');

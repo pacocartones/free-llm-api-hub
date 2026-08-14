@@ -1,7 +1,7 @@
 {
   "h1": "The best free LLM APIs right now",
-  "desc": "Our editorial top 10 — hand-picked from the 69 verified providers, ranked for real-world usefulness.",
-  "intro": "This is the editorial ranking: not an automatic filter, but the ten free tiers we would actually reach for first. Each pick links to its full verified profile — free tier, rate limits and the catch are all checked against the provider's own docs on the linked page. The list is reviewed and re-verified with the dataset.",
+  "desc": "Our editorial top 20 — hand-picked from the 69 verified providers, ranked for real-world usefulness.",
+  "intro": "This is the editorial ranking: not an automatic filter, but the twenty free tiers we would actually reach for first. Each pick links to its full verified profile — free tier, rate limits and the catch are all checked against the provider's own docs on the linked page. The list is reviewed and re-verified with the dataset.",
   "updated": "2026-08-14",
   "entries": [
     {
@@ -53,6 +53,56 @@
       "slug": "jina-ai",
       "why": "Free embeddings and rerank behind an OpenAI-compatible endpoint — the shortest path to a free RAG stack.",
       "tag": "Best for embeddings"
+    },
+    {
+      "slug": "deepgram",
+      "why": "The largest speech credit in the list — $200 for Nova STT and Aura TTS with no card and no expiration, plus an opt-out from model training.",
+      "tag": "Best STT credit"
+    },
+    {
+      "slug": "groq",
+      "why": "Purpose-built LPU inference makes this the lowest-latency free tier for open-weight models — the only catch is phone verification at signup.",
+      "tag": "Fastest inference"
+    },
+    {
+      "slug": "sambanova",
+      "why": "A rate-limited free tier across all models with a commercial license and no card — fast open-model inference without a trial clock counting down.",
+      "tag": "Fast, no card"
+    },
+    {
+      "slug": "wandb-inference",
+      "why": "$100/month of serverless inference credits covering frontier open models behind one OpenAI-compatible key, with Weave tracing on top.",
+      "tag": "Best monthly frontier credits"
+    },
+    {
+      "slug": "voyage-ai",
+      "why": "200M one-time tokens across best-in-class embedding and rerank models — the biggest free embedding balance here, no card required.",
+      "tag": "Best embedding allotment"
+    },
+    {
+      "slug": "pinecone-inference",
+      "why": "5M embedding tokens and 500 rerank requests a month on a managed Starter plan — a real, renewing free tier for RAG.",
+      "tag": "Best managed embeddings"
+    },
+    {
+      "slug": "pollinations",
+      "why": "Hosted Flux and Stable Diffusion behind a simple GET URL, anonymous to start — the easiest way to generate free images programmatically.",
+      "tag": "Free images, no signup"
+    },
+    {
+      "slug": "moondream",
+      "why": "A $5/month recurring credit for the Moondream vision model — caption, VQA and detection behind an OpenAI-compatible endpoint.",
+      "tag": "Best tiny vision"
+    },
+    {
+      "slug": "unstructured",
+      "why": "15,000 pages a month of document parsing and OCR with no card — the free path from messy PDFs to LLM-ready structured data.",
+      "tag": "Best doc pipeline"
+    },
+    {
+      "slug": "scaleway",
+      "why": "1M free tokens and 60 minutes of Whisper on EU-hosted open models — the sovereignty-friendly free tier for European workloads.",
+      "tag": "Best EU open models"
     }
   ]
 }

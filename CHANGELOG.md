@@ -10,6 +10,8 @@ Notable changes to the dataset and the project. Format based on [Keep a Changelo
 ### Data
 - **Paced re-verification — batch 2026-08-14.** The 6 oldest providers re-checked against their own docs: Vercel AI Gateway (the $5/month free credit is now stated in the docs, and BYOK is not available on the free tier), Jina AI (embeddings now v5), and Deepgram, AssemblyAI, Mixedbread and Arli AI re-confirmed unchanged. `last_verified` moved to 2026-08-14. [#151](https://github.com/pacocartones/free-llm-api-hub/pull/151)
 - **Paced re-verification — batch 2 (2026-08-14).** The next 6 oldest providers re-checked against their own docs: Ollama Cloud, AI Horde, ModelScope (API-Inference), Pollinations.ai, Runware and Pinecone Inference. All six already matched their live docs (no drift); only the `last_verified` dates moved to 2026-08-14. [#155](https://github.com/pacocartones/free-llm-api-hub/pull/155)
+- **Paced re-verification — batch 3 (2026-08-14).** Speechmatics replaced its recurring allowance (3,000 min/month + 1M chars) with a one-time $100 credit (no card) on 2026-07-31 — the entry moved from ongoing to trial and its free tier was rewritten. Nanonets gained a note (credits never expire). Twelve Labs, OCR.space, LlamaParse and Moondream re-confirmed unchanged. [#160](https://github.com/pacocartones/free-llm-api-hub/pull/160)
+- **Paced re-verification — batch 4 (2026-08-14).** The next 6 oldest providers (Speechify, Hume AI, Unreal Speech, ElevenLabs, Sarvam AI, Gladia — all audio/TTS) re-checked against their own docs: all six already matched (no drift), only `last_verified` moved to 2026-08-14. [#162](https://github.com/pacocartones/free-llm-api-hub/pull/162)
 
 ### Changed
 - **Backfill PR path.** `backfill.yml` no longer dispatches `verify.yml` (a `GITHUB_TOKEN` cannot chain workflows — it returned HTTP 403), and a live drift test showed the same token also cannot open the PR (`createPullRequest` is denied). The branch is pushed but no PR appears, so the weekly backfill needs a `BACKFILL_PR_TOKEN` (PAT) or the repo's "Allow GitHub Actions to create and approve pull requests" setting before it can ship anything.
@@ -17,6 +19,7 @@ Notable changes to the dataset and the project. Format based on [Keep a Changelo
 
 ### Docs
 - **SECURITY.md automation table** now lists the four workflows — including the weekly `backfill.yml` (`contents: write` / `pull-requests: write` over an `automated-backfill/*` branch + PR) — instead of claiming "no write-capable automation". [#152](https://github.com/pacocartones/free-llm-api-hub/pull/152)
+- **README restructured around the editorial top 20.** The two full provider tables (all 69) are replaced by a single top-20 table driven by [`data/best.json`](data/best.json), extended from 10 to 20 picks. The full dataset stays one link away (the explorer and the JSON/CSV/YAML exports); the README drops from ~50 KB to ~28 KB.
 
 ## [2.9.0] — 2026-08-14
 
