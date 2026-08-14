@@ -574,6 +574,10 @@ const citation = readFileSync(citationPath, 'utf8')
   .replace(/^date-released: .*$/m, `date-released: "${data.generated}"`);
 writeFileSync(citationPath, citation);
 
+// ---------- git-mined change history (computed once, before the homepage) ----------
+// Graceful if git is unavailable (tarball build): returns {} and the panel omits.
+const historyBySlug = mineProviderHistory({ cwd: ROOT });
+
 // ---------- server-render the homepage explorer (SEO + no-JS + instant paint) ----------
 // Row markup lives in lib/rows.mjs — the SAME function the client loads as
 // shared-rows.js — so the server render and the browser repaint can never
@@ -583,6 +587,25 @@ const homeRows = [...providers]
   .sort((a, b) => sortLib.comparator('recommended', 1, a, b))
   .map((p) => rows.explorerRowHtml(p, { now: data.generated }))
   .join('\n');
+
+// "Recently changed" panel: surface the drift re-verification catches, straight
+// from the mined history. Server-rendered only (the client repaint touches just
+// #tbody and #stats), so it is injected outside both and never repainted away.
+const nameBySlug = new Map(providers.map((p) => [p.slug, p.name]));
+const recentChanges = Object.entries(historyBySlug)
+  .flatMap(([slug, events]) => events.filter((e) => e.kind === 'changed').map((e) => ({ slug, ...e })))
+  .sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0))
+  .slice(0, 10);
+const recentHtml = recentChanges.length
+  ? '<section class="recent" id="recent" aria-label="Recently changed">' +
+    '<h2>🕝 Recently changed</h2>' +
+    '<p class="muted">Drift re-verification caught, straight from the <a href="' + REPO + '/commits/main/data/providers.json">git history of providers.json</a>.</p>' +
+    '<ul class="upd-list">' +
+    recentChanges.map((e) => `<li class="upd"><span class="upd-date">${htmlEsc(e.date)}</span> <span><a href="p/${htmlEsc(e.slug)}">${htmlEsc(nameBySlug.get(e.slug) || e.slug)}</a> — ${htmlEsc(e.text)}</span></li>`).join('') +
+    '</ul>' +
+    '<p class="count"><a href="updates">All updates</a> · <a href="api/v1/history.json">JSON history</a></p>' +
+    '</section>'
+  : '';
 
 // Emit the browser's copy of the shared rules (recScore + FLAG_PAIRS +
 // freshnessStatus) straight from the one source in scripts/lib/rules.mjs, so the
@@ -617,6 +640,7 @@ indexHtml = inject(indexHtml, 'csp', CSP);
 indexHtml = inject(indexHtml, 'themeguard', THEME_GUARD);
 indexHtml = inject(indexHtml, 'rows', homeRows);
 indexHtml = inject(indexHtml, 'data', inlineData);
+indexHtml = inject(indexHtml, 'recent', recentHtml);
 writeFileSync(join(ROOT, 'site/index.html'), indexHtml);
 
 // ---------- badge ----------
@@ -812,10 +836,10 @@ mkdirSync(join(ROOT, 'site/p'), { recursive: true });
 mkdirSync(join(ROOT, 'site/badges'), { recursive: true });
 
 // Per-provider change history, mined from the git log of data/providers.json.
-// Deterministic given the history; graceful if git is unavailable (tarball build).
 // The miner lives in lib/history.mjs so CI can validate it directly without a
-// full build (scripts/check-history.mjs + build.test.mjs).
-const historyBySlug = mineProviderHistory({ cwd: ROOT });
+// full build (scripts/check-history.mjs + build.test.mjs). historyBySlug is
+// computed once up front (before the homepage) so the explorer's "recently
+// changed" panel and the provider pages / history.json all read the same mine.
 const historyHtml = (slug) => {
   const all = historyBySlug[slug] || [];
   if (!all.length) return '';

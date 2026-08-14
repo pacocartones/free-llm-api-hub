@@ -1,0 +1,43 @@
+name: Tag release
+
+# Creates the annotated tag `vX.Y.Z` when the dataset version in
+# data/providers.json advances. Idempotent: if the tag already exists the job
+# is a no-op, so running on every data change is harmless.
+#
+# Why a workflow and not a hand-run `git tag`? The tag kept lagging behind
+# main (v2.9.0 shipped, then more re-verification landed untagged) because a
+# human has to remember to run it. Pinning a snapshot for programmatic
+# consumers (README "pin a snapshot") is only safe if the tag tracks the
+# dataset version it describes.
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'data/providers.json'
+  workflow_dispatch: {}
+
+permissions:
+  contents: write # push the tag; nothing else
+
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Read dataset version
+        id: version
+        run: echo "value=$(node -p "require('./data/providers.json').version")" >> "$GITHUB_OUTPUT"
+
+      - name: Create tag if missing
+        run: |
+          V="v${{ steps.version.outputs.value }}"
+          if git ls-remote --tags origin "$V" | grep -q "refs/tags/$V"; then
+            echo "tag $V already exists — nothing to do"
+            exit 0
+          fi
+          git tag -a "$V" -m "Dataset $V"
+          git push origin "$V"
+          echo "created and pushed tag $V"
