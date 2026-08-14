@@ -154,13 +154,16 @@ test('build is idempotent — a second run changes not a single byte', () => {
   assert.equal(hashAll(), first);
 });
 
-test('derived-fingerprints.json pins gitignored outputs and skips site/p/ + tracked files', () => {
+test('derived-fingerprints.json pins gitignored outputs, skips site/p/, tracked and git-log files', () => {
   const fp = join(ROOT, 'derived-fingerprints.json');
   if (!existsSync(fp)) run(['scripts/build.mjs']);
   const pins = JSON.parse(readFileSync(fp, 'utf8'));
-  for (const rel of ['site/updates.html', 'site/feed.xml', 'site/models/index.html',
-                     'site/api/v1/providers.json', 'site/llms.txt', 'site/shared-rules.js']) {
+  for (const rel of ['site/models/index.html', 'site/api/v1/providers.json',
+                     'site/llms.txt', 'site/shared-rules.js']) {
     assert.ok(pins[rel] && /^[0-9a-f]{64}$/.test(pins[rel]), rel + ' should be pinned with a sha256');
+  }
+  for (const rel of ['site/updates.html', 'site/feed.xml', 'site/api/v1/history.json']) {
+    assert.equal(pins[rel], undefined, rel + ' must not be pinned (git-log-derived)');
   }
   assert.equal(Object.keys(pins).some((k) => k.startsWith('site/p/')), false,
     'site/p/ must not be pinned (date-relative)');
