@@ -505,3 +505,25 @@ test('the server render and the shared emission use the same row source', () => 
   assert.match(build, /rows\.clientBundle\(\)/, 'build must write the shared-rows bundle from lib/rows.mjs');
   assert.match(build, /site\/shared-rows\.js/, 'build must emit shared-rows.js');
 });
+
+test('footer star button is block-level so its margin-top is not inert', () => {
+  // Regression for the verified-badge / Star-on-GitHub stacking fix: the
+  // global .star-btn rule is inline-flex, which makes margin-top inert. The
+  // footer override must be block-level (display: flex) or the badge and
+  // button silently share a line again.
+  const css = readFileSync(join(ROOT, 'site/styles.css'), 'utf8');
+  const rules = new Map();
+  for (const m of css.matchAll(/\s*([^{}]+)\s*\{([^{}]*)\}/g)) {
+    // selectors may carry leading CSS comments (the global .star-btn rule
+    // is introduced by a /* star button */ comment) - strip them so the
+    // map key is the bare selector.
+    const sel = m[1].replace(/\/\*[\s\S]*?\*\//g, '').trim();
+    if (sel.includes('.star-btn')) rules.set(sel, m[2]);
+  }
+  const footerRule = rules.get('.footer-brand .star-btn');
+  assert.ok(footerRule, 'must keep a .footer-brand .star-btn override');
+  assert.match(footerRule, /display\s*:\s*flex/, 'footer override must be block-level');
+  assert.match(footerRule, /margin-top\s*:\s*18px/, 'footer override must keep the 18px gap');
+  const globalRule = rules.get('.star-btn');
+  assert.ok(globalRule && /display\s*:\s*inline-flex/.test(globalRule), 'global .star-btn stays inline-flex elsewhere');
+});
