@@ -1,7 +1,7 @@
 {
   "site/api/index.html": "cec73fde95f539f44c110eea873345251395ae1b06f055b9b7ebdda1c1aab4ab",
   "site/api/v1/commercial.json": "a07ec63ce31c83e97bb7e1fbf4bd576ee745f7db55f678cbe0ad1766a8002ac5",
-  "site/api/v1/history.json": "0755eae45b3e77fb0bc46a927006ca5a420b20cc4d19d2d53ebbfa0907ad3b58",
+  "site/api/v1/history.json": "1ef2aac4f01351264b91f9359fb643f65aa508ed3ce042db87fa509e5b7d390c",
   "site/api/v1/index.json": "33ce9e85f2b3048c03860c0d658f7f6760969677b93839913d3e4709c31d5497",
   "site/api/v1/modality/audio.json": "993591c0003de9f96e446e3d751a4e6ee908cb3484d188daebcabb29c7f121b9",
   "site/api/v1/modality/embeddings.json": "342add1eb53ba3b03b06d69de0250ebe0e062700a8b0f4aff13b88127bf43c6c",
@@ -94,7 +94,7 @@
   "site/collections/no-credit-card.html": "96746eb23e70b5d5ffa677187db3c0cdeaa572469c5474197b829028207161bb",
   "site/collections/no-phone.html": "3dae8fc9b1e97d1cd00bcbbf281bf95e73d5f1fa19d07674ff2417173e205983",
   "site/collections/openai-compatible.html": "22233f9d297a86f06f22d726e33e73655cf7bea455d10763d6997ffeea4e2356",
-  "site/feed.xml": "40c495c6d5e3dd37ac5ce737ec7c0a6c71f161fdf318800e7071b48dab69d331",
+  "site/feed.xml": "84f6061eb2520e94b735dd5677c9255126c81a2f305c13d5e191c716ddb01768",
   "site/guides-and-collections/index.html": "7b4a8137c035e2470a1b93011e9b318fad432dbaf1de0a81ab50c82cbe13e48a",
   "site/guides/free-embeddings-apis.html": "fdb1d39beee25f91f96eb94f1dfdf5070da7c3d4d7019aab9b8e72c9e69aff1c",
   "site/guides/free-image-generation-apis.html": "b3d1f2f41f7afa5d889d261a7887f2d7f268081fa3bcca0a7a488c528229e7d4",
@@ -116,5 +116,5 @@
   "site/providers.yaml": "d31871b0c655bb32d318e56defeafe302495297616cf1aab758e5e75ab9b26b7",
   "site/shared-rows.js": "10b24f4f5024375964ed89d7a12d6924f2b7c5c1613aee2882c0794d6df1f232",
   "site/shared-rules.js": "1350ee75bf65a3e1d79b4ada2d77520b03b3db7d6d2d0e10fd0db251dcb7dbd8",
-  "site/updates.html": "c73a1e75063281121e46d0c62ca7f02fb2ae158627f358230133b302f8531706"
+  "site/updates.html": "8b26213cc928c9716dee9bd3aaea55243eeb0ed8ce625c77e9eceeb49a539d03"
 }
