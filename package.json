@@ -15,7 +15,7 @@
     "probe": "node scripts/probe.mjs",
     "og": "node scripts/og.mjs",
     "test": "node scripts/validate.mjs && node scripts/check-links.mjs && node --test scripts/build.test.mjs scripts/explorer.test.mjs",
-    "check": "node scripts/validate.mjs && node scripts/build.mjs && git diff --exit-code -- README.md data/providers.csv data/providers.yaml collections site/index.html site/sitemap.xml site/robots.txt docs/credit-programs.md CITATION.cff data/probe-report.json badge-verified.json site/badge-verified.json",
+    "check": "node scripts/validate.mjs && node scripts/build.mjs && git diff --exit-code -- README.md data/providers.csv data/providers.yaml collections site/index.html site/sitemap.xml site/robots.txt docs/credit-programs.md CITATION.cff data/probe-report.json badge-verified.json site/badge-verified.json derived-fingerprints.json",
     "check-live": "node scripts/check-sitemap-live.mjs",
     "smoke-live": "node scripts/smoke-live.mjs"
   },
