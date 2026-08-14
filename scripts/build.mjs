@@ -916,6 +916,17 @@ print(resp.choices[0].message.content)</code></pre><p class="muted">…or with c
   -H "Authorization: Bearer $API_KEY" \\
   -H "Content-Type: application/json" \\
   -d '{"model":"${m}","messages":[{"role":"user","content":"Hello!"}]}'</code></pre>`;
+  } else {
+    const docs = p.docs_url ? htmlEsc(p.docs_url) : '';
+    quick = `<h2>Quickstart</h2><p class="muted">First-party API — not OpenAI-compatible, so there is no drop-in base URL. The exact endpoint is in the <a href="${docs}" target="_blank" rel="noopener">official docs</a>; authenticate with your API key in the <code>Authorization: Bearer</code> header.</p><pre><code>curl -H "Authorization: Bearer $API_KEY" \\
+  https://&lt;api-base-url&gt;/&lt;endpoint&gt;</code></pre><p class="muted">…or in Python:</p><pre><code>import os, requests
+
+r = requests.post(
+    "https://<api-base-url>/<endpoint>",
+    headers={"Authorization": f"Bearer {os.environ['API_KEY']}"},
+    json={},
+)
+print(r.json())</code></pre>`;
   }
 
   // Free models — a prominent block when we have a sample, with a way to pull the live list.
