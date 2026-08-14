@@ -77,6 +77,7 @@
   "site/badges/speechmatics.json": "4eb946e62a9a39c53c6e042ef8b88172a464fc96798a06b76b5e37852f7d047b",
   "site/badges/tencent-hunyuan.json": "4eb946e62a9a39c53c6e042ef8b88172a464fc96798a06b76b5e37852f7d047b",
   "site/badges/twelve-labs.json": "4eb946e62a9a39c53c6e042ef8b88172a464fc96798a06b76b5e37852f7d047b",
+  "site/badges/typhoon.json": "7137e1bf99289d26ac16898c5f562f3f2cd794cbb0bfb20c78fda4fac26a3cc8",
   "site/badges/unreal-speech.json": "4eb946e62a9a39c53c6e042ef8b88172a464fc96798a06b76b5e37852f7d047b",
   "site/badges/unstructured.json": "a2df0a90d13986dd16b8fc8797601e45792e5ae48a824bab1960a5139c7761d3",
   "site/badges/upstage.json": "a2df0a90d13986dd16b8fc8797601e45792e5ae48a824bab1960a5139c7761d3",
@@ -84,6 +85,7 @@
   "site/badges/veryfi.json": "a2df0a90d13986dd16b8fc8797601e45792e5ae48a824bab1960a5139c7761d3",
   "site/badges/voicegain.json": "a2df0a90d13986dd16b8fc8797601e45792e5ae48a824bab1960a5139c7761d3",
   "site/badges/voyage-ai.json": "a2df0a90d13986dd16b8fc8797601e45792e5ae48a824bab1960a5139c7761d3",
+  "site/badges/wandb-inference.json": "7137e1bf99289d26ac16898c5f562f3f2cd794cbb0bfb20c78fda4fac26a3cc8",
   "site/badges/zai-glm.json": "bae0bcc8dca0827e1ed6843bbfdade20b7030fafb4faa42df469f8be0d24f044",
   "site/collections/always-free.html": "48a4fc2f7283dfe1c2dd9fe6876f712319ecc0d0e51224d59773589868fd344f",
   "site/collections/commercial-use.html": "b5158381f088ee4416ed0fe7f57128500805d84474d184942fd0ca200f50cf92",
@@ -92,7 +94,7 @@
   "site/collections/no-credit-card.html": "578dad1b3e29412b12cd85732d260e99dc48d3e473f8832a194f1dd4588340fd",
   "site/collections/no-phone.html": "3e840ec6bceb8a1964aab4b09b26159c4c1fd1607a25ae54c6114223e9977ddb",
   "site/collections/openai-compatible.html": "13d298c38ed45e657c677cb8af356f8594be38a1b62fee566f569ad8ce480311",
-  "site/feed.xml": "40c495c6d5e3dd37ac5ce737ec7c0a6c71f161fdf318800e7071b48dab69d331",
+  "site/feed.xml": "2f069de768abcebeee616e55f8e18a92b050364699b908ba56d9f8d864524312",
   "site/guides-and-collections/index.html": "6f2a14ccee0a02e8f67a7afd627a94d2cc254c3ee9dbf21f4b36e6874700e216",
   "site/guides/free-embeddings-apis.html": "fdb1d39beee25f91f96eb94f1dfdf5070da7c3d4d7019aab9b8e72c9e69aff1c",
   "site/guides/free-image-generation-apis.html": "b3d1f2f41f7afa5d889d261a7887f2d7f268081fa3bcca0a7a488c528229e7d4",
@@ -114,5 +116,5 @@
   "site/providers.yaml": "2e6c7efdfb150dda5e9ee199aaddf81aadcd67c635003e9ca67dec838cdaaf09",
   "site/shared-rows.js": "10b24f4f5024375964ed89d7a12d6924f2b7c5c1613aee2882c0794d6df1f232",
   "site/shared-rules.js": "1350ee75bf65a3e1d79b4ada2d77520b03b3db7d6d2d0e10fd0db251dcb7dbd8",
-  "site/updates.html": "c73a1e75063281121e46d0c62ca7f02fb2ae158627f358230133b302f8531706"
+  "site/updates.html": "d6db07fc4124e4d929b29cc322cc770739517289a186b2bdee7e2a46f8599de4"
 }
