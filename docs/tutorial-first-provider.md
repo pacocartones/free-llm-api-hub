@@ -157,7 +157,7 @@ The required **"Dataset integrity"** check validates the data, the internal link
 
 ## What happens next
 
-On merge, the entry goes live: the explorer and provider page appear, the badge count ticks up, and the freshness clock starts — your entry is now one of the ~67 the 90-day re-verification system keeps honest (see [freshness-sla.md](freshness-sla.md)).
+On merge, the entry goes live: the explorer and provider page appear, the badge count ticks up, and the freshness clock starts — your entry is now one of the 69 the 90-day re-verification system keeps honest (see [freshness-sla.md](freshness-sla.md)).
 
 ## Common mistakes
 
