@@ -1044,7 +1044,7 @@ providers:
     openai_compatible: false
     openai_base_url: null
     verified: true
-    last_verified: "2026-07-31"
+    last_verified: "2026-08-14"
   - slug: "camb-ai"
     name: "Camb.ai"
     category: "ongoing"
@@ -1063,7 +1063,7 @@ providers:
     openai_compatible: false
     openai_base_url: null
     verified: true
-    last_verified: "2026-07-31"
+    last_verified: "2026-08-14"
   - slug: "rev-ai"
     name: "Rev AI"
     category: "trial"
@@ -1082,7 +1082,7 @@ providers:
     openai_compatible: false
     openai_base_url: null
     verified: true
-    last_verified: "2026-07-31"
+    last_verified: "2026-08-14"
   - slug: "unstructured"
     name: "Unstructured"
     category: "ongoing"
@@ -1101,7 +1101,7 @@ providers:
     openai_compatible: false
     openai_base_url: null
     verified: true
-    last_verified: "2026-07-31"
+    last_verified: "2026-08-14"
   - slug: "nutrient"
     name: "Nutrient (Data Extraction API)"
     category: "ongoing"
@@ -1120,7 +1120,7 @@ providers:
     openai_compatible: false
     openai_base_url: null
     verified: true
-    last_verified: "2026-07-31"
+    last_verified: "2026-08-14"
   - slug: "photoroom"
     name: "Photoroom"
     category: "ongoing"
@@ -1139,7 +1139,7 @@ providers:
     openai_compatible: false
     openai_base_url: null
     verified: true
-    last_verified: "2026-07-31"
+    last_verified: "2026-08-14"
   - slug: "poolside"
     name: "Poolside"
     category: "ongoing"

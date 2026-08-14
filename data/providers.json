@@ -1209,7 +1209,7 @@
       "openai_compatible": false,
       "env_key": "FISH_AUDIO_API_KEY",
       "verified": true,
-      "last_verified": "2026-07-31",
+      "last_verified": "2026-08-14",
       "added": "2026-07-31"
     },
     {
@@ -1231,7 +1231,7 @@
       "openai_compatible": false,
       "env_key": "CAMB_API_KEY",
       "verified": true,
-      "last_verified": "2026-07-31",
+      "last_verified": "2026-08-14",
       "added": "2026-07-31"
     },
     {
@@ -1253,7 +1253,7 @@
       "openai_compatible": false,
       "env_key": "REV_AI_API_KEY",
       "verified": true,
-      "last_verified": "2026-07-31",
+      "last_verified": "2026-08-14",
       "added": "2026-07-31"
     },
     {
@@ -1275,7 +1275,7 @@
       "openai_compatible": false,
       "env_key": "UNSTRUCTURED_API_KEY",
       "verified": true,
-      "last_verified": "2026-07-31",
+      "last_verified": "2026-08-14",
       "added": "2026-07-31"
     },
     {
@@ -1297,7 +1297,7 @@
       "openai_compatible": false,
       "env_key": "NUTRIENT_API_KEY",
       "verified": true,
-      "last_verified": "2026-07-31",
+      "last_verified": "2026-08-14",
       "added": "2026-07-31"
     },
     {
@@ -1319,7 +1319,7 @@
       "openai_compatible": false,
       "env_key": "PHOTOROOM_API_KEY",
       "verified": true,
-      "last_verified": "2026-07-31",
+      "last_verified": "2026-08-14",
       "added": "2026-07-31"
     },
     {
