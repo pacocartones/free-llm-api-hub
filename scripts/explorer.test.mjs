@@ -8,6 +8,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { clientBundle } from './lib/rows.mjs';
+import { readFileSync } from 'node:fs';
 
 // The exact client bundle the browser runs — serialised by lib/rows.mjs itself
 // (the same string build.mjs writes to site/shared-rows.js), so no generated
@@ -100,4 +101,15 @@ test('unverified entries render the warning badge and no date', () => {
   assert.match(out, /badge b-warn/);
   assert.match(out, /unverified/);
   assert.ok(!out.includes('ver-date'), 'no date cell for unverified rows');
+});
+
+test('the hero shield derives its bucket from FLLM_RULES, not a local copy', () => {
+  const src = readFileSync(new URL('../site/explorer.js', import.meta.url), 'utf8');
+  // It must consume the shared function…
+  assert.ok(src.includes('const { recScore, SLA_DAYS, DUE_SOON_DAYS, freshnessStatus } = window.FLLM_RULES;'), 'must consume freshnessStatus from FLLM_RULES');
+  assert.ok(src.includes('freshnessStatus(oldest)'), 'shield must derive its bucket via the shared function');
+  // …and never re-declare the bucket thresholds inline (the drift that made
+  // the hero disagree with the badge/worklist possible).
+  assert.ok(!src.includes("oldest > slaDays ? 'stale'"), 'inline bucket ternary must not return');
+  assert.ok(!src.includes("(DUE_SOON_DAYS || 60)"), 'inline due-soon fallback must not return');
 });
