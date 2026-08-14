@@ -38,3 +38,35 @@ export const countExternalContributors = ({ cwd }) => {
     return 0; // no git available — keep the stats line honest at zero
   }
 };
+
+// Full list of external human contributors, oldest-first (each person's FIRST
+// commit), so the README "Contributors" section can be rendered from git
+// history and never go stale. Mined from ALL files — contributors can touch
+// docs or scripts, not just data/providers.json. Returns [] without git.
+export const listExternalContributors = ({ cwd }) => {
+  try {
+    const log = execSync(
+      'git log --reverse --no-merges --pretty=format:%an%x1f%ae%x1f%s',
+      { cwd, encoding: 'utf8', maxBuffer: 1024 * 1024 * 8 }
+    );
+    const byEmail = new Map();
+    for (const line of (log || '').split('\n')) {
+      const [name, email, subject] = line.split('\x1f');
+      if (!name || !email || !subject) continue;
+      if (BOT_AUTHORS.has(name) || MAINTAINER_EMAILS.has(email)) continue;
+      if (!byEmail.has(email)) byEmail.set(email, { name, email, subject });
+    }
+    return [...byEmail.values()];
+  } catch (_) {
+    return [];
+  }
+};
+
+// GitHub profile URL from a noreply email (ID+username@users.noreply.github.com)
+// or from a name that is already a bare username (no spaces). null when unknown.
+export const githubProfileUrl = (name, email) => {
+  const m = /\+([^@]+)@users\.noreply\.github\.com$/.exec(email || '');
+  if (m) return 'https://github.com/' + m[1];
+  if (/^[\w.-]+$/.test(name)) return 'https://github.com/' + name;
+  return null;
+};

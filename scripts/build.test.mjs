@@ -13,7 +13,7 @@ import { roundTripError } from './_serialize.mjs';
 import { freshnessBadge, freshnessColor, freshnessStatus, recScore, SLA_DAYS, DUE_SOON_DAYS } from './lib/rules.mjs';
 import { esc, stripTags } from './lib/escape.mjs';
 import { mineProviderHistory, assertHistoryPlausible } from './lib/history.mjs';
-import { countExternalContributors, countExternalContributorsFromLog } from './lib/contributors.mjs';
+import { countExternalContributors, countExternalContributorsFromLog, listExternalContributors } from './lib/contributors.mjs';
 import { buildOgManifest } from './lib/og.mjs';
 import { explorerRowHtml } from './lib/rows.mjs';
 
@@ -225,6 +225,12 @@ test('external contributor count tolerates empty and malformed history', () => {
   assert.equal(countExternalContributorsFromLog('\x1fonly@email.com'), 0); // empty name
 });
 
+test('the README Contributors section lists every external contributor from git history', () => {
+  const readme = readFileSync(join(ROOT, 'README.md'), 'utf8');
+  const people = listExternalContributors({ cwd: ROOT });
+  assert.ok(people.length >= 4, 'expected at least the four known external contributors, got ' + people.length);
+  for (const p of people) assert.ok(readme.includes(p.name), p.name + ' should be listed in the README Contributors section');
+});
 test('the README shows a live contributors badge, not a computed number', () => {
   // The contributor count used to be computed into the generated stats line and
   // could go stale between build passes (it did: 2 while the real count was 3).

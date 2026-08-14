@@ -16,6 +16,7 @@ import * as rows from './lib/rows.mjs';
 import * as sortLib from './lib/sort.mjs';
 import { esc, stripTags } from './lib/escape.mjs';
 import { mineProviderHistory } from './lib/history.mjs';
+import { listExternalContributors, githubProfileUrl } from './lib/contributors.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const FRESH_DAYS = SLA_DAYS; // the freshness SLA, defined once in lib/rules.mjs
@@ -559,10 +560,26 @@ const bestEntries = BEST.entries.map((e, i) => {
   return { rank: i + 1, ...e, p };
 });
 
+// ---------- contributors (rendered from git history so it never goes stale) ----------
+const contributorsMd = () => {
+  const people = listExternalContributors({ cwd: ROOT });
+  if (!people.length) return '_No external contributors yet — you could be the first._';
+  return people.map(({ name, email, subject }) => {
+    const url = githubProfileUrl(name, email);
+    const label = url ? '[' + name + '](' + url + ')' : '**' + name + '**';
+    const prMatch = subject.match(/\(#(\d+)\)\s*$/);
+    const short = prMatch ? subject.slice(0, prMatch.index).trim() : subject;
+    const prLink = prMatch ? ' ([PR #' + prMatch[1] + '](' + REPO + '/pull/' + prMatch[1] + '))' : '';
+    return '- ' + label + ' — ' + short + prLink;
+  }).join('\n');
+};
+
 let readme = readFileSync(join(ROOT, 'README.md'), 'utf8');
 readme = inject(readme, 'coverage', coverageTable);
 readme = inject(readme, 'collections', collectionsIndexMd);
 readme = inject(readme, 'best', bestTable(bestEntries));
+readme = inject(readme, 'contributors', contributorsMd());
+
 writeFileSync(join(ROOT, 'README.md'), readme);
 
 // ---------- keep CITATION.cff pinned to the dataset it describes ----------
