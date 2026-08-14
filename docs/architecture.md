@@ -29,6 +29,8 @@ data/schema.json       │                              data/providers.csv, data
 
 **The gitignored derived files are pinned too.** `derived-fingerprints.json` (a sha256 of every build output under `site/` that is not tracked by git) is itself a drift-gate target: a change to any gitignored derivative - `updates.html`, `feed.xml`, `models/`, `api/`, `badges/`, `legal/`, `programs/`, `llms.txt`, `shared-rules.js`/`shared-rows.js`, ... - is visible in review and fails CI until the author commits the regenerated fingerprint. The set is derived from `git ls-files site/` at the end of `build.mjs`, so it stays in sync with `.gitignore` automatically. The one deliberate exclusion is `site/p/`: provider pages render "verified Xd ago" relative to the current day - the same reason they are gitignored at all - so they can never be byte-pinned (`badge-freshness.json` is the other date-relative exception, above). And because `updates.html`, `feed.xml` and `api/v1/history.json` derive from the git log, the fingerprint moves on every commit: every PR (even docs-only) ships its own regenerated fingerprint, exactly like the tracked regenerated files.
 
+**Deploys are verified live.** `pages.yml` runs a `verify-live` job after every deploy: it re-checks the sitemap parity against the live site (`npm run check-live`, retrying `FLLM_LIVE_ATTEMPTS` times for edge propagation) and smoke-tests every URL of the published sitemap (`npm run smoke-live`), so a deploy that serves stale or broken pages fails the workflow.
+
 ## 2. Data model
 
 ### `data/providers.json`
@@ -87,7 +89,7 @@ The serializer **skips absent keys**, so new optional fields only appear on prov
 - **`check-links.mjs`** (`npm run links`, part of `npm test`) — validates INTERNAL markdown links (relative doc-to-doc paths) only. Never touches the network. The external `docs_url` sweep is a local on-demand pass in the [update playbook](update-playbook.md); genuine failures (not 401/403/405/429 bot-blocks) open a "broken link" issue.
 - **`probe-cron.sh`** — the VPS weekly cron alternative (Infisical → probe → models → build → push), for a zero-Actions-minutes setup.
 
-npm scripts: `build, validate, links, worklist, reverify, models, discover, probe, og, test (validate + links + test suites), check (validate + build + diff-gate), check-live (committed sitemap vs deployed)`.
+npm scripts: `build, validate, links, worklist, reverify, models, discover, probe, og, test (validate + links + test suites), check (validate + build + diff-gate), check-live (committed sitemap vs deployed), smoke-live (every published sitemap URL answers 200)`.
 
 ## 4. Site structure (`site/`)
 
