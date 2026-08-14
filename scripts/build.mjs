@@ -583,20 +583,17 @@ writeFileSync(join(ROOT, 'badge-freshness.json'), JSON.stringify(badge, null, 2)
 // (docs/credit-programs.md). Deterministic per dataset snapshot (NOT date-relative
 // like badge-freshness.json), so it IS a diff-gate target: the doc links the endpoint,
 // never a hardcoded count, so the number can't go stale between build passes.
-writeFileSync(join(ROOT, 'badge-verified.json'), JSON.stringify({
+// One object, two homes: the repo root (raw.githubusercontent badge in the docs)
+// and site/ (hero badge served from this domain) — same content, same build pass,
+// so the two copies can never drift.
+const badgeVerified = {
   schemaVersion: 1,
   label: 'verified',
   message: `${verifiedCount}/${total}`,
   color: 'brightgreen',
-}, null, 2) + '\n');
-// Also into site/ so the hero badge serves it from this domain (freellmapihub.com),
-// not raw.githubusercontent — same content, same build pass.
-writeFileSync(join(ROOT, 'site/badge-verified.json'), JSON.stringify({
-  schemaVersion: 1,
-  label: 'verified',
-  message: `${verifiedCount}/${total}`,
-  color: 'brightgreen',
-}, null, 2) + '\n');
+};
+writeFileSync(join(ROOT, 'badge-verified.json'), JSON.stringify(badgeVerified, null, 2) + '\n');
+writeFileSync(join(ROOT, 'site/badge-verified.json'), JSON.stringify(badgeVerified, null, 2) + '\n');
 
 // ---------- exports (CSV / YAML) ----------
 const COLS = [
