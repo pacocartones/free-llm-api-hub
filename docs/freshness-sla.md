@@ -83,7 +83,7 @@ Hovering shows `Verified Xd ago · YYYY-MM-DD`. The unverified case shows a yell
 
 ## 7. The trust summary line
 
-The hero's trust line — `67/67 verified against official docs · oldest entry 15d · 90-day re-verification SLA` — is computed client-side in `site/explorer.js` from the same rules: verified count, oldest age, and `SLA_DAYS` pulled from `shared-rules.js`. It is a read-out of §2 and §3, not a separate claim.
+The hero's trust line — `69/69 verified against official docs · oldest entry 15d · 90-day re-verification SLA` — is computed client-side in `site/explorer.js` from the same rules: verified count, oldest age, and `SLA_DAYS` pulled from `shared-rules.js`. It is a read-out of §2 and §3, not a separate claim.
 
 ## 8. Invariants a change must not break
 
@@ -91,7 +91,7 @@ The hero's trust line — `67/67 verified against official docs · oldest entry 
 - **A verified entry needs its date and source.** `scripts/validate.mjs` rejects `verified: true` without `last_verified` and a real `docs_url`.
 - **The dataset date cannot lie.** `generated` (top of `data/providers.json`) is rejected if older than the newest `last_verified`/`added` — the validator enforces it, so sitemap, API and CITATION never expose a stale date.
 - **Nothing committed may be relative to the current date.** `badge-freshness.json` is the only committed file that moves with the clock; the NEW badge and freshness colours in `site/index.html` are computed from `data.generated`, so they are deterministic per dataset snapshot. Provider pages under `site/p/` are gitignored precisely so they may use the current date; everything else committed must be byte-stable for a given dataset.
-- **No freshness signal depends on a schedule.** There is no regeneration bot and no scheduled workflow at all (CodeQL runs only on PRs and pushes to main). The committed `badge-freshness.json` is recommitted on data/build passes (date-relative by design, §3) and the worklist is computed on demand; nothing regenerates either on a schedule (`verify.yml` is a per-change integrity gate, nothing more).
+- **No freshness signal depends on a schedule.** Freshness itself has no regeneration bot and no scheduled workflow (CodeQL runs only on PRs and pushes to main). The committed `badge-freshness.json` is recommitted on data/build passes (date-relative by design, §3) and the worklist is computed on demand. The one scheduled Actions job is the weekly `models_free` backfill ([`backfill.yml`](../.github/workflows/backfill.yml)), which refreshes model samples and opens a PR — it never touches verification dates or the freshness badge (`verify.yml` is a per-change integrity gate, nothing more).
 
 ## Glossary
 
