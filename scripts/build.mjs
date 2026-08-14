@@ -400,12 +400,13 @@ const SPRITE = `<svg width="0" height="0" style="position:absolute" aria-hidden=
 <symbol id="ic-grid" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"><rect x="2.3" y="2.3" width="4.6" height="4.6" rx="1"/><rect x="9.1" y="2.3" width="4.6" height="4.6" rx="1"/><rect x="2.3" y="9.1" width="4.6" height="4.6" rx="1"/><rect x="9.1" y="9.1" width="4.6" height="4.6" rx="1"/></symbol>
 <symbol id="ic-rocket" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9.6 11.4 6 7.8c.3-3.6 2.2-5.6 5.6-6.2.6 3.4-.4 5.7-3 7.4z"/><path d="M6 8.2C4 8.6 3 11 3 13c2 0 4.4-1 4.8-3"/><circle cx="9.8" cy="6.2" r="1"/></symbol>
 <symbol id="ic-cap" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2.8 1.6 5.8 8 8.8l6.4-3z"/><path d="M4.4 7.4v3.1c0 1 1.6 1.9 3.6 1.9s3.6-.9 3.6-1.9V7.4M14.4 5.8v3.4"/></symbol>
+<symbol id="ic-trophy" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5.2 2.6h5.6v3.2a2.8 2.8 0 0 1-5.6 0z"/><path d="M5.2 3.4H3.4a1.2 1.2 0 0 0 0 2.4h1.5M10.8 3.4h1.8a1.2 1.2 0 0 1 0 2.4h-1.5"/><path d="M8 8.2v2.2M5.9 13.4h4.2M6.6 10.4h2.8v3h-2.8z"/></symbol>
 </defs></svg>`;
 const IC = (id) => `<svg class="i" aria-hidden="true"><use href="#${id}"/></svg>`;
 
 const siteHeader = (p) => `<header class="site-header"><div class="wrap header-inner">
 <a class="brand" href="${p}" aria-label="Free LLM API Hub — home"><svg class="logo-mark"><use href="#logo"/></svg><span class="brand-name">Free LLM API <span class="grad">Hub</span></span></a>
-<nav class="nav" id="primary-nav" aria-label="Primary"><a href="${p}models/">${IC('ic-cube')}Models</a><a href="${p}guides-and-collections/">${IC('ic-book')}Guides &amp; Collections</a><a href="${p}programs/startups">${IC('ic-rocket')}Startup credits</a><a href="${p}programs/research">${IC('ic-cap')}Student credits</a></nav>
+<nav class="nav" id="primary-nav" aria-label="Primary"><a href="${p}models/">${IC('ic-cube')}Models</a><a href="${p}guides-and-collections/">${IC('ic-book')}Guides &amp; Collections</a><a href="${p}programs/startups">${IC('ic-rocket')}Startup credits</a><a href="${p}programs/research">${IC('ic-cap')}Student credits</a><a class="nav-best" href="${p}best/">${IC('ic-trophy')}The best</a></nav>
 <div class="header-actions">
 <button class="icon-btn nav-toggle" id="navToggle" aria-label="Open menu" aria-expanded="false" aria-controls="primary-nav"><svg class="i menu" aria-hidden="true"><use href="#ic-menu"/></svg><svg class="i close" aria-hidden="true"><use href="#ic-close"/></svg></button>
 <a class="icon-btn" href="${REPO}" target="_blank" rel="noopener" aria-label="Star on GitHub">${GH_ICON}<span class="star-count" data-stars>★</span></a>
@@ -1241,11 +1242,76 @@ const llmsFull =
   providers.map(provBlock).join('\n') + `\n`;
 writeFileSync(join(ROOT, 'site/llms-full.txt'), llmsFull);
 
+
+// ---------- /best — editorial top 10 (data/best.json) ----------
+// The ranking is editorial, not a filter: data/best.json declares the order
+// and the "why" for each pick. The build validates every slug against the
+// dataset (a renamed/removed provider fails the build), then renders the page
+// with the provider's live verified data. Edit data/best.json to re-rank.
+const BEST = JSON.parse(readFileSync(join(ROOT, 'data/best.json'), 'utf8'));
+if (!Array.isArray(BEST.entries) || BEST.entries.length === 0) {
+  throw new Error('data/best.json must contain a non-empty entries array');
+}
+const bestBySlug = new Map(providers.map((p) => [p.slug, p]));
+const bestEntries = BEST.entries.map((e, i) => {
+  const p = bestBySlug.get(e.slug);
+  if (!p) throw new Error('data/best.json entry #' + (i + 1) + ' references unknown slug: ' + e.slug);
+  return { rank: i + 1, ...e, p };
+});
+const bestIntroHtml = htmlEsc(BEST.intro).replace(/`([^`]+)`/g, '<code>$1</code>').replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+const bestItemsHtml = bestEntries.map(({ rank, p, why, tag }) => {
+  const num = String(rank).padStart(2, '0');
+  const ver = p.verified
+    ? '<span class="v ok">' + IC('ic-check') + ' verified ' + htmlEsc(p.last_verified) + '</span>'
+    : '<span class="v warn">' + IC('ic-warn') + ' unverified</span>';
+  return '<li class="best-item"><div class="best-rank" aria-hidden="true">' + num + '</div><div class="best-body">' +
+    '<div class="best-head"><h2><a href="../p/' + p.slug + '">' + htmlEsc(p.name) + '</a></h2>' +
+    (tag ? '<span class="best-tag">' + htmlEsc(tag) + '</span>' : '') + '</div>' +
+    '<p class="best-why">' + htmlEsc(why) + '</p>' +
+    '<p class="best-meta">' + ver + (p.best_for ? ' <span class="sep">·</span> ' + htmlEsc(p.best_for) : '') + '</p>' +
+    '</div></li>';
+}).join('\n');
+const bestJsonld = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'ItemList',
+      name: BEST.h1,
+      description: BEST.desc,
+      numberOfItems: bestEntries.length,
+      itemListElement: bestEntries.map((e) => ({ '@type': 'ListItem', position: e.rank, name: e.p.name, url: SITE + '/p/' + e.p.slug })),
+    },
+    {
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Free LLM API Hub', item: SITE + '/' },
+        { '@type': 'ListItem', position: 2, name: 'The best free LLM APIs', item: SITE + '/best/' },
+      ],
+    },
+  ],
+});
+const bestMain =
+  '<section class="page-hero"><div class="wrap">' +
+  '<nav class="crumbs"><a href="../">Home</a> / The best</nav>' +
+  '<h1>' + htmlEsc(BEST.h1) + '</h1><p class="lede">' + htmlEsc(BEST.desc) + '</p>' +
+  '</div></section>' +
+  '<main id="main"><div class="wrap best-wrap">' +
+  '<p class="best-intro">' + bestIntroHtml + '</p>' +
+  '<ol class="best-list">' + bestItemsHtml + '</ol>' +
+  '<p class="count best-note">Editorial ranking, reviewed ' + htmlEsc(BEST.updated) + ' — every pick links to its full verified profile. Want to nominate a provider? See the repo.</p>' +
+  '</div></main>';
+mkdirSync(join(ROOT, 'site/best'), { recursive: true });
+writeFileSync(
+  join(ROOT, 'site/best/index.html'),
+  htmlPage({ title: 'The best free LLM APIs · Free LLM API Hub', desc: BEST.desc, canonical: SITE + '/best/', main: bestMain, jsonld: bestJsonld, prefix: '../' })
+);
+
 // ---------- sitemap.xml (site SEO) ----------
 const sitemapUrls = [
   `${SITE}/`,
   `${SITE}/models/`,
   `${SITE}/guides-and-collections/`,
+  `${SITE}/best/`,
   `${SITE}/api/`,
   `${SITE}/programs/startups`,
   `${SITE}/programs/research`,

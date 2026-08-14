@@ -1,0 +1,58 @@
+{
+  "h1": "The best free LLM APIs right now",
+  "desc": "Our editorial top 10 — hand-picked from the 69 verified providers, ranked for real-world usefulness.",
+  "intro": "This is the editorial ranking: not an automatic filter, but the ten free tiers we would actually reach for first. Each pick links to its full verified profile — free tier, rate limits and the catch are all checked against the provider's own docs on the linked page. The list is reviewed and re-verified with the dataset.",
+  "updated": "2026-08-14",
+  "entries": [
+    {
+      "slug": "typhoon",
+      "why": "The rare package that is genuinely free forever (perpetual, not a trial) with a frontier-class model, OCR and real-time speech behind one no-card OpenAI-compatible key.",
+      "tag": "Editor's pick"
+    },
+    {
+      "slug": "cloudflare-workers-ai",
+      "why": "The best free daily volume for a real side project — 10k requests a day with no card, and the quota renews.",
+      "tag": "Best free quota"
+    },
+    {
+      "slug": "google-gemini",
+      "why": "The only frontier-class model with a genuine, renewing free tier — the default when you want the smartest free model.",
+      "tag": "Frontier quality"
+    },
+    {
+      "slug": "ollama-cloud",
+      "why": "Cloud-hosted open models with the exact Ollama workflow and no card at signup — the easiest on-ramp for open-weight models.",
+      "tag": "Best on-ramp"
+    },
+    {
+      "slug": "openrouter",
+      "why": "One no-card key, every model: a wide rotating sample of :free models behind a single OpenAI-compatible endpoint.",
+      "tag": "Best gateway"
+    },
+    {
+      "slug": "ai-horde",
+      "why": "Anonymous, no-signup and permanently free — the fallback that works when everything else asks for an account.",
+      "tag": "No account needed"
+    },
+    {
+      "slug": "llamaparse",
+      "why": "The most generous free document-parsing tier for RAG builders (~10k pages a month), renewing every month.",
+      "tag": "Best for RAG"
+    },
+    {
+      "slug": "ocr-space",
+      "why": "Classic, reliable free OCR at 25k conversions a month with no card — the boring tool that just works.",
+      "tag": "Reliable utility"
+    },
+    {
+      "slug": "speechify",
+      "why": "Free commercial TTS at 50k characters a month — the pick when the output actually ships.",
+      "tag": "Best for TTS"
+    },
+    {
+      "slug": "jina-ai",
+      "why": "Free embeddings and rerank behind an OpenAI-compatible endpoint — the shortest path to a free RAG stack.",
+      "tag": "Best for embeddings"
+    }
+  ]
+}

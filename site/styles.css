@@ -104,6 +104,16 @@ svg.i { width: 15px; height: 15px; flex: none; vertical-align: -2px; }
 .nav a svg.i { width: 14px; height: 14px; opacity: .8; }
 .nav a:hover svg.i { opacity: 1; }
 .nav a:hover { color: var(--text); background: var(--panel); text-decoration: none; }
+/* /best — the editorial top 10 gets a distinctive pill so it stands out from
+   the plain nav links: accent border + tint, trophy icon stays lit. */
+.nav a.nav-best {
+  color: var(--accent);
+  border: 1px solid color-mix(in srgb, var(--accent) 42%, transparent);
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  font-weight: 700;
+}
+.nav a.nav-best svg.i { opacity: 1; }
+.nav a.nav-best:hover { color: var(--accent); background: color-mix(in srgb, var(--accent) 18%, transparent); box-shadow: var(--glow); }
 .header-actions { margin-left: auto; display: flex; align-items: center; gap: 8px; }
 .icon-btn {
   display: inline-flex; align-items: center; gap: 7px; height: 34px; padding: 0 11px;
@@ -304,6 +314,39 @@ pre:hover .pre-copy, .pre-copy:focus-visible { opacity: 1; }
 .coll-card-head strong { font-family: var(--font-mono); font-size: 1rem; }
 .coll-card .count { background: color-mix(in srgb, var(--accent) 13%, transparent); color: var(--accent); border: 1px solid color-mix(in srgb, var(--accent) 32%, transparent); border-radius: 999px; padding: 1px 9px; font-size: .74rem; font-weight: 700; }
 .coll-card p { margin: 0; color: var(--muted); font-size: .88rem; }
+/* /best — editorial top 10 */
+.best-wrap { max-width: 46rem; }
+.best-intro { color: var(--muted); line-height: 1.65; margin: 0 0 26px; max-width: 66ch; }
+.best-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+.best-item {
+  display: grid; grid-template-columns: 3.2rem 1fr; gap: 16px; align-items: start;
+  background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 16px 18px;
+}
+.best-item:hover { border-color: color-mix(in srgb, var(--accent) 40%, var(--border)); }
+.best-rank {
+  font-family: var(--font-mono); font-weight: 800; font-size: 1.7rem; line-height: 1;
+  color: color-mix(in srgb, var(--accent) 78%, transparent);
+  text-shadow: 0 0 18px color-mix(in srgb, var(--accent) 45%, transparent);
+}
+.best-body { min-width: 0; }
+.best-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 6px; }
+.best-head h2 { margin: 0; font-size: 1.08rem; font-family: var(--font-mono); }
+.best-head h2 a { color: var(--text); }
+.best-head h2 a:hover { color: var(--accent); }
+.best-tag {
+  font-size: .7rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+  color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 36%, transparent);
+  border-radius: 999px; padding: 2px 9px; font-family: var(--font-mono);
+}
+.best-why { margin: 0 0 8px; color: var(--text); line-height: 1.6; }
+.best-meta { margin: 0; color: var(--muted); font-size: .85rem; font-family: var(--font-mono); display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: center; }
+.best-note { margin-top: 18px; line-height: 1.6; }
+@media (max-width: 480px) {
+  .best-item { grid-template-columns: 2.4rem 1fr; gap: 10px; padding: 14px; }
+  .best-rank { font-size: 1.3rem; }
+}
 
 .prov-badges { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 6px 0 4px; }
 .flag-badge { display: inline-flex; align-items: center; gap: 6px; font-size: .74rem; color: var(--muted); background: var(--panel-2); border: 1px solid var(--border); border-radius: 7px; padding: 3px 10px; font-family: var(--font-mono); }
