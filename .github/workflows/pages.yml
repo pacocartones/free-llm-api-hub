@@ -8,6 +8,9 @@ on:
       - 'site/**'
       - 'scripts/**'
       - '.github/workflows/pages.yml'
+      # derived-fingerprints.json lives at the repo root, outside the dirs above,
+      # but a pin change means the build output shifted — redeploy and re-verify it.
+      - 'derived-fingerprints.json'
   workflow_dispatch: {}
 
 # Allow one concurrent deployment; never cancel an in-progress one mid-publish.
