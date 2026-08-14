@@ -72,9 +72,12 @@ const PUBLIC = {
   // Free credit / free-inference tiers with public OpenAI-shaped catalogs.
   'nvidia-nim': openaiPublic('https://integrate.api.nvidia.com/v1/models'),
   modelscope: openaiPublic('https://api-inference.modelscope.cn/v1/models'),
-  'ollama-cloud': async () => {
-    const d = await getJson('https://ollama.com/api/tags');
-    return sample((d.models || []).map((m) => m.name));
+  // Typhoon's /models is public and returns a bare array, not the OpenAI
+  // {data: [...]} shape — handle both so the extractor survives a shape change.
+  typhoon: async () => {
+    const d = await getJson('https://api.opentyphoon.ai/v1/models');
+    const list = Array.isArray(d) ? d : (d.data || []);
+    return sample(list.map((m) => m.id));
   },
 };
 
@@ -85,6 +88,7 @@ const KEYED = {
   cerebras: 'CEREBRAS_API_KEY',
   sambanova: 'SAMBANOVA_API_KEY',
   scaleway: 'SCALEWAY_API_KEY',
+  'wandb-inference': 'WANDB_API_KEY',
 };
 
 async function openaiModels(baseUrl, key) {

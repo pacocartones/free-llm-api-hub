@@ -47,7 +47,7 @@ providers:
     notes: "ToS (Jul 2026) prohibits reselling API access or building a competing service — platform-wide, not just the free models; per-model terms still apply"
     best_for: "Widest model selection behind one no-card key"
     modalities: ["text", "vision"]
-    models_free: ["cohere/north-mini-code:free", "google/gemma-4-26b-a4b-it:free", "google/gemma-4-31b-it:free", "inclusionai/ling-3.0-tiny:free", "nvidia/nemotron-3-nano-30b-a3b:free", "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free", "openai/gpt-oss-20b:free", "poolside/laguna-s-2.1:free"]
+    models_free: ["cohere/north-mini-code:free", "google/gemma-4-26b-a4b-it:free", "google/gemma-4-31b-it:free", "liquid/lfm-2.5-2.6b:free", "nvidia/nemotron-3-nano-30b-a3b:free", "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free", "openai/gpt-oss-20b:free", "poolside/laguna-s-2.1:free"]
     expires: null
     docs_url: "https://openrouter.ai/docs/api-reference/limits"
     phone_required: false
@@ -1301,7 +1301,7 @@ providers:
     notes: "By SCB 10X, the venture arm of Siam Commercial Bank, focused on Thai-language models. Beta, provided as-is with no formal support; usage data is collected to improve the model; SCB claims no rights in outputs. Sign up for an API key at opentyphoon.ai."
     best_for: "Thai-language models and OCR via an OpenAI-compatible research API"
     modalities: ["text"]
-    models_free: ["typhoon-v2.1-12b-instruct", "typhoon-ocr"]
+    models_free: ["typhoon-asr-realtime", "typhoon-isan-asr-realtime", "typhoon-ocr", "typhoon-ocr-preview", "typhoon-ocr-v1.5", "typhoon-v2.5-30b-a3b-instruct"]
     expires: null
     docs_url: "https://docs.opentyphoon.ai/en/faq/"
     phone_required: false
