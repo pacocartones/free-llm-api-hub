@@ -22,7 +22,7 @@ These collapse into **`probe_status`**: `live` · `auth-ok` · `auth-failed` · 
 
 The probe reads keys from `process.env[env_key]` (each provider declares its `env_key` in `data/providers.json`). It does **not** care how they got there — so any injector works. Keys are used only in `Authorization` headers; they are never logged, written to the dataset, or committed.
 
-**Active path: local environment.** Run `npm run probe -- --write --auth-only` whenever you have keys handy. The probe picks up whatever `process.env[env_key]` names are set — any subset works, so you can probe one provider at a time; missing keys are simply skipped. It deliberately records `auth-ok`, not `live`, because it does not perform inference.
+**Active path: local environment.** Copy [`.env.example`](../.env.example) to `.env` (gitignored), fill in the keys you have, then run `node --env-file=.env scripts/probe.mjs --write`. The probe picks up whatever `process.env[env_key]` names are set — any subset works, so you can probe one provider at a time, and missing keys are simply skipped. `--auth-only` deliberately records `auth-ok`, not `live`, because it does not perform inference; to earn the **live-tested** badge, run without it (one 1-token call per provider).
 
 **Alternative: a self-hosted Infisical on the same VPS** that runs the probe, so secrets never leave the box.
 
