@@ -9,6 +9,11 @@ Notable changes to the dataset and the project. Format based on [Keep a Changelo
 
 ### Data
 - **Paced re-verification — batch 2026-08-14.** The 6 oldest providers re-checked against their own docs: Vercel AI Gateway (the $5/month free credit is now stated in the docs, and BYOK is not available on the free tier), Jina AI (embeddings now v5), and Deepgram, AssemblyAI, Mixedbread and Arli AI re-confirmed unchanged. `last_verified` moved to 2026-08-14. [#151](https://github.com/pacocartones/free-llm-api-hub/pull/151)
+- **Paced re-verification — batch 2 (2026-08-14).** The next 6 oldest providers re-checked against their own docs: Ollama Cloud, AI Horde, ModelScope (API-Inference), Pollinations.ai, Runware and Pinecone Inference. All six already matched their live docs (no drift); only the `last_verified` dates moved to 2026-08-14. [#155](https://github.com/pacocartones/free-llm-api-hub/pull/155)
+
+### Changed
+- **Backfill PR path.** `backfill.yml` no longer dispatches `verify.yml` (a `GITHUB_TOKEN` cannot chain workflows — it returned HTTP 403), and a live drift test showed the same token also cannot open the PR (`createPullRequest` is denied). The branch is pushed but no PR appears, so the weekly backfill needs a `BACKFILL_PR_TOKEN` (PAT) or the repo's "Allow GitHub Actions to create and approve pull requests" setting before it can ship anything.
+- **Fingerprint gate excludes self-referential files.** `updates.html`, `feed.xml` and `api/v1/history.json` are derived from `git log`, so their bytes change on every squash-merge; they are no longer part of `derived-fingerprints.json`, which removes the post-merge pin-refresh chore. [#154](https://github.com/pacocartones/free-llm-api-hub/pull/154)
 
 ### Docs
 - **SECURITY.md automation table** now lists the four workflows — including the weekly `backfill.yml` (`contents: write` / `pull-requests: write` over an `automated-backfill/*` branch + PR) — instead of claiming "no write-capable automation". [#152](https://github.com/pacocartones/free-llm-api-hub/pull/152)
