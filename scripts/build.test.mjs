@@ -228,9 +228,7 @@ test('the README shows a live contributors badge, not a computed number', () => 
   // It is now a shields.io badge that GitHub resolves live on every view.
   const readme = readFileSync(join(ROOT, 'README.md'), 'utf8');
   assert.match(readme, /img\.shields\.io\/github\/contributors\/pacocartones\/free-llm-api-hub/);
-  const span = readme.match(/<!-- AUTOGEN:stats:start -->\s*([\s\S]*?)\s*<!-- AUTOGEN:stats:end -->/)?.[1];
-  assert.ok(span, 'README should carry an AUTOGEN stats span');
-  assert.doesNotMatch(span, /contributor/i, 'the stats line must not carry a computed contributor count');
+  assert.doesNotMatch(readme, /independently verified against the provider's own docs/, 'no computed stats line in the README header');
 });
 
 test('the committed OG manifest matches the current dataset', () => {

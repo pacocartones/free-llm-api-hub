@@ -1,8 +1,6 @@
 <div align="center">
 
-<img src="site/favicon.svg" alt="Free LLM API Hub logo" width="96">
-
-# Free LLM API Hub
+<img src="site/favicon.svg" alt="Free LLM API Hub" width="132">
 
 **A continuously-verified dataset of free LLM & AI-model APIs you can build on.**
 
@@ -20,9 +18,6 @@ No hype, no dead links, no "generous limits" hand-waving. Just what's actually f
 
 **[🔎 Interactive explorer](https://freellmapihub.com/)** &nbsp;·&nbsp; **[📊 Dataset](data/providers.json)** &nbsp;·&nbsp; **[🧪 How we verify](docs/methodology.md)** &nbsp;·&nbsp; **[➕ Add a provider](CONTRIBUTING.md)**
 
-<!-- AUTOGEN:stats:start -->
-**67 providers** tracked · 36 ongoing free tiers · 31 trial credits · **67/67** independently verified against the provider's own docs
-<!-- AUTOGEN:stats:end -->
 
 </div>
 
