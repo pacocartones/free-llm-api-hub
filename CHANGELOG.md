@@ -25,6 +25,7 @@ Notable changes to the dataset and the project. Format based on [Keep a Changelo
 - **Auto-tag on dataset version bump.** `tag-release.yml` creates the annotated `vX.Y.Z` tag when `data/providers.json` advances (idempotent no-op if the tag already exists), so "pin a snapshot" for programmatic consumers stops depending on a human remembering to tag.
 - **`scripts/generate-gfis.mjs`.** Recomputes the tri-state umbrella issues (#7 phone_required, #8 commercial_ok) from the data and refreshes their titles/checklists, so the unverified counts can never go stale again.
 - **Contributor on-ramps diversified.** The good-first-issue pool now spans "write a test", "improve the explorer UI" and "document the re-verification process" (previously all "confirm a field"); the existing `new-provider` and `inaccuracy` templates cover adding a provider and reporting drift; every good-first issue carries the `hacktoberfest` label.
+- **Auto-generated README Contributors section.** The list of external contributors (name + contribution + PR link) is now rendered from git history instead of hand-maintained, so it can never go stale again (it had silently dropped two contributors: Victoria Odalo #112 and MikeGatsby #117).
 - **`/api/v1/best.json`.** The editorial top 20 is now served as static, machine-readable JSON (rank + the "why" per pick + each pick's full verified profile), alongside the existing `/best/` page.
 
 ### Docs
