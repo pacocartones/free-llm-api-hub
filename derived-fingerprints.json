@@ -92,7 +92,7 @@
   "site/collections/no-credit-card.html": "22674d6b314ec84d8fd1eaaa25ed0c800c1bcfbb9f62ee914bfc720505dacb4c",
   "site/collections/no-phone.html": "40eb99bf294aa1dba63b42e84ebd83c0c08ee52d85d43a6575f6190f7a7f742f",
   "site/collections/openai-compatible.html": "5ded90db50d694940b55a0e4a23edf4b566af3788759a6fdfb445bde30777655",
-  "site/feed.xml": "c73a353f0f8ea3c6d2abfdb4bffaf0ec3543c239f446ade0d378fc0dc016883d",
+  "site/feed.xml": "91dda4192f0805f99c4adc13bf5ae27aeed6c2c6b6d8d832f0c4658bf368eb85",
   "site/guides-and-collections/index.html": "52ff6c095eb5d8a88d5fb279e082f09bcdb651c965539b5872762d5b4c7b2e10",
   "site/guides/free-embeddings-apis.html": "44b936fd1ea99364f702ba63fa35b3512ffe6c2c5a227ce1eea5ef7851a85d08",
   "site/guides/free-image-generation-apis.html": "b34f069ee7b5f3a2c925604e3460b5e044b0451b634a9e5c478ec4d82a9b7623",
@@ -114,5 +114,5 @@
   "site/providers.yaml": "2e6c7efdfb150dda5e9ee199aaddf81aadcd67c635003e9ca67dec838cdaaf09",
   "site/shared-rows.js": "10b24f4f5024375964ed89d7a12d6924f2b7c5c1613aee2882c0794d6df1f232",
   "site/shared-rules.js": "1350ee75bf65a3e1d79b4ada2d77520b03b3db7d6d2d0e10fd0db251dcb7dbd8",
-  "site/updates.html": "19895bed1f87b3ecac376c6c2ca13a78efb5c9833fa6f957e3fd057e97f5b6fe"
+  "site/updates.html": "69cce9ff737b328870adb2283824212f30661b283eba8961a5892bf520aae904"
 }
