@@ -41,7 +41,9 @@ function render() {
   const emptyEl = document.getElementById('empty');
   emptyEl.style.display = rows.length ? 'none' : 'block';
   emptyEl.textContent = rows.length ? '' : 'No providers match these filters.';
-  const activeCount = (category !== 'all' ? 1 : 0) + (modality !== 'all' ? 1 : 0) +
+  const activeCount = (category !== 'all' ? 1 : 0) + 
+    (modality !== 'all' ? 1 : 0) +
+    (sortKey !== 'recommended' ? 1 : 0) +
     [nocard, nophone, commercial, openai, verifiedOnly].filter(Boolean).length;
   document.getElementById('clearFilters').hidden = activeCount === 0;
 
