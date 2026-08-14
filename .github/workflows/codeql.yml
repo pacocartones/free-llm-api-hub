@@ -1,12 +1,15 @@
 name: CodeQL
 
 on:
-  # No schedule: analysis runs on every PR and on pushes to main, which already
-  # covers every code change. A weekly cron would burn Actions minutes for nothing.
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
+  # Weekly-only, to keep the Actions minutes budget off the per-PR hot path.
+  # The fast security signal on every change is the explorer XSS regression
+  # suite (scripts/explorer.test.mjs), which already gates every PR inside
+  # verify.yml. This broader static scan runs on a schedule (plus manual
+  # dispatch) instead of on every push and pull request.
+  schedule:
+    # 04:00 UTC every Monday.
+    - cron: '0 4 * * 1'
+  workflow_dispatch: {}
 
 permissions:
   contents: read

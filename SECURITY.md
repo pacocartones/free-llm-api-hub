@@ -30,7 +30,7 @@ Four workflows run against this repository; none of them writes to `main` direct
 |---|---|---|
 | `verify.yml` | pull request, push to `main`, manual | `contents: read` — cannot write anything |
 | `pages.yml` | push to `main`, manual | `contents: read`, `pages: write` — publishes the site |
-| `codeql.yml` | pull request, push to `main` | `contents: read` (job: `security-events: write`) — code scanning |
+| `codeql.yml` | weekly schedule, manual | `contents: read` (job: `security-events: write`) — code scanning |
 | `tag-release.yml` | push to `main` (data/providers.json), manual | `contents: write` — pushes the annotated `vX.Y.Z` tag when the dataset version advances; never writes to `main` |
 
 A pull request from a fork therefore never runs with a token that can write to this
