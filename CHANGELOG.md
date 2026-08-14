@@ -5,6 +5,14 @@ Notable changes to the dataset and the project. Format based on [Keep a Changelo
 - **Data changes** (a provider's limits/terms) are recorded here when notable; every change is also visible in the git history of `data/providers.json`.
 - **Schema changes** (a new field, a changed meaning) bump the dataset version and are always recorded.
 
+## [Unreleased]
+
+### Data
+- **Paced re-verification — batch 2026-08-14.** The 6 oldest providers re-checked against their own docs: Vercel AI Gateway (the $5/month free credit is now stated in the docs, and BYOK is not available on the free tier), Jina AI (embeddings now v5), and Deepgram, AssemblyAI, Mixedbread and Arli AI re-confirmed unchanged. `last_verified` moved to 2026-08-14. [#151](https://github.com/pacocartones/free-llm-api-hub/pull/151)
+
+### Docs
+- **SECURITY.md automation table** now lists the four workflows — including the weekly `backfill.yml` (`contents: write` / `pull-requests: write` over an `automated-backfill/*` branch + PR) — instead of claiming "no write-capable automation". [#152](https://github.com/pacocartones/free-llm-api-hub/pull/152)
+
 ## [2.9.0] — 2026-08-14
 
 ### Data
