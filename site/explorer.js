@@ -30,6 +30,16 @@ function render() {
 
   rows.sort((a, b) => {
     if (sortKey === 'recommended') { const d = recScore(b) - recScore(a); return d !== 0 ? d : (a.name < b.name ? -1 : a.name > b.name ? 1 : 0); }
+    if (sortKey === 'verified') {
+      // Sort by last_verified (YYYY-MM-DD), not the boolean: every verified row
+      // would compare equal. Unverified rows (no date) always sink to the bottom.
+      const vd = (p) => (p.last_verified ? Date.parse(p.last_verified + 'T00:00:00Z') : null);
+      const aU = vd(a) === null, bU = vd(b) === null;
+      if (aU !== bU) return aU ? 1 : -1;
+      if (aU) return a.name < b.name ? -1 : a.name > b.name ? 1 : 0;
+      const d = vd(a) - vd(b) || (a.name < b.name ? -1 : a.name > b.name ? 1 : 0);
+      return sortDir === 1 ? d : -d;
+    }
     let av = a[sortKey], bv = b[sortKey];
     if (typeof av === 'boolean') { av = av ? 1 : 0; bv = bv ? 1 : 0; }
     av = (av ?? ''); bv = (bv ?? '');
