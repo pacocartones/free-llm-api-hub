@@ -184,11 +184,10 @@ h1 { font-size: clamp(1.9rem, 4.4vw, 3rem); line-height: 1.1; margin: 0 auto 18p
 .controls-inner { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
 .sel { background: var(--panel-2); border: 1px solid var(--border); color: var(--text); padding: 9px 12px; border-radius: 8px; font-size: .9rem; font-family: var(--font-mono); }
 
-/* Verified cell: check badge + date on ONE line, aligned with the provider name.
-   A stacked (check over date) layout was tried here, but the date always lands
-   on the same line as the `.best` subtitle — rows read as staggered. Inline keeps
-   the whole unit on the name line, like the type badge. */
-.pver { display: inline-flex; align-items: center; gap: 6px; }
+/* Verified cell: check badge + date stacked and centered against the row, so the
+   unit lands on the provider-name line instead of hugging the top of a tall row. */
+.ver-cell { display: inline-flex; flex-direction: column; align-items: center; gap: 4px; }
+#table td.pver { vertical-align: middle; text-align: center; }
 .ver-date { font-size: .72rem; color: var(--muted); font-family: var(--font-mono); }
 .sel { cursor: pointer; } .sel:hover { border-color: var(--border-strong); }
 .seg { display: flex; gap: 3px; background: var(--panel-2); border: 1px solid var(--border); border-radius: 9px; padding: 3px; }
@@ -214,10 +213,7 @@ h1 { font-size: clamp(1.9rem, 4.4vw, 3rem); line-height: 1.1; margin: 0 auto 18p
 
 /* ---------- table ---------- */
 main { padding: 24px 0 80px; }
-.section-head { align-items: center; }
-.trust-summary { margin: 0; font-family: var(--font-mono); font-size: .78rem; color: var(--faint); }
-.section-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin: 4px 0 14px; }
-.trust-badge { align-self: center; }
+.hero .trust-badge { margin-top: 12px; }
 #count, .count { color: var(--muted); font-size: .82rem; font-family: var(--font-mono); }
 table { width: 100%; border-collapse: collapse; font-size: .9rem; }
 thead th { text-align: left; padding: 14px 14px; border-bottom: 1px solid var(--border-strong); color: var(--text); font-weight: 700; white-space: nowrap; font-family: var(--font-mono); font-size: .95rem; text-transform: uppercase; letter-spacing: .03em; }
@@ -226,10 +222,6 @@ main#explorer > .wrap, .controls .controls-inner { max-width: 1320px; }
 .fmini { display: flex; flex-wrap: wrap; gap: 7px 8px; margin-top: 8px; }
 .fmini-i { display: inline-flex; color: var(--muted); }
 .fmini-i svg.i { width: 15px; height: 15px; }
-.quickpicks { display: flex; flex-wrap: wrap; gap: 6px; }
-.quickpicks button { background: var(--panel-2); border: 1px solid var(--border); color: var(--muted); padding: 6px 12px; border-radius: 999px; cursor: pointer; font-size: .8rem; font-family: var(--font-mono); transition: border-color .12s, color .12s, background .12s; }
-.quickpicks button:hover { border-color: var(--accent); color: var(--accent); }
-.quickpicks button.active { background: color-mix(in srgb, var(--accent) 16%, transparent); border-color: var(--accent); color: var(--accent); }
 table.sortable thead th { cursor: pointer; }
 table.sortable thead th:hover { color: var(--text); }
 thead th.sorted { color: var(--accent); }
@@ -377,9 +369,10 @@ pre:hover .pre-copy, .pre-copy:focus-visible { opacity: 1; }
 .site-footer { border-top: 1px solid var(--border); background: var(--bg-elev); color: var(--muted); font-size: .87rem; }
 .footer-top { display: grid; grid-template-columns: 1.6fr 1fr 1fr 1fr; gap: 28px; padding: 40px 0 30px; }
 .foot-brand-link { display: inline-flex; align-items: center; gap: 10px; margin-bottom: 14px; color: var(--text); font-family: var(--font-mono); font-weight: 700; font-size: 1.02rem; }
-.foot-brand-link .logo-mark { width: 26px; height: 26px; }
+.foot-brand-link .logo-mark { width: 42px; height: 42px; filter: drop-shadow(0 0 8px rgba(63,206,143,.35)); }
 .foot-brand-link:hover { text-decoration: none; }
-.footer-brand p { max-width: 36ch; margin: 0; color: var(--muted); line-height: 1.55; }
+.footer-brand p { max-width: 38ch; margin: 0; color: color-mix(in srgb, var(--text) 74%, transparent); line-height: 1.6; }
+.footer-brand p strong { color: var(--accent); font-weight: 700; }
 .footer-brand .star-btn { margin-top: 18px; }
 .footer-col h4 { position: relative; display: inline-block; font-size: .78rem; text-transform: uppercase; letter-spacing: .09em; color: var(--text); margin: 2px 0 16px; padding-bottom: 8px; font-family: var(--font-mono); font-weight: 700; }
 .footer-col h4::after { content: ""; position: absolute; left: 0; bottom: 0; width: 22px; height: 2px; background: var(--accent); border-radius: 2px; }

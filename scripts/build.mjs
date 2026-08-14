@@ -404,7 +404,7 @@ const IC = (id) => `<svg class="i" aria-hidden="true"><use href="#${id}"/></svg>
 
 const siteHeader = (p) => `<header class="site-header"><div class="wrap header-inner">
 <a class="brand" href="${p}" aria-label="Free LLM API Hub — home"><svg class="logo-mark"><use href="#logo"/></svg><span class="brand-name">Free LLM API <span class="grad">Hub</span></span></a>
-<nav class="nav" id="primary-nav" aria-label="Primary"><a href="${p}">${IC('ic-home')}Home</a><a href="${p}models/">${IC('ic-cube')}Models</a><a href="${p}guides-and-collections/">${IC('ic-book')}Guides &amp; Collections</a><a href="${p}programs/startups">${IC('ic-rocket')}Startup credits</a><a href="${p}programs/research">${IC('ic-cap')}Student credits</a></nav>
+<nav class="nav" id="primary-nav" aria-label="Primary"><a href="${p}models/">${IC('ic-cube')}Models</a><a href="${p}guides-and-collections/">${IC('ic-book')}Guides &amp; Collections</a><a href="${p}programs/startups">${IC('ic-rocket')}Startup credits</a><a href="${p}programs/research">${IC('ic-cap')}Student credits</a></nav>
 <div class="header-actions">
 <button class="icon-btn nav-toggle" id="navToggle" aria-label="Open menu" aria-expanded="false" aria-controls="primary-nav"><svg class="i menu" aria-hidden="true"><use href="#ic-menu"/></svg><svg class="i close" aria-hidden="true"><use href="#ic-close"/></svg></button>
 <a class="icon-btn" href="${REPO}" target="_blank" rel="noopener" aria-label="Star on GitHub">${GH_ICON}<span class="star-count" data-stars>★</span></a>
@@ -412,10 +412,10 @@ const siteHeader = (p) => `<header class="site-header"><div class="wrap header-i
 </div></div></header>`;
 
 const siteFooter = (p) => `<footer class="site-footer"><div class="wrap footer-top">
-<div class="footer-brand"><a class="foot-brand-link" href="${p}" aria-label="Free LLM API Hub — home"><svg class="logo-mark"><use href="#logo"/></svg><span class="brand-name">Free LLM API <span class="grad">Hub</span></span></a><p>A continuously-verified, machine-readable dataset of free LLM &amp; AI-model APIs and trial credits for developers.</p><a class="star-btn" href="${REPO}" target="_blank" rel="noopener" aria-label="Star free-llm-api-hub on GitHub"><span class="sb-label">${GH_ICON} Star on GitHub</span><span class="sb-count" data-stars>★</span></a></div>
-<div class="footer-col"><h4>Explore</h4><a href="${p}#explorer">Interactive explorer</a><a href="${p}models/">Free model index</a><a href="${p}guides-and-collections/">Guides &amp; Collections</a><a href="${p}programs/startups">Startup credits</a><a href="${p}programs/research">Student &amp; research credits</a><a href="${p}updates">Updates</a><a href="${REPO}#notably-not-free">Notably NOT free</a></div>
+<div class="footer-brand"><a class="foot-brand-link" href="${p}" aria-label="Free LLM API Hub — home"><svg class="logo-mark"><use href="#logo"/></svg><span class="brand-name">Free LLM API <span class="grad">Hub</span></span></a><p>The <strong>continuously-verified</strong>, <strong>machine-readable</strong> dataset of <strong>free LLM &amp; AI-model APIs</strong> and <strong>trial credits</strong> — every entry <strong>dated</strong>, <strong>sourced</strong>, and <strong>free of dead links</strong>.</p><a class="star-btn" href="${REPO}" target="_blank" rel="noopener" aria-label="Star free-llm-api-hub on GitHub"><span class="sb-label">${GH_ICON} Star on GitHub</span><span class="sb-count" data-stars>★</span></a></div>
+<div class="footer-col"><h4>Explore</h4><a href="${p}#explorer">Interactive explorer</a><a href="${p}models/">Free model index</a><a href="${p}programs/startups">Startup credits</a><a href="${p}programs/research">Student &amp; research credits</a></div>
 <div class="footer-col"><h4>Data</h4><a href="${p}providers.json">providers.json</a><a href="${p}api/">JSON API</a><a href="${p}llms.txt">llms.txt</a><a href="${p}providers.csv">CSV export</a><a href="${p}providers.yaml">YAML export</a><a href="${REPO}/blob/main/data/schema.json">JSON Schema</a></div>
-<div class="footer-col"><h4>Project</h4><a href="${REPO}/blob/main/docs/methodology.md">Methodology</a><a href="${REPO}/blob/main/CONTRIBUTING.md">Contributing</a><a href="${REPO}/blob/main/CHANGELOG.md">Changelog</a><a href="${REPO}">GitHub ★</a></div>
+<div class="footer-col"><h4>Project</h4><a href="${p}updates">Updates</a><a href="${REPO}/blob/main/docs/methodology.md">Methodology</a><a href="${REPO}/blob/main/CONTRIBUTING.md">Contributing</a><a href="${REPO}">GitHub ★</a></div>
 </div><div class="wrap footer-bottom"><p>Independent, community-maintained — not affiliated with any provider listed. Terms change without notice; always confirm against each provider's own docs. MIT licensed.</p><p class="foot-legal"><a href="${p}legal/privacy">Privacy</a> · <a href="${p}legal/terms">Terms</a></p><p class="foot-email"><a href="mailto:admin@freellmapihub.com">admin@freellmapihub.com</a></p></div></footer>`;
 
 // Full page wrapper for generated (collection) pages. `p` is the path prefix to the site root.
@@ -476,18 +476,6 @@ ${siteFooter(prefix)}
 `;
 }
 
-// Kept deterministic from the data (no time-sensitive term) so PR CI never flakes on date drift.
-// The decaying freshness number lives in badge-freshness.json, refreshed on every build pass.
-//
-// Contributor count is deliberately NOT part of the generated stats line: the
-// README shows a live shields.io badge (github/contributors) instead, so the
-// number can never go stale between build passes. lib/contributors.mjs still
-// mines the external (non-maintainer, non-bot) count for local reporting and
-// its tests pin the rule.
-const statsLine =
-  `**${total} providers** tracked · ${ongoing.length} ongoing free tiers · ${trial.length} trial credits · ` +
-  `**${verifiedCount}/${total}** independently verified against the provider's own docs`;
-
 // ---------- inject into README ----------
 function inject(md, name, content) {
   const re = new RegExp(
@@ -529,7 +517,6 @@ const coverageTable =
   coverageRows.map((r) => `| **${r.label}** | ${r.count} | ${r.ex.join(', ')} |`).join('\n');
 
 let readme = readFileSync(join(ROOT, 'README.md'), 'utf8');
-readme = inject(readme, 'stats', statsLine);
 readme = inject(readme, 'coverage', coverageTable);
 readme = inject(readme, 'collections', collectionsIndexMd);
 readme = inject(readme, 'ongoing', ongoingTable(ongoing));
@@ -947,7 +934,7 @@ const legalPage = (slug, title, bodyHtml) => {
     `<h1>${htmlEsc(title)}</h1>` +
     `</div></section>` +
     `<main id="main"><div class="wrap prose legal">${bodyHtml}` +
-    `<p class="legal-org">${ADDRESS} · <a href="mailto:admin@tweakeo.com">admin@tweakeo.com</a></p>` +
+    `<p class="legal-org">${ADDRESS} · <a href="mailto:admin@freellmapihub.com">admin@freellmapihub.com</a></p>` +
     `</div></main>`;
   writeFileSync(
     join(ROOT, `site/legal/${slug}.html`),
@@ -966,7 +953,7 @@ legalPage('privacy', 'Privacy', `
 <h2>Hosting</h2>
 <p>Pages, fonts and assets are delivered by GitHub Pages (GitHub, Inc.), which may process standard request metadata (such as your IP address) to serve content, per GitHub's privacy statement.</p>
 <h2>Contact</h2>
-<p>Questions about privacy? Email <a href="mailto:admin@tweakeo.com">admin@tweakeo.com</a>.</p>
+<p>Questions about privacy? Email <a href="mailto:admin@freellmapihub.com">admin@freellmapihub.com</a>.</p>
 `);
 
 legalPage('terms', 'Terms of Use', `
@@ -978,7 +965,7 @@ legalPage('terms', 'Terms of Use', `
 <h2>Liability</h2>
 <p>To the maximum extent permitted by law, ${ORG} and the project's contributors are not liable for any loss or damage arising from use of this site or dataset.</p>
 <h2>Contact</h2>
-<p>Email <a href="mailto:admin@tweakeo.com">admin@tweakeo.com</a>.</p>
+<p>Email <a href="mailto:admin@freellmapihub.com">admin@freellmapihub.com</a>.</p>
 `);
 
 // ---------- updates page + RSS feed (from git history; graceful if git is absent) ----------

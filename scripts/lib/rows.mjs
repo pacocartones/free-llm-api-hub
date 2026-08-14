@@ -62,7 +62,7 @@ export function explorerRowHtml(p, opts = {}) {
     const st = freshnessStatus(age);
     const cls = st === 'stale' ? 'b-stale' : st === 'due' ? 'b-warn' : 'b-ok';
     const tip = age != null ? ` title="Verified ${age}d ago · ${date}"` : '';
-    v = `<span class="badge ${cls}"${tip}>${ICON('ic-check')}</span><span class="ver-date">${date}</span>`;
+    v = `<span class="ver-cell"><span class="badge ${cls}"${tip}>${ICON('ic-check')}</span><span class="ver-date">${date}</span></span>`;
   } else {
     v = `<span class="badge b-warn">${ICON('ic-warn')} unverified</span>`;
   }

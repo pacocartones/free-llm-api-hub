@@ -10,33 +10,6 @@ const { recScore, SLA_DAYS, DUE_SOON_DAYS, freshnessStatus } = window.FLLM_RULES
 // function build.mjs used to SSR this table. Every provider field is escaped
 // inside it before reaching innerHTML.
 
-// One-click filter presets (shareable via the URL like any other filter state).
-const PRESETS = {
-  starter: { nocard: 1, nophone: 1, commercial: 1 },
-  openai: { openai: 1, nocard: 1 },
-  speech: { mod: 'audio' },
-};
-const PRESET_FLAGS = { nocard: 'f-nocard', nophone: 'f-nophone', commercial: 'f-commercial', openai: 'f-openai', verified: 'f-verified' };
-function presetMatches(name) {
-  const pre = PRESETS[name]; if (!pre) return false;
-  if (category !== 'all') return false;
-  if ((pre.mod || 'all') !== modality) return false;
-  for (const k in PRESET_FLAGS) { if (!!pre[k] !== document.getElementById(PRESET_FLAGS[k]).checked) return false; }
-  return true;
-}
-function syncPresetActive() {
-  document.querySelectorAll('#presets button').forEach(b => b.classList.toggle('active', presetMatches(b.dataset.preset)));
-}
-function renderTrust() {
-  if (!DATA.length) return;
-  const now = Date.now();
-  const ages = DATA.filter(p => p.verified && p.last_verified).map(p => Math.floor((now - Date.parse(p.last_verified + 'T00:00:00Z')) / 86400000));
-  const oldest = ages.length ? Math.max(...ages) : 0;
-  const verified = DATA.filter(p => p.verified).length;
-  const slaDays = SLA_DAYS || 90;
-  document.getElementById('trustSummary').textContent = `${verified}/${DATA.length} verified against official docs · oldest entry ${oldest}d · ${slaDays}-day re-verification SLA`;
-}
-
 function render() {
   const nocard = document.getElementById('f-nocard').checked;
   const nophone = document.getElementById('f-nophone').checked;
@@ -77,7 +50,6 @@ function render() {
   // the server render uses data.generated for a deterministic initial paint.
   tbody.innerHTML = rows.map((p) => window.FLLM_ROWS.rowHtml(p, { now: Date.now() })).join('\n');
   syncURL();
-  syncPresetActive();
 }
 
 function renderStats() {
@@ -97,7 +69,6 @@ function renderStats() {
   ];
   document.getElementById('stats').innerHTML = tiles.map(([ic, n, l, c]) =>
     `<div class="stat ${c}"><svg class="si" aria-hidden="true"><use href="#${ic}"/></svg><div class="num">${n}</div><div class="lbl">${l}</div></div>`).join('');
-  renderTrust();
 }
 
 function applySort(th) {
@@ -191,14 +162,6 @@ document.getElementById('clearFilters').addEventListener('click', () => {
   document.querySelectorAll('thead th').forEach(h => { h.classList.remove('sorted', 'asc'); h.setAttribute('aria-sort', 'none'); });
   render();
 });
-document.querySelectorAll('#presets button').forEach(btn => btn.addEventListener('click', () => {
-  resetControls();
-  const pre = PRESETS[btn.dataset.preset] || {};
-  if (pre.mod) { modality = pre.mod; document.getElementById('modality').value = pre.mod; }
-  for (const k in PRESET_FLAGS) { if (pre[k]) { const el = document.getElementById(PRESET_FLAGS[k]); el.checked = true; const chip = el.closest('.chip'); if (chip) chip.classList.add('on'); } }
-  render();
-}));
-
 // Exports live on the dataset itself (providers.json / .csv / .yaml, linked in the footer)
 // and the static /api/v1 endpoints — the table stays focused on browsing.
 
