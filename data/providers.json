@@ -684,7 +684,7 @@
       "openai_base_url": "https://ollama.com/v1",
       "env_key": "OLLAMA_API_KEY",
       "verified": true,
-      "last_verified": "2026-07-30"
+      "last_verified": "2026-08-14"
     },
     {
       "slug": "ai-horde",
@@ -705,7 +705,7 @@
       "openai_compatible": false,
       "openai_base_url": null,
       "verified": true,
-      "last_verified": "2026-07-30"
+      "last_verified": "2026-08-14"
     },
     {
       "slug": "modelscope",
@@ -727,7 +727,7 @@
       "openai_base_url": "https://api-inference.modelscope.cn/v1",
       "env_key": "MODELSCOPE_API_KEY",
       "verified": true,
-      "last_verified": "2026-07-30"
+      "last_verified": "2026-08-14"
     },
     {
       "slug": "pollinations",
@@ -748,7 +748,7 @@
       "openai_compatible": false,
       "openai_base_url": null,
       "verified": true,
-      "last_verified": "2026-07-30"
+      "last_verified": "2026-08-14"
     },
     {
       "slug": "runware",
@@ -770,7 +770,7 @@
       "openai_base_url": null,
       "env_key": "RUNWARE_API_KEY",
       "verified": true,
-      "last_verified": "2026-07-30"
+      "last_verified": "2026-08-14"
     },
     {
       "slug": "pinecone-inference",
@@ -792,7 +792,7 @@
       "openai_base_url": null,
       "env_key": "PINECONE_API_KEY",
       "verified": true,
-      "last_verified": "2026-07-30"
+      "last_verified": "2026-08-14"
     },
     {
       "slug": "twelve-labs",
