@@ -218,7 +218,12 @@ This dataset is only as good as it is trustworthy, and right now there are `null
 
 Thanks to everyone who has verified an entry, fixed a link, or improved the project:
 
-- [@JhansiOruganti-43](https://github.com/JhansiOruganti-43) — first external contribution: confirmed Novita AI's free tier does **not** allow commercial use ([PR #27](https://github.com/pacocartones/free-llm-api-hub/pull/27)).
+<!-- AUTOGEN:contributors:start -->
+- [Jhansi Oruganti](https://github.com/JhansiOruganti-43) — data: confirm Novita AI free tier is not commercial-use allowed ([PR #27](https://github.com/pacocartones/free-llm-api-hub/pull/27))
+- [Victoria Odalo](https://github.com/OdaloV) — docs: verify Clarifai commercial_ok status ([PR #112](https://github.com/pacocartones/free-llm-api-hub/pull/112))
+- [MikeGatsby](https://github.com/MikeGatsby) — data: verify Datalab hosted-API commercial-use terms (no explicit statement found) ([PR #117](https://github.com/pacocartones/free-llm-api-hub/pull/117))
+- [bcabreraike-cmyk](https://github.com/bcabreraike-cmyk) — docs: explain paced re-verification batches ([PR #169](https://github.com/pacocartones/free-llm-api-hub/pull/169))
+<!-- AUTOGEN:contributors:end -->
 
 ## Project docs
 
