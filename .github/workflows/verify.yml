@@ -5,8 +5,10 @@ name: Verify
 # What blocks: the dataset must satisfy the integrity rules, internal doc links
 # must resolve, and the generated artifacts must be in sync with the data. The
 # author regenerates them locally (`npm run build`, `npm run og`) and commits
-# them in the same PR — there is no regeneration bot. All scheduled upkeep
-# (re-verification, badge, models, probe) is local and on-demand, see
+# them in the same PR. There is no regeneration bot for changes you author —
+# the author regenerates locally. The one scheduled job is the weekly
+# `models_free` backfill (backfill.yml), which regenerates its own branch and
+# opens a PR. Re-verification, badge and probe stay local and on-demand, see
 # docs/update-playbook.md.
 on:
   # No `paths:` filter on pull_request, deliberately. This job is the repository's
