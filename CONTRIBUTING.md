@@ -77,7 +77,7 @@ Data PRs are the common case, but scripts and site changes are welcome too. Star
 
 ## What happens next
 
-A maintainer re-checks the source link and the claim, then merges. Once your first PR merges, you are listed in the README [Contributors](../README.md#contributors) section automatically — it is rendered from git history, so there is nothing extra to do. See [GOVERNANCE.md](GOVERNANCE.md) for how decisions are made and [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) for community norms. By contributing you agree to license your contribution under the repository's [MIT License](LICENSE).
+A maintainer re-checks the source link and the claim, then merges. Once your first PR merges, you are listed in the README [Contributors](README.md#contributors) section automatically — it is rendered from git history, so there is nothing extra to do. See [GOVERNANCE.md](GOVERNANCE.md) for how decisions are made and [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) for community norms. By contributing you agree to license your contribution under the repository's [MIT License](LICENSE).
 
 ### Your first PR from a fork: the checks may wait
 
