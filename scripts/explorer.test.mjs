@@ -1,127 +1,103 @@
-// Regression tests for the explorer's XSS fix (CodeQL js/xss-through-dom).
-// providers.json is editable via community PRs, so provider data must never
-// pass through innerHTML — rows render from a static skeleton plus DOM
-// assignments. The script is a classic (non-module) script, so it runs here
-// inside a minimal DOM stub that records innerHTML writes and textContent
-// assignments separately.
+// Regression tests for the explorer's XSS story after the shared-rows refactor.
+// provider data (providers.json) is editable via community PRs, so every field
+// must be escaped before it reaches innerHTML. Rows no longer render from a
+// client-side DOM skeleton: the client repaints with window.FLLM_ROWS.rowHtml —
+// the SAME function build.mjs uses to SSR the table — so the escaping lives in
+// exactly one place (scripts/lib/rows.mjs). These tests exercise the real
+// serialised client copy (site/shared-rows.js) against hostile input.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
-import { join, dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { clientBundle } from './lib/rows.mjs';
 
-const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
-const CODE = readFileSync(join(ROOT, 'site/explorer.js'), 'utf8');
-
-const noop = () => {};
-function makeEl(extra = {}) {
-  const el = {
-    value: '', checked: false, hidden: false, style: {}, dataset: {},
-    options: [], textContent: '', innerHTML: '', href: '', className: '', title: '',
-    classList: { add: noop, remove: noop, toggle: noop, contains: () => false },
-    addEventListener: noop, setAttribute: noop, getAttribute: () => null,
-    appendChild: noop, prepend: noop, insertBefore: noop,
-    closest: () => null,
-    ...extra,
-  };
-  return new Proxy(el, { get: (t, k) => (k in t ? t[k] : noop) });
-}
-
-// A created element with per-selector child lookup, recording every innerHTML
-// string it receives and every child appended.
-function makeRowEl(record) {
-  const cells = new Map();
-  const el = {
-    innerHTML: '',
-    children: [],
-    appendChild(c) { this.children.push(c); },
-    prepend(c) { this.children.unshift(c); },
-    insertBefore(c) { this.children.push(c); },
-    querySelector(sel) {
-      if (!cells.has(sel)) cells.set(sel, makeRowEl(record));
-      return cells.get(sel);
-    },
-  };
-  return new Proxy(el, {
-    get: (t, k) => (k in t ? t[k] : noop),
-    set: (t, k, v) => {
-      if (k === 'innerHTML') record.innerHTMLWrites.push({ html: v });
-      t[k] = v;
-      return true;
-    },
-  });
-}
-
-// Renders one provider through site/explorer.js and returns the record of DOM
-// writes: every innerHTML string assigned anywhere, plus the row element.
-async function renderRows(provider) {
-  const record = { innerHTMLWrites: [] };
-  const rows = [];
-  const tbody = makeEl({ appendChild: (tr) => rows.push(tr) });
-  const byId = {
-    'providers-data': makeEl({ textContent: JSON.stringify({ providers: [provider] }) }),
-    tbody,
-  };
-  const documentStub = {
-    getElementById: (id) => byId[id] || makeEl(),
-    querySelectorAll: () => [],
-    createElement: () => makeRowEl(record),
-    createTextNode: (t) => ({ nodeType: 3, textContent: String(t) }),
-  };
-  const windowStub = { FLLM_RULES: { recScore: () => 0, FLAG_PAIRS: [], SLA_DAYS: 90, DUE_SOON_DAYS: 60 } };
-  new Function('window', 'document', 'history', 'location', 'navigator', 'fetch', CODE)(
-    windowStub, documentStub, { replaceState: noop }, { search: '', pathname: '/' }, {},
-    () => Promise.reject(new Error('no network in tests')),
-  );
-  await new Promise((r) => setTimeout(r, 50));
-  return { record, rows };
-}
-
-// All innerHTML writes anywhere during a render must be data-free: the row
-// skeleton and the badge/icon snippets are static markup.
-function assertStaticOnlyInnerHTML(record) {
-  for (const { html } of record.innerHTMLWrites) {
-    assert.ok(!/<(img|script)|onerror|onmouseover|alert\(/.test(html), `data reached innerHTML:\n${html}`);
-  }
-}
+// The exact client bundle the browser runs — serialised by lib/rows.mjs itself
+// (the same string build.mjs writes to site/shared-rows.js), so no generated
+// file has to exist on disk for the suite to pass in a clean checkout.
+const SHARED_ROWS = clientBundle();
 
 const base = {
-  slug: 'evil', name: 'Evil', category: 'ongoing', free_tier: 'free', notes: 'n',
+  slug: 'groq', name: 'Groq', category: 'ongoing', free_tier: 'free tier', notes: 'n',
   rate_limits: '10 rpm', verified: true, last_verified: '2026-08-01', card_required: false,
 };
 
-test('an HTML payload in any provider field never becomes markup', async () => {
+// Runs the serialised client copy and returns rowHtml bound to a fake
+// window.FLLM_RULES (the module imports FLAG_PAIRS/freshnessStatus from there).
+function clientRowHtml(extraRules = {}) {
+  const rules = {
+    FLAG_PAIRS: [
+      ['card_required', false, 'ic-nocard', 'no card'], ['card_required', true, 'ic-card', 'card'],
+      ['phone_required', false, 'ic-nophone', 'no phone'], ['phone_required', true, 'ic-phone', 'phone'],
+      ['commercial_ok', true, 'ic-building', 'commercial'], ['commercial_ok', false, 'ic-flask', 'eval only'],
+      ['openai_compatible', true, 'ic-code', 'OpenAI-compat'],
+    ],
+    freshnessStatus: (age) => {
+      if (age === null || age === undefined) return 'due';
+      if (age > 90) return 'stale';
+      if (age > 60) return 'due';
+      return 'fresh';
+    },
+    ...extraRules,
+  };
+  const win = { FLLM_RULES: rules };
+  const run = new Function('window', SHARED_ROWS);
+  run(win);
+  return win.FLLM_ROWS.rowHtml;
+}
+
+test('the client bundle exposes rowHtml', () => {
+  const rowHtml = clientRowHtml();
+  assert.equal(typeof rowHtml, 'function');
+  const out = rowHtml(base, { now: '2026-08-13' });
+  assert.match(out, /<tr>/);
+  assert.match(out, /href="p\/groq"/);
+  assert.ok(!out.includes('.html'), 'client link must match the clean-URL standard (#132)');
+});
+
+test('an HTML payload in any provider field never becomes markup', () => {
   const payload = '<img src=x onerror=alert(1)>';
-  const { record, rows } = await renderRows({
+  const rowHtml = clientRowHtml();
+  const out = rowHtml({
     ...base,
     name: `Evil ${payload}`, free_tier: `free ${payload}`, notes: `notes ${payload}`,
     best_for: `best ${payload}`, last_verified: `2026-08-01 ${payload}`,
-  });
-  assert.equal(rows.length, 1);
-  assertStaticOnlyInnerHTML(record);
-  // the payload survives as plain text, not markup
-  const nameCell = rows[0].querySelector('td.name');
-  const anchor = nameCell.children.find((c) => c && c.href);
-  assert.ok(anchor, 'valid slug keeps its anchor');
-  assert.equal(anchor.textContent, `Evil ${payload}`);
-  assert.equal(rows[0].querySelector('.notes').textContent, `notes ${payload}`);
-  assert.equal(rows[0].querySelector('[data-label="What\'s free"]').textContent, `free ${payload}`);
+  }, { now: '2026-08-13' });
+  // The payload must survive as escaped TEXT. The escaped output legitimately
+  // contains the substrings 'onerror=' and 'alert(' as text inside entities —
+  // the attack only lands if a real tag opens, so assert on that.
+  assert.ok(!/<(img|script)[\s>]/i.test(out), `payload became a real tag:\n${out}`);
+  assert.ok(out.includes('&lt;img'), 'payload must be escaped, not stripped');
+  // the anchor survives with escaped text, not the payload as markup
+  assert.match(out, /href="p\/groq"/);
+  assert.ok(out.includes('Evil &lt;img'), 'escaped payload survives in the name cell');
+  assert.ok(out.includes('best &lt;img'), 'escaped payload survives in best_for');
+  assert.ok(out.includes('notes &lt;img'), 'escaped payload survives in notes');
+  assert.ok(out.includes('free &lt;img'), 'escaped payload survives in free_tier');
 });
 
-test('a slug that is not kebab-case renders the name without a link', async () => {
-  const { record, rows } = await renderRows({ ...base, slug: 'x" onmouseover="alert(1)' });
-  assert.equal(rows.length, 1);
-  assertStaticOnlyInnerHTML(record);
-  const nameCell = rows[0].querySelector('td.name');
-  assert.ok(!nameCell.children.some((c) => c && c.href), 'invalid slug must drop the anchor');
-  const text = nameCell.children.find((c) => c && c.nodeType === 3);
-  assert.equal(text.textContent, 'Evil');
+test('a slug that is not kebab-case renders the name without a link', () => {
+  const rowHtml = clientRowHtml();
+  const out = rowHtml({ ...base, slug: 'x" onmouseover="alert(1)' }, { now: '2026-08-13' });
+  assert.ok(!out.includes('href="p/'), 'invalid slug must drop the anchor');
+  // the hostile slug text is escaped into the name cell, never an attribute
+  assert.ok(out.includes('Groq'), 'name still renders');
+  assert.ok(!out.includes('onmouseover='), 'no event handler may survive');
 });
 
-test('a normal provider keeps its link to the detail page', async () => {
-  const { rows } = await renderRows({ ...base, slug: 'groq', name: 'Groq' });
-  const nameCell = rows[0].querySelector('td.name');
-  const anchor = nameCell.children.find((c) => c && c.href);
-  assert.equal(anchor.href, 'p/groq.html');
-  assert.equal(anchor.textContent, 'Groq');
+test('freshness status drives the badge class and title', () => {
+  const d = (daysAgo) => {
+    const t = new Date('2026-08-13T00:00:00Z'); t.setUTCDate(t.getUTCDate() - daysAgo);
+    return t.toISOString().slice(0, 10);
+  };
+  const rowHtml = clientRowHtml();
+  assert.match(rowHtml({ ...base, last_verified: d(10) }, { now: '2026-08-13' }), /badge b-ok/);
+  assert.match(rowHtml({ ...base, last_verified: d(75) }, { now: '2026-08-13' }), /badge b-warn/);
+  assert.match(rowHtml({ ...base, last_verified: d(95) }, { now: '2026-08-13' }), /badge b-stale/);
+  assert.match(rowHtml({ ...base, last_verified: d(75) }, { now: '2026-08-13' }), /title="Verified 75d ago/);
+});
+
+test('unverified entries render the warning badge and no date', () => {
+  const rowHtml = clientRowHtml();
+  const out = rowHtml({ ...base, verified: false, last_verified: undefined }, { now: '2026-08-13' });
+  assert.match(out, /badge b-warn/);
+  assert.match(out, /unverified/);
+  assert.ok(!out.includes('ver-date'), 'no date cell for unverified rows');
 });
