@@ -47,11 +47,11 @@ Primarily **free LLM (text) APIs** — plus the adjacent model APIs a builder re
 <!-- AUTOGEN:coverage:start -->
 | Category | Providers | Examples |
 |---|---|---|
-| **Text / LLM** | 43 | Google Gemini API, Groq, OpenRouter |
+| **Text / LLM** | 45 | Google Gemini API, Groq, OpenRouter |
 | **Speech (STT / TTS)** | 25 | Google Gemini API, Groq, Cloudflare Workers AI |
 | **Embeddings** | 13 | Google Gemini API, Cloudflare Workers AI, Cohere |
 | **Image generation** | 10 | Cloudflare Workers AI, HuggingFace, Jina AI |
-| **Vision** | 9 | Google Gemini API, OpenRouter, Z.ai |
+| **Vision** | 10 | Google Gemini API, OpenRouter, Z.ai |
 | **OCR / documents** | 8 | OCR.space, LlamaParse, Nanonets |
 | **Rerank** | 6 | Cohere, Jina AI, Mixedbread |
 <!-- AUTOGEN:coverage:end -->
@@ -84,12 +84,12 @@ Starting points, not guarantees — read the full row before you build on it.
 Focused, always-current collections — each is generated from the dataset and has a live web page too.
 
 <!-- AUTOGEN:collections:start -->
-- **[Free LLM APIs with no credit card](collections/no-credit-card.md)** (40) — start without a payment method · [live page ↗](https://freellmapihub.com/collections/no-credit-card)
-- **[Free LLM APIs with no phone verification](collections/no-phone.md)** (20) — no SMS/phone verification · [live page ↗](https://freellmapihub.com/collections/no-phone)
-- **[Free LLM APIs for commercial use](collections/commercial-use.md)** (23) — safe to ship, not eval-only · [live page ↗](https://freellmapihub.com/collections/commercial-use)
-- **[OpenAI-compatible free LLM APIs](collections/openai-compatible.md)** (31) — drop-in OpenAI SDK swap · [live page ↗](https://freellmapihub.com/collections/openai-compatible)
-- **[Permanently free LLM APIs](collections/always-free.md)** (6) — $0 models, no trial clock · [live page ↗](https://freellmapihub.com/collections/always-free)
-- **[Free multimodal LLM APIs](collections/multimodal.md)** (50) — vision, audio, embeddings · [live page ↗](https://freellmapihub.com/collections/multimodal)
+- **[Free LLM APIs with no credit card](collections/no-credit-card.md)** (42) — start without a payment method · [live page ↗](https://freellmapihub.com/collections/no-credit-card)
+- **[Free LLM APIs with no phone verification](collections/no-phone.md)** (21) — no SMS/phone verification · [live page ↗](https://freellmapihub.com/collections/no-phone)
+- **[Free LLM APIs for commercial use](collections/commercial-use.md)** (25) — safe to ship, not eval-only · [live page ↗](https://freellmapihub.com/collections/commercial-use)
+- **[OpenAI-compatible free LLM APIs](collections/openai-compatible.md)** (33) — drop-in OpenAI SDK swap · [live page ↗](https://freellmapihub.com/collections/openai-compatible)
+- **[Permanently free LLM APIs](collections/always-free.md)** (7) — $0 models, no trial clock · [live page ↗](https://freellmapihub.com/collections/always-free)
+- **[Free multimodal LLM APIs](collections/multimodal.md)** (51) — vision, audio, embeddings · [live page ↗](https://freellmapihub.com/collections/multimodal)
 <!-- AUTOGEN:collections:end -->
 
 Every provider also has its own page with the full details and a copy-ready quickstart — e.g. [Groq](https://freellmapihub.com/p/groq), [Deepgram](https://freellmapihub.com/p/deepgram), [Jina AI](https://freellmapihub.com/p/jina-ai).
@@ -152,6 +152,8 @@ Recurring (daily/monthly) quotas that renew — no expiry, but usually rate-limi
 | **[Photoroom](https://www.photoroom.com/api/pricing)**<br><sub>💳 no card</sub> | 10 free production calls on the Remove Background API (one-time) plus 1,000 sandbox calls/month on the Image Editing API (watermarked) | 1,000 sandbox calls/month; 10 one-time production calls | No credit card required. Sandbox output is watermarked (for testing); the 10 production calls return clean output. Image editing/generation (AI backgrounds, relighting, shadows). | ✅ 2026-07-31 |
 | **[Poolside](https://docs.poolside.ai/api/overview)**<br><sub>🔌 OpenAI-compat</sub> | Laguna XS 2.1 (33B) and Laguna S 2.1 (118B) are free in Preview via a self-serve developer API key | Preview rate limits not published | Coding-focused models. Free access is Preview-stage and may change at general availability. Self-serve: create a free API key at platform.poolside.ai. OpenRouter is offered only as an alternative route. | ✅ 2026-07-31 |
 | **[Veryfi](https://www.veryfi.com/pricing/)**<br><sub>💳 no card · 🏢 commercial OK</sub> | Free Forever plan: up to 100 documents/month — OCR plus structured data extraction (receipts, invoices, and 100+ document types) | 100 documents/month on the free plan | No credit card required. The 'Free Forever' 100 docs/mo tier is the standing free tier (a separate 14-day trial unlocks paid features). Proprietary OCR / document-intelligence REST API. | ✅ 2026-07-31 |
+| **[W&B Inference](https://docs.wandb.ai/inference/usage-limits)**<br><sub>💳 no card · 🏢 commercial OK · 🔌 OpenAI-compat</sub> | $100/month of Serverless Inference credits on the Free plan (default spending cap; offer for a limited time) | No RPM/TPM published; default cap of $100/month on the Free tier; concurrency limits per project/user | Serverless Inference credits come with Free, Pro and Academic plans for a limited time; when credits run out, Free accounts must activate pay-as-you-go on the Billing tab or upgrade. OpenAI-compatible endpoint at api.inference.wandb.ai/v1 with any W&B API key. | ✅ 2026-08-14 |
+| **[Typhoon (SCB 10X)](https://docs.opentyphoon.ai/en/faq/)**<br><sub>💳 no card · 📵 no phone · 🏢 commercial OK · 🔌 OpenAI-compat</sub> | Free to use research showcase API — all Typhoon models at $0 | No published quotas (beta service) | By SCB 10X, the venture arm of Siam Commercial Bank, focused on Thai-language models. Beta, provided as-is with no formal support; usage data is collected to improve the model; SCB claims no rights in outputs. Sign up for an API key at opentyphoon.ai. | ✅ 2026-08-14 |
 <!-- AUTOGEN:ongoing:end -->
 
 ## One-time trial credits

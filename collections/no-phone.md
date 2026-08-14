@@ -8,7 +8,7 @@ LLM APIs whose signup needs no SMS/phone verification — a live slice of a cont
 
 Providers you can sign up for **without phone verification** (`phone_required: false`). Groq, Mistral, SiliconFlow and NVIDIA are excluded here because they gate signup behind a phone number.
 
-**20 of 67 tracked providers** match.
+**21 of 69 tracked providers** match.
 
 | Provider | Type | What's free | The catch | Verified |
 |---|---|---|---|---|
@@ -32,6 +32,7 @@ Providers you can sign up for **without phone verification** (`phone_required: f
 | **[Nanonets](https://nanonets.com/pricing)**<br><sub>💳 no card · 📵 no phone · 🏢 commercial OK</sub> | Trial | $50 in free credits on signup (one-time) across data-extraction / OCR workflows | One-time signup credit, not renewing; no credit card required to start. Paid plans start at $100/month afterwards. | ✅ 2026-07-30 |
 | **[Speechify API](https://speechify.ai/pricing)**<br><sub>💳 no card · 📵 no phone · 🏢 commercial OK</sub> | Ongoing | 50,000 characters/month TTS (hard cap) + 60 min/month voice agents | Commercial use is allowed on the free tier. No credit card required. Hard monthly cap that pauses at the limit. | ✅ 2026-07-30 |
 | **[ElevenLabs](https://elevenlabs.io/pricing)**<br><sub>💳 no card · 📵 no phone · 🔬 eval only</sub> | Ongoing | 10,000 credits/month shared across Text-to-Speech, Speech-to-Text and more (~10 min TTS/month) | The free tier is NON-COMMERCIAL only per the Terms of Use (a commercial license begins on paid Starter, $6/mo), and historically required attribution. API access is available on the free plan. No credit card to sign up. | ✅ 2026-07-30 |
+| **[Typhoon (SCB 10X)](https://docs.opentyphoon.ai/en/faq/)**<br><sub>💳 no card · 📵 no phone · 🏢 commercial OK · 🔌 OpenAI-compat</sub> | Ongoing | Free to use research showcase API — all Typhoon models at $0 | By SCB 10X, the venture arm of Siam Commercial Bank, focused on Thai-language models. Beta, provided as-is with no formal support; usage data is collected to improve the model; SCB claims no rights in outputs. Sign up for an API key at opentyphoon.ai. | ✅ 2026-08-14 |
 
 ---
 

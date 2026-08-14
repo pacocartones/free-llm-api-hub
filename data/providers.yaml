@@ -1273,3 +1273,41 @@ providers:
     openai_base_url: null
     verified: true
     last_verified: "2026-08-13"
+  - slug: "wandb-inference"
+    name: "W&B Inference"
+    category: "ongoing"
+    free_type: "recurring-credit"
+    free_tier: "$100/month of Serverless Inference credits on the Free plan (default spending cap; offer for a limited time)"
+    rate_limits: "No RPM/TPM published; default cap of $100/month on the Free tier; concurrency limits per project/user"
+    notes: "Serverless Inference credits come with Free, Pro and Academic plans for a limited time; when credits run out, Free accounts must activate pay-as-you-go on the Billing tab or upgrade. OpenAI-compatible endpoint at api.inference.wandb.ai/v1 with any W&B API key."
+    best_for: "Open-weight frontier models (DeepSeek, Llama, Qwen, GLM, GPT-OSS) behind one unified API with Weave tracing"
+    modalities: ["text", "vision"]
+    models_free: ["deepseek-ai/DeepSeek-V4-Flash", "meta-llama/Llama-3.3-70B-Instruct", "meta-llama/Llama-3.1-8B-Instruct", "MiniMaxAI/MiniMax-M3", "openai/gpt-oss-120b", "openai/gpt-oss-20b", "zai-org/GLM-5.2", "google/gemma-4-31B-it", "nvidia/NVIDIA-Nemotron-3-Ultra-550B-A55B"]
+    expires: null
+    docs_url: "https://docs.wandb.ai/inference/usage-limits"
+    phone_required: null
+    card_required: false
+    commercial_ok: true
+    openai_compatible: true
+    openai_base_url: "https://api.inference.wandb.ai/v1"
+    verified: true
+    last_verified: "2026-08-14"
+  - slug: "typhoon"
+    name: "Typhoon (SCB 10X)"
+    category: "ongoing"
+    free_type: "perpetual"
+    free_tier: "Free to use research showcase API — all Typhoon models at $0"
+    rate_limits: "No published quotas (beta service)"
+    notes: "By SCB 10X, the venture arm of Siam Commercial Bank, focused on Thai-language models. Beta, provided as-is with no formal support; usage data is collected to improve the model; SCB claims no rights in outputs. Sign up for an API key at opentyphoon.ai."
+    best_for: "Thai-language models and OCR via an OpenAI-compatible research API"
+    modalities: ["text"]
+    models_free: ["typhoon-v2.1-12b-instruct", "typhoon-ocr"]
+    expires: null
+    docs_url: "https://docs.opentyphoon.ai/en/faq/"
+    phone_required: false
+    card_required: false
+    commercial_ok: true
+    openai_compatible: true
+    openai_base_url: "https://api.opentyphoon.ai/v1"
+    verified: true
+    last_verified: "2026-08-14"
