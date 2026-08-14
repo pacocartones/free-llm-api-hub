@@ -30,7 +30,7 @@ Three workflows run against this repository; none of them can write to `main`:
 |---|---|---|
 | `verify.yml` | pull request, push to `main` | `contents: read` — cannot write anything |
 | `pages.yml` | push to `main` | `contents: read`, `pages: write` — publishes the site |
-| `codeql.yml` | pull request, push to `main`, weekly | `contents: read` (job: `security-events: write`) — code scanning |
+| `codeql.yml` | pull request, push to `main` | `contents: read` (job: `security-events: write`) — code scanning |
 
 A pull request from a fork therefore never runs with a token that can write to this
 repository, and never has access to repository secrets.
@@ -41,5 +41,5 @@ no write-capable automation. A change to `scripts/` is reviewed as code, not as 
 ## Notes for users of the data
 
 - The dataset contains **only links to public provider documentation**. It never contains API keys, secrets, or credentials — and it never should. Do not submit any.
-- The interactive site is fully static and makes no network calls other than fetching the public dataset.
+- The interactive site is fully static; its only network calls are the inlined dataset (with a `raw.githubusercontent.com` fallback) and the live GitHub star count (`site.js`, cached 6h).
 - The build scripts have **zero runtime dependencies**, which keeps the supply-chain surface minimal by design.

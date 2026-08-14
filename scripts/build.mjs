@@ -591,6 +591,17 @@ const { badge, oldest: oldestAge, median: medianAge } = freshnessBadge(providers
 const color = badge.color;
 writeFileSync(join(ROOT, 'badge-freshness.json'), JSON.stringify(badge, null, 2) + '\n');
 
+// badge-verified.json — live shields.io endpoint badge for the companion doc
+// (docs/credit-programs.md). Deterministic per dataset snapshot (NOT date-relative
+// like badge-freshness.json), so it IS a diff-gate target: the doc links the endpoint,
+// never a hardcoded count, so the number can't go stale between build passes.
+writeFileSync(join(ROOT, 'badge-verified.json'), JSON.stringify({
+  schemaVersion: 1,
+  label: 'verified',
+  message: `${verifiedCount}/${total}`,
+  color: 'brightgreen',
+}, null, 2) + '\n');
+
 // ---------- exports (CSV / YAML) ----------
 const COLS = [
   'slug', 'name', 'category', 'free_type', 'free_tier', 'rate_limits', 'notes',
