@@ -13,6 +13,7 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join, relative } from 'node:path';
 import { recScore, FLAG_PAIRS, SLA_DAYS, DUE_SOON_DAYS, ageInDays, freshnessColor, freshnessBadge, freshnessStatus } from './lib/rules.mjs';
 import * as rows from './lib/rows.mjs';
+import * as sortLib from './lib/sort.mjs';
 import { esc, stripTags } from './lib/escape.mjs';
 import { mineProviderHistory } from './lib/history.mjs';
 
@@ -561,6 +562,10 @@ writeFileSync(join(ROOT, 'site/shared-rules.js'), sharedRulesJs);
 // The string comes from lib/rows.mjs itself (rows.clientBundle), so the code the
 // build writes and the code explorer.test.mjs executes are the same string.
 writeFileSync(join(ROOT, 'site/shared-rows.js'), rows.clientBundle());
+// The sort comparator the browser runs — serialised from lib/sort.mjs so
+// explorer.js and explorer.test.mjs execute the same code (same contract as
+// shared-rules.js / shared-rows.js).
+writeFileSync(join(ROOT, 'site/shared-sort.js'), sortLib.clientBundle());
 // env_key is operational (which secret to use) — strip it from anything public.
 const publicProviders = providers.map(({ env_key, ...rest }) => rest);
 const inlineData = `<script type="application/json" id="providers-data">${JSON.stringify({ providers: publicProviders }).replace(/</g, '\\u003c')}</script>`;

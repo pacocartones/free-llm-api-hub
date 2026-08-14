@@ -6,9 +6,15 @@ let DATA = [], lastRows = [], sortKey = 'recommended', sortDir = 1, category = '
 // the client table can never drift from the server-rendered table.
 const { recScore, SLA_DAYS, DUE_SOON_DAYS, freshnessStatus } = window.FLLM_RULES;
 
+// The sort comparator lives in shared-sort.js (window.FLLM_SORT), serialised
+// from scripts/lib/sort.mjs — the same code explorer.test.mjs executes, so the
+// column ordering can never drift from its regression tests.
+
 // Row markup lives in shared-rows.js (window.FLLM_ROWS.rowHtml) — the exact
 // function build.mjs used to SSR this table. Every provider field is escaped
 // inside it before reaching innerHTML.
+
+const { comparator } = window.FLLM_SORT;
 
 function render() {
   const nocard = document.getElementById('f-nocard').checked;
@@ -28,32 +34,7 @@ function render() {
     return true;
   });
 
-  rows.sort((a, b) => {
-    if (sortKey === 'recommended') { const d = recScore(b) - recScore(a); return d !== 0 ? d : (a.name < b.name ? -1 : a.name > b.name ? 1 : 0); }
-    if (sortKey === 'free_tier') {
-      // "What's free" is free-form prose — alphabetising it is noise. Sort by
-      // the free_type taxonomy instead: permanently-free models first, one-time
-      // trial credits last, with the name as a stable tiebreak.
-      const rank = { perpetual: 0, 'renewing-quota': 1, 'recurring-credit': 2, 'trial-credit': 3 };
-      const rk = (p) => (rank[p.free_type] ?? 4);
-      const d = rk(a) - rk(b) || (a.name < b.name ? -1 : a.name > b.name ? 1 : 0);
-      return sortDir === 1 ? d : -d;
-    }
-    if (sortKey === 'verified') {
-      // Sort by last_verified (YYYY-MM-DD), not the boolean: every verified row
-      // would compare equal. Unverified rows (no date) always sink to the bottom.
-      const vd = (p) => (p.last_verified ? Date.parse(p.last_verified + 'T00:00:00Z') : null);
-      const aU = vd(a) === null, bU = vd(b) === null;
-      if (aU !== bU) return aU ? 1 : -1;
-      if (aU) return a.name < b.name ? -1 : a.name > b.name ? 1 : 0;
-      const d = vd(a) - vd(b) || (a.name < b.name ? -1 : a.name > b.name ? 1 : 0);
-      return sortDir === 1 ? d : -d;
-    }
-    let av = a[sortKey], bv = b[sortKey];
-    if (typeof av === 'boolean') { av = av ? 1 : 0; bv = bv ? 1 : 0; }
-    av = (av ?? ''); bv = (bv ?? '');
-    return av < bv ? -sortDir : av > bv ? sortDir : 0;
-  });
+  rows.sort((a, b) => comparator(sortKey, sortDir, a, b));
 
   lastRows = rows;
   const tbody = document.getElementById('tbody');

@@ -8,6 +8,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { clientBundle } from './lib/rows.mjs';
+import { clientBundle as sortClientBundle } from './lib/sort.mjs';
 import { readFileSync } from 'node:fs';
 
 // The exact client bundle the browser runs — serialised by lib/rows.mjs itself
@@ -112,4 +113,53 @@ test('the hero shield derives its bucket from FLLM_RULES, not a local copy', () 
   // the hero disagree with the badge/worklist possible).
   assert.ok(!src.includes("oldest > slaDays ? 'stale'"), 'inline bucket ternary must not return');
   assert.ok(!src.includes("(DUE_SOON_DAYS || 60)"), 'inline due-soon fallback must not return');
+});
+
+// Runs the serialised sort comparator (site/shared-sort.js source) bound to a
+// fake window.FLLM_RULES — recScore is only consulted by the 'recommended'
+// branch, never by the mapped columns under test.
+function clientComparator() {
+  const rules = { recScore: (p) => 0 };
+  const win = { FLLM_RULES: rules };
+  const run = new Function('window', sortClientBundle());
+  run(win);
+  return win.FLLM_SORT.comparator;
+}
+
+test('verified sort: ascending is oldest-first with unverified rows last', () => {
+  const cmp = clientComparator();
+  const rows = [
+    { name: 'Zeta', last_verified: '2026-08-14' },
+    { name: 'Alpha', last_verified: '2026-08-02' },
+    { name: 'Beta', last_verified: null }, // unverified: no date
+    { name: 'Gamma', last_verified: '2026-08-14' }, // date tie with Zeta
+  ];
+  const got = [...rows].sort((a, b) => cmp('verified', 1, a, b)).map((r) => r.name);
+  assert.deepEqual(got, ['Alpha', 'Gamma', 'Zeta', 'Beta']);
+});
+
+test('verified sort: descending is newest-first with unverified rows still last', () => {
+  const cmp = clientComparator();
+  const rows = [
+    { name: 'Zeta', last_verified: '2026-08-14' },
+    { name: 'Alpha', last_verified: '2026-08-02' },
+    { name: 'Beta', last_verified: null },
+    { name: 'Gamma', last_verified: '2026-08-14' },
+  ];
+  const got = [...rows].sort((a, b) => cmp('verified', -1, a, b)).map((r) => r.name);
+  assert.deepEqual(got, ['Zeta', 'Gamma', 'Alpha', 'Beta']);
+});
+
+test('verified sort: the boolean plays no role — only last_verified decides, with name as the tiebreak', () => {
+  const cmp = clientComparator();
+  const rows = [
+    { name: 'Zed', verified: true, last_verified: '2026-08-01' },
+    { name: 'Old', verified: true, last_verified: '2026-08-01' },
+    // Same date as the others but verified:false — must NOT be pinned last:
+    // the comparator keys on the date, not the flag.
+    { name: 'Bool', verified: false, last_verified: '2026-08-01' },
+    { name: 'Undated', verified: false, last_verified: null },
+  ];
+  const got = [...rows].sort((a, b) => cmp('verified', 1, a, b)).map((r) => r.name);
+  assert.deepEqual(got, ['Bool', 'Old', 'Zed', 'Undated']);
 });
