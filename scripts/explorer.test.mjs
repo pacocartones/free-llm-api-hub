@@ -7,14 +7,12 @@
 // serialised client copy (site/shared-rows.js) against hostile input.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
-import { join, dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { clientBundle } from './lib/rows.mjs';
 
-const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
-
-// The generated client bundle — what the browser actually runs.
-const SHARED_ROWS = readFileSync(join(ROOT, 'site/shared-rows.js'), 'utf8');
+// The exact client bundle the browser runs — serialised by lib/rows.mjs itself
+// (the same string build.mjs writes to site/shared-rows.js), so no generated
+// file has to exist on disk for the suite to pass in a clean checkout.
+const SHARED_ROWS = clientBundle();
 
 const base = {
   slug: 'groq', name: 'Groq', category: 'ongoing', free_tier: 'free tier', notes: 'n',
@@ -45,7 +43,7 @@ function clientRowHtml(extraRules = {}) {
   return win.FLLM_ROWS.rowHtml;
 }
 
-test('shared-rows.js exists and exposes rowHtml', () => {
+test('the client bundle exposes rowHtml', () => {
   const rowHtml = clientRowHtml();
   assert.equal(typeof rowHtml, 'function');
   const out = rowHtml(base, { now: '2026-08-13' });

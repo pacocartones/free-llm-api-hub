@@ -475,5 +475,6 @@ test('the server render and the shared emission use the same row source', () => 
   const build = readFileSync(join(ROOT, 'scripts/build.mjs'), 'utf8');
   assert.match(build, /rows.explorerRowHtml/, 'SSR must call the shared row function');
   assert.match(build, /freshnessStatus: \$\{freshnessStatus\.toString\(\)\}/, 'shared-rules.js must ship freshnessStatus to the client');
-  assert.match(build, /window.FLLM_ROWS/, 'build must emit shared-rows.js');
+  assert.match(build, /rows\.clientBundle\(\)/, 'build must write the shared-rows bundle from lib/rows.mjs');
+  assert.match(build, /site\/shared-rows\.js/, 'build must emit shared-rows.js');
 });
