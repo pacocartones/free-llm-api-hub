@@ -243,12 +243,18 @@ test('the committed OG manifest matches the current dataset', () => {
   assert.deepEqual(manifest, buildOgManifest(providers));
 });
 
-test('a generated README row matches the data it was built from', () => {
+test('the README top-20 table renders every editorial pick with its verified date', () => {
   const data = JSON.parse(readFileSync(DATA, 'utf8'));
-  const p = data.providers.find((x) => x.slug === 'groq');
+  const best = JSON.parse(readFileSync(join(ROOT, 'data/best.json'), 'utf8'));
   const readme = readFileSync(join(ROOT, 'README.md'), 'utf8');
-  assert.ok(readme.includes(`[${p.name}](${p.docs_url})`), 'README links the provider docs');
-  assert.ok(readme.includes(`✅ ${p.last_verified}`), 'README shows the verification date');
+  const bySlug = new Map(data.providers.map((x) => [x.slug, x]));
+  assert.equal(best.entries.length, 20, 'README is the editorial top 20, not the full list');
+  for (const e of best.entries) {
+    const p = bySlug.get(e.slug);
+    assert.ok(p, `${e.slug} is not in the dataset`);
+    assert.ok(readme.includes(`[${p.name}](${p.docs_url})`), `${e.slug}: README links the provider docs`);
+    assert.ok(readme.includes(`✅ ${p.last_verified}`), `${e.slug}: README shows the verification date`);
+  }
 });
 
 test('the explorer does not claim a column sort before the user chooses one', () => {
@@ -412,15 +418,30 @@ test('the shipped badge grades its own stated age by the rule', () => {
 });
 
 // ---------- a confirmed "yes" must never look like an unknown ----------
-test('the README shows a card wall for every provider confirmed to have one', () => {
+test('a confirmed card requirement is never hidden in the README top-20 or the explorer', () => {
   const { providers } = JSON.parse(readFileSync(DATA, 'utf8'));
+  const best = JSON.parse(readFileSync(join(ROOT, 'data/best.json'), 'utf8'));
   const readme = readFileSync(join(ROOT, 'README.md'), 'utf8');
+  const explorer = readFileSync(join(ROOT, 'site/index.html'), 'utf8');
+  const bySlug = new Map(providers.map((p) => [p.slug, p]));
   const walled = providers.filter((p) => p.card_required === true);
   assert.ok(walled.length, 'dataset has at least one card-gated provider to check');
+
+  // README: any top-20 pick that requires a card must say so.
+  for (const e of best.entries) {
+    const p = bySlug.get(e.slug);
+    if (p && p.card_required === true) {
+      const row = readme.split('\n').find((l) => l.includes(`](${p.docs_url})`));
+      assert.ok(row, `${p.slug}: no README top-20 row found`);
+      assert.match(row, /💳 card required/, `${p.slug}: README hides the card requirement`);
+    }
+  }
+
+  // Explorer: the full-list surface must show the card flag for every gated provider.
   for (const p of walled) {
-    const row = readme.split('\n').find((l) => l.includes(`](${p.docs_url})`));
-    assert.ok(row, `${p.slug}: no README row found`);
-    assert.match(row, /💳 card required/, `${p.slug}: README row hides the card requirement`);
+    const row = explorer.split('\n').find((l) => l.includes(`href="p/${p.slug}"`));
+    assert.ok(row, `${p.slug}: no explorer row found`);
+    assert.match(row, /aria-label="card"/, `${p.slug}: explorer row hides the card requirement`);
   }
 });
 
