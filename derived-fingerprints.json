@@ -95,7 +95,7 @@
   "site/collections/no-credit-card.html": "9bba59dda163b1ac53f298c399649bebfb92206d72ff14d9a796b29bcbc493a1",
   "site/collections/no-phone.html": "8f3f02328de689184739fc583198c9571e858c2874027f2dc824625410497ee8",
   "site/collections/openai-compatible.html": "c16235cdf831893a80783035b415154a6608d51364cc57f37022cb363ff3cd2c",
-  "site/feed.xml": "687d0c0c2045837ac9f8362a8eed6be9616b6721abbb1b12078aed3efab9ec4d",
+  "site/feed.xml": "dd02a5d57794b12ef8903f9ceb2ec3552e35574eac4d77d9ad21610f85e845e8",
   "site/guides-and-collections/index.html": "dae2fda36c8b7e8722e06ef621cb96f41f81a7e0e6c0a5e794ae49415ffd030a",
   "site/guides/free-embeddings-apis.html": "756cf2c1925816c33fc8194732606158428ea53890583a0f19849f03b0eb5e88",
   "site/guides/free-image-generation-apis.html": "6834734518fa5c48ded64484b8731cf80a0382dd6c3203adc65d19f69a97ad9e",
@@ -118,5 +118,5 @@
   "site/shared-rows.js": "10b24f4f5024375964ed89d7a12d6924f2b7c5c1613aee2882c0794d6df1f232",
   "site/shared-rules.js": "aa79eecbfe5210e909494c96c4702d486815740587e936250325f2b23903ecfa",
   "site/shared-sort.js": "fbbaace17447958ac05f8652c7b00d951a7dce7e9a6ed103ce0fb9beaf7e17d1",
-  "site/updates.html": "3ba8ffbb3f6c512ce6a9729e2753028e6c0b6595862f8fe0352a02e6a0299fa7"
+  "site/updates.html": "1220e4e5e404a516c851b47cdea02ad83a45877d47a51ce362337572f42680f1"
 }
