@@ -253,6 +253,20 @@ test('the explorer does not claim a column sort before the user chooses one', ()
   assert.match(explorer, /<th data-key="name" tabindex="0" role="button" aria-sort="none">API<\/th>/);
 });
 
+// models_free is sampled from the provider's own /models catalog, so an
+// ASR/audio model on the free tier that the entry does not claim in modalities
+// means the modality dimensions (speech collections, README coverage) silently
+// under-report. The typhoon drift: ASR models sampled, modalities text-only.
+test('any provider sampling ASR/audio models declares audio in modalities', () => {
+  const { providers } = JSON.parse(readFileSync(DATA, 'utf8'));
+  const AUDIO_ID = /(whisper|asr|audio|transcri|stt|tts|voice|speech)/i;
+  for (const p of providers) {
+    if (!Array.isArray(p.models_free)) continue;
+    const audioModels = p.models_free.filter((m) => AUDIO_ID.test(m));
+    assert.ok(audioModels.length === 0 || (p.modalities || []).includes('audio'),
+      `${p.slug} samples audio/ASR models (${audioModels.join(', ')}) but modalities is [${(p.modalities || []).join(', ')}]`);
+  }
+});
 // ---------- output sanitizers (CodeQL js/incomplete-sanitization + multi-char) ----------
 
 test('esc handles null and undefined gracefully', () => {

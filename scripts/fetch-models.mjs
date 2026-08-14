@@ -79,6 +79,10 @@ const PUBLIC = {
     const list = Array.isArray(d) ? d : (d.data || []);
     return sample(list.map((m) => m.id));
   },
+  'ollama-cloud': async () => {
+    const d = await getJson('https://ollama.com/api/tags');
+    return sample((d.models || []).map((m) => m.name));
+  },
 };
 
 // Key-gated providers exposing a standard OpenAI-compatible /models endpoint.
