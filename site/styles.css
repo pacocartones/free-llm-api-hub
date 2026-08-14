@@ -217,6 +217,7 @@ main { padding: 24px 0 80px; }
 .section-head { align-items: center; }
 .trust-summary { margin: 0; font-family: var(--font-mono); font-size: .78rem; color: var(--faint); }
 .section-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin: 4px 0 14px; }
+.trust-badge { align-self: center; }
 #count, .count { color: var(--muted); font-size: .82rem; font-family: var(--font-mono); }
 table { width: 100%; border-collapse: collapse; font-size: .9rem; }
 thead th { text-align: left; padding: 14px 14px; border-bottom: 1px solid var(--border-strong); color: var(--text); font-weight: 700; white-space: nowrap; font-family: var(--font-mono); font-size: .95rem; text-transform: uppercase; letter-spacing: .03em; }

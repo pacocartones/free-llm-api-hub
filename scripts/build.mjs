@@ -601,6 +601,14 @@ writeFileSync(join(ROOT, 'badge-verified.json'), JSON.stringify({
   message: `${verifiedCount}/${total}`,
   color: 'brightgreen',
 }, null, 2) + '\n');
+// Also into site/ so the hero badge serves it from this domain (freellmapihub.com),
+// not raw.githubusercontent — same content, same build pass.
+writeFileSync(join(ROOT, 'site/badge-verified.json'), JSON.stringify({
+  schemaVersion: 1,
+  label: 'verified',
+  message: `${verifiedCount}/${total}`,
+  color: 'brightgreen',
+}, null, 2) + '\n');
 
 // ---------- exports (CSV / YAML) ----------
 const COLS = [
