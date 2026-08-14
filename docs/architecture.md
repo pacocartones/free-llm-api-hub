@@ -27,6 +27,8 @@ data/schema.json       │                              data/providers.csv, data
 
   **The one deliberate exception is `badge-freshness.json`.** It has to be date-relative — a freshness badge that only moves when the data moves is not measuring freshness — so it is committed *and* excluded from both diff-gates (`npm run check` and the drift report list it nowhere). It goes stale between refreshes by design; it is recommitted on every data/build pass (see [update-playbook.md](update-playbook.md)). Nothing may assert that the committed badge equals a freshly built one, because on any day but the last refresh it does not — the test in `build.test.mjs` checks the file is internally consistent instead.
 
+**Deploys are verified live.** `pages.yml` runs a `verify-live` job after every deploy: it re-checks the sitemap parity against the live site (`npm run check-live`, retrying `FLLM_LIVE_ATTEMPTS` times for edge propagation) and smoke-tests every URL of the published sitemap (`npm run smoke-live`), so a deploy that serves stale or broken pages fails the workflow.
+
 ## 2. Data model
 
 ### `data/providers.json`
@@ -85,7 +87,7 @@ The serializer **skips absent keys**, so new optional fields only appear on prov
 - **`check-links.mjs`** (`npm run links`, part of `npm test`) — validates INTERNAL markdown links (relative doc-to-doc paths) only. Never touches the network. The external `docs_url` sweep is a local on-demand pass in the [update playbook](update-playbook.md); genuine failures (not 401/403/405/429 bot-blocks) open a "broken link" issue.
 - **`probe-cron.sh`** — the VPS weekly cron alternative (Infisical → probe → models → build → push), for a zero-Actions-minutes setup.
 
-npm scripts: `build, validate, links, worklist, reverify, models, discover, probe, og, test (validate + links + test suites), check (validate + build + diff-gate), check-live (committed sitemap vs deployed)`.
+npm scripts: `build, validate, links, worklist, reverify, models, discover, probe, og, test (validate + links + test suites), check (validate + build + diff-gate), check-live (committed sitemap vs deployed), smoke-live (every published sitemap URL answers 200)`.
 
 ## 4. Site structure (`site/`)
 

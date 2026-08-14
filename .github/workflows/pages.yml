@@ -38,6 +38,8 @@ jobs:
           path: site
   deploy:
     needs: build
+    outputs:
+      page_url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     environment:
       name: github-pages
@@ -45,3 +47,25 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v5
+
+  verify-live:
+    name: Verify live deploy
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 1
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+      - name: Sitemap parity — committed must equal deployed
+        run: node scripts/check-sitemap-live.mjs
+        env:
+          FLLM_SITE: ${{ needs.deploy.outputs.page_url }}
+          FLLM_LIVE_ATTEMPTS: 6
+          FLLM_LIVE_RETRY_DELAY: 10
+      - name: Smoke test — every published sitemap URL answers 200
+        run: node scripts/smoke-live.mjs
+        env:
+          FLLM_SITE: ${{ needs.deploy.outputs.page_url }}
