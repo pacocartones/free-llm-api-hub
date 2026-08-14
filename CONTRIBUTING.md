@@ -63,7 +63,7 @@ The smallest useful contribution: many entries carry `null` in `card_required`, 
 
 - **Something's outdated or wrong:** the [structured issue form](../../issues/new?template=inaccuracy.yml) takes under a minute.
 - **A new provider to add:** the [new-provider form](../../issues/new?template=new-provider.yml).
-- If the weekly link-check already opened a "🔗 Broken source link report" issue, feel free to just comment there with what you found.
+- If the link-check (`check-links.mjs`, run on every PR) flags a broken source link, feel free to just comment on the PR or open an [inaccuracy issue](../../issues/new?template=inaccuracy.yml).
 
 ## Style
 
