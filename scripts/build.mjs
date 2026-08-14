@@ -574,8 +574,9 @@ const citation = readFileSync(citationPath, 'utf8')
   .replace(/^date-released: .*$/m, `date-released: "${data.generated}"`);
 writeFileSync(citationPath, citation);
 
-// ---------- git-mined change history (computed once, before the homepage) ----------
-// Graceful if git is unavailable (tarball build): returns {} and the panel omits.
+// ---------- git-mined change history (computed once) ----------
+// Feeds the per-provider pages and api/v1/history.json (both git-mined and
+// regenerated on deploy). Graceful if git is unavailable (tarball build).
 const historyBySlug = mineProviderHistory({ cwd: ROOT });
 
 // ---------- server-render the homepage explorer (SEO + no-JS + instant paint) ----------
@@ -588,20 +589,24 @@ const homeRows = [...providers]
   .map((p) => rows.explorerRowHtml(p, { now: data.generated }))
   .join('\n');
 
-// "Recently changed" panel: surface the drift re-verification catches, straight
-// from the mined history. Server-rendered only (the client repaint touches just
-// #tbody and #stats), so it is injected outside both and never repainted away.
-const nameBySlug = new Map(providers.map((p) => [p.slug, p.name]));
-const recentChanges = Object.entries(historyBySlug)
-  .flatMap(([slug, events]) => events.filter((e) => e.kind === 'changed').map((e) => ({ slug, ...e })))
-  .sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0))
+// "Recently re-verified" panel — deterministic, derived from last_verified in
+// the committed data (NOT from git log). A git-mined list here would be
+// self-referential: committing data/providers.json changes the very history the
+// panel reads, so the inline panel could never pass the drift gate. The rich
+// per-field change detail lives on /updates and api/v1/history.json (git-mined,
+// regenerated on deploy, not diff-gated). Server-rendered only (the client
+// repaint touches just #tbody and #stats), so it is never repainted away.
+const recentVerified = [...providers]
+  .sort((a, b) =>
+    (a.last_verified < b.last_verified ? 1 : a.last_verified > b.last_verified ? -1 : 0) ||
+    (a.name < b.name ? -1 : a.name > b.name ? 1 : 0))
   .slice(0, 10);
-const recentHtml = recentChanges.length
-  ? '<section class="recent" id="recent" aria-label="Recently changed">' +
-    '<h2>🕝 Recently changed</h2>' +
-    '<p class="muted">Drift re-verification caught, straight from the <a href="' + REPO + '/commits/main/data/providers.json">git history of providers.json</a>.</p>' +
+const recentHtml = recentVerified.length
+  ? '<section class="recent" id="recent" aria-label="Recently re-verified">' +
+    '<h2>🕝 Recently re-verified</h2>' +
+    '<p class="muted">The 10 providers re-checked most recently against their own docs. Full per-field change history on <a href="updates">Updates</a>.</p>' +
     '<ul class="upd-list">' +
-    recentChanges.map((e) => `<li class="upd"><span class="upd-date">${htmlEsc(e.date)}</span> <span><a href="p/${htmlEsc(e.slug)}">${htmlEsc(nameBySlug.get(e.slug) || e.slug)}</a> — ${htmlEsc(e.text)}</span></li>`).join('') +
+    recentVerified.map((p) => `<li class="upd"><span class="upd-date">${htmlEsc(p.last_verified)}</span> <span><a href="p/${htmlEsc(p.slug)}">${htmlEsc(p.name)}</a> — re-verified against the provider docs</span></li>`).join('') +
     '</ul>' +
     '<p class="count"><a href="updates">All updates</a> · <a href="api/v1/history.json">JSON history</a></p>' +
     '</section>'
@@ -838,8 +843,7 @@ mkdirSync(join(ROOT, 'site/badges'), { recursive: true });
 // Per-provider change history, mined from the git log of data/providers.json.
 // The miner lives in lib/history.mjs so CI can validate it directly without a
 // full build (scripts/check-history.mjs + build.test.mjs). historyBySlug is
-// computed once up front (before the homepage) so the explorer's "recently
-// changed" panel and the provider pages / history.json all read the same mine.
+// computed once up front; the provider pages and api/v1/history.json read it.
 const historyHtml = (slug) => {
   const all = historyBySlug[slug] || [];
   if (!all.length) return '';
