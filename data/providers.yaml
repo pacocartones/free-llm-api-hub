@@ -120,17 +120,17 @@ providers:
     free_type: "renewing-quota"
     free_tier: "\"Restrictive\" free tier explicitly for \"try and explore\" — official docs say to upgrade for \"actual projects and production use\""
     rate_limits: "Not published publicly; exact caps only visible in-console after login (admin.mistral.ai)"
-    notes: "Phone verification required to activate; free tier is opt-in for data training"
+    notes: "Phone verification required to activate; no credit card required. Free tier is opt-in for data training."
     best_for: "European models to prototype against before upgrading"
     modalities: ["text"]
     models_free: null
     expires: null
     docs_url: "https://docs.mistral.ai/admin/billing-usage/usage-limits"
     phone_required: true
-    card_required: null
+    card_required: false
     commercial_ok: false
-    openai_compatible: null
-    openai_base_url: null
+    openai_compatible: true
+    openai_base_url: "https://api.mistral.ai/v1"
     verified: true
     last_verified: "2026-08-13"
   - slug: "huggingface"
@@ -319,8 +319,8 @@ providers:
     phone_required: null
     card_required: false
     commercial_ok: null
-    openai_compatible: null
-    openai_base_url: null
+    openai_compatible: true
+    openai_base_url: "https://api.ai21.com/studio/v1"
     verified: true
     last_verified: "2026-08-03"
   - slug: "nlpcloud"
@@ -367,14 +367,14 @@ providers:
     free_type: "recurring-credit"
     free_tier: "$30/month recurring credit (Starter plan)"
     rate_limits: "Starter: 100 containers + 10 GPU concurrency, 5 crons, 1-day log retention"
-    notes: "Corrected from a previously listed \"$5-30/month\" range; this is a recurring monthly credit, not a one-time trial. Modal is serverless compute you deploy models on, not a hosted model API"
+    notes: "Corrected from a previously listed \"$5-30/month\" range; this is a recurring monthly credit, not a one-time trial. Modal is serverless compute you deploy models on, not a hosted model API The full $30/month credit requires adding a payment method (without one the free credit is $5/month)."
     best_for: "Self-hosting open models on free monthly GPU credit"
     modalities: ["text"]
     models_free: null
     expires: null
     docs_url: "https://modal.com/pricing"
     phone_required: null
-    card_required: null
+    card_required: true
     commercial_ok: null
     openai_compatible: false
     openai_base_url: null
@@ -431,7 +431,7 @@ providers:
     expires: null
     docs_url: "https://build.nvidia.com/"
     phone_required: true
-    card_required: null
+    card_required: false
     commercial_ok: false
     openai_compatible: true
     openai_base_url: "https://integrate.api.nvidia.com/v1"
@@ -813,7 +813,7 @@ providers:
     phone_required: false
     card_required: false
     commercial_ok: true
-    openai_compatible: null
+    openai_compatible: false
     openai_base_url: null
     verified: true
     last_verified: "2026-08-14"
@@ -842,14 +842,14 @@ providers:
     free_type: "renewing-quota"
     free_tier: "250,000 characters/month TTS (~6 hours of audio)"
     rate_limits: "Tiered endpoints for different text lengths; specific caps not documented"
-    notes: "Commercial use allowed, but free-plan users must attribute Unreal Speech with a link when publishing audio. First-party REST endpoints. Card requirement not stated."
+    notes: "Commercial use allowed, but free-plan users must attribute Unreal Speech with a link when publishing audio. First-party REST endpoints. No credit card required."
     best_for: "Largest free TTS (250k chars/mo, attribution)"
     modalities: ["audio"]
     models_free: null
     expires: null
     docs_url: "https://unrealspeech.com/pricing"
     phone_required: null
-    card_required: null
+    card_required: false
     commercial_ok: true
     openai_compatible: false
     openai_base_url: null
@@ -908,7 +908,7 @@ providers:
     phone_required: null
     card_required: null
     commercial_ok: null
-    openai_compatible: null
+    openai_compatible: false
     openai_base_url: null
     verified: true
     last_verified: "2026-08-14"
@@ -927,7 +927,7 @@ providers:
     phone_required: null
     card_required: false
     commercial_ok: null
-    openai_compatible: null
+    openai_compatible: false
     openai_base_url: null
     verified: true
     last_verified: "2026-08-14"
@@ -1001,7 +1001,7 @@ providers:
     expires: null
     docs_url: "https://cartesia.ai/pricing"
     phone_required: null
-    card_required: null
+    card_required: false
     commercial_ok: false
     openai_compatible: false
     openai_base_url: null
