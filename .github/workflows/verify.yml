@@ -76,7 +76,7 @@ jobs:
       - name: Generated files must be in sync with the data
         run: |
           node scripts/build.mjs
-          targets="README.md data/providers.csv data/providers.yaml collections site/index.html docs/credit-programs.md CITATION.cff data/probe-report.json"
+          targets="README.md data/providers.csv data/providers.yaml collections site/index.html docs/credit-programs.md CITATION.cff data/probe-report.json badge-verified.json"
           if git diff --quiet -- $targets; then
             echo "Generated files are in sync with the data."
             echo "Generated files are in sync." >> "$GITHUB_STEP_SUMMARY"

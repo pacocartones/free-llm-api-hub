@@ -58,7 +58,7 @@ They're genuinely valuable, but different enough that they're kept **out of the 
 
 ---
 
-Looking for a key you can use *right now* with no application? That's the [main list](../README.md) — 67 verified self-serve free APIs.
+Looking for a key you can use *right now* with no application? That's the [main list](../README.md) — ![Verified](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/pacocartones/free-llm-api-hub/main/badge-verified.json) self-serve free APIs.
 
 ---
 
