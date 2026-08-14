@@ -7,6 +7,10 @@ Notable changes to the dataset and the project. Format based on [Keep a Changelo
 
 ## [Unreleased]
 
+### Data
+- **W&B Inference added** — $100/month of Serverless Inference credits on the Free plan (default spending cap, limited-time offer), OpenAI-compatible at `api.inference.wandb.ai/v1`. Verified against the usage-limits docs (2026-08-14).
+- **Typhoon (SCB 10X) added** — the FAQ states the API is "a research showcase and free to use"; Thai-language models incl. `typhoon-v2.1-12b-instruct` and `typhoon-ocr`, OpenAI-compatible at `api.opentyphoon.ai/v1`. Verified 2026-08-14.
+
 ### Changed
 - **All maintenance is local — no GitHub Actions minutes.** `regenerate.yml`, `maintenance.yml`, `probe.yml` and `og-regenerate.yml` are deleted. Derived files are regenerated and committed in the same PR (`npm run build`, `npm run og`), and the weekly re-verification pass runs on demand via `scripts/reverify.mjs` (agentic Layer 3 of the [update playbook](docs/update-playbook.md)). `verify.yml` (the required "Dataset integrity" check) now fails a PR whose generated files are out of sync, and `badge-freshness.json` is excluded from the diff-gates because it is date-relative by design.
 - **Deploys are verified live.** `pages.yml` now runs a `verify-live` job after each deploy: the committed sitemap must byte-match the deployed one (with retries for edge propagation) and every URL of the published sitemap must answer HTTP 200.

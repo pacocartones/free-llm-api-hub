@@ -8,7 +8,7 @@ Free LLM API tiers that permit production/commercial use — not restricted to e
 
 Free tiers that **allow commercial/production use** (`commercial_ok: true`). Eval-only tiers (Cohere trial keys, NVIDIA NIM) are deliberately excluded — read their rows in the main list for the restriction.
 
-**23 of 67 tracked providers** match.
+**25 of 69 tracked providers** match.
 
 | Provider | Type | What's free | The catch | Verified |
 |---|---|---|---|---|
@@ -35,6 +35,8 @@ Free tiers that **allow commercial/production use** (`commercial_ok: true`). Eva
 | **[Unreal Speech](https://unrealspeech.com/pricing)**<br><sub>🏢 commercial OK</sub> | Ongoing | 250,000 characters/month TTS (~6 hours of audio) | Commercial use allowed, but free-plan users must attribute Unreal Speech with a link when publishing audio. First-party REST endpoints. Card requirement not stated. | ✅ 2026-07-30 |
 | **[Upstage](https://console.upstage.ai/docs/getting-started)**<br><sub>💳 no card · 🏢 commercial OK · 🔌 OpenAI-compat</sub> | Trial | $10 in free credit on signup (no card) — Solar LLM (chat + embeddings) plus Document Parse / OCR / information extraction | No credit card required to receive the $10 credit; Studio agents also include 10 free runs. A separate institutional grant (up to 1 year of free Solar + Document Parse) exists for eligible organizations only. Credit validity period not stated. | ✅ 2026-07-31 |
 | **[Veryfi](https://www.veryfi.com/pricing/)**<br><sub>💳 no card · 🏢 commercial OK</sub> | Ongoing | Free Forever plan: up to 100 documents/month — OCR plus structured data extraction (receipts, invoices, and 100+ document types) | No credit card required. The 'Free Forever' 100 docs/mo tier is the standing free tier (a separate 14-day trial unlocks paid features). Proprietary OCR / document-intelligence REST API. | ✅ 2026-07-31 |
+| **[W&B Inference](https://docs.wandb.ai/inference/usage-limits)**<br><sub>💳 no card · 🏢 commercial OK · 🔌 OpenAI-compat</sub> | Ongoing | $100/month of Serverless Inference credits on the Free plan (default spending cap; offer for a limited time) | Serverless Inference credits come with Free, Pro and Academic plans for a limited time; when credits run out, Free accounts must activate pay-as-you-go on the Billing tab or upgrade. OpenAI-compatible endpoint at api.inference.wandb.ai/v1 with any W&B API key. | ✅ 2026-08-14 |
+| **[Typhoon (SCB 10X)](https://docs.opentyphoon.ai/en/faq/)**<br><sub>💳 no card · 📵 no phone · 🏢 commercial OK · 🔌 OpenAI-compat</sub> | Ongoing | Free to use research showcase API — all Typhoon models at $0 | By SCB 10X, the venture arm of Siam Commercial Bank, focused on Thai-language models. Beta, provided as-is with no formal support; usage data is collected to improve the model; SCB claims no rights in outputs. Sign up for an API key at opentyphoon.ai. | ✅ 2026-08-14 |
 
 ---
 

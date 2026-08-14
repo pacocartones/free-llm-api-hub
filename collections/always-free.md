@@ -8,7 +8,7 @@ LLM APIs with models priced at $0 on an ongoing basis — no trial window counti
 
 Providers with models that are **free on a permanent basis** (`free_type: perpetual`) — not a trial credit that runs out. Rate limits still apply; check each row.
 
-**6 of 67 tracked providers** match.
+**7 of 69 tracked providers** match.
 
 | Provider | Type | What's free | The catch | Verified |
 |---|---|---|---|---|
@@ -18,6 +18,7 @@ Providers with models that are **free on a permanent basis** (`free_type: perpet
 | **[AI Horde](https://aihorde.net/)**<br><sub>💳 no card · 📵 no phone</sub> | Ongoing | Free crowdsourced text & image generation; anonymous API key '0000000000' (no registration), or register to earn kudos for priority | Community-powered volunteer network — model availability and speed vary with worker supply, so it is not a fixed-SLA service. No card, no phone. Kudos never expire and cannot be sold. | ✅ 2026-07-30 |
 | **[Pollinations.ai](https://github.com/pollinations/pollinations/blob/master/APIDOCS.md)**<br><sub>💳 no card · 📵 no phone</sub> | Ongoing | Free hosted image models (Flux, Turbo, Stable Diffusion) via a simple GET URL; also text and audio. No signup required to start | Anonymous free images may carry a watermark (since 2025); free registration removes it via the nologo parameter. No card, no phone. Commercial use is not explicitly guaranteed in the docs. | ✅ 2026-07-30 |
 | **[Poolside](https://docs.poolside.ai/api/overview)**<br><sub>🔌 OpenAI-compat</sub> | Ongoing | Laguna XS 2.1 (33B) and Laguna S 2.1 (118B) are free in Preview via a self-serve developer API key | Coding-focused models. Free access is Preview-stage and may change at general availability. Self-serve: create a free API key at platform.poolside.ai. OpenRouter is offered only as an alternative route. | ✅ 2026-07-31 |
+| **[Typhoon (SCB 10X)](https://docs.opentyphoon.ai/en/faq/)**<br><sub>💳 no card · 📵 no phone · 🏢 commercial OK · 🔌 OpenAI-compat</sub> | Ongoing | Free to use research showcase API — all Typhoon models at $0 | By SCB 10X, the venture arm of Siam Commercial Bank, focused on Thai-language models. Beta, provided as-is with no formal support; usage data is collected to improve the model; SCB claims no rights in outputs. Sign up for an API key at opentyphoon.ai. | ✅ 2026-08-14 |
 
 ---
 

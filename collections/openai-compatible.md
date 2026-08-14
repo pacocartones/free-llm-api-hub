@@ -8,7 +8,7 @@ Free LLM APIs that expose an OpenAI-compatible endpoint — point the OpenAI SDK
 
 These providers expose an **OpenAI-compatible endpoint** (`openai_compatible: true`), so migrating is usually a one-line change: keep the OpenAI SDK, swap `base_url` and `api_key`. Grab each provider’s exact base URL from its linked docs.
 
-**31 of 67 tracked providers** match.
+**33 of 69 tracked providers** match.
 
 | Provider | OpenAI base URL | What's free | The catch | Verified |
 |---|---|---|---|---|
@@ -43,6 +43,8 @@ These providers expose an **OpenAI-compatible endpoint** (`openai_compatible: tr
 | **[Tencent Hunyuan](https://cloud.tencent.com/document/product/1729/97731)**<br><sub>🔌 OpenAI-compat</sub> | `https://api.hunyuan.cloud.tencent.com/v1` | 1,000,000 free tokens for Hunyuan text LLMs (hunyuan-a13b, turbos, translation & vision models), plus a separate 1,000,000-token allotment for hunyuan-embedding | Free resource package valid 1 year from activation; unused tokens expire. Tencent Cloud generally requires mainland-China real-name ID verification to activate — a practical barrier for non-China users. Commercial-use terms not stated on the free-quota page. | ✅ 2026-07-30 |
 | **[Poolside](https://docs.poolside.ai/api/overview)**<br><sub>🔌 OpenAI-compat</sub> | `https://inference.poolside.ai/v1` | Laguna XS 2.1 (33B) and Laguna S 2.1 (118B) are free in Preview via a self-serve developer API key | Coding-focused models. Free access is Preview-stage and may change at general availability. Self-serve: create a free API key at platform.poolside.ai. OpenRouter is offered only as an alternative route. | ✅ 2026-07-31 |
 | **[Upstage](https://console.upstage.ai/docs/getting-started)**<br><sub>💳 no card · 🏢 commercial OK · 🔌 OpenAI-compat</sub> | `https://api.upstage.ai/v1` | $10 in free credit on signup (no card) — Solar LLM (chat + embeddings) plus Document Parse / OCR / information extraction | No credit card required to receive the $10 credit; Studio agents also include 10 free runs. A separate institutional grant (up to 1 year of free Solar + Document Parse) exists for eligible organizations only. Credit validity period not stated. | ✅ 2026-07-31 |
+| **[W&B Inference](https://docs.wandb.ai/inference/usage-limits)**<br><sub>💳 no card · 🏢 commercial OK · 🔌 OpenAI-compat</sub> | `https://api.inference.wandb.ai/v1` | $100/month of Serverless Inference credits on the Free plan (default spending cap; offer for a limited time) | Serverless Inference credits come with Free, Pro and Academic plans for a limited time; when credits run out, Free accounts must activate pay-as-you-go on the Billing tab or upgrade. OpenAI-compatible endpoint at api.inference.wandb.ai/v1 with any W&B API key. | ✅ 2026-08-14 |
+| **[Typhoon (SCB 10X)](https://docs.opentyphoon.ai/en/faq/)**<br><sub>💳 no card · 📵 no phone · 🏢 commercial OK · 🔌 OpenAI-compat</sub> | `https://api.opentyphoon.ai/v1` | Free to use research showcase API — all Typhoon models at $0 | By SCB 10X, the venture arm of Siam Commercial Bank, focused on Thai-language models. Beta, provided as-is with no formal support; usage data is collected to improve the model; SCB claims no rights in outputs. Sign up for an API key at opentyphoon.ai. | ✅ 2026-08-14 |
 
 ## Quickstart — reuse the OpenAI SDK
 
