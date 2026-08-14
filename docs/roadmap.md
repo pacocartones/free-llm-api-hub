@@ -18,15 +18,15 @@ Direction, not dated promises. The north star: stay the **most trustworthy, curr
 ## Done recently
 
 - ✅ Cleared the ⚠️ backlog — the three entries whose free API access couldn't be confirmed were removed (see the changelog); the list is now 100% verified.
-- ✅ Backfilled `openai_compatible`, `modalities`, and `openai_base_url` (18 confirmed base URLs).
+- ✅ Backfilled `openai_compatible`, `modalities`, and `openai_base_url` (28 confirmed base URLs).
 - ✅ Shipped editorial [collections](../collections/README.md) generated from the data: no-card, no-phone, commercial-use, OpenAI-compatible, permanently-free, multimodal.
 - ✅ Per-provider OpenAI base URLs + a runnable quickstart (curl + OpenAI SDK) on the OpenAI-compatible page.
-- ✅ Broadened adjacent coverage: embeddings/rerank (Jina, Mixedbread) and speech (Deepgram, AssemblyAI).
-- ✅ **`models_free`** sampled model IDs with an automated live refresh from providers' own `/models` endpoints, a searchable [model index](../../models/), and intent-matched [SEO guides](../../guides/).
+- ✅ **A static, versioned JSON API** at [/api/v1/](https://freellmapihub.com/api/) — full dataset plus slices by category/constraint/modality, plus `llms.txt`/`llms-full.txt` for agents. No server, no query params.
+- ✅ **Stable release tags per dataset version** — `vX.Y.Z` tagged at each schema/dataset version (latest: `v2.8.0`), so downstream consumers can pin a snapshot.
+- ✅ **`models_free`** sampled model IDs with an automated live refresh from providers' own `/models` endpoints, a searchable [model index](../../models/), and intent-matched [SEO guides](../../guides-and-collections/).
 
 ## Next
 
-- **A stable release tag per dataset version** so downstream consumers can pin a snapshot.
 - **A "fastest free LLM APIs" collection**, once a defensible speed dimension exists in the data.
 - **Complete the `models_free` backfill** for the key-gated providers — see the [backlog](backlog.md) for the concrete checklist.
 
@@ -34,7 +34,6 @@ Direction, not dated promises. The north star: stay the **most trustworthy, curr
 
 - **History / diffs:** track how a provider's free tier changed over time, not just its current state.
 - **Sibling scope, kept separate:** free AI coding tools — valuable but volatile, so it would live as a clearly-separated section rather than diluting the core list. (The [self-hosting on free compute](self-hosting-on-free-compute.md) and [credit programs](credit-programs.md) companion references already follow this pattern: apply-to-get and compute offers are documented adjacent to, but outside, the verified self-serve dataset.)
-- **A small, documented public API** over the dataset (a hosted JSON endpoint with query params).
 
 ## Explicitly out of scope
 

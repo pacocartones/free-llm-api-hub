@@ -16,7 +16,7 @@ Per provider (`scripts/probe.mjs`, `npm run probe`):
 
 These collapse into **`probe_status`**: `live` · `auth-ok` · `auth-failed` · `tier-ended` (key works but the free tier looks gone, e.g. `402`) · `rate-limited` · `error`. `auth-ok` means that `/models` accepted the credential but no inference was attempted; only `live` means a real free-tier inference call succeeded and earns the **live-tested** badge. A `tier-ended` result is a strong signal to move the entry to "Notably NOT free". The full per-run detail is written to `data/probe-report.json`.
 
-`live` results show a **live-tested** badge on the provider page. Auth-only CI results show the narrower **credentials checked** badge instead.
+`live` results show a **live-tested** badge on the provider page; auth-only runs (`--auth-only`) show the narrower **credentials checked** badge instead (the probe has no CI path — it is purely local or VPS).
 
 ## Secrets — transport-agnostic by design
 
@@ -70,7 +70,7 @@ Everything on the code side is built, tested and committed (harness, fields, bad
 - [ ] Persist it: same command with `node scripts/probe.mjs --write`, then `npm run build`, review the diff, commit.
 - [ ] Wire the cron (see `scripts/probe-cron.sh`) once the deploy decision is made.
 
-**Then (phase 2, all in [backlog.md](backlog.md)):** provider-specific adapters for the non-OpenAI APIs; render `data/probe-report.json` as a "live-tested N/51" badge + a *measured* "fastest free APIs" collection; auto-flag `tier-ended` results onto the re-verification worklist.
+**Then (phase 2, all in [backlog.md](backlog.md)):** provider-specific adapters for the non-OpenAI APIs; render `data/probe-report.json` as a live-tested badge (N of the providers that declare an `env_key`) + a *measured* "fastest free APIs" collection; auto-flag `tier-ended` results onto the re-verification worklist.
 
 ---
 

@@ -7,7 +7,7 @@ A living, maintainer-facing checklist of concrete follow-ups. Direction and prin
 - [ ] **Wire the self-hosted Infisical → run the first real probe.** User creates the `/free-llm-api-hub` folder + read-only Machine Identity on the VPS; then `infisical run -- node scripts/probe.mjs --write`. Harness is built and tested (generic OpenAI-compatible path); waiting only on secrets.
 - [ ] **Provider-specific probe adapters** for the non-OpenAI APIs: Gemini native, Cohere, Deepgram/AssemblyAI (speech), ElevenLabs, Pinecone, etc. (Phase-1 covers the generic OpenAI `/models` + chat/embeddings path only.)
 - [ ] **Decide the zero-Actions deploy** (VPS → gh-pages branch, VPS nginx, or keep light pages.yml) and finish `scripts/probe-cron.sh` (uncomment the publish step). The weekly maintenance is already fully local ([update-playbook.md](update-playbook.md)); only the deploy decision remains.
-- [ ] Render `data/probe-report.json` on the site: a "live-tested N/51 <30d" badge + a **measured** "fastest free APIs" collection from tokens/sec.
+- [ ] Render `data/probe-report.json` on the site: a live-tested badge (N of the providers that declare an `env_key`, refreshed within 30d) + a **measured** "fastest free APIs" collection from tokens/sec.
 - [ ] Auto-flag `tier-ended` probe results onto the re-verification worklist / "Notably NOT free".
 
 ## Data — model samples (`models_free`)
@@ -23,8 +23,8 @@ A living, maintainer-facing checklist of concrete follow-ups. Direction and prin
 - ✅ **Mobile navigation.** Added an accessible hamburger toggle (in the shared `site.js`, so identical on the homepage and every generated page) that drops the nav down as a panel below 900px; closes on link-follow / Escape / outside-click. Also surfaced **Guides** in the primary nav (was footer/hero-only).
 - ✅ **Guides ↔ collections cross-links** and ✅ **FAQ blocks** (with `FAQPage` JSON-LD) on the higher-traffic collections.
 - ✅ **Two new modality guides** — image generation + OCR/document-AI (7 guides total), mapping onto the new providers.
-- ✅ **Explorer table polish** — desktop zebra striping, sortable-column affordance, width cap on the widest column, and a client-side **NEW** marker (via the new `added` field).
-- [ ] Consider a per-provider OG image (currently provider pages use the generic `og.png`).
+- ✅ **Explorer table polish** — desktop zebra striping, sortable-column affordance, width cap on the widest column, and a **NEW** marker (via the `added` field, rendered by the shared row code in both SSR and client).
+- ✅ **Per-provider OG images** — `og.mjs` renders one per provider (`site/og/p/<slug>.png`), wired via `ogImage` in build.mjs and verified by `check-og.mjs`.
 - [ ] Optional: export `added` in the CSV/YAML column set (currently JSON-only).
 
 ## Dataset / schema
@@ -95,9 +95,9 @@ only what confirms.
 
 ## Recently shipped
 
-- ✅ `models_free` with an automated live refresh (`scripts/fetch-models.mjs`); 14/51 providers on real `/models` data (OpenRouter, GitHub Models, Pollinations, NVIDIA NIM, ModelScope, Ollama Cloud).
+- ✅ `models_free` with an automated live refresh (`scripts/fetch-models.mjs`); 13/67 providers on real `/models` data (OpenRouter, Pollinations, NVIDIA NIM, ModelScope, Ollama Cloud, plus the key-gated Groq/Cerebras/SambaNova/Scaleway when keys are set).
 - ✅ Searchable [free model index](https://freellmapihub.com/models/) (`/models/`).
-- ✅ Five data-generated [SEO guides](https://freellmapihub.com/guides/) with editorial top picks + `FAQPage` structured data.
+- ✅ Seven data-generated [SEO guides & collections](https://freellmapihub.com/guides-and-collections/) with editorial top picks + `FAQPage` structured data.
 - ✅ Credit programs split into two standalone pages (startups / students & research).
 - ✅ Provider pages: prominent free-models block, modality-aware quickstart with a real model, freshness read-out, cross-links to guides & collections.
 
