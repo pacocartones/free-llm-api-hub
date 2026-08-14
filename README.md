@@ -97,7 +97,7 @@ Focused, always-current collections — each is generated from the dataset and h
 - **[Free multimodal LLM APIs](collections/multimodal.md)** (50) — vision, audio, embeddings · [live page ↗](https://freellmapihub.com/collections/multimodal)
 <!-- AUTOGEN:collections:end -->
 
-Every provider also has its own page with the full details and a copy-ready quickstart — e.g. [Groq](https://freellmapihub.com/p/groq.html), [Deepgram](https://freellmapihub.com/p/deepgram.html), [Jina AI](https://freellmapihub.com/p/jina-ai.html).
+Every provider also has its own page with the full details and a copy-ready quickstart — e.g. [Groq](https://freellmapihub.com/p/groq), [Deepgram](https://freellmapihub.com/p/deepgram), [Jina AI](https://freellmapihub.com/p/jina-ai).
 
 ## Contents
 
@@ -251,7 +251,7 @@ It renders the real, auditable age of the oldest entry in the list — not a sta
 
 Self-contained (inline styles, no CSS conflicts). `data-modality` is optional (`text`, `audio`, `embeddings`, `image`, `vision`, `ocr`, `rerank`).
 
-**Follow changes** — [updates page](https://freellmapihub.com/updates.html) or the [RSS feed](https://freellmapihub.com/feed.xml).
+**Follow changes** — [updates page](https://freellmapihub.com/updates) or the [RSS feed](https://freellmapihub.com/feed.xml).
 
 ## Contributing
 
