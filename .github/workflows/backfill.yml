@@ -13,9 +13,12 @@ name: Weekly model backfill
 # content is still gated inline (`npm test` + `npm run check` run above), and
 # the PR is opened with a repo PAT when the BACKFILL_PR_TOKEN secret exists: a
 # PAT-created PR triggers the normal pull_request checks, so "Dataset integrity"
-# reports on the PR and it merges without bypass. Without the secret the PR
-# opens with GITHUB_TOKEN and shows no checks — the maintainer merges via admin
-# bypass after reviewing (the inline gate already passed).
+# reports on the PR and it merges without bypass. Without the secret the run
+# STOPS at the push — GITHUB_TOKEN cannot open a PR (`createPullRequest` is
+# denied, verified in a live drift test on 2026-08-14), so the branch is pushed
+# but nothing can merge. Configure the secret (a PAT with repo scope) or enable
+# "Allow GitHub Actions to create and approve pull requests" in the repo's
+# Actions settings to unblock the weekly backfill.
 #
 # Key-gated providers (Groq, Cerebras, ...) are skipped unless the matching
 # secret is configured on the repo — the script's anti-blank design.

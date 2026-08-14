@@ -16,6 +16,10 @@ What earns a spot in the dataset — and what gets rejected. The scope is delibe
 
 `free_type` records the finer shape: `perpetual`, `renewing-quota`, `recurring-credit`, `trial-credit`. See [comparison-dimensions.md](comparison-dimensions.md).
 
+## Scope guardrail — modalities
+
+**Non-text providers never exceed 35% of the dataset.** "Non-text" = a provider whose `modalities` does not include `text` (speech, image, embeddings, rerank and OCR providers). The core promise of this project is free *text* LLM APIs; adjacent modalities are welcome but must stay a minority. Today: **24 / 69 = 35%** — at the cap, so a new non-text entry requires the count to drop (or the cap to be consciously raised), never the other way around.
+
 ## What gets rejected
 
 - **Consumer chat UIs** (a free web chatbot) with no developer API.
