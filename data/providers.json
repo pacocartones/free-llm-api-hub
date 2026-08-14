@@ -814,7 +814,7 @@
       "openai_base_url": null,
       "env_key": "TWELVELABS_API_KEY",
       "verified": true,
-      "last_verified": "2026-07-30"
+      "last_verified": "2026-08-14"
     },
     {
       "slug": "ocr-space",
@@ -836,7 +836,7 @@
       "openai_base_url": null,
       "env_key": "OCRSPACE_API_KEY",
       "verified": true,
-      "last_verified": "2026-07-30"
+      "last_verified": "2026-08-14"
     },
     {
       "slug": "llamaparse",
@@ -858,7 +858,7 @@
       "openai_base_url": null,
       "env_key": "LLAMACLOUD_API_KEY",
       "verified": true,
-      "last_verified": "2026-07-30"
+      "last_verified": "2026-08-14"
     },
     {
       "slug": "nanonets",
@@ -867,7 +867,7 @@
       "free_type": "trial-credit",
       "free_tier": "$50 in free credits on signup (one-time) across data-extraction / OCR workflows",
       "rate_limits": "Up to 3 users on the free credit",
-      "notes": "One-time signup credit, not renewing; no credit card required to start. Paid plans start at $100/month afterwards.",
+      "notes": "One-time signup credit, not renewing (credits never expire); no credit card required to start. Paid plans start at $100/month afterwards.",
       "best_for": "Document extraction on a $50 no-card credit",
       "modalities": ["ocr", "text"],
       "models_free": null,
@@ -880,7 +880,7 @@
       "openai_base_url": null,
       "env_key": "NANONETS_API_KEY",
       "verified": true,
-      "last_verified": "2026-07-30"
+      "last_verified": "2026-08-14"
     },
     {
       "slug": "moondream",
@@ -902,17 +902,17 @@
       "openai_base_url": "https://api.moondream.ai/v1",
       "env_key": "MOONDREAM_API_KEY",
       "verified": true,
-      "last_verified": "2026-07-30"
+      "last_verified": "2026-08-14"
     },
     {
       "slug": "speechmatics",
       "name": "Speechmatics",
-      "category": "ongoing",
-      "free_type": "renewing-quota",
-      "free_tier": "3,000 minutes (50 hours)/month speech-to-text + 1,000,000 characters (~20 hrs)/month text-to-speech",
-      "rate_limits": "2 concurrent real-time sessions on the free plan",
-      "notes": "No credit card required to start; add a card only when you exceed the free limit. Recurring monthly allowance covering both STT and TTS. Commercial-use permission not explicitly stated on the pricing page.",
-      "best_for": "Best free STT tier (50 hrs/mo, no card)",
+      "category": "trial",
+      "free_type": "trial-credit",
+      "free_tier": "$100 one-time usage credit (no card) covering Speech-to-Text and Text-to-Speech",
+      "rate_limits": "2 concurrent real-time STT sessions; 3 voice-agent conversations; 1 batch job/sec (bounded by the $100 credit)",
+      "notes": "One-time $100 credit, no card required — replaced the previous 3,000 min/month + 1M chars recurring allowance on 2026-07-31. Add a card when you move to Pro. Commercial-use permission not explicitly stated.",
+      "best_for": "High-accuracy STT + TTS on a $100 no-card credit",
       "modalities": ["audio"],
       "models_free": null,
       "expires": null,
@@ -924,7 +924,7 @@
       "openai_base_url": null,
       "env_key": "SPEECHMATICS_API_KEY",
       "verified": true,
-      "last_verified": "2026-07-30"
+      "last_verified": "2026-08-14"
     },
     {
       "slug": "speechify",
