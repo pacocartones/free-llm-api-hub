@@ -1253,6 +1253,15 @@ if (!Array.isArray(BEST.entries) || BEST.entries.length === 0) {
   throw new Error('data/best.json must contain a non-empty entries array');
 }
 const bestBySlug = new Map(providers.map((p) => [p.slug, p]));
+{
+  const seen = new Set();
+  for (const e of BEST.entries) {
+    if (!e.slug) throw new Error('data/best.json entry missing slug');
+    if (!e.why) throw new Error('data/best.json entry ' + e.slug + ' is missing its editorial "why"');
+    if (seen.has(e.slug)) throw new Error('data/best.json lists ' + e.slug + ' more than once — a provider can only rank once');
+    seen.add(e.slug);
+  }
+}
 const bestEntries = BEST.entries.map((e, i) => {
   const p = bestBySlug.get(e.slug);
   if (!p) throw new Error('data/best.json entry #' + (i + 1) + ' references unknown slug: ' + e.slug);

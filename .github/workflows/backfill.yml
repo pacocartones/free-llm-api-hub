@@ -8,8 +8,11 @@ name: Weekly model backfill
 #
 #   node scripts/fetch-models.mjs   # what the job runs (--write)
 #
-# The PR still goes through the normal Verify gate (drift-gate + tests), so a
-# bot commit can never slip past the same checks as a human one.
+# GITHUB_TOKEN-created PRs do not trigger pull_request workflows (GitHub's
+# documented behavior), so the run dispatches verify.yml against the branch
+# explicitly: the PR's content gets the exact same gate (drift-gate + tests)
+# before it is ever offered for review. A repo PAT in a BACKFILL_PR_TOKEN
+# secret would instead make the checks appear directly on the PR.
 #
 # Key-gated providers (Groq, Cerebras, ...) are skipped unless the matching
 # secret is configured on the repo — the script's anti-blank design.
@@ -82,7 +85,7 @@ jobs:
             const after = JSON.parse(fs.readFileSync('data/providers.json', 'utf8')).providers;
             const b = Object.fromEntries(before.map((p) => [p.slug, p]));
             const changed = after
-              .filter((p) => JSON.stringify(b[p.slug].models_free) !== JSON.stringify(p.models_free))
+              .filter((p) => JSON.stringify((b[p.slug] || {}).models_free) !== JSON.stringify(p.models_free))
               .map((p) => p.slug);
             console.log(changed.join(', ') || 'none');
           ")
@@ -96,7 +99,7 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           BRANCH="automated-backfill/$(date -u +%Y-%m-%d-%H%M%S)"
           git checkout -B "$BRANCH"
-          git add data/providers.json README.md data/providers.csv data/providers.yaml collections site/index.html site/sitemap.xml site/robots.txt docs/credit-programs.md CITATION.cff data/probe-report.json badge-verified.json site/badge-verified.json
+          git add data/providers.json README.md data/providers.csv data/providers.yaml collections site/index.html site/sitemap.xml site/robots.txt docs/credit-programs.md CITATION.cff data/probe-report.json badge-verified.json site/badge-verified.json site/og/
           git commit -m "data: refresh models_free from live provider APIs"
           echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
 
@@ -121,6 +124,15 @@ jobs:
         run: |
           git push -u origin "${{ steps.branch.outputs.branch }}" --force-with-lease
 
+      # GITHUB_TOKEN PRs do not trigger pull_request workflows, so run the gate
+      # explicitly on the branch. Result shows up as a Verify run on the branch
+      # (event: workflow_dispatch) — same checks, same outcome as a PR check.
+      - name: Dispatched Verify gate on the branch
+        if: steps.drift.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh workflow run verify.yml --ref "${{ steps.branch.outputs.branch }}"
       - name: Open the backfill PR
         if: steps.drift.outputs.changed == 'true'
         env:
