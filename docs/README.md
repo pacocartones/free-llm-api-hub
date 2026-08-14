@@ -6,6 +6,7 @@ How **Free LLM API Hub** works — how entries are verified, what earns a spot, 
 
 | Doc | What it covers |
 |---|---|
+| [Tutorial: add your first provider](tutorial-first-provider.md) | Follow along end to end — check, add, validate, regenerate, merge a real entry |
 | [Methodology](methodology.md) | How each entry is verified — what "verified" means, and where its limits are |
 | [Inclusion criteria](inclusion-criteria.md) | What earns a spot, and what gets rejected |
 | [Comparison dimensions](comparison-dimensions.md) | Every field and flag in the dataset, defined |
@@ -15,6 +16,7 @@ How **Free LLM API Hub** works — how entries are verified, what earns a spot, 
 | Doc | What it covers |
 |---|---|
 | [Update playbook](update-playbook.md) | The weekly routine that keeps the freshness badge green |
+| [Freshness SLA](freshness-sla.md) | The 90-day re-verification system: buckets, badge, worklist, reverify batch, verified column |
 | [Architecture](architecture.md) | The data-first pipeline: what each script does, the data model, the two-places rule |
 | [Discovery sources & competitive map](sources.md) | Where new providers are found, which lists to trust, and how we differ from rivals |
 | [Live testing](live-testing.md) | Probing each free tier with a real key — `last_probed`, and the Infisical setup |
