@@ -1,0 +1,81 @@
+// rows.mjs — single source of truth for the homepage explorer rows.
+//
+// Two audiences, one function:
+//   - scripts/build.mjs server-renders the home table with it (SEO + no-JS).
+//   - site/explorer.js repaints the table with it (loaded as the generated
+//     site/shared-rows.js, which serialises htmlEsc / ICON / SLUG_RE / rowHtml
+//     the same way shared-rules.js serialises recScore).
+//
+// This is the whole point: if SSR and client ever keep their own row code, the
+// server ships one structure and the browser repaints another the instant it
+// loads — a visible jump (or a divergence like the date column colliding with
+// the subtitle line). Keep row markup here, never in build.mjs or explorer.js.
+//
+// Provider fields come from providers.json, which community PRs can edit —
+// treat every field as untrusted: htmlEsc before it reaches innerHTML, and the
+// slug goes into an href only after SLUG_RE confirms it is kebab-case.
+
+export const htmlEsc = (s) => String(s ?? '')
+  .replace(/&/g, '&amp;')
+  .replace(/</g, '&lt;')
+  .replace(/>/g, '&gt;')
+  .replace(/"/g, '&quot;')
+  .replace(/'/g, '&#39;');
+
+export const ICON = (id) => `<svg class="i" aria-hidden="true"><use href="#${id}"/></svg>`;
+
+// slugs are kebab-case identifiers, enforced by data/schema.json in CI; re-check
+// here because the client fetch path bypasses that guarantee.
+export const SLUG_RE = /^[a-z0-9]+(-[a-z0-9]+)*$/;
+
+/**
+ * One explorer `<tr>`, identical server- and client-side.
+ *
+ * `opts.now` is the reference instant for the freshness colour and the "NEW"
+ * badge. The build passes a stable date (`data.generated`) so the server render
+ * is deterministic and the drift gate never trips on a calendar boundary; the
+ * client passes `Date.now()` so visitors see live freshness.
+ */
+export function explorerRowHtml(p, opts = {}) {
+  const now = (opts && opts.now) || null;
+  const nowMs = now
+    ? (typeof now === 'string' ? Date.parse(now + 'T00:00:00Z') : now instanceof Date ? now.getTime() : Number(now))
+    : Date.now();
+  const isNew = p.added && (nowMs - Date.parse(p.added + 'T00:00:00Z')) / 86400000 <= 45;
+
+  let name = SLUG_RE.test(String(p.slug || ''))
+    ? `<a href="p/${p.slug}">${htmlEsc(p.name)}</a>`
+    : htmlEsc(p.name);
+  if (isNew) name += ` <span class="badge b-new" title="Recently added to the hub">NEW</span>`;
+  if (p.best_for) name += `<div class="best">${htmlEsc(p.best_for)}</div>`;
+
+  const typeCell =
+    `<span class="badge ${p.category === 'ongoing' ? 'b-ongoing' : 'b-trial'}">${p.category === 'ongoing' ? 'Ongoing' : 'Trial'}</span>` +
+    `<div class="fmini">${FLAG_PAIRS.filter(([k, v]) => p[k] === v)
+      .map(([, , ic, t]) => `<span class="fmini-i" title="${t}" aria-label="${t}">${ICON(ic)}</span>`)
+      .join('')}</div>`;
+
+  let v;
+  if (p.verified) {
+    const date = htmlEsc(p.last_verified || '');
+    const age = p.last_verified ? Math.floor((nowMs - Date.parse(p.last_verified + 'T00:00:00Z')) / 86400000) : null;
+    const st = freshnessStatus(age);
+    const cls = st === 'stale' ? 'b-stale' : st === 'due' ? 'b-warn' : 'b-ok';
+    const tip = age != null ? ` title="Verified ${age}d ago · ${date}"` : '';
+    v = `<span class="badge ${cls}"${tip}>${ICON('ic-check')}</span><span class="ver-date">${date}</span>`;
+  } else {
+    v = `<span class="badge b-warn">${ICON('ic-warn')} unverified</span>`;
+  }
+
+  return `<tr>` +
+    `<td class="name" data-label="API">${name}</td>` +
+    `<td data-label="Type">${typeCell}</td>` +
+    `<td data-label="What's free">${htmlEsc(p.free_tier)}</td>` +
+    `<td class="notes" data-label="The catch">${htmlEsc(p.notes || '')}</td>` +
+    `<td class="pver" data-label="Verified">${v}</td></tr>`;
+}
+
+// FLAG_PAIRS + freshnessStatus are referenced by name inside explorerRowHtml so
+// the serialised copy (shared-rows.js) can pick them up from window.FLLM_RULES;
+// importing them here keeps the same names in scope for the server render.
+import { FLAG_PAIRS, freshnessStatus } from './rules.mjs';

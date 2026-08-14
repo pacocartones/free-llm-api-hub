@@ -261,6 +261,7 @@ table.sortable thead th:not(.sorted)::after { content: " ⇅"; opacity: .28; fon
 .b-new { background: var(--accent); color: var(--accent-ink); border: 1px solid var(--accent); font-weight: 700; font-size: .62rem; letter-spacing: .07em; padding: 1px 6px; vertical-align: 2px; }
 .b-ok, .v.ok { background: color-mix(in srgb, var(--green) 13%, transparent); color: var(--green); border: 1px solid color-mix(in srgb, var(--green) 32%, transparent); }
 .b-warn, .v.warn { background: color-mix(in srgb, var(--warn) 15%, transparent); color: var(--warn); border: 1px solid color-mix(in srgb, var(--warn) 38%, transparent); }
+.b-stale { background: color-mix(in srgb, var(--red) 13%, transparent); color: var(--red); border: 1px solid color-mix(in srgb, var(--red) 34%, transparent); }
 .v.live { background: var(--accent); color: #05130c; border: 1px solid var(--accent); font-weight: 600; }
 .v { display: inline-flex; align-items: center; gap: 5px; font-size: .72rem; padding: 2px 8px; border-radius: 6px; white-space: nowrap; font-family: var(--font-mono); }
 .flags { display: flex; flex-wrap: wrap; gap: 5px 10px; margin-top: 8px; }

@@ -15,6 +15,7 @@ import { esc, stripTags } from './lib/escape.mjs';
 import { mineProviderHistory, assertHistoryPlausible } from './lib/history.mjs';
 import { countExternalContributors, countExternalContributorsFromLog } from './lib/contributors.mjs';
 import { buildOgManifest } from './lib/og.mjs';
+import { explorerRowHtml } from './lib/rows.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const DATA = join(ROOT, 'data/providers.json');
@@ -418,4 +419,61 @@ test('no workflow runs `gh pr view` (bot logic is banned from CI)', () => {
     });
   }
   assert.deepEqual(offenders, [], offenders.join('\n'));
+});
+
+
+// ---------- shared row renderer (lib/rows.mjs → site/shared-rows.js) ----------
+// The home table is SSR'd and client-repainted from ONE function. These tests
+// pin what that function must keep guaranteeing: determinism for a fixed
+// reference date, freshness-aware verified badges, escaping, slug guard, and
+// that the client never re-implements the row markup.
+
+test('explorer row HTML is deterministic for a fixed reference date', () => {
+  const p = { slug: 'demo', name: 'Demo', category: 'ongoing', verified: true, last_verified: '2026-07-20', added: '2026-07-01' };
+  const a = explorerRowHtml(p, { now: '2026-08-13' });
+  const b = explorerRowHtml(p, { now: '2026-08-13' });
+  assert.equal(a, b);
+});
+
+test('the verified badge colours by freshness — fresh / due / stale', () => {
+  const mk = (daysAgo) => {
+    const d = new Date('2026-08-13T00:00:00Z'); d.setUTCDate(d.getUTCDate() - daysAgo);
+    return { slug: 'demo', name: 'Demo', category: 'ongoing', verified: true, last_verified: d.toISOString().slice(0, 10) };
+  };
+  const row = (p) => explorerRowHtml(p, { now: '2026-08-13' });
+  assert.match(row(mk(10)), /badge b-ok/, 'fresh entry must stay green');
+  assert.match(row(mk(75)), /badge b-warn/, 'due entry must turn yellow');
+  assert.match(row(mk(95)), /badge b-stale/, 'stale entry must turn red');
+  assert.match(row(mk(75)), /title="Verified 75d ago/, 'due badge explains its age');
+});
+
+test('row fields are escaped before innerHTML (XSS)', () => {
+  const evil = (field) => ({ slug: 'demo', name: 'Demo', category: 'ongoing', [field]: '<script>alert(1)</script>' });
+  for (const field of ['name', 'free_tier', 'notes', 'best_for']) {
+    const out = explorerRowHtml(evil(field), { now: '2026-08-13' });
+    assert.ok(!/<script>/.test(out), field + ' must not reach innerHTML raw');
+    assert.ok(out.includes('&lt;script&gt;'), field + ' must be escaped');
+  }
+});
+
+test('provider slugs are guarded and links stay extension-less', () => {
+  const good = explorerRowHtml({ slug: 'openai-compatible-free-apis', name: 'X', category: 'ongoing', verified: true, last_verified: '2026-08-01' }, { now: '2026-08-13' });
+  assert.match(good, /href="p\/openai-compatible-free-apis"/);
+  assert.ok(!good.includes('.html'), 'client link must match the clean-URL standard (#132)');
+  const bad = explorerRowHtml({ slug: '../evil', name: 'X', category: 'ongoing', verified: true, last_verified: '2026-08-01' }, { now: '2026-08-13' });
+  assert.ok(!bad.includes('href="p/'), 'non-kebab slug must not become a link');
+});
+
+test('the client explorer uses the shared row renderer, not its own copy', () => {
+  const explorer = readFileSync(join(ROOT, 'site/explorer.js'), 'utf8');
+  assert.match(explorer, /FLLM_ROWS.rowHtml/, 'explorer must repaint with the shared renderer');
+  assert.doesNotMatch(explorer, /ROW_SKELETON/, 'explorer must not re-implement the row skeleton');
+  assert.doesNotMatch(explorer, /flagMini|verCell|SLUG_RE/, 'explorer must not re-implement row markup');
+});
+
+test('the server render and the shared emission use the same row source', () => {
+  const build = readFileSync(join(ROOT, 'scripts/build.mjs'), 'utf8');
+  assert.match(build, /rows.explorerRowHtml/, 'SSR must call the shared row function');
+  assert.match(build, /freshnessStatus: \$\{freshnessStatus\.toString\(\)\}/, 'shared-rules.js must ship freshnessStatus to the client');
+  assert.match(build, /window.FLLM_ROWS/, 'build must emit shared-rows.js');
 });

@@ -34,8 +34,9 @@ Thumbs.db
 .env.*
 !.env.example
 
-# Shared rules for the browser, emitted by build.mjs from scripts/lib/rules.mjs
+# Shared rules + row renderer for the browser, emitted by build.mjs from scripts/lib/rules.mjs + rows.mjs
 site/shared-rules.js
+site/shared-rows.js
 
 # Freebuff desktop data (local DB) — never publish
 .freebuff/
