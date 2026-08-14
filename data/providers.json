@@ -1325,11 +1325,11 @@
     {
       "slug": "poolside",
       "name": "Poolside",
-      "category": "ongoing",
-      "free_type": "perpetual",
-      "free_tier": "Laguna XS 2.1 (33B) and Laguna S 2.1 (118B) are free in Preview via a self-serve developer API key",
+      "category": "trial",
+      "free_type": "trial-credit",
+      "free_tier": "Laguna M.1 (225B) and Laguna XS.2 (33B, open-weights) are free for a limited time via a self-serve developer API key (also on OpenRouter)",
       "rate_limits": "Preview rate limits not published",
-      "notes": "Coding-focused models. Free access is Preview-stage and may change at general availability. Self-serve: create a free API key at platform.poolside.ai. OpenRouter is offered only as an alternative route.",
+      "notes": "Coding-focused models. Poolside describes the free access as 'free for a limited time' (not perpetual) and it may change at general availability. Self-serve key at platform.poolside.ai; OpenRouter is an alternative route.",
       "best_for": "Free coding-focused LLMs behind an OpenAI-compatible key",
       "modalities": ["text"],
       "models_free": null,
@@ -1342,7 +1342,7 @@
       "openai_base_url": "https://inference.poolside.ai/v1",
       "env_key": "POOLSIDE_API_KEY",
       "verified": true,
-      "last_verified": "2026-07-31",
+      "last_verified": "2026-08-14",
       "added": "2026-07-31"
     },
     {
@@ -1350,9 +1350,9 @@
       "name": "Upstage",
       "category": "trial",
       "free_type": "trial-credit",
-      "free_tier": "$10 in free credit on signup (no card) — Solar LLM (chat + embeddings) plus Document Parse / OCR / information extraction",
-      "rate_limits": "Document Parse billed $0.01/page (+$0.03 for extract), drawn from the $10 credit",
-      "notes": "No credit card required to receive the $10 credit; Studio agents also include 10 free runs. A separate institutional grant (up to 1 year of free Solar + Document Parse) exists for eligible organizations only. Credit validity period not stated.",
+      "free_tier": "Solar Pro 4 is free for a limited time (promo); otherwise the API is paid prepaid (commitment tiers from $100/mo) — Solar LLM (chat + embeddings) plus Document Parse / OCR / information extraction; Studio agents include 10 free runs",
+      "rate_limits": "Document Parse billed $0.01/page (+$0.03 for extract); Tier 1 rate limits apply on prepaid tiers",
+      "notes": "The former $10 signup credit no longer appears on the pricing page (now prepaid commitment tiers from $100/mo). No card needed for the limited-time free model or the 10 free Studio runs; a separate institutional grant (up to 1 year of free Solar + Document Parse) exists for eligible organizations only.",
       "best_for": "Solar LLM + document OCR behind one OpenAI-compatible key",
       "modalities": ["text", "ocr", "embeddings"],
       "models_free": null,
@@ -1365,7 +1365,7 @@
       "openai_base_url": "https://api.upstage.ai/v1",
       "env_key": "UPSTAGE_API_KEY",
       "verified": true,
-      "last_verified": "2026-07-31",
+      "last_verified": "2026-08-14",
       "added": "2026-07-31"
     },
     {
@@ -1387,7 +1387,7 @@
       "openai_compatible": false,
       "env_key": "VERYFI_API_KEY",
       "verified": true,
-      "last_verified": "2026-07-31",
+      "last_verified": "2026-08-14",
       "added": "2026-07-31"
     },
     {
@@ -1396,7 +1396,7 @@
       "category": "trial",
       "free_type": "trial-credit",
       "free_tier": "$50 in free credits on signup (no credit card) — speech-to-text",
-      "rate_limits": "Bounded by the $50 credit; pay-as-you-go afterward",
+      "rate_limits": "Bounded by the $50 credit; pay-as-you-go afterward (4 concurrent requests or 4 hours of audio/hour)",
       "notes": "No credit card required to start — an explicit $50 developer credit. Commercial terms not stated on the pricing page. Native STT REST API.",
       "best_for": "Largest no-card speech-to-text credit ($50)",
       "modalities": ["audio"],
@@ -1409,7 +1409,7 @@
       "openai_compatible": false,
       "env_key": "VOICEGAIN_API_KEY",
       "verified": true,
-      "last_verified": "2026-07-31",
+      "last_verified": "2026-08-14",
       "added": "2026-07-31"
     },
     {
@@ -1431,7 +1431,7 @@
       "openai_compatible": false,
       "env_key": "SMALLEST_API_KEY",
       "verified": true,
-      "last_verified": "2026-07-31",
+      "last_verified": "2026-08-14",
       "added": "2026-07-31"
     },
     {
@@ -1453,7 +1453,7 @@
       "openai_compatible": false,
       "env_key": "RETELL_API_KEY",
       "verified": true,
-      "last_verified": "2026-07-31",
+      "last_verified": "2026-08-14",
       "added": "2026-07-31"
     },
     {
