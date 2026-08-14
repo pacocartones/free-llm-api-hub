@@ -16,7 +16,7 @@ import * as rows from './lib/rows.mjs';
 import * as sortLib from './lib/sort.mjs';
 import { esc, stripTags } from './lib/escape.mjs';
 import { mineProviderHistory } from './lib/history.mjs';
-import { listExternalContributors, githubProfileUrl } from './lib/contributors.mjs';
+import { githubProfileUrl } from './lib/contributors.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const FRESH_DAYS = SLA_DAYS; // the freshness SLA, defined once in lib/rules.mjs
@@ -560,9 +560,14 @@ const bestEntries = BEST.entries.map((e, i) => {
   return { rank: i + 1, ...e, p };
 });
 
-// ---------- contributors (rendered from git history so it never goes stale) ----------
+// ---------- contributors (rendered from data/contributors.json, which a
+// maintainer refreshes with scripts/update-contributors.mjs after a merge) ----------
+// The list must NOT be mined from git here: this file runs inside the integrity
+// gate on the PR's merge commit, so a contributor's own unmerged commit would
+// rewrite the README and fail the "generated files in sync" step (see #183).
+const CONTRIBUTORS = JSON.parse(readFileSync(join(ROOT, 'data/contributors.json'), 'utf8'));
 const contributorsMd = () => {
-  const people = listExternalContributors({ cwd: ROOT });
+  const people = CONTRIBUTORS.contributors || [];
   if (!people.length) return '_No external contributors yet — you could be the first._';
   return people.map(({ name, email, subject }) => {
     const url = githubProfileUrl(name, email);

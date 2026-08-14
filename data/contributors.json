@@ -1,0 +1,24 @@
+{
+  "contributors": [
+    {
+      "name": "Jhansi Oruganti",
+      "email": "155613006+JhansiOruganti-43@users.noreply.github.com",
+      "subject": "data: confirm Novita AI free tier is not commercial-use allowed (#27)"
+    },
+    {
+      "name": "Victoria Odalo",
+      "email": "147773886+OdaloV@users.noreply.github.com",
+      "subject": "docs: verify Clarifai commercial_ok status (#112)"
+    },
+    {
+      "name": "MikeGatsby",
+      "email": "mikael.gatfi@gmail.com",
+      "subject": "data: verify Datalab hosted-API commercial-use terms (no explicit statement found) (#117)"
+    },
+    {
+      "name": "bcabreraike-cmyk",
+      "email": "bcabrera.ike@gmail.com",
+      "subject": "docs: explain paced re-verification batches (#169)"
+    }
+  ]
+}
