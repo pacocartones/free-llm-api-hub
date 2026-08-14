@@ -8,11 +8,14 @@ name: Weekly model backfill
 #
 #   node scripts/fetch-models.mjs   # what the job runs (--write)
 #
-# GITHUB_TOKEN-created PRs do not trigger pull_request workflows (GitHub's
-# documented behavior), so the run dispatches verify.yml against the branch
-# explicitly: the PR's content gets the exact same gate (drift-gate + tests)
-# before it is ever offered for review. A repo PAT in a BACKFILL_PR_TOKEN
-# secret would instead make the checks appear directly on the PR.
+# GITHUB_TOKEN cannot trigger other workflows (`gh workflow run` returns 403 —
+# GitHub forbids workflow-chaining), so a dispatch step can never work. The
+# content is still gated inline (`npm test` + `npm run check` run above), and
+# the PR is opened with a repo PAT when the BACKFILL_PR_TOKEN secret exists: a
+# PAT-created PR triggers the normal pull_request checks, so "Dataset integrity"
+# reports on the PR and it merges without bypass. Without the secret the PR
+# opens with GITHUB_TOKEN and shows no checks — the maintainer merges via admin
+# bypass after reviewing (the inline gate already passed).
 #
 # Key-gated providers (Groq, Cerebras, ...) are skipped unless the matching
 # secret is configured on the repo — the script's anti-blank design.
@@ -123,20 +126,10 @@ jobs:
         if: steps.drift.outputs.changed == 'true'
         run: |
           git push -u origin "${{ steps.branch.outputs.branch }}" --force-with-lease
-
-      # GITHUB_TOKEN PRs do not trigger pull_request workflows, so run the gate
-      # explicitly on the branch. Result shows up as a Verify run on the branch
-      # (event: workflow_dispatch) — same checks, same outcome as a PR check.
-      - name: Dispatched Verify gate on the branch
-        if: steps.drift.outputs.changed == 'true'
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          gh workflow run verify.yml --ref "${{ steps.branch.outputs.branch }}"
       - name: Open the backfill PR
         if: steps.drift.outputs.changed == 'true'
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.BACKFILL_PR_TOKEN || github.token }}
         run: |
           BODY="Automated weekly backfill — \`node scripts/fetch-models.mjs --write\` refreshed \`models_free\` from the providers' live public /models endpoints, then regenerated every derived artifact (\`npm run build\` + \`npm run og\`) and passed \`npm test\` + \`npm run check\` locally in the workflow.
 
