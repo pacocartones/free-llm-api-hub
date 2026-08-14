@@ -588,7 +588,7 @@ providers:
     openai_compatible: true
     openai_base_url: "https://ollama.com/v1"
     verified: true
-    last_verified: "2026-07-30"
+    last_verified: "2026-08-14"
   - slug: "ai-horde"
     name: "AI Horde"
     category: "ongoing"
@@ -607,7 +607,7 @@ providers:
     openai_compatible: false
     openai_base_url: null
     verified: true
-    last_verified: "2026-07-30"
+    last_verified: "2026-08-14"
   - slug: "modelscope"
     name: "ModelScope (API-Inference)"
     category: "ongoing"
@@ -626,7 +626,7 @@ providers:
     openai_compatible: true
     openai_base_url: "https://api-inference.modelscope.cn/v1"
     verified: true
-    last_verified: "2026-07-30"
+    last_verified: "2026-08-14"
   - slug: "pollinations"
     name: "Pollinations.ai"
     category: "ongoing"
@@ -645,7 +645,7 @@ providers:
     openai_compatible: false
     openai_base_url: null
     verified: true
-    last_verified: "2026-07-30"
+    last_verified: "2026-08-14"
   - slug: "runware"
     name: "Runware"
     category: "trial"
@@ -664,7 +664,7 @@ providers:
     openai_compatible: false
     openai_base_url: null
     verified: true
-    last_verified: "2026-07-30"
+    last_verified: "2026-08-14"
   - slug: "pinecone-inference"
     name: "Pinecone Inference"
     category: "ongoing"
@@ -683,7 +683,7 @@ providers:
     openai_compatible: false
     openai_base_url: null
     verified: true
-    last_verified: "2026-07-30"
+    last_verified: "2026-08-14"
   - slug: "twelve-labs"
     name: "Twelve Labs (Marengo Embed)"
     category: "ongoing"
