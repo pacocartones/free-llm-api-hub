@@ -85,6 +85,21 @@ const PUBLIC = {
   },
 };
 
+// The canonical registry of providers whose /models endpoint is public. This
+// list is deliberately separate from the PUBLIC map: an extractor that quietly
+// vanishes (the ollama-cloud incident — an edit replaced its entry and the
+// provider went stale for a whole session) or a stale entry otherwise slips
+// through silently. The self-test fails if PUBLIC and this registry diverge,
+// so adding or removing a public extractor is an explicit, reviewed change.
+const PUBLIC_REQUIRED = [
+  'openrouter',
+  'pollinations',
+  'nvidia-nim',
+  'modelscope',
+  'ollama-cloud',
+  'typhoon',
+];
+
 // Key-gated providers exposing a standard OpenAI-compatible /models endpoint.
 // The base URL is read from the provider's own openai_base_url in the data.
 const KEYED = {
@@ -110,7 +125,27 @@ function selfTest() {
     console.error('✗ serializer does not round-trip.\n  ' + err);
     process.exit(1);
   }
+  // Extractor-registry guard: every extractor slug must exist in the dataset
+  // (a stale extractor silently skips in main), and PUBLIC must exactly match
+  // the PUBLIC_REQUIRED registry — a deleted extractor otherwise goes
+  // unnoticed until the provider's sample is stale (the ollama-cloud case).
+  const { providers } = JSON.parse(readFileSync(FILE, 'utf8'));
+  const slugs = new Set(providers.map((p) => p.slug));
+  const orphaned = [...Object.keys(PUBLIC), ...Object.keys(KEYED)].filter((s) => !slugs.has(s));
+  if (orphaned.length) {
+    console.error('✗ extractor slug(s) not in data/providers.json: ' + orphaned.join(', ') + ' — remove the extractor or restore the provider.');
+    process.exit(1);
+  }
+  const registered = Object.keys(PUBLIC).sort();
+  const required = [...PUBLIC_REQUIRED].sort();
+  if (JSON.stringify(registered) !== JSON.stringify(required)) {
+    console.error(`✗ PUBLIC extractors drifted from the registry.
+  registered: ${registered.join(', ')}
+  required:   ${required.join(', ')}`);
+    process.exit(1);
+  }
   console.log('✓ serializer round-trips data/providers.json exactly');
+  console.log('✓ extractor registry intact (' + Object.keys(PUBLIC).length + ' public, ' + Object.keys(KEYED).length + ' keyed)');
 }
 
 // --- main -------------------------------------------------------------------
