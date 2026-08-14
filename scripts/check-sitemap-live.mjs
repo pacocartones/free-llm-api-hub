@@ -7,7 +7,7 @@
 // Compares the repo's site/sitemap.xml (what the drift gate commits and the
 // build regenerates deterministically) with the live copy served by the site.
 // Any difference — a stale deploy, a drift-gate hole, or a build that stopped
-// being deterministic — surfaces here. being deterministic — surfaces here. Runs manually after a deploy and as the
+// being deterministic — surfaces here. Runs manually after a deploy and as the
 // verify-live job of pages.yml once the deployment is live.
 //
 // FLLM_LIVE_ATTEMPTS (default 1) + FLLM_LIVE_RETRY_DELAY seconds (default 10)
@@ -24,8 +24,10 @@ const SITE = (process.env.FLLM_SITE || 'https://freellmapihub.com').replace(/\/$
 
 async function main() {
   const local = readFileSync(join(ROOT, 'site/sitemap.xml'), 'utf8');
-  const attempts = Math.max(1, parseInt(process.env.FLLM_LIVE_ATTEMPTS || '1', 10));
-  const retryDelayMs = parseInt(process.env.FLLM_LIVE_RETRY_DELAY || '10', 10) * 1000;
+  const rawAttempts = parseInt(process.env.FLLM_LIVE_ATTEMPTS || '1', 10);
+  const attempts = Number.isFinite(rawAttempts) && rawAttempts >= 1 ? rawAttempts : 1;
+  const rawDelay = parseInt(process.env.FLLM_LIVE_RETRY_DELAY || '10', 10);
+  const retryDelayMs = (Number.isFinite(rawDelay) && rawDelay >= 0 ? rawDelay : 10) * 1000;
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
   let last = null;
