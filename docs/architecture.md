@@ -11,15 +11,17 @@ data/schema.json       │                              data/providers.csv, data
                        │                              collections/*.md, docs/credit-programs.md,
                        │                              site/index.html (SSR rows injected),
                        │                              site/{collections,models,guides,p,programs,legal}/,
+                       │                              site/guides-and-collections/ (unified hub),
                        │                              site/api/v1/*, site/llms.txt, site/llms-full.txt,
                        │                              site/sitemap.xml, site/updates.html, site/feed.xml,
-                       │                              site/badges/*.json
+                       │                              site/badges/*.json, site/shared-rules.js,
+                       │                              site/shared-rows.js (both gitignored)
                        └──►  everything is DERIVED. Never hand-edit generated files.
 ```
 
 - **`data/providers.json`** and **`data/programs.json`** are the ONLY sources you hand-edit.
 - **`scripts/build.mjs`** reads the data and writes everything. It's **idempotent**: running it twice with the same data produces byte-identical output.
-- **CI:** `verify.yml` runs `validate` + `check-links` + the pipeline tests on every PR, plus a **blocking drift check**: it rebuilds the derived files and fails the PR if they are out of sync with the data. There is no regeneration bot — the author regenerates locally (`npm run build`, and `npm run og` when needed) and commits the results in the same PR, so a change ships complete and nothing runs on a schedule. **Corollary: nothing date-relative may appear in committed generated files** (the "NEW" badge is client-side only; provider `/p/` pages are gitignored precisely so they can use the current date).
+- **CI:** `verify.yml` runs `validate` + `check-links` + `check-og` (OG images exist and match the dataset) + `check-history` (git-mined history) + the pipeline tests on every PR, plus a **blocking drift check**: it rebuilds the derived files and fails the PR if they are out of sync with the data. There is no regeneration bot — the author regenerates locally (`npm run build`, and `npm run og` when needed) and commits the results in the same PR, so a change ships complete and nothing runs on a schedule. **Corollary: nothing may be relative to the *current date*** in committed generated files — everything committed must be byte-stable for a given dataset (the "NEW" badge and the freshness colours are computed from `data.generated`, so they are deterministic and safe in committed files; provider `/p/` pages are gitignored precisely so they can use the current date).
 
   *E2E-verified 2026-08-13 (PR #127): a bare data change without regenerated files fails the drift step (verify run `31746567051`, exit 1, with the remediation instructions in the step summary); pushing the same change with the regenerated files committed passes (run `31746721656`).*
 
@@ -55,7 +57,7 @@ Per-provider fields (in serializer order):
 | `env_key` | UPPER_SNAKE | secret NAME for probe/fetch-models. **STRIPPED from all public output** (homepage payload, site/providers.json, /api). Never the value. |
 | `verified` | boolean | true = independently confirmed against own docs on `last_verified` |
 | `last_verified` | YYYY-MM-DD \| null | must be null when `verified:false` |
-| `added` | YYYY-MM-DD (optional) | provenance: when it entered the dataset. Drives the client-side NEW badge (<45d). Set once; never changes. |
+| `added` | YYYY-MM-DD (optional) | provenance: when it entered the dataset. Drives the NEW badge (≤45d) in the shared row code — SSR and client alike. Set once; never changes. |
 | `last_probed` | YYYY-MM-DD \| null | live-probe date (probe.mjs) |
 | `probe_status` | `live`/`auth-ok`/`auth-failed`/`tier-ended`/`rate-limited`/`error`/null | `live` → "live-tested" badge; `auth-ok` → credentials checked, no inference |
 
@@ -75,23 +77,26 @@ The serializer **skips absent keys**, so new optional fields only appear on prov
 - **`fetch-models.mjs`** (`npm run models`, `--write`, `--self-test`) — refreshes `models_free` from each provider's own `/models` endpoint. PUBLIC (no key): openrouter (`:free`), pollinations, nvidia-nim, modelscope, ollama-cloud. KEY-gated (only if env var set): groq, cerebras, sambanova, scaleway. Real IDs only; a fetch failure leaves the field untouched. Deterministic publisher-diverse sample, cap 8.
 - **`discover.mjs`** (`npm run discover`, `--write`, `--json`) — diffs OpenRouter's `:free` catalog vs a stored snapshot (`data/discover-snapshot.json`) and reports NEW free models + publishers not listed as first-party (leads). Never edits the dataset.
 - **`probe.mjs`** (`npm run probe`) — live-tests each free tier with a real key from `process.env[env_key]`; writes `last_probed`/`probe_status`. Generic OpenAI-compatible path only so far. Run on demand, locally: `node scripts/probe.mjs --write --auth-only`; see [live-testing.md](live-testing.md).
-- **`og.mjs`** (`npm run og`) — renders social PNGs with `@resvg/resvg-js` (the only devDependency). **NOT run by the Pages build** → the PNGs must be COMMITTED (`site/og/` is not gitignored). Run `npm run og` after adding providers/guides/collections.
-- **`staleness.mjs`** (`npm run worklist`) — re-verification worklist (>90d overdue etc.), printed locally; the weekly pass follows it (see [update-playbook.md](update-playbook.md)).
+- **`og.mjs`** (`npm run og`) — renders social PNGs with `@resvg/resvg-js` (the only devDependency): site-wide `og.png`, per-provider `site/og/p/*.png`, per-guide and per-collection; also writes `site/og/manifest.json` so `check-og.mjs` can fingerprint them. **NOT run by the Pages build** → the PNGs must be COMMITTED (`site/og/` is not gitignored). Run `npm run og` after adding providers/guides/collections.
+- **`staleness.mjs`** (`npm run worklist`) — re-verification worklist, printed locally, report-only: 🔴 overdue (>90d), 🟡 due soon (61–90d), ⚠️ never verified, plus this week's batch and the cliff watch (many entries sharing one verification date). Same buckets as the badge, imported from `rules.mjs`; see [freshness-sla.md](freshness-sla.md). The weekly pass follows it ([update-playbook.md](update-playbook.md)).
+- **`reverify.mjs`** (`npm run reverify`, `--batch N`, `--no-fetch`) — the local, on-demand re-verification pass (playbook layer 3, zero Actions): fetches each batch provider's own `docs_url` and writes a review dossier to `.freebuff/reverify/<slug>.md` (gitignored, local only). Never edits data by itself — an agent compares the fetched docs against the entry and drafts the edit; a human runs `npm run build && npm test` and opens the PR.
+- **`check-og.mjs`** (CI) — every committed OG PNG must exist AND match the dataset: recomputes the fingerprints in `site/og/manifest.json` from `data/providers.json`. Pure Node, no `@resvg`, so it runs in the dependency-free CI job.
+- **`check-history.mjs`** (CI) — cheaply validates the git-mined per-provider history (two git processes, no build) before the full test suite.
 - **`check-links.mjs`** (`npm run links`, part of `npm test`) — validates INTERNAL markdown links (relative doc-to-doc paths) only. Never touches the network. The external `docs_url` sweep is a local on-demand pass in the [update playbook](update-playbook.md); genuine failures (not 401/403/405/429 bot-blocks) open a "broken link" issue.
 - **`probe-cron.sh`** — the VPS weekly cron alternative (Infisical → probe → models → build → push), for a zero-Actions-minutes setup.
 
-npm scripts: `build, validate, links, worklist, models, discover, probe, og, test (validate+links), check (validate+build+diff-gate)`.
+npm scripts: `build, validate, links, worklist, reverify, models, discover, probe, og, test (validate + links + test suites), check (validate + build + diff-gate)`.
 
 ## 4. Site structure (`site/`)
 
 **IMPORTANT two-places rule:** the homepage `site/index.html` is **HAND-WRITTEN**; the build only injects the SSR table rows (`<!-- AUTOGEN:rows -->`) and the inline JSON payload (`<!-- AUTOGEN:data -->`). Every OTHER page is generated by `build.mjs` using `siteHeader(prefix)` / `siteFooter(prefix)` / `htmlPage(...)`. So **when you change the header/footer/nav you must edit BOTH** `site/index.html` AND the `siteHeader`/`siteFooter` functions in build.mjs. Same for the SVG icon sprite (one copy in build.mjs `SPRITE`, one inline in `site/index.html`).
 
 Pages:
-- **`/` (index.html)** — hero, trust strip, controls, SSR explorer table + inline dataset, client explorer JS (filter/sort/search/presets/URL-sync) in `site/explorer.js`. Works with no JS (SSR rows). The client `render()` and the SSR `explorerRowsHtml()` in build.mjs must produce the SAME row structure — the shared scoring/flag logic lives in `scripts/lib/rules.mjs`, serialized to `site/shared-rules.js` by the build.
+- **`/` (index.html)** — hero, trust strip, controls, SSR explorer table + inline dataset, client explorer JS (filter presets, sort, category/modality filters, URL-sync) in `site/explorer.js`. Works with no JS (SSR rows). Row markup is **single-source**: one `explorerRowHtml()` in `scripts/lib/rows.mjs` — build.mjs server-renders with it (`now: data.generated`, deterministic, drift-safe) and serializes it to `site/shared-rows.js` (`window.FLLM_ROWS.rowHtml`), which the client calls with `now: Date.now()` for live freshness. The shared scoring/flag/freshness logic lives in `scripts/lib/rules.mjs`, serialized to `site/shared-rules.js` (`window.FLLM_RULES`); both files are build-emitted and gitignored. Never keep row markup in build.mjs or explorer.js.
 - **`/models/`** — searchable model→provider index from every `models_free`.
-- **`/guides/`** — data-generated SEO guides + hub (`GUIDES` in build.mjs). Each: filter, top pick, FAQ (`FAQPage` JSON-LD), related guides, per-page OG.
-- **`/collections/`** — editorial collections (`COLLECTIONS` in build.mjs). Each has repo markdown (`collections/*.md`) + live HTML, FAQ on higher-traffic ones, per-collection OG.
-- **`/p/<slug>.html`** — provider cards. Gitignored + regenerated on deploy → may use the current date (freshness read-out). Badges, "Official docs" + "Visit website", meta table, free-models block, modality-aware quickstart, change history (from git).
+- **`/guides/<slug>`** — data-generated SEO guides (`GUIDES` in build.mjs): filter, top pick, FAQ (`FAQPage` JSON-LD), related guides, per-page OG. The unified **hub lives at `/guides-and-collections/`** (two sections — guides and collections); the old `/guides/` and `/collections/` roots are meta-refresh redirects to it.
+- **`/collections/<slug>`** — editorial collections (`COLLECTIONS` in build.mjs). Each has repo markdown (`collections/*.md`) + live HTML, FAQ on higher-traffic ones, per-collection OG. (`/collections/` root redirects to the hub.)
+- **`/p/<slug>`** (file `site/p/<slug>.html`) — provider cards, clean canonical URL. Gitignored + regenerated on deploy → may use the current date (freshness read-out). Badges, "Official docs" + "Visit website", meta table, free-models block, modality-aware quickstart, change history (from git).
 - **`/programs/`** — startup + research credit program pages, from programs.json.
 - **`/api/v1/`** — static JSON API: `providers.json`, `programs.json`, `history.json`, `index.json` (manifest), slices (`ongoing,trial,perpetual,no-card,no-phone,commercial,openai-compatible`), `modality/<m>.json`. Every object carries `version`+`generated`.
 - **`llms.txt` + `llms-full.txt`** — llmstxt.org index + full provider expansion, for AI agents.
@@ -102,7 +107,7 @@ Client JS: `site/site.js` (loaded on EVERY page) = theme toggle, live GitHub sta
 ## 5. Design system (`site/styles.css`)
 - Terminal-green identity: `--accent:#3fce8f`, self-hosted JetBrains Mono, CSS vars + `[data-theme]` dark/light (persisted), SVG icon sprite (`ic-*`), `>_`-style prompts, AA contrast.
 - **Header identical on every page** — keep `--header-bg` opaque (a translucent value lets content bleed through the blur).
-- **Nav (6 items, each with an icon):** Home · Models · Guides · Collections · Startup credits · Student credits. Collapses to a hamburger below 900px.
+- **Nav (5 items, each with an icon):** Home · Models · Guides & Collections · Startup credits · Student credits. Collapses to a hamburger below 900px.
 - **Explorer table** (home): 5 columns — API, Type, What's free, The catch, Verified.
 - **Hero H1 stays plain** — deliberate design decision, no typewriter/reveal effects.
 
