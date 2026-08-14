@@ -1344,12 +1344,16 @@ writeFileSync(join(ROOT, 'site/sitemap.xml'), sitemap);
 // models/, api/, badges/, legal/, programs/, llms.txt, shared-* - shows up in
 // review and in the CI drift gate, exactly like the tracked regenerated files.
 // The set is derived from `git ls-files site/`, so it stays in sync with
-// .gitignore automatically. site/p/ is deliberately excluded: provider pages
-// render "verified Xd ago" relative to the current day, so they can never be
-// byte-pinned (same deliberate exception as badge-freshness.json;
-// see docs/architecture.md).
-// It lives at the repo root (not under data/) so a fingerprint-only commit
-// never touches a path the updates feed watches - the pin self-stabilizes.
+// .gitignore automatically. site/p/ is excluded because provider pages render
+// verified-Xd-ago relative to the current day (same deliberate exception as
+// badge-freshness.json; see docs/architecture.md). The git-log-derived files
+// are excluded too — updates.html and feed.xml embed the commit hash+subject
+// and api/v1/history.json embeds commit dates, so their bytes shift across a
+// squash merge and can never be pinned deterministically. They are regenerated
+// on every deploy; pinning them caused the post-merge refresh-pin churn this
+// removes. It lives at the repo root (not under data/) so a fingerprint-only
+// commit never touches a path the updates feed watches.
+const GIT_LOG_DERIVED = new Set(['site/updates.html', 'site/feed.xml', 'site/api/v1/history.json']);
 const derivedFingerprints = deriveFingerprints();
 if (derivedFingerprints) {
   writeFileSync(join(ROOT, 'derived-fingerprints.json'), JSON.stringify(derivedFingerprints, null, 2) + String.fromCharCode(10));
@@ -1368,7 +1372,7 @@ function deriveFingerprints() {
       const abs = join(dir, entry.name);
       const rel = relative(ROOT, abs).split(String.fromCharCode(92)).join('/');
       if (entry.isDirectory()) walk(abs);
-      else if (!tracked.has(rel) && !rel.startsWith('site/p/')) {
+      else if (!tracked.has(rel) && !rel.startsWith('site/p/') && !GIT_LOG_DERIVED.has(rel)) {
         out[rel] = createHash('sha256').update(readFileSync(abs)).digest('hex');
       }
     }

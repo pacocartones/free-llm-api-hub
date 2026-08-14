@@ -40,7 +40,7 @@ For each provider on the worklist (`npm run worklist`, or just the reverify batc
    ```
    `npm run og` needs `@resvg/resvg-js` (the only devDependency — `npm install` before the first run). The CI gate checks that every PNG exists **and matches the current data** (a fingerprint check via `site/og/manifest.json`), not just that it is present — so a changed count, flag or category fails the check until you run `npm run og`.
 
-`npm run build` also rewrites `derived-fingerprints.json` - the sha256 pin of every gitignored build output under `site/` (see [architecture.md](architecture.md)). Commit it with the rest; the drift gate fails if it is missing or out of sync. Because `updates.html` and `feed.xml` embed the last commits, this file moves on every commit - expected: it is the drift gate for the gitignored derivatives themselves.
+`npm run build` also rewrites `derived-fingerprints.json` - the sha256 pin of every gitignored build output under `site/` (see [architecture.md](architecture.md)). Commit it with the rest; the drift gate fails if it is missing or out of sync. The git-log-derived files (`updates.html`, `feed.xml`, `api/v1/history.json`) are deliberately excluded from the pin: their content embeds the commit hash/subject or dates, so it shifts across a squash merge — they are regenerated on every deploy.
 5. **Commit `data/providers.json` + the regenerated files in one PR.** The required "Dataset integrity" check fails if the derived files are out of sync, so the PR is complete only when both ship together.
 
 ### Also scan for what's new (monthly is enough)
