@@ -18,8 +18,14 @@ Notable changes to the dataset and the project. Format based on [Keep a Changelo
 - **Backfill PR path.** `backfill.yml` no longer dispatches `verify.yml` (a `GITHUB_TOKEN` cannot chain workflows — it returned HTTP 403), and a live drift test showed the same token also cannot open the PR (`createPullRequest` is denied). The branch is pushed but no PR appears, so the weekly backfill needs a `BACKFILL_PR_TOKEN` (PAT) or the repo's "Allow GitHub Actions to create and approve pull requests" setting before it can ship anything.
 - **Fingerprint gate excludes self-referential files.** `updates.html`, `feed.xml` and `api/v1/history.json` are derived from `git log`, so their bytes change on every squash-merge; they are no longer part of `derived-fingerprints.json`, which removes the post-merge pin-refresh chore. [#154](https://github.com/pacocartones/free-llm-api-hub/pull/154)
 
+### Added
+- **"Recently changed" panel on the explorer homepage.** The drift that paced re-verification catches is surfaced straight from the git history of `data/providers.json` (top 10 changes, server-rendered), so accuracy work becomes public content instead of living only in CHANGELOG entries.
+- **Auto-tag on dataset version bump.** `tag-release.yml` creates the annotated `vX.Y.Z` tag when `data/providers.json` advances (idempotent no-op if the tag already exists), so "pin a snapshot" for programmatic consumers stops depending on a human remembering to tag.
+- **`scripts/generate-gfis.mjs`.** Recomputes the tri-state umbrella issues (#7 phone_required, #8 commercial_ok) from the data and refreshes their titles/checklists, so the unverified counts can never go stale again.
+- **Contributor on-ramps diversified.** The good-first-issue pool now spans "write a test", "improve the explorer UI" and "document the re-verification process" (previously all "confirm a field"); the existing `new-provider` and `inaccuracy` templates cover adding a provider and reporting drift; every good-first issue carries the `hacktoberfest` label.
+
 ### Docs
-- **SECURITY.md automation table** now lists the four workflows — including the weekly `backfill.yml` (`contents: write` / `pull-requests: write` over an `automated-backfill/*` branch + PR) — instead of claiming "no write-capable automation". [#152](https://github.com/pacocartones/free-llm-api-hub/pull/152)
+- **SECURITY.md automation table** now lists the five workflows — including the weekly `backfill.yml` (`contents: write` / `pull-requests: write` over an `automated-backfill/*` branch + PR) — instead of claiming "no write-capable automation". [#152](https://github.com/pacocartones/free-llm-api-hub/pull/152)
 - **README restructured around the editorial top 20.** The two full provider tables (all 69) are replaced by a single top-20 table driven by [`data/best.json`](data/best.json), extended from 10 to 20 picks. The full dataset stays one link away (the explorer and the JSON/CSV/YAML exports); the README drops from ~50 KB to ~28 KB.
 
 ## [2.9.0] — 2026-08-14

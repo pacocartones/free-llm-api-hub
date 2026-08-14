@@ -24,7 +24,7 @@ Out of scope:
 
 ## Automation and permissions
 
-Four workflows run against this repository; none of them writes to `main` directly:
+Five workflows run against this repository; none of them writes to `main` directly:
 
 | Workflow | Trigger | Token permissions |
 |---|---|---|
@@ -32,12 +32,13 @@ Four workflows run against this repository; none of them writes to `main` direct
 | `pages.yml` | push to `main`, manual | `contents: read`, `pages: write` — publishes the site |
 | `codeql.yml` | pull request, push to `main` | `contents: read` (job: `security-events: write`) — code scanning |
 | `backfill.yml` | weekly cron, manual | `contents: write`, `pull-requests: write` — refreshes `models_free`, commits on an `automated-backfill/*` branch and opens a PR; never pushes to `main` |
+| `tag-release.yml` | push to `main` (data/providers.json), manual | `contents: write` — pushes the annotated `vX.Y.Z` tag when the dataset version advances; never writes to `main` |
 
 A pull request from a fork therefore never runs with a token that can write to this
 repository, and never has access to repository secrets.
 
 Derived files are regenerated locally and committed by the author in the same PR; the only
-write-capable automation is the weekly model backfill, which delivers through a branch and a
+write-capable automation is the weekly model backfill (a branch + PR) and the release tagger (an annotated tag only). The backfill delivers through a branch and a
 PR (and re-runs the "Dataset integrity" gate on that branch via a dispatched `verify.yml`
 run). A change to `scripts/` is reviewed as code, not as data.
 

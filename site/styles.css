@@ -410,6 +410,10 @@ pre:hover .pre-copy, .pre-copy:focus-visible { opacity: 1; }
 .upd a:hover { color: var(--accent); }
 @media (max-width: 560px) { .upd { flex-direction: column; gap: 2px; } .upd-date { flex-basis: auto; } }
 
+/* ---------- recently changed panel (explorer homepage) ---------- */
+.recent { margin: 0 0 18px; }
+.recent h2 { font-size: 1.15rem; margin: 0 0 4px; }
+
 /* ---------- footer ---------- */
 .site-footer { border-top: 1px solid var(--border); background: var(--bg-elev); color: var(--muted); font-size: .87rem; }
 .footer-top { display: grid; grid-template-columns: 1.6fr 1fr 1fr 1fr; gap: 28px; padding: 40px 0 30px; }

@@ -262,6 +262,15 @@ test('the explorer does not claim a column sort before the user chooses one', ()
   assert.match(explorer, /<th data-key="name" tabindex="0" role="button" aria-sort="none">API<\/th>/);
 });
 
+test('the explorer homepage surfaces the recently-changed drift from git history', () => {
+  const p = join(ROOT, 'site/index.html');
+  if (!readFileSync(p, 'utf8').includes('<section class="recent"')) run(['scripts/build.mjs']);
+  const index = readFileSync(p, 'utf8');
+  assert.match(index, /<section class="recent" id="recent"/);
+  assert.match(index, /Recently changed/);
+  assert.match(index, /git history of providers\.json/);
+});
+
 // models_free is sampled from the provider's own /models catalog, so an
 // ASR/audio model on the free tier that the entry does not claim in modalities
 // means the modality dimensions (speech collections, README coverage) silently
