@@ -6,10 +6,11 @@
 //   - site/providers.json (+ csv/yaml) so the interactive site ships the data
 // Zero dependencies. Run with: node scripts/build.mjs   (or `npm run build`)
 
-import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync, readdirSync } from 'node:fs';
 import { execSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
-import { dirname, join } from 'node:path';
+import { dirname, join, relative } from 'node:path';
 import { recScore, FLAG_PAIRS, SLA_DAYS, DUE_SOON_DAYS, ageInDays, freshnessColor, freshnessBadge, freshnessStatus } from './lib/rules.mjs';
 import * as rows from './lib/rows.mjs';
 import { esc, stripTags } from './lib/escape.mjs';
@@ -1268,6 +1269,46 @@ const sitemap =
     .join('\n') +
   `\n</urlset>\n`;
 writeFileSync(join(ROOT, 'site/sitemap.xml'), sitemap);
+
+// ---------- fingerprint of the gitignored derived files (drift gate) ----------
+// derived-fingerprints.json pins every build output under site/ that is
+// not tracked by git, so a change to ANY derived file - updates.html, feed.xml,
+// models/, api/, badges/, legal/, programs/, llms.txt, shared-* - shows up in
+// review and in the CI drift gate, exactly like the tracked regenerated files.
+// The set is derived from `git ls-files site/`, so it stays in sync with
+// .gitignore automatically. site/p/ is deliberately excluded: provider pages
+// render "verified Xd ago" relative to the current day, so they can never be
+// byte-pinned (same deliberate exception as badge-freshness.json;
+// see docs/architecture.md).
+// It lives at the repo root (not under data/) so a fingerprint-only commit
+// never touches a path the updates feed watches - the pin self-stabilizes.
+const derivedFingerprints = deriveFingerprints();
+if (derivedFingerprints) {
+  writeFileSync(join(ROOT, 'derived-fingerprints.json'), JSON.stringify(derivedFingerprints, null, 2) + String.fromCharCode(10));
+}
+
+function deriveFingerprints() {
+  let tracked;
+  try {
+    tracked = new Set(execSync('git ls-files site/', { cwd: ROOT, encoding: 'utf8' }).split(String.fromCharCode(10)));
+  } catch (_) {
+    return null; // no git (tarball build) - leave the committed fingerprint untouched
+  }
+  const out = {};
+  const walk = (dir) => {
+    for (const entry of readdirSync(dir, { withFileTypes: true })) {
+      const abs = join(dir, entry.name);
+      const rel = relative(ROOT, abs).split(String.fromCharCode(92)).join('/');
+      if (entry.isDirectory()) walk(abs);
+      else if (!tracked.has(rel) && !rel.startsWith('site/p/')) {
+        out[rel] = createHash('sha256').update(readFileSync(abs)).digest('hex');
+      }
+    }
+  };
+  walk(join(ROOT, 'site'));
+  return Object.fromEntries(Object.keys(out).sort().map((k) => [k, out[k]]));
+}
+
 
 console.log(
   `Built: ${total} providers (${ongoing.length} ongoing, ${trial.length} trial), ` +

@@ -154,6 +154,21 @@ test('build is idempotent — a second run changes not a single byte', () => {
   assert.equal(hashAll(), first);
 });
 
+test('derived-fingerprints.json pins gitignored outputs and skips site/p/ + tracked files', () => {
+  const fp = join(ROOT, 'derived-fingerprints.json');
+  if (!existsSync(fp)) run(['scripts/build.mjs']);
+  const pins = JSON.parse(readFileSync(fp, 'utf8'));
+  for (const rel of ['site/updates.html', 'site/feed.xml', 'site/models/index.html',
+                     'site/api/v1/providers.json', 'site/llms.txt', 'site/shared-rules.js']) {
+    assert.ok(pins[rel] && /^[0-9a-f]{64}$/.test(pins[rel]), rel + ' should be pinned with a sha256');
+  }
+  assert.equal(Object.keys(pins).some((k) => k.startsWith('site/p/')), false,
+    'site/p/ must not be pinned (date-relative)');
+  assert.equal(Object.keys(pins).some((k) => k.startsWith('site/og/')), false,
+    'site/og/ is tracked and diff-gated directly');
+  assert.equal(pins['site/index.html'], undefined,
+    'tracked regenerated files are gated by git diff, not the fingerprint');
+});
 // ---------- the git-mined provider history must be alive ----------
 // A silent regression in the history miner (e.g. the Buffer-vs-utf8-string
 // misalignment that was fixed alongside the git cat-file --batch change)
