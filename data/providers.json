@@ -946,7 +946,7 @@
       "openai_base_url": null,
       "env_key": "SPEECHIFY_API_KEY",
       "verified": true,
-      "last_verified": "2026-07-30"
+      "last_verified": "2026-08-14"
     },
     {
       "slug": "hume-ai",
@@ -968,7 +968,7 @@
       "openai_base_url": null,
       "env_key": "HUME_API_KEY",
       "verified": true,
-      "last_verified": "2026-07-30"
+      "last_verified": "2026-08-14"
     },
     {
       "slug": "unreal-speech",
@@ -990,7 +990,7 @@
       "openai_base_url": null,
       "env_key": "UNREALSPEECH_API_KEY",
       "verified": true,
-      "last_verified": "2026-07-30"
+      "last_verified": "2026-08-14"
     },
     {
       "slug": "elevenlabs",
@@ -1012,7 +1012,7 @@
       "openai_base_url": null,
       "env_key": "ELEVENLABS_API_KEY",
       "verified": true,
-      "last_verified": "2026-07-30"
+      "last_verified": "2026-08-14"
     },
     {
       "slug": "sarvam-ai",
@@ -1034,7 +1034,7 @@
       "openai_base_url": "https://api.sarvam.ai/v1",
       "env_key": "SARVAM_API_KEY",
       "verified": true,
-      "last_verified": "2026-07-30"
+      "last_verified": "2026-08-14"
     },
     {
       "slug": "gladia",
@@ -1056,7 +1056,7 @@
       "openai_base_url": null,
       "env_key": "GLADIA_API_KEY",
       "verified": true,
-      "last_verified": "2026-07-30"
+      "last_verified": "2026-08-14"
     },
     {
       "slug": "rime",
