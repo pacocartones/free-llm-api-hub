@@ -48,7 +48,7 @@ Primarily **free LLM (text) APIs** — plus the adjacent model APIs a builder re
 | Category | Providers | Examples |
 |---|---|---|
 | **Text / LLM** | 45 | Google Gemini API, Groq, OpenRouter |
-| **Speech (STT / TTS)** | 25 | Google Gemini API, Groq, Cloudflare Workers AI |
+| **Speech (STT / TTS)** | 26 | Google Gemini API, Groq, Cloudflare Workers AI |
 | **Embeddings** | 13 | Google Gemini API, Cloudflare Workers AI, Cohere |
 | **Image generation** | 10 | Cloudflare Workers AI, HuggingFace, Jina AI |
 | **Vision** | 10 | Google Gemini API, OpenRouter, Z.ai |
@@ -89,7 +89,7 @@ Focused, always-current collections — each is generated from the dataset and h
 - **[Free LLM APIs for commercial use](collections/commercial-use.md)** (25) — safe to ship, not eval-only · [live page ↗](https://freellmapihub.com/collections/commercial-use)
 - **[OpenAI-compatible free LLM APIs](collections/openai-compatible.md)** (33) — drop-in OpenAI SDK swap · [live page ↗](https://freellmapihub.com/collections/openai-compatible)
 - **[Permanently free LLM APIs](collections/always-free.md)** (7) — $0 models, no trial clock · [live page ↗](https://freellmapihub.com/collections/always-free)
-- **[Free multimodal LLM APIs](collections/multimodal.md)** (51) — vision, audio, embeddings · [live page ↗](https://freellmapihub.com/collections/multimodal)
+- **[Free multimodal LLM APIs](collections/multimodal.md)** (52) — vision, audio, embeddings · [live page ↗](https://freellmapihub.com/collections/multimodal)
 <!-- AUTOGEN:collections:end -->
 
 Every provider also has its own page with the full details and a copy-ready quickstart — e.g. [Groq](https://freellmapihub.com/p/groq), [Deepgram](https://freellmapihub.com/p/deepgram), [Jina AI](https://freellmapihub.com/p/jina-ai).
@@ -153,7 +153,7 @@ Recurring (daily/monthly) quotas that renew — no expiry, but usually rate-limi
 | **[Poolside](https://docs.poolside.ai/api/overview)**<br><sub>🔌 OpenAI-compat</sub> | Laguna XS 2.1 (33B) and Laguna S 2.1 (118B) are free in Preview via a self-serve developer API key | Preview rate limits not published | Coding-focused models. Free access is Preview-stage and may change at general availability. Self-serve: create a free API key at platform.poolside.ai. OpenRouter is offered only as an alternative route. | ✅ 2026-07-31 |
 | **[Veryfi](https://www.veryfi.com/pricing/)**<br><sub>💳 no card · 🏢 commercial OK</sub> | Free Forever plan: up to 100 documents/month — OCR plus structured data extraction (receipts, invoices, and 100+ document types) | 100 documents/month on the free plan | No credit card required. The 'Free Forever' 100 docs/mo tier is the standing free tier (a separate 14-day trial unlocks paid features). Proprietary OCR / document-intelligence REST API. | ✅ 2026-07-31 |
 | **[W&B Inference](https://docs.wandb.ai/inference/usage-limits)**<br><sub>💳 no card · 🏢 commercial OK · 🔌 OpenAI-compat</sub> | $100/month of Serverless Inference credits on the Free plan (default spending cap; offer for a limited time) | No RPM/TPM published; default cap of $100/month on the Free tier; concurrency limits per project/user | Serverless Inference credits come with Free, Pro and Academic plans for a limited time; when credits run out, Free accounts must activate pay-as-you-go on the Billing tab or upgrade. OpenAI-compatible endpoint at api.inference.wandb.ai/v1 with any W&B API key. | ✅ 2026-08-14 |
-| **[Typhoon (SCB 10X)](https://docs.opentyphoon.ai/en/faq/)**<br><sub>💳 no card · 📵 no phone · 🏢 commercial OK · 🔌 OpenAI-compat</sub> | Free to use research showcase API — all Typhoon models at $0 | No published quotas (beta service) | By SCB 10X, the venture arm of Siam Commercial Bank, focused on Thai-language models. Beta, provided as-is with no formal support; usage data is collected to improve the model; SCB claims no rights in outputs. Sign up for an API key at opentyphoon.ai. | ✅ 2026-08-14 |
+| **[Typhoon (SCB 10X)](https://docs.opentyphoon.ai/en/faq/)**<br><sub>💳 no card · 📵 no phone · 🏢 commercial OK · 🔌 OpenAI-compat</sub> | Free to use research showcase API — all Typhoon models at $0 | typhoon-asr-realtime: 100 reqs/minute (documented on the ASR page); LLM/OCR models: no published quotas (beta service) | By SCB 10X, the venture arm of Siam Commercial Bank, focused on Thai-language models. The free catalog spans LLMs (typhoon-v2.5-30b-a3b-instruct), OCR (typhoon-ocr family) and realtime Thai ASR (typhoon-asr-realtime, typhoon-isan-asr-realtime) — the hosted API is OpenAI-compatible, including audio transcriptions. Beta, provided as-is with no formal support; usage data is collected to improve the model; SCB claims no rights in outputs. Sign up for a free API key at opentyphoon.ai. | ✅ 2026-08-14 |
 <!-- AUTOGEN:ongoing:end -->
 
 ## One-time trial credits

@@ -8,7 +8,7 @@ Free API tiers that go beyond text: vision, image, audio/speech, embeddings and 
 
 Free tiers that reach **beyond plain text** — vision, image, audio/speech, embeddings or rerank on the free plan.
 
-**51 of 69 tracked providers** match.
+**52 of 69 tracked providers** match.
 
 | Provider | Type | What's free | The catch | Verified |
 |---|---|---|---|---|
@@ -63,6 +63,7 @@ Free tiers that reach **beyond plain text** — vision, image, audio/speech, emb
 | **[Retell AI](https://www.retellai.com/pricing)** | Trial | $10 in free credits plus 20 free concurrent calls — voice-agent orchestration (STT + LLM + TTS) | $10 signup credit with full platform access. A voice-agent builder (orchestration), not a raw model API. Card terms not stated on the pricing page. | ✅ 2026-07-31 |
 | **[Datalab (Marker / Surya)](https://documentation.datalab.to/)**<br><sub>💳 no card</sub> | Trial | $20/month (work email) or $10/month (personal email) free usage allowance — OCR in 90+ languages, PDF-to-markdown, tables, forms and structured extraction | Landing page still advertises a $5 signup credit, but the billing page describes the current free tier as a recurring monthly allowance ($20/mo work email, $10/mo personal, no card, 10 req/min) “designed to let you run a complete proof of concept before committing to a paid plan” — no explicit statement on commercial use of the hosted API. The self-hosted OSS weights carry a separate restriction (research/personal/startups under $2M ARR/funding). | ✅ 2026-08-13 |
 | **[W&B Inference](https://docs.wandb.ai/inference/usage-limits)**<br><sub>💳 no card · 🏢 commercial OK · 🔌 OpenAI-compat</sub> | Ongoing | $100/month of Serverless Inference credits on the Free plan (default spending cap; offer for a limited time) | Serverless Inference credits come with Free, Pro and Academic plans for a limited time; when credits run out, Free accounts must activate pay-as-you-go on the Billing tab or upgrade. OpenAI-compatible endpoint at api.inference.wandb.ai/v1 with any W&B API key. | ✅ 2026-08-14 |
+| **[Typhoon (SCB 10X)](https://docs.opentyphoon.ai/en/faq/)**<br><sub>💳 no card · 📵 no phone · 🏢 commercial OK · 🔌 OpenAI-compat</sub> | Ongoing | Free to use research showcase API — all Typhoon models at $0 | By SCB 10X, the venture arm of Siam Commercial Bank, focused on Thai-language models. The free catalog spans LLMs (typhoon-v2.5-30b-a3b-instruct), OCR (typhoon-ocr family) and realtime Thai ASR (typhoon-asr-realtime, typhoon-isan-asr-realtime) — the hosted API is OpenAI-compatible, including audio transcriptions. Beta, provided as-is with no formal support; usage data is collected to improve the model; SCB claims no rights in outputs. Sign up for a free API key at opentyphoon.ai. | ✅ 2026-08-14 |
 
 ---
 

@@ -1297,10 +1297,10 @@ providers:
     category: "ongoing"
     free_type: "perpetual"
     free_tier: "Free to use research showcase API — all Typhoon models at $0"
-    rate_limits: "No published quotas (beta service)"
-    notes: "By SCB 10X, the venture arm of Siam Commercial Bank, focused on Thai-language models. Beta, provided as-is with no formal support; usage data is collected to improve the model; SCB claims no rights in outputs. Sign up for an API key at opentyphoon.ai."
-    best_for: "Thai-language models and OCR via an OpenAI-compatible research API"
-    modalities: ["text"]
+    rate_limits: "typhoon-asr-realtime: 100 reqs/minute (documented on the ASR page); LLM/OCR models: no published quotas (beta service)"
+    notes: "By SCB 10X, the venture arm of Siam Commercial Bank, focused on Thai-language models. The free catalog spans LLMs (typhoon-v2.5-30b-a3b-instruct), OCR (typhoon-ocr family) and realtime Thai ASR (typhoon-asr-realtime, typhoon-isan-asr-realtime) — the hosted API is OpenAI-compatible, including audio transcriptions. Beta, provided as-is with no formal support; usage data is collected to improve the model; SCB claims no rights in outputs. Sign up for a free API key at opentyphoon.ai."
+    best_for: "Thai-language LLMs, OCR and speech via an OpenAI-compatible research API"
+    modalities: ["text", "audio"]
     models_free: ["typhoon-asr-realtime", "typhoon-isan-asr-realtime", "typhoon-ocr", "typhoon-ocr-preview", "typhoon-ocr-v1.5", "typhoon-v2.5-30b-a3b-instruct"]
     expires: null
     docs_url: "https://docs.opentyphoon.ai/en/faq/"
