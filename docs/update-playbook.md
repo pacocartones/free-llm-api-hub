@@ -38,7 +38,7 @@ For each provider on the worklist (`npm run worklist`, or just the reverify batc
    npm run og         # regenerate social preview PNGs (counts in subtitles drift)
    npm run worklist   # preview the updated worklist locally (optional)
    ```
-   `npm run og` needs `@resvg/resvg-js` (the only devDependency — `npm install` before the first run). The CI gate checks that a PNG *exists* for every provider, but only this pass regenerates them when counts, flags or provider categories change.
+   `npm run og` needs `@resvg/resvg-js` (the only devDependency — `npm install` before the first run). The CI gate checks that every PNG exists **and matches the current data** (a fingerprint check via `site/og/manifest.json`), not just that it is present — so a changed count, flag or category fails the check until you run `npm run og`.
 5. **Commit `data/providers.json` + the regenerated files in one PR.** The required "Dataset integrity" check fails if the derived files are out of sync, so the PR is complete only when both ship together.
 
 ### Also scan for what's new (monthly is enough)
