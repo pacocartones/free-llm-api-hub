@@ -257,6 +257,23 @@ test('the README top-20 table renders every editorial pick with its verified dat
   }
 });
 
+test('/api/v1/best.json exposes the editorial top 20 with full profiles', () => {
+  const p = join(ROOT, 'site/api/v1/best.json');
+  if (!existsSync(p)) run(['scripts/build.mjs']);
+  const payload = JSON.parse(readFileSync(p, 'utf8'));
+  const best = JSON.parse(readFileSync(join(ROOT, 'data/best.json'), 'utf8'));
+  assert.equal(payload.count, 20, 'best.json carries the top 20 count');
+  assert.equal(payload.picks.length, 20, 'best.json lists all 20 picks');
+  assert.equal(payload.updated, best.updated, 'best.json carries the editorial updated date');
+  payload.picks.forEach((pick, i) => {
+    const e = best.entries[i];
+    assert.equal(pick.rank, i + 1, `pick ${i} rank`);
+    assert.equal(pick.slug, e.slug, `pick ${i} slug`);
+    assert.equal(pick.why, e.why, `pick ${i} why`);
+    assert.ok(pick.name && pick.free_tier && pick.docs_url, `${e.slug}: pick carries its full profile`);
+  });
+});
+
 test('the explorer does not claim a column sort before the user chooses one', () => {
   const explorer = readFileSync(join(ROOT, 'site/index.html'), 'utf8');
   assert.match(explorer, /<th data-key="name" tabindex="0" role="button" aria-sort="none">API<\/th>/);

@@ -1208,6 +1208,7 @@ const writeApi = (rel, obj) => writeFileSync(join(ROOT, `site/api/v1/${rel}`), J
 writeApi('providers.json', { ...apiBase, count: publicProviders.length, providers: publicProviders });
 writeApi('programs.json', { ...apiBase, startups: programs.startups, research: programs.research });
 writeApi('history.json', { ...apiBase, description: 'Per-provider change history mined from the git log of providers.json.', history: historyBySlug });
+writeApi('best.json', { ...apiBase, description: 'The editorial top 20 — hand-ranked free LLM APIs with the "why" for each pick, in rank order. Every pick carries its full verified profile.', updated: BEST.updated, count: bestEntries.length, picks: bestEntries.map(({ rank, why, tag, p }) => ({ rank, why, tag: tag || null, ...p })) });
 const API_SLICES = {
   ongoing: (p) => p.category === 'ongoing',
   trial: (p) => p.category === 'trial',
@@ -1230,6 +1231,7 @@ const apiEndpoints = {
   providers: 'v1/providers.json',
   programs: 'v1/programs.json',
   history: 'v1/history.json',
+  best: 'v1/best.json',
   slices: Object.fromEntries(Object.keys(API_SLICES).map((s) => [s, `v1/${s}.json`])),
   modality: Object.fromEntries(API_MODS.map((m) => [m, `v1/modality/${m}.json`])),
 };
@@ -1244,6 +1246,7 @@ const apiDocMain =
   `<h2>Everything</h2><table class="model-table"><thead><tr><th>Endpoint</th><th>Contents</th><th>Count</th></tr></thead><tbody>` +
   apiRow('Full provider dataset (all fields)', 'providers.json', publicProviders.length) +
   apiRow('Apply-to-get credit programs', 'programs.json', programs.startups.length + programs.research.length) +
+  apiRow('The editorial top 20, ranked with the "why" per pick', 'best.json', bestEntries.length) +
   apiRow('Endpoint manifest', 'index.json', null) +
   `</tbody></table>` +
   `<h2>Slices (by constraint)</h2><table class="model-table"><thead><tr><th>Endpoint</th><th>Contents</th><th>Count</th></tr></thead><tbody>` +
