@@ -1,12 +1,12 @@
 name: CodeQL
 
 on:
+  # No schedule: analysis runs on every PR and on pushes to main, which already
+  # covers every code change. A weekly cron would burn Actions minutes for nothing.
   push:
     branches: [main]
   pull_request:
     branches: [main]
-  schedule:
-    - cron: "0 6 * * 1" # weekly, Monday 06:00 UTC
 
 permissions:
   contents: read
