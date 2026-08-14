@@ -569,8 +569,8 @@ const CONTRIBUTORS = JSON.parse(readFileSync(join(ROOT, 'data/contributors.json'
 const contributorsMd = () => {
   const people = CONTRIBUTORS.contributors || [];
   if (!people.length) return '_No external contributors yet — you could be the first._';
-  return people.map(({ name, email, subject }) => {
-    const url = githubProfileUrl(name, email);
+  return people.map(({ name, email, subject, login }) => {
+    const url = login ? 'https://github.com/' + login : githubProfileUrl(name, email);
     const label = url ? '[' + name + '](' + url + ')' : '**' + name + '**';
     const prMatch = subject.match(/\(#(\d+)\)\s*$/);
     const short = prMatch ? subject.slice(0, prMatch.index).trim() : subject;

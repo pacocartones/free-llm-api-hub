@@ -19,6 +19,12 @@
       "name": "bcabreraike-cmyk",
       "email": "bcabrera.ike@gmail.com",
       "subject": "docs: explain paced re-verification batches (#169)"
+    },
+    {
+      "name": "Swarnabha Nandi",
+      "email": "nandiswarnabha@gmail.com",
+      "subject": "fix: show clear button when sort is changed (#183)",
+      "login": "Swarnabha753"
     }
   ]
 }

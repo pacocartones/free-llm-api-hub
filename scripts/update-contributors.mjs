@@ -18,6 +18,12 @@ import { fileURLToPath } from 'node:url';
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 
 const BOT_AUTHORS = new Set(['github-actions[bot]', 'dependabot[bot]', 'coderabbitai[bot]']);
+
+// Manual GitHub logins for contributors whose author email is a personal
+// address (the profile URL can't be derived from it). Keyed by author email.
+const LOGIN_OVERRIDES = {
+  'nandiswarnabha@gmail.com': 'Swarnabha753',
+};
 const MAINTAINER_EMAILS = new Set([
   'manusanchezhl@gmail.com',
   '253313177+pacocartones@users.noreply.github.com',
@@ -49,7 +55,10 @@ for (const line of (log || '').split('\n')) {
   if (!byEmail.has(email)) byEmail.set(email, { name, email, subject });
 }
 
-const contributors = [...byEmail.values()];
+const contributors = [...byEmail.values()].map((c) => ({
+  ...c,
+  ...(LOGIN_OVERRIDES[c.email] ? { login: LOGIN_OVERRIDES[c.email] } : {}),
+}));
 writeFileSync(join(ROOT, 'data/contributors.json'), JSON.stringify({ contributors }, null, 2) + '\n');
 console.log(`Wrote ${contributors.length} external contributor(s) to data/contributors.json`);
 for (const c of contributors) console.log(`  - ${c.name} <${c.email}>`);
