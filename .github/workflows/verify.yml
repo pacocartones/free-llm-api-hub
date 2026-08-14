@@ -6,10 +6,9 @@ name: Verify
 # must resolve, and the generated artifacts must be in sync with the data. The
 # author regenerates them locally (`npm run build`, `npm run og`) and commits
 # them in the same PR. There is no regeneration bot for changes you author —
-# the author regenerates locally. The one scheduled job is the weekly
-# `models_free` backfill (backfill.yml), which regenerates its own branch and
-# opens a PR. Re-verification, badge and probe stay local and on-demand, see
-# docs/update-playbook.md.
+# the author regenerates locally. There is no scheduled workflow at all:
+# re-verification, badge, probe and the `models_free` backfill all stay local
+# and on-demand, see docs/update-playbook.md.
 on:
   # No `paths:` filter on pull_request, deliberately. This job is the repository's
   # required status check, and a required check that is filtered out never reports

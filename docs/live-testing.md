@@ -1,6 +1,6 @@
 # Live testing
 
-> **Estado (2026-08-14): depriorizada a fase 2 (opcional).** No es un gate de lanzamiento ni de distribución; la señal principal de confianza sigue siendo la verificación fechada contra los docs + el badge de frescura, y el early-warning sin keys lo cubre el backfill semanal de `/models`. El harness está escrito y testeado, y `.env.example` queda listo si un día se quiere el badge "live-tested".
+> **Estado (2026-08-14): depriorizada a fase 2 (opcional).** No es un gate de lanzamiento ni de distribución; la señal principal de confianza sigue siendo la verificación fechada contra los docs + el badge de frescura, y el early-warning sin keys lo cubre el backfill local de `/models` (`npm run models`). El harness está escrito y testeado, y `.env.example` queda listo si un día se quiere el badge "live-tested".
 
 A second, stronger axis of trust on top of doc-verification: **actually calling each provider's free tier with a real key and recording that it answered.** `verified` says "confirmed against the provider's docs on `last_verified`". `last_probed` / `probe_status` say "we made a real API call and here's what happened."
 
