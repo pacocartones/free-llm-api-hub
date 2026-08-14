@@ -515,9 +515,9 @@
       "name": "Vercel AI Gateway",
       "category": "trial",
       "free_type": "recurring-credit",
-      "free_tier": "Free tier with a monthly free credit covering a subset of models at lower rate limits",
+      "free_tier": "Free tier: $5/month credit covering a subset of models (Free Tier eligible models) at lower rate limits",
       "rate_limits": "Free tier is rate-limited per model (HTTP 429 on exceed), lower than paid; routes to many providers rather than hosting models itself",
-      "notes": "Free tier and its monthly-credit behaviour are confirmed in Vercel's own docs; the specific \"$5/month\" figure circulating in community posts is not stated there. Once you purchase credits, your account moves to the paid tier and the monthly free credit no longer applies.",
+      "notes": "The monthly $5 credit is stated in Vercel's own docs. Once you purchase credits, your account moves to the paid tier and the monthly free credit no longer applies. BYOK is not available on the free tier.",
       "best_for": "One key across many providers with a free monthly credit",
       "modalities": ["text"],
       "models_free": null,
@@ -530,14 +530,14 @@
       "openai_base_url": "https://ai-gateway.vercel.sh/v1",
       "env_key": "VERCEL_AI_GATEWAY_KEY",
       "verified": true,
-      "last_verified": "2026-07-30"
+      "last_verified": "2026-08-14"
     },
     {
       "slug": "jina-ai",
       "name": "Jina AI",
       "category": "trial",
       "free_type": "trial-credit",
-      "free_tier": "10M free tokens (one-time) across all models — embeddings (v3/v4), rerankers, classifier; plus a keyless Reader (r.jina.ai) for basic use",
+      "free_tier": "10M free tokens (one-time) across all models — embeddings, rerankers, classifier; plus a keyless Reader (r.jina.ai) for basic use",
       "rate_limits": "Free key: 100 RPM / 100k TPM for embeddings & reranker (2 concurrent); keyless Reader 20 RPM",
       "notes": "The 10M-token balance is a one-time grant that does not replenish; the keyless Reader is genuinely ongoing. Hosted API is commercial-OK and data is not used for training. No card required.",
       "best_for": "Free embeddings & rerank behind an OpenAI-compatible endpoint",
@@ -552,7 +552,7 @@
       "openai_base_url": "https://api.jina.ai/v1",
       "env_key": "JINA_API_KEY",
       "verified": true,
-      "last_verified": "2026-07-30"
+      "last_verified": "2026-08-14"
     },
     {
       "slug": "deepgram",
@@ -574,7 +574,7 @@
       "openai_base_url": null,
       "env_key": "DEEPGRAM_API_KEY",
       "verified": true,
-      "last_verified": "2026-07-30"
+      "last_verified": "2026-08-14"
     },
     {
       "slug": "assemblyai",
@@ -596,7 +596,7 @@
       "openai_base_url": "https://llm-gateway.assemblyai.com/v1",
       "env_key": "ASSEMBLYAI_API_KEY",
       "verified": true,
-      "last_verified": "2026-07-30"
+      "last_verified": "2026-08-14"
     },
     {
       "slug": "mixedbread",
@@ -618,7 +618,7 @@
       "openai_base_url": null,
       "env_key": "MIXEDBREAD_API_KEY",
       "verified": true,
-      "last_verified": "2026-07-30"
+      "last_verified": "2026-08-14"
     },
     {
       "slug": "clarifai",
@@ -662,7 +662,7 @@
       "openai_base_url": "https://api.arliai.com/v1",
       "env_key": "ARLI_API_KEY",
       "verified": true,
-      "last_verified": "2026-07-30"
+      "last_verified": "2026-08-14"
     },
     {
       "slug": "ollama-cloud",
