@@ -9,6 +9,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { clientBundle } from './lib/rows.mjs';
 import { clientBundle as sortClientBundle } from './lib/sort.mjs';
+import { freeTypeRank } from './lib/rules.mjs';
 import { readFileSync } from 'node:fs';
 
 // The exact client bundle the browser runs — serialised by lib/rows.mjs itself
@@ -119,7 +120,7 @@ test('the hero shield derives its bucket from FLLM_RULES, not a local copy', () 
 // fake window.FLLM_RULES — recScore is only consulted by the 'recommended'
 // branch, never by the mapped columns under test.
 function clientComparator() {
-  const rules = { recScore: (p) => 0 };
+  const rules = { recScore: () => 0, freeTypeRank };
   const win = { FLLM_RULES: rules };
   const run = new Function('window', sortClientBundle());
   run(win);

@@ -33,6 +33,14 @@ export function recScore(p) {
   return s;
 }
 
+// The free_type taxonomy ranked by how "good" the free access is: permanently
+// free models beat quotas that reset, which beat monthly top-ups, which beat
+// one-time trial credits. Unknown values rank last. Shared so the "What's
+// free" column sort, the "Recommended" tiebreak and the SSR home order all
+// read the same order — no local copy may re-declare it.
+export const FREE_TYPE_RANK = { perpetual: 0, 'renewing-quota': 1, 'recurring-credit': 2, 'trial-credit': 3 };
+export const freeTypeRank = (p) => (FREE_TYPE_RANK[p.free_type] ?? 4);
+
 // [field, value, icon-id, label] — the access-flag pills in the Type column.
 export const FLAG_PAIRS = [
   ['card_required', false, 'ic-nocard', 'no card'], ['card_required', true, 'ic-card', 'card'],
