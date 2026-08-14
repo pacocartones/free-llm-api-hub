@@ -85,7 +85,7 @@ The serializer **skips absent keys**, so new optional fields only appear on prov
 - **`check-links.mjs`** (`npm run links`, part of `npm test`) — validates INTERNAL markdown links (relative doc-to-doc paths) only. Never touches the network. The external `docs_url` sweep is a local on-demand pass in the [update playbook](update-playbook.md); genuine failures (not 401/403/405/429 bot-blocks) open a "broken link" issue.
 - **`probe-cron.sh`** — the VPS weekly cron alternative (Infisical → probe → models → build → push), for a zero-Actions-minutes setup.
 
-npm scripts: `build, validate, links, worklist, reverify, models, discover, probe, og, test (validate + links + test suites), check (validate + build + diff-gate)`.
+npm scripts: `build, validate, links, worklist, reverify, models, discover, probe, og, test (validate + links + test suites), check (validate + build + diff-gate), check-live (committed sitemap vs deployed)`.
 
 ## 4. Site structure (`site/`)
 
