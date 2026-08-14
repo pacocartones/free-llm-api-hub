@@ -80,19 +80,4 @@
     });
   }
 
-  // --- model index search (models/ page): filter rows by their data-s attribute ---
-  var mq = document.getElementById('mq');
-  if (mq) {
-    var mshown = document.getElementById('mshown');
-    var mrows = [].slice.call(document.querySelectorAll('.model-table tbody tr'));
-    mq.addEventListener('input', function () {
-      var v = mq.value.toLowerCase().trim(), n = 0;
-      for (var i = 0; i < mrows.length; i++) {
-        var ok = !v || mrows[i].getAttribute('data-s').indexOf(v) > -1;
-        mrows[i].hidden = !ok;
-        if (ok) n++;
-      }
-      mshown.textContent = n;
-    });
-  }
 })();

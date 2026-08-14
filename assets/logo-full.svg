@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 208 40" role="img" aria-label="Free LLM API Hub">
+  <rect x="2" y="4" width="32" height="32" rx="8" fill="#0a0d0b"/>
+  <rect x="4.5" y="6.5" width="27" height="27" rx="6.5" fill="none" stroke="#3fce8f" stroke-width="1.6"/>
+  <path d="M10.5 12.5 L15.5 16.5 L10.5 20.5" fill="none" stroke="#3fce8f" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="18" y="19.6" width="7" height="2.4" rx="1.2" fill="#3fce8f"/>
+  <text x="46" y="26" font-family="'Inter', 'Segoe UI', system-ui, sans-serif" font-size="17.5" font-weight="700">
+    <tspan fill="#161b18">Free LLM API </tspan><tspan fill="#0fa46f">Hub</tspan>
+  </text>
+</svg>

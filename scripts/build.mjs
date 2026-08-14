@@ -412,7 +412,7 @@ const siteHeader = (p) => `<header class="site-header"><div class="wrap header-i
 </div></div></header>`;
 
 const siteFooter = (p) => `<footer class="site-footer"><div class="wrap footer-top">
-<div class="footer-brand"><a class="foot-brand-link" href="${p}" aria-label="Free LLM API Hub — home"><svg class="logo-mark"><use href="#logo"/></svg><span class="brand-name">Free LLM API <span class="grad">Hub</span></span></a><p>The <strong>continuously-verified</strong>, <strong>machine-readable</strong> dataset of <strong>free LLM &amp; AI-model APIs</strong> and <strong>trial credits</strong> — every entry <strong>dated</strong>, <strong>sourced</strong>, and <strong>free of dead links</strong>.</p><a class="star-btn" href="${REPO}" target="_blank" rel="noopener" aria-label="Star free-llm-api-hub on GitHub"><span class="sb-label">${GH_ICON} Star on GitHub</span><span class="sb-count" data-stars>★</span></a></div>
+<div class="footer-brand"><a class="foot-brand-link" href="${p}" aria-label="Free LLM API Hub — home"><svg class="logo-mark"><use href="#logo"/></svg><span class="brand-name">Free LLM API <span class="grad">Hub</span></span></a><p>The <strong>continuously-verified</strong>, <strong>machine-readable</strong> dataset of <strong>free LLM &amp; AI-model APIs</strong> and <strong>trial credits</strong> — every entry <strong>dated</strong>, <strong>sourced</strong>, and <strong>free of dead links</strong>.</p><img class="trust-badge" src="https://img.shields.io/endpoint?url=https://freellmapihub.com/badge-verified.json" alt="Verified providers" height="20" loading="lazy"><a class="star-btn" href="${REPO}" target="_blank" rel="noopener" aria-label="Star free-llm-api-hub on GitHub"><span class="sb-label">${GH_ICON} Star on GitHub</span><span class="sb-count" data-stars>★</span></a></div>
 <div class="footer-col"><h4>Explore</h4><a href="${p}#explorer">Interactive explorer</a><a href="${p}models/">Free model index</a><a href="${p}programs/startups">Startup credits</a><a href="${p}programs/research">Student &amp; research credits</a></div>
 <div class="footer-col"><h4>Data</h4><a href="${p}providers.json">providers.json</a><a href="${p}api/">JSON API</a><a href="${p}llms.txt">llms.txt</a><a href="${p}providers.csv">CSV export</a><a href="${p}providers.yaml">YAML export</a><a href="${REPO}/blob/main/data/schema.json">JSON Schema</a></div>
 <div class="footer-col"><h4>Project</h4><a href="${p}updates">Updates</a><a href="${REPO}/blob/main/docs/methodology.md">Methodology</a><a href="${REPO}/blob/main/CONTRIBUTING.md">Contributing</a><a href="${REPO}">GitHub ★</a></div>
@@ -1059,16 +1059,15 @@ const modelRowHtml = ({ m, p }) =>
   `<td>${htmlEsc(p.free_type)}</td>` +
   `<td class="notes">${(p.modalities || []).join(', ') || '—'}</td></tr>`;
 const modelsMain =
-  `<section class="page-hero"><div class="wrap"><nav class="crumbs"><a href="../">Home</a> / Free model index</nav>` +
+  `<section class="page-hero model-hero"><div class="wrap"><nav class="crumbs"><a href="../">Home</a> / Free model index</nav>` +
   `<h1>Free model index</h1><p class="lede">Every model our verified providers expose on a free tier — <strong>${modelIndex.length}</strong> entries across <strong>${modelProviderCount}</strong> providers, pulled from each provider's own <code>/models</code> endpoint where possible. The same model can appear under more than one provider.</p>` +
-  `<input id="mq" class="model-search" type="search" placeholder="Filter by model or provider — e.g. llama, deepseek, whisper, gpt-oss" aria-label="Filter models">` +
-  `<p class="count"><span id="mshown">${modelIndex.length}</span> shown</p></div></section>` +
+  `</div></section>` +
   `<main id="main"><div class="wrap"><table class="model-table"><thead><tr><th>Model</th><th>Provider</th><th>Free type</th><th>Modalities</th></tr></thead><tbody>\n` +
   modelIndex.map(modelRowHtml).join('\n') +
   `\n</tbody></table><p class="muted" style="margin-top:18px">Model lists are a live sample and change often — always confirm against the provider. A provider missing here usually needs an API key to list its models; <a href="${REPO}/blob/main/docs/update-playbook.md">see how the list is refreshed</a>.</p></div></main>`;
 writeFileSync(join(ROOT, 'site/models/index.html'), htmlPage({
   title: 'Free model index — which free API serves which model · Free LLM API Hub',
-  desc: `Searchable index of ${modelIndex.length} models available on free LLM & AI-model API tiers, and which provider serves each.`,
+  desc: `Index of ${modelIndex.length} models available on free LLM & AI-model API tiers, and which provider serves each.`,
   canonical: `${SITE}/models/`,
   main: modelsMain,
   ogImage: `${SITE}/og/models.png`,

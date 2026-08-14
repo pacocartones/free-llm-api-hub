@@ -213,7 +213,7 @@ h1 { font-size: clamp(1.9rem, 4.4vw, 3rem); line-height: 1.1; margin: 0 auto 18p
 
 /* ---------- table ---------- */
 main { padding: 24px 0 80px; }
-.hero .trust-badge { margin-top: 12px; }
+.footer-brand .trust-badge { margin-top: 14px; }
 #count, .count { color: var(--muted); font-size: .82rem; font-family: var(--font-mono); }
 table { width: 100%; border-collapse: collapse; font-size: .9rem; }
 thead th { text-align: left; padding: 14px 14px; border-bottom: 1px solid var(--border-strong); color: var(--text); font-weight: 700; white-space: nowrap; font-family: var(--font-mono); font-size: .95rem; text-transform: uppercase; letter-spacing: .03em; }
@@ -322,6 +322,8 @@ pre:hover .pre-copy, .pre-copy:focus-visible { opacity: 1; }
 .prov-hero h1 { max-width: none; }
 .prov-hero .prov-badges, .prov-hero .prov-actions { justify-content: center; }
 .prov-hero .lede { text-align: center; margin: 10px auto 0; max-width: 62ch; }
+.model-hero .crumbs, .model-hero h1 { text-align: center; }
+.model-hero .lede { text-align: center; margin: 10px auto 0; max-width: 62ch; }
 .btn.website { background: transparent; color: var(--green); border-color: color-mix(in srgb, var(--green) 50%, var(--border)); }
 .btn.website:hover { color: var(--green); border-color: var(--green); background: color-mix(in srgb, var(--green) 12%, transparent); }
 .prov-meta { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin: 20px 0; }
