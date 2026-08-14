@@ -30,6 +30,15 @@ function render() {
 
   rows.sort((a, b) => {
     if (sortKey === 'recommended') { const d = recScore(b) - recScore(a); return d !== 0 ? d : (a.name < b.name ? -1 : a.name > b.name ? 1 : 0); }
+    if (sortKey === 'free_tier') {
+      // "What's free" is free-form prose — alphabetising it is noise. Sort by
+      // the free_type taxonomy instead: permanently-free models first, one-time
+      // trial credits last, with the name as a stable tiebreak.
+      const rank = { perpetual: 0, 'renewing-quota': 1, 'recurring-credit': 2, 'trial-credit': 3 };
+      const rk = (p) => (rank[p.free_type] ?? 4);
+      const d = rk(a) - rk(b) || (a.name < b.name ? -1 : a.name > b.name ? 1 : 0);
+      return sortDir === 1 ? d : -d;
+    }
     if (sortKey === 'verified') {
       // Sort by last_verified (YYYY-MM-DD), not the boolean: every verified row
       // would compare equal. Unverified rows (no date) always sink to the bottom.
