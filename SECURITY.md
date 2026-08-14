@@ -24,19 +24,22 @@ Out of scope:
 
 ## Automation and permissions
 
-Three workflows run against this repository; none of them can write to `main`:
+Four workflows run against this repository; none of them writes to `main` directly:
 
 | Workflow | Trigger | Token permissions |
 |---|---|---|
 | `verify.yml` | pull request, push to `main`, manual | `contents: read` — cannot write anything |
 | `pages.yml` | push to `main`, manual | `contents: read`, `pages: write` — publishes the site |
 | `codeql.yml` | pull request, push to `main` | `contents: read` (job: `security-events: write`) — code scanning |
+| `backfill.yml` | weekly cron, manual | `contents: write`, `pull-requests: write` — refreshes `models_free`, commits on an `automated-backfill/*` branch and opens a PR; never pushes to `main` |
 
 A pull request from a fork therefore never runs with a token that can write to this
 repository, and never has access to repository secrets.
 
-Derived files are regenerated locally and committed by the author in the same PR — there is
-no write-capable automation. A change to `scripts/` is reviewed as code, not as data.
+Derived files are regenerated locally and committed by the author in the same PR; the only
+write-capable automation is the weekly model backfill, which delivers through a branch and a
+PR (and re-runs the "Dataset integrity" gate on that branch via a dispatched `verify.yml`
+run). A change to `scripts/` is reviewed as code, not as data.
 
 ## Notes for users of the data
 
