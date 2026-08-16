@@ -152,7 +152,7 @@ function applyURL() {
   if(sort && ['recommended', 'name', 'category', 'free_tier', 'notes', 'verified'].includes(sort)) {
     sortKey = sort;
     const th = document.querySelector(`thead th[data-key="${sort}"]`);
-    if (th) { th.classList.add('sorted'); th.setAttribute('aria-sort', 'ascending'); }
+    if (th) { th.classList.add('sorted', 'asc'); th.setAttribute('aria-sort', 'ascending'); }
 
   }
 
