@@ -164,3 +164,11 @@ test('verified sort: the boolean plays no role — only last_verified decides, w
   const got = [...rows].sort((a, b) => cmp('verified', 1, a, b)).map((r) => r.name);
   assert.deepEqual(got, ['Bool', 'Old', 'Zed', 'Undated']);
 });
+
+test('shareable sort URLs preserve a valid ascending or descending direction', () => {
+  const src = readFileSync(new URL('../site/explorer.js', import.meta.url), 'utf8');
+  assert.match(src, /params\.set\('dir', sortDir === 1 \? 'asc' : 'desc'\)/, 'a non-default sort must write its direction');
+  assert.match(src, /const dir = params\.get\('dir'\)/, 'URL state must read the direction');
+  assert.match(src, /sortDir = dir === 'desc' \? -1 : 1/, 'only desc may invert the default ascending direction');
+  assert.match(src, /th\.classList\.toggle\('asc', sortDir === 1\)/, 'the restored visual indicator must match the restored direction');
+});

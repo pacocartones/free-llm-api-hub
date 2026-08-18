@@ -128,6 +128,10 @@ function syncURL() {
   const params = new URLSearchParams();
   if (category !== 'all') params.set('cat', category);
   if (modality !== 'all') params.set('mod', modality);
+  if (sortKey !== 'recommended') {
+    params.set('sort', sortKey);
+    params.set('dir', sortDir === 1 ? 'asc' : 'desc');
+  }
   URL_FLAGS.forEach(([k, id]) => { if (document.getElementById(id).checked) params.set(k, '1'); });
   const qs = params.toString();
   history.replaceState(null, '', qs ? '?' + qs : location.pathname);
@@ -147,6 +151,18 @@ function applyURL() {
   URL_FLAGS.forEach(([k, id]) => {
     if (params.get(k) === '1') { const el = document.getElementById(id); el.checked = true; const chip = el.closest('.chip'); if (chip) chip.classList.add('on'); }
   });
+  const sort = params.get('sort');
+  const dir = params.get('dir');
+  if (sort && ['recommended', 'name', 'category', 'free_tier', 'notes', 'verified'].includes(sort)) {
+    sortKey = sort;
+    sortDir = dir === 'desc' ? -1 : 1;
+    const th = document.querySelector(`thead th[data-key="${sort}"]`);
+    if (th) {
+      th.classList.add('sorted');
+      th.classList.toggle('asc', sortDir === 1);
+      th.setAttribute('aria-sort', sortDir === 1 ? 'ascending' : 'descending');
+    }
+  }
 }
 applyURL();
 
