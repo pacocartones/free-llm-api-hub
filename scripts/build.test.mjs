@@ -140,8 +140,6 @@ test('existing script self-tests pass (fetch-models, probe)', () => {
 const GENERATED = [
   'README.md',
   'badge-freshness.json',
-  'data/providers.csv',
-  'data/providers.yaml',
   'site/index.html',
 ];
 const hashAll = () =>
@@ -152,6 +150,27 @@ test('build is idempotent — a second run changes not a single byte', () => {
   const first = hashAll();
   run(['scripts/build.mjs']);
   assert.equal(hashAll(), first);
+});
+
+test('the public surface omits retired exports and home redundancies, while updates stay paginated', () => {
+  run(['scripts/build.mjs']);
+
+  const index = readFileSync(join(ROOT, 'site/index.html'), 'utf8');
+  assert.doesNotMatch(index, /Recently re-verified/);
+  assert.doesNotMatch(index, /providers[.]csv|providers[.]yaml|CSV export|YAML export|JSON Schema/);
+  assert.doesNotMatch(readFileSync(join(ROOT, 'site/explorer.js'), 'utf8'), /Could not load providers[.]json[.]/);
+  for (const rel of ['data/providers.csv', 'data/providers.yaml', 'site/providers.csv', 'site/providers.yaml']) {
+    assert.equal(existsSync(join(ROOT, rel)), false, `${rel} must not survive the retired export feature`);
+  }
+
+  const best = readFileSync(join(ROOT, 'site/best/index.html'), 'utf8');
+  assert.match(best, /<section class="page-hero model-hero">/);
+  assert.doesNotMatch(best, /best-wrap/);
+  assert.match(best, /<a class="star-btn" href="https:\/\/github[.]com\/pacocartones\/free-llm-api-hub"/);
+
+  const updates = readFileSync(join(ROOT, 'site/updates.html'), 'utf8');
+  assert.ok((updates.match(/<li class="upd">/g) || []).length <= 20, 'the first updates page has at most 20 entries');
+  assert.match(updates, /Page 1 of \d+/);
 });
 
 test('derived-fingerprints.json pins gitignored outputs, skips site/p/, tracked and git-log files', () => {
@@ -285,15 +304,11 @@ test('the explorer does not claim a column sort before the user chooses one', ()
   assert.match(explorer, /<th data-key="name" tabindex="0" role="button" aria-sort="none">API<\/th>/);
 });
 
-test('the explorer homepage surfaces the recently re-verified providers deterministically', () => {
+test('the explorer homepage leaves the table immediately after its controls', () => {
   const p = join(ROOT, 'site/index.html');
-  if (!readFileSync(p, 'utf8').includes('<section class="recent"')) run(['scripts/build.mjs']);
   const index = readFileSync(p, 'utf8');
-  assert.match(index, /<section class="recent" id="recent"/);
-  assert.match(index, /Recently re-verified/);
-  // Deterministic: derived from last_verified, not from the (self-referential)
-  // git log — the panel must not reference the git history of providers.json.
-  assert.doesNotMatch(index, /git history of providers[.]json/);
+  assert.doesNotMatch(index, /Recently re-verified|class="recent"/);
+  assert.match(index, /<main id="explorer">\s*<div class="wrap">\s*<table id="table"/);
 });
 test('any provider sampling ASR/audio models declares audio in modalities', () => {
   const { providers } = JSON.parse(readFileSync(DATA, 'utf8'));

@@ -164,9 +164,6 @@ document.getElementById('clearFilters').addEventListener('click', () => {
   document.querySelectorAll('thead th').forEach(h => { h.classList.remove('sorted', 'asc'); h.setAttribute('aria-sort', 'none'); });
   render();
 });
-// Exports live on the dataset itself (providers.json / .csv / .yaml, linked in the footer)
-// and the static /api/v1 endpoints — the table stays focused on browsing.
-
 // The dataset is inlined at build time (see #providers-data) so the table is server-rendered
 // and the page needs no network round-trip. Fall back to fetch only if the inline data is absent.
 const SOURCES = ['providers.json', 'https://raw.githubusercontent.com/pacocartones/free-llm-api-hub/main/data/providers.json'];
@@ -183,6 +180,6 @@ const SOURCES = ['providers.json', 'https://raw.githubusercontent.com/pacocarton
       renderStats(); render(); return;
     } catch (_) { /* try next */ }
   }
-  document.getElementById('empty').style.display = 'block';
-  document.getElementById('empty').textContent = 'Could not load providers.json.';
+  // The server-rendered table remains available if a client-side refresh cannot
+  // load data. Do not replace it with a transport-level error message.
 })();

@@ -2,11 +2,10 @@
 // Regenerates every derived artifact from the single source of truth: data/providers.json.
 //   - README provider tables (between AUTOGEN markers)
 //   - badge-freshness.json (root, for the shields.io endpoint badge)
-//   - data/providers.csv and data/providers.yaml (portable exports)
-//   - site/providers.json (+ csv/yaml) so the interactive site ships the data
+//   - site/providers.json so the interactive site ships the data
 // Zero dependencies. Run with: node scripts/build.mjs   (or `npm run build`)
 
-import { readFileSync, writeFileSync, mkdirSync, readdirSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync, readdirSync, rmSync } from 'node:fs';
 import { execSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
@@ -431,9 +430,9 @@ const siteHeader = (p) => `<header class="site-header"><div class="wrap header-i
 </div></div></header>`;
 
 const siteFooter = (p) => `<footer class="site-footer"><div class="wrap footer-top">
-<div class="footer-brand"><a class="foot-brand-link" href="${p}" aria-label="Free LLM API Hub — home"><svg class="logo-mark"><use href="#logo"/></svg><span class="brand-name">Free LLM API <span class="grad">Hub</span></span></a><p>The <strong>continuously-verified</strong>, <strong>machine-readable</strong> dataset of <strong>free LLM &amp; AI-model APIs</strong> and <strong>trial credits</strong> — every entry <strong>dated</strong>, <strong>sourced</strong>, and <strong>free of dead links</strong>.</p><img class="trust-badge" src="https://img.shields.io/endpoint?url=https://freellmapihub.com/badge-verified.json" alt="Verified providers" height="20" loading="lazy"><a class="star-btn" href="${REPO}" target="_blank" rel="noopener" aria-label="Star free-llm-api-hub on GitHub"><span class="sb-label">${GH_ICON} Star on GitHub</span><span class="sb-count" data-stars>★</span></a></div>
+<div class="footer-brand"><a class="foot-brand-link" href="${p}" aria-label="Free LLM API Hub — home"><svg class="logo-mark"><use href="#logo"/></svg><span class="brand-name">Free LLM API <span class="grad">Hub</span></span></a><p>The <strong>continuously-verified</strong>, <strong>machine-readable</strong> dataset of <strong>free LLM &amp; AI-model APIs</strong> and <strong>trial credits</strong> — every entry <strong>dated</strong>, <strong>sourced</strong>, and <strong>free of dead links</strong>.</p><img class="trust-badge" src="https://img.shields.io/endpoint?url=https://freellmapihub.com/badge-verified.json" alt="Verified providers" height="20" loading="lazy"><a class="star-btn" href="${REPO}" target="_blank" rel="noopener" aria-label="Star free-llm-api-hub on GitHub"><span class="sb-label">${GH_ICON} Star on GitHub</span><span class="sb-count" data-stars>★</span></a></div></div>
 <div class="footer-col"><h4>Explore</h4><a href="${p}#explorer">Interactive explorer</a><a href="${p}models/">Free model index</a><a href="${p}programs/startups">Startup credits</a><a href="${p}programs/research">Student &amp; research credits</a></div>
-<div class="footer-col"><h4>Data</h4><a href="${p}providers.json">providers.json</a><a href="${p}api/">JSON API</a><a href="${p}llms.txt">llms.txt</a><a href="${p}providers.csv">CSV export</a><a href="${p}providers.yaml">YAML export</a><a href="${REPO}/blob/main/data/schema.json">JSON Schema</a></div>
+<div class="footer-col"><h4>Data</h4><a href="${p}providers.json">providers.json</a><a href="${p}api/">JSON API</a><a href="${p}llms.txt">llms.txt</a></div>
 <div class="footer-col"><h4>Project</h4><a href="${p}updates">Updates</a><a href="${REPO}/blob/main/docs/methodology.md">Methodology</a><a href="${REPO}/blob/main/CONTRIBUTING.md">Contributing</a><a href="${REPO}">GitHub ★</a></div>
 </div><div class="wrap footer-bottom"><p>Independent, community-maintained — not affiliated with any provider listed. Terms change without notice; always confirm against each provider's own docs. MIT licensed.</p><p class="foot-legal"><a href="${p}legal/privacy">Privacy</a> · <a href="${p}legal/terms">Terms</a></p><p class="foot-email"><a href="mailto:admin@freellmapihub.com">admin@freellmapihub.com</a></p></div></footer>`;
 
@@ -611,29 +610,6 @@ const homeRows = [...providers]
   .map((p) => rows.explorerRowHtml(p, { now: data.generated }))
   .join('\n');
 
-// "Recently re-verified" panel — deterministic, derived from last_verified in
-// the committed data (NOT from git log). A git-mined list here would be
-// self-referential: committing data/providers.json changes the very history the
-// panel reads, so the inline panel could never pass the drift gate. The rich
-// per-field change detail lives on /updates and api/v1/history.json (git-mined,
-// regenerated on deploy, not diff-gated). Server-rendered only (the client
-// repaint touches just #tbody and #stats), so it is never repainted away.
-const recentVerified = [...providers]
-  .sort((a, b) =>
-    (a.last_verified < b.last_verified ? 1 : a.last_verified > b.last_verified ? -1 : 0) ||
-    (a.name < b.name ? -1 : a.name > b.name ? 1 : 0))
-  .slice(0, 10);
-const recentHtml = recentVerified.length
-  ? '<section class="recent" id="recent" aria-label="Recently re-verified">' +
-    '<h2>🕝 Recently re-verified</h2>' +
-    '<p class="muted">The 10 providers re-checked most recently against their own docs. Full per-field change history on <a href="updates">Updates</a>.</p>' +
-    '<ul class="upd-list">' +
-    recentVerified.map((p) => `<li class="upd"><span class="upd-date">${htmlEsc(p.last_verified)}</span> <span><a href="p/${htmlEsc(p.slug)}">${htmlEsc(p.name)}</a> — re-verified against the provider docs</span></li>`).join('') +
-    '</ul>' +
-    '<p class="count"><a href="updates">All updates</a> · <a href="api/v1/history.json">JSON history</a></p>' +
-    '</section>'
-  : '';
-
 // Emit the browser's copy of the shared rules (recScore + FLAG_PAIRS +
 // freshnessStatus) straight from the one source in scripts/lib/rules.mjs, so the
 // client explorer never keeps its own and can never drift from this server render.
@@ -667,7 +643,6 @@ indexHtml = inject(indexHtml, 'csp', CSP);
 indexHtml = inject(indexHtml, 'themeguard', THEME_GUARD);
 indexHtml = inject(indexHtml, 'rows', homeRows);
 indexHtml = inject(indexHtml, 'data', inlineData);
-indexHtml = inject(indexHtml, 'recent', recentHtml);
 writeFileSync(join(ROOT, 'site/index.html'), indexHtml);
 
 // ---------- badge ----------
@@ -694,43 +669,12 @@ const badgeVerified = {
 writeFileSync(join(ROOT, 'badge-verified.json'), JSON.stringify(badgeVerified, null, 2) + '\n');
 writeFileSync(join(ROOT, 'site/badge-verified.json'), JSON.stringify(badgeVerified, null, 2) + '\n');
 
-// ---------- exports (CSV / YAML) ----------
-const COLS = [
-  'slug', 'name', 'category', 'free_type', 'free_tier', 'rate_limits', 'notes',
-  'best_for', 'modalities', 'models_free', 'expires', 'docs_url', 'phone_required',
-  'card_required', 'commercial_ok', 'openai_compatible', 'openai_base_url', 'verified', 'last_verified',
-];
-
-const csvCell = (v) => {
-  if (v === null || v === undefined) v = '';
-  if (Array.isArray(v)) v = v.join(';');
-  v = String(v);
-  return /[",\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v;
-};
-const csv = [COLS.join(','), ...providers.map((p) => COLS.map((c) => csvCell(p[c])).join(','))].join('\n') + '\n';
-
-const yamlScalar = (v) => {
-  if (v === null || v === undefined) return 'null';
-  if (typeof v === 'boolean' || typeof v === 'number') return String(v);
-  return JSON.stringify(String(v));
-};
-let yaml = `# Generated from data/providers.json — do not edit by hand.\nproviders:\n`;
-for (const p of providers) {
-  yaml += COLS.map((c, i) => {
-    const prefix = i === 0 ? '  - ' : '    ';
-    if (Array.isArray(p[c])) return `${prefix}${c}: [${p[c].map((m) => JSON.stringify(m)).join(', ')}]`;
-    return `${prefix}${c}: ${yamlScalar(p[c])}`;
-  }).join('\n') + '\n';
-}
-
-writeFileSync(join(ROOT, 'data/providers.csv'), csv);
-writeFileSync(join(ROOT, 'data/providers.yaml'), yaml);
-
 // ---------- ship data with the site ----------
 mkdirSync(join(ROOT, 'site'), { recursive: true });
 writeFileSync(join(ROOT, 'site/providers.json'), JSON.stringify({ ...data, providers: publicProviders }, null, 2) + '\n');
-writeFileSync(join(ROOT, 'site/providers.csv'), csv);
-writeFileSync(join(ROOT, 'site/providers.yaml'), yaml);
+for (const rel of ['data/providers.csv', 'data/providers.yaml', 'site/providers.csv', 'site/providers.yaml']) {
+  rmSync(join(ROOT, rel), { force: true });
+}
 
 // ---------- generate collection pages (repo markdown + live HTML) ----------
 mkdirSync(join(ROOT, 'collections'), { recursive: true });
@@ -1077,27 +1021,41 @@ legalPage('terms', 'Terms of Use', `
 <p>Email <a href="mailto:admin@freellmapihub.com">admin@freellmapihub.com</a>.</p>
 `);
 
-// ---------- updates page + RSS feed (from git history; graceful if git is absent) ----------
+// ---------- updates pages + RSS feed (from git history; graceful if git is absent) ----------
+const UPDATES_PER_PAGE = 20;
 let commits = [];
 try {
-  const raw = execSync('git log -n 40 --date=short --pretty=format:%h%x1f%ad%x1f%s -- data README.md docs collections scripts site', { cwd: ROOT, encoding: 'utf8' });
+  const raw = execSync('git log --no-merges --date=short --pretty=format:%h%x1f%ad%x1f%s', { cwd: ROOT, encoding: 'utf8' });
   commits = raw.split('\n')
     .map((l) => { const [hash, date, subject] = l.split('\x1f'); return { hash, date, subject }; })
-    .filter((c) => c.subject && !/\[skip ci\]|refresh freshness badge/i.test(c.subject))
-    .slice(0, 25);
+    .filter((c) => c.subject && !/\[skip ci\]|refresh freshness badge/i.test(c.subject));
 } catch (_) { /* no git available — skip the feed */ }
 
 if (commits.length) {
-  const updItems = commits
-    .map((c) => `<li class="upd"><span class="upd-date">${c.date}</span> <a href="${REPO}/commit/${c.hash}" target="_blank" rel="noopener">${htmlEsc(c.subject)}</a></li>`)
-    .join('\n');
-  const updMain =
-    `<section class="page-hero"><div class="wrap"><nav class="crumbs"><a href="./">Home</a> / Updates</nav>` +
-    `<h1>Updates</h1><p class="lede">Every recent change to the dataset and site, newest first. Subscribe via <a href="feed.xml">RSS</a>.</p></div></section>` +
-    `<main id="main"><div class="wrap"><ul class="upd-list">${updItems}</ul></div></main>`;
-  writeFileSync(join(ROOT, 'site/updates.html'), htmlPage({ title: 'Updates · Free LLM API Hub', desc: 'Recent changes to the Free LLM API Hub dataset and site.', canonical: `${SITE}/updates`, main: updMain, prefix: '' }));
+  const pageCount = Math.ceil(commits.length / UPDATES_PER_PAGE);
+  const pageHref = (page, prefix) => page === 1 ? `${prefix}updates` : `${prefix}updates/page/${page}/`;
+  const pagination = (page, prefix) => {
+    const prev = page > 1 ? `<a href="${pageHref(page - 1, prefix)}" rel="prev">← Newer</a>` : '<span aria-hidden="true"></span>';
+    const next = page < pageCount ? `<a href="${pageHref(page + 1, prefix)}" rel="next">Older →</a>` : '<span aria-hidden="true"></span>';
+    return `<nav class="pagination" aria-label="Updates pagination">${prev}<span>Page ${page} of ${pageCount}</span>${next}</nav>`;
+  };
+  rmSync(join(ROOT, 'site/updates'), { recursive: true, force: true });
+  for (let page = 1; page <= pageCount; page += 1) {
+    const prefix = page === 1 ? '' : '../../../';
+    const pageCommits = commits.slice((page - 1) * UPDATES_PER_PAGE, page * UPDATES_PER_PAGE);
+    const updItems = pageCommits
+      .map((c) => `<li class="upd"><span class="upd-date">${c.date}</span> <a href="${REPO}/commit/${c.hash}" target="_blank" rel="noopener">${htmlEsc(c.subject)}</a></li>`)
+      .join('\n');
+    const updMain =
+      `<section class="page-hero model-hero"><div class="wrap"><nav class="crumbs"><a href="${prefix}">Home</a> / Updates</nav>` +
+      `<h1>Updates</h1><p class="lede">Every published change to the dataset and site, newest first. Subscribe via <a href="${prefix}feed.xml">RSS</a>.</p></div></section>` +
+      `<main id="main"><div class="wrap"><ul class="upd-list">${updItems}</ul>${pagination(page, prefix)}</div></main>`;
+    const target = page === 1 ? join(ROOT, 'site/updates.html') : join(ROOT, `site/updates/page/${page}/index.html`);
+    if (page > 1) mkdirSync(dirname(target), { recursive: true });
+    writeFileSync(target, htmlPage({ title: `Updates${page > 1 ? ` · Page ${page}` : ''} · Free LLM API Hub`, desc: 'Published changes to the Free LLM API Hub dataset and site.', canonical: pageHref(page, ''), main: updMain, prefix }));
+  }
 
-  const rssItems = commits
+  const rssItems = commits.slice(0, UPDATES_PER_PAGE)
     .map((c) => `    <item><title>${htmlEsc(c.subject)}</title><link>${REPO}/commit/${c.hash}</link><guid isPermaLink="true">${REPO}/commit/${c.hash}</guid><pubDate>${new Date(c.date + 'T00:00:00Z').toUTCString()}</pubDate></item>`)
     .join('\n');
   const rss =
@@ -1310,7 +1268,6 @@ const llmsTxt =
   `${total} providers (${ongoing.length} ongoing free tiers, ${trial.length} trial credits) and ${programCount} apply-to-get credit programs. Schema v${data.version}. Terms change often — always confirm against each provider's own docs, linked from every entry. This whole site is static and machine-readable.\n\n` +
   `## Dataset\n` +
   `- [Full dataset, JSON](${SITE}/api/v1/providers.json): every provider, all fields\n` +
-  `- [CSV export](${SITE}/providers.csv)\n` +
   `- [JSON Schema](${REPO}/blob/main/data/schema.json)\n` +
   `- [Static JSON API](${SITE}/api/): versioned endpoints + pre-filtered slices (category, modality, no-card, commercial, OpenAI-compatible, …)\n` +
   `- [Full provider list expanded, markdown](${SITE}/llms-full.txt)\n\n` +
@@ -1384,11 +1341,11 @@ const bestJsonld = JSON.stringify({
   ],
 });
 const bestMain =
-  '<section class="page-hero"><div class="wrap">' +
+  '<section class="page-hero model-hero"><div class="wrap">' +
   '<nav class="crumbs"><a href="../">Home</a> / The best</nav>' +
   '<h1>' + htmlEsc(BEST.h1) + '</h1><p class="lede">' + htmlEsc(BEST.desc) + '</p>' +
   '</div></section>' +
-  '<main id="main"><div class="wrap best-wrap">' +
+  '<main id="main"><div class="wrap">' +
   '<p class="best-intro">' + bestIntroHtml + '</p>' +
   '<ol class="best-list">' + bestItemsHtml + '</ol>' +
   '<p class="count best-note">Editorial ranking, reviewed ' + htmlEsc(BEST.updated) + ' — every pick links to its full verified profile. Want to nominate a provider? See the repo.</p>' +
@@ -1409,7 +1366,7 @@ const sitemapUrls = [
   `${SITE}/programs/startups`,
   `${SITE}/programs/research`,
   ...GUIDES.map((g) => `${SITE}/guides/${g.slug}`),
-  ...(commits.length ? [`${SITE}/updates`] : []),
+  ...(commits.length ? Array.from({ length: Math.ceil(commits.length / UPDATES_PER_PAGE) }, (_, i) => i === 0 ? `${SITE}/updates` : `${SITE}/updates/page/${i + 1}/`) : []),
   ...COLLECTIONS.map((c) => `${SITE}/collections/${c.slug}`),
   ...providers.map((p) => `${SITE}/p/${p.slug}`),
 ];
@@ -1431,13 +1388,13 @@ writeFileSync(join(ROOT, 'site/sitemap.xml'), sitemap);
 // .gitignore automatically. site/p/ is excluded because provider pages render
 // verified-Xd-ago relative to the current day (same deliberate exception as
 // badge-freshness.json; see docs/architecture.md). The git-log-derived files
-// are excluded too — updates.html and feed.xml embed the commit hash+subject
+// are excluded too — updates pages and feed.xml embed the commit hash+subject
 // and api/v1/history.json embeds commit dates, so their bytes shift across a
 // squash merge and can never be pinned deterministically. They are regenerated
 // on every deploy; pinning them caused the post-merge refresh-pin churn this
 // removes. It lives at the repo root (not under data/) so a fingerprint-only
 // commit never touches a path the updates feed watches.
-const GIT_LOG_DERIVED = new Set(['site/updates.html', 'site/feed.xml', 'site/api/v1/history.json']);
+const isGitLogDerived = (rel) => rel === 'site/feed.xml' || rel === 'site/api/v1/history.json' || rel === 'site/updates.html' || rel.startsWith('site/updates/');
 const derivedFingerprints = deriveFingerprints();
 if (derivedFingerprints) {
   writeFileSync(join(ROOT, 'derived-fingerprints.json'), JSON.stringify(derivedFingerprints, null, 2) + String.fromCharCode(10));
@@ -1456,7 +1413,7 @@ function deriveFingerprints() {
       const abs = join(dir, entry.name);
       const rel = relative(ROOT, abs).split(String.fromCharCode(92)).join('/');
       if (entry.isDirectory()) walk(abs);
-      else if (!tracked.has(rel) && !rel.startsWith('site/p/') && !GIT_LOG_DERIVED.has(rel)) {
+      else if (!tracked.has(rel) && !rel.startsWith('site/p/') && !isGitLogDerived(rel)) {
         out[rel] = createHash('sha256').update(readFileSync(abs)).digest('hex');
       }
     }

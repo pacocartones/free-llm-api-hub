@@ -18,7 +18,5 @@
 
 # Generated artifacts: collapse them in PR diffs so a data change stays readable.
 README.md            linguist-generated=false
-data/providers.csv   linguist-generated=true
-data/providers.yaml  linguist-generated=true
 collections/*.md     linguist-generated=true
 site/**              linguist-generated=true

@@ -7,13 +7,14 @@ The map for anyone touching the code. The short version: **two files are hand-ed
 ```
 data/providers.json   ─┐
 data/programs.json    ─┤──►  scripts/build.mjs  ──►  README.md, badge-freshness.json,
-data/schema.json       │                              data/providers.csv, data/providers.yaml,
+data/schema.json       │                              collections/*.md, docs/credit-programs.md,
                        │                              collections/*.md, docs/credit-programs.md,
                        │                              site/index.html (SSR rows injected),
                        │                              site/{collections,models,guides,p,programs,legal}/,
                        │                              site/guides-and-collections/ (unified hub),
                        │                              site/api/v1/*, site/llms.txt, site/llms-full.txt,
-                       │                              site/sitemap.xml, site/updates.html, site/feed.xml,
+                       │                              site/sitemap.xml, site/updates.html and site/updates/page/*,
+                       │                              site/feed.xml,
                        │                              site/badges/*.json, site/shared-rules.js,
                        │                              site/shared-rows.js (both gitignored)
                        └──►  everything is DERIVED. Never hand-edit generated files.
@@ -27,7 +28,7 @@ data/schema.json       │                              data/providers.csv, data
 
   **The one deliberate exception is `badge-freshness.json`.** It has to be date-relative — a freshness badge that only moves when the data moves is not measuring freshness — so it is committed *and* excluded from both diff-gates (`npm run check` and the drift report list it nowhere). It goes stale between refreshes by design; it is recommitted on every data/build pass (see [update-playbook.md](update-playbook.md)). Nothing may assert that the committed badge equals a freshly built one, because on any day but the last refresh it does not — the test in `build.test.mjs` checks the file is internally consistent instead.
 
-**The gitignored derived files are pinned too.** `derived-fingerprints.json` (a sha256 of every build output under `site/` that is not tracked by git) is itself a drift-gate target: a change to any gitignored derivative - `updates.html`, `feed.xml`, `models/`, `api/`, `badges/`, `legal/`, `programs/`, `llms.txt`, `shared-rules.js`/`shared-rows.js`, ... - is visible in review and fails CI until the author commits the regenerated fingerprint. The set is derived from `git ls-files site/` at the end of `build.mjs`, so it stays in sync with `.gitignore` automatically. The deliberate exclusions are `site/p/` (provider pages render "verified Xd ago" relative to the current day, the same reason they are gitignored at all) and the git-log-derived files — `updates.html`, `feed.xml`, `api/v1/history.json` — whose content embeds the commit hash/subject or dates of the build history, so it shifts across a squash merge and cannot be deterministically pinned (they are regenerated on every deploy).
+**The gitignored derived files are pinned too.** `derived-fingerprints.json` (a sha256 of every build output under `site/` that is not tracked by git) is itself a drift-gate target: a change to any gitignored derivative - `updates.html`, `feed.xml`, `models/`, `api/`, `badges/`, `legal/`, `programs/`, `llms.txt`, `shared-rules.js`/`shared-rows.js`, ... - is visible in review and fails CI until the author commits the regenerated fingerprint. The set is derived from `git ls-files site/` at the end of `build.mjs`, so it stays in sync with `.gitignore` automatically. The deliberate exclusions are `site/p/` (provider pages render "verified Xd ago" relative to the current day, the same reason they are gitignored at all) and the git-log-derived files — `updates.html`, `updates/page/*`, `feed.xml`, `api/v1/history.json` — whose content embeds the commit hash/subject or dates of the build history, so it shifts across a squash merge and cannot be deterministically pinned (they are regenerated on every deploy).
 
 **Deploys are verified live.** `pages.yml` runs a `verify-live` job after every deploy: it re-checks the sitemap parity against the live site (`npm run check-live`, retrying `FLLM_LIVE_ATTEMPTS` times for edge propagation) and smoke-tests every URL of the published sitemap (`npm run smoke-live`), so a deploy that serves stale or broken pages fails the workflow.
 

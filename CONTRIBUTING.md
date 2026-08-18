@@ -6,7 +6,7 @@ Thanks for helping. Here's how it works.
 
 ## The one rule that matters
 
-> **Edit the data, not the docs.** The single source of truth is [`data/providers.json`](data/providers.json). The README tables, the freshness badge, the CSV/YAML exports, the `collections/` markdown, and the whole interactive site (explorer, per-provider pages, collection pages, badges, sitemap) are all *generated* from it.
+> **Edit the data, not the docs.** The single source of truth is [`data/providers.json`](data/providers.json). The README tables, the freshness badge, the `collections/` markdown, and the whole interactive site (explorer, per-provider pages, collection pages, badges, sitemap) are all *generated* from it.
 
 **Your pull request ships its own regenerated files.** After editing `data/providers.json`, run `npm run build` (and `npm run og` if the OG check flags drift) and commit the regenerated files together with the data change. There is no regeneration bot — the required "Dataset integrity" check fails until the derived files are in sync.
 
@@ -37,10 +37,10 @@ That's the whole loop. No dependencies to install — the scripts are plain Node
 If you want to preview how your entry renders on the site before opening the PR:
 
 ```bash
-npm run build     # regenerates README tables, badge, exports and the site payload
+npm run build     # regenerates README tables, badge, site payload, and other derived artifacts
 ```
 
-Just don't commit what it produces.
+Commit regenerated tracked artifacts when your data or generator change requires them. Do not commit a no-op preview.
 
 ## Adding or updating a provider
 

@@ -36,7 +36,7 @@ Notable changes to the dataset and the project. Format based on [Keep a Changelo
 
 ### Docs
 - **SECURITY.md automation table** now lists the five workflows — including the weekly `backfill.yml` (`contents: write` / `pull-requests: write` over an `automated-backfill/*` branch + PR) — instead of claiming "no write-capable automation". [#152](https://github.com/pacocartones/free-llm-api-hub/pull/152)
-- **README restructured around the editorial top 20.** The two full provider tables (all 69) are replaced by a single top-20 table driven by [`data/best.json`](data/best.json), extended from 10 to 20 picks. The full dataset stays one link away (the explorer and the JSON/CSV/YAML exports); the README drops from ~50 KB to ~28 KB.
+- **README restructured around the editorial top 20.** The two full provider tables (all 69) are replaced by a single top-20 table driven by [`data/best.json`](data/best.json), extended from 10 to 20 picks. The full dataset stays one link away through the explorer and JSON API; the README drops from ~50 KB to ~28 KB.
 
 ## [2.9.0] — 2026-08-14
 
@@ -243,10 +243,9 @@ Ground-up redesign into a data-first, continuously-verified open dataset.
 
 ### Added
 - **Canonical dataset** at `data/providers.json`, validated against `data/schema.json` in CI.
-- **Build pipeline** (`scripts/build.mjs`): README tables, the freshness badge, and CSV/YAML exports are now *generated* from the data — no more hand-mirroring.
+- **Build pipeline** (`scripts/build.mjs`): README tables and the freshness badge are generated from the data — no more hand-mirroring.
 - **Dataset validator** (`scripts/validate.mjs`): rejects any `verified: true` entry missing a date or a real source link.
 - New builder-first fields: `slug`, `free_type`, `openai_compatible`, `modalities`, `expires`, `best_for`.
-- Portable exports: `data/providers.csv`, `data/providers.yaml`.
 - Redesigned interactive site (landing + explorer) with live stats and an OpenAI-compatible filter.
 - Credibility docs: methodology, inclusion criteria, comparison dimensions, roadmap, governance, security, code of conduct, and a `CITATION.cff`.
 - New-provider issue form and a pull-request template.
