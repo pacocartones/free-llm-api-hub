@@ -171,6 +171,9 @@ test('the public surface omits retired exports and home redundancies, while upda
   const updates = readFileSync(join(ROOT, 'site/updates.html'), 'utf8');
   assert.ok((updates.match(/<li class="upd">/g) || []).length <= 20, 'the first updates page has at most 20 entries');
   assert.match(updates, /Page 1 of \d+/);
+  const secondUpdatesPage = join(ROOT, 'site/updates/page/2/index.html');
+  assert.equal(existsSync(secondUpdatesPage), true, 'the second page must be emitted when history exceeds 20 entries');
+  assert.match(readFileSync(secondUpdatesPage, 'utf8'), /Page 2 of \d+/);
 });
 
 test('derived-fingerprints.json pins gitignored outputs, skips site/p/, tracked and git-log files', () => {
