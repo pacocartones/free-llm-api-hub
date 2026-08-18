@@ -210,9 +210,6 @@ h1 { font-size: clamp(1.9rem, 4.4vw, 3rem); line-height: 1.1; margin: 0 auto 18p
 .chip.on { background: color-mix(in srgb, var(--accent) 14%, transparent); border-color: var(--accent); color: var(--accent); }
 .clear-btn { background: transparent; border: 1px solid var(--border); color: var(--muted); padding: 7px 11px; border-radius: 7px; cursor: pointer; font-size: .8rem; font-weight: 600; font-family: var(--font-mono); }
 .clear-btn:hover { border-color: var(--red); color: var(--red); }
-.export { display: flex; gap: 6px; margin-left: auto; }
-.export button { background: var(--panel-2); border: 1px solid var(--border); color: var(--text); padding: 6px 10px; border-radius: 7px; cursor: pointer; font-size: .8rem; font-family: var(--font-mono); }
-.export button:hover { border-color: var(--accent); color: var(--accent); }
 
 /* ---------- presets ---------- */
 .presets { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 11px; }
@@ -408,11 +405,11 @@ pre:hover .pre-copy, .pre-copy:focus-visible { opacity: 1; }
 .upd-date { font-family: var(--font-mono); font-size: .78rem; color: var(--accent); flex: 0 0 92px; }
 .upd a { color: var(--text); }
 .upd a:hover { color: var(--accent); }
+.pagination { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 16px; margin: 28px 0 8px; font-family: var(--font-mono); font-size: .82rem; color: var(--muted); }
+.pagination a:last-child { text-align: right; }
+.pagination span { text-align: center; }
+.pagination a { color: var(--accent); font-weight: 700; }
 @media (max-width: 560px) { .upd { flex-direction: column; gap: 2px; } .upd-date { flex-basis: auto; } }
-
-/* ---------- recently changed panel (explorer homepage) ---------- */
-.recent { margin: 0 0 18px; }
-.recent h2 { font-size: 1.15rem; margin: 0 0 4px; }
 
 /* ---------- footer ---------- */
 .site-footer { border-top: 1px solid var(--border); background: var(--bg-elev); color: var(--muted); font-size: .87rem; }
@@ -422,7 +419,7 @@ pre:hover .pre-copy, .pre-copy:focus-visible { opacity: 1; }
 .foot-brand-link:hover { text-decoration: none; }
 .footer-brand p { max-width: 38ch; margin: 0; color: color-mix(in srgb, var(--text) 74%, transparent); line-height: 1.6; }
 .footer-brand p strong { color: var(--accent); font-weight: 700; }
-.footer-brand .star-btn { display: flex; margin-top: 18px; } /* block-level so the badge and the button stack on separate lines (inline-flex made the margin inert) */
+.footer-brand .star-btn { display: flex; margin-top: 18px; width: fit-content; }
 .footer-col h4 { position: relative; display: inline-block; font-size: .78rem; text-transform: uppercase; letter-spacing: .09em; color: var(--text); margin: 2px 0 16px; padding-bottom: 8px; font-family: var(--font-mono); font-weight: 700; }
 .footer-col h4::after { content: ""; position: absolute; left: 0; bottom: 0; width: 22px; height: 2px; background: var(--accent); border-radius: 2px; }
 .footer-col a { display: block; color: var(--muted); padding: 4px 0; }

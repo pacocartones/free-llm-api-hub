@@ -129,7 +129,7 @@ The dataset is the source; everything else is a projection of it. Regenerate:
 npm run build
 ```
 
-This rewrites the README tables, the freshness badge, the CSV/YAML exports, the collection pages, and the whole site payload (explorer data, per-provider pages, sitemap). Then, if the OG check flags drift:
+This rewrites the README tables, the freshness badge, the collection pages, and the whole site payload (explorer data, per-provider pages, sitemap). Then, if the OG check flags drift:
 
 ```bash
 npm run og
@@ -142,7 +142,7 @@ npm run og
 Commit the data change **and** the regenerated files in the same commit — a data PR without its derived files fails CI by design, because there is no regeneration bot:
 
 ```bash
-git add data/providers.json data/providers.csv data/providers.yaml README.md badge-freshness.json CITATION.cff site collections
+git add data/providers.json README.md badge-freshness.json CITATION.cff site collections
 git commit -m "feat: add AI21 Labs free trial credit"
 git push -u fork add-ai21-labs
 ```

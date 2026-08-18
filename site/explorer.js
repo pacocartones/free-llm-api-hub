@@ -128,6 +128,10 @@ function syncURL() {
   const params = new URLSearchParams();
   if (category !== 'all') params.set('cat', category);
   if (modality !== 'all') params.set('mod', modality);
+  if (sortKey !== 'recommended') {
+    params.set('sort', sortKey);
+    params.set('dir', sortDir === 1 ? 'asc' : 'desc');
+  }
   URL_FLAGS.forEach(([k, id]) => { if (document.getElementById(id).checked) params.set(k, '1'); });
   const qs = params.toString();
   history.replaceState(null, '', qs ? '?' + qs : location.pathname);
@@ -147,6 +151,18 @@ function applyURL() {
   URL_FLAGS.forEach(([k, id]) => {
     if (params.get(k) === '1') { const el = document.getElementById(id); el.checked = true; const chip = el.closest('.chip'); if (chip) chip.classList.add('on'); }
   });
+  const sort = params.get('sort');
+  const dir = params.get('dir');
+  if (sort && ['recommended', 'name', 'category', 'free_tier', 'notes', 'verified'].includes(sort)) {
+    sortKey = sort;
+    sortDir = dir === 'desc' ? -1 : 1;
+    const th = document.querySelector(`thead th[data-key="${sort}"]`);
+    if (th) {
+      th.classList.add('sorted');
+      th.classList.toggle('asc', sortDir === 1);
+      th.setAttribute('aria-sort', sortDir === 1 ? 'ascending' : 'descending');
+    }
+  }
 }
 applyURL();
 
@@ -164,9 +180,6 @@ document.getElementById('clearFilters').addEventListener('click', () => {
   document.querySelectorAll('thead th').forEach(h => { h.classList.remove('sorted', 'asc'); h.setAttribute('aria-sort', 'none'); });
   render();
 });
-// Exports live on the dataset itself (providers.json / .csv / .yaml, linked in the footer)
-// and the static /api/v1 endpoints — the table stays focused on browsing.
-
 // The dataset is inlined at build time (see #providers-data) so the table is server-rendered
 // and the page needs no network round-trip. Fall back to fetch only if the inline data is absent.
 const SOURCES = ['providers.json', 'https://raw.githubusercontent.com/pacocartones/free-llm-api-hub/main/data/providers.json'];
@@ -183,6 +196,6 @@ const SOURCES = ['providers.json', 'https://raw.githubusercontent.com/pacocarton
       renderStats(); render(); return;
     } catch (_) { /* try next */ }
   }
-  document.getElementById('empty').style.display = 'block';
-  document.getElementById('empty').textContent = 'Could not load providers.json.';
+  // The server-rendered table remains available if a client-side refresh cannot
+  // load data. Do not replace it with a transport-level error message.
 })();

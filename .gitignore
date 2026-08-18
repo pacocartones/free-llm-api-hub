@@ -5,8 +5,6 @@ _internal-docs/
 
 # Generated site payload (build.mjs regenerates these during the Pages build)
 site/providers.json
-site/providers.csv
-site/providers.yaml
 site/collections/
 site/models/
 site/guides/
@@ -17,6 +15,7 @@ site/badges/
 site/legal/
 site/programs/
 site/updates.html
+site/updates/
 site/feed.xml
 site/api/
 site/llms.txt
