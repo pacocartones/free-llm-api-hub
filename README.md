@@ -164,7 +164,7 @@ What "verified" covers and where its limits are: [docs/methodology.md](docs/meth
 This is meant to be consumed by machines as much as by humans.
 
 - **[`data/providers.json`](data/providers.json)** — canonical dataset, validated against [`data/schema.json`](data/schema.json). Every field explained in [docs/comparison-dimensions.md](docs/comparison-dimensions.md).
-- **Static JSON API** — [`site/providers.json`](site/providers.json) and the versioned [JSON API](https://freellmapihub.com/api/) are generated from the canonical dataset for programmatic use.
+- **Static JSON API** — [the public JSON dataset](https://freellmapihub.com/providers.json) and the versioned [JSON API](https://freellmapihub.com/api/) are generated from the canonical dataset for programmatic use.
 
 ```bash
 # Every ongoing free tier that needs neither a card nor a phone number:
