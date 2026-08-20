@@ -176,6 +176,40 @@ test('the public surface omits retired exports and home redundancies, while upda
   assert.match(readFileSync(secondUpdatesPage, 'utf8'), /Page 2 of \d+/);
 });
 
+// ---------- footer structure (the two-places rule) ----------
+// The home footer is hand-written in site/index.html; every other page gets the
+// siteFooter() copy in build.mjs. One stray </div> after the brand block closed
+// .wrap.footer-top early, so the three link columns escaped the grid AND the
+// .wrap width on every generated page while the home page stayed correct. Pin
+// the shape on both copies so the two can never drift apart silently again.
+test('every page nests the footer columns inside .wrap.footer-top', () => {
+  run(['scripts/build.mjs']);
+
+  const pages = [
+    'site/index.html',                          // hand-written home
+    'site/p/groq.html',                         // provider page
+    'site/guides/free-embeddings-apis.html',    // guide
+    'site/collections/no-phone.html',           // collection
+    'site/best/index.html',                     // directory-index page
+    'site/updates.html',                        // root-prefix page
+    'site/legal/privacy.html',
+  ];
+
+  for (const rel of pages) {
+    const html = readFileSync(join(ROOT, rel), 'utf8');
+    const footer = html.slice(html.indexOf('<footer class="site-footer"'), html.indexOf('</footer>'));
+    assert.ok(footer, `${rel} must render the site footer`);
+
+    const opens = (footer.match(/<div\b/g) || []).length;
+    const closes = (footer.match(/<\/div>/g) || []).length;
+    assert.equal(closes, opens, `${rel}: unbalanced <div> in the footer (${opens} open, ${closes} close)`);
+
+    const top = footer.slice(footer.indexOf('<div class="wrap footer-top">'), footer.indexOf('<div class="wrap footer-bottom">'));
+    assert.equal((top.match(/<div class="footer-brand">/g) || []).length, 1, `${rel}: the brand block must sit in footer-top`);
+    assert.equal((top.match(/<div class="footer-col">/g) || []).length, 3, `${rel}: all three link columns must sit in footer-top`);
+  }
+});
+
 test('derived-fingerprints.json pins gitignored outputs, skips site/p/, tracked and git-log files', () => {
   const fp = join(ROOT, 'derived-fingerprints.json');
   if (!existsSync(fp)) run(['scripts/build.mjs']);
