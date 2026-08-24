@@ -1,4 +1,4 @@
-// Minimal real tests over the build pipeline (node --test, zero dependencies).
+// Minimal real tests over the build pipeline (node --test).
 // Covers: serializer round-trip, validator honesty rules, existing self-tests,
 // build idempotency, and one generated README row matching the data.
 import { test } from 'node:test';
@@ -35,6 +35,60 @@ test('serializer round-trips data/providers.json byte-exactly', () => {
 
 test('validate passes on the real dataset', () => {
   run(['scripts/validate.mjs']); // throws unless exit 0
+});
+
+test('validate rejects properties outside the JSON Schema with their exact path', () => {
+  const data = JSON.parse(readFileSync(DATA, 'utf8'));
+  data.providers[0].schema_only_typo = true;
+  const fixture = join(mkdtempSync(join(tmpdir(), 'flah-')), 'providers.json');
+  writeFileSync(fixture, JSON.stringify(data));
+
+  let validationError;
+  try {
+    run(['scripts/validate.mjs', fixture]);
+  } catch (error) {
+    validationError = error;
+  }
+
+  assert.ok(validationError, 'an undeclared provider property must fail validation');
+  assert.equal(validationError.status, 1);
+  assert.match(validationError.stderr.toString('utf8'), /\/providers\/0\/schema_only_typo/);
+});
+
+test('validate reports missing schema-required properties with their exact path', () => {
+  const data = JSON.parse(readFileSync(DATA, 'utf8'));
+  delete data.providers[0].name;
+  const fixture = join(mkdtempSync(join(tmpdir(), 'flah-')), 'providers.json');
+  writeFileSync(fixture, JSON.stringify(data));
+
+  let validationError;
+  try {
+    run(['scripts/validate.mjs', fixture]);
+  } catch (error) {
+    validationError = error;
+  }
+
+  assert.ok(validationError, 'a missing required property must fail validation');
+  assert.equal(validationError.status, 1);
+  assert.match(validationError.stderr.toString('utf8'), /\/providers\/0\/name/);
+});
+
+test('validate enforces JSON Schema formats with their exact path', () => {
+  const data = JSON.parse(readFileSync(DATA, 'utf8'));
+  data.source = 'not a URI';
+  const fixture = join(mkdtempSync(join(tmpdir(), 'flah-')), 'providers.json');
+  writeFileSync(fixture, JSON.stringify(data));
+
+  let validationError;
+  try {
+    run(['scripts/validate.mjs', fixture]);
+  } catch (error) {
+    validationError = error;
+  }
+
+  assert.ok(validationError, 'an invalid schema format must fail validation');
+  assert.equal(validationError.status, 1);
+  assert.match(validationError.stderr.toString('utf8'), /\/source/);
 });
 
 test('validate rejects a verified entry with no last_verified date', () => {

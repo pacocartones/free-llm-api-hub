@@ -10,7 +10,7 @@ You'll learn the whole loop once, with a real example:
 4. Regenerate the files derived from the data
 5. Open a PR that the "Dataset integrity" check accepts
 
-Time: about 30 minutes. No dependencies to install — the scripts are plain Node.
+Time: about 30 minutes. Install the locked development tools once with `npm ci --ignore-scripts`; the shipped site itself has no runtime dependencies.
 
 ## Our worked example: AI21 Labs
 
@@ -29,9 +29,10 @@ We'll use **AI21 Labs** as the worked example: a $10 trial credit on their Jamba
 ```bash
 git clone https://github.com/pacocartones/free-llm-api-hub
 cd free-llm-api-hub
+npm ci --ignore-scripts
 ```
 
-If you already cloned shallow, fix it with `git fetch --unshallow`. The validator fails loudly either way, so you'll know.
+`npm ci --ignore-scripts` installs the locked local tools, including JSON Schema validation, without running package lifecycle scripts. If you already cloned shallow, fix it with `git fetch --unshallow`. The validator fails loudly either way, so you'll know.
 
 ## Step 1 — Check it qualifies and isn't already tracked
 

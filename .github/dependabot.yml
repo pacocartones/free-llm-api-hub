@@ -1,6 +1,6 @@
-# The repo has zero runtime dependencies, so the surface here is small on
-# purpose: pinned GitHub Actions (the real supply-chain risk in a workflow-heavy
-# repo) and the single devDependency used to render social images.
+# The shipped site has zero runtime dependencies. Keep the small development
+# tooling surface (JSON Schema validation and social-image rendering), along
+# with pinned GitHub Actions, current.
 version: 2
 updates:
   - package-ecosystem: github-actions

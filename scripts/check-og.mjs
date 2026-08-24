@@ -6,7 +6,7 @@
 // `npm run og` writes site/og/manifest.json with the fingerprint of the exact
 // data inputs each image was rendered from; this script recomputes those
 // fingerprints from data/providers.json and fails on any difference. Pure Node
-// — no @resvg needed, so it runs in the dependency-free CI job.
+// — no @resvg needed, so the CI check does not need to render images.
 //
 // Exit 0 on a healthy state, 1 with the exact image path(s) + fix command.
 import { readFileSync, existsSync } from 'node:fs';

@@ -18,11 +18,14 @@ Fixing a rate limit means editing one field plus the files regenerated from it �
 git clone https://github.com/pacocartones/free-llm-api-hub
 cd free-llm-api-hub
 
+# install the locked development tools once:
+npm ci --ignore-scripts
+
 # edit data/providers.json, then:
 npm test          # validate the dataset against the integrity rules
 ```
 
-That's the whole loop. No dependencies to install — the scripts are plain Node (the version used in CI is pinned in [`.nvmrc`](.nvmrc); anything ≥18 works locally).
+That's the whole loop. `npm ci --ignore-scripts` installs the locked development tools for JSON Schema validation and local social-image generation without running package lifecycle scripts. The shipped site has no runtime dependencies. The Node version used in CI is pinned in [`.nvmrc`](.nvmrc); anything ≥18 works locally.
 
 > **You need the full git history.** `npm test` and `npm run build` mine the per-provider change history from `git log` (see [docs/architecture.md](docs/architecture.md)), so they require a **full clone** — not a shallow clone (`git clone --depth 1`), not a tarball download, and `git` must be on your `PATH`. Without full history the suite fails with a message like:
 >
