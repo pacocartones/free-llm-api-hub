@@ -23,9 +23,11 @@
     "node": ">=18"
   },
   "devDependencies": {
-    "@resvg/resvg-js": "^2.6.2"
+    "@resvg/resvg-js": "^2.6.2",
+    "ajv": "^8.20.0",
+    "ajv-formats": "^3.0.1"
   },
-  "comment": "devDependencies are used only by `npm run og` (social image). The shipped site and CI have zero runtime dependencies. badge-freshness.json is deliberately NOT a diff-gate target (it is date-relative: the oldest age in days moves daily — see docs/architecture.md). badge-verified.json IS a target (deterministic per dataset). The generated-file drift target list in `check` must stay in sync with the 'Generated files must be in sync with the data' step in verify.yml.",
+  "comment": "devDependencies support JSON Schema validation and local social-image generation. The shipped site has zero runtime dependencies; CI installs the locked development dependencies with scripts disabled. badge-freshness.json is deliberately NOT a diff-gate target (it is date-relative: the oldest age in days moves daily — see docs/architecture.md). badge-verified.json IS a target (deterministic per dataset). The generated-file drift target list in `check` must stay in sync with the 'Generated files must be in sync with the data' step in verify.yml.",
   "license": "MIT",
   "repository": {
     "type": "git",

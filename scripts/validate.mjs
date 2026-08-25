@@ -1,17 +1,21 @@
 #!/usr/bin/env node
 // Validates data/providers.json against the project's integrity rules.
 // Fails CI (exit 1) if the dataset would ship a claim it can't back up.
-// Zero dependencies. Run with: node scripts/validate.mjs [path-to-providers.json]
-// [path-to-probe-report.json]
+// Development dependencies provide Draft 2020-12 schema validation; the
+// shipped site still has no runtime dependencies. Run with:
+// node scripts/validate.mjs [path-to-providers.json] [path-to-probe-report.json]
 // (the optional paths are used by the test suite to validate fixtures)
 
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, resolve } from 'node:path';
+import Ajv2020 from 'ajv/dist/2020.js';
+import addFormats from 'ajv-formats';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const FILE = process.argv[2] ? resolve(process.argv[2]) : join(ROOT, 'data/providers.json');
 const data = JSON.parse(readFileSync(FILE, 'utf8'));
+const schema = JSON.parse(readFileSync(join(ROOT, 'data/schema.json'), 'utf8'));
 
 const CATEGORIES = ['ongoing', 'trial'];
 const FREE_TYPES = ['perpetual', 'renewing-quota', 'recurring-credit', 'trial-credit'];
@@ -27,6 +31,31 @@ const seenNames = new Set();
 
 function check(cond, msg) {
   if (!cond) errors.push(msg);
+}
+
+function jsonPointer(path, property) {
+  const escapedProperty = String(property).replace(/~/g, '~0').replace(/\//g, '~1');
+  return `${path || ''}/${escapedProperty}`;
+}
+
+function formatSchemaError(error) {
+  let path = error.instancePath || '/';
+  if (error.keyword === 'additionalProperties') path = jsonPointer(error.instancePath, error.params.additionalProperty);
+  if (error.keyword === 'required') path = jsonPointer(error.instancePath, error.params.missingProperty);
+  return `schema: ${path} ${error.message || `violates ${error.keyword}`}`;
+}
+
+// `schema.json` narrows the type of docs_url inside an if/then branch without
+// restating it there. Keep Ajv strict for unsupported schema features while
+// allowing that valid cross-branch refinement.
+const ajv = new Ajv2020({ allErrors: true, strict: true, strictTypes: false, validateFormats: true });
+addFormats(ajv, ['date', 'uri']);
+const validateSchema = ajv.compile(schema);
+if (!validateSchema(data)) {
+  const schemaErrors = (validateSchema.errors ?? []).map(formatSchemaError);
+  console.error(`✗ schema validation failed (${schemaErrors.length} issue${schemaErrors.length > 1 ? 's' : ''}):`);
+  for (const error of schemaErrors) console.error('  - ' + error);
+  process.exit(1);
 }
 
 if (!/^\d+\.\d+\.\d+$/.test(data.version || '')) errors.push('top-level: version must be semver');

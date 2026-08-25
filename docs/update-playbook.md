@@ -2,6 +2,12 @@
 
 How this list stays current — the routine that keeps the freshness badge green. There is **no GitHub Actions** in this flow: everything below runs locally, on demand, on a machine you control. Nothing in this project depends on Actions minutes.
 
+Before the first pass in a clone, install the locked local development tools without running package lifecycle scripts:
+
+```bash
+npm ci --ignore-scripts
+```
+
 ## Cadence
 
 - **Weekly:** aim for one pass a week (Mondays ~10:00 Madrid works well), but nothing enforces it — the badge and the worklist only move when the data moves, and `npm run reverify` sizes its batch to clear the 90-day SLA without a cliff.
@@ -52,7 +58,7 @@ For each provider on the worklist (`npm run worklist`, or just the reverify batc
    npm run og         # regenerate social preview PNGs (counts in subtitles drift)
    npm run worklist   # preview the updated worklist locally (optional)
    ```
-   `npm run og` needs `@resvg/resvg-js` (the only devDependency — `npm install` before the first run). The CI gate checks that every PNG exists **and matches the current data** (a fingerprint check via `site/og/manifest.json`), not just that it is present — so a changed count, flag or category fails the check until you run `npm run og`.
+   `npm run og` uses `@resvg/resvg-js`; JSON Schema validation also uses locked development tooling. Run `npm ci --ignore-scripts` before the first pass. The CI gate checks that every PNG exists **and matches the current data** (a fingerprint check via `site/og/manifest.json`), not just that it is present — so a changed count, flag or category fails the check until you run `npm run og`.
 
 `npm run build` also rewrites `derived-fingerprints.json` - the sha256 pin of every gitignored build output under `site/` (see [architecture.md](architecture.md)). Commit it with the rest; the drift gate fails if it is missing or out of sync. The git-log-derived files (`updates.html`, `feed.xml`, `api/v1/history.json`) are deliberately excluded from the pin: their content embeds the commit hash/subject or dates, so it shifts across a squash merge — they are regenerated on every deploy.
 5. **Commit `data/providers.json` + the regenerated files in one PR.** The required "Dataset integrity" check fails if the derived files are out of sync, so the PR is complete only when both ship together.

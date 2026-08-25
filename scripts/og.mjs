@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Renders social-preview PNGs from SVG: the site-wide og.png plus one per collection.
 // X/Facebook don't render SVG OG images, so we rasterize. Run after content changes: `npm run og`.
-// Uses @resvg/resvg-js — a devDependency only; the shipped site and CI stay dependency-free.
+// Uses @resvg/resvg-js — a devDependency only; the shipped site stays runtime-dependency-free.
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
