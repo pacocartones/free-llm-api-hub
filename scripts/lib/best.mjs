@@ -4,7 +4,7 @@
 // is a verified provider with editorial copy (why + tag). build.mjs used to
 // check only that slugs resolve and are unique, so an unverified (or copy-empty)
 // pick would silently ship as "best" — a credibility bug. This is the one place
-// those rules live: the validator, the build, and the test suite all call them.
+// those rules live: the validator, check-best.mjs, and the test suite all call them.
 
 /**
  * Return every integrity violation in `best` against `providers`.
@@ -47,7 +47,7 @@ export function bestPickErrors(best, providers) {
   return errors;
 }
 
-/** Throw on the first integrity violation. Used by the build. */
+/** Throw on the first integrity violation. Used by check-best.mjs. */
 export function assertBestPicks(best, providers) {
   const errors = bestPickErrors(best, providers);
   if (errors.length) throw new Error(errors[0]);
