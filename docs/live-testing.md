@@ -38,6 +38,40 @@ The probe reads keys from `process.env[env_key]` (each provider declares its `en
 
 `scripts/probe-cron.sh` wraps this for the weekly VPS cron (probe → model refresh → validate → build → push), publishing without spending GitHub Actions minutes.
 
+## Worked walkthrough (local, first run)
+
+Step by step from an empty checkout — no VPS, no Infisical needed for the basic path:
+
+```bash
+# 1. Start from the repo root and install dependencies once
+npm install
+
+# 2. Copy the example env and fill in the keys you have
+cp .env.example .env
+#    edit .env: add one or more provider keys under their env_key names,
+#    e.g. GROQ_API_KEY=... (any subset works; missing keys are skipped)
+
+# 3. Dry run first — report only, nothing written
+npm run probe
+#    you should see per-provider rows: missing-key providers skipped,
+#    present-key providers probed (auth + models + inference)
+
+# 4. Persist the results (last_probed / probe_status / models_free + report)
+node --env-file=.env scripts/probe.mjs --write
+
+# 5. Read the report and review the diff
+#    data/probe-report.json holds the per-run detail (auth, models,
+#    inference, latency, rate-limit headers, probe_status per provider).
+less data/probe-report.json
+git status          # data/providers.json + data/probe-report.json changed
+
+# 6. Build and commit, then let CI verify
+npm run build
+```
+
+To probe a single provider at a time: `node scripts/probe.mjs --only=groq`.
+To skip inference (near-zero footprint): `node scripts/probe.mjs --auth-only`.
+
 ## Modes & footprint
 
 ```bash
