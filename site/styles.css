@@ -249,11 +249,6 @@ table.sortable thead th:not(.sorted)::after { content: " ⇅"; opacity: .28; fon
 .best { color: var(--accent); font-size: .8rem; margin-top: 3px; opacity: .85; }
 .mods { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
 .mods span { font-size: .66rem; color: var(--muted); background: var(--panel-2); border: 1px solid var(--border); border-radius: 4px; padding: 1px 6px; font-family: var(--font-mono); text-transform: uppercase; letter-spacing: .03em; }
-.baseurl { margin-top: 7px; cursor: copy; display: inline-block; }
-.baseurl code { font-size: .72rem; color: var(--accent); background: color-mix(in srgb, var(--accent) 8%, transparent); border: 1px solid var(--border); border-radius: 5px; padding: 2px 6px; word-break: break-all; }
-.baseurl::after { content: " ⧉"; color: var(--faint); font-size: .7rem; }
-.baseurl.copied code { color: var(--green); border-color: var(--green); }
-.baseurl.copied::after { content: " copied"; color: var(--green); }
 .badge { display: inline-flex; align-items: center; gap: 5px; font-size: .72rem; padding: 2px 8px; border-radius: 6px; white-space: nowrap; font-family: var(--font-mono); }
 .b-ongoing, .type { background: color-mix(in srgb, var(--accent) 12%, transparent); color: var(--accent); border: 1px solid color-mix(in srgb, var(--accent) 32%, transparent); }
 .type { font-size: .72rem; padding: 2px 8px; border-radius: 6px; font-family: var(--font-mono); }
