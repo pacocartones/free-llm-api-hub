@@ -11,6 +11,7 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join, resolve } from 'node:path';
 import Ajv2020 from 'ajv/dist/2020.js';
 import addFormats from 'ajv-formats';
+import { bestPickErrors } from './lib/best.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const FILE = process.argv[2] ? resolve(process.argv[2]) : join(ROOT, 'data/providers.json');
@@ -152,6 +153,21 @@ try {
     }
   }
 } catch (e) { errors.push('programs.json: ' + e.message); }
+
+// ---------- best.json (editorial ranking must only feature verified providers) ----------
+// The /best page and the README top-20 are the first thing visitors trust.
+// Fixture runs pass a temp providers.json as argv[2] and must not be failed
+// by the on-disk ranking (a fixture that un-verifies typhoon would otherwise
+// trip this instead of the rule under test). The dedicated tests in
+// build.test.mjs exercise bestPickErrors against fabricated lists.
+if (!process.argv[2]) {
+  try {
+    const best = JSON.parse(readFileSync(join(ROOT, 'data/best.json'), 'utf8'));
+    for (const e of bestPickErrors(best, data.providers ?? [])) errors.push(e);
+  } catch (e) {
+    errors.push('best.json: ' + e.message);
+  }
+}
 
 // ---------- probe-report.json (consistency with the current dataset) ----------
 // The report is a probe artifact, not a build output, so the drift gate never

@@ -97,7 +97,7 @@ document.querySelectorAll('thead th[data-key]').forEach(th => {
     render();
   }));
 
-// Copy helpers: base URLs and ready-to-paste OpenAI snippets.
+// Copy helpers: ready-to-paste OpenAI snippets.
 function flashCopied(el, label) {
   if (label != null) { const prev = el.dataset.prev || el.textContent; el.dataset.prev = prev; el.textContent = label; }
   el.classList.add('copied');
@@ -112,14 +112,8 @@ function openaiSnippet(base) {
   return `from openai import OpenAI\n\nclient = OpenAI(base_url="${base}", api_key="<YOUR_FREE_API_KEY>")\nresp = client.chat.completions.create(\n    model="${model}",\n    messages=[{"role": "user", "content": "Hello!"}],\n)\nprint(resp.choices[0].message.content)`;
 }
 document.getElementById('tbody').addEventListener('click', e => {
-  const bu = e.target.closest('.baseurl');
-  if (bu) { copyText(bu.getAttribute('data-copy'), bu); return; }
   const snip = e.target.closest('.copy-btn[data-snippet]');
   if (snip) { copyText(openaiSnippet(snip.getAttribute('data-snippet')), snip, '✓ Copied'); }
-});
-document.getElementById('tbody').addEventListener('keydown', e => {
-  if (e.key !== 'Enter' && e.key !== ' ') return;
-  const el = e.target.closest('.baseurl'); if (el) { e.preventDefault(); copyText(el.getAttribute('data-copy'), el); }
 });
 
 // --- shareable state: sync filters to the URL and restore them on load ---

@@ -16,6 +16,7 @@ import * as sortLib from './lib/sort.mjs';
 import { esc, stripTags } from './lib/escape.mjs';
 import { mineProviderHistory } from './lib/history.mjs';
 import { githubProfileUrl } from './lib/contributors.mjs';
+import { resolveBestEntries } from './lib/best.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const FRESH_DAYS = SLA_DAYS; // the freshness SLA, defined once in lib/rules.mjs
@@ -537,27 +538,12 @@ const coverageTable =
 // ---------- editorial /best (data/best.json) ----------
 // Parsed once, up front, so the README table and the /best page render from the
 // same validated list. data/best.json declares the order and the "why" for each
-// pick; the build validates every slug against the dataset (a renamed/removed
-// provider fails the build). Edit data/best.json to re-rank.
+// pick. The integrity rules (non-empty list, unique slugs, editorial why + tag,
+// slug resolves, provider is verified) live in lib/best.mjs and are shared with
+// validate.mjs, check-best.mjs and best.test.mjs, so `npm run build` alone fails
+// on an unverified pick exactly like CI does (#165). Edit data/best.json to re-rank.
 const BEST = JSON.parse(readFileSync(join(ROOT, 'data/best.json'), 'utf8'));
-if (!Array.isArray(BEST.entries) || BEST.entries.length === 0) {
-  throw new Error('data/best.json must contain a non-empty entries array');
-}
-const bestBySlug = new Map(providers.map((p) => [p.slug, p]));
-{
-  const seen = new Set();
-  for (const e of BEST.entries) {
-    if (!e.slug) throw new Error('data/best.json entry missing slug');
-    if (!e.why) throw new Error('data/best.json entry ' + e.slug + ' is missing its editorial "why"');
-    if (seen.has(e.slug)) throw new Error('data/best.json lists ' + e.slug + ' more than once — a provider can only rank once');
-    seen.add(e.slug);
-  }
-}
-const bestEntries = BEST.entries.map((e, i) => {
-  const p = bestBySlug.get(e.slug);
-  if (!p) throw new Error('data/best.json entry #' + (i + 1) + ' references unknown slug: ' + e.slug);
-  return { rank: i + 1, ...e, p };
-});
+const bestEntries = resolveBestEntries(BEST, providers);
 
 // ---------- contributors (rendered from data/contributors.json, which a
 // maintainer refreshes with scripts/update-contributors.mjs after a merge) ----------
