@@ -55,6 +55,30 @@
     pre.appendChild(btn);
   });
 
+
+    // --- copy API endpoint buttons ---
+  document.querySelectorAll('[data-copy]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var text = btn.getAttribute('data-copy');
+
+      var done = function () {
+        btn.textContent = 'Copied';
+        btn.classList.add('copied');
+
+        setTimeout(function () {
+          btn.textContent = 'Copy';
+          btn.classList.remove('copied');
+        }, 1300);
+      };
+
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(text).then(done).catch(done);
+      } else {
+        done();
+      }
+    });
+  });
+
   // --- mobile nav toggle (nav is hidden <=760px until opened) ---
   var navToggle = document.getElementById('navToggle');
   var header = document.querySelector('.site-header');

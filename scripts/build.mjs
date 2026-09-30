@@ -1219,21 +1219,32 @@ const apiEndpoints = {
 writeApi('index.json', { ...apiBase, description: 'Static, versioned JSON over the free-llm-api-hub dataset. Paths are relative to /api/v1/. Regenerated on every dataset change; no query params, no auth, no rate limits.', counts: { providers: publicProviders.length, ongoing: ongoing.length, trial: trial.length, programs: programs.startups.length + programs.research.length }, endpoints: apiEndpoints });
 
 // human-facing API docs page
-const apiRow = (label, path, count) => `<tr><td class="name"><a href="v1/${path}"><code>/api/v1/${path}</code></a></td><td>${htmlEsc(label)}</td><td>${count != null ? count : ''}</td></tr>`;
+const apiRow = (label, path, count) =>
+  `<tr>
+    <td class="name">
+      <a href="v1/${path}"><code>/api/v1/${path}</code></a>
+      <button class="btn ghost api-copy" type="button" data-copy="/api/v1/${path}">Copy</button>
+    </td>
+    <td>${htmlEsc(label)}</td>
+    <td>${count != null ? count : ''}</td>
+    <td><code>curl -s ${SITE}/api/v1/${path}</code></td>
+  </tr>`;
+
+
 const apiDocMain =
   `<section class="page-hero"><div class="wrap"><nav class="crumbs"><a href="../">Home</a> / API</nav>` +
   `<h1>Static JSON API</h1><p class="lede">The whole dataset as versioned, machine-readable JSON at stable URLs — no server, no query params, no auth, no rate limits. CORS-open, so you can <code>fetch()</code> it straight from the browser. Regenerated on every dataset change (currently v${data.version}).</p></div></section>` +
   `<main id="main"><div class="wrap prose">` +
-  `<h2>Everything</h2><table class="model-table"><thead><tr><th>Endpoint</th><th>Contents</th><th>Count</th></tr></thead><tbody>` +
+  `<h2>Everything</h2><table class="model-table"><thead><tr><th>Endpoint</th><th>Contents</th><th>Count</th><th>curl</th></tr></thead><tbody>` +
   apiRow('Full provider dataset (all fields)', 'providers.json', publicProviders.length) +
   apiRow('Apply-to-get credit programs', 'programs.json', programs.startups.length + programs.research.length) +
   apiRow('The editorial top 20, ranked with the "why" per pick', 'best.json', bestEntries.length) +
   apiRow('Endpoint manifest', 'index.json', null) +
   `</tbody></table>` +
-  `<h2>Slices (by constraint)</h2><table class="model-table"><thead><tr><th>Endpoint</th><th>Contents</th><th>Count</th></tr></thead><tbody>` +
+  `<h2>Slices (by constraint)</h2><table class="model-table"><thead><tr><th>Endpoint</th><th>Contents</th><th>Count</th><th>curl</th></tr></thead><tbody>` +
   Object.entries(API_SLICES).map(([n, fn]) => apiRow(`Providers where ${n.replace(/-/g, ' ')}`, `${n}.json`, publicProviders.filter(fn).length)).join('') +
   `</tbody></table>` +
-  `<h2>Slices (by modality)</h2><table class="model-table"><thead><tr><th>Endpoint</th><th>Contents</th><th>Count</th></tr></thead><tbody>` +
+  `<h2>Slices (by modality)</h2><table class="model-table"><thead><tr><th>Endpoint</th><th>Contents</th><th>Count</th><th>curl</th></tr></thead><tbody>` +
   API_MODS.map((m) => apiRow(`Providers with a free ${m} modality`, `modality/${m}.json`, publicProviders.filter((p) => (p.modalities || []).includes(m)).length)).join('') +
   `</tbody></table>` +
   `<h2>Example</h2><pre><code>curl -s ${SITE}/api/v1/no-card.json | jq '.providers[].name'</code></pre>` +
