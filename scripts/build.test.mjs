@@ -5,7 +5,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { readFileSync, writeFileSync, mkdtempSync, existsSync, readdirSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdtempSync, existsSync, readdirSync, statSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -1322,4 +1322,98 @@ test('version is described the same way everywhere: the dataset release, not a s
   }
   assert.match(sources['docs/api.md'], /release version/);
   assert.match(sources['data/schema.json'], /release version/);
+});
+
+// ---------- canonicals, sitemap and /programs/ (public SEO errors) ----------
+test('every page declares an absolute canonical URL', () => {
+  for (const f of builtPages()) {
+    const html = readFileSync(f, 'utf8');
+    const m = html.match(/<link rel="canonical" href="([^"]*)"/);
+    if (!m) continue; // 404.html and the like declare none
+    assert.match(m[1], /^https:\/\/freellmapihub\.com\//, `${f.slice(ROOT.length + 1)}: canonical "${m[1]}" is not absolute`);
+  }
+});
+
+test('every page meta description fits a search snippet (<= 155 characters)', () => {
+  const unescape = (t) => t.replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
+  let seen = 0;
+  for (const f of builtPages()) {
+    const m = readFileSync(f, 'utf8').match(/<meta name="description" content="([^"]*)"/);
+    if (!m) continue;
+    seen += 1;
+    const n = [...unescape(m[1])].length;
+    assert.ok(n <= 155, `${f.slice(ROOT.length + 1)}: description is ${n} characters`);
+  }
+  assert.ok(seen > 100, 'the check reached the generated pages');
+});
+
+test('internal links in the built site resolve to a page (no 404)', () => {
+  const siteDir = join(ROOT, 'site');
+  const exists = (urlPath) => {
+    const rel = decodeURIComponent(urlPath).replace(/^\//, '');
+    return [rel, rel + '.html', rel.replace(/\/?$/, '/') + 'index.html', ...(rel === '' ? ['index.html'] : [])]
+      .some((c) => existsSync(join(siteDir, c)) && statSync(join(siteDir, c)).isFile());
+  };
+  const broken = [];
+  let checked = 0;
+  for (const f of builtPages()) {
+    const rel = f.slice(siteDir.length + 1);
+    const pagePath = '/' + (rel.endsWith('index.html') ? rel.slice(0, -'index.html'.length) : rel.replace(/\.html$/, ''));
+    const html = readFileSync(f, 'utf8').replace(/<script[\s\S]*?<\/script>/g, '').replace(/<!--[\s\S]*?-->/g, '');
+    for (const m of html.matchAll(/<a\b[^>]*\shref="([^"]+)"/g)) {
+      const href = m[1];
+      if (/^(https?:|mailto:|tel:|javascript:|#|data:)/.test(href)) continue;
+      const url = new URL(href, 'https://freellmapihub.com' + pagePath);
+      checked += 1;
+      if (!exists(url.pathname)) broken.push(`${rel} -> ${href}`);
+    }
+  }
+  assert.ok(checked > 1000, `the check reached the links (${checked})`);
+  assert.deepEqual(broken, [], 'internal links that resolve to no page');
+});
+
+test('/programs/ resolves to a page that links both program pages', () => {
+  builtPages();
+  const html = readFileSync(join(ROOT, 'site/programs/index.html'), 'utf8');
+  assert.match(html, /href="startups"/);
+  assert.match(html, /href="research"/);
+  assert.match(html, /<link rel="canonical" href="https:\/\/freellmapihub\.com\/programs\/">/);
+});
+
+test('sitemap lists every indexable page except the deliberately omitted ones, with a data-derived lastmod', () => {
+  const pages = builtPages();
+  const sitemap = readFileSync(join(ROOT, 'site/sitemap.xml'), 'utf8');
+  const listed = new Set([...sitemap.matchAll(/<loc>https:\/\/freellmapihub\.com\/([^<]*)<\/loc>/g)].map((m) => m[1]));
+  const missing = [];
+  for (const f of pages) {
+    const rel = f.slice(join(ROOT, 'site').length + 1);
+    if (rel === '404.html' || rel.startsWith('updates/page/') || /^state\/\d{4}-\d{2}\//.test(rel)) continue; // 404 is not a page; pagination follows the commit count (test above)
+    const html = readFileSync(f, 'utf8');
+    if (/<meta name="robots" content="noindex">/.test(html)) continue; // redirect stubs and legal pages
+    const path = rel === 'index.html' ? '' : rel.replace(/index\.html$/, '').replace(/\.html$/, '');
+    if (!listed.has(path)) missing.push(path || '/');
+  }
+  assert.deepEqual(missing, [], 'indexable pages missing from sitemap.xml');
+  const dates = new Set([...sitemap.matchAll(/<lastmod>([^<]*)<\/lastmod>/g)].map((m) => m[1]));
+  assert.ok(dates.size > 1, 'lastmod must follow the data, not stamp every page with one build date');
+  const gen = JSON.parse(readFileSync(DATA, 'utf8'));
+  const p = gen.providers[0];
+  assert.match(sitemap, new RegExp(`/p/${p.slug}</loc><lastmod>${p.last_verified}</lastmod>`));
+  // the monthly reports live in their own git-derived sitemap, advertised from robots.txt
+  const stateMap = readFileSync(join(ROOT, 'site/sitemap-state.xml'), 'utf8');
+  for (const m of readdirSync(join(ROOT, 'site/state')).filter((f) => /^\d{4}-\d{2}$/.test(f))) {
+    assert.match(stateMap, new RegExp(`<loc>https://freellmapihub\\.com/state/${m}/</loc>`), `state/${m} missing from sitemap-state.xml`);
+  }
+  assert.match(readFileSync(join(ROOT, 'site/robots.txt'), 'utf8'), /^Sitemap: https:\/\/freellmapihub\.com\/sitemap-state\.xml$/m);
+});
+
+test('the live state-sitemap check accepts a well-formed file and names every defect', async () => {
+  const { stateSitemapProblems } = await import('./lib/state-sitemap.mjs');
+  const site = 'https://freellmapihub.com';
+  const ok = `<urlset xmlns="x"><url><loc>${site}/state/2026-10/</loc></url></urlset>`;
+  const robots = `Sitemap: ${site}/sitemap.xml\nSitemap: ${site}/sitemap-state.xml\n`;
+  assert.deepEqual(stateSitemapProblems(ok, robots, site).problems, []);
+  assert.equal(stateSitemapProblems('<urlset></urlset>', robots, site).problems.length, 1);
+  assert.equal(stateSitemapProblems(ok.replace('/state/2026-10/', '/p/groq'), robots, site).problems.length, 1);
+  assert.equal(stateSitemapProblems(ok, `Sitemap: ${site}/sitemap.xml\n`, site).problems.length, 1);
 });

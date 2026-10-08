@@ -16,7 +16,7 @@ import * as sortLib from './lib/sort.mjs';
 import { esc, stripTags } from './lib/escape.mjs';
 import { mineHistoryAndSnapshots, HISTORY_FIELDS } from './lib/history.mjs';
 import { flattenFieldChanges, groupChangesByWeek, changesRss, weekTitle, formatValue, reportChangeUrl } from './lib/changes.mjs';
-import { monthlyReport, reportMonths } from './lib/state.mjs';
+import { monthlyReport, reportMonths, monthEndDate } from './lib/state.mjs';
 import { githubProfileUrl } from './lib/contributors.mjs';
 import { resolveBestEntries } from './lib/best.mjs';
 import { openaiClients, litellmYaml } from './lib/client-config.mjs';
@@ -458,6 +458,16 @@ const THEME_GUARD = `<script>(function(){try{var t=localStorage.getItem('theme')
 // If you edit THEME_GUARD or 404.html's inline scripts, recompute these hashes or the page breaks silently.
 const CSP = `<meta http-equiv="Content-Security-Policy" content="script-src 'self' 'sha256-r3FnVnP9W/uaNhK9XkZqH3GIfK4TudOQGYTwoNIjGR4=' 'sha256-YzEhxvq2BwovGsg/RCjKkQdwf+LZmTjIkiQcjXCZMHc='; connect-src 'self' https://api.github.com https://raw.githubusercontent.com; object-src 'none'; base-uri 'self'">`;
 
+// Search engines cut a snippet around 155 characters. Every page's description goes through
+// here, so no page can ship a longer one: cut at a word boundary and end with an ellipsis.
+const META_DESC_MAX = 155;
+const fitDescription = (s) => {
+  const t = String(s ?? '').replace(/\s+/g, ' ').trim();
+  if (t.length <= META_DESC_MAX) return t;
+  const cut = t.slice(0, META_DESC_MAX - 1);
+  return cut.slice(0, cut.lastIndexOf(' ') > 80 ? cut.lastIndexOf(' ') : cut.length).replace(/[\s,;:.\-–—]+$/, '') + '…';
+};
+
 function htmlPage({ title, desc, canonical, main, jsonld, prefix = '../', noindex = false, ogImage = `${SITE}/og.png`, feeds = [], scripts = [] }) {
   // jsonld carries provider names straight from the dataset; writing "<" as
   // the JSON unicode escape (backslash-u-003c) keeps a "</script>" in the
@@ -468,7 +478,7 @@ function htmlPage({ title, desc, canonical, main, jsonld, prefix = '../', noinde
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>${htmlEsc(title)}</title>
-<meta name="description" content="${htmlEsc(desc)}">${noindex ? '\n<meta name="robots" content="noindex">' : ''}
+<meta name="description" content="${htmlEsc(fitDescription(desc))}">${noindex ? '\n<meta name="robots" content="noindex">' : ''}
 ${CSP}
 ${THEME_GUARD}
 <link rel="canonical" href="${htmlEsc(canonical)}">
@@ -478,7 +488,7 @@ ${THEME_GUARD}
 <meta name="theme-color" content="#0a0d0b">
 <meta name="color-scheme" content="dark light">
 <meta property="og:title" content="${htmlEsc(title)}">
-<meta property="og:description" content="${htmlEsc(desc)}">
+<meta property="og:description" content="${htmlEsc(fitDescription(desc))}">
 <meta property="og:type" content="website">
 <meta property="og:url" content="${htmlEsc(canonical)}">
 <meta property="og:image" content="${ogImage}">
@@ -809,7 +819,7 @@ writeFileSync(
   htmlPage({ title: 'Guides & Collections · Free LLM API Hub', desc: 'Data-backed guides to free LLM and AI-model APIs, plus curated collections by constraint: no card, no phone, commercial use, OpenAI-compatible, permanently free, multimodal.', canonical: `${SITE}/guides-and-collections/`, main: hubMain })
 );
 // The old hubs redirect here so existing links and bookmarks keep working.
-const redirectPage = (to) => `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="robots" content="noindex"><meta http-equiv="refresh" content="0; url=${to}"><link rel="canonical" href="${to}"><title>Redirecting…</title></head><body><p>Moved to <a href="${to}">${to}</a>.</p></body></html>`;
+const redirectPage = (to) => `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="robots" content="noindex"><meta http-equiv="refresh" content="0; url=${to}"><link rel="canonical" href="${new URL(to, SITE + '/x/').href}"><title>Redirecting…</title></head><body><p>Moved to <a href="${to}">${to}</a>.</p></body></html>`;
 mkdirSync(join(ROOT, 'site/guides'), { recursive: true });
 mkdirSync(join(ROOT, 'site/collections'), { recursive: true });
 writeFileSync(join(ROOT, 'site/guides/index.html'), redirectPage('../guides-and-collections/'));
@@ -1084,7 +1094,7 @@ if (commits.length) {
       `<main id="main"><div class="wrap"><ul class="upd-list">${updItems}</ul>${pagination(page, prefix)}</div></main>`;
     const target = page === 1 ? join(ROOT, 'site/updates.html') : join(ROOT, `site/updates/page/${page}/index.html`);
     if (page > 1) mkdirSync(dirname(target), { recursive: true });
-    writeFileSync(target, htmlPage({ title: `Updates${page > 1 ? ` · Page ${page}` : ''} · Free LLM API Hub`, desc: 'Published changes to the Free LLM API Hub dataset and site.', canonical: pageHref(page, ''), main: updMain, prefix }));
+    writeFileSync(target, htmlPage({ title: `Updates${page > 1 ? ` · Page ${page}` : ''} · Free LLM API Hub`, desc: 'Published changes to the Free LLM API Hub dataset and site.', canonical: `${SITE}/${pageHref(page, '')}`, main: updMain, prefix }));
   }
 
   const rssItems = commits.slice(0, UPDATES_PER_PAGE)
@@ -1242,6 +1252,20 @@ writeFileSync(join(ROOT, 'site/programs/research.html'), programPage(
   '<tr><th>Program</th><th>Audience</th><th>What you get</th><th>Funds LLM API?</th><th>Who qualifies</th></tr>',
   programs.research.map(researchRowHtml).join('\n'),
   `<p style="margin-top:16px">Building a startup instead? See <a href="startups">free credits for startups</a>.</p>`));
+
+// /programs/ is the directory the two pages live in; without an index it was a 404
+// (nothing linked there, but people and crawlers trim the URL). Generated from the same data.
+writeFileSync(join(ROOT, 'site/programs/index.html'), htmlPage({
+  title: 'Free credit programs for LLM APIs · Free LLM API Hub',
+  desc: `${programs.startups.length + programs.research.length} apply-to-get credit programs that can fund LLM and AI-model API usage, for startups and for students and researchers.`,
+  canonical: `${SITE}/programs/`,
+  main:
+    `<section class="page-hero"><div class="wrap"><nav class="crumbs"><a href="../">Home</a> / Credit programs</nav>` +
+    `<h1>Free credit programs</h1><p class="lede">Credit programs you apply for, as opposed to the <a href="../#explorer">self-serve free tiers</a> you can call today. Volatile, so confirm the current terms before you rely on one.</p></div></section>` +
+    `<main id="main"><div class="wrap prose"><ul>` +
+    `<li><a href="startups">Free credits for startups</a> — ${programs.startups.length} programs</li>` +
+    `<li><a href="research">Free credits for students &amp; researchers</a> — ${programs.research.length} programs</li></ul></div></main>`,
+}));
 
 // regenerate the companion doc tables from the same source (data-first)
 const startupsMd = '| Program | What you get | Funds LLM API? | Who qualifies |\n|---|---|---|---|\n' +
@@ -1615,34 +1639,53 @@ writeFileSync(join(ROOT, 'site/compare/index.html'), htmlPage({
 }));
 
 // ---------- sitemap.xml (site SEO) ----------
-const sitemapUrls = [
-  `${SITE}/`,
-  `${SITE}/models/`,
-  `${SITE}/guides-and-collections/`,
-  `${SITE}/best/`,
-  `${SITE}/api/`,
-  `${SITE}/changes/`,
-  `${SITE}/state/`,
-  `${SITE}/programs/startups`,
-  `${SITE}/programs/research`,
-  ...GUIDES.map((g) => `${SITE}/guides/${g.slug}`),
+// lastmod is the date the page's content last changed in the DATA, not the build
+// date: a provider page moves with its last_verified, a collection or compare page with
+// the newest last_verified among the providers it shows, a state report with its month.
+// Every input is committed data, so the drift-gated sitemap stays deterministic.
+const newest = (dates) => dates.filter(Boolean).sort().pop() || data.generated;
+const lastVerified = (ps) => newest(ps.map((p) => p.last_verified));
+// The monthly state reports are NOT in this drift-gated sitemap: the months that exist
+// follow commit dates, so a PR's own merge commit would add one and fail the gate. They
+// get their own git-derived sitemap (below), advertised from robots.txt and never pinned.
+const stateLastmod = (month, i, all) => {
+  const end = monthEndDate(month);
+  return i === all.length - 1 && data.generated < end ? data.generated : end;
+};
+const sitemapEntries = [
+  [`${SITE}/`, data.generated],
+  [`${SITE}/models/`, data.generated],
+  [`${SITE}/guides-and-collections/`, data.generated],
+  [`${SITE}/best/`, newest([BEST.updated])],
+  [`${SITE}/api/`, data.generated],
+  [`${SITE}/changes/`, data.generated],
+  [`${SITE}/state/`, data.generated],
+  [`${SITE}/programs/`, programs.generated],
+  [`${SITE}/programs/startups`, programs.generated],
+  [`${SITE}/programs/research`, programs.generated],
+  ...GUIDES.map((g) => [`${SITE}/guides/${g.slug}`, data.generated]),
   // Only the first updates page: the number of /updates/page/N/ pages follows
   // the commit count, so listing them made the drift-gated sitemap change with
   // every merge, whatever the PR touched. Crawlers reach them via pagination.
-  ...(commits.length ? [`${SITE}/updates`] : []),
-  ...COLLECTIONS.map((c) => `${SITE}/collections/${c.slug}`),
-  ...providers.map((p) => `${SITE}/p/${p.slug}`),
-  `${SITE}/compare/`,
-  ...comparePairs.map((cp) => `${SITE}/compare/${cp.path}/`),
+  ...(commits.length ? [[`${SITE}/updates`, data.generated]] : []),
+  ...COLLECTIONS.map((c) => [`${SITE}/collections/${c.slug}`, lastVerified(providers.filter(c.filter))]),
+  ...providers.map((p) => [`${SITE}/p/${p.slug}`, p.last_verified || data.generated]),
+  [`${SITE}/compare/`, data.generated],
+  ...comparePairs.map((cp) => [`${SITE}/compare/${cp.path}/`, lastVerified([cp.a, cp.b])]),
 ];
 const sitemap =
   `<?xml version="1.0" encoding="UTF-8"?>\n` +
   `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +
-  sitemapUrls
-    .map((u) => `  <url><loc>${u}</loc><lastmod>${data.generated}</lastmod></url>`)
+  sitemapEntries
+    .map(([u, d]) => `  <url><loc>${u}</loc><lastmod>${d}</lastmod></url>`)
     .join('\n') +
   `\n</urlset>\n`;
 writeFileSync(join(ROOT, 'site/sitemap.xml'), sitemap);
+writeFileSync(join(ROOT, 'site/sitemap-state.xml'),
+  `<?xml version="1.0" encoding="UTF-8"?>\n` +
+  `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +
+  stateReports.map((r, i, all) => `  <url><loc>${SITE}/state/${r.month}/</loc><lastmod>${stateLastmod(r.month, i, all)}</lastmod></url>`).join('\n') +
+  `\n</urlset>\n`);
 
 // ---------- fingerprint of the gitignored derived files (drift gate) ----------
 // derived-fingerprints.json pins every build output under site/ that is
@@ -1667,7 +1710,7 @@ const isDateRelative = (rel) => rel.startsWith('site/p/') || rel.startsWith('sit
 // monthly state reports (state/) are mined from the same git history, so they
 // are excluded for the same reason.
 const isGitLogDerived = (rel) => rel === 'site/feed.xml' || rel === 'site/api/v1/history.json' || rel === 'site/updates.html' || rel.startsWith('site/updates/') ||
-  rel === 'site/changes.xml' || rel === 'site/api/v1/changes.json' || rel.startsWith('site/changes/') || rel.startsWith('site/state/');
+  rel === 'site/changes.xml' || rel === 'site/api/v1/changes.json' || rel.startsWith('site/changes/') || rel.startsWith('site/state/') || rel === 'site/sitemap-state.xml';
 const derivedFingerprints = deriveFingerprints();
 if (derivedFingerprints) {
   writeFileSync(join(ROOT, 'derived-fingerprints.json'), JSON.stringify(derivedFingerprints, null, 2) + String.fromCharCode(10));
