@@ -38,6 +38,9 @@ jobs:
             echo "tag $V already exists — nothing to do"
             exit 0
           fi
+          # An annotated tag needs a tagger identity; the runner has none.
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git tag -a "$V" -m "Dataset $V"
           git push origin "$V"
           echo "created and pushed tag $V"
