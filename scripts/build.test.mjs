@@ -1270,7 +1270,7 @@ test('validate rejects a category that contradicts free_type', () => {
 });
 
 // ---------- score inputs: is_text_llm, model_tier, free_limits ----------
-import { tierForRating, MODEL_TIER_THRESHOLDS, MODEL_TIER_MIN_VOTES } from './lib/model-tier.mjs';
+import { tierForRating, nearBoundary, MODEL_TIER_THRESHOLDS, MODEL_TIER_MIN_VOTES, MODEL_TIER_BOUNDARY_MARGIN } from './lib/model-tier.mjs';
 
 // Runs validate.mjs on a mutated copy of the dataset and removes the copy afterwards.
 const validateAfter = (mutate) => {
@@ -1297,6 +1297,16 @@ test('model tier thresholds: edges, tier 0 versus no source, and the minimum vot
   assert.equal(MODEL_TIER_MIN_VOTES, 1000);
 });
 
+test('boundary: an interval that crosses or comes within the margin of a threshold is flagged', () => {
+  assert.equal(MODEL_TIER_BOUNDARY_MARGIN, 5);
+  assert.equal(nearBoundary([1445.4, 1460.3]), true, 'crosses 1450');
+  assert.equal(nearBoundary([1332.2, 1351.3]), true, '2.2 points above 1330');
+  assert.equal(nearBoundary([1432.3, 1443.1]), false, '6.9 below 1450 and far from 1400');
+  assert.equal(nearBoundary([1337, 1351]), false, '7 points above 1330');
+  assert.equal(nearBoundary(null), false);
+  assert.equal(nearBoundary([1, 'x']), false);
+});
+
 test('every provider states is_text_llm; a tier always matches its cited rating and never sits on a trial credit', () => {
   const { providers } = JSON.parse(readFileSync(DATA, 'utf8'));
   for (const p of providers) {
@@ -1320,6 +1330,8 @@ test('validate rejects a tier that disagrees with its rating, a tier without a s
   assert.equal(validateAfter((d) => { delete rated(d).model_tier_source; }), false);
   assert.equal(validateAfter((d) => { delete d.providers[0].is_text_llm; }), false);
   assert.equal(validateAfter((d) => { const p = rated(d); p.model_tier_source.votes = 999; }), false);
+  assert.equal(validateAfter((d) => { const p = d.providers.find((x) => x.model_tier_source?.boundary); delete p.model_tier_source.boundary; }), false, 'a boundary the interval implies cannot be omitted');
+  assert.equal(validateAfter((d) => { const p = d.providers.find((x) => x.model_tier_source && !x.model_tier_source.boundary); p.model_tier_source.boundary = true; }), false, 'nor invented');
   assert.equal(validateAfter(() => {}), true, 'the unmodified dataset passes through the same path');
 });
 

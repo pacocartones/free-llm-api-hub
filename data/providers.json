@@ -26,7 +26,7 @@
       "env_key": "GEMINI_API_KEY",
       "is_text_llm": true,
       "model_tier": 3,
-      "model_tier_source": {"model":"gemini-2.5-pro","arena_model":"gemini-2.5-pro","match":"exact","rating":1445.6,"votes":124834,"snapshot":"2026-10-02","url":"https://huggingface.co/datasets/lmarena-ai/leaderboard-dataset"},
+      "model_tier_source": {"model":"gemini-2.5-pro","arena_model":"gemini-2.5-pro","match":"exact","rating":1445.6,"ci":[1443.1,1448],"boundary":true,"votes":124834,"snapshot":"2026-10-02","url":"https://huggingface.co/datasets/lmarena-ai/leaderboard-dataset"},
       "verified": true,
       "last_verified": "2026-10-08"
     },
@@ -50,9 +50,9 @@
       "openai_base_url": "https://api.groq.com/openai/v1",
       "env_key": "GROQ_API_KEY",
       "is_text_llm": true,
-      "model_tier": 2,
-      "model_tier_source": {"model":"openai/gpt-oss-120b","arena_model":"gpt-oss-120b","match":"exact","rating":1351.6,"votes":30018,"snapshot":"2026-10-02","url":"https://huggingface.co/datasets/lmarena-ai/leaderboard-dataset"},
-      "free_limits": {"requests_per_minute":30,"requests_per_day":1000,"tokens_per_day":200000,"scope":"free plan, each of openai/gpt-oss-120b and openai/gpt-oss-20b; limits vary by model","source":"https://console.groq.com/docs/rate-limits","checked":"2026-10-08"},
+      "model_tier": 3,
+      "model_tier_source": {"model":"qwen/qwen3.8-27b","arena_model":"qwen3.8-27b","match":"variant","rating":1437.7,"ci":[1432.3,1443.1],"votes":18462,"snapshot":"2026-10-02","url":"https://huggingface.co/datasets/lmarena-ai/leaderboard-dataset"},
+      "free_limits": {"requests_per_minute":30,"requests_per_day":1000,"tokens_per_day":200000,"scope":"free plan, each of openai/gpt-oss-120b, openai/gpt-oss-20b and qwen/qwen3.8-27b; limits vary by model","source":"https://console.groq.com/docs/rate-limits","checked":"2026-10-08"},
       "verified": true,
       "last_verified": "2026-10-08"
     },
@@ -77,7 +77,7 @@
       "env_key": "OPENROUTER_API_KEY",
       "is_text_llm": true,
       "model_tier": 4,
-      "model_tier_source": {"model":"google/gemma-4-31b-it:free","arena_model":"gemma-4-31b","match":"variant","rating":1452.8,"votes":6133,"boundary":true,"snapshot":"2026-10-02","url":"https://huggingface.co/datasets/lmarena-ai/leaderboard-dataset"},
+      "model_tier_source": {"model":"google/gemma-4-31b-it:free","arena_model":"gemma-4-31b","match":"variant","rating":1452.8,"ci":[1445.4,1460.3],"boundary":true,"votes":6133,"snapshot":"2026-10-02","url":"https://huggingface.co/datasets/lmarena-ai/leaderboard-dataset"},
       "free_limits": {"requests_per_minute":20,"requests_per_day":50,"scope":"free models, accounts with under 10 credits purchased lifetime (1,000 requests/day once 10+ credits are purchased); table not readable in a plain fetch, figures are those of the entry's own verification","source":"https://openrouter.ai/docs/api-reference/limits","checked":"2026-10-08"},
       "verified": true,
       "last_verified": "2026-10-08"
@@ -103,7 +103,7 @@
       "env_key": "CLOUDFLARE_API_TOKEN",
       "is_text_llm": true,
       "model_tier": 2,
-      "model_tier_source": {"model":"@cf/google/gemma-3-12b-it","arena_model":"gemma-3-12b-it","match":"exact","rating":1341.8,"votes":3829,"snapshot":"2026-10-02","url":"https://huggingface.co/datasets/lmarena-ai/leaderboard-dataset"},
+      "model_tier_source": {"model":"@cf/google/gemma-3-12b-it","arena_model":"gemma-3-12b-it","match":"exact","rating":1341.8,"ci":[1332.2,1351.3],"boundary":true,"votes":3829,"snapshot":"2026-10-02","url":"https://huggingface.co/datasets/lmarena-ai/leaderboard-dataset"},
       "free_limits": {"requests_per_minute":300,"scope":"text generation; models that require Workers Paid: 20 requests/minute per model. The daily allowance is 10,000 Neurons, a unit that is not requests or tokens","source":"https://developers.cloudflare.com/workers-ai/platform/limits/","checked":"2026-10-08"},
       "verified": true,
       "last_verified": "2026-10-08"
@@ -129,7 +129,7 @@
       "env_key": "COHERE_API_KEY",
       "is_text_llm": true,
       "model_tier": 2,
-      "model_tier_source": {"model":"command-a-03-2025","arena_model":"command-a-03-2025","match":"exact","rating":1353.7,"votes":55467,"snapshot":"2026-10-02","url":"https://huggingface.co/datasets/lmarena-ai/leaderboard-dataset"},
+      "model_tier_source": {"model":"command-a-03-2025","arena_model":"command-a-03-2025","match":"exact","rating":1353.7,"ci":[1350.2,1357.2],"votes":55467,"snapshot":"2026-10-02","url":"https://huggingface.co/datasets/lmarena-ai/leaderboard-dataset"},
       "free_limits": {"requests_per_minute":20,"requests_per_month":1000,"scope":"trial key, chat endpoint; 1,000 API calls per month in total","source":"https://docs.cohere.com/docs/rate-limits","checked":"2026-10-08"},
       "verified": true,
       "last_verified": "2026-10-08"
@@ -251,7 +251,7 @@
       "env_key": "ZAI_API_KEY",
       "is_text_llm": true,
       "model_tier": 2,
-      "model_tier_source": {"model":"glm-4.7-flash","arena_model":"glm-4.7-flash","match":"exact","rating":1364.9,"votes":11977,"snapshot":"2026-10-02","url":"https://huggingface.co/datasets/lmarena-ai/leaderboard-dataset"},
+      "model_tier_source": {"model":"glm-4.7-flash","arena_model":"glm-4.7-flash","match":"exact","rating":1364.9,"ci":[1359.1,1370.6],"votes":11977,"snapshot":"2026-10-02","url":"https://huggingface.co/datasets/lmarena-ai/leaderboard-dataset"},
       "verified": true,
       "last_verified": "2026-10-08"
     },
@@ -516,7 +516,7 @@
       "env_key": "SAMBANOVA_API_KEY",
       "is_text_llm": true,
       "model_tier": 3,
-      "model_tier_source": {"model":"DeepSeek-V3.1","arena_model":"deepseek-v3.1","match":"variant","rating":1417.1,"votes":14540,"snapshot":"2026-10-02","url":"https://huggingface.co/datasets/lmarena-ai/leaderboard-dataset"},
+      "model_tier_source": {"model":"DeepSeek-V3.1","arena_model":"deepseek-v3.1","match":"variant","rating":1417.1,"ci":[1411.1,1423.2],"votes":14540,"snapshot":"2026-10-02","url":"https://huggingface.co/datasets/lmarena-ai/leaderboard-dataset"},
       "free_limits": {"requests_per_minute":20,"requests_per_day":20,"tokens_per_day":200000,"scope":"Free Tier (no payment method linked), each of DeepSeek-V3.1, Meta-Llama-3.3-70B-Instruct and gpt-oss-120b","source":"https://docs.sambanova.ai/docs/en/models/rate-limits","checked":"2026-10-08"},
       "verified": true,
       "last_verified": "2026-08-13"
@@ -805,7 +805,7 @@
       "env_key": "MODELSCOPE_API_KEY",
       "is_text_llm": true,
       "model_tier": 4,
-      "model_tier_source": {"model":"Tencent-Hunyuan/Hy3","arena_model":"hy3","match":"variant","rating":1456,"votes":10476,"boundary":true,"snapshot":"2026-10-02","url":"https://huggingface.co/datasets/lmarena-ai/leaderboard-dataset"},
+      "model_tier_source": {"model":"Tencent-Hunyuan/Hy3","arena_model":"hy3","match":"variant","rating":1456,"ci":[1449.5,1462.5],"boundary":true,"votes":10476,"snapshot":"2026-10-02","url":"https://huggingface.co/datasets/lmarena-ai/leaderboard-dataset"},
       "verified": true,
       "last_verified": "2026-10-08"
     },

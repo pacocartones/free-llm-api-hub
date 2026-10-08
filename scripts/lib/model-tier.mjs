@@ -14,6 +14,17 @@ export const MODEL_TIER_THRESHOLDS = [[4, 1450], [3, 1400], [2, 1330], [1, 1250]
 export const MODEL_TIER_MIN_VOTES = 1000;
 export const MODEL_TIER_ATTRIBUTION = 'Model quality data: LMArena Arena Leaderboard Dataset (CC-BY-4.0)';
 
+// A tier is "near a boundary" when the rating's 95% interval crosses a threshold or comes within
+// this many rating points of one: the tier could change at the next snapshot. Declared, public.
+export const MODEL_TIER_BOUNDARY_MARGIN = 5;
+
+/** True when the interval [lo, hi] crosses or lies within the margin of a tier threshold. */
+export function nearBoundary(ci) {
+  if (!Array.isArray(ci) || ci.length !== 2 || !ci.every(Number.isFinite)) return false;
+  const [lo, hi] = ci;
+  return MODEL_TIER_THRESHOLDS.some(([, t]) => lo - MODEL_TIER_BOUNDARY_MARGIN <= t && t <= hi + MODEL_TIER_BOUNDARY_MARGIN);
+}
+
 /** Tier for a rating; null when the rating is not a finite number. */
 export function tierForRating(rating) {
   if (typeof rating !== 'number' || !Number.isFinite(rating)) return null;

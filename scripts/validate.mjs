@@ -13,7 +13,7 @@ import Ajv2020 from 'ajv/dist/2020.js';
 import addFormats from 'ajv-formats';
 import { bestPickErrors } from './lib/best.mjs';
 import { providerFigures, figureErrors } from './lib/figures.mjs';
-import { tierForRating, MODEL_TIER_MIN_VOTES } from './lib/model-tier.mjs';
+import { tierForRating, nearBoundary, MODEL_TIER_MIN_VOTES } from './lib/model-tier.mjs';
 import { readdirSync } from 'node:fs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -156,6 +156,8 @@ for (const p of data.providers ?? []) {
   if (tier !== null && src !== null) {
     check(tier === tierForRating(src.rating), `${id}: model_tier ${tier} does not match the cited rating ${src.rating} (expected ${tierForRating(src.rating)})`);
     check(Number.isInteger(src.votes) && src.votes >= MODEL_TIER_MIN_VOTES, `${id}: the rated row needs at least ${MODEL_TIER_MIN_VOTES} votes`);
+    check(Array.isArray(src.ci) && src.ci.length === 2 && src.ci[0] <= src.rating && src.rating <= src.ci[1], `${id}: model_tier_source.ci must be [lower, upper] around the rating`);
+    check((src.boundary === true) === nearBoundary(src.ci), `${id}: model_tier_source.boundary must be ${nearBoundary(src.ci)} for ci ${JSON.stringify(src.ci)} (crosses or is within 5 points of a threshold)`);
     check(p.is_text_llm === true, `${id}: model_tier only applies to a text-LLM offer`);
     check(p.free_type !== 'trial-credit', `${id}: a one-time trial credit is not continuous free access, so it carries no model_tier`);
     check(DATE_RE.test(src.snapshot || '') && src.snapshot <= data.generated, `${id}: model_tier_source.snapshot must be a date not after the dataset's generated date`);
