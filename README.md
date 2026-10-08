@@ -111,7 +111,7 @@ Every provider also has its own page with the full details and a copy-ready quic
 
 ## The best free LLM APIs
 
-Our editorial top 20 — hand-picked from the [69 verified providers](data/providers.json), ranked for real-world usefulness, not an automatic filter. Every row links to its full verified profile: free tier, rate limits and the catch are checked against the provider's own docs. The full editorial write-up is on the [**/best page ↗**](https://freellmapihub.com/best/).
+Our editorial top 20 — hand-picked from the [<!-- FIG:verified -->67<!-- /FIG --> verified providers](data/providers.json), ranked for real-world usefulness, not an automatic filter. Every row links to its full verified profile: free tier, rate limits and the catch are checked against the provider's own docs. The full editorial write-up is on the [**/best page ↗**](https://freellmapihub.com/best/).
 
 <sub>💳 no card · 📵 no phone · 📱 phone required · 🏢 commercial OK · 🔬 eval only · 🔌 OpenAI-compatible</sub>
 
@@ -140,7 +140,7 @@ Our editorial top 20 — hand-picked from the [69 verified providers](data/provi
 | **[Scaleway Generative APIs](https://www.scaleway.com/en/pricing/model-as-a-service/)**<br><sub>🏆 Best EU open models</sub><br><sub>💳 no card · 🔌 OpenAI-compat</sub> | 1,000,000 tokens free + 60 min Whisper transcription; billing starts at token 1,000,001 | European provider (France). Free allowance is a one-time token bucket, not time-limited. Official rate limits apply once a valid payment method is registered; identity verification raises them. | ✅ 2026-10-08 |
 <!-- AUTOGEN:best:end -->
 
-That's the shortlist. The full dataset — all 69 providers, every ongoing tier and one-time credit, filterable and machine-readable — lives in [**data/providers.json**](data/providers.json) and the [interactive explorer ↗](https://freellmapihub.com/).
+That's the shortlist. The full dataset — all <!-- FIG:providers -->68<!-- /FIG --> providers, every ongoing tier and one-time credit, filterable and machine-readable — lives in [**data/providers.json**](data/providers.json) and the [interactive explorer ↗](https://freellmapihub.com/).
 
 ## Notably NOT free
 

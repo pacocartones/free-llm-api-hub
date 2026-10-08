@@ -12,6 +12,8 @@ import { dirname, join, resolve } from 'node:path';
 import Ajv2020 from 'ajv/dist/2020.js';
 import addFormats from 'ajv-formats';
 import { bestPickErrors } from './lib/best.mjs';
+import { providerFigures, figureErrors } from './lib/figures.mjs';
+import { readdirSync } from 'node:fs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const FILE = process.argv[2] ? resolve(process.argv[2]) : join(ROOT, 'data/providers.json');
@@ -211,6 +213,16 @@ try {
   }
   check(report.count === (report.results ?? []).length, `probe-report: count (${report.count}) must equal results.length (${(report.results ?? []).length})`);
 } catch (e) { errors.push('probe-report.json: ' + e.message); }
+
+// ---------- provider counts quoted in prose (README, docs, editorial copy) ----------
+// A typed "69 verified providers" outlived the dataset it described. Prose must use a
+// {verified}/{providers} token or a FIG marker; any literal count that disagrees fails.
+{
+  const figs = providerFigures(data.providers);
+  const sources = ['README.md', 'CONTRIBUTING.md', 'GOVERNANCE.md', 'data/best.json', 'site/index.html',
+    ...readdirSync(join(ROOT, 'docs')).filter((f) => f.endsWith('.md')).map((f) => 'docs/' + f)];
+  for (const rel of sources) errors.push(...figureErrors(readFileSync(join(ROOT, rel), 'utf8'), figs, rel));
+}
 
 if (errors.length) {
   console.error(`✗ validation failed (${errors.length} issue${errors.length > 1 ? 's' : ''}):`);

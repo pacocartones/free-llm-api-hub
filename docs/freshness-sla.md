@@ -83,7 +83,7 @@ Hovering shows `Verified Xd ago · YYYY-MM-DD`. The unverified case shows a yell
 
 ## 7. The trust summary line
 
-The hero's trust line — `69/69 verified against official docs · oldest entry 15d · 90-day re-verification SLA` — is computed client-side in `site/explorer.js` from the same rules: verified count, oldest age, and `SLA_DAYS` pulled from `shared-rules.js`. It is a read-out of §2 and §3, not a separate claim.
+The hero's trust line — `N/N verified against official docs · oldest entry 15d · 90-day re-verification SLA` — is computed client-side in `site/explorer.js` from the same rules: verified count, oldest age, and `SLA_DAYS` pulled from `shared-rules.js`. It is a read-out of §2 and §3, not a separate claim.
 
 ## 8. Invariants a change must not break
 

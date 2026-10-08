@@ -1,6 +1,6 @@
 {
   "h1": "The best free LLM APIs right now",
-  "desc": "Our editorial top 20 — hand-picked from the 69 verified providers, ranked for real-world usefulness.",
+  "desc": "Our editorial top 20 — hand-picked from the {verified} verified providers, ranked for real-world usefulness.",
   "intro": "This is the editorial ranking: not an automatic filter, but the twenty free tiers we would actually reach for first. Each pick links to its full verified profile — free tier, rate limits and the catch are all checked against the provider's own docs on the linked page. The list is reviewed and re-verified with the dataset.",
   "updated": "2026-10-08",
   "entries": [

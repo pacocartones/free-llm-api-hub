@@ -1268,3 +1268,99 @@ test('validate rejects a category that contradicts free_type', () => {
   writeFileSync(fixture, JSON.stringify(data));
   assert.equal(exitOk(['scripts/validate.mjs', fixture]), false);
 });
+
+// ---------- derived figures, canonicals, sitemap and /programs/ (phase 0 public errors) ----------
+import { providerFigures, expandFigures, injectInlineFigures, figureErrors } from './lib/figures.mjs';
+import { statSync } from 'node:fs';
+
+const walkHtml = (dir) => readdirSync(dir, { withFileTypes: true }).flatMap((e) =>
+  e.isDirectory() ? walkHtml(join(dir, e.name)) : e.name.endsWith('.html') ? [join(dir, e.name)] : []);
+const builtPages = () => { run(['scripts/build.mjs']); return walkHtml(join(ROOT, 'site')); };
+
+test('figures: tokens and FIG markers take the number from the data', () => {
+  const figs = providerFigures([{ verified: true }, { verified: true }, { verified: false }]);
+  assert.deepEqual(figs, { providers: 3, verified: 2 });
+  assert.equal(expandFigures('{verified} of {providers}', figs), '2 of 3');
+  assert.equal(injectInlineFigures('all <!-- FIG:providers -->99<!-- /FIG --> providers', figs), 'all <!-- FIG:providers -->3<!-- /FIG --> providers');
+});
+
+test('figures: a typed count that disagrees with the data is reported, one that matches is not', () => {
+  const figs = { providers: 68, verified: 67 };
+  assert.equal(figureErrors('the 69 verified providers', figs, 'x').length, 1);
+  assert.equal(figureErrors('all 69 providers', figs, 'x').length, 1);
+  assert.deepEqual(figureErrors('the 67 verified providers and all 68 providers', figs, 'x'), []);
+  assert.deepEqual(figureErrors('a <!-- FIG:verified -->12<!-- /FIG --> verified providers marker', figs, 'x'), []);
+  assert.deepEqual(figureErrors('expected >10 providers in the mined history', figs, 'x'), []);
+});
+
+test('no source or generated page states a provider count that differs from providers.json', () => {
+  const figs = providerFigures(JSON.parse(readFileSync(DATA, 'utf8')).providers);
+  // updates/, changes/ and state/ quote git history (old commit subjects), not the dataset
+  const files = ['README.md', 'data/best.json', ...builtPages().map((f) => f.slice(ROOT.length + 1))
+    .filter((rel) => !/^site\/(updates|changes|state)(\/|\.html$)/.test(rel))];
+  const errs = files.flatMap((rel) => figureErrors(readFileSync(join(ROOT, rel), 'utf8'), figs, rel));
+  assert.deepEqual(errs, []);
+  const best = readFileSync(join(ROOT, 'site/best/index.html'), 'utf8');
+  assert.match(best, new RegExp(`from the ${figs.verified} verified providers`));
+});
+
+test('every page declares an absolute canonical URL', () => {
+  for (const f of builtPages()) {
+    const html = readFileSync(f, 'utf8');
+    const m = html.match(/<link rel="canonical" href="([^"]*)"/);
+    if (!m) continue; // 404.html and the like declare none
+    assert.match(m[1], /^https:\/\/freellmapihub\.com\//, `${f.slice(ROOT.length + 1)}: canonical "${m[1]}" is not absolute`);
+  }
+});
+
+test('the home meta description fits a search snippet (<= 155 characters)', () => {
+  const index = readFileSync(join(ROOT, 'site/index.html'), 'utf8');
+  const desc = index.match(/<meta name="description" content="([^"]*)"/)[1];
+  assert.ok(desc.length <= 155, `home description is ${desc.length} characters`);
+});
+
+test('/programs/ resolves to a page that links both program pages', () => {
+  builtPages();
+  const html = readFileSync(join(ROOT, 'site/programs/index.html'), 'utf8');
+  assert.match(html, /href="startups"/);
+  assert.match(html, /href="research"/);
+  assert.match(html, /<link rel="canonical" href="https:\/\/freellmapihub\.com\/programs\/">/);
+});
+
+test('sitemap lists every indexable page except the deliberately omitted ones, with a data-derived lastmod', () => {
+  const pages = builtPages();
+  const sitemap = readFileSync(join(ROOT, 'site/sitemap.xml'), 'utf8');
+  const listed = new Set([...sitemap.matchAll(/<loc>https:\/\/freellmapihub\.com\/([^<]*)<\/loc>/g)].map((m) => m[1]));
+  const missing = [];
+  for (const f of pages) {
+    const rel = f.slice(join(ROOT, 'site').length + 1);
+    if (rel === '404.html' || rel.startsWith('updates/page/') || /^state\/\d{4}-\d{2}\//.test(rel)) continue; // 404 is not a page; pagination follows the commit count (test above)
+    const html = readFileSync(f, 'utf8');
+    if (/<meta name="robots" content="noindex">/.test(html)) continue; // redirect stubs and legal pages
+    const path = rel === 'index.html' ? '' : rel.replace(/index\.html$/, '').replace(/\.html$/, '');
+    if (!listed.has(path)) missing.push(path || '/');
+  }
+  assert.deepEqual(missing, [], 'indexable pages missing from sitemap.xml');
+  const dates = new Set([...sitemap.matchAll(/<lastmod>([^<]*)<\/lastmod>/g)].map((m) => m[1]));
+  assert.ok(dates.size > 1, 'lastmod must follow the data, not stamp every page with one build date');
+  const gen = JSON.parse(readFileSync(DATA, 'utf8'));
+  const p = gen.providers[0];
+  assert.match(sitemap, new RegExp(`/p/${p.slug}</loc><lastmod>${p.last_verified}</lastmod>`));
+  // the monthly reports live in their own git-derived sitemap, advertised from robots.txt
+  const stateMap = readFileSync(join(ROOT, 'site/sitemap-state.xml'), 'utf8');
+  for (const m of readdirSync(join(ROOT, 'site/state')).filter((f) => /^\d{4}-\d{2}$/.test(f))) {
+    assert.match(stateMap, new RegExp(`<loc>https://freellmapihub\\.com/state/${m}/</loc>`), `state/${m} missing from sitemap-state.xml`);
+  }
+  assert.match(readFileSync(join(ROOT, 'site/robots.txt'), 'utf8'), /^Sitemap: https:\/\/freellmapihub\.com\/sitemap-state\.xml$/m);
+});
+
+test('the live state-sitemap check accepts a well-formed file and names every defect', async () => {
+  const { stateSitemapProblems } = await import('./lib/state-sitemap.mjs');
+  const site = 'https://freellmapihub.com';
+  const ok = `<urlset xmlns="x"><url><loc>${site}/state/2026-10/</loc></url></urlset>`;
+  const robots = `Sitemap: ${site}/sitemap.xml\nSitemap: ${site}/sitemap-state.xml\n`;
+  assert.deepEqual(stateSitemapProblems(ok, robots, site).problems, []);
+  assert.equal(stateSitemapProblems('<urlset></urlset>', robots, site).problems.length, 1);
+  assert.equal(stateSitemapProblems(ok.replace('/state/2026-10/', '/p/groq'), robots, site).problems.length, 1);
+  assert.equal(stateSitemapProblems(ok, `Sitemap: ${site}/sitemap.xml\n`, site).problems.length, 1);
+});
