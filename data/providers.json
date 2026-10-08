@@ -1100,7 +1100,7 @@
       "openai_base_url": "https://api.hunyuan.cloud.tencent.com/v1",
       "env_key": "HUNYUAN_API_KEY",
       "verified": true,
-      "last_verified": "2026-08-14"
+      "last_verified": "2026-10-08"
     },
     {
       "slug": "voyage-ai",
