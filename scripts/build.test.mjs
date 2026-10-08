@@ -16,7 +16,7 @@ import { esc, stripTags } from './lib/escape.mjs';
 import { mineProviderHistory, assertHistoryPlausible, historyFromRevisions } from './lib/history.mjs';
 import { isoWeek, flattenFieldChanges, groupChangesByWeek, changesRss, xmlEsc, reportChangeUrl } from './lib/changes.mjs';
 import { monthlyReport, reportMonths, monthEndDate } from './lib/state.mjs';
-import { countExternalContributorsFromLog } from './lib/contributors.mjs';
+import { externalContributors, countExternalContributors, githubProfileUrl } from './lib/contributors.mjs';
 import { buildOgManifest } from './lib/og.mjs';
 import { explorerRowHtml } from './lib/rows.mjs';
 import { weeklyPacing, weeklyBatch, WEEKLY_CAP, MIN_AGE_DAYS } from './lib/pacing.mjs';
@@ -388,27 +388,51 @@ test('the git-mined history miner is plausible directly (no build needed)', () =
   assertHistoryPlausible(history);
 });
 
-test('external contributor count excludes maintainer and bots, dedupes by email', () => {
-  const log = [
-    'pacocartones\x1f253313177+pacocartones@users.noreply.github.com', // maintainer (noreply)
-    'pacocartones\x1fmanusanchezhl@gmail.com', // maintainer (personal email)
-    'github-actions[bot]\x1fgithub-actions[bot]@users.noreply.github.com', // bot
-    'dependabot[bot]\x1f49699333+dependabot[bot]@users.noreply.github.com', // bot
-    'coderabbitai[bot]\x1fcoderabbitai[bot]@users.noreply.github.com', // bot
-    'Jhansi Oruganti\x1fjhansi@example.com', // external, twice → one contributor
-    'Jhansi Oruganti\x1fjhansi@example.com',
-    'Another Dev\x1fanother@example.com', // external
-    '', // trailing newline from git output
-  ].join('\n');
-  assert.equal(countExternalContributorsFromLog(log), 2);
+test('external contributors exclude the maintainers and bots by login and count one per person', () => {
+  const commits = [
+    { login: 'pacocartones', name: 'pacocartones', subject: 'maintainer' },
+    { login: 'PacoCartones', name: 'Paco', subject: 'maintainer, other case' },
+    { login: 'LeonMAG', name: 'Leon Marcos', subject: 'maintainer' },
+    { login: 'github-actions[bot]', name: 'github-actions[bot]', subject: 'bot' },
+    { login: null, name: 'dependabot[bot]', subject: 'bot without an account' },
+    { login: 'JhansiOruganti-43', name: 'Jhansi Oruganti', subject: 'first' },
+    { login: 'jhansioruganti-43', name: 'Jhansi Oruganti', subject: 'second, same person' },
+    { login: 'another-dev', name: 'Another Dev', subject: 'external' },
+    { login: null, name: 'No Account', subject: 'commit the API could not link' },
+  ];
+  const got = externalContributors(commits);
+  assert.deepEqual(got.map((c) => c.login ?? c.name), ['JhansiOruganti-43', 'another-dev', 'No Account']);
+  assert.equal(got[0].subject, 'first', 'a person is listed with their FIRST commit');
+  assert.equal(countExternalContributors(commits), 3);
+  assert.equal(githubProfileUrl(got[1]), 'https://github.com/another-dev');
+  assert.equal(githubProfileUrl(got[2]), null);
 });
 
-test('external contributor count tolerates empty and malformed history', () => {
-  assert.equal(countExternalContributorsFromLog(''), 0);
-  assert.equal(countExternalContributorsFromLog('\n'), 0);
-  assert.equal(countExternalContributorsFromLog('line without separator'), 0);
-  assert.equal(countExternalContributorsFromLog('Only Name\x1f'), 0); // empty email
-  assert.equal(countExternalContributorsFromLog('\x1fonly@email.com'), 0); // empty name
+test('external contributors tolerate empty and malformed input', () => {
+  assert.deepEqual(externalContributors([]), []);
+  assert.deepEqual(externalContributors(undefined), []);
+  assert.deepEqual(externalContributors([null, { login: null, name: '', subject: 'x' }, { login: 'a', name: 'A', subject: '' }]), []);
+});
+
+test('contributor data and scripts carry no e-mail address of any kind', () => {
+  // Identity is the GitHub login. Reports name the file, never the address.
+  const anyAddress = /[\w.+-]+@[\w-]+(?:\.[\w-]+)+/;
+  for (const rel of ['data/contributors.json', 'scripts/lib/contributors.mjs', 'scripts/update-contributors.mjs']) {
+    assert.ok(!anyAddress.test(readFileSync(join(ROOT, rel), 'utf8')), `${rel} contains an e-mail address`);
+  }
+  assert.ok(anyAddress.test('someone@example.invalid'), 'the pattern would catch an address');
+});
+
+test('no tracked file carries a personal mailbox address', () => {
+  // Contributors are identified by GitHub login; fixtures use the reserved .invalid TLD.
+  const personal = /[\w.+-]+@(?:gmail|googlemail|hotmail|outlook|live|yahoo|icloud|proton(?:mail)?|pm)\.[a-z.]+/i;
+  const files = execFileSync('git', ['ls-files', '-z'], { cwd: ROOT, encoding: 'utf8' }).split('\0').filter(Boolean);
+  const hits = [];
+  for (const rel of files) {
+    if (/\.(png|jpe?g|webp|gif|woff2?|ico)$/i.test(rel)) continue;
+    if (personal.test(readFileSync(join(ROOT, rel), 'utf8'))) hits.push(rel);
+  }
+  assert.deepEqual(hits, [], 'files that contain a personal mailbox address (names only; the address is never printed)');
 });
 
 test('the README Contributors section lists every contributor in data/contributors.json', () => {

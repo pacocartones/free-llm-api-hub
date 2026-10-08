@@ -1,72 +1,40 @@
-// contributors.mjs — the external-contributor count, mined from the git
-// history of data/providers.json. No longer rendered into the README (that is
-// a live shields.io badge now, so it cannot go stale); this remains the
-// canonical definition, used for local reporting and pinned by tests.
+// contributors.mjs — who counts as an external contributor.
 //
-// "External" means a human who touched data/providers.json and is neither the
-// maintainer nor an automation account. Deterministic given the history, so a
-// fixed checkout always renders the same number (PR CI never flakes); returns 0
-// when git is unavailable (tarball build).
+// Identity is the GitHub login, never an e-mail address: the repository must not
+// carry anyone's personal mailbox in code, tests or data. The logins come from the
+// GitHub commits API (see update-contributors.mjs), which resolves each commit to
+// the account that made it; this module only holds the pure rules.
+//
+// "External" means an account that is neither the maintainer nor an automation
+// account. Deterministic given its input, so a fixed list always yields the same
+// number (PR CI never flakes).
 
-import { execSync } from 'node:child_process';
+// The maintainer is excluded by login, not by the addresses they happened to commit with.
+export const MAINTAINER_LOGINS = new Set(['pacocartones', 'LeonMAG'].map((l) => l.toLowerCase()));
 
-const BOT_AUTHORS = new Set(['github-actions[bot]', 'dependabot[bot]', 'coderabbitai[bot]']);
-const MAINTAINER_EMAILS = new Set([
-  'manusanchezhl@gmail.com',
-  '253313177+pacocartones@users.noreply.github.com',
-]);
+const isBot = ({ login, name }) => /\[bot\]$/.test(login || '') || /\[bot\]$/.test(name || '');
 
-// Pure: count distinct external contributor emails in a `git log` --format
-// stream ("%an<0x1f>%ae" per line). Malformed or empty lines are skipped.
-export const countExternalContributorsFromLog = (log) =>
-  new Set(
-    (log || '')
-      .split('\n')
-      .map((l) => l.split('\x1f'))
-      .filter(([name, email]) => name && email && !BOT_AUTHORS.has(name) && !MAINTAINER_EMAILS.has(email))
-      .map(([, email]) => email)
-  ).size;
+// Stable identity of a commit author: the resolved login, else the display name
+// (a commit the API could not link to an account). Null when there is neither.
+const identity = ({ login, name }) => (login ? 'login:' + login.toLowerCase() : name ? 'name:' + name : null);
 
-export const countExternalContributors = ({ cwd }) => {
-  try {
-    const log = execSync(
-      'git log --pretty=format:%an%x1f%ae -- data/providers.json',
-      { cwd, encoding: 'utf8', maxBuffer: 1024 * 1024 * 8 }
-    );
-    return countExternalContributorsFromLog(log);
-  } catch (_) {
-    return 0; // no git available — keep the stats line honest at zero
+/**
+ * External contributors from commits, oldest first, one per person (their FIRST commit).
+ * commits: [{ login: string|null, name: string, subject: string }], oldest first.
+ */
+export const externalContributors = (commits) => {
+  const seen = new Map();
+  for (const c of commits || []) {
+    if (!c || !c.subject || isBot(c)) continue;
+    if (c.login && MAINTAINER_LOGINS.has(c.login.toLowerCase())) continue;
+    const id = identity(c);
+    if (!id || seen.has(id)) continue;
+    seen.set(id, { name: c.name || c.login, ...(c.login ? { login: c.login } : {}), subject: c.subject });
   }
+  return [...seen.values()];
 };
 
-// Full list of external human contributors, oldest-first (each person's FIRST
-// commit), so the README "Contributors" section can be rendered from git
-// history and never go stale. Mined from ALL files — contributors can touch
-// docs or scripts, not just data/providers.json. Returns [] without git.
-export const listExternalContributors = ({ cwd }) => {
-  try {
-    const log = execSync(
-      'git log --reverse --no-merges --pretty=format:%an%x1f%ae%x1f%s',
-      { cwd, encoding: 'utf8', maxBuffer: 1024 * 1024 * 8 }
-    );
-    const byEmail = new Map();
-    for (const line of (log || '').split('\n')) {
-      const [name, email, subject] = line.split('\x1f');
-      if (!name || !email || !subject) continue;
-      if (BOT_AUTHORS.has(name) || MAINTAINER_EMAILS.has(email)) continue;
-      if (!byEmail.has(email)) byEmail.set(email, { name, email, subject });
-    }
-    return [...byEmail.values()];
-  } catch (_) {
-    return [];
-  }
-};
+export const countExternalContributors = (commits) => externalContributors(commits).length;
 
-// GitHub profile URL from a noreply email (ID+username@users.noreply.github.com)
-// or from a name that is already a bare username (no spaces). null when unknown.
-export const githubProfileUrl = (name, email) => {
-  const m = /\+([^@]+)@users\.noreply\.github\.com$/.exec(email || '');
-  if (m) return 'https://github.com/' + m[1];
-  if (/^[\w.-]+$/.test(name)) return 'https://github.com/' + name;
-  return null;
-};
+// GitHub profile URL for a contributor record; null when the commit was not linked to an account.
+export const githubProfileUrl = ({ login }) => (login ? 'https://github.com/' + login : null);

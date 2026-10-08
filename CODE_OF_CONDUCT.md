@@ -19,7 +19,7 @@ This applies in all project spaces — the repository, issues, pull requests, an
 
 ## Enforcement
 
-Report concerns to the maintainer via the contact on their [GitHub profile](https://github.com/pacocartones), or through [GitHub's private reporting](https://github.com/pacocartones/free-llm-api-hub/security/advisories/new). Reports are handled confidentially.
+Report concerns by email to admin@freellmapihub.com, or through [GitHub's private reporting](https://github.com/pacocartones/free-llm-api-hub/security/advisories/new). Reports are handled confidentially.
 
 Maintainers may edit, remove, or reject contributions and comments that violate this code, and may temporarily or permanently ban any contributor for behavior they deem inappropriate, threatening, or harmful.
 

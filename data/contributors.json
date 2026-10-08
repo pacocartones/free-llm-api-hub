@@ -2,40 +2,38 @@
   "contributors": [
     {
       "name": "Jhansi Oruganti",
-      "email": "155613006+JhansiOruganti-43@users.noreply.github.com",
+      "login": "JhansiOruganti-43",
       "subject": "data: confirm Novita AI free tier is not commercial-use allowed (#27)"
     },
     {
       "name": "Victoria Odalo",
-      "email": "147773886+OdaloV@users.noreply.github.com",
+      "login": "OdaloV",
       "subject": "docs: verify Clarifai commercial_ok status (#112)"
     },
     {
       "name": "MikeGatsby",
-      "email": "mikael.gatfi@gmail.com",
+      "login": "MikeGatsby",
       "subject": "data: verify Datalab hosted-API commercial-use terms (no explicit statement found) (#117)"
     },
     {
       "name": "bcabreraike-cmyk",
-      "email": "bcabrera.ike@gmail.com",
+      "login": "bcabreraike-cmyk",
       "subject": "docs: explain paced re-verification batches (#169)"
     },
     {
       "name": "Swarnabha Nandi",
-      "email": "nandiswarnabha@gmail.com",
-      "subject": "fix: show clear button when sort is changed (#183)",
-      "login": "Swarnabha753"
+      "login": "Swarnabha753",
+      "subject": "fix: show clear button when sort is changed (#183)"
     },
     {
       "name": "Manan Bharti",
-      "email": "91620529+mananbharti@users.noreply.github.com",
+      "login": "mananbharti",
       "subject": "test: check serializer ORDER against the provider schema (#201)"
     },
     {
       "name": "Piyush",
-      "email": "jangidpiyush16011@gmail.com",
-      "subject": "data: verify Datalab phone requirement and free-tier rate limit (#198)",
-      "login": "piyusshhjangid"
+      "login": "piyusshhjangid",
+      "subject": "data: verify Datalab phone requirement and free-tier rate limit (#198)"
     }
   ]
 }

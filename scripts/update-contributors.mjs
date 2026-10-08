@@ -1,66 +1,49 @@
-// update-contributors.mjs — regenerate data/contributors.json from the git
-// history. Run this locally after merging a contribution (the same on-demand
-// model as reverify/badge/probe — no Actions, no secrets).
+// update-contributors.mjs — regenerate data/contributors.json from the repository's commits.
+// Run this locally after merging a contribution (the same on-demand model as
+// reverify/badge/probe — no Actions, no secrets).
 //
-// Why a committed JSON instead of mining git during the build: build.mjs runs
-// inside the "Dataset integrity" gate, where the checkout is the PR's merge
-// commit. Mining `git log` there is auto-referential — the contributor's own
-// unmerged commit appears in the log, rewrites the README Contributors section,
-// and the "generated files must be in sync" step fails (this blocked PR #183).
-// Rendering from data/contributors.json keeps the build deterministic; the list
+// Why a committed JSON instead of mining during the build: build.mjs runs inside the
+// "Dataset integrity" gate, where the checkout is the PR's merge commit. Mining there is
+// auto-referential — the contributor's own unmerged commit appears, rewrites the README
+// Contributors section, and the "generated files must be in sync" step fails (this blocked
+// PR #183). Rendering from data/contributors.json keeps the build deterministic; the list
 // advances one step at a time, whenever a maintainer runs this script.
+//
+// Identity is the GitHub login. The commits API links every commit to the account that
+// made it, so no e-mail address is read, kept or printed; the maintainer is excluded by
+// login (MAINTAINER_LOGINS). Only merged history is visible to the API, which is what we want.
+//
+//   node scripts/update-contributors.mjs [owner/repo]
+// An optional GITHUB_TOKEN raises the rate limit; none is needed for a public repo.
 
-import { execSync } from 'node:child_process';
 import { writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { externalContributors } from './lib/contributors.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
+const REPO = process.argv[2] || 'pacocartones/free-llm-api-hub';
+const headers = { Accept: 'application/vnd.github+json', 'User-Agent': 'free-llm-api-hub-update-contributors' };
+if (process.env.GITHUB_TOKEN) headers.Authorization = `Bearer ${process.env.GITHUB_TOKEN}`;
 
-const BOT_AUTHORS = new Set(['github-actions[bot]', 'dependabot[bot]', 'coderabbitai[bot]']);
-
-// Manual GitHub logins for contributors whose author email is a personal
-// address (the profile URL can't be derived from it). Keyed by author email.
-const LOGIN_OVERRIDES = {
-  'nandiswarnabha@gmail.com': 'Swarnabha753',
-  'jangidpiyush16011@gmail.com': 'piyusshhjangid',
-};
-const MAINTAINER_EMAILS = new Set([
-  'manusanchezhl@gmail.com',
-  '253313177+pacocartones@users.noreply.github.com',
-  'leonaniagomez@gmail.com',
-]);
-
-// Mine from origin/main when available so unmerged local commits are excluded;
-// fall back to HEAD (tarball/CI checkout without the remote ref).
-const REF = process.argv[2] || 'origin/main';
-const refs = [REF, 'HEAD'];
-let log = '';
-for (const ref of refs) {
-  try {
-    log = execSync(`git log ${ref} --reverse --no-merges --pretty=format:%an%x1f%ae%x1f%s`, {
-      cwd: ROOT,
-      encoding: 'utf8',
-      maxBuffer: 1024 * 1024 * 8,
+const commits = [];
+for (let page = 1; ; page++) {
+  const res = await fetch(`https://api.github.com/repos/${REPO}/commits?per_page=100&page=${page}`, { headers });
+  if (!res.ok) throw new Error(`GitHub commits API: HTTP ${res.status} for ${REPO} (page ${page})`);
+  const batch = await res.json();
+  if (!batch.length) break;
+  for (const c of batch) {
+    if ((c.parents || []).length > 1) continue; // merge commits
+    commits.push({
+      login: c.author?.login ?? null,
+      name: c.commit?.author?.name ?? '',
+      subject: (c.commit?.message || '').split('\n')[0],
     });
-    break;
-  } catch (_) {
-    /* try the next ref */
   }
+  if (batch.length < 100) break;
 }
 
-const byEmail = new Map();
-for (const line of (log || '').split('\n')) {
-  const [name, email, subject] = line.split('\x1f');
-  if (!name || !email || !subject) continue;
-  if (BOT_AUTHORS.has(name) || MAINTAINER_EMAILS.has(email)) continue;
-  if (!byEmail.has(email)) byEmail.set(email, { name, email, subject });
-}
-
-const contributors = [...byEmail.values()].map((c) => ({
-  ...c,
-  ...(LOGIN_OVERRIDES[c.email] ? { login: LOGIN_OVERRIDES[c.email] } : {}),
-}));
+const contributors = externalContributors(commits.reverse()); // API is newest-first
 writeFileSync(join(ROOT, 'data/contributors.json'), JSON.stringify({ contributors }, null, 2) + '\n');
 console.log(`Wrote ${contributors.length} external contributor(s) to data/contributors.json`);
-for (const c of contributors) console.log(`  - ${c.name} <${c.email}>`);
+for (const c of contributors) console.log(`  - ${c.name}${c.login ? ' (@' + c.login + ')' : ' (no linked account)'}`);
