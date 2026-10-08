@@ -8,6 +8,7 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { SLA_DAYS, DUE_SOON_DAYS, ageInDays, freshnessStatus } from './lib/rules.mjs';
+import { weeklyPacing, weeklyBatch, WEEKLY_CAP, MIN_AGE_DAYS } from './lib/pacing.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 // Same bucketing the freshness badge is graded on — imported from rules.mjs, not
@@ -49,17 +50,15 @@ for (const [d, n] of Object.entries(byDate)) {
   if (!cliff || n > cliff.n) cliff = { d, n, crossIn, crossOn };
 }
 
-// Weekly batch: the pacing target that keeps the SLA green without cliffs.
-// Steady state = all verified entries spread over the SLA window; near a
-// cliff, spread the cluster over the weeks it has left, whichever is larger.
+// Weekly batch: the smallest size that keeps every entry inside the SLA if
+// each week's batch is done, oldest first, capped at a week of work (see
+// lib/pacing.mjs). Taking the oldest each week re-verifies part of any
+// same-day cohort early, which is what spreads it out.
 const verifiedList = providers
   .filter((p) => p.verified && p.last_verified)
-  .sort((a, b) => (a.last_verified < b.last_verified ? -1 : 1));
-let batchSize = Math.ceil(verifiedList.length / (OVERDUE / 7));
-if (cliff && cliff.crossIn > 0) {
-  batchSize = Math.max(batchSize, Math.ceil(cliff.n / Math.max(1, Math.floor(cliff.crossIn / 7))));
-}
-const batch = verifiedList.slice(0, batchSize);
+  .sort((a, b) => (a.last_verified < b.last_verified ? -1 : 1) || (a.slug < b.slug ? -1 : 1));
+const pacing = weeklyPacing(verifiedList.map((p) => ageDays(p.last_verified)), OVERDUE);
+const batch = weeklyBatch(verifiedList, (p) => ageDays(p.last_verified), OVERDUE, pacing.size);
 
 const line = ({ p, age }) =>
   `- [ ] **${p.name}** (\`${p.slug}\`) — last verified ${p.last_verified} (${age} days ago)` +
@@ -73,13 +72,17 @@ out.push(`_Generated from \`data/providers.json\`. Freshness SLA: every verified
 out.push('');
 out.push(`**Summary:** 🔴 ${overdue.length} overdue · 🟡 ${dueSoon.length} due soon · ⚠️ ${unverified.length} never verified · ✅ ${providers.length - overdue.length - dueSoon.length - unverified.length} fresh.`);
 out.push('');
-if (cliff && cliff.crossIn <= 45) {
-  out.push(`> ⛰️ **Cliff watch:** ${cliff.n} entries were all verified on ${cliff.d} and cross the ${OVERDUE}-day SLA together around **${cliff.crossOn}** (~${cliff.crossIn} days). Re-verify a few of them early each week to spread the load instead of taking the hit all at once.`);
+if (pacing.capped) {
+  out.push(`> ⚠️ **Behind pace:** even ${WEEKLY_CAP} re-verifications a week will not keep every entry inside the SLA. Do an extra batch this week, or expect some entries to go overdue.`);
+  out.push('');
+}
+if (cliff && cliff.crossIn > 0) {
+  out.push(`> ⛰️ **Cliff watch:** ${cliff.n} entries were all verified on ${cliff.d} and cross the ${OVERDUE}-day SLA together around **${cliff.crossOn}** (~${cliff.crossIn} days). The weekly batch is sized (${pacing.size} a week) so that doing every batch spreads them out before then.`);
   out.push('');
 }
 
 out.push(`### 📅 This week's batch — ${batch.length}`);
-out.push(`_The ${batch.length} oldest verifications. Clearing one batch a week keeps the badge green without an end-of-quarter cliff._`);
+out.push(`_The ${batch.length} oldest verifications that are at least ${MIN_AGE_DAYS} days old (sized at ${pacing.size}, at most ${WEEKLY_CAP} a week). Doing one batch every week keeps every entry inside the ${OVERDUE}-day SLA and spreads same-day cohorts out, so no week inherits a cliff._`);
 out.push(batch.map((p) => `- [ ] **${p.name}** (\`${p.slug}\`) — last verified ${p.last_verified} (${ageDays(p.last_verified)} days ago)` + (p.docs_url ? ` · [docs](${p.docs_url})` : '')).join('\n') || '_None._');
 out.push('');
 

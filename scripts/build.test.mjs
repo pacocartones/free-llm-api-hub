@@ -19,6 +19,7 @@ import { monthlyReport, reportMonths, monthEndDate } from './lib/state.mjs';
 import { countExternalContributorsFromLog } from './lib/contributors.mjs';
 import { buildOgManifest } from './lib/og.mjs';
 import { explorerRowHtml } from './lib/rows.mjs';
+import { weeklyPacing, weeklyBatch, WEEKLY_CAP, MIN_AGE_DAYS } from './lib/pacing.mjs';
 import { clientConfigProviders, openaiClients, litellmYaml, MODEL_PLACEHOLDER } from './lib/client-config.mjs';
 import { selectComparePairs, COMPARE_PAGE_CAP, COMPARE_PER_PROVIDER_CAP, COMPARE_MAX as COMPARE_MAX_SLOTS } from './lib/compare.mjs';
 
@@ -1182,4 +1183,55 @@ test('keyboard navigation is client-only: the server-rendered rows carry no tabi
   const tbody = index.slice(index.indexOf('<tbody id="tbody">'), index.indexOf('</tbody>'));
   assert.doesNotMatch(tbody, /tabindex/);
   assert.match(index, /<caption class="sr-only">[^<]*arrow keys move between providers and Enter opens one\.<\/caption>/);
+});
+
+// ---------- weekly re-verification pacing (lib/pacing.mjs) ----------
+// Simulate doing exactly the proposed batch every week and check the two
+// promises the worklist makes: nothing goes overdue, and a same-day cohort
+// is spread out instead of expiring in one week.
+
+function simulateWorklist(ages, weeks) {
+  let entries = ages.map((age, id) => ({ id, age }));
+  let worstAge = 0;
+  const redoneByWeek = [];
+  for (let w = 0; w < weeks; w++) {
+    const { size } = weeklyPacing(entries.map((e) => e.age), SLA_DAYS);
+    const batch = weeklyBatch(entries, (e) => e.age, SLA_DAYS, size);
+    redoneByWeek.push(batch.length);
+    for (const e of batch) e.age = 0;
+    for (const e of entries) e.age += 7;
+    worstAge = Math.max(worstAge, ...entries.map((e) => e.age));
+  }
+  return { worstAge, redoneByWeek, entries };
+}
+
+test('pacing: a 64-entry same-day cohort never goes overdue and is spread out', () => {
+  const ages = [...Array(64).fill(0), 56, 55, 6];
+  const { worstAge, redoneByWeek } = simulateWorklist(ages, 40);
+  assert.ok(worstAge <= SLA_DAYS, `worst age ${worstAge} must stay within the ${SLA_DAYS}-day SLA`);
+  assert.ok(Math.max(...redoneByWeek) <= WEEKLY_CAP, 'no week asks for more than the cap');
+  // After a full cycle, no single week carries more than a cap's worth of expiries.
+  const { entries } = simulateWorklist(ages, 26);
+  const perAge = {};
+  for (const e of entries) perAge[e.age] = (perAge[e.age] || 0) + 1;
+  assert.ok(Math.max(...Object.values(perAge)) <= WEEKLY_CAP, 'the cohort no longer shares one verification week');
+});
+
+test('pacing: entries younger than the minimum age are not proposed', () => {
+  const ages = [...Array(20).fill(5), 40, 50];
+  const { size } = weeklyPacing(ages, SLA_DAYS);
+  const batch = weeklyBatch(ages.map((age) => ({ age })), (e) => e.age, SLA_DAYS, size);
+  assert.ok(batch.every((e) => e.age >= MIN_AGE_DAYS));
+});
+
+test('pacing: entries about to cross the SLA are always proposed first', () => {
+  const ages = [88, 10, 10, 10];
+  const batch = weeklyBatch(ages.map((age) => ({ age })), (e) => e.age, SLA_DAYS, 1);
+  assert.equal(batch[0].age, 88);
+});
+
+test('pacing: when even the cap cannot keep the SLA, it says so', () => {
+  const result = weeklyPacing(Array(68).fill(85), SLA_DAYS);
+  assert.equal(result.capped, true);
+  assert.equal(result.size, WEEKLY_CAP);
 });

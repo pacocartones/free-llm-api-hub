@@ -17,6 +17,7 @@ import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { SLA_DAYS, ageInDays } from './lib/rules.mjs';
+import { weeklyPacing, weeklyBatch } from './lib/pacing.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const OUT = join(ROOT, '.freebuff', 'reverify');
@@ -31,9 +32,12 @@ const verified = providers
   .filter((p) => p.verified && p.last_verified)
   .sort((a, b) => (a.last_verified < b.last_verified ? -1 : a.last_verified > b.last_verified ? 1 : 0));
 
-// Same pacing as staleness.mjs: clear the oldest entries before they breach the SLA.
-const n = batchSize ?? Math.ceil(verified.length / (SLA_DAYS / 7));
-const batch = verified.slice(0, n);
+// Same batch as the weekly worklist (staleness.mjs, lib/pacing.mjs), unless
+// --batch overrides the size.
+const today = new Date();
+const ageOf = (p) => ageInDays(p.last_verified, today);
+const n = batchSize ?? weeklyPacing(verified.map(ageOf), SLA_DAYS).size;
+const batch = batchSize ? verified.slice(0, n) : weeklyBatch(verified, ageOf, SLA_DAYS, n);
 
 // Single-pass entity decode: one regex + callback, so entities are never
 // double-unescaped (e.g. &amp;amp; -> &amp;, not &).
