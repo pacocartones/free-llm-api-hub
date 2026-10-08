@@ -116,6 +116,31 @@ test('validate rejects a verified entry with no last_verified date', () => {
   assert.equal(exitOk(['scripts/validate.mjs', fixture]), false);
 });
 
+for (const [label, value] of [
+  ['a model list', 'Various open-weight models'],
+  ['a model count', '30+ models: LLMs, embeddings, image'],
+  ['a pricing note', 'Model APIs are priced per token; dedicated deployments by compute time (per minute)'],
+  ['an empty string', ''],
+]) {
+  test(`validate rejects rate_limits holding ${label}`, () => {
+    const data = JSON.parse(readFileSync(DATA, 'utf8'));
+    data.providers[0].rate_limits = value;
+    const fixture = join(mkdtempSync(join(tmpdir(), 'flah-')), 'providers.json');
+    writeFileSync(fixture, JSON.stringify(data));
+    assert.equal(exitOk(['scripts/validate.mjs', fixture]), false);
+  });
+}
+
+for (const value of ['30 RPM / 14,400 RPD', '10,000 Neurons per day', 'Not published by the provider', 'Per-model limits are shown only in the console after sign-in']) {
+  test(`validate accepts rate_limits "${value}"`, () => {
+    const data = JSON.parse(readFileSync(DATA, 'utf8'));
+    data.providers[0].rate_limits = value;
+    const fixture = join(mkdtempSync(join(tmpdir(), 'flah-')), 'providers.json');
+    writeFileSync(fixture, JSON.stringify(data));
+    assert.equal(exitOk(['scripts/validate.mjs', fixture]), true);
+  });
+}
+
 test('validate rejects an unverified entry that still carries a date', () => {
   const data = JSON.parse(readFileSync(DATA, 'utf8'));
   data.providers[0].verified = false;

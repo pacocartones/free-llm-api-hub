@@ -105,6 +105,12 @@ for (const p of data.providers ?? []) {
     check(Array.isArray(p.models_free) && p.models_free.every((m) => typeof m === 'string'), `${id}: models_free must be an array of strings or null`);
   }
 
+  // rate_limits states limits, not models or prices: either a number with a
+  // limit unit (RPM, tokens/day, requests/min, concurrency, credits...) or an
+  // explicit statement that the provider publishes none. A model list or a
+  // pricing note here showed up as the "rate limits" row on compare pages.
+  check(rateLimitsOk(p.rate_limits), `${id}: rate_limits must give a limit with a unit, or say the provider publishes none (got: "${String(p.rate_limits).slice(0, 60)}")`);
+
   // openai_base_url: null, or an http(s) URL; and it only makes sense when the API is OpenAI-compatible.
   if (p.openai_base_url !== undefined && p.openai_base_url !== null) {
     check(typeof p.openai_base_url === 'string' && URL_RE.test(p.openai_base_url), `${id}: openai_base_url must be an http(s) URL or null`);
@@ -135,6 +141,13 @@ for (const p of data.providers ?? []) {
   } else {
     check(p.last_verified === null, `${id}: unverified entry must have last_verified: null`);
   }
+}
+
+function rateLimitsOk(text) {
+  if (typeof text !== 'string' || !text.trim()) return false;
+  const LIMIT_UNIT = /(rpm|rpd|tpm|tpd|rps|req|request|call|token|minute|\bmin\b|hour|day|month|second|\/s\b|neuron|concurren|credit|char|page|parallel)/i;
+  const NONE_PUBLISHED = /not (publicly |numerically )?(published|specified|stated|documented|disclosed)|no (numeric|fixed|published)|unpublished|in[- ]console|after sign-in|shown only|queue-based|no rpm/i;
+  return (/\d/.test(text) && LIMIT_UNIT.test(text)) || NONE_PUBLISHED.test(text);
 }
 
 // ---------- programs.json (credit programs) ----------
