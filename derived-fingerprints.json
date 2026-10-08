@@ -1,6 +1,6 @@
 {
   "site/api/index.html": "ee2624f8b6f2e0f1dd0196f6183a42e81e45227a4930dcca782b18db29aa0438",
-  "site/api/v1/best.json": "3bbf8abfe7fdae4d844d8dcbe49edb33abe0f70180dddb989fc374f74bbaf68c",
+  "site/api/v1/best.json": "037efd0f08e40943602764800ad58ca395e8cd4e7d517dfd8b0b5190a97aa997",
   "site/api/v1/commercial.json": "9f5a748464f361d0ce3f87722adc42c678b5737f2963603f2ab4dea84e5b52ea",
   "site/api/v1/index.json": "4c8b6ae6b596c2886e7e59ee4405587aef74b1859f81e5c28c3be44c727ac7bb",
   "site/api/v1/litellm.yaml": "936fdd545a44ffdb12259a94481d5567e703732e452efad452d414f8528de984",
@@ -21,7 +21,7 @@
   "site/api/v1/providers.json": "c3c0843ae4d65f11288c08ae24ee1484e5967267e07be5652f83e1a1350f5329",
   "site/api/v1/schema.json": "5d46cee73f4c447b09fc79a3badea0add447ad3c78c70e5de972092feb8e46af",
   "site/api/v1/trial.json": "37f7a01f5011d8cf94c44424bd5d17e15430ab306b4697db28415b7cbb3067ba",
-  "site/best/index.html": "710bf5c90f69940999b9141e23ed0f5d93cf901c0745c405f641651324e1704f",
+  "site/best/index.html": "96386c1969146e2e1ea84e8157263cc395abb0ac8999a8ef95f6f129aa68721c",
   "site/collections/always-free.html": "8eaada6fdb7f69acf4f1c041fa479259ad6c2b2d54199dab788cef3991c8fd31",
   "site/collections/commercial-use.html": "8a030f2abfe63aa247203f50409db19d50f76091d9a4daff744f6737028f3f63",
   "site/collections/index.html": "ac64b82babc21a1d23d50d810a6f4d620ebf78678298e9221b73dc91bea6d045",

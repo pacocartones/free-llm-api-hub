@@ -72,7 +72,7 @@
     {
       "slug": "wandb-inference",
       "why": "Frontier open models behind one OpenAI-compatible key, with Weave tracing on top; the docs promise Free-plan credits \"for a limited time\" without an amount, and the pricing page disagrees, so check before you rely on it.",
-      "tag": "Frontier open models on trial credits"
+      "tag": "Frontier open models, one key"
     },
     {
       "slug": "voyage-ai",
