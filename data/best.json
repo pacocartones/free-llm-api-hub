@@ -71,7 +71,7 @@
     },
     {
       "slug": "wandb-inference",
-      "why": "Serverless inference credits on the Free plan for a limited time (amount not published) cover frontier open models behind one OpenAI-compatible key, with Weave tracing on top.",
+      "why": "Frontier open models behind one OpenAI-compatible key, with Weave tracing on top; the docs promise Free-plan credits \"for a limited time\" without an amount, and the pricing page disagrees, so check before you rely on it.",
       "tag": "Frontier open models on trial credits"
     },
     {
