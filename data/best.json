@@ -2,7 +2,7 @@
   "h1": "The best free LLM APIs right now",
   "desc": "Our editorial top 20 — hand-picked from the 69 verified providers, ranked for real-world usefulness.",
   "intro": "This is the editorial ranking: not an automatic filter, but the twenty free tiers we would actually reach for first. Each pick links to its full verified profile — free tier, rate limits and the catch are all checked against the provider's own docs on the linked page. The list is reviewed and re-verified with the dataset.",
-  "updated": "2026-08-14",
+  "updated": "2026-10-08",
   "entries": [
     {
       "slug": "typhoon",
@@ -86,8 +86,8 @@
     },
     {
       "slug": "pollinations",
-      "why": "Hosted Flux and Stable Diffusion behind a simple GET URL, anonymous to start — the easiest way to generate free images programmatically.",
-      "tag": "Free images, no signup"
+      "why": "OpenAI-compatible text and image API whose free use is paid in Pollen credits earned by completing Quests; it needs an account and an API key.",
+      "tag": "Free credits via Quests"
     },
     {
       "slug": "moondream",

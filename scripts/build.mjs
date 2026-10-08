@@ -228,7 +228,7 @@ const GUIDES = [
     query: '?cat=ongoing&nocard=1&nophone=1#explorer',
     faq: [
       { q: 'Is there a free LLM API with no phone verification?', a: 'Yes — every provider here requires neither a credit card nor a phone number to obtain a key.' },
-      { q: 'Can I call an LLM API with no account at all?', a: 'A few, such as Pollinations and AI Horde, allow anonymous or account-free use for basic requests, with tighter rate limits.' },
+      { q: 'Can I call an LLM API with no account at all?', a: 'A few, such as AI Horde (a shared anonymous key, lowest queue priority) and OVHcloud AI Endpoints (anonymous access at a low rate limit), work without an account, with tighter limits.' },
     ],
   },
   {
@@ -276,11 +276,11 @@ const GUIDES = [
     intro: `<p>Text-to-image is one of the easiest modalities to try for free: several providers host <strong>Flux, Stable Diffusion and SDXL</strong> behind a simple API — some with no signup at all, others with a small starting credit. Every provider below was verified to offer free image generation against its own docs.</p><p>Watch two catches on each provider's page: whether the free output is <em>watermarked</em>, and whether <em>commercial use</em> is allowed — both vary a lot across free image tiers.</p>`,
     filter: (p) => (p.modalities || []).includes('image'),
     query: '#explorer',
-    pick: 'pollinations',
+    pick: 'ai-horde',
     faq: [
-      { q: 'Is there a free image generation API?', a: 'Yes — Pollinations and AI Horde offer free, no-signup image generation, while Runware, Photoroom and others give a starting credit for first-party Flux/SDXL models.' },
+      { q: 'Is there a free image generation API?', a: 'Yes — AI Horde (anonymous, queue-based) and OVHcloud AI Endpoints (Stable Diffusion XL, anonymous at a low rate limit) need no signup, while Pollinations (credits earned through Quests), Runware, Photoroom and others give credits for first-party Flux/SDXL models.' },
       { q: 'Can I use free AI-generated images commercially?', a: 'Sometimes — it depends on the provider and whether the output is watermarked. Each row flags commercial use, confirmed against the provider’s terms.' },
-      { q: 'Which free image API has no watermark?', a: 'Free registration removes the watermark on Pollinations, and providers such as Runware return unwatermarked output on their starting credit. Check the catch on each provider page.' },
+      { q: 'Which free image API has no watermark?', a: 'Watermark terms vary and change: Photoroom, for example, does not watermark its free production calls but does watermark its sandbox calls. Check the catch on each provider page.' },
     ],
   },
   {
