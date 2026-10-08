@@ -332,6 +332,14 @@ test('derived-fingerprints.json pins gitignored outputs, skips site/p/, site/bad
     'tracked regenerated files are gated by git diff, not the fingerprint');
 });
 
+test('build removes pages and badges of providers no longer in the dataset', () => {
+  writeFileSync(join(ROOT, 'site/badges/removed-provider.json'), '{}');
+  writeFileSync(join(ROOT, 'site/p/removed-provider.html'), '<p>stale</p>');
+  run(['scripts/build.mjs']);
+  assert.equal(existsSync(join(ROOT, 'site/badges/removed-provider.json')), false, 'stale badge must be pruned');
+  assert.equal(existsSync(join(ROOT, 'site/p/removed-provider.html')), false, 'stale provider page must be pruned');
+});
+
 // site/badges/ is outside the fingerprint (its colour tracks verification age),
 // so check the files directly: one shields.io endpoint per provider, no strays,
 // and a message that states the verification date the dataset records.

@@ -806,6 +806,10 @@ writeFileSync(join(ROOT, 'site/guides/index.html'), redirectPage('../guides-and-
 writeFileSync(join(ROOT, 'site/collections/index.html'), redirectPage('../guides-and-collections/'));
 
 // ---------- per-provider detail pages + embeddable badges ----------
+// Both directories are generated whole and gitignored: start them empty so a
+// provider removed from the dataset leaves no stale page or badge behind.
+rmSync(join(ROOT, 'site/p'), { recursive: true, force: true });
+rmSync(join(ROOT, 'site/badges'), { recursive: true, force: true });
 mkdirSync(join(ROOT, 'site/p'), { recursive: true });
 mkdirSync(join(ROOT, 'site/badges'), { recursive: true });
 
