@@ -1,7 +1,7 @@
 {
   "$schema": "./schema.json",
   "version": "2.9.0",
-  "generated": "2026-09-30",
+  "generated": "2026-10-08",
   "source": "https://github.com/pacocartones/free-llm-api-hub",
   "note": "Canonical dataset. README tables, badge-freshness.json and the interactive site are all generated from this file — do not hand-edit them. `verified: true` means the core facts (tier, limits, key catch, link) were independently confirmed against the provider's own docs on `last_verified`. `verified: false` means sourced from community tracking and not yet independently re-confirmed here — treat those as indicative. Attribute fields (openai_compatible, modalities, best_for) are progressively backfilled and may be null.",
   "providers": [
@@ -11,7 +11,7 @@
       "category": "ongoing",
       "free_type": "renewing-quota",
       "free_tier": "Gemini 2.5 Flash, 2.5 Flash-Lite, 2.5 Pro (limited), embeddings, TTS models",
-      "rate_limits": "Varies by model: 5-30 RPM and 15-1,000 RPD (e.g. 2.5 Pro: 5 RPM/100 RPD; 2.5 Flash: 10/250; 2.5 Flash-Lite: 15/1,000; embeddings: 100 RPD; TTS: 15 RPD)",
+      "rate_limits": "Per-model; Google no longer publishes the free-tier numbers in its public docs — they are shown only on the AI Studio rate-limit page after sign-in",
       "notes": "Free-tier prompts/outputs may be used by Google to improve its products outside the UK/CH/EEA/EU. Since the 2026-03-23 terms, only Paid Services may serve API clients to end users in the EEA/CH/UK",
       "best_for": "The only frontier-class model with a genuine free tier",
       "modalities": ["text", "vision", "embeddings", "audio"],
@@ -25,19 +25,19 @@
       "openai_base_url": "https://generativelanguage.googleapis.com/v1beta/openai/",
       "env_key": "GEMINI_API_KEY",
       "verified": true,
-      "last_verified": "2026-09-30"
+      "last_verified": "2026-10-08"
     },
     {
       "slug": "groq",
       "name": "Groq",
       "category": "ongoing",
       "free_type": "renewing-quota",
-      "free_tier": "Open-weight models (Llama, Qwen, GPT-OSS) plus Whisper, no credit card required",
+      "free_tier": "Open-weight models (GPT-OSS, Qwen) plus Whisper, no credit card required",
       "rate_limits": "Free plan examples: openai/gpt-oss-120b, openai/gpt-oss-20b and qwen/qwen3.8-27b: 30 RPM/1K RPD/8K TPM/200K TPD; Whisper models: 20 RPM/2K RPD/7.2K audio seconds/hour and 28.8K/day; limits vary by model",
       "notes": "Limits apply at the organization level, not per API key. Phone verification required at signup",
       "best_for": "Lowest-latency inference for open-weight models",
       "modalities": ["text", "audio"],
-      "models_free": ["llama-3.3-70b-versatile", "llama-3.1-8b-instant", "openai/gpt-oss-120b", "openai/gpt-oss-20b", "whisper-large-v3-turbo", "whisper-large-v3"],
+      "models_free": ["openai/gpt-oss-120b", "openai/gpt-oss-20b", "qwen/qwen3.8-27b", "whisper-large-v3", "whisper-large-v3-turbo"],
       "expires": null,
       "docs_url": "https://console.groq.com/docs/rate-limits",
       "phone_required": true,
@@ -47,19 +47,19 @@
       "openai_base_url": "https://api.groq.com/openai/v1",
       "env_key": "GROQ_API_KEY",
       "verified": true,
-      "last_verified": "2026-09-30"
+      "last_verified": "2026-10-08"
     },
     {
       "slug": "openrouter",
       "name": "OpenRouter",
       "category": "ongoing",
       "free_type": "renewing-quota",
-      "free_tier": "A rotating set of models with a :free suffix (~14 today; count fluctuates), single API across many providers",
+      "free_tier": "A rotating set of models with a :free suffix (16 on 2026-10-08; count fluctuates), single API across many providers",
       "rate_limits": "20 req/min; 50 req/day under 10 credits purchased lifetime, 1000 req/day once 10+ credits purchased (one-time, not a subscription)",
       "notes": "ToS (Jul 2026) prohibits reselling API access or building a competing service — platform-wide, not just the free models; per-model terms still apply",
       "best_for": "Widest model selection behind one no-card key",
       "modalities": ["text", "vision"],
-      "models_free": ["cohere/north-mini-code:free", "google/gemma-4-26b-a4b-it:free", "google/gemma-4-31b-it:free", "liquid/lfm-2.5-2.6b:free", "nvidia/nemotron-3-nano-30b-a3b:free", "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free", "openai/gpt-oss-20b:free", "poolside/laguna-s-2.1:free"],
+      "models_free": ["cohere/north-mini-code:free", "google/gemma-4-26b-a4b-it:free", "google/gemma-4-31b-it:free", "liquid/lfm-2.5-2.6b:free", "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free", "poolside/laguna-s-2.1:free"],
       "expires": null,
       "docs_url": "https://openrouter.ai/docs/api-reference/limits",
       "phone_required": false,
@@ -69,7 +69,7 @@
       "openai_base_url": "https://openrouter.ai/api/v1",
       "env_key": "OPENROUTER_API_KEY",
       "verified": true,
-      "last_verified": "2026-09-30"
+      "last_verified": "2026-10-08"
     },
     {
       "slug": "cloudflare-workers-ai",
@@ -91,7 +91,7 @@
       "openai_base_url": "https://api.cloudflare.com/client/v4/accounts/{account_id}/ai/v1",
       "env_key": "CLOUDFLARE_API_TOKEN",
       "verified": true,
-      "last_verified": "2026-09-30"
+      "last_verified": "2026-10-08"
     },
     {
       "slug": "cohere",
@@ -125,7 +125,7 @@
       "notes": "A verified payment method is required to activate Playground/API access (no charge until you buy credits). Credits expire 30 days after grant; whether any free access persists past expiry is not stated",
       "best_for": "Fastest tokens/sec on wafer-scale hardware",
       "modalities": ["text"],
-      "models_free": ["gpt-oss-120b", "zai-glm-4.7", "gemma-4-31b"],
+      "models_free": ["gpt-oss-120b", "qwen-3.8-27b"],
       "expires": "30 days",
       "docs_url": "https://inference-docs.cerebras.ai/support/rate-limits",
       "phone_required": null,
@@ -135,7 +135,7 @@
       "openai_base_url": "https://api.cerebras.ai/v1",
       "env_key": "CEREBRAS_API_KEY",
       "verified": true,
-      "last_verified": "2026-09-30"
+      "last_verified": "2026-10-08"
     },
     {
       "slug": "mistral",
@@ -267,7 +267,7 @@
       "openai_base_url": "https://oai.endpoints.kepler.ai.cloud.ovh.net/v1",
       "env_key": "OVHCLOUD_API_KEY",
       "verified": true,
-      "last_verified": "2026-09-30"
+      "last_verified": "2026-10-08"
     },
     {
       "slug": "fireworks-ai",
@@ -289,7 +289,7 @@
       "openai_base_url": "https://api.fireworks.ai/inference/v1",
       "env_key": "FIREWORKS_API_KEY",
       "verified": true,
-      "last_verified": "2026-09-30"
+      "last_verified": "2026-10-08"
     },
     {
       "slug": "baseten",
@@ -311,7 +311,7 @@
       "openai_base_url": "https://inference.baseten.co/v1",
       "env_key": "BASETEN_API_KEY",
       "verified": true,
-      "last_verified": "2026-09-30"
+      "last_verified": "2026-10-08"
     },
     {
       "slug": "nebius",
@@ -1462,20 +1462,20 @@
       "category": "trial",
       "free_type": "recurring-credit",
       "free_tier": "$20/month (work email) or $10/month (personal email) free usage allowance — OCR in 90+ languages, PDF-to-markdown, tables, forms and structured extraction",
-      "rate_limits": "10 requests/min on the free tier; per-page pricing (see datalab.to/pricing)",
-      "notes": "Landing page still advertises a $5 signup credit, but the billing page describes the current free tier as a recurring monthly allowance ($20/mo work email, $10/mo personal, no card, 10 req/min) “designed to let you run a complete proof of concept before committing to a paid plan” — no explicit statement on commercial use of the hosted API. The self-hosted OSS weights carry a separate restriction (research/personal/startups under $2M ARR/funding).",
+      "rate_limits": "25 requests/min on the free tier; per-page pricing (see datalab.to/pricing)",
+      "notes": "Landing page still advertises a $5 signup credit, but the billing page describes the current free tier as a recurring monthly allowance ($20/mo work email, $10/mo personal, no card, 25 req/min) “designed to let you run a complete proof of concept before committing to a paid plan” — no explicit statement on commercial use of the hosted API. The self-hosted OSS weights carry a separate restriction (research/personal/startups under $2M ARR/funding). Signup does not require a phone number; checked via Google signup flow on 2026-10-02.",
       "best_for": "Open-source-pedigree OCR (Marker/Surya) on a free monthly allowance",
       "modalities": ["ocr"],
       "models_free": null,
       "expires": null,
       "docs_url": "https://documentation.datalab.to/",
-      "phone_required": null,
+      "phone_required": false,
       "card_required": false,
       "commercial_ok": null,
       "openai_compatible": false,
       "env_key": "DATALAB_API_KEY",
       "verified": true,
-      "last_verified": "2026-08-13",
+      "last_verified": "2026-10-02",
       "added": "2026-07-31"
     },
     {
