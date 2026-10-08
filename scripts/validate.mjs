@@ -13,6 +13,7 @@ import Ajv2020 from 'ajv/dist/2020.js';
 import addFormats from 'ajv-formats';
 import { bestPickErrors } from './lib/best.mjs';
 import { providerFigures, figureErrors } from './lib/figures.mjs';
+import { tierForRating, MODEL_TIER_MIN_VOTES } from './lib/model-tier.mjs';
 import { readdirSync } from 'node:fs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -143,6 +144,26 @@ for (const p of data.providers ?? []) {
   if (p.probe_status !== undefined && p.probe_status !== null) {
     check(['live', 'auth-ok', 'auth-failed', 'tier-ended', 'rate-limited', 'error'].includes(p.probe_status), `${id}: invalid probe_status`);
     check(DATE_RE.test(p.last_probed || ''), `${id}: probe_status set but last_probed missing`);
+  }
+
+  // Score inputs. is_text_llm is explicit on every entry. model_tier is derived, never typed: it must
+  // equal the tier of its cited rating, and it only exists for a continuous free text-LLM offer (a
+  // one-time trial credit is not continuous free access). free_limits are published numbers with a source.
+  check(typeof p.is_text_llm === 'boolean', `${id}: is_text_llm must be true or false on every entry`);
+  const tier = p.model_tier ?? null;
+  const src = p.model_tier_source ?? null;
+  check((tier === null) === (src === null), `${id}: model_tier and model_tier_source go together (both set or both null)`);
+  if (tier !== null && src !== null) {
+    check(tier === tierForRating(src.rating), `${id}: model_tier ${tier} does not match the cited rating ${src.rating} (expected ${tierForRating(src.rating)})`);
+    check(Number.isInteger(src.votes) && src.votes >= MODEL_TIER_MIN_VOTES, `${id}: the rated row needs at least ${MODEL_TIER_MIN_VOTES} votes`);
+    check(p.is_text_llm === true, `${id}: model_tier only applies to a text-LLM offer`);
+    check(p.free_type !== 'trial-credit', `${id}: a one-time trial credit is not continuous free access, so it carries no model_tier`);
+    check(DATE_RE.test(src.snapshot || '') && src.snapshot <= data.generated, `${id}: model_tier_source.snapshot must be a date not after the dataset's generated date`);
+  }
+  if (p.free_limits != null) {
+    check(p.free_type !== 'trial-credit', `${id}: a one-time trial credit is not continuous free access, so it carries no free_limits`);
+    check(DATE_RE.test(p.free_limits.checked || '') && p.free_limits.checked <= data.generated, `${id}: free_limits.checked must be a date not after the dataset's generated date`);
+    check(URL_RE.test(p.free_limits.source || ''), `${id}: free_limits.source must be the provider's page (http/https)`);
   }
 
   // Integrity core: a verified entry must carry a dated, real source link.

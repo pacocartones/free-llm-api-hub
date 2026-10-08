@@ -24,6 +24,9 @@
       "openai_compatible": true,
       "openai_base_url": "https://generativelanguage.googleapis.com/v1beta/openai/",
       "env_key": "GEMINI_API_KEY",
+      "is_text_llm": true,
+      "model_tier": 3,
+      "model_tier_source": {"model":"gemini-2.5-pro","arena_model":"gemini-2.5-pro","match":"exact","rating":1445.6,"votes":124834,"snapshot":"2026-10-02","url":"https://huggingface.co/datasets/lmarena-ai/leaderboard-dataset"},
       "verified": true,
       "last_verified": "2026-10-08"
     },
@@ -46,6 +49,10 @@
       "openai_compatible": true,
       "openai_base_url": "https://api.groq.com/openai/v1",
       "env_key": "GROQ_API_KEY",
+      "is_text_llm": true,
+      "model_tier": 2,
+      "model_tier_source": {"model":"openai/gpt-oss-120b","arena_model":"gpt-oss-120b","match":"exact","rating":1351.6,"votes":30018,"snapshot":"2026-10-02","url":"https://huggingface.co/datasets/lmarena-ai/leaderboard-dataset"},
+      "free_limits": {"requests_per_minute":30,"requests_per_day":1000,"tokens_per_day":200000,"scope":"free plan, each of openai/gpt-oss-120b and openai/gpt-oss-20b; limits vary by model","source":"https://console.groq.com/docs/rate-limits","checked":"2026-10-08"},
       "verified": true,
       "last_verified": "2026-10-08"
     },
@@ -68,6 +75,10 @@
       "openai_compatible": true,
       "openai_base_url": "https://openrouter.ai/api/v1",
       "env_key": "OPENROUTER_API_KEY",
+      "is_text_llm": true,
+      "model_tier": 4,
+      "model_tier_source": {"model":"google/gemma-4-31b-it:free","arena_model":"gemma-4-31b","match":"variant","rating":1452.8,"votes":6133,"boundary":true,"snapshot":"2026-10-02","url":"https://huggingface.co/datasets/lmarena-ai/leaderboard-dataset"},
+      "free_limits": {"requests_per_minute":20,"requests_per_day":50,"scope":"free models, accounts with under 10 credits purchased lifetime (1,000 requests/day once 10+ credits are purchased)","source":"https://openrouter.ai/docs/api-reference/limits","checked":"2026-10-08"},
       "verified": true,
       "last_verified": "2026-10-08"
     },
@@ -90,6 +101,10 @@
       "openai_compatible": true,
       "openai_base_url": "https://api.cloudflare.com/client/v4/accounts/{account_id}/ai/v1",
       "env_key": "CLOUDFLARE_API_TOKEN",
+      "is_text_llm": true,
+      "model_tier": 2,
+      "model_tier_source": {"model":"@cf/google/gemma-3-12b-it","arena_model":"gemma-3-12b-it","match":"exact","rating":1341.8,"votes":3829,"snapshot":"2026-10-02","url":"https://huggingface.co/datasets/lmarena-ai/leaderboard-dataset"},
+      "free_limits": {"requests_per_minute":300,"scope":"text generation; models that require Workers Paid: 20 requests/minute per model. The daily allowance is 10,000 Neurons, a unit that is not requests or tokens","source":"https://developers.cloudflare.com/workers-ai/platform/limits/","checked":"2026-10-08"},
       "verified": true,
       "last_verified": "2026-10-08"
     },
@@ -112,6 +127,10 @@
       "openai_compatible": true,
       "openai_base_url": "https://api.cohere.ai/compatibility/v1",
       "env_key": "COHERE_API_KEY",
+      "is_text_llm": true,
+      "model_tier": 2,
+      "model_tier_source": {"model":"command-a-03-2025","arena_model":"command-a-03-2025","match":"exact","rating":1353.7,"votes":55467,"snapshot":"2026-10-02","url":"https://huggingface.co/datasets/lmarena-ai/leaderboard-dataset"},
+      "free_limits": {"requests_per_minute":20,"requests_per_month":1000,"scope":"trial key, chat endpoint; 1,000 API calls per month in total","source":"https://docs.cohere.com/docs/rate-limits","checked":"2026-10-08"},
       "verified": true,
       "last_verified": "2026-10-08"
     },
@@ -134,6 +153,8 @@
       "openai_compatible": true,
       "openai_base_url": "https://api.cerebras.ai/v1",
       "env_key": "CEREBRAS_API_KEY",
+      "is_text_llm": true,
+      "model_tier": null,
       "verified": true,
       "last_verified": "2026-10-08"
     },
@@ -156,6 +177,8 @@
       "openai_compatible": true,
       "openai_base_url": "https://api.mistral.ai/v1",
       "env_key": "MISTRAL_API_KEY",
+      "is_text_llm": true,
+      "model_tier": null,
       "verified": true,
       "last_verified": "2026-10-08"
     },
@@ -178,6 +201,8 @@
       "openai_compatible": true,
       "openai_base_url": "https://router.huggingface.co/v1",
       "env_key": "HF_TOKEN",
+      "is_text_llm": false,
+      "model_tier": null,
       "verified": true,
       "last_verified": "2026-10-08"
     },
@@ -200,6 +225,8 @@
       "openai_compatible": true,
       "openai_base_url": "https://api.siliconflow.cn/v1",
       "env_key": "SILICONFLOW_API_KEY",
+      "is_text_llm": true,
+      "model_tier": null,
       "verified": true,
       "last_verified": "2026-10-08"
     },
@@ -222,6 +249,9 @@
       "openai_compatible": true,
       "openai_base_url": "https://api.z.ai/api/paas/v4/",
       "env_key": "ZAI_API_KEY",
+      "is_text_llm": true,
+      "model_tier": 2,
+      "model_tier_source": {"model":"glm-4.7-flash","arena_model":"glm-4.7-flash","match":"exact","rating":1364.9,"votes":11977,"snapshot":"2026-10-02","url":"https://huggingface.co/datasets/lmarena-ai/leaderboard-dataset"},
       "verified": true,
       "last_verified": "2026-10-08"
     },
@@ -244,6 +274,9 @@
       "openai_compatible": true,
       "openai_base_url": "https://us-south.ml.cloud.ibm.com/ml/v1",
       "env_key": "WATSONX_API_KEY",
+      "is_text_llm": true,
+      "model_tier": null,
+      "free_limits": {"requests_per_second":2,"tokens_per_month":300000,"scope":"Lite plan: 2 inference requests per second; 300,000 tokens per month for foundation model inference","source":"https://www.ibm.com/docs/en/watsonx/saas?topic=cloud-watsonxai-runtime-plans","checked":"2026-10-08"},
       "verified": true,
       "last_verified": "2026-10-08"
     },
@@ -266,6 +299,8 @@
       "openai_compatible": true,
       "openai_base_url": "https://oai.endpoints.kepler.ai.cloud.ovh.net/v1",
       "env_key": "OVHCLOUD_API_KEY",
+      "is_text_llm": false,
+      "model_tier": null,
       "verified": true,
       "last_verified": "2026-10-08"
     },
@@ -288,6 +323,8 @@
       "openai_compatible": true,
       "openai_base_url": "https://api.fireworks.ai/inference/v1",
       "env_key": "FIREWORKS_API_KEY",
+      "is_text_llm": true,
+      "model_tier": null,
       "verified": true,
       "last_verified": "2026-10-08"
     },
@@ -310,6 +347,8 @@
       "openai_compatible": true,
       "openai_base_url": "https://inference.baseten.co/v1",
       "env_key": "BASETEN_API_KEY",
+      "is_text_llm": true,
+      "model_tier": null,
       "verified": true,
       "last_verified": "2026-10-08"
     },
@@ -332,6 +371,8 @@
       "openai_compatible": true,
       "openai_base_url": "https://api.tokenfactory.nebius.com/v1",
       "env_key": "NEBIUS_API_KEY",
+      "is_text_llm": true,
+      "model_tier": null,
       "verified": true,
       "last_verified": "2026-10-08"
     },
@@ -354,6 +395,8 @@
       "openai_compatible": true,
       "openai_base_url": "https://api.novita.ai/openai",
       "env_key": "NOVITA_API_KEY",
+      "is_text_llm": true,
+      "model_tier": null,
       "verified": true,
       "last_verified": "2026-10-08"
     },
@@ -376,6 +419,8 @@
       "openai_compatible": true,
       "openai_base_url": "https://api.ai21.com/studio/v1",
       "env_key": "AI21_API_KEY",
+      "is_text_llm": true,
+      "model_tier": null,
       "verified": true,
       "last_verified": "2026-10-08"
     },
@@ -398,6 +443,8 @@
       "openai_compatible": false,
       "openai_base_url": null,
       "env_key": "NLPCLOUD_API_KEY",
+      "is_text_llm": true,
+      "model_tier": null,
       "verified": true,
       "last_verified": "2026-10-08"
     },
@@ -420,6 +467,8 @@
       "openai_compatible": true,
       "openai_base_url": "https://dashscope-intl.aliyuncs.com/compatible-mode/v1",
       "env_key": "DASHSCOPE_API_KEY",
+      "is_text_llm": true,
+      "model_tier": null,
       "verified": true,
       "last_verified": "2026-10-08"
     },
@@ -441,6 +490,8 @@
       "commercial_ok": null,
       "openai_compatible": false,
       "openai_base_url": null,
+      "is_text_llm": false,
+      "model_tier": null,
       "verified": true,
       "last_verified": "2026-10-08"
     },
@@ -463,6 +514,10 @@
       "openai_compatible": true,
       "openai_base_url": "https://api.sambanova.ai/v1",
       "env_key": "SAMBANOVA_API_KEY",
+      "is_text_llm": true,
+      "model_tier": 3,
+      "model_tier_source": {"model":"DeepSeek-V3.1","arena_model":"deepseek-v3.1","match":"variant","rating":1417.1,"votes":14540,"snapshot":"2026-10-02","url":"https://huggingface.co/datasets/lmarena-ai/leaderboard-dataset"},
+      "free_limits": {"requests_per_minute":20,"requests_per_day":20,"tokens_per_day":200000,"scope":"Free Tier (no payment method linked), each of DeepSeek-V3.1, Meta-Llama-3.3-70B-Instruct and gpt-oss-120b","source":"https://docs.sambanova.ai/docs/en/models/rate-limits","checked":"2026-10-08"},
       "verified": true,
       "last_verified": "2026-08-13"
     },
@@ -485,6 +540,8 @@
       "openai_compatible": true,
       "openai_base_url": "https://api.scaleway.ai/v1",
       "env_key": "SCALEWAY_API_KEY",
+      "is_text_llm": true,
+      "model_tier": null,
       "verified": true,
       "last_verified": "2026-10-08"
     },
@@ -507,6 +564,8 @@
       "openai_compatible": true,
       "openai_base_url": "https://integrate.api.nvidia.com/v1",
       "env_key": "NVIDIA_API_KEY",
+      "is_text_llm": true,
+      "model_tier": null,
       "verified": true,
       "last_verified": "2026-10-08"
     },
@@ -529,6 +588,8 @@
       "openai_compatible": true,
       "openai_base_url": "https://ai-gateway.vercel.sh/v1",
       "env_key": "VERCEL_AI_GATEWAY_KEY",
+      "is_text_llm": true,
+      "model_tier": null,
       "verified": true,
       "last_verified": "2026-10-08"
     },
@@ -551,6 +612,8 @@
       "openai_compatible": true,
       "openai_base_url": "https://api.jina.ai/v1",
       "env_key": "JINA_API_KEY",
+      "is_text_llm": false,
+      "model_tier": null,
       "verified": true,
       "last_verified": "2026-10-08"
     },
@@ -573,6 +636,8 @@
       "openai_compatible": false,
       "openai_base_url": null,
       "env_key": "DEEPGRAM_API_KEY",
+      "is_text_llm": false,
+      "model_tier": null,
       "verified": true,
       "last_verified": "2026-10-08"
     },
@@ -595,6 +660,8 @@
       "openai_compatible": true,
       "openai_base_url": "https://llm-gateway.assemblyai.com/v1",
       "env_key": "ASSEMBLYAI_API_KEY",
+      "is_text_llm": true,
+      "model_tier": null,
       "verified": true,
       "last_verified": "2026-10-08"
     },
@@ -617,6 +684,8 @@
       "openai_compatible": false,
       "openai_base_url": null,
       "env_key": "MIXEDBREAD_API_KEY",
+      "is_text_llm": false,
+      "model_tier": null,
       "verified": true,
       "last_verified": "2026-10-08"
     },
@@ -639,6 +708,8 @@
       "openai_compatible": true,
       "openai_base_url": "https://api.clarifai.com/v2/ext/openai/v1",
       "env_key": "CLARIFAI_PAT",
+      "is_text_llm": true,
+      "model_tier": null,
       "verified": false,
       "last_verified": null
     },
@@ -661,6 +732,8 @@
       "openai_compatible": true,
       "openai_base_url": "https://api.arliai.com/v1",
       "env_key": "ARLI_API_KEY",
+      "is_text_llm": true,
+      "model_tier": null,
       "verified": true,
       "last_verified": "2026-10-08"
     },
@@ -683,6 +756,8 @@
       "openai_compatible": true,
       "openai_base_url": "https://ollama.com/v1",
       "env_key": "OLLAMA_API_KEY",
+      "is_text_llm": true,
+      "model_tier": null,
       "verified": true,
       "last_verified": "2026-10-08"
     },
@@ -704,6 +779,8 @@
       "commercial_ok": null,
       "openai_compatible": false,
       "openai_base_url": null,
+      "is_text_llm": true,
+      "model_tier": null,
       "verified": true,
       "last_verified": "2026-10-08"
     },
@@ -726,6 +803,9 @@
       "openai_compatible": true,
       "openai_base_url": "https://api-inference.modelscope.cn/v1",
       "env_key": "MODELSCOPE_API_KEY",
+      "is_text_llm": true,
+      "model_tier": 4,
+      "model_tier_source": {"model":"Tencent-Hunyuan/Hy3","arena_model":"hy3","match":"variant","rating":1456,"votes":10476,"boundary":true,"snapshot":"2026-10-02","url":"https://huggingface.co/datasets/lmarena-ai/leaderboard-dataset"},
       "verified": true,
       "last_verified": "2026-10-08"
     },
@@ -747,6 +827,8 @@
       "commercial_ok": null,
       "openai_compatible": true,
       "openai_base_url": "https://gen.pollinations.ai/v1",
+      "is_text_llm": true,
+      "model_tier": null,
       "verified": true,
       "last_verified": "2026-10-08"
     },
@@ -769,6 +851,8 @@
       "openai_compatible": false,
       "openai_base_url": null,
       "env_key": "RUNWARE_API_KEY",
+      "is_text_llm": false,
+      "model_tier": null,
       "verified": true,
       "last_verified": "2026-10-08"
     },
@@ -791,6 +875,8 @@
       "openai_compatible": false,
       "openai_base_url": null,
       "env_key": "PINECONE_API_KEY",
+      "is_text_llm": false,
+      "model_tier": null,
       "verified": true,
       "last_verified": "2026-10-08"
     },
@@ -813,6 +899,8 @@
       "openai_compatible": false,
       "openai_base_url": null,
       "env_key": "TWELVELABS_API_KEY",
+      "is_text_llm": false,
+      "model_tier": null,
       "verified": true,
       "last_verified": "2026-10-08"
     },
@@ -835,6 +923,8 @@
       "openai_compatible": false,
       "openai_base_url": null,
       "env_key": "OCRSPACE_API_KEY",
+      "is_text_llm": false,
+      "model_tier": null,
       "verified": true,
       "last_verified": "2026-10-08"
     },
@@ -857,6 +947,8 @@
       "openai_compatible": false,
       "openai_base_url": null,
       "env_key": "LLAMACLOUD_API_KEY",
+      "is_text_llm": false,
+      "model_tier": null,
       "verified": true,
       "last_verified": "2026-10-08"
     },
@@ -879,6 +971,8 @@
       "openai_compatible": false,
       "openai_base_url": null,
       "env_key": "NANONETS_API_KEY",
+      "is_text_llm": false,
+      "model_tier": null,
       "verified": true,
       "last_verified": "2026-10-08"
     },
@@ -901,6 +995,8 @@
       "openai_compatible": true,
       "openai_base_url": "https://api.moondream.ai/v1",
       "env_key": "MOONDREAM_API_KEY",
+      "is_text_llm": false,
+      "model_tier": null,
       "verified": true,
       "last_verified": "2026-10-08"
     },
@@ -923,6 +1019,8 @@
       "openai_compatible": false,
       "openai_base_url": null,
       "env_key": "SPEECHMATICS_API_KEY",
+      "is_text_llm": false,
+      "model_tier": null,
       "verified": true,
       "last_verified": "2026-10-08"
     },
@@ -945,6 +1043,8 @@
       "openai_compatible": false,
       "openai_base_url": null,
       "env_key": "SPEECHIFY_API_KEY",
+      "is_text_llm": false,
+      "model_tier": null,
       "verified": true,
       "last_verified": "2026-10-08"
     },
@@ -967,6 +1067,8 @@
       "openai_compatible": false,
       "openai_base_url": null,
       "env_key": "HUME_API_KEY",
+      "is_text_llm": false,
+      "model_tier": null,
       "verified": true,
       "last_verified": "2026-10-08"
     },
@@ -989,6 +1091,8 @@
       "openai_compatible": false,
       "openai_base_url": null,
       "env_key": "UNREALSPEECH_API_KEY",
+      "is_text_llm": false,
+      "model_tier": null,
       "verified": true,
       "last_verified": "2026-10-08"
     },
@@ -1011,6 +1115,8 @@
       "openai_compatible": false,
       "openai_base_url": null,
       "env_key": "ELEVENLABS_API_KEY",
+      "is_text_llm": false,
+      "model_tier": null,
       "verified": true,
       "last_verified": "2026-10-08"
     },
@@ -1033,6 +1139,8 @@
       "openai_compatible": true,
       "openai_base_url": "https://api.sarvam.ai/v1",
       "env_key": "SARVAM_API_KEY",
+      "is_text_llm": true,
+      "model_tier": null,
       "verified": true,
       "last_verified": "2026-10-08"
     },
@@ -1055,6 +1163,8 @@
       "openai_compatible": false,
       "openai_base_url": null,
       "env_key": "GLADIA_API_KEY",
+      "is_text_llm": false,
+      "model_tier": null,
       "verified": true,
       "last_verified": "2026-10-08"
     },
@@ -1077,6 +1187,8 @@
       "openai_compatible": false,
       "openai_base_url": null,
       "env_key": "RIME_API_KEY",
+      "is_text_llm": false,
+      "model_tier": null,
       "verified": true,
       "last_verified": "2026-10-08"
     },
@@ -1099,6 +1211,8 @@
       "openai_compatible": true,
       "openai_base_url": "https://api.hunyuan.cloud.tencent.com/v1",
       "env_key": "HUNYUAN_API_KEY",
+      "is_text_llm": true,
+      "model_tier": null,
       "verified": true,
       "last_verified": "2026-10-08"
     },
@@ -1120,6 +1234,8 @@
       "commercial_ok": null,
       "openai_compatible": false,
       "env_key": "VOYAGE_API_KEY",
+      "is_text_llm": false,
+      "model_tier": null,
       "verified": true,
       "last_verified": "2026-10-08",
       "added": "2026-07-31"
@@ -1142,6 +1258,8 @@
       "commercial_ok": null,
       "openai_compatible": false,
       "env_key": "CONTEXTUAL_API_KEY",
+      "is_text_llm": true,
+      "model_tier": null,
       "verified": true,
       "last_verified": "2026-10-08",
       "added": "2026-07-31"
@@ -1164,6 +1282,8 @@
       "commercial_ok": false,
       "openai_compatible": false,
       "env_key": "CARTESIA_API_KEY",
+      "is_text_llm": false,
+      "model_tier": null,
       "verified": true,
       "last_verified": "2026-10-08",
       "added": "2026-07-31"
@@ -1186,6 +1306,8 @@
       "commercial_ok": false,
       "openai_compatible": false,
       "env_key": "FISH_AUDIO_API_KEY",
+      "is_text_llm": false,
+      "model_tier": null,
       "verified": true,
       "last_verified": "2026-10-08",
       "added": "2026-07-31"
@@ -1208,6 +1330,8 @@
       "commercial_ok": null,
       "openai_compatible": false,
       "env_key": "CAMB_API_KEY",
+      "is_text_llm": false,
+      "model_tier": null,
       "verified": true,
       "last_verified": "2026-10-08",
       "added": "2026-07-31"
@@ -1230,6 +1354,8 @@
       "commercial_ok": null,
       "openai_compatible": false,
       "env_key": "REV_AI_API_KEY",
+      "is_text_llm": false,
+      "model_tier": null,
       "verified": true,
       "last_verified": "2026-10-08",
       "added": "2026-07-31"
@@ -1252,6 +1378,8 @@
       "commercial_ok": null,
       "openai_compatible": false,
       "env_key": "UNSTRUCTURED_API_KEY",
+      "is_text_llm": false,
+      "model_tier": null,
       "verified": true,
       "last_verified": "2026-10-08",
       "added": "2026-07-31"
@@ -1274,6 +1402,8 @@
       "commercial_ok": null,
       "openai_compatible": false,
       "env_key": "NUTRIENT_API_KEY",
+      "is_text_llm": false,
+      "model_tier": null,
       "verified": true,
       "last_verified": "2026-10-08",
       "added": "2026-07-31"
@@ -1296,6 +1426,8 @@
       "commercial_ok": null,
       "openai_compatible": false,
       "env_key": "PHOTOROOM_API_KEY",
+      "is_text_llm": false,
+      "model_tier": null,
       "verified": true,
       "last_verified": "2026-10-08",
       "added": "2026-07-31"
@@ -1319,6 +1451,8 @@
       "openai_compatible": true,
       "openai_base_url": "https://inference.poolside.ai/v1",
       "env_key": "POOLSIDE_API_KEY",
+      "is_text_llm": true,
+      "model_tier": null,
       "verified": true,
       "last_verified": "2026-10-08",
       "added": "2026-07-31"
@@ -1342,6 +1476,8 @@
       "openai_compatible": true,
       "openai_base_url": "https://api.upstage.ai/v1",
       "env_key": "UPSTAGE_API_KEY",
+      "is_text_llm": true,
+      "model_tier": null,
       "verified": true,
       "last_verified": "2026-10-08",
       "added": "2026-07-31"
@@ -1364,6 +1500,8 @@
       "commercial_ok": true,
       "openai_compatible": false,
       "env_key": "VERYFI_API_KEY",
+      "is_text_llm": false,
+      "model_tier": null,
       "verified": true,
       "last_verified": "2026-10-08",
       "added": "2026-07-31"
@@ -1386,6 +1524,8 @@
       "commercial_ok": null,
       "openai_compatible": false,
       "env_key": "VOICEGAIN_API_KEY",
+      "is_text_llm": false,
+      "model_tier": null,
       "verified": true,
       "last_verified": "2026-10-08",
       "added": "2026-07-31"
@@ -1408,6 +1548,8 @@
       "commercial_ok": null,
       "openai_compatible": false,
       "env_key": "SMALLEST_API_KEY",
+      "is_text_llm": false,
+      "model_tier": null,
       "verified": true,
       "last_verified": "2026-10-08",
       "added": "2026-07-31"
@@ -1430,6 +1572,8 @@
       "commercial_ok": null,
       "openai_compatible": false,
       "env_key": "RETELL_API_KEY",
+      "is_text_llm": false,
+      "model_tier": null,
       "verified": true,
       "last_verified": "2026-10-08",
       "added": "2026-07-31"
@@ -1452,6 +1596,8 @@
       "commercial_ok": null,
       "openai_compatible": false,
       "env_key": "DATALAB_API_KEY",
+      "is_text_llm": false,
+      "model_tier": null,
       "verified": true,
       "last_verified": "2026-10-02",
       "added": "2026-07-31"
@@ -1475,6 +1621,8 @@
       "openai_compatible": true,
       "openai_base_url": "https://api.inference.wandb.ai/v1",
       "env_key": "WANDB_API_KEY",
+      "is_text_llm": true,
+      "model_tier": null,
       "verified": true,
       "last_verified": "2026-10-08"
     },
@@ -1497,6 +1645,9 @@
       "openai_compatible": true,
       "openai_base_url": "https://api.opentyphoon.ai/v1",
       "env_key": "TYPHOON_API_KEY",
+      "is_text_llm": true,
+      "model_tier": null,
+      "free_limits": {"requests_per_second":5,"requests_per_minute":200,"scope":"typhoon-v2.5-30b-a3b-instruct","source":"https://docs.opentyphoon.ai/en/rate-limits/","checked":"2026-10-08"},
       "verified": true,
       "last_verified": "2026-10-08"
     }

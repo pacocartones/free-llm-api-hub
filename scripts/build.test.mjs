@@ -5,7 +5,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { readFileSync, writeFileSync, mkdtempSync, existsSync, readdirSync, statSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdtempSync, existsSync, readdirSync, statSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -1267,6 +1267,66 @@ test('validate rejects a category that contradicts free_type', () => {
   const fixture = join(mkdtempSync(join(tmpdir(), 'flah-')), 'providers.json');
   writeFileSync(fixture, JSON.stringify(data));
   assert.equal(exitOk(['scripts/validate.mjs', fixture]), false);
+});
+
+// ---------- score inputs: is_text_llm, model_tier, free_limits ----------
+import { tierForRating, MODEL_TIER_THRESHOLDS, MODEL_TIER_MIN_VOTES } from './lib/model-tier.mjs';
+
+// Runs validate.mjs on a mutated copy of the dataset and removes the copy afterwards.
+const validateAfter = (mutate) => {
+  const data = JSON.parse(readFileSync(DATA, 'utf8'));
+  mutate(data);
+  const dir = mkdtempSync(join(tmpdir(), 'flah-'));
+  try {
+    const fixture = join(dir, 'providers.json');
+    writeFileSync(fixture, JSON.stringify(data));
+    return exitOk(['scripts/validate.mjs', fixture]);
+  } finally { rmSync(dir, { recursive: true, force: true }); }
+};
+
+test('model tier thresholds: edges, tier 0 versus no source, and the minimum votes', () => {
+  assert.deepEqual(MODEL_TIER_THRESHOLDS, [[4, 1450], [3, 1400], [2, 1330], [1, 1250]]);
+  assert.equal(tierForRating(1450), 4);
+  assert.equal(tierForRating(1449.9), 3);
+  assert.equal(tierForRating(1400), 3);
+  assert.equal(tierForRating(1330), 2);
+  assert.equal(tierForRating(1250), 1);
+  assert.equal(tierForRating(1249.9), 0, 'sourced and below the lowest threshold is tier 0');
+  assert.equal(tierForRating(null), null, 'no rating is no tier, never 0');
+  assert.equal(tierForRating(Number.NaN), null);
+  assert.equal(MODEL_TIER_MIN_VOTES, 1000);
+});
+
+test('every provider states is_text_llm; a tier always matches its cited rating and never sits on a trial credit', () => {
+  const { providers } = JSON.parse(readFileSync(DATA, 'utf8'));
+  for (const p of providers) {
+    assert.equal(typeof p.is_text_llm, 'boolean', `${p.slug}: is_text_llm is explicit`);
+    if (p.model_tier != null) {
+      assert.equal(p.model_tier, tierForRating(p.model_tier_source.rating), `${p.slug}: tier follows the rating`);
+      assert.ok(p.model_tier_source.votes >= MODEL_TIER_MIN_VOTES, `${p.slug}: enough votes`);
+      assert.equal(p.is_text_llm, true, `${p.slug}: only text-LLM offers carry a tier`);
+      assert.notEqual(p.free_type, 'trial-credit', `${p.slug}: a trial credit is not continuous free access`);
+    } else {
+      assert.ok(!('model_tier_source' in p) || p.model_tier_source === null, `${p.slug}: no tier, no source`);
+    }
+    if (p.free_limits) assert.notEqual(p.free_type, 'trial-credit', `${p.slug}: no free_limits on a trial credit`);
+  }
+  assert.ok(providers.some((p) => p.model_tier != null), 'the dataset has rated providers');
+});
+
+test('validate rejects a tier that disagrees with its rating, a tier without a source and a missing is_text_llm', () => {
+  const rated = (d) => d.providers.find((p) => p.model_tier != null);
+  assert.equal(validateAfter((d) => { rated(d).model_tier = (rated(d).model_tier + 1) % 5; }), false);
+  assert.equal(validateAfter((d) => { delete rated(d).model_tier_source; }), false);
+  assert.equal(validateAfter((d) => { delete d.providers[0].is_text_llm; }), false);
+  assert.equal(validateAfter((d) => { const p = rated(d); p.model_tier_source.votes = 999; }), false);
+  assert.equal(validateAfter(() => {}), true, 'the unmodified dataset passes through the same path');
+});
+
+test('validate rejects free_limits on a trial credit or without a source', () => {
+  assert.equal(validateAfter((d) => { const p = d.providers.find((x) => x.free_type === 'trial-credit'); p.free_limits = { requests_per_day: 10, source: 'https://example.invalid/limits', checked: d.generated }; }), false);
+  assert.equal(validateAfter((d) => { const p = d.providers.find((x) => x.free_limits); delete p.free_limits.source; }), false);
+  assert.equal(validateAfter((d) => { const p = d.providers.find((x) => x.free_limits); p.free_limits.requests_per_day = 1.5; }), false);
 });
 
 // ---------- provider counts derived from the data ----------

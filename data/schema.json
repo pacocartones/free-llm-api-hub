@@ -36,7 +36,7 @@
       "additionalProperties": false,
       "required": [
         "slug", "name", "category", "free_type", "free_tier",
-        "docs_url", "verified"
+        "docs_url", "verified", "is_text_llm"
       ],
       "properties": {
         "slug": {
@@ -104,6 +104,50 @@
           "items": { "type": "string" },
           "uniqueItems": true
         },
+        "is_text_llm": {
+          "type": "boolean",
+          "description": "True when the free offering (free tier or trial credit) gives API access to text/chat language models. False for OCR, text-to-speech, speech-to-text, embeddings-only, image and compute-only services. Explicit on every entry; it makes an entry eligible for the top 10."
+        },
+        "model_tier": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "maximum": 4,
+          "description": "Quality tier 0-4 of the best free model that has a public rating, derived from model_tier_source.rating with the thresholds in docs/methodology.md (4 >= 1450, 3 >= 1400, 2 >= 1330, 1 >= 1250, 0 below). Null when no source exists; never estimated. Trial-credit offers are not rated: a one-time credit is not continuous free access."
+        },
+        "model_tier_source": {
+          "type": ["object", "null"],
+          "additionalProperties": false,
+          "required": ["model", "arena_model", "match", "rating", "votes", "snapshot", "url"],
+          "description": "Where model_tier comes from: the provider's model, the exact row of the LMArena Arena Leaderboard Dataset (CC-BY-4.0) it maps to, and that row's rating and vote count at the snapshot date.",
+          "properties": {
+            "model": { "type": "string", "minLength": 1, "description": "The model id as the provider lists it (models_free)." },
+            "arena_model": { "type": "string", "minLength": 1, "description": "The model_name of the matching Arena row." },
+            "match": { "enum": ["exact", "variant"], "description": "exact = same id; variant = same model with a serving suffix (quantisation, :free, effort level)." },
+            "rating": { "type": "number", "description": "Arena rating (text, style control, overall) at the snapshot." },
+            "votes": { "type": "integer", "minimum": 1000, "description": "Vote count of that row; a row needs at least 1,000." },
+            "boundary": { "type": "boolean", "description": "True when the row's confidence interval crosses a tier threshold." },
+            "snapshot": { "type": "string", "format": "date", "description": "The leaderboard_publish_date of the Arena snapshot." },
+            "url": { "type": "string", "format": "uri", "description": "The dataset the row comes from." }
+          }
+        },
+        "free_limits": {
+          "type": ["object", "null"],
+          "additionalProperties": false,
+          "required": ["source", "checked"],
+          "minProperties": 3,
+          "description": "Numeric free limits exactly as the provider publishes them. Null when the provider publishes none; never estimated or converted between units. scope says which models, plan or condition the numbers apply to.",
+          "properties": {
+            "requests_per_second": { "type": "integer", "minimum": 1 },
+            "requests_per_minute": { "type": "integer", "minimum": 1 },
+            "requests_per_day": { "type": "integer", "minimum": 1 },
+            "requests_per_month": { "type": "integer", "minimum": 1 },
+            "tokens_per_day": { "type": "integer", "minimum": 1 },
+            "tokens_per_month": { "type": "integer", "minimum": 1 },
+            "scope": { "type": "string", "minLength": 1 },
+            "source": { "type": "string", "format": "uri", "description": "The provider's own page that states the numbers." },
+            "checked": { "type": "string", "format": "date", "description": "The day the numbers were read on that page." }
+          }
+        },
         "verified": {
           "type": "boolean",
           "description": "true = core facts independently confirmed against the provider's own docs on last_verified. false = sourced from community tracking, flagged for follow-up."
@@ -128,6 +172,14 @@
         }
       },
       "allOf": [
+        {
+          "if": { "required": ["model_tier"], "properties": { "model_tier": { "type": "integer" } } },
+          "then": { "required": ["model_tier_source"], "properties": { "model_tier_source": { "type": "object" } } }
+        },
+        {
+          "if": { "required": ["model_tier_source"], "properties": { "model_tier_source": { "type": "object" } } },
+          "then": { "required": ["model_tier"], "properties": { "model_tier": { "type": "integer" } } }
+        },
         {
           "if": { "properties": { "verified": { "const": true } } },
           "then": {

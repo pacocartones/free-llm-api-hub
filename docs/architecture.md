@@ -62,6 +62,9 @@ Per-provider fields (in serializer order):
 | `commercial_ok` | true/false/null | |
 | `openai_compatible` | true/false/null | |
 | `openai_base_url` | url \| null | only when `openai_compatible !== false` |
+| `is_text_llm` | boolean (required) | free offering gives text/chat LLM API access; eligibility for the top 10 |
+| `model_tier` / `model_tier_source` | 0-4 / object, or both null | derived from a cited LMArena rating (thresholds in `lib/model-tier.mjs`); validated against the rating |
+| `free_limits` | object \| null | published numeric limits with `source` and `checked`; never estimated |
 | `env_key` | UPPER_SNAKE | secret NAME for probe/fetch-models. **STRIPPED from all public output** (homepage payload, site/providers.json, /api) except the two client configs (`api/v1/openai-clients.json`, `api/v1/litellm.yaml`), whose purpose is to tell users which variable to put their own key in. Never the value. |
 | `verified` | boolean | true = independently confirmed against own docs on `last_verified` |
 | `last_verified` | YYYY-MM-DD \| null | must be null when `verified:false` |

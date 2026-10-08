@@ -86,6 +86,7 @@ Add this object to the array (insert it near other trial-credit entries; positio
   "openai_compatible": null,
   "openai_base_url": null,
   "env_key": "AI21_API_KEY",
+  "is_text_llm": true,
   "verified": true,
   "last_verified": "<today, YYYY-MM-DD>"
 }

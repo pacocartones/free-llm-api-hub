@@ -49,3 +49,16 @@ Found something wrong or stale? The [inaccuracy form](../../issues/new?template=
 ---
 
 _[← Docs index](README.md) · [Main README](../README.md)_
+
+## Model tier
+
+`model_tier` (0-4) says how a provider's best *free* model is rated by people, not how capable it is. It is derived, never typed:
+
+- **Source:** the LMArena [Arena Leaderboard Dataset](https://huggingface.co/datasets/lmarena-ai/leaderboard-dataset) (CC-BY-4.0), config `text_style_control`, category `overall`. Style control discounts the effect of answer length and formatting on votes. Attribution: *Model quality data: LMArena Arena Leaderboard Dataset (CC-BY-4.0), snapshot 2026-10-02.*
+- **Mapping:** each id in a provider's `models_free` is matched by hand to one exact Arena `model_name` (`exact` = same id, `variant` = same model with a serving suffix such as `:free` or a quantisation). No match means no tier: a similar model is never substituted. A row counts only with at least 1,000 votes.
+- **Thresholds** (an editorial choice, public, independent of any provider): 4 at a rating of 1450 or more, 3 at 1400, 2 at 1330, 1 at 1250, 0 below. `boundary: true` marks a row whose confidence interval crosses a threshold. Changing a threshold changes published tiers.
+- **Provider tier** = the highest tier among its rated free models. `null` (no source) scores zero and is never estimated; 0 means "sourced and below the lowest threshold".
+- **Trial credits are not rated:** a one-time credit is not continuous free access, so those offers carry no tier and no `free_limits`.
+- **Limits:** preference votes are human, subject to the usual sampling biases, and move with each snapshot. `validate.mjs` checks that every `model_tier` equals the tier of its cited rating.
+
+`free_limits` follows the same rule: numbers exactly as the provider publishes them, with the page and the day they were read, `null` when it publishes none.
