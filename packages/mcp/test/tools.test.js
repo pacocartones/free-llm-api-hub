@@ -1,11 +1,10 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { fileURLToPath } from 'node:url';
-import { createLoader, normalizeDataset } from '../src/data.js';
+import { createClientsLoader, createLoader, normalizeClients, normalizeDataset } from '../src/data.js';
 import {
   ToolError,
   datasetInfo,
-  envVarName,
   getProvider,
   openaiClientConfig,
   searchProviders,
@@ -13,7 +12,9 @@ import {
 } from '../src/tools.js';
 
 const FIXTURE = fileURLToPath(new URL('./fixtures/providers.json', import.meta.url));
+const CLIENTS = fileURLToPath(new URL('./fixtures/openai-clients.json', import.meta.url));
 const data = await createLoader({ dataPath: FIXTURE })();
+const clients = await createClientsLoader({ clientsPath: CLIENTS })();
 const slugs = (r) => r.providers.map((p) => p.slug).sort();
 
 test('loader strips env_key and keeps version/generated', () => {
@@ -49,6 +50,23 @@ test('loader does not cache a failure', async () => {
 
 test('normalizeDataset rejects a file without providers', () => {
   assert.throws(() => normalizeDataset({ version: '1' }, 'x.json'), /no "providers" array/);
+});
+
+test('normalizeClients rejects a file without clients or with an incomplete entry', () => {
+  assert.throws(() => normalizeClients({ providers: [] }, 'c.json'), /no "clients" array/);
+  assert.throws(() => normalizeClients({ clients: [{ slug: 'x', base_url: 'https://x' }] }, 'c.json'), /without slug\/base_url\/env_key/);
+});
+
+test('clients loader fetches openai-clients.json once', async () => {
+  const urls = [];
+  const fetchImpl = async (url) => {
+    urls.push(url);
+    return { ok: true, json: async () => ({ clients: [] }) };
+  };
+  const load = createClientsLoader({ fetchImpl });
+  await load();
+  await load();
+  assert.deepEqual(urls, ['https://freellmapihub.com/api/v1/openai-clients.json']);
 });
 
 test('search without filters returns every provider in compact form', () => {
@@ -136,56 +154,65 @@ test('get_provider: unknown slug is a clear error with suggestions', () => {
   assert.throws(() => getProvider(data, { slug: 'alpha' }), /Did you mean: alpha-ai/);
 });
 
-test('openai_client_config for a verified compatible provider', () => {
-  const r = openaiClientConfig(data, { slug: 'alpha-ai' });
+test('openai_client_config takes base_url and env_key from openai-clients.json', () => {
+  const r = openaiClientConfig(data, clients, { slug: 'alpha-ai' });
   assert.equal(r.available, true);
-  assert.equal(r.base_url, 'https://api.alpha.example/v1');
-  assert.equal(r.env_var, 'ALPHA_AI_API_KEY');
+  // The fixture's clients file deliberately differs from providers.json, to prove which file is read.
+  assert.equal(r.base_url, 'https://api.alpha.example/openai/v1');
+  assert.equal(r.env_var, 'ALPHA_PUBLISHED_KEY');
   assert.equal(r.model, 'alpha-1-small');
-  assert.match(r.python, /base_url="https:\/\/api\.alpha\.example\/v1"/);
-  assert.match(r.python, /os\.environ\["ALPHA_AI_API_KEY"\]/);
-  assert.match(r.javascript, /process\.env\.ALPHA_AI_API_KEY/);
+  assert.match(r.python, /base_url="https:\/\/api\.alpha\.example\/openai\/v1"/);
+  assert.match(r.python, /os\.environ\["ALPHA_PUBLISHED_KEY"\]/);
+  assert.match(r.javascript, /process\.env\["ALPHA_PUBLISHED_KEY"\]/);
   assert.equal(r.docs_url, 'https://alpha.example/docs/limits');
   assert.equal(r.last_verified, '2026-09-30');
+  assert.match(r.disclaimer, /authoritative/);
   assert.match(r.model_note, /sample/);
 });
 
 test('openai_client_config honours an explicit model and flags an unsampled one', () => {
-  const r = openaiClientConfig(data, { slug: 'alpha-ai', model: 'alpha-2' });
+  const r = openaiClientConfig(data, clients, { slug: 'alpha-ai', model: 'alpha-2' });
   assert.equal(r.model, 'alpha-2');
   assert.match(r.javascript, /model: "alpha-2"/);
   assert.match(r.model_note, /not in the sampled free models/);
 });
 
 test('openai_client_config refuses a non-compatible provider and says why', () => {
-  const r = openaiClientConfig(data, { slug: 'beta-cloud' });
+  const r = openaiClientConfig(data, clients, { slug: 'beta-cloud' });
   assert.equal(r.available, false);
   assert.match(r.reason, /not OpenAI-compatible \(openai_compatible: false\)/);
+  assert.match(r.reason, /no OpenAI-compatible base URL/);
   assert.equal(r.docs_url, 'https://beta.example/pricing');
   assert.equal(r.last_verified, '2026-07-01');
   assert.equal('python' in r, false);
+  assert.equal('env_var' in r, false);
 });
 
 test('openai_client_config: null compatibility is reported as unconfirmed, not as "not compatible"', () => {
-  const r = openaiClientConfig(data, { slug: 'gamma-labs' });
+  const r = openaiClientConfig(data, clients, { slug: 'gamma-labs' });
   assert.equal(r.available, false);
   assert.match(r.reason, /not confirmed \(openai_compatible: null\)/);
   assert.doesNotMatch(r.reason, /is not OpenAI-compatible/);
 });
 
 test('openai_client_config refuses an unverified provider even with a base URL', () => {
-  const r = openaiClientConfig(data, { slug: 'delta-free' });
+  const r = openaiClientConfig(data, clients, { slug: 'delta-free' });
   assert.equal(r.available, false);
   assert.match(r.reason, /not verified/);
   assert.equal(r.last_verified, null);
 });
 
-test('openai_client_config: unknown slug is an error', () => {
-  assert.throws(() => openaiClientConfig(data, { slug: 'zzz' }), ToolError);
+test('openai_client_config: an eligible provider missing from the clients file is explained as a build mismatch', () => {
+  const empty = { version: '9.9.8', generated: '2026-09-01', clients: [] };
+  const r = openaiClientConfig(data, empty, { slug: 'alpha-ai' });
+  assert.equal(r.available, false);
+  assert.match(r.reason, /not listed in openai-clients\.json/);
+  assert.match(r.reason, /different builds/);
+  assert.equal(r.docs_url, 'https://alpha.example/docs/limits');
 });
 
-test('envVarName', () => {
-  assert.equal(envVarName('google-gemini'), 'GOOGLE_GEMINI_API_KEY');
+test('openai_client_config: unknown slug is an error', () => {
+  assert.throws(() => openaiClientConfig(data, clients, { slug: 'zzz' }), ToolError);
 });
 
 test('dataset_info: version, counts and freshness', () => {

@@ -1,0 +1,17 @@
+{
+  "dataset": "free-llm-api-hub",
+  "version": "9.9.9",
+  "generated": "2026-10-01",
+  "count": 1,
+  "clients": [
+    {
+      "slug": "alpha-ai",
+      "name": "Alpha AI",
+      "base_url": "https://api.alpha.example/openai/v1",
+      "env_key": "ALPHA_PUBLISHED_KEY",
+      "models_free": ["alpha-1-small", "alpha-1-large"],
+      "docs_url": "https://alpha.example/docs/limits",
+      "last_verified": "2026-09-30"
+    }
+  ]
+}

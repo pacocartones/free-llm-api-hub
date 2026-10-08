@@ -31,7 +31,7 @@ function fail(err) {
   return { isError: true, content: [{ type: 'text', text: message }] };
 }
 
-export function createServer(load) {
+export function createServer(load, loadClients) {
   const server = new McpServer({ name: pkg.name, version: pkg.version });
 
   const run = (fn) => async (args) => {
@@ -88,9 +88,10 @@ export function createServer(load) {
     {
       title: 'OpenAI client config for a provider',
       description:
-        'For a verified, OpenAI-compatible provider with a recorded base URL: return the base_url, a suggested ' +
-        'API-key environment variable name, and Python and JavaScript snippets using the official openai SDK. ' +
-        'For any other provider, explains why no drop-in config is offered. ' +
+        'For a provider listed in the published openai-clients.json (verified, OpenAI-compatible, with a base URL): ' +
+        'return its base_url, the API-key environment variable name published there (env_key), and Python and ' +
+        'JavaScript snippets using the official openai SDK. For any other provider, explains why no drop-in config ' +
+        'is offered (not verified, not OpenAI-compatible or not confirmed, or no base URL). ' +
         TERMS,
       inputSchema: {
         slug: z.string().describe('Provider slug.'),
@@ -98,7 +99,14 @@ export function createServer(load) {
       },
       annotations: READ_ONLY,
     },
-    run((data, args) => openaiClientConfig(data, args)),
+    async (args) => {
+      try {
+        const [data, clients] = await Promise.all([load(), loadClients()]);
+        return ok(openaiClientConfig(data, clients, args ?? {}));
+      } catch (err) {
+        return fail(err);
+      }
+    },
   );
 
   server.registerTool(

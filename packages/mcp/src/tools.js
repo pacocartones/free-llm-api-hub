@@ -140,38 +140,50 @@ export function getProvider(data, { slug }) {
   };
 }
 
-/** Suggested environment variable name. The dataset does not publish one. */
-export function envVarName(slug) {
-  return `${slug.toUpperCase().replace(/[^A-Z0-9]+/g, '_')}_API_KEY`;
-}
-
-export function openaiClientConfig(data, { slug, model }) {
-  const p = findProvider(data, slug);
-  const base = {
-    slug: p.slug,
-    name: p.name,
-    docs_url: p.docs_url,
-    last_verified: p.last_verified ?? null,
-    disclaimer: DISCLAIMER,
-  };
-
+/**
+ * Why a provider is not in openai-clients.json, from its providers.json entry.
+ * Null openai_compatible is reported as unconfirmed, never as "not compatible".
+ */
+function exclusionReasons(p) {
   const reasons = [];
-  if (p.verified !== true) reasons.push('the entry is not verified against the provider\'s own docs (verified: false)');
+  if (p.verified !== true) reasons.push("the entry is not verified against the provider's own docs (verified: false)");
   if (p.openai_compatible === false) reasons.push('the provider is not OpenAI-compatible (openai_compatible: false)');
   else if (p.openai_compatible !== true) reasons.push('OpenAI compatibility is not confirmed (openai_compatible: null)');
   if (!p.openai_base_url) reasons.push('no OpenAI-compatible base URL is recorded (openai_base_url: null)');
-  if (reasons.length) {
+  return reasons;
+}
+
+/**
+ * Client config from the published openai-clients.json (base_url, env_key,
+ * models_free, docs_url, last_verified). `data` is providers.json, used to
+ * resolve unknown slugs and to explain why a provider is not in the list.
+ */
+export function openaiClientConfig(data, clients, { slug, model }) {
+  const c = clients.clients.find((x) => x.slug === slug);
+  if (!c) {
+    const p = findProvider(data, slug);
+    const reasons = exclusionReasons(p);
+    if (!reasons.length) {
+      reasons.push(
+        `it is not listed in openai-clients.json (clients ${clients.version ?? '?'} / ${clients.generated ?? '?'}, ` +
+          `providers ${data.version ?? '?'} / ${data.generated ?? '?'}); the two files may come from different builds`,
+      );
+    }
     return {
-      ...base,
+      slug: p.slug,
+      name: p.name,
+      docs_url: p.docs_url,
+      last_verified: p.last_verified ?? null,
+      disclaimer: DISCLAIMER,
       available: false,
       reason: `No drop-in OpenAI client config for ${p.name}: ${reasons.join('; ')}. Follow the provider's own docs at ${p.docs_url || '(no docs_url recorded)'} for its API.`,
     };
   }
 
-  const env = envVarName(p.slug);
-  const samples = Array.isArray(p.models_free) ? p.models_free : [];
+  const env = c.env_key;
+  const url = c.base_url;
+  const samples = Array.isArray(c.models_free) ? c.models_free : [];
   const chosen = model ?? samples[0] ?? '<model-id>';
-  const url = p.openai_base_url;
   const python = [
     'import os',
     'from openai import OpenAI',
@@ -186,7 +198,7 @@ export function openaiClientConfig(data, { slug, model }) {
   const javascript = [
     "import OpenAI from 'openai';",
     '',
-    `const client = new OpenAI({ baseURL: ${JSON.stringify(url)}, apiKey: process.env.${env} });`,
+    `const client = new OpenAI({ baseURL: ${JSON.stringify(url)}, apiKey: process.env[${JSON.stringify(env)}] });`,
     'const resp = await client.chat.completions.create({',
     `  model: ${JSON.stringify(chosen)},`,
     "  messages: [{ role: 'user', content: 'Hello' }],",
@@ -195,11 +207,15 @@ export function openaiClientConfig(data, { slug, model }) {
   ].join('\n');
 
   const out = {
-    ...base,
+    slug: c.slug,
+    name: c.name ?? c.slug,
+    docs_url: c.docs_url,
+    last_verified: c.last_verified ?? null,
+    disclaimer: DISCLAIMER,
     available: true,
     base_url: url,
     env_var: env,
-    env_var_note: 'Suggested variable name for your key; any name works. Get the key from the provider (see docs_url).',
+    env_var_note: 'Name of the environment variable for your own key, as published in openai-clients.json; any name works if you change the snippet. Get the key from the provider (see docs_url).',
     model: chosen,
     python,
     javascript,

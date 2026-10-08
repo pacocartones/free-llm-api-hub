@@ -8,7 +8,14 @@ An [MCP](https://modelcontextprotocol.io) server over the free-llm-api-hub datas
 
 ## Data source
 
-By default the server fetches `https://freellmapihub.com/api/v1/providers.json` once, on the first tool call, and keeps it in memory for the life of the process. To use a local file instead (offline use, or a dataset you are editing), pass `--data <path>` or set `FLAH_DATA=<path>`. Both the published API file and the repository's `data/providers.json` work. The `env_key` field of the repository file is dropped on load, as it is from every public output.
+The server reads two files of the static API, each fetched once (on first use) and kept in memory for the life of the process:
+
+| File | Used by | Local override |
+|---|---|---|
+| `https://freellmapihub.com/api/v1/providers.json` | every tool | `--data <path>` or `FLAH_DATA=<path>` |
+| `https://freellmapihub.com/api/v1/openai-clients.json` | `openai_client_config` | `--clients <path>` or `FLAH_CLIENTS=<path>` |
+
+Both the published `providers.json` and the repository's `data/providers.json` work as `--data`. After `npm run build`, the repository's `site/api/v1/openai-clients.json` works as `--clients`. The `env_key` field is dropped from `providers.json` on load, as it is from every public output. The API-key variable name comes only from `openai-clients.json`, the one file the project publishes it in.
 
 ## Run it
 
@@ -20,6 +27,8 @@ cd free-llm-api-hub/packages/mcp
 npm ci --ignore-scripts
 node src/index.js                              # live dataset
 node src/index.js --data ../../data/providers.json   # local dataset
+# after `npm run build` at the repository root:
+node src/index.js --data ../../data/providers.json --clients ../../site/api/v1/openai-clients.json
 ```
 
 The server speaks MCP over stdio, so on its own it just waits for a client. Requires Node 18 or later.
@@ -28,7 +37,7 @@ The server speaks MCP over stdio, so on its own it just waits for a client. Requ
 
 ```bash
 npx -y free-llm-api-hub-mcp
-npx -y free-llm-api-hub-mcp --data ./providers.json
+npx -y free-llm-api-hub-mcp --data ./providers.json --clients ./openai-clients.json
 ```
 
 ## Client configuration
@@ -46,9 +55,9 @@ Claude Desktop (`claude_desktop_config.json`), from a local checkout:
 }
 ```
 
-Once published, replace `command`/`args` with `"command": "npx", "args": ["-y", "free-llm-api-hub-mcp"]`. To pin a local dataset, add `"env": { "FLAH_DATA": "/absolute/path/to/providers.json" }`.
+Once published, replace `command`/`args` with `"command": "npx", "args": ["-y", "free-llm-api-hub-mcp"]`. To pin local files, add `"env": { "FLAH_DATA": "/absolute/path/to/providers.json", "FLAH_CLIENTS": "/absolute/path/to/openai-clients.json" }`.
 
-Any other MCP host that launches stdio servers takes the same three things: the command (`node`), the arguments (the path to `src/index.js`, optionally `--data <path>`), and optionally the `FLAH_DATA` environment variable.
+Any other MCP host that launches stdio servers takes the same three things: the command (`node`), the arguments (the path to `src/index.js`, optionally `--data <path>` and `--clients <path>`), and optionally the `FLAH_DATA` / `FLAH_CLIENTS` environment variables.
 
 ## Tools
 
@@ -58,7 +67,7 @@ All tools are read-only.
 |---|---|---|
 | `search_providers` | `query?`, `modality?` (`text`, `vision`, `image`, `audio`, `embeddings`, `rerank`, `ocr`), `category?` (`ongoing`, `trial`), `no_card?`, `no_phone?`, `commercial_ok?`, `openai_compatible?` | Compact list: `slug`, `name`, `category`, `free_tier`, `rate_limits`, `docs_url`, `last_verified`, `verified` |
 | `get_provider` | `slug` | The full entry, the tri-state flags spelled out (`yes` / `no` / `not confirmed`) and the list of unconfirmed fields. An unknown slug is an error that suggests close matches. |
-| `openai_client_config` | `slug`, `model?` | For a verified, OpenAI-compatible provider with a recorded base URL: `base_url`, a suggested API-key variable name, and Python and JavaScript snippets for the official `openai` SDK. For any other provider, `available: false` and the reason. |
+| `openai_client_config` | `slug`, `model?` | For a provider listed in `openai-clients.json` (verified, OpenAI-compatible, with a base URL): its `base_url`, the API-key variable name published there (`env_key`, returned as `env_var`), and Python and JavaScript snippets for the official `openai` SDK. For any other provider, `available: false` and the reason: not verified, not OpenAI-compatible (or not confirmed), or no base URL. If a provider qualifies but is missing from the list, the reply says the two files may come from different builds. |
 | `dataset_info` | none | Dataset `version` and `generated` date, counts, and freshness (oldest, median and newest `last_verified`, never-verified count, the oldest entries). |
 
 ### Unconfirmed is not "no"
@@ -69,7 +78,7 @@ All tools are read-only.
 - `get_provider` labels null as `not confirmed`;
 - `openai_client_config` says "not confirmed" for a null `openai_compatible`, and "not OpenAI-compatible" only for an explicit false.
 
-The suggested environment variable name (`<SLUG>_API_KEY`, for example `GROQ_API_KEY`) is a convention of this server, not a field of the dataset. The model in the snippets defaults to the first entry of `models_free`, which is a sample and may be out of date.
+The model in the snippets defaults to the first entry of `models_free`, which is a sample and may be out of date.
 
 ## Tests
 
@@ -78,7 +87,7 @@ npm --prefix packages/mcp ci --ignore-scripts
 npm --prefix packages/mcp test
 ```
 
-The tests run the tool logic against `test/fixtures/providers.json`, and one end-to-end test spawns the server over stdio with the SDK client. None of them touch the network.
+The tests run the tool logic against `test/fixtures/providers.json` and `test/fixtures/openai-clients.json`, and one end-to-end test spawns the server over stdio with the SDK client. None of them touch the network.
 
 ## License
 
