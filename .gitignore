@@ -17,6 +17,9 @@ site/programs/
 site/updates.html
 site/updates/
 site/feed.xml
+site/changes/
+site/changes.xml
+site/state/
 site/api/
 site/llms.txt
 site/llms-full.txt

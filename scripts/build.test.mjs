@@ -13,7 +13,9 @@ import { createHash } from 'node:crypto';
 import { ORDER, roundTripError } from './_serialize.mjs';
 import { freshnessBadge, freshnessColor, freshnessStatus, recScore, SLA_DAYS, DUE_SOON_DAYS } from './lib/rules.mjs';
 import { esc, stripTags } from './lib/escape.mjs';
-import { mineProviderHistory, assertHistoryPlausible } from './lib/history.mjs';
+import { mineProviderHistory, assertHistoryPlausible, historyFromRevisions } from './lib/history.mjs';
+import { isoWeek, flattenFieldChanges, groupChangesByWeek, changesRss, xmlEsc, reportChangeUrl } from './lib/changes.mjs';
+import { monthlyReport, reportMonths, monthEndDate } from './lib/state.mjs';
 import { countExternalContributorsFromLog } from './lib/contributors.mjs';
 import { buildOgManifest } from './lib/og.mjs';
 import { explorerRowHtml } from './lib/rows.mjs';
@@ -842,4 +844,192 @@ test('the built client configs match the dataset, are registered, and the schema
   for (const needle of ['v1/litellm.yaml', 'v1/openai-clients.json', 'v1/schema.json', 'docs/api.md', 'from openai import OpenAI']) {
     assert.ok(page.includes(needle), `API page mentions ${needle}`);
   }
+});
+
+// ---------- weekly change feed + monthly state report (fixtures) ----------
+// Pure functions from lib/changes.mjs and lib/state.mjs, exercised on small
+// fixture histories so the numbers are known by construction, not read off
+// the live dataset.
+const prov = (slug, extra = {}) => ({
+  slug, name: slug.toUpperCase(), category: 'ongoing', free_type: 'perpetual', free_tier: 'x', rate_limits: '10 rpm',
+  notes: '', modalities: ['text'], card_required: null, phone_required: null, commercial_ok: null, openai_compatible: null,
+  verified: true, last_verified: '2026-01-01', ...extra,
+});
+const rev = (date, providers) => ({ date, parsed: { providers } });
+
+test('isoWeek follows ISO-8601 at year boundaries', () => {
+  assert.deepEqual(isoWeek('2021-01-03'), { key: '2020-W53', year: 2020, week: 53, start: '2020-12-28', end: '2021-01-03' });
+  assert.equal(isoWeek('2024-12-30').key, '2025-W01');
+  assert.equal(isoWeek('2026-01-01').key, '2026-W01');
+  assert.deepEqual(isoWeek('2026-10-08'), { key: '2026-W41', year: 2026, week: 41, start: '2026-10-05', end: '2026-10-11' });
+  assert.equal(isoWeek('2026-10-11').key, '2026-W41', 'Sunday closes the ISO week');
+  assert.equal(isoWeek('2026-10-12').key, '2026-W42', 'Monday opens the next one');
+});
+
+test('history revisions carry field-level from/to values for the change feed', () => {
+  const { historyBySlug, monthEnd } = historyFromRevisions([
+    rev('2026-06-30', [prov('a'), prov('b')]),
+    rev('2026-07-02', [prov('a', { rate_limits: '20 rpm', card_required: false }), prov('b')]),
+    rev('2026-07-20', [prov('a', { rate_limits: '20 rpm', card_required: false }), prov('b', { notes: 'phone needed' }), prov('c')]),
+  ]);
+  assert.deepEqual(historyBySlug.a[1].changes, [
+    { field: 'rate_limits', from: '10 rpm', to: '20 rpm' },
+    { field: 'card_required', from: null, to: false },
+  ]);
+  assert.equal(historyBySlug.c[0].kind, 'added');
+  assert.deepEqual(Object.keys(monthEnd), ['2026-06', '2026-07']);
+  assert.equal(monthEnd['2026-07'].date, '2026-07-20', 'the month-end snapshot is the last revision of the month');
+  assert.equal(monthEnd['2026-07'].providers.length, 3);
+});
+
+test('weekly grouping: newest week first, newest change first, 12-week window anchored on the newest change', () => {
+  const ev = (date, field, from, to) => ({ date, kind: 'changed', fields: [field], text: 't', changes: [{ field, from, to }] });
+  const history = {
+    alpha: [{ date: '2026-01-01', kind: 'added', text: 'Added' }, ev('2026-10-05', 'rate_limits', '1', '2'), ev('2026-10-08', 'free_tier', 'a', 'b')],
+    beta: [ev('2026-10-08', 'notes', '', 'catch'), ev('2026-09-30', 'card_required', null, true)],
+    gamma: [ev('2026-07-13', 'free_tier', 'old', 'new'), ev('2026-07-12', 'free_tier', 'older', 'old')],
+  };
+  const flat = flattenFieldChanges(history, { alpha: 'Alpha', beta: 'Beta' });
+  assert.equal(flat.length, 6, 'added events never enter the field feed');
+  assert.deepEqual(flat.slice(0, 3).map((c) => [c.date, c.slug, c.field]), [
+    ['2026-10-08', 'alpha', 'free_tier'], ['2026-10-08', 'beta', 'notes'], ['2026-10-05', 'alpha', 'rate_limits'],
+  ]);
+  assert.equal(flat.find((c) => c.slug === 'gamma').name, 'gamma', 'a provider no longer in the dataset falls back to its slug');
+
+  const weeks = groupChangesByWeek(flat, { weeks: 12 });
+  // 2026-W41 (Oct 5-11), 2026-W40 (Sep 28-Oct 4); 2026-W29 (Jul 13) is exactly 12 weeks
+  // before W41 and falls outside, as does W28 (Jul 12). Empty weeks are omitted.
+  assert.deepEqual(weeks.map((w) => [w.week, w.count]), [['2026-W41', 3], ['2026-W40', 1]]);
+  assert.deepEqual(weeks[0].providers, ['Alpha', 'Beta']);
+  assert.equal(weeks[0].lastDate, '2026-10-08');
+  assert.equal(weeks[1].start, '2026-09-28');
+  assert.deepEqual(groupChangesByWeek(flat, { weeks: 13 }).map((w) => w.week), ['2026-W41', '2026-W40', '2026-W29']);
+  assert.deepEqual(groupChangesByWeek([], { weeks: 12 }), []);
+});
+
+// Minimal XML well-formedness: every tag balanced and properly nested, no
+// stray '<', and every '&' starts a known entity or a numeric reference.
+const assertWellFormedXml = (xml) => {
+  const body = xml.replace(/^<\?xml[^?]*\?>\s*/, '');
+  const stack = [];
+  const tagRe = /<(\/?)([A-Za-z][\w:.-]*)((?:\s+[\w:.-]+="[^"<]*")*)\s*(\/?)>/g;
+  let last = 0;
+  let m;
+  while ((m = tagRe.exec(body))) {
+    const text = body.slice(last, m.index);
+    assert.doesNotMatch(text, /</, `stray '<' before ${m[0]}`);
+    assert.doesNotMatch(text, /&(?!(?:amp|lt|gt|quot|apos|#\d+|#x[0-9a-fA-F]+);)/, `bare '&' in "${text.slice(0, 60)}"`);
+    if (m[1]) assert.equal(stack.pop(), m[2], `mismatched </${m[2]}>`);
+    else if (!m[4]) stack.push(m[2]);
+    last = tagRe.lastIndex;
+  }
+  assert.equal(body.slice(last).trim(), '', 'nothing after the root element');
+  assert.deepEqual(stack, [], 'every element is closed');
+  // eslint-disable-next-line no-control-regex
+  assert.doesNotMatch(xml, /[\u0000-\u0008\u000B\u000C\u000E-\u001F]/, 'no XML-forbidden control characters');
+};
+
+test('the weekly RSS is well-formed and escapes provider names and values', () => {
+  const nasty = 'Tom & Jerry <script>alert("x")</script> \u0007AI';
+  const history = {
+    tj: [{ date: '2026-10-08', kind: 'changed', fields: ['free_tier'], text: 't', changes: [{ field: 'free_tier', from: 'a & b', to: '<b>c</b>' }] }],
+    ok: [{ date: '2026-09-29', kind: 'changed', fields: ['rate_limits', 'notes'], text: 't', changes: [{ field: 'rate_limits', from: '1', to: '2' }, { field: 'notes', from: '', to: 'x' }] }],
+  };
+  const weeks = groupChangesByWeek(flattenFieldChanges(history, { tj: nasty, ok: 'OK Labs' }));
+  const xml = changesRss(weeks, { site: 'https://example.test' });
+  assertWellFormedXml(xml);
+  assert.equal((xml.match(/<item>/g) || []).length, 2, 'one item per ISO week');
+  assert.doesNotMatch(xml, /<script/);
+  assert.match(xml, /Tom &amp; Jerry &lt;script&gt;alert\(&quot;x&quot;\)&lt;\/script&gt; AI: free tier\./);
+  assert.match(xml, /<guid isPermaLink="false">free-llm-api-hub-changes-2026-W41<\/guid>/);
+  assert.match(xml, /<pubDate>Thu, 08 Oct 2026 00:00:00 GMT<\/pubDate>/);
+  assert.match(xml, /<title>2026-W40 \(2026-09-28 to 2026-10-04\): 2 field changes across 1 provider<\/title>/);
+  assert.ok(xml.indexOf('2026-W41') < xml.indexOf('2026-W40'), 'newest week first');
+  assert.equal(xmlEsc(`a'b`), 'a&apos;b');
+  assertWellFormedXml(changesRss([], { site: 'https://example.test' }));
+});
+
+test('the monthly state report computes its numbers from the snapshot and history', () => {
+  const snapshot = [
+    prov('a', { modalities: ['text', 'vision'], last_verified: '2026-07-01' }),
+    prov('b', { category: 'trial', modalities: ['image'], last_verified: '2026-07-21' }),
+    prov('c', { modalities: ['text', 'embeddings'], last_verified: '2026-06-01', added: '2026-07-15' }),
+    prov('d', { verified: false, last_verified: null, category: 'trial', added: '2026-06-30' }),
+  ];
+  const history = {
+    a: [{ date: '2026-07-02', kind: 'changed', fields: ['rate_limits', 'card_required'], text: 't' },
+        { date: '2026-07-25', kind: 'changed', fields: ['rate_limits'], text: 't' },
+        { date: '2026-08-01', kind: 'changed', fields: ['notes'], text: 't' }],
+    b: [{ date: '2026-07-10', kind: 'added', text: 'Added' }],
+    c: [{ date: '2026-06-30', kind: 'changed', fields: ['free_tier'], text: 't' }],
+    gone: [{ date: '2026-07-03', kind: 'changed', fields: ['notes'], text: 't' }],
+  };
+  const r = monthlyReport({ month: '2026-07', asOf: monthEndDate('2026-07'), snapshot, historyBySlug: history, addedBySlug: { b: '2026-07-10' } });
+  assert.equal(r.asOf, '2026-07-31');
+  assert.equal(r.total, 4);
+  assert.deepEqual(r.byCategory, { ongoing: 2, trial: 2 });
+  assert.deepEqual(Object.fromEntries(r.byModality.map((m) => [m.modality, m.count])),
+    { text: 3, vision: 1, image: 1, audio: 0, embeddings: 1, rerank: 0, ocr: 0 });
+  assert.equal(r.verified, 3);
+  assert.equal(r.verifiedShare, 0.75);
+  // ages at 2026-07-31: a 30, b 10, c 60 → sorted [10, 30, 60]
+  assert.deepEqual(r.freshness, { dated: 3, oldestDays: 60, medianDays: 30 });
+  assert.equal(r.fieldChanges, 4, 'a: 2 + 1 in July, gone: 1; August and June events excluded');
+  assert.deepEqual(r.providersChanged, [
+    { slug: 'a', name: 'A', fields: ['rate_limits', 'card_required'] },
+    { slug: 'gone', name: 'gone', fields: ['notes'] },
+  ]);
+  assert.deepEqual(r.added, [
+    { slug: 'b', name: 'B', added: '2026-07-10' },
+    { slug: 'c', name: 'C', added: '2026-07-15' },
+  ], 'added comes from the `added` field (current data first), not from history events');
+
+  const months = reportMonths({ '2026-08': { date: '2026-08-14', providers: [] }, '2026-07': { date: '2026-07-20', providers: snapshot } });
+  assert.deepEqual(months.map((m) => [m.month, m.asOf]), [['2026-07', '2026-07-31'], ['2026-08', '2026-08-14']],
+    'past months are measured at their end; the newest at its last revision');
+  assert.equal(monthEndDate('2028-02'), '2028-02-29');
+});
+
+test('the "Report a change" URL prefills the inaccuracy form and is escaped on the page', () => {
+  const repo = 'https://github.com/pacocartones/free-llm-api-hub';
+  const url = reportChangeUrl({ slug: 'a-b', name: 'A&B "Labs" / 100% #1' }, repo);
+  assert.equal(url, `${repo}/issues/new?template=inaccuracy.yml&provider=a-b&title=%5Boutdated%5D%20A%26B%20%22Labs%22%20%2F%20100%25%20%231`);
+  const parsed = new URL(url);
+  assert.equal(parsed.searchParams.get('template'), 'inaccuracy.yml');
+  assert.equal(parsed.searchParams.get('provider'), 'a-b');
+  assert.equal(parsed.searchParams.get('title'), '[outdated] A&B "Labs" / 100% #1');
+  // The form's provider input id really is `provider`, so GitHub can prefill it.
+  assert.match(readFileSync(join(ROOT, '.github/ISSUE_TEMPLATE/inaccuracy.yml'), 'utf8'), /\n\s+id: provider\n/);
+
+  const page = join(ROOT, 'site/p/groq.html');
+  if (!existsSync(page)) run(['scripts/build.mjs']);
+  assert.match(readFileSync(page, 'utf8'),
+    /<a class="btn ghost" href="https:\/\/github\.com\/pacocartones\/free-llm-api-hub\/issues\/new\?template=inaccuracy\.yml&amp;provider=groq&amp;title=%5Boutdated%5D%20Groq"/);
+});
+
+test('the change feed and state reports are built but never pinned in derived-fingerprints.json', () => {
+  run(['scripts/build.mjs']);
+  for (const rel of ['site/changes/index.html', 'site/changes.xml', 'site/api/v1/changes.json', 'site/state/index.html']) {
+    assert.ok(existsSync(join(ROOT, rel)), rel + ' should be generated');
+  }
+  const months = readdirSync(join(ROOT, 'site/state')).filter((f) => /^\d{4}-\d{2}$/.test(f));
+  assert.ok(months.length > 0, 'at least one monthly report');
+  assertWellFormedXml(readFileSync(join(ROOT, 'site/changes.xml'), 'utf8'));
+  const api = JSON.parse(readFileSync(join(ROOT, 'site/api/v1/changes.json'), 'utf8'));
+  assert.ok(api.weeks.length > 0 && api.weeks.length <= 12);
+  for (let i = 1; i < api.weeks.length; i++) assert.ok(api.weeks[i - 1].start > api.weeks[i].start, 'weeks newest first');
+  for (const c of api.weeks[0].changes) assert.deepEqual(Object.keys(c), ['date', 'slug', 'name', 'field', 'from', 'to']);
+  assert.equal(JSON.parse(readFileSync(join(ROOT, 'site/api/v1/index.json'), 'utf8')).endpoints.changes, 'v1/changes.json');
+  const history = JSON.parse(readFileSync(join(ROOT, 'site/api/v1/history.json'), 'utf8')).history;
+  assert.equal(Object.values(history).flat().some((e) => 'changes' in e), false, 'history.json keeps its published shape');
+
+  const pins = Object.keys(JSON.parse(readFileSync(join(ROOT, 'derived-fingerprints.json'), 'utf8')));
+  for (const k of pins) {
+    assert.ok(!k.startsWith('site/changes/') && !k.startsWith('site/state/') && k !== 'site/changes.xml' && k !== 'site/api/v1/changes.json',
+      k + ' is git-log derived and must not be pinned');
+  }
+  const sitemap = readFileSync(join(ROOT, 'site/sitemap.xml'), 'utf8');
+  assert.match(sitemap, /<loc>https:\/\/freellmapihub\.com\/changes\/<\/loc>/);
+  assert.match(sitemap, /<loc>https:\/\/freellmapihub\.com\/state\/<\/loc>/);
+  assert.doesNotMatch(sitemap, /\/state\/\d{4}-\d{2}\//, 'per-month URLs depend on commit dates, so they stay out of the drift-gated sitemap');
 });

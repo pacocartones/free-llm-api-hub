@@ -16,58 +16,86 @@ export const HISTORY_FIELDS = {
   openai_compatible: 'OpenAI compatibility',
 };
 
-export const mineProviderHistory = ({ cwd }) => {
-  const historyBySlug = {};
-  try {
-    const log = execSync('git log --reverse --date=short --format=%H%x1f%ad -- data/providers.json', { cwd, encoding: 'utf8', maxBuffer: 1024 * 1024 * 40 }).trim();
-    const revs = log ? log.split('\n').map((l) => { const [hash, date] = l.split('\x1f'); return { hash, date }; }) : [];
-    // Read every revision's file in ONE process instead of one `git show` spawn
-    // per commit (which made the build take minutes on slow checkouts).
-    // `git cat-file --batch` resolves each `rev:path` and streams the blobs back
-    // in input order — a missing path (e.g. a revision where the file was
-    // deleted) answers "<spec> missing" and is skipped, like the old try/catch.
-    const specs = revs.map(({ hash }) => `${hash}:data/providers.json`);
-    const blobsByRev = new Map();
-    if (specs.length) {
-      const batch = spawnSync('git', ['cat-file', '--batch'], {
-        cwd, input: specs.join('\n') + '\n', maxBuffer: 1024 * 1024 * 40,
-      });
-      if (batch.error || batch.status !== 0) throw batch.error || new Error(`git cat-file --batch exited ${batch.status}`);
-      // Stream format per input spec: "<oid> blob <size>\n<content>\n" | "<spec> missing\n".
-      // The size is in BYTES, so walk the raw Buffer (slicing a utf8-decoded
-      // string by byte size misaligns on multi-byte characters) and decode only
-      // each blob before JSON.parse.
-      let i = 0;
-      for (const spec of specs) {
-        const nl = batch.stdout.indexOf(0x0a, i);
-        if (nl === -1) break;
-        const header = batch.stdout.toString('utf8', i, nl);
-        const m = header.match(/^[0-9a-f]{40} blob (\d+)$/);
-        if (!m) { i = nl + 1; continue; } // missing/unparseable header — skip this revision
-        const start = nl + 1;
-        const size = +m[1];
-        try { blobsByRev.set(spec, JSON.parse(batch.stdout.toString('utf8', start, start + size))); } catch { /* corrupt blob — skip */ }
-        i = start + size + 1; // +1 consumes the newline that terminates the content
-      }
+// Reads every committed revision of data/providers.json, oldest first, as
+// [{ hash, date, parsed }]. Throws if git is unavailable; callers degrade.
+const readRevisions = (cwd) => {
+  const log = execSync('git log --reverse --date=short --format=%H%x1f%ad -- data/providers.json', { cwd, encoding: 'utf8', maxBuffer: 1024 * 1024 * 40 }).trim();
+  const revs = log ? log.split('\n').map((l) => { const [hash, date] = l.split('\x1f'); return { hash, date }; }) : [];
+  // Read every revision's file in ONE process instead of one `git show` spawn
+  // per commit (which made the build take minutes on slow checkouts).
+  // `git cat-file --batch` resolves each `rev:path` and streams the blobs back
+  // in input order — a missing path (e.g. a revision where the file was
+  // deleted) answers "<spec> missing" and is skipped, like the old try/catch.
+  const specs = revs.map(({ hash }) => `${hash}:data/providers.json`);
+  const blobsByRev = new Map();
+  if (specs.length) {
+    const batch = spawnSync('git', ['cat-file', '--batch'], {
+      cwd, input: specs.join('\n') + '\n', maxBuffer: 1024 * 1024 * 40,
+    });
+    if (batch.error || batch.status !== 0) throw batch.error || new Error(`git cat-file --batch exited ${batch.status}`);
+    // Stream format per input spec: "<oid> blob <size>\n<content>\n" | "<spec> missing\n".
+    // The size is in BYTES, so walk the raw Buffer (slicing a utf8-decoded
+    // string by byte size misaligns on multi-byte characters) and decode only
+    // each blob before JSON.parse.
+    let i = 0;
+    for (const spec of specs) {
+      const nl = batch.stdout.indexOf(0x0a, i);
+      if (nl === -1) break;
+      const header = batch.stdout.toString('utf8', i, nl);
+      const m = header.match(/^[0-9a-f]{40} blob (\d+)$/);
+      if (!m) { i = nl + 1; continue; } // missing/unparseable header — skip this revision
+      const start = nl + 1;
+      const size = +m[1];
+      try { blobsByRev.set(spec, JSON.parse(batch.stdout.toString('utf8', start, start + size))); } catch { /* corrupt blob — skip */ }
+      i = start + size + 1; // +1 consumes the newline that terminates the content
     }
-    const prevSnap = {};
-    for (const { hash, date } of revs) {
-      const parsed = blobsByRev.get(`${hash}:data/providers.json`);
-      if (!parsed) continue;
-      for (const pp of parsed.providers || []) {
-        const prior = prevSnap[pp.slug];
-        if (!prior) {
-          (historyBySlug[pp.slug] ||= []).push({ date, kind: 'added', text: 'Added to the hub' });
-        } else {
-          const changed = Object.keys(HISTORY_FIELDS).filter((k) => JSON.stringify(prior[k]) !== JSON.stringify(pp[k]));
-          if (changed.length) (historyBySlug[pp.slug] ||= []).push({ date, kind: 'changed', fields: changed, text: `Updated ${changed.map((k) => HISTORY_FIELDS[k]).join(', ')}` });
-        }
-        prevSnap[pp.slug] = pp;
-      }
-    }
-  } catch (_) { /* no git — provider pages simply omit the history section */ }
-  return historyBySlug;
+  }
+  return revs
+    .map(({ hash, date }) => ({ hash, date, parsed: blobsByRev.get(`${hash}:data/providers.json`) }))
+    .filter((r) => r.parsed);
 };
+
+// Pure: turns an ordered list of parsed revisions ([{ date, parsed }], oldest
+// first) into the per-provider history plus one snapshot per calendar month
+// (the last revision committed in that month). A 'changed' event carries the
+// field-level before/after values in `changes`, which feed the weekly change
+// feed; api/v1/history.json strips them to keep its published shape.
+export const historyFromRevisions = (revisions) => {
+  const historyBySlug = {};
+  const monthEnd = {};
+  const prevSnap = {};
+  for (const { date, parsed } of revisions) {
+    for (const pp of parsed.providers || []) {
+      const prior = prevSnap[pp.slug];
+      if (!prior) {
+        (historyBySlug[pp.slug] ||= []).push({ date, kind: 'added', text: 'Added to the hub' });
+      } else {
+        const changed = Object.keys(HISTORY_FIELDS).filter((k) => JSON.stringify(prior[k]) !== JSON.stringify(pp[k]));
+        if (changed.length) {
+          (historyBySlug[pp.slug] ||= []).push({
+            date, kind: 'changed', fields: changed,
+            text: `Updated ${changed.map((k) => HISTORY_FIELDS[k]).join(', ')}`,
+            changes: changed.map((k) => ({ field: k, from: prior[k] ?? null, to: pp[k] ?? null })),
+          });
+        }
+      }
+      prevSnap[pp.slug] = pp;
+    }
+    monthEnd[date.slice(0, 7)] = { date, providers: parsed.providers || [] };
+  }
+  return { historyBySlug, monthEnd };
+};
+
+// History plus month-end snapshots in one git pass. Both are {} without git.
+export const mineHistoryAndSnapshots = ({ cwd }) => {
+  try {
+    return historyFromRevisions(readRevisions(cwd));
+  } catch (_) {
+    return { historyBySlug: {}, monthEnd: {} }; // no git — the history-derived pages degrade to empty
+  }
+};
+
+export const mineProviderHistory = ({ cwd }) => mineHistoryAndSnapshots({ cwd }).historyBySlug;
 
 // Plausibility invariants shared by scripts/check-history.mjs and the test
 // suite. Throws with a specific message on the first violation: a healthy
