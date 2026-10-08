@@ -574,7 +574,7 @@
       "openai_base_url": null,
       "env_key": "DEEPGRAM_API_KEY",
       "verified": true,
-      "last_verified": "2026-08-14"
+      "last_verified": "2026-10-08"
     },
     {
       "slug": "assemblyai",
@@ -596,7 +596,7 @@
       "openai_base_url": "https://llm-gateway.assemblyai.com/v1",
       "env_key": "ASSEMBLYAI_API_KEY",
       "verified": true,
-      "last_verified": "2026-08-14"
+      "last_verified": "2026-10-08"
     },
     {
       "slug": "mixedbread",
@@ -647,8 +647,8 @@
       "name": "Arli AI",
       "category": "ongoing",
       "free_type": "renewing-quota",
-      "free_tier": "Free plan ($0): access to all text LLMs (Gemma, Qwen, etc.), capped at ~5 requests per 2-day window, 12K context, 1 request at a time",
-      "rate_limits": "1 request at a time; ~5 requests per 2 days across all models; max 12K context; delayed responses",
+      "free_tier": "Free plan ($0): text LLMs for testing, max 5 requests every 2 days per model, 12K context, 1 request at a time, delayed responses; no image generation",
+      "rate_limits": "5 requests every 2 days per model; 1 request at a time; max 12K context tokens",
       "notes": "Free tier is for testing only — very restrictive. Provider advertises zero-log / no data retention. Card requirement for the free tier is not stated on the pricing page.",
       "best_for": "A permanently-free (heavily rate-limited) test tier",
       "modalities": ["text"],
@@ -662,7 +662,7 @@
       "openai_base_url": "https://api.arliai.com/v1",
       "env_key": "ARLI_API_KEY",
       "verified": true,
-      "last_verified": "2026-08-14"
+      "last_verified": "2026-10-08"
     },
     {
       "slug": "ollama-cloud",
@@ -705,7 +705,7 @@
       "openai_compatible": false,
       "openai_base_url": null,
       "verified": true,
-      "last_verified": "2026-08-14"
+      "last_verified": "2026-10-08"
     },
     {
       "slug": "modelscope",
@@ -953,22 +953,22 @@
       "name": "Hume AI (Octave TTS)",
       "category": "ongoing",
       "free_type": "renewing-quota",
-      "free_tier": "10,000 characters/month TTS (~10 minutes) on the Free plan",
-      "rate_limits": "15 requests per minute",
-      "notes": "The free plan includes a commercial license; overage billed at $0.15/1,000 chars. No card stated as required to start. Not OpenAI-compatible.",
+      "free_tier": "Free tier for Octave TTS and EVI; new accounts start with $20 in credits",
+      "rate_limits": "Rate set by subscription tier, numbers not published; max 5,000 characters per utterance and 5 generations per request",
+      "notes": "Free and Starter tiers are non-commercial only (commercial use starts on Creator). The Free plan cannot buy overage, so going past it means upgrading. Not OpenAI-compatible. The former plan quota (10,000 characters/month) is no longer on a live official page: hume.ai/pricing redirected to the homepage on 2026-10-08.",
       "best_for": "Expressive TTS with a commercial free tier",
       "modalities": ["audio"],
       "models_free": null,
       "expires": null,
-      "docs_url": "https://www.hume.ai/pricing",
+      "docs_url": "https://dev.hume.ai/docs/resources/billing",
       "phone_required": null,
       "card_required": false,
-      "commercial_ok": true,
+      "commercial_ok": false,
       "openai_compatible": false,
       "openai_base_url": null,
       "env_key": "HUME_API_KEY",
       "verified": true,
-      "last_verified": "2026-08-14"
+      "last_verified": "2026-10-08"
     },
     {
       "slug": "unreal-speech",
@@ -998,8 +998,8 @@
       "category": "ongoing",
       "free_type": "renewing-quota",
       "free_tier": "10,000 credits/month shared across Text-to-Speech, Speech-to-Text and more (~10 min TTS/month)",
-      "rate_limits": "Concurrency tied to the Free plan (not numerically published)",
-      "notes": "The free tier is NON-COMMERCIAL only per the Terms of Use (a commercial license begins on paid Starter, $6/mo), and historically required attribution. API access is available on the free plan. No credit card to sign up.",
+      "rate_limits": "2 concurrent requests on the Free plan",
+      "notes": "The free tier is NON-COMMERCIAL only per the Terms of Use (commercial license starts on paid Starter, $6/mo); non-commercial use requires a personal email address. Free-plan credits do not roll over. API access is available on the free plan. No credit card to sign up.",
       "best_for": "Best-known TTS voices (free tier is non-commercial)",
       "modalities": ["audio"],
       "models_free": null,
@@ -1012,7 +1012,7 @@
       "openai_base_url": null,
       "env_key": "ELEVENLABS_API_KEY",
       "verified": true,
-      "last_verified": "2026-08-14"
+      "last_verified": "2026-10-08"
     },
     {
       "slug": "sarvam-ai",
@@ -1042,7 +1042,7 @@
       "category": "trial",
       "free_type": "trial-credit",
       "free_tier": "€50 in free credits on signup for speech-to-text (~80+ hrs pre-recorded or 60+ hrs real-time at current rates)",
-      "rate_limits": "Not published; bounded by the €50 credit",
+      "rate_limits": "30 real-time and 25 async concurrent requests (Starter pay-as-you-go plan that carries the €50 credit)",
       "notes": "One-time grant with no monthly reset; prepaid model — top up once the credit is consumed. Card requirement not explicitly stated on the pricing page.",
       "best_for": "High-accuracy async + real-time transcription to trial",
       "modalities": ["audio"],
@@ -1056,7 +1056,7 @@
       "openai_base_url": null,
       "env_key": "GLADIA_API_KEY",
       "verified": true,
-      "last_verified": "2026-08-14"
+      "last_verified": "2026-10-08"
     },
     {
       "slug": "rime",
@@ -1130,7 +1130,7 @@
       "category": "trial",
       "free_type": "trial-credit",
       "free_tier": "$25 in free credits on the on-demand plan, usable on the Rerank (rerank-v2) and Generate APIs",
-      "rate_limits": "Bounded by the $25 credit balance",
+      "rate_limits": "Not published by the provider (Rerank requests capped at 400,000 tokens each)",
       "notes": "One-time signup credit (does not renew); the instruction-following reranker is the standout free capability. Commercial-use terms not stated on the pricing page.",
       "best_for": "A strong instruction-following reranker to try for free",
       "modalities": ["text", "rerank"],
@@ -1143,7 +1143,7 @@
       "openai_compatible": false,
       "env_key": "CONTEXTUAL_API_KEY",
       "verified": true,
-      "last_verified": "2026-08-14",
+      "last_verified": "2026-10-08",
       "added": "2026-07-31"
     },
     {
@@ -1165,7 +1165,7 @@
       "openai_compatible": false,
       "env_key": "CARTESIA_API_KEY",
       "verified": true,
-      "last_verified": "2026-08-14",
+      "last_verified": "2026-10-08",
       "added": "2026-07-31"
     },
     {
@@ -1173,9 +1173,9 @@
       "name": "Fish Audio",
       "category": "ongoing",
       "free_type": "renewing-quota",
-      "free_tier": "8,000 credits/month (~7 min of generation, up to 500 characters per generation); TTS, STT and voice cloning",
-      "rate_limits": "500 characters per generation; 8,000 credits/month",
-      "notes": "Free plan is personal, non-commercial only (commercial use requires a Premium subscription). No credit card required to sign up.",
+      "free_tier": "App Free plan: 8,000 credits/month (~7 min, up to 500 characters per generation). API: the s2.1-pro-free TTS model is $0 under fair-use limits (pay-as-you-go API, no subscription)",
+      "rate_limits": "API: 5 concurrent requests (Starter tier, <$100 paid); s2.1-pro-free under unpublished fair-use limits. App Free plan: 500 characters per generation, 8,000 credits/month",
+      "notes": "Free app plan is personal, non-commercial only (commercial use requires Premium). The $0 API model s2.1-pro-free is pitched for testing, prototyping and smaller businesses but has no TTFA/DPA guarantees. No credit card required for the Free plan.",
       "best_for": "Free multilingual TTS with voice cloning for personal projects",
       "modalities": ["audio"],
       "models_free": null,
@@ -1187,17 +1187,17 @@
       "openai_compatible": false,
       "env_key": "FISH_AUDIO_API_KEY",
       "verified": true,
-      "last_verified": "2026-08-14",
+      "last_verified": "2026-10-08",
       "added": "2026-07-31"
     },
     {
       "slug": "camb-ai",
       "name": "Camb.ai",
-      "category": "ongoing",
-      "free_type": "renewing-quota",
-      "free_tier": "2,000 credits/month covering ~25K characters of MARS TTS, 125 min of STT, plus limited watermarked dubbing and translation (incl. 5 OCR pages)",
-      "rate_limits": "500 chars/generation TTS, 15 min/generation STT; 2,000 credits/month",
-      "notes": "Uses its own MARS8 voice models (not OpenAI-compatible). Dubbing output on the free tier is watermarked. Card and commercial terms not stated on the pricing page.",
+      "category": "trial",
+      "free_type": "trial-credit",
+      "free_tier": "Free plan: 5,000 credits one-time (no monthly renewal) across TTS, dubbing, speech and translation tools",
+      "rate_limits": "Not published by the provider; bounded by the one-time 5,000-credit grant",
+      "notes": "Uses its own MARS voice models (not OpenAI-compatible). Free credits are a one-time grant, not monthly. Per-feature limits (characters per generation, watermarking) are not readable on the current pricing page. Card and commercial terms not stated on the pricing page.",
       "best_for": "Expressive multilingual TTS, STT and dubbing on one free quota",
       "modalities": ["audio"],
       "models_free": null,
@@ -1209,7 +1209,7 @@
       "openai_compatible": false,
       "env_key": "CAMB_API_KEY",
       "verified": true,
-      "last_verified": "2026-08-14",
+      "last_verified": "2026-10-08",
       "added": "2026-07-31"
     },
     {
