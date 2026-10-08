@@ -23,7 +23,8 @@ export function injectInlineFigures(md, figs) {
 
 // Phrases that state a dataset-wide count. "N verified providers" is the verified
 // count; "all N providers" and "N of the M providers" style claims are the total.
-// Deliberately narrow: "10 providers in the mined history" is not a dataset figure.
+// NOT exhaustive: only the three phrasings below are recognised; a count worded any other way is
+// not caught, so prefer a token over a typed number everywhere. Deliberately narrow: "10 providers in the mined history" is not a dataset figure.
 const RULES = [
   { re: /\b(\d+) verified providers\b/g, key: 'verified', label: 'verified providers' },
   { re: /\ball (\d+) providers\b/g, key: 'providers', label: 'providers' },

@@ -27,7 +27,7 @@ The script never edits the data: an agent (or a human) reads each dossier, compa
 
 ### Paced re-verification batches
 
-Start each weekly pass with `npm run worklist`. It prints this week's oldest verified providers — currently six — so the 90-day freshness SLA is spread across small, regular batches instead of becoming a large end-of-quarter cleanup. If the worklist flags a cliff of entries that share a verification date, take the larger batch it recommends.
+Start each weekly pass with `npm run worklist`. It prints this week's oldest verified providers — a batch sized by `scripts/lib/pacing.mjs` (at most 11 a week), so the 90-day freshness SLA is spread across small, regular batches instead of becoming a large end-of-quarter cleanup. If the worklist flags a cliff of entries that share a verification date, take the larger batch it recommends.
 
 Run `npm run reverify` for the normal weekly batch, or pass the worklist size explicitly (for example, `npm run reverify -- --batch 12`) when clearing a larger one. The script fetches each provider's primary `docs_url` and saves a local review dossier at `.freebuff/reverify/<slug>.md`; it does not change `data/providers.json` itself.
 

@@ -217,6 +217,8 @@ try {
 // ---------- provider counts quoted in prose (README, docs, editorial copy) ----------
 // A typed "69 verified providers" outlived the dataset it described. Prose must use a
 // {verified}/{providers} token or a FIG marker; any literal count that disagrees fails.
+// NOT exhaustive: it only recognises "N verified providers", "all N providers" and "N/M providers".
+// A count written another way is not caught, so prefer a token over a typed number everywhere.
 {
   const figs = providerFigures(data.providers);
   const sources = ['README.md', 'CONTRIBUTING.md', 'GOVERNANCE.md', 'data/best.json', 'site/index.html',
