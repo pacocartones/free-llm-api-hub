@@ -62,3 +62,24 @@ _[← Docs index](README.md) · [Main README](../README.md)_
 - **Limits:** preference votes are human, subject to the usual sampling biases, and move with each snapshot. `validate.mjs` checks that every `model_tier` equals the tier of its cited rating.
 
 `free_limits` follows the same rule: numbers exactly as the provider publishes them, with the page and the day they were read, `null` when it publishes none.
+
+## The score
+
+The score ranks providers from 0 to 100. `scripts/lib/score.mjs` computes it from the data on every run, and `npm run score` prints it with each part. Every number below is a named constant in that file.
+
+| Part | Points | What it reads |
+|---|---|---|
+| Quality | 22 | `model_tier` / 4 |
+| Limits | 18 | the requests per day or tokens per day the provider publishes |
+| Friction | 13 | no card required (weight 3) and no phone required (weight 2) |
+| Commercial use | 9 | `commercial_ok` |
+| OpenAI compatibility | 4 | `openai_compatible` |
+| Stability | 4 | the latest live probe in `data/probe-report.json` |
+| Editorial | 30 | a rating from 0 to 30 per provider in `data/editorial.json`; a provider without one gets 15. The internal rubric behind the ratings is not published |
+
+- **Unknown is not estimated.** Quality, limits and stability score zero when the data does not confirm them. Friction and commercial use are symmetric around "unknown": a confirmed good answer adds, a confirmed bad one subtracts, and unknown sits in the middle, neither rewarded nor punished. Next to every score the engine reports how many of the six mathematical inputs are confirmed ("n of 6").
+- **Limits scale (provisional).** Between a floor and a ceiling on a log scale: 10 to 10,000 requests per day, 10 thousand to 10 million tokens per day; the more generous of the two counts. A monthly figure counts as its daily share (divided by 30). Per-second and per-minute limits are a speed, not an allowance, and are not converted. These two ranges are provisional and may change.
+- **Stability** is the latest probe, not an uptime: the repository keeps no probe history. A probe older than 30 days, or a provider without an API key at probe time, is not measured and scores zero.
+- **Eligibility.** Only verified providers inside the 90-day freshness SLA are ranked; the top 10 also needs `is_text_llm`. Ties break by the mathematical score, then by name.
+- **No position is fixed.** The ranking is recomputed from the data; tests pin properties of the method (weights add up to 100, ranges, determinism), never who ranks where.
+
