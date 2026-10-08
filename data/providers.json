@@ -1087,7 +1087,7 @@
       "free_type": "trial-credit",
       "free_tier": "One-time free package on first activation: 1,000,000 tokens shared across Hunyuan text/vision models (Hunyuan-a13b, Hunyuan-role-latest, Hunyuan-translation, Hunyuan-translation-lite, Tencent HY Vision 1.5 Instruct, Hunyuan-turbos-vision, Hunyuan-t1-vision, Hunyuan-turbos-vision-video), plus a separate 1,000,000 tokens for Hunyuan-embedding",
       "rate_limits": "ChatCompletions (Tencent Cloud API): default 5 concurrent requests per account; GetEmbedding: 5 requests/second; most other Hunyuan APIs 20 requests/second",
-      "notes": "Free resource package valid 1 year from activation; unused tokens expire, and it does not roll into pay-as-you-go automatically. Activation requires Tencent Cloud real-name verification (enterprise or personal) — a practical barrier for many non-China users. Tencent says Hunyuan is migrating to TokenHub: the legacy platform will add no new models and stops supporting new model-service purchases; the legacy ChatCompletions API is marked pre-offline with expected shutdown 2026-12-21 (the OpenAI-compatible endpoint is the documented alternative). Whether new activations still receive the free package after the migration is not stated. Commercial-use terms not stated on the free-quota page.",
+      "notes": "Free resource package valid 1 year from activation; unused tokens expire, and it does not roll into pay-as-you-go automatically. Activation requires Tencent Cloud real-name verification (enterprise or personal) — a practical barrier for many non-China users. Tencent says Hunyuan is migrating to TokenHub: the legacy platform will add no new models and stops supporting new model-service purchases; the legacy ChatCompletions and GetEmbedding APIs are marked pre-offline with expected shutdown 2026-12-21 (the OpenAI-compatible endpoint is the documented alternative), and the same API page (updated 2026-09-23) says the old Hunyuan console goes offline on 30 September. Whether new activations still receive the free package after the migration is not stated. Commercial-use terms not stated on the free-quota page.",
       "best_for": "Chinese-language LLM workloads via an OpenAI-compatible endpoint",
       "modalities": ["text", "vision", "embeddings"],
       "models_free": null,
@@ -1100,7 +1100,7 @@
       "openai_base_url": "https://api.hunyuan.cloud.tencent.com/v1",
       "env_key": "HUNYUAN_API_KEY",
       "verified": true,
-      "last_verified": "2026-10-08"
+      "last_verified": "2026-08-14"
     },
     {
       "slug": "voyage-ai",
