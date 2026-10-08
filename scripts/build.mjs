@@ -223,7 +223,7 @@ const GUIDES = [
     title: 'Free LLM API — no phone, no credit card · Free LLM API Hub',
     desc: 'The lowest-friction free LLM APIs: no credit card and no phone verification. A couple need no account at all.',
     lede: 'The lowest-friction free APIs: no card, and no phone number either.',
-    intro: `<p>Some free tiers add phone verification on top of the signup form. The providers here ask for <strong>neither a credit card nor a phone number</strong>, so you can go from zero to a working key in a couple of minutes.</p><p>A few — like Pollinations and AI Horde — don't even need an account for basic use. The trade-off is predictable: the fewer the gates, the tighter the rate limits.</p>`,
+    intro: `<p>Some free tiers add phone verification on top of the signup form. The providers here ask for <strong>neither a credit card nor a phone number</strong>, so you can go from zero to a working key in a couple of minutes.</p><p>A few — like AI Horde and OVHcloud AI Endpoints — don't even need an account for basic use. The trade-off is predictable: the fewer the gates, the tighter the rate limits.</p>`,
     filter: (p) => p.card_required === false && p.phone_required === false && p.category === 'ongoing',
     query: '?cat=ongoing&nocard=1&nophone=1#explorer',
     faq: [
@@ -278,7 +278,7 @@ const GUIDES = [
     query: '#explorer',
     pick: 'ai-horde',
     faq: [
-      { q: 'Is there a free image generation API?', a: 'Yes — AI Horde (anonymous, queue-based) and OVHcloud AI Endpoints (Stable Diffusion XL, anonymous at a low rate limit) need no signup, while Pollinations (credits earned through Quests), Runware, Photoroom and others give credits for first-party Flux/SDXL models.' },
+      { q: 'Is there a free image generation API?', a: 'Yes — AI Horde (anonymous, queue-based) and OVHcloud AI Endpoints (Stable Diffusion XL, anonymous at a low rate limit) need no signup, while Pollinations (credits earned through Quests), Runware and others give credits for hosted Flux and SDXL models, and Photoroom gives free background-removal and editing calls.' },
       { q: 'Can I use free AI-generated images commercially?', a: 'Sometimes — it depends on the provider and whether the output is watermarked. Each row flags commercial use, confirmed against the provider’s terms.' },
       { q: 'Which free image API has no watermark?', a: 'Watermark terms vary and change: Photoroom, for example, does not watermark its free production calls but does watermark its sandbox calls. Check the catch on each provider page.' },
     ],
