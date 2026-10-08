@@ -17,6 +17,7 @@ import { esc, stripTags } from './lib/escape.mjs';
 import { mineProviderHistory } from './lib/history.mjs';
 import { githubProfileUrl } from './lib/contributors.mjs';
 import { resolveBestEntries } from './lib/best.mjs';
+import { openaiClients, litellmYaml } from './lib/client-config.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const FRESH_DAYS = SLA_DAYS; // the freshness SLA, defined once in lib/rules.mjs
@@ -1208,11 +1209,22 @@ for (const m of API_MODS) {
   const list = publicProviders.filter((p) => (p.modalities || []).includes(m));
   writeApi(`modality/${m}.json`, { ...apiBase, modality: m, count: list.length, providers: list });
 }
+// Client configs (LiteLLM proxy + OpenAI SDK) for the verified OpenAI-compatible
+// providers, and the JSON Schema the dataset is validated against. These are the
+// only API files that publish env_key: the NAME of the variable holding the
+// user's own key, never a value (see scripts/lib/client-config.mjs).
+const clientList = openaiClients(providers);
+writeApi('openai-clients.json', { ...apiBase, description: 'Base URL, API-key env var name and sampled free models for every verified OpenAI-compatible provider. Plug into any OpenAI SDK; confirm free-tier terms in docs_url first.', count: clientList.length, clients: clientList });
+writeFileSync(join(ROOT, 'site/api/v1/litellm.yaml'), litellmYaml({ version: data.version, generated: data.generated, providers }));
+writeFileSync(join(ROOT, 'site/api/v1/schema.json'), readFileSync(join(ROOT, 'data/schema.json')));
 const apiEndpoints = {
   providers: 'v1/providers.json',
   programs: 'v1/programs.json',
   history: 'v1/history.json',
   best: 'v1/best.json',
+  schema: 'v1/schema.json',
+  'openai-clients': 'v1/openai-clients.json',
+  litellm: 'v1/litellm.yaml',
   slices: Object.fromEntries(Object.keys(API_SLICES).map((s) => [s, `v1/${s}.json`])),
   modality: Object.fromEntries(API_MODS.map((m) => [m, `v1/modality/${m}.json`])),
 };
@@ -1220,6 +1232,34 @@ writeApi('index.json', { ...apiBase, description: 'Static, versioned JSON over t
 
 // human-facing API docs page
 const apiRow = (label, path, count) => `<tr><td class="name"><a href="v1/${path}"><code>/api/v1/${path}</code></a></td><td>${htmlEsc(label)}</td><td>${count != null ? count : ''}</td></tr>`;
+// Client-config section: the example uses the first client with a sampled model,
+// so it always names a provider and model that are really in the file.
+const exampleClient = clientList.find((c) => c.models_free && c.models_free.length) || clientList[0];
+const exampleModel = exampleClient && exampleClient.models_free && exampleClient.models_free.length ? exampleClient.models_free[0] : '<model-id>';
+const clientConfigDocs = !exampleClient ? '' :
+  `<h2>Client configs</h2>` +
+  `<p>Two generated files turn the dataset into working client configuration for the <strong>${clientList.length} providers</strong> that are verified, OpenAI-compatible and have a known base URL and key variable. Both carry the <em>name</em> of the environment variable for your own key (for example <code>${htmlEsc(exampleClient.env_key)}</code>), never a key. Free-tier terms change without notice: check each provider's <code>docs_url</code> before you depend on it.</p>` +
+  `<h3><code>openai-clients.json</code></h3>` +
+  `<p>One record per provider: <code>slug</code>, <code>name</code>, <code>base_url</code>, <code>env_key</code>, <code>models_free</code> (a sample, may be <code>null</code>), <code>docs_url</code>, <code>last_verified</code>. With the OpenAI Python SDK:</p>` +
+  `<pre><code>import json, os, urllib.request
+from openai import OpenAI
+
+url = "${SITE}/api/v1/openai-clients.json"
+clients = {c["slug"]: c for c in json.load(urllib.request.urlopen(url))["clients"]}
+c = clients["${htmlEsc(exampleClient.slug)}"]
+
+client = OpenAI(base_url=c["base_url"], api_key=os.environ[c["env_key"]])
+reply = client.chat.completions.create(
+    model="${htmlEsc(exampleModel)}",
+    messages=[{"role": "user", "content": "Hello"}],
+)
+print(reply.choices[0].message.content)</code></pre>` +
+  `<h3><code>litellm.yaml</code></h3>` +
+  `<p>A <a href="https://docs.litellm.ai/docs/proxy/configs" rel="noopener">LiteLLM proxy</a> <code>model_list</code> with one entry per provider and sampled model, named <code>&lt;slug&gt;/&lt;model&gt;</code>. Keys are read with LiteLLM's <code>os.environ/&lt;ENV_KEY&gt;</code> syntax; a provider without a model sample gets one entry whose model id is marked <code># set a model id</code>. Delete the providers you have no key for, then:</p>` +
+  `<pre><code>curl -sO ${SITE}/api/v1/litellm.yaml
+export ${htmlEsc(exampleClient.env_key)}=...
+litellm --config litellm.yaml</code></pre>` +
+  `<p>Point any OpenAI client at the proxy (<code>base_url="http://0.0.0.0:4000"</code>) and request a model by its <code>model_name</code>, e.g. <code>${htmlEsc(`${exampleClient.slug}/${exampleModel}`)}</code>.</p>`;
 const apiDocMain =
   `<section class="page-hero"><div class="wrap"><nav class="crumbs"><a href="../">Home</a> / API</nav>` +
   `<h1>Static JSON API</h1><p class="lede">The whole dataset as versioned, machine-readable JSON at stable URLs — no server, no query params, no auth, no rate limits. CORS-open, so you can <code>fetch()</code> it straight from the browser. Regenerated on every dataset change (currently v${data.version}).</p></div></section>` +
@@ -1229,6 +1269,9 @@ const apiDocMain =
   apiRow('Apply-to-get credit programs', 'programs.json', programs.startups.length + programs.research.length) +
   apiRow('The editorial top 20, ranked with the "why" per pick', 'best.json', bestEntries.length) +
   apiRow('Endpoint manifest', 'index.json', null) +
+  apiRow('JSON Schema of the dataset (copy of data/schema.json)', 'schema.json', null) +
+  apiRow('OpenAI SDK settings per verified OpenAI-compatible provider', 'openai-clients.json', clientList.length) +
+  apiRow('LiteLLM proxy config (model_list) for the same providers', 'litellm.yaml', clientList.length) +
   `</tbody></table>` +
   `<h2>Slices (by constraint)</h2><table class="model-table"><thead><tr><th>Endpoint</th><th>Contents</th><th>Count</th></tr></thead><tbody>` +
   Object.entries(API_SLICES).map(([n, fn]) => apiRow(`Providers where ${n.replace(/-/g, ' ')}`, `${n}.json`, publicProviders.filter(fn).length)).join('') +
@@ -1237,6 +1280,8 @@ const apiDocMain =
   API_MODS.map((m) => apiRow(`Providers with a free ${m} modality`, `modality/${m}.json`, publicProviders.filter((p) => (p.modalities || []).includes(m)).length)).join('') +
   `</tbody></table>` +
   `<h2>Example</h2><pre><code>curl -s ${SITE}/api/v1/no-card.json | jq '.providers[].name'</code></pre>` +
+  clientConfigDocs +
+  `<h2>Stability</h2><p>Paths under <code>/api/v1/</code> stay put and fields are only ever added within v1; a breaking change ships as <code>/api/v2/</code>. The full policy, and how the dataset <code>version</code> relates to the path, is in <a href="${REPO}/blob/main/docs/api.md">docs/api.md</a>. The JSON Schema is published at <a href="v1/schema.json"><code>/api/v1/schema.json</code></a>.</p>` +
   `<p class="muted">Every object carries the dataset <code>version</code> and <code>generated</code> date. Prefer a stable snapshot? Pin a Git tag of <a href="${REPO}">the repo</a>. For AI agents, see <a href="../llms.txt">llms.txt</a>.</p>` +
   `</div></main>`;
 mkdirSync(join(ROOT, 'site/api'), { recursive: true });

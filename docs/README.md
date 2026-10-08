@@ -18,6 +18,7 @@ How **Free LLM API Hub** works — how entries are verified, what earns a spot, 
 | [Update playbook](update-playbook.md) | The weekly routine that keeps the freshness badge green |
 | [Freshness SLA](freshness-sla.md) | The 90-day re-verification system: buckets, badge, worklist, reverify batch, verified column |
 | [Architecture](architecture.md) | The data-first pipeline: what each script does, the data model, the two-places rule |
+| [Static JSON API: stability and versioning](api.md) | What `/api/v1/` guarantees, how `version` relates to the path, and pinning a snapshot by tag |
 | [Discovery sources & competitive map](sources.md) | Where new providers are found, which lists to trust, and how we differ from rivals |
 | [Live testing](live-testing.md) | Probing each free tier with a real key — `last_probed`, and the Infisical setup |
 | [Roadmap](roadmap.md) | Where the project is going next |

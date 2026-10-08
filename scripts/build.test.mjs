@@ -1,6 +1,7 @@
 // Minimal real tests over the build pipeline (node --test).
 // Covers: serializer round-trip, validator honesty rules, existing self-tests,
-// build idempotency, and one generated README row matching the data.
+// build idempotency, one generated README row matching the data, and the
+// generated client configs (LiteLLM + OpenAI SDK) and published JSON Schema.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
@@ -16,6 +17,7 @@ import { mineProviderHistory, assertHistoryPlausible } from './lib/history.mjs';
 import { countExternalContributorsFromLog } from './lib/contributors.mjs';
 import { buildOgManifest } from './lib/og.mjs';
 import { explorerRowHtml } from './lib/rows.mjs';
+import { clientConfigProviders, openaiClients, litellmYaml, MODEL_PLACEHOLDER } from './lib/client-config.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const DATA = join(ROOT, 'data/providers.json');
@@ -716,4 +718,128 @@ test('footer star button is block-level so its margin-top is not inert', () => {
   assert.match(footerRule, /margin-top\s*:\s*18px/, 'footer override must keep the 18px gap');
   const globalRule = rules.get('.star-btn');
   assert.ok(globalRule && /display\s*:\s*inline-flex/.test(globalRule), 'global .star-btn stays inline-flex elsewhere');
+});
+
+// ---------- client configs (LiteLLM + OpenAI SDK) and the published schema ----------
+
+// No YAML parser in devDependencies (and none is added for this): the generator
+// emits a fixed subset — comments, `model_list:`, and entries whose scalars are
+// JSON strings — so the test parses that grammar strictly, line by line, and
+// fails on any line outside it.
+function parseLitellm(yaml) {
+  const lines = yaml.split('\n');
+  assert.equal(lines.at(-1), '', 'file ends with a newline');
+  const entries = [];
+  let seenList = false;
+  let cur = null;
+  const STR = '("(?:[^"\\\\]|\\\\.)*")';
+  const rx = {
+    item: new RegExp(`^  - model_name: ${STR}$`),
+    params: /^    litellm_params:$/,
+    field: new RegExp(`^      (model|api_base|api_key): ${STR}(  # set a model id)?$`),
+  };
+  for (const [i, line] of lines.slice(0, -1).entries()) {
+    if (line === '' || /^\s*#/.test(line)) continue;
+    if (line === 'model_list:') { assert.ok(!seenList, 'one model_list'); seenList = true; continue; }
+    assert.ok(seenList, `line ${i + 1} before model_list: ${line}`);
+    let m;
+    if ((m = line.match(rx.item))) { cur = { model_name: JSON.parse(m[1]), litellm_params: {}, marked: false, hasParams: false }; entries.push(cur); continue; }
+    if (rx.params.test(line)) { assert.ok(cur && !cur.hasParams, `line ${i + 1}: litellm_params out of place`); cur.hasParams = true; continue; }
+    if ((m = line.match(rx.field))) {
+      assert.ok(cur && cur.hasParams, `line ${i + 1}: field outside litellm_params`);
+      assert.ok(!(m[1] in cur.litellm_params), `line ${i + 1}: duplicate ${m[1]}`);
+      cur.litellm_params[m[1]] = JSON.parse(m[2]);
+      if (m[3]) cur.marked = true;
+      continue;
+    }
+    assert.fail(`line ${i + 1} is outside the generated YAML grammar: ${JSON.stringify(line)}`);
+  }
+  assert.ok(seenList, 'model_list present');
+  return entries;
+}
+
+const ccBase = { verified: true, last_verified: '2026-10-01', openai_compatible: true, docs_url: 'https://example.com/docs' };
+const ccFixture = [
+  { ...ccBase, slug: 'alpha', name: 'Alpha', openai_base_url: 'https://api.alpha.test/v1', env_key: 'ALPHA_API_KEY', models_free: ['a-small', 'org/a-large:free'] },
+  { ...ccBase, slug: 'beta', name: 'Beta', openai_base_url: 'https://api.beta.test/v1', env_key: 'BETA_API_KEY', models_free: null },
+  { ...ccBase, slug: 'gamma', name: 'Gamma', openai_base_url: 'https://api.gamma.test/accounts/{account_id}/v1', env_key: 'GAMMA_TOKEN', models_free: [] },
+  { ...ccBase, slug: 'unverified', name: 'Unverified', verified: false, last_verified: null, openai_base_url: 'https://u.test/v1', env_key: 'U_KEY', models_free: ['m'] },
+  { ...ccBase, slug: 'not-openai', name: 'Not OpenAI', openai_compatible: false, openai_base_url: null, env_key: 'N_KEY', models_free: ['m'] },
+  { ...ccBase, slug: 'unknown-compat', name: 'Unknown', openai_compatible: null, openai_base_url: 'https://x.test/v1', env_key: 'X_KEY', models_free: ['m'] },
+  { ...ccBase, slug: 'no-base', name: 'No base', openai_base_url: null, env_key: 'NB_KEY', models_free: ['m'] },
+  { ...ccBase, slug: 'no-env', name: 'No env', openai_base_url: 'https://ne.test/v1', models_free: ['m'] },
+];
+
+test('client configs include only verified OpenAI-compatible providers with a base URL and env key', () => {
+  assert.deepEqual(clientConfigProviders(ccFixture).map((p) => p.slug), ['alpha', 'beta', 'gamma']);
+  assert.deepEqual(openaiClients(ccFixture)[0], {
+    slug: 'alpha', name: 'Alpha', base_url: 'https://api.alpha.test/v1', env_key: 'ALPHA_API_KEY',
+    models_free: ['a-small', 'org/a-large:free'], docs_url: 'https://example.com/docs', last_verified: '2026-10-01',
+  });
+  assert.equal(openaiClients(ccFixture)[1].models_free, null);
+});
+
+test('litellm.yaml has one model_list entry per (provider, model) and a marked placeholder otherwise', () => {
+  const yaml = litellmYaml({ version: '9.8.7', generated: '2026-01-02', providers: ccFixture });
+  assert.match(yaml, /^# .*\n# Dataset version 9\.8\.7, generated 2026-01-02\.\n/);
+  assert.match(yaml, /terms change without notice/i);
+  assert.match(yaml, /https:\/\/docs\.litellm\.ai\/docs\/proxy\/configs/);
+  const entries = parseLitellm(yaml);
+  assert.deepEqual(entries.map((e) => e.model_name), ['alpha/a-small', 'alpha/org/a-large:free', 'beta', 'gamma']);
+  for (const e of entries) {
+    assert.deepEqual(Object.keys(e.litellm_params).sort(), ['api_base', 'api_key', 'model'], `${e.model_name}: exactly model, api_base, api_key`);
+    assert.match(e.litellm_params.model, /^openai\/./, `${e.model_name}: openai/ prefix`);
+    assert.match(e.litellm_params.api_key, /^os\.environ\/[A-Z][A-Z0-9_]*$/, `${e.model_name}: os.environ/<ENV_KEY>`);
+  }
+  assert.deepEqual(entries[1].litellm_params, { model: 'openai/org/a-large:free', api_base: 'https://api.alpha.test/v1', api_key: 'os.environ/ALPHA_API_KEY' });
+  assert.equal(entries[2].litellm_params.model, `openai/${MODEL_PLACEHOLDER}`);
+  assert.ok(entries[2].marked && entries[3].marked && !entries[0].marked, 'only placeholder models carry "# set a model id"');
+  assert.match(yaml, /# Gamma[^\n]*\n  # api_base contains a \{placeholder\}/);
+  for (const slug of ['unverified', 'not-openai', 'unknown-compat', 'no-base', 'no-env']) {
+    assert.ok(!yaml.includes(slug), `${slug} must not appear`);
+  }
+});
+
+test('litellm.yaml quotes values so YAML-special characters stay literal', () => {
+  const tricky = [{ ...ccBase, slug: 'tricky', name: 'Tricky', openai_base_url: 'https://t.test/v1', env_key: 'T_KEY', models_free: ['a: b # c', 'say "hi"'] }];
+  const entries = parseLitellm(litellmYaml({ version: '1.0.0', generated: '2026-01-01', providers: tricky }));
+  assert.deepEqual(entries.map((e) => e.litellm_params.model), ['openai/a: b # c', 'openai/say "hi"']);
+});
+
+test('the built client configs match the dataset, are registered, and the schema is published verbatim', () => {
+  const v1 = join(ROOT, 'site/api/v1');
+  if (!existsSync(join(v1, 'litellm.yaml'))) run(['scripts/build.mjs']);
+  const data = JSON.parse(readFileSync(DATA, 'utf8'));
+  const eligible = data.providers.filter((p) => p.verified === true && p.openai_compatible === true && p.openai_base_url && p.env_key);
+  assert.ok(eligible.length > 0, 'the real dataset has eligible providers');
+
+  const yaml = readFileSync(join(v1, 'litellm.yaml'), 'utf8');
+  assert.ok(yaml.includes(`# Dataset version ${data.version}, generated ${data.generated}.`), 'header uses data.version and data.generated');
+  const entries = parseLitellm(yaml);
+  const expectedCount = eligible.reduce((n, p) => n + (p.models_free && p.models_free.length ? p.models_free.length : 1), 0);
+  assert.equal(entries.length, expectedCount);
+  const envKeys = new Set(eligible.map((p) => `os.environ/${p.env_key}`));
+  for (const e of entries) assert.ok(envKeys.has(e.litellm_params.api_key), `${e.model_name}: env key of an eligible provider`);
+
+  const clients = JSON.parse(readFileSync(join(v1, 'openai-clients.json'), 'utf8'));
+  assert.equal(clients.version, data.version);
+  assert.equal(clients.generated, data.generated);
+  assert.equal(clients.count, eligible.length);
+  assert.deepEqual(clients.clients.map((c) => c.slug), eligible.map((p) => p.slug));
+  for (const c of clients.clients) assert.match(c.env_key, /^[A-Z][A-Z0-9_]*$/);
+
+  // env_key stays out of every other API file
+  assert.ok(!readFileSync(join(v1, 'providers.json'), 'utf8').includes('"env_key"'), 'providers.json still strips env_key');
+
+  const index = JSON.parse(readFileSync(join(v1, 'index.json'), 'utf8'));
+  assert.equal(index.endpoints.litellm, 'v1/litellm.yaml');
+  assert.equal(index.endpoints['openai-clients'], 'v1/openai-clients.json');
+  assert.equal(index.endpoints.schema, 'v1/schema.json');
+
+  assert.ok(readFileSync(join(v1, 'schema.json')).equals(readFileSync(join(ROOT, 'data/schema.json'))), 'schema.json is a byte copy of data/schema.json');
+
+  const page = readFileSync(join(ROOT, 'site/api/index.html'), 'utf8');
+  for (const needle of ['v1/litellm.yaml', 'v1/openai-clients.json', 'v1/schema.json', 'docs/api.md', 'from openai import OpenAI']) {
+    assert.ok(page.includes(needle), `API page mentions ${needle}`);
+  }
 });
