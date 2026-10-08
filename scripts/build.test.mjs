@@ -1138,3 +1138,15 @@ test('the compare view loads its scripts under the CSP and the null tri-state re
   assert.ok(page, 'the real set contains a provider with an unconfirmed flag');
   assert.match(readFileSync(join(ROOT, `site/compare/${page}/index.html`), 'utf8'), /<span class="tri tri-unk">not confirmed<\/span>/);
 });
+
+test('keyboard navigation is client-only: the server-rendered rows carry no tabindex', () => {
+  // Without JS there is no key handler, so SSR rows must not add dead tab stops;
+  // explorer.js assigns the roving tabindex after it repaints.
+  const p = { slug: 'demo', name: 'Demo', category: 'ongoing', verified: true, last_verified: '2026-07-20' };
+  assert.doesNotMatch(explorerRowHtml(p, { now: '2026-08-13' }), /tabindex/);
+  run(['scripts/build.mjs']);
+  const index = readFileSync(join(ROOT, 'site/index.html'), 'utf8');
+  const tbody = index.slice(index.indexOf('<tbody id="tbody">'), index.indexOf('</tbody>'));
+  assert.doesNotMatch(tbody, /tabindex/);
+  assert.match(index, /<caption class="sr-only">[^<]*arrow keys move between providers and Enter opens one\.<\/caption>/);
+});

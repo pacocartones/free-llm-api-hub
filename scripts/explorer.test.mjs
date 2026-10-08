@@ -260,3 +260,53 @@ test('compare: the client view renders through the shared renderer only', () => 
   assert.deepEqual(writes, ["innerHTML = C.compareTableHtml(list, { prefix: '../' })"]);
   assert.doesNotMatch(src, /\.name\s*\+|\+\s*p\.\w+/, 'compare.js must not concatenate provider fields into markup');
 });
+
+// ---------- keyboard navigation over the explorer rows (#174) ----------
+// The movement rule ships in shared-rows.js (window.FLLM_ROWS.rowKeyTarget);
+// run that exact serialised copy.
+function clientRowKeyTarget() {
+  const win = { FLLM_RULES: { FLAG_PAIRS: [], freshnessStatus: () => 'fresh' } };
+  new Function('window', SHARED_ROWS)(win);
+  return win.FLLM_ROWS.rowKeyTarget;
+}
+
+test('keyboard: arrows move one row, Home/End jump, and the edges hand the key back to the browser', () => {
+  const key = clientRowKeyTarget();
+  assert.equal(typeof key, 'function');
+  assert.equal(key('ArrowDown', 0, 5), 1);
+  assert.equal(key('ArrowUp', 3, 5), 2);
+  assert.equal(key('ArrowDown', 4, 5), null, 'past the last row: no move, no preventDefault (no trap)');
+  assert.equal(key('ArrowUp', 0, 5), null, 'above the first row: no move');
+  assert.equal(key('Home', 3, 5), 0);
+  assert.equal(key('End', 1, 5), 4);
+  assert.equal(key('ArrowDown', -1, 5), 0, 'no focused row: down starts at the top');
+  assert.equal(key('ArrowUp', -1, 5), 4, 'no focused row: up starts at the bottom');
+  assert.equal(key('ArrowDown', 9, 5), 0, 'an out-of-range index is treated as no focused row');
+});
+
+test('keyboard: only navigation keys are claimed — Tab, Enter, "/" and letters pass through', () => {
+  const key = clientRowKeyTarget();
+  for (const k of ['Tab', 'Enter', ' ', '/', 'a', 'Escape', 'PageDown', 'ArrowLeft', 'ArrowRight']) {
+    assert.equal(key(k, 2, 5), null, `${JSON.stringify(k)} must not move focus`);
+  }
+  assert.equal(key('ArrowDown', 0, 0), null, 'an empty table claims nothing');
+});
+
+test('keyboard: the explorer wires a roving tabindex without trapping focus', () => {
+  const src = readFileSync(new URL('../site/explorer.js', import.meta.url), 'utf8');
+  assert.match(src, /const \{ rowKeyTarget \} = window\.FLLM_ROWS;/, 'movement comes from the shared bundle');
+  assert.match(src, /r\.tabIndex = r === tr \? 0 : -1/, 'exactly one row is in the tab order');
+  assert.match(src, /syncRoving\(\);\n  syncURL\(\);/, 'every repaint restores the roving tabindex');
+  assert.match(src, /if \(e\.altKey \|\| e\.ctrlKey \|\| e\.metaKey \|\| e\.shiftKey\) return;/, 'modified keys (and Shift+Tab) pass through');
+  assert.match(src, /if \(next === null\) return;\n  e\.preventDefault\(\);/, 'preventDefault only when focus actually moves');
+  assert.match(src, /a\.click\(\)/, 'Enter on a row follows its provider link');
+  assert.doesNotMatch(src, /stopPropagation|stopImmediatePropagation/, 'never swallow keys other handlers (the "/" shortcut) need');
+  assert.doesNotMatch(src, /key === 'Tab'/, 'Tab is never intercepted');
+  // the existing sortable-header pattern is untouched
+  assert.match(src, /th\.addEventListener\('keydown', e => \{ if \(e\.key === 'Enter' \|\| e\.key === ' '\) \{ e\.preventDefault\(\); applySort\(th\); \} \}\);/);
+});
+
+test('keyboard: the focused row has a visible focus ring in styles.css', () => {
+  const css = readFileSync(new URL('../site/styles.css', import.meta.url), 'utf8');
+  assert.match(css, /#table tbody tr:focus-visible \{ outline: 2px solid var\(--accent\);/);
+});

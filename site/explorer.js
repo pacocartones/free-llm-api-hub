@@ -51,8 +51,59 @@ function render() {
   // this table (see lib/rows.mjs). Date.now() gives visitors live freshness;
   // the server render uses data.generated for a deterministic initial paint.
   tbody.innerHTML = rows.map((p) => window.FLLM_ROWS.rowHtml(p, { now: Date.now() })).join('\n');
+  syncRoving();
   syncURL();
 }
+
+// --- keyboard navigation (#174): roving tabindex over the rows ---
+// One row is in the tab order (tabindex=0), the rest are tabindex=-1. Arrow
+// Up/Down move between rows, Home/End jump to the first/last row, and Enter on
+// a row opens its provider page. The movement rule is rowKeyTarget in
+// shared-rows.js (lib/rows.mjs), the same code explorer.test.mjs executes.
+// Tab/Shift+Tab are never intercepted and the provider links stay in the tab
+// order, so there is no keyboard trap; keys with a modifier, and every other
+// key (including the "/" a site-wide shortcut would use), pass through.
+const { rowKeyTarget } = window.FLLM_ROWS;
+let activeSlug = null;
+const rowLink = (tr) => tr.querySelector('td.name a[href]');
+const rowSlug = (tr) => { const a = rowLink(tr); return a ? a.getAttribute('href').replace(/^p\//, '') : null; };
+function setActiveRow(tr) {
+  const trs = Array.from(document.getElementById('tbody').rows);
+  trs.forEach((r) => { r.tabIndex = r === tr ? 0 : -1; });
+  activeSlug = tr ? rowSlug(tr) : null;
+}
+function syncRoving() {
+  const trs = Array.from(document.getElementById('tbody').rows);
+  // Keep the same provider active across re-sorts and filters; else the first row.
+  setActiveRow(trs.find((tr) => activeSlug && rowSlug(tr) === activeSlug) || trs[0] || null);
+}
+document.getElementById('tbody').addEventListener('keydown', (e) => {
+  if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
+  const tbody = e.currentTarget;
+  const tr = e.target.closest('tr');
+  if (!tr || tr.parentNode !== tbody) return;
+  const onRow = e.target === tr;
+  if (e.key === 'Enter') {
+    // Enter on a link already follows it natively; on the row, follow its link.
+    const a = onRow && rowLink(tr);
+    if (a) { e.preventDefault(); a.click(); }
+    return;
+  }
+  // Home/End only move rows when a row itself has focus.
+  if (!onRow && (e.key === 'Home' || e.key === 'End')) return;
+  const trs = Array.from(tbody.rows);
+  const next = rowKeyTarget(e.key, trs.indexOf(tr), trs.length);
+  if (next === null) return;
+  e.preventDefault();
+  setActiveRow(trs[next]);
+  trs[next].focus();
+});
+document.getElementById('tbody').addEventListener('focusin', (e) => {
+  const tr = e.target.closest('tr');
+  if (tr && tr.parentNode === e.currentTarget) setActiveRow(tr);
+});
+// The server-rendered rows are navigable before (or without) a client repaint.
+syncRoving();
 
 function renderStats() {
   const total = DATA.length;

@@ -75,6 +75,24 @@ export function explorerRowHtml(p, opts = {}) {
     `<td class="pver" data-label="Verified">${v}</td></tr>`;
 }
 
+/**
+ * Keyboard navigation over the explorer rows (#174): the row index a key moves
+ * focus to, or null when the key is not a row-navigation key or would leave the
+ * table (so the browser keeps its default, e.g. scrolling the page past the
+ * last row — never a keyboard trap). `index` is the focused row (-1 for none),
+ * `count` the number of rows. Enter is handled by the caller (it follows the
+ * row's provider link), so it is not a movement key here.
+ */
+export function rowKeyTarget(key, index, count) {
+  if (!(count > 0)) return null;
+  const i = Number.isInteger(index) && index >= 0 && index < count ? index : -1;
+  if (key === 'ArrowDown') return i < 0 ? 0 : (i + 1 < count ? i + 1 : null);
+  if (key === 'ArrowUp') return i < 0 ? count - 1 : (i > 0 ? i - 1 : null);
+  if (key === 'Home') return 0;
+  if (key === 'End') return count - 1;
+  return null;
+}
+
 // FLAG_PAIRS + freshnessStatus are referenced by name inside explorerRowHtml so
 // the serialised copy (shared-rows.js) can pick them up from window.FLLM_RULES;
 // importing them here keeps the same names in scope for the server render.
@@ -95,7 +113,8 @@ window.FLLM_ROWS = (function () {
   const ICON = ${ICON.toString()};
   const SLUG_RE = ${SLUG_RE.toString()};
   const rowHtml = ${explorerRowHtml.toString()};
-  return { rowHtml };
+  const rowKeyTarget = ${rowKeyTarget.toString()};
+  return { rowHtml, rowKeyTarget };
 })();
 `;
 }
