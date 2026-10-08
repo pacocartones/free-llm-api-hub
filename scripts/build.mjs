@@ -20,6 +20,7 @@ import { monthlyReport, reportMonths } from './lib/state.mjs';
 import { githubProfileUrl } from './lib/contributors.mjs';
 import { resolveBestEntries } from './lib/best.mjs';
 import { openaiClients, litellmYaml } from './lib/client-config.mjs';
+import * as compareLib from './lib/compare.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const FRESH_DAYS = SLA_DAYS; // the freshness SLA, defined once in lib/rules.mjs
@@ -454,7 +455,7 @@ const THEME_GUARD = `<script>(function(){try{var t=localStorage.getItem('theme')
 // If you edit THEME_GUARD or 404.html's inline scripts, recompute these hashes or the page breaks silently.
 const CSP = `<meta http-equiv="Content-Security-Policy" content="script-src 'self' 'sha256-r3FnVnP9W/uaNhK9XkZqH3GIfK4TudOQGYTwoNIjGR4=' 'sha256-YzEhxvq2BwovGsg/RCjKkQdwf+LZmTjIkiQcjXCZMHc='; connect-src 'self' https://api.github.com https://raw.githubusercontent.com; object-src 'none'; base-uri 'self'">`;
 
-function htmlPage({ title, desc, canonical, main, jsonld, prefix = '../', noindex = false, ogImage = `${SITE}/og.png`, feeds = [] }) {
+function htmlPage({ title, desc, canonical, main, jsonld, prefix = '../', noindex = false, ogImage = `${SITE}/og.png`, feeds = [], scripts = [] }) {
   // jsonld carries provider names straight from the dataset; writing "<" as
   // the JSON unicode escape (backslash-u-003c) keeps a "</script>" in the
   // data from ever closing the block.
@@ -493,7 +494,7 @@ ${siteHeader(prefix)}
 ${main}
 ${siteFooter(prefix)}
 <script src="${prefix}site.js"></script>
-</body>
+${scripts.map((src) => `<script src="${prefix}${src}" defer></script>\n`).join('')}</body>
 </html>
 `;
 }
@@ -547,6 +548,10 @@ const coverageTable =
 // on an unverified pick exactly like CI does (#165). Edit data/best.json to re-rank.
 const BEST = JSON.parse(readFileSync(join(ROOT, 'data/best.json'), 'utf8'));
 const bestEntries = resolveBestEntries(BEST, providers);
+// Static /compare/<a>-vs-<b>/ pages (#175): editorial picks compared pairwise
+// where they share a modality, capped (see lib/compare.mjs). Computed up front
+// so the provider pages can link to the comparisons they appear in.
+const comparePairs = compareLib.selectComparePairs(bestEntries.map((e) => e.p));
 
 // ---------- contributors (rendered from data/contributors.json, which a
 // maintainer refreshes with scripts/update-contributors.mjs after a merge) ----------
@@ -921,6 +926,15 @@ print(r.json())</code></pre>`;
   // are percent-encoded in reportChangeUrl; htmlEsc makes the & separators safe
   // inside the attribute.
   const reportBtn = `<a class="btn ghost" href="${htmlEsc(reportChangeUrl(p, REPO))}" target="_blank" rel="noopener">${IC('ic-flag')}Report a change</a>`;
+  // "Compare with …": the static comparisons this provider appears in, plus the
+  // interactive view pre-filled with it.
+  const comparePeers = comparePairs
+    .filter((cp) => cp.a.slug === p.slug || cp.b.slug === p.slug)
+    .map((cp) => ({ path: cp.path, other: cp.a.slug === p.slug ? cp.b : cp.a }));
+  const compareHtml =
+    `<h2>Compare</h2><div class="colls">` +
+    comparePeers.map((c) => `<a href="../compare/${c.path}/">Compare with ${htmlEsc(c.other.name)}</a>`).join('') +
+    `<a href="../compare/?compare=${p.slug}">Compare with another provider →</a></div>`;
   const crossChips = [
     ...inColls.map((c) => `<a href="../collections/${c.slug}">${htmlEsc(c.title)}</a>`),
     ...inGuides.map((g) => `<a href="../guides/${g.slug}">${htmlEsc(g.card)}</a>`),
@@ -940,6 +954,7 @@ print(r.json())</code></pre>`;
     modelsBlock +
     quick +
     (crossChips ? `<h2>Appears in</h2><div class="colls">${crossChips}</div>` : '') +
+    compareHtml +
     historyHtml(p.slug) +
     `<p class="prov-back"><a href="../#explorer">← All providers</a></p>` +
     `</div></main>`;
@@ -1517,6 +1532,74 @@ writeFileSync(
   htmlPage({ title: 'The best free LLM APIs · Free LLM API Hub', desc: BEST.desc, canonical: SITE + '/best/', main: bestMain, jsonld: bestJsonld, prefix: '../' })
 );
 
+// ---------- /compare — provider compare view (#175) ----------
+// The interactive view (/compare/?compare=a,b — 2 to 4 slugs) and a small,
+// deterministic set of static pages (/compare/<a>-vs-<b>/). Both render the
+// table with lib/compare.mjs; the browser loads the same code as
+// site/shared-compare.js. Everything here derives from committed data only (no
+// current date), because the pages are gitignored and pinned in
+// derived-fingerprints.json.
+writeFileSync(join(ROOT, 'site/shared-compare.js'), compareLib.clientBundle());
+rmSync(join(ROOT, 'site/compare'), { recursive: true, force: true });
+mkdirSync(join(ROOT, 'site/compare'), { recursive: true });
+const compareLinksHtml = (prefix, except = null) => comparePairs
+  .filter((cp) => cp.path !== except)
+  .map((cp) => `<a href="${prefix}compare/${cp.path}/">${htmlEsc(cp.a.name)} vs ${htmlEsc(cp.b.name)}</a>`).join('');
+for (const cp of comparePairs) {
+  const { a, b } = cp;
+  const title = `${a.name} vs ${b.name}`;
+  const desc = `${a.name} vs ${b.name}: free tier, rate limits, card, phone and commercial-use requirements, OpenAI compatibility and docs, side by side from the verified dataset.`;
+  const main =
+    `<section class="page-hero"><div class="wrap">` +
+    `<nav class="crumbs"><a href="../../">Home</a> / <a href="../">Compare</a> / ${htmlEsc(title)}</nav>` +
+    `<h1>${htmlEsc(title)}</h1>` +
+    `<p class="lede">Both offer ${htmlEsc(cp.shared.join(', '))} on their free plan. Every field below comes from the dataset and is checked against each provider's own docs; <em>not confirmed</em> means nobody has confirmed that field yet — not that the answer is no.</p>` +
+    `</div></section>` +
+    `<main id="main"><div class="wrap prose">` +
+    compareLib.compareTableHtml([a, b], { prefix: '../../' }) +
+    `<div class="prov-actions" style="margin-top:22px"><a class="btn primary" href="../?compare=${a.slug},${b.slug}">Add a provider to this comparison →</a></div>` +
+    `<h2>Other comparisons</h2><nav class="colls">${compareLinksHtml('../../', cp.path)}</nav>` +
+    `<p class="prov-back"><a href="../../#explorer">← All providers</a></p>` +
+    `</div></main>`;
+  const jsonld = JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Free LLM API Hub', item: `${SITE}/` },
+      { '@type': 'ListItem', position: 2, name: 'Compare', item: `${SITE}/compare/` },
+      { '@type': 'ListItem', position: 3, name: title, item: `${SITE}/compare/${cp.path}/` },
+    ],
+  });
+  mkdirSync(join(ROOT, `site/compare/${cp.path}`), { recursive: true });
+  writeFileSync(join(ROOT, `site/compare/${cp.path}/index.html`), htmlPage({
+    title: `${title} — free tiers compared · Free LLM API Hub`, desc, canonical: `${SITE}/compare/${cp.path}/`, main, jsonld, prefix: '../../',
+  }));
+}
+// Interactive view: a picker that also works as a plain GET form without JS
+// (?p=a&p=b — compare.js normalises it to ?compare=a,b), plus the static pages.
+const pickerOptions = [...providers].sort((x, y) => x.name.localeCompare(y.name, 'en'))
+  .map((p) => `<option value="${htmlEsc(p.slug)}">${htmlEsc(p.name)}</option>`).join('');
+const pickerSelects = Array.from({ length: compareLib.COMPARE_MAX }, (_, i) =>
+  `<label class="cmp-slot"><span>Provider ${i + 1}${i < compareLib.COMPARE_MIN ? '' : ' (optional)'}</span>` +
+  `<select class="sel" name="p"><option value="">—</option>${pickerOptions}</select></label>`).join('');
+const compareIndexMain =
+  `<section class="page-hero"><div class="wrap">` +
+  `<nav class="crumbs"><a href="../">Home</a> / Compare</nav>` +
+  `<h1>Compare free LLM APIs</h1>` +
+  `<p class="lede">Pick two to four providers to see their free tiers side by side — limits, card, phone and commercial-use requirements, OpenAI compatibility and the date each was last verified. Share the result: the URL keeps your selection.</p>` +
+  `</div></section>` +
+  `<main id="main"><div class="wrap prose">` +
+  `<form id="compare-form" class="cmp-form" method="get" action="./">${pickerSelects}<button type="submit" class="btn primary">Compare</button></form>` +
+  `<div id="compare-out" class="cmp-out" aria-live="polite"></div>` +
+  `<h2>Popular comparisons</h2><nav class="colls">${compareLinksHtml('../')}</nav>` +
+  `<p class="prov-back"><a href="../#explorer">← All providers</a></p>` +
+  `</div></main>`;
+writeFileSync(join(ROOT, 'site/compare/index.html'), htmlPage({
+  title: 'Compare free LLM APIs side by side · Free LLM API Hub',
+  desc: 'Compare two to four free LLM and AI-model APIs side by side: free tier, rate limits, card, phone and commercial-use requirements, OpenAI compatibility and verification date.',
+  canonical: `${SITE}/compare/`, main: compareIndexMain, prefix: '../', scripts: ['shared-compare.js', 'compare.js'],
+}));
+
 // ---------- sitemap.xml (site SEO) ----------
 const sitemapUrls = [
   `${SITE}/`,
@@ -1535,6 +1618,8 @@ const sitemapUrls = [
   ...(commits.length ? [`${SITE}/updates`] : []),
   ...COLLECTIONS.map((c) => `${SITE}/collections/${c.slug}`),
   ...providers.map((p) => `${SITE}/p/${p.slug}`),
+  `${SITE}/compare/`,
+  ...comparePairs.map((cp) => `${SITE}/compare/${cp.path}/`),
 ];
 const sitemap =
   `<?xml version="1.0" encoding="UTF-8"?>\n` +
@@ -1601,5 +1686,5 @@ console.log(
   `Built: ${total} providers (${ongoing.length} ongoing, ${trial.length} trial), ` +
   `${verifiedCount} verified, ${freshCount} fresh <${FRESH_DAYS}d, ` +
   `oldest ${oldestAge}d / median ${medianAge}d → badge ${color}. ` +
-  `${COLLECTIONS.length} collections, ${providers.length} provider pages + badges + sitemap generated.`
+  `${COLLECTIONS.length} collections, ${providers.length} provider pages + badges, ${comparePairs.length} compare pages + sitemap generated.`
 );

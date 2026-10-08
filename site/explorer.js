@@ -132,6 +132,12 @@ function syncURL() {
 }
 function applyURL() {
   const params = new URLSearchParams(location.search);
+  // ?compare=a,b on the home page opens the compare view (#175), which owns
+  // the slug parsing and validation (lib/compare.mjs).
+  if (params.has('compare')) {
+    location.replace('compare/?compare=' + encodeURIComponent(params.get('compare')).replace(/%2C/gi, ','));
+    return;
+  }
   const cat = params.get('cat');
   if (cat && ['all', 'ongoing', 'trial'].includes(cat)) {
     category = cat;

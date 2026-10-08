@@ -11,6 +11,7 @@ import { clientBundle } from './lib/rows.mjs';
 import { clientBundle as sortClientBundle } from './lib/sort.mjs';
 import { freeTypeRank } from './lib/rules.mjs';
 import { readFileSync } from 'node:fs';
+import { clientBundle as compareClientBundle } from './lib/compare.mjs';
 
 // The exact client bundle the browser runs — serialised by lib/rows.mjs itself
 // (the same string build.mjs writes to site/shared-rows.js), so no generated
@@ -171,4 +172,91 @@ test('shareable sort URLs preserve a valid ascending or descending direction', (
   assert.match(src, /const dir = params\.get\('dir'\)/, 'URL state must read the direction');
   assert.match(src, /sortDir = dir === 'desc' \? -1 : 1/, 'only desc may invert the default ascending direction');
   assert.match(src, /th\.classList\.toggle\('asc', sortDir === 1\)/, 'the restored visual indicator must match the restored direction');
+});
+
+// ---------- provider compare view (#175) ----------
+// The interactive /compare/ view renders with window.FLLM_COMPARE — the
+// serialised copy of lib/compare.mjs that also renders the static
+// /compare/<a>-vs-<b>/ pages. Exercise that exact client string.
+
+function clientCompare() {
+  const win = {};
+  new Function('window', compareClientBundle())(win);
+  return win.FLLM_COMPARE;
+}
+
+const cmpBase = {
+  slug: 'groq', name: 'Groq', category: 'ongoing', free_type: 'renewing-quota', free_tier: 'free',
+  rate_limits: '30 rpm', notes: 'n', modalities: ['text'], models_free: ['m1'],
+  docs_url: 'https://console.groq.com/docs', card_required: false, phone_required: true,
+  commercial_ok: null, openai_compatible: true, openai_base_url: 'https://api.groq.com/openai/v1',
+  verified: true, last_verified: '2026-08-01',
+};
+
+test('compare: the URL parser keeps 2-4 known, well-formed, unique slugs in order', () => {
+  const { parseCompareSlugs, COMPARE_MIN, COMPARE_MAX } = clientCompare();
+  assert.equal(COMPARE_MIN, 2);
+  assert.equal(COMPARE_MAX, 4);
+  const known = ['groq', 'cloudflare-workers-ai', 'openrouter', 'jina-ai', 'cohere'];
+  assert.deepEqual(parseCompareSlugs('?compare=groq,cloudflare-workers-ai', known), ['groq', 'cloudflare-workers-ai']);
+  assert.deepEqual(parseCompareSlugs('?compare=GROQ, groq,nope,../x,openrouter', known), ['groq', 'openrouter'],
+    'case-folded duplicates, unknown and malformed slugs are dropped');
+  assert.deepEqual(parseCompareSlugs('?compare=groq,openrouter,jina-ai,cohere,cloudflare-workers-ai', known),
+    ['groq', 'openrouter', 'jina-ai', 'cohere'], 'capped at four');
+  assert.deepEqual(parseCompareSlugs('?p=jina-ai&p=&p=groq', known), ['jina-ai', 'groq'], 'the no-JS form shape (?p=a&p=b) parses too');
+  assert.deepEqual(parseCompareSlugs('', known), []);
+  assert.deepEqual(parseCompareSlugs('?compare=groq', null), [], 'nothing is valid without a known list');
+});
+
+test('compare: a null tri-state renders "not confirmed", never "no"', () => {
+  const { compareTableHtml } = clientCompare();
+  const out = compareTableHtml([cmpBase, { ...cmpBase, slug: 'b', name: 'B', card_required: null, phone_required: null, commercial_ok: false, openai_compatible: null, openai_base_url: null }]);
+  const row = (label) => out.split('\n').find((l) => l.includes(`<th scope="row">${label}</th>`));
+  assert.match(row('Credit card'), /tri-no">not required<\/span><\/td><td><span class="tri tri-unk">not confirmed/);
+  assert.match(row('Phone verification'), /tri-yes">required<\/span><\/td><td><span class="tri tri-unk">not confirmed/);
+  assert.match(row('Commercial use'), /tri-unk">not confirmed<\/span><\/td><td><span class="tri tri-no">not allowed \(eval only\)/);
+  assert.match(row('OpenAI-compatible'), /tri-yes">yes<\/span><div class="cmp-sub"><code>https:\/\/api\.groq\.com\/openai\/v1<\/code>/);
+  assert.match(row('OpenAI-compatible'), /<td><span class="tri tri-unk">not confirmed<\/span><\/td><\/tr>$/);
+});
+
+test('compare: every dataset field the issue lists has a row, one column per provider', () => {
+  const { compareTableHtml } = clientCompare();
+  const out = compareTableHtml([cmpBase, { ...cmpBase, slug: 'b', name: 'B' }, { ...cmpBase, slug: 'c', name: 'C' }], { prefix: '../' });
+  for (const label of ['Type', 'What&#39;s free', 'Rate limits', 'Credit card', 'Phone verification', 'Commercial use',
+    'OpenAI-compatible', 'Modalities', 'Free models (sample)', 'Official docs', 'Last verified']) {
+    assert.ok(out.includes(`<th scope="row">${label}</th>`), `missing row ${label}`);
+  }
+  assert.equal((out.match(/<th scope="col">/g) || []).length, 4, 'a label column plus one per provider');
+  assert.match(out, /<th scope="col"><a href="\.\.\/p\/groq">Groq<\/a><\/th>/);
+  assert.match(out, /<span class="v ok">2026-08-01<\/span>/);
+  assert.match(compareTableHtml([{ ...cmpBase, verified: false, last_verified: null }]), /<span class="v warn">unverified<\/span>/);
+});
+
+test('compare: an HTML payload in any provider field never becomes markup', () => {
+  const { compareTableHtml } = clientCompare();
+  const payload = '<img src=x onerror=alert(1)>';
+  const out = compareTableHtml([{
+    ...cmpBase,
+    name: `Evil ${payload}`, free_tier: `free ${payload}`, rate_limits: `rl ${payload}`, notes: `notes ${payload}`,
+    expires: `exp ${payload}`, free_type: `ft ${payload}`, modalities: [`text ${payload}`], models_free: [`m ${payload}`],
+    openai_base_url: `https://x.test/${payload}`, docs_url: `https://x.test/"><script>alert(1)</script>`,
+    last_verified: `2026-08-01 ${payload}`,
+  }, { ...cmpBase, slug: 'x" onmouseover="alert(1)', docs_url: 'javascript:alert(1)' }]);
+  assert.ok(!/<(img|script)[\s>]/i.test(out), `payload became a real tag:\n${out}`);
+  assert.ok(!out.includes('onmouseover='), 'no event handler may survive');
+  assert.ok(!/href="javascript:/i.test(out), 'a non-http docs_url must not become a link');
+  assert.ok(!out.includes('href="p/x'), 'a non-kebab slug must not become a link');
+  for (const s of ['Evil &lt;img', 'free &lt;img', 'rl &lt;img', 'notes &lt;img', 'exp &lt;img', 'ft &lt;img', 'text &lt;img', 'm &lt;img', '2026-08-01 &lt;img']) {
+    assert.ok(out.includes(s), `escaped payload must survive as text: ${s}`);
+  }
+});
+
+test('compare: the client view renders through the shared renderer only', () => {
+  const src = readFileSync(new URL('../site/compare.js', import.meta.url), 'utf8');
+  assert.match(src, /C\.compareTableHtml\(list/, 'compare.js must render with FLLM_COMPARE.compareTableHtml');
+  assert.match(src, /C\.parseCompareSlugs\(/, 'compare.js must parse slugs with the shared parser');
+  // the only innerHTML write is the shared, escaping renderer
+  const writes = src.match(/innerHTML\s*=[^;]*/g) || [];
+  assert.deepEqual(writes, ["innerHTML = C.compareTableHtml(list, { prefix: '../' })"]);
+  assert.doesNotMatch(src, /\.name\s*\+|\+\s*p\.\w+/, 'compare.js must not concatenate provider fields into markup');
 });

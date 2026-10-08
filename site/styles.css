@@ -370,6 +370,23 @@ pre:hover .pre-copy, .pre-copy:focus-visible { opacity: 1; }
 .meta-v code { word-break: break-all; color: var(--accent); }
 .prov-back { margin-top: 30px; font-family: var(--font-mono); font-size: .85rem; }
 @media (max-width: 560px) { .meta-row { grid-template-columns: 1fr; gap: 3px; } }
+/* provider compare view (/compare/) — one column per provider, one row per field */
+.cmp-form { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; margin: 6px 0 22px; }
+.cmp-slot { display: flex; flex-direction: column; gap: 5px; flex: 1 1 180px; min-width: 0; }
+.cmp-slot span { color: var(--muted); font-family: var(--font-mono); font-size: .72rem; text-transform: uppercase; letter-spacing: .04em; }
+.cmp-slot .sel { width: 100%; }
+.compare-scroll { overflow-x: auto; margin: 8px 0 4px; border: 1px solid var(--border); border-radius: var(--radius); }
+.compare-table { min-width: 560px; }
+.compare-table thead th { white-space: normal; }
+.compare-table thead th a { color: var(--text); }
+.compare-table thead th a:hover { color: var(--accent); }
+.compare-table tbody th[scope="row"] { text-align: left; padding: 14px 12px; border-bottom: 1px solid var(--border); vertical-align: top; color: var(--muted); font-family: var(--font-mono); font-size: .74rem; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; white-space: nowrap; }
+.compare-table tbody tr:nth-child(even) { background: color-mix(in srgb, var(--panel) 42%, transparent); }
+.compare-table td code { word-break: break-all; }
+.cmp-sub { margin-top: 4px; font-size: .8rem; }
+.tri-yes { color: var(--text); }
+.tri-no { color: var(--text); }
+.tri-unk { color: var(--muted); font-style: italic; }
 .muted { color: var(--muted); }
 .model-chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0 6px; }
 .model-chips code { background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 4px 9px; font-size: .82rem; color: var(--accent); word-break: break-all; }

@@ -43,3 +43,7 @@ site/shared-sort.js
 
 # Freebuff desktop data (local DB) — never publish
 .freebuff/
+
+# Provider compare view (#175): static /compare/ pages and the shared table renderer, emitted by build.mjs from scripts/lib/compare.mjs
+site/compare/
+site/shared-compare.js

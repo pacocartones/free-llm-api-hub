@@ -20,6 +20,7 @@ import { countExternalContributorsFromLog } from './lib/contributors.mjs';
 import { buildOgManifest } from './lib/og.mjs';
 import { explorerRowHtml } from './lib/rows.mjs';
 import { clientConfigProviders, openaiClients, litellmYaml, MODEL_PLACEHOLDER } from './lib/client-config.mjs';
+import { selectComparePairs, COMPARE_PAGE_CAP, COMPARE_PER_PROVIDER_CAP, COMPARE_MAX as COMPARE_MAX_SLOTS } from './lib/compare.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const DATA = join(ROOT, 'data/providers.json');
@@ -1059,4 +1060,81 @@ test('shared-rules.js runs on its own: every serialised rule resolves its consta
   assert.equal(R.SLA_DAYS, SLA_DAYS);
   assert.equal(R.DUE_SOON_DAYS, DUE_SOON_DAYS);
   assert.ok(Array.isArray(R.FLAG_PAIRS) && R.FLAG_PAIRS.length > 0);
+});
+
+// ---------- provider compare view (#175) ----------
+// Static /compare/<a>-vs-<b>/ pages: a small deterministic set of editorial
+// picks compared pairwise where they share a modality. They are gitignored and
+// pinned in derived-fingerprints.json, and sitemap.xml is drift-gated, so the
+// selection and the bytes must be a pure function of the committed data.
+
+test('compare pairs: only picks sharing a modality, ordered by rank, capped overall and per provider', () => {
+  const mk = (slug, modalities) => ({ slug, name: slug.toUpperCase(), modalities });
+  const ranked = [mk('a', ['text']), mk('b', ['text', 'audio']), mk('c', ['ocr']), mk('d', ['audio']), mk('e', ['text']), mk('f', ['ocr'])];
+  const pairs = selectComparePairs(ranked, { cap: 30, perProvider: 10 });
+  assert.deepEqual(pairs.map((p) => p.path), ['a-vs-b', 'a-vs-e', 'b-vs-d', 'b-vs-e', 'c-vs-f'],
+    'rank-sum order (ties: higher-ranked member first), no pair without a shared modality');
+  assert.deepEqual(pairs.find((p) => p.path === 'b-vs-d').shared, ['audio']);
+  assert.deepEqual(selectComparePairs(ranked, { cap: 2, perProvider: 10 }).map((p) => p.path), ['a-vs-b', 'a-vs-e'], 'overall cap');
+  assert.deepEqual(selectComparePairs(ranked, { cap: 30, perProvider: 1 }).map((p) => p.path), ['a-vs-b', 'c-vs-f'], 'per-provider cap');
+  assert.deepEqual(selectComparePairs(ranked), selectComparePairs(ranked), 'deterministic');
+  assert.deepEqual(selectComparePairs([mk('a', ['text']), { slug: '../x', name: 'X', modalities: ['text'] }]), [], 'a malformed slug never becomes a path');
+});
+
+test('compare pairs on the real ranking: at most 30, unique, shared modality, every page built', () => {
+  const { providers } = JSON.parse(readFileSync(DATA, 'utf8'));
+  const best = JSON.parse(readFileSync(join(ROOT, 'data/best.json'), 'utf8'));
+  const ranked = best.entries.map((e) => providers.find((p) => p.slug === e.slug));
+  const pairs = selectComparePairs(ranked);
+  assert.ok(pairs.length > 0 && pairs.length <= COMPARE_PAGE_CAP, `got ${pairs.length} pairs`);
+  assert.equal(new Set(pairs.map((p) => p.path)).size, pairs.length, 'no duplicate pages');
+  for (const { a, b, shared } of pairs) {
+    assert.ok(shared.length && shared.every((m) => a.modalities.includes(m) && b.modalities.includes(m)), `${a.slug}/${b.slug} share a modality`);
+  }
+  const uses = {};
+  for (const { a, b } of pairs) { uses[a.slug] = (uses[a.slug] || 0) + 1; uses[b.slug] = (uses[b.slug] || 0) + 1; }
+  assert.ok(Object.values(uses).every((n) => n <= COMPARE_PER_PROVIDER_CAP), 'per-provider cap holds');
+
+  run(['scripts/build.mjs']);
+  const sitemap = readFileSync(join(ROOT, 'site/sitemap.xml'), 'utf8');
+  const pins = JSON.parse(readFileSync(join(ROOT, 'derived-fingerprints.json'), 'utf8'));
+  // Dates a compare page may legitimately carry: the ones in the data.
+  const dataDates = new Set(JSON.stringify(providers).match(/\d{4}-\d{2}-\d{2}/g));
+  assert.match(sitemap, /<loc>https:\/\/freellmapihub\.com\/compare\/<\/loc>/);
+  assert.ok(pins['site/compare/index.html'] && pins['site/shared-compare.js'], 'the compare view is pinned');
+  const built = readdirSync(join(ROOT, 'site/compare')).filter((d) => d.includes('-vs-')).sort();
+  assert.deepEqual(built, pairs.map((p) => p.path).sort(), 'exactly the selected pages are built (stale pages are removed)');
+  for (const { a, b, path } of pairs) {
+    const rel = `site/compare/${path}/index.html`;
+    const html = readFileSync(join(ROOT, rel), 'utf8');
+    assert.ok(html.includes(`<link rel="canonical" href="https://freellmapihub.com/compare/${path}/">`), `${rel}: canonical`);
+    assert.ok(sitemap.includes(`<loc>https://freellmapihub.com/compare/${path}/</loc>`), `${rel}: in the sitemap`);
+    assert.match(pins[rel] || '', /^[0-9a-f]{64}$/, `${rel}: pinned in derived-fingerprints.json`);
+    assert.ok(html.includes(`<a href="../../p/${a.slug}">`) && html.includes(`<a href="../../p/${b.slug}">`), `${rel}: links both providers`);
+    assert.ok(!html.includes(`href="../../compare/${path}/"`), `${rel}: does not list itself under other comparisons`);
+    for (const d of html.match(/\d{4}-\d{2}-\d{2}/g) || []) {
+      assert.ok(dataDates.has(d), `${rel}: date ${d} is not from the dataset (pages must not depend on the build day)`);
+    }
+    // provider pages link to the comparisons they appear in
+    for (const s of [a.slug, b.slug]) {
+      assert.ok(readFileSync(join(ROOT, `site/p/${s}.html`), 'utf8').includes(`href="../compare/${path}/"`), `p/${s} links ${path}`);
+    }
+  }
+});
+
+test('the compare view loads its scripts under the CSP and the null tri-state reads "not confirmed"', () => {
+  run(['scripts/build.mjs']);
+  const index = readFileSync(join(ROOT, 'site/compare/index.html'), 'utf8');
+  assert.match(index, /<script src="\.\.\/shared-compare\.js" defer><\/script>\n<script src="\.\.\/compare\.js" defer><\/script>\n<\/body>/);
+  assert.equal((index.match(/<script>/g) || []).length, 1, 'only the hashed theme guard runs inline');
+  assert.equal((index.match(/<select class="sel" name="p">/g) || []).length, COMPARE_MAX_SLOTS);
+  // ai-horde has commercial_ok: null in the dataset; any page with a null flag
+  // must say so instead of rendering it as "no".
+  const { providers } = JSON.parse(readFileSync(DATA, 'utf8'));
+  const page = readdirSync(join(ROOT, 'site/compare')).find((d) => {
+    if (!d.includes('-vs-')) return false;
+    return d.split('-vs-').some((s) => { const p = providers.find((x) => x.slug === s); return p && p.commercial_ok === null; });
+  });
+  assert.ok(page, 'the real set contains a provider with an unconfirmed flag');
+  assert.match(readFileSync(join(ROOT, `site/compare/${page}/index.html`), 'utf8'), /<span class="tri tri-unk">not confirmed<\/span>/);
 });
