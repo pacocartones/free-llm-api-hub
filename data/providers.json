@@ -113,7 +113,7 @@
       "openai_base_url": "https://api.cohere.ai/compatibility/v1",
       "env_key": "COHERE_API_KEY",
       "verified": true,
-      "last_verified": "2026-08-13"
+      "last_verified": "2026-10-08"
     },
     {
       "slug": "cerebras",
@@ -142,9 +142,9 @@
       "name": "Mistral (La Plateforme)",
       "category": "ongoing",
       "free_type": "renewing-quota",
-      "free_tier": "\"Restrictive\" free tier explicitly for \"try and explore\" — official docs say to upgrade for \"actual projects and production use\"",
-      "rate_limits": "Not published publicly; exact caps only visible in-console after login (admin.mistral.ai)",
-      "notes": "Phone verification required to activate; no credit card required. Free tier is opt-in for data training.",
+      "free_tier": "\"Free mode\" (default for new accounts): API keys with included monthly usage and the lowest limits, \"intended for evaluation and prototyping\"",
+      "rate_limits": "Not published publicly; per-model requests/second, tokens/minute and tokens/month caps are shown only in-console (Admin Panel > API > Limits)",
+      "notes": "No credit card required. In Free mode Mistral may use your inputs and outputs to train its models unless you opt out in the Admin panel. Phone verification at signup was recorded in an earlier check; the current docs do not mention it.",
       "best_for": "European models to prototype against before upgrading",
       "modalities": ["text"],
       "models_free": null,
@@ -157,14 +157,14 @@
       "openai_base_url": "https://api.mistral.ai/v1",
       "env_key": "MISTRAL_API_KEY",
       "verified": true,
-      "last_verified": "2026-08-13"
+      "last_verified": "2026-10-08"
     },
     {
       "slug": "huggingface",
       "name": "HuggingFace",
       "category": "ongoing",
       "free_type": "recurring-credit",
-      "free_tier": "Free CPU Basic + ZeroGPU for Spaces; Inference Providers has a monthly credit ($0.10/mo on Free plan, $2.00/mo on PRO/Team/Enterprise)",
+      "free_tier": "Free CPU Basic + ZeroGPU for Spaces; Inference Providers has no included credit on the Free plan (credits must be purchased) — $2.00/mo is included only on PRO/Team/Enterprise",
       "rate_limits": "No RPM/TPM published, only credit amounts",
       "notes": "Credits only apply with \"Routed by Hugging Face\" billing, not with a Custom Provider Key",
       "best_for": "Router access to many open-weight providers under one key",
@@ -179,29 +179,29 @@
       "openai_base_url": "https://router.huggingface.co/v1",
       "env_key": "HF_TOKEN",
       "verified": true,
-      "last_verified": "2026-08-13"
+      "last_verified": "2026-10-08"
     },
     {
       "slug": "siliconflow",
       "name": "SiliconFlow",
       "category": "ongoing",
       "free_type": "perpetual",
-      "free_tier": "Several models permanently free (e.g. Qwen2.5-7B-Instruct and others) at $0 cost, plus a $1 welcome credit for paid models",
+      "free_tier": "China platform (siliconflow.cn): several models permanently free at ¥0 (e.g. Qwen/Qwen2.5-7B-Instruct, tencent/Hunyuan-MT-7B, BAAI embeddings and rerankers). The international platform (siliconflow.com) lists no $0 LLMs and gives $1 in free credits instead",
       "rate_limits": "Fixed per-model limits for free models; generic docs cite ranges of 1,000-10,000 RPM and 50,000-5,000,000 TPM depending on model tier — exact limits shown in-account",
-      "notes": "Signup requires SMS phone verification. Full \"real-name authentication\" (needed for recharging/billing) requires a mainland China, Hong Kong/Macao, or Taiwan ID document — this may limit full access for users without one, though basic use of free models appears reachable with standard account verification",
+      "notes": "Free models live on the China platform and need real-name authentication to use all of them; accepted documents are a mainland ID card, HK/Macao or Taiwan travel permits, HK/Macao/Taiwan residence permits or a Chinese permanent-residence card for foreigners. Signup is by phone number; virtual-carrier numbers are blocked.",
       "best_for": "Permanently-free open models, no trial clock",
       "modalities": ["text", "embeddings"],
       "models_free": null,
       "expires": null,
-      "docs_url": "https://docs.siliconflow.cn/en/userguide/rate-limits/rate-limit-and-upgradation",
+      "docs_url": "https://docs.siliconflow.cn/docs/userguide/faqs/rate-limit-and-upgradation",
       "phone_required": true,
       "card_required": false,
       "commercial_ok": null,
       "openai_compatible": true,
-      "openai_base_url": "https://api.siliconflow.com/v1",
+      "openai_base_url": "https://api.siliconflow.cn/v1",
       "env_key": "SILICONFLOW_API_KEY",
       "verified": true,
-      "last_verified": "2026-08-13"
+      "last_verified": "2026-10-08"
     },
     {
       "slug": "zai-glm",
@@ -210,7 +210,7 @@
       "free_type": "perpetual",
       "free_tier": "GLM-4.5-Flash, GLM-4.7-Flash (text), and GLM-4.6V-Flash (vision) are officially listed as $0 cost (input, cached input, and output) on a permanent basis",
       "rate_limits": "Not specified with concrete RPM/TPM figures in public docs",
-      "notes": "Terms of Use prohibit using the service to \"develop, train, or improve\" competing algorithms or models — otherwise general use, including commercial, isn't restricted",
+      "notes": "Terms of Use prohibit using Z.ai to \"develop, train, or enhance any algorithms, models, or technologies that directly or indirectly compete with us\" — otherwise general use, including commercial, isn't restricted",
       "best_for": "A permanently-free model with no trial clock",
       "modalities": ["text", "vision"],
       "models_free": ["glm-4.7-flash", "glm-4.5-flash", "glm-4.6v-flash"],
@@ -223,7 +223,7 @@
       "openai_base_url": "https://api.z.ai/api/paas/v4/",
       "env_key": "ZAI_API_KEY",
       "verified": true,
-      "last_verified": "2026-08-13"
+      "last_verified": "2026-10-08"
     },
     {
       "slug": "ibm-watsonx",
@@ -245,7 +245,7 @@
       "openai_base_url": "https://us-south.ml.cloud.ibm.com/ml/v1",
       "env_key": "WATSONX_API_KEY",
       "verified": true,
-      "last_verified": "2026-08-13"
+      "last_verified": "2026-10-08"
     },
     {
       "slug": "ovhcloud-ai-endpoints",
@@ -333,17 +333,17 @@
       "openai_base_url": "https://api.tokenfactory.nebius.com/v1",
       "env_key": "NEBIUS_API_KEY",
       "verified": true,
-      "last_verified": "2026-08-13"
+      "last_verified": "2026-10-08"
     },
     {
       "slug": "novita",
       "name": "Novita AI",
       "category": "trial",
       "free_type": "trial-credit",
-      "free_tier": "$100 Sandbox credits, valid for 90 days",
+      "free_tier": "$100 promotional credits valid for 90 days, only for eligible Novita Agent Sandbox usage (CPU, RAM, storage) and granted after an account-setup survey; the pricing page also lists a few LLMs as Free (e.g. Ling 3.1 Flash, Apodex 1.1 Mini)",
       "rate_limits": "Various open-weight models",
-      "notes": "Official signup advertises $100 Sandbox credits valid for 90 days; no credit card required. Novita Terms of Service state that the Site and Marketplace Offerings may not be exploited for any commercial purpose without express prior written permission.",
-      "best_for": "$100 Sandbox credits for trying Model APIs, GPUs, and agent workflows",
+      "notes": "Signup advertises $100 Sandbox credits valid for 90 days; Novita's sandbox pricing doc scopes them to \"eligible Novita Sandbox usage\", not Model API calls. No credit card required. Novita Terms of Service state that the Site and Marketplace Offerings may not be exploited for any commercial purpose without express prior written permission.",
+      "best_for": "$100 credits for Novita Agent Sandbox; a few LLMs priced Free on Model APIs",
       "modalities": ["text"],
       "models_free": null,
       "expires": "90 days",
@@ -355,7 +355,7 @@
       "openai_base_url": "https://api.novita.ai/openai",
       "env_key": "NOVITA_API_KEY",
       "verified": true,
-      "last_verified": "2026-08-10"
+      "last_verified": "2026-10-08"
     },
     {
       "slug": "ai21",
@@ -377,7 +377,7 @@
       "openai_base_url": "https://api.ai21.com/studio/v1",
       "env_key": "AI21_API_KEY",
       "verified": true,
-      "last_verified": "2026-08-03"
+      "last_verified": "2026-10-08"
     },
     {
       "slug": "nlpcloud",
@@ -399,20 +399,20 @@
       "openai_base_url": null,
       "env_key": "NLPCLOUD_API_KEY",
       "verified": true,
-      "last_verified": "2026-08-13"
+      "last_verified": "2026-10-08"
     },
     {
       "slug": "alibaba-model-studio",
       "name": "Alibaba Cloud (Model Studio)",
       "category": "trial",
       "free_type": "trial-credit",
-      "free_tier": "1,000,000 tokens (example figure, varies by model), international/Singapore region only",
+      "free_tier": "Typically 1,000,000 tokens per model for new users, Singapore region (International deployment scope) only",
       "rate_limits": "Qwen open & proprietary models",
-      "notes": "Excludes batch processing, context caching, fine-tuning, and dedicated deployment",
+      "notes": "Covers real-time inference only; excludes batch invocation, fine-tuning, model deployment, custom models, PAI-DSW and OSS fees. Account information must be completed before activation. One quota per account (shared with RAM users); re-registering does not grant a new one.",
       "best_for": "Qwen models with a large free token quota (Singapore region)",
       "modalities": ["text"],
       "models_free": null,
-      "expires": "30-90 days",
+      "expires": "90 days",
       "docs_url": "https://www.alibabacloud.com/help/en/model-studio/new-free-quota",
       "phone_required": null,
       "card_required": false,
@@ -421,7 +421,7 @@
       "openai_base_url": "https://dashscope-intl.aliyuncs.com/compatible-mode/v1",
       "env_key": "DASHSCOPE_API_KEY",
       "verified": true,
-      "last_verified": "2026-08-13"
+      "last_verified": "2026-10-08"
     },
     {
       "slug": "modal",
@@ -430,7 +430,7 @@
       "free_type": "recurring-credit",
       "free_tier": "$30/month recurring credit (Starter plan)",
       "rate_limits": "Starter: 100 containers + 10 GPU concurrency, 5 crons, 1-day log retention",
-      "notes": "Corrected from a previously listed \"$5-30/month\" range; this is a recurring monthly credit, not a one-time trial. Modal is serverless compute you deploy models on, not a hosted model API The full $30/month credit requires adding a payment method (without one the free credit is $5/month).",
+      "notes": "Recurring monthly credit, not a one-time trial. Modal is serverless compute you deploy models on, not a hosted model API. A payment method on file is required to use Modal at all.",
       "best_for": "Self-hosting open models on free monthly GPU credit",
       "modalities": ["text"],
       "models_free": null,
@@ -442,7 +442,7 @@
       "openai_compatible": false,
       "openai_base_url": null,
       "verified": true,
-      "last_verified": "2026-08-13"
+      "last_verified": "2026-10-08"
     },
     {
       "slug": "sambanova",
@@ -451,7 +451,7 @@
       "free_type": "renewing-quota",
       "free_tier": "Rate-limited free tier (applies when no payment method is linked) across all models",
       "rate_limits": "Free Tier: 20 RPM / 20 RPD / 200,000 TPD across all models; Developer Tier (card required): 60-240 RPM depending on model",
-      "notes": "Free Tier applies when no payment method is linked to the account; SambaCloud ToS grants a commercial license (no evaluation-only clause). The previously-listed \"$5 / 3 months\" trial could not be re-confirmed on official pages (2026-07-30).",
+      "notes": "Free Tier applies when no payment method is linked to the account; SambaCloud ToS grants a commercial license (no evaluation-only clause). The previously-listed \"$5 / 3 months\" trial could not be re-confirmed on official pages (2026-07-30). As of 2026-10-08 SambaNova's own pages disagree: the rate-limits doc still describes this no-card Free Tier, while the plans page says to add a payment method and buy credits before the first request. Needs a hands-on signup check.",
       "best_for": "Fast open models on a rate-limited free tier",
       "modalities": ["text"],
       "models_free": ["DeepSeek-V3.1", "Meta-Llama-3.3-70B-Instruct", "gpt-oss-120b"],
@@ -472,11 +472,11 @@
       "category": "trial",
       "free_type": "trial-credit",
       "free_tier": "1,000,000 tokens free + 60 min Whisper transcription; billing starts at token 1,000,001",
-      "rate_limits": "Gemma, Llama, Mistral, Qwen",
-      "notes": "European provider (France). Free allowance is a one-time token bucket, not time-limited. The 1M free tokens need no card; adding a card + passing KYC unlocks the official rate limits.",
+      "rate_limits": "With a validated payment method: 300 RPM / 200k TPM per model; 600 RPM and higher TPM once identity is verified",
+      "notes": "European provider (France). Free allowance is a one-time token bucket, not time-limited. Official rate limits apply once a valid payment method is registered; identity verification raises them.",
       "best_for": "EU-hosted open models with 1M free tokens",
       "modalities": ["text", "audio"],
-      "models_free": ["llama-3.3-70b-instruct", "qwen3-235b-a22b-instruct-2507", "mistral-small-3.2-24b-instruct-2506", "deepseek-r1-distill-llama-70b", "gemma-3-27b-it", "qwen2.5-coder-32b-instruct"],
+      "models_free": ["llama-3.3-70b-instruct", "qwen3-235b-a22b-instruct-2507", "mistral-small-3.2-24b-instruct-2506", "gpt-oss-120b", "gemma-4-26b-a4b-it", "qwen3-coder-30b-a3b-instruct"],
       "expires": null,
       "docs_url": "https://www.scaleway.com/en/pricing/model-as-a-service/",
       "phone_required": null,
@@ -486,7 +486,7 @@
       "openai_base_url": "https://api.scaleway.ai/v1",
       "env_key": "SCALEWAY_API_KEY",
       "verified": true,
-      "last_verified": "2026-08-13"
+      "last_verified": "2026-10-08"
     },
     {
       "slug": "nvidia-nim",
@@ -508,7 +508,7 @@
       "openai_base_url": "https://integrate.api.nvidia.com/v1",
       "env_key": "NVIDIA_API_KEY",
       "verified": true,
-      "last_verified": "2026-08-13"
+      "last_verified": "2026-10-08"
     },
     {
       "slug": "vercel-ai-gateway",
@@ -627,7 +627,7 @@
       "free_type": "trial-credit",
       "free_tier": "One-time $5 credit across serverless models (GPT-OSS-120B, Claude, Llama), vision, embeddings and image generation",
       "rate_limits": "15 requests/second global default (CONN_THROTTLED on exceed)",
-      "notes": "Catch: SMS phone verification is required to claim the $5. Credit is one-time and expires 30 days after grant; a card is required to recharge afterward. Checked ToS (clarifai.com/company/terms, effective 2025-10-01) and billing docs (docs.clarifai.com/control/account-billing/) for commercial/production-use language. No clause restricts the $5 trial credit / Pay-As-You-Go tier to evaluation-only. The 'evaluation purposes only, not for production' language in §7.3 applies specifically to Beta Releases, not this plan. No explicit statement either way, so left null per contribution guidelines.",
+      "notes": "Could not be re-verified on 2026-10-08: docs.clarifai.com no longer resolves and www.clarifai.com does not respond. Nebius has announced that Clarifai's core team joined Nebius and that it licensed Clarifai's inference technology. Treat this entry as likely discontinued. Previously recorded: SMS phone verification to claim a one-time $5 credit that expired 30 days after grant.",
       "best_for": "Multimodal (LLM + vision) models on a $5 credit",
       "modalities": ["text", "vision", "embeddings", "image"],
       "models_free": null,
@@ -639,8 +639,8 @@
       "openai_compatible": true,
       "openai_base_url": "https://api.clarifai.com/v2/ext/openai/v1",
       "env_key": "CLARIFAI_PAT",
-      "verified": true,
-      "last_verified": "2026-08-11"
+      "verified": false,
+      "last_verified": null
     },
     {
       "slug": "arli-ai",
