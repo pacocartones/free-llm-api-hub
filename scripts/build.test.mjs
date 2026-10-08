@@ -264,7 +264,7 @@ test('every page nests the footer columns inside .wrap.footer-top', () => {
   }
 });
 
-test('derived-fingerprints.json pins gitignored outputs, skips site/p/, tracked and git-log files', () => {
+test('derived-fingerprints.json pins gitignored outputs, skips site/p/, site/badges/, tracked and git-log files', () => {
   const fp = join(ROOT, 'derived-fingerprints.json');
   if (!existsSync(fp)) run(['scripts/build.mjs']);
   const pins = JSON.parse(readFileSync(fp, 'utf8'));
@@ -277,6 +277,8 @@ test('derived-fingerprints.json pins gitignored outputs, skips site/p/, tracked 
   }
   assert.equal(Object.keys(pins).some((k) => k.startsWith('site/p/')), false,
     'site/p/ must not be pinned (date-relative)');
+  assert.equal(Object.keys(pins).some((k) => k.startsWith('site/badges/')), false,
+    'site/badges/ must not be pinned (colour tracks verification age)');
   assert.equal(Object.keys(pins).some((k) => k.startsWith('site/og/')), false,
     'site/og/ is tracked and diff-gated directly');
   assert.equal(pins['site/index.html'], undefined,
