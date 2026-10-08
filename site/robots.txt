@@ -2,4 +2,3 @@ User-agent: *
 Allow: /
 
 Sitemap: https://freellmapihub.com/sitemap.xml
-Sitemap: https://freellmapihub.com/sitemap-state.xml

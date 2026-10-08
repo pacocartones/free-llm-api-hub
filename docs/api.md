@@ -19,7 +19,7 @@ What is *not* guaranteed: the order of providers in a list, the exact contents o
 
 Every API object carries `version` and `generated`, copied from `data/providers.json`:
 
-- **`version`** is a [SemVer](https://semver.org/) string for the dataset (its description in the [JSON Schema](../data/schema.json) is "Dataset schema version"). Minor and patch bumps are additive: a new field, a new file, a re-verification release. They stay on `/api/v1/`.
+- **`version`** is the dataset's [SemVer](https://semver.org/) release version, in lockstep with the `vX.Y.Z` Git tag (it is not a separate schema version). Minor and patch bumps are additive: a new field, a new file, a re-verification release. They stay on `/api/v1/`.
 - **A new major `version`** is reserved for a breaking change to the shape, and is the release that introduces the next API path. The API path counts breaking changes to the API; it does not repeat the dataset's major number.
 - **`generated`** is the date of the last dataset change (`YYYY-MM-DD`). Generated files are byte-stable for a given dataset: nothing in them depends on the day the build ran.
 

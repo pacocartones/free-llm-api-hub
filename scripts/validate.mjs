@@ -230,4 +230,4 @@ if (errors.length) {
   process.exit(1);
 }
 
-console.log(`✓ valid — ${data.providers.length} providers (schema v${data.version}) + ${programCount} credit programs.`);
+console.log(`✓ valid — ${data.providers.length} providers (dataset v${data.version}) + ${programCount} credit programs.`);

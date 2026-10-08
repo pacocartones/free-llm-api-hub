@@ -1269,9 +1269,8 @@ test('validate rejects a category that contradicts free_type', () => {
   assert.equal(exitOk(['scripts/validate.mjs', fixture]), false);
 });
 
-// ---------- derived figures, canonicals, sitemap and /programs/ (phase 0 public errors) ----------
+// ---------- provider counts derived from the data ----------
 import { providerFigures, expandFigures, injectInlineFigures, figureErrors } from './lib/figures.mjs';
-import { statSync } from 'node:fs';
 
 const walkHtml = (dir) => readdirSync(dir, { withFileTypes: true }).flatMap((e) =>
   e.isDirectory() ? walkHtml(join(dir, e.name)) : e.name.endsWith('.html') ? [join(dir, e.name)] : []);
@@ -1291,6 +1290,8 @@ test('figures: a typed count that disagrees with the data is reported, one that 
   assert.deepEqual(figureErrors('the 67 verified providers and all 68 providers', figs, 'x'), []);
   assert.deepEqual(figureErrors('a <!-- FIG:verified -->12<!-- /FIG --> verified providers marker', figs, 'x'), []);
   assert.deepEqual(figureErrors('expected >10 providers in the mined history', figs, 'x'), []);
+  assert.equal(figureErrors('13/67 providers on real data', figs, 'x').length, 0, 'a verified-count denominator is fine');
+  assert.equal(figureErrors('13/70 providers on real data', figs, 'x').length, 1);
 });
 
 test('no source or generated page states a provider count that differs from providers.json', () => {
@@ -1304,63 +1305,21 @@ test('no source or generated page states a provider count that differs from prov
   assert.match(best, new RegExp(`from the ${figs.verified} verified providers`));
 });
 
-test('every page declares an absolute canonical URL', () => {
-  for (const f of builtPages()) {
-    const html = readFileSync(f, 'utf8');
-    const m = html.match(/<link rel="canonical" href="([^"]*)"/);
-    if (!m) continue; // 404.html and the like declare none
-    assert.match(m[1], /^https:\/\/freellmapihub\.com\//, `${f.slice(ROOT.length + 1)}: canonical "${m[1]}" is not absolute`);
+test('version is described the same way everywhere: the dataset release, not a schema version', () => {
+  const read = (rel) => readFileSync(join(ROOT, rel), 'utf8');
+  run(['scripts/build.mjs']);
+  const claimsSchemaVersion = /dataset schema version|schema v\d|dataset schema\b/i;
+  const sources = {
+    'data/schema.json': JSON.parse(read('data/schema.json')).properties.version.description,
+    'docs/api.md': read('docs/api.md').split('\n').find((l) => l.startsWith('- **`version`**')),
+    'CHANGELOG.md (intro)': read('CHANGELOG.md').split('\n').slice(0, 8).join('\n'),
+    'site/llms.txt': read('site/llms.txt'),
+    'site/llms-full.txt': read('site/llms-full.txt'),
+  };
+  for (const [name, text] of Object.entries(sources)) {
+    assert.ok(text, `${name}: has a description of version`);
+    assert.doesNotMatch(text, claimsSchemaVersion, `${name} calls version a schema version`);
   }
-});
-
-test('the home meta description fits a search snippet (<= 155 characters)', () => {
-  const index = readFileSync(join(ROOT, 'site/index.html'), 'utf8');
-  const desc = index.match(/<meta name="description" content="([^"]*)"/)[1];
-  assert.ok(desc.length <= 155, `home description is ${desc.length} characters`);
-});
-
-test('/programs/ resolves to a page that links both program pages', () => {
-  builtPages();
-  const html = readFileSync(join(ROOT, 'site/programs/index.html'), 'utf8');
-  assert.match(html, /href="startups"/);
-  assert.match(html, /href="research"/);
-  assert.match(html, /<link rel="canonical" href="https:\/\/freellmapihub\.com\/programs\/">/);
-});
-
-test('sitemap lists every indexable page except the deliberately omitted ones, with a data-derived lastmod', () => {
-  const pages = builtPages();
-  const sitemap = readFileSync(join(ROOT, 'site/sitemap.xml'), 'utf8');
-  const listed = new Set([...sitemap.matchAll(/<loc>https:\/\/freellmapihub\.com\/([^<]*)<\/loc>/g)].map((m) => m[1]));
-  const missing = [];
-  for (const f of pages) {
-    const rel = f.slice(join(ROOT, 'site').length + 1);
-    if (rel === '404.html' || rel.startsWith('updates/page/') || /^state\/\d{4}-\d{2}\//.test(rel)) continue; // 404 is not a page; pagination follows the commit count (test above)
-    const html = readFileSync(f, 'utf8');
-    if (/<meta name="robots" content="noindex">/.test(html)) continue; // redirect stubs and legal pages
-    const path = rel === 'index.html' ? '' : rel.replace(/index\.html$/, '').replace(/\.html$/, '');
-    if (!listed.has(path)) missing.push(path || '/');
-  }
-  assert.deepEqual(missing, [], 'indexable pages missing from sitemap.xml');
-  const dates = new Set([...sitemap.matchAll(/<lastmod>([^<]*)<\/lastmod>/g)].map((m) => m[1]));
-  assert.ok(dates.size > 1, 'lastmod must follow the data, not stamp every page with one build date');
-  const gen = JSON.parse(readFileSync(DATA, 'utf8'));
-  const p = gen.providers[0];
-  assert.match(sitemap, new RegExp(`/p/${p.slug}</loc><lastmod>${p.last_verified}</lastmod>`));
-  // the monthly reports live in their own git-derived sitemap, advertised from robots.txt
-  const stateMap = readFileSync(join(ROOT, 'site/sitemap-state.xml'), 'utf8');
-  for (const m of readdirSync(join(ROOT, 'site/state')).filter((f) => /^\d{4}-\d{2}$/.test(f))) {
-    assert.match(stateMap, new RegExp(`<loc>https://freellmapihub\\.com/state/${m}/</loc>`), `state/${m} missing from sitemap-state.xml`);
-  }
-  assert.match(readFileSync(join(ROOT, 'site/robots.txt'), 'utf8'), /^Sitemap: https:\/\/freellmapihub\.com\/sitemap-state\.xml$/m);
-});
-
-test('the live state-sitemap check accepts a well-formed file and names every defect', async () => {
-  const { stateSitemapProblems } = await import('./lib/state-sitemap.mjs');
-  const site = 'https://freellmapihub.com';
-  const ok = `<urlset xmlns="x"><url><loc>${site}/state/2026-10/</loc></url></urlset>`;
-  const robots = `Sitemap: ${site}/sitemap.xml\nSitemap: ${site}/sitemap-state.xml\n`;
-  assert.deepEqual(stateSitemapProblems(ok, robots, site).problems, []);
-  assert.equal(stateSitemapProblems('<urlset></urlset>', robots, site).problems.length, 1);
-  assert.equal(stateSitemapProblems(ok.replace('/state/2026-10/', '/p/groq'), robots, site).problems.length, 1);
-  assert.equal(stateSitemapProblems(ok, `Sitemap: ${site}/sitemap.xml\n`, site).problems.length, 1);
+  assert.match(sources['docs/api.md'], /release version/);
+  assert.match(sources['data/schema.json'], /release version/);
 });

@@ -29,6 +29,9 @@ const RULES = [
   { re: /\ball (\d+) providers\b/g, key: 'providers', label: 'providers' },
 ];
 
+// "N/M providers": the denominator is a dataset-wide count, so it must be the total or the verified count.
+const RATIO = /\b(\d+)\/(\d+) providers\b/g;
+
 /** Every literal dataset count in `text` that disagrees with `figs`. `where` names the source. */
 export function figureErrors(text, figs, where) {
   const errors = [];
@@ -39,6 +42,11 @@ export function figureErrors(text, figs, where) {
       if (Number(m[1]) !== figs[key]) {
         errors.push(`${where}: says "${m[0]}" but data/providers.json has ${figs[key]} ${label} — use {${key}} or a FIG marker so the build derives it`);
       }
+    }
+  }
+  for (const m of prose.matchAll(RATIO)) {
+    if (Number(m[2]) !== figs.providers && Number(m[2]) !== figs.verified) {
+      errors.push(`${where}: says "${m[0]}" but data/providers.json has ${figs.providers} providers (${figs.verified} verified) — derive the figure or drop it`);
     }
   }
   return errors;

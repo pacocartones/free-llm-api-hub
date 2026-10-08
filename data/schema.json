@@ -10,7 +10,7 @@
     "$schema": { "type": "string" },
     "version": {
       "type": "string",
-      "description": "Dataset schema version (semver).",
+      "description": "Dataset release version (semver), in lockstep with the vX.Y.Z Git tag.",
       "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
     },
     "generated": {

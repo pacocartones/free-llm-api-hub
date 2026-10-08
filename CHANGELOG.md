@@ -1,9 +1,9 @@
 # Changelog
 
-Notable changes to the dataset and the project. Format based on [Keep a Changelog](https://keepachangelog.com/); the project follows [Semantic Versioning](https://semver.org/) for the **dataset schema** (`version` in `data/providers.json`).
+Notable changes to the dataset and the project. Format based on [Keep a Changelog](https://keepachangelog.com/); the project follows [Semantic Versioning](https://semver.org/) for the **dataset release** (`version` in `data/providers.json`, in lockstep with the `vX.Y.Z` tag; it is not a separate schema version).
 
 - **Data changes** (a provider's limits/terms) are recorded here when notable; every change is also visible in the git history of `data/providers.json`.
-- **Schema changes** (a new field, a changed meaning) bump the dataset version and are always recorded.
+- **Shape changes** (a new field, a changed meaning) bump the dataset `version` and are always recorded.
 
 ## [Unreleased]
 

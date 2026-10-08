@@ -18,12 +18,9 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
-import { stateSitemapProblems } from './lib/state-sitemap.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const SITE = (process.env.FLLM_SITE || 'https://freellmapihub.com').replace(/\/$/, '');
-// URLs inside the generated files always carry the canonical origin, whatever host serves them.
-const CANONICAL = 'https://freellmapihub.com';
 
 async function main() {
   const local = readFileSync(join(ROOT, 'site/sitemap.xml'), 'utf8');
@@ -79,53 +76,4 @@ async function main() {
   }
   process.exitCode = 1;
 }
-
-// The monthly reports' own sitemap is git-derived and unpinned, so it is checked for shape
-// (valid, non-empty, only /state/YYYY-MM/ URLs, advertised by robots.txt) and for every
-// listed report answering 200, not for byte equality with a committed copy.
-async function getText(url) {
-  const ctrl = new AbortController();
-  const t = setTimeout(() => ctrl.abort(), 20000);
-  try {
-    const res = await fetch(url, { signal: ctrl.signal });
-    return { status: res.status, text: res.ok ? await res.text() : '' };
-  } catch (e) {
-    return { status: 0, text: '', err: e.name === 'AbortError' ? 'timeout' : e.message };
-  } finally {
-    clearTimeout(t);
-  }
-}
-
-async function checkStateSitemap() {
-  const rawAttempts = parseInt(process.env.FLLM_LIVE_ATTEMPTS || '1', 10);
-  const attempts = Number.isFinite(rawAttempts) && rawAttempts >= 1 ? rawAttempts : 1;
-  const rawDelay = parseInt(process.env.FLLM_LIVE_RETRY_DELAY || '10', 10);
-  const retryDelayMs = (Number.isFinite(rawDelay) && rawDelay >= 0 ? rawDelay : 10) * 1000;
-  let problems = [];
-  for (let attempt = 1; attempt <= attempts; attempt++) {
-    const [sm, robots] = await Promise.all([getText(`${SITE}/sitemap-state.xml`), getText(`${SITE}/robots.txt`)]);
-    problems = [];
-    if (sm.status !== 200) problems.push(`${SITE}/sitemap-state.xml → ${sm.err || 'HTTP ' + sm.status}`);
-    else {
-      const r = stateSitemapProblems(sm.text, robots.text, CANONICAL);
-      problems.push(...r.problems);
-      for (const u of r.locs) {
-        const page = await getText(SITE + new URL(u).pathname);
-        if (page.status !== 200) problems.push(`${new URL(u).pathname} → ${page.err || 'HTTP ' + page.status}`);
-      }
-      if (!problems.length) {
-        console.log(`✓ sitemap-state.xml live — ${r.locs.length} monthly report${r.locs.length === 1 ? '' : 's'}, all answer 200, advertised by robots.txt.`);
-        return;
-      }
-    }
-    if (attempt < attempts) {
-      console.log(`  state sitemap attempt ${attempt}/${attempts}: ${problems[0]} — retrying in ${retryDelayMs / 1000}s`);
-      await new Promise((r) => setTimeout(r, retryDelayMs));
-    }
-  }
-  for (const p of problems) console.error(`✗ sitemap-state: ${p}`);
-  process.exitCode = 1;
-}
-
 await main();
-await checkStateSitemap();

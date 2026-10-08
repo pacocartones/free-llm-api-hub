@@ -95,7 +95,7 @@ only what confirms.
 
 ## Recently shipped
 
-- ✅ `models_free` with an automated live refresh (`scripts/fetch-models.mjs`); 13/67 providers on real `/models` data (OpenRouter, Pollinations, NVIDIA NIM, ModelScope, Ollama Cloud, plus the key-gated Groq/Cerebras/SambaNova/Scaleway when keys are set).
+- ✅ `models_free` with an automated live refresh (`scripts/fetch-models.mjs`); the providers that publish a `/models` list carry it in `models_free` (OpenRouter, Pollinations, NVIDIA NIM, ModelScope, Ollama Cloud, plus the key-gated Groq/Cerebras/SambaNova/Scaleway when keys are set).
 - ✅ Searchable [free model index](https://freellmapihub.com/models/) (`/models/`).
 - ✅ Seven data-generated [SEO guides & collections](https://freellmapihub.com/guides-and-collections/) with editorial top picks + `FAQPage` structured data.
 - ✅ Credit programs split into two standalone pages (startups / students & research).

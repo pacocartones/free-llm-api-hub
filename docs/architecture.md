@@ -38,7 +38,7 @@ data/schema.json       │                              collections/*.md, docs/c
 ## 2. Data model
 
 ### `data/providers.json`
-Top level: `{ $schema, version (semver), generated (YYYY-MM-DD), source, note, providers: [...] }`.
+Top level: `{ $schema, version (semver, the dataset release), generated (YYYY-MM-DD), source, note, providers: [...] }`.
 Schema in `data/schema.json`; validated by `scripts/validate.mjs`. Canonical byte-format enforced by `scripts/_serialize.mjs` (the `ORDER` array). **Field order in the file MUST match `ORDER`** or the serializer self-test fails.
 
 Per-provider fields (in serializer order):
