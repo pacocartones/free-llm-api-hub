@@ -78,7 +78,7 @@
       "is_text_llm": true,
       "model_tier": 4,
       "model_tier_source": {"model":"google/gemma-4-31b-it:free","arena_model":"gemma-4-31b","match":"variant","rating":1452.8,"votes":6133,"boundary":true,"snapshot":"2026-10-02","url":"https://huggingface.co/datasets/lmarena-ai/leaderboard-dataset"},
-      "free_limits": {"requests_per_minute":20,"requests_per_day":50,"scope":"free models, accounts with under 10 credits purchased lifetime (1,000 requests/day once 10+ credits are purchased)","source":"https://openrouter.ai/docs/api-reference/limits","checked":"2026-10-08"},
+      "free_limits": {"requests_per_minute":20,"requests_per_day":50,"scope":"free models, accounts with under 10 credits purchased lifetime (1,000 requests/day once 10+ credits are purchased); table not readable in a plain fetch, figures are those of the entry's own verification","source":"https://openrouter.ai/docs/api-reference/limits","checked":"2026-10-08"},
       "verified": true,
       "last_verified": "2026-10-08"
     },
@@ -276,7 +276,7 @@
       "env_key": "WATSONX_API_KEY",
       "is_text_llm": true,
       "model_tier": null,
-      "free_limits": {"requests_per_second":2,"tokens_per_month":300000,"scope":"Lite plan: 2 inference requests per second; 300,000 tokens per month for foundation model inference","source":"https://www.ibm.com/docs/en/watsonx/saas?topic=cloud-watsonxai-runtime-plans","checked":"2026-10-08"},
+      "free_limits": {"requests_per_second":2,"tokens_per_month":300000,"scope":"Lite plan: 2 inference requests per second; 300,000 tokens per month for foundation model inference; not re-read in a plain fetch, figures are those of the entry's own verification","source":"https://www.ibm.com/docs/en/watsonx/saas?topic=cloud-watsonxai-runtime-plans","checked":"2026-10-08"},
       "verified": true,
       "last_verified": "2026-10-08"
     },
