@@ -701,7 +701,7 @@ test('the client explorer uses the shared row renderer, not its own copy', () =>
 test('the server render and the shared emission use the same row source', () => {
   const build = readFileSync(join(ROOT, 'scripts/build.mjs'), 'utf8');
   assert.match(build, /rows.explorerRowHtml/, 'SSR must call the shared row function');
-  assert.match(build, /freshnessStatus: \$\{freshnessStatus\.toString\(\)\}/, 'shared-rules.js must ship freshnessStatus to the client');
+  assert.match(build, /const freshnessStatus = \$\{freshnessStatus\.toString\(\)\}/, 'shared-rules.js must ship freshnessStatus to the client');
   assert.match(build, /rows\.clientBundle\(\)/, 'build must write the shared-rows bundle from lib/rows.mjs');
   assert.match(build, /site\/shared-rows\.js/, 'build must emit shared-rows.js');
 });
@@ -1038,4 +1038,25 @@ test('the change feed and state reports are built but never pinned in derived-fi
   assert.match(sitemap, /<loc>https:\/\/freellmapihub\.com\/changes\/<\/loc>/);
   assert.match(sitemap, /<loc>https:\/\/freellmapihub\.com\/state\/<\/loc>/);
   assert.doesNotMatch(sitemap, /\/state\/\d{4}-\d{2}\//, 'per-month URLs depend on commit dates, so they stay out of the drift-gated sitemap');
+});
+
+test('shared-rules.js runs on its own: every serialised rule resolves its constants', () => {
+  // freeTypeRank reads FREE_TYPE_RANK and freshnessStatus reads SLA_DAYS by
+  // name. Emitted as bare object properties they were out of scope, so the
+  // client comparator threw on every repaint and the explorer never re-sorted
+  // or filtered. Execute the emitted file with nothing else in scope.
+  run(['scripts/build.mjs']);
+  const win = {};
+  new Function('window', readFileSync(join(ROOT, 'site/shared-rules.js'), 'utf8'))(win);
+  const R = win.FLLM_RULES;
+  assert.equal(R.freeTypeRank({ free_type: 'perpetual' }), 0);
+  assert.equal(R.freeTypeRank({ free_type: 'trial-credit' }), 3);
+  assert.equal(R.freeTypeRank({}), 4);
+  assert.equal(R.freshnessStatus(10), freshnessStatus(10));
+  assert.equal(R.freshnessStatus(SLA_DAYS + 1), 'stale');
+  assert.equal(R.freshnessStatus(DUE_SOON_DAYS + 1), 'due');
+  assert.equal(R.recScore({ card_required: false }), recScore({ card_required: false }));
+  assert.equal(R.SLA_DAYS, SLA_DAYS);
+  assert.equal(R.DUE_SOON_DAYS, DUE_SOON_DAYS);
+  assert.ok(Array.isArray(R.FLAG_PAIRS) && R.FLAG_PAIRS.length > 0);
 });
