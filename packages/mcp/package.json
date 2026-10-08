@@ -1,0 +1,31 @@
+{
+  "name": "free-llm-api-hub-mcp",
+  "version": "0.1.0",
+  "private": true,
+  "description": "MCP server over the free-llm-api-hub dataset: search free-tier LLM API providers, read an entry, and get an OpenAI-client config.",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "free-llm-api-hub-mcp": "src/index.js"
+  },
+  "files": [
+    "src/",
+    "README.md"
+  ],
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "node --test test/tools.test.js test/stdio.test.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pacocartones/free-llm-api-hub",
+    "directory": "packages/mcp"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.32.1",
+    "zod": "4.6.5"
+  }
+}
