@@ -105,6 +105,15 @@ for (const p of data.providers ?? []) {
     check(Array.isArray(p.models_free) && p.models_free.every((m) => typeof m === 'string'), `${id}: models_free must be an array of strings or null`);
   }
 
+  // category follows free_type: a one-time signup balance is a trial; a free
+  // tier that renews (daily/monthly quota, monthly credit) or never runs out
+  // is ongoing. The two fields split the README, the explorer and the
+  // collections, so they must not disagree.
+  if (p.free_type !== undefined && p.category !== undefined) {
+    const expected = p.free_type === 'trial-credit' ? 'trial' : 'ongoing';
+    check(p.category === expected, `${id}: free_type "${p.free_type}" belongs in category "${expected}" (got "${p.category}")`);
+  }
+
   // rate_limits states limits, not models or prices: either a number with a
   // limit unit (RPM, tokens/day, requests/min, concurrency, credits...) or an
   // explicit statement that the provider publishes none. A model list or a

@@ -26,7 +26,7 @@ Three consequences the rest of the project has to honour, or the tri-state is de
 |---|---|---|
 | `slug` | string | Stable, unique, kebab-case identifier. Never renamed or reused — safe to reference externally. |
 | `name` | string | Human-readable provider name. |
-| `category` | `ongoing` \| `trial` | Primary bucket. Splits the README and the explorer. |
+| `category` | `ongoing` \| `trial` | Primary bucket. Splits the README and the explorer. Follows `free_type`: `trial-credit` is `trial`, every renewing or perpetual type is `ongoing` (enforced by `validate.mjs`). |
 | `free_type` | enum | Finer shape of the free access (see below). |
 | `free_tier` | string | What you actually get for free, in concrete terms. |
 | `rate_limits` | string | Published limits — RPM/RPD/TPM/TPD, or an explicit "not published publicly." |

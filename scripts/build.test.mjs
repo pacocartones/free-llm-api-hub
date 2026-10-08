@@ -1235,3 +1235,12 @@ test('pacing: when even the cap cannot keep the SLA, it says so', () => {
   assert.equal(result.capped, true);
   assert.equal(result.size, WEEKLY_CAP);
 });
+
+test('validate rejects a category that contradicts free_type', () => {
+  const data = JSON.parse(readFileSync(DATA, 'utf8'));
+  const p = data.providers.find((x) => x.free_type === 'trial-credit');
+  p.category = 'ongoing';
+  const fixture = join(mkdtempSync(join(tmpdir(), 'flah-')), 'providers.json');
+  writeFileSync(fixture, JSON.stringify(data));
+  assert.equal(exitOk(['scripts/validate.mjs', fixture]), false);
+});

@@ -261,7 +261,7 @@
       "expires": null,
       "docs_url": "https://www.ovhcloud.com/en/public-cloud/ai-endpoints/catalog/",
       "phone_required": null,
-      "card_required": true,
+      "card_required": false,
       "commercial_ok": null,
       "openai_compatible": true,
       "openai_base_url": "https://oai.endpoints.kepler.ai.cloud.ovh.net/v1",
@@ -426,7 +426,7 @@
     {
       "slug": "modal",
       "name": "Modal",
-      "category": "trial",
+      "category": "ongoing",
       "free_type": "recurring-credit",
       "free_tier": "$30/month recurring credit (Starter plan)",
       "rate_limits": "Starter: 100 containers + 10 GPU concurrency, 5 crons, 1-day log retention",
@@ -513,7 +513,7 @@
     {
       "slug": "vercel-ai-gateway",
       "name": "Vercel AI Gateway",
-      "category": "trial",
+      "category": "ongoing",
       "free_type": "recurring-credit",
       "free_tier": "Free tier: $5/month credit covering a subset of models (Free Tier eligible models) at lower rate limits",
       "rate_limits": "No numeric free-tier limit published: the free tier has a lower per-model limit than paid (HTTP 429 when exceeded); Vercel documents behavior, not numbers",
@@ -1437,7 +1437,7 @@
     {
       "slug": "datalab",
       "name": "Datalab (Marker / Surya)",
-      "category": "trial",
+      "category": "ongoing",
       "free_type": "recurring-credit",
       "free_tier": "$20/month (work email) or $10/month (personal email) free usage allowance — OCR in 90+ languages, PDF-to-markdown, tables, forms and structured extraction",
       "rate_limits": "25 requests/min on the free tier; per-page pricing (see datalab.to/pricing)",
