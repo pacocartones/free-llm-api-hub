@@ -25,6 +25,17 @@
       "email": "nandiswarnabha@gmail.com",
       "subject": "fix: show clear button when sort is changed (#183)",
       "login": "Swarnabha753"
+    },
+    {
+      "name": "Manan Bharti",
+      "email": "91620529+mananbharti@users.noreply.github.com",
+      "subject": "test: check serializer ORDER against the provider schema (#201)"
+    },
+    {
+      "name": "Piyush",
+      "email": "jangidpiyush16011@gmail.com",
+      "subject": "data: verify Datalab phone requirement and free-tier rate limit (#198)",
+      "login": "piyusshhjangid"
     }
   ]
 }

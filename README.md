@@ -11,10 +11,13 @@ No hype, no dead links, no "generous limits" hand-waving. Just what's actually f
 
 [![Verify](https://github.com/pacocartones/free-llm-api-hub/actions/workflows/verify.yml/badge.svg)](https://github.com/pacocartones/free-llm-api-hub/actions/workflows/verify.yml)
 [![Freshness](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/pacocartones/free-llm-api-hub/main/badge-freshness.json)](#how-verification-works)
+[![Verified providers](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/pacocartones/free-llm-api-hub/main/badge-verified.json)](docs/methodology.md)
+[![Website](https://img.shields.io/badge/explorer-freellmapihub.com-0b7285.svg)](https://freellmapihub.com/)
 [![Dataset: JSON](https://img.shields.io/badge/dataset-JSON%20%2B%20schema-blue.svg)](data/providers.json)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 [![Contributors](https://img.shields.io/github/contributors/pacocartones/free-llm-api-hub)](https://github.com/pacocartones/free-llm-api-hub/graphs/contributors)
+[![Hacktoberfest](https://img.shields.io/badge/Hacktoberfest-good%20first%20issues-9c4668.svg)](https://github.com/pacocartones/free-llm-api-hub/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22)
 
 **[🔎 Interactive explorer](https://freellmapihub.com/)** &nbsp;·&nbsp; **[📊 Dataset](data/providers.json)** &nbsp;·&nbsp; **[🧪 How we verify](docs/methodology.md)** &nbsp;·&nbsp; **[➕ Add a provider](CONTRIBUTING.md)**
 
@@ -74,7 +77,7 @@ Each pick links to its full verified profile on the live site.
 | **EU / data-sovereignty hosting** | [OVHcloud](https://freellmapihub.com/p/ovhcloud-ai-endpoints) or [Scaleway](https://freellmapihub.com/p/scaleway) | French/EU providers; OVHcloud even has an anonymous, no-account tier |
 | **Free embeddings & rerank** | [Jina AI](https://freellmapihub.com/p/jina-ai) or [Cohere](https://freellmapihub.com/p/cohere) | 10M free tokens (Jina, OpenAI-compatible) or 1,000 calls/mo (Cohere) |
 | **Free speech-to-text / TTS** | [Deepgram](https://freellmapihub.com/p/deepgram) or [AssemblyAI](https://freellmapihub.com/p/assemblyai) | $200 / $50 in no-card credit for Whisper-class STT and TTS |
-| **A bigger one-time credit** | [Deepgram](https://freellmapihub.com/p/deepgram) ($200, speech) or [Baseten](https://freellmapihub.com/p/baseten) ($30, LLMs) | Largest credits in the list |
+| **A bigger one-time credit** | [Deepgram](https://freellmapihub.com/p/deepgram) ($200, speech) or [Novita AI](https://freellmapihub.com/p/novita) ($100 for 90 days, LLMs) | Largest credits in the list |
 | **Something safe to ship commercially** | [Cloudflare Workers AI](https://freellmapihub.com/p/cloudflare-workers-ai) or [Groq](https://freellmapihub.com/p/groq) | Don't restrict the free tier to personal/eval use, the way Cohere and NVIDIA do |
 
 Starting points, not guarantees — read the full profile before you build on it.
@@ -212,7 +215,15 @@ Full guidelines, including what counts as an acceptable source: **[CONTRIBUTING.
 
 ## 🙋 Contributions wanted right now
 
-This dataset is only as good as it is trustworthy, and right now there are `null` fields (= "nobody has confirmed it yet") waiting for a source. Three concrete ways to help, from smallest to biggest: **(1)** grab a [*good first issue*](https://github.com/pacocartones/free-llm-api-hub/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) and confirm **a single fact** about one provider — e.g. *"does Cerebras require a phone?"* — using its official site and today's date; it's a one-line diff in [`data/providers.json`](data/providers.json). **(2)** Tackle the umbrella issue [**confirm `phone_required`** (43 entries)](https://github.com/pacocartones/free-llm-api-hub/issues?q=is%3Aissue+is%3Aopen+label%3Amaintenance+phone_required) by claiming a provider from the checklist. **(3)** Do the same with [**confirm `commercial_ok`** (35 entries)](https://github.com/pacocartones/free-llm-api-hub/issues?q=is%3Aissue+is%3Aopen+label%3Amaintenance+commercial_ok), reading the provider's ToS. The rule is simple and honest: primary source (the provider's own docs) + `last_verified` with a real date, and if you're not sure, leave it `null` and say so. See [CONTRIBUTING.md](CONTRIBUTING.md).
+This dataset is only as good as it is trustworthy, and right now there are `null` fields (= "nobody has confirmed it yet") waiting for a source. Three concrete ways to help, from smallest to biggest:
+
+1. Grab a [*good first issue*](https://github.com/pacocartones/free-llm-api-hub/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) and confirm **a single fact** about one provider (e.g. *"does Cerebras require a phone?"*) from its official site, with today's date. It's a one-line diff in [`data/providers.json`](data/providers.json).
+2. Pick a provider from the umbrella issue [**confirm `phone_required`**](https://github.com/pacocartones/free-llm-api-hub/issues/7).
+3. Do the same for [**confirm `commercial_ok`**](https://github.com/pacocartones/free-llm-api-hub/issues/8), reading the provider's terms.
+
+The rule is simple and honest: primary source (the provider's own docs) + `last_verified` with a real date, and if you're not sure, leave it `null` and say so. Comment on an issue to claim it and a maintainer will assign it to you.
+
+**Hacktoberfest:** this repository takes part. Merged pull requests are labelled `hacktoberfest-accepted`. One sourced fact beats ten cosmetic edits; see [CONTRIBUTING.md](CONTRIBUTING.md#hacktoberfest).
 
 ## Contributors
 
@@ -224,6 +235,8 @@ Thanks to everyone who has verified an entry, fixed a link, or improved the proj
 - [MikeGatsby](https://github.com/MikeGatsby) — data: verify Datalab hosted-API commercial-use terms (no explicit statement found) ([PR #117](https://github.com/pacocartones/free-llm-api-hub/pull/117))
 - [bcabreraike-cmyk](https://github.com/bcabreraike-cmyk) — docs: explain paced re-verification batches ([PR #169](https://github.com/pacocartones/free-llm-api-hub/pull/169))
 - [Swarnabha Nandi](https://github.com/Swarnabha753) — fix: show clear button when sort is changed ([PR #183](https://github.com/pacocartones/free-llm-api-hub/pull/183))
+- [Manan Bharti](https://github.com/mananbharti) — test: check serializer ORDER against the provider schema ([PR #201](https://github.com/pacocartones/free-llm-api-hub/pull/201))
+- [Piyush](https://github.com/piyusshhjangid) — data: verify Datalab phone requirement and free-tier rate limit ([PR #198](https://github.com/pacocartones/free-llm-api-hub/pull/198))
 <!-- AUTOGEN:contributors:end -->
 
 ## Project docs

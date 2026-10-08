@@ -78,13 +78,25 @@ The smallest useful contribution: many entries carry `null` in `card_required`, 
 
 Data PRs are the common case, but scripts and site changes are welcome too. Start with **[docs/architecture.md](docs/architecture.md)** — it maps the pipeline, what each script does, and the two-places rule (the homepage is hand-written; everything else is generated). The checks a code PR must pass: `npm test` (data integrity + internal links) and, if you touched anything the build consumes, `npm run check` (build idempotency + drift).
 
+## Claiming an issue
+
+Comment on the issue to say you're taking it and a maintainer will assign it to you. If you can't continue, just say so in a comment; that's completely fine, and it frees the issue for someone else. An assigned issue with no activity for two weeks may be offered to another contributor, after a ping.
+
+We aim to answer new issues and pull requests within two days.
+
+## Hacktoberfest
+
+This repository takes part in Hacktoberfest. Merged pull requests get the `hacktoberfest-accepted` label. The [good first issues](https://github.com/pacocartones/free-llm-api-hub/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) are the best place to start: most are one sourced fact about one provider.
+
+What gets merged is what makes the data more accurate: a field confirmed from the provider's own docs, a stale number corrected, a dead link fixed with its replacement. Pull requests that only reword text, reformat files or add unsourced claims will be closed, and so will pull requests opened without reading the issue they claim to fix.
+
 ## What happens next
 
 A maintainer re-checks the source link and the claim, then merges. Once your first PR merges, you are credited in the README [Contributors](README.md#contributors) section (a maintainer refreshes it from git history) — there is nothing extra for you to do. See [GOVERNANCE.md](GOVERNANCE.md) for how decisions are made and [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) for community norms. By contributing you agree to license your contribution under the repository's [MIT License](LICENSE).
 
 ### Your first PR from a fork: the checks may wait
 
-GitHub holds workflow runs from a **first-time contributor** until a maintainer approves them (a safety default for code from new accounts). If your PR shows no checks, or the required "Dataset integrity" check stays grey at *Expected — Waiting for approval*, that's normal and says nothing about your change. Just leave a comment on your PR (e.g. "Could you approve the checks?") and a maintainer will approve the run. This only happens on the very first PR from your account.
+GitHub holds workflow runs from a **first-time contributor** until a maintainer approves them (a safety default for code from new accounts). Until your first pull request here is merged, **every push** to it waits for that approval. If your PR shows no checks, or the required "Dataset integrity" check stays grey at *Expected — Waiting for approval*, that's normal and says nothing about your change. Leave a comment on your PR (e.g. "Could you approve the checks?") and a maintainer will approve the run. Once your first PR is merged, your later PRs run straight away.
 
 ## Maintainer notes
 

@@ -2,21 +2,28 @@
 
 ## What changed
 
-<!-- e.g. "Update Groq daily limit"; "Add Acme Inference"; "Mark Cohere re-verified" -->
+<!-- e.g. "Update Groq daily limit"; "Add Acme Inference"; "Confirm phone_required for Cerebras"; "Add copy buttons to /api/" -->
 
-## Source
+Closes #
 
-<!-- Link to the provider's OWN official docs confirming this change. Third-party summaries don't count. -->
+## Source (data changes)
+
+<!-- Link to the provider's OWN official docs confirming this change, and the date you checked. Third-party summaries don't count. Delete this section for code or docs changes. -->
+
+## How I tested it (code or docs changes)
+
+<!-- Commands you ran and what you checked. Delete this section for data-only changes. -->
 
 ## Checklist
 
-- [ ] I edited **`data/providers.json`** and nothing else.
-- [ ] I ran `npm test` and the dataset validation passed.
-- [ ] For a verified change, I set `verified: true` **with** a `last_verified` date (today) **and** a real `docs_url`.
-- [ ] For anything I couldn't confirm against the provider's own docs, I left it `verified: false` and explained what's unconfirmed.
+- [ ] I ran `npm test` and it passed.
+- [ ] I ran `npm run build` (and `npm run og` if the OG check asked for it) and committed the regenerated files.
+- [ ] **Data changes:** I edited `data/providers.json` by hand and nothing generated from it.
+- [ ] **Data changes:** for a verified change, I set `verified: true` **with** a `last_verified` date (the day I checked) **and** a real `docs_url`.
+- [ ] **Data changes:** anything I couldn't confirm against the provider's own docs stays `null` or `verified: false`, with a note saying what's unconfirmed.
 
 <!--
-Please run `npm run build` (and `npm run og` if the OG check flags drift) and commit
-the regenerated files together with the data change — there is no regeneration bot,
-and the required "Dataset integrity" check fails until the derived files are in sync.
+There is no regeneration bot: the required "Dataset integrity" check fails until the
+derived files are in sync with the data. If it says files are out of sync, run
+`npm run build`, commit, and push again.
 -->

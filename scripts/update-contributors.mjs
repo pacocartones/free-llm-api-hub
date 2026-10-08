@@ -23,10 +23,12 @@ const BOT_AUTHORS = new Set(['github-actions[bot]', 'dependabot[bot]', 'coderabb
 // address (the profile URL can't be derived from it). Keyed by author email.
 const LOGIN_OVERRIDES = {
   'nandiswarnabha@gmail.com': 'Swarnabha753',
+  'jangidpiyush16011@gmail.com': 'piyusshhjangid',
 };
 const MAINTAINER_EMAILS = new Set([
   'manusanchezhl@gmail.com',
   '253313177+pacocartones@users.noreply.github.com',
+  'leonaniagomez@gmail.com',
 ]);
 
 // Mine from origin/main when available so unmerged local commits are excluded;
