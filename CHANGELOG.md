@@ -8,6 +8,23 @@ Notable changes to the dataset and the project. Format based on [Keep a Changelo
 ## [Unreleased]
 
 ### Data
+- **Re-verification — 2026-10-08, 24 providers.** Every entry last verified in early or mid-August was re-checked against the provider's own pages, ahead of the 2026-11-12 cliff.
+  - **Corrected:**
+    - Groq: `llama-3.1-8b-instant` and `llama-3.3-70b-versatile` are now Enterprise / Contact Sales.
+    - Cerebras and OpenRouter: retired models dropped from the samples.
+    - Google Gemini: free-tier numbers are no longer in the public docs.
+    - Mistral: Free-mode training is opt-out, not opt-in.
+    - Hugging Face: no Inference Providers credit on the Free plan.
+    - SiliconFlow: the $0 models are on the China platform and need real-name verification; new `docs_url` and base URL.
+    - Novita AI: the $100 credit is for Agent Sandbox usage.
+    - Alibaba Model Studio: 90-day quota.
+    - Modal: a payment method is required.
+    - Scaleway: published rate limits.
+  - **Confirmed:** Cloudflare Workers AI, OVHcloud AI Endpoints, Fireworks AI, Baseten, Cohere, IBM watsonx.ai, Nebius, AI21 Labs, NLP Cloud, NVIDIA NIM and Z.ai.
+  - **Not re-dated:** SambaNova, whose own pages disagree on whether the free tier needs a card.
+  - **Marked unverified:** Clarifai, whose docs domain no longer resolves.
+  - [#197](https://github.com/pacocartones/free-llm-api-hub/pull/197), [#205](https://github.com/pacocartones/free-llm-api-hub/pull/205)
+- **Datalab:** `phone_required` confirmed `false`; free-tier rate limit corrected to 25 requests/min. Thanks @piyusshhjangid. [#198](https://github.com/pacocartones/free-llm-api-hub/pull/198)
 - **Attribute enrichment — batch 2 (flags + base URLs).** Resolved 13 more `card_required` nulls (12 need no card — SiliconFlow, Z.ai, Scaleway, Moondream, Sarvam, Gladia, Tencent Hunyuan, Contextual AI, LMNT, Rev AI, Poolside, Smallest.ai; Retell AI captures a card at signup per its Stripe case study) and closed the `openai_base_url` gap for OpenAI-compatible providers (Cohere `api.cohere.ai/compatibility/v1`, IBM watsonx `us-south.ml.cloud.ibm.com/ml/v1`, Novita `api.novita.ai/openai`). `card_required` gap 16 → 3 (Baseten, Arli AI, Camb.ai — card policy not stated on current pricing pages).
 - **Attribute enrichment — batch 1 (tri-state flags).** Resolved five `openai_compatible` nulls (Mistral and AI21 are OpenAI-compatible, with `openai_base_url` added; Speechify, Gladia and Rime are first-party REST APIs) and five `card_required` nulls (Mistral, NVIDIA NIM, Unreal Speech and Cartesia need no card; Modal's full $30/month credit requires a payment method, so `card_required: true` with a clarifying note). `card_required` gap 21 → 16; `openai_compatible` gap 5 → 0.
 - **Paced re-verification — batch 2026-08-14.** The 6 oldest providers re-checked against their own docs: Vercel AI Gateway (the $5/month free credit is now stated in the docs, and BYOK is not available on the free tier), Jina AI (embeddings now v5), and Deepgram, AssemblyAI, Mixedbread and Arli AI re-confirmed unchanged. `last_verified` moved to 2026-08-14. [#151](https://github.com/pacocartones/free-llm-api-hub/pull/151)
@@ -18,6 +35,9 @@ Notable changes to the dataset and the project. Format based on [Keep a Changelo
 - **Paced re-verification — batch 6 (2026-08-14).** The next 6 oldest providers (Fish Audio, Camb.ai, Rev AI, Unstructured, Nutrient, Photoroom) re-checked against their own docs: all six already matched (no drift), only `last_verified` moved to 2026-08-14. Nutrient's Data Extraction API free tier was double-checked against its dedicated pricing page (5,000 credits/month, no card — unchanged).
 - **Paced re-verification — batch 7 (2026-08-14).** Poolside's free access is now described as "free for a limited time" (not perpetual) and the free models are Laguna M.1 (225B) and Laguna XS.2 (33B, open-weights) — the entry moved ongoing→trial and `free_type` perpetual→trial-credit. Upstage's $10 signup credit is gone: the API is now paid prepaid (commitment tiers from $100/mo) with Solar Pro 4 free as a limited-time promo and 10 free Studio agent runs. Voicegain gained its documented rate limits (4 concurrent requests or 4 hours of audio/hour). Veryfi, Smallest.ai and Retell AI confirmed unchanged. This closes the October re-verification cliff.
 
+### Fixed
+- **Required check no longer fails by date.** `derived-fingerprints.json` pinned the per-provider badges, whose colour depends on the age of the verification. Any pull request built on a later day than main's last regeneration therefore failed, whatever it changed. The badges are now excluded like `site/p/`, and checked directly by a test. [#202](https://github.com/pacocartones/free-llm-api-hub/pull/202)
+
 ### Changed
 - **CodeQL is now weekly-only.** The broad static scan moved from every PR/push to a Monday schedule (plus manual dispatch), cutting the biggest single slice of per-PR Actions minutes. The per-change security signal stays: the explorer XSS regression suite gates every PR inside `verify.yml`.
 - **Model-sample backfill degraded to local on-demand.** `backfill.yml` (the last scheduled job) is deleted: `models_free` is refreshed with `npm run models -- --write` locally, then `npm run build && npm run og && npm test` and PR'd like every other change. This removes the weekly Actions minutes and the `BACKFILL_PR_TOKEN` requirement entirely.
@@ -26,6 +46,7 @@ Notable changes to the dataset and the project. Format based on [Keep a Changelo
 - **Fingerprint gate excludes self-referential files.** `updates.html`, `feed.xml` and `api/v1/history.json` are derived from `git log`, so their bytes change on every squash-merge; they are no longer part of `derived-fingerprints.json`, which removes the post-merge pin-refresh chore. [#154](https://github.com/pacocartones/free-llm-api-hub/pull/154)
 
 ### Added
+- **Serializer/schema drift test.** `ORDER` in `_serialize.mjs` must match the provider properties in `data/schema.json`. Thanks @mananbharti. [#201](https://github.com/pacocartones/free-llm-api-hub/pull/201)
 - **Quickstart on every provider page.** Non-OpenAI-compatible providers now ship a copyable curl + Python skeleton (Bearer auth, with the endpoint path left to the official docs) alongside the existing OpenAI-SDK quickstart that OpenAI-compatible providers already had.
 - **"Recently re-verified" panel on the explorer homepage.** The 10 providers re-checked most recently (by `last_verified`) are surfaced server-rendered on the homepage, each linking to its full per-field change history. Deterministic by design — the per-field diff itself lives on `/updates` and `api/v1/history.json` (git-mined, regenerated on deploy), since a git-mined inline list would be self-referential and could never pass the drift gate.
 - **Auto-tag on dataset version bump.** `tag-release.yml` creates the annotated `vX.Y.Z` tag when `data/providers.json` advances (idempotent no-op if the tag already exists), so "pin a snapshot" for programmatic consumers stops depending on a human remembering to tag.
@@ -35,6 +56,7 @@ Notable changes to the dataset and the project. Format based on [Keep a Changelo
 - **`/api/v1/best.json`.** The editorial top 20 is now served as static, machine-readable JSON (rank + the "why" per pick + each pick's full verified profile), alongside the existing `/best/` page.
 
 ### Docs
+- **Contributor guide for Hacktoberfest.** How to claim an issue, what gets merged, a PR template that fits code and data, and the real first-time-contributor CI approval policy. [#203](https://github.com/pacocartones/free-llm-api-hub/pull/203), [#204](https://github.com/pacocartones/free-llm-api-hub/pull/204)
 - **SECURITY.md automation table** now lists the five workflows — including the weekly `backfill.yml` (`contents: write` / `pull-requests: write` over an `automated-backfill/*` branch + PR) — instead of claiming "no write-capable automation". [#152](https://github.com/pacocartones/free-llm-api-hub/pull/152)
 - **README restructured around the editorial top 20.** The two full provider tables (all 69) are replaced by a single top-20 table driven by [`data/best.json`](data/best.json), extended from 10 to 20 picks. The full dataset stays one link away through the explorer and JSON API; the README drops from ~50 KB to ~28 KB.
 
