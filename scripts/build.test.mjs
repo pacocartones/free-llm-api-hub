@@ -279,6 +279,12 @@ test('every page nests the footer columns inside .wrap.footer-top', () => {
   }
 });
 
+test('sitemap.xml lists no paginated updates pages (their count follows the commit count)', () => {
+  const sitemap = readFileSync(join(ROOT, 'site/sitemap.xml'), 'utf8');
+  assert.match(sitemap, /<loc>https:\/\/freellmapihub\.com\/updates<\/loc>/);
+  assert.doesNotMatch(sitemap, /\/updates\/page\//, 'a page count tied to git history would make the drift-gated sitemap change on every merge');
+});
+
 test('derived-fingerprints.json pins gitignored outputs, skips site/p/, site/badges/, tracked and git-log files', () => {
   const fp = join(ROOT, 'derived-fingerprints.json');
   if (!existsSync(fp)) run(['scripts/build.mjs']);

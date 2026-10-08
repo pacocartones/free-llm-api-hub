@@ -1523,7 +1523,10 @@ const sitemapUrls = [
   `${SITE}/programs/startups`,
   `${SITE}/programs/research`,
   ...GUIDES.map((g) => `${SITE}/guides/${g.slug}`),
-  ...(commits.length ? Array.from({ length: Math.ceil(commits.length / UPDATES_PER_PAGE) }, (_, i) => i === 0 ? `${SITE}/updates` : `${SITE}/updates/page/${i + 1}/`) : []),
+  // Only the first updates page: the number of /updates/page/N/ pages follows
+  // the commit count, so listing them made the drift-gated sitemap change with
+  // every merge, whatever the PR touched. Crawlers reach them via pagination.
+  ...(commits.length ? [`${SITE}/updates`] : []),
   ...COLLECTIONS.map((c) => `${SITE}/collections/${c.slug}`),
   ...providers.map((p) => `${SITE}/p/${p.slug}`),
 ];
