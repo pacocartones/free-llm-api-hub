@@ -1,0 +1,37 @@
+name: 🐛 Site or API bug
+description: Something on the website, the explorer, the compare view or the /api/v1 files is broken.
+title: "[bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        For a wrong or outdated provider entry, use the "Report an outdated or incorrect entry" form instead.
+  - type: input
+    id: where
+    attributes:
+      label: Where does it happen?
+      description: The page URL or the API path.
+      placeholder: "e.g. https://… or /api/v1/providers.json"
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What happens, and what did you expect?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: "1. Open …  2. Click …  3. See …"
+    validations:
+      required: false
+  - type: input
+    id: env
+    attributes:
+      label: Browser or client
+      placeholder: "e.g. Firefox 131, curl 8.9"
+    validations:
+      required: false

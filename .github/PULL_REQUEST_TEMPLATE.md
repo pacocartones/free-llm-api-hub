@@ -21,6 +21,7 @@ Closes #
 - [ ] **Data changes:** I edited `data/providers.json` by hand and nothing generated from it.
 - [ ] **Data changes:** for a verified change, I set `verified: true` **with** a `last_verified` date (the day I checked) **and** a real `docs_url`.
 - [ ] **Data changes:** anything I couldn't confirm against the provider's own docs stays `null` or `verified: false`, with a note saying what's unconfirmed.
+- [ ] (Optional) I used AI tools for part of this change, and I have read and tested it myself.
 
 <!--
 There is no regeneration bot: the required "Dataset integrity" check fails until the

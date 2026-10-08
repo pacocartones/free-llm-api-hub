@@ -82,11 +82,32 @@ Data PRs are the common case, but scripts and site changes are welcome too. Star
 
 Comment on the issue to say you're taking it and a maintainer will assign it to you. If you can't continue, just say so in a comment; that's completely fine, and it frees the issue for someone else. An assigned issue with no activity for two weeks may be offered to another contributor, after a ping.
 
-We aim to answer new issues and pull requests within two days.
+We reply to every new issue, pull request and "can I take this?" comment within 24 hours, usually the same day. A reply is a real answer (a review, a question or an assignment), not an acknowledgement.
+
+## Good first issues
+
+An issue carries the `good first issue` label only if all of these hold:
+
+1. **No third-party account or payment.** The answer comes from public pages. (This is why `phone_required` questions are not good first issues: most providers don't document it, and answering needs a sign-up. They live in the [#7](https://github.com/pacocartones/free-llm-api-hub/issues/7) checklist instead.)
+2. **One or two files**, named in the issue.
+3. **A named check** that must pass, for example `npm run build && npm test`, or `npm run check` for `data/` changes.
+4. **Under about two hours** for someone new to the repository.
+5. **Unclaimed:** no assignee and no open pull request linked to it.
+6. **Reviewed by a maintainer in the last 30 days.**
+
+We keep 8 to 12 of them open at a time. When one closes, the next comes from the [#7](https://github.com/pacocartones/free-llm-api-hub/issues/7) and [#8](https://github.com/pacocartones/free-llm-api-hub/issues/8) checklists or from the weekly re-verification batch. If the provider's docs don't answer the question, that is a useful result too: say so in the issue with the link and the date, and the field stays `null`.
+
+## Using AI
+
+AI-assisted contributions are welcome. Please read [AI_POLICY.md](AI_POLICY.md): understand and test your change, check facts at their source, and own what you submit. Saying you used AI is optional and never counts against you. We also maintain this project with AI agents under human oversight; a human maintainer reviews every merge.
+
+## Review
+
+A human maintainer reviews and is responsible for every merge. Automated review comments (CodeRabbit) are advisory: a person makes the call, and you don't need to reply to the bot. We resolve every review conversation, from people or bots, before merging, either by changing the code or by noting why not.
 
 ## Hacktoberfest
 
-This repository takes part in Hacktoberfest. Merged pull requests get the `hacktoberfest-accepted` label. The [good first issues](https://github.com/pacocartones/free-llm-api-hub/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) are the best place to start: most are one sourced fact about one provider.
+This repository takes part in Hacktoberfest. Merged pull requests get the `hacktoberfest-accepted` label. The [good first issues](https://github.com/pacocartones/free-llm-api-hub/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) are the best place to start (see [Good first issues](#good-first-issues) for what qualifies).
 
 What gets merged is what makes the data more accurate: a field confirmed from the provider's own docs, a stale number corrected, a dead link fixed with its replacement. Pull requests that only reword text, reformat files or add unsourced claims will be closed, and so will pull requests opened without reading the issue they claim to fix.
 

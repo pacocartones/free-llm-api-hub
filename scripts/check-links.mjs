@@ -11,7 +11,7 @@ import { dirname, join, resolve } from 'node:path';
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 
 const files = [
-  'README.md', 'CONTRIBUTING.md', 'GOVERNANCE.md', 'SECURITY.md', 'CODE_OF_CONDUCT.md', 'CHANGELOG.md',
+  'README.md', 'CONTRIBUTING.md', 'AI_POLICY.md', 'GOVERNANCE.md', 'SECURITY.md', 'CODE_OF_CONDUCT.md', 'CHANGELOG.md',
   ...readdirSync(join(ROOT, 'docs')).filter((f) => f.endsWith('.md')).map((f) => `docs/${f}`),
   ...readdirSync(join(ROOT, 'collections')).filter((f) => f.endsWith('.md')).map((f) => `collections/${f}`),
 ];

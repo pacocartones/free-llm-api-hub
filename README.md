@@ -213,6 +213,10 @@ Found an outdated limit, a dead link, or a provider that belongs here? You'll ke
 
 Full guidelines, including what counts as an acceptable source: **[CONTRIBUTING.md](CONTRIBUTING.md)**.
 
+### AI-assisted contributions are welcome
+
+Use AI tools if they help you — we do too. We ask for good judgement: understand and test what you send, and check every fact at its source. See [AI_POLICY.md](AI_POLICY.md).
+
 ## 🙋 Contributions wanted right now
 
 This dataset is only as good as it is trustworthy, and right now there are `null` fields (= "nobody has confirmed it yet") waiting for a source. Three concrete ways to help, from smallest to biggest:
@@ -250,6 +254,7 @@ Thanks to everyone who has verified an entry, fixed a link, or improved the proj
 | [Self-hosting on free compute](docs/self-hosting-on-free-compute.md) | Adjacent: free GPU/compute when no hosted API fits |
 | [Credit programs (apply to get)](docs/credit-programs.md) | Adjacent: startup & student/research credit programs |
 | [Roadmap](docs/roadmap.md) | Where this is going next |
+| [AI policy](AI_POLICY.md) | AI-assisted contributions are welcome; what we ask in return |
 | [Changelog](CHANGELOG.md) | What changed, when |
 | [Governance](GOVERNANCE.md) | How decisions get made |
 | [Security](SECURITY.md) · [Code of Conduct](CODE_OF_CONDUCT.md) | Reporting & community norms |
