@@ -14,6 +14,7 @@ import addFormats from 'ajv-formats';
 import { bestPickErrors } from './lib/best.mjs';
 import { providerFigures, figureErrors } from './lib/figures.mjs';
 import { tierForRating, nearBoundary, MODEL_TIER_MIN_VOTES } from './lib/model-tier.mjs';
+import { editorialErrors } from './lib/score.mjs';
 import { readdirSync } from 'node:fs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -248,6 +249,11 @@ try {
     ...readdirSync(join(ROOT, 'docs')).filter((f) => f.endsWith('.md')).map((f) => 'docs/' + f)];
   for (const rel of sources) errors.push(...figureErrors(readFileSync(join(ROOT, rel), 'utf8'), figs, rel));
 }
+
+// ---------- editorial ratings (data/editorial.json) ----------
+try {
+  errors.push(...editorialErrors(JSON.parse(readFileSync(join(ROOT, 'data/editorial.json'), 'utf8')), data.providers));
+} catch (e) { errors.push('editorial.json: ' + e.message); }
 
 if (errors.length) {
   console.error(`✗ validation failed (${errors.length} issue${errors.length > 1 ? 's' : ''}):`);
