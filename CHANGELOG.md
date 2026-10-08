@@ -7,6 +7,17 @@ Notable changes to the dataset and the project. Format based on [Keep a Changelo
 
 ## [Unreleased]
 
+### Removed
+- **LMNT** (`lmnt`): lmnt.com now says "LMNT has shut down" and the docs URL no longer resolves (checked 2026-10-08). Removed under the inclusion criteria: an entry leaves when the provider ends free access entirely.
+
+### Data
+- **Re-verification — batch 3B (2026-10-08).** Jina AI, Mixedbread, Ollama Cloud, ModelScope, OCR.space, LlamaParse, Nanonets, Moondream, Nutrient and Photoroom were re-checked against their own pages. Corrections:
+  - Ollama Cloud's free plan is now credit-based with a monthly reset. The 5-hour and weekly limits are gone.
+  - ModelScope's free calls are now paid in daily "Magicubes".
+  - OCR.space's Engine 3 quota is now 1,000 a month.
+  - Moondream publishes 2 requests per second.
+  - Nutrient has a new docs URL.
+
 ## [2.9.1] — 2026-10-08
 
 Dataset snapshot: 24 providers re-verified against their own docs, and the date-dependent CI failure fixed. No schema change.

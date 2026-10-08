@@ -1,7 +1,7 @@
 {
   "probed_at": "2026-08-02",
   "auth_only": true,
-  "count": 64,
+  "count": 63,
   "results": [
     {
       "slug": "google-gemini",
@@ -300,12 +300,6 @@
     {
       "slug": "cartesia",
       "env_key": "CARTESIA_API_KEY",
-      "key_present": false,
-      "status": "skipped-no-key"
-    },
-    {
-      "slug": "lmnt",
-      "env_key": "LMNT_API_KEY",
       "key_present": false,
       "status": "skipped-no-key"
     },

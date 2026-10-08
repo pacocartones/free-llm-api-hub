@@ -538,7 +538,7 @@
       "category": "trial",
       "free_type": "trial-credit",
       "free_tier": "10M free tokens (one-time) across all models — embeddings, rerankers, classifier; plus a keyless Reader (r.jina.ai) for basic use",
-      "rate_limits": "Free key: 100 RPM / 100k TPM for embeddings & reranker (2 concurrent); keyless Reader 20 RPM",
+      "rate_limits": "Free key: 100 RPM / 100k TPM for embeddings & reranker; Reader 20 RPM keyless, 500 RPM with a free key",
       "notes": "The 10M-token balance is a one-time grant that does not replenish; the keyless Reader is genuinely ongoing. Hosted API is commercial-OK and data is not used for training. No card required.",
       "best_for": "Free embeddings & rerank behind an OpenAI-compatible endpoint",
       "modalities": ["text", "image", "embeddings", "rerank"],
@@ -552,7 +552,7 @@
       "openai_base_url": "https://api.jina.ai/v1",
       "env_key": "JINA_API_KEY",
       "verified": true,
-      "last_verified": "2026-08-14"
+      "last_verified": "2026-10-08"
     },
     {
       "slug": "deepgram",
@@ -618,7 +618,7 @@
       "openai_base_url": null,
       "env_key": "MIXEDBREAD_API_KEY",
       "verified": true,
-      "last_verified": "2026-08-14"
+      "last_verified": "2026-10-08"
     },
     {
       "slug": "clarifai",
@@ -669,12 +669,12 @@
       "name": "Ollama Cloud",
       "category": "ongoing",
       "free_type": "renewing-quota",
-      "free_tier": "$0 Free plan: access to cloud-hosted open models (Qwen, GPT-OSS, DeepSeek, etc.) via API",
-      "rate_limits": "Session limits reset every 5 hours and weekly limits every 7 days; 1 concurrent cloud model on the free plan (exact token caps not published)",
-      "notes": "First-party — Ollama hosts the cloud models. Requires an ollama.com account + API key (`ollama signin`); the free plan is for light usage, Pro ($20/mo) raises limits. No card required.",
+      "free_tier": "$0 Free plan: starter amount of cloud usage credits, limited to a smaller set of starter models; buying credits unlocks all cloud models",
+      "rate_limits": "1 concurrent request on the free plan; included usage resets monthly from signup date (dollar amount of starter credits not published)",
+      "notes": "First-party — Ollama hosts the cloud models. Requires an ollama.com account + API key. The old 5-hour session / weekly limits are gone: usage is now credit-based with a monthly reset; Pro ($20/mo) includes $60 of credits. Prompts/responses are not logged or trained on. Card requirement not stated on the pricing page.",
       "best_for": "Cloud-hosted open models with the Ollama workflow, no card",
       "modalities": ["text", "vision"],
-      "models_free": ["deepseek-v4-flash:0731", "deepseek-v4-flash:preview", "deepseek-v4-pro:preview", "gemma4:31b", "glm-5.1", "glm-5.2", "gpt-oss:120b", "gpt-oss:20b"],
+      "models_free": null,
       "expires": null,
       "docs_url": "https://docs.ollama.com/cloud",
       "phone_required": false,
@@ -684,7 +684,7 @@
       "openai_base_url": "https://ollama.com/v1",
       "env_key": "OLLAMA_API_KEY",
       "verified": true,
-      "last_verified": "2026-08-14"
+      "last_verified": "2026-10-08"
     },
     {
       "slug": "ai-horde",
@@ -712,10 +712,10 @@
       "name": "ModelScope (API-Inference)",
       "category": "ongoing",
       "free_type": "renewing-quota",
-      "free_tier": "~2,000 free API calls/day across open-weight models (Qwen3, DeepSeek, GLM, Llama, etc.) via API-Inference",
-      "rate_limits": "~2,000 calls/day; concurrency/QPS caps applied and dynamically adjusted",
+      "free_tier": "Free API-Inference calls paid with daily 'Magicubes': 200/day for signing in + 50/day after linking an Alibaba Cloud account (do not roll over); calls cost ~0.5 / 1 / 2 Magicubes for lightweight / standard / flagship models",
+      "rate_limits": "Bounded by ~250 Magicubes/day (~125-500 calls depending on model tier); concurrency dynamically limited, single concurrency guaranteed",
       "notes": "Alibaba's model hub — a different product from Alibaba Model Studio. Requires a ModelScope account bound to an Alibaba Cloud account with real-name (ID) verification — a practical barrier for non-China users. Explicitly non-commercial (\"for developers to experience\"). No card.",
-      "best_for": "Free daily calls to many open models (real-name verification required)",
+      "best_for": "Free daily calls to many open models (Alibaba Cloud real-name verification required)",
       "modalities": ["text", "vision"],
       "models_free": ["MedAIBase/AntAngelMed", "MiniMax/MiniMax-M1-80k", "MusePublic/Qwen-Image-Edit", "OpenGVLab/InternVL3_5-241B-A28B", "PaddlePaddle/ERNIE-4.5-0.3B-PT", "Qwen/Qwen-Image-Edit", "Shanghai_AI_Laboratory/Intern-S1", "Tencent-Hunyuan/Hy3"],
       "expires": null,
@@ -727,7 +727,7 @@
       "openai_base_url": "https://api-inference.modelscope.cn/v1",
       "env_key": "MODELSCOPE_API_KEY",
       "verified": true,
-      "last_verified": "2026-08-14"
+      "last_verified": "2026-10-08"
     },
     {
       "slug": "pollinations",
@@ -821,7 +821,7 @@
       "name": "OCR.space",
       "category": "ongoing",
       "free_type": "renewing-quota",
-      "free_tier": "25,000 conversions/month (Engine 1 & 2) plus 2,500 Engine 3 conversions/month; max 1 MB file, PDFs up to 3 pages",
+      "free_tier": "25,000 conversions/month (Engine 1 & 2) plus 1,000 Engine 3 conversions/month; max 1 MB file, PDFs up to 3 pages",
       "rate_limits": "500 requests per day per IP address",
       "notes": "Free searchable-PDF output carries a watermark (raw text extraction is unrestricted); the free key needs only an email, no card. Commercial use permitted.",
       "best_for": "Classic free OCR (25k conversions/mo, no card)",
@@ -836,14 +836,14 @@
       "openai_base_url": null,
       "env_key": "OCRSPACE_API_KEY",
       "verified": true,
-      "last_verified": "2026-08-14"
+      "last_verified": "2026-10-08"
     },
     {
       "slug": "llamaparse",
       "name": "LlamaParse (LlamaCloud)",
       "category": "ongoing",
       "free_type": "renewing-quota",
-      "free_tier": "Free plan: 10,000 credits/month (~10,000 pages in balanced parse mode at 1 credit/page)",
+      "free_tier": "Free plan: 10,000 credits/month (up to ~10,000 pages at the cheapest parse tier, as low as 1 credit/page)",
       "rate_limits": "5 concurrent jobs; 1 project; 5 indexes on the free plan",
       "notes": "Credit-based (1,000 credits = $1.25); premium parse modes consume more credits per page. No card required. Document parsing for RAG (LlamaIndex).",
       "best_for": "Free document parsing for RAG (~10k pages/mo)",
@@ -858,7 +858,7 @@
       "openai_base_url": null,
       "env_key": "LLAMACLOUD_API_KEY",
       "verified": true,
-      "last_verified": "2026-08-14"
+      "last_verified": "2026-10-08"
     },
     {
       "slug": "nanonets",
@@ -866,7 +866,7 @@
       "category": "trial",
       "free_type": "trial-credit",
       "free_tier": "$50 in free credits on signup (one-time) across data-extraction / OCR workflows",
-      "rate_limits": "Up to 3 users on the free credit",
+      "rate_limits": "Not published by the provider",
       "notes": "One-time signup credit, not renewing (credits never expire); no credit card required to start. Paid plans start at $100/month afterwards.",
       "best_for": "Document extraction on a $50 no-card credit",
       "modalities": ["ocr", "text"],
@@ -880,7 +880,7 @@
       "openai_base_url": null,
       "env_key": "NANONETS_API_KEY",
       "verified": true,
-      "last_verified": "2026-08-14"
+      "last_verified": "2026-10-08"
     },
     {
       "slug": "moondream",
@@ -888,8 +888,8 @@
       "category": "ongoing",
       "free_type": "recurring-credit",
       "free_tier": "$5/month usage credits in every workspace (Free plan) for the Moondream vision model — caption, query (VQA), detect, point",
-      "rate_limits": "Bounded by the $5/month credit",
-      "notes": "Recurring $5/month credit, no credit card required (stated on the pricing page/blog). Commercial terms not specified. OpenAI-compatible endpoint.",
+      "rate_limits": "2 requests/sec on the free tier (10 req/sec with ≥$10 account balance); usage bounded by the $5/month credit",
+      "notes": "Recurring $5/month credit, no credit card required. Data is not used for training. Commercial terms for the hosted API not specified. OpenAI-compatible endpoint.",
       "best_for": "Tiny vision model, OpenAI-compatible, monthly free credit",
       "modalities": ["vision"],
       "models_free": null,
@@ -902,7 +902,7 @@
       "openai_base_url": "https://api.moondream.ai/v1",
       "env_key": "MOONDREAM_API_KEY",
       "verified": true,
-      "last_verified": "2026-08-14"
+      "last_verified": "2026-10-08"
     },
     {
       "slug": "speechmatics",
@@ -1169,28 +1169,6 @@
       "added": "2026-07-31"
     },
     {
-      "slug": "lmnt",
-      "name": "LMNT",
-      "category": "ongoing",
-      "free_type": "renewing-quota",
-      "free_tier": "15,000 characters/month of TTS, with unlimited voice clones",
-      "rate_limits": "15,000 characters/month",
-      "notes": "Commercial use is not included on the free tier (the paid Indie plan and above add a commercial licence). Real-time streaming speech API.",
-      "best_for": "Free real-time TTS with unlimited voice cloning",
-      "modalities": ["audio"],
-      "models_free": null,
-      "expires": null,
-      "docs_url": "https://www.lmnt.com/pricing",
-      "phone_required": null,
-      "card_required": false,
-      "commercial_ok": false,
-      "openai_compatible": false,
-      "env_key": "LMNT_API_KEY",
-      "verified": true,
-      "last_verified": "2026-08-14",
-      "added": "2026-07-31"
-    },
-    {
       "slug": "fish-audio",
       "name": "Fish Audio",
       "category": "ongoing",
@@ -1284,20 +1262,20 @@
       "category": "ongoing",
       "free_type": "renewing-quota",
       "free_tier": "5,000 credits/month (renews; no rollover) — ~5,000 text-parse pages, fewer for OCR-heavy 'Understand'/'Agentic' parsing (9-18 credits/page)",
-      "rate_limits": "5,000 credits/month; per-page cost varies by parse mode (1-18 credits)",
+      "rate_limits": "5,000 credits/month; Parse costs 1-18 credits/page by mode (Extract 7-24)",
       "notes": "No credit card required. Formerly PSPDFKit. Extraction/OCR with tables, key-value and handwriting. Commercial terms not stated on the pricing page.",
       "best_for": "Document data extraction with a genuinely renewing free monthly quota",
       "modalities": ["ocr"],
       "models_free": null,
       "expires": null,
-      "docs_url": "https://www.nutrient.io/api/pricing/",
+      "docs_url": "https://www.nutrient.io/api/pricing/data-extraction-api/",
       "phone_required": null,
       "card_required": false,
       "commercial_ok": null,
       "openai_compatible": false,
       "env_key": "NUTRIENT_API_KEY",
       "verified": true,
-      "last_verified": "2026-08-14",
+      "last_verified": "2026-10-08",
       "added": "2026-07-31"
     },
     {
@@ -1319,7 +1297,7 @@
       "openai_compatible": false,
       "env_key": "PHOTOROOM_API_KEY",
       "verified": true,
-      "last_verified": "2026-08-14",
+      "last_verified": "2026-10-08",
       "added": "2026-07-31"
     },
     {
