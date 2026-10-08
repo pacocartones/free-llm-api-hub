@@ -9,7 +9,7 @@ import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
-import { roundTripError } from './_serialize.mjs';
+import { ORDER, roundTripError } from './_serialize.mjs';
 import { freshnessBadge, freshnessColor, freshnessStatus, recScore, SLA_DAYS, DUE_SOON_DAYS } from './lib/rules.mjs';
 import { esc, stripTags } from './lib/escape.mjs';
 import { mineProviderHistory, assertHistoryPlausible } from './lib/history.mjs';
@@ -31,6 +31,17 @@ const exitOk = (args) => {
 
 test('serializer round-trips data/providers.json byte-exactly', () => {
   assert.equal(roundTripError(readFileSync(DATA, 'utf8')), null);
+});
+
+test('serializer ORDER matches the JSON Schema provider properties', () => {
+  const schema = JSON.parse(readFileSync(join(ROOT, 'data/schema.json'), 'utf8'));
+  const providerKeys = Object.keys(schema.$defs.provider.properties);
+
+  assert.deepEqual(
+    [...ORDER].sort(),
+    providerKeys.sort(),
+    'serializer ORDER and provider schema properties must stay in sync',
+  );
 });
 
 test('validate passes on the real dataset', () => {
@@ -264,7 +275,7 @@ test('every page nests the footer columns inside .wrap.footer-top', () => {
   }
 });
 
-test('derived-fingerprints.json pins gitignored outputs, skips site/p/, tracked and git-log files', () => {
+test('derived-fingerprints.json pins gitignored outputs, skips site/p/, site/badges/, tracked and git-log files', () => {
   const fp = join(ROOT, 'derived-fingerprints.json');
   if (!existsSync(fp)) run(['scripts/build.mjs']);
   const pins = JSON.parse(readFileSync(fp, 'utf8'));
@@ -277,10 +288,30 @@ test('derived-fingerprints.json pins gitignored outputs, skips site/p/, tracked 
   }
   assert.equal(Object.keys(pins).some((k) => k.startsWith('site/p/')), false,
     'site/p/ must not be pinned (date-relative)');
+  assert.equal(Object.keys(pins).some((k) => k.startsWith('site/badges/')), false,
+    'site/badges/ must not be pinned (colour tracks verification age)');
   assert.equal(Object.keys(pins).some((k) => k.startsWith('site/og/')), false,
     'site/og/ is tracked and diff-gated directly');
   assert.equal(pins['site/index.html'], undefined,
     'tracked regenerated files are gated by git diff, not the fingerprint');
+});
+
+// site/badges/ is outside the fingerprint (its colour tracks verification age),
+// so check the files directly: one shields.io endpoint per provider, no strays,
+// and a message that states the verification date the dataset records.
+test('per-provider badges exist for every provider and match the dataset', () => {
+  const dir = join(ROOT, 'site/badges');
+  if (!existsSync(dir)) run(['scripts/build.mjs']);
+  const { providers } = JSON.parse(readFileSync(DATA, 'utf8'));
+  const files = readdirSync(dir).filter((f) => f.endsWith('.json')).sort();
+  assert.deepEqual(files, providers.map((p) => p.slug + '.json').sort(), 'one badge per provider, no strays');
+  for (const p of providers) {
+    const b = JSON.parse(readFileSync(join(dir, p.slug + '.json'), 'utf8'));
+    assert.equal(b.schemaVersion, 1, p.slug);
+    assert.equal(b.label, 'free-llm-api-hub', p.slug);
+    assert.equal(b.message, p.verified ? 'verified ' + p.last_verified : 'unverified', p.slug);
+    assert.ok(['brightgreen', 'yellow', 'red'].includes(b.color), p.slug + ': unexpected colour ' + b.color);
+  }
 });
 // ---------- the git-mined provider history must be alive ----------
 // A silent regression in the history miner (e.g. the Buffer-vs-utf8-string
