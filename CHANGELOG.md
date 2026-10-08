@@ -7,6 +7,10 @@ Notable changes to the dataset and the project. Format based on [Keep a Changelo
 
 ## [Unreleased]
 
+## [2.9.1] — 2026-10-08
+
+Dataset snapshot: 24 providers re-verified against their own docs, and the date-dependent CI failure fixed. No schema change.
+
 ### Data
 - **Re-verification — 2026-10-08, 24 providers.** Every entry last verified in early or mid-August was re-checked against the provider's own pages, ahead of the 2026-11-12 cliff.
   - **Corrected:**
