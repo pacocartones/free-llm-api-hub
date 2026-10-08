@@ -297,7 +297,7 @@ const GUIDES = [
     pick: 'unstructured',
     faq: [
       { q: 'Is there a free OCR API?', a: 'Yes — OCR.space, Unstructured, Nutrient and LlamaParse all offer free OCR / document parsing, several with thousands of pages a month.' },
-      { q: 'What’s the best free API to parse PDFs for RAG?', a: 'Unstructured and LlamaParse are built specifically to turn documents into clean, chunked text for RAG, both on a renewing monthly free tier.' },
+      { q: 'What’s the best free API to parse PDFs for RAG?', a: 'Unstructured (10,000 free pages to start) and LlamaParse (10,000 credits a month) are built specifically to turn documents into clean, chunked text for RAG.' },
       { q: 'Can free OCR handle tables and handwriting?', a: 'Some do — providers such as Nutrient extract tables, key-values and handwriting. Check each provider page for the exact free-tier capabilities.' },
     ],
   },

@@ -530,7 +530,7 @@
       "openai_base_url": "https://ai-gateway.vercel.sh/v1",
       "env_key": "VERCEL_AI_GATEWAY_KEY",
       "verified": true,
-      "last_verified": "2026-08-14"
+      "last_verified": "2026-10-08"
     },
     {
       "slug": "jina-ai",
@@ -799,7 +799,7 @@
       "name": "Twelve Labs (Marengo Embed)",
       "category": "ongoing",
       "free_type": "renewing-quota",
-      "free_tier": "Free plan: the Marengo Embed API for all input types (video, audio, image, text) at no cost, plus ~600 min indexing",
+      "free_tier": "Free plan: the Marengo 3.5 Embed API (video, audio, image, text and document inputs) and the Pegasus Analyze API at no cost, plus 600 minutes (10 hours) of video indexing in total",
       "rate_limits": "Embed video/audio: 3,000 RPD, 25 RPM; embed text/image: 3,000 RPD, 600 RPM",
       "notes": "No credit card for the Free plan, but indexed data expires after 90 days unless upgraded. Marengo produces multimodal embeddings. Not OpenAI-compatible.",
       "best_for": "Free multimodal (video/audio/image/text) embeddings",
@@ -814,7 +814,7 @@
       "openai_base_url": null,
       "env_key": "TWELVELABS_API_KEY",
       "verified": true,
-      "last_verified": "2026-08-14"
+      "last_verified": "2026-10-08"
     },
     {
       "slug": "ocr-space",
@@ -976,7 +976,7 @@
       "category": "ongoing",
       "free_type": "renewing-quota",
       "free_tier": "250,000 characters/month TTS (~6 hours of audio)",
-      "rate_limits": "Tiered endpoints for different text lengths; specific caps not documented",
+      "rate_limits": "No rate limit published in the current V8 API docs (legacy v7 docs listed 2 requests/second on Free). Per-request size: /stream up to 1,000 characters, /speech up to 3,000, /synthesisTasks up to 500,000",
       "notes": "Commercial use allowed, but free-plan users must attribute Unreal Speech with a link when publishing audio. First-party REST endpoints. No credit card required.",
       "best_for": "Largest free TTS (250k chars/mo, attribution)",
       "modalities": ["audio"],
@@ -990,7 +990,7 @@
       "openai_base_url": null,
       "env_key": "UNREALSPEECH_API_KEY",
       "verified": true,
-      "last_verified": "2026-08-14"
+      "last_verified": "2026-10-08"
     },
     {
       "slug": "elevenlabs",
@@ -1085,9 +1085,9 @@
       "name": "Tencent Hunyuan",
       "category": "trial",
       "free_type": "trial-credit",
-      "free_tier": "1,000,000 free tokens for Hunyuan text LLMs (hunyuan-a13b, turbos, translation & vision models), plus a separate 1,000,000-token allotment for hunyuan-embedding",
-      "rate_limits": "Not published; bounded by the token package",
-      "notes": "Free resource package valid 1 year from activation; unused tokens expire. Tencent Cloud generally requires mainland-China real-name ID verification to activate — a practical barrier for non-China users. Hunyuan is gradually migrating to TokenHub (the legacy platform is no longer adding new models). Commercial-use terms not stated on the free-quota page.",
+      "free_tier": "One-time free package on first activation: 1,000,000 tokens shared across Hunyuan text/vision models (Hunyuan-a13b, Hunyuan-role-latest, Hunyuan-translation, Hunyuan-translation-lite, Tencent HY Vision 1.5 Instruct, Hunyuan-turbos-vision, Hunyuan-t1-vision, Hunyuan-turbos-vision-video), plus a separate 1,000,000 tokens for Hunyuan-embedding",
+      "rate_limits": "ChatCompletions (Tencent Cloud API): default 5 concurrent requests per account; GetEmbedding: 5 requests/second; most other Hunyuan APIs 20 requests/second",
+      "notes": "Free resource package valid 1 year from activation; unused tokens expire, and it does not roll into pay-as-you-go automatically. Activation requires Tencent Cloud real-name verification (enterprise or personal) — a practical barrier for many non-China users. Tencent says Hunyuan is migrating to TokenHub: the legacy platform will add no new models and stops supporting new model-service purchases; the legacy ChatCompletions API is marked pre-offline with expected shutdown 2026-12-21 (the OpenAI-compatible endpoint is the documented alternative). Whether new activations still receive the free package after the migration is not stated. Commercial-use terms not stated on the free-quota page.",
       "best_for": "Chinese-language LLM workloads via an OpenAI-compatible endpoint",
       "modalities": ["text", "vision", "embeddings"],
       "models_free": null,
@@ -1107,9 +1107,9 @@
       "name": "Voyage AI",
       "category": "trial",
       "free_type": "trial-credit",
-      "free_tier": "200M free tokens on current embedding models (voyage-4-large, voyage-4, voyage-4-lite, voyage-context-4, voyage-code-4) and on rerankers (rerank-2.5 family); voyage-multimodal-3.5 and voyage-multimodal-3 get 200M text tokens + 150B pixels — a large one-time complimentary allotment per model",
-      "rate_limits": "No numeric limit published for accounts without a payment method. With a payment method (Tier 1, free tokens still apply), per model: voyage-4 / voyage-code-4 8M TPM, 2,000 RPM; voyage-4-large / voyage-context-4 3M TPM, 2,000 RPM; voyage-4-lite 16M TPM, 2,000 RPM; voyage-multimodal-3.5 2M TPM, 2,000 RPM; rerank-2.5 2M TPM, 2,000 RPM; rerank-2.5-lite 4M TPM, 2,000 RPM. HTTP 429 on exceed",
-      "notes": "The allotment is a one-time complimentary balance per model, not a renewing monthly quota. No credit card required to claim. Owned by MongoDB — a first-party model provider, not a proxy.",
+      "free_tier": "200M free tokens per model on current embedding models (voyage-4-large, voyage-4, voyage-4-lite, voyage-context-4, voyage-code-4) and on the rerankers listed in the price table (rerank-3, rerank-3-lite); voyage-multimodal-3.5 and voyage-multimodal-3 get 200M text tokens + 150B pixels; legacy voyage-finance-2, voyage-law-2 and voyage-code-2 get 50M — a one-time complimentary allotment per account",
+      "rate_limits": "No numeric limit published for accounts without a payment method. With a payment method (Tier 1, free tokens still apply), per model: voyage-4 / voyage-code-4 8M TPM, 2,000 RPM; voyage-4-large / voyage-context-4 3M TPM, 2,000 RPM; voyage-4-lite 16M TPM, 2,000 RPM; voyage-multimodal-3.5 2M TPM, 2,000 RPM; rerank-3 / rerank-2.5 2M TPM, 2,000 RPM; rerank-3-lite / rerank-2.5-lite 4M TPM, 2,000 RPM. HTTP 429 on exceed",
+      "notes": "The allotment is a one-time complimentary balance per model, not a renewing monthly quota. Free tokens do not apply to Batch API usage. Voyage's pricing page is internally inconsistent on rerankers: the prose still names the rerank-2.5/rerank-2 families as free, while the price table gives 200M free tokens to rerank-3 and rerank-3-lite and lists rerank-2.5 under older models with no free tokens. No credit card required to claim. Owned by MongoDB — a first-party model provider, not a proxy.",
       "best_for": "Best-in-class embeddings and reranking with a large free allotment",
       "modalities": ["text", "image", "embeddings", "rerank"],
       "models_free": null,
@@ -1121,7 +1121,7 @@
       "openai_compatible": false,
       "env_key": "VOYAGE_API_KEY",
       "verified": true,
-      "last_verified": "2026-08-14",
+      "last_verified": "2026-10-08",
       "added": "2026-07-31"
     },
     {
@@ -1237,12 +1237,12 @@
     {
       "slug": "unstructured",
       "name": "Unstructured",
-      "category": "ongoing",
-      "free_type": "renewing-quota",
-      "free_tier": "15,000 pages/month, resets monthly — document parsing/OCR across 50+ file types (layout, tables, generative OCR enrichment)",
-      "rate_limits": "15,000 pages/month",
-      "notes": "No credit card required. Purpose-built to turn documents into clean, structured input for RAG/LLM pipelines. Commercial terms not stated on the pricing page.",
-      "best_for": "Turning messy documents into LLM-ready structured data, free every month",
+      "category": "trial",
+      "free_type": "trial-credit",
+      "free_tier": "10,000 free pages once per account — document parsing/OCR across 50+ file types (layout, tables, generative OCR enrichment); then $0.015/page pay-as-you-go",
+      "rate_limits": "Local-file jobs: at least 1 second between job launches, max 5 jobs running at once, max 10 files of 50 MB each per job; free allotment 10,000 pages in total",
+      "notes": "No credit card required. The free pages are a one-time credit per account (not monthly); after 10,000 pages, processing requests fail until you upgrade to Pay-As-You-Go. Purpose-built to turn documents into clean, structured input for RAG/LLM pipelines. Commercial terms not stated on the pricing page.",
+      "best_for": "Turning messy documents into LLM-ready structured data (10,000 free pages to start)",
       "modalities": ["ocr"],
       "models_free": null,
       "expires": null,
@@ -1253,7 +1253,7 @@
       "openai_compatible": false,
       "env_key": "UNSTRUCTURED_API_KEY",
       "verified": true,
-      "last_verified": "2026-08-14",
+      "last_verified": "2026-10-08",
       "added": "2026-07-31"
     },
     {
@@ -1328,9 +1328,9 @@
       "name": "Upstage",
       "category": "trial",
       "free_type": "trial-credit",
-      "free_tier": "Solar Pro 4 is free for a limited time (promo); otherwise the API is paid prepaid (commitment tiers from $100/mo) — Solar LLM (chat + embeddings) plus Document Parse / OCR / information extraction; Studio agents include 10 free runs",
-      "rate_limits": "Document Parse billed $0.01/page (+$0.03 for extract); Tier 1 rate limits apply on prepaid tiers",
-      "notes": "The former $10 signup credit no longer appears on the pricing page (now prepaid commitment tiers from $100/mo). No card needed for the limited-time free model or the 10 free Studio runs; a separate institutional grant (up to 1 year of free Solar + Document Parse) exists for eligible organizations only.",
+      "free_tier": "$10 free credit on sign-up (per Upstage's Getting Started docs) for the API — Solar LLM (chat + embeddings) plus Document Parse / OCR / information extraction; Studio document agents include 10 free runs each",
+      "rate_limits": "Tier 0 (below the Explore commitment tier): Solar Pro 4 100 RPM / 250,000 TPM; Solar Mini 4 100 RPM / 50,000 TPM; Embeddings 100 RPM / 300,000 TPM; Document OCR 3 requests/second, 500 pages/minute",
+      "notes": "The Solar Pro 4 free window (2026-08-05 to 2026-08-11) has ended; it is now $0.30 input / $1.20 output per 1M tokens (Playground chat stays free to try). Beyond the signup credit, API use is pay-per-use, with prepaid commitment tiers from $100/mo adding bonus credit and higher limits. Studio agent runs need no card. A separate institutional grant (up to 1 year of free Solar Pro + Document Parse) exists for eligible schools, hospitals and nonprofits only. Solar Pro 2/3 and Solar Mini are deprecated on 2026-10-30 (KST).",
       "best_for": "Solar LLM + document OCR behind one OpenAI-compatible key",
       "modalities": ["text", "ocr", "embeddings"],
       "models_free": null,
@@ -1343,7 +1343,7 @@
       "openai_base_url": "https://api.upstage.ai/v1",
       "env_key": "UPSTAGE_API_KEY",
       "verified": true,
-      "last_verified": "2026-08-14",
+      "last_verified": "2026-10-08",
       "added": "2026-07-31"
     },
     {
@@ -1365,7 +1365,7 @@
       "openai_compatible": false,
       "env_key": "VERYFI_API_KEY",
       "verified": true,
-      "last_verified": "2026-08-14",
+      "last_verified": "2026-10-08",
       "added": "2026-07-31"
     },
     {
@@ -1374,20 +1374,20 @@
       "category": "trial",
       "free_type": "trial-credit",
       "free_tier": "$50 in free credits on signup (no credit card) — speech-to-text",
-      "rate_limits": "Bounded by the $50 credit; pay-as-you-go afterward (4 concurrent requests or 4 hours of audio/hour)",
-      "notes": "No credit card required to start — an explicit $50 developer credit. Commercial terms not stated on the pricing page. Native STT REST API.",
+      "rate_limits": "Default for new accounts: 75 API requests/minute and 2,000/hour; 4 concurrent real-time ASR requests; OFF-LINE transcription up to 4 hours of audio per hour (queue of 10 jobs)",
+      "notes": "No credit card required to start — an explicit $50 platform credit on signup; afterwards cloud STT is billed at $0.00020/second of audio (6-second minimum per request). Commercial terms not stated on the pricing page. Native STT REST API. The former /pricing URL now redirects to /developers.",
       "best_for": "Largest no-card speech-to-text credit ($50)",
       "modalities": ["audio"],
       "models_free": null,
       "expires": null,
-      "docs_url": "https://www.voicegain.ai/pricing",
+      "docs_url": "https://www.voicegain.ai/developers",
       "phone_required": null,
       "card_required": false,
       "commercial_ok": null,
       "openai_compatible": false,
       "env_key": "VOICEGAIN_API_KEY",
       "verified": true,
-      "last_verified": "2026-08-14",
+      "last_verified": "2026-10-08",
       "added": "2026-07-31"
     },
     {
@@ -1459,16 +1459,16 @@
     {
       "slug": "wandb-inference",
       "name": "W&B Inference",
-      "category": "ongoing",
-      "free_type": "recurring-credit",
-      "free_tier": "$100/month of Serverless Inference credits on the Free plan (default spending cap; offer for a limited time)",
-      "rate_limits": "No RPM/TPM published; default cap of $100/month on the Free tier; concurrency limits per project/user",
-      "notes": "Serverless Inference credits come with Free, Pro and Academic plans for a limited time; when credits run out, Free accounts must activate pay-as-you-go on the Billing tab or upgrade. OpenAI-compatible endpoint at api.inference.wandb.ai/v1 with any W&B API key.",
+      "category": "trial",
+      "free_type": "trial-credit",
+      "free_tier": "Serverless Inference credits on the Free plan \"for a limited time\" (amount not published); Free accounts have a default spending cap of $100/month",
+      "rate_limits": "No RPM/TPM published; per-project and per-user concurrency limits (HTTP 429 when exceeded); default spending cap $100/month on the Free tier",
+      "notes": "W&B Inference is now documented as CoreWeave Forge Serverless Inference (docs.wandb.ai redirects to docs.coreweave.com). The $100/month figure is a default spending cap, not a stated free-credit amount. When credits run out, Free accounts must activate pay-as-you-go on the Billing tab or upgrade; CoreWeave requires prepayment for paid access. Available only from supported geographic locations. OpenAI-compatible endpoint at api.inference.wandb.ai/v1; API keys are created at forge.coreweave.com. The pricing page lists \"$5/mo free credit for a limited time\" only under Pro and \"Billed monthly\" under Free, so the Free amount is unclear.",
       "best_for": "Open-weight frontier models (DeepSeek, Llama, Qwen, GLM, GPT-OSS) behind one unified API with Weave tracing",
       "modalities": ["text", "vision"],
-      "models_free": ["deepseek-ai/DeepSeek-V4-Flash", "meta-llama/Llama-3.3-70B-Instruct", "meta-llama/Llama-3.1-8B-Instruct", "MiniMaxAI/MiniMax-M3", "openai/gpt-oss-120b", "openai/gpt-oss-20b", "zai-org/GLM-5.2", "google/gemma-4-31B-it", "nvidia/NVIDIA-Nemotron-3-Ultra-550B-A55B"],
+      "models_free": ["deepseek-ai/DeepSeek-V4.1-Flash", "deepseek-ai/DeepSeek-V4-Flash-0731", "meta-llama/Llama-3.3-70B-Instruct", "meta-llama/Llama-3.1-8B-Instruct", "MiniMaxAI/MiniMax-M3", "openai/gpt-oss-120b", "openai/gpt-oss-20b", "zai-org/GLM-5.2", "google/gemma-4-31B-it", "nvidia/NVIDIA-Nemotron-3-Ultra-550B-A55B"],
       "expires": null,
-      "docs_url": "https://docs.wandb.ai/inference/usage-limits",
+      "docs_url": "https://docs.coreweave.com/products/inference/serverless/usage-limits",
       "phone_required": null,
       "card_required": false,
       "commercial_ok": true,
@@ -1476,7 +1476,7 @@
       "openai_base_url": "https://api.inference.wandb.ai/v1",
       "env_key": "WANDB_API_KEY",
       "verified": true,
-      "last_verified": "2026-08-14"
+      "last_verified": "2026-10-08"
     },
     {
       "slug": "typhoon",
@@ -1484,7 +1484,7 @@
       "category": "ongoing",
       "free_type": "perpetual",
       "free_tier": "Free to use research showcase API — all Typhoon models at $0",
-      "rate_limits": "typhoon-asr-realtime: 100 reqs/minute (documented on the ASR page); LLM/OCR models: no published quotas (beta service)",
+      "rate_limits": "typhoon-v2.5-30b-a3b-instruct: 5 requests/second, 200 requests/minute; typhoon-ocr and typhoon-ocr-preview: 2 requests/second, 20 requests/minute; typhoon-asr-realtime: 100 requests/minute",
       "notes": "By SCB 10X, the venture arm of Siam Commercial Bank, focused on Thai-language models. The free catalog spans LLMs (typhoon-v2.5-30b-a3b-instruct), OCR (typhoon-ocr family) and realtime Thai ASR (typhoon-asr-realtime, typhoon-isan-asr-realtime) — the hosted API is OpenAI-compatible, including audio transcriptions. Beta, provided as-is with no formal support; usage data is collected to improve the model; SCB claims no rights in outputs. Sign up for a free API key at opentyphoon.ai.",
       "best_for": "Thai-language LLMs, OCR and speech via an OpenAI-compatible research API",
       "modalities": ["text", "audio"],
@@ -1498,7 +1498,7 @@
       "openai_base_url": "https://api.opentyphoon.ai/v1",
       "env_key": "TYPHOON_API_KEY",
       "verified": true,
-      "last_verified": "2026-08-14"
+      "last_verified": "2026-10-08"
     }
   ]
 }
