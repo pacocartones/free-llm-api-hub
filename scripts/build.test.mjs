@@ -284,6 +284,24 @@ test('derived-fingerprints.json pins gitignored outputs, skips site/p/, site/bad
   assert.equal(pins['site/index.html'], undefined,
     'tracked regenerated files are gated by git diff, not the fingerprint');
 });
+
+// site/badges/ is outside the fingerprint (its colour tracks verification age),
+// so check the files directly: one shields.io endpoint per provider, no strays,
+// and a message that states the verification date the dataset records.
+test('per-provider badges exist for every provider and match the dataset', () => {
+  const dir = join(ROOT, 'site/badges');
+  if (!existsSync(dir)) run(['scripts/build.mjs']);
+  const { providers } = JSON.parse(readFileSync(DATA, 'utf8'));
+  const files = readdirSync(dir).filter((f) => f.endsWith('.json')).sort();
+  assert.deepEqual(files, providers.map((p) => p.slug + '.json').sort(), 'one badge per provider, no strays');
+  for (const p of providers) {
+    const b = JSON.parse(readFileSync(join(dir, p.slug + '.json'), 'utf8'));
+    assert.equal(b.schemaVersion, 1, p.slug);
+    assert.equal(b.label, 'free-llm-api-hub', p.slug);
+    assert.equal(b.message, p.verified ? 'verified ' + p.last_verified : 'unverified', p.slug);
+    assert.ok(['brightgreen', 'yellow', 'red'].includes(b.color), p.slug + ': unexpected colour ' + b.color);
+  }
+});
 // ---------- the git-mined provider history must be alive ----------
 // A silent regression in the history miner (e.g. the Buffer-vs-utf8-string
 // misalignment that was fixed alongside the git cat-file --batch change)

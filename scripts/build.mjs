@@ -1367,7 +1367,7 @@ writeFileSync(join(ROOT, 'site/sitemap.xml'), sitemap);
 
 // ---------- fingerprint of the gitignored derived files (drift gate) ----------
 // derived-fingerprints.json pins every build output under site/ that is
-// not tracked by git, so a change to ANY derived file - updates.html, feed.xml,
+// not tracked by git, so a change to ANY derived file -
 // models/, api/, legal/, programs/, llms.txt, shared-* - shows up in
 // review and in the CI drift gate, exactly like the tracked regenerated files.
 // The set is derived from `git ls-files site/`, so it stays in sync with
