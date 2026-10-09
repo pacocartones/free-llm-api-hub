@@ -513,3 +513,23 @@ p.muted a, .prose p a, .prov-summary p a { text-decoration: underline; text-unde
 .limits-table td { font-variant-numeric: tabular-nums; font-weight: 700; }
 .limits-src { margin: 4px 0 14px; font-size: .88rem; }
 .models-none { margin: 14px 0; }
+
+/* No horizontal page scroll on narrow screens (360 to 860 px).
+   Cards (<= 720px): the first-column width of the table (21%) beat the card width, which crushed the
+   provider name to 64px and pushed long notes past the viewport; cells may now shrink and wrap.
+   Tablet (721 to 1000px): the table needed 939px, so the headers wrap and the cells take less padding.
+   /models/: same for its four columns on phones. */
+@media (max-width: 720px) {
+  #table td:nth-child(1) { width: 100%; }
+  #table td { min-width: 0; overflow-wrap: anywhere; }
+}
+@media (min-width: 721px) and (max-width: 1000px) {
+  #table thead th { white-space: normal; padding: 12px 6px; letter-spacing: 0; }
+  #table td { padding-left: 6px; padding-right: 6px; }
+  #table td.notes { max-width: 24ch; }
+}
+.model-table th, .model-table td { overflow-wrap: anywhere; }
+@media (max-width: 480px) {
+  .model-table th, .model-table td { padding-left: 6px; padding-right: 6px; }
+  .model-table thead th { white-space: normal; letter-spacing: 0; font-size: .75rem; }
+}

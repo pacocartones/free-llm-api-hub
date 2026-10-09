@@ -1657,3 +1657,14 @@ test('temporary directories are created only through scripts/lib/tmp.mjs', () =>
   walk(join(ROOT, 'scripts'));
   assert.deepEqual(offenders, []);
 });
+
+test('the narrow-screen rules that keep the pages from scrolling sideways stay in the stylesheet', () => {
+  // Measured with a browser at 360, 390, 768, 860 and 1280 px (page scrollWidth equals the viewport).
+  // A browser is not part of this suite, so the rules that fixed it are pinned by text.
+  const css = readFileSync(join(ROOT, 'site/styles.css'), 'utf8').replace(/\s+/g, ' ');
+  assert.match(css, /@media \(max-width: 720px\) \{ #table td:nth-child\(1\) \{ width: 100%; \}/);
+  assert.match(css, /#table td \{ min-width: 0; overflow-wrap: anywhere; \}/);
+  assert.match(css, /@media \(min-width: 721px\) and \(max-width: 1000px\) \{ #table thead th \{ white-space: normal;/);
+  assert.match(css, /\.model-table th, \.model-table td \{ overflow-wrap: anywhere; \}/);
+  assert.match(css, /@media \(max-width: 480px\) \{ \.model-table th, \.model-table td \{ padding-left: 6px;/);
+});
