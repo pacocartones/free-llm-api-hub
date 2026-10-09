@@ -5,7 +5,7 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
-import { rankProviders, topProviders, SCORE_WEIGHTS, EDITORIAL_WEIGHT } from './lib/score.mjs';
+import { rankProviders, topProviders, SCORE_WEIGHTS, EDITORIAL_WEIGHT, MIN_CONFIRMED, MATH_INPUTS, TOP_SIZE } from './lib/score.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const read = (rel) => JSON.parse(readFileSync(join(ROOT, rel), 'utf8'));
@@ -18,7 +18,9 @@ const row = (r, i) => `${String(i + 1).padStart(2)}  ${r.name.padEnd(30)} ${f(r.
   Object.entries(r.parts).map(([k, v]) => `${k} ${v.toFixed(1)}`).join(' · ');
 
 console.log(`Weights: ${Object.entries(SCORE_WEIGHTS).map(([k, v]) => `${k} ${v}`).join(', ')}, editorial ${EDITORIAL_WEIGHT}. Data of ${generated}.\n`);
-console.log('Top 10 (verified, unexpired, text LLMs):');
-topProviders(providers, { editorial, probeReport, now }).forEach((r, i) => console.log(row(r, i)));
-console.log('\nAll eligible providers:');
-rankProviders(providers, { editorial, probeReport, now }).forEach((r, i) => console.log(row(r, i)));
+console.log(`Top (verified, unexpired, text LLMs, at least ${MIN_CONFIRMED} of ${MATH_INPUTS.length} inputs confirmed; up to ${TOP_SIZE}):`);
+const tops = topProviders(providers, { editorial, probeReport, now });
+tops.forEach((r, i) => console.log(row(r, i) + (r.boundary ? '  [tier near a threshold]' : '')));
+console.log(`  -> ${tops.length} providers`);
+console.log('\nAll eligible providers (including those below the minimum of confirmed inputs):');
+rankProviders(providers, { editorial, probeReport, now, minConfirmed: 0 }).forEach((r, i) => console.log(row(r, i) + (r.confirmed < MIN_CONFIRMED ? '  (below minimum)' : '') + (r.boundary ? '  [tier near a threshold]' : '') + (r.editorialClipped ? '  [editorial clipped]' : '')));

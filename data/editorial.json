@@ -1,5 +1,5 @@
 {
-  "note": "Editorial rating per provider, 0-30, added to the mathematical score (70 points). A provider with no entry here gets 15. The ratings and the notes are public; the internal rubric that produces them is not. Being a partner never changes a rating.",
+  "note": "Editorial rating per provider, 0-30, added to the mathematical score (70 points). A provider with no entry here gets 15. The ratings and the notes are public; the internal rubric that produces them is not. Being a partner never changes a rating. A rating more than 5 points from the default needs a public note here, and the engine never lets a rating move a provider further than its confirmed data allows (15 x confirmed / 6 points).",
   "default": 15,
   "ratings": {
     "google-gemini": { "score": 15, "note": "" },

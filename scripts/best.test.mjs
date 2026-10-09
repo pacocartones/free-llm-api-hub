@@ -84,6 +84,7 @@ test('/api/v1/best.json does not expose an unverified pick', () => {
 // because a provider moved one place.
 import {
   SCORE_WEIGHTS, EDITORIAL_WEIGHT, EDITORIAL_DEFAULT, MATH_INPUTS, TOP_SIZE,
+  MIN_CONFIRMED, EDITORIAL_CAP_BASE, EDITORIAL_NOTE_THRESHOLD, STABILITY_MIN_DAYS, STABILITY_MIN_SAMPLES, editorialCap,
   scoreProvider, rankProviders, topProviders, editorialRating, stabilityFromProbe, inputFractions, editorialErrors, isEligible,
 } from './lib/score.mjs';
 
@@ -91,6 +92,8 @@ const scoreData = () => JSON.parse(readFileSync(DATA, 'utf8'));
 const editorialData = () => JSON.parse(readFileSync(join(ROOT, 'data/editorial.json'), 'utf8'));
 const probeData = () => JSON.parse(readFileSync(join(ROOT, 'data/probe-report.json'), 'utf8'));
 const NOW = new Date('2026-10-08T12:00:00Z');
+// A provider with five of the six inputs confirmed (everything but stability), so it clears the minimum.
+const confirmed5 = (over = {}) => blank({ model_tier: 2, card_required: false, phone_required: false, commercial_ok: true, openai_compatible: true, free_limits: { requests_per_day: 100, source: 'https://x.example/', checked: '2026-10-08' }, ...over });
 const blank = (over = {}) => ({ slug: 'acme', name: 'Acme', verified: true, last_verified: '2026-10-08', is_text_llm: true, card_required: null, phone_required: null, commercial_ok: null, openai_compatible: null, model_tier: null, ...over });
 
 test('score weights: the six mathematical inputs and the editorial share add up to 100', () => {
@@ -129,7 +132,7 @@ test('deterministic: the same data gives the same order, whatever order it arriv
   assert.deepEqual(order([...base].reverse()), order(base));
   assert.deepEqual(order([...base.slice(20), ...base.slice(0, 20)]), order(base));
   // ties break by the mathematical score, then by name
-  const tied = [blank({ slug: 'b', name: 'Beta' }), blank({ slug: 'a', name: 'Alpha' })];
+  const tied = [confirmed5({ slug: 'b', name: 'Beta' }), confirmed5({ slug: 'a', name: 'Alpha' })];
   assert.deepEqual(rankProviders(tied, { now: NOW }).map((r) => r.slug), ['a', 'b']);
 });
 
@@ -187,24 +190,93 @@ test('eligibility: verified, within the freshness SLA, and for the top 10 a text
   assert.equal(isEligible(blank({ verified: false, last_verified: null }), NOW), false);
   assert.equal(isEligible(blank({ last_verified: '2026-06-01' }), NOW), false, 'past 90 days');
   assert.equal(isEligible(blank({ last_verified: '2026-07-20' }), NOW), true, 'inside 90 days');
-  const list = [blank({ slug: 'llm', name: 'Llm' }), blank({ slug: 'ocr', name: 'Ocr', is_text_llm: false, model_tier: 4 }), blank({ slug: 'old', name: 'Old', last_verified: '2026-01-01' })];
+  const list = [confirmed5({ slug: 'llm', name: 'Llm' }), confirmed5({ slug: 'ocr', name: 'Ocr', is_text_llm: false, model_tier: 4 }), confirmed5({ slug: 'old', name: 'Old', last_verified: '2026-01-01' })];
   assert.deepEqual(topProviders(list, { now: NOW }).map((r) => r.slug), ['llm']);
   assert.deepEqual(rankProviders(list, { now: NOW }).map((r) => r.slug).sort(), ['llm', 'ocr'], 'the full ranking keeps non-LLM providers');
-  const many = Array.from({ length: 14 }, (_, i) => blank({ slug: `p${i}`, name: `P${String(i).padStart(2, '0')}` }));
-  assert.equal(topProviders(many, { now: NOW }).length, 10);
+  const many = Array.from({ length: 14 }, (_, i) => confirmed5({ slug: `p${i}`, name: `P${String(i).padStart(2, '0')}` }));
+  assert.equal(topProviders(many, { now: NOW }).length, 10, 'the top holds at most ten');
   const real = topProviders(scoreData().providers, { editorial: editorialData(), probeReport: probeData(), now: NOW });
   assert.ok(real.length > 0 && real.every((r) => r.provider.is_text_llm === true && r.provider.verified === true));
 });
 
-test('stability comes from a recent probe; no key, no probe or an old probe is not measured', () => {
-  const report = (status, probed_at = '2026-10-01') => ({ probed_at, results: [{ slug: 'acme', status }] });
-  assert.equal(stabilityFromProbe(report('live'), 'acme', NOW), 1);
-  assert.equal(stabilityFromProbe(report('auth-ok'), 'acme', NOW), 0.5);
-  for (const bad of ['error', 'auth-failed', 'tier-ended', 'rate-limited']) assert.equal(stabilityFromProbe(report(bad), 'acme', NOW), 0);
-  assert.equal(stabilityFromProbe(report('skipped-no-key'), 'acme', NOW), null);
-  assert.equal(stabilityFromProbe(report('live', '2026-08-02'), 'acme', NOW), null, 'older than 30 days says nothing about now');
-  assert.equal(stabilityFromProbe(report('live', '2026-10-20'), 'acme', NOW), null, 'a date in the future is not a measurement');
-  assert.equal(stabilityFromProbe(report('live'), 'other', NOW), null);
+test('stability is null until a real series of probes exists; a single probe report never counts', () => {
+  const single = { probed_at: '2026-10-07', results: [{ slug: 'acme', status: 'live' }] };
+  assert.equal(stabilityFromProbe(single, 'acme', NOW), null, 'one fresh live probe is not a 30-day series');
+  assert.equal(stabilityFromProbe(probeData(), 'acme', NOW), null);
+  for (const p of scoreData().providers) assert.equal(stabilityFromProbe(probeData(), p.slug, NOW), null, `${p.slug}: unmeasured today`);
   assert.equal(stabilityFromProbe(null, 'acme', NOW), null);
   assert.equal(stabilityFromProbe({}, 'acme', NOW), null);
+  const day = (n) => new Date(NOW.getTime() - n * 86400000).toISOString().slice(0, 10);
+  const series = (days, status = 'live') => ({ history: days.map((n) => ({ date: day(n), slug: 'acme', status })) });
+  const daily = Array.from({ length: 31 }, (_, i) => i);
+  assert.equal(stabilityFromProbe(series(daily), 'acme', NOW), 1, 'a daily series of 31 days, all live');
+  assert.equal(stabilityFromProbe(series(daily, 'auth-ok'), 'acme', NOW), 0.5);
+  assert.equal(stabilityFromProbe(series(daily, 'error'), 'acme', NOW), 0);
+  assert.equal(stabilityFromProbe(series(daily.slice(0, STABILITY_MIN_SAMPLES - 1)), 'acme', NOW), null, 'too few samples');
+  assert.equal(stabilityFromProbe(series(Array.from({ length: 20 }, (_, i) => i)), 'acme', NOW), null, 'twenty days do not span thirty');
+  assert.equal(stabilityFromProbe(series(daily, 'skipped-no-key'), 'acme', NOW), null, 'probes without a key are not samples');
+  assert.equal(stabilityFromProbe(series(daily), 'other', NOW), null);
+  assert.equal(STABILITY_MIN_DAYS, 30);
+});
+
+test('the minimum: a provider enters the ranking and the top only with at least 4 of the 6 inputs confirmed, and the top is not padded', () => {
+  assert.equal(MIN_CONFIRMED, 4);
+  const three = confirmed5({ slug: 'three', name: 'Three', model_tier: null, commercial_ok: null }); // friction, openai, nothing else
+  assert.equal(scoreProvider(three).confirmed, 3, 'limits, friction and openai');
+  const four = confirmed5({ slug: 'four', name: 'Four', model_tier: null });
+  assert.equal(scoreProvider(four).confirmed, 4);
+  const list = [three, four, confirmed5()];
+  assert.deepEqual(rankProviders(list, { now: NOW }).map((r) => r.slug).sort(), ['acme', 'four']);
+  assert.deepEqual(topProviders(list, { now: NOW }).map((r) => r.slug).sort(), ['acme', 'four'], 'the top has two entries, not ten');
+  assert.deepEqual(rankProviders(list, { now: NOW, minConfirmed: 0 }).map((r) => r.slug).sort(), ['acme', 'four', 'three'], 'review mode lists everyone eligible');
+  const real = topProviders(scoreData().providers, { editorial: editorialData(), probeReport: probeData(), now: NOW });
+  assert.ok(real.length <= 10 && real.every((r) => r.confirmed >= MIN_CONFIRMED));
+  assert.ok(real.length < 10, 'today fewer than ten text-LLM providers have their quality confirmed, and the top says so by being shorter');
+});
+
+test('the editorial cap: |rating - 15| <= 15 * confirmed / 6, enforced by clipping', () => {
+  assert.equal(EDITORIAL_CAP_BASE, 15);
+  assert.equal(editorialCap(6), 15);
+  assert.equal(editorialCap(5), 12.5);
+  assert.equal(editorialCap(4), 10);
+  assert.equal(editorialCap(0), 0);
+  assert.equal(editorialCap(9), 15, 'never above the base');
+  const ed = (score) => ({ ratings: { acme: { score, note: 'x' } } });
+  const five = confirmed5(); // 5 confirmed: cap 12.5
+  assert.equal(scoreProvider(five, { editorial: ed(30) }).editorial, 27.5, 'a 30 is clipped to 15 + 12.5');
+  assert.equal(scoreProvider(five, { editorial: ed(30) }).editorialClipped, true);
+  assert.equal(scoreProvider(five, { editorial: ed(0) }).editorial, 2.5, 'and a 0 to 15 - 12.5');
+  assert.equal(scoreProvider(five, { editorial: ed(25) }).editorial, 25, 'inside the cap it is untouched');
+  assert.equal(scoreProvider(five, { editorial: ed(25) }).editorialClipped, false);
+  const four = confirmed5({ model_tier: null });
+  assert.equal(scoreProvider(four, { editorial: ed(30) }).editorial, 25, 'four confirmed: cap 10');
+  const none = blank();
+  assert.equal(scoreProvider(none, { editorial: ed(30) }).editorial, 15, 'nothing confirmed: the editorial part cannot move at all');
+  // for every real provider the deviation never exceeds the cap, whatever the file says
+  const wild = { ratings: Object.fromEntries(scoreData().providers.map((p, i) => [p.slug, { score: i % 2 ? 30 : 0, note: 'x' }])) };
+  for (const r of rankProviders(scoreData().providers, { editorial: wild, probeReport: probeData(), now: NOW, minConfirmed: 0 })) {
+    assert.ok(Math.abs(r.editorial - 15) <= editorialCap(r.confirmed) + 1e-9, `${r.slug}: ${r.editorial}`);
+  }
+});
+
+test('a rating more than 5 points from the default needs a public note', () => {
+  assert.equal(EDITORIAL_NOTE_THRESHOLD, 5);
+  const providers = scoreData().providers;
+  const slug = providers[0].slug;
+  const file = (rating) => ({ default: 15, ratings: { [slug]: rating } });
+  assert.deepEqual(editorialErrors(file({ score: 20, note: '' }), providers), [], 'exactly 5 away needs no note');
+  assert.deepEqual(editorialErrors(file({ score: 10 }), providers), []);
+  assert.equal(editorialErrors(file({ score: 21, note: '' }), providers).length, 1, 'more than 5 away with no note');
+  assert.equal(editorialErrors(file({ score: 21 }), providers).length, 1);
+  assert.equal(editorialErrors(file({ score: 9, note: '   ' }), providers).length, 1, 'a blank note is no note');
+  assert.deepEqual(editorialErrors(file({ score: 21, note: 'Documented reason.' }), providers), []);
+  assert.deepEqual(editorialErrors(editorialData(), providers), [], 'the shipped file starts at 15 for everyone');
+});
+
+test('a tier near a threshold is flagged and never penalised', () => {
+  const near = confirmed5({ model_tier: 4, model_tier_source: { model: 'm', arena_model: 'm', match: 'exact', rating: 1452, ci: [1445, 1460], boundary: true, votes: 2000, snapshot: '2026-10-02', url: 'https://x.example/' } });
+  const far = confirmed5({ model_tier: 4, model_tier_source: { ...near.model_tier_source, boundary: undefined } });
+  assert.equal(scoreProvider(near).boundary, true);
+  assert.equal(scoreProvider(far).boundary, false);
+  assert.equal(scoreProvider(near).total, scoreProvider(far).total, 'the flag changes nothing in the score');
 });

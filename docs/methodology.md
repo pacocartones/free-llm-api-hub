@@ -74,12 +74,15 @@ The score ranks providers from 0 to 100. `scripts/lib/score.mjs` computes it fro
 | Friction | 13 | no card required (weight 3) and no phone required (weight 2) |
 | Commercial use | 9 | `commercial_ok` |
 | OpenAI compatibility | 4 | `openai_compatible` |
-| Stability | 4 | the latest live probe in `data/probe-report.json` |
+| Stability | 4 | the share of successful probes over a real 30-day series (not measured yet) |
 | Editorial | 30 | a rating from 0 to 30 per provider in `data/editorial.json`; a provider without one gets 15. The internal rubric behind the ratings is not published |
 
 - **Unknown is not estimated.** Quality, limits and stability score zero when the data does not confirm them. Friction and commercial use are symmetric around "unknown": a confirmed good answer adds, a confirmed bad one subtracts, and unknown sits in the middle, neither rewarded nor punished. Next to every score the engine reports how many of the six mathematical inputs are confirmed ("n of 6").
 - **Limits scale (provisional).** Between a floor and a ceiling on a log scale: 10 to 10,000 requests per day, 10 thousand to 10 million tokens per day; the more generous of the two counts. A monthly figure counts as its daily share (divided by 30). Per-second and per-minute limits are a speed, not an allowance, and are not converted. These two ranges are provisional and may change.
-- **Stability** is the latest probe, not an uptime: the repository keeps no probe history. A probe older than 30 days, or a provider without an API key at probe time, is not measured and scores zero.
-- **Eligibility.** Only verified providers inside the 90-day freshness SLA are ranked; the top 10 also needs `is_text_llm`. Ties break by the mathematical score, then by name.
+- **Stability is not measured yet.** It needs a series of probes spanning at least 30 days with at least 12 samples per provider, and the repository keeps no probe history, so it is unmeasured (scores zero, counts as unconfirmed) for every provider. A single probe report is never enough. It starts counting when a real series exists.
+- **Eligibility.** Only verified providers inside the 90-day freshness SLA are ranked; the top also needs `is_text_llm`. Ties break by the mathematical score, then by name.
+- **Minimum evidence: 4 of 6.** A provider enters the ranking and the top only when at least four of the six mathematical inputs are confirmed. The top holds up to ten providers and is never padded: today it is shorter than ten because few text-LLM providers have a confirmed model quality (`model_tier`) and stability is not measured yet. `npm run score` prints the current size and who is below the minimum.
+- **Editorial cap.** The editorial rating can move a provider away from the default of 15 by at most `15 × confirmed / 6` points, so the less of a provider's data is confirmed, the less the editorial part can matter; the engine clips anything beyond that. A rating more than 5 points from the default needs a public note in `data/editorial.json`.
+- **A tier near a threshold is shown, not downgraded.** When the confidence interval of the rated model crosses a tier threshold or lies within 5 rating points of one (`boundary` in `model_tier_source`), the score keeps the tier as it is and the provider is marked, because the tier could change at the next snapshot.
 - **No position is fixed.** The ranking is recomputed from the data; tests pin properties of the method (weights add up to 100, ranges, determinism), never who ranks where.
 
