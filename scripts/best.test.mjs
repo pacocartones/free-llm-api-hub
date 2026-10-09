@@ -172,12 +172,14 @@ test('missing data scores zero, or neutral for the two yes/no requirements, and 
   assert.equal(full.confirmed, 4, 'quality, friction, commercial and openai are confirmed; limits and stability are not');
   assert.equal(inputFractions(blank({ model_tier: 0 })).quality.known, true, 'tier 0 is sourced, unlike null');
   assert.equal(scoreProvider(blank({ model_tier: 0 })).parts.quality, 0);
-  // friction counts as confirmed only when both flags are known, yet a single known flag keeps its partial score
+  // friction is confirmed as soon as one of its two parts is known (the Owner's reading); none known is not confirmed
   const half = scoreProvider(blank({ card_required: false }));
-  assert.equal(half.confirmed, 0, 'one of two flags is not a confirmed input');
-  assert.ok(half.parts.friction > empty.parts.friction, 'but the partial score is kept');
-  assert.equal(scoreProvider(blank({ phone_required: true })).confirmed, 0);
-  assert.equal(scoreProvider(blank({ card_required: false, phone_required: true })).confirmed, 1);
+  assert.equal(half.confirmed, 1, 'one known flag already informs: friction is confirmed');
+  assert.ok(half.parts.friction > 0, 'and it scores');
+  assert.equal(scoreProvider(blank({ phone_required: true })).confirmed, 1);
+  assert.ok(scoreProvider(blank({ phone_required: true })).parts.friction > 0, 'even a confirmed requirement keeps part of the points');
+  assert.equal(scoreProvider(blank({ card_required: false, phone_required: true })).confirmed, 1, 'two known flags are still one input');
+  assert.equal(scoreProvider(blank({ card_required: null, phone_required: null })).confirmed, 0, 'neither known: not confirmed');
   // a confirmed requirement subtracts what a confirmed absence adds
   const yes = scoreProvider(blank({ card_required: true })).parts.friction;
   const no = scoreProvider(blank({ card_required: false })).parts.friction;

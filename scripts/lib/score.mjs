@@ -90,8 +90,9 @@ export function inputFractions(p, stability = null) {
   return {
     quality: known(Number.isInteger(p.model_tier) ? clamp01(p.model_tier / 4) : null),
     limits: known(limits),
-    // The partial score is kept when only one flag is known, but friction counts as confirmed only when both are.
-    friction: { frac: frictionAny ? mapSigned(frictionSigned) : 0.5, known: p.card_required != null && p.phone_required != null },
+    // Friction is one requirement with two parts, and a part that is known already informs: it counts as confirmed
+    // when at least one of card_required and phone_required is known (the Owner's reading); the unknown part scores neutral.
+    friction: { frac: frictionAny ? mapSigned(frictionSigned) : 0.5, known: frictionAny },
     commercial: { frac: p.commercial_ok == null ? 0.5 : p.commercial_ok ? 1 : 0, known: p.commercial_ok != null },
     openai: { frac: p.openai_compatible === true ? 1 : 0, known: p.openai_compatible != null },
     stability: known(stability),
