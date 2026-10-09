@@ -491,3 +491,4 @@ p.muted a, .prose p a, .prov-summary p a { text-decoration: underline; text-unde
 /* Sorting on small screens: the column headers are hidden there, so a select takes their place. */
 .sort-mobile { display: none; align-items: center; gap: 8px; font-size: .85rem; color: var(--muted); font-family: var(--font-mono); }
 @media (max-width: 720px) { .sort-mobile { display: inline-flex; } }
+.search-input { cursor: text; flex: 1 1 180px; max-width: 260px; min-width: 150px; }

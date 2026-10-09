@@ -1221,6 +1221,25 @@ test('mobile sort select shows a placeholder for sorts it does not offer', () =>
   run('name', -1); assert.equal(sel.value, 'custom');
 });
 
+test('home: search box, Compare and API in the menu, and the star count rendered at build', () => {
+  run(['scripts/build.mjs']);
+  const index = readFileSync(join(ROOT, 'site/index.html'), 'utf8');
+  assert.match(index, /<input type="search" id="q"[^>]*>/);
+  assert.match(index, /<label class="sr-only" for="q">/);
+  for (const page of [index, readFileSync(join(ROOT, 'site/compare/index.html'), 'utf8'), readFileSync(join(ROOT, 'site/p/groq.html'), 'utf8')]) {
+    const nav = page.slice(page.indexOf('id="primary-nav"'), page.indexOf('</nav>', page.indexOf('id="primary-nav"')));
+    assert.match(nav, /href="(\.\.\/)?compare\/"/);
+    assert.match(nav, /href="(\.\.\/)?api\/"/);
+  }
+  const { stars } = JSON.parse(readFileSync(join(ROOT, 'data/repo-stats.json'), 'utf8'));
+  assert.ok(Number.isInteger(stars));
+  const shown = stars.toLocaleString('en-US');
+  assert.equal([...index.matchAll(/data-stars>([^<]*)</g)].every((m) => m[1] === shown), true, 'every star slot carries the build-time count');
+  const explorer = readFileSync(join(ROOT, 'site/explorer.js'), 'utf8');
+  assert.match(explorer, /getElementById\('q'\)\.addEventListener\('input'/);
+  assert.match(explorer, /params\.set\('q'/);
+});
+
 // ---------- weekly re-verification pacing (lib/pacing.mjs) ----------
 // Simulate doing exactly the proposed batch every week and check the two
 // promises the worklist makes: nothing goes overdue, and a same-day cohort

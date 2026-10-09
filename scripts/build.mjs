@@ -430,7 +430,7 @@ const IC = (id) => `<svg class="i" aria-hidden="true"><use href="#${id}"/></svg>
 
 const siteHeader = (p) => `<header class="site-header"><div class="wrap header-inner">
 <a class="brand" href="${p}" aria-label="Free LLM API Hub — home"><svg class="logo-mark"><use href="#logo"/></svg><span class="brand-name">Free LLM API <span class="grad">Hub</span></span></a>
-<nav class="nav" id="primary-nav" aria-label="Primary"><a href="${p}models/">${IC('ic-cube')}Models</a><a href="${p}guides-and-collections/">${IC('ic-book')}Guides &amp; Collections</a><a href="${p}programs/startups">${IC('ic-rocket')}Startup credits</a><a href="${p}programs/research">${IC('ic-cap')}Student credits</a><a class="nav-best" href="${p}best/">${IC('ic-trophy')}The best</a></nav>
+<nav class="nav" id="primary-nav" aria-label="Primary"><a href="${p}models/">${IC('ic-cube')}Models</a><a href="${p}compare/">${IC('ic-grid')}Compare</a><a href="${p}api/">${IC('ic-code')}API</a><a href="${p}guides-and-collections/">${IC('ic-book')}Guides &amp; Collections</a><a href="${p}programs/startups">${IC('ic-rocket')}Startup credits</a><a href="${p}programs/research">${IC('ic-cap')}Student credits</a><a class="nav-best" href="${p}best/">${IC('ic-trophy')}The best</a></nav>
 <div class="header-actions">
 <button class="icon-btn nav-toggle" id="navToggle" aria-label="Open menu" aria-expanded="false" aria-controls="primary-nav"><svg class="i menu" aria-hidden="true"><use href="#ic-menu"/></svg><svg class="i close" aria-hidden="true"><use href="#ic-close"/></svg></button>
 <a class="icon-btn" href="${REPO}" target="_blank" rel="noopener"><span class="sr-only">Star on GitHub</span>${GH_ICON}<span class="star-count" data-stars>★</span></a>
@@ -468,7 +468,17 @@ const fitDescription = (s) => {
   return cut.slice(0, cut.lastIndexOf(' ') > 80 ? cut.lastIndexOf(' ') : cut.length).replace(/[\s,;:.\-–—]+$/, '') + '…';
 };
 
-function htmlPage({ title, desc, canonical, main, jsonld, prefix = '../', noindex = false, ogImage = `${SITE}/og.png`, feeds = [], scripts = [] }) {
+// Star count resolved at build from data/repo-stats.json (written by `npm run stars`, never fetched here:
+// the build stays offline and deterministic). The page script still refreshes it live.
+let STARS = null;
+try {
+  const stats = JSON.parse(readFileSync(join(ROOT, 'data/repo-stats.json'), 'utf8'));
+  if (Number.isInteger(stats.stars) && stats.stars >= 0) STARS = stats.stars.toLocaleString('en-US');
+} catch { /* no stats file: the placeholder stays */ }
+const withStars = (html) => (STARS ? html.replace(/(data-stars>)[^<]*(<)/g, `$1${STARS}$2`) : html);
+
+function htmlPage(args) { return withStars(htmlPageRaw(args)); }
+function htmlPageRaw({ title, desc, canonical, main, jsonld, prefix = '../', noindex = false, ogImage = `${SITE}/og.png`, feeds = [], scripts = [] }) {
   // jsonld carries provider names straight from the dataset; writing "<" as
   // the JSON unicode escape (backslash-u-003c) keeps a "</script>" in the
   // data from ever closing the block.
@@ -666,6 +676,7 @@ indexHtml = inject(indexHtml, 'csp', CSP);
 indexHtml = inject(indexHtml, 'themeguard', THEME_GUARD);
 indexHtml = inject(indexHtml, 'rows', homeRows);
 indexHtml = inject(indexHtml, 'data', inlineData);
+indexHtml = withStars(indexHtml);
 writeFileSync(join(ROOT, 'site/index.html'), indexHtml);
 
 // ---------- badge ----------
