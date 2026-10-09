@@ -492,7 +492,7 @@ test('/api/v1/best.json exposes the editorial top 20 with full profiles', () => 
 
 test('the explorer does not claim a column sort before the user chooses one', () => {
   const explorer = readFileSync(join(ROOT, 'site/index.html'), 'utf8');
-  assert.match(explorer, /<th data-key="name" tabindex="0" role="button" aria-sort="none">API<\/th>/);
+  assert.match(explorer, /<th data-key="name" tabindex="0" aria-sort="none">API<\/th>/);
 });
 
 test('the explorer homepage leaves the table immediately after its controls', () => {

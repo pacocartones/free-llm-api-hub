@@ -51,6 +51,7 @@ function render() {
   // this table (see lib/rows.mjs). Date.now() gives visitors live freshness;
   // the server render uses data.generated for a deterministic initial paint.
   tbody.innerHTML = rows.map((p) => window.FLLM_ROWS.rowHtml(p, { now: Date.now() })).join('\n');
+  syncSortSel();
   syncRoving();
   syncURL();
 }
@@ -123,6 +124,25 @@ function renderStats() {
   document.getElementById('stats').innerHTML = tiles.map(([ic, n, l, c]) =>
     `<div class="stat ${c}"><svg class="si" aria-hidden="true"><use href="#${ic}"/></svg><div class="num">${n}</div><div class="lbl">${l}</div></div>`).join('');
 }
+
+// On small screens the column headers are hidden, so a select offers the same sorts.
+function syncSortSel() {
+  const sel = document.getElementById('sortSel');
+  if (!sel) return;
+  const v = sortKey + ':' + sortDir;
+  if ([...sel.options].some(o => o.value === v)) sel.value = v;
+}
+document.getElementById('sortSel').addEventListener('change', e => {
+  const [key, dir] = e.target.value.split(':');
+  sortKey = key; sortDir = Number(dir);
+  document.querySelectorAll('thead th').forEach(h => { h.classList.remove('sorted', 'asc'); h.setAttribute('aria-sort', 'none'); });
+  const th = document.querySelector('thead th[data-key="' + key + '"]');
+  if (th) {
+    th.classList.add('sorted'); th.classList.toggle('asc', sortDir === 1);
+    th.setAttribute('aria-sort', sortDir === 1 ? 'ascending' : 'descending');
+  }
+  render();
+});
 
 function applySort(th) {
   const key = th.dataset.key;

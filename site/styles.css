@@ -47,12 +47,12 @@
   --border-strong: #c3cfc8;
   --text: #0e1a13;
   --muted: #46584e;
-  --faint: #6b7970;
-  --accent: #0f8a50;
-  --accent-dim: #0c7444;
+  --faint: #566860;
+  --accent: #0b7040;
+  --accent-dim: #095a33;
   --accent-ink: #ffffff;
-  --green: #0f8a50;
-  --warn: #9a6a12;
+  --green: #0b7040;
+  --warn: #7d540d;
   --red: #c53a22;
   --shadow-sm: 0 1px 2px rgba(14,26,19,.06);
   --shadow-md: 0 12px 34px rgba(14,26,19,.10);
@@ -249,7 +249,7 @@ tbody tr:hover { background: var(--panel); }
 table.sortable thead th:not(.sorted)::after { content: " ⇅"; opacity: .28; font-weight: 400; }
 .name a { color: var(--text); font-weight: 700; font-family: var(--font-mono); font-size: .92rem; letter-spacing: -.01em; }
 .name a:hover { color: var(--accent); }
-.best { color: var(--accent); font-size: .8rem; margin-top: 3px; opacity: .85; }
+.best { color: var(--accent); font-size: .8rem; margin-top: 3px; }
 .mods { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
 .mods span { font-size: .66rem; color: var(--muted); background: var(--panel-2); border: 1px solid var(--border); border-radius: 4px; padding: 1px 6px; font-family: var(--font-mono); text-transform: uppercase; letter-spacing: .03em; }
 .badge { display: inline-flex; align-items: center; gap: 5px; font-size: .72rem; padding: 2px 8px; border-radius: 6px; white-space: nowrap; font-family: var(--font-mono); }
@@ -351,7 +351,7 @@ pre:hover .pre-copy, .pre-copy:focus-visible { opacity: 1; }
 .prov-card p { margin: 0; font-size: .92rem; }
 .prov-card code { word-break: break-all; }
 .prov-summary { background: color-mix(in srgb, var(--accent) 9%, var(--panel)); border: 1px solid color-mix(in srgb, var(--accent) 30%, var(--border)); border-radius: var(--radius); padding: 20px 22px; margin: 22px 0; }
-.prov-summary h3 { margin: 0 0 6px; font-size: .74rem; text-transform: uppercase; letter-spacing: .06em; color: var(--accent); font-weight: 700; }
+.prov-summary h2 { margin: 0 0 6px; font-size: .74rem; text-transform: uppercase; letter-spacing: .06em; color: var(--accent); font-weight: 700; }
 .prov-summary p { margin: 0; font-size: 1.04rem; line-height: 1.55; }
 .prov-actions { margin-top: 18px; display: flex; flex-wrap: wrap; gap: 10px; }
 /* Provider card hero — centered header, breadcrumbs, badges and actions. */
@@ -435,8 +435,8 @@ pre:hover .pre-copy, .pre-copy:focus-visible { opacity: 1; }
 .footer-brand p { max-width: 38ch; margin: 0; color: color-mix(in srgb, var(--text) 74%, transparent); line-height: 1.6; }
 .footer-brand p strong { color: var(--accent); font-weight: 700; }
 .footer-brand .star-btn { display: flex; margin-top: 18px; width: fit-content; }
-.footer-col h4 { position: relative; display: inline-block; font-size: .78rem; text-transform: uppercase; letter-spacing: .09em; color: var(--text); margin: 2px 0 16px; padding-bottom: 8px; font-family: var(--font-mono); font-weight: 700; }
-.footer-col h4::after { content: ""; position: absolute; left: 0; bottom: 0; width: 22px; height: 2px; background: var(--accent); border-radius: 2px; }
+.footer-col .footer-h { position: relative; display: inline-block; font-size: .78rem; text-transform: uppercase; letter-spacing: .09em; color: var(--text); margin: 2px 0 16px; padding-bottom: 8px; font-family: var(--font-mono); font-weight: 700; }
+.footer-col .footer-h::after { content: ""; position: absolute; left: 0; bottom: 0; width: 22px; height: 2px; background: var(--accent); border-radius: 2px; }
 .footer-col a { display: block; color: var(--muted); padding: 4px 0; }
 .footer-col a:hover { color: var(--accent); text-decoration: none; }
 .footer-bottom { border-top: 1px solid var(--border); padding: 24px 0 46px; color: var(--faint); font-size: .8rem; font-family: var(--font-mono); display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px; }
@@ -484,3 +484,10 @@ pre:hover .pre-copy, .pre-copy:focus-visible { opacity: 1; }
 }
 @media (max-width: 640px) { .stats { grid-template-columns: repeat(2, 1fr); } .footer-top { grid-template-columns: 1fr; } .notes { max-width: none; } }
 @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto; transition: none !important; } .caret { animation: none; } }
+
+/* Links inside running text must not rely on colour alone. */
+p.muted a, .prose p a, .prov-summary p a { text-decoration: underline; text-underline-offset: 2px; }
+
+/* Sorting on small screens: the column headers are hidden there, so a select takes their place. */
+.sort-mobile { display: none; align-items: center; gap: 8px; font-size: .85rem; color: var(--muted); font-family: var(--font-mono); }
+@media (max-width: 720px) { .sort-mobile { display: inline-flex; } }
