@@ -21,7 +21,7 @@ import { buildOgManifest } from './lib/og.mjs';
 import { explorerRowHtml } from './lib/rows.mjs';
 import { weeklyPacing, weeklyBatch, WEEKLY_CAP, MIN_AGE_DAYS } from './lib/pacing.mjs';
 import { clientConfigProviders, openaiClients, litellmYaml, MODEL_PLACEHOLDER } from './lib/client-config.mjs';
-import { requirementsHtml, limitsHtml, modelsHtml, dataPolicyHtml } from './lib/provider-sections.mjs';
+import { requirementsHtml, limitsHtml, glanceHtml, modelsHtml, dataPolicyHtml } from './lib/provider-sections.mjs';
 import { comparisonCategory, sameComparisonCategory, selectComparePairs, COMPARE_PAGE_CAP, COMPARE_PER_PROVIDER_CAP, COMPARE_MAX as COMPARE_MAX_SLOTS } from './lib/compare.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -1310,6 +1310,16 @@ test('provider sections: honest empty states, numbers only with source and date,
   assert.doesNotMatch(without, /<table/);
   assert.match(without, /Numeric limits are not recorded in structured form/);
   assert.doesNotMatch(limitsHtml({ ...base, free_limits: { requests_per_day: 5, scope: 's', source: 'javascript:alert(1)', checked: '2026-10-08' } }), /javascript:/, 'a non-http source never becomes a link');
+  // numbers without an http(s) source or a read date are not shown at all
+  for (const bad of [{ source: 'javascript:alert(1)', checked: '2026-10-08' }, { source: 'https://example.com/x', checked: '' }, { checked: '2026-10-08' }]) {
+    const out = limitsHtml({ ...base, free_limits: { requests_per_day: 5, scope: 's', ...bad } });
+    assert.doesNotMatch(out, /<table/, `no table for ${JSON.stringify(bad)}`);
+    assert.match(out, /Numeric limits are not recorded in structured form/);
+  }
+  // Expires: an ongoing free tier with no end date reads "no expiry"; a trial credit with none is "not confirmed"
+  assert.match(glanceHtml({ ...base, expires: null }, 'Ongoing'), /Expires<\/span><span class="meta-v">no expiry/);
+  assert.match(glanceHtml({ ...base, free_type: 'trial-credit', category: 'trial', expires: null }, 'Trial'), /Expires<\/span><span class="meta-v"><span class="tri tri-unk">not confirmed<\/span>/);
+  assert.match(glanceHtml({ ...base, free_type: 'trial-credit', category: 'trial', expires: '2026-12-31' }, 'Trial'), /Expires<\/span><span class="meta-v">2026-12-31/);
   // models: one line when none are listed, a section when they are
   assert.match(modelsHtml(base), /Free models: not listed yet\./);
   assert.doesNotMatch(modelsHtml(base), /<h2/);
@@ -1325,6 +1335,7 @@ test('provider sections: honest empty states, numbers only with source and date,
 test('every provider page has the same sections in the same order, unnumbered, with a valid heading order', () => {
   run(['scripts/build.mjs']);
   const order = ['whats-free', 'limits'];
+  const providersBySlug = new Map(JSON.parse(readFileSync(DATA, 'utf8')).providers.map((q) => [q.slug, q]));
   for (const f of readdirSync(join(ROOT, 'site/p')).filter((n) => n.endsWith('.html'))) {
     const html = readFileSync(join(ROOT, 'site/p', f), 'utf8');
     const main = html.slice(html.indexOf('<main id="main">'));
@@ -1332,12 +1343,27 @@ test('every provider page has the same sections in the same order, unnumbered, w
     for (const id of order) { const i = main.indexOf(`id="${id}"`); assert.ok(i > at, `${f}: #${id} missing or out of order`); at = i; }
     assert.match(main, /class="wrap prose prov-prose"/, `${f}: unnumbered prose wrapper`);
     assert.match(main, /class="prov-reqs"/, `${f}: requirement flags present`);
-    assert.doesNotMatch(main, /Data policy/, `${f}: no data-policy filler before REPO-064`);
+    const prov = providersBySlug.get(f.replace(/[.]html$/, ''));
+    if (prov && prov.data_policy) assert.match(main, /<h2 id="data-policy">/, `${f}: a provider with data_policy shows it`);
+    else assert.doesNotMatch(main, /Data policy/, `${f}: no data-policy filler without the field`);
     const levels = [...html.matchAll(/<h([1-6])[ >]/g)].map((m) => +m[1]);
     for (let i = 1; i < levels.length; i += 1) assert.ok(levels[i] <= levels[i - 1] + 1, `${f}: heading level jumps from h${levels[i - 1]} to h${levels[i]}`);
     if (/class="[^"]*\bbtn primary\b/.test(html) && /Quickstart|Get started/.test(main)) assert.match(main, /<h2 id="quickstart">/, `${f}: the #quickstart anchor stays`);
     assert.doesNotMatch(main, /https:\/\/&lt;api-base-url&gt;|https:\/\/\//, `${f}: no invented endpoint in a sample`);
   }
+});
+
+test('real pages: a trial credit without an end date says "not confirmed", an ongoing free tier says "no expiry"', () => {
+  run(['scripts/build.mjs']);
+  const { providers } = JSON.parse(readFileSync(DATA, 'utf8'));
+  const trial = providers.find((p) => p.free_type === 'trial-credit' && !p.expires);
+  const ongoing = providers.find((p) => p.free_type !== 'trial-credit' && !p.expires);
+  assert.ok(trial && ongoing, 'the real data has both cases');
+  const expiresCell = (slug) => readFileSync(join(ROOT, 'site/p', `${slug}.html`), 'utf8').match(/Expires<\/span><span class="meta-v">([\s\S]*?)<\/span>(?:<\/span>)?<\/div>/)[1];
+  assert.match(expiresCell(trial.slug), /not confirmed/, `${trial.slug}: trial credit without expires`);
+  assert.match(expiresCell(ongoing.slug), /no expiry/, `${ongoing.slug}: ongoing free tier without expires`);
+  const known = providers.find((p) => p.expires);
+  if (known) assert.ok(readFileSync(join(ROOT, 'site/p', `${known.slug}.html`), 'utf8').includes(known.expires), 'a recorded end date is still shown');
 });
 
 // ---------- weekly re-verification pacing (lib/pacing.mjs) ----------

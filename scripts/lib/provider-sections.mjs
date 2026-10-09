@@ -37,7 +37,8 @@ export function requirementsHtml(p) {
 
 /** Free limits: the structured numbers with their source and reading date, then the provider's wording. */
 export function limitsHtml(p) {
-  const fl = p.free_limits;
+  // Numbers appear only with the provider page they come from and the day they were read.
+  const fl = p.free_limits && safeUrl(p.free_limits.source) && /^\d{4}-\d{2}-\d{2}$/.test(String(p.free_limits.checked || '')) ? p.free_limits : null;
   let table = '';
   if (fl) {
     const rows = LIMIT_UNITS.filter(([k]) => Number.isInteger(fl[k]))
@@ -55,12 +56,13 @@ export function limitsHtml(p) {
 
 /** The at-a-glance list: plain words instead of the dataset's internal labels. */
 export function glanceHtml(p, typeLabel) {
+  // A trial credit with no recorded end date is unknown, not endless: only ongoing free tiers read "no expiry".
   const mods = (p.modalities || []).join(', ') || 'not listed';
   const base = p.openai_base_url ? `<code>${htmlEsc(p.openai_base_url)}</code>` : 'Not OpenAI-compatible: see the official docs';
   const rows = [
     ['Plan', `${htmlEsc(typeLabel)}${p.category === 'ongoing' ? ' free tier' : ' credit'}`],
     ['How it renews', htmlEsc(FREE_TYPE_LABEL[p.free_type] || p.free_type || 'not recorded')],
-    ['Expires', htmlEsc(p.expires) || 'no expiry'],
+    ['Expires', p.expires ? htmlEsc(p.expires) : (p.free_type === 'trial-credit' ? '<span class="tri tri-unk">not confirmed</span>' : 'no expiry')],
     ['Modalities', htmlEsc(mods)],
     ['OpenAI base URL', base],
     ...(p.added ? [['Added to the hub', htmlEsc(p.added)]] : []),
