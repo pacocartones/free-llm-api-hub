@@ -5,8 +5,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { readFileSync, writeFileSync, mkdtempSync, existsSync, readdirSync, statSync, rmSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { readFileSync, writeFileSync, existsSync, readdirSync, statSync, rmSync } from 'node:fs';
+import { tmpFile } from './lib/tmp.mjs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
@@ -57,7 +57,7 @@ test('validate passes on the real dataset', () => {
 test('validate rejects properties outside the JSON Schema with their exact path', () => {
   const data = JSON.parse(readFileSync(DATA, 'utf8'));
   data.providers[0].schema_only_typo = true;
-  const fixture = join(mkdtempSync(join(tmpdir(), 'flah-')), 'providers.json');
+  const fixture = tmpFile('providers.json');
   writeFileSync(fixture, JSON.stringify(data));
 
   let validationError;
@@ -75,7 +75,7 @@ test('validate rejects properties outside the JSON Schema with their exact path'
 test('validate reports missing schema-required properties with their exact path', () => {
   const data = JSON.parse(readFileSync(DATA, 'utf8'));
   delete data.providers[0].name;
-  const fixture = join(mkdtempSync(join(tmpdir(), 'flah-')), 'providers.json');
+  const fixture = tmpFile('providers.json');
   writeFileSync(fixture, JSON.stringify(data));
 
   let validationError;
@@ -93,7 +93,7 @@ test('validate reports missing schema-required properties with their exact path'
 test('validate enforces JSON Schema formats with their exact path', () => {
   const data = JSON.parse(readFileSync(DATA, 'utf8'));
   data.source = 'not a URI';
-  const fixture = join(mkdtempSync(join(tmpdir(), 'flah-')), 'providers.json');
+  const fixture = tmpFile('providers.json');
   writeFileSync(fixture, JSON.stringify(data));
 
   let validationError;
@@ -112,7 +112,7 @@ test('validate rejects a verified entry with no last_verified date', () => {
   const data = JSON.parse(readFileSync(DATA, 'utf8'));
   data.providers[0].verified = true;
   data.providers[0].last_verified = null;
-  const fixture = join(mkdtempSync(join(tmpdir(), 'flah-')), 'providers.json');
+  const fixture = tmpFile('providers.json');
   writeFileSync(fixture, JSON.stringify(data));
   assert.equal(exitOk(['scripts/validate.mjs', fixture]), false);
 });
@@ -126,7 +126,7 @@ for (const [label, value] of [
   test(`validate rejects rate_limits holding ${label}`, () => {
     const data = JSON.parse(readFileSync(DATA, 'utf8'));
     data.providers[0].rate_limits = value;
-    const fixture = join(mkdtempSync(join(tmpdir(), 'flah-')), 'providers.json');
+    const fixture = tmpFile('providers.json');
     writeFileSync(fixture, JSON.stringify(data));
     assert.equal(exitOk(['scripts/validate.mjs', fixture]), false);
   });
@@ -136,7 +136,7 @@ for (const value of ['30 RPM / 14,400 RPD', '10,000 Neurons per day', 'Not publi
   test(`validate accepts rate_limits "${value}"`, () => {
     const data = JSON.parse(readFileSync(DATA, 'utf8'));
     data.providers[0].rate_limits = value;
-    const fixture = join(mkdtempSync(join(tmpdir(), 'flah-')), 'providers.json');
+    const fixture = tmpFile('providers.json');
     writeFileSync(fixture, JSON.stringify(data));
     assert.equal(exitOk(['scripts/validate.mjs', fixture]), true);
   });
@@ -146,7 +146,7 @@ test('validate rejects an unverified entry that still carries a date', () => {
   const data = JSON.parse(readFileSync(DATA, 'utf8'));
   data.providers[0].verified = false;
   data.providers[0].last_verified = '2026-01-01';
-  const fixture = join(mkdtempSync(join(tmpdir(), 'flah-')), 'providers.json');
+  const fixture = tmpFile('providers.json');
   writeFileSync(fixture, JSON.stringify(data));
   assert.equal(exitOk(['scripts/validate.mjs', fixture]), false);
 });
@@ -161,7 +161,7 @@ test('validate rejects a generated date older than the newest verification', () 
     .pop();
   assert.ok(newest, 'fixture needs at least one dated entry to be meaningful');
   data.generated = '2000-01-01'; // older than every real date in the dataset
-  const fixture = join(mkdtempSync(join(tmpdir(), 'flah-')), 'providers.json');
+  const fixture = tmpFile('providers.json');
   writeFileSync(fixture, JSON.stringify(data));
   assert.equal(exitOk(['scripts/validate.mjs', fixture]), false);
 });
@@ -208,14 +208,14 @@ test('validate accepts a credential-only probe result', () => {
   const data = JSON.parse(readFileSync(DATA, 'utf8'));
   data.providers[0].last_probed = '2026-08-03';
   data.providers[0].probe_status = 'auth-ok';
-  const fixture = join(mkdtempSync(join(tmpdir(), 'flah-')), 'providers.json');
+  const fixture = tmpFile('providers.json');
   writeFileSync(fixture, JSON.stringify(data));
   assert.equal(exitOk(['scripts/validate.mjs', fixture]), true);
 });
 
 test('validate rejects a probe report that references a removed provider', () => {
   const data = JSON.parse(readFileSync(DATA, 'utf8'));
-  const fixture = join(mkdtempSync(join(tmpdir(), 'flah-')), 'providers.json');
+  const fixture = tmpFile('providers.json');
   writeFileSync(fixture, JSON.stringify(data));
   // github-models was retired from the dataset on 2026-08-02; a report that
   // still lists it must fail (this is the exact nine-day drift that hid until
@@ -223,7 +223,7 @@ test('validate rejects a probe report that references a removed provider', () =>
   const report = JSON.parse(readFileSync(join(ROOT, 'data/probe-report.json'), 'utf8'));
   report.results.push({ slug: 'github-models', env_key: 'GITHUB_TOKEN', key_present: false, status: 'skipped-no-key' });
   report.count = report.results.length;
-  const reportFixture = join(mkdtempSync(join(tmpdir(), 'flah-')), 'probe-report.json');
+  const reportFixture = tmpFile('probe-report.json');
   writeFileSync(reportFixture, JSON.stringify(report));
   assert.equal(exitOk(['scripts/validate.mjs', fixture, reportFixture]), false);
 });
@@ -1276,7 +1276,7 @@ test('validate rejects a category that contradicts free_type', () => {
   const data = JSON.parse(readFileSync(DATA, 'utf8'));
   const p = data.providers.find((x) => x.free_type === 'trial-credit');
   p.category = 'ongoing';
-  const fixture = join(mkdtempSync(join(tmpdir(), 'flah-')), 'providers.json');
+  const fixture = tmpFile('providers.json');
   writeFileSync(fixture, JSON.stringify(data));
   assert.equal(exitOk(['scripts/validate.mjs', fixture]), false);
 });
@@ -1284,16 +1284,13 @@ test('validate rejects a category that contradicts free_type', () => {
 // ---------- score inputs: is_text_llm, model_tier, free_limits ----------
 import { tierForRating, nearBoundary, MODEL_TIER_THRESHOLDS, MODEL_TIER_MIN_VOTES, MODEL_TIER_BOUNDARY_MARGIN } from './lib/model-tier.mjs';
 
-// Runs validate.mjs on a mutated copy of the dataset and removes the copy afterwards.
+// Runs validate.mjs on a mutated copy of the dataset (removed when the process exits).
 const validateAfter = (mutate) => {
   const data = JSON.parse(readFileSync(DATA, 'utf8'));
   mutate(data);
-  const dir = mkdtempSync(join(tmpdir(), 'flah-'));
-  try {
-    const fixture = join(dir, 'providers.json');
-    writeFileSync(fixture, JSON.stringify(data));
-    return exitOk(['scripts/validate.mjs', fixture]);
-  } finally { rmSync(dir, { recursive: true, force: true }); }
+  const fixture = tmpFile('providers.json');
+  writeFileSync(fixture, JSON.stringify(data));
+  return exitOk(['scripts/validate.mjs', fixture]);
 };
 
 test('model tier thresholds: edges, tier 0 versus no source, and the minimum votes', () => {
@@ -1500,4 +1497,18 @@ test('the live state-sitemap check accepts a well-formed file and names every de
   assert.equal(stateSitemapProblems('<urlset></urlset>', robots, site).problems.length, 1);
   assert.equal(stateSitemapProblems(ok.replace('/state/2026-10/', '/p/groq'), robots, site).problems.length, 1);
   assert.equal(stateSitemapProblems(ok, `Sitemap: ${site}/sitemap.xml\n`, site).problems.length, 1);
+});
+
+test('temporary directories are created only through scripts/lib/tmp.mjs', () => {
+  const needle = ['mkdtemp', 'Sync'].join('');
+  const offenders = [];
+  const walk = (dir) => {
+    for (const name of readdirSync(dir)) {
+      const path = join(dir, name);
+      if (statSync(path).isDirectory()) walk(path);
+      else if (name.endsWith('.mjs') && path !== join(ROOT, 'scripts/lib/tmp.mjs') && readFileSync(path, 'utf8').includes(needle)) offenders.push(path);
+    }
+  };
+  walk(join(ROOT, 'scripts'));
+  assert.deepEqual(offenders, []);
 });

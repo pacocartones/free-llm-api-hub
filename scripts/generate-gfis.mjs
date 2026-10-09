@@ -15,7 +15,7 @@
 // reports no change. It never closes issues and never touches the per-provider
 // GFIs — those are claimed by contributors, not regenerated.
 
-import { readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync, rmSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
@@ -63,7 +63,9 @@ for (const u of UMBRELLAS) {
   const body = (idx === -1 ? current.body : current.body.slice(0, idx)) + statusSection(rows);
   const tmp = join(tmpdir(), `gfi-${u.issue}.md`);
   writeFileSync(tmp, body);
-  gh(['issue', 'edit', String(u.issue), '--repo', REPO, '--title', title, '--body-file', tmp]);
+  try {
+    gh(['issue', 'edit', String(u.issue), '--repo', REPO, '--title', title, '--body-file', tmp]);
+  } finally { rmSync(tmp, { force: true }); }
   console.log(`#${u.issue} updated.`);
 }
 
