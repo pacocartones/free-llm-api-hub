@@ -1209,6 +1209,18 @@ test('keyboard navigation is client-only: the server-rendered rows carry no tabi
   assert.match(index, /<caption class="sr-only">[^<]*arrow keys move between providers and Enter opens one\.<\/caption>/);
 });
 
+test('mobile sort select shows a placeholder for sorts it does not offer', () => {
+  // ?sort=notes (or a reversed column) has no matching option; the select must not keep a stale value.
+  const index = readFileSync(join(ROOT, 'site/index.html'), 'utf8');
+  assert.match(index, /<select id="sortSel"[^>]*>\s*<option value="custom" disabled hidden>/);
+  const fn = readFileSync(join(ROOT, 'site/explorer.js'), 'utf8').match(/function syncSortSel\(\) \{[\s\S]*?\n\}/)[0];
+  const sel = { options: [{ value: 'custom', disabled: true }, { value: 'name:1', disabled: false }], value: 'name:1' };
+  const run = (key, dir) => new Function('document', 'sortKey', 'sortDir', fn + '; syncSortSel();')({ getElementById: () => sel }, key, dir);
+  run('notes', 1); assert.equal(sel.value, 'custom');
+  run('name', 1); assert.equal(sel.value, 'name:1');
+  run('name', -1); assert.equal(sel.value, 'custom');
+});
+
 // ---------- weekly re-verification pacing (lib/pacing.mjs) ----------
 // Simulate doing exactly the proposed batch every week and check the two
 // promises the worklist makes: nothing goes overdue, and a same-day cohort

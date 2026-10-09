@@ -130,7 +130,8 @@ function syncSortSel() {
   const sel = document.getElementById('sortSel');
   if (!sel) return;
   const v = sortKey + ':' + sortDir;
-  if ([...sel.options].some(o => o.value === v)) sel.value = v;
+  // Sorts the select does not offer (e.g. ?sort=notes, or a reversed column) show the placeholder.
+  sel.value = [...sel.options].some(o => o.value === v && !o.disabled) ? v : 'custom';
 }
 document.getElementById('sortSel').addEventListener('change', e => {
   const [key, dir] = e.target.value.split(':');
