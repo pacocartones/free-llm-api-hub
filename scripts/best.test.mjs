@@ -136,22 +136,27 @@ test('deterministic: the same data gives the same order, whatever order it arriv
   assert.deepEqual(rankProviders(tied, { now: NOW }).map((r) => r.slug), ['a', 'b']);
 });
 
-test('a provider with no editorial rating gets exactly 15, and the file starts everyone at 15', () => {
+test('a provider with no editorial rating gets exactly 15; the shipped file is valid whatever it rates', () => {
   assert.equal(EDITORIAL_DEFAULT, 15);
   assert.equal(editorialRating({ ratings: {} }, 'nobody'), 15);
   assert.equal(editorialRating(null, 'nobody'), 15);
   assert.equal(editorialRating({ ratings: { a: { score: 'x' } } }, 'a'), 15, 'a malformed rating falls back to the default');
   assert.equal(editorialRating({ ratings: { a: { score: 31 } } }, 'a'), 15, 'out of range falls back too');
   assert.equal(editorialRating({ ratings: { a: { score: 22 } } }, 'a'), 22);
-  const ed = editorialData();
-  const { providers } = scoreData();
-  assert.equal(ed.default, 15);
-  assert.deepEqual(Object.keys(ed.ratings).sort(), providers.map((p) => p.slug).sort(), 'every provider has an entry');
-  assert.ok(Object.values(ed.ratings).every((r) => r.score === 15), 'at the start nobody is rated: the editorial part does not discriminate');
-  assert.deepEqual(editorialErrors(ed, providers), []);
-  assert.ok(editorialErrors({ default: 15, ratings: { ghost: { score: 15 } } }, providers).length > 0, 'a rating for an unknown provider is an error');
-  assert.ok(editorialErrors({ default: 15, ratings: { [providers[0].slug]: { score: 31 } } }, providers).length > 0, 'a rating above 30 is an error');
+  // the rule, on a synthetic file: an absent provider scores the default, ratings from 0 to 30 are valid, others are rejected
+  const providers = [blank({ slug: 'rated', name: 'Rated' }), blank({ slug: 'absent', name: 'Absent' })];
+  const file = (ratings) => ({ default: 15, ratings });
+  assert.equal(scoreProvider(providers[1], { editorial: file({ rated: { score: 30, note: 'x' } }) }).editorial, 15, 'absent from the file: exactly 15');
+  for (const ok of [0, 9.5, 15, 20, 30]) assert.deepEqual(editorialErrors(file({ rated: { score: ok, note: 'Documented.' } }), providers), [], `${ok} is a valid rating`);
+  for (const bad of [-1, 30.5, NaN, '15', null]) assert.ok(editorialErrors(file({ rated: { score: bad, note: 'x' } }), providers).length > 0, `${bad} is rejected`);
+  assert.ok(editorialErrors(file({ ghost: { score: 15 } }), providers).length > 0, 'a rating for an unknown provider is an error');
   assert.ok(editorialErrors({ default: 14, ratings: {} }, providers).length > 0, 'the default cannot drift from the constant');
+  assert.ok(editorialErrors({ default: 15, ratings: [] }, providers).length > 0, 'an array is not a ratings object');
+  assert.ok(editorialErrors({ default: 15, ratings: [{ score: 15 }] }, providers).length > 0);
+  // the shipped file: valid against the real providers, without pinning any particular rating
+  const ed = editorialData();
+  assert.equal(ed.default, 15);
+  assert.deepEqual(editorialErrors(ed, scoreData().providers), []);
 });
 
 test('missing data scores zero, or neutral for the two yes/no requirements, and lowers the confidence', () => {
@@ -167,6 +172,12 @@ test('missing data scores zero, or neutral for the two yes/no requirements, and 
   assert.equal(full.confirmed, 4, 'quality, friction, commercial and openai are confirmed; limits and stability are not');
   assert.equal(inputFractions(blank({ model_tier: 0 })).quality.known, true, 'tier 0 is sourced, unlike null');
   assert.equal(scoreProvider(blank({ model_tier: 0 })).parts.quality, 0);
+  // friction counts as confirmed only when both flags are known, yet a single known flag keeps its partial score
+  const half = scoreProvider(blank({ card_required: false }));
+  assert.equal(half.confirmed, 0, 'one of two flags is not a confirmed input');
+  assert.ok(half.parts.friction > empty.parts.friction, 'but the partial score is kept');
+  assert.equal(scoreProvider(blank({ phone_required: true })).confirmed, 0);
+  assert.equal(scoreProvider(blank({ card_required: false, phone_required: true })).confirmed, 1);
   // a confirmed requirement subtracts what a confirmed absence adds
   const yes = scoreProvider(blank({ card_required: true })).parts.friction;
   const no = scoreProvider(blank({ card_required: false })).parts.friction;
@@ -190,6 +201,8 @@ test('eligibility: verified, within the freshness SLA, and for the top 10 a text
   assert.equal(isEligible(blank({ verified: false, last_verified: null }), NOW), false);
   assert.equal(isEligible(blank({ last_verified: '2026-06-01' }), NOW), false, 'past 90 days');
   assert.equal(isEligible(blank({ last_verified: '2026-07-20' }), NOW), true, 'inside 90 days');
+  assert.equal(isEligible(blank({ last_verified: '2026-10-09' }), NOW), false, 'a verification date in the future is not fresh');
+  assert.equal(isEligible(blank({ last_verified: '2026-10-08' }), NOW), true, 'today is');
   const list = [confirmed5({ slug: 'llm', name: 'Llm' }), confirmed5({ slug: 'ocr', name: 'Ocr', is_text_llm: false, model_tier: 4 }), confirmed5({ slug: 'old', name: 'Old', last_verified: '2026-01-01' })];
   assert.deepEqual(topProviders(list, { now: NOW }).map((r) => r.slug), ['llm']);
   assert.deepEqual(rankProviders(list, { now: NOW }).map((r) => r.slug).sort(), ['llm', 'ocr'], 'the full ranking keeps non-LLM providers');

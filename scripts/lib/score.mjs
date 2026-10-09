@@ -74,7 +74,7 @@ const mapSigned = (x) => (x + 1) / 2; // -1..1 -> 0..1; unknown sits in the midd
  * bad one subtracts, unknown sits in the middle and is neither rewarded nor punished.
  */
 export function inputFractions(p, stability = null) {
-  const frictionKnown = p.card_required != null || p.phone_required != null;
+  const frictionAny = p.card_required != null || p.phone_required != null;
   const frictionSigned = (FRICTION_WEIGHTS.card * noRequirement(p.card_required) + FRICTION_WEIGHTS.phone * noRequirement(p.phone_required)) / (FRICTION_WEIGHTS.card + FRICTION_WEIGHTS.phone);
   const fl = p.free_limits;
   let limits = null;
@@ -90,7 +90,8 @@ export function inputFractions(p, stability = null) {
   return {
     quality: known(Number.isInteger(p.model_tier) ? clamp01(p.model_tier / 4) : null),
     limits: known(limits),
-    friction: { frac: frictionKnown ? mapSigned(frictionSigned) : 0.5, known: frictionKnown },
+    // The partial score is kept when only one flag is known, but friction counts as confirmed only when both are.
+    friction: { frac: frictionAny ? mapSigned(frictionSigned) : 0.5, known: p.card_required != null && p.phone_required != null },
     commercial: { frac: p.commercial_ok == null ? 0.5 : p.commercial_ok ? 1 : 0, known: p.commercial_ok != null },
     openai: { frac: p.openai_compatible === true ? 1 : 0, known: p.openai_compatible != null },
     stability: known(stability),
@@ -151,7 +152,7 @@ export function scoreProvider(p, { editorial = null, stability = null } = {}) {
 /** Every violation in the public editorial file against the providers. Does not throw. */
 export function editorialErrors(editorial, providers) {
   const errors = [];
-  if (!editorial || typeof editorial !== 'object' || typeof editorial.ratings !== 'object' || editorial.ratings === null) {
+  if (!editorial || typeof editorial !== 'object' || typeof editorial.ratings !== 'object' || editorial.ratings === null || Array.isArray(editorial.ratings)) {
     return ['data/editorial.json must have a ratings object'];
   }
   if (editorial.default !== EDITORIAL_DEFAULT) errors.push(`data/editorial.json default must be ${EDITORIAL_DEFAULT} (the constant in lib/score.mjs), got ${editorial.default}`);
@@ -171,7 +172,7 @@ export function editorialErrors(editorial, providers) {
 export function isEligible(p, now = new Date()) {
   if (p.verified !== true) return false;
   const age = ageInDays(p.last_verified, now);
-  return age != null && age <= SLA_DAYS;
+  return age != null && age >= 0 && age <= SLA_DAYS; // a verification date in the future is not a verification
 }
 
 const byRank = (a, b) => b.total - a.total || b.math - a.math || (a.name < b.name ? -1 : a.name > b.name ? 1 : 0);
