@@ -165,7 +165,7 @@ What "verified" covers and where its limits are: [docs/methodology.md](docs/meth
 
 ## How this project is maintained
 
-Much of the routine maintenance of this repository is done by AI agents working under human oversight: they re-check provider sources, prepare data updates, triage issues and draft code. Every change still goes through a pull request, a human maintainer reviews it and is responsible for every merge, and every data change carries a link to the provider's own page and the date it was checked. Commit messages carry no AI signature or trailer; this section and [AI_POLICY.md](AI_POLICY.md) are where we say it.
+Much of the routine maintenance of this repository is done by AI agents working under human oversight: they re-check provider sources, prepare data updates, triage issues and draft code. Every change still goes through a pull request, a human maintainer reviews it and is responsible for every merge, and every data change carries a link to the provider's own page and the date it was checked. Commit messages carry no AI signature or trailer; this section is where we say it.
 
 ## Use the data
 
