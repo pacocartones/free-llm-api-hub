@@ -500,3 +500,16 @@ p.muted a, .prose p a, .prov-summary p a { text-decoration: underline; text-unde
   .brand-name { font-size: .85rem; }
   .header-actions { gap: 6px; }
 }
+
+/* Provider pages: sections are not numbered (the order is the same on every page) and the requirement flags read as words. */
+.prov-prose h2::before { content: none; }
+.prov-reqs { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px; margin: 14px 0 20px; }
+.prov-reqs .req { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 10px 14px; }
+.prov-reqs dt { font-size: .7rem; text-transform: uppercase; letter-spacing: .06em; color: var(--faint); font-weight: 700; }
+.prov-reqs dd { margin: 4px 0 0; font-size: .95rem; }
+.limits-table { width: auto; min-width: 320px; margin: 12px 0 4px; border-collapse: collapse; }
+.limits-table th, .limits-table td { text-align: left; padding: 7px 14px; border-bottom: 1px solid var(--border); font-size: .92rem; }
+.limits-table th { color: var(--muted); font-weight: 500; }
+.limits-table td { font-variant-numeric: tabular-nums; font-weight: 700; }
+.limits-src { margin: 4px 0 14px; font-size: .88rem; }
+.models-none { margin: 14px 0; }

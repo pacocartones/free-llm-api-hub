@@ -21,6 +21,7 @@ import { buildOgManifest } from './lib/og.mjs';
 import { explorerRowHtml } from './lib/rows.mjs';
 import { weeklyPacing, weeklyBatch, WEEKLY_CAP, MIN_AGE_DAYS } from './lib/pacing.mjs';
 import { clientConfigProviders, openaiClients, litellmYaml, MODEL_PLACEHOLDER } from './lib/client-config.mjs';
+import { requirementsHtml, limitsHtml, modelsHtml, dataPolicyHtml } from './lib/provider-sections.mjs';
 import { comparisonCategory, sameComparisonCategory, selectComparePairs, COMPARE_PAGE_CAP, COMPARE_PER_PROVIDER_CAP, COMPARE_MAX as COMPARE_MAX_SLOTS } from './lib/compare.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -1290,6 +1291,52 @@ test('header menu: only Models, Compare, API and The best; the other destination
     for (const kept of ['models/', 'compare/', 'api/', 'best/']) assert.ok(nav.includes(kept), `${rel}: header lost ${kept}`);
     const footer = html.slice(html.indexOf('<footer'));
     for (const dest of ['guides-and-collections/', 'programs/startups', 'programs/research']) assert.ok(footer.includes(dest), `${rel}: footer lacks ${dest}`);
+  }
+});
+
+test('provider sections: honest empty states, numbers only with source and date, no filler', () => {
+  const base = { slug: 'x', name: 'X', modalities: ['text'], free_type: 'perpetual', category: 'ongoing' };
+  // flags read in words, and "not confirmed" is its own text, not a colour
+  const reqs = requirementsHtml({ ...base, card_required: null, phone_required: false, commercial_ok: true });
+  assert.match(reqs, /Credit card<\/dt><dd><span class="tri tri-unk">not confirmed<\/span>/);
+  assert.match(reqs, /Phone verification<\/dt><dd><span class="tri tri-no">not required<\/span>/);
+  assert.match(reqs, /Commercial use<\/dt><dd><span class="tri tri-yes">allowed<\/span>/);
+  // limits: numbers appear with their source and reading date; without them one honest line
+  const withNumbers = limitsHtml({ ...base, rate_limits: '30 RPM', free_limits: { requests_per_minute: 30, requests_per_day: 14400, scope: 'free plan', source: 'https://example.com/limits', checked: '2026-10-08' } });
+  assert.match(withNumbers, /<th scope="row">requests per minute<\/th><td>30<\/td>/);
+  assert.match(withNumbers, /14,400/);
+  assert.match(withNumbers, /href="https:\/\/example\.com\/limits"[^>]*>the provider's page<\/a>, read 2026-10-08/);
+  const without = limitsHtml({ ...base, rate_limits: 'Not published' });
+  assert.doesNotMatch(without, /<table/);
+  assert.match(without, /Numeric limits are not recorded in structured form/);
+  assert.doesNotMatch(limitsHtml({ ...base, free_limits: { requests_per_day: 5, scope: 's', source: 'javascript:alert(1)', checked: '2026-10-08' } }), /javascript:/, 'a non-http source never becomes a link');
+  // models: one line when none are listed, a section when they are
+  assert.match(modelsHtml(base), /Free models: not listed yet\./);
+  assert.doesNotMatch(modelsHtml(base), /<h2/);
+  assert.match(modelsHtml({ ...base, models_free: ['a/b'] }), /<h2 id="models">Free models/);
+  // data policy: the slot for REPO-064 is empty until a provider has the field
+  assert.equal(dataPolicyHtml(base), '');
+  const dp = dataPolicyHtml({ ...base, data_policy: { trains_on_prompts: false, retention: '30 days', source: 'https://example.com/p' } });
+  assert.match(dp, /<h2 id="data-policy">Data policy<\/h2>/);
+  assert.match(dp, /Trains on your prompts<\/dt><dd><span class="tri tri-no">no<\/span>/);
+  assert.match(dp, /30 days/);
+});
+
+test('every provider page has the same sections in the same order, unnumbered, with a valid heading order', () => {
+  run(['scripts/build.mjs']);
+  const order = ['whats-free', 'limits'];
+  for (const f of readdirSync(join(ROOT, 'site/p')).filter((n) => n.endsWith('.html'))) {
+    const html = readFileSync(join(ROOT, 'site/p', f), 'utf8');
+    const main = html.slice(html.indexOf('<main id="main">'));
+    let at = -1;
+    for (const id of order) { const i = main.indexOf(`id="${id}"`); assert.ok(i > at, `${f}: #${id} missing or out of order`); at = i; }
+    assert.match(main, /class="wrap prose prov-prose"/, `${f}: unnumbered prose wrapper`);
+    assert.match(main, /class="prov-reqs"/, `${f}: requirement flags present`);
+    assert.doesNotMatch(main, /Data policy/, `${f}: no data-policy filler before REPO-064`);
+    const levels = [...html.matchAll(/<h([1-6])[ >]/g)].map((m) => +m[1]);
+    for (let i = 1; i < levels.length; i += 1) assert.ok(levels[i] <= levels[i - 1] + 1, `${f}: heading level jumps from h${levels[i - 1]} to h${levels[i]}`);
+    if (/class="[^"]*\bbtn primary\b/.test(html) && /Quickstart|Get started/.test(main)) assert.match(main, /<h2 id="quickstart">/, `${f}: the #quickstart anchor stays`);
+    assert.doesNotMatch(main, /https:\/\/&lt;api-base-url&gt;|https:\/\/\//, `${f}: no invented endpoint in a sample`);
   }
 });
 

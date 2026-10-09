@@ -21,6 +21,7 @@ import { githubProfileUrl } from './lib/contributors.mjs';
 import { resolveBestEntries } from './lib/best.mjs';
 import { openaiClients, litellmYaml } from './lib/client-config.mjs';
 import * as compareLib from './lib/compare.mjs';
+import { requirementsHtml, limitsHtml, glanceHtml, modelsHtml, dataPolicyHtml } from './lib/provider-sections.mjs';
 import { providerFigures, expandFigures, injectInlineFigures, figureErrors } from './lib/figures.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -883,12 +884,12 @@ for (const p of providers) {
     const base = htmlEsc(p.openai_base_url);
     const m = htmlEsc(model);
     quick = embeddingsFirst
-      ? `<h2>Quickstart — embeddings</h2><pre><code>from openai import OpenAI
+      ? `<h2 id="quickstart">Quickstart — embeddings</h2><pre><code>from openai import OpenAI
 
 client = OpenAI(base_url="${base}", api_key="&lt;YOUR_FREE_API_KEY&gt;")
 resp = client.embeddings.create(model="${m}", input="Hello world")
 print(len(resp.data[0].embedding))</code></pre>`
-      : `<h2>Quickstart — chat completions</h2><pre><code>from openai import OpenAI
+      : `<h2 id="quickstart">Quickstart — chat completions</h2><pre><code>from openai import OpenAI
 
 client = OpenAI(base_url="${base}", api_key="&lt;YOUR_FREE_API_KEY&gt;")
 resp = client.chat.completions.create(
@@ -901,39 +902,10 @@ print(resp.choices[0].message.content)</code></pre><p class="muted">…or with c
   -d '{"model":"${m}","messages":[{"role":"user","content":"Hello!"}]}'</code></pre>`;
   } else {
     const docs = p.docs_url ? htmlEsc(p.docs_url) : '';
-    quick = `<h2>Quickstart</h2><p class="muted">First-party API — not OpenAI-compatible, so there is no drop-in base URL. The exact endpoint is in the <a href="${docs}" target="_blank" rel="noopener">official docs</a>; authenticate with your API key in the <code>Authorization: Bearer</code> header.</p><pre><code>curl -H "Authorization: Bearer $API_KEY" \\
-  https://&lt;api-base-url&gt;/&lt;endpoint&gt;</code></pre><p class="muted">…or in Python:</p><pre><code>import os, requests
-
-r = requests.post(
-    "https://<api-base-url>/<endpoint>",
-    headers={"Authorization": f"Bearer {os.environ['API_KEY']}"},
-    json={},
-)
-print(r.json())</code></pre>`;
+    quick = `<h2 id="quickstart">Get started</h2><p class="muted">This is a first-party API, not OpenAI-compatible, so there is no drop-in base URL. The endpoint, the key and a working example are in the <a href="${docs}" target="_blank" rel="noopener">official docs</a>.</p>`;
   }
 
-  // Free models — a prominent block when we have a sample, with a way to pull the live list.
-  const modelsBlock = (p.models_free && p.models_free.length)
-    ? `<h2>Free models <span class="muted">· sample</span></h2>` +
-      `<div class="model-chips">${p.models_free.map((mm) => `<code>${htmlEsc(mm)}</code>`).join('')}</div>` +
-      `<p class="muted">A sample of models reachable on the free tier — the live catalog changes.` +
-      (p.openai_base_url ? ` Pull the current set with <code>GET ${htmlEsc(p.openai_base_url)}/models</code>.` : '') +
-      `</p>`
-    : '';
-
-  const summary = `<div class="prov-summary"><h2>What's free</h2><p>${htmlEsc(p.free_tier)}</p></div>`;
-  const bigCards = [
-    ['Rate limits', htmlEsc(p.rate_limits)],
-    ['The catch', htmlEsc(p.notes)],
-  ].filter(([, v]) => v).map(([k, v]) => `<div class="prov-card"><h3>${k}</h3><p>${v}</p></div>`).join('');
-  const metaRows = [
-    ['Type', typeLabel(p) + (p.category === 'ongoing' ? ' free tier' : ' credit')],
-    ['Free type', htmlEsc(p.free_type)],
-    ['Expires', htmlEsc(p.expires) || 'no expiry'],
-    ['Modalities', mods.join(', ') || '—'],
-    ['OpenAI base URL', p.openai_base_url ? `<code>${htmlEsc(p.openai_base_url)}</code>` : '—'],
-    ...(p.added ? [['Added to the hub', htmlEsc(p.added)]] : []),
-  ].map(([k, v]) => `<div class="meta-row"><span class="meta-k">${k}</span><span class="meta-v">${v}</span></div>`).join('');
+  const summary = `<div class="prov-summary"><h2 id="whats-free">What's free</h2><p>${htmlEsc(p.free_tier)}</p></div>` + requirementsHtml(p);
   // Freshness relative to the current day (provider pages are regenerated on deploy, not diff-gated).
   const daysAgo = p.verified && p.last_verified ? ageInDays(p.last_verified, today) : null;
   const verifiedLine = p.verified
@@ -983,11 +955,12 @@ print(r.json())</code></pre>`;
     (p.best_for ? `<p class="lede">${htmlEsc(p.best_for)}</p>` : '') +
     `<div class="prov-actions">${docsBtn}${websiteBtn}${reportBtn}</div>` +
     `</div></section>` +
-    `<main id="main"><div class="wrap prose">` +
+    `<main id="main"><div class="wrap prose prov-prose">` +
     summary +
-    (bigCards ? `<div class="prov-grid">${bigCards}</div>` : '') +
-    `<div class="prov-meta">${metaRows}</div>` +
-    modelsBlock +
+    limitsHtml(p) +
+    glanceHtml(p, typeLabel(p)) +
+    modelsHtml(p) +
+    dataPolicyHtml(p) +
     quick +
     (crossChips ? `<h2>Appears in</h2><div class="colls">${crossChips}</div>` : '') +
     compareHtml +
