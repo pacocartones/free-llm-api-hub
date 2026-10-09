@@ -453,10 +453,10 @@ const THEME_GUARD = `<script>(function(){try{var t=localStorage.getItem('theme')
 // in 404.html). script-src pins our two inline scripts by hash — the theme guard (every page)
 // and the path read-out (404.html only) — so no other inline or injected script can run;
 // everything else is 'self' (site.js, explorer.js, shared-rules.js, widget.js). connect-src
-// allows the star count (api.github.com) and explorer.js's data fallback (raw.githubusercontent).
+// allows explorer.js's data fallback (raw.githubusercontent).
 // No default-src/style-src on purpose: inline style="" attributes and the 404 <style> stay valid.
 // If you edit THEME_GUARD or 404.html's inline scripts, recompute these hashes or the page breaks silently.
-const CSP = `<meta http-equiv="Content-Security-Policy" content="script-src 'self' 'sha256-r3FnVnP9W/uaNhK9XkZqH3GIfK4TudOQGYTwoNIjGR4=' 'sha256-YzEhxvq2BwovGsg/RCjKkQdwf+LZmTjIkiQcjXCZMHc='; connect-src 'self' https://api.github.com https://raw.githubusercontent.com; object-src 'none'; base-uri 'self'">`;
+const CSP = `<meta http-equiv="Content-Security-Policy" content="script-src 'self' 'sha256-r3FnVnP9W/uaNhK9XkZqH3GIfK4TudOQGYTwoNIjGR4=' 'sha256-YzEhxvq2BwovGsg/RCjKkQdwf+LZmTjIkiQcjXCZMHc='; connect-src 'self' https://raw.githubusercontent.com; object-src 'none'; base-uri 'self'">`;
 
 // Search engines cut a snippet around 155 characters. Every page's description goes through
 // here, so no page can ship a longer one: cut at a word boundary and end with an ellipsis.
@@ -494,7 +494,6 @@ ${THEME_GUARD}
 <link rel="canonical" href="${htmlEsc(canonical)}">
 <link rel="icon" href="${prefix}favicon.svg" type="image/svg+xml">
 <link rel="preload" href="${prefix}fonts/jetbrains-mono-700.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preconnect" href="https://api.github.com" crossorigin>
 <meta name="theme-color" content="#0a0d0b">
 <meta name="color-scheme" content="dark light">
 <meta property="og:title" content="${htmlEsc(title)}">
@@ -577,6 +576,8 @@ const bestEntries = resolveBestEntries(BEST, providers);
 // where they share a modality, capped (see lib/compare.mjs). Computed up front
 // so the provider pages can link to the comparisons they appear in.
 const comparePairs = compareLib.selectComparePairs(bestEntries.map((e) => e.p));
+// Only same-category pairs are suggested (links); every pair keeps its page and sitemap entry.
+const suggestedPairs = comparePairs.filter((cp) => compareLib.sameComparisonCategory(cp.a, cp.b));
 
 // ---------- contributors (rendered from data/contributors.json, which a
 // maintainer refreshes with scripts/update-contributors.mjs after a merge) ----------
@@ -963,7 +964,7 @@ print(r.json())</code></pre>`;
   const reportBtn = `<a class="btn ghost" href="${htmlEsc(reportChangeUrl(p, REPO))}" target="_blank" rel="noopener">${IC('ic-flag')}Report a change</a>`;
   // "Compare with …": the static comparisons this provider appears in, plus the
   // interactive view pre-filled with it.
-  const comparePeers = comparePairs
+  const comparePeers = suggestedPairs
     .filter((cp) => cp.a.slug === p.slug || cp.b.slug === p.slug)
     .map((cp) => ({ path: cp.path, other: cp.a.slug === p.slug ? cp.b : cp.a }));
   const compareHtml =
@@ -1591,7 +1592,7 @@ writeFileSync(
 writeFileSync(join(ROOT, 'site/shared-compare.js'), compareLib.clientBundle());
 rmSync(join(ROOT, 'site/compare'), { recursive: true, force: true });
 mkdirSync(join(ROOT, 'site/compare'), { recursive: true });
-const compareLinksHtml = (prefix, except = null) => comparePairs
+const compareLinksHtml = (prefix, except = null) => suggestedPairs
   .filter((cp) => cp.path !== except)
   .map((cp) => `<a href="${prefix}compare/${cp.path}/">${htmlEsc(cp.a.name)} vs ${htmlEsc(cp.b.name)}</a>`).join('');
 for (const cp of comparePairs) {

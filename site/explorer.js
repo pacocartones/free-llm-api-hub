@@ -16,9 +16,10 @@ const { recScore, SLA_DAYS, DUE_SOON_DAYS, freshnessStatus } = window.FLLM_RULES
 
 const { comparator } = window.FLLM_SORT;
 
-// Free-text search over the fields a visitor would type: name, slug, category label and what is free.
+// Free-text search over the fields a visitor would type: name, slug, category label, what is free and model names.
 function searchText(p) {
-  return [p.name, p.slug, p.category, p.free_tier, ...(p.modalities || [])].filter(Boolean).join(' ').toLowerCase();
+  const models = Array.isArray(p.models_free) ? p.models_free : Object.values(p.models_free || {}).flat();
+  return [p.name, p.slug, p.category, p.free_tier, p.best_for, ...models, ...(p.modalities || [])].filter(Boolean).join(' ').toLowerCase();
 }
 
 function render() {

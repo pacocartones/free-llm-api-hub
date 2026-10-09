@@ -26,6 +26,18 @@ export const COMPARE_PER_PROVIDER_CAP = 4;
 
 export const comparePath = (a, b) => `${a}-vs-${b}`;
 
+/**
+ * A provider's comparison category is its principal modality: the first one
+ * listed in its dataset entry (text with text, OCR with OCR, speech with speech).
+ * Suggested comparisons (the "Compare with" links) only join providers of one
+ * category; the pages for other pairs still exist and stay in the sitemap.
+ */
+export const comparisonCategory = (p) => (p.modalities || [])[0] ?? null;
+export const sameComparisonCategory = (a, b) => {
+  const ca = comparisonCategory(a);
+  return ca !== null && ca === comparisonCategory(b);
+};
+
 /** Modalities both providers offer, in the first provider's order. */
 export function sharedModalities(a, b) {
   const mb = new Set(b.modalities || []);

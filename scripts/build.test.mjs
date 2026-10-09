@@ -7,7 +7,7 @@ import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { readFileSync, writeFileSync, existsSync, readdirSync, statSync, rmSync } from 'node:fs';
 import { tmpFile } from './lib/tmp.mjs';
-import { join, dirname } from 'node:path';
+import { join, dirname, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
 import { ORDER, roundTripError } from './_serialize.mjs';
@@ -21,7 +21,7 @@ import { buildOgManifest } from './lib/og.mjs';
 import { explorerRowHtml } from './lib/rows.mjs';
 import { weeklyPacing, weeklyBatch, WEEKLY_CAP, MIN_AGE_DAYS } from './lib/pacing.mjs';
 import { clientConfigProviders, openaiClients, litellmYaml, MODEL_PLACEHOLDER } from './lib/client-config.mjs';
-import { selectComparePairs, COMPARE_PAGE_CAP, COMPARE_PER_PROVIDER_CAP, COMPARE_MAX as COMPARE_MAX_SLOTS } from './lib/compare.mjs';
+import { comparisonCategory, sameComparisonCategory, selectComparePairs, COMPARE_PAGE_CAP, COMPARE_PER_PROVIDER_CAP, COMPARE_MAX as COMPARE_MAX_SLOTS } from './lib/compare.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const DATA = join(ROOT, 'data/providers.json');
@@ -1173,9 +1173,10 @@ test('compare pairs on the real ranking: at most 30, unique, shared modality, ev
     for (const d of html.match(/\d{4}-\d{2}-\d{2}/g) || []) {
       assert.ok(dataDates.has(d), `${rel}: date ${d} is not from the dataset (pages must not depend on the build day)`);
     }
-    // provider pages link to the comparisons they appear in
+    // provider pages suggest the comparisons they appear in, when both sides share a category
     for (const s of [a.slug, b.slug]) {
-      assert.ok(readFileSync(join(ROOT, `site/p/${s}.html`), 'utf8').includes(`href="../compare/${path}/"`), `p/${s} links ${path}`);
+      const linked = readFileSync(join(ROOT, `site/p/${s}.html`), 'utf8').includes(`href="../compare/${path}/"`);
+      assert.equal(linked, sameComparisonCategory(a, b), `p/${s} ${sameComparisonCategory(a, b) ? 'links' : 'does not suggest'} ${path}`);
     }
   }
 });
@@ -1238,6 +1239,45 @@ test('home: search box, Compare and API in the menu, and the star count rendered
   const explorer = readFileSync(join(ROOT, 'site/explorer.js'), 'utf8');
   assert.match(explorer, /getElementById\('q'\)\.addEventListener\('input'/);
   assert.match(explorer, /params\.set\('q'/);
+});
+
+test('suggested comparisons join one category only; the existing compare pages stay', () => {
+  run(['scripts/build.mjs']);
+  const providers = JSON.parse(readFileSync(DATA, 'utf8')).providers;
+  const bySlug = new Map(providers.map((p) => [p.slug, p]));
+  assert.equal(comparisonCategory({ modalities: ['ocr', 'text'] }), 'ocr');
+  assert.equal(comparisonCategory({ modalities: [] }), null);
+  assert.equal(sameComparisonCategory({ modalities: [] }, { modalities: [] }), false, 'no category is never "the same"');
+  const suggested = (html) => [...html.matchAll(/href="(?:\.\.\/)*compare\/([a-z0-9-]+-vs-[a-z0-9-]+)\/"/g)].map((m) => m[1]);
+  let links = 0;
+  const pages = [join(ROOT, 'site/compare/index.html'), ...readdirSync(join(ROOT, 'site/p')).filter((f) => f.endsWith('.html')).map((f) => join(ROOT, 'site/p', f))];
+  for (const file of pages) {
+    for (const path of suggested(readFileSync(file, 'utf8'))) {
+      const ok = [...path.matchAll(/-vs-/g)].some((m) => {
+        const pa = bySlug.get(path.slice(0, m.index)), pb = bySlug.get(path.slice(m.index + 4));
+        return pa && pb && sameComparisonCategory(pa, pb);
+      });
+      assert.ok(ok, `${path} (linked from ${relative(ROOT, file)}) mixes categories`);
+      links += 1;
+    }
+  }
+  assert.ok(links > 0, 'some same-category comparisons are still suggested');
+  // the pages of the pairs that are no longer suggested are still published
+  for (const mixed of ['ocr-space-vs-groq', 'speechify-vs-groq']) {
+    assert.ok(existsSync(join(ROOT, `site/compare/${mixed}/index.html`)), `${mixed} page stays`);
+  }
+});
+
+test('the client makes no GitHub API call and the home search covers model names', () => {
+  for (const f of readdirSync(join(ROOT, 'site')).filter((n) => n.endsWith('.js'))) {
+    assert.doesNotMatch(readFileSync(join(ROOT, 'site', f), 'utf8'), /api\.github\.com/, `${f} must not call the GitHub API`);
+  }
+  assert.doesNotMatch(readFileSync(join(ROOT, 'site/index.html'), 'utf8'), /api\.github\.com/);
+  const fn = readFileSync(join(ROOT, 'site/explorer.js'), 'utf8').match(/function searchText\(p\) \{[\s\S]*?\n\}/)[0];
+  const searchText = new Function(fn + '; return searchText;')();
+  assert.ok(searchText({ name: 'Groq', models_free: ['openai/gpt-oss-120b'] }).includes('gpt-oss-120b'));
+  const groq = JSON.parse(readFileSync(DATA, 'utf8')).providers.find((p) => p.slug === 'groq');
+  assert.ok(searchText(groq).includes(groq.models_free[0].toLowerCase()), 'a real provider is found by one of its models');
 });
 
 // ---------- weekly re-verification pacing (lib/pacing.mjs) ----------

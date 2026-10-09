@@ -16,28 +16,7 @@
     });
   }
 
-  // --- live GitHub star count (cached 6h, graceful fallback) ---
-  var starEls = document.querySelectorAll('[data-stars]');
-  if (starEls.length) {
-    var setStars = function (n) {
-      starEls.forEach(function (el) { el.textContent = n; });
-    };
-    var CK = 'flh_stars', CT = 'flh_stars_at', cached, at = 0;
-    try { cached = localStorage.getItem(CK); at = +localStorage.getItem(CT) || 0; } catch (e) {}
-    if (cached) setStars(cached);
-    if (!cached || Date.now() - at > 6 * 3600 * 1000) {
-      fetch('https://api.github.com/repos/pacocartones/free-llm-api-hub')
-        .then(function (r) { return r.ok ? r.json() : null; })
-        .then(function (d) {
-          if (d && typeof d.stargazers_count === 'number') {
-            var n = d.stargazers_count.toLocaleString('en-US');
-            setStars(n);
-            try { localStorage.setItem(CK, n); localStorage.setItem(CT, String(Date.now())); } catch (e) {}
-          }
-        })
-        .catch(function () {});
-    }
-  }
+  // The GitHub star count is written into the pages at build time (data/repo-stats.json); the client makes no GitHub call.
 
   // --- copy button on every code block (quickstarts, embed snippets) ---
   document.querySelectorAll('pre').forEach(function (pre) {
