@@ -371,6 +371,7 @@ pre:hover .pre-copy, .pre-copy:focus-visible { opacity: 1; }
 .meta-k { color: var(--muted); font-family: var(--font-mono); font-size: .76rem; text-transform: uppercase; letter-spacing: .04em; }
 .meta-v { color: var(--text); font-size: .9rem; }
 .meta-v code { word-break: break-all; color: var(--accent); }
+.meta-v a { text-decoration: underline; text-underline-offset: 2px; }
 .prov-back { margin-top: 30px; font-family: var(--font-mono); font-size: .85rem; }
 @media (max-width: 560px) { .meta-row { grid-template-columns: 1fr; gap: 3px; } }
 /* provider compare view (/compare/) — one column per provider, one row per field */

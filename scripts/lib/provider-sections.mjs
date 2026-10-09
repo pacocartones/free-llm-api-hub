@@ -6,6 +6,7 @@
 
 import { htmlEsc } from './rows.mjs';
 import { triStateHtml } from './compare.mjs';
+import { expiryHtml } from './expiry.mjs';
 
 const FREE_TYPE_LABEL = {
   'renewing-quota': 'Free quota that renews',
@@ -56,13 +57,12 @@ export function limitsHtml(p) {
 
 /** The at-a-glance list: plain words instead of the dataset's internal labels. */
 export function glanceHtml(p, typeLabel) {
-  // A trial credit with no recorded end date is unknown, not endless: only ongoing free tiers read "no expiry".
   const mods = (p.modalities || []).join(', ') || 'not listed';
   const base = p.openai_base_url ? `<code>${htmlEsc(p.openai_base_url)}</code>` : 'Not OpenAI-compatible: see the official docs';
   const rows = [
     ['Plan', `${htmlEsc(typeLabel)}${p.category === 'ongoing' ? ' free tier' : ' credit'}`],
     ['How it renews', htmlEsc(FREE_TYPE_LABEL[p.free_type] || p.free_type || 'not recorded')],
-    ['Expires', p.expires ? htmlEsc(p.expires) : (p.free_type === 'trial-credit' ? '<span class="tri tri-unk">not confirmed</span>' : 'no expiry')],
+    ['Expires', expiryHtml(p)],
     ['Modalities', htmlEsc(mods)],
     ['OpenAI base URL', base],
     ...(p.added ? [['Added to the hub', htmlEsc(p.added)]] : []),

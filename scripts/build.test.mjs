@@ -22,7 +22,7 @@ import { explorerRowHtml } from './lib/rows.mjs';
 import { weeklyPacing, weeklyBatch, WEEKLY_CAP, MIN_AGE_DAYS } from './lib/pacing.mjs';
 import { clientConfigProviders, openaiClients, litellmYaml, MODEL_PLACEHOLDER } from './lib/client-config.mjs';
 import { requirementsHtml, limitsHtml, glanceHtml, modelsHtml, dataPolicyHtml } from './lib/provider-sections.mjs';
-import { comparisonCategory, sameComparisonCategory, selectComparePairs, COMPARE_PAGE_CAP, COMPARE_PER_PROVIDER_CAP, COMPARE_MAX as COMPARE_MAX_SLOTS } from './lib/compare.mjs';
+import { compareTableHtml, comparisonCategory, sameComparisonCategory, selectComparePairs, COMPARE_PAGE_CAP, COMPARE_PER_PROVIDER_CAP, COMPARE_MAX as COMPARE_MAX_SLOTS } from './lib/compare.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const DATA = join(ROOT, 'data/providers.json');
@@ -1364,6 +1364,39 @@ test('real pages: a trial credit without an end date says "not confirmed", an on
   assert.match(expiresCell(ongoing.slug), /no expiry/, `${ongoing.slug}: ongoing free tier without expires`);
   const known = providers.find((p) => p.expires);
   if (known) assert.ok(readFileSync(join(ROOT, 'site/p', `${known.slug}.html`), 'utf8').includes(known.expires), 'a recorded end date is still shown');
+});
+
+test('no_expiry: the validator accepts a sourced statement on a trial credit and rejects the rest', () => {
+  const good = { source: 'https://example.com/pricing', checked: '2026-10-09', quote: 'Credits never expire.' };
+  const trial = (d) => d.providers.find((p) => p.free_type === 'trial-credit' && !p.expires);
+  const ongoing = (d) => d.providers.find((p) => p.free_type !== 'trial-credit');
+  assert.equal(validateAfter((d) => { trial(d).no_expiry = { ...good }; }), true, 'a sourced statement on a trial credit passes');
+  assert.equal(validateAfter((d) => { ongoing(d).no_expiry = { ...good }; }), false, 'not on a continuous free tier');
+  assert.equal(validateAfter((d) => { const t = d.providers.find((p) => p.free_type === 'recurring-credit'); t.no_expiry = { ...good }; }), false, 'not on a recurring credit');
+  assert.equal(validateAfter((d) => { const t = d.providers.find((p) => p.free_type === 'trial-credit' && p.expires); t.no_expiry = { ...good }; }), false, 'not together with a non-null expires');
+  for (const bad of [{ source: 'javascript:alert(1)' }, { source: '' }, { checked: '2999-01-01' }, { checked: 'yesterday' }, { quote: '' }, { quote: 'x'.repeat(301) }, { extra: 1 }]) {
+    assert.equal(validateAfter((d) => { trial(d).no_expiry = { ...good, ...bad }; }), false, `rejected: ${JSON.stringify(bad).slice(0, 40)}`);
+  }
+  assert.equal(validateAfter((d) => { const t = trial(d); t.no_expiry = { ...good }; delete t.no_expiry.quote; }), false, 'the quote is required');
+});
+
+test('expiry reads the same on the provider page, the comparison and the API', () => {
+  run(['scripts/build.mjs']);
+  const { providers } = JSON.parse(readFileSync(DATA, 'utf8'));
+  const by = (slug) => providers.find((p) => p.slug === slug);
+  const pageCell = (slug) => readFileSync(join(ROOT, 'site/p', `${slug}.html`), 'utf8').match(/Expires<\/span><span class="meta-v">([\s\S]*?)<\/div>/)[1];
+  const compareCell = (p, q) => compareTableHtml([p, q]).match(new RegExp(`Expires[\\s\\S]*?</tr>`))[0];
+  const api = JSON.parse(readFileSync(join(ROOT, 'site/api/v1/providers.json'), 'utf8')).providers;
+  // a trial credit whose provider says it never expires, a trial credit nobody has spoken for, and a continuous free tier
+  const never = by('deepgram'), unknown = by('scaleway'), ongoing = by('groq');
+  assert.ok(never.no_expiry && !unknown.no_expiry && !unknown.expires && ongoing.free_type !== 'trial-credit');
+  assert.match(pageCell('deepgram'), /no expiry[\s\S]*per the provider[\s\S]*read 2026-10-09/);
+  assert.match(compareCell(never, ongoing), /no expiry[\s\S]*per the provider/);
+  assert.ok(api.find((p) => p.slug === 'deepgram').no_expiry, 'the API carries the field');
+  assert.match(pageCell('scaleway'), /not confirmed/);
+  assert.match(compareCell(unknown, ongoing), /not confirmed/, 'a trial credit with no data is no longer "no expiry" in comparisons');
+  assert.equal(api.find((p) => p.slug === 'scaleway').no_expiry, undefined);
+  assert.match(pageCell('groq'), /^no expiry<\/span>$/);
 });
 
 // ---------- weekly re-verification pacing (lib/pacing.mjs) ----------

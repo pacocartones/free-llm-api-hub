@@ -15,6 +15,7 @@
 // pinned in derived-fingerprints.json and must be byte-stable per dataset.
 
 import { htmlEsc, SLUG_RE } from './rows.mjs';
+import { expiryHtml } from './expiry.mjs';
 
 export const COMPARE_MIN = 2;
 export const COMPARE_MAX = 4;
@@ -122,7 +123,7 @@ export function compareTableHtml(list, opts = {}) {
     ['Type', (p) => cell((p.category === 'ongoing' ? 'Ongoing free tier' : 'Trial credit') + (p.free_type ? ' · ' + p.free_type : ''))],
     ["What's free", (p) => cell(p.free_tier || '—')],
     ['Rate limits', (p) => cell(p.rate_limits || 'not specified')],
-    ['Expires', (p) => cell(p.expires || 'no expiry')],
+    ['Expires', (p) => expiryHtml(p)],
     ['The catch', (p) => cell(p.notes || '—')],
     ['Credit card', (p) => triStateHtml(p.card_required, 'required', 'not required')],
     ['Phone verification', (p) => triStateHtml(p.phone_required, 'required', 'not required')],
@@ -168,6 +169,7 @@ window.FLLM_COMPARE = (function () {
   const COMPARE_MIN = ${COMPARE_MIN};
   const COMPARE_MAX = ${COMPARE_MAX};
   const triStateHtml = ${triStateHtml.toString()};
+  const expiryHtml = ${expiryHtml.toString()};
   const parseCompareSlugs = ${parseCompareSlugs.toString()};
   const compareTableHtml = ${compareTableHtml.toString()};
   return { COMPARE_MIN, COMPARE_MAX, parseCompareSlugs, compareTableHtml };
