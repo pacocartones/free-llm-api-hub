@@ -1280,6 +1280,19 @@ test('the client makes no GitHub API call and the home search covers model names
   assert.ok(searchText(groq).includes(groq.models_free[0].toLowerCase()), 'a real provider is found by one of its models');
 });
 
+test('header menu: only Models, Compare, API and The best; the other destinations live in the footer', () => {
+  run(['scripts/build.mjs']);
+  const pages = ['site/index.html', 'site/compare/index.html', 'site/p/groq.html', 'site/models/index.html', 'site/guides-and-collections/index.html'];
+  for (const rel of pages) {
+    const html = readFileSync(join(ROOT, rel), 'utf8');
+    const nav = html.slice(html.indexOf('id="primary-nav"'), html.indexOf('</nav>', html.indexOf('id="primary-nav"')));
+    for (const gone of ['guides-and-collections/', 'programs/startups', 'programs/research']) assert.ok(!nav.includes(gone), `${rel}: header still links ${gone}`);
+    for (const kept of ['models/', 'compare/', 'api/', 'best/']) assert.ok(nav.includes(kept), `${rel}: header lost ${kept}`);
+    const footer = html.slice(html.indexOf('<footer'));
+    for (const dest of ['guides-and-collections/', 'programs/startups', 'programs/research']) assert.ok(footer.includes(dest), `${rel}: footer lacks ${dest}`);
+  }
+});
+
 // ---------- weekly re-verification pacing (lib/pacing.mjs) ----------
 // Simulate doing exactly the proposed batch every week and check the two
 // promises the worklist makes: nothing goes overdue, and a same-day cohort

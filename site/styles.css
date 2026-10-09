@@ -100,7 +100,7 @@ svg.i { width: 15px; height: 15px; flex: none; vertical-align: -2px; }
 .brand:hover { text-decoration: none; }
 .brand-name { font-family: var(--font-mono); font-weight: 700; font-size: .98rem; white-space: nowrap; letter-spacing: -.02em; }
 .nav { display: flex; gap: 4px; margin-left: 6px; }
-.nav a { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-size: .88rem; font-family: var(--font-mono); font-weight: 500; padding: 6px 10px; border-radius: 7px; }
+.nav a { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; color: var(--muted); font-size: .88rem; font-family: var(--font-mono); font-weight: 500; padding: 6px 10px; border-radius: 7px; }
 .nav a svg.i { width: 14px; height: 14px; opacity: .8; }
 .nav a:hover svg.i { opacity: 1; }
 .nav a:hover { color: var(--text); background: var(--panel); text-decoration: none; }
@@ -492,3 +492,11 @@ p.muted a, .prose p a, .prov-summary p a { text-decoration: underline; text-unde
 .sort-mobile { display: none; align-items: center; gap: 8px; font-size: .85rem; color: var(--muted); font-family: var(--font-mono); }
 @media (max-width: 720px) { .sort-mobile { display: inline-flex; } }
 .search-input { cursor: text; flex: 1 1 180px; max-width: 260px; min-width: 150px; }
+
+/* Narrow phones: the brand and the three header buttons must fit without the theme toggle leaving the viewport. */
+@media (max-width: 420px) {
+  .header-inner { gap: 10px; }
+  .brand { gap: 8px; }
+  .brand-name { font-size: .85rem; }
+  .header-actions { gap: 6px; }
+}
