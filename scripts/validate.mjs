@@ -169,6 +169,15 @@ for (const p of data.providers ?? []) {
     check(URL_RE.test(p.free_limits.source || ''), `${id}: free_limits.source must be the provider's page (http/https)`);
   }
 
+  // no_expiry: the provider's own statement that a one-time trial credit does not expire (see docs/comparison-dimensions.md).
+  if (p.no_expiry != null) {
+    check(p.free_type === 'trial-credit', `${id}: no_expiry applies only to a one-time trial credit (on a continuous free tier a null expires already means no end)`);
+    check(p.expires == null, `${id}: no_expiry and a non-null expires contradict each other`);
+    check(DATE_RE.test(p.no_expiry.checked || '') && p.no_expiry.checked <= data.generated, `${id}: no_expiry.checked must be a date not after the dataset's generated date`);
+    check(URL_RE.test(p.no_expiry.source || ''), `${id}: no_expiry.source must be the provider's page (http/https)`);
+    check(typeof p.no_expiry.quote === 'string' && p.no_expiry.quote.trim().length >= 1 && p.no_expiry.quote.length <= 300, `${id}: no_expiry.quote must be the passage, 1 to 300 characters`);
+  }
+
   // Integrity core: a verified entry must carry a dated, real source link.
   if (p.verified) {
     check(DATE_RE.test(p.last_verified || ''), `${id}: verified entry needs a YYYY-MM-DD last_verified`);

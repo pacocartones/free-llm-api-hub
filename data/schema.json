@@ -149,6 +149,17 @@
             "checked": { "type": "string", "format": "date", "description": "The day the numbers were read on that page." }
           }
         },
+        "no_expiry": {
+          "type": ["object", "null"],
+          "additionalProperties": false,
+          "required": ["source", "checked", "quote"],
+          "description": "Present only on a one-time trial credit whose provider says in its own words that the credit does not expire. Null (or absent) means the provider says nothing. expires stays null when this is set; it never carries a literal.",
+          "properties": {
+            "source": { "type": "string", "format": "uri", "description": "The provider's own page that says it." },
+            "checked": { "type": "string", "format": "date", "description": "The day the passage was read on that page." },
+            "quote": { "type": "string", "minLength": 1, "maxLength": 300, "description": "The passage, as the page words it (a sentence, not a paragraph)." }
+          }
+        },
         "verified": {
           "type": "boolean",
           "description": "true = core facts independently confirmed against the provider's own docs on last_verified. false = sourced from community tracking, flagged for follow-up."

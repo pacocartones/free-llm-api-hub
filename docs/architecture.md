@@ -56,6 +56,7 @@ Per-provider fields (in serializer order):
 | `modalities` | array of `text,vision,image,audio,embeddings,rerank,ocr` | |
 | `models_free` | array of strings \| null | SAMPLED model IDs (attribute, not core claim). Refreshed by `fetch-models.mjs`. |
 | `expires` | string \| null | e.g. "30 days" |
+| `no_expiry` | object \| null | trial credits only: the provider's own statement that the credit does not expire, with `source`, `checked` and a short `quote`; validated, never combined with a non-null `expires` |
 | `docs_url` | url | **primary source** — provider's own page. Required when `verified:true`. Also drives the "Visit website" button. |
 | `phone_required` | true/false/null | null = not confirmed |
 | `card_required` | true/false/null | |

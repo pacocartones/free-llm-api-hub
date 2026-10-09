@@ -34,6 +34,7 @@ Three consequences the rest of the project has to honour, or the tri-state is de
 | `best_for` | string \| null | Editorial one-liner: when this is the right pick. Optional. |
 | `modalities` | string[] | Modalities reachable on the free tier: `text`, `vision`, `image`, `audio`, `embeddings`, `rerank`, `ocr`. |
 | `expires` | string \| null | Validity window for time-limited offers, e.g. `"30 days"`. `null` for perpetual/renewing tiers. |
+| `no_expiry` | object \| null | Only on a one-time trial credit whose provider says, in its own words, that the credit does not expire: `source` (the provider's page), `checked` (the day it was read) and `quote` (the passage, 1 to 300 characters). `expires` stays `null` when it is set. Absent or `null` means the provider says nothing: a trial credit with neither `expires` nor `no_expiry` reads *not confirmed*. Rejected on any other `free_type`. |
 | `docs_url` | string | Primary source — the provider's own pricing/rate-limit page. Empty only for ⚠️ unverified entries. |
 | `phone_required` | tri-state | Does signup require phone verification? |
 | `card_required` | tri-state | Is a payment method required to use the free access? |

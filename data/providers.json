@@ -1,6 +1,6 @@
 {
   "$schema": "./schema.json",
-  "version": "2.9.1",
+  "version": "2.10.0",
   "generated": "2026-10-09",
   "source": "https://github.com/pacocartones/free-llm-api-hub",
   "note": "Canonical dataset. README tables, badge-freshness.json and the interactive site are all generated from this file — do not hand-edit them. `verified: true` means the core facts (tier, limits, key catch, link) were independently confirmed against the provider's own docs on `last_verified`. `verified: false` means sourced from community tracking and not yet independently re-confirmed here — treat those as indicative. Attribute fields (openai_compatible, modalities, best_for) are progressively backfilled and may be null.",
@@ -639,6 +639,7 @@
       "env_key": "DEEPGRAM_API_KEY",
       "is_text_llm": false,
       "model_tier": null,
+      "no_expiry": {"source":"https://deepgram.com/pricing","checked":"2026-10-09","quote":"Unlike \"free tiers\" that expire after 12 months, this credit is available until you use it up, allowing you to prototype without time pressure."},
       "verified": true,
       "last_verified": "2026-10-08"
     },
@@ -1145,6 +1146,7 @@
       "env_key": "SARVAM_API_KEY",
       "is_text_llm": true,
       "model_tier": null,
+      "no_expiry": {"source":"https://docs.sarvam.ai/api/getting-started/ratelimits","checked":"2026-10-09","quote":"Credits are universal and never expire."},
       "verified": true,
       "last_verified": "2026-10-08"
     },

@@ -11,6 +11,10 @@ The [static JSON API](https://freellmapihub.com/api/) serves the dataset as file
 
 What is *not* guaranteed: the order of providers in a list, the exact contents of sampled fields such as `models_free`, and the human-facing HTML pages.
 
+### Fields added within v1
+
+- **`no_expiry`** (dataset 2.10.0): an optional object on one-time trial credits whose provider says the credit does not expire — `source`, `checked`, `quote`. It appears in the provider objects the API serves; consumers that ignore unknown fields are unaffected. `expires` keeps its type and meaning (a window such as `"30 days"`, or `null`).
+
 ### Generated client configs
 
 `/api/v1/openai-clients.json` and `/api/v1/litellm.yaml` follow the same rules. Their *contents* follow the data: a provider enters or leaves them when it becomes, or stops being, verified and OpenAI-compatible with a known base URL and key variable. They carry `env_key`, the **name** of the environment variable for your own API key (for example `GROQ_API_KEY`), never a key value. The other API files do not carry `env_key`.
