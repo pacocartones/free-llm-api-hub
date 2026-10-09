@@ -533,3 +533,19 @@ p.muted a, .prose p a, .prov-summary p a { text-decoration: underline; text-unde
   .model-table th, .model-table td { padding-left: 6px; padding-right: 6px; }
   .model-table thead th { white-space: normal; letter-spacing: 0; font-size: .75rem; }
 }
+
+/* The stat tiles are written by explorer.js, so the block is empty until the script runs. Without a reserved
+   height it grew from 0 to its full size and pushed the "Popular guides" row down (layout shift 0.068 on a phone).
+   The height is reserved only where scripts run: with scripting off the block stays empty and takes no room.
+   The heights are measured (2026-10-09, JetBrains Mono, four tiles): 157px in one row, 288px in two rows, 308px
+   when two labels wrap (<= 479px). Re-measure them if a tile is added or removed, a label changes length or
+   the font changes (scripts/build.test.mjs pins the numbers; Lighthouse CLS on the home should stay at 0). */
+@media (scripting: enabled) {
+  .stats { min-height: 157px; }
+}
+@media (scripting: enabled) and (max-width: 640px) {
+  .stats { min-height: 288px; }
+}
+@media (scripting: enabled) and (max-width: 479px) {
+  .stats { min-height: 308px; }
+}
