@@ -1,7 +1,7 @@
 {
   "$schema": "./schema.json",
   "version": "2.9.1",
-  "generated": "2026-10-08",
+  "generated": "2026-10-09",
   "source": "https://github.com/pacocartones/free-llm-api-hub",
   "note": "Canonical dataset. README tables, badge-freshness.json and the interactive site are all generated from this file — do not hand-edit them. `verified: true` means the core facts (tier, limits, key catch, link) were independently confirmed against the provider's own docs on `last_verified`. `verified: false` means sourced from community tracking and not yet independently re-confirmed here — treat those as indicative. Attribute fields (openai_compatible, modalities, best_for) are progressively backfilled and may be null.",
   "providers": [
@@ -301,6 +301,7 @@
       "env_key": "OVHCLOUD_API_KEY",
       "is_text_llm": false,
       "model_tier": null,
+      "free_limits": {"requests_per_minute":2,"scope":"anonymous access, per IP and per model. With an API access key the page gives 400 requests per minute per Public Cloud project and per model, but the getting-started guide says keys from projects without a payment method (Discovery mode) cannot use the service, so that figure needs a project with a payment method","source":"https://docs.ovhcloud.com/en/guides/public-cloud/ai-machine-learning/ai-endpoints-capabilities","checked":"2026-10-09"},
       "verified": true,
       "last_verified": "2026-10-08"
     },
@@ -877,6 +878,7 @@
       "env_key": "PINECONE_API_KEY",
       "is_text_llm": false,
       "model_tier": null,
+      "free_limits": {"tokens_per_month":5000000,"requests_per_month":500,"scope":"Starter plan: 5M embedding tokens per month for each of llama-text-embed-v2, multilingual-e5-large and pinecone-sparse-english-v0; 500 rerank requests per month for bge-reranker-v2-m3; Starter plan limits as listed on the pricing page, which Pinecone can change","source":"https://www.pinecone.io/pricing/","checked":"2026-10-09"},
       "verified": true,
       "last_verified": "2026-10-08"
     },
@@ -901,6 +903,7 @@
       "env_key": "TWELVELABS_API_KEY",
       "is_text_llm": false,
       "model_tier": null,
+      "free_limits": {"requests_per_day":3000,"requests_per_minute":25,"scope":"Free plan, Embed API (Marengo 3.5): 3,000 requests per day for video, audio, image and text; 25 requests per minute for video and audio, 600 for image and text. Other APIs have their own limits","source":"https://docs.twelvelabs.io/docs/get-started/rate-limits","checked":"2026-10-09"},
       "verified": true,
       "last_verified": "2026-10-08"
     },
@@ -925,6 +928,7 @@
       "env_key": "OCRSPACE_API_KEY",
       "is_text_llm": false,
       "model_tier": null,
+      "free_limits": {"requests_per_day":500,"scope":"free OCR API key, per IP address","source":"https://ocr.space/OCRAPI","checked":"2026-10-09"},
       "verified": true,
       "last_verified": "2026-10-08"
     },
@@ -1584,7 +1588,7 @@
       "category": "ongoing",
       "free_type": "recurring-credit",
       "free_tier": "$20/month (work email) or $10/month (personal email) free usage allowance — OCR in 90+ languages, PDF-to-markdown, tables, forms and structured extraction",
-      "rate_limits": "25 requests/min on the free tier; per-page pricing (see datalab.to/pricing)",
+      "rate_limits": "10 requests/min and 5 concurrent requests on the free tier; per-page pricing (see datalab.to/pricing)",
       "notes": "Landing page still advertises a $5 signup credit, but the billing page describes the current free tier as a recurring monthly allowance ($20/mo work email, $10/mo personal, no card, 25 req/min) “designed to let you run a complete proof of concept before committing to a paid plan” — no explicit statement on commercial use of the hosted API. The self-hosted OSS weights carry a separate restriction (research/personal/startups under $2M ARR/funding). Signup does not require a phone number; checked via Google signup flow on 2026-10-02.",
       "best_for": "Open-source-pedigree OCR (Marker/Surya) on a free monthly allowance",
       "modalities": ["ocr"],
@@ -1598,6 +1602,7 @@
       "env_key": "DATALAB_API_KEY",
       "is_text_llm": false,
       "model_tier": null,
+      "free_limits": {"requests_per_minute":10,"scope":"free tier; 5 concurrent requests","source":"https://documentation.datalab.to/docs/common/limits","checked":"2026-10-09"},
       "verified": true,
       "last_verified": "2026-10-02",
       "added": "2026-07-31"

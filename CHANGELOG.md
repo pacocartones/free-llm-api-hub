@@ -11,6 +11,7 @@ Notable changes to the dataset and the project. Format based on [Keep a Changelo
 - **LMNT** (`lmnt`): lmnt.com now says "LMNT has shut down" and the docs URL no longer resolves (checked 2026-10-08). Removed under the inclusion criteria: an entry leaves when the provider ends free access entirely.
 
 ### Data
+- **Free limits, batch 1 (2026-10-09).** OCR.space, OVHcloud AI Endpoints, Twelve Labs, Datalab and Pinecone Inference gain `free_limits`, each with the provider's own page and the day it was read. Datalab's own page gives 10 requests per minute and 5 concurrent on the free tier, not 25: the entry's `rate_limits` text now follows it.
 - **Re-verification — batch 3B (2026-10-08).** Jina AI, Mixedbread, Ollama Cloud, ModelScope, OCR.space, LlamaParse, Nanonets, Moondream, Nutrient and Photoroom were re-checked against their own pages. Corrections:
   - Ollama Cloud's free plan is now credit-based with a monthly reset. The 5-hour and weekly limits are gone.
   - ModelScope's free calls are now paid in daily "Magicubes".
