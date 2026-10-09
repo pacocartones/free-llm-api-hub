@@ -104,6 +104,7 @@ Every provider also has its own page with the full details and a copy-ready quic
 - [The best free LLM APIs](#the-best-free-llm-apis) — our editorial top 20
 - [Notably NOT free](#notably-not-free) — so this list doesn't waste your time
 - [How verification works](#how-verification-works) — the trust engine
+- [How this project is maintained](#how-this-project-is-maintained) — agents under human oversight
 - [Use the data](#use-the-data) — dataset, exports, badge
 - [Contributing](#contributing) · [Project docs](#project-docs)
 
@@ -161,6 +162,10 @@ Free-tier terms move fast, and most lists go stale silently. This one is built t
 5. **Reporting a stale entry takes under a minute** via a [structured form](../../issues/new?template=inaccuracy.yml) that asks for the provider, what changed and a source link.
 
 What "verified" covers and where its limits are: [docs/methodology.md](docs/methodology.md) · what earns a spot on the list: [docs/inclusion-criteria.md](docs/inclusion-criteria.md).
+
+## How this project is maintained
+
+Much of the routine maintenance of this repository is done by AI agents working under human oversight: they re-check provider sources, prepare data updates, triage issues and draft code. Every change still goes through a pull request, a human maintainer reviews it and is responsible for every merge, and every data change carries a link to the provider's own page and the date it was checked. Commit messages carry no AI signature or trailer; this section and [AI_POLICY.md](AI_POLICY.md) are where we say it.
 
 ## Use the data
 
