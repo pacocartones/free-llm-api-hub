@@ -56,7 +56,6 @@ Per-provider fields (in serializer order):
 | `modalities` | array of `text,vision,image,audio,embeddings,rerank,ocr` | |
 | `models_free` | array of strings \| null | SAMPLED model IDs (attribute, not core claim). Refreshed by `fetch-models.mjs`. |
 | `expires` | string \| null | e.g. "30 days" |
-| `no_expiry` | object \| null | trial credits only: the provider's own statement that the credit does not expire, with `source`, `checked` and a short `quote`; validated, never combined with a non-null `expires` |
 | `docs_url` | url | **primary source** — provider's own page. Required when `verified:true`. Also drives the "Visit website" button. |
 | `phone_required` | true/false/null | null = not confirmed |
 | `card_required` | true/false/null | |
@@ -66,6 +65,7 @@ Per-provider fields (in serializer order):
 | `is_text_llm` | boolean (required) | free offering gives text/chat LLM API access; eligibility for the top 10 |
 | `model_tier` / `model_tier_source` | 0-4 / object, or both null | derived from a cited LMArena rating (thresholds in `lib/model-tier.mjs`); validated against the rating |
 | `free_limits` | object \| null | published numeric limits with `source` and `checked`; never estimated |
+| `no_expiry` | object \| null | trial credits only: the provider's own statement that the credit does not expire, with `source`, `checked` and a short `quote`; validated, never combined with a non-null `expires` |
 | `env_key` | UPPER_SNAKE | secret NAME for probe/fetch-models. **STRIPPED from all public output** (homepage payload, site/providers.json, /api) except the two client configs (`api/v1/openai-clients.json`, `api/v1/litellm.yaml`), whose purpose is to tell users which variable to put their own key in. Never the value. |
 | `verified` | boolean | true = independently confirmed against own docs on `last_verified` |
 | `last_verified` | YYYY-MM-DD \| null | must be null when `verified:false` |

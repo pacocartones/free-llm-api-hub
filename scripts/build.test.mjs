@@ -1390,7 +1390,7 @@ test('expiry reads the same on the provider page, the comparison and the API', (
   // a trial credit whose provider says it never expires, a trial credit nobody has spoken for, and a continuous free tier
   const never = by('deepgram'), unknown = by('scaleway'), ongoing = by('groq');
   assert.ok(never.no_expiry && !unknown.no_expiry && !unknown.expires && ongoing.free_type !== 'trial-credit');
-  assert.match(pageCell('deepgram'), /no expiry[\s\S]*per the provider[\s\S]*read 2026-10-09/);
+  assert.match(pageCell('deepgram'), new RegExp(`no expiry[\\s\\S]*per the provider[\\s\\S]*read ${never.no_expiry.checked}`));
   assert.match(compareCell(never, ongoing), /no expiry[\s\S]*per the provider/);
   assert.ok(api.find((p) => p.slug === 'deepgram').no_expiry, 'the API carries the field');
   assert.match(pageCell('scaleway'), /not confirmed/);
