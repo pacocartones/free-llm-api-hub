@@ -501,7 +501,7 @@
       "name": "SambaNova Cloud",
       "category": "ongoing",
       "free_type": "renewing-quota",
-      "free_tier": "Rate-limited free tier (applies when no payment method is linked) across all models",
+      "free_tier": "Rate-limited free tier (applies when no payment method is linked) across the models listed in the Free Tier table",
       "rate_limits": "Free Tier: 20 RPM / 20 RPD / 200,000 TPD listed per model in the table, enforcement scope not stated; Developer Tier (card required): 60-240 RPM depending on model",
       "notes": "Free Tier applies when no payment method is linked to the account; SambaCloud ToS grants a commercial license (no evaluation-only clause). The previously-listed \"$5 / 3 months\" trial could not be re-confirmed on official pages (2026-07-30). card_required is unconfirmed because SambaNova's own pages disagree (read 2026-10-08): the rate-limits doc (https://docs.sambanova.ai/docs/en/models/rate-limits) says \"Free Tier: Applied when there is no payment method linked with your account\", while the plans page (https://cloud.sambanova.ai/plans) says \"Add a payment method and purchase credits to run your first requests\". Settling it needs a real signup, which is not done without the Owner's OK. The rate-limits doc (read 2026-10-09) also lists two preview models on the Free Tier at the same 20 RPM / 20 RPD / 200,000 TPD (DeepSeek-V3.2, gemma-4-31B-it), described there as having limited capacity and removable at short notice; they are not in models_free.",
       "best_for": "Fast open models on a rate-limited free tier",
