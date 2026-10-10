@@ -549,3 +549,9 @@ p.muted a, .prose p a, .prov-summary p a { text-decoration: underline; text-unde
 @media (scripting: enabled) and (max-width: 479px) {
   .stats { min-height: 308px; }
 }
+
+/* Provider pages on a phone (360 to 390 px): a note with a long unbroken string (a documentation URL, a model id)
+   was wider than the card and widened the whole page (7 of the 68 pages, up to 614px at 360px). The string now
+   wraps at the edge when it does not fit; ordinary words and numbers still break only at spaces, and the
+   code blocks keep their own horizontal scroll. */
+.prov-card p, p.muted { overflow-wrap: anywhere; }

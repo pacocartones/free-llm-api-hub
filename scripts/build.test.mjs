@@ -1681,3 +1681,10 @@ test('the stat tiles keep a reserved height, so filling them in does not push th
   // Not reserved without scripts: the block would be an empty gap when explorer.js never runs.
   assert.doesNotMatch(css, /\.stats \{ display: grid;[^}]*min-height/);
 });
+
+test('long strings in provider notes wrap instead of widening the page on a phone', () => {
+  // Measured with a browser: 7 of the 68 provider pages were wider than a 360px screen (a long URL in a note); with
+  // this rule none is, at 360 and 390px. The rule is pinned by text because a browser is not part of the suite.
+  const css = readFileSync(join(ROOT, 'site/styles.css'), 'utf8').replace(/\s+/g, ' ');
+  assert.match(css, /\.prov-card p, p\.muted \{ overflow-wrap: anywhere; \}/);
+});
