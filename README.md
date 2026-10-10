@@ -205,7 +205,7 @@ It renders the real, auditable age of the oldest entry in the list — not a sta
 <script src="https://freellmapihub.com/widget.js" async></script>
 ```
 
-Self-contained (inline styles, no CSS conflicts). `data-modality` is optional (`text`, `audio`, `embeddings`, `image`, `vision`, `ocr`, `rerank`).
+Self-contained (inline styles, no CSS conflicts). All attributes are optional: `data-count` (1-20, default 6), `data-modality` (`text`, `audio`, `embeddings`, `image`, `vision`, `ocr`, `rerank`), `data-category` (`ongoing` or `trial`; default both), `data-sort` (an explorer sort key - `recommended` (default), `name`, `category`, `free_tier`, `notes`, `verified`).
 
 **Follow changes** — [updates page](https://freellmapihub.com/updates) or the [RSS feed](https://freellmapihub.com/feed.xml).
 
@@ -267,3 +267,4 @@ Thanks to everyone who has verified an entry, fixed a link, or improved the proj
 ## License
 
 [MIT](LICENSE) — free to reuse, fork, and adapt, including the dataset. A link back is appreciated but not required.
+
