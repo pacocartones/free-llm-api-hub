@@ -8,11 +8,10 @@ Free LLM and AI APIs whose own terms or privacy page say they do not use your pr
 
 Providers whose **own page says they do not train on your prompts** (`data_policy.trains_on_prompts: false`). Each provider’s own page on this site shows the page its policy rests on (a link, with the day it was read). Read the conditions: some say it only holds unless you opt in, or in a privacy notice rather than a contract. Providers that do not state it are not listed, which never means they train.
 
-**13 of 68 tracked providers** match.
+**12 of 68 tracked providers** match.
 
 | Provider | Type | What's free | The catch | Verified |
 |---|---|---|---|---|
-| **[OpenRouter](https://openrouter.ai/docs/api-reference/limits)**<br><sub>💳 no card · 📵 no phone · 🏢 commercial OK · 🔌 OpenAI-compat</sub> | Ongoing | A rotating set of models with a :free suffix (16 on 2026-10-08; count fluctuates), single API across many providers | ToS (Jul 2026) prohibits reselling API access or building a competing service — platform-wide, not just the free models; per-model terms still apply | ✅ 2026-10-08 |
 | **[Cloudflare Workers AI](https://developers.cloudflare.com/workers-ai/platform/pricing/)**<br><sub>💳 no card · 📵 no phone · 🏢 commercial OK · 🔌 OpenAI-compat</sub> | Ongoing | 10,000 Neurons/day, all account plans | Resets daily at 00:00 UTC; overage on a Workers Paid plan bills at $0.011/1,000 Neurons. A few models (e.g. Kimi K2.6/K2.7-code, GLM-5.2) now require a Workers Paid plan | ✅ 2026-10-08 |
 | **[Cerebras](https://inference-docs.cerebras.ai/support/rate-limits)**<br><sub>💳 card required · 🏢 commercial OK · 🔌 OpenAI-compat</sub> | Trial | $5 in free credits for new accounts, usable across all public models | A verified payment method is required to activate Playground/API access (no charge until you buy credits). Credits expire 30 days after grant; whether any free access persists past expiry is not stated | ✅ 2026-10-08 |
 | **[Fireworks AI](https://docs.fireworks.ai/faq-new/billing-pricing/)**<br><sub>💳 no card · 🔌 OpenAI-compat</sub> | Trial | $1 trial credit | Fireworks uses prepaid credits. After the $1 credit is exhausted, add a payment method and credits (or enable auto top-up) to continue; account limits can rise with spend | ✅ 2026-10-08 |

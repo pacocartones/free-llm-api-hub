@@ -65,7 +65,7 @@
       "free_type": "renewing-quota",
       "free_tier": "A rotating set of models with a :free suffix (16 on 2026-10-08; count fluctuates), single API across many providers",
       "rate_limits": "20 req/min; 50 req/day under 10 credits purchased lifetime, 1000 req/day once 10+ credits purchased (one-time, not a subscription)",
-      "notes": "ToS (Jul 2026) prohibits reselling API access or building a competing service — platform-wide, not just the free models; per-model terms still apply",
+      "notes": "ToS (Jul 2026) prohibits reselling API access or building a competing service — platform-wide, not just the free models; per-model terms still apply. OpenRouter says it does not use inputs or outputs for training, but some upstream model providers may; an account setting (separate for free models) can exclude providers that train (openrouter.ai/privacy and docs/features/privacy-and-logging, read 2026-10-13).",
       "best_for": "Widest model selection behind one no-card key",
       "modalities": ["text", "vision"],
       "models_free": ["cohere/north-mini-code:free", "google/gemma-4-26b-a4b-it:free", "google/gemma-4-31b-it:free", "liquid/lfm-2.5-2.6b:free", "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free", "poolside/laguna-s-2.1:free"],
@@ -83,7 +83,7 @@
       "free_limits": {"requests_per_minute":20,"requests_per_day":50,"scope":"free models, accounts with under 10 credits purchased lifetime (1,000 requests/day once 10+ credits are purchased); table not readable in a plain fetch, figures are those of the entry's own verification","source":"https://openrouter.ai/docs/api-reference/limits","checked":"2026-10-08"},
       "verified": true,
       "last_verified": "2026-10-08",
-      "data_policy": {"trains_on_prompts":false,"retention":null,"source":"https://openrouter.ai/privacy","checked":"2026-10-13"}
+      "data_policy": null
     },
     {
       "slug": "cloudflare-workers-ai",
