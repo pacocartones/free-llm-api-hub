@@ -70,32 +70,6 @@ function verifiedCell(p) {
   return p.verified ? `✅ ${p.last_verified}` : '⚠️ unverified';
 }
 
-function ongoingTable(rows) {
-  const head =
-    '| Provider | What\'s free | Rate limits | The catch | Verified |\n' +
-    '|---|---|---|---|---|';
-  const body = rows
-    .map(
-      (p) =>
-        `| ${nameCell(p)} | ${esc(p.free_tier)} | ${esc(p.rate_limits)} | ${esc(p.notes)} | ${verifiedCell(p)} |`
-    )
-    .join('\n');
-  return `${head}\n${body}`;
-}
-
-function trialTable(rows) {
-  const head =
-    '| Provider | Credit | Models / notes | Expires | Verified |\n' +
-    '|---|---|---|---|---|';
-  const body = rows
-    .map(
-      (p) =>
-        `| ${nameCell(p)} | ${esc(p.free_tier)} | ${esc(p.notes || p.rate_limits)} | ${esc(p.expires || '—')} | ${verifiedCell(p)} |`
-    )
-    .join('\n');
-  return `${head}\n${body}`;
-}
-
 // The single README table: the top 10 by the FLLMAPIHUB score, in rank order. The score and
 // how many of its six inputs are confirmed sit next to the name; the method is on /best/methodology/.
 function bestTable(entries) {
