@@ -1486,7 +1486,7 @@
       "free_type": "trial-credit",
       "free_tier": "$10 free credit on sign-up (per Upstage's Getting Started docs) for the API — Solar LLM (chat + embeddings) plus Document Parse / OCR / information extraction; Studio document agents include 10 free runs each",
       "rate_limits": "Tier 0 (below the Explore commitment tier): Solar Pro 4 100 RPM / 250,000 TPM; Solar Mini 4 100 RPM / 50,000 TPM; Embeddings 100 RPM / 300,000 TPM; Document OCR 3 requests/second, 500 pages/minute",
-      "notes": "The Solar Pro 4 free window (2026-08-05 to 2026-08-11) has ended; standard pricing is $0.30 input / $1.20 output per 1M tokens from 2026-10-11 (UTC), after a 70%-off phase that runs until 2026-10-10. Beyond the signup credit, API use is pay-per-use, with prepaid commitment tiers from $100/mo adding bonus credit and higher limits. Studio agent runs need no card. A separate institutional grant (up to 1 year of free Solar Pro + Document Parse) exists for eligible schools, hospitals and nonprofits only. Solar Pro 2/3 and Solar Mini are deprecated on 2026-10-30 (KST).",
+      "notes": "The Solar Pro 4 free window (2026-08-05 to 2026-08-11) has ended; standard pricing is $0.30 input / $1.20 output per 1M tokens from 2026-10-11 (UTC), after a 70%-off phase that runs until 2026-10-10. Beyond the signup credit, API use is pay-per-use, with prepaid commitment tiers from $100/mo adding bonus credit and higher limits. Studio agent runs need no card. A separate institutional grant (up to 1 year of free Solar Pro + Document Parse) exists for eligible schools, hospitals and nonprofits only. Solar Pro 2/3 and Solar Mini are deprecated on 2026-10-30 (KST). Data policy evidence: Terms of Use, Article 22(6): \"Member Input/Output Data generated through services provided free of charge (excluding services temporarily provided free of charge for promotional purposes in anticipation of paid services) may be used for service provision and improvement, as well as for research and development of artificial intelligence technologies (including training).\" Privacy Policy, Free Tier API row: \"Until the end of service provision or a separately notified period.\" Whether the signup credit counts as the \"temporarily provided free of charge for promotional purposes in anticipation of paid services\" exception is not stated on either page, so trains_on_prompts stays null (unconfirmed) and only the retention is recorded. Sources read 2026-10-13: https://www.upstage.ai/terms-of-service/update-may-06-2026 ; https://www.upstage.ai/privacy-policy/updated-aug-26-2026",
       "best_for": "Solar LLM + document OCR behind one OpenAI-compatible key",
       "modalities": ["text", "ocr", "embeddings"],
       "models_free": null,
@@ -1502,7 +1502,8 @@
       "model_tier": null,
       "verified": true,
       "last_verified": "2026-10-08",
-      "added": "2026-07-31"
+      "added": "2026-07-31",
+      "data_policy": {"trains_on_prompts":null,"retention":"Until the end of service provision or a separately notified period","source":"https://www.upstage.ai/terms-of-service/update-may-06-2026","checked":"2026-10-13"}
     },
     {
       "slug": "veryfi",
