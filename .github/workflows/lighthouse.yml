@@ -3,7 +3,7 @@ name: Lighthouse
 # Accessibility and performance budget for the built site.
 #
 # Serves site/ itself on a free local port and measures what it serves with
-# Lighthouse, on four pages: the home, /best/, /coverage/ and one provider page.
+# Lighthouse, on five pages: the home, /best/, /coverage/, /free-gpu/ and one provider page.
 # The job fails when a page falls below the thresholds in
 # scripts/lib/lighthouse-gate.mjs. Nothing is published, no secret is used, and
 # the token can only read the repository.
@@ -41,7 +41,7 @@ jobs:
         working-directory: tools/lighthouse
         run: npm ci --ignore-scripts
 
-      - name: Measure the four pages
+      - name: Measure the five pages
         env:
           CHROME_PATH: /usr/bin/google-chrome
         run: node scripts/lighthouse-gate.mjs
