@@ -82,7 +82,8 @@
       "model_tier_source": {"model":"google/gemma-4-31b-it:free","arena_model":"gemma-4-31b","match":"variant","rating":1452.8,"ci":[1445.4,1460.3],"boundary":true,"votes":6133,"snapshot":"2026-10-02","url":"https://huggingface.co/datasets/lmarena-ai/leaderboard-dataset"},
       "free_limits": {"requests_per_minute":20,"requests_per_day":50,"scope":"free models, accounts with under 10 credits purchased lifetime (1,000 requests/day once 10+ credits are purchased); table not readable in a plain fetch, figures are those of the entry's own verification","source":"https://openrouter.ai/docs/api-reference/limits","checked":"2026-10-08"},
       "verified": true,
-      "last_verified": "2026-10-08"
+      "last_verified": "2026-10-08",
+      "data_policy": {"trains_on_prompts":false,"retention":null,"source":"https://openrouter.ai/privacy","checked":"2026-10-13"}
     },
     {
       "slug": "cloudflare-workers-ai",
