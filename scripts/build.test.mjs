@@ -1944,3 +1944,22 @@ test('home: site.js keeps the banner through 31 October (UTC) and removes it fro
   assert.equal(runSiteJsAt('2026-11-01T00:00:00Z'), true, '1 November: banner is removed');
   assert.equal(runSiteJsAt('2027-02-01T12:00:00Z'), true, 'later: banner is removed');
 });
+
+// The collection of providers that say they do not train on prompts is built from
+// data_policy.trains_on_prompts === false and from nothing else: a provider with
+// true or an unstated policy is never listed, and the page links each row's own source.
+test('the no-training collection lists exactly the providers whose data_policy says false', () => {
+  run(['scripts/build.mjs']);
+  const providers = JSON.parse(readFileSync(DATA, 'utf8')).providers;
+  const expected = providers.filter((p) => p.data_policy && p.data_policy.trains_on_prompts === false).map((p) => p.slug).sort();
+  assert.ok(expected.length >= 8, 'the card asks for at least 8 before the collection exists');
+  const md = readFileSync(join(ROOT, 'collections/no-training.md'), 'utf8');
+  const rows = md.split('\n').filter((l) => l.startsWith('| **['));
+  assert.equal(rows.length, expected.length, 'one row per provider whose policy says false');
+  const listed = providers.filter((p) => rows.some((r) => r.startsWith(`| **[${p.name}]`))).map((p) => p.slug).sort();
+  assert.deepEqual(listed, expected);
+  assert.ok(existsSync(join(ROOT, 'site/collections/no-training.html')), 'the page is generated');
+  for (const p of providers.filter((q) => q.data_policy && q.data_policy.trains_on_prompts !== false)) {
+    assert.ok(!listed.includes(p.slug), `${p.slug} is listed but its policy is not false`);
+  }
+});

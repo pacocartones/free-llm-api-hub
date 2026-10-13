@@ -71,6 +71,6 @@ Every provider below offers free API access with **no card required** to get sta
 
 ---
 
-Other collections: [Free LLM APIs with no credit card](no-credit-card.md) · [Free LLM APIs with no phone verification](no-phone.md) · [Free LLM APIs for commercial use](commercial-use.md) · [OpenAI-compatible free LLM APIs](openai-compatible.md) · [Permanently free LLM APIs](always-free.md) · [Free multimodal LLM APIs](multimodal.md)
+Other collections: [Free LLM APIs with no credit card](no-credit-card.md) · [Free LLM APIs with no phone verification](no-phone.md) · [Free LLM APIs for commercial use](commercial-use.md) · [OpenAI-compatible free LLM APIs](openai-compatible.md) · [Permanently free LLM APIs](always-free.md) · [Free multimodal LLM APIs](multimodal.md) · [Free LLM APIs that say they do not train on your prompts](no-training.md)
 
 _Generated from [providers.json](../data/providers.json). Terms change without notice — always confirm against each provider's own docs._
