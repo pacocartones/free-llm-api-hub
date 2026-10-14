@@ -26,6 +26,7 @@ function render() {
   const nocard = document.getElementById('f-nocard').checked;
   const nophone = document.getElementById('f-nophone').checked;
   const commercial = document.getElementById('f-commercial').checked;
+  const notrain = document.getElementById('f-notrain').checked;
   const openai = document.getElementById('f-openai').checked;
   const verifiedOnly = document.getElementById('f-verified').checked;
 
@@ -37,6 +38,7 @@ function render() {
     if (nocard && p.card_required !== false) return false;
     if (nophone && p.phone_required !== false) return false;
     if (commercial && p.commercial_ok !== true) return false;
+    if (notrain && p.data_policy?.trains_on_prompts !== false) return false;
     if (openai && p.openai_compatible !== true) return false;
     if (verifiedOnly && p.verified !== true) return false;
     return true;
@@ -52,7 +54,7 @@ function render() {
   const activeCount = (query.trim() ? 1 : 0) + (category !== 'all' ? 1 : 0) + 
     (modality !== 'all' ? 1 : 0) +
     (sortKey !== 'recommended' ? 1 : 0) +
-    [nocard, nophone, commercial, openai, verifiedOnly].filter(Boolean).length;
+    [nocard, nophone, commercial, notrain, openai, verifiedOnly].filter(Boolean).length;
   document.getElementById('clearFilters').hidden = activeCount === 0;
 
   // Rows come from shared-rows.js — the same function the server used to SSR
@@ -171,7 +173,7 @@ document.querySelectorAll('thead th[data-key]').forEach(th => {
   th.addEventListener('click', () => applySort(th));
   th.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); applySort(th); } });
 });
-['f-nocard', 'f-nophone', 'f-commercial', 'f-openai', 'f-verified'].forEach(id =>
+['f-nocard', 'f-nophone', 'f-commercial', 'f-notrain', 'f-openai', 'f-verified'].forEach(id =>
   document.getElementById(id).addEventListener('input', e => {
     const chip = e.target.closest('.chip'); if (chip) chip.classList.toggle('on', e.target.checked);
     render();
@@ -197,7 +199,7 @@ document.getElementById('tbody').addEventListener('click', e => {
 });
 
 // --- shareable state: sync filters to the URL and restore them on load ---
-const URL_FLAGS = [['nocard', 'f-nocard'], ['nophone', 'f-nophone'], ['commercial', 'f-commercial'], ['openai', 'f-openai'], ['verified', 'f-verified']];
+const URL_FLAGS = [['nocard', 'f-nocard'], ['nophone', 'f-nophone'], ['commercial', 'f-commercial'], ['notrain', 'f-notrain'], ['openai', 'f-openai'], ['verified', 'f-verified']];
 function syncURL() {
   const params = new URLSearchParams();
   if (query.trim()) params.set('q', query.trim());

@@ -311,3 +311,15 @@ test('keyboard: the focused row has a visible focus ring in styles.css', () => {
   const css = readFileSync(new URL('../site/styles.css', import.meta.url), 'utf8');
   assert.match(css, /#table tbody tr:focus-visible \{ outline: 2px solid var\(--accent\);/);
 });
+
+test('explorer: "Does not train on prompts" filter chip and URL flag (#289)', () => {
+  const html = readFileSync(new URL('../site/index.html', import.meta.url), 'utf8');
+  assert.match(html, /<input type="checkbox" id="f-notrain"> Doesn't train on prompts<\/label>/);
+
+  const src = readFileSync(new URL('../site/explorer.js', import.meta.url), 'utf8');
+  assert.match(src, /const notrain = document\.getElementById\('f-notrain'\)\.checked;/);
+  assert.match(src, /if \(notrain && p\.data_policy\?\.trains_on_prompts !== false\) return false;/);
+  assert.match(src, /'f-notrain'/);
+  assert.match(src, /\['notrain', 'f-notrain'\]/);
+});
+
