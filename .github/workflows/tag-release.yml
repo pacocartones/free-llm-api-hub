@@ -16,12 +16,14 @@ on:
       - 'data/providers.json'
   workflow_dispatch: {}
 
-permissions:
-  contents: write # push the tag; nothing else
+# No permissions at workflow level; the one job below asks for what it needs.
+permissions: {}
 
 jobs:
   tag:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write # push the tag; nothing else
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
