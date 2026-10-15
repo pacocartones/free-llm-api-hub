@@ -1171,7 +1171,8 @@
       "model_tier": null,
       "no_expiry": {"source":"https://docs.sarvam.ai/api/getting-started/ratelimits","checked":"2026-10-09","quote":"Credits are universal and never expire."},
       "verified": true,
-      "last_verified": "2026-10-08"
+      "last_verified": "2026-10-08",
+      "data_policy": {"trains_on_prompts":null,"retention":"Retained indefinitely until a workspace Owner configures a period.","source":"https://docs.sarvam.ai/api/platform/data-retention","checked":"2026-10-15","quote":"Until an Owner sets a retention period, your workspace’s data is retained indefinitely.","note":"The page describes workspace-level retention for Model APIs, with per-product overrides. It does not explicitly identify the free-credit plan.","plan_named":false}
     },
     {
       "slug": "gladia",
