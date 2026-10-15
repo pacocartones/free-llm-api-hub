@@ -12,6 +12,28 @@ Thanks for helping. Here's how it works.
 
 Fixing a rate limit means editing one field plus the files regenerated from it — still a small, reviewable diff.
 
+## Running Lighthouse locally
+
+The CI gate is `node scripts/lighthouse-gate.mjs` (after `npm ci` in `tools/lighthouse` and `node scripts/build.mjs`; it needs a Chrome binary in `CHROME_PATH`). It gives every run its own Chrome profile and process group, and on exit (also on Ctrl-C or a kill) it ends those groups by pid, deletes the profile and checks that nothing still points at it.
+
+If you run Lighthouse or Chrome by hand against a local server instead, do it like this so nothing is left running:
+
+```bash
+profile="$(mktemp -d)"
+python3 -m http.server 8080 --directory site --bind 127.0.0.1 &
+server=$!
+cleanup() {
+  kill "$server" 2>/dev/null
+  kill -- -"$$" 2>/dev/null          # children of this shell, by group, never `pkill -f`
+  rm -rf "$profile"
+}
+trap cleanup EXIT INT TERM
+tools/lighthouse/node_modules/.bin/lighthouse http://127.0.0.1:8080/ \
+  --chrome-flags="--headless --no-sandbox --user-data-dir=$profile" --output=json --quiet > lh.json
+# final check: nothing should still reference the profile
+if grep -l -- "$profile" /proc/[0-9]*/cmdline 2>/dev/null | grep -qv "/proc/$$/"; then echo "orphan processes left" >&2; fi
+```
+
 ## Quick start
 
 ```bash
