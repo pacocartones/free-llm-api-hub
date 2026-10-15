@@ -11,7 +11,7 @@ updates:
     commit-message:
       prefix: "chore(ci)"
     labels:
-      - chore
+      - dependencies
     groups:
       actions:
         patterns:
@@ -25,4 +25,4 @@ updates:
     commit-message:
       prefix: "chore(deps)"
     labels:
-      - chore
+      - dependencies
