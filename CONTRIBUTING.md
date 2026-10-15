@@ -12,6 +12,30 @@ Thanks for helping. Here's how it works.
 
 Fixing a rate limit means editing one field plus the files regenerated from it — still a small, reviewable diff.
 
+## Running Lighthouse locally
+
+The CI gate is `node scripts/lighthouse-gate.mjs` (after `npm ci` in `tools/lighthouse` and `node scripts/build.mjs`; it needs a Chrome binary in `CHROME_PATH`). It gives every run its own Chrome profile and process group, and on exit (also on Ctrl-C or a kill) it ends those groups by pid, deletes the profile and checks that nothing still points at it.
+
+If you run Lighthouse or Chrome by hand against a local server instead, do it like this so nothing is left running:
+
+```bash
+profile="$(mktemp -d)"
+python3 -m http.server 8080 --directory site --bind 127.0.0.1 &
+server=$!
+cleanup() {
+  kill "$server" 2>/dev/null
+  [ -n "${lh:-}" ] && kill -- -"$lh" 2>/dev/null   # Lighthouse runs in its own process group (setsid), never `pkill -f`
+  rm -rf "$profile"
+}
+trap cleanup EXIT INT TERM
+setsid tools/lighthouse/node_modules/.bin/lighthouse http://127.0.0.1:8080/ \
+  --chrome-flags="--headless --no-sandbox --user-data-dir=$profile" --output=json --quiet > lh.json &
+lh=$!
+wait "$lh"
+# final check: nothing should still reference the profile
+if grep -l -- "$profile" /proc/[0-9]*/cmdline 2>/dev/null | grep -qv "/proc/$$/"; then echo "orphan processes left" >&2; fi
+```
+
 ## Quick start
 
 ```bash
@@ -61,6 +85,8 @@ Slugs are permanent identifiers — never rename or reuse a `slug`.
 ### Confirming a single unknown field
 
 The smallest useful contribution: many entries carry `null` in `card_required`, `phone_required` or `commercial_ok`, which means *nobody has confirmed it yet* — not that the answer is "no". Turning one `null` into a sourced `true`/`false` is a genuine improvement and takes minutes. Open a PR with the flag set, `last_verified` bumped, and the primary source in `docs_url` or `notes`.
+
+The same applies to `data_policy`, which records what a provider says about your prompts (`trains_on_prompts`, `retention`, `source`, `checked`). An absent `data_policy` object means "not recorded", never "no". Sourced values come exclusively from the provider's own pages, alongside the day they were read. If a provider's official pages do not settle the question, that is a completely valid result too: leave the entry as it is and report your findings with the link and date in your PR. See the full field definition in [docs/comparison-dimensions.md](docs/comparison-dimensions.md).
 
 ## Reporting without a PR
 

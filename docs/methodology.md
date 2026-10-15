@@ -63,6 +63,8 @@ _[← Docs index](README.md) · [Main README](../README.md)_
 
 `free_limits` follows the same rule: numbers exactly as the provider publishes them, with the page and the day they were read, `null` when it publishes none.
 
+`data_policy` follows the same rule: the value comes only from the provider's own page, with the page and the day it was read. A missing or `null` object means unrecorded, while `trains_on_prompts: null` inside a recorded object means "not stated" by the provider; values are never estimated or inferred from similar providers. `retention` uses the provider's own wording. See the field definition in [comparison-dimensions.md](comparison-dimensions.md).
+
 ## The score
 
 The score ranks providers from 0 to 100. `scripts/lib/score.mjs` computes it from the data on every run, and `npm run score` prints it with each part. Every number below is a named constant in that file.

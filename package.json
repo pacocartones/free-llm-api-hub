@@ -14,7 +14,7 @@
     "discover": "node scripts/discover.mjs",
     "probe": "node scripts/probe.mjs",
     "og": "node scripts/og.mjs",
-    "test": "node scripts/validate.mjs && node scripts/check-links.mjs && node --test scripts/build.test.mjs scripts/explorer.test.mjs scripts/best.test.mjs scripts/lighthouse-gate.test.mjs scripts/gpu-compute.test.mjs",
+    "test": "node scripts/validate.mjs && node scripts/check-links.mjs && node --test scripts/build.test.mjs scripts/explorer.test.mjs scripts/best.test.mjs scripts/lighthouse-gate.test.mjs scripts/gpu-compute.test.mjs scripts/test-lists.test.mjs",
     "score": "node scripts/score.mjs",
     "stars": "node scripts/refresh-stars.mjs",
     "check": "node scripts/validate.mjs && node scripts/build.mjs && git diff --exit-code -- README.md collections site/index.html site/sitemap.xml site/robots.txt docs/credit-programs.md CITATION.cff data/probe-report.json badge-verified.json site/badge-verified.json derived-fingerprints.json",
