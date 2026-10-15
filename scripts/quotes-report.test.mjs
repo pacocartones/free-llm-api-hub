@@ -5,7 +5,7 @@ import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
-import { verifyEntries, buildReport, reportErrors, reportAge, quotesReportHtml, AMBER_DAYS, RED_DAYS, PERSISTENT_RUNS, RESULTS } from './lib/quotes-report.mjs';
+import { verifyEntries, buildReport, reportErrors, reportCoverage, reportAge, quotesReportHtml, AMBER_DAYS, RED_DAYS, PERSISTENT_RUNS, RESULTS } from './lib/quotes-report.mjs';
 import { METHOD, READ_HEADERS, htmlToText, sha256 } from './lib/page-text.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -83,12 +83,12 @@ test('reportErrors: a good report passes and every broken one is caught', () => 
   assert.match(bad((r) => { r.version = 2; }), /version 1/);
   assert.match(bad((r) => { r.ran_at = '2026-10-19'; }), /ran_at/);
   assert.match(bad((r) => { r.runner = ''; }), /runner/);
-  assert.match(bad((r) => { r.results[0].id = 'z.sentence'; }), /no such entry/);
-  assert.match(bad((r) => { r.results[1].id = 'a.sentence'; }), /twice|not in the report/);
+  assert.deepEqual(reportErrors((() => { const r = goodReport(); r.results[0].id = 'z.sentence'; return r; })(), registry), [], 'an entry the register no longer has is a stale result, not an error');
+  assert.match(bad((r) => { r.results[1].id = 'a.sentence'; }), /twice/);
   assert.match(bad((r) => { r.results[1].result = 'maybe'; }), /unknown result/);
   assert.match(bad((r) => { r.results[0].runs_in_a_row = 2; }), /runs_in_a_row/);
   assert.match(bad((r) => { r.results[1].runs_in_a_row = 0; }), /runs_in_a_row/);
-  assert.match(bad((r) => { r.results.pop(); r.summary.total = 1; r.summary.expired = 0; }), /not in the report: a run covers every entry/);
+  assert.deepEqual(reportErrors((() => { const r = goodReport(); r.results.pop(); r.summary.total = 1; r.summary.expired = 0; return r; })(), registry), [], 'an entry added to the register after the run is not an error: the report is a photograph');
   assert.match(bad((r) => { r.summary.ok = 2; }), /summary\.ok/);
   assert.match(bad((r) => { r.summary.total = 5; }), /summary\.total/);
   assert.match(bad((r) => { r.results[0].source_url = 'http://x'; }), /https/);
@@ -131,4 +131,17 @@ test('the real build: /data-policy/ carries the section, and with no report in t
 test('the command: --offline reads no page and agrees with the data', () => {
   const out = execFileSync('node', [join(ROOT, 'scripts/verify-quotes.mjs'), '--offline'], { encoding: 'utf8' });
   assert.match(out, /consistent with the data/); assert.match(out, /this does not read any page/);
+});
+test('coverage: what the register gained or lost since the run is said, not rejected; the page tells it', () => {
+  const full = goodReport();
+  const grown = { entries: [...registry.entries, E('c.sentence', 'c')] };
+  assert.deepEqual(reportCoverage(full, grown), { notRead: ['c.sentence'], stale: [] });
+  assert.deepEqual(reportCoverage(full, { entries: [registry.entries[0]] }), { notRead: [], stale: ['b.sentence'] });
+  assert.deepEqual(reportCoverage(full, registry), { notRead: [], stale: [] });
+  assert.deepEqual(reportErrors(full, grown), [], 'a new row does not make the committed report fail CI');
+  const html = quotesReportHtml(full, grown, Date.parse('2026-10-20T12:00:00Z'));
+  assert.match(html, /1 quoted passage was added after that run and has not been read from the server yet/);
+  assert.doesNotMatch(quotesReportHtml(full, registry, Date.parse('2026-10-20T12:00:00Z')), /added after that run/);
+  const gone = quotesReportHtml(full, { entries: [registry.entries[0]] }, Date.parse('2026-10-20T12:00:00Z'));
+  assert.doesNotMatch(gone, /<th scope="row">b<\/th>/, 'the result of an entry that is no longer in the register is not listed');
 });
