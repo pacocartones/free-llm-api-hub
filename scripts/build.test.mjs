@@ -2064,6 +2064,12 @@ test('a11y: wide data tables sit in a keyboard-reachable scroll region and the h
 });
 
 // ---- the data-policy table fits a laptop screen (measured: 1114px at 1100px before, 1052px after) ----
+test('mobile: the two long text cells stack their label above the text at 720px', () => {
+  const css = readFileSync(join(ROOT, 'site/styles.css'), 'utf8').replace(/\s+/g, ' ');
+  assert.match(css, /#table td\.notes, #table td:nth-child\(3\) \{ display: block; \}/, 'the notes and the catch cells are blocks, not a 40% label beside a narrow column');
+  assert.match(css, /#table td\.notes::before, #table td:nth-child\(3\)::before \{ display: block;/, 'the label sits above the text');
+});
+
 test('data-policy page: five columns, the help link inside the source cell, and the header labels may wrap', () => {
   const html = readFileSync(join(ROOT, 'site/data-policy/index.html'), 'utf8');
   const head = html.slice(html.indexOf('<thead>'), html.indexOf('</thead>'));

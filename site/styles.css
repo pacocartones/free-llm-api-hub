@@ -516,6 +516,10 @@ pre:hover .pre-copy, .pre-copy:focus-visible { opacity: 1; }
   #table td.name { display: block; padding: 12px 14px 8px; border-bottom: 1px solid var(--border); margin-bottom: 4px; }
   #table td.name::before { content: none; }
   #table td.notes { max-width: none; }
+  /* The two long text cells stack their label above the text and use the whole card width: beside a 40% label the text was a
+     narrow column (the catch alone was 43% of a 54,000px page at 360px). */
+  #table td.notes, #table td:nth-child(3) { display: block; }
+  #table td.notes::before, #table td:nth-child(3)::before { display: block; margin-bottom: 3px; }
 }
 @media (max-width: 640px) { .stats { grid-template-columns: repeat(2, 1fr); } .footer-top { grid-template-columns: 1fr; } .notes { max-width: none; } }
 @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto; transition: none !important; } .caret { animation: none; } }
