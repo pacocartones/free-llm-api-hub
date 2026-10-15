@@ -2067,7 +2067,7 @@ test('a11y: wide data tables sit in a keyboard-reachable scroll region and the h
 test('data_policy lot 2: 21 of 68 providers, the four new rows carry a quote and a source, and Deepgram stays unconfirmed', () => {
   const data = JSON.parse(readFileSync(join(ROOT, 'data/providers.json'), 'utf8'));
   const withPolicy = data.providers.filter((p) => p.data_policy);
-  assert.equal(withPolicy.length, 21, 'the count of covered providers');
+  assert.ok(withPolicy.length >= 21, 'lot 2 raised the covered providers to 21; later lots only add (the exact count is pinned by the latest lot test)');
   for (const slug of ['assemblyai', 'elevenlabs', 'voyage-ai', 'cartesia']) {
     const dp = data.providers.find((p) => p.slug === slug).data_policy;
     assert.ok(dp, `${slug} has a data_policy`);
@@ -2079,6 +2079,24 @@ test('data_policy lot 2: 21 of 68 providers, the four new rows carry a quote and
   const assembly = data.providers.find((p) => p.slug === 'assemblyai').data_policy;
   assert.match(assembly.note, /Free users do not have the ability to opt out/, 'the free plan is stated for AssemblyAI');
   assert.equal(data.providers.find((p) => p.slug === 'deepgram').data_policy, undefined, 'Deepgram has no policy: its page says only contractually included data is used and participation is voluntary');
+});
+
+test('data_policy lot 3: 23 of 68, LlamaParse says it does not train, Retell AI trains only if recording is not opted out', () => {
+  const data = JSON.parse(readFileSync(join(ROOT, 'data/providers.json'), 'utf8'));
+  assert.equal(data.providers.filter((p) => p.data_policy).length, 23, 'the count of covered providers');
+  const llama = data.providers.find((p) => p.slug === 'llamaparse').data_policy;
+  assert.equal(llama.trains_on_prompts, false);
+  assert.equal(llama.quote, 'We do not train any models on User Content.');
+  assert.match(llama.note, /up to 48 hours after processing/, 'the retention sentence is in the note');
+  assert.match(llama.note, /names no plan/, 'the note says the page names no plan');
+  const retell = data.providers.find((p) => p.slug === 'retell-ai').data_policy;
+  assert.equal(retell.trains_on_prompts, true);
+  assert.match(retell.quote, /^If you do not opt-out of recording/, 'the condition is in the quote');
+  assert.match(retell.note, /Only if you do not opt out of recording/, 'the condition is in the note');
+  for (const dp of [llama, retell]) {
+    assert.match(dp.source, /^https:\/\//);
+    assert.equal(dp.checked, '2026-10-15');
+  }
 });
 
 test('mobile: the two long text cells stack their label above the text at 720px', () => {

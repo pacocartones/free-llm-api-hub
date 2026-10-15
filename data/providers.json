@@ -970,7 +970,8 @@
       "is_text_llm": false,
       "model_tier": null,
       "verified": true,
-      "last_verified": "2026-10-08"
+      "last_verified": "2026-10-08",
+      "data_policy": {"trains_on_prompts":false,"retention":null,"source":"https://www.llamaindex.ai/terms-of-service","checked":"2026-10-15","quote":"We do not train any models on User Content.","note":"Same clause: «LlamaIndex will only retain such User Content and other data provided by you in S3 for up to 48 hours after processing.» Terms last updated Jun 7, 2024; the page names no plan, so the free plan is neither included nor excluded by it."}
     },
     {
       "slug": "nanonets",
@@ -1605,7 +1606,8 @@
       "model_tier": null,
       "verified": true,
       "last_verified": "2026-10-08",
-      "added": "2026-07-31"
+      "added": "2026-07-31",
+      "data_policy": {"trains_on_prompts":true,"retention":null,"source":"https://www.retellai.com/terms-of-service","checked":"2026-10-15","quote":"If you do not opt-out of recording, you give Retell AI permission to record calls made using the Service and process communication data (“Communications”) and User Content for offering AI-powered analytics and the development, training, and improvement of artificial intelligence and machine learning models that are included in the Service.","note":"Only if you do not opt out of recording (section 11). The next sentence says the data is de-identified and aggregated before use. Terms last updated October 7, 2026; the page names no plan."}
     },
     {
       "slug": "datalab",
