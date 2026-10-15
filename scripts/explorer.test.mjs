@@ -362,3 +362,24 @@ test('explorer: "Does not train on prompts" filter chip and URL flag (#289)', ()
   assert.match(src, /\['notrain', 'f-notrain'\]/);
 });
 
+test('explorer: "Text LLMs only" filter chip and URL flag (#335)', () => {
+  const html = readFileSync(new URL('../site/index.html', import.meta.url), 'utf8');
+  assert.match(html, /<input type="checkbox" id="f-text"> Text LLMs only<\/label>/);
+
+  const src = readFileSync(new URL('../site/explorer.js', import.meta.url), 'utf8');
+  assert.match(src, /const textOnly = document\.getElementById\('f-text'\)\.checked;/);
+  assert.match(src, /if \(textOnly && p\.is_text_llm !== true\) return false;/);
+  assert.match(src, /'f-text'/);
+  assert.match(src, /\['text', 'f-text'\]/);
+  assert.match(src, /\[nocard, nophone, commercial, textOnly, notrain, openai, verifiedOnly\]/);
+
+  const data = JSON.parse(readFileSync(new URL('../data/providers.json', import.meta.url), 'utf8'));
+  const allProviders = data.providers;
+  const filtered = allProviders.filter(p => p.is_text_llm === true);
+  assert(filtered.length > 0, 'has text llm providers');
+  assert(filtered.length < allProviders.length, 'filters out non-text providers');
+  assert(filtered.every(p => p.is_text_llm === true), 'all filtered items are text LLMs');
+  assert(allProviders.some(p => p.is_text_llm !== true), 'dataset contains non-text providers');
+});
+
+
