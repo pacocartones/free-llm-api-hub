@@ -106,6 +106,8 @@ A `data_policy` row also needs its entries in `data/quotes.json` (the sentence, 
 
 Data PRs are the common case, but scripts and site changes are welcome too. Start with **[docs/architecture.md](docs/architecture.md)** — it maps the pipeline, what each script does, and the two-places rule (the homepage is hand-written; everything else is generated). The checks a code PR must pass: `npm test` (data integrity + internal links) and, if you touched anything the build consumes, `npm run check` (build idempotency + drift).
 
+**Adding a test.** Put it in `scripts/<name>.test.mjs`. `npm test` and CI run every `scripts/*.test.mjs` through `scripts/run-tests.mjs`, which finds the files on disk, so a new test file does not touch `package.json` or `.github/workflows/verify.yml` and does not collide with other pull requests. A test named any other way (`*.test.js`, or inside a subfolder) would not run, and `scripts/test-lists.test.mjs` fails if there is one.
+
 ## Claiming an issue
 
 There are two kinds of issue:
