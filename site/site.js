@@ -67,4 +67,18 @@
     if (!isNaN(cutoff) && Date.now() >= cutoff) banner.remove();
   }
 
+  // --- data-policy page: how old the weekly report of the quoted pages is, counted when the page is opened ---
+  var chk = document.querySelector('.dp-check[data-ran-at]');
+  if (chk && chk.getAttribute('data-ran-at')) {
+    var ran = Date.parse(chk.getAttribute('data-ran-at'));
+    if (!isNaN(ran)) {
+      var days = Math.max(0, Math.floor((Date.now() - ran) / 86400000));
+      var level = days >= 15 ? 'red' : days >= 8 ? 'amber' : 'ok';
+      var age = chk.querySelector('.dp-age'); var lv = chk.querySelector('.dp-level');
+      if (age) age.textContent = days + (days === 1 ? ' day old' : ' days old');
+      if (lv) lv.textContent = level === 'red' ? 'The report has not been renewed for more than two weeks.' : level === 'amber' ? 'The report has not been renewed for more than a week.' : 'The report is up to date.';
+      chk.setAttribute('data-level', level);
+    }
+  }
+
 })();

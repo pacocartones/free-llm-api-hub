@@ -1,0 +1,512 @@
+{
+ "version": 1,
+ "note": "Register of the passages that data_policy rows quote: the sentence of each row, each phrase a note puts between guillemets, and each absence check behind a note that says a page has no mention of free, trial, paid or plan. CI checks that this file and the data agree (offline, consistency only). It does not prove the page says that now: that is what npm run verify-quotes reads with the network. Only the quoted fragment is kept, never a copy of the page; page_sha256 is the hash of the page text as it was read; lang is the language of the passage and of the page it is read in.",
+ "entries": [
+  {
+   "id": "google-gemini.sentence",
+   "slug": "google-gemini",
+   "kind": "sentence",
+   "text": "Google uses the content you submit to the Services and any generated responses to provide, improve, and develop Google products and services and machine learning technologies",
+   "source_url": "https://ai.google.dev/gemini-api/terms",
+   "read_on": "2026-10-15",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "296d96034f56cc95ddbf4be680e92510a4fd38d651d6499dff2fcfc079305cec"
+  },
+  {
+   "id": "groq.sentence",
+   "slug": "groq",
+   "kind": "sentence",
+   "text": "By default, Groq does not retain customer data for inference requests.",
+   "source_url": "https://console.groq.com/docs/your-data",
+   "read_on": "2026-10-15",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "544a0f7b12ebfe9831d7f816b6107a73f90b492561a607af7486ecac41be2f37"
+  },
+  {
+   "id": "cloudflare-workers-ai.sentence",
+   "slug": "cloudflare-workers-ai",
+   "kind": "sentence",
+   "text": "Cloudflare does not use your Customer Content to (1) train any AI models made available on Workers AI or (2) improve any Cloudflare or third-party services, and would not do so unless we received your explicit consent.",
+   "source_url": "https://developers.cloudflare.com/workers-ai/platform/data-usage/",
+   "read_on": "2026-10-15",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "af92d21e1594885b0ba9baf7d1f8983e25a45062faad91761bd87d342b4c26f3"
+  },
+  {
+   "id": "cerebras.sentence",
+   "slug": "cerebras",
+   "kind": "sentence",
+   "text": "For clarity, the foregoing does not grant Cerebras the right to use Service Content for the purpose of training or fine-tuning models.",
+   "source_url": "https://www.cerebras.ai/terms-of-service",
+   "read_on": "2026-10-15",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "b0880ab5f91f2cc4c500b66e7bd079d7a35b90fb73c41059d735c0d26cf07be3"
+  },
+  {
+   "id": "cerebras.note_passage.1",
+   "slug": "cerebras",
+   "kind": "note_passage",
+   "text": "may be provided for free",
+   "source_url": "https://www.cerebras.ai/terms-of-service",
+   "read_on": "2026-10-15",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "b0880ab5f91f2cc4c500b66e7bd079d7a35b90fb73c41059d735c0d26cf07be3"
+  },
+  {
+   "id": "mistral.sentence",
+   "slug": "mistral",
+   "kind": "sentence",
+   "text": "As stated during subscription, we may use your data (input and output) to train our artificial intelligence models.",
+   "source_url": "https://help.mistral.ai/en/articles/347617-do-you-use-my-user-data-to-train-your-artificial-intelligence-models",
+   "read_on": "2026-10-15",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "4fed33d3c67b8756c3b474483dd9686507dbee02cc3df00114d7cbfd119bcc69"
+  },
+  {
+   "id": "fireworks-ai.sentence",
+   "slug": "fireworks-ai",
+   "kind": "sentence",
+   "text": "No AI Training on Your Data: We do not use your prompts, training data, or API inputs to train or improve our AI models without your explicit opt-in.",
+   "source_url": "https://fireworks.ai/privacy-policy",
+   "read_on": "2026-10-15",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "c47bfd258ed2f573a44c557ae68a1b679c3e0b5f8267f52957e27c4c7cabae40"
+  },
+  {
+   "id": "fireworks-ai.absence_check",
+   "slug": "fireworks-ai",
+   "kind": "absence_check",
+   "terms": [
+    "free",
+    "trial",
+    "paid",
+    "plan"
+   ],
+   "hits": {
+    "free": 0,
+    "trial": 0,
+    "paid": 0,
+    "plan": 0
+   },
+   "source_url": "https://fireworks.ai/privacy-policy",
+   "read_on": "2026-10-15",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "c47bfd258ed2f573a44c557ae68a1b679c3e0b5f8267f52957e27c4c7cabae40"
+  },
+  {
+   "id": "nebius.sentence",
+   "slug": "nebius",
+   "kind": "sentence",
+   "text": "Subject to the terms of the DPA, Nebius may access, use, host, cache, store, copy, modify, and otherwise process Input and Output to (a) provide, maintain, monitor, protect, and support the Services, Token Factory Service or (b) train smaller Models used for Speculative Decoding.",
+   "source_url": "https://docs.nebius.com/legal/token-factory",
+   "read_on": "2026-10-15",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "d98c5e06af8d200e23fa309b354614399e13f51041bcdcb5d86e49f5558c8581"
+  },
+  {
+   "id": "novita.sentence",
+   "slug": "novita",
+   "kind": "sentence",
+   "text": "By Default, Novita AI will not use your Content to train our own models or to improve the Services.",
+   "source_url": "https://novita.ai/legal/terms-of-service",
+   "read_on": "2026-10-15",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "33ffe95d0b5609619759841fa28263023c890b0b52ca9dc64e4af8d4ee99964f"
+  },
+  {
+   "id": "ai21.sentence",
+   "slug": "ai21",
+   "kind": "sentence",
+   "text": "Consistent with our Terms of Service, and unless otherwise agreed in writing or required to provide the Services, we do not use your inputs or outputs to train AI21’s foundational or generally available AI models.",
+   "source_url": "https://www.ai21.com/terms-policies/privacy-policy/",
+   "read_on": "2026-10-15",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "3a2697b1e08e9928e6d77198a5c875b6abba4812f9d4c38020a03afe8086bb03"
+  },
+  {
+   "id": "ai21.note_passage.1",
+   "slug": "ai21",
+   "kind": "note_passage",
+   "text": "Privacy Policy",
+   "source_url": "https://www.ai21.com/terms-policies/privacy-policy/",
+   "read_on": "2026-10-15",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "3a2697b1e08e9928e6d77198a5c875b6abba4812f9d4c38020a03afe8086bb03"
+  },
+  {
+   "id": "ai21.note_passage.2",
+   "slug": "ai21",
+   "kind": "note_passage",
+   "text": "for example, for individual-developer accounts",
+   "source_url": "https://www.ai21.com/terms-policies/privacy-policy/",
+   "read_on": "2026-10-15",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "3a2697b1e08e9928e6d77198a5c875b6abba4812f9d4c38020a03afe8086bb03"
+  },
+  {
+   "id": "ai21.note_passage.3",
+   "slug": "ai21",
+   "kind": "note_passage",
+   "text": "that processing is governed by our agreement with the customer",
+   "source_url": "https://www.ai21.com/terms-policies/privacy-policy/",
+   "read_on": "2026-10-15",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "3a2697b1e08e9928e6d77198a5c875b6abba4812f9d4c38020a03afe8086bb03"
+  },
+  {
+   "id": "ai21.absence_check",
+   "slug": "ai21",
+   "kind": "absence_check",
+   "terms": [
+    "free",
+    "trial",
+    "paid",
+    "plan"
+   ],
+   "hits": {
+    "free": 0,
+    "trial": 0,
+    "paid": 0,
+    "plan": 0
+   },
+   "source_url": "https://www.ai21.com/terms-policies/privacy-policy/",
+   "read_on": "2026-10-15",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "3a2697b1e08e9928e6d77198a5c875b6abba4812f9d4c38020a03afe8086bb03"
+  },
+  {
+   "id": "modal.sentence",
+   "slug": "modal",
+   "kind": "sentence",
+   "text": "Modal will not, except with Customer's prior written consent: (i) train any AI model using Customer Data, or (ii) export Customer Data into, or cause Customer Data to be ingested by, large language models.",
+   "source_url": "https://modal.com/legal/terms",
+   "read_on": "2026-10-15",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "246080092abebcd77646fc52b62b9e966cda34106c6eacc52ed0ea0532d86b83"
+  },
+  {
+   "id": "modal.note_passage.1",
+   "slug": "modal",
+   "kind": "note_passage",
+   "text": "may be subject to certain additional restrictions, limitations and differing terms",
+   "source_url": "https://modal.com/legal/terms",
+   "read_on": "2026-10-15",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "246080092abebcd77646fc52b62b9e966cda34106c6eacc52ed0ea0532d86b83"
+  },
+  {
+   "id": "scaleway.sentence",
+   "slug": "scaleway",
+   "kind": "sentence",
+   "text": "Your data is not used for training, retraining, or improving the base models.",
+   "source_url": "https://www.scaleway.com/en/docs/generative-apis/reference-content/data-privacy/",
+   "read_on": "2026-10-15",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "8da85e4dccfaaaea63f791b192f28d209cfb6d5704522d6f4ebe19ffc12aad27"
+  },
+  {
+   "id": "jina-ai.sentence",
+   "slug": "jina-ai",
+   "kind": "sentence",
+   "text": "We never use your API requests, inputs, or outputs to train our embedding, reranker, or any other models.",
+   "source_url": "https://jina.ai/embeddings/",
+   "read_on": "2026-10-15",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "8248d3aa3cb0d451fa61856ac51541b25728e09eebcfdc0bd480f278136edaae"
+  },
+  {
+   "id": "deepgram.sentence",
+   "slug": "deepgram",
+   "kind": "sentence",
+   "text": "We may also use Your Content to improve our Services, to develop other products and services, and for other business purposes, including training and testing our Models.",
+   "source_url": "https://deepgram.com/terms",
+   "read_on": "2026-10-15",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "42fc8c93a7d1893ee3a402ac817f846f477ded0bfc6b16c0932a7c5bc84b7372"
+  },
+  {
+   "id": "deepgram.note_passage.1",
+   "slug": "deepgram",
+   "kind": "note_passage",
+   "text": "you may opt out of model training on a per-request basis by setting the applicable parameter in your request",
+   "source_url": "https://deepgram.com/terms",
+   "read_on": "2026-10-15",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "42fc8c93a7d1893ee3a402ac817f846f477ded0bfc6b16c0932a7c5bc84b7372"
+  },
+  {
+   "id": "assemblyai.sentence",
+   "slug": "assemblyai",
+   "kind": "sentence",
+   "text": "(iii) to train AssemblyAI’s artificial intelligence and machine learning models.",
+   "source_url": "https://www.assemblyai.com/legal/terms-of-service",
+   "read_on": "2026-10-15",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "2e1b18c2cc443d7ca82740ce26bb5c0befb536f0ec8f4768c105f4ba6d0c4c75"
+  },
+  {
+   "id": "assemblyai.note_passage.1",
+   "slug": "assemblyai",
+   "kind": "note_passage",
+   "text": "Free users do not have the ability to opt out of the model improvement program.",
+   "source_url": "https://www.assemblyai.com/docs/faq/how-to-opt-out-of-data-sharing-for-our-model-improvement-program",
+   "read_on": "2026-10-15",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "d3e92df175183957a1d4ca502bd3461354f35b21ce0a29275f394b8698ea40ee"
+  },
+  {
+   "id": "ollama-cloud.sentence",
+   "slug": "ollama-cloud",
+   "kind": "sentence",
+   "text": "Ollama processes cloud prompts and responses to answer your requests. We do not use them to train models.",
+   "source_url": "https://docs.ollama.com/cloud",
+   "read_on": "2026-10-15",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "3b06fbebae30a07ca39f76c97597ccfb9d5765b125fe18ed87edaa37dd38ff07"
+  },
+  {
+   "id": "runware.sentence",
+   "slug": "runware",
+   "kind": "sentence",
+   "text": "Runware will not use your Customer Material to train, fine-tune or develop Runware's own models or services or those of any third party.",
+   "source_url": "https://runware.ai/terms",
+   "read_on": "2026-10-15",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "7e94345821523a4c8a1a0b0a474fc7b9dafea62db0e11b7a36a9aba968f2eaca"
+  },
+  {
+   "id": "runware.note_passage.1",
+   "slug": "runware",
+   "kind": "note_passage",
+   "text": "aggregated or de-identified operational data",
+   "source_url": "https://runware.ai/terms",
+   "read_on": "2026-10-15",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "7e94345821523a4c8a1a0b0a474fc7b9dafea62db0e11b7a36a9aba968f2eaca"
+  },
+  {
+   "id": "runware.note_passage.2",
+   "slug": "runware",
+   "kind": "note_passage",
+   "text": "may be free of charge",
+   "source_url": "https://runware.ai/terms",
+   "read_on": "2026-10-15",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "7e94345821523a4c8a1a0b0a474fc7b9dafea62db0e11b7a36a9aba968f2eaca"
+  },
+  {
+   "id": "llamaparse.sentence",
+   "slug": "llamaparse",
+   "kind": "sentence",
+   "text": "We do not train any models on User Content.",
+   "source_url": "https://www.llamaindex.ai/terms-of-service",
+   "read_on": "2026-10-15",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "79f2c3d983593e673e2cca21afec4e75113c3e1833393bc3a55206aa23a0664e"
+  },
+  {
+   "id": "llamaparse.note_passage.1",
+   "slug": "llamaparse",
+   "kind": "note_passage",
+   "text": "LlamaIndex will only retain such User Content and other data provided by you in S3 for up to 48 hours after processing.",
+   "source_url": "https://www.llamaindex.ai/terms-of-service",
+   "read_on": "2026-10-15",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "79f2c3d983593e673e2cca21afec4e75113c3e1833393bc3a55206aa23a0664e"
+  },
+  {
+   "id": "moondream.sentence",
+   "slug": "moondream",
+   "kind": "sentence",
+   "text": "M87 Labs will not use Customer Content or Outputs to Train any model or adapter that is made generally available by M87 Labs (including the base Moondream models), or to Train any model or adapter for the benefit of any third party, except where you explicitly opt in under a separate written agreement.",
+   "source_url": "https://moondream.ai/terms",
+   "read_on": "2026-10-15",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "a7c151d622c571676ef6225174ff69e6e77e071a79c55c9c88dfec0f76f1976a"
+  },
+  {
+   "id": "moondream.note_passage.1",
+   "slug": "moondream",
+   "kind": "note_passage",
+   "text": "Customer Content",
+   "source_url": "https://moondream.ai/terms",
+   "read_on": "2026-10-15",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "a7c151d622c571676ef6225174ff69e6e77e071a79c55c9c88dfec0f76f1976a"
+  },
+  {
+   "id": "speechmatics.sentence",
+   "slug": "speechmatics",
+   "kind": "sentence",
+   "text": "Speechmatics will not use Your inputs, outputs or any other data for machine learning or model training purposes unless You opt in by enabling model training within Your portal workspace.",
+   "source_url": "https://www.speechmatics.com/legal/terms-of-service",
+   "read_on": "2026-10-15",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "6a5ac7574639ad10941f34dbafcec23350835b571b56a5df6642e3b1a2c7f15c"
+  },
+  {
+   "id": "speechmatics.note_passage.1",
+   "slug": "speechmatics",
+   "kind": "note_passage",
+   "text": "free Hours of use",
+   "source_url": "https://www.speechmatics.com/legal/terms-of-service",
+   "read_on": "2026-10-15",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "6a5ac7574639ad10941f34dbafcec23350835b571b56a5df6642e3b1a2c7f15c"
+  },
+  {
+   "id": "elevenlabs.sentence",
+   "slug": "elevenlabs",
+   "kind": "sentence",
+   "text": "you may opt out of our use of your Content for training at any time by navigating to the 'Data use' menu in the 'Terms and Privacy' section of your ElevenLabs account.",
+   "source_url": "https://elevenlabs.io/terms-of-use",
+   "read_on": "2026-10-15",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "e1aace949855493f0c20860532894ea9eb0c8c84b98c55e85d132c6abe98062e"
+  },
+  {
+   "id": "rime.sentence",
+   "slug": "rime",
+   "kind": "sentence",
+   "text": "Except for Rime’s limited right to use your Voice Recordings to train a Customer Voice Model (as both terms are defined below) if you choose to use that feature, Rime does not use either the Input or Output to train its AI models.",
+   "source_url": "https://www.rime.ai/terms",
+   "read_on": "2026-10-15",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "39bba9b221549afaa686e558ba03e69f81d59efc3e821b36bf5bff8cae5f1492"
+  },
+  {
+   "id": "rime.note_passage.1",
+   "slug": "rime",
+   "kind": "note_passage",
+   "text": "limited by the terms of such trial",
+   "source_url": "https://www.rime.ai/terms",
+   "read_on": "2026-10-15",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "39bba9b221549afaa686e558ba03e69f81d59efc3e821b36bf5bff8cae5f1492"
+  },
+  {
+   "id": "voyage-ai.sentence",
+   "slug": "voyage-ai",
+   "kind": "sentence",
+   "text": "(iii) to train, improve, and otherwise further develop the Service (such as by training the artificial intelligence models we use).",
+   "source_url": "https://www.voyageai.com/tos",
+   "read_on": "2026-10-15",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "fe6ffaf647e5b7e0038fdd3146890e326f28488a6bdde4640408d7feccc5b39c"
+  },
+  {
+   "id": "voyage-ai.note_passage.1",
+   "slug": "voyage-ai",
+   "kind": "note_passage",
+   "text": "If you opt out, any credits or tokens for free usage of the Service may be automatically void (as determined by Voyage AI in its sole discretion).",
+   "source_url": "https://www.voyageai.com/tos",
+   "read_on": "2026-10-15",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "fe6ffaf647e5b7e0038fdd3146890e326f28488a6bdde4640408d7feccc5b39c"
+  },
+  {
+   "id": "cartesia.sentence",
+   "slug": "cartesia",
+   "kind": "sentence",
+   "text": "You may request that we not use certain categories of Your Content to train our Models by completing this online form",
+   "source_url": "https://cartesia.ai/legal/terms.html",
+   "read_on": "2026-10-15",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "9399f9854cd2d68dce07f6bcfbdc9f8a785c7d06a3e8930b6cf81789fd32f5ff"
+  },
+  {
+   "id": "cartesia.note_passage.1",
+   "slug": "cartesia",
+   "kind": "note_passage",
+   "text": "Training Opt-Out",
+   "source_url": "https://cartesia.ai/legal/terms.html",
+   "read_on": "2026-10-15",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "9399f9854cd2d68dce07f6bcfbdc9f8a785c7d06a3e8930b6cf81789fd32f5ff"
+  },
+  {
+   "id": "upstage.sentence",
+   "slug": "upstage",
+   "kind": "sentence",
+   "text": "may be used for service provision and improvement, as well as for research and development of artificial intelligence technologies (including training).",
+   "source_url": "https://www.upstage.ai/terms-of-service/update-may-06-2026",
+   "read_on": "2026-10-15",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "75df986dd5918e8ad1183cd8f9ad18dba8677ac15d129c25bf90fd0d72594646"
+  },
+  {
+   "id": "smallest-ai.sentence",
+   "slug": "smallest-ai",
+   "kind": "sentence",
+   "text": "We will not use such User Content or Input to train and improve our Services or to develop new products and services.",
+   "source_url": "https://smallest.ai/terms-of-service",
+   "read_on": "2026-10-15",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "c3e061e0e2175c2af4cbeddfd0cdee6a31724821f21c9be0c43064eee841e10a"
+  },
+  {
+   "id": "smallest-ai.note_passage.1",
+   "slug": "smallest-ai",
+   "kind": "note_passage",
+   "text": "free or trial versions",
+   "source_url": "https://smallest.ai/terms-of-service",
+   "read_on": "2026-10-15",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "c3e061e0e2175c2af4cbeddfd0cdee6a31724821f21c9be0c43064eee841e10a"
+  },
+  {
+   "id": "retell-ai.sentence",
+   "slug": "retell-ai",
+   "kind": "sentence",
+   "text": "If you do not opt-out of recording, you give Retell AI permission to record calls made using the Service and process communication data (“Communications”) and User Content for offering AI-powered analytics and the development, training, and improvement of artificial intelligence and machine learning models that are included in the Service.",
+   "source_url": "https://www.retellai.com/terms-of-service",
+   "read_on": "2026-10-15",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "3a54549fbc652bc6ad70a202a3f172564af25a0dd7b6033f8c086121af52b475"
+  }
+ ]
+}

@@ -5,7 +5,7 @@
 //   - site/providers.json so the interactive site ships the data
 // Zero dependencies. Run with: node scripts/build.mjs   (or `npm run build`)
 
-import { readFileSync, writeFileSync, mkdirSync, readdirSync, rmSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync, readdirSync, rmSync, existsSync } from 'node:fs';
 import { execSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
@@ -25,6 +25,7 @@ import { labelTables } from './lib/tables.mjs';
 import { markNewTabLinks } from './lib/links.mjs';
 import { codingToolsMainHtml } from './lib/free-coding-tools.mjs';
 import { dataPolicyRows, dataPolicyMainHtml } from './lib/data-policy-page.mjs';
+import { quotesReportHtml } from './lib/quotes-report.mjs';
 import { SCORE_WEIGHTS, EDITORIAL_WEIGHT, EDITORIAL_DEFAULT, MATH_INPUTS, MIN_CONFIRMED, TOP_SIZE, EDITORIAL_NOTE_THRESHOLD, STABILITY_MIN_DAYS, STABILITY_MIN_SAMPLES, rankProviders, editorialRating } from './lib/score.mjs';
 import { openaiClients, litellmYaml } from './lib/client-config.mjs';
 import * as compareLib from './lib/compare.mjs';
@@ -1751,10 +1752,20 @@ writeFileSync(
     main:
       '<section class="page-hero model-hero"><div class="wrap"><nav class="crumbs"><a href="../">Home</a> / Who trains on your data</nav>' +
       '<h1>Who trains on your data</h1><p class="lede">The provider\'s own sentence about training on prompts, where one is recorded, with its page and the day it was read.</p></div></section>' +
-      dataPolicyMainHtml(dataPolicyRows(providers), { repo: REPO, generated: data.generated, prefix: '../' }),
+      dataPolicyMainHtml(dataPolicyRows(providers), { repo: REPO, generated: data.generated, prefix: '../', quotesCheck: quotesCheckHtml() }),
     prefix: '../',
   })
 );
+
+// The section "do the quoted pages still say it?" of /data-policy/: the report of npm run verify-quotes, if there is one. The age is computed
+// from the dataset's day (noon UTC), never from the clock, so a build is the same on every machine; a small script of the page recomputes
+// it when the page is opened, because a static page cannot know how long ago it was built.
+function quotesCheckHtml() {
+  const file = join(ROOT, 'data/quotes-report.json');
+  const registry = JSON.parse(readFileSync(join(ROOT, 'data/quotes.json'), 'utf8'));
+  const report = existsSync(file) ? JSON.parse(readFileSync(file, 'utf8')) : null;
+  return quotesReportHtml(report, registry, Date.parse(`${data.generated}T12:00:00Z`));
+}
 
 // ---------- /free-gpu/ — the Free GPU compute section, apart from the ranking ----------
 // Reads data/gpu-compute.json only; nothing here enters a provider count, score or collection.
