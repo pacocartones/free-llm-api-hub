@@ -7,6 +7,9 @@ Notable changes to the dataset and the project. Format based on [Keep a Changelo
 
 ## [Unreleased]
 
+### Corrected
+- **Corrección:** the notes of the data policy rows of Voyage AI, Cartesia, Retell AI and LlamaParse said "the page names no plan". That was wrong: a search of each page for the words free, trial, paid and plan finds them (Cartesia: section 2.6 "Free Trials"; Retell AI: section 7 "Beta, evaluation, and trial services"; LlamaParse: section 6 "Payments, Billing, and Subscription Plans"). The Voyage AI note mattered most: its opt-out clause says that, if you opt out, "any credits or tokens for free usage of the Service may be automatically void", so the clause does name free usage and its `plan_named` is now `true`. What changes: those four notes, plus the ones of Scaleway and Moondream, now say only what was checked (the sentence or the clause names no plan, with the nearby section where there is one); `plan_named` is now set on the rows that had a sentence and no value (AssemblyAI `true`, ElevenLabs `false`, Cartesia `false`, Retell AI `false`). A statement about the whole page is kept only where the search finds none of the four words (AI21 and Fireworks AI).
+
 ### Added
 - **`/api/v1/score.json` and `/api/v1/score.schema.json`**: the whole FLLMAPIHUB score (every eligible provider, with its parts and its confirmed inputs) in the stable API, with a JSON Schema at a stable URL. Contract v1, documented in `docs/api.md`. A new file, not a change to the dataset shape, so the dataset `version` does not change.
 - **`partner` and `partner_note`** (dataset 2.11.0, two new optional fields): the project's relationship with a provider, shown only on the /best podium with a visible label and note, and never read by the score. They arrived with the top 10 by score and the /best/methodology/ page (#253).

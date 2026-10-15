@@ -2123,7 +2123,10 @@ test('data_policy lot 4: the 13 providers that say they do not train were read f
     assert.ok(p.data_policy.note && p.data_policy.note.length <= 300, `${p.slug}: note within 300 characters`);
   }
   for (const p of data.providers.filter((q) => q.data_policy && q.data_policy.trains_on_prompts !== false)) {
-    if (p.slug === 'deepgram') assert.equal(p.data_policy.plan_named, false, 'deepgram (lot 5) was read for the plan');
+    // rows that say it may train were read for the plan later (lots 2, 3, 5 and the correction of the absence claims): true where the
+    // clause names the free users or free usage (AssemblyAI, Voyage AI), false where it does not
+    const READ = { assemblyai: true, 'voyage-ai': true, elevenlabs: false, cartesia: false, 'retell-ai': false, deepgram: false };
+    if (p.slug in READ) assert.equal(p.data_policy.plan_named, READ[p.slug], `${p.slug}: plan_named as read`);
     else assert.equal(p.data_policy.plan_named, undefined, `${p.slug}: not read for the plan yet, so no value is written`);
   }
   const api = JSON.parse(readFileSync(join(ROOT, 'site/api/v1/providers.json'), 'utf8'));
@@ -2155,6 +2158,15 @@ test('data_policy lot 6: 26 of 68, AI21 says it does not train, with the conditi
   assert.ok(dp.quote.length <= 400 && dp.note.length <= 300);
   const md = readFileSync(join(ROOT, 'collections/no-training.md'), 'utf8');
   assert.ok(md.split('\n').some((l) => l.startsWith('| **[AI21')), 'AI21 is in the no-training collection');
+});
+
+test('correction of the absence claims: no note says the page names no plan unless the page has none of the four words, and Voyage AI names free usage', () => {
+  const data = JSON.parse(readFileSync(DATA, 'utf8'));
+  const dpOf = (slug) => data.providers.find((p) => p.slug === slug).data_policy;
+  for (const slug of ['voyage-ai', 'cartesia', 'retell-ai', 'llamaparse', 'scaleway', 'moondream']) assert.doesNotMatch(dpOf(slug).note, /\bThe page names no/i, `${slug}: no statement about the whole page`);
+  assert.equal(dpOf('voyage-ai').plan_named, true);
+  assert.match(dpOf('voyage-ai').note, /credits or tokens for free usage of the Service may be automatically void/, 'the passage about free usage is in the note');
+  assert.match(readFileSync(join(ROOT, 'CHANGELOG.md'), 'utf8'), /^- \*\*Corrección:\*\*/m, 'the correction is visible in the changelog');
 });
 
 test('mobile: the two long text cells stack their label above the text at 720px', () => {

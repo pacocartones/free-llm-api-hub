@@ -557,7 +557,7 @@
       "model_tier": null,
       "verified": true,
       "last_verified": "2026-10-08",
-      "data_policy": {"trains_on_prompts":false,"retention":"Inputs and outputs not collected, except briefly for errors or abuse; anonymized usage data up to 6 months","source":"https://www.scaleway.com/en/docs/generative-apis/reference-content/data-privacy/","checked":"2026-10-15","quote":"Your data is not used for training, retraining, or improving the base models.","note":"Page reviewed 2025-10-03. The page names no plan.","plan_named":false}
+      "data_policy": {"trains_on_prompts":false,"retention":"Inputs and outputs not collected, except briefly for errors or abuse; anonymized usage data up to 6 months","source":"https://www.scaleway.com/en/docs/generative-apis/reference-content/data-privacy/","checked":"2026-10-15","quote":"Your data is not used for training, retraining, or improving the base models.","note":"Page reviewed 2025-10-03. The sentence names no plan.","plan_named":false}
     },
     {
       "slug": "nvidia-nim",
@@ -681,7 +681,7 @@
       "model_tier": null,
       "verified": true,
       "last_verified": "2026-10-08",
-      "data_policy": {"trains_on_prompts":true,"retention":null,"source":"https://www.assemblyai.com/legal/terms-of-service","checked":"2026-10-15","quote":"(iii) to train AssemblyAI’s artificial intelligence and machine learning models.","note":"Terms §4.3(b)(iii), about Customer Data. Its FAQ (assemblyai.com/docs/faq/how-to-opt-out-of-data-sharing-for-our-model-improvement-program, read 2026-10-15) says: «Free users do not have the ability to opt out of the model improvement program.» Paid customers can opt out, forward only."}
+      "data_policy": {"trains_on_prompts":true,"retention":null,"source":"https://www.assemblyai.com/legal/terms-of-service","checked":"2026-10-15","quote":"(iii) to train AssemblyAI’s artificial intelligence and machine learning models.","note":"Terms §4.3(b)(iii), about Customer Data. Its FAQ (assemblyai.com/docs/faq/how-to-opt-out-of-data-sharing-for-our-model-improvement-program, read 2026-10-15) says: «Free users do not have the ability to opt out of the model improvement program.» Paid customers can opt out, forward only.","plan_named":true}
     },
     {
       "slug": "mixedbread",
@@ -974,7 +974,7 @@
       "model_tier": null,
       "verified": true,
       "last_verified": "2026-10-08",
-      "data_policy": {"trains_on_prompts":false,"retention":null,"source":"https://www.llamaindex.ai/terms-of-service","checked":"2026-10-15","quote":"We do not train any models on User Content.","note":"Same clause: «LlamaIndex will only retain such User Content and other data provided by you in S3 for up to 48 hours after processing.» Terms last updated Jun 7, 2024; the page names no plan, so the free plan is neither included nor excluded by it.","plan_named":false}
+      "data_policy": {"trains_on_prompts":false,"retention":null,"source":"https://www.llamaindex.ai/terms-of-service","checked":"2026-10-15","quote":"We do not train any models on User Content.","note":"Same clause: «LlamaIndex will only retain such User Content and other data provided by you in S3 for up to 48 hours after processing.» Terms last updated Jun 7, 2024. The clause names no plan; the terms have a separate section on payments and subscription plans (6).","plan_named":false}
     },
     {
       "slug": "nanonets",
@@ -1023,7 +1023,7 @@
       "model_tier": null,
       "verified": true,
       "last_verified": "2026-10-08",
-      "data_policy": {"trains_on_prompts":false,"retention":"No longer than necessary to provide the Service","source":"https://moondream.ai/terms","checked":"2026-10-15","quote":"M87 Labs will not use Customer Content or Outputs to Train any model or adapter that is made generally available by M87 Labs (including the base Moondream models), or to Train any model or adapter for the benefit of any third party, except where you explicitly opt in under a separate written agreement.","note":"Last updated 2025-12-10. The page names no free plan; the clause speaks of «Customer Content».","plan_named":false}
+      "data_policy": {"trains_on_prompts":false,"retention":"No longer than necessary to provide the Service","source":"https://moondream.ai/terms","checked":"2026-10-15","quote":"M87 Labs will not use Customer Content or Outputs to Train any model or adapter that is made generally available by M87 Labs (including the base Moondream models), or to Train any model or adapter for the benefit of any third party, except where you explicitly opt in under a separate written agreement.","note":"Last updated 2025-12-10. The clause names no free plan and speaks of «Customer Content».","plan_named":false}
     },
     {
       "slug": "speechmatics",
@@ -1145,7 +1145,7 @@
       "model_tier": null,
       "verified": true,
       "last_verified": "2026-10-08",
-      "data_policy": {"trains_on_prompts":true,"retention":null,"source":"https://elevenlabs.io/terms-of-use","checked":"2026-10-15","quote":"you may opt out of our use of your Content for training at any time by navigating to the 'Data use' menu in the 'Terms and Privacy' section of your ElevenLabs account.","note":"Terms of Service (non-EEA), last updated 09 Oct 2026. The sentence is addressed to every user and does not name a plan; the same terms define Free Users separately. Whether the Data use menu exists on the free plan is not stated."}
+      "data_policy": {"trains_on_prompts":true,"retention":null,"source":"https://elevenlabs.io/terms-of-use","checked":"2026-10-15","quote":"you may opt out of our use of your Content for training at any time by navigating to the 'Data use' menu in the 'Terms and Privacy' section of your ElevenLabs account.","note":"Terms of Service (non-EEA), last updated 09 Oct 2026. The sentence is addressed to every user and does not name a plan; the same terms define Free Users separately. Whether the Data use menu exists on the free plan is not stated.","plan_named":false}
     },
     {
       "slug": "sarvam-ai",
@@ -1268,7 +1268,7 @@
       "verified": true,
       "last_verified": "2026-10-08",
       "added": "2026-07-31",
-      "data_policy": {"trains_on_prompts":true,"retention":null,"source":"https://www.voyageai.com/tos","checked":"2026-10-15","quote":"(iii) to train, improve, and otherwise further develop the Service (such as by training the artificial intelligence models we use).","note":"Customer Content, section 3(iii). The same terms let you opt out on the website; it applies only to Customer Content submitted after the opt-out. The page names no plan, so the free plan is neither included nor excluded by it."}
+      "data_policy": {"trains_on_prompts":true,"retention":null,"source":"https://www.voyageai.com/tos","checked":"2026-10-15","quote":"(iii) to train, improve, and otherwise further develop the Service (such as by training the artificial intelligence models we use).","note":"Customer Content, section 3(iii). The same section lets you opt out on the website, for content submitted after the opt-out, and adds: «If you opt out, any credits or tokens for free usage of the Service may be automatically void (as determined by Voyage AI in its sole discretion).»","plan_named":true}
     },
     {
       "slug": "contextual-ai",
@@ -1317,7 +1317,7 @@
       "verified": true,
       "last_verified": "2026-10-08",
       "added": "2026-07-31",
-      "data_policy": {"trains_on_prompts":true,"retention":null,"source":"https://cartesia.ai/legal/terms.html","checked":"2026-10-15","quote":"You may request that we not use certain categories of Your Content to train our Models by completing this online form","note":"Section «Training Opt-Out». The request covers selected categories and applies only to later use; earlier uses are not affected. The page names no plan, so the free plan is neither included nor excluded by it."}
+      "data_policy": {"trains_on_prompts":true,"retention":null,"source":"https://cartesia.ai/legal/terms.html","checked":"2026-10-15","quote":"You may request that we not use certain categories of Your Content to train our Models by completing this online form","note":"Section «Training Opt-Out». The request covers selected categories and applies only to later use; earlier uses are not affected. The clause is not tied to a plan; the terms treat free trials in a separate section (2.6).","plan_named":false}
     },
     {
       "slug": "fish-audio",
@@ -1610,7 +1610,7 @@
       "verified": true,
       "last_verified": "2026-10-08",
       "added": "2026-07-31",
-      "data_policy": {"trains_on_prompts":true,"retention":null,"source":"https://www.retellai.com/terms-of-service","checked":"2026-10-15","quote":"If you do not opt-out of recording, you give Retell AI permission to record calls made using the Service and process communication data (“Communications”) and User Content for offering AI-powered analytics and the development, training, and improvement of artificial intelligence and machine learning models that are included in the Service.","note":"Only if you do not opt out of recording (section 11). The next sentence says the data is de-identified and aggregated before use. Terms last updated October 7, 2026; the page names no plan."}
+      "data_policy": {"trains_on_prompts":true,"retention":null,"source":"https://www.retellai.com/terms-of-service","checked":"2026-10-15","quote":"If you do not opt-out of recording, you give Retell AI permission to record calls made using the Service and process communication data (“Communications”) and User Content for offering AI-powered analytics and the development, training, and improvement of artificial intelligence and machine learning models that are included in the Service.","note":"Only if you do not opt out of recording (section 11). The next sentence says the data is de-identified and aggregated before use. Terms last updated October 7, 2026. The sentence names no plan; section 7 covers beta, evaluation and trial services.","plan_named":false}
     },
     {
       "slug": "datalab",
