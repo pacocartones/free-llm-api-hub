@@ -19,6 +19,7 @@ import { readdirSync } from 'node:fs';
 import { gpuComputeErrors } from './lib/gpu-compute.mjs';
 import { codingToolsErrors } from './lib/coding-tools.mjs';
 import { hasHiddenChars } from './lib/hidden-chars.mjs';
+import { quoteErrors } from './lib/quotes.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const FILE = process.argv[2] ? resolve(process.argv[2]) : join(ROOT, 'data/providers.json');
@@ -265,6 +266,14 @@ if (!process.argv[2]) {
       for (const e of tools.entries) { if (seenToolSlugs.has(e.slug)) errors.push(`${file}: the slug ${e.slug} is in both coding-tools files`); seenToolSlugs.add(e.slug); }
     }
   } catch (e) { errors.push('coding-tools.json: ' + e.message); }
+}
+
+// ---------- quotes.json (the register of the passages the data_policy rows quote) ----------
+// Consistency only, offline: the sentence of each row, each phrase of a note between guillemets and each claim about a whole page
+// have an entry. It does not say the page says that today (npm run verify-quotes reads the pages). Skipped for fixture runs (argv[2]).
+if (!process.argv[2]) {
+  try { errors.push(...quoteErrors(data, JSON.parse(readFileSync(join(ROOT, 'data/quotes.json'), 'utf8')))); }
+  catch (e) { errors.push('quotes.json: ' + e.message); }
 }
 
 // ---------- best.json (editorial ranking must only feature verified providers) ----------
