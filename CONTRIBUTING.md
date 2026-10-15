@@ -24,12 +24,14 @@ python3 -m http.server 8080 --directory site --bind 127.0.0.1 &
 server=$!
 cleanup() {
   kill "$server" 2>/dev/null
-  kill -- -"$$" 2>/dev/null          # children of this shell, by group, never `pkill -f`
+  [ -n "${lh:-}" ] && kill -- -"$lh" 2>/dev/null   # Lighthouse runs in its own process group (setsid), never `pkill -f`
   rm -rf "$profile"
 }
 trap cleanup EXIT INT TERM
-tools/lighthouse/node_modules/.bin/lighthouse http://127.0.0.1:8080/ \
-  --chrome-flags="--headless --no-sandbox --user-data-dir=$profile" --output=json --quiet > lh.json
+setsid tools/lighthouse/node_modules/.bin/lighthouse http://127.0.0.1:8080/ \
+  --chrome-flags="--headless --no-sandbox --user-data-dir=$profile" --output=json --quiet > lh.json &
+lh=$!
+wait "$lh"
 # final check: nothing should still reference the profile
 if grep -l -- "$profile" /proc/[0-9]*/cmdline 2>/dev/null | grep -qv "/proc/$$/"; then echo "orphan processes left" >&2; fi
 ```
