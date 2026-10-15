@@ -2064,6 +2064,23 @@ test('a11y: wide data tables sit in a keyboard-reachable scroll region and the h
 });
 
 // ---- the data-policy table fits a laptop screen (measured: 1114px at 1100px before, 1052px after) ----
+test('data_policy lot 2: 21 of 68 providers, the four new rows carry a quote and a source, and Deepgram stays unconfirmed', () => {
+  const data = JSON.parse(readFileSync(join(ROOT, 'data/providers.json'), 'utf8'));
+  const withPolicy = data.providers.filter((p) => p.data_policy);
+  assert.equal(withPolicy.length, 21, 'the count of covered providers');
+  for (const slug of ['assemblyai', 'elevenlabs', 'voyage-ai', 'cartesia']) {
+    const dp = data.providers.find((p) => p.slug === slug).data_policy;
+    assert.ok(dp, `${slug} has a data_policy`);
+    assert.equal(dp.trains_on_prompts, true, `${slug}: the provider's own sentence says it trains`);
+    assert.match(dp.source, /^https:\/\//, `${slug}: https source`);
+    assert.equal(dp.checked, '2026-10-15', `${slug}: read date`);
+    assert.ok(dp.quote && dp.quote.length <= 400, `${slug}: literal quote within the limit`);
+  }
+  const assembly = data.providers.find((p) => p.slug === 'assemblyai').data_policy;
+  assert.match(assembly.note, /Free users do not have the ability to opt out/, 'the free plan is stated for AssemblyAI');
+  assert.equal(data.providers.find((p) => p.slug === 'deepgram').data_policy, undefined, 'Deepgram has no policy: its page says only contractually included data is used and participation is voluntary');
+});
+
 test('mobile: the two long text cells stack their label above the text at 720px', () => {
   const css = readFileSync(join(ROOT, 'site/styles.css'), 'utf8').replace(/\s+/g, ' ');
   assert.match(css, /#table td\.notes, #table td:nth-child\(3\) \{ display: block; \}/, 'the notes and the catch cells are blocks, not a 40% label beside a narrow column');

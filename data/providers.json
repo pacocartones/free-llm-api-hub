@@ -678,7 +678,8 @@
       "is_text_llm": true,
       "model_tier": null,
       "verified": true,
-      "last_verified": "2026-10-08"
+      "last_verified": "2026-10-08",
+      "data_policy": {"trains_on_prompts":true,"retention":null,"source":"https://www.assemblyai.com/legal/terms-of-service","checked":"2026-10-15","quote":"(iii) to train AssemblyAI’s artificial intelligence and machine learning models.","note":"Terms §4.3(b)(iii), about Customer Data. Its FAQ (assemblyai.com/docs/faq/how-to-opt-out-of-data-sharing-for-our-model-improvement-program, read 2026-10-15) says: «Free users do not have the ability to opt out of the model improvement program.» Paid customers can opt out, forward only."}
     },
     {
       "slug": "mixedbread",
@@ -1139,7 +1140,8 @@
       "is_text_llm": false,
       "model_tier": null,
       "verified": true,
-      "last_verified": "2026-10-08"
+      "last_verified": "2026-10-08",
+      "data_policy": {"trains_on_prompts":true,"retention":null,"source":"https://elevenlabs.io/terms-of-use","checked":"2026-10-15","quote":"you may opt out of our use of your Content for training at any time by navigating to the 'Data use' menu in the 'Terms and Privacy' section of your ElevenLabs account.","note":"Terms of Service (non-EEA), last updated 09 Oct 2026. The sentence is addressed to every user and does not name a plan; the same terms define Free Users separately. Whether the Data use menu exists on the free plan is not stated."}
     },
     {
       "slug": "sarvam-ai",
@@ -1261,7 +1263,8 @@
       "model_tier": null,
       "verified": true,
       "last_verified": "2026-10-08",
-      "added": "2026-07-31"
+      "added": "2026-07-31",
+      "data_policy": {"trains_on_prompts":true,"retention":null,"source":"https://www.voyageai.com/tos","checked":"2026-10-15","quote":"(iii) to train, improve, and otherwise further develop the Service (such as by training the artificial intelligence models we use).","note":"Customer Content, section 3(iii). The same terms let you opt out on the website; it applies only to Customer Content submitted after the opt-out. The page names no plan, so the free plan is neither included nor excluded by it."}
     },
     {
       "slug": "contextual-ai",
@@ -1309,7 +1312,8 @@
       "model_tier": null,
       "verified": true,
       "last_verified": "2026-10-08",
-      "added": "2026-07-31"
+      "added": "2026-07-31",
+      "data_policy": {"trains_on_prompts":true,"retention":null,"source":"https://cartesia.ai/legal/terms.html","checked":"2026-10-15","quote":"You may request that we not use certain categories of Your Content to train our Models by completing this online form","note":"Section «Training Opt-Out». The request covers selected categories and applies only to later use; earlier uses are not affected. The page names no plan, so the free plan is neither included nor excluded by it."}
     },
     {
       "slug": "fish-audio",
