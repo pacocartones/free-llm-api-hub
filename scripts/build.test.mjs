@@ -2038,6 +2038,15 @@ test('a11y: the filter bar is pinned only where there is room, and a focused row
   assert.match(css, /^html \{ scroll-behavior: smooth; scroll-padding-top: calc\(var\(--header-h\) \+ 12px\); \}/m, 'with the bar not pinned, only the header needs room');
 });
 
+// ---- links inside running text are underlined (WCAG 1.4.1; axe link-in-text-block) ----
+test('a11y: a plain link inside a paragraph or a list item is underlined, so it does not rest on colour alone', () => {
+  const css = readFileSync(join(ROOT, 'site/styles.css'), 'utf8');
+  assert.match(css, /main p a:not\(\[class\]\), main li a:not\(\[class\]\) \{ text-decoration: underline; text-underline-offset: 2px; \}/);
+  // The case that axe found on /best/: a classless link in the lead paragraph.
+  const best = readFileSync(join(ROOT, 'site/best/index.html'), 'utf8');
+  assert.match(best, /<p[^>]*>[^<]*<a href="methodology\/">how the score works<\/a>/, 'the link axe measured is a classless link inside a paragraph, so the rule reaches it');
+});
+
 // ---- focus ring contrast (WCAG 1.4.11, 2.4.7): the global ring is the accent colour, and it must stand out against every surface ----
 const luminance = (hex) => {
   const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255).map((c) => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4));
