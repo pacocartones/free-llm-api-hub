@@ -38,7 +38,24 @@ Pages are requested with `Accept-Language: en-US` (`READ_HEADERS`): at least one
 with no language. The text is made as `scripts/lib/page-text.mjs` says: scripts and styles removed, tags replaced by a space, character
 references decoded, white space collapsed. Curly quotes and apostrophes are kept as the page spells them.
 
-## Adding a passage
+## Adding or changing a row: `npm run quotes:add`
 
-Put the phrase between « » in the `note`, add its entry (id `<slug>.note_passage.<n>`) with the page it comes from, and run `npm test`: the
-consistency check names what is missing. The register is built from the data by reading each source; do not edit `page_sha256` by hand.
+Write the `data_policy` of the provider in `data/providers.json` (its `quote`, `source`, `checked` and, if you have one, a `note`), then run
+
+```
+npm run quotes:add -- <slug>
+```
+
+The command reads the source page in English and writes the entries of that provider in `data/quotes.json`: the sentence, each phrase of the note
+between « », and the absence check if the note says something about the whole page. It writes the day, the hash and the method itself; you never
+type them. Then run `npm test`.
+
+- If the quote or a phrase is **not literally on the page**, it says which one and writes nothing: fix the text, or copy it as the page spells it
+  (curly quotes and apostrophes included).
+- If a phrase comes from **another page** (for example a FAQ), say so: `npm run quotes:add -- <slug> --passage-url "<the phrase>=<its address>"`.
+- If the note says something about the **whole page** ("the page has no mention of ..."), the command counts free, trial, paid and plan on the
+  page; if any is there it refuses and tells you to say what the sentence or the clause names instead.
+- A page that answers an error, needs scripts, or declares another language cannot be read this way; the message says so. Do not paste the
+  entry by hand: open the pull request and say that the page could not be read, and a maintainer will read it from the server.
+- To change a row that already has entries, change the row and run the command again: it replaces the entries of that provider and touches no
+  other.

@@ -88,6 +88,8 @@ The smallest useful contribution: many entries carry `null` in `card_required`, 
 
 The same applies to `data_policy`, which records what a provider says about your prompts (`trains_on_prompts`, `retention`, `source`, `checked`). An absent `data_policy` object means "not recorded", never "no". Sourced values come exclusively from the provider's own pages, alongside the day they were read. If a provider's official pages do not settle the question, that is a completely valid result too: leave the entry as it is and report your findings with the link and date in your PR. See the full field definition in [docs/comparison-dimensions.md](docs/comparison-dimensions.md).
 
+A `data_policy` row also needs its entries in `data/quotes.json` (the sentence, each phrase of the note between « », and a check behind any claim about a whole page). You do not write them: after editing the row, run `npm run quotes:add -- <slug>` and then `npm test`. `docs/quotes.md` says what the command does and what to do when a page cannot be read.
+
 ## Reporting without a PR
 
 - **Something's outdated or wrong:** the [structured issue form](../../issues/new?template=inaccuracy.yml) takes under a minute.
