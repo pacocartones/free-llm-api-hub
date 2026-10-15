@@ -31,6 +31,8 @@ const TRISTATE = [true, false, null];
 const SLUG_RE = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 const URL_RE = /^https?:\/\/.+/;
+// Control characters, bidirectional marks and overrides, and zero-width characters: invisible in a quoted sentence.
+const HIDDEN_CHARS_RE = /[\u0000-\u001f\u007f-\u009f\u200b-\u200f\u2028-\u202e\u2060-\u2069\ufeff]/;
 
 const errors = [];
 const seenSlugs = new Set();
@@ -177,6 +179,13 @@ for (const p of data.providers ?? []) {
     check(dp.trains_on_prompts != null || dp.retention != null, `${id}: data_policy must state trains_on_prompts or retention (an all-null policy records nothing)`);
     check(DATE_RE.test(dp.checked || '') && dp.checked <= data.generated, `${id}: data_policy.checked must be a date not after the dataset's generated date`);
     check(URL_RE.test(dp.source || ''), `${id}: data_policy.source must be the provider's page (http/https)`);
+    // The provider's own sentence and its condition: plain text only (no control, bidirectional or zero-width characters).
+    for (const [k, max] of [['quote', 400], ['note', 300]]) {
+      if (dp[k] == null) continue;
+      check(typeof dp[k] === 'string' && dp[k].trim().length >= 1 && dp[k].length <= max, `${id}: data_policy.${k} must be text of 1 to ${max} characters`);
+      check(typeof dp[k] !== 'string' || !HIDDEN_CHARS_RE.test(dp[k]), `${id}: data_policy.${k} must not contain control, bidirectional or zero-width characters`);
+    }
+    check(dp.quote == null || dp.trains_on_prompts != null || dp.retention != null, `${id}: a data_policy sentence goes with a stated part`);
   }
 
   // no_expiry: the provider's own statement that a one-time trial credit does not expire (see docs/comparison-dimensions.md).

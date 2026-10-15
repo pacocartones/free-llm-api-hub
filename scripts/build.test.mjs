@@ -1927,6 +1927,69 @@ test('a11y: small fixes stay in place (finite caret, placeholder colour, no 320p
   assert.match(readFileSync(join(ROOT, 'site/site.js'), 'utf8'), /setNav\(false\); navToggle\.focus\(\)/, 'Escape returns the focus to the menu button');
 });
 
+// ---- /data-policy/ — who trains on your data -----------------------------------------------------
+import { trainState, dataPolicyRows, dataPolicyCounts, dataPolicyMainHtml } from './lib/data-policy-page.mjs';
+
+test('data-policy page: a state is yes or no only when the data says true or false; anything else is not confirmed', () => {
+  assert.equal(trainState({ data_policy: { trains_on_prompts: true } }), 'yes');
+  assert.equal(trainState({ data_policy: { trains_on_prompts: false } }), 'no');
+  assert.equal(trainState({ data_policy: { trains_on_prompts: null, retention: '30 days' } }), 'unknown');
+  assert.equal(trainState({ data_policy: null }), 'unknown');
+  assert.equal(trainState({}), 'unknown');
+  assert.equal(trainState({ data_policy: { trains_on_prompts: 'false' } }), 'unknown', 'a string is not a boolean');
+});
+
+test('data-policy page: the counts come from the rows, every verified provider has one row, and nothing is written by hand', () => {
+  const providers = JSON.parse(readFileSync(join(ROOT, 'data/providers.json'), 'utf8')).providers;
+  const rows = dataPolicyRows(providers);
+  const c = dataPolicyCounts(rows);
+  assert.equal(rows.length, providers.filter((p) => p.verified === true).length);
+  assert.equal(c.yes + c.no + c.unknown, c.total);
+  const html = readFileSync(join(ROOT, 'site/data-policy/index.html'), 'utf8');
+  assert.match(html, new RegExp(`Of ${c.total} verified providers, ${c.no} say they do not train on your prompts on this free access, ${c.yes} say they may, and ${c.unknown} are not confirmed`));
+  assert.equal((html.match(/<tr><th scope="row">/g) || []).length, c.total, 'one row per verified provider');
+  assert.match(readFileSync(join(ROOT, 'site/sitemap.xml'), 'utf8'), /<loc>https:\/\/freellmapihub\.com\/data-policy\/<\/loc>/);
+  assert.match(html, /<link rel="canonical" href="https:\/\/freellmapihub\.com\/data-policy\/">/);
+});
+
+test('data-policy page: a missing sentence and a missing source are said so; a sentence and a source are escaped and only http(s) links are made', () => {
+  const base = { name: 'Acme <b>', slug: 'acme', verified: true };
+  const rows = dataPolicyRows([
+    { ...base, data_policy: null },
+    { ...base, slug: 'beta', data_policy: { trains_on_prompts: false, retention: null, source: 'javascript:alert(1)', checked: '2026-10-15' } },
+    { ...base, slug: 'gamma', data_policy: { trains_on_prompts: true, retention: null, source: 'https://example.com/terms', checked: '2026-10-15', quote: 'We may use "your" <content>.', note: 'Free plan only.' } },
+  ]);
+  const html = dataPolicyMainHtml(rows, { repo: 'https://github.com/x/y', generated: '2026-10-15', prefix: '../' });
+  assert.match(html, /not confirmed/);
+  assert.match(html, /No sentence recorded yet\./);
+  assert.match(html, /no source recorded/);
+  assert.doesNotMatch(html, /javascript:/);
+  assert.match(html, /We may use &quot;your&quot; &lt;content&gt;\./);
+  assert.match(html, /Free plan only\./);
+  assert.match(html, /href="https:\/\/example\.com\/terms"/);
+  assert.doesNotMatch(html, /Acme <b>/, 'a name from the data is escaped');
+});
+
+test('data-policy page: no word that promises safety or ranks providers by their policy', () => {
+  const html = readFileSync(join(ROOT, 'site/data-policy/index.html'), 'utf8');
+  const main = html.slice(html.indexOf('<main id="main"'), html.indexOf('</main>'));
+  const visible = main.replace(/<[^>]*>/g, ' ');
+  assert.doesNotMatch(visible, /\b(safe|safer|secure|private|privacy-friendly|guarantee[sd]?|trustworthy|best|worst|better|worse)\b/i);
+  assert.match(visible, /not legal advice/i, 'the notice is on the page');
+  assert.match(visible, /it never means &ldquo;no&rdquo;/i, 'the page says not confirmed is not no');
+});
+
+test('data_policy: the sentence and its note are plain text, bounded, and go with a stated part', () => {
+  const good = { trains_on_prompts: true, retention: null, source: 'https://example.com/terms', checked: '2026-10-09' };
+  const target = (d) => d.providers.find((p) => p.verified === true);
+  assert.equal(validateAfter((d) => { target(d).data_policy = { ...good, quote: 'We may use your content.', note: 'Free plan.' }; }), true, 'a sentence and a note pass');
+  assert.equal(validateAfter((d) => { target(d).data_policy = { ...good, quote: null, note: null }; }), true, 'null means none recorded');
+  for (const bad of [{ quote: '' }, { quote: '   ' }, { quote: 'x'.repeat(401) }, { note: 'x'.repeat(301) }, { quote: 'a​b' }, { quote: 'a‮b' }, { quote: 'a\u0007b' }, { note: 'a﻿b' }, { quote: 42 }]) {
+    assert.equal(validateAfter((d) => { target(d).data_policy = { ...good, ...bad }; }), false, `rejected: ${JSON.stringify(bad).slice(0, 40)}`);
+  }
+  assert.equal(validateAfter((d) => { target(d).data_policy = { ...good, trains_on_prompts: null, retention: null, quote: 'Some sentence.' }; }), false, 'a sentence alone records nothing');
+});
+
 // ---- Dated banner mechanism (site/site.js) ---------------------------------
 // A banner hand-written in site/index.html is removed by site/site.js once its
 // data-until day (UTC, inclusive) has passed; none is on the page today. The build stays
