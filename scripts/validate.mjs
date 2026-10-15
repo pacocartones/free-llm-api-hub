@@ -18,6 +18,7 @@ import { editorialErrors } from './lib/score.mjs';
 import { readdirSync } from 'node:fs';
 import { gpuComputeErrors } from './lib/gpu-compute.mjs';
 import { codingToolsErrors } from './lib/coding-tools.mjs';
+import { hasHiddenChars } from './lib/hidden-chars.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const FILE = process.argv[2] ? resolve(process.argv[2]) : join(ROOT, 'data/providers.json');
@@ -31,8 +32,6 @@ const TRISTATE = [true, false, null];
 const SLUG_RE = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 const URL_RE = /^https?:\/\/.+/;
-// Control characters, bidirectional marks and overrides, and zero-width characters: invisible in a quoted sentence.
-const HIDDEN_CHARS_RE = /[\u0000-\u001f\u007f-\u009f\u00ad\u034f\u061c\u180e\u200b-\u200f\u2028-\u202e\u2060-\u2069\ufe00-\ufe0f\ufeff\u{e0000}-\u{e007f}\u{e0100}-\u{e01ef}]/u;
 
 const errors = [];
 const seenSlugs = new Set();
@@ -183,7 +182,7 @@ for (const p of data.providers ?? []) {
     for (const [k, max] of [['quote', 400], ['note', 300]]) {
       if (dp[k] == null) continue;
       check(typeof dp[k] === 'string' && dp[k].trim().length >= 1 && dp[k].length <= max, `${id}: data_policy.${k} must be text of 1 to ${max} characters`);
-      check(typeof dp[k] !== 'string' || !HIDDEN_CHARS_RE.test(dp[k]), `${id}: data_policy.${k} must not contain control, bidirectional or zero-width characters`);
+      check(typeof dp[k] !== 'string' || !hasHiddenChars(dp[k]), `${id}: data_policy.${k} must not contain control, bidirectional or zero-width characters`);
     }
     check(dp.quote == null || dp.trains_on_prompts != null || dp.retention != null, `${id}: a data_policy sentence goes with a stated part`);
   }

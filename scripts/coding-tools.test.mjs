@@ -8,6 +8,7 @@ import Ajv2020 from 'ajv/dist/2020.js';
 import addFormats from 'ajv-formats';
 import { privateTree } from './lib/private-tree.mjs';
 import { codingToolsErrors, CLAIM_FIELDS, KINDS } from './lib/coding-tools.mjs';
+import { hasHiddenChars } from './lib/hidden-chars.mjs';
 import { codingToolsMainHtml, codingToolsCounts } from './lib/free-coding-tools.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -255,4 +256,36 @@ test('no entry can clash with the page or the other lists: own-key anchor, llms.
   }
   const page = readFileSync(join(out(), 'site/coding-tools/index.html'), 'utf8');
   for (const slug of all) assert.equal((page.match(new RegExp('id="' + slug + '"', 'g')) || []).length, 1, `${slug} is the id of exactly one block`);
+});
+
+// ---- hidden characters: one definition (lib/hidden-chars.mjs) shared with data_policy, one test per class ----
+const HIDDEN_CLASSES = [
+  ['control character', 0x0007], ['delete', 0x007f], ['C1 control', 0x0085], ['soft hyphen', 0x00ad],
+  ['combining grapheme joiner', 0x034f], ['Arabic letter mark', 0x061c], ['Mongolian vowel separator', 0x180e],
+  ['zero-width space', 0x200b], ['zero-width non-joiner', 0x200c], ['left-to-right mark', 0x200e],
+  ['line separator', 0x2028], ['right-to-left override', 0x202e], ['word joiner', 0x2060], ['directional isolate', 0x2066],
+  ['variation selector 16', 0xfe0f], ['byte order mark', 0xfeff], ['tag character', 0xe0041], ['variation selector supplement', 0xe0100],
+];
+
+test('hidden characters: every class is rejected in a sentence, a name and a note, by the same definition data_policy uses', () => {
+  for (const [label, cp] of HIDDEN_CLASSES) {
+    const bad = 'a' + String.fromCodePoint(cp) + 'b';
+    assert.equal(hasHiddenChars(bad), true, `${label} is not caught by the shared definition`);
+    const inQuote = entry(); inQuote.claims.limits = claim('stated', [quote({ text: bad })]);
+    assert.ok(codingToolsErrors({ entries: [inQuote] }, slugs).some((m) => /control, bidirectional or zero-width/.test(m)), `${label} accepted in a sentence`);
+    assert.ok(codingToolsErrors({ entries: [entry({ name: bad })] }, slugs).some((m) => /name must not contain/.test(m)), `${label} accepted in a name`);
+    const note = { subject: 'S', text: 'ok', quotes: [] };
+    assert.ok(codingToolsErrors({ entries: [entry()], notes: [{ ...note, text: bad }] }, slugs).some((m) => /must not contain/.test(m)), `${label} accepted in a note text`);
+    assert.ok(codingToolsErrors({ entries: [entry()], notes: [{ ...note, quotes: [quote({ text: bad })] }] }, slugs).some((m) => /control, bidirectional or zero-width/.test(m)), `${label} accepted in a note sentence`);
+  }
+  for (const ok of ['plain text', 'caf\u00e9', 'a b', 'tab\u0020space', '\u201cquoted\u201d', '\u4e2d\u6587']) assert.equal(hasHiddenChars(ok), false, `a normal text was rejected: ${JSON.stringify(ok)}`);
+});
+
+test('hidden characters: the two validators use the shared file and neither defines its own pattern', () => {
+  const validate = readFileSync(join(ROOT, 'scripts/validate.mjs'), 'utf8');
+  const tools = readFileSync(join(ROOT, 'scripts/lib/coding-tools.mjs'), 'utf8');
+  for (const [name, src] of [['validate.mjs', validate], ['coding-tools.mjs', tools]]) {
+    assert.match(src, /from '\.\/(lib\/)?hidden-chars\.mjs'/, `${name} does not import the shared definition`);
+    assert.doesNotMatch(src, /HIDDEN_CHARS_RE\s*=/, `${name} defines its own pattern`);
+  }
 });
