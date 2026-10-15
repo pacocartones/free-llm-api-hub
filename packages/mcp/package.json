@@ -15,7 +15,8 @@
   ],
   "scripts": {
     "start": "node src/index.js",
-    "test": "node --test test/tools.test.js test/stdio.test.js test/forward-compat.test.js"
+    "test": "node --test test/tools.test.js test/stdio.test.js test/forward-compat.test.js",
+    "validate:server-json": "node scripts/validate-server-json.mjs"
   },
   "engines": {
     "node": ">=18"
@@ -45,5 +46,8 @@
   "publishConfig": {
     "access": "public",
     "provenance": true
+  },
+  "devDependencies": {
+    "ajv": "8.20.0"
   }
 }

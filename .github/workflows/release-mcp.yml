@@ -14,6 +14,11 @@ on:
 
 permissions: {}
 
+# One publication at a time, never cancelled half way.
+concurrency:
+  group: release-mcp
+  cancel-in-progress: false
+
 jobs:
   check:
     if: ${{ vars.NPM_PUBLISH_ENABLED == 'true' }}
@@ -26,6 +31,9 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+          fetch-depth: 0
+      - name: The tagged commit must be on main
+        run: git merge-base --is-ancestor "$GITHUB_SHA" origin/main || { echo "::error::tag $GITHUB_REF_NAME points at a commit that is not on main"; exit 1; }
       - id: decide
         working-directory: packages/mcp
         run: |
@@ -35,8 +43,30 @@ jobs:
           [ "$(node -p "require('./server.json').version")" = "$version" ] || { echo "::error::server.json version differs"; exit 1; }
           if npm view "$name@$version" version >/dev/null 2>&1; then echo "needed=false" >> "$GITHUB_OUTPUT"; else echo "needed=true" >> "$GITHUB_OUTPUT"; fi
 
-  publish:
+  test:
+    # Tests run in a job WITHOUT id-token, so installing dependencies can never touch the publishing identity.
     needs: check
+    if: ${{ needs.check.outputs.needed == 'true' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: packages/mcp
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+      - run: npm ci --ignore-scripts
+      - run: npm test
+      - run: npm run validate:server-json
+      - run: npm pack --dry-run
+
+  publish:
+    needs: [check, test]
     if: ${{ needs.check.outputs.needed == 'true' }}
     # Human gate: required reviewer on the environment "release-mcp"; the npm
     # trusted publisher names this workflow file and this environment too.
@@ -55,10 +85,6 @@ jobs:
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 24 # npm 11, required for trusted publishing (>= 11.5.1)
-      - run: npm ci --ignore-scripts
-      - run: npm test
-      - name: Pack and inspect
-        run: npm pack --dry-run
       - name: Publish with provenance
         run: npm publish --provenance --access public
       - name: Verify what was published

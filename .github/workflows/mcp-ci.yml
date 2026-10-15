@@ -13,8 +13,12 @@ permissions:
 
 jobs:
   test:
-    name: mcp tests
+    name: mcp tests (node ${{ matrix.node }})
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [18, 22]
     timeout-minutes: 10
     defaults:
       run:
@@ -25,8 +29,10 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          node-version: 22
+          node-version: ${{ matrix.node }}
       - run: npm ci --ignore-scripts
       - run: npm test
+      - name: server.json against the registry schema
+        run: npm run validate:server-json
       - name: What would be published
         run: npm pack --dry-run
