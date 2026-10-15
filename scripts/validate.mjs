@@ -17,6 +17,7 @@ import { tierForRating, nearBoundary, MODEL_TIER_MIN_VOTES } from './lib/model-t
 import { editorialErrors } from './lib/score.mjs';
 import { readdirSync } from 'node:fs';
 import { gpuComputeErrors } from './lib/gpu-compute.mjs';
+import { codingToolsErrors } from './lib/coding-tools.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const FILE = process.argv[2] ? resolve(process.argv[2]) : join(ROOT, 'data/providers.json');
@@ -234,6 +235,20 @@ if (!process.argv[2]) {
     errors.push(...gpuComputeErrors(gpu, new Set(data.providers.map((p) => p.slug))));
     gpuComputeCount = gpu.entries.length;
   } catch (e) { errors.push('gpu-compute.json: ' + e.message); }
+}
+
+// ---------- coding-tools.json (Free AI coding tools: a section apart from the ranking) ----------
+// Skipped for fixture runs (argv[2]) like gpu-compute.json.
+if (!process.argv[2]) {
+  try {
+    const tools = JSON.parse(readFileSync(join(ROOT, 'data/coding-tools.json'), 'utf8'));
+    const toolsSchema = JSON.parse(readFileSync(join(ROOT, 'data/coding-tools.schema.json'), 'utf8'));
+    const toolsAjv = new Ajv2020({ allErrors: true, strict: true });
+    addFormats(toolsAjv);
+    const toolsValidate = toolsAjv.compile(toolsSchema);
+    if (!toolsValidate(tools)) for (const e of toolsValidate.errors) errors.push(`coding-tools.json: ${e.instancePath || '/'} ${e.message}`);
+    errors.push(...codingToolsErrors(tools, new Set(data.providers.map((p) => p.slug))));
+  } catch (e) { errors.push('coding-tools.json: ' + e.message); }
 }
 
 // ---------- best.json (editorial ranking must only feature verified providers) ----------

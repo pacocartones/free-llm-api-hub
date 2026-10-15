@@ -1,0 +1,164 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://freellmapihub.com/data/coding-tools.schema.json",
+  "title": "Free AI coding tools",
+  "description": "A section apart from the provider ranking. A value is written only when the tool's own page states it, with the sentence and the day it was read; otherwise it is not_stated.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "generated",
+    "entries"
+  ],
+  "properties": {
+    "generated": {
+      "type": "string",
+      "format": "date"
+    },
+    "note": {
+      "type": "string"
+    },
+    "entries": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "slug",
+          "name",
+          "url",
+          "kind",
+          "claims"
+        ],
+        "properties": {
+          "slug": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "kind": {
+            "enum": [
+              "ide-extension",
+              "editor",
+              "cli"
+            ]
+          },
+          "claims": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "free_access",
+              "limits",
+              "card_required",
+              "commercial_use",
+              "expires",
+              "trains_on_code"
+            ],
+            "properties": {
+              "free_access": {
+                "$ref": "#/$defs/claim"
+              },
+              "limits": {
+                "$ref": "#/$defs/claim"
+              },
+              "card_required": {
+                "$ref": "#/$defs/claim"
+              },
+              "commercial_use": {
+                "$ref": "#/$defs/claim"
+              },
+              "expires": {
+                "$ref": "#/$defs/claim"
+              },
+              "trains_on_code": {
+                "$ref": "#/$defs/claim"
+              }
+            }
+          }
+        }
+      }
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "subject",
+          "text",
+          "quotes"
+        ],
+        "properties": {
+          "subject": {
+            "type": "string",
+            "minLength": 1
+          },
+          "text": {
+            "type": "string",
+            "minLength": 1
+          },
+          "quotes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/quote"
+            }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "quote": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "text",
+        "source",
+        "read"
+      ],
+      "properties": {
+        "text": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source": {
+          "type": "string",
+          "format": "uri"
+        },
+        "read": {
+          "type": "string",
+          "format": "date"
+        }
+      }
+    },
+    "claim": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "state",
+        "quotes"
+      ],
+      "properties": {
+        "state": {
+          "enum": [
+            "stated",
+            "not_stated"
+          ]
+        },
+        "quotes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/quote"
+          }
+        }
+      }
+    }
+  }
+}

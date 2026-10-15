@@ -1,0 +1,413 @@
+{
+  "generated": "2026-10-15",
+  "note": "Free AI coding tools: a section apart from the provider ranking. Nothing here is a provider of the LLM dataset and none of it enters a provider count, a score or a collection. A value is written only when the tool's own page states it, with the sentence and the day it was read; otherwise it is not_stated. Tools that work only with your own API keys are not listed.",
+  "entries": [
+    {
+      "slug": "github-copilot-free",
+      "name": "GitHub Copilot Free",
+      "url": "https://docs.github.com/en/copilot/get-started/plans",
+      "kind": "ide-extension",
+      "claims": {
+        "free_access": {
+          "state": "stated",
+          "quotes": [
+            {
+              "text": "This plan includes limited access to a selection of Copilot features allowing you to try AI-powered coding assistance at no cost.",
+              "source": "https://docs.github.com/en/copilot/get-started/plans",
+              "read": "2026-10-15"
+            }
+          ]
+        },
+        "limits": {
+          "state": "stated",
+          "quotes": [
+            {
+              "text": "Limited to 2000 completions per month on Copilot Free.",
+              "source": "https://docs.github.com/en/copilot/get-started/plans",
+              "read": "2026-10-15"
+            },
+            {
+              "text": "On Copilot Free and Copilot Student plans, access to models is available through auto model selection only.",
+              "source": "https://docs.github.com/en/copilot/get-started/plans",
+              "read": "2026-10-15"
+            }
+          ]
+        },
+        "card_required": {
+          "state": "not_stated",
+          "quotes": []
+        },
+        "commercial_use": {
+          "state": "not_stated",
+          "quotes": []
+        },
+        "expires": {
+          "state": "not_stated",
+          "quotes": []
+        },
+        "trains_on_code": {
+          "state": "not_stated",
+          "quotes": []
+        }
+      }
+    },
+    {
+      "slug": "amazon-q-developer-free",
+      "name": "Amazon Q Developer Free Tier",
+      "url": "https://aws.amazon.com/q/developer/pricing/",
+      "kind": "ide-extension",
+      "claims": {
+        "free_access": {
+          "state": "stated",
+          "quotes": [
+            {
+              "text": "Amazon Q Developer offers a perpetual Free Tier with monthly limits available to users logged in as an AWS Identity and Access Management (IAM) user or AWS Builder ID user.",
+              "source": "https://aws.amazon.com/q/developer/pricing/",
+              "read": "2026-10-15"
+            }
+          ]
+        },
+        "limits": {
+          "state": "stated",
+          "quotes": [
+            {
+              "text": "Included agentic requests (Q&A chat, agentic coding) 50 agentic requests per month",
+              "source": "https://aws.amazon.com/q/developer/pricing/",
+              "read": "2026-10-15"
+            },
+            {
+              "text": "Amazon Q Developer Free Tier users can upgrade 1,000 LOC per month, per user.",
+              "source": "https://aws.amazon.com/q/developer/pricing/",
+              "read": "2026-10-15"
+            }
+          ]
+        },
+        "card_required": {
+          "state": "not_stated",
+          "quotes": []
+        },
+        "commercial_use": {
+          "state": "not_stated",
+          "quotes": []
+        },
+        "expires": {
+          "state": "not_stated",
+          "quotes": []
+        },
+        "trains_on_code": {
+          "state": "not_stated",
+          "quotes": []
+        }
+      }
+    },
+    {
+      "slug": "jetbrains-ai-free",
+      "name": "JetBrains AI Free",
+      "url": "https://www.jetbrains.com/help/ai-assistant/licensing-and-subscriptions.html",
+      "kind": "ide-extension",
+      "claims": {
+        "free_access": {
+          "state": "stated",
+          "quotes": [
+            {
+              "text": "AI Free Free 3 AI credits per 30-days",
+              "source": "https://www.jetbrains.com/help/ai-assistant/licensing-and-subscriptions.html",
+              "read": "2026-10-15"
+            },
+            {
+              "text": "The AI Free license tier is not available in Community Editions of PyCharm and IntelliJ IDEA, as well as in PyCharm Unified when used for free.",
+              "source": "https://www.jetbrains.com/help/ai-assistant/licensing-and-subscriptions.html",
+              "read": "2026-10-15"
+            }
+          ]
+        },
+        "limits": {
+          "state": "stated",
+          "quotes": [
+            {
+              "text": "AI Free Free 3 AI credits per 30-days",
+              "source": "https://www.jetbrains.com/help/ai-assistant/licensing-and-subscriptions.html",
+              "read": "2026-10-15"
+            }
+          ]
+        },
+        "card_required": {
+          "state": "not_stated",
+          "quotes": []
+        },
+        "commercial_use": {
+          "state": "not_stated",
+          "quotes": []
+        },
+        "expires": {
+          "state": "not_stated",
+          "quotes": []
+        },
+        "trains_on_code": {
+          "state": "not_stated",
+          "quotes": []
+        }
+      }
+    },
+    {
+      "slug": "cursor-free",
+      "name": "Cursor Free",
+      "url": "https://cursor.com/pricing",
+      "kind": "editor",
+      "claims": {
+        "free_access": {
+          "state": "stated",
+          "quotes": [
+            {
+              "text": "Free $0 /month Get started Get started with: Limited AI usage AI Features Limited agent requests Limited Chat requests",
+              "source": "https://cursor.com/pricing",
+              "read": "2026-10-15"
+            }
+          ]
+        },
+        "limits": {
+          "state": "stated",
+          "quotes": [
+            {
+              "text": "Free $0 /month Get started Get started with: Limited AI usage AI Features Limited agent requests Limited Chat requests",
+              "source": "https://cursor.com/pricing",
+              "read": "2026-10-15"
+            },
+            {
+              "text": "Your allowance refreshes weekly, so one heavy day never wipes out your whole month.",
+              "source": "https://cursor.com/pricing",
+              "read": "2026-10-15"
+            }
+          ]
+        },
+        "card_required": {
+          "state": "not_stated",
+          "quotes": []
+        },
+        "commercial_use": {
+          "state": "not_stated",
+          "quotes": []
+        },
+        "expires": {
+          "state": "not_stated",
+          "quotes": []
+        },
+        "trains_on_code": {
+          "state": "not_stated",
+          "quotes": [
+            {
+              "text": "When it is enabled, we guarantee that code data is not used for training by us or our model providers.",
+              "source": "https://cursor.com/pricing",
+              "read": "2026-10-15"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "slug": "google-antigravity-individual",
+      "name": "Google Antigravity (Individual plan)",
+      "url": "https://antigravity.google/pricing",
+      "kind": "editor",
+      "claims": {
+        "free_access": {
+          "state": "stated",
+          "quotes": [
+            {
+              "text": "For Individuals $0/month Experience Antigravity without a subscription plan Get started Plan includes: Access to a variety of agent models",
+              "source": "https://antigravity.google/pricing",
+              "read": "2026-10-15"
+            }
+          ]
+        },
+        "limits": {
+          "state": "stated",
+          "quotes": [
+            {
+              "text": "Access to a variety of agent models Unlimited Tab completions Unlimited Command requests Basic weekly rate limits *",
+              "source": "https://antigravity.google/pricing",
+              "read": "2026-10-15"
+            }
+          ]
+        },
+        "card_required": {
+          "state": "not_stated",
+          "quotes": []
+        },
+        "commercial_use": {
+          "state": "not_stated",
+          "quotes": []
+        },
+        "expires": {
+          "state": "not_stated",
+          "quotes": []
+        },
+        "trains_on_code": {
+          "state": "not_stated",
+          "quotes": []
+        }
+      }
+    },
+    {
+      "slug": "kiro-free",
+      "name": "Kiro Free",
+      "url": "https://kiro.dev/pricing/",
+      "kind": "editor",
+      "claims": {
+        "free_access": {
+          "state": "stated",
+          "quotes": [
+            {
+              "text": "New users can start with the perpetual Kiro Free tier, which includes 50 credits.",
+              "source": "https://kiro.dev/pricing/",
+              "read": "2026-10-15"
+            }
+          ]
+        },
+        "limits": {
+          "state": "stated",
+          "quotes": [
+            {
+              "text": "The Free Tier includes access to open weight models and Claude Sonnet 4.5, with limits.",
+              "source": "https://kiro.dev/pricing/",
+              "read": "2026-10-15"
+            },
+            {
+              "text": "Access is subject to rate limits .",
+              "source": "https://kiro.dev/pricing/",
+              "read": "2026-10-15"
+            }
+          ]
+        },
+        "card_required": {
+          "state": "not_stated",
+          "quotes": []
+        },
+        "commercial_use": {
+          "state": "not_stated",
+          "quotes": []
+        },
+        "expires": {
+          "state": "not_stated",
+          "quotes": []
+        },
+        "trains_on_code": {
+          "state": "not_stated",
+          "quotes": []
+        }
+      }
+    },
+    {
+      "slug": "trae-free",
+      "name": "TRAE Free",
+      "url": "https://www.trae.ai/pricing",
+      "kind": "editor",
+      "claims": {
+        "free_access": {
+          "state": "stated",
+          "quotes": [
+            {
+              "text": "Free $0 Start for free Auto mode only Limited usage Limited Autocomplete",
+              "source": "https://www.trae.ai/pricing",
+              "read": "2026-10-15"
+            }
+          ]
+        },
+        "limits": {
+          "state": "stated",
+          "quotes": [
+            {
+              "text": "Free $0 Start for free Auto mode only Limited usage Limited Autocomplete",
+              "source": "https://www.trae.ai/pricing",
+              "read": "2026-10-15"
+            }
+          ]
+        },
+        "card_required": {
+          "state": "not_stated",
+          "quotes": []
+        },
+        "commercial_use": {
+          "state": "not_stated",
+          "quotes": []
+        },
+        "expires": {
+          "state": "not_stated",
+          "quotes": []
+        },
+        "trains_on_code": {
+          "state": "not_stated",
+          "quotes": []
+        }
+      }
+    },
+    {
+      "slug": "devin-desktop-free-windsurf",
+      "name": "Devin Desktop Free (formerly Windsurf)",
+      "url": "https://devin.ai/pricing",
+      "kind": "editor",
+      "claims": {
+        "free_access": {
+          "state": "stated",
+          "quotes": [
+            {
+              "text": "The Free plan includes a light quota to code with agents, limited model availability, unlimited inline edits, and unlimited Tab completions.",
+              "source": "https://devin.ai/pricing",
+              "read": "2026-10-15"
+            }
+          ]
+        },
+        "limits": {
+          "state": "stated",
+          "quotes": [
+            {
+              "text": "The Free plan includes a light quota to code with agents, limited model availability, unlimited inline edits, and unlimited Tab completions.",
+              "source": "https://devin.ai/pricing",
+              "read": "2026-10-15"
+            }
+          ]
+        },
+        "card_required": {
+          "state": "not_stated",
+          "quotes": []
+        },
+        "commercial_use": {
+          "state": "not_stated",
+          "quotes": []
+        },
+        "expires": {
+          "state": "not_stated",
+          "quotes": []
+        },
+        "trains_on_code": {
+          "state": "not_stated",
+          "quotes": []
+        }
+      }
+    }
+  ],
+  "notes": [
+    {
+      "subject": "Gemini CLI free tier replaced",
+      "text": "Google's Gemini Code Assist page for teams and businesses says the unpaid tier of Gemini CLI was replaced by Antigravity CLI on 2026-06-18, while the Gemini CLI README read the same day still advertises the free tier. Check before relying on the Gemini CLI entry.",
+      "quotes": [
+        {
+          "text": "Unpaid tier (Gemini Code Assist for individuals) and Google One users only : Gemini CLI and Gemini Code Assist IDE extensions were replaced by Antigravity CLI and Antigravity on June 18th 2026.",
+          "source": "https://codeassist.google/products/business",
+          "read": "2026-10-15"
+        }
+      ]
+    },
+    {
+      "subject": "Windsurf renamed",
+      "text": "The Windsurf site now says Devin Desktop is the new name for Windsurf; the free plan quoted in the entry is from the Devin pricing page.",
+      "quotes": [
+        {
+          "text": "Devin Desktop is the new name for Windsurf.",
+          "source": "https://devin.ai/desktop",
+          "read": "2026-10-15"
+        }
+      ]
+    }
+  ]
+}
