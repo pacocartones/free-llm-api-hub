@@ -1916,9 +1916,9 @@ test('a11y: the filter chips stay reachable by keyboard and screen reader, with 
   for (const chip of chips) assert.match(chip, /<input type="checkbox" id="f-[a-z]+">/, 'each chip label contains its checkbox, so the label stays the click target');
 });
 
-// ---- Hacktoberfest banner on the home (F8) --------------------------------
-// The banner is hand-written in site/index.html and removed by site/site.js
-// once its data-until day (UTC, inclusive) has passed. The build stays
+// ---- Dated banner mechanism (site/site.js) ---------------------------------
+// A banner hand-written in site/index.html is removed by site/site.js once its
+// data-until day (UTC, inclusive) has passed; none is on the page today. The build stays
 // deterministic: no clock is read at build time.
 function runSiteJsAt(isoNow) {
   const src = readFileSync(join(ROOT, 'site/site.js'), 'utf8');
@@ -1946,15 +1946,10 @@ function runSiteJsAt(isoNow) {
   return removed;
 }
 
-test('home: the Hacktoberfest banner exists, links to /coverage/ and to what gets merged, and has no clock at build time', () => {
+test('home: no campaign banner sits above the hero, and the build reads no clock for one', () => {
   const index = readFileSync(join(ROOT, 'site/index.html'), 'utf8');
-  assert.equal(index.split('id="event-banner"').length - 1, 1, 'exactly one banner');
-  assert.match(index, /id="event-banner" data-until="2026-10-31"/);
-  const banner = index.slice(index.indexOf('<aside class="event-banner"'), index.indexOf('</aside>'));
-  assert.match(banner, /href="coverage\/"/, 'links to the coverage page');
-  assert.match(banner, /CONTRIBUTING\.md#hacktoberfest/, 'links to the contributing section that says what gets merged and closed');
-  assert.ok(existsSync(join(ROOT, 'site/coverage/index.html')), 'the coverage page it links to exists');
-  assert.doesNotMatch(readFileSync(join(ROOT, 'scripts/build.mjs'), 'utf8'), /event-banner/, 'the build must not read a clock to decide the banner');
+  assert.equal(index.includes('event-banner'), false, 'the October campaign is over: no event banner on the home');
+  assert.doesNotMatch(readFileSync(join(ROOT, 'scripts/build.mjs'), 'utf8'), /event-banner/, 'the build must not read a clock to decide a banner');
 });
 
 test('home: site.js keeps the banner through 31 October (UTC) and removes it from 1 November', () => {
