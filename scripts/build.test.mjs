@@ -2149,7 +2149,7 @@ test('data_policy lot 5: at least 25 of 68, Deepgram trains by its terms with an
 
 test('data_policy lot 6: at least 26 of 68, AI21 says it does not train, with the conditions of its own sentence', () => {
   const data = JSON.parse(readFileSync(DATA, 'utf8'));
-  assert.equal(data.providers.filter((p) => p.data_policy).length, 27, 'the count of covered providers');
+  assert.ok(data.providers.filter((p) => p.data_policy).length >= 26, 'lot 6 raised the covered providers to 26; later rows only add');
   const dp = data.providers.find((p) => p.slug === 'ai21').data_policy;
   assert.equal(dp.trains_on_prompts, false); assert.equal(dp.plan_named, false); assert.equal(dp.checked, '2026-10-15');
   assert.equal(dp.source, 'https://www.ai21.com/terms-policies/privacy-policy/', 'the final address, not the one that redirects');
@@ -2171,7 +2171,7 @@ test('correction of the absence claims: no note says the page names no plan unle
 
 test('data_policy: Arli AI, from a contributor, states retention only: trains stays not confirmed, the quote is literal and has its register entry', () => {
   const data = JSON.parse(readFileSync(DATA, 'utf8'));
-  assert.equal(data.providers.filter((p) => p.data_policy).length, 27, 'the count of covered providers');
+  assert.equal(data.providers.filter((p) => p.data_policy).length, 28, 'the count of covered providers');
   const dp = data.providers.find((p) => p.slug === 'arli-ai').data_policy;
   assert.equal(dp.trains_on_prompts, null, 'the policy says nothing about training: not stated is not no');
   assert.match(dp.retention, /processed transiently and immediately discarded/); assert.equal(dp.plan_named, false);
