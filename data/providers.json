@@ -654,7 +654,8 @@
       "model_tier": null,
       "no_expiry": {"source":"https://deepgram.com/pricing","checked":"2026-10-09","quote":"Unlike \"free tiers\" that expire after 12 months, this credit is available until you use it up, allowing you to prototype without time pressure."},
       "verified": true,
-      "last_verified": "2026-10-08"
+      "last_verified": "2026-10-08",
+      "data_policy": {"trains_on_prompts":true,"retention":null,"source":"https://deepgram.com/terms","checked":"2026-10-15","quote":"We may also use Your Content to improve our Services, to develop other products and services, and for other business purposes, including training and testing our Models.","note":"Terms of Service §3.2, last updated August 6, 2026. §3.3 offers an opt-out: «you may opt out of model training on a per-request basis by setting the applicable parameter in your request». The terms name Promotional Offers (§5.6); they are not tied to this sentence.","plan_named":false}
     },
     {
       "slug": "assemblyai",
@@ -871,7 +872,8 @@
       "is_text_llm": false,
       "model_tier": null,
       "verified": true,
-      "last_verified": "2026-10-08"
+      "last_verified": "2026-10-08",
+      "data_policy": {"trains_on_prompts":false,"retention":null,"source":"https://runware.ai/terms","checked":"2026-10-15","quote":"Runware will not use your Customer Material to train, fine-tune or develop Runware's own models or services or those of any third party.","note":"Terms last updated 29 September 2026. The next sentence leaves out «aggregated or de-identified operational data». The terms mention Beta Services that «may be free of charge», not tied to this sentence.","plan_named":false}
     },
     {
       "slug": "pinecone-inference",

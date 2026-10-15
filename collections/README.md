@@ -10,6 +10,6 @@ Curated, always-current slices of the [dataset](../data/providers.json) — each
 - **[OpenAI-compatible free LLM APIs](openai-compatible.md)** — Free LLM APIs that expose an OpenAI-compatible endpoint — point the OpenAI SDK at a new base_url and you are done. _(36 providers)_
 - **[Permanently free LLM APIs](always-free.md)** — LLM APIs with models priced at $0 on an ongoing basis — no trial window counting down. Verified from a live dataset. _(5 providers)_
 - **[Free multimodal LLM APIs](multimodal.md)** — Free API tiers that go beyond text: vision, image, audio/speech, embeddings and rerank. A live slice of a verified dataset. _(52 providers)_
-- **[Free LLM APIs that say they do not train on your prompts](no-training.md)** — Free LLM and AI APIs whose own terms or privacy page say they do not use your prompts to train their models; each provider’s page on this site cites the source and the day it was read. A live slice of a verified dataset. _(13 providers)_
+- **[Free LLM APIs that say they do not train on your prompts](no-training.md)** — Free LLM and AI APIs whose own terms or privacy page say they do not use your prompts to train their models; each provider’s page on this site cites the source and the day it was read. A live slice of a verified dataset. _(14 providers)_
 
 [← Back to the main list](../README.md)

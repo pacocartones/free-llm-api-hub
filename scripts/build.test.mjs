@@ -2064,7 +2064,7 @@ test('a11y: wide data tables sit in a keyboard-reachable scroll region and the h
 });
 
 // ---- the data-policy table fits a laptop screen (measured: 1114px at 1100px before, 1052px after) ----
-test('data_policy lot 2: 21 of 68 providers, the four new rows carry a quote and a source, and Deepgram stays unconfirmed', () => {
+test('data_policy lot 2: at least 21 of 68, the four new rows carry a quote and a source', () => {
   const data = JSON.parse(readFileSync(join(ROOT, 'data/providers.json'), 'utf8'));
   const withPolicy = data.providers.filter((p) => p.data_policy);
   assert.ok(withPolicy.length >= 21, 'lot 2 raised the covered providers to 21; later lots only add (the exact count is pinned by the latest lot test)');
@@ -2078,12 +2078,12 @@ test('data_policy lot 2: 21 of 68 providers, the four new rows carry a quote and
   }
   const assembly = data.providers.find((p) => p.slug === 'assemblyai').data_policy;
   assert.match(assembly.note, /Free users do not have the ability to opt out/, 'the free plan is stated for AssemblyAI');
-  assert.equal(data.providers.find((p) => p.slug === 'deepgram').data_policy, undefined, 'Deepgram has no policy: its page says only contractually included data is used and participation is voluntary');
+  // Deepgram stayed out of lot 2 (its only source then was a voluntary programme); lot 5 brings it in from its terms, and its test is there.
 });
 
-test('data_policy lot 3: 23 of 68, LlamaParse says it does not train, Retell AI trains only if recording is not opted out', () => {
+test('data_policy lot 3: at least 23 of 68, LlamaParse says it does not train, Retell AI trains only if recording is not opted out', () => {
   const data = JSON.parse(readFileSync(join(ROOT, 'data/providers.json'), 'utf8'));
-  assert.equal(data.providers.filter((p) => p.data_policy).length, 23, 'the count of covered providers');
+  assert.ok(data.providers.filter((p) => p.data_policy).length >= 23, 'lot 3 raised the covered providers to 23; later lots only add (the exact count is pinned by the latest lot test)');
   const llama = data.providers.find((p) => p.slug === 'llamaparse').data_policy;
   assert.equal(llama.trains_on_prompts, false);
   assert.equal(llama.quote, 'We do not train any models on User Content.');
@@ -2110,18 +2110,32 @@ test('data_policy.plan_named: true, false, null or absent; anything else is reje
 test('data_policy lot 4: the 13 providers that say they do not train were read for the plan; none names it; the notes stay in the limit', () => {
   const data = JSON.parse(readFileSync(DATA, 'utf8'));
   const falses = data.providers.filter((p) => p.data_policy && p.data_policy.trains_on_prompts === false);
-  assert.equal(falses.length, 13, 'the 12 published and LlamaParse');
+  assert.equal(falses.length, 14, 'the 13 read for the plan in lot 4, and Runware (lot 5)');
   for (const p of falses) {
     assert.equal(p.data_policy.plan_named, false, `${p.slug}: read for the plan, not named`);
     assert.equal(p.data_policy.checked, '2026-10-15', `${p.slug}: read date`);
     assert.ok(p.data_policy.note && p.data_policy.note.length <= 300, `${p.slug}: note within 300 characters`);
   }
   for (const p of data.providers.filter((q) => q.data_policy && q.data_policy.trains_on_prompts !== false)) {
-    assert.equal(p.data_policy.plan_named, undefined, `${p.slug}: not read for the plan yet, so no value is written`);
+    if (p.slug === 'deepgram') assert.equal(p.data_policy.plan_named, false, 'deepgram (lot 5) was read for the plan');
+    else assert.equal(p.data_policy.plan_named, undefined, `${p.slug}: not read for the plan yet, so no value is written`);
   }
   const api = JSON.parse(readFileSync(join(ROOT, 'site/api/v1/providers.json'), 'utf8'));
   const row = (api.providers || api).find((p) => p.slug === 'modal');
   assert.equal(row.data_policy.plan_named, false, 'the API carries the new field');
+});
+
+test('data_policy lot 5: 25 of 68, Deepgram trains by its terms with an opt-out, Runware says it does not', () => {
+  const data = JSON.parse(readFileSync(DATA, 'utf8'));
+  assert.equal(data.providers.filter((p) => p.data_policy).length, 25, 'the count of covered providers');
+  const dg = data.providers.find((p) => p.slug === 'deepgram').data_policy;
+  assert.equal(dg.trains_on_prompts, true); assert.equal(dg.source, 'https://deepgram.com/terms'); assert.equal(dg.plan_named, false);
+  assert.match(dg.quote, /including training and testing our Models\.$/); assert.match(dg.note, /opt out of model training on a per-request basis/);
+  assert.doesNotMatch(dg.note, /\bonly\b/, 'an absence is not proved by a substring search, so the note does not claim one');
+  const rw = data.providers.find((p) => p.slug === 'runware').data_policy;
+  assert.equal(rw.trains_on_prompts, false); assert.equal(rw.source, 'https://runware.ai/terms'); assert.equal(rw.plan_named, false);
+  assert.match(rw.note, /aggregated or de-identified operational data/);
+  for (const dp of [dg, rw]) { assert.equal(dp.checked, '2026-10-15'); assert.ok(dp.quote.length <= 400 && dp.note.length <= 300); }
 });
 
 test('mobile: the two long text cells stack their label above the text at 720px', () => {
