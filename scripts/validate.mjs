@@ -6,7 +6,7 @@
 // node scripts/validate.mjs [path-to-providers.json] [path-to-probe-report.json]
 // (the optional paths are used by the test suite to validate fixtures)
 
-import { readFileSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, resolve } from 'node:path';
 import Ajv2020 from 'ajv/dist/2020.js';
@@ -20,6 +20,7 @@ import { gpuComputeErrors } from './lib/gpu-compute.mjs';
 import { codingToolsErrors } from './lib/coding-tools.mjs';
 import { hasHiddenChars } from './lib/hidden-chars.mjs';
 import { quoteErrors } from './lib/quotes.mjs';
+import { reportErrors } from './lib/quotes-report.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const FILE = process.argv[2] ? resolve(process.argv[2]) : join(ROOT, 'data/providers.json');
@@ -274,6 +275,11 @@ if (!process.argv[2]) {
 if (!process.argv[2]) {
   try { errors.push(...quoteErrors(data, JSON.parse(readFileSync(join(ROOT, 'data/quotes.json'), 'utf8')))); }
   catch (e) { errors.push('quotes.json: ' + e.message); }
+  // the weekly report of verify-quotes is optional; when it is there it has to agree with the register
+  try {
+    const reportFile = join(ROOT, 'data/quotes-report.json');
+    if (existsSync(reportFile)) errors.push(...reportErrors(JSON.parse(readFileSync(reportFile, 'utf8')), JSON.parse(readFileSync(join(ROOT, 'data/quotes.json'), 'utf8'))));
+  } catch (e) { errors.push('quotes-report.json: ' + e.message); }
 }
 
 // ---------- best.json (editorial ranking must only feature verified providers) ----------

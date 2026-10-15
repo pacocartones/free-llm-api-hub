@@ -85,7 +85,7 @@ export function dataPolicyFaqHtml(counts) {
 }
 
 /** The main content of /data-policy/. `prefix` is the path from the page to the site root. */
-export function dataPolicyMainHtml(rows, { repo, generated, prefix = '../' }) {
+export function dataPolicyMainHtml(rows, { repo, generated, prefix = '../', quotesCheck = '' }) {
   const c = dataPolicyCounts(rows);
   const body = rows.map((r) => {
     const p = r.provider;
@@ -116,6 +116,7 @@ export function dataPolicyMainHtml(rows, { repo, generated, prefix = '../' }) {
     '<div class="table-scroll" role="region" aria-label="Table: the sentence of each verified provider about training on prompts" tabindex="0"><table class="dp-table"><caption class="sr-only">The sentence of each verified provider about training on prompts, with its source</caption>' +
     '<thead><tr><th scope="col">Provider</th><th scope="col">Trains on your prompts</th><th scope="col">Retention, as the dataset words it</th><th scope="col">The provider\'s own words</th><th scope="col">Source and help</th></tr></thead>' +
     `<tbody>${body}</tbody></table></div>` +
+    quotesCheck +
     dataPolicyFaqHtml(c) +
     `<p class="muted">To add a sentence or fix one, <a href="${htmlEsc(repo)}/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener">read how we take a value</a> and open an issue from the row.</p>` +
     '</div></main>';
