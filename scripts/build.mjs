@@ -21,6 +21,7 @@ import { githubProfileUrl } from './lib/contributors.mjs';
 import { resolveBestEntries, topEntries, partnerErrors, PODIUM_SIZE } from './lib/best.mjs';
 import { coverage, coverageMainHtml } from './lib/coverage.mjs';
 import { freeGpuMainHtml } from './lib/free-gpu.mjs';
+import { labelTables } from './lib/tables.mjs';
 import { codingToolsMainHtml } from './lib/free-coding-tools.mjs';
 import { dataPolicyRows, dataPolicyMainHtml } from './lib/data-policy-page.mjs';
 import { SCORE_WEIGHTS, EDITORIAL_WEIGHT, EDITORIAL_DEFAULT, MATH_INPUTS, MIN_CONFIRMED, TOP_SIZE, EDITORIAL_NOTE_THRESHOLD, STABILITY_MIN_DAYS, STABILITY_MIN_SAMPLES, rankProviders, editorialRating } from './lib/score.mjs';
@@ -471,7 +472,7 @@ try {
 } catch { /* no stats file: the placeholder stays */ }
 const withStars = (html) => (STARS ? html.replace(/(data-stars>)[^<]*(<)/g, `$1${STARS}$2`) : html);
 
-function htmlPage(args) { return withStars(htmlPageRaw(args)); }
+function htmlPage(args) { return labelTables(withStars(htmlPageRaw(args))); }
 function htmlPageRaw({ title, desc, canonical, main, jsonld, prefix = '../', noindex = false, ogImage = `${SITE}/og.png`, feeds = [], scripts = [] }) {
   // jsonld carries provider names straight from the dataset; writing "<" as
   // the JSON unicode escape (backslash-u-003c) keeps a "</script>" in the

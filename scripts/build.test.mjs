@@ -20,6 +20,7 @@ import { monthlyReport, reportMonths, monthEndDate } from './lib/state.mjs';
 import { externalContributors, countExternalContributors, githubProfileUrl } from './lib/contributors.mjs';
 import { buildOgManifest } from './lib/og.mjs';
 import { explorerRowHtml } from './lib/rows.mjs';
+import { labelTables } from './lib/tables.mjs';
 import { weeklyPacing, weeklyBatch, WEEKLY_CAP, MIN_AGE_DAYS } from './lib/pacing.mjs';
 import { clientConfigProviders, openaiClients, litellmYaml, MODEL_PLACEHOLDER } from './lib/client-config.mjs';
 import { requirementsHtml, limitsHtml, glanceHtml, modelsHtml, dataPolicyHtml } from './lib/provider-sections.mjs';
@@ -525,7 +526,7 @@ test('/best shows the podium of three and the methodology page states the rules'
 
 test('the explorer does not claim a column sort before the user chooses one', () => {
   const explorer = readFileSync(join(ROOT, 'site/index.html'), 'utf8');
-  assert.match(explorer, /<th data-key="name" aria-sort="none"><button type="button" class="th-sort">API<\/button><\/th>/);
+  assert.match(explorer, /<th data-key="name" scope="col" aria-sort="none"><button type="button" class="th-sort">API<\/button><\/th>/);
 });
 
 test('the explorer homepage leaves the table immediately after its controls', () => {
@@ -2070,6 +2071,36 @@ test('data-policy page: five columns, the help link inside the source cell, and 
   const row = html.slice(html.indexOf('<tbody>')).match(/<tr>[\s\S]*?<\/tr>/)[0];
   assert.match(row, /<td>[\s\S]*?<p class="muted dp-foot"><a href="[^"]+\/issues\/new[^"]*"[^>]*>add or correct<\/a><\/p><\/td><\/tr>/, 'the add-or-correct link sits under the source');
   assert.match(readFileSync(join(ROOT, 'site/styles.css'), 'utf8'), /^\.dp-table thead th \{ white-space: normal; \}/m, 'the long header labels wrap instead of widening the table');
+});
+
+// ---- every table names itself and its headers (WCAG 1.3.1, 2.4.6) ----
+test('tables: labelTables adds a caption from the nearest heading and a scope to every header, and leaves what is already there', () => {
+  const html = '<h1>Page</h1><h2>Free <em>limits</em></h2><h3>Detail</h3><table><thead><tr><th>A</th><th class="n">B</th></tr></thead><tbody><tr><th>row</th><td>1</td></tr></tbody></table>';
+  const out = labelTables(html);
+  assert.match(out, /<table><caption class="sr-only">Free limits<\/caption>/, 'the nearest h1 or h2, tags removed; an h3 is not used');
+  assert.match(out, /<th scope="col">A<\/th><th scope="col" class="n">B<\/th>/, 'a header row gets scope col');
+  assert.match(out, /<th scope="row">row<\/th>/, 'a header beside data cells gets scope row');
+  const kept = labelTables('<h2>X</h2><table><caption>Mine</caption><tr><th scope="rowgroup">G</th><td>1</td></tr></table>');
+  assert.equal((kept.match(/<caption/g) || []).length, 1, 'an existing caption is kept and none is added');
+  assert.match(kept, /<caption>Mine<\/caption>/);
+  assert.match(kept, /<th scope="rowgroup">/, 'an existing scope is kept');
+  assert.match(labelTables('<table><tr><th>A</th></tr></table>'), /<caption class="sr-only">Table<\/caption>/, 'no heading above: a plain name');
+  assert.equal(labelTables('<p>no table</p>'), '<p>no table</p>');
+});
+
+test('tables: every table of every generated page has a caption and every header cell a scope', () => {
+  const walk = (dir) => readdirSync(dir).flatMap((n) => { const p = join(dir, n); return statSync(p).isDirectory() ? walk(p) : p.endsWith('.html') ? [p] : []; });
+  const bad = [];
+  let tables = 0;
+  for (const f of walk(join(ROOT, 'site'))) {
+    for (const tbl of readFileSync(f, 'utf8').match(/<table\b[^>]*>[\s\S]*?<\/table>/g) || []) {
+      tables += 1;
+      if (!/<caption\b/.test(tbl)) bad.push(`${relative(ROOT, f)}: a table without caption`);
+      for (const th of tbl.match(/<th\b[^>]*>/g) || []) if (!/\bscope=/.test(th)) { bad.push(`${relative(ROOT, f)}: ${th} without scope`); break; }
+    }
+  }
+  assert.ok(tables > 50, `the check really saw the tables (${tables})`);
+  assert.deepEqual(bad, []);
 });
 
 // ---- focus ring contrast (WCAG 1.4.11, 2.4.7): the global ring is the accent colour, and it must stand out against every surface ----
