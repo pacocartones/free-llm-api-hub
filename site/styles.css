@@ -194,7 +194,7 @@ h1 { font-size: clamp(1.9rem, 4.4vw, 3rem); line-height: 1.1; margin: 0 auto 18p
 /* ---------- controls ---------- */
 .controls { position: sticky; top: var(--header-h); z-index: 30; background: color-mix(in srgb, var(--bg) 90%, transparent); backdrop-filter: blur(8px); border-bottom: 1px solid var(--border); padding: 13px 0; }
 .controls-inner { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
-.sel { background: var(--panel-2); border: 1px solid var(--border); color: var(--text); padding: 9px 12px; border-radius: 8px; font-size: .9rem; font-family: var(--font-mono); }
+.sel { background: var(--panel-2); border: 1px solid var(--control-border); color: var(--text); padding: 9px 12px; border-radius: 8px; font-size: .9rem; font-family: var(--font-mono); }
 
 /* Verified cell: check badge + date stacked and centered against the row, so the
    unit lands on the provider-name line instead of hugging the top of a tall row. */
