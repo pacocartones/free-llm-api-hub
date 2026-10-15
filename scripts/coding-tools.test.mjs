@@ -265,6 +265,9 @@ const HIDDEN_CLASSES = [
   ['zero-width space', 0x200b], ['zero-width non-joiner', 0x200c], ['left-to-right mark', 0x200e],
   ['line separator', 0x2028], ['right-to-left override', 0x202e], ['word joiner', 0x2060], ['directional isolate', 0x2066],
   ['variation selector 16', 0xfe0f], ['byte order mark', 0xfeff], ['tag character', 0xe0041], ['variation selector supplement', 0xe0100],
+  ['Mongolian free variation selector one', 0x180b], ['Mongolian free variation selector three', 0x180d], ['Mongolian free variation selector four', 0x180f],
+  ['Hangul choseong filler', 0x115f], ['Hangul jungseong filler', 0x1160], ['Hangul filler', 0x3164], ['halfwidth Hangul filler', 0xffa0],
+  ['Khmer inherent vowel aq', 0x17b4], ['Khmer inherent vowel aa', 0x17b5], ['blank Braille pattern', 0x2800],
 ];
 
 test('hidden characters: every class is rejected in a sentence, a name and a note, by the same definition data_policy uses', () => {

@@ -2017,7 +2017,7 @@ test('data_policy: the sentence and its note are plain text, bounded, and go wit
   const target = (d) => d.providers.find((p) => p.verified === true);
   assert.equal(validateAfter((d) => { target(d).data_policy = { ...good, quote: 'We may use your content.', note: 'Free plan.' }; }), true, 'a sentence and a note pass');
   assert.equal(validateAfter((d) => { target(d).data_policy = { ...good, quote: null, note: null }; }), true, 'null means none recorded');
-  for (const bad of [{ quote: '' }, { quote: '   ' }, { quote: 'x'.repeat(401) }, { note: 'x'.repeat(301) }, { quote: 'a\u200bb' }, { quote: 'a\u202eb' }, { quote: 'a\u0007b' }, { note: 'a\ufeffb' }, { quote: 'a\u061cb' }, { quote: 'a\u00adb' }, { quote: 'a\u034fb' }, { quote: 'a\u180eb' }, { quote: 'a\ufe0fb' }, { quote: 'a\u{e0041}b' }, { quote: 42 }]) {
+  for (const bad of [{ quote: '' }, { quote: '   ' }, { quote: 'x'.repeat(401) }, { note: 'x'.repeat(301) }, { quote: 'a\u200bb' }, { quote: 'a\u202eb' }, { quote: 'a\u0007b' }, { note: 'a\ufeffb' }, { quote: 'a\u061cb' }, { quote: 'a\u00adb' }, { quote: 'a\u034fb' }, { quote: 'a\u180eb' }, { quote: 'a\ufe0fb' }, { quote: 'a\u{e0041}b' }, { quote: 'a\u180bb' }, { quote: 'a\u115fb' }, { quote: 'a\u17b4b' }, { quote: 'a\u2800b' }, { quote: 'a\u3164b' }, { quote: 'a\uffa0b' }, { quote: 42 }]) {
     assert.equal(validateAfter((d) => { target(d).data_policy = { ...good, ...bad }; }), false, `rejected: ${JSON.stringify(bad).slice(0, 40)}`);
   }
   assert.equal(validateAfter((d) => { target(d).data_policy = { ...good, trains_on_prompts: null, retention: null, quote: 'Some sentence.' }; }), false, 'a sentence alone records nothing');
