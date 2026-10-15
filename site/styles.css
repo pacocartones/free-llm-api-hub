@@ -535,6 +535,13 @@ p.muted a, .prose p a, .prov-summary p a { text-decoration: underline; text-unde
   .brand-name { font-size: .85rem; }
   .header-actions { gap: 6px; }
 }
+/* At 320 CSS px (WCAG 1.4.10) the brand and three buttons were 23px too wide: the star count is dropped, the link keeps its label. */
+@media (max-width: 340px) {
+  .header-actions .star-count { display: none; }
+  .header-inner { gap: 6px; }
+}
+/* A data table wider than its column scrolls inside its own region instead of widening the page (WCAG 1.4.10: tables may scroll in two dimensions). */
+.table-scroll { overflow-x: auto; max-width: 100%; }
 
 /* Provider pages: sections are not numbered (the order is the same on every page) and the requirement flags read as words. */
 .prov-prose h2::before { content: none; }

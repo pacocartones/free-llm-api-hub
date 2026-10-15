@@ -113,7 +113,7 @@ export function dataPolicyMainHtml(rows, { repo, generated, prefix = '../' }) {
     `Each row shows the day its page was read. Data of ${htmlEsc(String(generated))}.</p>` +
     '<p class="dp-legend"><strong>Sentence: does not train</strong>: a recorded sentence from the provider\'s page says it does not train on prompts. <strong>Sentence: may train</strong>: a recorded sentence says it may. ' +
     '<strong>Not confirmed</strong>: no sentence is recorded. That never means &ldquo;no&rdquo;.</p>' +
-    '<div class="table-wrap"><table class="dp-table"><caption class="sr-only">The sentence of each verified provider about training on prompts, with its source</caption>' +
+    '<div class="table-scroll" role="region" aria-label="Table: the sentence of each verified provider about training on prompts" tabindex="0"><table class="dp-table"><caption class="sr-only">The sentence of each verified provider about training on prompts, with its source</caption>' +
     '<thead><tr><th scope="col">Provider</th><th scope="col">Trains on your prompts</th><th scope="col">Retention, as the dataset words it</th><th scope="col">The provider\'s own words</th><th scope="col">Source</th><th scope="col">Help</th></tr></thead>' +
     `<tbody>${body}</tbody></table></div>` +
     dataPolicyFaqHtml(c) +

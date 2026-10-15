@@ -384,7 +384,8 @@ function collectionTableHtml(rows, opts = {}) {
       return `<tr><td class="name">${name}${flagsHtml(p)}</td><td>${col2}</td><td>${htmlEsc(p.free_tier)}</td><td class="notes">${htmlEsc(p.notes)}</td><td>${v}</td></tr>`;
     })
     .join('\n');
-  return `<table><thead><tr><th>Provider</th><th>${col2Head}</th><th>What's free</th><th>The catch</th><th>Verified</th></tr></thead><tbody>\n${rowsHtml}\n</tbody></table>`;
+  // The table scrolls inside its own region when it is wider than the column (it is 611px at a 360px screen): the page never scrolls sideways.
+  return `<div class="table-scroll" role="region" aria-label="Table of providers" tabindex="0"><table><thead><tr><th>Provider</th><th>${col2Head}</th><th>What's free</th><th>The catch</th><th>Verified</th></tr></thead><tbody>\n${rowsHtml}\n</tbody></table></div>`;
 }
 
 // Shared chrome for generated pages (collection pages live one level below site root → '../').
@@ -1226,7 +1227,7 @@ const programPage = (slug, h1, lede, tableHead, rowsHtml, extra = '') =>
       `<section class="page-hero"><div class="wrap"><nav class="crumbs"><a href="../">Home</a> / ${htmlEsc(h1)}</nav>` +
       `<h1>${htmlEsc(h1)}</h1><p class="lede">${lede}</p></div></section>` +
       `<main id="main"><div class="wrap prose"><p class="count"><strong>${LEGEND}</strong></p>` +
-      `<table><thead>${tableHead}</thead><tbody>\n${rowsHtml}\n</tbody></table>` +
+      `<div class="table-scroll" role="region" aria-label="Table of programs" tabindex="0"><table><thead>${tableHead}</thead><tbody>\n${rowsHtml}\n</tbody></table></div>` +
       `<p style="margin-top:24px">Looking for a key to use right now with no application? See the <a href="../#explorer">verified self-serve list</a>.</p>${extra}</div></main>`,
   });
 

@@ -2047,6 +2047,20 @@ test('a11y: a plain link inside a paragraph or a list item is underlined, so it 
   assert.match(best, /<p[^>]*>[^<]*<a href="methodology\/">how the score works<\/a>/, 'the link axe measured is a classless link inside a paragraph, so the rule reaches it');
 });
 
+// ---- reflow at 320 CSS px (WCAG 1.4.10): a wide data table scrolls inside its own region, and the header fits ----
+test('a11y: wide data tables sit in a keyboard-reachable scroll region and the header fits at 320px', () => {
+  const css = readFileSync(join(ROOT, 'site/styles.css'), 'utf8');
+  assert.match(css, /^\.table-scroll \{ overflow-x: auto; max-width: 100%; \}/m);
+  assert.match(css, /@media \(max-width: 340px\) \{\s*\.header-actions \.star-count \{ display: none; \}/, 'at 320px the star count is dropped so the header buttons stay in the viewport');
+  const region = /<div class="table-scroll" role="region" aria-label="[^"]+" tabindex="0"><table/;
+  for (const f of ['site/data-policy/index.html', 'site/collections/no-training.html', 'site/collections/no-credit-card.html']) {
+    const html = readFileSync(join(ROOT, f), 'utf8');
+    assert.match(html, region, `${f}: the table is in a labelled, focusable scroll region`);
+    assert.equal((html.match(/<table/g) || []).length, (html.match(/class="table-scroll"/g) || []).length, `${f}: every table of the page is in one`);
+  }
+  assert.match(readFileSync(join(ROOT, 'site/programs/startups.html'), 'utf8'), region, 'the programs table too');
+});
+
 // ---- focus ring contrast (WCAG 1.4.11, 2.4.7): the global ring is the accent colour, and it must stand out against every surface ----
 const luminance = (hex) => {
   const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255).map((c) => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4));
