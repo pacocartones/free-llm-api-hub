@@ -1,0 +1,454 @@
+{
+ "version": 1,
+ "ran_at": "2026-10-15T16:49:34Z",
+ "runner": "server",
+ "summary": {
+  "ok": 44,
+  "expired": 0,
+  "unreachable": 0,
+  "other_language": 0,
+  "total": 44
+ },
+ "results": [
+  {
+   "id": "google-gemini.sentence",
+   "slug": "google-gemini",
+   "kind": "sentence",
+   "source_url": "https://ai.google.dev/gemini-api/terms",
+   "read_on": "2026-10-15",
+   "result": "ok",
+   "runs_in_a_row": 0,
+   "page_changed": false
+  },
+  {
+   "id": "groq.sentence",
+   "slug": "groq",
+   "kind": "sentence",
+   "source_url": "https://console.groq.com/docs/your-data",
+   "read_on": "2026-10-15",
+   "result": "ok",
+   "runs_in_a_row": 0,
+   "page_changed": false
+  },
+  {
+   "id": "cloudflare-workers-ai.sentence",
+   "slug": "cloudflare-workers-ai",
+   "kind": "sentence",
+   "source_url": "https://developers.cloudflare.com/workers-ai/platform/data-usage/",
+   "read_on": "2026-10-15",
+   "result": "ok",
+   "runs_in_a_row": 0,
+   "page_changed": false
+  },
+  {
+   "id": "cerebras.sentence",
+   "slug": "cerebras",
+   "kind": "sentence",
+   "source_url": "https://www.cerebras.ai/terms-of-service",
+   "read_on": "2026-10-15",
+   "result": "ok",
+   "runs_in_a_row": 0,
+   "page_changed": false
+  },
+  {
+   "id": "cerebras.note_passage.1",
+   "slug": "cerebras",
+   "kind": "note_passage",
+   "source_url": "https://www.cerebras.ai/terms-of-service",
+   "read_on": "2026-10-15",
+   "result": "ok",
+   "runs_in_a_row": 0,
+   "page_changed": false
+  },
+  {
+   "id": "mistral.sentence",
+   "slug": "mistral",
+   "kind": "sentence",
+   "source_url": "https://help.mistral.ai/en/articles/347617-do-you-use-my-user-data-to-train-your-artificial-intelligence-models",
+   "read_on": "2026-10-15",
+   "result": "ok",
+   "runs_in_a_row": 0,
+   "page_changed": false
+  },
+  {
+   "id": "fireworks-ai.sentence",
+   "slug": "fireworks-ai",
+   "kind": "sentence",
+   "source_url": "https://fireworks.ai/privacy-policy",
+   "read_on": "2026-10-15",
+   "result": "ok",
+   "runs_in_a_row": 0,
+   "page_changed": false
+  },
+  {
+   "id": "fireworks-ai.absence_check",
+   "slug": "fireworks-ai",
+   "kind": "absence_check",
+   "source_url": "https://fireworks.ai/privacy-policy",
+   "read_on": "2026-10-15",
+   "result": "ok",
+   "runs_in_a_row": 0,
+   "page_changed": false
+  },
+  {
+   "id": "nebius.sentence",
+   "slug": "nebius",
+   "kind": "sentence",
+   "source_url": "https://docs.nebius.com/legal/token-factory",
+   "read_on": "2026-10-15",
+   "result": "ok",
+   "runs_in_a_row": 0,
+   "page_changed": false
+  },
+  {
+   "id": "novita.sentence",
+   "slug": "novita",
+   "kind": "sentence",
+   "source_url": "https://novita.ai/legal/terms-of-service",
+   "read_on": "2026-10-15",
+   "result": "ok",
+   "runs_in_a_row": 0,
+   "page_changed": false
+  },
+  {
+   "id": "ai21.sentence",
+   "slug": "ai21",
+   "kind": "sentence",
+   "source_url": "https://www.ai21.com/terms-policies/privacy-policy/",
+   "read_on": "2026-10-15",
+   "result": "ok",
+   "runs_in_a_row": 0,
+   "page_changed": false
+  },
+  {
+   "id": "ai21.note_passage.1",
+   "slug": "ai21",
+   "kind": "note_passage",
+   "source_url": "https://www.ai21.com/terms-policies/privacy-policy/",
+   "read_on": "2026-10-15",
+   "result": "ok",
+   "runs_in_a_row": 0,
+   "page_changed": false
+  },
+  {
+   "id": "ai21.note_passage.2",
+   "slug": "ai21",
+   "kind": "note_passage",
+   "source_url": "https://www.ai21.com/terms-policies/privacy-policy/",
+   "read_on": "2026-10-15",
+   "result": "ok",
+   "runs_in_a_row": 0,
+   "page_changed": false
+  },
+  {
+   "id": "ai21.note_passage.3",
+   "slug": "ai21",
+   "kind": "note_passage",
+   "source_url": "https://www.ai21.com/terms-policies/privacy-policy/",
+   "read_on": "2026-10-15",
+   "result": "ok",
+   "runs_in_a_row": 0,
+   "page_changed": false
+  },
+  {
+   "id": "ai21.absence_check",
+   "slug": "ai21",
+   "kind": "absence_check",
+   "source_url": "https://www.ai21.com/terms-policies/privacy-policy/",
+   "read_on": "2026-10-15",
+   "result": "ok",
+   "runs_in_a_row": 0,
+   "page_changed": false
+  },
+  {
+   "id": "modal.sentence",
+   "slug": "modal",
+   "kind": "sentence",
+   "source_url": "https://modal.com/legal/terms",
+   "read_on": "2026-10-15",
+   "result": "ok",
+   "runs_in_a_row": 0,
+   "page_changed": false
+  },
+  {
+   "id": "modal.note_passage.1",
+   "slug": "modal",
+   "kind": "note_passage",
+   "source_url": "https://modal.com/legal/terms",
+   "read_on": "2026-10-15",
+   "result": "ok",
+   "runs_in_a_row": 0,
+   "page_changed": false
+  },
+  {
+   "id": "scaleway.sentence",
+   "slug": "scaleway",
+   "kind": "sentence",
+   "source_url": "https://www.scaleway.com/en/docs/generative-apis/reference-content/data-privacy/",
+   "read_on": "2026-10-15",
+   "result": "ok",
+   "runs_in_a_row": 0,
+   "page_changed": false
+  },
+  {
+   "id": "jina-ai.sentence",
+   "slug": "jina-ai",
+   "kind": "sentence",
+   "source_url": "https://jina.ai/embeddings/",
+   "read_on": "2026-10-15",
+   "result": "ok",
+   "runs_in_a_row": 0,
+   "page_changed": false
+  },
+  {
+   "id": "deepgram.sentence",
+   "slug": "deepgram",
+   "kind": "sentence",
+   "source_url": "https://deepgram.com/terms",
+   "read_on": "2026-10-15",
+   "result": "ok",
+   "runs_in_a_row": 0,
+   "page_changed": false
+  },
+  {
+   "id": "deepgram.note_passage.1",
+   "slug": "deepgram",
+   "kind": "note_passage",
+   "source_url": "https://deepgram.com/terms",
+   "read_on": "2026-10-15",
+   "result": "ok",
+   "runs_in_a_row": 0,
+   "page_changed": false
+  },
+  {
+   "id": "assemblyai.sentence",
+   "slug": "assemblyai",
+   "kind": "sentence",
+   "source_url": "https://www.assemblyai.com/legal/terms-of-service",
+   "read_on": "2026-10-15",
+   "result": "ok",
+   "runs_in_a_row": 0,
+   "page_changed": false
+  },
+  {
+   "id": "assemblyai.note_passage.1",
+   "slug": "assemblyai",
+   "kind": "note_passage",
+   "source_url": "https://www.assemblyai.com/docs/faq/how-to-opt-out-of-data-sharing-for-our-model-improvement-program",
+   "read_on": "2026-10-15",
+   "result": "ok",
+   "runs_in_a_row": 0,
+   "page_changed": false
+  },
+  {
+   "id": "ollama-cloud.sentence",
+   "slug": "ollama-cloud",
+   "kind": "sentence",
+   "source_url": "https://docs.ollama.com/cloud",
+   "read_on": "2026-10-15",
+   "result": "ok",
+   "runs_in_a_row": 0,
+   "page_changed": false
+  },
+  {
+   "id": "runware.sentence",
+   "slug": "runware",
+   "kind": "sentence",
+   "source_url": "https://runware.ai/terms",
+   "read_on": "2026-10-15",
+   "result": "ok",
+   "runs_in_a_row": 0,
+   "page_changed": false
+  },
+  {
+   "id": "runware.note_passage.1",
+   "slug": "runware",
+   "kind": "note_passage",
+   "source_url": "https://runware.ai/terms",
+   "read_on": "2026-10-15",
+   "result": "ok",
+   "runs_in_a_row": 0,
+   "page_changed": false
+  },
+  {
+   "id": "runware.note_passage.2",
+   "slug": "runware",
+   "kind": "note_passage",
+   "source_url": "https://runware.ai/terms",
+   "read_on": "2026-10-15",
+   "result": "ok",
+   "runs_in_a_row": 0,
+   "page_changed": false
+  },
+  {
+   "id": "llamaparse.sentence",
+   "slug": "llamaparse",
+   "kind": "sentence",
+   "source_url": "https://www.llamaindex.ai/terms-of-service",
+   "read_on": "2026-10-15",
+   "result": "ok",
+   "runs_in_a_row": 0,
+   "page_changed": false
+  },
+  {
+   "id": "llamaparse.note_passage.1",
+   "slug": "llamaparse",
+   "kind": "note_passage",
+   "source_url": "https://www.llamaindex.ai/terms-of-service",
+   "read_on": "2026-10-15",
+   "result": "ok",
+   "runs_in_a_row": 0,
+   "page_changed": false
+  },
+  {
+   "id": "moondream.sentence",
+   "slug": "moondream",
+   "kind": "sentence",
+   "source_url": "https://moondream.ai/terms",
+   "read_on": "2026-10-15",
+   "result": "ok",
+   "runs_in_a_row": 0,
+   "page_changed": false
+  },
+  {
+   "id": "moondream.note_passage.1",
+   "slug": "moondream",
+   "kind": "note_passage",
+   "source_url": "https://moondream.ai/terms",
+   "read_on": "2026-10-15",
+   "result": "ok",
+   "runs_in_a_row": 0,
+   "page_changed": false
+  },
+  {
+   "id": "speechmatics.sentence",
+   "slug": "speechmatics",
+   "kind": "sentence",
+   "source_url": "https://www.speechmatics.com/legal/terms-of-service",
+   "read_on": "2026-10-15",
+   "result": "ok",
+   "runs_in_a_row": 0,
+   "page_changed": false
+  },
+  {
+   "id": "speechmatics.note_passage.1",
+   "slug": "speechmatics",
+   "kind": "note_passage",
+   "source_url": "https://www.speechmatics.com/legal/terms-of-service",
+   "read_on": "2026-10-15",
+   "result": "ok",
+   "runs_in_a_row": 0,
+   "page_changed": false
+  },
+  {
+   "id": "elevenlabs.sentence",
+   "slug": "elevenlabs",
+   "kind": "sentence",
+   "source_url": "https://elevenlabs.io/terms-of-use",
+   "read_on": "2026-10-15",
+   "result": "ok",
+   "runs_in_a_row": 0,
+   "page_changed": false
+  },
+  {
+   "id": "rime.sentence",
+   "slug": "rime",
+   "kind": "sentence",
+   "source_url": "https://www.rime.ai/terms",
+   "read_on": "2026-10-15",
+   "result": "ok",
+   "runs_in_a_row": 0,
+   "page_changed": false
+  },
+  {
+   "id": "rime.note_passage.1",
+   "slug": "rime",
+   "kind": "note_passage",
+   "source_url": "https://www.rime.ai/terms",
+   "read_on": "2026-10-15",
+   "result": "ok",
+   "runs_in_a_row": 0,
+   "page_changed": false
+  },
+  {
+   "id": "voyage-ai.sentence",
+   "slug": "voyage-ai",
+   "kind": "sentence",
+   "source_url": "https://www.voyageai.com/tos",
+   "read_on": "2026-10-15",
+   "result": "ok",
+   "runs_in_a_row": 0,
+   "page_changed": false
+  },
+  {
+   "id": "voyage-ai.note_passage.1",
+   "slug": "voyage-ai",
+   "kind": "note_passage",
+   "source_url": "https://www.voyageai.com/tos",
+   "read_on": "2026-10-15",
+   "result": "ok",
+   "runs_in_a_row": 0,
+   "page_changed": false
+  },
+  {
+   "id": "cartesia.sentence",
+   "slug": "cartesia",
+   "kind": "sentence",
+   "source_url": "https://cartesia.ai/legal/terms.html",
+   "read_on": "2026-10-15",
+   "result": "ok",
+   "runs_in_a_row": 0,
+   "page_changed": false
+  },
+  {
+   "id": "cartesia.note_passage.1",
+   "slug": "cartesia",
+   "kind": "note_passage",
+   "source_url": "https://cartesia.ai/legal/terms.html",
+   "read_on": "2026-10-15",
+   "result": "ok",
+   "runs_in_a_row": 0,
+   "page_changed": false
+  },
+  {
+   "id": "upstage.sentence",
+   "slug": "upstage",
+   "kind": "sentence",
+   "source_url": "https://www.upstage.ai/terms-of-service/update-may-06-2026",
+   "read_on": "2026-10-15",
+   "result": "ok",
+   "runs_in_a_row": 0,
+   "page_changed": false
+  },
+  {
+   "id": "smallest-ai.sentence",
+   "slug": "smallest-ai",
+   "kind": "sentence",
+   "source_url": "https://smallest.ai/terms-of-service",
+   "read_on": "2026-10-15",
+   "result": "ok",
+   "runs_in_a_row": 0,
+   "page_changed": false
+  },
+  {
+   "id": "smallest-ai.note_passage.1",
+   "slug": "smallest-ai",
+   "kind": "note_passage",
+   "source_url": "https://smallest.ai/terms-of-service",
+   "read_on": "2026-10-15",
+   "result": "ok",
+   "runs_in_a_row": 0,
+   "page_changed": false
+  },
+  {
+   "id": "retell-ai.sentence",
+   "slug": "retell-ai",
+   "kind": "sentence",
+   "source_url": "https://www.retellai.com/terms-of-service",
+   "read_on": "2026-10-15",
+   "result": "ok",
+   "runs_in_a_row": 0,
+   "page_changed": false
+  }
+ ]
+}
