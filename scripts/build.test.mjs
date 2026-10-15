@@ -1994,7 +1994,7 @@ const dpOurWords = (html) => {
   const hero = (html.match(/<section class="page-hero[\s\S]*?<\/section>/) || [''])[0];
   const main = html.slice(html.indexOf('<main id="main"'), html.indexOf('</main>'));
   // The attribution line under a sentence carries the provider's name and its page address, which can say privacy: it is the provider's, not our words.
-  return [title, desc, hero, main].join(' ').replace(/<blockquote[\s\S]*?<\/blockquote>/g, ' ').replace(/<p class="muted dp-foot">[\s\S]*?<\/p>/g, ' ').replace(/<[^>]*>/g, ' ');
+  return [title, desc, hero, main].join(' ').replace(/<blockquote[\s\S]*?<\/blockquote>/g, ' ').replace(/<p class="muted dp-foot">[\s\S]*?<\/p>/g, ' ').replace(/<[^>]*>/g, ' ').replace(/«[^»]*»/g, ' '); // a phrase between « » in a note is the provider's own wording, like a quote
 };
 const DP_BANNED = /\b(safe|safer|secure|private|privacy|privacy-friendly|guarantee[sd]?|trustworthy|best|worst|better|worse|we check|we copy|always|never trains)\b/i;
 
@@ -2012,6 +2012,12 @@ test('data-policy page: no word that promises safety or ranks providers, no proc
   const fixture = dataPolicyMainHtml(rows, { repo: 'https://github.com/x/y', generated: '2026-10-15' });
   assert.match(fixture, /We guarantee that your prompts are private\./);
   assert.doesNotMatch(dpOurWords(fixture), DP_BANNED, 'the quoted sentence and its attribution line (a page address that says privacy) are exempt');
+});
+
+test('data-policy page: a phrase between « » in a note is the provider\'s own and is exempt; the same word outside them is not', () => {
+  const mk = (note) => dataPolicyMainHtml(dataPolicyRows([{ name: 'Acme', slug: 'acme', verified: true, data_policy: { trains_on_prompts: false, source: 'https://example.com/terms', checked: '2026-10-15', quote: 'We do not train.', note } }]), { repo: 'https://github.com/x/y', generated: '2026-10-15' });
+  assert.doesNotMatch(dpOurWords(mk('The «Privacy Policy» is the document.')), DP_BANNED, 'the document title between « » is the provider\'s');
+  assert.match(dpOurWords(mk('This is the best privacy policy.')), DP_BANNED, 'the same words in our own voice are caught');
 });
 
 test('data_policy: the sentence and its note are plain text, bounded, and go with a stated part', () => {
@@ -2110,14 +2116,17 @@ test('data_policy.plan_named: true, false, null or absent; anything else is reje
 test('data_policy lot 4: the 13 providers that say they do not train were read for the plan; none names it; the notes stay in the limit', () => {
   const data = JSON.parse(readFileSync(DATA, 'utf8'));
   const falses = data.providers.filter((p) => p.data_policy && p.data_policy.trains_on_prompts === false);
-  assert.equal(falses.length, 14, 'the 13 read for the plan in lot 4, and Runware (lot 5)');
+  assert.ok(falses.length >= 14, 'the 13 read for the plan in lot 4, Runware (lot 5) and the later ones: every one carries plan_named false');
   for (const p of falses) {
     assert.equal(p.data_policy.plan_named, false, `${p.slug}: read for the plan, not named`);
     assert.equal(p.data_policy.checked, '2026-10-15', `${p.slug}: read date`);
     assert.ok(p.data_policy.note && p.data_policy.note.length <= 300, `${p.slug}: note within 300 characters`);
   }
   for (const p of data.providers.filter((q) => q.data_policy && q.data_policy.trains_on_prompts !== false)) {
-    if (p.slug === 'deepgram') assert.equal(p.data_policy.plan_named, false, 'deepgram (lot 5) was read for the plan');
+    // rows that say it may train were read for the plan later (lots 2, 3, 5 and the correction of the absence claims): true where the
+    // clause names the free users or free usage (AssemblyAI, Voyage AI), false where it does not
+    const READ = { assemblyai: true, 'voyage-ai': true, elevenlabs: false, cartesia: false, 'retell-ai': false, deepgram: false };
+    if (p.slug in READ) assert.equal(p.data_policy.plan_named, READ[p.slug], `${p.slug}: plan_named as read`);
     else assert.equal(p.data_policy.plan_named, undefined, `${p.slug}: not read for the plan yet, so no value is written`);
   }
   const api = JSON.parse(readFileSync(join(ROOT, 'site/api/v1/providers.json'), 'utf8'));
@@ -2125,9 +2134,9 @@ test('data_policy lot 4: the 13 providers that say they do not train were read f
   assert.equal(row.data_policy.plan_named, false, 'the API carries the new field');
 });
 
-test('data_policy lot 5: 26 of 68, including Arli AI, Deepgram trains by its terms with an opt-out, Runware says it does not', () => {
+test('data_policy lot 5: at least 25 of 68, Deepgram trains by its terms with an opt-out, Runware says it does not', () => {
   const data = JSON.parse(readFileSync(DATA, 'utf8'));
-  assert.equal(data.providers.filter((p) => p.data_policy).length, 26, 'the count of covered providers');
+  assert.ok(data.providers.filter((p) => p.data_policy).length >= 25, 'lot 5 raised the covered providers to 25; later lots only add (the exact count is pinned by the latest lot test)');
   const dg = data.providers.find((p) => p.slug === 'deepgram').data_policy;
   assert.equal(dg.trains_on_prompts, true); assert.equal(dg.source, 'https://deepgram.com/terms'); assert.equal(dg.plan_named, false);
   assert.match(dg.quote, /including training and testing our Models\.$/); assert.match(dg.note, /opt out of model training on a per-request basis/);
@@ -2136,6 +2145,28 @@ test('data_policy lot 5: 26 of 68, including Arli AI, Deepgram trains by its ter
   assert.equal(rw.trains_on_prompts, false); assert.equal(rw.source, 'https://runware.ai/terms'); assert.equal(rw.plan_named, false);
   assert.match(rw.note, /aggregated or de-identified operational data/);
   for (const dp of [dg, rw]) { assert.equal(dp.checked, '2026-10-15'); assert.ok(dp.quote.length <= 400 && dp.note.length <= 300); }
+});
+
+test('data_policy lot 6: 26 of 68, AI21 says it does not train, with the conditions of its own sentence', () => {
+  const data = JSON.parse(readFileSync(DATA, 'utf8'));
+  assert.equal(data.providers.filter((p) => p.data_policy).length, 26, 'the count of covered providers');
+  const dp = data.providers.find((p) => p.slug === 'ai21').data_policy;
+  assert.equal(dp.trains_on_prompts, false); assert.equal(dp.plan_named, false); assert.equal(dp.checked, '2026-10-15');
+  assert.equal(dp.source, 'https://www.ai21.com/terms-policies/privacy-policy/', 'the final address, not the one that redirects');
+  assert.match(dp.quote, /unless otherwise agreed in writing or required to provide the Services/, 'the condition is in the quote');
+  assert.match(dp.note, /for example, for individual-developer accounts/); assert.match(dp.note, /has no mention of a free, trial, paid or other plan/);
+  assert.ok(dp.quote.length <= 400 && dp.note.length <= 300);
+  const md = readFileSync(join(ROOT, 'collections/no-training.md'), 'utf8');
+  assert.ok(md.split('\n').some((l) => l.startsWith('| **[AI21')), 'AI21 is in the no-training collection');
+});
+
+test('correction of the absence claims: no note says the page names no plan unless the page has none of the four words, and Voyage AI names free usage', () => {
+  const data = JSON.parse(readFileSync(DATA, 'utf8'));
+  const dpOf = (slug) => data.providers.find((p) => p.slug === slug).data_policy;
+  for (const slug of ['voyage-ai', 'cartesia', 'retell-ai', 'llamaparse', 'scaleway', 'moondream']) assert.doesNotMatch(dpOf(slug).note, /\bThe page names no/i, `${slug}: no statement about the whole page`);
+  assert.equal(dpOf('voyage-ai').plan_named, true);
+  assert.match(dpOf('voyage-ai').note, /credits or tokens for free usage of the Service may be automatically void/, 'the passage about free usage is in the note');
+  assert.match(readFileSync(join(ROOT, 'CHANGELOG.md'), 'utf8'), /^- \*\*Corrección:\*\*/m, 'the correction is visible in the changelog');
 });
 
 test('mobile: the two long text cells stack their label above the text at 720px', () => {
