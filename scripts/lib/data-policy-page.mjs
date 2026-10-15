@@ -40,10 +40,16 @@ export function dataPolicyRows(providers) {
   });
 }
 
-/** { total, yes, no, recorded, unknown, notConfirmed, withQuote } computed from the rows. */
+/** { total, yes, no, recorded, unknown, notConfirmed, withQuote, withTrainingQuote, withRetentionQuote } computed from the rows. */
 export function dataPolicyCounts(rows) {
-  const c = { total: rows.length, yes: 0, no: 0, recorded: 0, unknown: 0, withQuote: 0 };
-  for (const r of rows) { c[r.state] += 1; if (r.quote) c.withQuote += 1; }
+  const c = { total: rows.length, yes: 0, no: 0, recorded: 0, unknown: 0, withQuote: 0, withTrainingQuote: 0, withRetentionQuote: 0 };
+  for (const r of rows) {
+    c[r.state] += 1;
+    if (!r.quote) continue;
+    c.withQuote += 1;
+    // A sentence only counts as a training sentence when it backs a yes or a no; any other sentence is about retention.
+    if (r.state === 'yes' || r.state === 'no') c.withTrainingQuote += 1; else c.withRetentionQuote += 1;
+  }
   c.notConfirmed = c.recorded + c.unknown;
   return c;
 }
@@ -103,7 +109,7 @@ export function dataPolicyMainHtml(rows, { repo, generated, prefix = '../' }) {
   return '<main id="main"><div class="wrap prose">' +
     '<h2>The provider\'s own sentence about your prompts</h2>' +
     `<p>For each of ${c.total} verified providers, this page shows the sentence from the provider's own page about training on prompts where one is recorded. ` +
-    `${c.withQuote} rows have one; ${c.notConfirmed} are not confirmed (${c.recorded} of them have a value in the dataset but no sentence yet). ` +
+    `${c.withTrainingQuote} rows have one about training${c.withRetentionQuote ? ` (${c.withRetentionQuote} more carry a sentence about retention only)` : ''}; ${c.notConfirmed} are not confirmed (${c.recorded} of them have a value in the dataset but no sentence yet). ` +
     `Each row shows the day its page was read. Data of ${htmlEsc(String(generated))}.</p>` +
     '<p class="dp-legend"><strong>Sentence: does not train</strong>: a recorded sentence from the provider\'s page says it does not train on prompts. <strong>Sentence: may train</strong>: a recorded sentence says it may. ' +
     '<strong>Not confirmed</strong>: no sentence is recorded. That never means &ldquo;no&rdquo;.</p>' +

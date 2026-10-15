@@ -1,7 +1,7 @@
 {
   "$schema": "./schema.json",
   "version": "2.11.0",
-  "generated": "2026-10-14",
+  "generated": "2026-10-15",
   "source": "https://github.com/pacocartones/free-llm-api-hub",
   "note": "Canonical dataset. README tables, badge-freshness.json and the interactive site are all generated from this file — do not hand-edit them. `verified: true` means the core facts (tier, limits, key catch, link) were independently confirmed against the provider's own docs on `last_verified`. `verified: false` means sourced from community tracking and not yet independently re-confirmed here — treat those as indicative. Attribute fields (openai_compatible, modalities, best_for) are progressively backfilled and may be null.",
   "providers": [
@@ -29,7 +29,7 @@
       "model_tier_source": {"model":"gemini-2.5-pro","arena_model":"gemini-2.5-pro","match":"exact","rating":1445.6,"ci":[1443.1,1448],"boundary":true,"votes":124834,"snapshot":"2026-10-02","url":"https://huggingface.co/datasets/lmarena-ai/leaderboard-dataset"},
       "verified": true,
       "last_verified": "2026-10-08",
-      "data_policy": {"trains_on_prompts":true,"retention":null,"source":"https://ai.google.dev/gemini-api/terms","checked":"2026-10-13"}
+      "data_policy": {"trains_on_prompts":true,"retention":null,"source":"https://ai.google.dev/gemini-api/terms","checked":"2026-10-15","quote":"Google uses the content you submit to the Services and any generated responses to provide, improve, and develop Google products and services and machine learning technologies","note":"Applies to the Unpaid Services; in the EEA, Switzerland and the UK the paid terms also apply to free access. Terms effective 2026-03-23."}
     },
     {
       "slug": "groq",
@@ -56,7 +56,7 @@
       "free_limits": {"requests_per_minute":30,"requests_per_day":1000,"tokens_per_day":200000,"scope":"free plan, each of openai/gpt-oss-120b, openai/gpt-oss-20b and qwen/qwen3.8-27b; limits vary by model","source":"https://console.groq.com/docs/rate-limits","checked":"2026-10-08"},
       "verified": true,
       "last_verified": "2026-10-08",
-      "data_policy": {"trains_on_prompts":null,"retention":"Not retained by default; logged up to 30 days only for reliability or abuse checks","source":"https://console.groq.com/docs/your-data","checked":"2026-10-13"}
+      "data_policy": {"trains_on_prompts":null,"retention":"Not retained by default; logged up to 30 days only for reliability or abuse checks","source":"https://console.groq.com/docs/your-data","checked":"2026-10-15","quote":"By default, Groq does not retain customer data for inference requests.","note":"The page covers retention only; it has no sentence about training, so training stays not confirmed."}
     },
     {
       "slug": "openrouter",
@@ -110,7 +110,7 @@
       "free_limits": {"requests_per_minute":300,"scope":"text generation; models that require Workers Paid: 20 requests/minute per model. The daily allowance is 10,000 Neurons, a unit that is not requests or tokens","source":"https://developers.cloudflare.com/workers-ai/platform/limits/","checked":"2026-10-08"},
       "verified": true,
       "last_verified": "2026-10-08",
-      "data_policy": {"trains_on_prompts":false,"retention":null,"source":"https://developers.cloudflare.com/workers-ai/platform/data-usage/","checked":"2026-10-13"}
+      "data_policy": {"trains_on_prompts":false,"retention":null,"source":"https://developers.cloudflare.com/workers-ai/platform/data-usage/","checked":"2026-10-15","quote":"Cloudflare does not use your Customer Content to (1) train any AI models made available on Workers AI or (2) improve any Cloudflare or third-party services, and would not do so unless we received your explicit consent."}
     },
     {
       "slug": "cohere",
@@ -161,7 +161,7 @@
       "model_tier": null,
       "verified": true,
       "last_verified": "2026-10-08",
-      "data_policy": {"trains_on_prompts":false,"retention":null,"source":"https://www.cerebras.ai/terms-of-service","checked":"2026-10-13"}
+      "data_policy": {"trains_on_prompts":false,"retention":null,"source":"https://www.cerebras.ai/terms-of-service","checked":"2026-10-15","quote":"For clarity, the foregoing does not grant Cerebras the right to use Service Content for the purpose of training or fine-tuning models.","note":"The sentence says the terms do not grant Cerebras the right to use Service Content to train or fine-tune models. Terms effective 2024-08-27."}
     },
     {
       "slug": "mistral",
@@ -186,7 +186,7 @@
       "model_tier": null,
       "verified": true,
       "last_verified": "2026-10-08",
-      "data_policy": {"trains_on_prompts":true,"retention":null,"source":"https://help.mistral.ai/en/articles/347617-do-you-use-my-user-data-to-train-your-artificial-intelligence-models","checked":"2026-10-12"}
+      "data_policy": {"trains_on_prompts":true,"retention":null,"source":"https://help.mistral.ai/en/articles/347617-do-you-use-my-user-data-to-train-your-artificial-intelligence-models","checked":"2026-10-15","quote":"As stated during subscription, we may use your data (input and output) to train our artificial intelligence models.","note":"The free-mode sentence in Mistral Studio; the page says you can opt out."}
     },
     {
       "slug": "huggingface",
@@ -334,7 +334,7 @@
       "model_tier": null,
       "verified": true,
       "last_verified": "2026-10-08",
-      "data_policy": {"trains_on_prompts":false,"retention":"Prompt and generation data for open models not logged or stored without opt-in","source":"https://fireworks.ai/privacy-policy","checked":"2026-10-13"}
+      "data_policy": {"trains_on_prompts":false,"retention":"Prompt and generation data for open models not logged or stored without opt-in","source":"https://fireworks.ai/privacy-policy","checked":"2026-10-15","quote":"No AI Training on Your Data: We do not use your prompts, training data, or API inputs to train or improve our AI models without your explicit opt-in.","note":"Last modified 2026-08-11."}
     },
     {
       "slug": "baseten",
@@ -383,7 +383,7 @@
       "model_tier": null,
       "verified": true,
       "last_verified": "2026-10-08",
-      "data_policy": {"trains_on_prompts":true,"retention":null,"source":"https://docs.nebius.com/legal/token-factory","checked":"2026-10-13"}
+      "data_policy": {"trains_on_prompts":true,"retention":null,"source":"https://docs.nebius.com/legal/token-factory","checked":"2026-10-15","quote":"Subject to the terms of the DPA, Nebius may access, use, host, cache, store, copy, modify, and otherwise process Input and Output to (a) provide, maintain, monitor, protect, and support the Services, Token Factory Service or (b) train smaller Models used for Speculative Decoding.","note":"Covers training of smaller models used for speculative decoding; the terms are not specific to free access. Effective 2026-09-15."}
     },
     {
       "slug": "novita",
@@ -408,7 +408,7 @@
       "model_tier": null,
       "verified": true,
       "last_verified": "2026-10-08",
-      "data_policy": {"trains_on_prompts":false,"retention":null,"source":"https://novita.ai/legal/terms-of-service","checked":"2026-10-13"}
+      "data_policy": {"trains_on_prompts":false,"retention":null,"source":"https://novita.ai/legal/terms-of-service","checked":"2026-10-15","quote":"By Default, Novita AI will not use your Content to train our own models or to improve the Services.","note":"Updated 2026-08-05."}
     },
     {
       "slug": "ai21",
@@ -504,7 +504,7 @@
       "model_tier": null,
       "verified": true,
       "last_verified": "2026-10-08",
-      "data_policy": {"trains_on_prompts":false,"retention":null,"source":"https://modal.com/legal/terms","checked":"2026-10-13"}
+      "data_policy": {"trains_on_prompts":false,"retention":null,"source":"https://modal.com/legal/terms","checked":"2026-10-15","quote":"Modal will not, except with Customer's prior written consent: (i) train any AI model using Customer Data, or (ii) export Customer Data into, or cause Customer Data to be ingested by, large language models.","note":"The terms are written for Customers (businesses) and do not say whether they apply to the free monthly credit."}
     },
     {
       "slug": "sambanova",
@@ -531,7 +531,7 @@
       "free_limits": {"requests_per_minute":20,"requests_per_day":20,"tokens_per_day":200000,"scope":"Free Tier (no payment method linked); limits listed per model in the table for DeepSeek-V3.1, Meta-Llama-3.3-70B-Instruct and gpt-oss-120b, enforcement scope not stated","source":"https://docs.sambanova.ai/docs/en/models/rate-limits","checked":"2026-10-09"},
       "verified": true,
       "last_verified": "2026-10-09",
-      "data_policy": {"trains_on_prompts":false,"retention":null,"source":"https://sambanova.ai/cloud-end-user-license-agreement","checked":"2026-10-13"}
+      "data_policy": null
     },
     {
       "slug": "scaleway",
@@ -556,7 +556,7 @@
       "model_tier": null,
       "verified": true,
       "last_verified": "2026-10-08",
-      "data_policy": {"trains_on_prompts":false,"retention":"Inputs and outputs not collected, except briefly for errors or abuse; anonymized usage data up to 6 months","source":"https://www.scaleway.com/en/docs/generative-apis/reference-content/data-privacy/","checked":"2026-10-13"}
+      "data_policy": {"trains_on_prompts":false,"retention":"Inputs and outputs not collected, except briefly for errors or abuse; anonymized usage data up to 6 months","source":"https://www.scaleway.com/en/docs/generative-apis/reference-content/data-privacy/","checked":"2026-10-15","quote":"Your data is not used for training, retraining, or improving the base models.","note":"Page reviewed 2025-10-03."}
     },
     {
       "slug": "nvidia-nim",
@@ -629,7 +629,7 @@
       "model_tier": null,
       "verified": true,
       "last_verified": "2026-10-08",
-      "data_policy": {"trains_on_prompts":false,"retention":null,"source":"https://jina.ai/embeddings/","checked":"2026-10-13"}
+      "data_policy": {"trains_on_prompts":false,"retention":null,"source":"https://jina.ai/embeddings/","checked":"2026-10-15","quote":"We never use your API requests, inputs, or outputs to train our embedding, reranker, or any other models."}
     },
     {
       "slug": "deepgram",
@@ -775,7 +775,7 @@
       "model_tier": null,
       "verified": true,
       "last_verified": "2026-10-08",
-      "data_policy": {"trains_on_prompts":false,"retention":null,"source":"https://docs.ollama.com/cloud","checked":"2026-10-12"}
+      "data_policy": {"trains_on_prompts":false,"retention":null,"source":"https://docs.ollama.com/cloud","checked":"2026-10-15","quote":"Ollama processes cloud prompts and responses to answer your requests. We do not use them to train models."}
     },
     {
       "slug": "ai-horde",
@@ -1018,7 +1018,7 @@
       "model_tier": null,
       "verified": true,
       "last_verified": "2026-10-08",
-      "data_policy": {"trains_on_prompts":false,"retention":"No longer than necessary to provide the Service","source":"https://moondream.ai/terms","checked":"2026-10-12"}
+      "data_policy": {"trains_on_prompts":false,"retention":"No longer than necessary to provide the Service","source":"https://moondream.ai/terms","checked":"2026-10-15","quote":"M87 Labs will not use Customer Content or Outputs to Train any model or adapter that is made generally available by M87 Labs (including the base Moondream models), or to Train any model or adapter for the benefit of any third party, except where you explicitly opt in under a separate written agreement.","note":"Last updated 2025-12-10."}
     },
     {
       "slug": "speechmatics",
@@ -1043,7 +1043,7 @@
       "model_tier": null,
       "verified": true,
       "last_verified": "2026-10-08",
-      "data_policy": {"trains_on_prompts":false,"retention":null,"source":"https://www.speechmatics.com/terms-and-conditions","checked":"2026-10-13"}
+      "data_policy": {"trains_on_prompts":false,"retention":null,"source":"https://www.speechmatics.com/legal/terms-of-service","checked":"2026-10-15","quote":"Speechmatics will not use Your inputs, outputs or any other data for machine learning or model training purposes unless You opt in by enabling model training within Your portal workspace."}
     },
     {
       "slug": "speechify",
@@ -1213,7 +1213,7 @@
       "model_tier": null,
       "verified": true,
       "last_verified": "2026-10-08",
-      "data_policy": {"trains_on_prompts":false,"retention":null,"source":"https://www.rime.ai/terms","checked":"2026-10-13"}
+      "data_policy": {"trains_on_prompts":false,"retention":null,"source":"https://www.rime.ai/terms","checked":"2026-10-15","quote":"Except for Rime’s limited right to use your Voice Recordings to train a Customer Voice Model (as both terms are defined below) if you choose to use that feature, Rime does not use either the Input or Output to train its AI models.","note":"The sentence includes an exception for Voice Recordings when the customer chooses to train a Customer Voice Model. Effective 2025-04-08."}
     },
     {
       "slug": "tencent-hunyuan",
@@ -1504,7 +1504,7 @@
       "verified": true,
       "last_verified": "2026-10-08",
       "added": "2026-07-31",
-      "data_policy": {"trains_on_prompts":null,"retention":"Until the end of service provision or a separately notified period","source":"https://www.upstage.ai/terms-of-service/update-may-06-2026","checked":"2026-10-13"}
+      "data_policy": {"trains_on_prompts":true,"retention":"Until the end of service provision or a separately notified period","source":"https://www.upstage.ai/terms-of-service/update-may-06-2026","checked":"2026-10-15","quote":"may be used for service provision and improvement, as well as for research and development of artificial intelligence technologies (including training).","note":"Terms effective 2026-05-30; the quoted sentence is about data from the free services."}
     },
     {
       "slug": "veryfi",
@@ -1577,7 +1577,7 @@
       "verified": true,
       "last_verified": "2026-10-08",
       "added": "2026-07-31",
-      "data_policy": {"trains_on_prompts":false,"retention":null,"source":"https://smallest.ai/terms-of-service","checked":"2026-10-13"}
+      "data_policy": {"trains_on_prompts":false,"retention":null,"source":"https://smallest.ai/terms-of-service","checked":"2026-10-15","quote":"We will not use such User Content or Input to train and improve our Services or to develop new products and services.","note":"Effective 2026-10-13."}
     },
     {
       "slug": "retell-ai",

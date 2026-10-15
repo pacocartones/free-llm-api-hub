@@ -1954,8 +1954,10 @@ test('data-policy page: the counts come from the rows, every verified provider h
   assert.equal(rows.length, providers.filter((p) => p.verified === true).length);
   assert.equal(c.yes + c.no + c.recorded + c.unknown, c.total);
   assert.equal(c.notConfirmed, c.recorded + c.unknown);
+  assert.equal(c.withTrainingQuote + c.withRetentionQuote, c.withQuote, 'every sentence is either about training or about retention');
+  assert.equal(c.withTrainingQuote, rows.filter((r) => r.quote && (r.state === 'yes' || r.state === 'no')).length);
   const html = readFileSync(join(ROOT, 'site/data-policy/index.html'), 'utf8');
-  assert.match(html, new RegExp(`For each of ${c.total} verified providers, this page shows the sentence from the provider's own page about training on prompts where one is recorded\\. ${c.withQuote} rows have one; ${c.notConfirmed} are not confirmed \\(${c.recorded} of them have a value in the dataset but no sentence yet\\)`));
+  assert.match(html, new RegExp(`For each of ${c.total} verified providers, this page shows the sentence from the provider's own page about training on prompts where one is recorded\\. ${c.withTrainingQuote} rows have one about training${c.withRetentionQuote ? ` (${c.withRetentionQuote} more carry a sentence about retention only)`.replace(/[()]/g, '\\$&') : ''}; ${c.notConfirmed} are not confirmed \\(${c.recorded} of them have a value in the dataset but no sentence yet\\)`));
   assert.match(html, new RegExp(`${c.no} have a recorded sentence that says they do not train on prompts, ${c.yes} have one that says they may, and ${c.notConfirmed} are not confirmed`));
   assert.equal((html.match(/<tr><th scope="row">/g) || []).length, c.total, 'one row per verified provider');
   assert.match(readFileSync(join(ROOT, 'site/sitemap.xml'), 'utf8'), /<loc>https:\/\/freellmapihub\.com\/data-policy\/<\/loc>/);
