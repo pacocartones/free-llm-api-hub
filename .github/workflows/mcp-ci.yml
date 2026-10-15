@@ -1,0 +1,32 @@
+name: MCP package CI
+
+# Runs the tests of packages/mcp on every pull request and push that touches it.
+on:
+  pull_request:
+    paths: ['packages/mcp/**', '.github/workflows/mcp-ci.yml']
+  push:
+    branches: [main]
+    paths: ['packages/mcp/**', '.github/workflows/mcp-ci.yml']
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: mcp tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: packages/mcp
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+      - run: npm ci --ignore-scripts
+      - run: npm test
+      - name: What would be published
+        run: npm pack --dry-run

@@ -1,0 +1,25 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.pacocartones/free-llm-api-hub",
+  "title": "Free LLM API Hub",
+  "description": "Search free-tier and trial-credit LLM API providers, read one entry, get an OpenAI-client config. Read-only, unaffiliated.",
+  "repository": {
+    "url": "https://github.com/pacocartones/free-llm-api-hub",
+    "source": "github",
+    "subfolder": "packages/mcp"
+  },
+  "websiteUrl": "https://freellmapihub.com/",
+  "version": "0.1.0",
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "free-llm-api-hub-mcp",
+      "version": "0.1.0",
+      "transport": { "type": "stdio" },
+      "environmentVariables": [
+        { "name": "FLAH_DATA", "description": "Optional path to a local providers.json instead of fetching https://freellmapihub.com/api/v1/providers.json", "isRequired": false, "format": "string" },
+        { "name": "FLAH_CLIENTS", "description": "Optional path to a local openai-clients.json instead of fetching the published file", "isRequired": false, "format": "string" }
+      ]
+    }
+  ]
+}

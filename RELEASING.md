@@ -14,7 +14,13 @@ npm package to publish, so a release is a pinned snapshot of the data.
    written on an existing tag.
 3. **Source:** only from `main`, with every check green, from the exact commit the tag points to.
 4. **Approval:** publishing a GitHub release is done by the maintainer, after the owner's OK.
-   Nothing is published to a package registry.
+   Nothing is published to a package registry, with one scoped exception: `packages/mcp` (the
+   MCP server) may be published to npm and listed in the MCP registry, only after the owner's explicit
+   OK for that release, from CI with provenance (`.github/workflows/release-mcp.yml`: tag
+   `mcp-vX.Y.Z`, environment `release-mcp` with a required reviewer, npm trusted publishing, no token).
+   The package has its own SemVer, independent of the dataset's; `server.json` carries the same
+   version. Until the owner enables it the package stays `"private": true` and the workflow does
+   nothing.
 5. **Notes:** written from the pull requests merged between the previous tag and this one, in
    English. Every pull request that changes something for users is cited by number; related ones
    may share a line. An entry for an outside contributor ends with

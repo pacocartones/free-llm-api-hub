@@ -1,0 +1,82 @@
+# Publication path for packages/mcp. It does nothing until the owner enables it: the check job needs
+# the repository variable NPM_PUBLISH_ENABLED=true, the package is "private": true until the owner's go
+# (npm refuses to publish a private package), and the publish job waits for the required reviewer of the
+# environment release-mcp.
+# Publishes packages/mcp to npm with provenance (trusted publishing, OIDC, no token)
+# and then lists it in the official MCP registry (GitHub OIDC, no token).
+# Trigger: a tag mcp-vX.Y.Z pushed by the maintainer. The tag must equal
+# packages/mcp/package.json "version" and server.json "version".
+name: Release MCP package
+
+on:
+  push:
+    tags: ['mcp-v*']
+
+permissions: {}
+
+jobs:
+  check:
+    if: ${{ vars.NPM_PUBLISH_ENABLED == 'true' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      needed: ${{ steps.decide.outputs.needed }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - id: decide
+        working-directory: packages/mcp
+        run: |
+          name=$(node -p "require('./package.json').name")
+          version=$(node -p "require('./package.json').version")
+          [ "mcp-v$version" = "$GITHUB_REF_NAME" ] || { echo "::error::tag $GITHUB_REF_NAME does not match package version $version"; exit 1; }
+          [ "$(node -p "require('./server.json').version")" = "$version" ] || { echo "::error::server.json version differs"; exit 1; }
+          if npm view "$name@$version" version >/dev/null 2>&1; then echo "needed=false" >> "$GITHUB_OUTPUT"; else echo "needed=true" >> "$GITHUB_OUTPUT"; fi
+
+  publish:
+    needs: check
+    if: ${{ needs.check.outputs.needed == 'true' }}
+    # Human gate: required reviewer on the environment "release-mcp"; the npm
+    # trusted publisher names this workflow file and this environment too.
+    environment: release-mcp
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # npm trusted publishing + provenance, MCP registry github-oidc
+    defaults:
+      run:
+        working-directory: packages/mcp
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24 # npm 11, required for trusted publishing (>= 11.5.1)
+      - run: npm ci --ignore-scripts
+      - run: npm test
+      - name: Pack and inspect
+        run: npm pack --dry-run
+      - name: Publish with provenance
+        run: npm publish --provenance --access public
+      - name: Verify what was published
+        run: |
+          sleep 20
+          mkdir /tmp/v && cd /tmp/v && npm init -y >/dev/null
+          npm install --ignore-scripts "$(node -p "require('$GITHUB_WORKSPACE/packages/mcp/package.json').name")@$(node -p "require('$GITHUB_WORKSPACE/packages/mcp/package.json').version")"
+          npm audit signatures
+      - name: Install mcp-publisher (pinned, checksum verified)
+        working-directory: ${{ runner.temp }}
+        env:
+          V: v1.8.1
+          SHA256: a06c9096dcb9727c13555b6be26c7effa707b01f06a4c561ba7a3635443cf2cc # mcp-publisher_linux_amd64.tar.gz of v1.8.1; re-read from the release before use
+        run: |
+          curl -fsSL -o p.tgz "https://github.com/modelcontextprotocol/registry/releases/download/$V/mcp-publisher_linux_amd64.tar.gz"
+          echo "$SHA256  p.tgz" | sha256sum -c -
+          tar xzf p.tgz mcp-publisher
+      - name: Publish to the MCP registry
+        run: |
+          "$RUNNER_TEMP/mcp-publisher" login github-oidc
+          "$RUNNER_TEMP/mcp-publisher" publish
