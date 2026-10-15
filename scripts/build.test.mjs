@@ -2061,6 +2061,17 @@ test('a11y: wide data tables sit in a keyboard-reachable scroll region and the h
   assert.match(readFileSync(join(ROOT, 'site/programs/startups.html'), 'utf8'), region, 'the programs table too');
 });
 
+// ---- the data-policy table fits a laptop screen (measured: 1114px at 1100px before, 1052px after) ----
+test('data-policy page: five columns, the help link inside the source cell, and the header labels may wrap', () => {
+  const html = readFileSync(join(ROOT, 'site/data-policy/index.html'), 'utf8');
+  const head = html.slice(html.indexOf('<thead>'), html.indexOf('</thead>'));
+  assert.equal((head.match(/<th scope="col">/g) || []).length, 5, 'five columns: provider, state, retention, own words, source and help');
+  assert.doesNotMatch(head, />Help</, 'no separate Help column: it was the one cut off at 1100px');
+  const row = html.slice(html.indexOf('<tbody>')).match(/<tr>[\s\S]*?<\/tr>/)[0];
+  assert.match(row, /<td>[\s\S]*?<p class="muted dp-foot"><a href="[^"]+\/issues\/new[^"]*"[^>]*>add or correct<\/a><\/p><\/td><\/tr>/, 'the add-or-correct link sits under the source');
+  assert.match(readFileSync(join(ROOT, 'site/styles.css'), 'utf8'), /^\.dp-table thead th \{ white-space: normal; \}/m, 'the long header labels wrap instead of widening the table');
+});
+
 // ---- focus ring contrast (WCAG 1.4.11, 2.4.7): the global ring is the accent colour, and it must stand out against every surface ----
 const luminance = (hex) => {
   const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255).map((c) => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4));

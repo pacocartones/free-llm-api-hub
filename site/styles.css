@@ -628,3 +628,4 @@ p.muted a, .prose p a, .prov-summary p a { text-decoration: underline; text-unde
   /* A focused row scrolls into view below BOTH pinned bars, not only the header. */
   html { scroll-padding-top: calc(var(--header-h) + var(--controls-h, 120px) + 12px); }
 }
+.dp-table thead th { white-space: normal; }

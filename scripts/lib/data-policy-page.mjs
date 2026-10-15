@@ -103,8 +103,8 @@ export function dataPolicyMainHtml(rows, { repo, generated, prefix = '../' }) {
     const ret = r.retention ? htmlEsc(r.retention) : '<span class="tri tri-unk">not confirmed</span>';
     const cls = r.state === 'yes' ? 'yes' : r.state === 'no' ? 'no' : 'unk';
     return `<tr><th scope="row">${name}</th><td><span class="tri tri-${cls}">${STATE_LABEL[r.state]}</span></td>` +
-      `<td>${ret}</td><td>${quote}${note}</td><td>${src}</td>` +
-      `<td><a href="${htmlEsc(dataPolicyIssueUrl(p, repo))}" target="_blank" rel="noopener">add or correct</a></td></tr>`;
+      `<td>${ret}</td><td>${quote}${note}</td>` +
+      `<td>${src}<p class="muted dp-foot"><a href="${htmlEsc(dataPolicyIssueUrl(p, repo))}" target="_blank" rel="noopener">add or correct</a></p></td></tr>`;
   }).join('');
   return '<main id="main"><div class="wrap prose">' +
     '<h2>The provider\'s own sentence about your prompts</h2>' +
@@ -114,7 +114,7 @@ export function dataPolicyMainHtml(rows, { repo, generated, prefix = '../' }) {
     '<p class="dp-legend"><strong>Sentence: does not train</strong>: a recorded sentence from the provider\'s page says it does not train on prompts. <strong>Sentence: may train</strong>: a recorded sentence says it may. ' +
     '<strong>Not confirmed</strong>: no sentence is recorded. That never means &ldquo;no&rdquo;.</p>' +
     '<div class="table-scroll" role="region" aria-label="Table: the sentence of each verified provider about training on prompts" tabindex="0"><table class="dp-table"><caption class="sr-only">The sentence of each verified provider about training on prompts, with its source</caption>' +
-    '<thead><tr><th scope="col">Provider</th><th scope="col">Trains on your prompts</th><th scope="col">Retention, as the dataset words it</th><th scope="col">The provider\'s own words</th><th scope="col">Source</th><th scope="col">Help</th></tr></thead>' +
+    '<thead><tr><th scope="col">Provider</th><th scope="col">Trains on your prompts</th><th scope="col">Retention, as the dataset words it</th><th scope="col">The provider\'s own words</th><th scope="col">Source and help</th></tr></thead>' +
     `<tbody>${body}</tbody></table></div>` +
     dataPolicyFaqHtml(c) +
     `<p class="muted">To add a sentence or fix one, <a href="${htmlEsc(repo)}/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener">read how we take a value</a> and open an issue from the row.</p>` +
