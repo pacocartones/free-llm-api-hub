@@ -57,20 +57,26 @@ export function reportErrors(report, registry) {
   if (!STAMP_RE.test(report.ran_at || '')) fail('ran_at must be a UTC time like 2026-10-19T12:10:00Z');
   if (typeof report.runner !== 'string' || !report.runner) fail('runner must say where the run happened');
   if (!Array.isArray(report.results)) return [...errors, 'quotes-report.json: results must be a list'];
-  const ids = new Set((registry.entries || []).map((e) => e.id)); const seen = new Set();
+  // A report is a dated photograph of a run: the register may have gained entries since (a new row) or lost some (a row removed). That is not an
+  // error: reportCoverage says it, and the page shows it. What must hold is that the report agrees with itself.
+  const seen = new Set();
   for (const r of report.results) {
-    if (!ids.has(r.id)) fail(`${r.id}: no such entry in quotes.json`);
     if (seen.has(r.id)) fail(`${r.id}: twice`); seen.add(r.id);
     if (!RESULTS.includes(r.result)) fail(`${r.id}: unknown result ${JSON.stringify(r.result)}`);
     if (!Number.isInteger(r.runs_in_a_row) || r.runs_in_a_row < 0 || (r.result === 'ok') !== (r.runs_in_a_row === 0)) fail(`${r.id}: runs_in_a_row is 0 exactly when the result is ok`);
     if (!/^https:\/\//.test(r.source_url || '')) fail(`${r.id}: source_url must be https`);
     if (!DATE_RE.test(r.read_on || '')) fail(`${r.id}: read_on must be a date`);
   }
-  for (const id of ids) if (!seen.has(id)) fail(`${id}: not in the report: a run covers every entry`);
   const s = report.summary || {};
   for (const k of RESULTS) if (s[k] !== report.results.filter((r) => r.result === k).length) fail(`summary.${k} does not match the results`);
   if (s.total !== report.results.length) fail('summary.total does not match the results');
   return errors;
+}
+
+/** What the register has gained or lost since the run of the report: new entries are not read yet, and results of removed ones are stale. */
+export function reportCoverage(report, registry) {
+  const inRegister = new Set((registry.entries || []).map((e) => e.id)); const inReport = new Set(((report && report.results) || []).map((r) => r.id));
+  return { notRead: [...inRegister].filter((id) => !inReport.has(id)), stale: [...inReport].filter((id) => !inRegister.has(id)) };
 }
 
 /** How old the report is, in whole days, and the level the page gives it: none (no report), ok, amber (8 days), red (15 days). */
@@ -94,7 +100,8 @@ export function quotesReportHtml(report, registry, nowMs) {
     '<p>Every quoted sentence and passage is read again on its page once a week, from the server, in English. Only what is listed below needs a person: a passage the page no longer carries, or a page that could not be read.</p>';
   if (!report || age.level === 'none') return `${head}<p class="dp-check" data-level="none" data-ran-at="">${LEVEL_TEXT.none}</p>`;
   const byId = new Map((registry.entries || []).map((e) => [e.id, e]));
-  const bad = report.results.filter((r) => r.result !== 'ok');
+  const cov = reportCoverage(report, registry);
+  const bad = report.results.filter((r) => r.result !== 'ok' && byId.has(r.id));
   const s = report.summary;
   const rows = bad.map((r) => {
     const e = byId.get(r.id) || {};
@@ -107,5 +114,6 @@ export function quotesReportHtml(report, registry, nowMs) {
     ? `<div class="table-scroll" role="region" aria-label="Table: quoted passages that need a person" tabindex="0"><table class="dp-table"><thead><tr><th scope="col">Provider</th><th scope="col">Passage</th><th scope="col">Result</th><th scope="col">Last read as found</th></tr></thead><tbody>${rows}</tbody></table></div>`
     : '<p>Every passage was found on its page.</p>';
   return `${head}<p class="dp-check" data-level="${age.level}" data-ran-at="${htmlEsc(report.ran_at)}"><strong>${s.ok} of ${s.total}</strong> found on their pages in the run of ${htmlEsc(report.ran_at.slice(0, 10))} ` +
-    `(<span class="dp-age">${age.days} day${age.days === 1 ? '' : 's'} old</span>). <span class="dp-level">${LEVEL_TEXT[age.level]}</span></p>${list}`;
+    `(<span class="dp-age">${age.days} day${age.days === 1 ? '' : 's'} old</span>). <span class="dp-level">${LEVEL_TEXT[age.level]}</span></p>${list}` +
+    (cov.notRead.length ? `<p>${cov.notRead.length} quoted passage${cov.notRead.length === 1 ? ' was' : 's were'} added after that run and ${cov.notRead.length === 1 ? 'has' : 'have'} not been read from the server yet.</p>` : '');
 }
