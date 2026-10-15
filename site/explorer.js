@@ -265,6 +265,12 @@ function resetControls() {
   modality = 'all'; document.getElementById('modality').value = 'all';
   URL_FLAGS.forEach(([, id]) => { const el = document.getElementById(id); el.checked = false; const chip = el.closest('.chip'); if (chip) chip.classList.remove('on'); });
 }
+// The pinned filter bar's real height (it wraps) keeps a focused row from sitting under it: the style sheet reads --controls-h.
+(() => {
+  const bar = document.querySelector('.controls');
+  if (!bar || typeof ResizeObserver === 'undefined') return;
+  new ResizeObserver(() => document.documentElement.style.setProperty('--controls-h', Math.round(bar.getBoundingClientRect().height) + 'px')).observe(bar);
+})();
 document.getElementById('clearFilters').addEventListener('click', () => {
   resetControls();
   sortKey = 'recommended'; sortDir = 1;

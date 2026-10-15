@@ -2023,6 +2023,21 @@ test('data_policy: the sentence and its note are plain text, bounded, and go wit
   assert.equal(validateAfter((d) => { target(d).data_policy = { ...good, trains_on_prompts: null, retention: null, quote: 'Some sentence.' }; }), false, 'a sentence alone records nothing');
 });
 
+// ---- pinned bars never cover the focused element (WCAG 2.4.11, 1.4.10) ----
+test('a11y: the filter bar is pinned only where there is room, and a focused row scrolls in below both bars', () => {
+  const css = readFileSync(join(ROOT, 'site/styles.css'), 'utf8');
+  const js = readFileSync(join(ROOT, 'site/explorer.js'), 'utf8');
+  const base = css.match(/^\.controls \{[^}]*\}/m);
+  assert.ok(base, 'the base .controls rule exists');
+  assert.doesNotMatch(base[0], /position:\s*sticky/, 'the bar is not pinned by default: at 360x700 it is 340px tall and at 320x256 taller than the screen');
+  const media = css.match(/@media \(min-width: 761px\) and \(min-height: 600px\) \{([\s\S]*?)\n\}/);
+  assert.ok(media, 'the pinned mode lives in a media query for wide and tall screens');
+  assert.match(media[1], /\.controls \{ position: sticky; top: var\(--header-h\); \}/, 'pinned only there');
+  assert.match(media[1], /scroll-padding-top: calc\(var\(--header-h\) \+ var\(--controls-h, 120px\) \+ 12px\)/, 'the scroll padding counts both bars');
+  assert.match(js, /new ResizeObserver\(\(\) => document\.documentElement\.style\.setProperty\('--controls-h'/, 'the real height of the wrapping bar is measured');
+  assert.match(css, /^html \{ scroll-behavior: smooth; scroll-padding-top: calc\(var\(--header-h\) \+ 12px\); \}/m, 'with the bar not pinned, only the header needs room');
+});
+
 // ---- focus ring contrast (WCAG 1.4.11, 2.4.7): the global ring is the accent colour, and it must stand out against every surface ----
 const luminance = (hex) => {
   const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255).map((c) => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4));

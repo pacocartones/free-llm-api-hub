@@ -193,7 +193,9 @@ h1 { font-size: clamp(1.9rem, 4.4vw, 3rem); line-height: 1.1; margin: 0 auto 18p
 @media (max-width: 460px) { .trust-grid { grid-template-columns: 1fr; } }
 
 /* ---------- controls ---------- */
-.controls { position: sticky; top: var(--header-h); z-index: 30; background: color-mix(in srgb, var(--bg) 90%, transparent); backdrop-filter: blur(8px); border-bottom: 1px solid var(--border); padding: 13px 0; }
+/* The filter bar stays pinned only where there is room for it (WCAG 2.4.11, 1.4.10): at 360x700 it is 340px tall, at 320x256 taller than
+   the screen. Elsewhere it scrolls with the page. --controls-h is its measured height, set by explorer.js. */
+.controls { z-index: 30; background: color-mix(in srgb, var(--bg) 90%, transparent); backdrop-filter: blur(8px); border-bottom: 1px solid var(--border); padding: 13px 0; }
 .controls-inner { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
 .sel { background: var(--panel-2); border: 1px solid var(--control-border); color: var(--text); padding: 9px 12px; border-radius: 8px; font-size: .9rem; font-family: var(--font-mono); }
 
@@ -611,3 +613,9 @@ p.muted a, .prose p a, .prov-summary p a { text-decoration: underline; text-unde
 .dp-legend { margin: 12px 0; }
 
 .th-sort { background: none; border: 0; padding: 0; margin: 0; font: inherit; color: inherit; text-align: left; cursor: pointer; }
+
+@media (min-width: 761px) and (min-height: 600px) {
+  .controls { position: sticky; top: var(--header-h); }
+  /* A focused row scrolls into view below BOTH pinned bars, not only the header. */
+  html { scroll-padding-top: calc(var(--header-h) + var(--controls-h, 120px) + 12px); }
+}
