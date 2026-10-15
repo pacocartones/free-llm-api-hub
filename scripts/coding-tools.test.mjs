@@ -166,3 +166,69 @@ test('every field of the coding-tools schema is mentioned in docs/api.md', () =>
   const section = docs.slice(docs.indexOf('### Free AI coding tools'), docs.indexOf('### Generated client configs'));
   for (const n of names) assert.ok(section.includes('`' + n + '`') || ['dataset', 'version', 'generated', 'license', 'homepage', 'docs', 'description'].includes(n), `${n} is not documented`);
 });
+
+// ---- the tools you connect your own key to: a second file, the same rules, a page subsection and an endpoint of its own ----
+const ownKey = () => JSON.parse(readFileSync(join(ROOT, 'data/coding-tools-own-key.json'), 'utf8'));
+const ownKeyApi = () => JSON.parse(readFileSync(join(out(), 'site/api/v1/coding-tools-own-key.json'), 'utf8'));
+const ownKeyApiSchema = () => JSON.parse(readFileSync(join(ROOT, 'data/coding-tools-own-key-api.schema.json'), 'utf8'));
+
+test('own-key file: passes the same rules and schema, and shares no slug with the other file or a provider', () => {
+  const o = ownKey();
+  assert.deepEqual(codingToolsErrors(o, slugs), []);
+  const ajv = new Ajv2020({ allErrors: true, strict: true });
+  addFormats(ajv);
+  const validate = ajv.compile(JSON.parse(readFileSync(join(ROOT, 'data/coding-tools.schema.json'), 'utf8')));
+  assert.equal(validate(o), true, JSON.stringify(validate.errors));
+  const main = new Set(section().entries.map((e) => e.slug));
+  for (const e of o.entries) assert.ok(!main.has(e.slug) && !slugs.has(e.slug), `${e.slug} is in another list`);
+  assert.match(o.note, /inference is paid with your own key or a free API/);
+});
+
+test('own-key page: the subsection shows every sentence and links the free APIs, and the page stays out of counts', () => {
+  buildSite();
+  const html = readFileSync(join(out(), 'site/coding-tools/index.html'), 'utf8');
+  assert.match(html, /<h2 id="own-key">Tools you connect your own key to<\/h2>/);
+  assert.match(html, /href="\.\.\/collections\/openai-compatible\.html"/);
+  assert.match(html, /href="\.\.\/#explorer"/);
+  for (const e of ownKey().entries) {
+    assert.ok(html.includes(esc(e.name)), `${e.name} is missing from the page`);
+    for (const c of Object.values(e.claims)) for (const q of c.quotes) {
+      assert.ok(html.includes(esc(q.text)), `a sentence of ${e.name} is missing from the page`);
+      assert.ok(html.includes(`read ${q.read}`));
+    }
+    assert.ok(!existsSync(join(out(), `site/p/${e.slug}.html`)), `${e.slug} got a provider page`);
+  }
+  // Our own words only: a tool's sentence is quoted as it is and may use any word.
+  const visible = html.slice(html.indexOf('<main id="main"'), html.indexOf('</main>')).replace(/<blockquote[\s\S]*?<\/blockquote>/g, ' ').replace(/<[^>]*>/g, ' ');
+  assert.doesNotMatch(visible, /\b(safe|secure|private|guarantee[sd]?|best|worst|better|worse|recommended|featured|winner)\b/i);
+});
+
+test('own-key endpoint: carries the data file as it is, validates against its own schema and never mixes with coding-tools.json', () => {
+  buildSite();
+  const file = ownKeyApi();
+  const o = ownKey();
+  assert.deepEqual(file.entries, o.entries);
+  assert.equal(file.count, o.entries.length);
+  assert.equal(file.schema, ownKeyApiSchema().$id);
+  assert.equal(file.schema, 'https://freellmapihub.com/api/v1/coding-tools-own-key.schema.json');
+  const ajv = new Ajv2020({ allErrors: true, strict: true, strictTypes: false, validateFormats: true });
+  addFormats(ajv, ['date', 'uri']);
+  const validate = ajv.compile(ownKeyApiSchema());
+  assert.equal(validate(file), true, JSON.stringify(validate.errors));
+  assert.equal(validate({ ...structuredClone(file), entries: [{ ...file.entries[0], kind: 'plugin' }] }), false, 'a kind outside the three fails');
+  const main = apiFile();
+  assert.ok(main.entries.every((e) => !file.entries.some((x) => x.slug === e.slug)), 'no entry is in both endpoints');
+  assert.ok(!('own_key_entries' in main), 'the contract of coding-tools.json did not change');
+  const index = JSON.parse(readFileSync(join(out(), 'site/api/v1/index.json'), 'utf8'));
+  assert.equal(index.endpoints['coding-tools-own-key'], 'v1/coding-tools-own-key.json');
+  assert.equal(index.endpoints['coding-tools-own-key-schema'], 'v1/coding-tools-own-key.schema.json');
+  assert.equal(readFileSync(join(out(), 'site/api/v1/coding-tools-own-key.schema.json'), 'utf8'), readFileSync(join(ROOT, 'data/coding-tools-own-key-api.schema.json'), 'utf8'));
+});
+
+test('the same slug in both coding-tools files is rejected by the validator', () => {
+  const dup = { ...ownKey(), entries: [{ ...ownKey().entries[0], slug: section().entries[0].slug }] };
+  const all = [...section().entries, ...dup.entries].map((e) => e.slug);
+  assert.ok(new Set(all).size < all.length, 'the fixture really repeats a slug');
+  // The rule lives in scripts/validate.mjs (it reads both files); the per-file check only sees one list.
+  assert.match(readFileSync(join(ROOT, 'scripts/validate.mjs'), 'utf8'), /is in both coding-tools files/);
+});

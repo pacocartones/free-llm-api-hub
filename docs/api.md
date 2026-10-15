@@ -121,6 +121,10 @@ Each entry has:
 
 A claim has `state`, which is `stated` or `not_stated`, and `quotes`, a list of quotations. A `stated` claim has at least one quotation; a `not_stated` claim may carry the sentences that do not settle it. A quotation has `text`, the sentence as the page words it, `source`, the tool's own page, and `read`, the day it was read. A note has `subject`, `text` and `quotes`.
 
+### Free AI coding tools you connect your own key to: `/api/v1/coding-tools-own-key.json`
+
+[`/api/v1/coding-tools-own-key.json`](https://freellmapihub.com/api/v1/coding-tools-own-key.json) is the second part of the [Free AI coding tools](https://freellmapihub.com/coding-tools/#own-key) section as data: tools that are free themselves while inference is paid with your own key or a free API, **apart from the provider ranking** and from the tools that bring their own free plan. It is a file of its own so the contract of `coding-tools.json` never changes and the two lists never mix in a client. It has the same shape, the same rules (a `stated` value rests on a sentence of the tool's own page, `not_stated` is never `no`) and the same fields as `coding-tools.json`, described above; its JSON Schema is [`/api/v1/coding-tools-own-key.schema.json`](https://freellmapihub.com/api/v1/coding-tools-own-key.schema.json) (the source is [`data/coding-tools-own-key-api.schema.json`](../data/coding-tools-own-key-api.schema.json)). It carries no count of providers and nothing in it enters `providers.json`, a slice, a collection or the score.
+
 ### Generated client configs
 
 `/api/v1/openai-clients.json` and `/api/v1/litellm.yaml` follow the same rules. Their *contents* follow the data: a provider enters or leaves them when it becomes, or stops being, verified and OpenAI-compatible with a known base URL and key variable. They carry `env_key`, the **name** of the environment variable for your own API key (for example `GROQ_API_KEY`), never a key value. The other API files do not carry `env_key`.

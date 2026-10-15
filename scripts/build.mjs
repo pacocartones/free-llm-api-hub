@@ -1418,6 +1418,19 @@ writeApi('coding-tools.json', {
   notes: codingTools.notes || [],
 });
 writeFileSync(join(ROOT, 'site/api/v1/coding-tools.schema.json'), readFileSync(join(ROOT, 'data/coding-tools-api.schema.json')));
+// /api/v1/coding-tools-own-key.json: the coding tools that are free themselves while inference is paid with your own key
+// or a free API. A file of its own so the contract of coding-tools.json never changes and the two lists never mix in a client.
+const codingToolsOwnKey = JSON.parse(readFileSync(join(ROOT, 'data/coding-tools-own-key.json'), 'utf8'));
+writeApi('coding-tools-own-key.json', {
+  ...apiBase,
+  description: 'Coding tools that are free themselves while inference is paid with your own key or a free API, apart from the provider ranking and from the tools with their own free plan: each value with the sentence it rests on and the day it was read; a value the tool did not state reads not_stated, which is never no. Page: ' + SITE + '/coding-tools/#own-key',
+  schema: SITE + '/api/v1/coding-tools-own-key.schema.json',
+  page: SITE + '/coding-tools/#own-key',
+  count: codingToolsOwnKey.entries.length,
+  entries: codingToolsOwnKey.entries,
+  notes: codingToolsOwnKey.notes || [],
+});
+writeFileSync(join(ROOT, 'site/api/v1/coding-tools-own-key.schema.json'), readFileSync(join(ROOT, 'data/coding-tools-own-key-api.schema.json')));
 const API_SLICES = {
   ongoing: (p) => p.category === 'ongoing',
   trial: (p) => p.category === 'trial',
@@ -1456,6 +1469,8 @@ const apiEndpoints = {
   'free-gpu-schema': 'v1/free-gpu.schema.json',
   'coding-tools': 'v1/coding-tools.json',
   'coding-tools-schema': 'v1/coding-tools.schema.json',
+  'coding-tools-own-key': 'v1/coding-tools-own-key.json',
+  'coding-tools-own-key-schema': 'v1/coding-tools-own-key.schema.json',
   schema: 'v1/schema.json',
   'openai-clients': 'v1/openai-clients.json',
   litellm: 'v1/litellm.yaml',
@@ -1508,6 +1523,8 @@ const apiDocMain =
   apiRow('JSON Schema of free-gpu.json (contract v1)', 'free-gpu.schema.json', null) +
   apiRow('Free AI coding tools, apart from the ranking (not a count of providers)', 'coding-tools.json', codingTools.entries.length) +
   apiRow('JSON Schema of coding-tools.json (contract v1)', 'coding-tools.schema.json', null) +
+  apiRow('Free AI coding tools you connect your own key to, apart from the ranking (not a count of providers)', 'coding-tools-own-key.json', codingToolsOwnKey.entries.length) +
+  apiRow('JSON Schema of coding-tools-own-key.json (contract v1)', 'coding-tools-own-key.schema.json', null) +
   apiRow('Field-level provider changes by ISO week (last 12 weeks)', 'changes.json', null) +
   apiRow('Endpoint manifest', 'index.json', null) +
   apiRow('JSON Schema of the dataset (copy of data/schema.json)', 'schema.json', null) +
@@ -1700,7 +1717,7 @@ writeFileSync(
     main:
       '<section class="page-hero model-hero"><div class="wrap"><nav class="crumbs"><a href="../">Home</a> / Free AI coding tools</nav>' +
       '<h1>Free AI coding tools</h1><p class="lede">Coding tools that say they have a free plan. Apart from the ranking, and every value written only where the tool\'s own page says it.</p></div></section>' +
-      codingToolsMainHtml(codingTools, { prefix: '../', repo: REPO }),
+      codingToolsMainHtml(codingTools, { prefix: '../', repo: REPO, ownKey: codingToolsOwnKey }),
     prefix: '../',
   })
 );

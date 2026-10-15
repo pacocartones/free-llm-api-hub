@@ -1,0 +1,208 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://freellmapihub.com/api/v1/coding-tools-own-key.schema.json",
+  "title": "Free LLM API Hub, Free AI coding tools you connect your own key to (/api/v1/coding-tools-own-key.json)",
+  "description": "Coding tools that are free themselves while inference is paid with your own key or a free API, apart from the provider ranking and from the tools that bring their own free plan: each value with the sentence it rests on and the day it was read. A value the tool's own page did not state is not_stated, which is never no. Contract v1: fields may be added within v1; none is removed or changed.",
+  "type": "object",
+  "required": [
+    "dataset",
+    "version",
+    "generated",
+    "schema",
+    "count",
+    "entries",
+    "notes"
+  ],
+  "properties": {
+    "dataset": {
+      "const": "free-llm-api-hub"
+    },
+    "version": {
+      "type": "string",
+      "description": "The dataset release version (SemVer), the same as in every other file of /api/v1/."
+    },
+    "generated": {
+      "type": "string",
+      "format": "date",
+      "description": "The date of the last dataset change."
+    },
+    "license": {
+      "type": "string"
+    },
+    "homepage": {
+      "type": "string",
+      "format": "uri"
+    },
+    "docs": {
+      "type": "string",
+      "format": "uri"
+    },
+    "description": {
+      "type": "string"
+    },
+    "schema": {
+      "type": "string",
+      "format": "uri",
+      "description": "The URL of this schema."
+    },
+    "page": {
+      "type": "string",
+      "format": "uri",
+      "description": "The public page that shows the same section."
+    },
+    "count": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "The number of entries. Not a count of providers: the section is not part of the provider dataset."
+    },
+    "entries": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/entry"
+      }
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/note"
+      }
+    }
+  },
+  "$defs": {
+    "quote": {
+      "type": "object",
+      "required": [
+        "text",
+        "source",
+        "read"
+      ],
+      "properties": {
+        "text": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The sentence, as the tool's page words it."
+        },
+        "source": {
+          "type": "string",
+          "format": "uri",
+          "description": "The tool's own page."
+        },
+        "read": {
+          "type": "string",
+          "format": "date",
+          "description": "The day the page was read."
+        }
+      }
+    },
+    "claim": {
+      "type": "object",
+      "required": [
+        "state",
+        "quotes"
+      ],
+      "properties": {
+        "state": {
+          "enum": [
+            "stated",
+            "not_stated"
+          ],
+          "description": "stated needs at least one quotation; not_stated means the tool's page did not say it and may carry the sentences that do not settle it. It is never no."
+        },
+        "quotes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/quote"
+          }
+        }
+      }
+    },
+    "entry": {
+      "type": "object",
+      "required": [
+        "slug",
+        "name",
+        "url",
+        "kind",
+        "claims"
+      ],
+      "properties": {
+        "slug": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+          "description": "Never the slug of a provider of the dataset."
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "description": "The tool's own page."
+        },
+        "kind": {
+          "enum": [
+            "ide-extension",
+            "editor",
+            "cli"
+          ]
+        },
+        "claims": {
+          "type": "object",
+          "required": [
+            "free_access",
+            "limits",
+            "card_required",
+            "commercial_use",
+            "expires",
+            "trains_on_code"
+          ],
+          "properties": {
+            "free_access": {
+              "$ref": "#/$defs/claim"
+            },
+            "limits": {
+              "$ref": "#/$defs/claim"
+            },
+            "card_required": {
+              "$ref": "#/$defs/claim"
+            },
+            "commercial_use": {
+              "$ref": "#/$defs/claim"
+            },
+            "expires": {
+              "$ref": "#/$defs/claim"
+            },
+            "trains_on_code": {
+              "$ref": "#/$defs/claim"
+            }
+          }
+        }
+      }
+    },
+    "note": {
+      "type": "object",
+      "required": [
+        "subject",
+        "text",
+        "quotes"
+      ],
+      "properties": {
+        "subject": {
+          "type": "string",
+          "minLength": 1
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1
+        },
+        "quotes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/quote"
+          }
+        }
+      }
+    }
+  }
+}

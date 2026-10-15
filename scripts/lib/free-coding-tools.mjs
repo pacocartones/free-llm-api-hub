@@ -43,16 +43,34 @@ export function codingToolsCounts(section) {
   return { tools: section.entries.length, stated, total };
 }
 
-export function codingToolsMainHtml(section, { prefix = '../', repo = '' } = {}) {
-  const c = codingToolsCounts(section);
-  const entries = section.entries.map((e) => {
+function entriesHtml(section) {
+  return section.entries.map((e) => {
     const url = safeHttp(e.url);
     const name = url ? `<a href="${htmlEsc(url)}" target="_blank" rel="noopener">${htmlEsc(e.name)}</a>` : htmlEsc(e.name);
     const claims = Object.keys(LABELS).map((f) => claimHtml(f, e.claims[f])).join('');
     return `<section class="gpu-entry" id="${SLUG_RE.test(e.slug) ? e.slug : ''}"><h3>${name} <span class="muted">· ${htmlEsc(KIND_LABEL[e.kind] || e.kind)}</span></h3><dl class="gpu-claims">${claims}</dl></section>`;
   }).join('');
-  const notes = (section.notes || []).map((n) =>
-    `<section class="gpu-note"><h3>${htmlEsc(n.subject)}</h3><p>${htmlEsc(n.text)}</p>${n.quotes.map(quoteHtml).join('')}</section>`).join('');
+}
+
+const notesHtml = (section) => (section.notes || []).map((n) =>
+  `<section class="gpu-note"><h3>${htmlEsc(n.subject)}</h3><p>${htmlEsc(n.text)}</p>${n.quotes.map(quoteHtml).join('')}</section>`).join('');
+
+/** The second part of the page: tools that are free themselves while inference is paid with your own key or a free API. */
+function ownKeyHtml(ownKey, prefix) {
+  if (!ownKey || !Array.isArray(ownKey.entries) || !ownKey.entries.length) return '';
+  const c = codingToolsCounts(ownKey);
+  return '<h2 id="own-key">Tools you connect your own key to</h2>' +
+    `<p>${htmlEsc(ownKey.note || 'The tool is free; inference is paid with your own key or a free API.')} ` +
+    `You can pair them with the <a href="${prefix}collections/openai-compatible.html">OpenAI-compatible free APIs</a> or with <a href="${prefix}#explorer">the interactive explorer</a> of free LLM APIs. ` +
+    'The same rule holds: a value is written only where the tool\'s own page says it, and <strong>Not stated</strong> is never <em>no</em>.</p>' +
+    `<p class="muted">${c.tools} tools listed; ${c.stated} of ${c.total} values rest on a sentence from the tool's own page.</p>` +
+    entriesHtml(ownKey) + notesHtml(ownKey);
+}
+
+export function codingToolsMainHtml(section, { prefix = '../', repo = '', ownKey = null } = {}) {
+  const c = codingToolsCounts(section);
+  const entries = entriesHtml(section);
+  const notes = notesHtml(section);
   return '<main id="main"><div class="wrap prose">' +
     '<h2>What each tool says about free access</h2>' +
     '<p>This is a separate list from the free LLM APIs: these are tools you code with, not hosted model APIs. It is <strong>not part of the ranking</strong> and no count, score or collection of the site includes it. ' +
@@ -61,6 +79,7 @@ export function codingToolsMainHtml(section, { prefix = '../', repo = '' } = {})
     `<p class="muted">${c.tools} tools listed; ${c.stated} of ${c.total} values rest on a sentence from the tool's own page.</p>` +
     (entries || '<p class="muted">No tool is recorded yet.</p>') +
     (notes ? '<h2>Worth knowing</h2>' + notes : '') +
+    ownKeyHtml(ownKey, prefix) +
     `<p class="muted">Looking for hosted LLM APIs instead? <a href="${prefix}">See the main list</a>. To add or correct a value, ${repo ? `<a href="${htmlEsc(repo)}/issues/new?template=inaccuracy.yml" target="_blank" rel="noopener">open an issue</a>` : 'open an issue'} with the tool\'s own page.</p>` +
     '</div></main>';
 }

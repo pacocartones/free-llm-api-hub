@@ -1,0 +1,141 @@
+{
+  "generated": "2026-10-15",
+  "note": "The tool is free; inference is paid with your own key or a free API.",
+  "entries": [
+    {
+      "slug": "zed-own-key",
+      "name": "Zed (Personal plan, own API keys)",
+      "url": "https://zed.dev/pricing",
+      "kind": "editor",
+      "claims": {
+        "free_access": {
+          "state": "stated",
+          "quotes": [
+            {
+              "text": "Personal $0 forever The next-generation code editor. Free forever. Unlimited use with your API keys or external agents like Claude Agent, Codex CLI, and more",
+              "source": "https://zed.dev/pricing",
+              "read": "2026-10-15"
+            },
+            {
+              "text": "Since Zed is open source, these controls govern Zed's hosted services specifically.",
+              "source": "https://zed.dev/pricing",
+              "read": "2026-10-15"
+            }
+          ]
+        },
+        "limits": {
+          "state": "stated",
+          "quotes": [
+            {
+              "text": "Unlimited use with your API keys or external agents like Claude Agent, Codex CLI, and more",
+              "source": "https://zed.dev/pricing",
+              "read": "2026-10-15"
+            }
+          ]
+        },
+        "card_required": {
+          "state": "not_stated",
+          "quotes": []
+        },
+        "commercial_use": {
+          "state": "not_stated",
+          "quotes": []
+        },
+        "expires": {
+          "state": "not_stated",
+          "quotes": []
+        },
+        "trains_on_code": {
+          "state": "not_stated",
+          "quotes": []
+        }
+      }
+    },
+    {
+      "slug": "cline-own-key",
+      "name": "Cline (open source)",
+      "url": "https://cline.bot/pricing",
+      "kind": "ide-extension",
+      "claims": {
+        "free_access": {
+          "state": "stated",
+          "quotes": [
+            {
+              "text": "The Cline open source extension is completely free for individual developers.",
+              "source": "https://cline.bot/pricing",
+              "read": "2026-10-15"
+            },
+            {
+              "text": "You can bring your own API keys or use the Cline provider.",
+              "source": "https://cline.bot/pricing",
+              "read": "2026-10-15"
+            }
+          ]
+        },
+        "limits": {
+          "state": "not_stated",
+          "quotes": []
+        },
+        "card_required": {
+          "state": "not_stated",
+          "quotes": []
+        },
+        "commercial_use": {
+          "state": "not_stated",
+          "quotes": []
+        },
+        "expires": {
+          "state": "not_stated",
+          "quotes": []
+        },
+        "trains_on_code": {
+          "state": "not_stated",
+          "quotes": []
+        }
+      }
+    },
+    {
+      "slug": "goose-own-key",
+      "name": "goose",
+      "url": "https://raw.githubusercontent.com/block/goose/main/README.md",
+      "kind": "cli",
+      "claims": {
+        "free_access": {
+          "state": "stated",
+          "quotes": [
+            {
+              "text": "your native open source AI agent — desktop app, CLI, and API — for code, workflows, and everything in between",
+              "source": "https://raw.githubusercontent.com/block/goose/main/README.md",
+              "read": "2026-10-15"
+            },
+            {
+              "text": "Use API keys or your existing Claude, ChatGPT, or Gemini subscriptions via [ACP]",
+              "source": "https://raw.githubusercontent.com/block/goose/main/README.md",
+              "read": "2026-10-15"
+            }
+          ]
+        },
+        "limits": {
+          "state": "not_stated",
+          "quotes": []
+        },
+        "card_required": {
+          "state": "not_stated",
+          "quotes": []
+        },
+        "commercial_use": {
+          "state": "not_stated",
+          "quotes": []
+        },
+        "expires": {
+          "state": "not_stated",
+          "quotes": []
+        },
+        "trains_on_code": {
+          "state": "not_stated",
+          "quotes": []
+        }
+      }
+    }
+  ]
+}

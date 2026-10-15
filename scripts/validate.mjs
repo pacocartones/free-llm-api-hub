@@ -241,13 +241,19 @@ if (!process.argv[2]) {
 // Skipped for fixture runs (argv[2]) like gpu-compute.json.
 if (!process.argv[2]) {
   try {
-    const tools = JSON.parse(readFileSync(join(ROOT, 'data/coding-tools.json'), 'utf8'));
     const toolsSchema = JSON.parse(readFileSync(join(ROOT, 'data/coding-tools.schema.json'), 'utf8'));
     const toolsAjv = new Ajv2020({ allErrors: true, strict: true });
     addFormats(toolsAjv);
     const toolsValidate = toolsAjv.compile(toolsSchema);
-    if (!toolsValidate(tools)) for (const e of toolsValidate.errors) errors.push(`coding-tools.json: ${e.instancePath || '/'} ${e.message}`);
-    errors.push(...codingToolsErrors(tools, new Set(data.providers.map((p) => p.slug))));
+    // Two files, one schema and one set of rules: the tools with their own free plan and the tools you connect your own key to.
+    const toolSlugs = new Set(data.providers.map((p) => p.slug));
+    const seenToolSlugs = new Set();
+    for (const file of ['coding-tools.json', 'coding-tools-own-key.json']) {
+      const tools = JSON.parse(readFileSync(join(ROOT, 'data', file), 'utf8'));
+      if (!toolsValidate(tools)) for (const e of toolsValidate.errors) errors.push(`${file}: ${e.instancePath || '/'} ${e.message}`);
+      errors.push(...codingToolsErrors(tools, toolSlugs));
+      for (const e of tools.entries) { if (seenToolSlugs.has(e.slug)) errors.push(`${file}: the slug ${e.slug} is in both coding-tools files`); seenToolSlugs.add(e.slug); }
+    }
   } catch (e) { errors.push('coding-tools.json: ' + e.message); }
 }
 
