@@ -2260,6 +2260,24 @@ test('the no-training collection lists exactly the providers whose data_policy s
   }
 });
 
+// Whether a sentence covers the free plan is a separate fact. Until data_policy.plan_named is set (true | false | null) every row of the
+// collection says "plan: not checked yet"; the page and the .md carry the header line; nobody leaves the collection for it.
+test('the no-training collection carries the plan header and a plan mark on every row', () => {
+  run(['scripts/build.mjs']);
+  const header = 'Each row is the provider’s own sentence. Many sources do not say whether it covers the free plan; read the row’s note.';
+  const md = readFileSync(join(ROOT, 'collections/no-training.md'), 'utf8');
+  const html = readFileSync(join(ROOT, 'site/collections/no-training.html'), 'utf8');
+  assert.ok(md.includes(header), 'the .md has the header line');
+  assert.ok(html.includes(header), 'the page has the header line');
+  const rows = md.split('\n').filter((l) => l.startsWith('| **['));
+  assert.ok(rows.length >= 13, 'the collection keeps its rows, LlamaParse among them');
+  assert.ok(rows.some((r) => r.startsWith('| **[LlamaParse')), 'LlamaParse is listed');
+  for (const r of rows) assert.match(r, /_plan: not checked yet_/, 'each .md row carries the mark');
+  assert.equal((html.match(/plan: not checked yet/g) || []).length, rows.length, 'each page row carries the mark');
+  const other = readFileSync(join(ROOT, 'collections/no-credit-card.md'), 'utf8');
+  assert.ok(!other.includes('plan: not checked yet') && !other.includes(header), 'other collections are unchanged');
+});
+
 // The point of the private copy: the builds of this file must not write in the tree of the repository, or they race
 // with the builds of the other test files, which is what failed in CI (ENOTEMPTY on site/p).
 test('the builds of this file leave the generated folders of the repository untouched', () => {

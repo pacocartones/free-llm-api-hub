@@ -168,6 +168,9 @@ const COLLECTIONS = [
     h1: 'Free LLM APIs that say they do not train on your prompts',
     desc: 'Free LLM and AI APIs whose own terms or privacy page say they do not use your prompts to train their models; each provider’s page on this site cites the source and the day it was read. A live slice of a verified dataset.',
     intro: 'Providers whose **own page says they do not train on your prompts** (`data_policy.trains_on_prompts: false`). Each provider’s own page on this site shows the page its policy rests on (a link, with the day it was read). Read the conditions: some say it only holds unless you opt in, or in a privacy notice rather than a contract. Providers that do not state it are not listed, which never means they train.',
+    // A row is the provider's own sentence; whether it covers the free plan is a separate fact, shown per row (see planMark).
+    header: 'Each row is the provider’s own sentence. Many sources do not say whether it covers the free plan; read the row’s note.',
+    rowMark: (p) => planMark(p.data_policy),
     filter: (p) => p.data_policy?.trains_on_prompts === false,
     faq: [
       { q: 'Which free LLM APIs say they do not train on my prompts?', a: 'The providers on this page, each according to its own terms or privacy page, cited with the day it was read on the provider’s page on this site. The wording differs: for some it holds only while you have not opted in to training, and a privacy notice is not a contract.' },
@@ -306,6 +309,14 @@ const typeLabel = (p) => (p.category === 'ongoing' ? 'Ongoing' : 'Trial');
 
 // Markdown table for a collection. With opts.baseUrl, the 2nd column shows the
 // OpenAI base URL instead of the tier type (used on the openai-compatible page).
+// The plan mark of a data_policy row. `plan_named` is an optional field (true | false | null) that records whether the source
+// itself names the plan; until it is set the row says it was not checked, never that the source names no plan.
+function planMark(dp) {
+  if (dp && dp.plan_named === true) return 'plan named in the source';
+  if (dp && dp.plan_named === false) return 'plan not named in the source';
+  return 'plan: not checked yet';
+}
+
 function collectionTableMd(rows, opts = {}) {
   const bu = opts.baseUrl;
   const head = bu
@@ -314,7 +325,8 @@ function collectionTableMd(rows, opts = {}) {
   const body = rows
     .map((p) => {
       const col2 = bu ? (p.openai_base_url ? `\`${esc(p.openai_base_url)}\`` : '_see docs_') : typeLabel(p);
-      return `| ${nameCell(p)} | ${col2} | ${esc(p.free_tier)} | ${esc(p.notes)} | ${verifiedCell(p)} |`;
+      const mark = opts.rowMark ? `<br>_${opts.rowMark(p)}_` : '';
+      return `| ${nameCell(p)}${mark} | ${col2} | ${esc(p.free_tier)} | ${esc(p.notes)} | ${verifiedCell(p)} |`;
     })
     .join('\n');
   return `${head}\n${body}`;
@@ -383,7 +395,8 @@ function collectionTableHtml(rows, opts = {}) {
       const col2 = bu
         ? (p.openai_base_url ? `<code>${htmlEsc(p.openai_base_url)}</code>` : '<span class="notes">see docs</span>')
         : `<span class="type">${typeLabel(p)}</span>`;
-      return `<tr><td class="name">${name}${flagsHtml(p)}</td><td>${col2}</td><td>${htmlEsc(p.free_tier)}</td><td class="notes">${htmlEsc(p.notes)}</td><td>${v}</td></tr>`;
+      const mark = opts.rowMark ? `<div class="flags"><span>${htmlEsc(opts.rowMark(p))}</span></div>` : '';
+      return `<tr><td class="name">${name}${flagsHtml(p)}${mark}</td><td>${col2}</td><td>${htmlEsc(p.free_tier)}</td><td class="notes">${htmlEsc(p.notes)}</td><td>${v}</td></tr>`;
     })
     .join('\n');
   // The table scrolls inside its own region when it is wider than the column (it is 611px at a 360px screen): the page never scrolls sideways.
@@ -745,7 +758,7 @@ for (const c of COLLECTIONS) {
     `${GEN_NOTE}\n\n# ${c.h1}\n\n${c.desc}\n\n` +
     `[← All collections](README.md) · [Interactive explorer ↗](${SITE}/) · [Main list](../README.md)\n\n` +
     `${c.intro}\n\n**${rows.length} of ${total} tracked providers** match.\n\n` +
-    `${collectionTableMd(rows, { baseUrl: c.quickstart })}\n\n` +
+    `${c.header ? `${c.header}\n\n` : ''}${collectionTableMd(rows, { baseUrl: c.quickstart, rowMark: c.rowMark })}\n\n` +
     (c.quickstart ? `${QUICKSTART_MD}\n` : '') +
     `---\n\nOther collections: ${collNavMd}\n\n` +
     `_Generated from [providers.json](../data/providers.json). Terms change without notice — always confirm against each provider's own docs._\n`;
@@ -788,7 +801,7 @@ for (const c of COLLECTIONS) {
     `<main id="main"><div class="wrap prose">` +
     `<p>${introHtml}</p>` +
     `<p class="count"><strong>${rows.length} of ${total}</strong> tracked providers match.</p>` +
-    `${collectionTableHtml(rows, { baseUrl: c.quickstart })}` +
+    `${c.header ? `<p>${htmlEsc(c.header)}</p>` : ''}${collectionTableHtml(rows, { baseUrl: c.quickstart, rowMark: c.rowMark })}` +
     (c.quickstart
       ? `<h2>Quickstart — reuse the OpenAI SDK</h2><p class="count">Point <code>base_url</code> at the provider (URLs in the table above) and use its free key. Example: ${htmlEsc(QS_NAME)}.</p><pre><code>from openai import OpenAI
 
