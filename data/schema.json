@@ -31,6 +31,13 @@
       "description": "true / false / null, where null means 'not yet confirmed'.",
       "type": ["boolean", "null"]
     },
+    "commercial_ok_value": {
+      "description": "true / false / null, or 'conditional' when commercial use depends on specific conditions (e.g. per-model licence, give-back rules) documented in commercial_ok_condition and notes.",
+      "anyOf": [
+        { "$ref": "#/$defs/tristate" },
+        { "const": "conditional" }
+      ]
+    },
     "provider": {
       "type": "object",
       "additionalProperties": false,
@@ -88,7 +95,11 @@
         },
         "phone_required": { "$ref": "#/$defs/tristate" },
         "card_required": { "$ref": "#/$defs/tristate" },
-        "commercial_ok": { "$ref": "#/$defs/tristate" },
+        "commercial_ok": { "$ref": "#/$defs/commercial_ok_value" },
+        "commercial_ok_condition": {
+          "type": ["string", "null"],
+          "description": "Condition summary when commercial_ok is 'conditional'. Must be a non-empty string when commercial_ok is 'conditional', and null or absent otherwise."
+        },
         "openai_compatible": { "$ref": "#/$defs/tristate" },
         "openai_base_url": {
           "type": ["string", "null"],

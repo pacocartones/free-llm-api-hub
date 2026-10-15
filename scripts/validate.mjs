@@ -104,8 +104,16 @@ for (const p of data.providers ?? []) {
   check(typeof p.free_tier === 'string' && p.free_tier.length > 0, `${id}: free_tier required`);
   check(typeof p.verified === 'boolean', `${id}: verified must be boolean`);
 
-  for (const f of ['phone_required', 'card_required', 'commercial_ok', 'openai_compatible'])
+  for (const f of ['phone_required', 'card_required', 'openai_compatible'])
     check(TRISTATE.includes(p[f]), `${id}: ${f} must be true/false/null`);
+
+  check(TRISTATE.includes(p.commercial_ok) || p.commercial_ok === 'conditional', `${id}: commercial_ok must be true/false/null or "conditional"`);
+  if (p.commercial_ok === 'conditional') {
+    check(typeof p.commercial_ok_condition === 'string' && p.commercial_ok_condition.trim().length > 0, `${id}: commercial_ok is conditional, so commercial_ok_condition is required`);
+    check(typeof p.notes === 'string' && p.notes.trim().length > 0, `${id}: commercial_ok is conditional, so notes explaining the condition is required`);
+  } else {
+    check(p.commercial_ok_condition === undefined || p.commercial_ok_condition === null, `${id}: commercial_ok_condition only allowed when commercial_ok is "conditional"`);
+  }
 
   if (Array.isArray(p.modalities))
     for (const m of p.modalities) check(MODALITIES.includes(m), `${id}: unknown modality "${m}"`);

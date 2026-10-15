@@ -15,6 +15,7 @@ What is *not* guaranteed: the order of providers in a list, the exact contents o
 
 - **`no_expiry`** (dataset 2.10.0): an optional object on one-time trial credits whose provider says the credit does not expire — `source`, `checked`, `quote`. It appears in the provider objects the API serves; consumers that ignore unknown fields are unaffected. `expires` keeps its type and meaning (a window such as `"30 days"`, or `null`).
 - **`data_policy`** (dataset 2.11.0): an optional object with `trains_on_prompts` (boolean or `null`), `retention` (string or `null`), `source`, `checked`, and an optional `plan_named` (boolean or `null`): whether the sentence names the free or trial plan: `true` = it does, to cover or to exclude it; `false` = the source was read and does not name it in that sentence (never that the plan is covered, nor that it is not); `null` or absent = not checked. Absent or `null` means nobody has recorded it. It appears in the provider objects the API serves; consumers that ignore unknown fields are unaffected.
+- **`commercial_ok_condition`** (dataset 2.12.0): an optional string explaining the conditions when commercial use is conditional (e.g. per-model licences or give-back rules). In `/api/v1/` responses, `commercial_ok` remains `null` for such providers to preserve the `boolean | null` type contract, while `commercial_ok_condition` carries the reason. Consumers that ignore unknown fields are unaffected.
 
 ### The score: `/api/v1/score.json`
 
