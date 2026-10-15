@@ -1989,7 +1989,8 @@ const dpOurWords = (html) => {
   const desc = (html.match(/<meta name="description" content="([^"]*)"/) || [])[1] || '';
   const hero = (html.match(/<section class="page-hero[\s\S]*?<\/section>/) || [''])[0];
   const main = html.slice(html.indexOf('<main id="main"'), html.indexOf('</main>'));
-  return [title, desc, hero, main].join(' ').replace(/<blockquote[\s\S]*?<\/blockquote>/g, ' ').replace(/<[^>]*>/g, ' ');
+  // The attribution line under a sentence carries the provider's name and its page address, which can say privacy: it is the provider's, not our words.
+  return [title, desc, hero, main].join(' ').replace(/<blockquote[\s\S]*?<\/blockquote>/g, ' ').replace(/<p class="muted dp-foot">[\s\S]*?<\/p>/g, ' ').replace(/<[^>]*>/g, ' ');
 };
 const DP_BANNED = /\b(safe|safer|secure|private|privacy|privacy-friendly|guarantee[sd]?|trustworthy|best|worst|better|worse|we check|we copy|always|never trains)\b/i;
 
@@ -2003,10 +2004,10 @@ test('data-policy page: no word that promises safety or ranks providers, no proc
   assert.match(visible, /Sentence: does not train.*Sentence: may train.*Not confirmed/is, 'the legend of the three states is on the page');
   assert.match(visible, /That never means &ldquo;no&rdquo;/i);
   // A provider's quoted sentence may contain a banned word: it is shown as written and is not scanned.
-  const rows = dataPolicyRows([{ name: 'Acme', slug: 'acme', verified: true, data_policy: { trains_on_prompts: false, source: 'https://example.com/t', checked: '2026-10-15', quote: 'We guarantee that your prompts are private.' } }]);
+  const rows = dataPolicyRows([{ name: 'Acme', slug: 'acme', verified: true, data_policy: { trains_on_prompts: false, source: 'https://example.com/privacy-policy', checked: '2026-10-15', quote: 'We guarantee that your prompts are private.' } }]);
   const fixture = dataPolicyMainHtml(rows, { repo: 'https://github.com/x/y', generated: '2026-10-15' });
   assert.match(fixture, /We guarantee that your prompts are private\./);
-  assert.doesNotMatch(dpOurWords(fixture), DP_BANNED, 'the quoted sentence is exempt');
+  assert.doesNotMatch(dpOurWords(fixture), DP_BANNED, 'the quoted sentence and its attribution line (a page address that says privacy) are exempt');
 });
 
 test('data_policy: the sentence and its note are plain text, bounded, and go with a stated part', () => {
