@@ -432,7 +432,8 @@
       "is_text_llm": true,
       "model_tier": null,
       "verified": true,
-      "last_verified": "2026-10-08"
+      "last_verified": "2026-10-08",
+      "data_policy": {"trains_on_prompts":false,"retention":null,"source":"https://www.ai21.com/terms-policies/privacy-policy/","checked":"2026-10-15","quote":"Consistent with our Terms of Service, and unless otherwise agreed in writing or required to provide the Services, we do not use your inputs or outputs to train AI21’s foundational or generally available AI models.","note":"«Privacy Policy», last updated August 2, 2026. It applies where AI21 acts as controller, «for example, for individual-developer accounts»; for a business customer «that processing is governed by our agreement with the customer». The policy has no mention of a free, trial, paid or other plan.","plan_named":false}
     },
     {
       "slug": "nlpcloud",
