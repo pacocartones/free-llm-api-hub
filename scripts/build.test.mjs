@@ -2099,6 +2099,31 @@ test('data_policy lot 3: 23 of 68, LlamaParse says it does not train, Retell AI 
   }
 });
 
+test('data_policy.plan_named: true, false, null or absent; anything else is rejected', () => {
+  const good = { trains_on_prompts: false, retention: null, source: 'https://example.com/terms', checked: '2026-10-09', quote: 'We do not train.' };
+  const one = (d) => d.providers[0];
+  for (const v of [true, false, null]) assert.equal(validateAfter((d) => { one(d).data_policy = { ...good, plan_named: v }; }), true, `accepted: ${v}`);
+  assert.equal(validateAfter((d) => { one(d).data_policy = { ...good }; }), true, 'absent means not checked');
+  for (const bad of ['yes', 'false', 0, 1, [], {}]) assert.equal(validateAfter((d) => { one(d).data_policy = { ...good, plan_named: bad }; }), false, `rejected: ${JSON.stringify(bad)}`);
+});
+
+test('data_policy lot 4: the 13 providers that say they do not train were read for the plan; none names it; the notes stay in the limit', () => {
+  const data = JSON.parse(readFileSync(DATA, 'utf8'));
+  const falses = data.providers.filter((p) => p.data_policy && p.data_policy.trains_on_prompts === false);
+  assert.equal(falses.length, 13, 'the 12 published and LlamaParse');
+  for (const p of falses) {
+    assert.equal(p.data_policy.plan_named, false, `${p.slug}: read for the plan, not named`);
+    assert.equal(p.data_policy.checked, '2026-10-15', `${p.slug}: read date`);
+    assert.ok(p.data_policy.note && p.data_policy.note.length <= 300, `${p.slug}: note within 300 characters`);
+  }
+  for (const p of data.providers.filter((q) => q.data_policy && q.data_policy.trains_on_prompts !== false)) {
+    assert.equal(p.data_policy.plan_named, undefined, `${p.slug}: not read for the plan yet, so no value is written`);
+  }
+  const api = JSON.parse(readFileSync(join(ROOT, 'site/api/v1/providers.json'), 'utf8'));
+  const row = (api.providers || api).find((p) => p.slug === 'modal');
+  assert.equal(row.data_policy.plan_named, false, 'the API carries the new field');
+});
+
 test('mobile: the two long text cells stack their label above the text at 720px', () => {
   const css = readFileSync(join(ROOT, 'site/styles.css'), 'utf8').replace(/\s+/g, ' ');
   assert.match(css, /#table td\.notes, #table td:nth-child\(3\) \{ display: block; \}/, 'the notes and the catch cells are blocks, not a 40% label beside a narrow column');
@@ -2272,10 +2297,19 @@ test('the no-training collection carries the plan header and a plan mark on ever
   const rows = md.split('\n').filter((l) => l.startsWith('| **['));
   assert.ok(rows.length >= 13, 'the collection keeps its rows, LlamaParse among them');
   assert.ok(rows.some((r) => r.startsWith('| **[LlamaParse')), 'LlamaParse is listed');
-  for (const r of rows) assert.match(r, /_plan: not checked yet_/, 'each .md row carries the mark');
-  assert.equal((html.match(/plan: not checked yet/g) || []).length, rows.length, 'each page row carries the mark');
+  // every row's mark follows its plan_named: unset or null reads "not checked yet", never "not named"
+  const providers = JSON.parse(readFileSync(DATA, 'utf8')).providers;
+  const word = (v) => (v === true ? 'plan named in the source' : v === false ? 'plan not named in the source' : 'plan: not checked yet');
+  let marks = 0;
+  for (const p of providers.filter((q) => q.data_policy && q.data_policy.trains_on_prompts === false)) {
+    const row = rows.find((r) => r.startsWith(`| **[${p.name.split(' (')[0]}`));
+    assert.ok(row, `${p.slug} is a row`);
+    assert.ok(row.includes(`_${word(p.data_policy.plan_named)}_`), `${p.slug}: the .md mark follows plan_named`);
+    marks += 1;
+  }
+  assert.equal(marks, rows.length, 'one mark per row');
   const other = readFileSync(join(ROOT, 'collections/no-credit-card.md'), 'utf8');
-  assert.ok(!other.includes('plan: not checked yet') && !other.includes(header), 'other collections are unchanged');
+  assert.ok(!other.includes('plan: not checked yet') && !other.includes('plan not named') && !other.includes(header), 'other collections are unchanged');
 });
 
 // The point of the private copy: the builds of this file must not write in the tree of the repository, or they race

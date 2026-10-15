@@ -180,7 +180,8 @@
             "source": { "type": "string", "format": "uri", "description": "The provider's own page that states it." },
             "checked": { "type": "string", "format": "date", "description": "The day the page was read." },
             "quote": { "type": ["string", "null"], "minLength": 1, "maxLength": 400, "description": "The provider's own sentence about prompts, copied as the page words it (a sentence or two, not a paragraph); never a paraphrase. Absent or null = no sentence recorded yet." },
-            "note": { "type": ["string", "null"], "minLength": 1, "maxLength": 300, "description": "A condition the sentence carries, in plain words: which plan it applies to, an opt-out, or that it varies by model. Not an interpretation." }
+            "note": { "type": ["string", "null"], "minLength": 1, "maxLength": 300, "description": "A condition the sentence carries, in plain words: which plan it applies to, an opt-out, or that it varies by model. Not an interpretation." },
+            "plan_named": { "type": ["boolean", "null"], "description": "true = the sentence (or its clause) names the free or trial plan, to cover it or to exclude it; false = the source was read and does not name it in that sentence; null or absent = not checked. false never means the free plan is covered, nor that it is not." }
           }
         },
         "verified": {

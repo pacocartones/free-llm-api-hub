@@ -185,6 +185,8 @@ for (const p of data.providers ?? []) {
       check(typeof dp[k] !== 'string' || !hasHiddenChars(dp[k]), `${id}: data_policy.${k} must not contain control, bidirectional or zero-width characters`);
     }
     check(dp.quote == null || dp.trains_on_prompts != null || dp.retention != null, `${id}: a data_policy sentence goes with a stated part`);
+    // plan_named: whether the sentence itself names the free or trial plan (true), was read and does not (false), or was not checked (null or absent).
+    check(dp.plan_named == null || typeof dp.plan_named === 'boolean', `${id}: data_policy.plan_named must be true, false or null`);
   }
 
   // no_expiry: the provider's own statement that a one-time trial credit does not expire (see docs/comparison-dimensions.md).
