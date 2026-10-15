@@ -2125,9 +2125,9 @@ test('data_policy lot 4: the 13 providers that say they do not train were read f
   assert.equal(row.data_policy.plan_named, false, 'the API carries the new field');
 });
 
-test('data_policy lot 5: 25 of 68, Deepgram trains by its terms with an opt-out, Runware says it does not', () => {
+test('data_policy lot 5: 26 of 68, including Arli AI, Deepgram trains by its terms with an opt-out, Runware says it does not', () => {
   const data = JSON.parse(readFileSync(DATA, 'utf8'));
-  assert.equal(data.providers.filter((p) => p.data_policy).length, 25, 'the count of covered providers');
+  assert.equal(data.providers.filter((p) => p.data_policy).length, 26, 'the count of covered providers');
   const dg = data.providers.find((p) => p.slug === 'deepgram').data_policy;
   assert.equal(dg.trains_on_prompts, true); assert.equal(dg.source, 'https://deepgram.com/terms'); assert.equal(dg.plan_named, false);
   assert.match(dg.quote, /including training and testing our Models\.$/); assert.match(dg.note, /opt out of model training on a per-request basis/);

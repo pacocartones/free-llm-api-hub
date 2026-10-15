@@ -737,7 +737,7 @@
       "free_type": "renewing-quota",
       "free_tier": "Free plan ($0): text LLMs for testing, max 5 requests every 2 days per model, 12K context, 1 request at a time, delayed responses; no image generation",
       "rate_limits": "5 requests every 2 days per model; 1 request at a time; max 12K context tokens",
-      "notes": "Free tier is for testing only — very restrictive. Provider advertises zero-log / no data retention. Card requirement for the free tier is not stated on the pricing page.",
+      "notes": "Free tier is for testing only — very restrictive. Provider says prompt/output content is not logged or stored; usage metadata may be retained for up to 60 days. Card requirement for the free tier is not stated on the pricing page.",
       "best_for": "A permanently-free (heavily rate-limited) test tier",
       "modalities": ["text"],
       "models_free": null,
