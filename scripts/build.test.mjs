@@ -1966,6 +1966,7 @@ test('data-policy page: a missing sentence and a missing source are said so; a s
   assert.doesNotMatch(html, /javascript:/);
   assert.match(html, /We may use &quot;your&quot; &lt;content&gt;\./);
   assert.match(html, /Free plan only\./);
+  assert.match(html, /&ldquo;We may use &quot;your&quot; &lt;content&gt;\.&rdquo;<\/blockquote><p class="muted dp-foot">Acme &lt;b&gt;, page: <a href="https:\/\/example\.com\/terms"[^>]*>https:\/\/example\.com\/terms<\/a>, read on 2026-10-15\.<\/p>/, 'a sentence carries its provider, page and day');
   assert.match(html, /href="https:\/\/example\.com\/terms"/);
   assert.doesNotMatch(html, /Acme <b>/, 'a name from the data is escaped');
 });
@@ -1974,7 +1975,10 @@ test('data-policy page: no word that promises safety or ranks providers by their
   const html = readFileSync(join(ROOT, 'site/data-policy/index.html'), 'utf8');
   const main = html.slice(html.indexOf('<main id="main"'), html.indexOf('</main>'));
   const visible = main.replace(/<[^>]*>/g, ' ');
-  assert.doesNotMatch(visible, /\b(safe|safer|secure|private|privacy-friendly|guarantee[sd]?|trustworthy|best|worst|better|worse)\b/i);
+  assert.doesNotMatch(visible, /\b(safe|safer|secure|private|privacy|privacy-friendly|guarantee[sd]?|trustworthy|best|worst|better|worse)\b/i);
+  assert.equal((main.match(/<h3>/g) || []).length, 6, 'six questions, as text only');
+  assert.doesNotMatch(html, /FAQPage/, 'no FAQPage markup until enough rows carry a sentence');
+  assert.match(visible, /Says it does not.*Says it may.*Not confirmed/is, 'the legend of the three states is on the page');
   assert.match(visible, /not legal advice/i, 'the notice is on the page');
   assert.match(visible, /it never means &ldquo;no&rdquo;/i, 'the page says not confirmed is not no');
 });

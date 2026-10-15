@@ -607,3 +607,5 @@ p.muted a, .prose p a, .prov-summary p a { text-decoration: underline; text-unde
 @media (max-width: 640px) { .gpu-claim { grid-template-columns: 1fr; } }
 .dp-quote { margin: 0 0 6px; padding-left: 10px; border-left: 3px solid var(--control-border); color: var(--text); }
 .dp-table td, .dp-table th { vertical-align: top; }
+.dp-foot { margin: 0 0 6px; font-size: .85rem; overflow-wrap: anywhere; }
+.dp-legend { margin: 12px 0; }
