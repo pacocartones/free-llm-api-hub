@@ -266,6 +266,8 @@ document.getElementById('clearFilters').addEventListener('click', () => {
   sortKey = 'recommended'; sortDir = 1;
   document.querySelectorAll('thead th').forEach(h => { h.classList.remove('sorted', 'asc'); h.setAttribute('aria-sort', 'none'); });
   render();
+  // The Clear button hides itself once nothing is filtered: keep the keyboard focus on the page.
+  document.getElementById('q').focus();
 });
 // The dataset is inlined at build time (see #providers-data) so the table is server-rendered
 // and the page needs no network round-trip. Fall back to fetch only if the inline data is absent.

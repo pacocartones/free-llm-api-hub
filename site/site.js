@@ -52,7 +52,7 @@
       if (e.target.closest('a')) setNav(false);
     });
     document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape' && header.classList.contains('nav-open')) setNav(false);
+      if (e.key === 'Escape' && header.classList.contains('nav-open')) { setNav(false); navToggle.focus(); }
     });
     document.addEventListener('click', function (e) {
       if (header.classList.contains('nav-open') && !e.target.closest('.site-header')) setNav(false);
