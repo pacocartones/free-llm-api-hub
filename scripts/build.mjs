@@ -1730,11 +1730,11 @@ writeFileSync(
   join(ROOT, 'site/data-policy/index.html'),
   htmlPage({
     title: 'Who trains on your data · Free LLM API Hub',
-    desc: 'What each free LLM API provider says about training on your prompts, with the provider\'s own page and the day we read it. Not confirmed is never no.',
+    desc: 'The sentence from each free LLM API provider\'s own page about training on prompts, where one is recorded, with the page and the day it was read. Not confirmed is never no.',
     canonical: SITE + '/data-policy/',
     main:
       '<section class="page-hero model-hero"><div class="wrap"><nav class="crumbs"><a href="../">Home</a> / Who trains on your data</nav>' +
-      '<h1>Who trains on your data</h1><p class="lede">What each provider says about your prompts on its free access, in its own words where we have them, with the page and the day we read it.</p></div></section>' +
+      '<h1>Who trains on your data</h1><p class="lede">The provider\'s own sentence about training on prompts, where one is recorded, with its page and the day it was read.</p></div></section>' +
       dataPolicyMainHtml(dataPolicyRows(providers), { repo: REPO, generated: data.generated, prefix: '../' }),
     prefix: '../',
   })

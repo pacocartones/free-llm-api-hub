@@ -10,10 +10,18 @@ import { htmlEsc, SLUG_RE } from './rows.mjs';
 
 const safeHttp = (u) => (/^https?:\/\//i.test(String(u || '')) ? String(u) : '');
 
-/** 'yes' | 'no' | 'unknown' from the data only. Anything but a literal true or false is "not confirmed". */
+/**
+ * 'yes' | 'no' | 'recorded' | 'unknown'. A row reads yes or no only when the data holds a literal true or false AND the
+ * provider's own sentence (data_policy.quote). A true or false without a sentence is "recorded": the page shows it as
+ * not confirmed, because a value alone is not the provider's word. Anything else is "unknown".
+ */
 export function trainState(p) {
-  const v = p && p.data_policy ? p.data_policy.trains_on_prompts : null;
-  return v === true ? 'yes' : v === false ? 'no' : 'unknown';
+  const dp = p && p.data_policy && typeof p.data_policy === 'object' ? p.data_policy : null;
+  if (!dp) return 'unknown';
+  const v = dp.trains_on_prompts;
+  if (v !== true && v !== false) return 'unknown';
+  const hasQuote = typeof dp.quote === 'string' && dp.quote.trim().length > 0;
+  return hasQuote ? (v ? 'yes' : 'no') : 'recorded';
 }
 
 /** Rows for every verified provider, in dataset order. */
@@ -24,7 +32,7 @@ export function dataPolicyRows(providers) {
       provider: p,
       state: trainState(p),
       retention: dp && dp.retention ? String(dp.retention) : null,
-      quote: dp && typeof dp.quote === 'string' && dp.quote.length ? dp.quote : null,
+      quote: dp && typeof dp.quote === 'string' && dp.quote.trim().length ? dp.quote : null,
       note: dp && typeof dp.note === 'string' && dp.note.length ? dp.note : null,
       source: dp ? safeHttp(dp.source) : '',
       checked: dp && dp.checked ? String(dp.checked) : null,
@@ -32,14 +40,20 @@ export function dataPolicyRows(providers) {
   });
 }
 
-/** { total, yes, no, unknown, withQuote } computed from the rows. */
+/** { total, yes, no, recorded, unknown, notConfirmed, withQuote } computed from the rows. */
 export function dataPolicyCounts(rows) {
-  const c = { total: rows.length, yes: 0, no: 0, unknown: 0, withQuote: 0 };
+  const c = { total: rows.length, yes: 0, no: 0, recorded: 0, unknown: 0, withQuote: 0 };
   for (const r of rows) { c[r.state] += 1; if (r.quote) c.withQuote += 1; }
+  c.notConfirmed = c.recorded + c.unknown;
   return c;
 }
 
-const STATE_LABEL = { yes: 'says it may', no: 'says it does not', unknown: 'not confirmed' };
+const STATE_LABEL = {
+  yes: 'Sentence: may train',
+  no: 'Sentence: does not train',
+  recorded: 'Not confirmed: a value is recorded, no sentence yet',
+  unknown: 'Not confirmed',
+};
 
 /** The issue that opens the existing inaccuracy form for one provider, to add or correct its sentence. */
 export const dataPolicyIssueUrl = (p, repo) =>
@@ -47,17 +61,15 @@ export const dataPolicyIssueUrl = (p, repo) =>
 
 const FAQ = (c) => [
   ['Which providers train on my data?',
-    `Each provider says it in its own policy. This page shows its words when we have them, the page they come from and the day we read it. Of ${c.total} verified providers, ${c.no} say they do not train on your prompts on this free access, ${c.yes} say they may, and ${c.unknown} are not confirmed.`],
+    `Each provider says it in its own policy. This page shows a provider's own sentence where one is recorded, with its page and the day it was read. Of ${c.total} verified providers, ${c.no} have a recorded sentence that says they do not train on prompts, ${c.yes} have one that says they may, and ${c.notConfirmed} are not confirmed.`],
   ['What does \u201cnot confirmed\u201d mean?',
-    'Nobody has recorded a sentence from the provider\'s own pages that says it. It never means \u201cno\u201d.'],
-  ['Does the paid plan have the same policy?',
-    'Not necessarily. We record what the page says about this free access. Paid plans can differ: check the provider\'s page.'],
-  ['How do you choose the sentences?',
-    'We copy one or two sentences as written from the provider\'s own page and show the page and the day we read it. We do not paraphrase or interpret.'],
+    'No sentence from the provider\'s own pages is recorded for the row. It never means \u201cno\u201d.'],
+  ['Does a row cover every plan?',
+    'A row covers the plan its sentence is read for, and the note says which when the page does. Other plans are not covered by that row.'],
+  ['Where do the sentences come from?',
+    'A recorded sentence is copied as written from the provider\'s own page, with the page and the day it was read.'],
   ['How can I correct or add a row?',
-    'Open an issue from the link in the row, with the page and the sentence. We check it against the page before changing anything.'],
-  ['Is this legal advice?',
-    'No. It is informative. Policies change; always confirm on the provider\'s own page.'],
+    'Use the link in the row to open an issue with the page and the sentence.'],
 ];
 
 /** The visible questions of the page. Text only: no FAQPage markup until enough rows carry a sentence. */
@@ -83,20 +95,20 @@ export function dataPolicyMainHtml(rows, { repo, generated, prefix = '../' }) {
       ? `<a href="${htmlEsc(r.source)}" target="_blank" rel="noopener">the provider's page</a>${r.checked ? ` · read ${htmlEsc(r.checked)}` : ''}`
       : '<span class="muted">no source recorded</span>';
     const ret = r.retention ? htmlEsc(r.retention) : '<span class="tri tri-unk">not confirmed</span>';
-    return `<tr><th scope="row">${name}</th><td><span class="tri tri-${r.state === 'yes' ? 'yes' : r.state === 'no' ? 'no' : 'unk'}">${STATE_LABEL[r.state]}</span></td>` +
+    const cls = r.state === 'yes' ? 'yes' : r.state === 'no' ? 'no' : 'unk';
+    return `<tr><th scope="row">${name}</th><td><span class="tri tri-${cls}">${STATE_LABEL[r.state]}</span></td>` +
       `<td>${ret}</td><td>${quote}${note}</td><td>${src}</td>` +
       `<td><a href="${htmlEsc(dataPolicyIssueUrl(p, repo))}" target="_blank" rel="noopener">add or correct</a></td></tr>`;
   }).join('');
   return '<main id="main"><div class="wrap prose">' +
-    '<h2>What each provider says about your prompts</h2>' +
-    `<p>Of ${c.total} verified providers, ${c.no} say they do not train on your prompts on this free access, ${c.yes} say they may, and ${c.unknown} are not confirmed. ` +
-    `${c.withQuote} of the ${c.total} rows carry the provider's own sentence. Data of ${htmlEsc(String(generated))}.</p>` +
-    '<p class="muted">Informative, not legal advice. Policies change and a free plan can have conditions the paid plan does not: read the provider\'s page, and the day we read it, before you rely on a row. ' +
-    '&ldquo;Not confirmed&rdquo; means nobody has recorded a sentence that says it; it never means &ldquo;no&rdquo;. We quote and do not interpret.</p>' +
-    '<p class="dp-legend"><strong>Says it does not</strong>: the provider\'s page says it does not train on your prompts on this access. <strong>Says it may</strong>: the page says it may. ' +
-    '<strong>Not confirmed</strong>: nobody has recorded a sentence that says it. That never means &ldquo;no&rdquo;.</p>' +
-    '<div class="table-wrap"><table class="dp-table"><caption class="sr-only">What each verified provider says about training on prompts, with its source</caption>' +
-    '<thead><tr><th scope="col">Provider</th><th scope="col">Trains on your prompts</th><th scope="col">Retention</th><th scope="col">The provider\'s own words</th><th scope="col">Source</th><th scope="col">Help</th></tr></thead>' +
+    '<h2>The provider\'s own sentence about your prompts</h2>' +
+    `<p>For each of ${c.total} verified providers, this page shows the sentence from the provider's own page about training on prompts where one is recorded. ` +
+    `${c.withQuote} rows have one; ${c.notConfirmed} are not confirmed (${c.recorded} of them have a value in the dataset but no sentence yet). ` +
+    `Each row shows the day its page was read. Data of ${htmlEsc(String(generated))}.</p>` +
+    '<p class="dp-legend"><strong>Sentence: does not train</strong>: a recorded sentence from the provider\'s page says it does not train on prompts. <strong>Sentence: may train</strong>: a recorded sentence says it may. ' +
+    '<strong>Not confirmed</strong>: no sentence is recorded. That never means &ldquo;no&rdquo;.</p>' +
+    '<div class="table-wrap"><table class="dp-table"><caption class="sr-only">The sentence of each verified provider about training on prompts, with its source</caption>' +
+    '<thead><tr><th scope="col">Provider</th><th scope="col">Trains on your prompts</th><th scope="col">Retention, as the dataset words it</th><th scope="col">The provider\'s own words</th><th scope="col">Source</th><th scope="col">Help</th></tr></thead>' +
     `<tbody>${body}</tbody></table></div>` +
     dataPolicyFaqHtml(c) +
     `<p class="muted">To add a sentence or fix one, <a href="${htmlEsc(repo)}/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener">read how we take a value</a> and open an issue from the row.</p>` +
