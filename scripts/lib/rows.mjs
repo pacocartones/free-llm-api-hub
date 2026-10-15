@@ -62,7 +62,9 @@ export function explorerRowHtml(p, opts = {}) {
     const st = freshnessStatus(age);
     const cls = st === 'stale' ? 'b-stale' : st === 'due' ? 'b-warn' : 'b-ok';
     const tip = age != null ? ` title="Verified ${age}d ago · ${date}"` : '';
-    v = `<span class="ver-cell"><span class="badge ${cls}"${tip}>${ICON('ic-check')}</span><span class="ver-date">${date}</span></span>`;
+    // The state is said in words (and by the icon shape), not only by colour and a title.
+    const word = st === 'stale' ? 'Verified, stale: re-check overdue' : st === 'due' ? 'Verified, due for re-check' : 'Verified, fresh';
+    v = `<span class="ver-cell"><span class="badge ${cls}"${tip}>${ICON(st === 'fresh' ? 'ic-check' : 'ic-warn')}<span class="sr-only">${word}</span></span><span class="ver-date">${date}</span></span>`;
   } else {
     v = `<span class="badge b-warn">${ICON('ic-warn')} unverified</span>`;
   }

@@ -86,6 +86,44 @@ test('a slug that is not kebab-case renders the name without a link', () => {
   assert.ok(!out.includes('onmouseover='), 'no event handler may survive');
 });
 
+test('freshness is said in words and by icon shape, not only by colour and a title (WCAG 1.4.1)', () => {
+  const d = (daysAgo) => {
+    const t = new Date('2026-08-13T00:00:00Z'); t.setUTCDate(t.getUTCDate() - daysAgo);
+    return t.toISOString().slice(0, 10);
+  };
+  const rowHtml = clientRowHtml();
+  const cell = (days) => rowHtml({ ...base, last_verified: d(days) }, { now: '2026-08-13' }).match(/<span class="ver-cell">[\s\S]*?<\/span><span class="ver-date">/)[0];
+  const fresh = cell(10), due = cell(75), stale = cell(95);
+  assert.match(fresh, /<span class="sr-only">Verified, fresh<\/span>/);
+  assert.match(due, /<span class="sr-only">Verified, due for re-check<\/span>/);
+  assert.match(stale, /<span class="sr-only">Verified, stale: re-check overdue<\/span>/);
+  assert.match(fresh, /ic-check/);
+  assert.doesNotMatch(due, /ic-check/, 'due uses a different icon from fresh');
+  assert.doesNotMatch(stale, /ic-check/, 'stale uses a different icon from fresh');
+  assert.match(due, /ic-warn/);
+  assert.match(stale, /ic-warn/);
+});
+
+test('the explorer announces how many providers are shown, in a permanent live region', () => {
+  const html = readFileSync(new URL('../site/index.html', import.meta.url), 'utf8');
+  const js = readFileSync(new URL('../site/explorer.js', import.meta.url), 'utf8');
+  assert.match(html, /<p id="count" class="sr-only" role="status" aria-live="polite" aria-atomic="true"><\/p>/, 'the region exists in the page from the start');
+  assert.doesNotMatch(html, /id="stats" aria-live/, 'the stat tiles are written once at load and must not announce on every paint');
+  assert.match(js, /getElementById\('count'\)\.textContent = rows\.length \? `\$\{rows\.length\} of \$\{DATA\.length\} providers shown`/, 'every render writes the count');
+  assert.match(js, /STATUS_WORD = \{ fresh: 'fresh', due: 'due for re-check', stale: 'stale' \}/, 'the oldest-verification tile says its status in words');
+});
+
+test('every sortable header holds a real button and the header cell has no tab stop of its own', () => {
+  const html = readFileSync(new URL('../site/index.html', import.meta.url), 'utf8');
+  const heads = html.match(/<th data-key="[a-z_]+"[^>]*>[\s\S]*?<\/th>/g) || [];
+  assert.equal(heads.length, 5, 'five sortable headers');
+  for (const h of heads) {
+    assert.doesNotMatch(h, /tabindex/, 'no tab stop on the cell');
+    assert.match(h, /<button type="button" class="th-sort">[^<]+<\/button>/, 'a real button inside');
+    assert.match(h, /aria-sort="none"/, 'the sort state stays on the header cell');
+  }
+});
+
 test('freshness status drives the badge class and title', () => {
   const d = (daysAgo) => {
     const t = new Date('2026-08-13T00:00:00Z'); t.setUTCDate(t.getUTCDate() - daysAgo);
@@ -303,8 +341,9 @@ test('keyboard: the explorer wires a roving tabindex without trapping focus', ()
   assert.match(src, /a\.click\(\)/, 'Enter on a row follows its provider link');
   assert.doesNotMatch(src, /stopPropagation|stopImmediatePropagation/, 'never swallow keys other handlers (the "/" shortcut) need');
   assert.doesNotMatch(src, /key === 'Tab'/, 'Tab is never intercepted');
-  // the existing sortable-header pattern is untouched
-  assert.match(src, /th\.addEventListener\('keydown', e => \{ if \(e\.key === 'Enter' \|\| e\.key === ' '\) \{ e\.preventDefault\(\); applySort\(th\); \} \}\);/);
+  // the sortable headers hold a real button: its click reaches the header cell, so no keydown handler is needed
+  assert.match(src, /th\.addEventListener\('click', \(\) => applySort\(th\)\);/);
+  assert.doesNotMatch(src, /th\.addEventListener\('keydown'/, 'a button needs no key handler on the header cell');
 });
 
 test('keyboard: the focused row has a visible focus ring in styles.css', () => {
