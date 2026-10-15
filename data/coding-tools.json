@@ -196,7 +196,7 @@
           "state": "not_stated",
           "quotes": [
             {
-              "text": "When it is enabled, we guarantee that code data is not used for training by us or our model providers.",
+              "text": "Privacy mode can be enabled in settings or by a team admin. When it is enabled, we guarantee that code data is not used for training by us or our model providers.",
               "source": "https://cursor.com/pricing",
               "read": "2026-10-15"
             }
@@ -389,11 +389,16 @@
   "notes": [
     {
       "subject": "Gemini CLI free tier replaced",
-      "text": "Google's Gemini Code Assist page for teams and businesses says the unpaid tier of Gemini CLI was replaced by Antigravity CLI on 2026-06-18, while the Gemini CLI README read the same day still advertises the free tier. Check before relying on the Gemini CLI entry.",
+      "text": "Gemini CLI's own quota page (geminicli.com, last updated 2026-06-18) says the unpaid tier was replaced by Antigravity CLI on 2026-06-18, while the Gemini CLI README read the same day still advertises the free tier. Not listed as an entry.",
       "quotes": [
         {
           "text": "Unpaid tier (Gemini Code Assist for individuals) and Google One users only : Gemini CLI and Gemini Code Assist IDE extensions were replaced by Antigravity CLI and Antigravity on June 18th 2026.",
           "source": "https://codeassist.google/products/business",
+          "read": "2026-10-15"
+        },
+        {
+          "text": "Unpaid tier and Google One users: Gemini CLI was replaced by Antigravity CLI on June 18th, 2026.",
+          "source": "https://geminicli.com/docs/resources/quota-and-pricing/",
           "read": "2026-10-15"
         }
       ]

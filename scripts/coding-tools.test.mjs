@@ -70,7 +70,7 @@ test('the page shows every sentence escaped, with its page and day; not stated n
   assert.doesNotMatch(html, /href="javascript:/, 'only http(s) links are made');
   assert.match(html, /read 2026-10-15/);
   assert.match(html, /Stated by the tool's page/);
-  assert.match(html, /Not stated; what the page says is below/);
+  assert.match(html, /Not stated<\/span> <span class="muted">Context quoted from the page:<\/span>/, 'a sentence under a not-stated value is context, not the value');
   assert.match(html, /<span class="gpu-unstated">Not stated<\/span>/);
   assert.match(html, /never the same as <em>no<\/em>/);
   assert.match(html, /not part of the ranking/);

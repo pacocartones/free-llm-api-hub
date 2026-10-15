@@ -31,7 +31,7 @@ function claimHtml(field, claim) {
   const quotes = claim.quotes.map(quoteHtml).join('');
   let state;
   if (claim.state === 'stated') state = '<span class="gpu-stated">Stated by the tool\'s page</span>';
-  else if (claim.quotes.length) state = '<span class="gpu-unstated">Not stated; what the page says is below</span>';
+  else if (claim.quotes.length) state = '<span class="gpu-unstated">Not stated</span> <span class="muted">Context quoted from the page:</span>';
   else state = '<span class="gpu-unstated">Not stated</span>';
   return `<div class="gpu-claim"><dt>${htmlEsc(LABELS[field] || field)}</dt><dd>${state}${quotes}</dd></div>`;
 }
