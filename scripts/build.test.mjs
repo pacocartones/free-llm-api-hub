@@ -2023,6 +2023,29 @@ test('data_policy: the sentence and its note are plain text, bounded, and go wit
   assert.equal(validateAfter((d) => { target(d).data_policy = { ...good, trains_on_prompts: null, retention: null, quote: 'Some sentence.' }; }), false, 'a sentence alone records nothing');
 });
 
+// ---- focus ring contrast (WCAG 1.4.11, 2.4.7): the global ring is the accent colour, and it must stand out against every surface ----
+const luminance = (hex) => {
+  const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255).map((c) => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4));
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+};
+const contrast = (a, b) => { const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x); return (hi + 0.05) / (lo + 0.05); };
+
+test('a11y: the global focus ring is at least 2px, uses the accent and reaches 3:1 against every surface in both themes', () => {
+  const css = readFileSync(join(ROOT, 'site/styles.css'), 'utf8');
+  assert.match(css, /^:focus-visible \{ outline: 2px solid var\(--accent\); outline-offset: 2px;/m, 'the global ring: 2px, accent, offset');
+  const block = (selector) => css.slice(css.indexOf(selector + ' {'), css.indexOf('\n}', css.indexOf(selector + ' {')));
+  const token = (b, name) => { const m = b.match(new RegExp('--' + name + ':\\s*(#[0-9a-fA-F]{6})')); assert.ok(m, `token --${name} is missing`); return m[1]; };
+  for (const [theme, b] of [['dark', block(':root')], ['light', block('[data-theme="light"]')]]) {
+    const ring = token(b, 'accent');
+    for (const surface of ['bg', 'bg-elev', 'panel', 'panel-2']) {
+      assert.ok(contrast(ring, token(b, surface)) >= 3, `${theme}: the focus ring on --${surface} is below 3:1 (${contrast(ring, token(b, surface)).toFixed(2)})`);
+    }
+  }
+  // The ring must not be removed from a control that takes the keyboard: the only outline:none rules are the ones that draw their own focus.
+  const removed = [...css.matchAll(/([^{}]+)\{[^}]*outline:\s*none[^}]*\}/g)].map((m) => m[1].trim());
+  assert.deepEqual(removed.filter((s) => /th-sort|chip|\.sel\b|button|a:focus/.test(s)), [], 'no outline:none on the sort buttons, chips, selects, buttons or links');
+});
+
 // ---- Dated banner mechanism (site/site.js) ---------------------------------
 // A banner hand-written in site/index.html is removed by site/site.js once its
 // data-until day (UTC, inclusive) has passed; none is on the page today. The build stays
