@@ -4,18 +4,18 @@
 // lib/lighthouse-gate.mjs. Needs the runner from tools/lighthouse (npm ci there)
 // and a Chrome binary in CHROME_PATH. Nothing is published and nothing leaves the machine.
 import { createServer } from 'node:http';
-import { readFileSync, existsSync, statSync, mkdtempSync, rmSync, readdirSync } from 'node:fs';
+import { readFileSync, existsSync, statSync, rmSync, readdirSync } from 'node:fs';
 import { spawn } from 'node:child_process';
-import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, extname, normalize } from 'node:path';
 import { evaluate, medianReport } from './lib/lighthouse-gate.mjs';
+import { makeTmpDir } from './lib/tmp.mjs';
 
 // Every Lighthouse run gets its own Chrome profile directory and its own process group.
 // Whatever way this script ends (normal exit, failure, Ctrl-C, kill), the groups are
 // killed by pid, the profile directory is removed and a final check looks for any Chrome
 // that still points at it, so no headless Chrome is left behind. Never `pkill -f`.
-const PROFILE = mkdtempSync(join(tmpdir(), 'flah-lighthouse-'));
+const PROFILE = makeTmpDir('flah-lighthouse-');
 const groups = new Set();
 
 function runLighthouse(bin, args) {
