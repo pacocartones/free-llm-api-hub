@@ -1,0 +1,29 @@
+name: Welcome
+
+# A short, human greeting on a person's first issue or first pull request. It
+# does not check out or run any code from the pull request, which is why the
+# pull_request_target trigger is safe here: the only thing it can do is post a
+# comment with the token's issues/pull-requests write permission.
+on:
+  issues:
+    types: [opened]
+  pull_request_target: # zizmor: ignore[dangerous-triggers] no checkout, no PR code is run; only posts a comment
+    types: [opened]
+
+permissions: {}
+
+jobs:
+  greet:
+    name: greet first-time contributors
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    permissions:
+      issues: write
+      pull-requests: write
+    steps:
+      - uses: actions/first-interaction@1c4688942c71f71d4f5502a26ea67c331730fa4d # v3.1.0
+        with:
+          issue_message: |
+            Welcome, and thank you for opening your first issue here. A maintainer replies within 24 hours, usually the same day. If you are reporting a wrong or missing fact, please include the provider's own page and the date you read it: that is the one rule of this dataset. [CONTRIBUTING.md](../blob/main/CONTRIBUTING.md) has the details.
+          pr_message: |
+            Welcome, and thank you for your first pull request. The automatic checks on a first pull request wait for a maintainer to approve them; that happens soon, you do not need to do anything. If the change touches data, make sure the source and the date are in the pull request description. A maintainer replies within 24 hours, usually the same day, and may push a small fix to your branch (your authorship stays) if you allow edits. [CONTRIBUTING.md](../blob/main/CONTRIBUTING.md) has the details.
