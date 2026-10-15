@@ -421,6 +421,28 @@
    "page_sha256": "57f3bc7b7807b7c0d80c5c1011f0aa620a727f2b4efa6c84753b7d376862c336"
   },
   {
+   "id": "sarvam-ai.absence_check",
+   "slug": "sarvam-ai",
+   "kind": "absence_check",
+   "terms": [
+    "free",
+    "trial",
+    "paid",
+    "plan"
+   ],
+   "hits": {
+    "free": 0,
+    "trial": 0,
+    "paid": 0,
+    "plan": 0
+   },
+   "source_url": "https://docs.sarvam.ai/api/platform/data-retention",
+   "read_on": "2026-10-15",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "57f3bc7b7807b7c0d80c5c1011f0aa620a727f2b4efa6c84753b7d376862c336"
+  },
+  {
    "id": "rime.sentence",
    "slug": "rime",
    "kind": "sentence",
