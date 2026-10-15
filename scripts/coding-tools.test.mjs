@@ -30,6 +30,15 @@ const entry = (over = {}) => ({
   slug: 'example-tool', name: 'Example', url: 'https://example.com/', kind: 'cli',
   claims: Object.fromEntries(CLAIM_FIELDS.map((f) => [f, claim('not_stated')])), ...over,
 });
+// Our own words only: the title, the description, the hero and the main text, without a tool's quoted sentences, which are shown as written.
+const BANNED = /\b(safe|secure|private|guarantee[sd]?|best|worst|better|worse|recommended|featured|winner|top)\b/i;
+const ourWords = (html) => {
+  const title = (html.match(/<title>([^<]*)<\/title>/) || [])[1] || '';
+  const desc = (html.match(/<meta name="description" content="([^"]*)"/) || [])[1] || '';
+  const hero = (html.match(/<section class="page-hero[\s\S]*?<\/section>/) || [''])[0];
+  const main = html.slice(html.indexOf('<main id="main"'), html.indexOf('</main>'));
+  return [title, desc, hero, main].join(' ').replace(/<blockquote[\s\S]*?<\/blockquote>/g, ' ').replace(/<[^>]*>/g, ' ');
+};
 const esc = (t) => t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 
 test('the section exists, passes its own rules and its JSON Schema', () => {
@@ -74,8 +83,7 @@ test('the page shows every sentence escaped, with its page and day; not stated n
   assert.match(html, /<span class="gpu-unstated">Not stated<\/span>/);
   assert.match(html, /never the same as <em>no<\/em>/);
   assert.match(html, /not part of the ranking/);
-  const visible = html.replace(/<[^>]*>/g, ' ');
-  assert.doesNotMatch(visible, /\b(safe|secure|private|guarantee[sd]?|best|worst|better|worse|top|recommended|featured|winner)\b/i);
+  assert.doesNotMatch(ourWords(html), BANNED);
   assert.deepEqual(codingToolsCounts(s), { tools: 1, stated: 1, total: 6 });
   assert.match(codingToolsMainHtml({ entries: [] }), /No tool is recorded yet\./);
 });
@@ -199,8 +207,9 @@ test('own-key page: the subsection shows every sentence and links the free APIs,
     assert.ok(!existsSync(join(out(), `site/p/${e.slug}.html`)), `${e.slug} got a provider page`);
   }
   // Our own words only: a tool's sentence is quoted as it is and may use any word.
-  const visible = html.slice(html.indexOf('<main id="main"'), html.indexOf('</main>')).replace(/<blockquote[\s\S]*?<\/blockquote>/g, ' ').replace(/<[^>]*>/g, ' ');
-  assert.doesNotMatch(visible, /\b(safe|secure|private|guarantee[sd]?|best|worst|better|worse|recommended|featured|winner)\b/i);
+  const visible = ourWords(html);
+  assert.doesNotMatch(visible, BANNED);
+  assert.doesNotMatch(visible, /\b(you can|you should|we recommend|change often|before you rely|not legal advice)\b/i, 'no advice and no unsourced claim in our voice');
 });
 
 test('own-key endpoint: carries the data file as it is, validates against its own schema and never mixes with coding-tools.json', () => {
@@ -231,4 +240,19 @@ test('the same slug in both coding-tools files is rejected by the validator', ()
   assert.ok(new Set(all).size < all.length, 'the fixture really repeats a slug');
   // The rule lives in scripts/validate.mjs (it reads both files); the per-file check only sees one list.
   assert.match(readFileSync(join(ROOT, 'scripts/validate.mjs'), 'utf8'), /is in both coding-tools files/);
+});
+
+test('no entry can clash with the page or the other lists: own-key anchor, llms.txt, best.json, the API of the top 10 and the coverage page', () => {
+  buildSite();
+  const all = [...section().entries, ...ownKey().entries].map((e) => e.slug);
+  assert.ok(!all.includes('own-key'), 'a slug "own-key" would clash with the id of the subsection');
+  const files = ['site/llms.txt', 'site/llms-full.txt', 'data/best.json', 'site/api/v1/best.json', 'site/coverage/index.html', 'site/scores.json'];
+  for (const f of files) {
+    const path = join(out(), f);
+    if (!existsSync(path)) continue;
+    const text = readFileSync(path, 'utf8');
+    for (const slug of all) assert.ok(!text.includes(slug), `${f} mentions the coding tool ${slug}`);
+  }
+  const page = readFileSync(join(out(), 'site/coding-tools/index.html'), 'utf8');
+  for (const slug of all) assert.equal((page.match(new RegExp('id="' + slug + '"', 'g')) || []).length, 1, `${slug} is the id of exactly one block`);
 });
