@@ -24,7 +24,7 @@ export function tristateLabel(value) {
 }
 
 function unconfirmedFields(p) {
-  return TRISTATE_FIELDS.filter((f) => p[f] === null || p[f] === undefined);
+  return TRISTATE_FIELDS.filter((f) => typeof p[f] !== 'boolean');
 }
 
 function compact(p) {
@@ -86,7 +86,8 @@ export function searchProviders(data, args = {}) {
     for (const [param, { field, want }] of Object.entries(TRISTATE_FILTERS)) {
       if (args[param] === undefined) continue;
       const value = p[field];
-      if (value === null || value === undefined) {
+      // Anything that is not an explicit boolean (null, a value added later such as "conditional") is unconfirmed.
+      if (typeof value !== 'boolean') {
         excluded[param] = (excluded[param] ?? 0) + 1;
         keep = false;
         break;
@@ -258,7 +259,7 @@ export function datasetInfo(data) {
       verified: by((p) => p.verified === true),
       unverified: by((p) => p.verified !== true),
       openai_client_ready: by((p) => p.verified === true && p.openai_compatible === true && !!p.openai_base_url),
-      unconfirmed: Object.fromEntries(TRISTATE_FIELDS.map((f) => [f, by((p) => p[f] === null || p[f] === undefined)])),
+      unconfirmed: Object.fromEntries(TRISTATE_FIELDS.map((f) => [f, by((p) => typeof p[f] !== 'boolean')])),
     },
     freshness: {
       oldest_last_verified: oldestDate,

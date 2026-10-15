@@ -14,7 +14,7 @@
   ],
   "scripts": {
     "start": "node src/index.js",
-    "test": "node --test test/tools.test.js test/stdio.test.js"
+    "test": "node --test test/tools.test.js test/stdio.test.js test/forward-compat.test.js"
   },
   "engines": {
     "node": ">=18"
