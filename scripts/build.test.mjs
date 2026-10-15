@@ -1916,6 +1916,17 @@ test('a11y: the filter chips stay reachable by keyboard and screen reader, with 
   for (const chip of chips) assert.match(chip, /<input type="checkbox" id="f-[a-z]+">/, 'each chip label contains its checkbox, so the label stays the click target');
 });
 
+test('a11y: small fixes stay in place (finite caret, placeholder colour, no 320px minimum, focus kept after Clear and Escape)', () => {
+  const css = readFileSync(join(ROOT, 'site/styles.css'), 'utf8');
+  const caret = css.split('\n').find((l) => l.startsWith('.caret {'));
+  assert.ok(caret && !/infinite/.test(caret), 'the caret blink stops by itself (WCAG 2.2.2)');
+  assert.match(css, /::placeholder\s*\{[^}]*color:\s*var\(--muted\)/, 'placeholder text uses the muted colour');
+  assert.doesNotMatch(css, /\.limits-table\s*\{[^}]*min-width:\s*320px/, 'the limits table has no 320px minimum (reflow at 320px)');
+  assert.match(css, /minmax\(min\(280px, 100%\), 1fr\)/, 'collection tracks never exceed the container');
+  assert.match(readFileSync(join(ROOT, 'site/explorer.js'), 'utf8'), /getElementById\('q'\)\.focus\(\)/, 'Clear keeps the focus on the search box');
+  assert.match(readFileSync(join(ROOT, 'site/site.js'), 'utf8'), /setNav\(false\); navToggle\.focus\(\)/, 'Escape returns the focus to the menu button');
+});
+
 // ---- Dated banner mechanism (site/site.js) ---------------------------------
 // A banner hand-written in site/index.html is removed by site/site.js once its
 // data-until day (UTC, inclusive) has passed; none is on the page today. The build stays
