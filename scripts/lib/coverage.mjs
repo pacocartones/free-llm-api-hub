@@ -50,9 +50,9 @@ export function coverageMainHtml(rows, { repo, generated, prefix = '../' }) {
     const items = r.open.map((p) => {
       const name = SLUG_RE.test(String(p.slug || '')) ? `<a href="${prefix}p/${p.slug}">${htmlEsc(p.name)}</a>` : htmlEsc(p.name);
       const docs = safeHttp(p.docs_url);
-      const docsLink = docs ? `<a href="${htmlEsc(docs)}" target="_blank" rel="noopener">official docs</a>` : '<span class="muted">no official docs link</span>';
+      const docsLink = docs ? `<a href="${htmlEsc(docs)}" target="_blank" rel="noopener">official docs<span class="sr-only"> for ${htmlEsc(p.name)}</span></a>` : '<span class="muted">no official docs link</span>';
       return `<li class="cov-task">${name} <span class="sep">·</span> ${docsLink} <span class="sep">·</span> ` +
-        `<a href="${htmlEsc(coverageIssueUrl(p, r, repo))}" target="_blank" rel="noopener">propose the value</a></li>`;
+        `<a href="${htmlEsc(coverageIssueUrl(p, r, repo))}" target="_blank" rel="noopener">propose the value<span class="sr-only"> for ${htmlEsc(p.name)}</span></a></li>`;
     }).join('');
     return `<details class="cov-field" id="${r.key}"><summary><strong>${htmlEsc(r.label)}</strong> <span class="muted">· ${r.open.length} not confirmed</span></summary><ul class="cov-list">${items}</ul></details>`;
   }).join('');

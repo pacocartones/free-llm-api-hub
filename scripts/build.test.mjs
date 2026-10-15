@@ -21,6 +21,7 @@ import { externalContributors, countExternalContributors, githubProfileUrl } fro
 import { buildOgManifest } from './lib/og.mjs';
 import { explorerRowHtml } from './lib/rows.mjs';
 import { labelTables } from './lib/tables.mjs';
+import { markNewTabLinks } from './lib/links.mjs';
 import { weeklyPacing, weeklyBatch, WEEKLY_CAP, MIN_AGE_DAYS } from './lib/pacing.mjs';
 import { clientConfigProviders, openaiClients, litellmYaml, MODEL_PLACEHOLDER } from './lib/client-config.mjs';
 import { requirementsHtml, limitsHtml, glanceHtml, modelsHtml, dataPolicyHtml } from './lib/provider-sections.mjs';
@@ -2051,7 +2052,7 @@ test('a11y: a plain link inside a paragraph or a list item is underlined, so it 
 // ---- reflow at 320 CSS px (WCAG 1.4.10): a wide data table scrolls inside its own region, and the header fits ----
 test('a11y: wide data tables sit in a keyboard-reachable scroll region and the header fits at 320px', () => {
   const css = readFileSync(join(ROOT, 'site/styles.css'), 'utf8');
-  assert.match(css, /^\.table-scroll \{ overflow-x: auto; max-width: 100%; \}/m);
+  assert.match(css, /^\.table-scroll \{ overflow-x: auto; max-width: 100%; position: relative; \}/m, 'the region is positioned, so the screen-reader-only text inside the table cannot widen the page');
   assert.match(css, /@media \(max-width: 340px\) \{\s*\.header-actions \.star-count \{ display: none; \}/, 'at 320px the star count is dropped so the header buttons stay in the viewport');
   const region = /<div class="table-scroll" role="region" aria-label="[^"]+" tabindex="0"><table/;
   for (const f of ['site/data-policy/index.html', 'site/collections/no-training.html', 'site/collections/no-credit-card.html']) {
@@ -2069,7 +2070,7 @@ test('data-policy page: five columns, the help link inside the source cell, and 
   assert.equal((head.match(/<th scope="col">/g) || []).length, 5, 'five columns: provider, state, retention, own words, source and help');
   assert.doesNotMatch(head, />Help</, 'no separate Help column: it was the one cut off at 1100px');
   const row = html.slice(html.indexOf('<tbody>')).match(/<tr>[\s\S]*?<\/tr>/)[0];
-  assert.match(row, /<td>[\s\S]*?<p class="muted dp-foot"><a href="[^"]+\/issues\/new[^"]*"[^>]*>add or correct<\/a><\/p><\/td><\/tr>/, 'the add-or-correct link sits under the source');
+  assert.match(row, /<td>[\s\S]*?<p class="muted dp-foot"><a href="[^"]+\/issues\/new[^"]*"[^>]*>add or correct(<span class="sr-only">[^<]*<\/span>)*<\/a><\/p><\/td><\/tr>/, 'the add-or-correct link sits under the source');
   assert.match(readFileSync(join(ROOT, 'site/styles.css'), 'utf8'), /^\.dp-table thead th \{ white-space: normal; \}/m, 'the long header labels wrap instead of widening the table');
 });
 
@@ -2101,6 +2102,35 @@ test('tables: every table of every generated page has a caption and every header
   }
   assert.ok(tables > 50, `the check really saw the tables (${tables})`);
   assert.deepEqual(bad, []);
+});
+
+// ---- a link that opens a new tab says so, and repeated link texts say what they are for (WCAG 2.4.4, 3.2.5) ----
+test('links: markNewTabLinks adds a screen-reader note to every link that opens a new tab and touches nothing else', () => {
+  const out = markNewTabLinks('<p><a href="https://a.example" target="_blank" rel="noopener">docs</a> <a href="/x">same tab</a> <a target="_blank" href="y">y <b>bold</b></a></p><script>var s = \'<a target="_blank">in a script</a>\';</script><style>a[target="_blank"]{}</style>');
+  assert.match(out, /docs<span class="sr-only"> \(opens in a new tab\)<\/span><\/a>/);
+  assert.match(out, /<a href="\/x">same tab<\/a>/, 'a same-tab link is untouched');
+  assert.match(out, /y <b>bold<\/b><span class="sr-only"> \(opens in a new tab\)<\/span><\/a>/, 'inner markup is kept');
+  assert.match(out, /<script>var s = '<a target="_blank">in a script<\/a>';<\/script>/, 'a script is untouched');
+  assert.equal(markNewTabLinks(out), out, 'applying it twice changes nothing');
+});
+
+test('links: on every generated page, each link that opens a new tab carries the note, and the coverage tasks name their provider', () => {
+  const walk = (dir) => readdirSync(dir).flatMap((n) => { const p = join(dir, n); return statSync(p).isDirectory() ? walk(p) : p.endsWith('.html') ? [p] : []; });
+  let seen = 0;
+  const bad = [];
+  for (const f of walk(join(ROOT, 'site'))) {
+    const html = readFileSync(f, 'utf8').replace(/<script\b[\s\S]*?<\/script>/g, '');
+    for (const m of html.matchAll(/<a\b[^>]*target="_blank"[^>]*>[\s\S]*?<\/a>/g)) { seen += 1; if (!m[0].includes('(opens in a new tab)')) bad.push(`${relative(ROOT, f)}: ${m[0].slice(0, 80)}`); }
+  }
+  assert.ok(seen > 500, `the check really saw the links (${seen})`);
+  assert.deepEqual(bad.slice(0, 5), []);
+  const cov = readFileSync(join(ROOT, 'site/coverage/index.html'), 'utf8');
+  const tasks = cov.match(/<li class="cov-task">[\s\S]*?<\/li>/g) || [];
+  assert.ok(tasks.length > 50, 'the coverage page lists its open tasks');
+  for (const t of tasks.slice(0, 30)) {
+    assert.match(t, /official docs<span class="sr-only"> for [^<]+<\/span>/, 'the docs link says whose docs');
+    assert.match(t, /propose the value<span class="sr-only"> for [^<]+<\/span>/, 'the proposal link says for whom');
+  }
 });
 
 // ---- focus ring contrast (WCAG 1.4.11, 2.4.7): the global ring is the accent colour, and it must stand out against every surface ----
