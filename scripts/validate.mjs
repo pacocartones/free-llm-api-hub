@@ -70,6 +70,11 @@ if (!validateSchema(data)) {
 
 if (!/^\d+\.\d+\.\d+$/.test(data.version || '')) errors.push('top-level: version must be semver');
 if (!DATE_RE.test(data.generated || '')) errors.push('top-level: generated must be YYYY-MM-DD');
+// Every date of the dataset is a UTC day, and none is in the future: `generated` is at least the newest last_verified, added and checked, so a
+// `generated` after today's UTC day is a date written in a time zone ahead of UTC (a contributor in Asia at the end of their day).
+// VALIDATE_TODAY fixes the day for the tests of this rule.
+const todayUtc = process.env.VALIDATE_TODAY || new Date().toISOString().slice(0, 10);
+if (DATE_RE.test(data.generated || '') && data.generated > todayUtc) errors.push(`top-level: generated (${data.generated}) is after today in UTC (${todayUtc}); write the dates of the dataset in UTC (date -u +%F)`);
 if (!Array.isArray(data.providers) || data.providers.length === 0)
   errors.push('top-level: providers must be a non-empty array');
 
