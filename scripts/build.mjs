@@ -1208,6 +1208,8 @@ const changesMain =
   `</section>` +
   `<p class="prov-back"><a href="../updates">← All updates</a></p>` +
   `</div></main>`;
+rmSync(join(ROOT, 'site/changes'), { recursive: true, force: true });
+mkdirSync(join(ROOT, 'site/changes'), { recursive: true });
 writeFileSync(join(ROOT, 'site/changes/index.html'), htmlPage({
   title: 'What changed · Free LLM API Hub',
   desc: 'What changed in the free LLM API dataset: field-level changes week by week (free tier, rate limits, the catch and access flags, before and after) and a state report for each month.',
