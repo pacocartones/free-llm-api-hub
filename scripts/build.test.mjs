@@ -357,8 +357,10 @@ test('the interaction layer is CSS only and respects prefers-reduced-motion and 
   assert.match(reduce[0], /transition: none !important/);
   assert.match(reduce[0], /animation: none !important/);
   assert.match(reduce[0], /scroll-behavior: auto/);
-  // the draw-in underline of text links only where there is a hover, so it does not stick on touch screens
-  assert.match(css, /@media \(hover: hover\) \{\s*\.prose p a, \.prose li a, \.lede a \{[^}]*\}[^@]*\.prose p a:hover/);
+  // the underline of text links thickens only where there is a hover; links that are underlined at rest keep their underline
+  assert.match(css, /@media \(hover: hover\) \{[^@]*transition: text-decoration-thickness var\(--t-base\) var\(--ease\)[^@]*text-decoration-thickness: 2px/);
+  const hoverBlock = css.slice(css.indexOf('@media (hover: hover) {\n  /* These links'), css.indexOf('.chip:active'));
+  assert.doesNotMatch(hoverBlock, /text-decoration: none|background:/, 'the hover effect never removes the underline');
   // the page-change fade and the target highlight are a layer that is off with reduced motion
   assert.match(css, /@media \(prefers-reduced-motion: no-preference\) \{[^@]*@keyframes target-flash[\s\S]*?@view-transition \{ navigation: auto; \}/);
   // only movement properties and colours: no property that moves the layout inside the new layer

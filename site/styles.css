@@ -522,11 +522,11 @@ pre:hover .pre-copy, .pre-copy:focus-visible { opacity: 1; }
    CSS only, no script. Movement is a layer: with prefers-reduced-motion every state change stays (colour, outline)
    and every movement goes. Hover effects only where there is a hover; on touch the :active state answers. */
 @media (hover: hover) {
-  .prose p a, .prose li a, .lede a {
-    background: linear-gradient(currentColor, currentColor) 0 100% / 0 1px no-repeat;
-    transition: background-size var(--t-base) var(--ease);
+  /* These links are already underlined at rest: the underline stays and only its thickness moves, so nothing flickers. */
+  main p a:not([class]), main li a:not([class]), .prose p a, .prov-summary p a, p.muted a {
+    transition: text-decoration-thickness var(--t-base) var(--ease);
   }
-  .prose p a:hover, .prose li a:hover, .lede a:hover { background-size: 100% 1px; text-decoration: none; }
+  main p a:not([class]):hover, main li a:not([class]):hover, .prose p a:hover, .prov-summary p a:hover, p.muted a:hover { text-decoration-thickness: 2px; }
 }
 .chip:active, .colls a:active, .presets button:active, .coll-card:active { transform: scale(.98); }
 @media (prefers-reduced-motion: no-preference) {
