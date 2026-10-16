@@ -517,7 +517,7 @@ test('/best shows the podium of three and the methodology page states the rules'
   assert.equal((best.match(/<li class="best-item/g) || []).length, top.length, 'one card per provider of the top');
   for (const e of top) assert.ok(best.includes(`href="../p/${e.p.slug}"`), `${e.p.slug} is on /best`);
   const method = readFileSync(join(ROOT, 'site/best/methodology/index.html'), 'utf8');
-  assert.match(method, /Being a partner scores nothing/);
+  assert.match(method, /Money scores nothing/);
   assert.match(method, /editorial rating/);
   assert.match(method, /30/);
   assert.match(method, /internal rubric behind those ratings is not published/);
@@ -1334,7 +1334,7 @@ test('footer columns: where each link lives, and no GitHub star entry in Project
   const expected = {
     Explore: ['#explorer', 'models/', 'guides-and-collections/', 'programs/startups', 'programs/research', 'free-gpu/', 'coding-tools/'],
     Data: ['providers.json', 'api/', 'llms.txt', 'data-policy/', 'coverage/'],
-    Project: ['updates', 'changes/', 'state/', 'docs/methodology.md', 'CONTRIBUTING.md'],
+    Project: ['updates', 'changes/', 'state/', 'docs/methodology.md', 'CONTRIBUTING.md', 'agreements/'],
   };
   for (const rel of ['site/index.html', 'site/compare/index.html', 'site/p/groq.html', 'site/legal/privacy.html']) {
     const html = readFileSync(join(ROOT, rel), 'utf8');

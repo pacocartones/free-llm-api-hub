@@ -54,7 +54,7 @@ Each object of `providers`:
 | `top_rank` | integer or null | its place in the top, or `null` |
 | `tier_near_threshold` | boolean | true when the model-quality tier is near a threshold and could change at the next snapshot; the score keeps it as it is |
 
-A provider with few confirmed inputs still appears, with a low `confirmed`: missing information scores zero or neutral and is never estimated. A provider that is not verified, or is past the freshness window, is not listed. Being a partner is not a field here: the score never reads it.
+A provider with few confirmed inputs still appears, with a low `confirmed`: missing information scores zero or neutral and is never estimated. A provider that is not verified, or is past the freshness window, is not listed. Nothing paid is in these files: the agreements are a file apart, `data/sponsorships.json`, which is not published under `/api/v1/`.
 
 ```json
 {

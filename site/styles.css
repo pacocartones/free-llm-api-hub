@@ -357,6 +357,11 @@ pre:hover .pre-copy, .pre-copy:focus-visible { opacity: 1; }
 .best-head h2 { margin: 0; font-size: 1.08rem; font-family: var(--font-mono); }
 .best-head h2 a { color: var(--text); }
 .best-head h2 a:hover { color: var(--accent); }
+/* Sponsored blocks and disclosures (data/sponsorships.json): the label is text, the size of the text around it. */
+.sponsored { border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; margin: 16px 0; line-height: 1.6; }
+.sponsored p { margin: 0 0 8px; }
+.sponsored-label { color: var(--text); }
+.sponsored-foot, .disclosure { color: var(--muted); font-size: .9rem; }
 .best-tag {
   font-size: .7rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
   color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent);
@@ -368,7 +373,7 @@ pre:hover .pre-copy, .pre-copy:focus-visible { opacity: 1; }
 .best-note { margin-top: 18px; line-height: 1.6; }
 .best-section { font-size: 1rem; margin: 26px 0 12px; color: var(--muted); font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
 .best-score { font-family: var(--font-mono); font-weight: 700; font-size: .85rem; color: var(--accent); margin-left: auto; }
-.best-editorial, .best-partner { margin: 0 0 8px; color: var(--muted); line-height: 1.55; font-size: .9rem; }
+.best-editorial { margin: 0 0 8px; color: var(--muted); line-height: 1.55; font-size: .9rem; }
 .best-podium { border-color: color-mix(in srgb, var(--accent) 45%, var(--border)); }
 .best-podium-1 { background: color-mix(in srgb, var(--accent) 7%, var(--panel)); }
 .best-weights { border-collapse: collapse; margin: 0 0 18px; }

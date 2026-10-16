@@ -11,7 +11,8 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join, resolve } from 'node:path';
 import Ajv2020 from 'ajv/dist/2020.js';
 import addFormats from 'ajv-formats';
-import { bestPickErrors, topEntries, partnerErrors } from './lib/best.mjs';
+import { bestPickErrors } from './lib/best.mjs';
+import { agreementsErrors } from './lib/agreements.mjs';
 import { providerFigures, figureErrors } from './lib/figures.mjs';
 import { tierForRating, nearBoundary, MODEL_TIER_MIN_VOTES } from './lib/model-tier.mjs';
 import { editorialErrors } from './lib/score.mjs';
@@ -340,15 +341,12 @@ try {
   errors.push(...editorialErrors(JSON.parse(readFileSync(join(ROOT, 'data/editorial.json'), 'utf8')), data.providers));
 } catch (e) { errors.push('editorial.json: ' + e.message); }
 
-// ---------- partners (a partner may only show on the /best podium) ----------
-for (const p of data.providers ?? []) {
-  if (p.partner === true && !(typeof p.partner_note === 'string' && p.partner_note.trim())) errors.push(`${p.slug}: a partner needs a partner_note, the public note shown on the podium`);
-}
+// ---------- nothing paid in the dataset ----------
+// The `partner` field is retired: the schema allows no extra property on a provider, so it fails there. Relations with
+// money live in data/sponsorships.json, never in a provider's record.
 try {
-  const editorial = JSON.parse(readFileSync(join(ROOT, 'data/editorial.json'), 'utf8'));
-  const probeReport = JSON.parse(readFileSync(join(ROOT, 'data/probe-report.json'), 'utf8'));
-  errors.push(...partnerErrors(topEntries(data.providers ?? [], { editorial, probeReport, now: new Date(data.generated + 'T12:00:00Z') })));
-} catch (e) { errors.push('top 10 partner check: ' + e.message); }
+  errors.push(...agreementsErrors(JSON.parse(readFileSync(join(ROOT, 'data/sponsorships.json'), 'utf8')), { slugs: (data.providers ?? []).map((p) => p.slug), generated: data.generated }));
+} catch (e) { errors.push('sponsorships.json: ' + e.message); }
 
 if (errors.length) {
   console.error(`✗ validation failed (${errors.length} issue${errors.length > 1 ? 's' : ''}):`);

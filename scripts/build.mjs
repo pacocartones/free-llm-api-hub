@@ -18,7 +18,8 @@ import { mineHistoryAndSnapshots, HISTORY_FIELDS } from './lib/history.mjs';
 import { flattenFieldChanges, groupChangesByWeek, changesRss, weekTitle, formatValue, reportChangeUrl } from './lib/changes.mjs';
 import { monthlyReport, reportMonths, monthEndDate } from './lib/state.mjs';
 import { githubProfileUrl } from './lib/contributors.mjs';
-import { resolveBestEntries, topEntries, partnerErrors, PODIUM_SIZE } from './lib/best.mjs';
+import { resolveBestEntries, topEntries, PODIUM_SIZE } from './lib/best.mjs';
+import { agreementsTableHtml, sponsoredBlockHtml, disclosureHtml, inForce, NOT_IN_DATA_SENTENCE, MACHINE_SENTENCE } from './lib/agreements.mjs';
 import { coverage, coverageMainHtml } from './lib/coverage.mjs';
 import { freeGpuMainHtml } from './lib/free-gpu.mjs';
 import { labelTables } from './lib/tables.mjs';
@@ -91,8 +92,7 @@ function bestTable(entries) {
     .map((e) => {
       const { p } = e;
       const label = p.docs_url ? `**[${esc(p.name)}](${p.docs_url})**` : `**${esc(p.name)}**`;
-      const partner = e.podium && p.partner === true ? `<br><sub>🤝 Partner: ${esc(p.partner_note)}</sub>` : '';
-      return `| ${e.rank} | ${label}${partner}${flags(p)} | ${e.total.toFixed(1)}<br><sub>${e.confirmed} of ${e.of} inputs</sub> | ${esc(p.free_tier)} | ${esc(p.notes)} | ${verifiedCell(p)} |`;
+      return `| ${e.rank} | ${label}${flags(p)} | ${e.total.toFixed(1)}<br><sub>${e.confirmed} of ${e.of} inputs</sub> | ${esc(p.free_tier)} | ${esc(p.notes)} | ${verifiedCell(p)} |`;
     })
     .join('\n');
   return `${head}\n${body}`;
@@ -457,7 +457,7 @@ const siteFooter = (p) => `<footer class="site-footer"><div class="wrap footer-t
 <div class="footer-brand"><a class="foot-brand-link" href="${p}" aria-label="Free LLM API Hub — home"><svg class="logo-mark"><use href="#logo"/></svg><span class="brand-name">Free LLM API <span class="grad">Hub</span></span></a><p>The <strong>continuously-verified</strong>, <strong>machine-readable</strong> dataset of <strong>free LLM &amp; AI-model APIs</strong> and <strong>trial credits</strong> — every entry <strong>dated</strong>, <strong>sourced</strong>, and <strong>free of dead links</strong>.</p><img class="trust-badge" src="${p}badge-verified.svg" alt="Verified providers" width="${BADGE_W}" height="20" loading="lazy"><a class="star-btn" href="${REPO}" target="_blank" rel="noopener"><span class="sb-label">${GH_ICON} Star on GitHub</span><span class="sb-count" data-stars>★</span></a></div>
 <div class="footer-col"><h2 class="footer-h">Explore</h2><a href="${p}#explorer">Interactive explorer</a><a href="${p}models/">Free model index</a><a href="${p}guides-and-collections/">Guides &amp; collections</a><a href="${p}programs/startups">Startup credits</a><a href="${p}programs/research">Student &amp; research credits</a><a href="${p}free-gpu/">Free GPU compute</a><a href="${p}coding-tools/">Free AI coding tools</a></div>
 <div class="footer-col"><h2 class="footer-h">Data</h2><a href="${p}providers.json">providers.json</a><a href="${p}api/">JSON API</a><a href="${p}llms.txt">llms.txt</a><a href="${p}data-policy/">Who trains on your data</a><a href="${p}coverage/">Data coverage</a></div>
-<div class="footer-col"><h2 class="footer-h">Project</h2><a href="${p}updates">Updates</a><a href="${p}changes/">What changed</a><a href="${p}state/">Monthly state report</a><a href="${REPO}/blob/main/docs/methodology.md">Methodology</a><a href="${REPO}/blob/main/CONTRIBUTING.md">Contributing</a></div>
+<div class="footer-col"><h2 class="footer-h">Project</h2><a href="${p}updates">Updates</a><a href="${p}changes/">What changed</a><a href="${p}state/">Monthly state report</a><a href="${REPO}/blob/main/docs/methodology.md">Methodology</a><a href="${REPO}/blob/main/CONTRIBUTING.md">Contributing</a><a href="${p}agreements/">Agreements</a></div>
 </div><div class="wrap footer-bottom"><p>Independent, community-maintained — not affiliated with any provider listed. Terms change without notice; always confirm against each provider's own docs. MIT licensed.</p><p class="foot-legal"><a href="${p}legal/privacy">Privacy</a> · <a href="${p}legal/terms">Terms</a></p><p class="foot-email"><a href="mailto:admin@freellmapihub.com">admin@freellmapihub.com</a></p></div></footer>`;
 
 // Full page wrapper for generated (collection) pages. `p` is the path prefix to the site root.
@@ -593,13 +593,11 @@ BEST.intro = expandFigures(BEST.intro, FIGS);
 const bestEntries = resolveBestEntries(BEST, providers);
 // The /best top 10, the README table and /api/v1/best.json come from the score (lib/score.mjs), computed
 // from the data on every build at the dataset's own date, so the output is reproducible. It is never padded.
+// data/sponsorships.json: read by /agreements/ and the provider-page disclosure only (see lib/agreements.mjs).
+const AGREEMENTS_FILE = JSON.parse(readFileSync(join(ROOT, 'data/sponsorships.json'), 'utf8'));
 const EDITORIAL = JSON.parse(readFileSync(join(ROOT, 'data/editorial.json'), 'utf8'));
 const PROBE_REPORT = JSON.parse(readFileSync(join(ROOT, 'data/probe-report.json'), 'utf8'));
 const topList = topEntries(providers, { editorial: EDITORIAL, probeReport: PROBE_REPORT, now: new Date(data.generated + 'T12:00:00Z') });
-{
-  const bad = partnerErrors(topList);
-  if (bad.length) throw new Error(bad.join('\n'));
-}
 // The score of every eligible provider, for the /compare/ tables (static pages and the browser view).
 const rankedAll = rankProviders(providers, { editorial: EDITORIAL, probeReport: PROBE_REPORT, now: new Date(data.generated + 'T12:00:00Z'), minConfirmed: 0 });
 const scoreMap = Object.fromEntries(rankedAll
@@ -989,6 +987,7 @@ print(resp.choices[0].message.content)</code></pre><p class="muted">…or with c
     glanceHtml(p, typeLabel(p)) +
     modelsHtml(p) +
     dataPolicyHtml(p) +
+    disclosureHtml(AGREEMENTS_FILE, p.slug) +
     quick +
     (crossChips ? `<h2>Appears in</h2><div class="colls">${crossChips}</div>` : '') +
     compareHtml +
@@ -1627,15 +1626,11 @@ const bestCard = (e) => {
     ? '<span class="v ok">' + IC('ic-check') + ' verified ' + htmlEsc(p.last_verified) + '</span>'
     : '<span class="v warn">' + IC('ic-warn') + ' unverified</span>';
   const note = EDITORIAL.ratings?.[p.slug]?.note;
-  const partner = podium && p.partner === true
-    ? '<p class="best-partner"><span class="best-tag">Partner</span> ' + htmlEsc(p.partner_note) + ' Being a partner adds nothing to the score.</p>'
-    : '';
   return '<li class="best-item' + (podium ? ' best-podium best-podium-' + rank : '') + '"><div class="best-rank" aria-hidden="true">' + String(rank).padStart(2, '0') + '</div><div class="best-body">' +
     '<div class="best-head"><h2><a href="../p/' + p.slug + '">' + htmlEsc(p.name) + '</a></h2>' +
     '<span class="best-score" title="Out of 100">' + scoreTxt(e.total) + ' / 100</span></div>' +
     '<p class="best-why">' + htmlEsc(p.free_tier) + '</p>' +
     (note ? '<p class="best-editorial">' + htmlEsc(note) + '</p>' : '') +
-    partner +
     '<p class="best-meta">' + ver + ' <span class="sep">·</span> ' + e.confirmed + ' of ' + e.of + ' inputs confirmed' +
     (e.boundary ? ' <span class="sep">·</span> model tier near a threshold' : '') +
     (p.best_for ? ' <span class="sep">·</span> ' + htmlEsc(p.best_for) : '') + '</p>' +
@@ -1697,7 +1692,7 @@ const methodMain =
   '<p>Seventy points are mathematical, from six inputs in the public dataset. Thirty points are an <strong>editorial rating</strong> per provider, shown in <a href="' + REPO + '/blob/main/data/editorial.json">data/editorial.json</a> with a public note whenever it moves more than ' + EDITORIAL_NOTE_THRESHOLD + ' points from the default of ' + EDITORIAL_DEFAULT + '. <strong>The internal rubric behind those ratings is not published.</strong></p>' +
   (editorialNeutral ? '<p class="best-neutral"><strong>Today the editorial part is neutral.</strong> Every provider carries the same ' + EDITORIAL_DEFAULT + ' of ' + EDITORIAL_WEIGHT + ' editorial points, so it moves no position: the order is decided by the ' + (100 - EDITORIAL_WEIGHT) + ' measurable points. It stays neutral until a public rubric exists.</p>' : '') +
   '<h2>What the rules guarantee</h2><ul>' +
-  '<li><strong>Being a partner scores nothing.</strong> The score never reads the partner flag. A partner can appear only on the podium (ranks 1 to ' + PODIUM_SIZE + '), marked with a visible “Partner” label and a public note; a partner ranked ' + (PODIUM_SIZE + 1) + ' or lower fails the build.</li>' +
+  '<li><strong>Money scores nothing.</strong> The score reads only the provider\'s own record in the dataset. Paid relationships are in a file apart, listed on <a href="../../agreements/">the agreements page</a>, and they never enter the dataset, the API files or the ranking.</li>' +
   '<li><strong>Missing information is not estimated.</strong> A figure the provider does not publish scores zero, or the middle for the two yes/no requirements. Each provider shows how many of the six inputs are confirmed.</li>' +
   '<li><strong>Minimum evidence.</strong> Only verified providers inside the freshness window that offer text models, and with at least ' + MIN_CONFIRMED + ' of the six inputs confirmed, can enter. The list holds up to ' + TOP_SIZE + ' and is never padded.</li>' +
   '<li><strong>The editorial part cannot outweigh the data.</strong> It can move a provider away from ' + EDITORIAL_DEFAULT + ' only by as much as its confirmed inputs allow.</li>' +
@@ -1758,6 +1753,27 @@ writeFileSync(
       '<section class="page-hero model-hero"><div class="wrap"><nav class="crumbs"><a href="../">Home</a> / Who trains on your data</nav>' +
       '<h1>Who trains on your data</h1><p class="lede">The provider\'s own sentence about training on prompts, where one is recorded, with its page and the day it was read.</p></div></section>' +
       dataPolicyMainHtml(dataPolicyRows(providers), { repo: REPO, generated: data.generated, prefix: '../', quotesCheck: quotesCheckHtml() }),
+    prefix: '../',
+  })
+);
+
+// ---------- /agreements/ — every paid relationship, with the labelled blocks (data/sponsorships.json) ----------
+// The file is read here and in the provider-page disclosure; never by the score, the API files, llms.txt or the structured data.
+const AGREEMENTS = AGREEMENTS_FILE;
+mkdirSync(join(ROOT, 'site/agreements'), { recursive: true });
+writeFileSync(
+  join(ROOT, 'site/agreements/index.html'),
+  htmlPage({
+    title: 'Agreements and sponsorship · Free LLM API Hub',
+    desc: 'Every paid relationship of Free LLM API Hub, with its dates and what each side gets. Paid content is outside the dataset, the API files and the ranking.',
+    canonical: SITE + '/agreements/',
+    main:
+      '<section class="page-hero model-hero"><div class="wrap"><nav class="crumbs"><a href="../">Home</a> / Agreements</nav>' +
+      '<h1>Agreements and sponsorship</h1><p class="lede">' + htmlEsc(NOT_IN_DATA_SENTENCE) + '</p></div></section>' +
+      '<main id="main"><div class="wrap prose">' + agreementsTableHtml(AGREEMENTS, data.generated) +
+      '<h2>Where paid items can and cannot appear</h2><p>' + htmlEsc(MACHINE_SENTENCE) + '</p>' +
+      inForce(AGREEMENTS, data.generated).map(sponsoredBlockHtml).join('') +
+      '</div></main>',
     prefix: '../',
   })
 );
@@ -1880,6 +1896,7 @@ const sitemapEntries = [
   [`${SITE}/best/methodology/`, data.generated],
   [`${SITE}/coverage/`, data.generated],
   [`${SITE}/data-policy/`, data.generated],
+  [`${SITE}/agreements/`, AGREEMENTS.generated],
   [`${SITE}/free-gpu/`, freeGpu.generated],
   [`${SITE}/coding-tools/`, codingTools.generated],
   [`${SITE}/api/`, data.generated],
