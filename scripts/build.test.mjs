@@ -1446,6 +1446,9 @@ test('the privacy page and SECURITY.md say what the star count really does: no G
   const privacy = readFileSync(join(ROOT, 'site/legal/privacy.html'), 'utf8');
   assert.match(privacy, /read from GitHub's public API by the process that builds the site/);
   assert.doesNotMatch(privacy, /fetched directly from GitHub/);
+  // the proxy in front of GitHub Pages sees the request: the page must say so (and keep saying there is no analytics and no cookie)
+  assert.match(privacy, /through Cloudflare \(Cloudflare, Inc\.\)/);
+  assert.match(privacy, /sets no cookies/);
   // the company name ends with its own full stop: no sentence may add a second one
   for (const page of ['site/legal/privacy.html', 'site/legal/terms.html']) assert.doesNotMatch(readFileSync(join(ROOT, page), 'utf8'), /Inc\.\./, `${page} has a double full stop after the company name`);
   for (const rel of ['site/site.js', 'site/explorer.js', 'site/widget.js']) {

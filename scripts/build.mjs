@@ -1070,7 +1070,7 @@ legalPage('privacy', 'Privacy', `
 <li><strong>The GitHub star count</strong> is read from GitHub's public API by the process that builds the site (at least once a day), not by your browser: no request about it is sent from your device.</li>
 </ul>
 <h2>Hosting</h2>
-<p>Pages, fonts and assets are delivered by GitHub Pages (GitHub, Inc.), which may process standard request metadata (such as your IP address) to serve content, per GitHub's privacy statement.</p>
+<p>Pages, fonts and assets are delivered by GitHub Pages (GitHub, Inc.) through Cloudflare (Cloudflare, Inc.), a content-delivery and security proxy that sits between your browser and GitHub Pages. Both may process standard request metadata (such as your IP address) to serve content, per GitHub's and Cloudflare's privacy statements. We do not use Cloudflare's analytics or any other analytics, and this site sets no cookies.</p>
 <h2>Contact</h2>
 <p>Questions about privacy? Email <a href="mailto:admin@freellmapihub.com">admin@freellmapihub.com</a>.</p>
 `);
