@@ -11,6 +11,10 @@ on:
       # derived-fingerprints.json lives at the repo root, outside the dirs above,
       # but a pin change means the build output shifted — redeploy and re-verify it.
       - 'derived-fingerprints.json'
+  # The star counter is read from the GitHub API at every deploy (see the refresh step below), so the site is
+  # deployed once a day even when nobody pushes: the number then never ages more than a day.
+  schedule:
+    - cron: '17 5 * * *'
   workflow_dispatch: {}
 
 # Allow one concurrent deployment; never cancel an in-progress one mid-publish.
@@ -34,6 +38,10 @@ jobs:
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: .nvmrc
+      - name: Refresh the star count (the committed number stays if GitHub does not answer)
+        run: node scripts/refresh-stars.mjs --keep-on-failure
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Build site payload (copies dataset + exports into site/)
         run: node scripts/build.mjs
       - uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
