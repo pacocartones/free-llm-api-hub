@@ -155,4 +155,11 @@ test('built with a paid row and a disclosure: the text is on the agreements page
   assert.doesNotMatch(page, /No agreement is in force/);
   // the structured data of the agreements page itself says nothing about the row either
   for (const m of page.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)) assert.doesNotMatch(m[1], /Zorbit|ZORBIT/);
+  // and the provider page, which does carry the disclosure in its text, keeps it out of its structured data
+  const providerFile = ['site/p/' + slug + '.html', 'site/p/' + slug + '/index.html'].find((f) => existsSync(join(ROOT, f)));
+  const providerPage = readFileSync(join(ROOT, providerFile), 'utf8');
+  assert.match(providerPage, /DISCLOSEDCO/, 'the provider page shows the disclosure');
+  const ld = [...providerPage.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)];
+  assert.ok(ld.length > 0, 'the provider page has structured data');
+  for (const m of ld) assert.doesNotMatch(m[1], /DISCLOSEDCO|Zorbit|ZORBIT/);
 });
