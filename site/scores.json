@@ -151,6 +151,12 @@
       "of": 6,
       "rank": null
     },
+    "rime": {
+      "total": 34.4,
+      "confirmed": 3,
+      "of": 6,
+      "rank": null
+    },
     "unreal-speech": {
       "total": 34.4,
       "confirmed": 3,
@@ -296,12 +302,6 @@
       "rank": null
     },
     "rev-ai": {
-      "total": 29.9,
-      "confirmed": 2,
-      "of": 6,
-      "rank": null
-    },
-    "rime": {
       "total": 29.9,
       "confirmed": 2,
       "of": 6,
