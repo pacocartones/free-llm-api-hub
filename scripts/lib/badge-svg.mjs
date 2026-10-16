@@ -42,12 +42,15 @@ export function badgeSvg({ label, message, color }) {
   const lx = lw / 2;
   const mx = lw + mw / 2;
   const title = `${label}: ${message}`;
+  // textLength pins each text to the width the layout was computed with, so a font that is wider or narrower than Verdana
+  // squeezes or spaces the letters instead of overflowing its half (what shields.io does).
+  const fit = (t) => ` textLength="${textWidth(t)}" lengthAdjust="spacing"`;
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" role="img" aria-label="${esc(title)}"><title>${esc(title)}</title>` +
     `<linearGradient id="s" x2="0" y2="100%"><stop offset="0" stop-color="#bbb" stop-opacity=".1"/><stop offset="1" stop-opacity=".1"/></linearGradient>` +
     `<clipPath id="r"><rect width="${width}" height="${height}" rx="3" fill="#fff"/></clipPath>` +
     `<g clip-path="url(#r)"><rect width="${lw}" height="${height}" fill="#555"/><rect x="${lw}" width="${mw}" height="${height}" fill="${fill}"/><rect width="${width}" height="${height}" fill="url(#s)"/></g>` +
     `<g fill="#fff" text-anchor="middle" font-family="Verdana,Geneva,DejaVu Sans,sans-serif" font-size="${FONT_PX}">` +
-    `<text x="${lx}" y="15" fill="#010101" fill-opacity=".3">${esc(label)}</text><text x="${lx}" y="14">${esc(label)}</text>` +
-    `<text x="${mx}" y="15" fill="#010101" fill-opacity=".3">${esc(message)}</text><text x="${mx}" y="14">${esc(message)}</text></g></svg>\n`;
+    `<text x="${lx}" y="15" fill="#010101" fill-opacity=".3"${fit(label)}>${esc(label)}</text><text x="${lx}" y="14"${fit(label)}>${esc(label)}</text>` +
+    `<text x="${mx}" y="15" fill="#010101" fill-opacity=".3"${fit(message)}>${esc(message)}</text><text x="${mx}" y="14"${fit(message)}>${esc(message)}</text></g></svg>\n`;
   return { svg, width, height };
 }

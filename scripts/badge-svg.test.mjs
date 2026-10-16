@@ -16,6 +16,9 @@ test('badgeSvg: label, message and colour are in the file, the sizes add up, and
   assert.match(a.svg, /<title>verified: 67\/68<\/title>/);
   assert.ok(a.svg.includes(`fill="${COLORS.brightgreen}"`));
   assert.equal(a.width, textWidth('verified') + 10 + textWidth('67/68') + 10);
+  // each text is pinned to the width the layout was computed with, shadow and text alike
+  assert.equal((a.svg.match(/ textLength="\d+" lengthAdjust="spacing"/g) || []).length, 4);
+  assert.ok(a.svg.includes(`textLength="${textWidth('verified')}"`) && a.svg.includes(`textLength="${textWidth('67/68')}"`));
   assert.ok(a.width > 50 && a.width < 120, `a badge this size is between 50 and 120 px wide (got ${a.width})`);
 });
 test('badgeSvg: text is escaped and an unknown colour name throws instead of shipping a wrong badge', () => {
@@ -40,4 +43,9 @@ test('the built site serves the verified badge itself: it matches the endpoint f
   }
   assert.deepEqual(offenders.slice(0, 5), [], 'no page may load an image from another origin: the privacy page says so');
   assert.match(readFileSync(join(ROOT, 'site/index.html'), 'utf8'), /<img class="trust-badge" src="badge-verified\.svg"/);
+  // every footer image carries the width of the badge, so the footer does not move when it arrives
+  const w = badgeSvg(json).width;
+  for (const rel of ['site/index.html', 'site/legal/privacy.html', 'site/best/index.html']) {
+    assert.match(readFileSync(join(ROOT, rel), 'utf8'), new RegExp(`<img class="trust-badge" src="[^"]*badge-verified\\.svg" alt="Verified providers" width="${w}" height="20"`), `${rel}: the badge image has width ${w}`);
+  }
 });
