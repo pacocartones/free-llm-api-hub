@@ -44,5 +44,5 @@ A change to `scripts/` is reviewed as code, not as data.
 ## Notes for users of the data
 
 - The dataset contains **only links to public provider documentation**. It never contains API keys, secrets, or credentials — and it never should. Do not submit any.
-- The interactive site is fully static; its only network calls are the inlined dataset (with a `raw.githubusercontent.com` fallback), the live GitHub star count (`site.js`, cached 6h), and the live verified-providers badge (`img.shields.io`, whose endpoint JSON is served from this site).
+- The interactive site is fully static; its only network calls are the inlined dataset (with a `raw.githubusercontent.com` fallback) and the live verified-providers badge (`img.shields.io`, whose endpoint JSON is served from this site). The GitHub star count is written into the pages when the site is built (the deploy reads it from the GitHub API), so the browser makes no GitHub API call for it.
 - The build scripts have **zero runtime dependencies**, which keeps the supply-chain surface minimal by design.

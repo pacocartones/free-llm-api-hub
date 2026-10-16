@@ -1053,7 +1053,7 @@ legalPage('privacy', 'Privacy', `
 <ul>
 <li><strong>Nothing on a server.</strong> The site is served as static files by GitHub Pages; there is no backend and no cookies are set.</li>
 <li><strong>Your theme choice</strong> (light/dark) is saved only in your browser's local storage and never leaves your device.</li>
-<li><strong>The GitHub star count</strong> is fetched directly from GitHub's public API when a page loads; that request is governed by GitHub's own privacy policy.</li>
+<li><strong>The GitHub star count</strong> is read from GitHub's public API by the process that builds the site (at least once a day), not by your browser: no request about it is sent from your device.</li>
 </ul>
 <h2>Hosting</h2>
 <p>Pages, fonts and assets are delivered by GitHub Pages (GitHub, Inc.), which may process standard request metadata (such as your IP address) to serve content, per GitHub's privacy statement.</p>

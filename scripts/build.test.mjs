@@ -1328,6 +1328,17 @@ test('header menu: only Models, Compare, API and The best; the other destination
   }
 });
 
+test('the privacy page and SECURITY.md say what the star count really does: no GitHub call from the browser', () => {
+  run(['scripts/build.mjs']);
+  const privacy = readFileSync(join(ROOT, 'site/legal/privacy.html'), 'utf8');
+  assert.match(privacy, /read from GitHub's public API by the process that builds the site/);
+  assert.doesNotMatch(privacy, /fetched directly from GitHub/);
+  for (const rel of ['site/site.js', 'site/explorer.js', 'site/widget.js']) {
+    assert.doesNotMatch(readFileSync(join(ROOT, rel), 'utf8'), /api\.github\.com/, `${rel} must not call the GitHub API: the privacy page says the browser makes no such request`);
+  }
+  assert.doesNotMatch(readFileSync(join(ROOT, 'SECURITY.md'), 'utf8'), /live GitHub star count/);
+});
+
 test('provider sections: honest empty states, numbers only with source and date, no filler', () => {
   const base = { slug: 'x', name: 'X', modalities: ['text'], free_type: 'perpetual', category: 'ongoing' };
   // flags read in words, and "not confirmed" is its own text, not a colour

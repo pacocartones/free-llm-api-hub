@@ -1,4 +1,4 @@
-/* Shared site behaviour: theme toggle, live GitHub star count, "/" to focus search.
+/* Shared site behaviour: theme toggle, "/" to focus search.
    Loaded on every page. Theme is also set inline in <head> to avoid a flash. */
 (function () {
   var root = document.documentElement;
