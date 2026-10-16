@@ -346,6 +346,28 @@ test('every generated page has the same centred header: crumbs, one title and, w
   assert.doesNotMatch(css, /\.model-hero/);
 });
 
+// ---------- subtle interaction (CSS only) ----------
+test('the interaction layer is CSS only and respects prefers-reduced-motion and touch', () => {
+  const css = readFileSync(join(ROOT, 'site/styles.css'), 'utf8');
+  for (const token of ['--t-fast', '--t-base', '--t-slow', '--ease']) assert.match(css, new RegExp(`${token}:`), `${token} is defined once`);
+  assert.equal((css.match(/--t-fast:/g) || []).length, 1, 'the tokens are defined once');
+  // with reduced motion every movement goes: transitions, animations and smooth scrolling
+  const reduce = css.match(/@media \(prefers-reduced-motion: reduce\) \{[^\n]*\}/);
+  assert.ok(reduce, 'a reduced-motion block exists');
+  assert.match(reduce[0], /transition: none !important/);
+  assert.match(reduce[0], /animation: none !important/);
+  assert.match(reduce[0], /scroll-behavior: auto/);
+  // the draw-in underline of text links only where there is a hover, so it does not stick on touch screens
+  assert.match(css, /@media \(hover: hover\) \{\s*\.prose p a, \.prose li a, \.lede a \{[^}]*\}[^@]*\.prose p a:hover/);
+  // the page-change fade and the target highlight are a layer that is off with reduced motion
+  assert.match(css, /@media \(prefers-reduced-motion: no-preference\) \{[^@]*@keyframes target-flash[\s\S]*?@view-transition \{ navigation: auto; \}/);
+  // only movement properties and colours: no property that moves the layout inside the new layer
+  const layer = css.slice(css.indexOf('/* ---------- subtle interaction'), css.indexOf('/* ---------- responsive ---------- */'));
+  assert.doesNotMatch(layer, /\b(width|height|margin|padding|top|left)\s*:/, 'the layer moves nothing that changes the layout');
+  // and no script: the layer adds none
+  for (const js of ['site/site.js', 'site/explorer.js', 'site/widget.js']) assert.doesNotMatch(readFileSync(join(ROOT, js), 'utf8'), /view-transition|target-flash/);
+});
+
 test('sitemap.xml lists no paginated updates pages (their count follows the commit count)', () => {
   const sitemap = readFileSync(join(ROOT, 'site/sitemap.xml'), 'utf8');
   assert.match(sitemap, /<loc>https:\/\/freellmapihub\.com\/updates<\/loc>/);

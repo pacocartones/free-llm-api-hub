@@ -14,6 +14,7 @@
 
 /* ---------- tokens ---------- */
 :root {
+  --t-fast: 120ms; --t-base: 200ms; --t-slow: 320ms; --ease: cubic-bezier(.2, .8, .2, 1);
   --bg: #0a0d0b;
   --bg-elev: #0c100e;
   --panel: #0f1512;
@@ -517,6 +518,24 @@ pre:hover .pre-copy, .pre-copy:focus-visible { opacity: 1; }
 .meta-row { transition: background .12s ease; }
 .meta-row:hover { background: color-mix(in srgb, var(--accent) 6%, var(--panel)); }
 
+/* ---------- subtle interaction (guide of agent:social, item 9) ----------
+   CSS only, no script. Movement is a layer: with prefers-reduced-motion every state change stays (colour, outline)
+   and every movement goes. Hover effects only where there is a hover; on touch the :active state answers. */
+@media (hover: hover) {
+  .prose p a, .prose li a, .lede a {
+    background: linear-gradient(currentColor, currentColor) 0 100% / 0 1px no-repeat;
+    transition: background-size var(--t-base) var(--ease);
+  }
+  .prose p a:hover, .prose li a:hover, .lede a:hover { background-size: 100% 1px; text-decoration: none; }
+}
+.chip:active, .colls a:active, .presets button:active, .coll-card:active { transform: scale(.98); }
+@media (prefers-reduced-motion: no-preference) {
+  .prose :target, main :target { animation: target-flash 1s var(--ease); }
+  @keyframes target-flash { from { background: color-mix(in srgb, var(--accent) 16%, transparent); } to { background: transparent; } }
+  @view-transition { navigation: auto; }
+  ::view-transition-old(root), ::view-transition-new(root) { animation-duration: 150ms; }
+}
+
 /* ---------- responsive ---------- */
 @media (max-width: 860px) { .footer-top { grid-template-columns: 1fr 1fr; } }
 @media (max-width: 900px) {
@@ -548,7 +567,7 @@ pre:hover .pre-copy, .pre-copy:focus-visible { opacity: 1; }
   #table td.notes::before, #table td:nth-child(3)::before { display: block; margin-bottom: 3px; }
 }
 @media (max-width: 640px) { .stats { grid-template-columns: repeat(2, 1fr); } .footer-top { grid-template-columns: 1fr; } .notes { max-width: none; } }
-@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto; transition: none !important; } .caret { animation: none; } }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto; transition: none !important; animation: none !important; } }
 
 /* Links inside running text must not rely on colour alone. */
 p.muted a, .prose p a, .prov-summary p a { text-decoration: underline; text-underline-offset: 2px; }
