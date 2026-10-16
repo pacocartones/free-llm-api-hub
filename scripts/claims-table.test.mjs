@@ -31,9 +31,9 @@ test('claimsTableHtml: one row per service, every cell says Stated or Not stated
     assert.ok(row, `${e.slug} has a row that links to #${e.slug}`);
     assert.equal(row[1], ['a', 'b', 'c'].filter((f) => e.claims[f].state === 'stated').join(' '), 'the stated points, recomputed');
   }
-  const body = html.slice(html.indexOf('<tbody>'));   // the cells, not the sentence that explains them
+  const body = html.slice(html.indexOf('<tbody>'), html.indexOf('</tbody>'));   // the cells, not the sentences around them
   assert.equal((body.match(/>Stated</g) || []).length, 4);
-  assert.equal((body.match(/>Not stated</g) || []).length, 5);
+  assert.equal((body.match(/>Not stated</g) || []).length, 2);
   // a Stated cell links to its sentence; a Not stated cell links to nothing
   assert.match(body, /<td class="s"><a href="#one-a">Stated<\/a><\/td>/);
   assert.ok(!/<td class="n"><a/.test(body), 'Not stated has nothing to link to');
