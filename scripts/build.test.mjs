@@ -317,6 +317,35 @@ test('every page nests the footer columns inside .wrap.footer-top', () => {
   }
 });
 
+// ---------- one standard page header ----------
+test('every generated page has the same centred header: crumbs, one title and, when there is one, the lede', () => {
+  run(['scripts/build.mjs']);
+  const walk = (dir) => readdirSync(dir).flatMap((n) => {
+    const f = join(dir, n);
+    return statSync(f).isDirectory() ? (n === 'node_modules' ? [] : walk(f)) : (f.endsWith('.html') ? [f] : []);
+  });
+  // The home page has its own hero (hand-written), 404 is a hand-written page, and two index files are redirect stubs.
+  const exceptions = new Set(['index.html', '404.html', 'collections/index.html', 'guides/index.html']);
+  let checked = 0;
+  for (const file of walk(join(ROOT, 'site'))) {
+    const rel = relative(join(ROOT, 'site'), file);
+    if (exceptions.has(rel) || rel.startsWith('og')) continue;
+    const html = readFileSync(file, 'utf8');
+    const heroes = html.match(/<section class="page-hero[^"]*">/g) || [];
+    assert.equal(heroes.length, 1, `${rel}: one page header`);
+    assert.match(heroes[0], /class="page-hero (?:model-hero|prov-hero)"/, `${rel}: the header is the centred one, not the old left-aligned variant`);
+    const hero = html.slice(html.indexOf(heroes[0]), html.indexOf('</section>', html.indexOf(heroes[0])));
+    assert.equal((hero.match(/<nav class="crumbs">/g) || []).length, 1, `${rel}: breadcrumbs`);
+    assert.equal((hero.match(/<h1>/g) || []).length, 1, `${rel}: one title`);
+    checked += 1;
+  }
+  assert.ok(checked > 100, `the check covered ${checked} pages`);
+  // and the style centres it by default, so a new page cannot come out left-aligned by forgetting a class
+  const css = readFileSync(join(ROOT, 'site/styles.css'), 'utf8');
+  assert.match(css, /\.page-hero \.crumbs, \.page-hero h1 \{ text-align: center; \}/);
+  assert.doesNotMatch(css, /\.model-hero/);
+});
+
 test('sitemap.xml lists no paginated updates pages (their count follows the commit count)', () => {
   const sitemap = readFileSync(join(ROOT, 'site/sitemap.xml'), 'utf8');
   assert.match(sitemap, /<loc>https:\/\/freellmapihub\.com\/updates<\/loc>/);

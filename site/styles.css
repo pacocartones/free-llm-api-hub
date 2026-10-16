@@ -308,8 +308,10 @@ table.sortable thead th:not(.sorted)::after { content: " ⇅"; opacity: .28; fon
 .crumbs { font-size: .84rem; margin-bottom: 12px; font-family: var(--font-mono); }
 .crumbs a { color: var(--muted); }
 .crumbs::before { content: "> "; color: var(--accent); }
-.page-hero h1 { text-align: left; margin: 0 0 10px; font-size: clamp(1.6rem, 3.4vw, 2.2rem); max-width: none; }
-.page-hero .lede { text-align: left; margin: 0; }
+/* One standard header for every generated page (pageHero() in scripts/build.mjs): breadcrumbs, title and subtitle are centred. */
+.page-hero .crumbs, .page-hero h1 { text-align: center; }
+.page-hero h1 { margin: 0 0 10px; font-size: clamp(1.6rem, 3.4vw, 2.2rem); max-width: none; }
+.page-hero .lede { text-align: center; margin: 10px auto 0; max-width: 62ch; }
 .colls { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
 .colls a { font-size: .82rem; padding: 6px 12px; border: 1px solid var(--border); border-radius: 7px; background: var(--panel); color: var(--muted); font-family: var(--font-mono); }
 .colls a:hover { border-color: var(--accent); color: var(--accent); text-decoration: none; }
@@ -418,8 +420,6 @@ pre:hover .pre-copy, .pre-copy:focus-visible { opacity: 1; }
 .prov-hero h1 { max-width: none; }
 .prov-hero .prov-badges, .prov-hero .prov-actions { justify-content: center; }
 .prov-hero .lede { text-align: center; margin: 10px auto 0; max-width: 62ch; }
-.model-hero .crumbs, .model-hero h1 { text-align: center; }
-.model-hero .lede { text-align: center; margin: 10px auto 0; max-width: 62ch; }
 .btn.website { background: transparent; color: var(--green); border-color: color-mix(in srgb, var(--green) 50%, var(--border)); }
 .btn.website:hover { color: var(--green); border-color: var(--green); background: color-mix(in srgb, var(--green) 12%, transparent); }
 .prov-meta { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin: 20px 0; }

@@ -444,6 +444,12 @@ const SPRITE = `<svg width="0" height="0" style="position:absolute" aria-hidden=
 </defs></svg>`;
 const IC = (id) => `<svg class="i" aria-hidden="true"><use href="#${id}"/></svg>`;
 
+// The page header that every generated page shares: breadcrumbs, title, an optional subtitle (the lede) and optional
+// extra markup, centred by the model-hero class. The provider page passes cls 'prov-hero' and puts its badges after
+// the title and its buttons in extra. The home page (hand-written) has its own hero.
+const pageHero = ({ crumbs, h1, lede = '', afterTitle = '', extra = '', cls = 'model-hero' }) =>
+  `<section class="page-hero ${cls}"><div class="wrap"><nav class="crumbs">${crumbs}</nav><h1>${h1}</h1>${afterTitle}${lede ? `<p class="lede">${lede}</p>` : ''}${extra}</div></section>`;
+
 const siteHeader = (p) => `<header class="site-header"><div class="wrap header-inner">
 <a class="brand" href="${p}" aria-label="Free LLM API Hub — home"><svg class="logo-mark"><use href="#logo"/></svg><span class="brand-name">Free LLM API <span class="grad">Hub</span></span></a>
 <nav class="nav" id="primary-nav" aria-label="Primary"><a href="${p}guides-and-collections/">${IC('ic-book')}Guides &amp; Collections</a><a href="${p}compare/">${IC('ic-grid')}Compare</a><a class="nav-best" href="${p}best/" title="The top 10 by score, recomputed from the data at every build">${IC('ic-spark')}The Best</a></nav>
@@ -798,10 +804,7 @@ for (const c of COLLECTIONS) {
   });
   const introHtml = htmlEsc(c.intro).replace(/`([^`]+)`/g, '<code>$1</code>').replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
   const main =
-    `<section class="page-hero"><div class="wrap">` +
-    `<nav class="crumbs"><a href="../">Home</a> / <a href="../guides-and-collections/">Guides &amp; Collections</a> / ${htmlEsc(c.title)}</nav>` +
-    `<h1>${htmlEsc(c.h1)}</h1><p class="lede">${htmlEsc(c.desc)}</p>` +
-    `<nav class="colls">${nav}</nav></div></section>` +
+    pageHero({ crumbs: `<a href="../">Home</a> / <a href="../guides-and-collections/">Guides &amp; Collections</a> / ${htmlEsc(c.title)}`, h1: `${htmlEsc(c.h1)}`, lede: `${htmlEsc(c.desc)}`, extra: `<nav class="colls">${nav}</nav>` }) +
     `<main id="main"><div class="wrap prose">` +
     `<p>${introHtml}</p>` +
     `<p class="count"><strong>${rows.length} of ${total}</strong> tracked providers match.</p>` +
@@ -844,10 +847,7 @@ const guidesCards = GUIDES.map((g) =>
   `<a class="coll-card" href="../guides/${g.slug}"><div class="coll-card-head"><strong>${htmlEsc(g.card)}</strong><span class="count">${providers.filter(g.filter).length}</span></div><p>${htmlEsc(g.blurb)}</p></a>`
 ).join('');
 const hubMain =
-  `<section class="page-hero"><div class="wrap">` +
-  `<nav class="crumbs"><a href="../">Home</a> / Guides &amp; Collections</nav>` +
-  `<h1>Guides &amp; Collections</h1><p class="lede">Short, data-backed answers to the most common “is there a free API for…” questions, plus curated slices of the dataset by a single constraint — every card generated from the verified dataset so it stays current.</p>` +
-  `</div></section>` +
+  pageHero({ crumbs: `<a href="../">Home</a> / Guides &amp; Collections`, h1: `Guides &amp; Collections`, lede: `Short, data-backed answers to the most common “is there a free API for…” questions, plus curated slices of the dataset by a single constraint — every card generated from the verified dataset so it stays current.` }) +
   `<main id="main"><div class="wrap">` +
   `<p class="eyebrow">Guides</p><div class="coll-grid">${guidesCards}</div>` +
   `<p class="eyebrow" style="margin-top:26px">Collections</p><div class="coll-grid">${hubCards}</div>` +
@@ -974,13 +974,14 @@ print(resp.choices[0].message.content)</code></pre><p class="muted">…or with c
     ...inGuides.map((g) => `<a href="../guides/${g.slug}">${htmlEsc(g.card)}</a>`),
   ].join('');
   const main =
-    `<section class="page-hero prov-hero"><div class="wrap">` +
-    `<nav class="crumbs"><a href="../">Home</a> / <a href="../#explorer">Providers</a> / ${htmlEsc(p.name)}</nav>` +
-    `<h1>${htmlEsc(p.name)}</h1>` +
-    `<div class="prov-badges"><span class="type">${typeLabel(p)}</span> ${verifiedLine}${probedLine} ${provFlagsHtml(p)}</div>` +
-    (p.best_for ? `<p class="lede">${htmlEsc(p.best_for)}</p>` : '') +
-    `<div class="prov-actions">${docsBtn}${websiteBtn}${reportBtn}</div>` +
-    `</div></section>` +
+    pageHero({
+      cls: 'prov-hero',
+      crumbs: `<a href="../">Home</a> / <a href="../#explorer">Providers</a> / ${htmlEsc(p.name)}`,
+      h1: htmlEsc(p.name),
+      afterTitle: `<div class="prov-badges"><span class="type">${typeLabel(p)}</span> ${verifiedLine}${probedLine} ${provFlagsHtml(p)}</div>`,
+      lede: p.best_for ? htmlEsc(p.best_for) : '',
+      extra: `<div class="prov-actions">${docsBtn}${websiteBtn}${reportBtn}</div>`,
+    }) +
     `<main id="main"><div class="wrap prose prov-prose">` +
     summary +
     limitsHtml(p) +
@@ -1036,10 +1037,7 @@ const ORG = 'Tweakeo, Inc.';
 const ADDRESS = 'Tweakeo, Inc., 2093 Philadelphia Pike, Suite #4108, Claymont, DE 19703';
 const legalPage = (slug, title, bodyHtml) => {
   const main =
-    `<section class="page-hero"><div class="wrap">` +
-    `<nav class="crumbs"><a href="../">Home</a> / ${htmlEsc(title)}</nav>` +
-    `<h1>${htmlEsc(title)}</h1>` +
-    `</div></section>` +
+    pageHero({ crumbs: `<a href="../">Home</a> / ${htmlEsc(title)}`, h1: `${htmlEsc(title)}` }) +
     `<main id="main"><div class="wrap prose legal">${bodyHtml}` +
     `<p class="legal-org">${ADDRESS} · <a href="mailto:admin@freellmapihub.com">admin@freellmapihub.com</a></p>` +
     `</div></main>`;
@@ -1101,8 +1099,7 @@ if (commits.length) {
       .map((c) => `<li class="upd"><span class="upd-date">${c.date}</span> <a href="${REPO}/commit/${c.hash}" target="_blank" rel="noopener">${htmlEsc(c.subject)}</a></li>`)
       .join('\n');
     const updMain =
-      `<section class="page-hero model-hero"><div class="wrap"><nav class="crumbs"><a href="${prefix}">Home</a> / Updates</nav>` +
-      `<h1>Updates</h1><p class="lede">Every published change to the dataset and site, newest first. Subscribe via <a href="${prefix}feed.xml">RSS</a>. For field-level changes to the providers themselves, week by week, see <a href="${prefix}changes/">what changed this week</a>.</p></div></section>` +
+      pageHero({ crumbs: `<a href="${prefix}">Home</a> / Updates`, h1: `Updates`, lede: `Every published change to the dataset and site, newest first. Subscribe via <a href="${prefix}feed.xml">RSS</a>. For field-level changes to the providers themselves, week by week, see <a href="${prefix}changes/">what changed this week</a>.` }) +
       `<main id="main"><div class="wrap"><ul class="upd-list">${updItems}</ul>${pagination(page, prefix)}</div></main>`;
     const target = page === 1 ? join(ROOT, 'site/updates.html') : join(ROOT, `site/updates/page/${page}/index.html`);
     if (page > 1) mkdirSync(dirname(target), { recursive: true });
@@ -1135,8 +1132,7 @@ const changeRowHtml = (c) =>
   `<tr><td class="notes">${c.date}</td><td class="name">${provLink(c.slug, c.name, '../')}</td><td>${htmlEsc(c.label)}</td>` +
   `<td class="notes">${htmlEsc(formatValue(c.from))}</td><td>${htmlEsc(formatValue(c.to))}</td></tr>`;
 const changesMain =
-  `<section class="page-hero model-hero"><div class="wrap"><nav class="crumbs"><a href="../">Home</a> / <a href="../updates">Updates</a> / What changed</nav>` +
-  `<h1>What changed this week</h1><p class="lede">Field-level changes to the free tiers we track (what's free, rate limits, the catch and the card, phone, commercial-use and OpenAI-compatibility flags), grouped by ISO week, newest first. Covers the last 12 weeks up to the newest change, mined from the git history of <a href="${REPO}/commits/main/data/providers.json">providers.json</a>. Subscribe via <a href="../changes.xml">RSS</a> or read the <a href="../api/v1/changes.json">JSON</a>.</p></div></section>` +
+  pageHero({ crumbs: `<a href="../">Home</a> / <a href="../updates">Updates</a> / What changed`, h1: `What changed this week`, lede: `Field-level changes to the free tiers we track (what's free, rate limits, the catch and the card, phone, commercial-use and OpenAI-compatibility flags), grouped by ISO week, newest first. Covers the last 12 weeks up to the newest change, mined from the git history of <a href="${REPO}/commits/main/data/providers.json">providers.json</a>. Subscribe via <a href="../changes.xml">RSS</a> or read the <a href="../api/v1/changes.json">JSON</a>.` }) +
   `<main id="main"><div class="wrap prose">` +
   (changeWeeks.length
     ? changeWeeks.map((g) =>
@@ -1174,9 +1170,7 @@ stateReports.forEach((r, i) => {
   const next = stateReports[i + 1];
   const days = (d) => (d === null ? '—' : `${d}d`);
   const main =
-    `<section class="page-hero model-hero"><div class="wrap"><nav class="crumbs"><a href="../../">Home</a> / <a href="../">State reports</a> / ${label}</nav>` +
-    `<h1>State of free LLM APIs — ${label}</h1>` +
-    `<p class="lede">Computed from the last revision of providers.json committed in ${label} (${r.snapshotDate}) and the git-mined change history. Ages are measured as of ${r.asOf}.</p></div></section>` +
+    pageHero({ crumbs: `<a href="../../">Home</a> / <a href="../">State reports</a> / ${label}`, h1: `State of free LLM APIs — ${label}`, lede: `Computed from the last revision of providers.json committed in ${label} (${r.snapshotDate}) and the git-mined change history. Ages are measured as of ${r.asOf}.` }) +
     `<main id="main"><div class="wrap prose">` +
     `<div class="stats">${stat(r.total, 'providers')}${stat(pct(r.verifiedShare), 'verified')}${stat(days(r.freshness.medianDays), 'median verification age')}${stat(r.fieldChanges, 'field changes this month')}</div>` +
     `<h2>Providers by category</h2>` +
@@ -1212,8 +1206,7 @@ stateReports.forEach((r, i) => {
   }));
 });
 const stateIndexMain =
-  `<section class="page-hero model-hero"><div class="wrap"><nav class="crumbs"><a href="../">Home</a> / State reports</nav>` +
-  `<h1>State of free LLM APIs</h1><p class="lede">One report per month with a committed change to providers.json: provider counts by category and modality, verified share, verification age, field changes and providers added. Every number is computed from the dataset and its git history.</p></div></section>` +
+  pageHero({ crumbs: `<a href="../">Home</a> / State reports`, h1: `State of free LLM APIs`, lede: `One report per month with a committed change to providers.json: provider counts by category and modality, verified share, verification age, field changes and providers added. Every number is computed from the dataset and its git history.` }) +
   `<main id="main"><div class="wrap prose">` +
   (stateReports.length
     ? kvTable(['Month', 'Providers', 'Verified', 'Field changes', 'Added'],
@@ -1244,8 +1237,7 @@ const programPage = (slug, h1, lede, tableHead, rowsHtml, extra = '') =>
   htmlPage({
     title: `${h1} · Free LLM API Hub`, desc: stripTags(lede), canonical: `${SITE}/programs/${slug}`,
     main:
-      `<section class="page-hero"><div class="wrap"><nav class="crumbs"><a href="../">Home</a> / ${htmlEsc(h1)}</nav>` +
-      `<h1>${htmlEsc(h1)}</h1><p class="lede">${lede}</p></div></section>` +
+      pageHero({ crumbs: `<a href="../">Home</a> / ${htmlEsc(h1)}`, h1: `${htmlEsc(h1)}`, lede: `${lede}` }) +
       `<main id="main"><div class="wrap prose"><p class="count"><strong>${LEGEND}</strong></p>` +
       `<div class="table-scroll" role="region" aria-label="Table of programs" tabindex="0"><table><thead>${tableHead}</thead><tbody>\n${rowsHtml}\n</tbody></table></div>` +
       `<p style="margin-top:24px">Looking for a key to use right now with no application? See the <a href="../#explorer">verified self-serve list</a>.</p>${extra}</div></main>`,
@@ -1272,8 +1264,7 @@ writeFileSync(join(ROOT, 'site/programs/index.html'), htmlPage({
   desc: `${programs.startups.length + programs.research.length} apply-to-get credit programs that can fund LLM and AI-model API usage, for startups and for students and researchers.`,
   canonical: `${SITE}/programs/`,
   main:
-    `<section class="page-hero"><div class="wrap"><nav class="crumbs"><a href="../">Home</a> / Credit programs</nav>` +
-    `<h1>Free credit programs</h1><p class="lede">Credit programs you apply for, as opposed to the <a href="../#explorer">self-serve free tiers</a> you can call today. Volatile, so confirm the current terms before you rely on one.</p></div></section>` +
+    pageHero({ crumbs: `<a href="../">Home</a> / Credit programs`, h1: `Free credit programs`, lede: `Credit programs you apply for, as opposed to the <a href="../#explorer">self-serve free tiers</a> you can call today. Volatile, so confirm the current terms before you rely on one.` }) +
     `<main id="main"><div class="wrap prose"><ul>` +
     `<li><a href="startups">Free credits for startups</a> — ${programs.startups.length} programs</li>` +
     `<li><a href="research">Free credits for students &amp; researchers</a> — ${programs.research.length} programs</li></ul></div></main>`,
@@ -1302,9 +1293,7 @@ const modelRowHtml = ({ m, p }) =>
   `<td>${htmlEsc(p.free_type)}</td>` +
   `<td class="notes">${(p.modalities || []).join(', ') || '—'}</td></tr>`;
 const modelsMain =
-  `<section class="page-hero model-hero"><div class="wrap"><nav class="crumbs"><a href="../">Home</a> / Free model index</nav>` +
-  `<h1>Free model index</h1><p class="lede">Every model our verified providers expose on a free tier — <strong>${modelIndex.length}</strong> entries across <strong>${modelProviderCount}</strong> providers, pulled from each provider's own <code>/models</code> endpoint where possible. The same model can appear under more than one provider.</p>` +
-  `</div></section>` +
+  pageHero({ crumbs: `<a href="../">Home</a> / Free model index`, h1: `Free model index`, lede: `Every model our verified providers expose on a free tier — <strong>${modelIndex.length}</strong> entries across <strong>${modelProviderCount}</strong> providers, pulled from each provider's own <code>/models</code> endpoint where possible. The same model can appear under more than one provider.` }) +
   `<main id="main"><div class="wrap"><table class="model-table"><thead><tr><th>Model</th><th>Provider</th><th>Free type</th><th>Modalities</th></tr></thead><tbody>\n` +
   modelIndex.map(modelRowHtml).join('\n') +
   `\n</tbody></table><p class="muted" style="margin-top:18px">Model lists are a live sample and change often — always confirm against the provider. A provider missing here usually needs an API key to list its models; <a href="${REPO}/blob/main/docs/update-playbook.md">see how the list is refreshed</a>.</p></div></main>`;
@@ -1333,8 +1322,7 @@ for (const g of GUIDES) {
     ? `<h2>FAQ</h2>` + g.faq.map((f) => `<div class="faq-item"><h3>${htmlEsc(f.q)}</h3><p>${f.a}</p></div>`).join('')
     : '';
   const main =
-    `<section class="page-hero"><div class="wrap"><nav class="crumbs"><a href="../">Home</a> / <a href="../guides-and-collections/">Guides &amp; Collections</a> / ${htmlEsc(g.h1)}</nav>` +
-    `<h1>${htmlEsc(g.h1)}</h1><p class="lede">${htmlEsc(g.lede)}</p></div></section>` +
+    pageHero({ crumbs: `<a href="../">Home</a> / <a href="../guides-and-collections/">Guides &amp; Collections</a> / ${htmlEsc(g.h1)}`, h1: `${htmlEsc(g.h1)}`, lede: `${htmlEsc(g.lede)}` }) +
     `<main id="main"><div class="wrap prose">` +
     g.intro +
     (top ? `<div class="prov-summary"><h2>Top pick — ${htmlEsc(top.name)}</h2><p>${htmlEsc(top.best_for || top.free_tier)} <a href="../p/${top.slug}">Details →</a></p></div>` : '') +
@@ -1532,8 +1520,7 @@ export ${htmlEsc(exampleClient.env_key)}=...
 litellm --config litellm.yaml</code></pre>` +
   `<p>Point any OpenAI client at the proxy (<code>base_url="http://0.0.0.0:4000"</code>) and request a model by its <code>model_name</code>, e.g. <code>${htmlEsc(`${exampleClient.slug}/${exampleModel}`)}</code>.</p>`;
 const apiDocMain =
-  `<section class="page-hero"><div class="wrap"><nav class="crumbs"><a href="../">Home</a> / API</nav>` +
-  `<h1>Static JSON API</h1><p class="lede">The whole dataset as versioned, machine-readable JSON at stable URLs — no server, no query params, no auth, no rate limits. CORS-open, so you can <code>fetch()</code> it straight from the browser. Regenerated on every dataset change (currently v${data.version}).</p></div></section>` +
+  pageHero({ crumbs: `<a href="../">Home</a> / API`, h1: `Static JSON API`, lede: `The whole dataset as versioned, machine-readable JSON at stable URLs — no server, no query params, no auth, no rate limits. CORS-open, so you can <code>fetch()</code> it straight from the browser. Regenerated on every dataset change (currently v${data.version}).` }) +
   `<main id="main"><div class="wrap prose">` +
   `<h2>Everything</h2><table class="model-table"><thead><tr><th>Endpoint</th><th>Contents</th><th>Count</th></tr></thead><tbody>` +
   apiRow('Full provider dataset (all fields)', 'providers.json', publicProviders.length) +
@@ -1658,10 +1645,7 @@ const bestJsonld = JSON.stringify({
   ],
 });
 const bestMain =
-  '<section class="page-hero model-hero"><div class="wrap">' +
-  '<nav class="crumbs"><a href="../">Home</a> / The best</nav>' +
-  '<h1>' + htmlEsc(BEST.h1) + '</h1><p class="lede">' + htmlEsc(BEST.desc) + '</p>' +
-  '</div></section>' +
+  pageHero({ crumbs: `<a href="../">Home</a> / The best`, h1: `${htmlEsc(BEST.h1)}`, lede: `${htmlEsc(BEST.desc)}` }) +
   '<main id="main"><div class="wrap">' +
   '<p class="best-intro">' + bestIntroHtml + '</p>' +
   '<h2 class="best-section">The podium</h2><ol class="best-list best-podium-list">' + podiumHtml + '</ol>' +
@@ -1682,10 +1666,7 @@ const editorialNeutral = providers.every((p) => editorialRating(EDITORIAL, p.slu
 const methodRows = MATH_INPUTS.map((k) => '<tr><td>' + WEIGHT_LABELS[k] + '</td><td class="num">' + SCORE_WEIGHTS[k] + '</td></tr>').join('') +
   '<tr><td>Editorial rating</td><td class="num">' + EDITORIAL_WEIGHT + '</td></tr>';
 const methodMain =
-  '<section class="page-hero model-hero"><div class="wrap">' +
-  '<nav class="crumbs"><a href="../../">Home</a> / <a href="../">The best</a> / Methodology</nav>' +
-  '<h1>How the score works</h1><p class="lede">Every provider on /best gets a score from 0 to 100, computed from the data each time the site is built. Data of ' + htmlEsc(data.generated) + '.</p>' +
-  '</div></section>' +
+  pageHero({ crumbs: `<a href="../../">Home</a> / <a href="../">The best</a> / Methodology`, h1: `How the score works`, lede: `Every provider on /best gets a score from 0 to 100, computed from the data each time the site is built. Data of ${htmlEsc(data.generated)}.` }) +
   '<main id="main"><div class="wrap best-method">' +
   '<h2>The parameters and their weights</h2>' +
   '<table class="best-weights"><thead><tr><th>Part</th><th class="num">Points</th></tr></thead><tbody>' + methodRows + '</tbody></table>' +
@@ -1716,8 +1697,7 @@ writeFileSync(
     desc: 'What the free LLM API dataset does not know yet, field by field, with the provider docs and a prefilled issue for every open item: pick one value and add its source.',
     canonical: SITE + '/coverage/',
     main:
-      '<section class="page-hero model-hero"><div class="wrap"><nav class="crumbs"><a href="../">Home</a> / Data coverage</nav>' +
-      '<h1>Data coverage</h1><p class="lede">Where the data is thin, and how to add one value. Every gap links the provider\'s own docs.</p></div></section>' +
+      pageHero({ crumbs: `<a href="../">Home</a> / Data coverage`, h1: `Data coverage`, lede: `Where the data is thin, and how to add one value. Every gap links the provider's own docs.` }) +
       coverageMainHtml(fieldCoverage, { repo: REPO, generated: data.generated, prefix: '../' }),
     prefix: '../',
   })
@@ -1733,8 +1713,7 @@ writeFileSync(
     desc: 'Coding tools that say they have a free plan, each value with the tool\'s own sentence and the day it was read. A separate list from the ranking of free LLM APIs; not stated is never no.',
     canonical: SITE + '/coding-tools/',
     main:
-      '<section class="page-hero model-hero"><div class="wrap"><nav class="crumbs"><a href="../">Home</a> / Free AI coding tools</nav>' +
-      '<h1>Free AI coding tools</h1><p class="lede">Coding tools that say they have a free plan. Apart from the ranking, and every value written only where the tool\'s own page says it.</p></div></section>' +
+      pageHero({ crumbs: `<a href="../">Home</a> / Free AI coding tools`, h1: `Free AI coding tools`, lede: `Coding tools that say they have a free plan. Apart from the ranking, and every value written only where the tool's own page says it.` }) +
       codingToolsMainHtml(codingTools, { prefix: '../', repo: REPO, ownKey: codingToolsOwnKey }),
     prefix: '../',
   })
@@ -1750,8 +1729,7 @@ writeFileSync(
     desc: 'The sentence from each free LLM API provider\'s own page about training on prompts, where one is recorded, with the page and the day it was read. Not confirmed is never no.',
     canonical: SITE + '/data-policy/',
     main:
-      '<section class="page-hero model-hero"><div class="wrap"><nav class="crumbs"><a href="../">Home</a> / Who trains on your data</nav>' +
-      '<h1>Who trains on your data</h1><p class="lede">The provider\'s own sentence about training on prompts, where one is recorded, with its page and the day it was read.</p></div></section>' +
+      pageHero({ crumbs: `<a href="../">Home</a> / Who trains on your data`, h1: `Who trains on your data`, lede: `The provider's own sentence about training on prompts, where one is recorded, with its page and the day it was read.` }) +
       dataPolicyMainHtml(dataPolicyRows(providers), { repo: REPO, generated: data.generated, prefix: '../', quotesCheck: quotesCheckHtml() }),
     prefix: '../',
   })
@@ -1798,8 +1776,7 @@ writeFileSync(
     desc: 'Services that give free GPU time to run your own model, each value with the provider\'s own sentence and the day it was read. A separate list from the ranking of free LLM APIs.',
     canonical: SITE + '/free-gpu/',
     main:
-      '<section class="page-hero model-hero"><div class="wrap"><nav class="crumbs"><a href="../">Home</a> / Free GPU compute</nav>' +
-      '<h1>Free GPU compute</h1><p class="lede">Free GPU time to run a model yourself. Apart from the ranking, and every value cited to the provider\'s own page.</p></div></section>' +
+      pageHero({ crumbs: `<a href="../">Home</a> / Free GPU compute`, h1: `Free GPU compute`, lede: `Free GPU time to run a model yourself. Apart from the ranking, and every value cited to the provider's own page.` }) +
       freeGpuMainHtml(freeGpu, { prefix: '../' }),
     prefix: '../',
   })
@@ -1824,11 +1801,7 @@ for (const cp of comparePairs) {
   const title = `${a.name} vs ${b.name}`;
   const desc = `${a.name} vs ${b.name}: free tier, rate limits, card, phone and commercial-use requirements, OpenAI compatibility and docs, side by side from the verified dataset.`;
   const main =
-    `<section class="page-hero"><div class="wrap">` +
-    `<nav class="crumbs"><a href="../../">Home</a> / <a href="../">Compare</a> / ${htmlEsc(title)}</nav>` +
-    `<h1>${htmlEsc(title)}</h1>` +
-    `<p class="lede">Both offer ${htmlEsc(cp.shared.join(', '))} on their free plan. Every field below comes from the dataset and is checked against each provider's own docs; <em>not confirmed</em> means nobody has confirmed that field yet — not that the answer is no.</p>` +
-    `</div></section>` +
+    pageHero({ crumbs: `<a href="../../">Home</a> / <a href="../">Compare</a> / ${htmlEsc(title)}`, h1: `${htmlEsc(title)}`, lede: `Both offer ${htmlEsc(cp.shared.join(', '))} on their free plan. Every field below comes from the dataset and is checked against each provider's own docs; <em>not confirmed</em> means nobody has confirmed that field yet — not that the answer is no.` }) +
     `<main id="main"><div class="wrap prose">` +
     compareLib.compareTableHtml([a, b], { prefix: '../../', scores: scoreMap }) +
     `<div class="prov-actions" style="margin-top:22px"><a class="btn primary" href="../?compare=${a.slug},${b.slug}">Add a provider to this comparison →</a></div>` +
@@ -1857,11 +1830,7 @@ const pickerSelects = Array.from({ length: compareLib.COMPARE_MAX }, (_, i) =>
   `<label class="cmp-slot"><span>Provider ${i + 1}${i < compareLib.COMPARE_MIN ? '' : ' (optional)'}</span>` +
   `<select class="sel" name="p"><option value="">—</option>${pickerOptions}</select></label>`).join('');
 const compareIndexMain =
-  `<section class="page-hero"><div class="wrap">` +
-  `<nav class="crumbs"><a href="../">Home</a> / Compare</nav>` +
-  `<h1>Compare free LLM APIs</h1>` +
-  `<p class="lede">Pick two to four providers to see their free tiers side by side — limits, card, phone and commercial-use requirements, OpenAI compatibility and the date each was last verified. Share the result: the URL keeps your selection.</p>` +
-  `</div></section>` +
+  pageHero({ crumbs: `<a href="../">Home</a> / Compare`, h1: `Compare free LLM APIs`, lede: `Pick two to four providers to see their free tiers side by side — limits, card, phone and commercial-use requirements, OpenAI compatibility and the date each was last verified. Share the result: the URL keeps your selection.` }) +
   `<main id="main"><div class="wrap prose">` +
   `<form id="compare-form" class="cmp-form" method="get" action="./">${pickerSelects}<button type="submit" class="btn primary">Compare</button></form>` +
   `<div id="compare-out" class="cmp-out" aria-live="polite"></div>` +
