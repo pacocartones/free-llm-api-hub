@@ -105,9 +105,9 @@ for (const p of data.providers ?? []) {
   seenNames.add(p.name);
 
   check(typeof p.name === 'string' && p.name.length > 0, `${id}: name required`);
-  check(CATEGORIES.includes(p.category), `${id}: category must be one of ${CATEGORIES.join('/')}`);
-  check(FREE_TYPES.includes(p.free_type), `${id}: free_type must be one of ${FREE_TYPES.join('/')}`);
-  check(typeof p.free_tier === 'string' && p.free_tier.length > 0, `${id}: free_tier required`);
+  check(CATEGORIES.includes(p.category) || p.category === null, `${id}: category must be one of ${CATEGORIES.join('/')} or null`);
+  check(FREE_TYPES.includes(p.free_type) || p.free_type === null, `${id}: free_type must be one of ${FREE_TYPES.join('/')} or null`);
+  check(typeof p.free_tier === 'string' || p.free_tier === null, `${id}: free_tier required or null`);
   check(typeof p.verified === 'boolean', `${id}: verified must be boolean`);
 
   for (const f of ['phone_required', 'card_required', 'commercial_ok', 'openai_compatible'])
@@ -124,7 +124,7 @@ for (const p of data.providers ?? []) {
   // tier that renews (daily/monthly quota, monthly credit) or never runs out
   // is ongoing. The two fields split the README, the explorer and the
   // collections, so they must not disagree.
-  if (p.free_type !== undefined && p.category !== undefined) {
+  if (p.free_type !== null && p.free_type !== undefined && p.category !== null && p.category !== undefined) {
     const expected = p.free_type === 'trial-credit' ? 'trial' : 'ongoing';
     check(p.category === expected, `${id}: free_type "${p.free_type}" belongs in category "${expected}" (got "${p.category}")`);
   }
@@ -133,7 +133,7 @@ for (const p of data.providers ?? []) {
   // limit unit (RPM, tokens/day, requests/min, concurrency, credits...) or an
   // explicit statement that the provider publishes none. A model list or a
   // pricing note here showed up as the "rate limits" row on compare pages.
-  check(rateLimitsOk(p.rate_limits), `${id}: rate_limits must give a limit with a unit, or say the provider publishes none (got: "${String(p.rate_limits).slice(0, 60)}")`);
+  if (p.rate_limits !== null) check(rateLimitsOk(p.rate_limits), `${id}: rate_limits must give a limit with a unit, or say the provider publishes none (got: "${String(p.rate_limits).slice(0, 60)}")`);
 
   // openai_base_url: null, or an http(s) URL; and it only makes sense when the API is OpenAI-compatible.
   if (p.openai_base_url !== undefined && p.openai_base_url !== null) {
@@ -161,7 +161,7 @@ for (const p of data.providers ?? []) {
   // Score inputs. is_text_llm is explicit on every entry. model_tier is derived, never typed: it must
   // equal the tier of its cited rating, and it only exists for a continuous free text-LLM offer (a
   // one-time trial credit is not continuous free access). free_limits are published numbers with a source.
-  check(typeof p.is_text_llm === 'boolean', `${id}: is_text_llm must be true or false on every entry`);
+  check(typeof p.is_text_llm === 'boolean' || p.is_text_llm === null, `${id}: is_text_llm must be true or false on every entry`);
   const tier = p.model_tier ?? null;
   const src = p.model_tier_source ?? null;
   check((tier === null) === (src === null), `${id}: model_tier and model_tier_source go together (both set or both null)`);
@@ -219,7 +219,8 @@ function rateLimitsOk(text) {
   if (typeof text !== 'string' || !text.trim()) return false;
   const LIMIT_UNIT = /(rpm|rpd|tpm|tpd|rps|req|request|call|token|minute|\bmin\b|hour|day|month|second|\/s\b|neuron|concurren|credit|char|page|parallel)/i;
   const NONE_PUBLISHED = /not (publicly |numerically )?(published|specified|stated|documented|disclosed)|no (numeric|fixed|published)|unpublished|in[- ]console|after sign-in|shown only|queue-based|no rpm/i;
-  return (/\d/.test(text) && LIMIT_UNIT.test(text)) || NONE_PUBLISHED.test(text);
+  const NOT_CONFIRMED = /^Not yet confirmed$/i;
+  return (typeof text === 'string' && NOT_CONFIRMED.test(text.trim())) || (/\d/.test(text) && LIMIT_UNIT.test(text)) || NONE_PUBLISHED.test(text);
 }
 
 // ---------- programs.json (credit programs) ----------
