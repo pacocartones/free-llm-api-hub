@@ -478,8 +478,10 @@ const fitDescription = (s) => {
   return cut.slice(0, cut.lastIndexOf(' ') > 80 ? cut.lastIndexOf(' ') : cut.length).replace(/[\s,;:.\-–—]+$/, '') + '…';
 };
 
-// Star count resolved at build from data/repo-stats.json (written by `npm run stars`, never fetched here:
-// the build stays offline and deterministic). The page script still refreshes it live.
+// Star count resolved at build from data/repo-stats.json (never fetched here: the build stays offline and
+// deterministic). The deploy workflow runs scripts/refresh-stars.mjs just before the build, every day and on
+// every push; by hand, `npm run stars` does the same. No page script asks GitHub: the number is only as
+// fresh as the last deploy.
 let STARS = null;
 try {
   const stats = JSON.parse(readFileSync(join(ROOT, 'data/repo-stats.json'), 'utf8'));
