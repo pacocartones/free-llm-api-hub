@@ -6,6 +6,7 @@
 // are shown with the page they come from and the day they were read.
 
 import { htmlEsc, SLUG_RE } from './rows.mjs';
+import { claimsTableHtml } from './claims-table.mjs';
 
 const safeHttp = (u) => (/^https?:\/\//i.test(String(u || '')) ? String(u) : '');
 
@@ -33,12 +34,14 @@ function claimHtml(field, claim) {
   return `<div class="gpu-claim"><dt>${htmlEsc(LABELS[field] || field)}</dt><dd>${state}${quotes}</dd></div>`;
 }
 
+const kindLabel = (k) => (k === 'notebook' ? 'notebook service' : 'serverless API');
+
 export function freeGpuMainHtml(section, { prefix = '../' } = {}) {
   const entries = section.entries.map((e) => {
     const url = safeHttp(e.url);
     const name = url ? `<a href="${htmlEsc(url)}" target="_blank" rel="noopener">${htmlEsc(e.name)}</a>` : htmlEsc(e.name);
     const claims = Object.keys(LABELS).map((f) => claimHtml(f, e.claims[f])).join('');
-    return `<section class="gpu-entry" id="${SLUG_RE.test(e.slug) ? e.slug : ''}"><h3>${name} <span class="muted">· ${htmlEsc(e.kind === 'notebook' ? 'notebook service' : 'serverless API')}</span></h3><dl class="gpu-claims">${claims}</dl></section>`;
+    return `<section class="gpu-entry" id="${SLUG_RE.test(e.slug) ? e.slug : ''}"><h3>${name} <span class="muted">· ${htmlEsc(kindLabel(e.kind))}</span></h3><dl class="gpu-claims">${claims}</dl></section>`;
   }).join('');
   const notes = (section.notes || []).map((n) =>
     `<section class="gpu-note"><h3>${htmlEsc(n.subject)}</h3><p>${htmlEsc(n.text)}</p>${n.quotes.map(quoteHtml).join('')}</section>`).join('');
@@ -47,6 +50,7 @@ export function freeGpuMainHtml(section, { prefix = '../' } = {}) {
     '<p>This is a separate list from the free LLM APIs: these services give you compute, not a hosted model. It is <strong>not part of the ranking</strong> and no count, score or collection of the site includes it. ' +
     'Each value below is written only when the provider\'s own page says it, with the sentence and the day it was read; otherwise it reads <strong>Not stated</strong>, which is not the same as <em>no</em>. ' +
     'A service is listed only when its own page, read as plain text, says what it offers; pages that need a browser to read are not covered yet. A listed service can still have <strong>Not stated</strong> next to "Free GPU access": the page does not say that its free credit pays for GPU time, and the page then does not claim it. Data of ' + htmlEsc(section.generated) + '.</p>' +
+    claimsTableHtml({ id: 'gpu', entries: section.entries, labels: LABELS, kindLabel, subject: 'service' }) +
     entries +
     (notes ? '<h2>Worth knowing</h2>' + notes : '') +
     `<p class="muted">Looking for hosted LLM APIs instead? <a href="${prefix}">See the main list</a>. To add or correct a value, open an issue with the provider\'s own page.</p>` +
