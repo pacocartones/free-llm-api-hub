@@ -21,14 +21,17 @@ export function claimsFilters(entries, labels) {
 
 export function claimsTableHtml({ id, entries, labels, kindLabel, subject }) {
   if (!entries || entries.length < 2) return '';
-  const fields = Object.keys(labels);
+  const allFields = Object.keys(labels);
+  const stateCount = (f) => entries.filter((e) => e.claims[f] && e.claims[f].state === 'stated').length;
+  // A point that no service states is not a column of "Not stated" repeated on every row: it is said once, under the table.
+  const fields = allFields.filter((f) => stateCount(f) > 0);
+  const none = allFields.filter((f) => stateCount(f) === 0);
   const { fields: filterFields, kinds } = claimsFilters(entries, labels);
   // "Stated" links to the sentence itself (the claim block of the entry); "Not stated" has nothing to link to
-  const cell = (e, f) => (e.claims[f] && e.claims[f].state === 'stated' && SLUG_RE.test(e.slug)
-    ? `<a class="gpu-stated" href="#${e.slug}-${f}" title="Read the sentence">Stated</a>`
-    : e.claims[f] && e.claims[f].state === 'stated'
-      ? '<span class="gpu-stated">Stated</span>'
-      : '<span class="gpu-unstated">Not stated</span>');
+  // The state is the class of the cell (s: stated, n: not stated), not a span in every cell: the page is mostly cells.
+  const cell = (e, f) => (e.claims[f] && e.claims[f].state === 'stated'
+    ? `<td class="s">${SLUG_RE.test(e.slug) ? `<a href="#${e.slug}-${f}">Stated</a>` : 'Stated'}</td>`
+    : '<td class="n">Not stated</td>');
   const filters = (filterFields.length || kinds.length)
     ? `<fieldset class="cmp-filters"><legend>Show only</legend>` +
       (kinds.length
@@ -43,10 +46,10 @@ export function claimsTableHtml({ id, entries, labels, kindLabel, subject }) {
       `</fieldset>`
     : '';
   const rows = entries.map((e) => {
-    const stated = fields.filter((f) => e.claims[f] && e.claims[f].state === 'stated').join(' ');
+    const stated = allFields.filter((f) => e.claims[f] && e.claims[f].state === 'stated').join(' ');
     const anchor = SLUG_RE.test(e.slug) ? `<a href="#${e.slug}">${htmlEsc(e.name)}</a>` : htmlEsc(e.name);
     return `<tr data-kind="${htmlEsc(e.kind)}" data-stated="${htmlEsc(stated)}"><th scope="row">${anchor}</th><td>${htmlEsc(kindLabel(e.kind))}</td>` +
-      fields.map((f) => `<td>${cell(e, f)}</td>`).join('') + `</tr>`;
+      fields.map((f) => cell(e, f)).join('') + `</tr>`;
   }).join('');
   return `<div class="cmp" id="${id}-glance"><h3>At a glance</h3>` +
     `<p class="muted">One row per ${htmlEsc(subject)}. <strong>Stated</strong> means the page's own sentence says it, and the cell links to that sentence in the entry below; ` +
@@ -55,5 +58,6 @@ export function claimsTableHtml({ id, entries, labels, kindLabel, subject }) {
     `<div class="table-scroll" role="region" aria-label="Comparison of the ${htmlEsc(subject)}s" tabindex="0">` +
     `<table class="cmp-table"><caption class="sr-only">What each ${htmlEsc(subject)} says about each point</caption>` +
     `<thead><tr><th scope="col">${htmlEsc(subject[0].toUpperCase() + subject.slice(1))}</th><th scope="col">Kind</th>` +
-    fields.map((f) => `<th scope="col">${htmlEsc(labels[f])}</th>`).join('') + `</tr></thead><tbody>${rows}</tbody></table></div></div>`;
+    fields.map((f) => `<th scope="col">${htmlEsc(labels[f])}</th>`).join('') + `</tr></thead><tbody>${rows}</tbody></table></div>` +
+    (none.length ? `<p class="muted">No ${htmlEsc(subject)} states: ${none.map((f) => htmlEsc(labels[f].toLowerCase())).join(', ')}. That is <strong>Not stated</strong>, never <em>no</em>; each entry below says what its page does say.</p>` : '') + `</div>`;
 }

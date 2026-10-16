@@ -13,21 +13,21 @@
 .cmp-table thead th { color: var(--muted); font-family: var(--font-mono); font-size: .74rem; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
 .cmp-table tbody th { font-family: var(--font-mono); font-weight: 700; white-space: nowrap; position: sticky; left: 0; background: var(--bg); }
 .cmp-table tbody tr:hover :is(th, td) { background: var(--panel); }
-.cmp-table .gpu-stated { color: var(--accent); font-weight: 700; }
-.cmp-table a.gpu-stated { text-decoration: underline; text-underline-offset: 3px; }
-.cmp-table .gpu-unstated { color: var(--muted); }
+.cmp-table .s { color: var(--accent); font-weight: 700; }
+.cmp-table .s a { text-decoration: underline; text-underline-offset: 3px; }
+.cmp-table .n { color: var(--muted); }
 /* filters: a checked point keeps the rows that state it; a chosen kind keeps that kind */
-.cmp:has(input[name$="-state"][value="gpu_access"]:checked) tbody tr:not([data-stated~="gpu_access"]) { display: none; }
-.cmp:has(input[name$="-state"][value="quota"]:checked) tbody tr:not([data-stated~="quota"]) { display: none; }
-.cmp:has(input[name$="-state"][value="credit_amount"]:checked) tbody tr:not([data-stated~="credit_amount"]) { display: none; }
-.cmp:has(input[name$="-state"][value="expires"]:checked) tbody tr:not([data-stated~="expires"]) { display: none; }
-.cmp:has(input[name$="-state"][value="card_required"]:checked) tbody tr:not([data-stated~="card_required"]) { display: none; }
-.cmp:has(input[name$="-state"][value="free_access"]:checked) tbody tr:not([data-stated~="free_access"]) { display: none; }
-.cmp:has(input[name$="-state"][value="limits"]:checked) tbody tr:not([data-stated~="limits"]) { display: none; }
-.cmp:has(input[name$="-state"][value="commercial_use"]:checked) tbody tr:not([data-stated~="commercial_use"]) { display: none; }
-.cmp:has(input[name$="-state"][value="trains_on_code"]:checked) tbody tr:not([data-stated~="trains_on_code"]) { display: none; }
-.cmp:has(input[name$="-kind"][value="notebook"]:checked) tbody tr:not([data-kind="notebook"]) { display: none; }
-.cmp:has(input[name$="-kind"][value="serverless-api"]:checked) tbody tr:not([data-kind="serverless-api"]) { display: none; }
-.cmp:has(input[name$="-kind"][value="ide-extension"]:checked) tbody tr:not([data-kind="ide-extension"]) { display: none; }
-.cmp:has(input[name$="-kind"][value="editor"]:checked) tbody tr:not([data-kind="editor"]) { display: none; }
-.cmp:has(input[name$="-kind"][value="cli"]:checked) tbody tr:not([data-kind="cli"]) { display: none; }
+.cmp:has([name$=-state][value=gpu_access]:checked) tbody tr:not([data-stated~=gpu_access]){display:none}
+.cmp:has([name$=-state][value=quota]:checked) tbody tr:not([data-stated~=quota]){display:none}
+.cmp:has([name$=-state][value=credit_amount]:checked) tbody tr:not([data-stated~=credit_amount]){display:none}
+.cmp:has([name$=-state][value=expires]:checked) tbody tr:not([data-stated~=expires]){display:none}
+.cmp:has([name$=-state][value=card_required]:checked) tbody tr:not([data-stated~=card_required]){display:none}
+.cmp:has([name$=-state][value=free_access]:checked) tbody tr:not([data-stated~=free_access]){display:none}
+.cmp:has([name$=-state][value=limits]:checked) tbody tr:not([data-stated~=limits]){display:none}
+.cmp:has([name$=-state][value=commercial_use]:checked) tbody tr:not([data-stated~=commercial_use]){display:none}
+.cmp:has([name$=-state][value=trains_on_code]:checked) tbody tr:not([data-stated~=trains_on_code]){display:none}
+.cmp:has([name$=-kind][value=notebook]:checked) tbody tr:not([data-kind=notebook]){display:none}
+.cmp:has([name$=-kind][value=serverless-api]:checked) tbody tr:not([data-kind=serverless-api]){display:none}
+.cmp:has([name$=-kind][value=ide-extension]:checked) tbody tr:not([data-kind=ide-extension]){display:none}
+.cmp:has([name$=-kind][value=editor]:checked) tbody tr:not([data-kind=editor]){display:none}
+.cmp:has([name$=-kind][value=cli]:checked) tbody tr:not([data-kind=cli]){display:none}

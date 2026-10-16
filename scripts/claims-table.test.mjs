@@ -24,7 +24,8 @@ test('claimsFilters: only a point that tells the services apart is a filter; kin
 test('claimsTableHtml: one row per service, every cell says Stated or Not stated, every row links to its entry', () => {
   const html = claimsTableHtml({ id: 'z', entries: ENTRIES, labels: LABELS, kindLabel, subject: 'service' });
   assert.equal((html.match(/<tr data-kind=/g) || []).length, 3);
-  assert.equal((html.match(/<th scope="col">/g) || []).length, 2 + 3, 'service, kind and one column per point');
+  assert.equal((html.match(/<th scope="col">/g) || []).length, 2 + 2, 'service, kind and a column per point that some service states (C is stated by none)');
+  assert.match(html, /No service states: point c\. That is <strong>Not stated<\/strong>/);
   for (const e of ENTRIES) {
     const row = html.match(new RegExp(`<tr data-kind="${e.kind}" data-stated="([^"]*)"><th scope="row"><a href="#${e.slug}">`));
     assert.ok(row, `${e.slug} has a row that links to #${e.slug}`);
@@ -34,9 +35,10 @@ test('claimsTableHtml: one row per service, every cell says Stated or Not stated
   assert.equal((body.match(/>Stated</g) || []).length, 4);
   assert.equal((body.match(/>Not stated</g) || []).length, 5);
   // a Stated cell links to its sentence; a Not stated cell links to nothing
-  assert.match(body, /<a class="gpu-stated" href="#one-a"[^>]*>Stated<\/a>/);
-  assert.ok(!/href="#[^"]*"[^>]*>Not stated</.test(body), 'Not stated has nothing to link to');
-  assert.equal((body.match(/<a class="gpu-stated"/g) || []).length, 4, 'every Stated cell is a link');
+  assert.match(body, /<td class="s"><a href="#one-a">Stated<\/a><\/td>/);
+  assert.ok(!/<td class="n"><a/.test(body), 'Not stated has nothing to link to');
+  assert.equal((body.match(/<td class="s"><a href="#/g) || []).length, 4, 'every Stated cell is a link');
+  assert.equal((body.match(/<td class="n">Not stated<\/td>/g) || []).length, 2, 'only the points that someone states are columns');
   // keyboard and screen readers: every checkbox and radio sits inside its label
   const inputs = html.match(/<input [^>]*>/g) || [];
   assert.ok(inputs.length >= 3);
@@ -78,7 +80,7 @@ test('the built pages: the table matches the data, tables.css is loaded only by 
   for (const page of ['free-gpu', 'coding-tools']) {
     const html = readFileSync(join(ROOT, `site/${page}/index.html`), 'utf8');
     let links = 0;
-    for (const m of html.matchAll(/<a class="gpu-stated" href="#([^"]+)"/g)) {
+    for (const m of html.matchAll(/<td class="s"><a href="#([^"]+)"/g)) {
       links += 1;
       const at = html.indexOf(`<div class="gpu-claim" id="${m[1]}">`);
       assert.ok(at > 0, `${page}: the claim ${m[1]} exists`);
@@ -95,8 +97,9 @@ test('the built pages: the table matches the data, tables.css is loaded only by 
   for (const file of ['data/gpu-compute.json', 'data/coding-tools.json', 'data/coding-tools-own-key.json']) {
     for (const e of JSON.parse(readFileSync(join(ROOT, file), 'utf8')).entries) { kinds.add(e.kind); Object.keys(e.claims).forEach((f) => fields.add(f)); }
   }
-  for (const f of fields) assert.ok(css.includes(`input[name$="-state"][value="${f}"]:checked) tbody tr:not([data-stated~="${f}"])`), `tables.css has the rule of the point ${f}`);
-  for (const k of kinds) assert.ok(css.includes(`input[name$="-kind"][value="${k}"]:checked) tbody tr:not([data-kind="${k}"])`), `tables.css has the rule of the kind ${k}`);
+  for (const f of fields) assert.ok(css.includes(`[name$=-state][value=${f}]:checked) tbody tr:not([data-stated~=${f}])`), `tables.css has the rule of the point ${f}`);
+  for (const k of kinds) assert.ok(css.includes(`[name$=-kind][value=${k}]:checked) tbody tr:not([data-kind=${k}])`), `tables.css has the rule of the kind ${k}`);
+  assert.ok(!/:checked\) tr:not/.test(css), 'every filter rule is scoped to tbody, so a filter never hides the header row');
   assert.ok(css.length < 4096, `tables.css stays small (${css.length} bytes)`);
   assert.doesNotMatch(css, /@import|url\(/, 'no request from the sheet');
 });
