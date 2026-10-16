@@ -410,6 +410,17 @@
    "page_sha256": "e1aace949855493f0c20860532894ea9eb0c8c84b98c55e85d132c6abe98062e"
   },
   {
+   "id": "sarvam-ai.sentence",
+   "slug": "sarvam-ai",
+   "kind": "sentence",
+   "text": "We use Your content (including inputs, uploads, prompts, or generated outputs) to train, fine-tune, and/ or improve our AI models unless you explicitly opt-out through your account settings",
+   "source_url": "https://www.sarvam.ai/privacy-policy",
+   "read_on": "2026-10-16",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "c4808fa38c743a4afe39cfcbc942c5c89043a1146fa994a5ee55ffdf2b6f53ed"
+  },
+  {
    "id": "rime.sentence",
    "slug": "rime",
    "kind": "sentence",

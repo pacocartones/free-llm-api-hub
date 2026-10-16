@@ -1,7 +1,7 @@
 {
   "$schema": "./schema.json",
   "version": "2.11.0",
-  "generated": "2026-10-15",
+  "generated": "2026-10-16",
   "source": "https://github.com/pacocartones/free-llm-api-hub",
   "note": "Canonical dataset. README tables, badge-freshness.json and the interactive site are all generated from this file — do not hand-edit them. `verified: true` means the core facts (tier, limits, key catch, link) were independently confirmed against the provider's own docs on `last_verified`. `verified: false` means sourced from community tracking and not yet independently re-confirmed here — treat those as indicative. Attribute fields (openai_compatible, modalities, best_for) are progressively backfilled and may be null.",
   "providers": [
@@ -1171,7 +1171,8 @@
       "model_tier": null,
       "no_expiry": {"source":"https://docs.sarvam.ai/api/getting-started/ratelimits","checked":"2026-10-09","quote":"Credits are universal and never expire."},
       "verified": true,
-      "last_verified": "2026-10-08"
+      "last_verified": "2026-10-08",
+      "data_policy": {"trains_on_prompts":true,"retention":"User-configurable (default: 30 days after last access)","source":"https://www.sarvam.ai/privacy-policy","checked":"2026-10-16","quote":"We use Your content (including inputs, uploads, prompts, or generated outputs) to train, fine-tune, and/ or improve our AI models unless you explicitly opt-out through your account settings","note":"The policy labels the default as opt-in; content is used for training unless you opt out through account settings or in writing. The retention table gives your content a default of 30 days after last access; the policy does not apply to enterprise-processed content under customer agreements.","plan_named":false}
     },
     {
       "slug": "gladia",
