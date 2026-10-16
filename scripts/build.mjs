@@ -190,6 +190,8 @@ const COLLECTIONS = [
 const GUIDES = [
   {
     slug: 'free-llm-api-without-credit-card',
+    answer: 'Yes. {n} providers in the verified dataset give a free tier without asking for a card at signup, so reaching a limit means being rate-limited rather than billed. Before you choose, compare two columns in the table: the rate limits, and whether the free tier allows commercial use.',
+    metaDesc: '{n} free LLM APIs that need no credit card at signup, verified and dated {date}. Rate limits and commercial-use flags side by side.',
     card: 'No credit card',
     blurb: 'Production-grade free tiers that never ask for a card.',
     h1: 'Free LLM APIs with no credit card required',
@@ -207,6 +209,8 @@ const GUIDES = [
   },
   {
     slug: 'openai-compatible-free-apis',
+    answer: '{n} verified free APIs expose an OpenAI-compatible endpoint. With the official OpenAI SDK you change the base_url and the API key and keep the rest of your code. Compatibility can be partial, so check which endpoints and features, such as tools or streaming, each provider supports.',
+    metaDesc: "{n} free LLM APIs with an OpenAI-compatible endpoint: change base_url and your key, keep your SDK. Confirmed against each provider's docs, {date}.",
     card: 'OpenAI-compatible',
     blurb: 'Keep your code — just swap base_url and key.',
     h1: 'Free OpenAI-compatible APIs (drop-in base_url)',
@@ -224,22 +228,26 @@ const GUIDES = [
   },
   {
     slug: 'free-llm-api-no-signup',
+    answer: '{n} providers in the verified dataset need neither a payment card nor a phone number to get a key. Signup is not removed: most still ask for an email or a sign-in with an existing account. The table shows what each free tier allows and the rate limits that come with the lowest friction.',
+    metaDesc: '{n} free LLM APIs whose signup asks for neither a card nor a phone number: the lowest-friction keys, verified and dated {date}.',
     card: 'No card, no phone',
     blurb: 'The lowest-friction keys: no card, no phone number.',
     h1: 'Free LLM APIs with no phone number (and no card)',
     title: 'Free LLM API — no phone, no credit card · Free LLM API Hub',
     desc: 'The lowest-friction free LLM APIs: no credit card and no phone verification. A couple need no account at all.',
     lede: 'The lowest-friction free APIs: no card, and no phone number either.',
-    intro: `<p>Some free tiers add phone verification on top of the signup form. The providers here ask for <strong>neither a credit card nor a phone number</strong>, so you can go from zero to a working key in a couple of minutes.</p><p>A few — like AI Horde and OVHcloud AI Endpoints — don't even need an account for basic use. The trade-off is predictable: the fewer the gates, the tighter the rate limits.</p>`,
+    intro: `<p>Some free tiers add phone verification on top of the signup form. The providers here ask for <strong>neither a credit card nor a phone number</strong>, so you can go from zero to a working key in a couple of minutes.</p><p>A few — like AI Horde — don't even need an account for basic use. The trade-off is predictable: the fewer the gates, the tighter the rate limits.</p>`,
     filter: (p) => p.card_required === false && p.phone_required === false && p.category === 'ongoing',
     query: '?cat=ongoing&nocard=1&nophone=1#explorer',
     faq: [
       { q: 'Is there a free LLM API with no phone verification?', a: 'Yes — every provider here requires neither a credit card nor a phone number to obtain a key.' },
-      { q: 'Can I call an LLM API with no account at all?', a: 'A few, such as AI Horde (a shared anonymous key, lowest queue priority) and OVHcloud AI Endpoints (anonymous access at a low rate limit), work without an account, with tighter limits.' },
+      { q: 'Can I call an LLM API with no account at all?', a: 'A few can, with tighter limits: AI Horde works with a shared anonymous key and the lowest queue priority. Most providers here still want an email or a sign-in with an existing account.' },
     ],
   },
   {
     slug: 'free-embeddings-apis',
+    answer: '{n} providers in the verified dataset include embedding models on a free tier. They suit prototypes of semantic search and retrieval-augmented generation (RAG); the table lists each free tier and its limits. Choose the model before you index, because vectors from different models are not comparable and changing models means re-embedding your data.',
+    metaDesc: '{n} free vector embedding APIs for semantic search and RAG, with free tiers and limits compared. Verified {date}.',
     card: 'Embeddings / RAG',
     blurb: 'Free vector embeddings for search and RAG.',
     h1: 'Free embeddings APIs for search and RAG',
@@ -257,6 +265,8 @@ const GUIDES = [
   },
   {
     slug: 'free-speech-to-text-apis',
+    answer: '{n} providers in the verified dataset offer free speech APIs, for transcription (speech-to-text) or voice output (text-to-speech). Free allowances are given in audio time, characters or credits, so convert them to the same unit before comparing. Voice terms often differ from text terms, so read the commercial-use flag in the Gotchas column for each row.',
+    metaDesc: '{n} free transcription and text-to-speech APIs, with limits in audio time, characters or credits compared. Verified {date}.',
     card: 'Speech (STT/TTS)',
     blurb: 'Free transcription and text-to-speech tiers.',
     h1: 'Free speech APIs — transcription and text-to-speech',
@@ -274,6 +284,8 @@ const GUIDES = [
   },
   {
     slug: 'free-image-generation-apis',
+    answer: '{n} providers in the verified dataset offer a free tier or starting credit for text-to-image generation. Allowances are usually images or credits, and the catches that matter are watermarks and commercial-use terms. The Gotchas column flags commercial use; watermark rules are in the notes on each provider page.',
+    metaDesc: '{n} free text-to-image APIs, with limits, watermarks and commercial-use terms compared. Verified {date}.',
     card: 'Image generation',
     blurb: 'Free text-to-image APIs — Flux, SDXL and more.',
     h1: 'Free image generation APIs',
@@ -292,6 +304,8 @@ const GUIDES = [
   },
   {
     slug: 'free-ocr-document-ai-apis',
+    answer: '{n} providers in the verified dataset offer free OCR or document parsing. Allowances are given in pages or credits, and some are one-time rather than monthly, so check each row. Layout-aware parsers keep tables and headings, which matters for RAG; plain OCR returns only the text.',
+    metaDesc: '{n} free OCR and document-parsing APIs to turn PDFs and scans into text for RAG. Page limits and terms compared, {date}.',
     card: 'OCR / document AI',
     blurb: 'Free OCR and document-parsing APIs for RAG.',
     h1: 'Free OCR and document-parsing APIs',
@@ -1313,6 +1327,9 @@ const guideRow = (p) =>
   `<td>${provFlagsHtml(p)}</td></tr>`;
 for (const g of GUIDES) {
   const list = providers.filter(g.filter);
+  const fill = (t) => t.replaceAll('{n}', String(list.length)).replaceAll('{date}', data.generated);
+  const metaDesc = fill(g.metaDesc);
+  const twins = COLLECTIONS.filter((c) => (c.guides || []).includes(g.slug));
   const top = (g.pick && list.find((x) => x.slug === g.pick)) ||
     [...list].sort((a, b) => recScore(b) - recScore(a) || (a.name < b.name ? -1 : 1))[0];
   const related = GUIDES.filter((x) => x.slug !== g.slug)
@@ -1323,6 +1340,7 @@ for (const g of GUIDES) {
   const main =
     pageHero({ crumbs: `<a href="../">Home</a> / <a href="../guides-and-collections/">Guides &amp; Collections</a> / ${htmlEsc(g.h1)}`, h1: `${htmlEsc(g.h1)}`, lede: `${htmlEsc(g.lede)}` }) +
     `<main id="main"><div class="wrap prose">` +
+    `<p class="answer"><strong>${htmlEsc(fill(g.answer))}</strong></p>` +
     g.intro +
     (top ? `<div class="prov-summary"><h2>Top pick — ${htmlEsc(top.name)}</h2><p>${htmlEsc(top.best_for || top.free_tier)} <a href="../p/${top.slug}">Details →</a></p></div>` : '') +
     `<p class="count"><strong>${list.length}</strong> verified providers</p>` +
@@ -1331,6 +1349,7 @@ for (const g of GUIDES) {
     `\n</tbody></table>` +
     `<div class="prov-actions" style="margin-top:22px"><a class="btn primary" href="../${g.query}">Open in the explorer →</a></div>` +
     faqHtml +
+    (twins.length ? `<h2>Related collections</h2><nav class="colls">${twins.map((c) => `<a href="../collections/${c.slug}">${htmlEsc(c.title)}</a>`).join('')}</nav>` : '') +
     `<h2>More guides</h2><nav class="colls">${related}</nav>` +
     `<p class="prov-back"><a href="../guides-and-collections/">← All guides</a></p>` +
     `</div></main>`;
@@ -1338,8 +1357,16 @@ for (const g of GUIDES) {
     '@context': 'https://schema.org',
     '@graph': [
       {
-        '@type': 'Article', headline: g.h1, description: g.desc,
+        '@type': 'Article', headline: g.h1, description: metaDesc, dateModified: data.generated,
         url: `${SITE}/guides/${g.slug}`, isPartOf: { '@type': 'WebSite', name: 'Free LLM API Hub', url: `${SITE}/` },
+      },
+      {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Free LLM API Hub', item: `${SITE}/` },
+          { '@type': 'ListItem', position: 2, name: 'Guides & Collections', item: `${SITE}/guides-and-collections/` },
+          { '@type': 'ListItem', position: 3, name: g.h1, item: `${SITE}/guides/${g.slug}` },
+        ],
       },
       ...(g.faq && g.faq.length ? [{
         '@type': 'FAQPage',
@@ -1351,7 +1378,7 @@ for (const g of GUIDES) {
     ],
   });
   writeFileSync(join(ROOT, `site/guides/${g.slug}.html`), htmlPage({
-    title: g.title, desc: g.desc, canonical: `${SITE}/guides/${g.slug}`, main, jsonld,
+    title: g.title, desc: metaDesc, canonical: `${SITE}/guides/${g.slug}`, main, jsonld,
     ogImage: `${SITE}/og/guides/${g.slug}.png`,
   }));
 }
