@@ -313,6 +313,7 @@ table.sortable thead th:not(.sorted)::after { content: " ⇅"; opacity: .28; fon
 .page-hero h1 { margin: 0 0 10px; font-size: clamp(1.6rem, 3.4vw, 2.2rem); max-width: none; }
 .page-hero .lede { text-align: center; margin: 10px auto 0; max-width: 62ch; }
 .colls { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+.page-hero .colls { justify-content: center; }
 .colls a { font-size: .82rem; padding: 6px 12px; border: 1px solid var(--border); border-radius: 7px; background: var(--panel); color: var(--muted); font-family: var(--font-mono); }
 .colls a:hover { border-color: var(--accent); color: var(--accent); text-decoration: none; }
 .colls a.active { border-color: var(--accent); color: var(--accent); background: color-mix(in srgb, var(--accent) 11%, transparent); }
