@@ -9,6 +9,8 @@ The [static JSON API](https://freellmapihub.com/api/) serves the dataset as file
 3. **Values change; shapes do not.** The data itself (limits, flags, model samples, counts) changes with every re-verification. That is the point of the dataset, not a breaking change. A provider can also leave the dataset when its free tier ends; its `slug` is never reused for a different provider.
 4. **A breaking change ships as `/api/v2/`.** Renaming or removing a field, changing a type, or changing what a value means goes to a new path. `/api/v1/` keeps being generated, from the same data, for a deprecation period announced in the [changelog](../CHANGELOG.md) and on the API page when `/api/v2/` is published.
 
+**One removal, on record.** The schema published at [`/api/v1/schema.json`](https://freellmapihub.com/api/v1/schema.json) declared two optional provider properties, `partner` and `partner_note`, from dataset 2.11.0 (13 October 2026). They are removed from the schema on 2026-10-16. No response of `/api/v1/` ever carried either one (no provider had a value for them), so no value a client could read changes; what changes is that the published schema loses those two property names, and the `intro` text of `/api/v1/best.json` now says that money, not only a partnership, adds nothing to the score. This is a withdrawal from a published schema, not an addition, and it is recorded here and in the [changelog](../CHANGELOG.md) so that the rules above are not read as saying that nothing was ever removed.
+
 What is *not* guaranteed: the order of providers in a list, the exact contents of sampled fields such as `models_free`, and the human-facing HTML pages.
 
 ### Fields added within v1
