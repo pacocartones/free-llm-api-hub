@@ -502,7 +502,7 @@ try {
 const withStars = (html) => (STARS ? html.replace(/(data-stars>)[^<]*(<)/g, `$1${STARS}$2`) : html);
 
 function htmlPage(args) { return markNewTabLinks(labelTables(withStars(htmlPageRaw(args)))); }
-function htmlPageRaw({ title, desc, canonical, main, jsonld, prefix = '../', noindex = false, ogImage = `${SITE}/og.png`, feeds = [], scripts = [] }) {
+function htmlPageRaw({ title, desc, canonical, main, jsonld, prefix = '../', noindex = false, ogImage = `${SITE}/og.png`, feeds = [], scripts = [], styles = [] }) {
   // jsonld carries provider names straight from the dataset; writing "<" as
   // the JSON unicode escape (backslash-u-003c) keeps a "</script>" in the
   // data from ever closing the block.
@@ -531,7 +531,7 @@ ${THEME_GUARD}
 <meta name="twitter:image" content="${ogImage}">
 <link rel="alternate" type="application/rss+xml" title="Free LLM API Hub — updates" href="${prefix}feed.xml">
 ${feeds.map((f) => `<link rel="alternate" type="application/rss+xml" title="${htmlEsc(f.title)}" href="${prefix}${f.href}">\n`).join('')}<link rel="stylesheet" href="${prefix}styles.css">
-${jsonld ? `<script type="application/ld+json">${jsonld.replace(/</g, '\\u003c')}</script>` : ''}
+${styles.map((s) => `<link rel="stylesheet" href="${prefix}${s}">\n`).join('')}${jsonld ? `<script type="application/ld+json">${jsonld.replace(/</g, '\\u003c')}</script>` : ''}
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
@@ -1715,6 +1715,7 @@ writeFileSync(
       pageHero({ crumbs: `<a href="../">Home</a> / Free AI coding tools`, h1: `Free AI coding tools`, lede: `Coding tools that say they have a free plan. Apart from the ranking, and every value written only where the tool's own page says it.` }) +
       codingToolsMainHtml(codingTools, { prefix: '../', repo: REPO, ownKey: codingToolsOwnKey }),
     prefix: '../',
+    styles: ['tables.css'],
   })
 );
 
@@ -1777,6 +1778,7 @@ writeFileSync(
       pageHero({ crumbs: `<a href="../">Home</a> / Free GPU compute`, h1: `Free GPU compute`, lede: `Free GPU time to run a model yourself. Apart from the ranking, and every value cited to the provider's own page.` }) +
       freeGpuMainHtml(freeGpu, { prefix: '../' }),
     prefix: '../',
+    styles: ['tables.css'],
   })
 );
 
