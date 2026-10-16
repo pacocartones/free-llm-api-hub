@@ -23,9 +23,12 @@ export function claimsTableHtml({ id, entries, labels, kindLabel, subject }) {
   if (!entries || entries.length < 2) return '';
   const fields = Object.keys(labels);
   const { fields: filterFields, kinds } = claimsFilters(entries, labels);
-  const cell = (e, f) => (e.claims[f] && e.claims[f].state === 'stated'
-    ? '<span class="gpu-stated">Stated</span>'
-    : '<span class="gpu-unstated">Not stated</span>');
+  // "Stated" links to the sentence itself (the claim block of the entry); "Not stated" has nothing to link to
+  const cell = (e, f) => (e.claims[f] && e.claims[f].state === 'stated' && SLUG_RE.test(e.slug)
+    ? `<a class="gpu-stated" href="#${e.slug}-${f}" title="Read the sentence">Stated</a>`
+    : e.claims[f] && e.claims[f].state === 'stated'
+      ? '<span class="gpu-stated">Stated</span>'
+      : '<span class="gpu-unstated">Not stated</span>');
   const filters = (filterFields.length || kinds.length)
     ? `<fieldset class="cmp-filters"><legend>Show only</legend>` +
       (kinds.length
@@ -46,7 +49,7 @@ export function claimsTableHtml({ id, entries, labels, kindLabel, subject }) {
       fields.map((f) => `<td>${cell(e, f)}</td>`).join('') + `</tr>`;
   }).join('');
   return `<div class="cmp" id="${id}-glance"><h3>At a glance</h3>` +
-    `<p class="muted">One row per ${htmlEsc(subject)}. <strong>Stated</strong> means the page's own sentence says it, shown in the entry below; ` +
+    `<p class="muted">One row per ${htmlEsc(subject)}. <strong>Stated</strong> means the page's own sentence says it, and the cell links to that sentence in the entry below; ` +
     `<strong>Not stated</strong> is never <em>no</em>. ${filterFields.length > 1 ? `If the filters leave no row, no ${htmlEsc(subject)} states all of the points you chose.` : ''}</p>` +
     filters +
     `<div class="table-scroll" role="region" aria-label="Comparison of the ${htmlEsc(subject)}s" tabindex="0">` +

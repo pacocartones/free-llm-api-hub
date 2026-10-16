@@ -28,13 +28,13 @@ const quoteHtml = (q) => {
   return `<blockquote class="gpu-quote"><p>&ldquo;${htmlEsc(q.text)}&rdquo;</p><footer class="muted">${link}${link ? ' · ' : ''}read ${htmlEsc(q.read)}</footer></blockquote>`;
 };
 
-function claimHtml(field, claim) {
+function claimHtml(slug, field, claim) {
   const quotes = claim.quotes.map(quoteHtml).join('');
   let state;
   if (claim.state === 'stated') state = '<span class="gpu-stated">Stated by the tool\'s page</span>';
   else if (claim.quotes.length) state = '<span class="gpu-unstated">Not stated</span> <span class="muted">Context quoted from the page:</span>';
   else state = '<span class="gpu-unstated">Not stated</span>';
-  return `<div class="gpu-claim"><dt>${htmlEsc(LABELS[field] || field)}</dt><dd>${state}${quotes}</dd></div>`;
+  return `<div class="gpu-claim"${SLUG_RE.test(slug) ? ` id="${slug}-${field}"` : ''}><dt>${htmlEsc(LABELS[field] || field)}</dt><dd>${state}${quotes}</dd></div>`;
 }
 
 /** { tools, stated } computed from the entries: how many tools, and how many of their values rest on a sentence. */
@@ -48,7 +48,7 @@ function entriesHtml(section) {
   return section.entries.map((e) => {
     const url = safeHttp(e.url);
     const name = url ? `<a href="${htmlEsc(url)}" target="_blank" rel="noopener">${htmlEsc(e.name)}</a>` : htmlEsc(e.name);
-    const claims = Object.keys(LABELS).map((f) => claimHtml(f, e.claims[f])).join('');
+    const claims = Object.keys(LABELS).map((f) => claimHtml(e.slug, f, e.claims[f])).join('');
     return `<section class="gpu-entry" id="${SLUG_RE.test(e.slug) ? e.slug : ''}"><h3>${name} <span class="muted">· ${htmlEsc(KIND_LABEL[e.kind] || e.kind)}</span></h3><dl class="gpu-claims">${claims}</dl></section>`;
   }).join('');
 }

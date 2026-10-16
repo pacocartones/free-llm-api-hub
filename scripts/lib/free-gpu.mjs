@@ -24,14 +24,14 @@ const quoteHtml = (q) => {
   return `<blockquote class="gpu-quote"><p>“${htmlEsc(q.text)}”</p><footer class="muted">${link}${link ? ' · ' : ''}read ${htmlEsc(q.read)}</footer></blockquote>`;
 };
 
-function claimHtml(field, claim) {
+function claimHtml(slug, field, claim) {
   const quotes = claim.quotes.map(quoteHtml).join('');
   let state;
   if (claim.state === 'stated') state = '<span class="gpu-stated">Stated by the provider</span>';
   else if (claim.quotes.length > 1) state = '<span class="gpu-unstated">Not stated: the sentences below do not settle it</span>';
   else if (claim.quotes.length === 1) state = '<span class="gpu-unstated">Not stated as a figure; what the page says is below</span>';
   else state = '<span class="gpu-unstated">Not stated</span>';
-  return `<div class="gpu-claim"><dt>${htmlEsc(LABELS[field] || field)}</dt><dd>${state}${quotes}</dd></div>`;
+  return `<div class="gpu-claim"${SLUG_RE.test(slug) ? ` id="${slug}-${field}"` : ''}><dt>${htmlEsc(LABELS[field] || field)}</dt><dd>${state}${quotes}</dd></div>`;
 }
 
 const kindLabel = (k) => (k === 'notebook' ? 'notebook service' : 'serverless API');
@@ -40,7 +40,7 @@ export function freeGpuMainHtml(section, { prefix = '../' } = {}) {
   const entries = section.entries.map((e) => {
     const url = safeHttp(e.url);
     const name = url ? `<a href="${htmlEsc(url)}" target="_blank" rel="noopener">${htmlEsc(e.name)}</a>` : htmlEsc(e.name);
-    const claims = Object.keys(LABELS).map((f) => claimHtml(f, e.claims[f])).join('');
+    const claims = Object.keys(LABELS).map((f) => claimHtml(e.slug, f, e.claims[f])).join('');
     return `<section class="gpu-entry" id="${SLUG_RE.test(e.slug) ? e.slug : ''}"><h3>${name} <span class="muted">· ${htmlEsc(kindLabel(e.kind))}</span></h3><dl class="gpu-claims">${claims}</dl></section>`;
   }).join('');
   const notes = (section.notes || []).map((n) =>

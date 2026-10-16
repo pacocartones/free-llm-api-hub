@@ -14,6 +14,7 @@
 .cmp-table tbody th { font-family: var(--font-mono); font-weight: 700; white-space: nowrap; position: sticky; left: 0; background: var(--bg); }
 .cmp-table tbody tr:hover :is(th, td) { background: var(--panel); }
 .cmp-table .gpu-stated { color: var(--accent); font-weight: 700; }
+.cmp-table a.gpu-stated { text-decoration: underline; text-underline-offset: 3px; }
 .cmp-table .gpu-unstated { color: var(--muted); }
 /* filters: a checked point keeps the rows that state it; a chosen kind keeps that kind */
 .cmp:has(input[name$="-state"][value="gpu_access"]:checked) tbody tr:not([data-stated~="gpu_access"]) { display: none; }

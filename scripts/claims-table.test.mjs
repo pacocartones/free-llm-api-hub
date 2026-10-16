@@ -33,6 +33,14 @@ test('claimsTableHtml: one row per service, every cell says Stated or Not stated
   const body = html.slice(html.indexOf('<tbody>'));   // the cells, not the sentence that explains them
   assert.equal((body.match(/>Stated</g) || []).length, 4);
   assert.equal((body.match(/>Not stated</g) || []).length, 5);
+  // a Stated cell links to its sentence; a Not stated cell links to nothing
+  assert.match(body, /<a class="gpu-stated" href="#one-a"[^>]*>Stated<\/a>/);
+  assert.ok(!/href="#[^"]*"[^>]*>Not stated</.test(body), 'Not stated has nothing to link to');
+  assert.equal((body.match(/<a class="gpu-stated"/g) || []).length, 4, 'every Stated cell is a link');
+  // keyboard and screen readers: every checkbox and radio sits inside its label
+  const inputs = html.match(/<input [^>]*>/g) || [];
+  assert.ok(inputs.length >= 3);
+  assert.equal((html.match(/<label><input /g) || []).length, inputs.length, 'every input is inside a label');
   assert.ok(!html.includes('<script'), 'no script');
   assert.ok(!/<(svg|img)/.test(html), 'text only: no icon stands for a state');
   assert.match(html, /<caption class="sr-only">/);
@@ -65,6 +73,22 @@ test('the built pages: the table matches the data, tables.css is loaded only by 
       assert.ok(row, `${page}: ${e.slug} has its row`);
       assert.equal(row[1], Object.keys(e.claims).filter((f) => e.claims[f].state === 'stated').join(' '));
     }
+  }
+  // every Stated cell of the built pages leads to a claim block that holds the sentence itself
+  for (const page of ['free-gpu', 'coding-tools']) {
+    const html = readFileSync(join(ROOT, `site/${page}/index.html`), 'utf8');
+    let links = 0;
+    for (const m of html.matchAll(/<a class="gpu-stated" href="#([^"]+)"/g)) {
+      links += 1;
+      const at = html.indexOf(`<div class="gpu-claim" id="${m[1]}">`);
+      assert.ok(at > 0, `${page}: the claim ${m[1]} exists`);
+      const block = html.slice(at, html.indexOf('</div>', html.indexOf('</dd>', at)));
+      assert.match(block, /<blockquote class="gpu-quote">/, `${page}: the claim ${m[1]} shows its sentence`);
+    }
+    assert.ok(links > 0, `${page}: some value is stated`);
+    assert.equal((html.match(/id="[a-z0-9_-]+-[a-z_]+"/g) || []).length >= links, true);
+    // the focus ring is never taken away from the filters, and without :has() nothing is hidden
+    assert.doesNotMatch(css, /outline:\s*(none|0)/);
   }
   // every point and kind that a filter can carry has its rule, so a new value cannot be a dead checkbox
   const fields = new Set(); const kinds = new Set();
