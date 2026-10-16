@@ -530,7 +530,8 @@ pre:hover .pre-copy, .pre-copy:focus-visible { opacity: 1; }
 }
 .chip:active, .colls a:active, .presets button:active, .coll-card:active { transform: scale(.98); }
 @media (prefers-reduced-motion: no-preference) {
-  .prose :target, main :target { animation: target-flash 1s var(--ease); }
+  /* the heading flashes, not the whole section that carries the id (a section can be a whole page of tables) */
+  main :is(h2, h3):target, main :target > :is(h2, h3):first-child { animation: target-flash 1s var(--ease); }
   @keyframes target-flash { from { background: color-mix(in srgb, var(--accent) 16%, transparent); } to { background: transparent; } }
   @view-transition { navigation: auto; }
   ::view-transition-old(root), ::view-transition-new(root) { animation-duration: 150ms; }

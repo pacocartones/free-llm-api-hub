@@ -324,8 +324,8 @@ test('every generated page has the same centred header: crumbs, one title and, w
     const f = join(dir, n);
     return statSync(f).isDirectory() ? (n === 'node_modules' ? [] : walk(f)) : (f.endsWith('.html') ? [f] : []);
   });
-  // The home page has its own hero (hand-written), 404 is a hand-written page, and two index files are redirect stubs.
-  const exceptions = new Set(['index.html', '404.html', 'collections/index.html', 'guides/index.html']);
+  // The home page has its own hero (hand-written), 404 is a hand-written page, and three index files are redirect stubs.
+  const exceptions = new Set(['index.html', '404.html', 'collections/index.html', 'guides/index.html', 'state/index.html']);
   let checked = 0;
   for (const file of walk(join(ROOT, 'site'))) {
     const rel = relative(join(ROOT, 'site'), file);
@@ -363,11 +363,39 @@ test('the interaction layer is CSS only and respects prefers-reduced-motion and 
   assert.doesNotMatch(hoverBlock, /text-decoration: none|background:/, 'the hover effect never removes the underline');
   // the page-change fade and the target highlight are a layer that is off with reduced motion
   assert.match(css, /@media \(prefers-reduced-motion: no-preference\) \{[^@]*@keyframes target-flash[\s\S]*?@view-transition \{ navigation: auto; \}/);
+  // the anchor flash marks the heading, never a whole section that carries the id
+  assert.match(css, /main :is\(h2, h3\):target, main :target > :is\(h2, h3\):first-child \{ animation: target-flash/);
+  assert.doesNotMatch(css, /\.prose :target|main :target \{/);
   // only movement properties and colours: no property that moves the layout inside the new layer
   const layer = css.slice(css.indexOf('/* ---------- subtle interaction'), css.indexOf('/* ---------- responsive ---------- */'));
   assert.doesNotMatch(layer, /\b(width|height|margin|padding|top|left)\s*:/, 'the layer moves nothing that changes the layout');
   // and no script: the layer adds none
   for (const js of ['site/site.js', 'site/explorer.js', 'site/widget.js']) assert.doesNotMatch(readFileSync(join(ROOT, js), 'utf8'), /view-transition|target-flash/);
+});
+
+// ---------- no broken internal link ----------
+test('every internal link of every built page points to a file that exists', () => {
+  run(['scripts/build.mjs']);
+  const site = join(ROOT, 'site');
+  const walk = (dir) => readdirSync(dir).flatMap((n) => {
+    const f = join(dir, n);
+    return statSync(f).isDirectory() ? (n === 'node_modules' ? [] : walk(f)) : (f.endsWith('.html') ? [f] : []);
+  });
+  const exists = (target) => [target, target + '.html', join(target, 'index.html')].some((c) => existsSync(c) && statSync(c).isFile());
+  const broken = [];
+  let checked = 0;
+  for (const file of walk(site)) {
+    const html = readFileSync(file, 'utf8');
+    for (const m of html.matchAll(/<a\s[^>]*?href="([^"#?]*)(?:[#?][^"]*)?"/g)) {
+      const href = m[1];
+      if (!href || /^(?:[a-z][a-z0-9+.-]*:|\/\/)/i.test(href)) continue;   // http(s), mailto, protocol-relative
+      const target = href.startsWith('/') ? join(site, href) : join(dirname(file), href);
+      checked += 1;
+      if (!exists(target)) broken.push(`${relative(site, file)} -> ${href}`);
+    }
+  }
+  assert.ok(checked > 1000, `the check covered ${checked} internal links`);
+  assert.deepEqual([...new Set(broken)].slice(0, 10), [], `${broken.length} broken internal link(s)`);
 });
 
 test('sitemap.xml lists no paginated updates pages (their count follows the commit count)', () => {
@@ -1183,7 +1211,16 @@ test('the change feed and state reports are built but never pinned in derived-fi
   }
   const sitemap = readFileSync(join(ROOT, 'site/sitemap.xml'), 'utf8');
   assert.match(sitemap, /<loc>https:\/\/freellmapihub\.com\/changes\/<\/loc>/);
-  assert.match(sitemap, /<loc>https:\/\/freellmapihub\.com\/state\/<\/loc>/);
+  // /state/ is a redirect page to the single page for what changed: it is not listed, and it says where it goes
+  assert.doesNotMatch(sitemap, /<loc>https:\/\/freellmapihub\.com\/state\/<\/loc>/);
+  const stateRedirect = readFileSync(join(ROOT, 'site/state/index.html'), 'utf8');
+  assert.match(stateRedirect, /<meta http-equiv="refresh" content="0; url=\.\.\/changes\/#months">/);
+  assert.match(stateRedirect, /<link rel="canonical" href="https:\/\/freellmapihub\.com\/changes\/">/);
+  assert.match(stateRedirect, /<meta name="robots" content="noindex">/);
+  const changesPage = readFileSync(join(ROOT, 'site/changes/index.html'), 'utf8');
+  assert.match(changesPage, /<section id="months">/);
+  assert.match(changesPage, /<section id="weeks">/);
+  for (const month of months) assert.match(changesPage, new RegExp(`href="\\.\\./state/${month}/"`), `the month ${month} is linked from the one page`);
   assert.doesNotMatch(sitemap, /\/state\/\d{4}-\d{2}\//, 'per-month URLs depend on commit dates, so they stay out of the drift-gated sitemap');
 });
 
@@ -1387,7 +1424,7 @@ test('footer columns: where each link lives, and no GitHub star entry in Project
   const expected = {
     Explore: ['#explorer', 'models/', 'guides-and-collections/', 'programs/startups', 'programs/research', 'free-gpu/', 'coding-tools/'],
     Data: ['providers.json', 'api/', 'llms.txt', 'data-policy/', 'coverage/'],
-    Project: ['updates', 'changes/', 'state/', 'docs/methodology.md', 'CONTRIBUTING.md', 'agreements/'],
+    Project: ['updates', 'changes/', 'docs/methodology.md', 'CONTRIBUTING.md', 'agreements/'],
   };
   for (const rel of ['site/index.html', 'site/compare/index.html', 'site/p/groq.html', 'site/legal/privacy.html']) {
     const html = readFileSync(join(ROOT, rel), 'utf8');

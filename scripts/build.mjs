@@ -463,7 +463,7 @@ const siteFooter = (p) => `<footer class="site-footer"><div class="wrap footer-t
 <div class="footer-brand"><a class="foot-brand-link" href="${p}" aria-label="Free LLM API Hub — home"><svg class="logo-mark"><use href="#logo"/></svg><span class="brand-name">Free LLM API <span class="grad">Hub</span></span></a><p>The <strong>continuously-verified</strong>, <strong>machine-readable</strong> dataset of <strong>free LLM &amp; AI-model APIs</strong> and <strong>trial credits</strong> — every entry <strong>dated</strong>, <strong>sourced</strong>, and <strong>free of dead links</strong>.</p><img class="trust-badge" src="${p}badge-verified.svg" alt="Verified providers" width="${BADGE_W}" height="20" loading="lazy"><a class="star-btn" href="${REPO}" target="_blank" rel="noopener"><span class="sb-label">${GH_ICON} Star on GitHub</span><span class="sb-count" data-stars>★</span></a></div>
 <div class="footer-col"><h2 class="footer-h">Explore</h2><a href="${p}#explorer">Interactive explorer</a><a href="${p}models/">Free model index</a><a href="${p}guides-and-collections/">Guides &amp; collections</a><a href="${p}programs/startups">Startup credits</a><a href="${p}programs/research">Student &amp; research credits</a><a href="${p}free-gpu/">Free GPU compute</a><a href="${p}coding-tools/">Free AI coding tools</a></div>
 <div class="footer-col"><h2 class="footer-h">Data</h2><a href="${p}providers.json">providers.json</a><a href="${p}api/">JSON API</a><a href="${p}llms.txt">llms.txt</a><a href="${p}data-policy/">Who trains on your data</a><a href="${p}coverage/">Data coverage</a></div>
-<div class="footer-col"><h2 class="footer-h">Project</h2><a href="${p}updates">Updates</a><a href="${p}changes/">What changed</a><a href="${p}state/">Monthly state report</a><a href="${REPO}/blob/main/docs/methodology.md">Methodology</a><a href="${REPO}/blob/main/CONTRIBUTING.md">Contributing</a><a href="${p}agreements/">Agreements</a></div>
+<div class="footer-col"><h2 class="footer-h">Project</h2><a href="${p}updates">Updates</a><a href="${p}changes/">What changed</a><a href="${REPO}/blob/main/docs/methodology.md">Methodology</a><a href="${REPO}/blob/main/CONTRIBUTING.md">Contributing</a><a href="${p}agreements/">Agreements</a></div>
 </div><div class="wrap footer-bottom"><p>Independent, community-maintained — not affiliated with any provider listed. Terms change without notice; always confirm against each provider's own docs. MIT licensed.</p><p class="foot-legal"><a href="${p}legal/privacy">Privacy</a> · <a href="${p}legal/terms">Terms</a></p><p class="foot-email"><a href="mailto:admin@freellmapihub.com">admin@freellmapihub.com</a></p></div></footer>`;
 
 // Full page wrapper for generated (collection) pages. `p` is the path prefix to the site root.
@@ -858,7 +858,7 @@ writeFileSync(
   htmlPage({ title: 'Guides & Collections · Free LLM API Hub', desc: 'Data-backed guides to free LLM and AI-model APIs, plus curated collections by constraint: no card, no phone, commercial use, OpenAI-compatible, permanently free, multimodal.', canonical: `${SITE}/guides-and-collections/`, main: hubMain })
 );
 // The old hubs redirect here so existing links and bookmarks keep working.
-const redirectPage = (to) => `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="robots" content="noindex"><meta http-equiv="refresh" content="0; url=${to}"><link rel="canonical" href="${new URL(to, SITE + '/x/').href}"><title>Redirecting…</title></head><body><p>Moved to <a href="${to}">${to}</a>.</p></body></html>`;
+const redirectPage = (to) => `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="robots" content="noindex"><meta http-equiv="refresh" content="0; url=${to}"><link rel="canonical" href="${new URL(to, SITE + '/x/').href.replace(/#.*$/, '')}"><title>Redirecting…</title></head><body><p>Moved to <a href="${to}">${to}</a>.</p></body></html>`;
 mkdirSync(join(ROOT, 'site/guides'), { recursive: true });
 mkdirSync(join(ROOT, 'site/collections'), { recursive: true });
 writeFileSync(join(ROOT, 'site/guides/index.html'), redirectPage('../guides-and-collections/'));
@@ -1131,25 +1131,6 @@ writeFileSync(join(ROOT, 'site/changes.xml'), changesRss(changeWeeks, { site: SI
 const changeRowHtml = (c) =>
   `<tr><td class="notes">${c.date}</td><td class="name">${provLink(c.slug, c.name, '../')}</td><td>${htmlEsc(c.label)}</td>` +
   `<td class="notes">${htmlEsc(formatValue(c.from))}</td><td>${htmlEsc(formatValue(c.to))}</td></tr>`;
-const changesMain =
-  pageHero({ crumbs: `<a href="../">Home</a> / <a href="../updates">Updates</a> / What changed`, h1: `What changed this week`, lede: `Field-level changes to the free tiers we track (what's free, rate limits, the catch and the card, phone, commercial-use and OpenAI-compatibility flags), grouped by ISO week, newest first. Covers the last 12 weeks up to the newest change, mined from the git history of <a href="${REPO}/commits/main/data/providers.json">providers.json</a>. Subscribe via <a href="../changes.xml">RSS</a> or read the <a href="../api/v1/changes.json">JSON</a>.` }) +
-  `<main id="main"><div class="wrap prose">` +
-  (changeWeeks.length
-    ? changeWeeks.map((g) =>
-      `<section id="${g.week}"><h2>${htmlEsc(weekTitle(g))}</h2>` +
-      `<table class="model-table"><thead><tr><th>Date</th><th>Provider</th><th>Field</th><th>From</th><th>To</th></tr></thead><tbody>\n` +
-      g.changes.map(changeRowHtml).join('\n') + `\n</tbody></table></section>`).join('\n')
-    : `<p class="muted">No field-level changes in the mined history.</p>`) +
-  `<p class="prov-back"><a href="../updates">← All updates</a> · <a href="../state/">Monthly state reports</a></p>` +
-  `</div></main>`;
-rmSync(join(ROOT, 'site/changes'), { recursive: true, force: true });
-mkdirSync(join(ROOT, 'site/changes'), { recursive: true });
-writeFileSync(join(ROOT, 'site/changes/index.html'), htmlPage({
-  title: 'What changed this week · Free LLM API Hub',
-  desc: 'Field-level changes to free LLM API tiers, week by week: free tier, rate limits, the catch and access flags, with the before and after values.',
-  canonical: `${SITE}/changes/`, main: changesMain, prefix: '../',
-  feeds: [{ title: 'Free LLM API Hub — what changed, week by week', href: 'changes.xml' }],
-}));
 
 const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 const monthLabel = (month) => `${MONTH_NAMES[Number(month.slice(5, 7)) - 1]} ${month.slice(0, 4)}`;
@@ -1170,7 +1151,7 @@ stateReports.forEach((r, i) => {
   const next = stateReports[i + 1];
   const days = (d) => (d === null ? '—' : `${d}d`);
   const main =
-    pageHero({ crumbs: `<a href="../../">Home</a> / <a href="../">State reports</a> / ${label}`, h1: `State of free LLM APIs — ${label}`, lede: `Computed from the last revision of providers.json committed in ${label} (${r.snapshotDate}) and the git-mined change history. Ages are measured as of ${r.asOf}.` }) +
+    pageHero({ crumbs: `<a href="../../">Home</a> / <a href="../../changes/#months">What changed</a> / ${label}`, h1: `State of free LLM APIs — ${label}`, lede: `Computed from the last revision of providers.json committed in ${label} (${r.snapshotDate}) and the git-mined change history. Ages are measured as of ${r.asOf}.` }) +
     `<main id="main"><div class="wrap prose">` +
     `<div class="stats">${stat(r.total, 'providers')}${stat(pct(r.verifiedShare), 'verified')}${stat(days(r.freshness.medianDays), 'median verification age')}${stat(r.fieldChanges, 'field changes this month')}</div>` +
     `<h2>Providers by category</h2>` +
@@ -1195,7 +1176,7 @@ stateReports.forEach((r, i) => {
       : `<p class="muted">No provider in the snapshot has an <code>added</code> date in ${label}.</p>`) +
     `<nav class="pagination" aria-label="State reports">` +
     (prev ? `<a href="../${prev.month}/" rel="prev">← ${monthLabel(prev.month)}</a>` : '<span aria-hidden="true"></span>') +
-    `<span><a href="../">All months</a></span>` +
+    `<span><a href="../../changes/#months">All months</a></span>` +
     (next ? `<a href="../${next.month}/" rel="next">${monthLabel(next.month)} →</a>` : '<span aria-hidden="true"></span>') +
     `</nav></div></main>`;
   mkdirSync(join(ROOT, `site/state/${r.month}`), { recursive: true });
@@ -1205,20 +1186,36 @@ stateReports.forEach((r, i) => {
     canonical: `${SITE}/state/${r.month}/`, main, prefix: '../../',
   }));
 });
-const stateIndexMain =
-  pageHero({ crumbs: `<a href="../">Home</a> / State reports`, h1: `State of free LLM APIs`, lede: `One report per month with a committed change to providers.json: provider counts by category and modality, verified share, verification age, field changes and providers added. Every number is computed from the dataset and its git history.` }) +
+// /changes/ is the one page for what changed: the months (the state reports) and the weeks. /state/ redirects to it.
+const monthsTable = stateReports.length
+  ? kvTable(['Month', 'Providers', 'Verified', 'Field changes', 'Added'],
+    [...stateReports].reverse().map((r) => [`<a href="../state/${r.month}/">${monthLabel(r.month)}</a>`, r.total, pct(r.verifiedShare), r.fieldChanges, r.added.length]))
+  : `<p class="muted">No history available.</p>`;
+const changesMain =
+  pageHero({ crumbs: `<a href="../">Home</a> / <a href="../updates">Updates</a> / What changed`, h1: `What changed`, lede: `Field-level changes to the free tiers we track (what's free, rate limits, the catch and the card, phone, commercial-use and OpenAI-compatibility flags), week by week, and one state report for each month. Mined from the git history of <a href="${REPO}/commits/main/data/providers.json">providers.json</a>. Subscribe via <a href="../changes.xml">RSS</a> or read the <a href="../api/v1/changes.json">JSON</a>.`, extra: `<nav class="colls" aria-label="On this page"><a href="#months">Month by month</a><a href="#weeks">Week by week</a></nav>` }) +
   `<main id="main"><div class="wrap prose">` +
-  (stateReports.length
-    ? kvTable(['Month', 'Providers', 'Verified', 'Field changes', 'Added'],
-      [...stateReports].reverse().map((r) => [`<a href="${r.month}/">${monthLabel(r.month)}</a>`, r.total, pct(r.verifiedShare), r.fieldChanges, r.added.length]))
-    : `<p class="muted">No history available.</p>`) +
-  `<p class="prov-back"><a href="../changes/">What changed this week →</a></p>` +
+  `<section id="months"><h2>Month by month</h2>` +
+  `<p>One report per month with a committed change to providers.json: provider counts by category and modality, verified share, verification age, field changes and providers added. Every figure is computed from the data and its git history.</p>` +
+  monthsTable + `</section>` +
+  `<section id="weeks"><h2>Week by week</h2>` +
+  `<p>Grouped by ISO week, newest first. Covers the last 12 weeks up to the newest change.</p>` +
+  (changeWeeks.length
+    ? changeWeeks.map((g) =>
+      `<section id="${g.week}"><h3>${htmlEsc(weekTitle(g))}</h3>` +
+      `<table class="model-table"><thead><tr><th>Date</th><th>Provider</th><th>Field</th><th>From</th><th>To</th></tr></thead><tbody>\n` +
+      g.changes.map(changeRowHtml).join('\n') + `\n</tbody></table></section>`).join('\n')
+    : `<p class="muted">No field-level changes in the mined history.</p>`) +
+  `</section>` +
+  `<p class="prov-back"><a href="../updates">← All updates</a></p>` +
   `</div></main>`;
-writeFileSync(join(ROOT, 'site/state/index.html'), htmlPage({
-  title: 'State of free LLM APIs — monthly reports · Free LLM API Hub',
-  desc: 'Monthly reports on the free LLM API dataset: provider counts, verified share, verification age, field changes and additions, computed from the data.',
-  canonical: `${SITE}/state/`, main: stateIndexMain, prefix: '../',
+writeFileSync(join(ROOT, 'site/changes/index.html'), htmlPage({
+  title: 'What changed · Free LLM API Hub',
+  desc: 'What changed in the free LLM API dataset: field-level changes week by week (free tier, rate limits, the catch and access flags, before and after) and a state report for each month.',
+  canonical: `${SITE}/changes/`, main: changesMain, prefix: '../',
+  feeds: [{ title: 'Free LLM API Hub — what changed, week by week', href: 'changes.xml' }],
 }));
+// The old index of the monthly reports now lives in /changes/#months; the reports keep their URLs.
+writeFileSync(join(ROOT, 'site/state/index.html'), redirectPage('../changes/#months'));
 
 // ---------- credit programs: site pages + doc, from data/programs.json ----------
 const programs = JSON.parse(readFileSync(join(ROOT, 'data/programs.json'), 'utf8'));
@@ -1869,7 +1866,6 @@ const sitemapEntries = [
   [`${SITE}/coding-tools/`, codingTools.generated],
   [`${SITE}/api/`, data.generated],
   [`${SITE}/changes/`, data.generated],
-  [`${SITE}/state/`, data.generated],
   [`${SITE}/programs/`, programs.generated],
   [`${SITE}/programs/startups`, programs.generated],
   [`${SITE}/programs/research`, programs.generated],
