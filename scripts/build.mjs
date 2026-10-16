@@ -190,8 +190,8 @@ const COLLECTIONS = [
 const GUIDES = [
   {
     slug: 'free-llm-api-without-credit-card',
-    answer: 'Yes. {n} providers in the verified dataset give a free tier without asking for a card at signup, so reaching a limit means being rate-limited rather than billed. Before you choose, compare two columns in the table: the rate limits, and whether the free tier allows commercial use.',
-    metaDesc: '{n} free LLM APIs that need no credit card at signup, verified and dated {date}. Rate limits and commercial-use flags side by side.',
+    answer: 'Yes. {n} providers in the verified dataset give a free tier without asking for a card at signup, so reaching a limit usually means being rate-limited rather than billed, because no card is on file. Before you choose, compare two columns in the table: the rate limits, and whether the free tier allows commercial use.',
+    metaDesc: '{n} free LLM APIs that need no credit card at signup. Rate limits and commercial-use flags side by side. Dataset of {date}; each row is dated.',
     card: 'No credit card',
     blurb: 'Production-grade free tiers that never ask for a card.',
     h1: 'Free LLM APIs with no credit card required',
@@ -210,7 +210,7 @@ const GUIDES = [
   {
     slug: 'openai-compatible-free-apis',
     answer: '{n} verified free APIs expose an OpenAI-compatible endpoint. With the official OpenAI SDK you change the base_url and the API key and keep the rest of your code. Compatibility can be partial, so check which endpoints and features, such as tools or streaming, each provider supports.',
-    metaDesc: "{n} free LLM APIs with an OpenAI-compatible endpoint: change base_url and your key, keep your SDK. Confirmed against each provider's docs, {date}.",
+    metaDesc: "{n} free LLM APIs with an OpenAI-compatible endpoint: change base_url and your key, keep your SDK. Dataset of {date}; every row carries its own verification date.",
     card: 'OpenAI-compatible',
     blurb: 'Keep your code — just swap base_url and key.',
     h1: 'Free OpenAI-compatible APIs (drop-in base_url)',
@@ -229,7 +229,7 @@ const GUIDES = [
   {
     slug: 'free-llm-api-no-signup',
     answer: '{n} providers in the verified dataset need neither a payment card nor a phone number to get a key. Signup is not removed: most still ask for an email or a sign-in with an existing account. The table shows what each free tier allows and the rate limits that come with the lowest friction.',
-    metaDesc: '{n} free LLM APIs whose signup asks for neither a card nor a phone number: the lowest-friction keys, verified and dated {date}.',
+    metaDesc: '{n} free LLM APIs whose signup asks for neither a card nor a phone number: the lowest-friction keys. Dataset of {date}; every row is dated.',
     card: 'No card, no phone',
     blurb: 'The lowest-friction keys: no card, no phone number.',
     h1: 'Free LLM APIs with no phone number (and no card)',
@@ -247,7 +247,7 @@ const GUIDES = [
   {
     slug: 'free-embeddings-apis',
     answer: '{n} providers in the verified dataset include embedding models on a free tier. They suit prototypes of semantic search and retrieval-augmented generation (RAG); the table lists each free tier and its limits. Choose the model before you index, because vectors from different models are not comparable and changing models means re-embedding your data.',
-    metaDesc: '{n} free vector embedding APIs for semantic search and RAG, with free tiers and limits compared. Verified {date}.',
+    metaDesc: '{n} free vector embedding APIs for semantic search and RAG, with free tiers and limits compared. Dataset of {date}.',
     card: 'Embeddings / RAG',
     blurb: 'Free vector embeddings for search and RAG.',
     h1: 'Free embeddings APIs for search and RAG',
@@ -266,7 +266,7 @@ const GUIDES = [
   {
     slug: 'free-speech-to-text-apis',
     answer: '{n} providers in the verified dataset offer free speech APIs, for transcription (speech-to-text) or voice output (text-to-speech). Free allowances are given in audio time, characters or credits, so convert them to the same unit before comparing. Voice terms often differ from text terms, so read the commercial-use flag in the Gotchas column for each row.',
-    metaDesc: '{n} free transcription and text-to-speech APIs, with limits in audio time, characters or credits compared. Verified {date}.',
+    metaDesc: '{n} free transcription and text-to-speech APIs, with limits in audio time, characters or credits compared. Dataset of {date}.',
     card: 'Speech (STT/TTS)',
     blurb: 'Free transcription and text-to-speech tiers.',
     h1: 'Free speech APIs — transcription and text-to-speech',
@@ -285,7 +285,7 @@ const GUIDES = [
   {
     slug: 'free-image-generation-apis',
     answer: '{n} providers in the verified dataset offer a free tier or starting credit for text-to-image generation. Allowances are usually images or credits, and the catches that matter are watermarks and commercial-use terms. The Gotchas column flags commercial use; watermark rules are in the notes on each provider page.',
-    metaDesc: '{n} free text-to-image APIs, with limits, watermarks and commercial-use terms compared. Verified {date}.',
+    metaDesc: '{n} free text-to-image APIs, with limits, watermarks and commercial-use terms compared. Dataset of {date}.',
     card: 'Image generation',
     blurb: 'Free text-to-image APIs — Flux, SDXL and more.',
     h1: 'Free image generation APIs',
@@ -305,7 +305,7 @@ const GUIDES = [
   {
     slug: 'free-ocr-document-ai-apis',
     answer: '{n} providers in the verified dataset offer free OCR or document parsing. Allowances are given in pages or credits, and some are one-time rather than monthly, so check each row. Layout-aware parsers keep tables and headings, which matters for RAG; plain OCR returns only the text.',
-    metaDesc: '{n} free OCR and document-parsing APIs to turn PDFs and scans into text for RAG. Page limits and terms compared, {date}.',
+    metaDesc: '{n} free OCR and document-parsing APIs to turn PDFs and scans into text for RAG. Page limits and terms compared. Dataset of {date}.',
     card: 'OCR / document AI',
     blurb: 'Free OCR and document-parsing APIs for RAG.',
     h1: 'Free OCR and document-parsing APIs',
