@@ -1746,8 +1746,7 @@ writeFileSync(
     desc: 'Every paid relationship of Free LLM API Hub, with its dates and what each side gets. Paid content is outside the dataset, the API files and the ranking.',
     canonical: SITE + '/agreements/',
     main:
-      '<section class="page-hero model-hero"><div class="wrap"><nav class="crumbs"><a href="../">Home</a> / Agreements</nav>' +
-      '<h1>Agreements and sponsorship</h1><p class="lede">' + htmlEsc(NOT_IN_DATA_SENTENCE) + '</p></div></section>' +
+      pageHero({ crumbs: '<a href="../">Home</a> / Agreements', h1: 'Agreements and sponsorship', lede: htmlEsc(NOT_IN_DATA_SENTENCE) }) +
       '<main id="main"><div class="wrap prose">' + agreementsTableHtml(AGREEMENTS, data.generated) +
       '<h2>Where paid items can and cannot appear</h2><p>' + htmlEsc(MACHINE_SENTENCE) + '</p>' +
       inForce(AGREEMENTS, data.generated).map(sponsoredBlockHtml).join('') +
