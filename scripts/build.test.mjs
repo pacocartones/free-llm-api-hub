@@ -2140,7 +2140,7 @@ test('data_policy lot 4: the 13 providers that say they do not train were read f
   for (const p of data.providers.filter((q) => q.data_policy && q.data_policy.trains_on_prompts !== false)) {
     // rows that say it may train were read for the plan later (lots 2, 3, 5 and the correction of the absence claims): true where the
     // clause names the free users or free usage (AssemblyAI, Voyage AI), false where it does not
-    const READ = { assemblyai: true, 'voyage-ai': true, elevenlabs: false, cartesia: false, 'retell-ai': false, deepgram: false, 'arli-ai': false };
+    const READ = { assemblyai: true, 'voyage-ai': true, elevenlabs: false, cartesia: false, 'retell-ai': false, deepgram: false, 'arli-ai': false, 'sarvam-ai': false };
     if (p.slug in READ) assert.equal(p.data_policy.plan_named, READ[p.slug], `${p.slug}: plan_named as read`);
     else assert.equal(p.data_policy.plan_named, undefined, `${p.slug}: not read for the plan yet, so no value is written`);
   }
@@ -2186,7 +2186,7 @@ test('correction of the absence claims: no note says the page names no plan unle
 
 test('data_policy: Arli AI, from a contributor, states retention only: trains stays not confirmed, the quote is literal and has its register entry', () => {
   const data = JSON.parse(readFileSync(DATA, 'utf8'));
-  assert.equal(data.providers.filter((p) => p.data_policy).length, 27, 'the count of covered providers');
+  assert.equal(data.providers.filter((p) => p.data_policy).length, 28, 'the count of covered providers');
   const dp = data.providers.find((p) => p.slug === 'arli-ai').data_policy;
   assert.equal(dp.trains_on_prompts, null, 'the policy says nothing about training: not stated is not no');
   assert.match(dp.retention, /processed transiently and immediately discarded/); assert.equal(dp.plan_named, false);
