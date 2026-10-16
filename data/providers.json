@@ -1008,7 +1008,7 @@
       "free_type": "recurring-credit",
       "free_tier": "$5/month usage credits in every workspace (Free plan) for the Moondream vision model — caption, query (VQA), detect, point",
       "rate_limits": "2 requests/sec on the free tier (10 req/sec with ≥$10 account balance); usage bounded by the $5/month credit",
-      "notes": "Recurring $5/month credit, no credit card required. Per the Terms (§5.2), data is not used to train Moondream's generally available models. Commercial terms for the hosted API not specified. OpenAI-compatible endpoint.",
+      "notes": "Last updated 2025-12-10. Commercial use of the free tier is unclear: §4.1 permits use for «internal business or personal purposes», while §4.2 prohibits «commercially exploit the Service or any portion of the Service». The terms do not explicitly clarify whether commercial use is permitted on the free tier.",
       "best_for": "Tiny vision model, OpenAI-compatible, monthly free credit",
       "modalities": ["vision"],
       "models_free": null,
@@ -1023,8 +1023,8 @@
       "is_text_llm": false,
       "model_tier": null,
       "verified": true,
-      "last_verified": "2026-10-08",
-      "data_policy": {"trains_on_prompts":false,"retention":"No longer than necessary to provide the Service","source":"https://moondream.ai/terms","checked":"2026-10-15","quote":"M87 Labs will not use Customer Content or Outputs to Train any model or adapter that is made generally available by M87 Labs (including the base Moondream models), or to Train any model or adapter for the benefit of any third party, except where you explicitly opt in under a separate written agreement.","note":"Last updated 2025-12-10. The clause names no free plan and speaks of «Customer Content».","plan_named":false}
+      "last_verified": "2026-10-16",
+      "data_policy": {"trains_on_prompts":false,"retention":"No longer than necessary to provide the Service","source":"https://moondream.ai/terms","checked":"2026-10-15","quote":"M87 Labs will not use Customer Content or Outputs to Train any model or adapter that is made generally available by M87 Labs (including the base Moondream models), or to Train any model or adapter for the benefit of any third party, except where you explicitly opt in under a separate written agreement.","note":"Commercial use of the free tier is unclear. §4.1: «your internal business or personal purposes»; §4.2: «commercially exploit the Service or any portion of the Service». The terms do not name the free plan.","plan_named":false}
     },
     {
       "slug": "speechmatics",
