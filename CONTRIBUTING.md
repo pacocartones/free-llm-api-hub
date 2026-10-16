@@ -90,6 +90,8 @@ The same applies to `data_policy`, which records what a provider says about your
 
 A `data_policy` row also needs its entries in `data/quotes.json` (the sentence, each phrase of the note between « », and a check behind any claim about a whole page). You do not write them: after editing the row, run `npm run quotes:add -- <slug>` and then `npm test`. `docs/quotes.md` says what the command does and what to do when a page cannot be read.
 
+**Dates are UTC days.** `last_verified`, `added`, `checked` and `generated` are the day in UTC, written `YYYY-MM-DD` (`date -u +%F` gives it). If your day is already tomorrow in UTC, write today's UTC day, never tomorrow: `npm test` fails on a `generated` that is after today in UTC.
+
 ## Reporting without a PR
 
 - **Something's outdated or wrong:** the [structured issue form](../../issues/new?template=inaccuracy.yml) takes under a minute.

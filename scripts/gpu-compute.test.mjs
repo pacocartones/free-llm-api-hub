@@ -82,6 +82,30 @@ test('fal.ai keeps both of its contradicting expiry sentences and no invented va
   for (const f of ['credit_amount', 'card_required']) assert.equal(fal.claims[f].state, 'not_stated');
 });
 
+test('ZeroGPU records sourced free access and daily quota without inferring credit, expiry or card requirements', () => {
+  const s = section();
+  const entries = s.entries.filter((e) => e.slug === 'hugging-face-zerogpu');
+  assert.equal(entries.length, 1, 'ZeroGPU must appear once in the GPU compute section');
+  const zeroGpu = entries[0];
+  const source = 'https://huggingface.co/docs/hub/en/spaces-zerogpu';
+  assert.equal(zeroGpu.kind, 'serverless-api');
+  assert.equal(zeroGpu.url, source);
+  for (const field of ['gpu_access', 'quota']) {
+    const c = zeroGpu.claims[field];
+    assert.equal(c.state, 'stated');
+    assert.ok(c.quotes.length > 0);
+    for (const q of c.quotes) {
+      assert.equal(q.source, source);
+      assert.ok(q.read <= s.generated, 'a quotation cannot be read after the section was generated');
+    }
+  }
+  assert.match(zeroGpu.claims.gpu_access.quotes.map((q) => q.text).join(' '), /free to all users/);
+  assert.match(zeroGpu.claims.quota.quotes.map((q) => q.text).join(' '), /daily quota.*24 hours/);
+  for (const field of ['credit_amount', 'expires', 'card_required']) {
+    assert.deepEqual(zeroGpu.claims[field], claim('not_stated'), `${field} must remain unknown`);
+  }
+});
+
 // The page of the section. It reads data/gpu-compute.json only, shows every quoted sentence with the day it
 // was read, says "Not stated" where the provider did not, and stays out of everything that counts providers.
 test('the section has a page that shows its quotations and stays out of every provider count', () => {

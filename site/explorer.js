@@ -53,8 +53,10 @@ function render() {
   const emptyEl = document.getElementById('empty');
   emptyEl.style.display = rows.length ? 'none' : 'block';
   emptyEl.textContent = rows.length ? '' : 'No providers match these filters.';
-  // A permanent live region says how many providers are shown after each filter or search (the empty message is visible text only).
-  document.getElementById('count').textContent = rows.length ? `${rows.length} of ${DATA.length} providers shown` : 'No providers match these filters.';
+  // Keep the result count separate from the visible empty-state message.
+  document.getElementById('count').textContent = rows.length === DATA.length
+    ? `${rows.length} providers`
+    : `Showing ${rows.length} of ${DATA.length} providers`;
   const activeCount = (query.trim() ? 1 : 0) + (category !== 'all' ? 1 : 0) + 
     (modality !== 'all' ? 1 : 0) +
     (sortKey !== 'recommended' ? 1 : 0) +

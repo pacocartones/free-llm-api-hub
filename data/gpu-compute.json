@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-13",
+  "generated": "2026-10-16",
   "note": "Free GPU compute: a section apart from the provider ranking. Nothing here is a provider of the LLM dataset and none of it enters a provider count, a score or a collection. A value is written only when the provider's own page states it, with the sentence and the day it was read; otherwise it is not_stated.",
   "entries": [
     {
@@ -18,6 +18,29 @@
           "state": "not_stated",
           "quotes": [
             { "text": "Colab resources are not guaranteed and not unlimited, and usage limits sometimes fluctuate.", "source": "https://research.google.com/colaboratory/faq.html", "read": "2026-10-13" }
+          ]
+        },
+        "credit_amount": { "state": "not_stated", "quotes": [] },
+        "expires": { "state": "not_stated", "quotes": [] },
+        "card_required": { "state": "not_stated", "quotes": [] }
+      }
+    },
+    {
+      "slug": "hugging-face-zerogpu",
+      "name": "Hugging Face Spaces ZeroGPU",
+      "url": "https://huggingface.co/docs/hub/en/spaces-zerogpu",
+      "kind": "serverless-api",
+      "claims": {
+        "gpu_access": {
+          "state": "stated",
+          "quotes": [
+            { "text": "ZeroGPU Spaces are available to use for free to all users.", "source": "https://huggingface.co/docs/hub/en/spaces-zerogpu", "read": "2026-10-16" }
+          ]
+        },
+        "quota": {
+          "state": "stated",
+          "quotes": [
+            { "text": "Included daily quota resets exactly 24 hours after your first GPU usage.", "source": "https://huggingface.co/docs/hub/en/spaces-zerogpu", "read": "2026-10-16" }
           ]
         },
         "credit_amount": { "state": "not_stated", "quotes": [] },

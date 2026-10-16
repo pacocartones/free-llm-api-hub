@@ -17,6 +17,8 @@ import { clientBundle as compareClientBundle } from './lib/compare.mjs';
 // (the same string build.mjs writes to site/shared-rows.js), so no generated
 // file has to exist on disk for the suite to pass in a clean checkout.
 const SHARED_ROWS = clientBundle();
+const EXPLORER_JS = readFileSync(new URL('../site/explorer.js', import.meta.url), 'utf8');
+const PROVIDERS = JSON.parse(readFileSync(new URL('../data/providers.json', import.meta.url), 'utf8')).providers;
 
 const base = {
   slug: 'groq', name: 'Groq', category: 'ongoing', free_tier: 'free tier', notes: 'n',
@@ -45,6 +47,45 @@ function clientRowHtml(extraRules = {}) {
   const run = new Function('window', SHARED_ROWS);
   run(win);
   return win.FLLM_ROWS.rowHtml;
+}
+
+function runExplorer() {
+  const listeners = new Map();
+  const element = (id, extra = {}) => ({
+    id, checked: false, value: '', textContent: '', innerHTML: '', hidden: false,
+    style: { display: '' }, options: [], rows: [],
+    addEventListener(type, handler) { listeners.set(`${id}:${type}`, handler); },
+    dispatch(type) { listeners.get(`${id}:${type}`)?.({ target: this }); },
+    focus() {},
+    closest() { return { classList: { toggle() {}, add() {}, remove() {} } }; },
+    classList: { toggle() {}, add() {}, remove() {} },
+    ...extra,
+  });
+  const elements = new Map([
+    ['providers-data', element('providers-data', { textContent: JSON.stringify({ providers: PROVIDERS }) })],
+    ['q', element('q')], ['modality', element('modality', { options: [{ value: 'all' }] })],
+    ['sortSel', element('sortSel', { options: [] })], ['tbody', element('tbody')],
+    ['empty', element('empty')], ['count', element('count')], ['stats', element('stats')],
+    ['clearFilters', element('clearFilters')],
+    ...['f-nocard', 'f-nophone', 'f-commercial', 'f-text', 'f-notrain', 'f-openai', 'f-verified']
+      .map((id) => [id, element(id)]),
+  ]);
+  const document = {
+    getElementById: (id) => elements.get(id),
+    querySelectorAll: (selector) => selector === '#cat button' ? [] : [],
+    querySelector: () => null,
+    documentElement: { style: { setProperty() {} } },
+  };
+  const window = {
+    FLLM_RULES: { recScore: () => 0, SLA_DAYS: 90, DUE_SOON_DAYS: 60, freshnessStatus: () => 'fresh' },
+    FLLM_SORT: { comparator: (a, b, left, right) => String(left.name).localeCompare(String(right.name)) },
+    FLLM_ROWS: { rowHtml: () => '<tr></tr>' },
+  };
+  const history = { replaceState() {} };
+  const location = { search: '', pathname: '/' };
+  const run = new Function('window', 'document', 'history', 'location', 'ResizeObserver', 'fetch', 'navigator', EXPLORER_JS);
+  run(window, document, history, location, undefined, undefined, {});
+  return { elements, dispatch: (id, type) => elements.get(id).dispatch(type) };
 }
 
 test('the client bundle exposes rowHtml', () => {
@@ -107,10 +148,27 @@ test('freshness is said in words and by icon shape, not only by colour and a tit
 test('the explorer announces how many providers are shown, in a permanent live region', () => {
   const html = readFileSync(new URL('../site/index.html', import.meta.url), 'utf8');
   const js = readFileSync(new URL('../site/explorer.js', import.meta.url), 'utf8');
-  assert.match(html, /<p id="count" class="sr-only" role="status" aria-live="polite" aria-atomic="true"><\/p>/, 'the region exists in the page from the start');
+  assert.match(html, /<p id="count" class="filter-count" role="status" aria-live="polite" aria-atomic="true"><\/p>/, 'the visible region exists near the filters from the start');
   assert.doesNotMatch(html, /id="stats" aria-live/, 'the stat tiles are written once at load and must not announce on every paint');
-  assert.match(js, /getElementById\('count'\)\.textContent = rows\.length \? `\$\{rows\.length\} of \$\{DATA\.length\} providers shown`/, 'every render writes the count');
+  assert.match(js, /getElementById\('count'\)\.textContent = rows\.length === DATA\.length\s+\? `\$\{rows\.length\} providers`\s+: `Showing \$\{rows\.length\} of \$\{DATA\.length\} providers`/, 'every render writes a distinct filtered or unfiltered count');
+  assert.doesNotMatch(js, /getElementById\('count'\)[^\n]*No providers match/, 'the live count must not repeat the empty-state message');
   assert.match(js, /STATUS_WORD = \{ fresh: 'fresh', due: 'due for re-check', stale: 'stale' \}/, 'the oldest-verification tile says its status in words');
+});
+
+test('the explorer count reflects unfiltered and filtered render output', () => {
+  const explorer = runExplorer();
+  const count = explorer.elements.get('count');
+  assert.equal(count.textContent, `${PROVIDERS.length} providers`);
+
+  const query = explorer.elements.get('q');
+  query.value = 'groq';
+  explorer.dispatch('q', 'input');
+  const matchingRows = PROVIDERS.filter((provider) =>
+    [provider.name, provider.slug, provider.category, provider.free_tier, provider.best_for,
+      ...(Array.isArray(provider.models_free) ? provider.models_free : Object.values(provider.models_free || {}).flat()),
+      ...(provider.modalities || [])]
+      .filter(Boolean).join(' ').toLowerCase().includes('groq'));
+  assert.equal(count.textContent, `Showing ${matchingRows.length} of ${PROVIDERS.length} providers`);
 });
 
 test('every sortable header holds a real button and the header cell has no tab stop of its own', () => {
