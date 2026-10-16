@@ -1257,7 +1257,7 @@ test('mobile sort select shows a placeholder for sorts it does not offer', () =>
   run('name', -1); assert.equal(sel.value, 'custom');
 });
 
-test('home: search box, Compare and API in the menu, and the star count rendered at build', () => {
+test('home: search box, Compare in the menu, and the star count rendered at build', () => {
   run(['scripts/build.mjs']);
   const index = readFileSync(join(ROOT, 'site/index.html'), 'utf8');
   assert.match(index, /<input type="search" id="q"[^>]*>/);
@@ -1265,7 +1265,6 @@ test('home: search box, Compare and API in the menu, and the star count rendered
   for (const page of [index, readFileSync(join(ROOT, 'site/compare/index.html'), 'utf8'), readFileSync(join(ROOT, 'site/p/groq.html'), 'utf8')]) {
     const nav = page.slice(page.indexOf('id="primary-nav"'), page.indexOf('</nav>', page.indexOf('id="primary-nav"')));
     assert.match(nav, /href="(\.\.\/)?compare\/"/);
-    assert.match(nav, /href="(\.\.\/)?api\/"/);
   }
   const { stars } = JSON.parse(readFileSync(join(ROOT, 'data/repo-stats.json'), 'utf8'));
   assert.ok(Number.isInteger(stars));
@@ -1315,17 +1314,54 @@ test('the client makes no GitHub API call and the home search covers model names
   assert.ok(searchText(groq).includes(groq.models_free[0].toLowerCase()), 'a real provider is found by one of its models');
 });
 
-test('header menu: only Models, Compare, API and The best; the other destinations live in the footer', () => {
+test('header menu: only Guides & Collections, Compare and The Best (highlighted); Models and API live in the footer', () => {
   run(['scripts/build.mjs']);
   const pages = ['site/index.html', 'site/compare/index.html', 'site/p/groq.html', 'site/models/index.html', 'site/guides-and-collections/index.html'];
   for (const rel of pages) {
     const html = readFileSync(join(ROOT, rel), 'utf8');
     const nav = html.slice(html.indexOf('id="primary-nav"'), html.indexOf('</nav>', html.indexOf('id="primary-nav"')));
-    for (const gone of ['guides-and-collections/', 'programs/startups', 'programs/research']) assert.ok(!nav.includes(gone), `${rel}: header still links ${gone}`);
-    for (const kept of ['models/', 'compare/', 'api/', 'best/']) assert.ok(nav.includes(kept), `${rel}: header lost ${kept}`);
+    const hrefs = [...nav.matchAll(/<a [^>]*href="([^"]+)"/g)].map((m) => m[1].replace(/^(\.\.\/)+|^\.\//, ''));
+    assert.deepEqual(hrefs, ['guides-and-collections/', 'compare/', 'best/'], `${rel}: the header menu is exactly Guides & Collections, Compare, The Best`);
+    assert.match(nav, /<a class="nav-best" href="[^"]*best\/"[^>]*>.*The Best<\/a>/s, `${rel}: The Best carries the highlight class`);
+    assert.equal((nav.match(/class="nav-best"/g) || []).length, 1, `${rel}: only one highlighted entry`);
     const footer = html.slice(html.indexOf('<footer'));
-    for (const dest of ['guides-and-collections/', 'programs/startups', 'programs/research']) assert.ok(footer.includes(dest), `${rel}: footer lacks ${dest}`);
+    for (const dest of ['models/', 'api/', 'programs/startups', 'programs/research']) assert.ok(footer.includes(dest), `${rel}: footer lacks ${dest}`);
   }
+});
+
+test('footer columns: where each link lives, and no GitHub star entry in Project', () => {
+  run(['scripts/build.mjs']);
+  const expected = {
+    Explore: ['#explorer', 'models/', 'guides-and-collections/', 'programs/startups', 'programs/research', 'free-gpu/', 'coding-tools/'],
+    Data: ['providers.json', 'api/', 'llms.txt', 'data-policy/', 'coverage/'],
+    Project: ['updates', 'changes/', 'state/', 'docs/methodology.md', 'CONTRIBUTING.md'],
+  };
+  for (const rel of ['site/index.html', 'site/compare/index.html', 'site/p/groq.html', 'site/legal/privacy.html']) {
+    const html = readFileSync(join(ROOT, rel), 'utf8');
+    const footer = html.slice(html.indexOf('<footer'), html.indexOf('</footer>'));
+    const cols = footer.split('<div class="footer-col">').slice(1);
+    assert.equal(cols.length, 3, `${rel}: three link columns`);
+    for (const colHtml of cols) {
+      const col = colHtml.split('</div>')[0];
+      const name = col.match(/footer-h">([^<]+)</)[1];
+      const hrefs = [...col.matchAll(/<a [^>]*href="([^"]+)"/g)].map((m) => m[1].replace(/^(\.\.\/)+|^\.\//, '').replace(/^.*\/blob\/main\//, ''));
+      assert.deepEqual(hrefs, expected[name], `${rel}: column ${name}`);
+    }
+    assert.ok(!footer.includes('GitHub ★'), `${rel}: the footer has no "GitHub ★" entry`);
+  }
+});
+
+test('the privacy page and SECURITY.md say what the star count really does: no GitHub call from the browser', () => {
+  run(['scripts/build.mjs']);
+  const privacy = readFileSync(join(ROOT, 'site/legal/privacy.html'), 'utf8');
+  assert.match(privacy, /read from GitHub's public API by the process that builds the site/);
+  assert.doesNotMatch(privacy, /fetched directly from GitHub/);
+  // the company name ends with its own full stop: no sentence may add a second one
+  for (const page of ['site/legal/privacy.html', 'site/legal/terms.html']) assert.doesNotMatch(readFileSync(join(ROOT, page), 'utf8'), /Inc\.\./, `${page} has a double full stop after the company name`);
+  for (const rel of ['site/site.js', 'site/explorer.js', 'site/widget.js']) {
+    assert.doesNotMatch(readFileSync(join(ROOT, rel), 'utf8'), /api\.github\.com/, `${rel} must not call the GitHub API: the privacy page says the browser makes no such request`);
+  }
+  assert.doesNotMatch(readFileSync(join(ROOT, 'SECURITY.md'), 'utf8'), /live GitHub star count/);
 });
 
 test('provider sections: honest empty states, numbers only with source and date, no filler', () => {

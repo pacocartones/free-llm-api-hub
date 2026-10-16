@@ -31,6 +31,7 @@ import { openaiClients, litellmYaml } from './lib/client-config.mjs';
 import * as compareLib from './lib/compare.mjs';
 import { requirementsHtml, limitsHtml, glanceHtml, modelsHtml, dataPolicyHtml } from './lib/provider-sections.mjs';
 import { providerFigures, expandFigures, injectInlineFigures, figureErrors } from './lib/figures.mjs';
+import { badgeSvg } from './lib/badge-svg.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const FRESH_DAYS = SLA_DAYS; // the freshness SLA, defined once in lib/rules.mjs
@@ -52,6 +53,10 @@ const ongoing = providers.filter((p) => p.category === 'ongoing');
 const trial = providers.filter((p) => p.category === 'trial');
 const freshCount = providers.filter(isFresh).length;
 const verifiedCount = providers.filter((p) => p.verified).length;
+// The footer badge: its data is one object (written as badge-verified.json and drawn as badge-verified.svg), and its width
+// goes into every <img> so the footer does not move when the image arrives.
+const badgeVerified = { schemaVersion: 1, label: 'verified', message: `${verifiedCount}/${total}`, color: 'brightgreen' };
+const BADGE_W = badgeSvg(badgeVerified).width;
 
 // ---------- markdown helpers ----------
 function flags(p) {
@@ -435,12 +440,13 @@ const SPRITE = `<svg width="0" height="0" style="position:absolute" aria-hidden=
 <symbol id="ic-rocket" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9.6 11.4 6 7.8c.3-3.6 2.2-5.6 5.6-6.2.6 3.4-.4 5.7-3 7.4z"/><path d="M6 8.2C4 8.6 3 11 3 13c2 0 4.4-1 4.8-3"/><circle cx="9.8" cy="6.2" r="1"/></symbol>
 <symbol id="ic-cap" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2.8 1.6 5.8 8 8.8l6.4-3z"/><path d="M4.4 7.4v3.1c0 1 1.6 1.9 3.6 1.9s3.6-.9 3.6-1.9V7.4M14.4 5.8v3.4"/></symbol>
 <symbol id="ic-trophy" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5.2 2.6h5.6v3.2a2.8 2.8 0 0 1-5.6 0z"/><path d="M5.2 3.4H3.4a1.2 1.2 0 0 0 0 2.4h1.5M10.8 3.4h1.8a1.2 1.2 0 0 1 0 2.4h-1.5"/><path d="M8 8.2v2.2M5.9 13.4h4.2M6.6 10.4h2.8v3h-2.8z"/></symbol>
+<symbol id="ic-spark" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M8 1.6l1.5 4.9 4.9 1.5-4.9 1.5L8 14.4l-1.5-4.9L1.6 8l4.9-1.5z"/></symbol>
 </defs></svg>`;
 const IC = (id) => `<svg class="i" aria-hidden="true"><use href="#${id}"/></svg>`;
 
 const siteHeader = (p) => `<header class="site-header"><div class="wrap header-inner">
 <a class="brand" href="${p}" aria-label="Free LLM API Hub — home"><svg class="logo-mark"><use href="#logo"/></svg><span class="brand-name">Free LLM API <span class="grad">Hub</span></span></a>
-<nav class="nav" id="primary-nav" aria-label="Primary"><a href="${p}models/">${IC('ic-cube')}Models</a><a href="${p}compare/">${IC('ic-grid')}Compare</a><a href="${p}api/">${IC('ic-code')}API</a><a class="nav-best" href="${p}best/">${IC('ic-trophy')}The best</a></nav>
+<nav class="nav" id="primary-nav" aria-label="Primary"><a href="${p}guides-and-collections/">${IC('ic-book')}Guides &amp; Collections</a><a href="${p}compare/">${IC('ic-grid')}Compare</a><a class="nav-best" href="${p}best/" title="The top 10 by score, recomputed from the data at every build">${IC('ic-spark')}The Best</a></nav>
 <div class="header-actions">
 <button class="icon-btn nav-toggle" id="navToggle" aria-label="Open menu" aria-expanded="false" aria-controls="primary-nav"><svg class="i menu" aria-hidden="true"><use href="#ic-menu"/></svg><svg class="i close" aria-hidden="true"><use href="#ic-close"/></svg></button>
 <a class="icon-btn" href="${REPO}" target="_blank" rel="noopener"><span class="sr-only">Star on GitHub</span>${GH_ICON}<span class="star-count" data-stars>★</span></a>
@@ -448,10 +454,10 @@ const siteHeader = (p) => `<header class="site-header"><div class="wrap header-i
 </div></div></header>`;
 
 const siteFooter = (p) => `<footer class="site-footer"><div class="wrap footer-top">
-<div class="footer-brand"><a class="foot-brand-link" href="${p}" aria-label="Free LLM API Hub — home"><svg class="logo-mark"><use href="#logo"/></svg><span class="brand-name">Free LLM API <span class="grad">Hub</span></span></a><p>The <strong>continuously-verified</strong>, <strong>machine-readable</strong> dataset of <strong>free LLM &amp; AI-model APIs</strong> and <strong>trial credits</strong> — every entry <strong>dated</strong>, <strong>sourced</strong>, and <strong>free of dead links</strong>.</p><img class="trust-badge" src="https://img.shields.io/endpoint?url=https://freellmapihub.com/badge-verified.json" alt="Verified providers" height="20" loading="lazy"><a class="star-btn" href="${REPO}" target="_blank" rel="noopener"><span class="sb-label">${GH_ICON} Star on GitHub</span><span class="sb-count" data-stars>★</span></a></div>
-<div class="footer-col"><h2 class="footer-h">Explore</h2><a href="${p}#explorer">Interactive explorer</a><a href="${p}models/">Free model index</a><a href="${p}guides-and-collections/">Guides &amp; collections</a><a href="${p}programs/startups">Startup credits</a><a href="${p}programs/research">Student &amp; research credits</a></div>
-<div class="footer-col"><h2 class="footer-h">Data</h2><a href="${p}providers.json">providers.json</a><a href="${p}api/">JSON API</a><a href="${p}llms.txt">llms.txt</a></div>
-<div class="footer-col"><h2 class="footer-h">Project</h2><a href="${p}updates">Updates</a><a href="${p}changes/">What changed</a><a href="${p}state/">Monthly state report</a><a href="${p}coverage/">Data coverage</a><a href="${p}data-policy/">Who trains on your data</a><a href="${p}free-gpu/">Free GPU compute</a><a href="${p}coding-tools/">Free AI coding tools</a><a href="${REPO}/blob/main/docs/methodology.md">Methodology</a><a href="${REPO}/blob/main/CONTRIBUTING.md">Contributing</a><a href="${REPO}">GitHub ★</a></div>
+<div class="footer-brand"><a class="foot-brand-link" href="${p}" aria-label="Free LLM API Hub — home"><svg class="logo-mark"><use href="#logo"/></svg><span class="brand-name">Free LLM API <span class="grad">Hub</span></span></a><p>The <strong>continuously-verified</strong>, <strong>machine-readable</strong> dataset of <strong>free LLM &amp; AI-model APIs</strong> and <strong>trial credits</strong> — every entry <strong>dated</strong>, <strong>sourced</strong>, and <strong>free of dead links</strong>.</p><img class="trust-badge" src="${p}badge-verified.svg" alt="Verified providers" width="${BADGE_W}" height="20" loading="lazy"><a class="star-btn" href="${REPO}" target="_blank" rel="noopener"><span class="sb-label">${GH_ICON} Star on GitHub</span><span class="sb-count" data-stars>★</span></a></div>
+<div class="footer-col"><h2 class="footer-h">Explore</h2><a href="${p}#explorer">Interactive explorer</a><a href="${p}models/">Free model index</a><a href="${p}guides-and-collections/">Guides &amp; collections</a><a href="${p}programs/startups">Startup credits</a><a href="${p}programs/research">Student &amp; research credits</a><a href="${p}free-gpu/">Free GPU compute</a><a href="${p}coding-tools/">Free AI coding tools</a></div>
+<div class="footer-col"><h2 class="footer-h">Data</h2><a href="${p}providers.json">providers.json</a><a href="${p}api/">JSON API</a><a href="${p}llms.txt">llms.txt</a><a href="${p}data-policy/">Who trains on your data</a><a href="${p}coverage/">Data coverage</a></div>
+<div class="footer-col"><h2 class="footer-h">Project</h2><a href="${p}updates">Updates</a><a href="${p}changes/">What changed</a><a href="${p}state/">Monthly state report</a><a href="${REPO}/blob/main/docs/methodology.md">Methodology</a><a href="${REPO}/blob/main/CONTRIBUTING.md">Contributing</a></div>
 </div><div class="wrap footer-bottom"><p>Independent, community-maintained — not affiliated with any provider listed. Terms change without notice; always confirm against each provider's own docs. MIT licensed.</p><p class="foot-legal"><a href="${p}legal/privacy">Privacy</a> · <a href="${p}legal/terms">Terms</a></p><p class="foot-email"><a href="mailto:admin@freellmapihub.com">admin@freellmapihub.com</a></p></div></footer>`;
 
 // Full page wrapper for generated (collection) pages. `p` is the path prefix to the site root.
@@ -703,7 +709,7 @@ indexHtml = inject(indexHtml, 'csp', CSP);
 indexHtml = inject(indexHtml, 'themeguard', THEME_GUARD);
 indexHtml = inject(indexHtml, 'rows', homeRows);
 indexHtml = inject(indexHtml, 'data', inlineData);
-indexHtml = withStars(indexHtml);
+indexHtml = withStars(indexHtml).replace(/(<img class="trust-badge"[^>]*? width=")\d+(")/, `$1${BADGE_W}$2`);
 writeFileSync(join(ROOT, 'site/index.html'), indexHtml);
 
 // ---------- badge ----------
@@ -721,14 +727,11 @@ writeFileSync(join(ROOT, 'badge-freshness.json'), JSON.stringify(badge, null, 2)
 // One object, two homes: the repo root (raw.githubusercontent badge in the docs)
 // and site/ (hero badge served from this domain) — same content, same build pass,
 // so the two copies can never drift.
-const badgeVerified = {
-  schemaVersion: 1,
-  label: 'verified',
-  message: `${verifiedCount}/${total}`,
-  color: 'brightgreen',
-};
 writeFileSync(join(ROOT, 'badge-verified.json'), JSON.stringify(badgeVerified, null, 2) + '\n');
 writeFileSync(join(ROOT, 'site/badge-verified.json'), JSON.stringify(badgeVerified, null, 2) + '\n');
+// The footer badge is this SVG, served by the site itself: no page asks a third party for it (see the privacy page).
+const verifiedBadge = badgeSvg(badgeVerified);
+writeFileSync(join(ROOT, 'site/badge-verified.svg'), verifiedBadge.svg);
 
 // ---------- ship data with the site ----------
 mkdirSync(join(ROOT, 'site'), { recursive: true });
@@ -1043,17 +1046,17 @@ const legalPage = (slug, title, bodyHtml) => {
     `</div></main>`;
   writeFileSync(
     join(ROOT, `site/legal/${slug}.html`),
-    htmlPage({ title: `${title} · Free LLM API Hub`, desc: `${title} for Free LLM API Hub, operated by ${ORG}.`, canonical: `${SITE}/legal/${slug}`, main, noindex: true })
+    htmlPage({ title: `${title} · Free LLM API Hub`, desc: `${title} for Free LLM API Hub, operated by ${ORG}`, canonical: `${SITE}/legal/${slug}`, main, noindex: true })
   );
 };
 
 legalPage('privacy', 'Privacy', `
-<p>This site is a static, open-source reference operated by ${ORG}. It has no user accounts, no ads, and no third-party analytics or tracking.</p>
+<p>This site is a static, open-source reference operated by ${ORG} It has no user accounts, no ads, and no third-party analytics or tracking.</p>
 <h2>What we store</h2>
 <ul>
 <li><strong>Nothing on a server.</strong> The site is served as static files by GitHub Pages; there is no backend and no cookies are set.</li>
 <li><strong>Your theme choice</strong> (light/dark) is saved only in your browser's local storage and never leaves your device.</li>
-<li><strong>The GitHub star count</strong> is fetched directly from GitHub's public API when a page loads; that request is governed by GitHub's own privacy policy.</li>
+<li><strong>The GitHub star count</strong> is read from GitHub's public API by the process that builds the site (at least once a day), not by your browser: no request about it is sent from your device.</li>
 </ul>
 <h2>Hosting</h2>
 <p>Pages, fonts and assets are delivered by GitHub Pages (GitHub, Inc.), which may process standard request metadata (such as your IP address) to serve content, per GitHub's privacy statement.</p>

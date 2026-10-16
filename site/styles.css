@@ -109,17 +109,35 @@ svg.i { width: 15px; height: 15px; flex: none; vertical-align: -2px; }
 .nav a svg.i { width: 14px; height: 14px; opacity: .8; }
 .nav a:hover svg.i { opacity: 1; }
 .nav a:hover { color: var(--text); background: var(--panel); text-decoration: none; }
-/* /best — the editorial top 10 gets a distinctive pill so it stands out from
-   the plain nav links: accent border + tint, trophy icon stays lit. */
+/* The Best — the editorial top 10 is the one highlighted entry: a thin pill with a gradient border
+   (accent to a soft amber) and a small spark. One flash crosses it once on load and the spark turns on
+   hover; both stay behind prefers-reduced-motion and nothing moves the layout (transform and opacity only). */
 .nav a.nav-best {
-  color: var(--accent);
-  border: 1px solid color-mix(in srgb, var(--accent) 42%, transparent);
-  background: color-mix(in srgb, var(--accent) 10%, transparent);
-  font-weight: 700;
+  position: relative; overflow: hidden; color: var(--accent); font-weight: 700;
+  border: 1px solid transparent; border-radius: 999px; padding: 5px 13px;
+  background: linear-gradient(var(--bg), var(--bg)) padding-box, linear-gradient(120deg, var(--accent), #e9b44c) border-box;
 }
-.nav a.nav-best svg.i { opacity: 1; }
-.nav a.nav-best:hover { color: var(--accent); background: color-mix(in srgb, var(--accent) 18%, transparent); box-shadow: var(--glow); }
+.nav a.nav-best svg.i { opacity: 1; transition: transform .3s cubic-bezier(.2, .8, .2, 1); }
+.nav a.nav-best:hover {
+  color: var(--accent); box-shadow: var(--glow);
+  background: linear-gradient(var(--bg), var(--bg)) padding-box, linear-gradient(120deg, #e9b44c, var(--accent)) border-box;
+}
+@media (hover: hover) { .nav a.nav-best:hover svg.i { transform: rotate(20deg) scale(1.1); } }
+@media (prefers-reduced-motion: no-preference) {
+  .nav a.nav-best::after {
+    content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+    background: linear-gradient(110deg, transparent 35%, color-mix(in srgb, #fff 55%, transparent) 50%, transparent 65%);
+    transform: translateX(-120%); animation: best-shine .9s .6s 1 both;
+  }
+  @keyframes best-shine { to { transform: translateX(120%); } }
+}
 .header-actions { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+/* Desktop: logo on the left, the menu centred on the page, the star counter and the theme toggle on the right. */
+@media (min-width: 901px) {
+  .header-inner { display: grid; grid-template-columns: 1fr auto 1fr; }
+  .nav { margin-left: 0; justify-self: center; }
+  .header-actions { margin-left: 0; justify-self: end; }
+}
 .icon-btn {
   display: inline-flex; align-items: center; gap: 7px; height: 34px; padding: 0 11px;
   background: var(--panel); border: 1px solid var(--border); border-radius: 8px;
@@ -507,6 +525,7 @@ pre:hover .pre-copy, .pre-copy:focus-visible { opacity: 1; }
   }
   .site-header.nav-open .nav { display: flex; }
   .nav a { padding: 11px 12px; font-size: .95rem; border-radius: 8px; }
+  .nav a.nav-best { padding: 11px 14px; border-radius: 999px; }
 }
 @media (max-width: 720px) {
   #table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
