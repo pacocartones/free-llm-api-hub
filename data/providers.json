@@ -1,7 +1,7 @@
 {
   "$schema": "./schema.json",
   "version": "2.11.0",
-  "generated": "2026-10-15",
+  "generated": "2026-10-16",
   "source": "https://github.com/pacocartones/free-llm-api-hub",
   "note": "Canonical dataset. README tables, badge-freshness.json and the interactive site are all generated from this file — do not hand-edit them. `verified: true` means the core facts (tier, limits, key catch, link) were independently confirmed against the provider's own docs on `last_verified`. `verified: false` means sourced from community tracking and not yet independently re-confirmed here — treat those as indicative. Attribute fields (openai_compatible, modalities, best_for) are progressively backfilled and may be null.",
   "providers": [
@@ -1570,7 +1570,7 @@
       "free_type": "trial-credit",
       "free_tier": "$10 in free credits with full access on Pay As You Go — TTS (Lightning v3.1), STT (Pulse) and voice agents; speech-to-speech (Hydra) is beta/request-access",
       "rate_limits": "Pay As You Go: 15 concurrent TTS streams, 100 TTS requests/min, 450M chars/month cap; 100 concurrent STT streams; 20 concurrent agent calls (bounded by the $10 credit)",
-      "notes": "$10 starting credit on Pay As You Go. The models pricing page lists 15 concurrent TTS streams while the API reference still says 1 active TTS request per account — inconsistent. The models table shows Voice Cloning 'No' for Pay As You Go although the TTS card advertises instant cloning. Card and commercial terms not stated. /pricing now redirects to /pricing/agents.",
+      "notes": "$10 starting credit on Pay As You Go. The models pricing page lists 15 concurrent TTS streams while the API reference still says 1 active TTS request per account; inconsistent. The models table shows Voice Cloning 'No' for Pay As You Go although the TTS card advertises instant cloning. Terms of Service (effective 2026-10-13) prohibit commercial use under Sections 8(b) and 9(j). /pricing now redirects to /pricing/agents.",
       "best_for": "Fast TTS + STT on a $10 credit",
       "modalities": ["audio"],
       "models_free": null,
@@ -1578,13 +1578,13 @@
       "docs_url": "https://smallest.ai/pricing",
       "phone_required": null,
       "card_required": null,
-      "commercial_ok": null,
+      "commercial_ok": false,
       "openai_compatible": false,
       "env_key": "SMALLEST_API_KEY",
       "is_text_llm": false,
       "model_tier": null,
       "verified": true,
-      "last_verified": "2026-10-08",
+      "last_verified": "2026-10-16",
       "added": "2026-07-31",
       "data_policy": {"trains_on_prompts":false,"retention":null,"source":"https://smallest.ai/terms-of-service","checked":"2026-10-15","quote":"We will not use such User Content or Input to train and improve our Services or to develop new products and services.","note":"Effective 2026-10-13. The terms offer «free or trial versions» (Trial Services); the clause on Your Content does not mention them.","plan_named":false}
     },
