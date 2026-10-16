@@ -44,8 +44,9 @@ Commit the data change and generated files together, and open one PR for that ba
 For each provider on the worklist (`npm run worklist`, or just the reverify batch):
 
 1. **Open the provider's own docs** (the `docs` link in the item). Third-party summaries don't count.
-2. **Compare against `data/providers.json`:** free tier, rate limits, credit amount/expiry, and the catches (`card_required`, `phone_required`, `commercial_ok`, `openai_compatible`).
+2. **Compare against `data/providers.json`:** free tier, rate limits, credit amount/expiry, and the catches (`card_required`, `phone_required`, `commercial_ok`, `openai_compatible`); re-read `trains_on_prompts`, `retention`, and [`data_policy`](../data/schema.json), including its `source` and `checked` date, on the provider's own official documentation page.
 3. **Update the entry:**
+   - **Re-read `data_policy`:** set `data_policy.checked` to today whenever the policy information is re-read, even if its value is unchanged. If the provider's official page doesn't state a policy detail, leave it `null`; never guess `false`. This date records when the policy was checked, separately from `last_verified`, which tracks core-fact verification.
    - Confirmed → set the current numbers, `verified: true`, `last_verified` = today.
    - Changed → correct the numbers, same as above.
    - Gone → remove the entry (note it in [CHANGELOG.md](../CHANGELOG.md)) or, if the free tier ended, move the note to the README's "Notably NOT free" section.
@@ -109,6 +110,7 @@ for its current requirements.
 - Badge is green (oldest entry under 60 days).
 - `npm test` passes and generated files are in sync.
 - `npm run og` produces zero diffs — provider, collection and guide OGs match the current data.
+- Every provider touched had its `data_policy` re-read or explicitly left as it was.
 
 ---
 
