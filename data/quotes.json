@@ -245,6 +245,17 @@
    "page_sha256": "8da85e4dccfaaaea63f791b192f28d209cfb6d5704522d6f4ebe19ffc12aad27"
   },
   {
+   "id": "vercel-ai-gateway.sentence",
+   "slug": "vercel-ai-gateway",
+   "kind": "sentence",
+   "text": "The gateway layer does not retain prompts, outputs, or sensitive data, and user data is deleted immediately after a request completes.",
+   "source_url": "https://vercel.com/i/secure-ai-gateway",
+   "read_on": "2026-10-15",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": null
+  },
+  {
    "id": "jina-ai.sentence",
    "slug": "jina-ai",
    "kind": "sentence",
