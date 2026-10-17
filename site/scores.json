@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-16",
+  "generated": "2026-10-17",
   "scores": {
     "openrouter": {
       "total": 67.2,
@@ -373,12 +373,6 @@
       "of": 6,
       "rank": null
     },
-    "smallest-ai": {
-      "total": 26,
-      "confirmed": 1,
-      "of": 6,
-      "rank": null
-    },
     "cartesia": {
       "total": 25.4,
       "confirmed": 3,
@@ -399,6 +393,12 @@
     },
     "modal": {
       "total": 22.1,
+      "confirmed": 2,
+      "of": 6,
+      "rank": null
+    },
+    "smallest-ai": {
+      "total": 21.5,
       "confirmed": 2,
       "of": 6,
       "rank": null
