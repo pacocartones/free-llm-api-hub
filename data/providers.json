@@ -1597,7 +1597,7 @@
       "free_type": "trial-credit",
       "free_tier": "$10 in free trial credits (once per email address) plus 20 concurrent calls included — voice-agent orchestration (STT + LLM + TTS)",
       "rate_limits": "20 concurrent calls per workspace (Pay-As-You-Go default)",
-      "notes": "$10 trial credit with full platform access, granted once per email address. A payment method is required only to buy phone numbers or use the service beyond the free trial. A voice-agent builder (orchestration), not a raw model API. Voice agents cost ~$0.07-$0.31/min after the credit.",
+      "notes": "$10 trial credit with full platform access, granted once per email address. A payment method is required only to buy phone numbers or use the service beyond the free trial. A voice-agent builder (orchestration), not a raw model API. Voice agents cost ~$0.07-$0.31/min after the credit. Terms of Service (updated 2026-10-07, https://www.retellai.com/terms-of-service) section 10.2 licenses the Service «for your personal or internal business purposes» and section 10.4 licenses AI-Generated Content «for Your personal or internal business purposes»; neither explicitly authorizes commercial use or mentions the $10 credit. Pricing page (https://www.retellai.com/pricing) advertises full platform access.",
       "best_for": "Build a voice agent on a $10 no-card trial credit",
       "modalities": ["audio"],
       "models_free": null,
