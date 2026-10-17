@@ -1205,7 +1205,7 @@
       "free_type": "trial-credit",
       "free_tier": "Free minutes for every new account (Starter plan): the pricing card says ~800 minutes (~800k characters), while the FAQ and docs say 3,000",
       "rate_limits": "Starter: 20 concurrent TTS generations",
-      "notes": "One-time allotment on signup; no credit card required (stated on the pricing page). The pricing table shows ~800 free minutes (~800k characters) while the page’s own FAQ and the docs still say 3,000 — an internal inconsistency. Commercial-use terms not stated.",
+      "notes": "One-time allotment on signup; no credit card required (stated on the pricing page). The pricing table shows ~800 free minutes (~800k characters) while the page's own FAQ and the docs still say 3,000; an internal inconsistency. Terms of Service section 4 states that customers retain all rights in and to their Input and Output; section 3 forbids using Output to train an AI model and reselling the Services; section 4 defers trial rights to «the terms of such trial», so commercial use of the free minutes is unconfirmed.",
       "best_for": "Low-latency conversational TTS to prototype",
       "modalities": ["audio"],
       "models_free": null,
