@@ -48,7 +48,7 @@ done < <(git rev-list --no-merges "${base}..${head}")
 if [ -n "${GITHUB_HEAD_REF:-}" ] && [ -n "${GITHUB_EVENT_PATH:-}" ] && [ -f "$GITHUB_EVENT_PATH" ]; then
   head_repo="$(jq -r '.pull_request.head.repo.full_name // empty' "$GITHUB_EVENT_PATH")"
   if [ "$head_repo" = "${GITHUB_REPOSITORY:-}" ] && ! printf '%s' "$GITHUB_HEAD_REF" | grep -Eq "$branch_pattern"; then
-    echo "::error title=Branch name::'$GITHUB_HEAD_REF' does not follow <type>/<short-slug> (feat, fix, docs, data, test, ci, chore, refactor) or a reserved name; see CONTRIBUTING."
+    echo "::error title=Branch name::The branch name '$GITHUB_HEAD_REF' does not follow the pattern <type>/<short-slug> (types: feat, fix, docs, data, test, ci, chore, refactor; lowercase letters, digits and hyphens). Example: fix/sitemap-canonical. Rename the branch and push again; pull requests from forks are not checked."
     fail=1
   fi
 fi

@@ -174,18 +174,17 @@ GitHub holds workflow runs from a **first-time contributor** until a maintainer 
 - **No regeneration bot — the author ships the derived files.** There is no `bot/regenerate`: `main` requires the "Dataset integrity" check, and a change is complete when its regenerated files are committed in the same PR. After editing `data/providers.json` (or `data/programs.json`), run `npm run build` (and `npm run og` if the OG check flags drift), commit the regenerated files together with the data change, and push. The "Dataset integrity" check fails until they are in sync.
 - **Nothing runs on a schedule.** Re-verification, badge refresh, model samples and the live probe are all local on-demand tasks — see [docs/update-playbook.md](docs/update-playbook.md). This project does not depend on GitHub Actions minutes.
 
-### Branch names and commit identity (maintainers)
+### Branch names and commit identity
 
-- **Branch names:** `<type>/<short-slug>`, lower case with hyphens, the type being the one of the
-  conventional commit: `feat/`, `fix/`, `docs/`, `data/`, `test/`, `ci/`, `chore/` or `refactor/`.
-  No internal task ids or tool names in the branch. Reserved and never deleted: `main`,
-  `gh-pages`, `changeset-release/main` and `bot/*`. Contributors' branches in their own forks are
-  theirs and are not checked.
-- **Branch lifecycle:** a branch whose pull request was merged is deleted (GitHub does it on merge);
-  one whose pull request was closed without merging is deleted after 30 days; a branch with no pull
-  request is never deleted by a script. The commits of a closed or merged pull request stay
-  available from the pull request.
-- **Commit identity:** every commit written by a maintainer uses
-  `Paco Cartones <253313177+pacocartones@users.noreply.github.com>` as author and committer, never a
-  tool or agent name. `scripts/check-commit-policy.sh` reports any other maintainer identity and,
-  on a maintainer's pull request, a branch name outside the list above.
+- **If you contribute from a fork, none of the branch rules apply to you:** name your branch as you
+  like. They are for the maintainers' branches in this repository.
+- **Maintainers' branch names:** `<type>/<short-slug>`, lower case with hyphens, where the type is
+  the one of the conventional commit: `feat/`, `fix/`, `docs/`, `data/`, `test/`, `ci/`, `chore/` or `refactor/`. Example: `fix/sitemap-canonical`. Branch names
+  describe the change, not who made it or an internal ticket. Reserved: `main`, `gh-pages`, `changeset-release/main` and `bot/*`.
+- **What happens to branches:** merged and closed pull requests keep their commits; we delete the
+  branch afterwards.
+- **Commit identity:** maintainers commit as
+  `Paco Cartones <253313177+pacocartones@users.noreply.github.com>`, and
+  `scripts/check-commit-policy.sh` checks maintainer commits only. If you do not want your email in
+  the public history, use your GitHub noreply address
+  ([how](https://docs.github.com/en/account-and-profile/setting-up-and-managing-your-personal-account-on-github/managing-email-preferences/setting-your-commit-email-address)).
