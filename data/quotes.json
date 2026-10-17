@@ -595,6 +595,39 @@
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "3a54549fbc652bc6ad70a202a3f172564af25a0dd7b6033f8c086121af52b475"
+  },
+  {
+   "id": "typhoon.sentence",
+   "slug": "typhoon",
+   "kind": "sentence",
+   "text": "The Applicant hereby perpetually grants, on a royalty-free basis, the Company the right to use such Input and the Intellectual Property Rights relating thereto for the purpose of providing the Services, developing and training the Company's Artificial Intelligence models",
+   "source_url": "https://opentyphoon.ai/tac",
+   "read_on": "2026-10-17",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "ebe16a520e4f71baba1802bb45e168f3d8dd928c796381c9b25a79f599fc36c2"
+  },
+  {
+   "id": "typhoon.note_passage.1",
+   "slug": "typhoon",
+   "kind": "note_passage",
+   "text": "developing and training the Company's Artificial Intelligence models",
+   "source_url": "https://opentyphoon.ai/tac",
+   "read_on": "2026-10-17",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "ebe16a520e4f71baba1802bb45e168f3d8dd928c796381c9b25a79f599fc36c2"
+  },
+  {
+   "id": "typhoon.note_passage.2",
+   "slug": "typhoon",
+   "kind": "note_passage",
+   "text": "Yes, we are collecting usage data from the Typhoon API. We use this data to improve the model and the API.",
+   "source_url": "https://docs.opentyphoon.ai/en/faq/",
+   "read_on": "2026-10-17",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "6c6f959b0156ecf8549b8846d173a7d43be68908a894c2cc5df061b541f6be4a"
   }
  ]
 }

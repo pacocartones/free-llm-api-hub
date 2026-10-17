@@ -178,7 +178,9 @@ svg.i { width: 15px; height: 15px; flex: none; vertical-align: -2px; }
 }
 .hero-inner { position: relative; z-index: 1; padding: 58px 0 46px; text-align: center; }
 .hero-logo { display: inline-flex; margin-bottom: 16px; }
-.hero-star { margin-bottom: 22px; }
+.hero-star { margin-bottom: 22px; display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+.contrib-btn { display: inline-flex; align-items: center; padding: 9px 14px; border-radius: 9px; border: 1px solid var(--border-strong); background: var(--panel); color: var(--text); box-shadow: var(--shadow-sm); font-weight: 700; font-size: .88rem; font-family: var(--font-mono); }
+.contrib-btn:hover { text-decoration: none; color: var(--accent); }
 .eyebrow { color: var(--accent); font-weight: 700; font-size: .74rem; letter-spacing: .18em; text-transform: uppercase; margin: 0 0 14px; font-family: var(--font-mono); }
 .eyebrow::before { content: "> "; opacity: .8; }
 h1 { font-size: clamp(1.9rem, 4.4vw, 3rem); line-height: 1.1; margin: 0 auto 18px; max-width: 20ch; }
