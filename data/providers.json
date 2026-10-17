@@ -1181,7 +1181,7 @@
       "free_type": "trial-credit",
       "free_tier": "€50 in free credits on signup for speech-to-text (~80+ hrs pre-recorded or 60+ hrs real-time at current rates)",
       "rate_limits": "30 real-time and 25 async concurrent requests (Starter pay-as-you-go plan that carries the €50 credit)",
-      "notes": "One-time grant with no monthly reset; prepaid model — top up once the credit is consumed. Card requirement not explicitly stated on the pricing page.",
+      "notes": "One-time grant with no monthly reset; prepaid model: top up once the credit is consumed. General Terms of Use (Gladia Inc, https://www.gladia.io/general-terms-of-use-gladia-inc, read 2026-10-17) section 7 licenses Output solely for «internal, personal and commercial purposes», but conditions the licence on «payment of all applicable fees» and does not mention free credits or trials, so commercial use of the signup credit is unconfirmed. Card requirement not explicitly stated on the pricing page.",
       "best_for": "High-accuracy async + real-time transcription to trial",
       "modalities": ["audio"],
       "models_free": null,
