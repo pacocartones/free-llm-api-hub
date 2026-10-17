@@ -45,7 +45,7 @@ Two quick checks before touching anything:
 grep -i "ai21" data/providers.json
 ```
 
-No match — good. (If it *is* tracked, the more valuable contribution is fixing a `null` flag or a stale number — see [the "confirming a single unknown field" note in CONTRIBUTING](../CONTRIBUTING.md).)
+If AI21 appears in the results, that's expected because it is already tracked. For your contribution, replace `ai21` in the search command with the slug of the provider you want to add. If that provider is already tracked, the more valuable contribution is fixing a `null` flag or a stale number — see [the "confirming a single unknown field" note in CONTRIBUTING](../CONTRIBUTING.md).
 
 Not ready to do the work yet? File the one-minute [new-provider issue form](../../issues/new?template=new-provider.yml) instead and someone else can pick it up.
 
@@ -55,16 +55,16 @@ Fork the repo on GitHub, then:
 
 ```bash
 git remote add fork https://github.com/<your-username>/free-llm-api-hub
-git checkout -b add-ai21-labs
+git checkout -b add-your-provider
 ```
 
-A branch named after the provider (`add-<slug>`, `fix-<slug>`) keeps your PR title obvious.
+Replace `<your-username>` with your GitHub username. Use a branch name that reflects your contribution, such as `add-<slug>` or `fix-<slug>`.
 
 ## Step 3 — Add the entry
 
 Open `data/providers.json`. It's one JSON file with a `providers` array — the **single source of truth** for the README tables, the badge, the exports, and the whole site. Everything else is generated from it.
 
-Add this object to the array (insert it near other trial-credit entries; position is cosmetic — the build re-sorts — but a tidy diff is easier to review):
+Use this existing AI21 Labs entry as a reference for the fields. Do not add it again, because AI21 is already in the dataset. For your contribution, adapt the object to the provider you chose and add it to the array (insert it near similar entries; position is cosmetic — the build re-sorts — but a tidy diff is easier to review):
 
 ```json
 {
@@ -114,14 +114,14 @@ If your `last_verified` is newer than it, the validator refuses — because the 
 npm test
 ```
 
-Expect it to fail on your first try — that's the point of the gate. The two classic failures:
+If the tests fail, inspect the output and fix issues related to your contribution. Some failures may be unrelated to your changes, so check whether they also occur on the unchanged baseline. Two possible validation errors are:
 
 ```text
 ai21: verified entry needs a YYYY-MM-DD last_verified
 top-level: generated (2026-08-01) is older than the newest last_verified/added (2026-08-14) — bump it in data/providers.json
 ```
 
-Fix each one in the data, not by loosening the check. When it's green you'll see the integrity rules pass, the internal link check pass, and the full test suite completes.
+These are illustrative examples, not guaranteed failures. The dates and provider-specific message may differ in your checkout. Fix data-related validation errors in the data, not by loosening the check. Before opening your PR, investigate any remaining failures and report unrelated baseline failures rather than assuming the full suite passes.
 
 ## Step 5 — Regenerate the derived files
 
@@ -145,13 +145,15 @@ Commit the data change **and** the regenerated files in the same commit — a da
 
 ```bash
 git add data/providers.json README.md badge-freshness.json CITATION.cff site collections
-git commit -m "feat: add AI21 Labs free trial credit"
-git push -u fork add-ai21-labs
+git commit -m "feat: add your provider"
+git push -u fork add-your-provider
 ```
+
+If you chose a different branch name, use that name in the push command too.
 
 `CITATION.cff` is in that list on purpose: it carries the dataset date, so bumping `generated` rewrites it — skip it and the drift gate fails.
 
-Open the pull request. Give it a title that says what changed (`feat: add AI21 Labs free trial credit`) and a body with the source link and what you confirmed.
+Open the pull request. Give it a title that says what changed and a body with the source link and what you confirmed.
 
 The required **"Dataset integrity"** check validates the data, the internal links, the OG images, and — via the drift gate — that the regenerated files match the data. When it's green, a maintainer re-checks your source link and the claim, then merges.
 
@@ -159,7 +161,7 @@ The required **"Dataset integrity"** check validates the data, the internal link
 
 ## What happens next
 
-On merge, the entry goes live: the explorer and provider page appear, the badge count ticks up, and the freshness clock starts — your entry is now one of the 69 the 90-day re-verification system keeps honest (see [freshness-sla.md](freshness-sla.md)).
+On merge, the entry goes live: the explorer and provider page appear, the badge count updates, and the freshness clock starts — your entry joins the 90-day re-verification system (see [freshness-sla.md](freshness-sla.md)).
 
 ## Common mistakes
 
