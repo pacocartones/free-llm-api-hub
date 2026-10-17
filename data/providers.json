@@ -1570,7 +1570,7 @@
       "free_type": "trial-credit",
       "free_tier": "$10 in free credits with full access on Pay As You Go — TTS (Lightning v3.1), STT (Pulse) and voice agents; speech-to-speech (Hydra) is beta/request-access",
       "rate_limits": "Pay As You Go: 15 concurrent TTS streams, 100 TTS requests/min, 450M chars/month cap; 100 concurrent STT streams; 20 concurrent agent calls (bounded by the $10 credit)",
-      "notes": "$10 starting credit on Pay As You Go. The models pricing page lists 15 concurrent TTS streams while the API reference still says 1 active TTS request per account; inconsistent. The models table shows Voice Cloning 'No' for Pay As You Go although the TTS card advertises instant cloning. Terms of Service (effective 2026-10-13) prohibit commercial use under Sections 8(b) and 9(j). /pricing now redirects to /pricing/agents.",
+      "notes": "$10 starting credit on Pay As You Go. The models pricing page lists 15 concurrent TTS streams while the API reference still says 1 active TTS request per account; inconsistent. The models table shows Voice Cloning 'No' for Pay As You Go although the TTS card advertises instant cloning. Terms of Service (effective 2026-10-13), section 9(j): «Use the Services, or any portion thereof, for any commercial purpose or for the benefit of any third party or in any manner not permitted by these Terms»; section 8(b): «You may not sell or share the Output with any third parties for commercial benefit or purposes». The Trial Services paragraph (the $10 trial credit) does not mention commercial use, so it does not exempt trial use. The same Terms describe the Services as letting you create AI agents that make and receive calls, so the prohibition reads wider than the free credit alone. /pricing now redirects to /pricing/agents.",
       "best_for": "Fast TTS + STT on a $10 credit",
       "modalities": ["audio"],
       "models_free": null,
@@ -1584,7 +1584,7 @@
       "is_text_llm": false,
       "model_tier": null,
       "verified": true,
-      "last_verified": "2026-10-16",
+      "last_verified": "2026-10-08",
       "added": "2026-07-31",
       "data_policy": {"trains_on_prompts":false,"retention":null,"source":"https://smallest.ai/terms-of-service","checked":"2026-10-15","quote":"We will not use such User Content or Input to train and improve our Services or to develop new products and services.","note":"Effective 2026-10-13. The terms offer «free or trial versions» (Trial Services); the clause on Your Content does not mention them.","plan_named":false}
     },
