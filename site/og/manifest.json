@@ -1,7 +1,7 @@
 {
   "collections/no-credit-card.png": "7688b6ef52555962d008fff894223582c484517cea7da49ee67800adc7fc8866",
   "collections/no-phone.png": "785f3ec7eb32f30b90cd0fcf3657d388b5ff4297f2f9716ff66e9b69c05ddd09",
-  "collections/commercial-use.png": "5f9c4ab08cac7457e9111a30e4664920607ea2c115a1433d7be98e97e64244ca",
+  "collections/commercial-use.png": "670671cd97404156226e507973f2ab8330d3022ca96e0c93bdbdb320c41adcaf",
   "collections/openai-compatible.png": "76a50887d8f1c2e9301755428990ad81479ee21c25b43215cf524541e0503269",
   "collections/always-free.png": "ef2d127de37b942baad06145e54b0c619a1f22327b2ebbcfbec78f5564afe39d",
   "collections/multimodal.png": "41cfc0d1f2d127b04555b7246d84019b4d27710a3f3aff6e7764375b1e06e05d",
@@ -42,7 +42,7 @@
   "p/assemblyai.png": "d3ef942ebd7f339355b7c197f23d9a487d7c5d46d8506dafb8fb0e00bfddef46",
   "p/mixedbread.png": "3c510a9c0389d3d5833fcc064f5ec52bbdfb634be7c73e7c15a1058be8855444",
   "p/clarifai.png": "1b8daf880af4db1aeea5fda85e945b64d8dc8821f1d9cc74e2663021559b4b52",
-  "p/arli-ai.png": "3fa52dab6cafc2a6d297fda3ac729195cb2a7004e33953db01115b31112e874b",
+  "p/arli-ai.png": "37b19ca1f0859cc35669d4f850b206c182be17c04efb5642f42c088f1581df73",
   "p/ollama-cloud.png": "ab348457cb08698c85ec8a7e0c25be3c4abbe26ecdc8f71b0a41e2c948b8e131",
   "p/ai-horde.png": "c510894cc4faa1642545d4c9f376e14cc20ef987708d906a7e6f5f45b94aaf99",
   "p/modelscope.png": "7e455a61fe5ecde17e2206690853f254c19466b3871d10c20620d7e2bc625b66",
