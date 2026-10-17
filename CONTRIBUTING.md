@@ -4,6 +4,17 @@ The entire value of this project is that its data can be trusted. Every contribu
 
 Thanks for helping. Here's how it works.
 
+## Your first contribution, step by step
+
+Each issue says which files to edit; for a data issue:
+
+1. Pick a [good first issue](https://github.com/pacocartones/free-llm-api-hub/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) (small, answered from the provider's public pages).
+2. Read the provider's own page, copy the exact sentence and note the day you read it (UTC).
+3. Fork, edit [`data/providers.json`](data/providers.json), run `npm ci --ignore-scripts` once, then `npm run build && npm test`, and commit the regenerated files with your change.
+4. Open the pull request and say which page you read and when. If you are not sure, say what you found and what you could not confirm: a partial answer is useful.
+
+Details follow: [Quick start](#quick-start), [Confirming a single unknown field](#confirming-a-single-unknown-field) and [Claiming an issue](#claiming-an-issue).
+
 ## The one rule that matters
 
 > **Edit the data, not the docs.** The single source of truth is [`data/providers.json`](data/providers.json). The README tables, the freshness badge, the `collections/` markdown, and the whole interactive site (explorer, per-provider pages, collection pages, badges, sitemap) are all *generated* from it.
@@ -11,30 +22,6 @@ Thanks for helping. Here's how it works.
 **Your pull request ships its own regenerated files.** After editing `data/providers.json`, run `npm run build` (and `npm run og` if the OG check flags drift) and commit the regenerated files together with the data change. There is no regeneration bot — the required "Dataset integrity" check fails until the derived files are in sync.
 
 Fixing a rate limit means editing one field plus the files regenerated from it — still a small, reviewable diff.
-
-## Running Lighthouse locally
-
-The CI gate is `node scripts/lighthouse-gate.mjs` (after `npm ci` in `tools/lighthouse` and `node scripts/build.mjs`; it needs a Chrome binary in `CHROME_PATH`). It gives every run its own Chrome profile and process group, and on exit (also on Ctrl-C or a kill) it ends those groups by pid, deletes the profile and checks that nothing still points at it.
-
-If you run Lighthouse or Chrome by hand against a local server instead, do it like this so nothing is left running:
-
-```bash
-profile="$(mktemp -d)"
-python3 -m http.server 8080 --directory site --bind 127.0.0.1 &
-server=$!
-cleanup() {
-  kill "$server" 2>/dev/null
-  [ -n "${lh:-}" ] && kill -- -"$lh" 2>/dev/null   # Lighthouse runs in its own process group (setsid), never `pkill -f`
-  rm -rf "$profile"
-}
-trap cleanup EXIT INT TERM
-setsid tools/lighthouse/node_modules/.bin/lighthouse http://127.0.0.1:8080/ \
-  --chrome-flags="--headless --no-sandbox --user-data-dir=$profile" --output=json --quiet > lh.json &
-lh=$!
-wait "$lh"
-# final check: nothing should still reference the profile
-if grep -l -- "$profile" /proc/[0-9]*/cmdline 2>/dev/null | grep -qv "/proc/$$/"; then echo "orphan processes left" >&2; fi
-```
 
 ## Quick start
 
@@ -86,7 +73,7 @@ Slugs are permanent identifiers — never rename or reuse a `slug`.
 
 The smallest useful contribution: many entries carry `null` in `card_required`, `phone_required` or `commercial_ok`, which means *nobody has confirmed it yet* — not that the answer is "no". Turning one `null` into a sourced `true`/`false` is a genuine improvement and takes minutes. Open a PR with the flag set, `last_verified` bumped, and the primary source in `docs_url` or `notes`.
 
-The same applies to `data_policy`, which records what a provider says about your prompts (`trains_on_prompts`, `retention`, `source`, `checked`). An absent `data_policy` object means "not recorded", never "no". Sourced values come exclusively from the provider's own pages, alongside the day they were read. If a provider's official pages do not settle the question, that is a completely valid result too: leave the entry as it is and report your findings with the link and date in your PR. See the full field definition in [docs/comparison-dimensions.md](docs/comparison-dimensions.md).
+The same applies to `data_policy`, which records what a provider says about your prompts (`trains_on_prompts`, `retention`, `source`, `checked`). An absent `data_policy` object means "not recorded", never "no". Sourced values come exclusively from the provider's own pages, alongside the day they were read. If a provider's official pages do not settle the question, that is a completely valid result too: leave the entry as it is and report your findings with the link and date in your PR. See the full field definition in [docs/comparison-dimensions.md](docs/comparison-dimensions.md). A `data_policy` row needs at least one of `trains_on_prompts` or `retention` stated: a row with both `null` records nothing, and `npm test` rejects it.
 
 A `data_policy` row also needs its entries in `data/quotes.json` (the sentence, each phrase of the note between « », and a check behind any claim about a whole page). You do not write them: after editing the row, run `npm run quotes:add -- <slug>` and then `npm test`. `docs/quotes.md` says what the command does and what to do when a page cannot be read.
 
@@ -109,6 +96,30 @@ A `data_policy` row also needs its entries in `data/quotes.json` (the sentence, 
 Data PRs are the common case, but scripts and site changes are welcome too. Start with **[docs/architecture.md](docs/architecture.md)** — it maps the pipeline, what each script does, and the two-places rule (the homepage is hand-written; everything else is generated). The checks a code PR must pass: `npm test` (data integrity + internal links) and, if you touched anything the build consumes, `npm run check` (build idempotency + drift).
 
 **Adding a test.** Put it in `scripts/<name>.test.mjs`. `npm test` and CI run every `scripts/*.test.mjs` through `scripts/run-tests.mjs`, which finds the files on disk, so a new test file does not touch `package.json` or `.github/workflows/verify.yml` and does not collide with other pull requests. A test named any other way (`*.test.js`, or inside a subfolder) would not run, and `scripts/test-lists.test.mjs` fails if there is one.
+
+## Running Lighthouse locally
+
+The CI gate is `node scripts/lighthouse-gate.mjs` (after `npm ci` in `tools/lighthouse` and `node scripts/build.mjs`; it needs a Chrome binary in `CHROME_PATH`). It gives every run its own Chrome profile and process group, and on exit (also on Ctrl-C or a kill) it ends those groups by pid, deletes the profile and checks that nothing still points at it.
+
+If you run Lighthouse or Chrome by hand against a local server instead, do it like this so nothing is left running:
+
+```bash
+profile="$(mktemp -d)"
+python3 -m http.server 8080 --directory site --bind 127.0.0.1 &
+server=$!
+cleanup() {
+  kill "$server" 2>/dev/null
+  [ -n "${lh:-}" ] && kill -- -"$lh" 2>/dev/null   # Lighthouse runs in its own process group (setsid), never `pkill -f`
+  rm -rf "$profile"
+}
+trap cleanup EXIT INT TERM
+setsid tools/lighthouse/node_modules/.bin/lighthouse http://127.0.0.1:8080/ \
+  --chrome-flags="--headless --no-sandbox --user-data-dir=$profile" --output=json --quiet > lh.json &
+lh=$!
+wait "$lh"
+# final check: nothing should still reference the profile
+if grep -l -- "$profile" /proc/[0-9]*/cmdline 2>/dev/null | grep -qv "/proc/$$/"; then echo "orphan processes left" >&2; fi
+```
 
 ## Claiming an issue
 
