@@ -490,7 +490,7 @@
       "free_type": "recurring-credit",
       "free_tier": "$30/month recurring credit (Starter plan)",
       "rate_limits": "Starter: 100 containers + 10 GPU concurrency, 5 crons, 1-day log retention",
-      "notes": "Recurring monthly credit, not a one-time trial. Modal is serverless compute you deploy models on, not a hosted model API. A payment method on file is required to use Modal at all.",
+      "notes": "Recurring monthly credit, not a one-time trial. Modal is serverless compute you deploy models on, not a hosted model API. A payment method on file is required to use Modal at all. Commercial terms: Modal Terms of Service (https://modal.com/legal/terms, read 2026-10-16) authorize use «solely for Customer's internal business» (reselling direct access prohibited), but Section 1.2 states «No-Fee Use» «may be subject to certain additional restrictions, limitations and differing terms»; the clause does not list them, so whether the Starter plan credit permits production/commercial use is not settled and commercial_ok remains null.",
       "best_for": "Self-hosting open models on free monthly GPU credit",
       "modalities": ["text"],
       "models_free": null,
@@ -504,8 +504,8 @@
       "is_text_llm": false,
       "model_tier": null,
       "verified": true,
-      "last_verified": "2026-10-08",
-      "data_policy": {"trains_on_prompts":false,"retention":null,"source":"https://modal.com/legal/terms","checked":"2026-10-15","quote":"Modal will not, except with Customer's prior written consent: (i) train any AI model using Customer Data, or (ii) export Customer Data into, or cause Customer Data to be ingested by, large language models.","note":"The terms are written for Customers (businesses) and do not say whether they apply to the free monthly credit. Another clause: No-Fee Use «may be subject to certain additional restrictions, limitations and differing terms».","plan_named":false}
+      "last_verified": "2026-10-16",
+      "data_policy": {"trains_on_prompts":false,"retention":null,"source":"https://modal.com/legal/terms","checked":"2026-10-16","quote":"Modal will not, except with Customer's prior written consent: (i) train any AI model using Customer Data, or (ii) export Customer Data into, or cause Customer Data to be ingested by, large language models.","note":"The terms are written for Customers (businesses): use is «solely for Customer's internal business», while «No-Fee Use» «may be subject to certain additional restrictions, limitations and differing terms»; the clause does not list them.","plan_named":false}
     },
     {
       "slug": "sambanova",
@@ -1008,7 +1008,7 @@
       "free_type": "recurring-credit",
       "free_tier": "$5/month usage credits in every workspace (Free plan) for the Moondream vision model — caption, query (VQA), detect, point",
       "rate_limits": "2 requests/sec on the free tier (10 req/sec with ≥$10 account balance); usage bounded by the $5/month credit",
-      "notes": "Recurring $5/month credit, no credit card required. Per the Terms (§5.2), data is not used to train Moondream's generally available models. Commercial terms for the hosted API not specified. OpenAI-compatible endpoint.",
+      "notes": "Last updated 2025-12-10. Commercial use of the free tier is unclear: §4.1 permits use for «internal business or personal purposes», while §4.2 prohibits «commercially exploit the Service or any portion of the Service». The terms do not explicitly clarify whether commercial use is permitted on the free tier.",
       "best_for": "Tiny vision model, OpenAI-compatible, monthly free credit",
       "modalities": ["vision"],
       "models_free": null,
@@ -1023,8 +1023,8 @@
       "is_text_llm": false,
       "model_tier": null,
       "verified": true,
-      "last_verified": "2026-10-08",
-      "data_policy": {"trains_on_prompts":false,"retention":"No longer than necessary to provide the Service","source":"https://moondream.ai/terms","checked":"2026-10-15","quote":"M87 Labs will not use Customer Content or Outputs to Train any model or adapter that is made generally available by M87 Labs (including the base Moondream models), or to Train any model or adapter for the benefit of any third party, except where you explicitly opt in under a separate written agreement.","note":"Last updated 2025-12-10. The clause names no free plan and speaks of «Customer Content».","plan_named":false}
+      "last_verified": "2026-10-16",
+      "data_policy": {"trains_on_prompts":false,"retention":"No longer than necessary to provide the Service","source":"https://moondream.ai/terms","checked":"2026-10-15","quote":"M87 Labs will not use Customer Content or Outputs to Train any model or adapter that is made generally available by M87 Labs (including the base Moondream models), or to Train any model or adapter for the benefit of any third party, except where you explicitly opt in under a separate written agreement.","note":"Commercial use of the free tier is unclear. §4.1: «your internal business or personal purposes»; §4.2: «commercially exploit the Service or any portion of the Service». The terms do not name the free plan.","plan_named":false}
     },
     {
       "slug": "speechmatics",
@@ -1033,7 +1033,7 @@
       "free_type": "trial-credit",
       "free_tier": "Free plan: $100 credit grant on signup (no payment card) for Speech-to-Text; Text-to-Speech lists the first 1 million characters free",
       "rate_limits": "Free: 2 concurrent real-time sessions; Batch API: 10 new jobs/s and 50 job-status requests/s (bounded by the $100 credit)",
-      "notes": "One-time $100 credit grant, no card required; to go beyond it, add a card and move to Pro (pay-as-you-go). Accounts created before 1 August 2026 received a one-time $25 transition credit. No data logging for model training by default. Commercial-use permission not explicitly stated.",
+      "notes": "One-time $100 credit grant, no card required; to go beyond it, add a card and move to Pro (pay-as-you-go). Accounts created before 1 August 2026 received a one-time $25 transition credit. No data logging for model training by default. Terms of Service 3.1 licenses the Software to produce Integrated Products, 4.4 only bars reselling the Software as a standalone product, and 10.3 assigns to the customer all rights in the Transcripts; Free Usage (5.1) is part of the same terms, and no clause limits it to evaluation or non-commercial use.",
       "best_for": "High-accuracy STT + TTS on a $100 no-card credit",
       "modalities": ["audio"],
       "models_free": null,
@@ -1041,7 +1041,7 @@
       "docs_url": "https://www.speechmatics.com/pricing",
       "phone_required": null,
       "card_required": false,
-      "commercial_ok": null,
+      "commercial_ok": true,
       "openai_compatible": false,
       "openai_base_url": null,
       "env_key": "SPEECHMATICS_API_KEY",
@@ -1171,7 +1171,8 @@
       "model_tier": null,
       "no_expiry": {"source":"https://docs.sarvam.ai/api/getting-started/ratelimits","checked":"2026-10-09","quote":"Credits are universal and never expire."},
       "verified": true,
-      "last_verified": "2026-10-08"
+      "last_verified": "2026-10-08",
+      "data_policy": {"trains_on_prompts":null,"retention":"Retained indefinitely until a workspace Owner configures a period.","source":"https://docs.sarvam.ai/api/platform/data-retention","checked":"2026-10-15","quote":"Until an Owner sets a retention period, your workspace’s data is retained indefinitely.","note":"The page describes workspace-level retention for Model APIs, with per-product overrides. The page names no plan.","plan_named":false}
     },
     {
       "slug": "gladia",
@@ -1229,7 +1230,7 @@
       "free_type": "trial-credit",
       "free_tier": "One-time TokenHub new-user trial (Hunyuan has moved to TokenHub): 1,000,000 free tokens for each language model and each multimodal-understanding model, claimable once per main account; offer runs until 2026-12-31. The legacy Hunyuan free package (1,000,000 tokens shared across text/vision models plus 1,000,000 for Hunyuan-embedding) is no longer offered: the old platform stopped new purchases on 2026-06-30",
       "rate_limits": "ChatCompletions (Tencent Cloud API): default 5 concurrent requests per account; GetEmbedding: 5 requests/second (both marked pre-offline, expected 2026-12-21). A limit of 20 requests/second for the other Hunyuan APIs is not stated on any official API page checked on 2026-10-15, so it is not confirmed",
-      "notes": "Tencent has moved Hunyuan to TokenHub, its model-service platform. Per Tencent's migration notice, the legacy platform stopped new purchases on 2026-06-30, and its console and APIs were due to close on 2026-09-30; the legacy ChatCompletions and GetEmbedding API pages (updated 2026-09-23) still list an expected shutdown of 2026-12-21, so the two official sources disagree. The four vision models in the old free package (Tencent HY Vision 1.5 Instruct, hunyuan-turbos-vision, hunyuan-t1-vision, hunyuan-turbos-vision-video) left the old platform on 2026-06-22. TokenHub trial: the free quota is used first, unused quota expires, and once it runs out calls stop unless post-paid billing is enabled. The TokenHub billing page gives the new-user trial a validity of 1 year for language and multimodal-understanding models; the 3-month validity in Tencent's migration notice applies only to the separate free quota for users who complete the migration from the old platform. Tencent adds that the validity differs between models, so check the model you plan to use. TokenHub requires Tencent Cloud real-name verification (enterprise or personal) — a practical barrier for many non-China users. openai_base_url is TokenHub's OpenAI-compatible endpoint; the legacy endpoint (api.hunyuan.cloud.tencent.com/v1) belongs to the closed platform. Commercial-use terms not stated.",
+      "notes": "Tencent has moved Hunyuan to TokenHub, its model-service platform. Per Tencent's migration notice, the legacy platform stopped new purchases on 2026-06-30, and its console and APIs were due to close on 2026-09-30; the legacy ChatCompletions and GetEmbedding API pages (updated 2026-09-23) still list an expected shutdown of 2026-12-21, so the two official sources disagree. The four vision models in the old free package (Tencent HY Vision 1.5 Instruct, hunyuan-turbos-vision, hunyuan-t1-vision, hunyuan-turbos-vision-video) left the old platform on 2026-06-22. TokenHub trial: the free quota is used first, unused quota expires, and once it runs out calls stop unless post-paid billing is enabled. The new-user free package page (the docs_url, updated 2026-09-04, read 2026-10-17) gives 1,000,000 tokens with a validity of 1 year for all language models and for all multimodal-understanding models, counted from the day the quota is claimed (the page says 免费额度从领取时起算), after which the unused part expires; the 3-month validity in Tencent's migration notice applies only to the separate free quota for users who complete the migration from the old platform. The same page adds that the validity differs between models, so check the model you plan to use. TokenHub requires Tencent Cloud real-name verification (enterprise or personal) — a practical barrier for many non-China users. openai_base_url is TokenHub's OpenAI-compatible endpoint; the legacy endpoint (api.hunyuan.cloud.tencent.com/v1) belongs to the closed platform. Tencent documents the same two hosts under two domains, one per documentation site: the China site (cloud.tencent.com/document/product/1823/130078, updated 2026-10-13) lists tokenhub.tencentmaas.com (Guangzhou) and tokenhub-intl.tencentmaas.com (Singapore); the international site (intl.cloud.tencent.com/document/product/1300/80632, updated 2026-10-09, AI-translated) lists tokenhub.tencentcloudmaas.com and tokenhub-intl.tencentcloudmaas.com, and a Silicon Valley host. This entry uses the first, as the China-site quick start does. Read 2026-10-17. Commercial-use terms not stated.",
       "best_for": "Chinese-language LLM workloads via an OpenAI-compatible endpoint",
       "modalities": ["text", "vision", "embeddings"],
       "models_free": null,
@@ -1375,7 +1376,7 @@
       "free_type": "trial-credit",
       "free_tier": "Free credits equivalent to 5 hours of Reverb ASR (speech-to-text), usable across all Rev AI products",
       "rate_limits": "Bounded by the 5-hour credit grant",
-      "notes": "Free credits granted at signup (renewal/expiry not stated). High-accuracy English ASR. No credit card required (stated on the signup page). Commercial terms not stated.",
+      "notes": "Free credits are available at signup. Section 2.1 limits use to internal business purposes during the applicable Order Term, while section 2.2(f) prohibits providing access as part of a service bureau or similar fee-for-service purpose. Sections 2.1 and 2.2 do not say whether signup free credits constitute an Order, so commercial use of these credits is unconfirmed. Source: https://www.rev.com/legal/terms (read 2026-10-15).",
       "best_for": "5 free hours of high-accuracy speech-to-text to evaluate",
       "modalities": ["audio"],
       "models_free": null,
@@ -1487,7 +1488,8 @@
       "model_tier": null,
       "verified": true,
       "last_verified": "2026-10-08",
-      "added": "2026-07-31"
+      "added": "2026-07-31",
+      "data_policy": {"trains_on_prompts":true,"retention":null,"source":"https://poolside.ai/legal/eula","checked":"2026-10-15","quote":"We may use your Content to provide, maintain, improve, and develop the Products and other Poolside offerings, including training our models, unless you opt-out.","note":"Terms of Use, section 4, last updated July 21, 2026. Even after opting out, Poolside may use Content for training if you give Feedback or it is flagged for safety review. The terms cover the Products (APIs and Platform); this clause names no plan.","plan_named":false}
     },
     {
       "slug": "upstage",
@@ -1570,7 +1572,7 @@
       "free_type": "trial-credit",
       "free_tier": "$10 in free credits with full access on Pay As You Go — TTS (Lightning v3.1), STT (Pulse) and voice agents; speech-to-speech (Hydra) is beta/request-access",
       "rate_limits": "Pay As You Go: 15 concurrent TTS streams, 100 TTS requests/min, 450M chars/month cap; 100 concurrent STT streams; 20 concurrent agent calls (bounded by the $10 credit)",
-      "notes": "$10 starting credit on Pay As You Go. The models pricing page lists 15 concurrent TTS streams while the API reference still says 1 active TTS request per account — inconsistent. The models table shows Voice Cloning 'No' for Pay As You Go although the TTS card advertises instant cloning. Card and commercial terms not stated. /pricing now redirects to /pricing/agents.",
+      "notes": "$10 starting credit on Pay As You Go. The models pricing page lists 15 concurrent TTS streams while the API reference still says 1 active TTS request per account; inconsistent. The models table shows Voice Cloning 'No' for Pay As You Go although the TTS card advertises instant cloning. Terms of Service (effective 2026-10-13), section 9(j): «Use the Services, or any portion thereof, for any commercial purpose or for the benefit of any third party or in any manner not permitted by these Terms»; section 8(b): «You may not sell or share the Output with any third parties for commercial benefit or purposes». The Trial Services paragraph (the $10 trial credit) does not mention commercial use, so it does not exempt trial use. The same Terms describe the Services as letting you create AI agents that make and receive calls, so the prohibition reads wider than the free credit alone. /pricing now redirects to /pricing/agents.",
       "best_for": "Fast TTS + STT on a $10 credit",
       "modalities": ["audio"],
       "models_free": null,
@@ -1578,7 +1580,7 @@
       "docs_url": "https://smallest.ai/pricing",
       "phone_required": null,
       "card_required": null,
-      "commercial_ok": null,
+      "commercial_ok": false,
       "openai_compatible": false,
       "env_key": "SMALLEST_API_KEY",
       "is_text_llm": false,

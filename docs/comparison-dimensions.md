@@ -18,7 +18,7 @@ Three consequences the rest of the project has to honour, or the tri-state is de
 
 - **Both confirmed states get a pill.** Every surface that renders a flag — the README tables, the collection tables, the explorer, the provider pages — shows a badge for `true` *and* for `false`. Absence of a pill therefore means `null` and nothing else. A confirmed card wall must never render the same as an unknown one.
 - **`null` never scores as `false`.** In the "Recommended" ranking ([`scripts/lib/rules.mjs`](../scripts/lib/rules.mjs)) a confirmed `false` earns points, a confirmed `true` loses the same points, and `null` scores zero — it sits *between* the two, because that is what not knowing is worth.
-- **A `null` is a task, not a verdict.** Resolving one against a primary source is the highest-value contribution to this dataset. Current gaps: `phone_required` 41/68, `commercial_ok` 34/68, `card_required` 7/68.
+- **A `null` is a task, not a verdict.** Resolving one against a primary source is the highest-value contribution to this dataset. Current gaps: `phone_required` 41/68, `commercial_ok` 32/68, `card_required` 7/68.
 
 ## Fields
 
@@ -35,7 +35,6 @@ Three consequences the rest of the project has to honour, or the tri-state is de
 | `modalities` | string[] | Modalities reachable on the free tier: `text`, `vision`, `image`, `audio`, `embeddings`, `rerank`, `ocr`. |
 | `expires` | string \| null | Validity window for time-limited offers, e.g. `"30 days"`. `null` for perpetual/renewing tiers. |
 | `no_expiry` | object \| null | Only on a one-time trial credit whose provider says, in its own words, that the credit does not expire: `source` (the provider's page), `checked` (the day it was read) and `quote` (the passage, 1 to 300 characters). `expires` stays `null` when it is set. Absent or `null` means the provider says nothing: a trial credit with neither `expires` nor `no_expiry` reads *not confirmed*. Rejected on any other `free_type`. |
-| `partner` / `partner_note` | boolean / string | Only when the provider has a commercial or sponsorship relationship with the project: `partner: true` and the public `partner_note` shown next to the Partner label. It never changes a score or a rank; a partner can appear only on the /best podium (ranks 1 to 3), and one ranked 4 to 10, or one without a note, fails validation. Absent means not a partner. |
 | `data_policy` | object \| null | What the provider itself says about your prompts: `trains_on_prompts` (`true`, `false` or `null` when not stated), `retention` (the provider's wording, or `null`), `source` (the provider's page) and `checked` (the day it was read); at least one of the first two is set; `plan_named` (optional, `true`, `false` or `null`): whether the sentence names the free or trial plan: `true` = it does, to cover or to exclude it; `false` = the source was read and does not name it in that sentence (never that the plan is covered, nor that it is not); `null` or absent = not checked. Absent or `null` means nobody has recorded it, never that the answer is no. The provider page shows a *Data policy* section only when it is set. |
 | `docs_url` | string | Primary source — the provider's own pricing/rate-limit page. Empty only for ⚠️ unverified entries. |
 | `phone_required` | tri-state | Does signup require phone verification? |

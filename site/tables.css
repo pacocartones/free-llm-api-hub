@@ -1,0 +1,33 @@
+/* tables.css — the comparison table of /free-gpu/ and /coding-tools/ (scripts/lib/claims-table.mjs). Only these two pages load it.
+   The filters need no script: a checked box keeps the rows that state that point, a chosen kind keeps that kind.
+   They read the inputs with :has(); a browser without it shows the whole table. */
+.cmp { margin: 8px 0 28px; }
+.cmp-filters { display: flex; flex-wrap: wrap; gap: 6px 26px; margin: 14px 0; padding: 8px 14px 10px; border: 1px solid var(--border); border-radius: var(--radius); }
+.cmp-filters legend { padding: 0 6px; color: var(--muted); font-family: var(--font-mono); font-size: .76rem; text-transform: uppercase; letter-spacing: .05em; }
+.cmp-group { display: flex; flex-wrap: wrap; gap: 0 18px; }
+.cmp-filters label { display: inline-flex; align-items: center; gap: 7px; min-height: 36px; color: var(--muted); font-family: var(--font-mono); font-size: .84rem; cursor: pointer; }
+.cmp-filters label:hover { color: var(--text); }
+.cmp-filters input { accent-color: var(--accent); width: 16px; height: 16px; }
+.cmp-table { width: 100%; border-collapse: collapse; font-size: .86rem; }
+.cmp-table th, .cmp-table td { padding: 10px 12px; border-bottom: 1px solid var(--border); text-align: left; vertical-align: top; }
+.cmp-table thead th { color: var(--muted); font-family: var(--font-mono); font-size: .74rem; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
+.cmp-table tbody th { font-family: var(--font-mono); font-weight: 700; white-space: nowrap; position: sticky; left: 0; background: var(--bg); }
+.cmp-table tbody tr:hover :is(th, td) { background: var(--panel); }
+.cmp-table .s { color: var(--accent); font-weight: 700; }
+.cmp-table .s a { text-decoration: underline; text-underline-offset: 3px; }
+.cmp-table .n { color: var(--muted); }
+/* filters: a checked point keeps the rows that state it; a chosen kind keeps that kind */
+.cmp:has([name$=-state][value=gpu_access]:checked) tbody tr:not([data-stated~=gpu_access]){display:none}
+.cmp:has([name$=-state][value=quota]:checked) tbody tr:not([data-stated~=quota]){display:none}
+.cmp:has([name$=-state][value=credit_amount]:checked) tbody tr:not([data-stated~=credit_amount]){display:none}
+.cmp:has([name$=-state][value=expires]:checked) tbody tr:not([data-stated~=expires]){display:none}
+.cmp:has([name$=-state][value=card_required]:checked) tbody tr:not([data-stated~=card_required]){display:none}
+.cmp:has([name$=-state][value=free_access]:checked) tbody tr:not([data-stated~=free_access]){display:none}
+.cmp:has([name$=-state][value=limits]:checked) tbody tr:not([data-stated~=limits]){display:none}
+.cmp:has([name$=-state][value=commercial_use]:checked) tbody tr:not([data-stated~=commercial_use]){display:none}
+.cmp:has([name$=-state][value=trains_on_code]:checked) tbody tr:not([data-stated~=trains_on_code]){display:none}
+.cmp:has([name$=-kind][value=notebook]:checked) tbody tr:not([data-kind=notebook]){display:none}
+.cmp:has([name$=-kind][value=serverless-api]:checked) tbody tr:not([data-kind=serverless-api]){display:none}
+.cmp:has([name$=-kind][value=ide-extension]:checked) tbody tr:not([data-kind=ide-extension]){display:none}
+.cmp:has([name$=-kind][value=editor]:checked) tbody tr:not([data-kind=editor]){display:none}
+.cmp:has([name$=-kind][value=cli]:checked) tbody tr:not([data-kind=cli]){display:none}

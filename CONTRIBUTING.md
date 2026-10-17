@@ -4,6 +4,17 @@ The entire value of this project is that its data can be trusted. Every contribu
 
 Thanks for helping. Here's how it works.
 
+## Your first contribution, step by step
+
+Each issue says which files to edit; for a data issue:
+
+1. Pick a [good first issue](https://github.com/pacocartones/free-llm-api-hub/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) (small, answered from the provider's public pages).
+2. Read the provider's own page, copy the exact sentence and note the day you read it (UTC).
+3. Fork, edit [`data/providers.json`](data/providers.json), run `npm ci --ignore-scripts` once, then `npm run build && npm test`, and commit the regenerated files with your change.
+4. Open the pull request and say which page you read and when. If you are not sure, say what you found and what you could not confirm: a partial answer is useful.
+
+Details follow: [Quick start](#quick-start), [Confirming a single unknown field](#confirming-a-single-unknown-field) and [Claiming an issue](#claiming-an-issue).
+
 ## The one rule that matters
 
 > **Edit the data, not the docs.** The single source of truth is [`data/providers.json`](data/providers.json). The README tables, the freshness badge, the `collections/` markdown, and the whole interactive site (explorer, per-provider pages, collection pages, badges, sitemap) are all *generated* from it.
@@ -11,30 +22,6 @@ Thanks for helping. Here's how it works.
 **Your pull request ships its own regenerated files.** After editing `data/providers.json`, run `npm run build` (and `npm run og` if the OG check flags drift) and commit the regenerated files together with the data change. There is no regeneration bot — the required "Dataset integrity" check fails until the derived files are in sync.
 
 Fixing a rate limit means editing one field plus the files regenerated from it — still a small, reviewable diff.
-
-## Running Lighthouse locally
-
-The CI gate is `node scripts/lighthouse-gate.mjs` (after `npm ci` in `tools/lighthouse` and `node scripts/build.mjs`; it needs a Chrome binary in `CHROME_PATH`). It gives every run its own Chrome profile and process group, and on exit (also on Ctrl-C or a kill) it ends those groups by pid, deletes the profile and checks that nothing still points at it.
-
-If you run Lighthouse or Chrome by hand against a local server instead, do it like this so nothing is left running:
-
-```bash
-profile="$(mktemp -d)"
-python3 -m http.server 8080 --directory site --bind 127.0.0.1 &
-server=$!
-cleanup() {
-  kill "$server" 2>/dev/null
-  [ -n "${lh:-}" ] && kill -- -"$lh" 2>/dev/null   # Lighthouse runs in its own process group (setsid), never `pkill -f`
-  rm -rf "$profile"
-}
-trap cleanup EXIT INT TERM
-setsid tools/lighthouse/node_modules/.bin/lighthouse http://127.0.0.1:8080/ \
-  --chrome-flags="--headless --no-sandbox --user-data-dir=$profile" --output=json --quiet > lh.json &
-lh=$!
-wait "$lh"
-# final check: nothing should still reference the profile
-if grep -l -- "$profile" /proc/[0-9]*/cmdline 2>/dev/null | grep -qv "/proc/$$/"; then echo "orphan processes left" >&2; fi
-```
 
 ## Quick start
 
@@ -86,7 +73,7 @@ Slugs are permanent identifiers — never rename or reuse a `slug`.
 
 The smallest useful contribution: many entries carry `null` in `card_required`, `phone_required` or `commercial_ok`, which means *nobody has confirmed it yet* — not that the answer is "no". Turning one `null` into a sourced `true`/`false` is a genuine improvement and takes minutes. Open a PR with the flag set, `last_verified` bumped, and the primary source in `docs_url` or `notes`.
 
-The same applies to `data_policy`, which records what a provider says about your prompts (`trains_on_prompts`, `retention`, `source`, `checked`). An absent `data_policy` object means "not recorded", never "no". Sourced values come exclusively from the provider's own pages, alongside the day they were read. If a provider's official pages do not settle the question, that is a completely valid result too: leave the entry as it is and report your findings with the link and date in your PR. See the full field definition in [docs/comparison-dimensions.md](docs/comparison-dimensions.md).
+The same applies to `data_policy`, which records what a provider says about your prompts (`trains_on_prompts`, `retention`, `source`, `checked`). An absent `data_policy` object means "not recorded", never "no". Sourced values come exclusively from the provider's own pages, alongside the day they were read. If a provider's official pages do not settle the question, that is a completely valid result too: leave the entry as it is and report your findings with the link and date in your PR. See the full field definition in [docs/comparison-dimensions.md](docs/comparison-dimensions.md). A `data_policy` row needs at least one of `trains_on_prompts` or `retention` stated: a row with both `null` records nothing, and `npm test` rejects it.
 
 A `data_policy` row also needs its entries in `data/quotes.json` (the sentence, each phrase of the note between « », and a check behind any claim about a whole page). You do not write them: after editing the row, run `npm run quotes:add -- <slug>` and then `npm test`. `docs/quotes.md` says what the command does and what to do when a page cannot be read.
 
@@ -110,6 +97,30 @@ Data PRs are the common case, but scripts and site changes are welcome too. Star
 
 **Adding a test.** Put it in `scripts/<name>.test.mjs`. `npm test` and CI run every `scripts/*.test.mjs` through `scripts/run-tests.mjs`, which finds the files on disk, so a new test file does not touch `package.json` or `.github/workflows/verify.yml` and does not collide with other pull requests. A test named any other way (`*.test.js`, or inside a subfolder) would not run, and `scripts/test-lists.test.mjs` fails if there is one.
 
+## Running Lighthouse locally
+
+The CI gate is `node scripts/lighthouse-gate.mjs` (after `npm ci` in `tools/lighthouse` and `node scripts/build.mjs`; it needs a Chrome binary in `CHROME_PATH`). It gives every run its own Chrome profile and process group, and on exit (also on Ctrl-C or a kill) it ends those groups by pid, deletes the profile and checks that nothing still points at it.
+
+If you run Lighthouse or Chrome by hand against a local server instead, do it like this so nothing is left running:
+
+```bash
+profile="$(mktemp -d)"
+python3 -m http.server 8080 --directory site --bind 127.0.0.1 &
+server=$!
+cleanup() {
+  kill "$server" 2>/dev/null
+  [ -n "${lh:-}" ] && kill -- -"$lh" 2>/dev/null   # Lighthouse runs in its own process group (setsid), never `pkill -f`
+  rm -rf "$profile"
+}
+trap cleanup EXIT INT TERM
+setsid tools/lighthouse/node_modules/.bin/lighthouse http://127.0.0.1:8080/ \
+  --chrome-flags="--headless --no-sandbox --user-data-dir=$profile" --output=json --quiet > lh.json &
+lh=$!
+wait "$lh"
+# final check: nothing should still reference the profile
+if grep -l -- "$profile" /proc/[0-9]*/cmdline 2>/dev/null | grep -qv "/proc/$$/"; then echo "orphan processes left" >&2; fi
+```
+
 ## Claiming an issue
 
 There are two kinds of issue:
@@ -117,7 +128,7 @@ There are two kinds of issue:
 - **Labelled both `good first issue` and `data`** (a data question answered from the provider's own page): don't claim it, open a pull request when it's ready. The first correct, sourced PR is merged. If you found something useful but won't open a PR, post it in the issue with the link and the date; the PR that uses it credits you.
 - **Everything else:** comment `/take` on the issue and a bot assigns it to you straight away, if nobody has it and you have fewer than two open issues assigned. If you can't continue, comment `/release`; that's completely fine, and it frees the issue for someone else. An assigned issue with no activity for two weeks may be offered to another contributor, after a ping. A pull request for an issue assigned to someone else waits for them.
 
-We reply to every new issue, pull request and "can I take this?" comment within 24 hours, usually the same day. A reply is a real answer (a review, a question or an assignment), not an acknowledgement.
+We read every pull request and reply as soon as we can. A reply is a real answer (a review, a question or an assignment), not an acknowledgement.
 
 ## Good first issues
 
@@ -162,3 +173,19 @@ GitHub holds workflow runs from a **first-time contributor** until a maintainer 
 
 - **No regeneration bot — the author ships the derived files.** There is no `bot/regenerate`: `main` requires the "Dataset integrity" check, and a change is complete when its regenerated files are committed in the same PR. After editing `data/providers.json` (or `data/programs.json`), run `npm run build` (and `npm run og` if the OG check flags drift), commit the regenerated files together with the data change, and push. The "Dataset integrity" check fails until they are in sync.
 - **Nothing runs on a schedule.** Re-verification, badge refresh, model samples and the live probe are all local on-demand tasks — see [docs/update-playbook.md](docs/update-playbook.md). This project does not depend on GitHub Actions minutes.
+
+### Branch names and commit identity
+
+- **If you contribute from a fork, none of the branch rules apply to you:** name your branch as you
+  like. They are for the maintainers' branches in this repository.
+- **Maintainers' branch names:** `<type>/<short-slug>`, lower case with hyphens, where the type is
+  the conventional-commit type: `feat/`, `fix/`, `docs/`, `data/`, `test/`, `ci/`, `chore/` or `refactor/`. Example: `fix/sitemap-canonical`. Branch names
+  describe the change, not who made it or an internal ticket. Reserved: `main`, `changeset-release/main` and `bot/*`.
+- **What happens to branches:** in this repository, merged and closed pull requests keep their
+  commits and the branch is deleted afterwards; branches in your fork are yours.
+- **Commit identity:** maintainers commit as
+  `Paco Cartones <253313177+pacocartones@users.noreply.github.com>` (how the project is maintained,
+  including the part done by AI agents under human oversight, is described in the README ([How this project is maintained](README.md#how-this-project-is-maintained))), and
+  `scripts/check-commit-policy.sh` checks maintainer commits only. If you do not want your email in
+  the public history, use your GitHub noreply address
+  ([how](https://docs.github.com/en/account-and-profile/setting-up-and-managing-your-personal-account-on-github/managing-email-preferences/setting-your-commit-email-address)).

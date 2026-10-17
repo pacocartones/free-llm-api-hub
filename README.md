@@ -5,7 +5,7 @@
 **A continuously-verified dataset of free LLM & AI-model APIs you can build on.**
 
 Free LLM APIs plus adjacent model APIs — image, speech, embeddings, rerank and OCR. Free tiers, trial credits and no-cost quotas, every entry dated, sourced, and machine-readable.
-No hype, no dead links, no "generous limits" hand-waving. Just what's actually free, and the fine print that bites.
+Every entry is dated and sourced to the provider's own docs; what we could not confirm is marked. Just what's actually free, and the fine print that bites.
 
 <img src="assets/demo.svg" alt="Terminal demo: curl freellmapihub.com/api/v1/no-card.json returns Google Gemini, Groq, Cloudflare Workers AI, OpenRouter and Mistral AI" width="740">
 
@@ -21,6 +21,8 @@ No hype, no dead links, no "generous limits" hand-waving. Just what's actually f
 [![Hacktoberfest](https://img.shields.io/badge/contribute-good%20first%20issues-9c4668.svg)](https://github.com/pacocartones/free-llm-api-hub/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22)
 
 **[🔎 Interactive explorer](https://freellmapihub.com/)** &nbsp;·&nbsp; **[📊 Dataset](data/providers.json)** &nbsp;·&nbsp; **[🧪 How we verify](docs/methodology.md)** &nbsp;·&nbsp; **[➕ Add a provider](CONTRIBUTING.md)**
+
+⭐ **Useful? [Star the repo](https://github.com/pacocartones/free-llm-api-hub)** so other builders find it. &nbsp;·&nbsp; 🛠 **Want to help?** Pick a [good first issue](https://github.com/pacocartones/free-llm-api-hub/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) or a [help wanted](https://github.com/pacocartones/free-llm-api-hub/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22) issue; each one names the page to read and the check to run. New here? [CONTRIBUTING.md](CONTRIBUTING.md) is the short version.
 
 
 </div>
@@ -90,7 +92,7 @@ Focused, always-current collections — each is generated from the dataset and h
 <!-- AUTOGEN:collections:start -->
 - **[Free LLM APIs with no credit card](collections/no-credit-card.md)** (56) — start without a payment method · [live page ↗](https://freellmapihub.com/collections/no-credit-card)
 - **[Free LLM APIs with no phone verification](collections/no-phone.md)** (22) — no SMS/phone verification · [live page ↗](https://freellmapihub.com/collections/no-phone)
-- **[Free LLM APIs for commercial use](collections/commercial-use.md)** (25) — safe to ship, not eval-only · [live page ↗](https://freellmapihub.com/collections/commercial-use)
+- **[Free LLM APIs for commercial use](collections/commercial-use.md)** (26) — safe to ship, not eval-only · [live page ↗](https://freellmapihub.com/collections/commercial-use)
 - **[OpenAI-compatible free LLM APIs](collections/openai-compatible.md)** (36) — drop-in OpenAI SDK swap · [live page ↗](https://freellmapihub.com/collections/openai-compatible)
 - **[Permanently free LLM APIs](collections/always-free.md)** (5) — $0 models, no trial clock · [live page ↗](https://freellmapihub.com/collections/always-free)
 - **[Free multimodal LLM APIs](collections/multimodal.md)** (52) — vision, audio, embeddings · [live page ↗](https://freellmapihub.com/collections/multimodal)
@@ -114,7 +116,7 @@ Every provider also has its own page with the full details and a copy-ready quic
 
 ## The best free LLM APIs
 
-Our top 10 by score — computed from the [<!-- FIG:verified -->67<!-- /FIG --> verified providers](data/providers.json) every time the site is built, never hand-ordered and never padded to ten. The three best form the podium. Being a partner adds nothing to the score. Every row links to its full verified profile: free tier, rate limits and the catch are checked against the provider's own docs. The podium and the method are on the [**/best page ↗**](https://freellmapihub.com/best/) and in [how the score works ↗](https://freellmapihub.com/best/methodology/).
+Our top 10 by score — computed from the [<!-- FIG:verified -->67<!-- /FIG --> verified providers](data/providers.json) every time the site is built, never hand-ordered and never padded to ten. The three best form the podium. Money adds nothing to the score. Every row links to its full verified profile: free tier, rate limits and the catch are checked against the provider's own docs. The podium and the method are on the [**/best page ↗**](https://freellmapihub.com/best/) and in [how the score works ↗](https://freellmapihub.com/best/methodology/).
 
 <sub>💳 no card · 📵 no phone · 📱 phone required · 🏢 commercial OK · 🔬 eval only · 🔌 OpenAI-compatible</sub>
 
@@ -175,7 +177,7 @@ curl -s https://raw.githubusercontent.com/pacocartones/free-llm-api-hub/main/dat
 **Pin a snapshot for reproducible builds.** `main` moves; depend on an immutable tag instead:
 
 ```bash
-curl -s https://raw.githubusercontent.com/pacocartones/free-llm-api-hub/v2.9.1/data/providers.json
+curl -s https://raw.githubusercontent.com/pacocartones/free-llm-api-hub/v2.11.0/data/providers.json   # v2.11.0 was the latest on 2026-10-17; see Releases
 ```
 
 Tags track the dataset `version` in [`data/providers.json`](data/providers.json) (see [CHANGELOG.md](CHANGELOG.md)) — pin `vX.Y.Z` and bump deliberately. The [live JSON API](https://freellmapihub.com/api/v1/providers.json) always serves the latest `main`.
@@ -216,11 +218,11 @@ Use AI tools if they help you — we do too. We ask for good judgement: understa
 
 This dataset is only as good as it is trustworthy, and right now there are `null` fields (= "nobody has confirmed it yet") waiting for a source. Three concrete ways to help, from smallest to biggest:
 
-1. Grab a [*good first issue*](https://github.com/pacocartones/free-llm-api-hub/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) and confirm **a single fact** about one provider (e.g. *"does Cerebras require a phone?"*) from its official site, with today's date. It's a one-line diff in [`data/providers.json`](data/providers.json).
+1. Grab a [*good first issue*](https://github.com/pacocartones/free-llm-api-hub/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) and answer **a single question** about one provider (e.g. *"what does this provider say it does with your prompts?"*) from its official site, with today's date. Those issues are answered from public pages and name the files and the check to run; there is also a [*help wanted*](https://github.com/pacocartones/free-llm-api-hub/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22) list for larger pieces. A `good first issue` + `data` question is not claimed: just open the pull request when it's ready, because the first correct, sourced answer is merged and a claim would only hold it up.
 2. Pick a provider from the umbrella issue [**confirm `phone_required`**](https://github.com/pacocartones/free-llm-api-hub/issues/7).
 3. Do the same for [**confirm `commercial_ok`**](https://github.com/pacocartones/free-llm-api-hub/issues/8), reading the provider's terms.
 
-The rule is simple and honest: primary source (the provider's own docs) + `last_verified` with a real date, and if you're not sure, leave it `null` and say so. Comment on an issue to claim it and a maintainer will assign it to you.
+The rule is simple and honest: primary source (the provider's own docs) + a real date, and if you can't find it, leave a yes/no field `null` and tell us what you read. For any other issue, comment `/take` and a bot assigns it to you straight away; `/release` frees it. We read every pull request and reply as soon as we can; see [CONTRIBUTING.md](CONTRIBUTING.md#claiming-an-issue).
 
 **October:** help us verify, in the open, which AI APIs are really free. Contributions are welcome all year; Hacktoberfest 2026 no longer rewards pull requests, so none is promised here. One sourced fact beats ten cosmetic edits; see [CONTRIBUTING.md](CONTRIBUTING.md#hacktoberfest).
 

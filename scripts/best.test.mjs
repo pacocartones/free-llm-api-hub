@@ -118,14 +118,14 @@ test('every score stays inside 0..100 and no part exceeds its weight', () => {
   assert.equal(top.total, 100, 'the best possible provider scores exactly 100');
 });
 
-test('being a partner adds nothing: toggling the flag leaves every score identical', () => {
+test('money adds nothing: a paid field on a record leaves every score identical', () => {
   const ed = editorialData();
   const base = scoreData().providers;
-  const run = (partner) => rankProviders(base.map((p) => ({ ...p, partner })), { editorial: ed, probeReport: probeData(), now: NOW }).map((r) => [r.slug, r.total, r.math]);
+  const run = (paid) => rankProviders(base.map((p) => ({ ...p, paid })), { editorial: ed, probeReport: probeData(), now: NOW }).map((r) => [r.slug, r.total, r.math]);
   assert.deepEqual(run(true), run(false));
   assert.deepEqual(run(undefined), run(false));
   const one = blank();
-  assert.equal(scoreProvider({ ...one, partner: true }).total, scoreProvider({ ...one, partner: false }).total);
+  assert.equal(scoreProvider({ ...one, paid: true }).total, scoreProvider({ ...one, paid: false }).total);
 });
 
 test('deterministic: the same data gives the same order, whatever order it arrives in', () => {
@@ -297,40 +297,6 @@ test('a tier near a threshold is flagged and never penalised', () => {
   assert.equal(scoreProvider(near).boundary, true);
   assert.equal(scoreProvider(far).boundary, false);
   assert.equal(scoreProvider(near).total, scoreProvider(far).total, 'the flag changes nothing in the score');
-});
-
-// ---------- partners on the podium (lib/best.mjs) ----------
-import { topEntries, partnerErrors, PODIUM_SIZE } from './lib/best.mjs';
-
-test('a partner is accepted on the podium with a note and rejected below it', () => {
-  const providers = scoreData().providers;
-  const opts = { editorial: JSON.parse(readFileSync(join(ROOT, 'data/editorial.json'), 'utf8')), probeReport: probeData(), now: NOW };
-  const top = topEntries(providers, opts);
-  assert.ok(top.length > PODIUM_SIZE, 'the data has a top longer than the podium');
-  const mark = (slug) => providers.map((p) => (p.slug === slug ? { ...p, partner: true, partner_note: 'Sponsors the project.' } : p));
-  assert.deepEqual(partnerErrors(topEntries(mark(top[0].p.slug), opts)), [], 'a partner on rank 1 is accepted');
-  assert.deepEqual(partnerErrors(topEntries(mark(top[PODIUM_SIZE - 1].p.slug), opts)), [], 'a partner on rank 3 is accepted');
-  const below = partnerErrors(topEntries(mark(top[PODIUM_SIZE].p.slug), opts));
-  assert.equal(below.length, 1, 'a partner on rank 4 is a validation error');
-  assert.match(below[0], /only on the podium/);
-  const noNote = providers.map((p) => (p.slug === top[0].p.slug ? { ...p, partner: true } : p));
-  assert.match(partnerErrors(topEntries(noNote, opts))[0], /without a partner_note/);
-});
-
-test('being a partner leaves the order of the top identical', () => {
-  const providers = scoreData().providers;
-  const opts = { editorial: JSON.parse(readFileSync(join(ROOT, 'data/editorial.json'), 'utf8')), probeReport: probeData(), now: NOW };
-  const order = (ps) => topEntries(ps, opts).map((e) => [e.p.slug, e.total]);
-  const first = topEntries(providers, opts)[0].p.slug;
-  assert.deepEqual(order(providers.map((p) => (p.slug === first ? { ...p, partner: true, partner_note: 'x' } : p))), order(providers));
-});
-
-test('validate rejects a partner without its public note', () => {
-  const data = scoreData();
-  data.providers[0].partner = true;
-  const fixture = tmpFile('providers.json');
-  writeFileSync(fixture, JSON.stringify(data));
-  assert.throws(() => execFileSync(process.execPath, ['scripts/validate.mjs', fixture], { cwd: ROOT, stdio: 'pipe' }), (e) => /needs a partner_note/.test(String(e.stderr)));
 });
 
 // ---------- the editorial part is declared neutral only while it is ----------

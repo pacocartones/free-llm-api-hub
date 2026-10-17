@@ -71,18 +71,3 @@ export function resolveBestEntries(best, providers) {
 export function topEntries(providers, opts = {}) {
   return topProviders(providers, opts).map((r, i) => ({ ...r, rank: i + 1, podium: i < PODIUM_SIZE, p: r.provider }));
 }
-
-/**
- * Partner rules for a top: a partner may appear only on the podium, and there it must carry a public
- * note. Being a partner never moves a score (lib/score.mjs does not read it), so these are only about
- * where it may show. Does not throw.
- */
-export function partnerErrors(top) {
-  const errors = [];
-  for (const e of top) {
-    if (e.p.partner !== true) continue;
-    if (!e.podium) errors.push(`${e.p.slug} is a partner ranked ${e.rank}: a partner can appear only on the podium (ranks 1 to ${PODIUM_SIZE})`);
-    else if (typeof e.p.partner_note !== 'string' || !e.p.partner_note.trim()) errors.push(`${e.p.slug} is a partner on the podium without a partner_note`);
-  }
-  return errors;
-}

@@ -16,7 +16,7 @@
 // Rules the code enforces (each has a test):
 //  - Missing information scores zero or neutral (the middle, for the two yes/no requirements), never an estimate. A missing input also lowers
 //    the confidence shown: the number of the six mathematical inputs that are confirmed.
-//  - `partner` is never read here. Being a partner adds nothing to the score.
+//  - Nothing paid is read here: the score takes only the fields of the provider's own record, and the agreements file (data/sponsorships.json) is not one of them.
 //  - Deterministic: the same data gives the same order; ties break by the mathematical score, then by name.
 //  - Nothing here fixes a position. The ranking is computed from the data every time.
 //  - The top takes only verified, unexpired providers that offer text LLMs (is_text_llm), and only those with at
@@ -129,7 +129,7 @@ export function stabilityFromProbe(report, slug, now = new Date()) {
   return samples.reduce((a, h) => a + h.v, 0) / samples.length;
 }
 
-/** The score of one provider. Never reads `partner`. */
+/** The score of one provider. Reads only that provider's record; no agreement, no payment. */
 export function scoreProvider(p, { editorial = null, stability = null } = {}) {
   const f = inputFractions(p, stability);
   const parts = {};

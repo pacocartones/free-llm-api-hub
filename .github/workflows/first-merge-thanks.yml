@@ -1,0 +1,45 @@
+name: First merge thanks
+
+# One short comment when a person's first pull request is merged, pointing at the
+# good first issues. Like welcome.yml, it does not check out or run any code from
+# the pull request: it reads the event, asks the API how many merged pull requests
+# the author has, and posts a comment. The author and number reach the shell only
+# through environment variables, never interpolated into the script.
+on:
+  pull_request_target: # zizmor: ignore[dangerous-triggers] no checkout, no PR code is run; only posts a comment
+    types: [closed]
+
+permissions: {}
+
+jobs:
+  thank:
+    name: thank first-time contributors on merge
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    permissions:
+      pull-requests: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      REPO: ${{ github.repository }}
+      AUTHOR: ${{ github.event.pull_request.user.login }}
+      AUTHOR_TYPE: ${{ github.event.pull_request.user.type }}
+      NUMBER: ${{ github.event.pull_request.number }}
+    steps:
+      - name: Comment on the first merged pull request of an outside contributor
+        run: |
+          set -euo pipefail
+          # Maintainers and bots are not thanked here.
+          if [ "$AUTHOR_TYPE" != "User" ] || [ "$AUTHOR" = "pacocartones" ]; then
+            echo "skipped: $AUTHOR is a maintainer or a bot"; exit 0
+          fi
+          # Count from the pull request list rather than search, which can lag behind a merge
+          # that has just happened.
+          merged="$(gh api --paginate "repos/$REPO/pulls?state=closed&per_page=100" \
+            | jq -s --arg a "$AUTHOR" '[.[][] | select(.user.login == $a and .merged_at != null)] | length')"
+          if [ "$merged" != "1" ]; then
+            echo "skipped: $AUTHOR has $merged merged pull requests"; exit 0
+          fi
+          body='Merged, thank you. If you would like to do another, the [good first issues](https://github.com/pacocartones/free-llm-api-hub/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) list is open.'
+          gh api -X POST "repos/$REPO/issues/$NUMBER/comments" -f body="$body" >/dev/null
+          echo "thanked $AUTHOR on #$NUMBER"
