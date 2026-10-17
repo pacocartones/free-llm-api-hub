@@ -195,7 +195,7 @@
    "kind": "sentence",
    "text": "Modal will not, except with Customer's prior written consent: (i) train any AI model using Customer Data, or (ii) export Customer Data into, or cause Customer Data to be ingested by, large language models.",
    "source_url": "https://modal.com/legal/terms",
-   "read_on": "2026-10-15",
+   "read_on": "2026-10-16",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "246080092abebcd77646fc52b62b9e966cda34106c6eacc52ed0ea0532d86b83"
@@ -204,9 +204,31 @@
    "id": "modal.note_passage.1",
    "slug": "modal",
    "kind": "note_passage",
+   "text": "solely for Customer's internal business",
+   "source_url": "https://modal.com/legal/terms",
+   "read_on": "2026-10-16",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "246080092abebcd77646fc52b62b9e966cda34106c6eacc52ed0ea0532d86b83"
+  },
+  {
+   "id": "modal.note_passage.2",
+   "slug": "modal",
+   "kind": "note_passage",
+   "text": "No-Fee Use",
+   "source_url": "https://modal.com/legal/terms",
+   "read_on": "2026-10-16",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "246080092abebcd77646fc52b62b9e966cda34106c6eacc52ed0ea0532d86b83"
+  },
+  {
+   "id": "modal.note_passage.3",
+   "slug": "modal",
+   "kind": "note_passage",
    "text": "may be subject to certain additional restrictions, limitations and differing terms",
    "source_url": "https://modal.com/legal/terms",
-   "read_on": "2026-10-15",
+   "read_on": "2026-10-16",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "246080092abebcd77646fc52b62b9e966cda34106c6eacc52ed0ea0532d86b83"
@@ -360,7 +382,7 @@
    "kind": "sentence",
    "text": "M87 Labs will not use Customer Content or Outputs to Train any model or adapter that is made generally available by M87 Labs (including the base Moondream models), or to Train any model or adapter for the benefit of any third party, except where you explicitly opt in under a separate written agreement.",
    "source_url": "https://moondream.ai/terms",
-   "read_on": "2026-10-15",
+   "read_on": "2026-10-16",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "a7c151d622c571676ef6225174ff69e6e77e071a79c55c9c88dfec0f76f1976a"
@@ -369,9 +391,20 @@
    "id": "moondream.note_passage.1",
    "slug": "moondream",
    "kind": "note_passage",
-   "text": "Customer Content",
+   "text": "your internal business or personal purposes",
    "source_url": "https://moondream.ai/terms",
-   "read_on": "2026-10-15",
+   "read_on": "2026-10-16",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "a7c151d622c571676ef6225174ff69e6e77e071a79c55c9c88dfec0f76f1976a"
+  },
+  {
+   "id": "moondream.note_passage.2",
+   "slug": "moondream",
+   "kind": "note_passage",
+   "text": "commercially exploit the Service or any portion of the Service",
+   "source_url": "https://moondream.ai/terms",
+   "read_on": "2026-10-16",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "a7c151d622c571676ef6225174ff69e6e77e071a79c55c9c88dfec0f76f1976a"
@@ -408,6 +441,39 @@
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "e1aace949855493f0c20860532894ea9eb0c8c84b98c55e85d132c6abe98062e"
+  },
+  {
+   "id": "sarvam-ai.sentence",
+   "slug": "sarvam-ai",
+   "kind": "sentence",
+   "text": "Until an Owner sets a retention period, your workspace’s data is retained indefinitely.",
+   "source_url": "https://docs.sarvam.ai/api/platform/data-retention",
+   "read_on": "2026-10-15",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "57f3bc7b7807b7c0d80c5c1011f0aa620a727f2b4efa6c84753b7d376862c336"
+  },
+  {
+   "id": "sarvam-ai.absence_check",
+   "slug": "sarvam-ai",
+   "kind": "absence_check",
+   "terms": [
+    "free",
+    "trial",
+    "paid",
+    "plan"
+   ],
+   "hits": {
+    "free": 0,
+    "trial": 0,
+    "paid": 0,
+    "plan": 0
+   },
+   "source_url": "https://docs.sarvam.ai/api/platform/data-retention",
+   "read_on": "2026-10-15",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "57f3bc7b7807b7c0d80c5c1011f0aa620a727f2b4efa6c84753b7d376862c336"
   },
   {
    "id": "rime.sentence",
@@ -474,6 +540,17 @@
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "9399f9854cd2d68dce07f6bcfbdc9f8a785c7d06a3e8930b6cf81789fd32f5ff"
+  },
+  {
+   "id": "poolside.sentence",
+   "slug": "poolside",
+   "kind": "sentence",
+   "text": "We may use your Content to provide, maintain, improve, and develop the Products and other Poolside offerings, including training our models, unless you opt-out.",
+   "source_url": "https://poolside.ai/legal/eula",
+   "read_on": "2026-10-16",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "e61bfb4ed61a5d4ffb954d7f42d9b8a30322dae299ad4fd317dd9ed0b1fe1aea"
   },
   {
    "id": "upstage.sentence",

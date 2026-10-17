@@ -27,9 +27,9 @@ Run these on the monthly "what's new" scan (see the
    **`npm run discover`** ([`scripts/discover.mjs`](../scripts/discover.mjs))
    reports what's new since the last snapshot and which publishers with free
    models we don't yet list as a first-party provider.
-2. **[cheahjs/free-llm-api-resources](https://github.com/cheahjs/free-llm-api-resources)**
-   — the incumbent, high-trust (cites official docs, excludes proxies,
-   bot-updated). Benchmark our coverage and freshness against it.
+2. **`cheahjs/free-llm-api-resources`** — unavailable: GitHub returned HTTP
+   404 on 2026-10-16, and no replacement repository was found on the owner's
+   GitHub profile. It is no longer a usable discovery source.
 3. **freellm.net + its repo (open-free-llm-api/awesome-freellm-apis)** — our
    closest architectural twin (live-probed directory + daily repo). Watch for
    new providers and competitive moves. Note: it is also a backlink funnel for
@@ -46,11 +46,14 @@ only) and the **Generative AI** section of **ripienaar/free-for-dev**.
 ## Trust classification
 
 - **Trustworthy leads (cite official docs — safe to mine):** OpenRouter
-  `/models` JSON, cheahjs/free-llm-api-resources, mnfst/awesome-free-llm-apis,
-  freellm.net, wotai.co, free-llm.com, Analytics Vidhya's "Free LLM APIs"
+  `/models` JSON, mnfst/awesome-free-llm-apis, freellm.net, wotai.co,
+  free-llm.com, Analytics Vidhya's "Free LLM APIs"
   roundup, provider-comparison posts from Portkey / Helicone / Eden AI,
   ripienaar/free-for-dev, and — for the [credit-programs](credit-programs.md)
   companion — cloudcredits.io and the GitHub Student Developer Pack.
+- **Unavailable:** `cheahjs/free-llm-api-resources` — GitHub returned HTTP 404
+  on 2026-10-16, and no replacement repository was found on the owner's GitHub
+  profile.
 - **Proxy-heavy — never list their methods as offerings:**
   zukixa/cool-ai-stuff, xtekky/gpt4free, LiLittleCat/awesome-free-chatgpt,
   TokenMix. Useful only to see _which_ models people wish were free.
@@ -64,7 +67,7 @@ The primary keyword is **"free LLM API"**. Direct competitors on that head term:
 
 | Competitor | Type | Angle | Trust |
 |---|---|---|---|
-| cheahjs/free-llm-api-resources | GitHub repo | The incumbent; official-docs tables, bot-updated | High |
+| cheahjs/free-llm-api-resources | GitHub repo (unavailable) | Former incumbent; repository returned HTTP 404 on 2026-10-16 | — |
 | freellm.net | Website + repo | Live-probed directory; sells a router/key-vault product | Mixed (has an agenda) |
 | freellmapi.co | Website | A self-hosted OpenAI-compatible router ($19/yr), not a hand-verified catalog | Mixed |
 | wotai.co | Blog | Live-probed editorial, tiers by real usability | High |

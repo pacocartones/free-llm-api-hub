@@ -89,7 +89,7 @@ const base = `http://127.0.0.1:${server.address().port}`;
 const providers = JSON.parse(readFileSync(join(ROOT, 'data/providers.json'), 'utf8')).providers;
 const sample = providers.find((p) => existsSync(join(SITE, 'p', `${p.slug}.html`)));
 if (!sample) { console.error('No generated provider page under site/p/: run `node scripts/build.mjs` first.'); process.exit(1); }
-const pages = ['/', '/best/', '/coverage/', '/free-gpu/', `/p/${sample.slug}.html`];
+const pages = ['/', '/best/', '/coverage/', '/free-gpu/', '/coding-tools/', `/p/${sample.slug}.html`];
 const lighthouse = join(ROOT, 'tools/lighthouse/node_modules/.bin/lighthouse');
 const RUNS = 3;
 const failures = [];

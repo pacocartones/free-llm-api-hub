@@ -108,15 +108,6 @@
           "type": "boolean",
           "description": "True when the free offering (free tier or trial credit) gives API access to text/chat language models. False for OCR, text-to-speech, speech-to-text, embeddings-only, image and compute-only services. Explicit on every entry; it makes an entry eligible for the top 10."
         },
-        "partner": {
-          "type": "boolean",
-          "description": "True when the provider has a commercial or sponsorship relationship with this project. It never changes a score or a rank. A partner can appear only on the /best podium (ranks 1 to 3), marked as a partner; one ranked 4 to 10 fails validation. Absent means not a partner."
-        },
-        "partner_note": {
-          "type": "string",
-          "minLength": 1,
-          "description": "The public note about the relationship, shown next to the Partner label on the podium. Required when partner is true."
-        },
         "model_tier": {
           "type": ["integer", "null"],
           "minimum": 0,

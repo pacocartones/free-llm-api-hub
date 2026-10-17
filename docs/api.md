@@ -9,12 +9,16 @@ The [static JSON API](https://freellmapihub.com/api/) serves the dataset as file
 3. **Values change; shapes do not.** The data itself (limits, flags, model samples, counts) changes with every re-verification. That is the point of the dataset, not a breaking change. A provider can also leave the dataset when its free tier ends; its `slug` is never reused for a different provider.
 4. **A breaking change ships as `/api/v2/`.** Renaming or removing a field, changing a type, or changing what a value means goes to a new path. `/api/v1/` keeps being generated, from the same data, for a deprecation period announced in the [changelog](../CHANGELOG.md) and on the API page when `/api/v2/` is published.
 
+**One removal, on record.** The schema published at [`/api/v1/schema.json`](https://freellmapihub.com/api/v1/schema.json) declared two optional provider properties, `partner` and `partner_note`, from dataset 2.11.0 (13 October 2026). They are removed from the schema on 2026-10-16. No response of `/api/v1/` ever carried either one (no provider had a value for them), so no value a client could read changes; what changes is that the published schema loses those two property names, and the `intro` text of `/api/v1/best.json` now says that money, not only a partnership, adds nothing to the score. This is a withdrawal from a published schema, not an addition, and it is recorded here and in the [changelog](../CHANGELOG.md) so that the rules above are not read as saying that nothing was ever removed.
+
 What is *not* guaranteed: the order of providers in a list, the exact contents of sampled fields such as `models_free`, and the human-facing HTML pages.
 
 ### Fields added within v1
 
 - **`no_expiry`** (dataset 2.10.0): an optional object on one-time trial credits whose provider says the credit does not expire — `source`, `checked`, `quote`. It appears in the provider objects the API serves; consumers that ignore unknown fields are unaffected. `expires` keeps its type and meaning (a window such as `"30 days"`, or `null`).
 - **`data_policy`** (dataset 2.11.0): an optional object with `trains_on_prompts` (boolean or `null`), `retention` (string or `null`), `source`, `checked`, and an optional `plan_named` (boolean or `null`): whether the sentence names the free or trial plan: `true` = it does, to cover or to exclude it; `false` = the source was read and does not name it in that sentence (never that the plan is covered, nor that it is not); `null` or absent = not checked. Absent or `null` means nobody has recorded it. It appears in the provider objects the API serves; consumers that ignore unknown fields are unaffected.
+- **`model_tier` / `model_tier_source`** (dataset 2.10.0): optional `model_tier` integer from 0 to 4, with `model_tier_source` an optional object containing the provider's model, the exact LMArena row it maps to, that row's rating, its two-number 95% confidence interval `ci`, votes, snapshot date, and `boundary` (boolean): whether the interval crosses or approaches a tier threshold. `model_tier` and `model_tier_source` are `null` or absent when there is no public rating source; `model_tier_source` is present if and only if `model_tier` is. It appears in the provider objects the API serves; consumers that ignore unknown fields are unaffected.
+- **`free_limits`** (dataset 2.10.0): an optional object with optional positive-integer `requests_per_second/minute/day/month` and `tokens_per_day/month` limits as published by the provider, an optional `scope`, and required `source` (an HTTP(S) URL) and `checked` (a date). An omitted limit field means no value is recorded for that unit; `null` or absent for the object means the provider publishes no numeric free limits. Numbers are never converted between units. It appears in the provider objects the API serves; consumers that ignore unknown fields are unaffected.
 
 ### The score: `/api/v1/score.json`
 
@@ -52,7 +56,7 @@ Each object of `providers`:
 | `top_rank` | integer or null | its place in the top, or `null` |
 | `tier_near_threshold` | boolean | true when the model-quality tier is near a threshold and could change at the next snapshot; the score keeps it as it is |
 
-A provider with few confirmed inputs still appears, with a low `confirmed`: missing information scores zero or neutral and is never estimated. A provider that is not verified, or is past the freshness window, is not listed. Being a partner is not a field here: the score never reads it.
+A provider with few confirmed inputs still appears, with a low `confirmed`: missing information scores zero or neutral and is never estimated. A provider that is not verified, or is past the freshness window, is not listed. Nothing paid is in these files: the agreements are a file apart, `data/sponsorships.json`, which is not published under `/api/v1/`.
 
 ```json
 {

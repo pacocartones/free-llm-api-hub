@@ -6,7 +6,7 @@ Free LLM API tiers that permit production/commercial use — not restricted to e
 
 [← All collections](README.md) · [Interactive explorer ↗](https://freellmapihub.com/) · [Main list](../README.md)
 
-Free tiers that **allow commercial/production use** (`commercial_ok: true`). Eval-only tiers (Cohere trial keys, NVIDIA NIM) are deliberately excluded — read their rows in the main list for the restriction.
+Free tiers that **allow commercial/production use** (`commercial_ok: true`). Evaluation-only tiers (`commercial_ok: false`) and tiers whose terms do not say are deliberately left out — read their rows in the main list for the restriction.
 
 **25 of 68 tracked providers** match.
 

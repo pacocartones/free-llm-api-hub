@@ -78,7 +78,7 @@ only what confirms.
   reports what's NEW since the last snapshot plus **publishers with free models
   we don't list as a first-party provider** (leads). Never edits the dataset.
 - [ ] Track the competitive/lead sources in [sources.md](sources.md) on the
-  monthly scan; benchmark our freshness against cheahjs.
+  monthly scan; benchmark our freshness against mnfst/awesome-free-llm-apis.
 - [ ] Consider a second discovery feed (models.dev or the Portkey pricing
   dataset) behind the same `discover.mjs` report, for cross-checking.
 
