@@ -3,35 +3,31 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync, spawnSync } from 'node:child_process';
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { writeFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { makeTmpDir } from './lib/tmp.mjs';
 
 const SCRIPT = join(dirname(fileURLToPath(import.meta.url)), 'check-commit-policy.sh');
 const NOREPLY = '253313177+pacocartones@users.noreply.github.com';
 const skip = process.platform === 'win32' ? 'bash script, checked on Linux' : false;
 
 function run({ name, email, message = 'change', branch, headRepo }) {
-  const dir = mkdtempSync(join(tmpdir(), 'commit-policy-'));
-  try {
-    const git = (args, env = {}) => execFileSync('git', args, { cwd: dir, env: { ...process.env, ...env }, encoding: 'utf8' }).trim();
-    git(['init', '-q']);
-    git(['-c', 'user.name=base', '-c', 'user.email=base@example.com', 'commit', '-q', '--allow-empty', '-m', 'base']);
-    const base = git(['rev-parse', 'HEAD']);
-    git(['commit', '-q', '--allow-empty', '-m', message], {
-      GIT_AUTHOR_NAME: name, GIT_AUTHOR_EMAIL: email, GIT_COMMITTER_NAME: name, GIT_COMMITTER_EMAIL: email,
-    });
-    const env = { ...process.env, GITHUB_HEAD_REF: '', GITHUB_EVENT_PATH: '', GITHUB_REPOSITORY: 'pacocartones/free-llm-api-hub' };
-    if (branch) {
-      const event = join(dir, 'event.json');
-      writeFileSync(event, JSON.stringify({ pull_request: { head: { repo: { full_name: headRepo } } } }));
-      Object.assign(env, { GITHUB_HEAD_REF: branch, GITHUB_EVENT_PATH: event });
-    }
-    return spawnSync('bash', [SCRIPT, base, 'HEAD'], { cwd: dir, env, encoding: 'utf8' }).status;
-  } finally {
-    rmSync(dir, { recursive: true, force: true });
+  const dir = makeTmpDir('commit-policy-');
+  const git = (args, env = {}) => execFileSync('git', args, { cwd: dir, env: { ...process.env, ...env }, encoding: 'utf8' }).trim();
+  git(['init', '-q']);
+  git(['-c', 'user.name=base', '-c', 'user.email=base@example.com', 'commit', '-q', '--allow-empty', '-m', 'base']);
+  const base = git(['rev-parse', 'HEAD']);
+  git(['commit', '-q', '--allow-empty', '-m', message], {
+    GIT_AUTHOR_NAME: name, GIT_AUTHOR_EMAIL: email, GIT_COMMITTER_NAME: name, GIT_COMMITTER_EMAIL: email,
+  });
+  const env = { ...process.env, GITHUB_HEAD_REF: '', GITHUB_EVENT_PATH: '', GITHUB_REPOSITORY: 'pacocartones/free-llm-api-hub' };
+  if (branch) {
+    const event = join(dir, 'event.json');
+    writeFileSync(event, JSON.stringify({ pull_request: { head: { repo: { full_name: headRepo } } } }));
+    Object.assign(env, { GITHUB_HEAD_REF: branch, GITHUB_EVENT_PATH: event });
   }
+  return spawnSync('bash', [SCRIPT, base, 'HEAD'], { cwd: dir, env, encoding: 'utf8' }).status;
 }
 
 test('a maintainer commit with the noreply identity passes', { skip }, () => {
