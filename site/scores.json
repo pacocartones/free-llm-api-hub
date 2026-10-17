@@ -145,6 +145,12 @@
       "of": 6,
       "rank": null
     },
+    "arli-ai": {
+      "total": 34.5,
+      "confirmed": 2,
+      "of": 6,
+      "rank": null
+    },
     "sarvam-ai": {
       "total": 34.5,
       "confirmed": 2,
@@ -256,12 +262,6 @@
     "cerebras": {
       "total": 30.6,
       "confirmed": 3,
-      "of": 6,
-      "rank": null
-    },
-    "arli-ai": {
-      "total": 30,
-      "confirmed": 1,
       "of": 6,
       "rank": null
     },

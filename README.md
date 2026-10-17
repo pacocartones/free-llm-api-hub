@@ -92,7 +92,7 @@ Focused, always-current collections — each is generated from the dataset and h
 <!-- AUTOGEN:collections:start -->
 - **[Free LLM APIs with no credit card](collections/no-credit-card.md)** (56) — start without a payment method · [live page ↗](https://freellmapihub.com/collections/no-credit-card)
 - **[Free LLM APIs with no phone verification](collections/no-phone.md)** (22) — no SMS/phone verification · [live page ↗](https://freellmapihub.com/collections/no-phone)
-- **[Free LLM APIs for commercial use](collections/commercial-use.md)** (26) — safe to ship, not eval-only · [live page ↗](https://freellmapihub.com/collections/commercial-use)
+- **[Free LLM APIs for commercial use](collections/commercial-use.md)** (27) — safe to ship, not eval-only · [live page ↗](https://freellmapihub.com/collections/commercial-use)
 - **[OpenAI-compatible free LLM APIs](collections/openai-compatible.md)** (36) — drop-in OpenAI SDK swap · [live page ↗](https://freellmapihub.com/collections/openai-compatible)
 - **[Permanently free LLM APIs](collections/always-free.md)** (5) — $0 models, no trial clock · [live page ↗](https://freellmapihub.com/collections/always-free)
 - **[Free multimodal LLM APIs](collections/multimodal.md)** (52) — vision, audio, embeddings · [live page ↗](https://freellmapihub.com/collections/multimodal)
