@@ -8,6 +8,10 @@ reviews:
   auto_review:
     enabled: true
     drafts: false
+    # The maintainers' own pull requests are not reviewed automatically; every pull request
+    # from an outside contributor still is (owner's decision, 2026-10-17).
+    ignore_usernames:
+      - pacocartones
   path_filters:
     - "!data/**"
     - "!dist/**"

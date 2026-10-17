@@ -30,9 +30,24 @@ npm package to publish, so a release is a pinned snapshot of the data.
 7. **Pre-releases:** none today. A release candidate would be `vX.Y.Z-rc.N`, marked as a
    pre-release on GitHub.
 8. **Verification:** the notes say how to check the snapshot (see *Verify* below).
-9. **Cadence:** no fixed calendar. A release ships when it is useful to users, and always when the
-   dataset version advances.
+9. **Cadence:** changes accumulate; merging a pull request is not releasing. The dataset `version`
+   is bumped, and so tagged and released, only when one of these holds:
+   (a) a correction users are relying on, or a security fix: release soon, the same day if needed;
+   (b) a milestone of the roadmap is reached;
+   (c) at least 14 days since the last release, with at least one minor change users would notice.
+   At most one minor release a week, and never two releases on the same day except under (a). The
+   owner's OK for a release names which of (a), (b) or (c) applies.
+   **Not a reason to release:** documentation, tests, CI, refactors with no visible effect, metadata,
+   or crediting a contributor. Those merge without a version bump; the thanks go in the notes of the
+   next real release.
 10. **Language:** the notes are always in English.
+11. **0.x, 1.0 and 2.0** (for `packages/mcp`; the dataset is already 2.x): **0.x** may change its
+    tools or output in a minor version, said in the notes. **1.0** needs the public interface fully
+    documented and tested, a deprecation policy (what will be removed warns for at least one minor
+    release first), at least one real outside user, and the owner's approval as a milestone. **A
+    major version** needs the breaking change justified in writing, a migration guide in the notes,
+    at least one release candidate first (tag `mcp-vX.Y.Z-rc.N`, marked as a pre-release), and
+    breaking changes grouped rather than spent one at a time.
 
 ## What a release looks like
 

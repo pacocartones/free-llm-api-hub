@@ -2104,7 +2104,7 @@ test('data-policy page: the counts come from the rows, every verified provider h
   assert.equal(c.withTrainingQuote + c.withRetentionQuote, c.withQuote, 'every sentence is either about training or about retention');
   assert.equal(c.withTrainingQuote, rows.filter((r) => r.quote && (r.state === 'yes' || r.state === 'no')).length);
   const html = readFileSync(join(ROOT, 'site/data-policy/index.html'), 'utf8');
-  assert.match(html, new RegExp(`For each of ${c.total} verified providers, this page shows the sentence from the provider's own page about training on prompts where one is recorded\\. ${c.withTrainingQuote} rows have one about training${c.withRetentionQuote ? ` (${c.withRetentionQuote} more carry a sentence about retention only)`.replace(/[()]/g, '\\$&') : ''}; ${c.notConfirmed} are not confirmed \\(${c.recorded} of them have a value in the dataset but no sentence yet\\)`));
+  assert.match(html, new RegExp(`For each of ${c.total} verified providers, this page shows the sentence from the provider's own page about training on prompts where one is recorded\\. ${c.withTrainingQuote} rows have one about training; the other ${c.notConfirmed} are not confirmed \\(${c.withRetentionQuote ? `${c.withRetentionQuote} of them carry a sentence about retention only, and ` : ''}${c.recorded} have a value in the dataset but no sentence yet\\)`));
   assert.match(html, new RegExp(`${c.no} have a recorded sentence that says they do not train on prompts, ${c.yes} have one that says they may, and ${c.notConfirmed} are not confirmed`));
   assert.equal((html.match(/<tr><th scope="row">/g) || []).length, c.total, 'one row per verified provider');
   assert.match(readFileSync(join(ROOT, 'site/sitemap.xml'), 'utf8'), /<loc>https:\/\/freellmapihub\.com\/data-policy\/<\/loc>/);
@@ -2270,7 +2270,7 @@ test('data_policy lot 4: the 13 providers that say they do not train were read f
   for (const p of data.providers.filter((q) => q.data_policy && q.data_policy.trains_on_prompts !== false)) {
     // rows that say it may train were read for the plan later (lots 2, 3, 5 and the correction of the absence claims): true where the
     // clause names the free users or free usage (AssemblyAI, Voyage AI), false where it does not
-    const READ = { assemblyai: true, 'voyage-ai': true, elevenlabs: false, cartesia: false, 'retell-ai': false, deepgram: false, 'arli-ai': false, 'sarvam-ai': false, poolside: false };
+    const READ = { assemblyai: true, 'voyage-ai': true, elevenlabs: false, cartesia: false, 'retell-ai': false, deepgram: false, 'arli-ai': false, 'sarvam-ai': false, poolside: false, typhoon: false };
     if (p.slug in READ) assert.equal(p.data_policy.plan_named, READ[p.slug], `${p.slug}: plan_named as read`);
     else assert.equal(p.data_policy.plan_named, undefined, `${p.slug}: not read for the plan yet, so no value is written`);
   }

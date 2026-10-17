@@ -173,3 +173,19 @@ GitHub holds workflow runs from a **first-time contributor** until a maintainer 
 
 - **No regeneration bot — the author ships the derived files.** There is no `bot/regenerate`: `main` requires the "Dataset integrity" check, and a change is complete when its regenerated files are committed in the same PR. After editing `data/providers.json` (or `data/programs.json`), run `npm run build` (and `npm run og` if the OG check flags drift), commit the regenerated files together with the data change, and push. The "Dataset integrity" check fails until they are in sync.
 - **Nothing runs on a schedule.** Re-verification, badge refresh, model samples and the live probe are all local on-demand tasks — see [docs/update-playbook.md](docs/update-playbook.md). This project does not depend on GitHub Actions minutes.
+
+### Branch names and commit identity
+
+- **If you contribute from a fork, none of the branch rules apply to you:** name your branch as you
+  like. They are for the maintainers' branches in this repository.
+- **Maintainers' branch names:** `<type>/<short-slug>`, lower case with hyphens, where the type is
+  the conventional-commit type: `feat/`, `fix/`, `docs/`, `data/`, `test/`, `ci/`, `chore/` or `refactor/`. Example: `fix/sitemap-canonical`. Branch names
+  describe the change, not who made it or an internal ticket. Reserved: `main`, `changeset-release/main` and `bot/*`.
+- **What happens to branches:** in this repository, merged and closed pull requests keep their
+  commits and the branch is deleted afterwards; branches in your fork are yours.
+- **Commit identity:** maintainers commit as
+  `Paco Cartones <253313177+pacocartones@users.noreply.github.com>` (how the project is maintained,
+  including the part done by AI agents under human oversight, is described in the README ([How this project is maintained](README.md#how-this-project-is-maintained))), and
+  `scripts/check-commit-policy.sh` checks maintainer commits only. If you do not want your email in
+  the public history, use your GitHub noreply address
+  ([how](https://docs.github.com/en/account-and-profile/setting-up-and-managing-your-personal-account-on-github/managing-email-preferences/setting-your-commit-email-address)).
