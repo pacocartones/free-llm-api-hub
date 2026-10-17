@@ -14,6 +14,7 @@
 //
 // Pure functions of their input, so the output is byte-stable for a given
 // dataset (the header uses data.generated, never the current date).
+import { keyHostErrors } from './key-hosts.mjs';
 
 /** The providers that get a client config, in dataset order. */
 export function clientConfigProviders(providers) {
@@ -94,4 +95,15 @@ export function litellmYaml({ version, generated, providers }) {
     }
   }
   return out.join('\n') + '\n';
+}
+
+/**
+ * The client configs the build publishes, or an Error when a key in them points at a host that is not
+ * pinned for it (ADVISORY-007). These files tell users which base URL to send THEIR key to, so the
+ * refusal sits where the published content is produced: the build cannot write the files without it.
+ */
+export function publishableClientConfigs({ version, generated, providers }) {
+  const errors = keyHostErrors(clientConfigProviders(providers));
+  if (errors.length) throw new Error('refusing to publish client configs, a key points at a host that is not pinned:\n  ' + errors.join('\n  '));
+  return { clients: openaiClients(providers), yaml: litellmYaml({ version, generated, providers }) };
 }

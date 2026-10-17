@@ -6,6 +6,7 @@
 // page it comes from and the day it was read. Nothing is ranked or called best, and nothing is interpreted.
 
 import { htmlEsc, SLUG_RE } from './rows.mjs';
+import { claimsTableHtml } from './claims-table.mjs';
 
 const safeHttp = (u) => (/^https?:\/\//i.test(String(u || '')) ? String(u) : '');
 
@@ -27,13 +28,13 @@ const quoteHtml = (q) => {
   return `<blockquote class="gpu-quote"><p>&ldquo;${htmlEsc(q.text)}&rdquo;</p><footer class="muted">${link}${link ? ' · ' : ''}read ${htmlEsc(q.read)}</footer></blockquote>`;
 };
 
-function claimHtml(field, claim) {
+function claimHtml(slug, field, claim) {
   const quotes = claim.quotes.map(quoteHtml).join('');
   let state;
   if (claim.state === 'stated') state = '<span class="gpu-stated">Stated by the tool\'s page</span>';
   else if (claim.quotes.length) state = '<span class="gpu-unstated">Not stated</span> <span class="muted">Context quoted from the page:</span>';
   else state = '<span class="gpu-unstated">Not stated</span>';
-  return `<div class="gpu-claim"><dt>${htmlEsc(LABELS[field] || field)}</dt><dd>${state}${quotes}</dd></div>`;
+  return `<div class="gpu-claim"${SLUG_RE.test(slug) ? ` id="${slug}-${field}"` : ''}><dt>${htmlEsc(LABELS[field] || field)}</dt><dd>${state}${quotes}</dd></div>`;
 }
 
 /** { tools, stated } computed from the entries: how many tools, and how many of their values rest on a sentence. */
@@ -47,7 +48,7 @@ function entriesHtml(section) {
   return section.entries.map((e) => {
     const url = safeHttp(e.url);
     const name = url ? `<a href="${htmlEsc(url)}" target="_blank" rel="noopener">${htmlEsc(e.name)}</a>` : htmlEsc(e.name);
-    const claims = Object.keys(LABELS).map((f) => claimHtml(f, e.claims[f])).join('');
+    const claims = Object.keys(LABELS).map((f) => claimHtml(e.slug, f, e.claims[f])).join('');
     return `<section class="gpu-entry" id="${SLUG_RE.test(e.slug) ? e.slug : ''}"><h3>${name} <span class="muted">· ${htmlEsc(KIND_LABEL[e.kind] || e.kind)}</span></h3><dl class="gpu-claims">${claims}</dl></section>`;
   }).join('');
 }
@@ -64,6 +65,7 @@ function ownKeyHtml(ownKey, prefix) {
     `See also: <a href="${prefix}collections/openai-compatible.html">OpenAI-compatible free APIs</a>; <a href="${prefix}#explorer">the interactive explorer</a>. ` +
     'The same rule holds: a value is written only where the tool\'s own page says it, and <strong>Not stated</strong> is never <em>no</em>.</p>' +
     `<p class="muted">${c.tools} tools listed; ${c.stated} of ${c.total} values rest on a sentence from the tool's own page.</p>` +
+    claimsTableHtml({ id: 'own', entries: ownKey.entries, labels: LABELS, kindLabel: (k) => KIND_LABEL[k] || k, subject: 'tool' }) +
     entriesHtml(ownKey) + notesHtml(ownKey);
 }
 
@@ -77,6 +79,7 @@ export function codingToolsMainHtml(section, { prefix = '../', repo = '', ownKey
     'Each value below is written only when the tool\'s own page says it, with the sentence and the day it was read; otherwise it reads <strong>Not stated</strong>, which is never the same as <em>no</em>. ' +
     'Each row shows the day its page was read.</p>' +
     `<p class="muted">${c.tools} tools listed; ${c.stated} of ${c.total} values rest on a sentence from the tool's own page.</p>` +
+    claimsTableHtml({ id: 'tools', entries: section.entries, labels: LABELS, kindLabel: (k) => KIND_LABEL[k] || k, subject: 'tool' }) +
     (entries || '<p class="muted">No tool is recorded yet.</p>') +
     (notes ? '<h2>Worth knowing</h2>' + notes : '') +
     ownKeyHtml(ownKey, prefix) +

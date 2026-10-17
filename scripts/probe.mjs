@@ -23,6 +23,7 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import assert from 'node:assert/strict';
 import { serialize, roundTripError } from './_serialize.mjs';
+import { keyHostError } from './lib/key-hosts.mjs';
 
 const FILE = new URL('../data/providers.json', import.meta.url);
 const REPORT = new URL('../data/probe-report.json', import.meta.url);
@@ -161,6 +162,8 @@ async function main() {
     const key = process.env[p.env_key];
     if (!key) { noKey++; results.push({ slug: p.slug, env_key: p.env_key, key_present: false, status: 'skipped-no-key' }); continue; }
     if (!p.openai_base_url) { noAdapter++; results.push({ slug: p.slug, env_key: p.env_key, key_present: true, status: 'no-adapter' }); continue; }
+    const hostError = keyHostError(p);
+    if (hostError) { results.push({ slug: p.slug, env_key: p.env_key, key_present: true, status: 'host-not-pinned' }); console.log(`· ${p.slug.padEnd(22)} host-not-pinned (${hostError})`); continue; }
 
     const r = await probeOpenAI(p, key);
     results.push({

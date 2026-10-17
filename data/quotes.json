@@ -382,7 +382,7 @@
    "kind": "sentence",
    "text": "M87 Labs will not use Customer Content or Outputs to Train any model or adapter that is made generally available by M87 Labs (including the base Moondream models), or to Train any model or adapter for the benefit of any third party, except where you explicitly opt in under a separate written agreement.",
    "source_url": "https://moondream.ai/terms",
-   "read_on": "2026-10-15",
+   "read_on": "2026-10-16",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "a7c151d622c571676ef6225174ff69e6e77e071a79c55c9c88dfec0f76f1976a"
@@ -391,9 +391,20 @@
    "id": "moondream.note_passage.1",
    "slug": "moondream",
    "kind": "note_passage",
-   "text": "Customer Content",
+   "text": "your internal business or personal purposes",
    "source_url": "https://moondream.ai/terms",
-   "read_on": "2026-10-15",
+   "read_on": "2026-10-16",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "a7c151d622c571676ef6225174ff69e6e77e071a79c55c9c88dfec0f76f1976a"
+  },
+  {
+   "id": "moondream.note_passage.2",
+   "slug": "moondream",
+   "kind": "note_passage",
+   "text": "commercially exploit the Service or any portion of the Service",
+   "source_url": "https://moondream.ai/terms",
+   "read_on": "2026-10-16",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "a7c151d622c571676ef6225174ff69e6e77e071a79c55c9c88dfec0f76f1976a"

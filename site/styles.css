@@ -14,6 +14,7 @@
 
 /* ---------- tokens ---------- */
 :root {
+  --t-fast: 120ms; --t-base: 200ms; --t-slow: 320ms; --ease: cubic-bezier(.2, .8, .2, 1);
   --bg: #0a0d0b;
   --bg-elev: #0c100e;
   --panel: #0f1512;
@@ -308,9 +309,12 @@ table.sortable thead th:not(.sorted)::after { content: " ⇅"; opacity: .28; fon
 .crumbs { font-size: .84rem; margin-bottom: 12px; font-family: var(--font-mono); }
 .crumbs a { color: var(--muted); }
 .crumbs::before { content: "> "; color: var(--accent); }
-.page-hero h1 { text-align: left; margin: 0 0 10px; font-size: clamp(1.6rem, 3.4vw, 2.2rem); max-width: none; }
-.page-hero .lede { text-align: left; margin: 0; }
+/* One standard header for every generated page (pageHero() in scripts/build.mjs): breadcrumbs, title and subtitle are centred. */
+.page-hero .crumbs, .page-hero h1 { text-align: center; }
+.page-hero h1 { margin: 0 0 10px; font-size: clamp(1.6rem, 3.4vw, 2.2rem); max-width: none; }
+.page-hero .lede { text-align: center; margin: 10px auto 0; max-width: 62ch; }
 .colls { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+.page-hero .colls { justify-content: center; }
 .colls a { font-size: .82rem; padding: 6px 12px; border: 1px solid var(--border); border-radius: 7px; background: var(--panel); color: var(--muted); font-family: var(--font-mono); }
 .colls a:hover { border-color: var(--accent); color: var(--accent); text-decoration: none; }
 .colls a.active { border-color: var(--accent); color: var(--accent); background: color-mix(in srgb, var(--accent) 11%, transparent); }
@@ -357,6 +361,11 @@ pre:hover .pre-copy, .pre-copy:focus-visible { opacity: 1; }
 .best-head h2 { margin: 0; font-size: 1.08rem; font-family: var(--font-mono); }
 .best-head h2 a { color: var(--text); }
 .best-head h2 a:hover { color: var(--accent); }
+/* Sponsored blocks and disclosures (data/sponsorships.json): the label is text, the size of the text around it. */
+.sponsored { border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; margin: 16px 0; line-height: 1.6; }
+.sponsored p { margin: 0 0 8px; }
+.sponsored-label { color: var(--text); }
+.sponsored-foot, .disclosure { color: var(--muted); font-size: .9rem; }
 .best-tag {
   font-size: .7rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
   color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent);
@@ -368,7 +377,7 @@ pre:hover .pre-copy, .pre-copy:focus-visible { opacity: 1; }
 .best-note { margin-top: 18px; line-height: 1.6; }
 .best-section { font-size: 1rem; margin: 26px 0 12px; color: var(--muted); font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
 .best-score { font-family: var(--font-mono); font-weight: 700; font-size: .85rem; color: var(--accent); margin-left: auto; }
-.best-editorial, .best-partner { margin: 0 0 8px; color: var(--muted); line-height: 1.55; font-size: .9rem; }
+.best-editorial { margin: 0 0 8px; color: var(--muted); line-height: 1.55; font-size: .9rem; }
 .best-podium { border-color: color-mix(in srgb, var(--accent) 45%, var(--border)); }
 .best-podium-1 { background: color-mix(in srgb, var(--accent) 7%, var(--panel)); }
 .best-weights { border-collapse: collapse; margin: 0 0 18px; }
@@ -413,8 +422,6 @@ pre:hover .pre-copy, .pre-copy:focus-visible { opacity: 1; }
 .prov-hero h1 { max-width: none; }
 .prov-hero .prov-badges, .prov-hero .prov-actions { justify-content: center; }
 .prov-hero .lede { text-align: center; margin: 10px auto 0; max-width: 62ch; }
-.model-hero .crumbs, .model-hero h1 { text-align: center; }
-.model-hero .lede { text-align: center; margin: 10px auto 0; max-width: 62ch; }
 .btn.website { background: transparent; color: var(--green); border-color: color-mix(in srgb, var(--green) 50%, var(--border)); }
 .btn.website:hover { color: var(--green); border-color: var(--green); background: color-mix(in srgb, var(--green) 12%, transparent); }
 .prov-meta { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin: 20px 0; }
@@ -511,6 +518,25 @@ pre:hover .pre-copy, .pre-copy:focus-visible { opacity: 1; }
 .meta-row { transition: background .12s ease; }
 .meta-row:hover { background: color-mix(in srgb, var(--accent) 6%, var(--panel)); }
 
+/* ---------- subtle interaction (guide of agent:social, item 9) ----------
+   CSS only, no script. Movement is a layer: with prefers-reduced-motion every state change stays (colour, outline)
+   and every movement goes. Hover effects only where there is a hover; on touch the :active state answers. */
+@media (hover: hover) {
+  /* These links are already underlined at rest: the underline stays and only its thickness moves, so nothing flickers. */
+  main p a:not([class]), main li a:not([class]), .prose p a, .prov-summary p a, p.muted a {
+    transition: text-decoration-thickness var(--t-base) var(--ease);
+  }
+  main p a:not([class]):hover, main li a:not([class]):hover, .prose p a:hover, .prov-summary p a:hover, p.muted a:hover { text-decoration-thickness: 2px; }
+}
+.chip:active, .colls a:active, .presets button:active, .coll-card:active { transform: scale(.98); }
+@media (prefers-reduced-motion: no-preference) {
+  /* the heading flashes, not the whole section that carries the id (a section can be a whole page of tables) */
+  main :is(h2, h3):target, main :target > :is(h2, h3):first-child { animation: target-flash 1s var(--ease); }
+  @keyframes target-flash { from { background: color-mix(in srgb, var(--accent) 16%, transparent); } to { background: transparent; } }
+  @view-transition { navigation: auto; }
+  ::view-transition-old(root), ::view-transition-new(root) { animation-duration: 150ms; }
+}
+
 /* ---------- responsive ---------- */
 @media (max-width: 860px) { .footer-top { grid-template-columns: 1fr 1fr; } }
 @media (max-width: 900px) {
@@ -542,7 +568,7 @@ pre:hover .pre-copy, .pre-copy:focus-visible { opacity: 1; }
   #table td.notes::before, #table td:nth-child(3)::before { display: block; margin-bottom: 3px; }
 }
 @media (max-width: 640px) { .stats { grid-template-columns: repeat(2, 1fr); } .footer-top { grid-template-columns: 1fr; } .notes { max-width: none; } }
-@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto; transition: none !important; } .caret { animation: none; } }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto; transition: none !important; animation: none !important; } }
 
 /* Links inside running text must not rely on colour alone. */
 p.muted a, .prose p a, .prov-summary p a { text-decoration: underline; text-underline-offset: 2px; }

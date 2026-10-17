@@ -15,6 +15,7 @@
 
 import { readFileSync, writeFileSync } from 'node:fs';
 import { serialize, roundTripError } from './_serialize.mjs';
+import { keyHostError } from './lib/key-hosts.mjs';
 
 const FILE = new URL('../data/providers.json', import.meta.url);
 const SAMPLE = 8; // cap: models_free is a *sample*, not the full catalog
@@ -173,6 +174,11 @@ async function main() {
     }
     if (!p.openai_base_url) {
       console.log(`- ${slug}: skipped (no openai_base_url in data)`);
+      continue;
+    }
+    const hostError = keyHostError({ env_key: envVar, openai_base_url: p.openai_base_url });
+    if (hostError) {
+      console.log(`- ${slug}: skipped (${hostError})`);
       continue;
     }
     jobs.push({ slug, run: () => openaiModels(p.openai_base_url, key), kind: 'keyed' });
