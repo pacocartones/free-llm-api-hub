@@ -109,7 +109,7 @@ export function dataPolicyMainHtml(rows, { repo, generated, prefix = '../', quot
   return '<main id="main"><div class="wrap prose">' +
     '<h2>The provider\'s own sentence about your prompts</h2>' +
     `<p>For each of ${c.total} verified providers, this page shows the sentence from the provider's own page about training on prompts where one is recorded. ` +
-    `${c.withTrainingQuote} rows have one about training${c.withRetentionQuote ? ` (${c.withRetentionQuote} more carry a sentence about retention only)` : ''}; ${c.notConfirmed} are not confirmed (${c.recorded} of them have a value in the dataset but no sentence yet). ` +
+    `${c.withTrainingQuote} rows have one about training; the other ${c.notConfirmed} are not confirmed (${c.withRetentionQuote ? `${c.withRetentionQuote} of them carry a sentence about retention only, and ` : ''}${c.recorded} have a value in the dataset but no sentence yet). ` +
     `Each row shows the day its page was read. Data of ${htmlEsc(String(generated))}.</p>` +
     '<p class="dp-legend"><strong>Sentence: does not train</strong>: a recorded sentence from the provider\'s page says it does not train on prompts. <strong>Sentence: may train</strong>: a recorded sentence says it may. ' +
     '<strong>Not confirmed</strong>: no sentence is recorded. That never means &ldquo;no&rdquo;.</p>' +
