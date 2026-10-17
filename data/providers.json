@@ -1033,7 +1033,7 @@
       "free_type": "trial-credit",
       "free_tier": "Free plan: $100 credit grant on signup (no payment card) for Speech-to-Text; Text-to-Speech lists the first 1 million characters free",
       "rate_limits": "Free: 2 concurrent real-time sessions; Batch API: 10 new jobs/s and 50 job-status requests/s (bounded by the $100 credit)",
-      "notes": "One-time $100 credit grant, no card required; to go beyond it, add a card and move to Pro (pay-as-you-go). Accounts created before 1 August 2026 received a one-time $25 transition credit. No data logging for model training by default. Terms of Service section 3.1 grants a license to produce Integrated Products, section 4.4 confirms licensing or selling Integrated Products is permitted (standalone resale prohibited), and section 10.3 assigns all IP rights in Transcripts to the customer.",
+      "notes": "One-time $100 credit grant, no card required; to go beyond it, add a card and move to Pro (pay-as-you-go). Accounts created before 1 August 2026 received a one-time $25 transition credit. No data logging for model training by default. Terms of Service 3.1 licenses the Software to produce Integrated Products, 4.4 only bars reselling the Software as a standalone product, and 10.3 assigns to the customer all rights in the Transcripts; Free Usage (5.1) is part of the same terms, and no clause limits it to evaluation or non-commercial use.",
       "best_for": "High-accuracy STT + TTS on a $100 no-card credit",
       "modalities": ["audio"],
       "models_free": null,
@@ -1048,7 +1048,7 @@
       "is_text_llm": false,
       "model_tier": null,
       "verified": true,
-      "last_verified": "2026-10-16",
+      "last_verified": "2026-10-08",
       "data_policy": {"trains_on_prompts":false,"retention":null,"source":"https://www.speechmatics.com/legal/terms-of-service","checked":"2026-10-15","quote":"Speechmatics will not use Your inputs, outputs or any other data for machine learning or model training purposes unless You opt in by enabling model training within Your portal workspace.","note":"Section 5.1 gives «free Hours of use» per month; the clause on inputs, outputs and other data does not mention Free Usage.","plan_named":false}
     },
     {
