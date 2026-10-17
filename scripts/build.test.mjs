@@ -8,6 +8,7 @@ import { execFileSync } from 'node:child_process';
 import { readFileSync, writeFileSync, existsSync, readdirSync, statSync, rmSync } from 'node:fs';
 import { tmpFile } from './lib/tmp.mjs';
 import { privateTree } from './lib/private-tree.mjs';
+import { htmlEsc } from './lib/rows.mjs';
 import { join, dirname, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
@@ -2304,9 +2305,8 @@ test('data_policy lot 6: at least 26 of 68, AI21 says it does not train, with th
   assert.ok(md.split('\n').some((l) => l.startsWith('| **[AI21')), 'AI21 is in the no-training collection');
 });
 
-test('data_policy lot 7: 29 of 68, Poolside may train on your Content by its Terms of Use unless you opt out (#341)', () => {
+test('data_policy lot 7: Poolside may train on your Content by its Terms of Use unless you opt out (#341)', () => {
   const data = JSON.parse(readFileSync(DATA, 'utf8'));
-  assert.equal(data.providers.filter((p) => p.data_policy).length, 29, 'the count of covered providers');
   const dp = data.providers.find((p) => p.slug === 'poolside').data_policy;
   assert.equal(dp.trains_on_prompts, true, 'may train, even though you can opt out');
   assert.equal(dp.retention, null, 'the terms state no retention period for Content');
@@ -2320,6 +2320,17 @@ test('data_policy lot 7: 29 of 68, Poolside may train on your Content by its Ter
   const md = readFileSync(join(ROOT, 'collections/no-training.md'), 'utf8');
   assert.ok(!md.split('\n').some((l) => l.startsWith('| **[Poolside')), 'Poolside is not in the no-training collection');
   assert.match(readFileSync(join(ROOT, 'site/data-policy/index.html'), 'utf8'), /Poolside/, 'the data-policy page lists Poolside');
+});
+
+test('data_policy coverage: a floor that only rises, and every recorded row is on the data-policy page', () => {
+  const data = JSON.parse(readFileSync(DATA, 'utf8'));
+  const covered = data.providers.filter((p) => p.data_policy);
+  // Lot 7 raised the covered providers to 29; later rows only add. The test does not pin the exact number, so a pull request that
+  // adds one row does not have to edit it (and two of them in flight do not collide on one line).
+  assert.ok(covered.length >= 29, `${covered.length} providers have a data_policy; it must not fall below the 29 of lot 7`);
+  const page = readFileSync(join(ROOT, 'site/data-policy/index.html'), 'utf8');
+  // The page lists verified providers only (dataPolicyRows), so that is the set the page must show.
+  for (const p of covered.filter((x) => x.verified === true)) assert.ok(page.includes(htmlEsc(p.name)), `${p.slug}: its data_policy row is on the data-policy page`);
 });
 
 test('correction of the absence claims: no note says the page names no plan unless the page has none of the four words, and Voyage AI names free usage', () => {
