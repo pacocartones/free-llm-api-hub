@@ -46,7 +46,8 @@ npm package to publish, so a release is a pinned snapshot of the data.
     documented and tested, a deprecation policy (what will be removed warns for at least one minor
     release first), at least one real outside user, and the owner's approval as a milestone. **A
     major version** needs the breaking change justified in writing, a migration guide in the notes,
-    at least one `-rc.N` first, and breaking changes grouped rather than spent one at a time.
+    at least one release candidate first (tag `mcp-vX.Y.Z-rc.N`, marked as a pre-release), and
+    breaking changes grouped rather than spent one at a time.
 
 ## What a release looks like
 
