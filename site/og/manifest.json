@@ -1,7 +1,7 @@
 {
   "collections/no-credit-card.png": "7688b6ef52555962d008fff894223582c484517cea7da49ee67800adc7fc8866",
   "collections/no-phone.png": "785f3ec7eb32f30b90cd0fcf3657d388b5ff4297f2f9716ff66e9b69c05ddd09",
-  "collections/commercial-use.png": "b7a56873cd771f2c446d369b649430b65a756ba278ff97ec81bb6f55b2e73569",
+  "collections/commercial-use.png": "5f9c4ab08cac7457e9111a30e4664920607ea2c115a1433d7be98e97e64244ca",
   "collections/openai-compatible.png": "76a50887d8f1c2e9301755428990ad81479ee21c25b43215cf524541e0503269",
   "collections/always-free.png": "ef2d127de37b942baad06145e54b0c619a1f22327b2ebbcfbec78f5564afe39d",
   "collections/multimodal.png": "41cfc0d1f2d127b04555b7246d84019b4d27710a3f3aff6e7764375b1e06e05d",
@@ -54,7 +54,7 @@
   "p/llamaparse.png": "ff3fa4b75841a34cac243b2374c145b3c605c39e169b23238b256e68513521d4",
   "p/nanonets.png": "327f661743b948ff44f37ecdb15177099e6f95dde0679ff76c9f61c49729f01d",
   "p/moondream.png": "78dacf19c618912ba999773e8a3e0202e522aef8d36097d6a346e0bb25fcb4bc",
-  "p/speechmatics.png": "a1e62cfbfa52e4f5c28c7c2999a8b5cb5afb76c09ff961a19ffbcd22f9b7b23d",
+  "p/speechmatics.png": "38da6b65838a6dcd1c8633cfbdb488442e9d5c150dc9ef3e599c49c164bbfd19",
   "p/speechify.png": "a42e21fb230db3605fcf128aac9e9af882c631d2c42a5bad9648646f046c0670",
   "p/hume-ai.png": "96352b75b76116bf58c9425695b56b0b94c4fcacacabe6a4ac974c9e1bde25de",
   "p/unreal-speech.png": "14f18a00d1aad16ce52da929ad35c5272a02333096c6b37ef589541a09830bd8",
