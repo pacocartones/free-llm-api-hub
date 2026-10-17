@@ -107,4 +107,3 @@ export function publishableClientConfigs({ version, generated, providers }) {
   if (errors.length) throw new Error('refusing to publish client configs, a key points at a host that is not pinned:\n  ' + errors.join('\n  '));
   return { clients: openaiClients(providers), yaml: litellmYaml({ version, generated, providers }) };
 }
-
