@@ -15,7 +15,7 @@ const copies = new Map();
 export function privateTree(root) {
   if (copies.has(root)) return copies.get(root);
   const dir = makeTmpDir('flah-tree-');
-  cpSync(root, dir, { recursive: true, filter: (src) => !/(^|[\\/])node_modules([\\/]|$)/.test(src) });
+  cpSync(root, dir, { recursive: true, filter: (src) => resolve(src) !== resolve(root, '.git') && !/(^|[\\/])node_modules([\\/]|$)/.test(src) });
   if (existsSync(join(root, 'node_modules'))) symlinkSync(join(root, 'node_modules'), join(dir, 'node_modules'));
   // A linked worktree has a .git FILE, not a directory: "gitdir: <path>". The path can be relative to the worktree, and
   // copied as it is it would point elsewhere from the copy, so the build would mine an empty history. Write it absolute.

@@ -1,7 +1,7 @@
 {
   "$schema": "./schema.json",
   "version": "2.11.0",
-  "generated": "2026-10-15",
+  "generated": "2026-10-17",
   "source": "https://github.com/pacocartones/free-llm-api-hub",
   "note": "Canonical dataset. README tables, badge-freshness.json and the interactive site are all generated from this file — do not hand-edit them. `verified: true` means the core facts (tier, limits, key catch, link) were independently confirmed against the provider's own docs on `last_verified`. `verified: false` means sourced from community tracking and not yet independently re-confirmed here — treat those as indicative. Attribute fields (openai_compatible, modalities, best_for) are progressively backfilled and may be null.",
   "providers": [
@@ -1685,7 +1685,8 @@
       "model_tier": null,
       "free_limits": {"requests_per_second":5,"requests_per_minute":200,"scope":"typhoon-v2.5-30b-a3b-instruct","source":"https://docs.opentyphoon.ai/en/rate-limits/","checked":"2026-10-08"},
       "verified": true,
-      "last_verified": "2026-10-08"
+      "last_verified": "2026-10-08",
+      "data_policy": {"trains_on_prompts":true,"retention":null,"plan_named":false,"source":"https://opentyphoon.ai/tac","checked":"2026-10-17","quote":"The Applicant hereby perpetually grants, on a royalty-free basis, the Company the right to use such Input and the Intellectual Property Rights relating thereto for the purpose of providing the Services, developing and training the Company's Artificial Intelligence models","note":"Terms permit Input for «developing and training the Company's Artificial Intelligence models»; no retention period is stated. FAQ: «Yes, we are collecting usage data from the Typhoon API. We use this data to improve the model and the API.» The FAQ does not specify prompt training or retention."}
     }
   ]
 }

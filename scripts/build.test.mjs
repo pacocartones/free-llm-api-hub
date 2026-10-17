@@ -8,7 +8,7 @@ import { execFileSync } from 'node:child_process';
 import { readFileSync, writeFileSync, existsSync, readdirSync, statSync, rmSync } from 'node:fs';
 import { tmpFile } from './lib/tmp.mjs';
 import { privateTree } from './lib/private-tree.mjs';
-import { join, dirname, relative } from 'node:path';
+import { join, dirname, relative, isAbsolute } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
 import { ORDER, roundTripError, serialize } from './_serialize.mjs';
@@ -1642,7 +1642,7 @@ test('figures: a typed count that disagrees with the data is reported, one that 
 test('no source or generated page states a provider count that differs from providers.json', () => {
   const figs = providerFigures(JSON.parse(readFileSync(DATA, 'utf8')).providers);
   // updates/, changes/ and state/ quote git history (old commit subjects), not the dataset
-  const files = ['README.md', 'data/best.json', ...builtPages().map((f) => f.slice(ROOT.length + 1))
+  const files = ['README.md', 'data/best.json', ...builtPages().map((f) => f.slice(ROOT.length + 1).replaceAll('\\', '/'))
     .filter((rel) => !/^site\/(updates|changes|state)(\/|\.html$)/.test(rel))];
   const errs = files.flatMap((rel) => figureErrors(readFileSync(join(ROOT, rel), 'utf8'), figs, rel));
   assert.deepEqual(errs, []);
@@ -1731,7 +1731,7 @@ test('sitemap lists every indexable page except the deliberately omitted ones, w
   const listed = new Set([...sitemap.matchAll(/<loc>https:\/\/freellmapihub\.com\/([^<]*)<\/loc>/g)].map((m) => m[1]));
   const missing = [];
   for (const f of pages) {
-    const rel = f.slice(join(ROOT, 'site').length + 1);
+    const rel = f.slice(join(ROOT, 'site').length + 1).replaceAll('\\', '/');
     if (rel === '404.html' || rel.startsWith('updates/page/') || /^state\/\d{4}-\d{2}\//.test(rel)) continue; // 404 is not a page; pagination follows the commit count (test above)
     const html = readFileSync(f, 'utf8');
     if (/<meta name="robots" content="noindex">/.test(html)) continue; // redirect stubs and legal pages
@@ -2140,7 +2140,7 @@ test('data_policy lot 4: the 13 providers that say they do not train were read f
   for (const p of data.providers.filter((q) => q.data_policy && q.data_policy.trains_on_prompts !== false)) {
     // rows that say it may train were read for the plan later (lots 2, 3, 5 and the correction of the absence claims): true where the
     // clause names the free users or free usage (AssemblyAI, Voyage AI), false where it does not
-    const READ = { assemblyai: true, 'voyage-ai': true, elevenlabs: false, cartesia: false, 'retell-ai': false, deepgram: false, 'arli-ai': false };
+    const READ = { assemblyai: true, 'voyage-ai': true, elevenlabs: false, cartesia: false, 'retell-ai': false, deepgram: false, 'arli-ai': false, typhoon: false };
     if (p.slug in READ) assert.equal(p.data_policy.plan_named, READ[p.slug], `${p.slug}: plan_named as read`);
     else assert.equal(p.data_policy.plan_named, undefined, `${p.slug}: not read for the plan yet, so no value is written`);
   }
@@ -2186,7 +2186,7 @@ test('correction of the absence claims: no note says the page names no plan unle
 
 test('data_policy: Arli AI, from a contributor, states retention only: trains stays not confirmed, the quote is literal and has its register entry', () => {
   const data = JSON.parse(readFileSync(DATA, 'utf8'));
-  assert.equal(data.providers.filter((p) => p.data_policy).length, 27, 'the count of covered providers');
+  assert.equal(data.providers.filter((p) => p.data_policy).length, 28, 'the count of covered providers');
   const dp = data.providers.find((p) => p.slug === 'arli-ai').data_policy;
   assert.equal(dp.trains_on_prompts, null, 'the policy says nothing about training: not stated is not no');
   assert.match(dp.retention, /processed transiently and immediately discarded/); assert.equal(dp.plan_named, false);
@@ -2408,9 +2408,10 @@ test('the private copy of a worktree with a relative gitdir still sees the histo
   git(main, 'worktree', 'add', '-q', '--detach', wt);
   // make the gitdir relative, as `git worktree add --relative-paths` does
   const abs = /^gitdir:\s*(.+?)\s*$/m.exec(readFileSync(join(wt, '.git'), 'utf8'))[1];
+  rmSync(join(wt, '.git'));
   writeFileSync(join(wt, '.git'), `gitdir: ${relative(wt, abs)}\n`);
   assert.ok(!/^gitdir: \//.test(readFileSync(join(wt, '.git'), 'utf8')), 'the fixture gitdir is relative');
   const copy = privateTree(wt);
-  assert.match(readFileSync(join(copy, '.git'), 'utf8'), /^gitdir: \//, 'the copy points at the gitdir by an absolute path');
+  assert.ok(isAbsolute(/^gitdir:\s*(.+?)\s*$/m.exec(readFileSync(join(copy, '.git'), 'utf8'))[1]), 'the copy points at the gitdir by an absolute path');
   assert.equal(git(copy, 'log', '--format=%s').trim(), 'first', 'the copy sees the history');
 });
