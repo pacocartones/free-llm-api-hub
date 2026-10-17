@@ -85,3 +85,78 @@ test('every guide links to its twin collection when a collection points to it', 
   assert.match(html, /<h2>Related collections<\/h2>[\s\S]*href="..\/collections\/no-credit-card"/);
   assert.ok(generated === null || /^\d{4}-\d{2}-\d{2}$/.test(generated));
 });
+
+// ---- the seven collections and the hub ----
+const readColl = (slug) => readFileSync(join(ROOT, 'site/collections', `${slug}.html`), 'utf8');
+const colls = () => readdirSync(join(ROOT, 'site/collections')).filter((f) => f.endsWith('.html') && f !== 'index.html').map((f) => f.replace(/\.html$/, ''));
+
+test('every collection opens with a direct answer of 40 to 55 words and a meta description that start from its live count', () => {
+  const slugs = colls();
+  assert.equal(slugs.length, 7);
+  for (const slug of slugs) {
+    const html = readColl(slug);
+    const a = html.match(/<p class="answer"><strong>([^<]*)<\/strong><\/p>/);
+    assert.ok(a, `${slug}: no direct answer`);
+    const text = stripTags(a[1]);
+    assert.ok(words(text) >= 40 && words(text) <= 55, `${slug}: ${words(text)} words`);
+    const n = html.match(/<p class="count"><strong>(\d+) of (\d+)<\/strong> tracked providers match/);
+    assert.ok(text.includes(n[1]), `${slug}: the answer must carry the count the table has (${n[1]})`);
+    assert.doesNotMatch(text, /\{n\}|\{total\}|\{date\}/);
+    const meta = html.match(/<meta name="description" content="([^"]*)"/)[1];
+    assert.ok(meta.length <= 155, `${slug}: meta ${meta.length} characters`);
+    assert.ok(meta.startsWith(n[1]), `${slug}: the description starts with the count`);
+    assert.doesNotMatch(meta, /\{n\}|\{total\}|\{date\}/);
+  }
+});
+
+test('every collection declares ItemList, BreadcrumbList and a FAQPage whose text is the visible text, with at least two questions', () => {
+  for (const slug of colls()) {
+    const html = readColl(slug);
+    const graph = jsonld(html)['@graph'];
+    const types = graph.map((g) => g['@type']);
+    for (const t of ['ItemList', 'BreadcrumbList', 'FAQPage']) assert.ok(types.includes(t), `${slug}: no ${t}`);
+    const qs = graph.find((g) => g['@type'] === 'FAQPage').mainEntity;
+    assert.ok(qs.length >= 2, `${slug}: ${qs.length} questions`);
+    const visible = stripTags(html.replace(/<script[\s\S]*?<\/script>/g, '')).replace(/\s+/g, ' ');
+    for (const q of qs) {
+      assert.ok(visible.includes(q.name), `${slug}: question "${q.name}" is not on the page`);
+      assert.ok(visible.includes(q.acceptedAnswer.text.replace(/\s+/g, ' ')), `${slug}: answer to "${q.name}" differs from the visible text`);
+    }
+  }
+});
+
+test('a provider named in a collection text is a row of that collection table', () => {
+  for (const slug of colls()) {
+    const html = readColl(slug);
+    const table = html.match(/<tbody>([\s\S]*?)<\/tbody>/)[1];
+    const prose = stripTags(html.match(/<div class="wrap prose">([\s\S]*?)<table/)[1] + (html.match(/<h2>FAQ<\/h2>([\s\S]*?)(<h2>|<\/div>)/) || ['', ''])[1]);
+    for (const p of list) {
+      if (p.name.length < 4) continue;
+      if (new RegExp(`\\b${p.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`).test(prose)) {
+        assert.ok(table.includes(`>${p.name}<`), `${slug}: the text names ${p.name} but it is not in the table`);
+      }
+    }
+  }
+});
+
+test('the hub has a direct answer, a title and a description from its live counts, and CollectionPage, BreadcrumbList and FAQPage that list all fourteen pages', () => {
+  const html = readFileSync(join(ROOT, 'site/guides-and-collections/index.html'), 'utf8');
+  const a = stripTags(html.match(/<p class="answer"><strong>([^<]*)<\/strong><\/p>/)[1]);
+  assert.ok(words(a) >= 40 && words(a) <= 55, `${words(a)} words`);
+  assert.ok(a.includes(`${guides().length} guides`) && a.includes(`${colls().length} collections`));
+  const meta = html.match(/<meta name="description" content="([^"]*)"/)[1];
+  assert.ok(meta.length <= 155 && meta.startsWith(`${guides().length} guides and ${colls().length} collections`));
+  const title = html.match(/<title>([^<]*)<\/title>/)[1];
+  assert.ok(title.length <= 60, `title ${title.length} characters`);
+  const graph = jsonld(html)['@graph'];
+  const page = graph.find((g) => g['@type'] === 'CollectionPage');
+  assert.equal(page.mainEntity.itemListElement.length, 14);
+  for (const e of page.mainEntity.itemListElement) {
+    const path = e.url.replace('https://freellmapihub.com/', '');
+    const file = path.startsWith('guides/') ? `site/${path}.html` : `site/${path}.html`;
+    assert.ok(readFileSync(join(ROOT, file), 'utf8').length > 0, `${e.url} has no page`);
+  }
+  for (const t of ['BreadcrumbList', 'FAQPage']) assert.ok(graph.some((g) => g['@type'] === t), t);
+  const visible = stripTags(html.replace(/<script[\s\S]*?<\/script>/g, '')).replace(/\s+/g, ' ');
+  for (const q of graph.find((g) => g['@type'] === 'FAQPage').mainEntity) assert.ok(visible.includes(q.acceptedAnswer.text), q.name);
+});

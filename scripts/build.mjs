@@ -104,6 +104,8 @@ const SITE = 'https://freellmapihub.com';
 const COLLECTIONS = [
   {
     slug: 'no-credit-card',
+    answer: '{n} of {total} tracked providers need no payment method to start. That includes trial credits as well as permanent free tiers, so read the Type column. Each row says what is free and the catch. The list is a live filter and changes when a provider changes its terms.',
+    metaDesc: '{n} LLM APIs you can start calling without a payment method, filtered live from a dated dataset. Dataset of {date}.',
     title: 'Free LLM APIs with no credit card',
     h1: 'Free LLM APIs with no credit card required',
     desc: 'LLM APIs you can start calling without entering a payment method — filtered live from a continuously-verified dataset.',
@@ -112,33 +114,49 @@ const COLLECTIONS = [
     guides: ['free-llm-api-without-credit-card', 'free-llm-api-no-signup'],
     faq: [
       { q: 'Can I use an LLM API for free without a credit card?', a: 'Yes — every provider on this page offers a free tier with no card required, confirmed against its own docs. You are limited by rate, not billing.' },
-      { q: 'Will I be charged if I go over the free limit?', a: 'No. Without a payment method on file you get rate-limited (HTTP 429) rather than billed — you would have to add a card before any spend is possible.' },
+      { q: 'Will I be charged if I go over the free limit?', a: 'Usually not. Without a payment method on file there is nothing to charge, so reaching a limit means being rate-limited (HTTP 429). Read the catch on each row, because terms change.' },
+      { q: 'How often does this list change?', a: 'It is a live filter of the dataset: it is regenerated whenever the dataset changes, and every row shows the day its source was read.' },
+      { q: 'How do I report a mistake?', a: 'Open an issue on GitHub with the row and the evidence; the maintainers re-read the provider’s own page.' },
     ],
   },
   {
     slug: 'no-phone',
+    answer: '{n} of {total} tracked providers do not ask for a phone number at signup. Some still require an email or a sign-in with another account. A provider whose phone rule is not known is left out rather than assumed, and the list updates when a provider changes its signup.',
+    metaDesc: '{n} LLM APIs whose signup needs no SMS or phone verification, filtered live from a dated dataset. Dataset of {date}.',
     title: 'Free LLM APIs with no phone verification',
     h1: 'Free LLM APIs with no phone number required',
     desc: 'LLM APIs whose signup needs no SMS/phone verification — a live slice of a continuously-verified dataset.',
-    intro: 'Providers you can sign up for **without phone verification** (`phone_required: false`). Groq, Mistral, SiliconFlow and NVIDIA are excluded here because they gate signup behind a phone number.',
+    intro: 'Providers you can sign up for **without phone verification** (`phone_required: false`). Providers that gate signup behind a phone number, or whose rule is not known, are left out.',
     filter: (p) => p.phone_required === false,
     guides: ['free-llm-api-no-signup'],
+    faq: [
+      { q: 'Is there a free LLM API with no phone verification?', a: 'Yes — every provider on this page asks for no phone number at signup, according to its own docs. A provider whose rule is not known is not listed.' },
+      { q: 'Do these APIs need any account at all?', a: 'Almost always: they ask for an email or a sign-in with an existing account, only not for a phone number.' },
+      { q: 'How often does this list change?', a: 'It is a live filter of the dataset: it is regenerated whenever the dataset changes, and every row shows the day its source was read.' },
+      { q: 'How do I report a mistake?', a: 'Open an issue on GitHub with the row and the evidence; the maintainers re-read the provider’s own page.' },
+    ],
   },
   {
     slug: 'commercial-use',
+    answer: '{n} of {total} tracked free tiers say commercial or production use is allowed, according to each provider’s own terms. Evaluation-only tiers are left out, and so is any tier whose terms do not say. Confirm with the provider before you launch.',
+    metaDesc: '{n} free LLM API tiers that allow production use, checked against each provider’s terms. Dataset of {date}.',
     title: 'Free LLM APIs for commercial use',
     h1: 'Free LLM APIs you can use commercially',
     desc: 'Free LLM API tiers that permit production/commercial use — not restricted to evaluation. Verified against each provider’s terms.',
-    intro: 'Free tiers that **allow commercial/production use** (`commercial_ok: true`). Eval-only tiers (Cohere trial keys, NVIDIA NIM) are deliberately excluded — read their rows in the main list for the restriction.',
+    intro: 'Free tiers that **allow commercial/production use** (`commercial_ok: true`). Evaluation-only tiers (`commercial_ok: false`) and tiers whose terms do not say are deliberately left out — read their rows in the main list for the restriction.',
     filter: (p) => p.commercial_ok === true,
     guides: ['openai-compatible-free-apis', 'free-llm-api-without-credit-card'],
     faq: [
       { q: 'Which free LLM APIs allow commercial use?', a: 'Every provider on this page permits commercial/production use on its free tier (`commercial_ok: true`), confirmed against its own terms. Evaluation-only tiers are excluded.' },
       { q: 'Is a free tier safe to ship to production?', a: 'Check the rate limits and whether the free tier is renewing or a one-time credit — both are on each provider’s row. For steady load, a renewing free tier or a paid plan is safer than a trial credit.' },
+      { q: 'How often does this list change?', a: 'It is a live filter of the dataset: it is regenerated whenever the dataset changes, and every row shows the day its source was read.' },
+      { q: 'How do I report a mistake?', a: 'Open an issue on GitHub with the row and the evidence; the maintainers re-read the provider’s own page.' },
     ],
   },
   {
     slug: 'openai-compatible',
+    answer: '{n} of {total} tracked free APIs accept OpenAI-style requests, so you point the OpenAI SDK at a new base_url and key and keep your code. The table gives each provider’s base URL. Compatibility can be partial: the catch column notes limits.',
+    metaDesc: '{n} free LLM APIs with an OpenAI-compatible endpoint: change base_url and key, keep your SDK. Dataset of {date}.',
     title: 'OpenAI-compatible free LLM APIs',
     h1: 'Free LLM APIs with an OpenAI-compatible endpoint',
     desc: 'Free LLM APIs that expose an OpenAI-compatible endpoint — point the OpenAI SDK at a new base_url and you are done.',
@@ -146,17 +164,33 @@ const COLLECTIONS = [
     filter: (p) => p.openai_compatible === true,
     quickstart: true,
     guides: ['openai-compatible-free-apis'],
+    faq: [
+      { q: 'What does OpenAI-compatible mean?', a: 'The API accepts the same request format as OpenAI’s <code>/chat/completions</code>, so the OpenAI SDK works by changing only <code>base_url</code> and the API key.' },
+      { q: 'Is every feature supported?', a: 'Not necessarily: compatibility can be partial, and a feature a provider lacks fails at the provider. Read the catch on each row.' },
+      { q: 'How often does this list change?', a: 'It is a live filter of the dataset: it is regenerated whenever the dataset changes, and every row shows the day its source was read.' },
+      { q: 'How do I report a mistake?', a: 'Open an issue on GitHub with the row and the evidence; the maintainers re-read the provider’s own page.' },
+    ],
   },
   {
     slug: 'always-free',
+    answer: '{n} of {total} tracked providers list models at $0 on a perpetual basis, with no trial window counting down. That describes what the provider says today, not a promise: prices and limits can change, so each row shows the day it was read.',
+    metaDesc: '{n} LLM APIs with models priced at $0 on an ongoing basis, not a trial countdown. Dataset of {date}.',
     title: 'Permanently free LLM APIs',
     h1: 'Permanently free LLM APIs (no trial clock)',
     desc: 'LLM APIs with models priced at $0 on an ongoing basis — no trial window counting down. Verified from a live dataset.',
     intro: 'Providers with models that are **free on a permanent basis** (`free_type: perpetual`) — not a trial credit that runs out. Rate limits still apply; check each row.',
     filter: (p) => p.free_type === 'perpetual',
+    faq: [
+      { q: 'Are there LLM APIs that are free with no trial clock?', a: 'Yes — the providers on this page list models at $0 on a perpetual basis, according to their own pages. Rate limits still apply.' },
+      { q: 'Does permanently free mean free forever?', a: 'No. It describes what the provider says today; prices and limits can change, so every row shows the day it was read.' },
+      { q: 'How often does this list change?', a: 'It is a live filter of the dataset: it is regenerated whenever the dataset changes, and every row shows the day its source was read.' },
+      { q: 'How do I report a mistake?', a: 'Open an issue on GitHub with the row and the evidence; the maintainers re-read the provider’s own page.' },
+    ],
   },
   {
     slug: 'multimodal',
+    answer: '{n} of {total} tracked free tiers go beyond text: vision, image, speech, embeddings, rerank or OCR. The What’s free column describes each tier and the catch column its limits. The guides linked below go deeper on each modality, with the limits side by side.',
+    metaDesc: '{n} free API tiers beyond text: vision, image, audio, embeddings, rerank and OCR. Dataset of {date}.',
     title: 'Free multimodal LLM APIs',
     h1: 'Free multimodal APIs — vision, audio, embeddings',
     desc: 'Free API tiers that go beyond text: vision, image, audio/speech, embeddings and rerank. A live slice of a verified dataset.',
@@ -165,11 +199,15 @@ const COLLECTIONS = [
     guides: ['free-embeddings-apis', 'free-speech-to-text-apis', 'free-image-generation-apis', 'free-ocr-document-ai-apis'],
     faq: [
       { q: 'Are there free APIs for images, speech and embeddings — not just text?', a: 'Yes — the providers here reach beyond text on their free tier: vision, image generation, speech (STT/TTS), embeddings or rerank. See the modality-specific guides linked above.' },
-      { q: 'Can one free API cover several modalities?', a: 'Some do — Google Gemini and Cloudflare Workers AI, for example, span text, vision, embeddings and more on a single free key. Each row lists the modalities that provider offers free.' },
+      { q: 'Can one free API cover several modalities?', a: 'Some do: a provider can span text, vision, audio and embeddings on a single free key. The What’s free column of each row says which modalities that provider offers free.' },
+      { q: 'How often does this list change?', a: 'It is a live filter of the dataset: it is regenerated whenever the dataset changes, and every row shows the day its source was read.' },
+      { q: 'How do I report a mistake?', a: 'Open an issue on GitHub with the row and the evidence; the maintainers re-read the provider’s own page.' },
     ],
   },
   {
     slug: 'no-training',
+    answer: 'Only providers with a sentence of their own saying they do not train on prompts are listed: {n} of {total}. Each provider page cites its source and read date. A provider that says nothing is not listed, which does not mean it trains. Many sources do not say if it covers the free plan.',
+    metaDesc: '{n} of {total} tracked providers say in their own terms that they do not train on your prompts. Source and date on each provider page.',
     title: 'Free LLM APIs that say they do not train on your prompts',
     h1: 'Free LLM APIs that say they do not train on your prompts',
     desc: 'Free LLM and AI APIs whose own terms or privacy page say they do not use your prompts to train their models; each provider’s page on this site cites the source and the day it was read. A live slice of a verified dataset.',
@@ -181,6 +219,8 @@ const COLLECTIONS = [
     faq: [
       { q: 'Which free LLM APIs say they do not train on my prompts?', a: 'The providers on this page, each according to its own terms or privacy page, cited with the day it was read on the provider’s page on this site. The wording differs: for some it holds only while you have not opted in to training, and a privacy notice is not a contract.' },
       { q: 'Does a provider missing from this list train on my data?', a: 'Not necessarily. A provider is missing when its own page says it may train on prompts, says nothing we could cite, or could not be read. Check the provider before you send sensitive data.' },
+      { q: 'How often does this list change?', a: 'It is a live filter of the dataset: it is regenerated whenever the dataset changes, and every row shows the day its source was read.' },
+      { q: 'How do I report a mistake?', a: 'Open an issue on GitHub with the row and the evidence; the maintainers re-read the provider’s own page.' },
     ],
   },
 ];
@@ -767,6 +807,8 @@ const collNavMd = COLLECTIONS.map((c) => `[${c.title}](${c.slug}.md)`).join(' ·
 
 for (const c of COLLECTIONS) {
   const rows = collRows(c);
+  const fill = (t) => t.replaceAll('{n}', String(rows.length)).replaceAll('{total}', String(total)).replaceAll('{date}', data.generated);
+  const metaDesc = fill(c.metaDesc);
   const nav = COLLECTIONS.map(
     (o) => `<a href="${o.slug}"${o.slug === c.slug ? ' class="active" aria-current="page"' : ''}>${htmlEsc(o.title)}</a>`
   ).join('');
@@ -795,7 +837,7 @@ for (const c of COLLECTIONS) {
       {
         '@type': 'ItemList',
         name: c.h1,
-        description: c.desc,
+        description: metaDesc,
         numberOfItems: rows.length,
         itemListElement: rows.map((p, i) => ({ '@type': 'ListItem', position: i + 1, name: p.name, url: p.docs_url || undefined })),
       },
@@ -820,6 +862,7 @@ for (const c of COLLECTIONS) {
   const main =
     pageHero({ crumbs: `<a href="../">Home</a> / <a href="../guides-and-collections/">Guides &amp; Collections</a> / ${htmlEsc(c.title)}`, h1: `${htmlEsc(c.h1)}`, lede: `${htmlEsc(c.desc)}`, extra: `<nav class="colls">${nav}</nav>` }) +
     `<main id="main"><div class="wrap prose">` +
+    `<p class="answer"><strong>${htmlEsc(fill(c.answer))}</strong></p>` +
     `<p>${introHtml}</p>` +
     `<p class="count"><strong>${rows.length} of ${total}</strong> tracked providers match.</p>` +
     `${c.header ? `<p>${htmlEsc(c.header)}</p>` : ''}${collectionTableHtml(rows, { baseUrl: c.quickstart, rowMark: c.rowMark })}` +
@@ -841,7 +884,7 @@ print(resp.choices[0].message.content)</code></pre><pre><code>curl ${htmlEsc(QS_
     `</div></main>`;
   writeFileSync(
     join(ROOT, `site/collections/${c.slug}.html`),
-    htmlPage({ title: `${c.title} · Free LLM API Hub`, desc: c.desc, canonical: `${SITE}/collections/${c.slug}`, main, jsonld, ogImage: `${SITE}/og/collections/${c.slug}.png` })
+    htmlPage({ title: `${c.title} · Free LLM API Hub`, desc: metaDesc, canonical: `${SITE}/collections/${c.slug}`, main, jsonld, ogImage: `${SITE}/og/collections/${c.slug}.png` })
   );
 }
 
@@ -860,16 +903,50 @@ const hubCards = COLLECTIONS.map((c) =>
 const guidesCards = GUIDES.map((g) =>
   `<a class="coll-card" href="../guides/${g.slug}"><div class="coll-card-head"><strong>${htmlEsc(g.card)}</strong><span class="count">${providers.filter(g.filter).length}</span></div><p>${htmlEsc(g.blurb)}</p></a>`
 ).join('');
+const HUB_ANSWER = `Which free LLM API fits your constraint? Each of the ${GUIDES.length} guides answers one “is there a free API for…?” question; each of the ${COLLECTIONS.length} collections is a live filter of our dataset by one condition, such as no card, no phone or commercial use. Every entry is dated and sourced.`;
+const HUB_META = `${GUIDES.length} guides and ${COLLECTIONS.length} collections of free LLM APIs, filtered from a dated dataset: no card, no phone, commercial use, OpenAI-compatible.`;
+const HUB_FAQ = [
+  { q: 'What is the difference between a guide and a collection?', a: 'A guide answers one question with a short explanation and a table; a collection is a live filter of the dataset by one condition, with no commentary.' },
+  { q: 'How current is the data?', a: 'Every row shows the day its source was read. The dataset is re-verified on a schedule, and each provider page cites its source.' },
+  { q: 'Can I use these lists in my own project?', a: 'The dataset and the code are published under the MIT licence. Each provider’s own terms still apply to its API.' },
+];
 const hubMain =
   pageHero({ crumbs: `<a href="../">Home</a> / Guides &amp; Collections`, h1: `Guides &amp; Collections`, lede: `Short, data-backed answers to the most common “is there a free API for…” questions, plus curated slices of the dataset by a single constraint — every card generated from the verified dataset so it stays current.` }) +
   `<main id="main"><div class="wrap">` +
-  `<p class="eyebrow">Guides</p><div class="coll-grid">${guidesCards}</div>` +
-  `<p class="eyebrow" style="margin-top:26px">Collections</p><div class="coll-grid">${hubCards}</div>` +
+  `<p class="answer"><strong>${htmlEsc(HUB_ANSWER)}</strong></p>` +
+  `<h2 class="eyebrow">Guides: answers to one question</h2><div class="coll-grid">${guidesCards}</div>` +
+  `<h2 class="eyebrow" style="margin-top:26px">Collections: one filter, live</h2><div class="coll-grid">${hubCards}</div>` +
+  `<h2 class="eyebrow" style="margin-top:26px">FAQ</h2>` + HUB_FAQ.map((f) => `<div class="faq-item"><h3>${htmlEsc(f.q)}</h3><p>${htmlEsc(f.a)}</p></div>`).join('') +
   `</div></main>`;
+const hubJsonLd = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'CollectionPage', name: 'Free LLM API guides and collections', description: HUB_META,
+      url: `${SITE}/guides-and-collections/`, dateModified: data.generated,
+      isPartOf: { '@type': 'WebSite', name: 'Free LLM API Hub', url: `${SITE}/` },
+      mainEntity: {
+        '@type': 'ItemList', numberOfItems: GUIDES.length + COLLECTIONS.length,
+        itemListElement: [
+          ...GUIDES.map((g) => ({ name: g.card, url: `${SITE}/guides/${g.slug}` })),
+          ...COLLECTIONS.map((c) => ({ name: c.title, url: `${SITE}/collections/${c.slug}` })),
+        ].map((e, i) => ({ '@type': 'ListItem', position: i + 1, name: e.name, url: e.url })),
+      },
+    },
+    {
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Free LLM API Hub', item: `${SITE}/` },
+        { '@type': 'ListItem', position: 2, name: 'Guides & Collections', item: `${SITE}/guides-and-collections/` },
+      ],
+    },
+    { '@type': 'FAQPage', mainEntity: HUB_FAQ.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })) },
+  ],
+});
 mkdirSync(join(ROOT, 'site/guides-and-collections'), { recursive: true });
 writeFileSync(
   join(ROOT, 'site/guides-and-collections/index.html'),
-  htmlPage({ title: 'Guides & Collections · Free LLM API Hub', desc: 'Data-backed guides to free LLM and AI-model APIs, plus curated collections by constraint: no card, no phone, commercial use, OpenAI-compatible, permanently free, multimodal.', canonical: `${SITE}/guides-and-collections/`, main: hubMain })
+  htmlPage({ title: 'Free LLM API guides and collections · Free LLM API Hub', desc: HUB_META, canonical: `${SITE}/guides-and-collections/`, main: hubMain, jsonld: hubJsonLd })
 );
 // The old hubs redirect here so existing links and bookmarks keep working.
 const redirectPage = (to) => `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="robots" content="noindex"><meta http-equiv="refresh" content="0; url=${to}"><link rel="canonical" href="${new URL(to, SITE + '/x/').href.replace(/#.*$/, '')}"><title>Redirecting…</title></head><body><p>Moved to <a href="${to}">${to}</a>.</p></body></html>`;
