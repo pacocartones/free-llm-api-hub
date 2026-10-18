@@ -11,7 +11,7 @@ test('preferred IDs lead the sample and remaining slots stay publisher-diverse',
     'zeta/featured',
   ];
   const expected = [
-    'alpha/featured', 'alpha/oldest', 'beta/featured',
+    'alpha/featured', 'alpha/older', 'beta/featured',
     'beta/older', 'delta/featured', 'epsilon/featured',
     'gamma/featured', 'zeta/featured',
   ].sort();
