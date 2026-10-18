@@ -157,6 +157,8 @@ A human maintainer reviews and is responsible for every merge. Automated review 
 
 If your pull request falls behind `main`, we update it before merging. When that update only changes regenerated files, the review still holds: it is tied to the patch of the files you changed under `data/`, `scripts/` and `docs/`, and we check that this patch is exactly the one we reviewed. If any of those lines changes, the pull request is reviewed again. The *Dataset integrity* check has to be green either way.
 
+Contributions here are voluntary. We don't pay for comments, reviews or other work that nobody asked for, and a request for payment in an issue or a pull request gets no reply and doesn't change how we review it.
+
 ## Hacktoberfest
 
 October is Hacktoberfest month, but Hacktoberfest 2026 no longer rewards pull requests (it is about learning and building with open-source AI), so a pull request here does not earn Hacktoberfest swag or points, and we do not promise any. Contributions are welcome all year. The [good first issues](https://github.com/pacocartones/free-llm-api-hub/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) are the best place to start (see [Good first issues](#good-first-issues) for what qualifies). Your name goes in [CONTRIBUTORS.md](CONTRIBUTORS.md) when a pull request is merged.
