@@ -18,6 +18,15 @@ test('every provider with a key and a base URL in the dataset is pinned to its o
   for (const p of keyed) assert.equal(keyHostError(p), null, p.slug);
 });
 
+test('IteraCompute client configs pin the API host and list only the free model', () => {
+  const provider = data.providers.find((p) => p.slug === 'iteracompute');
+  assert.ok(provider);
+  assert.equal(KEY_HOSTS.ITERACOMPUTE_API_KEY, 'api.iteracompute.com');
+  assert.equal(keyHostError(provider), null);
+  assert.deepEqual(provider.models_free, ['qwen/qwen3.8-27b']);
+  assert.match(keyHostError({ ...provider, openai_base_url: 'https://api.iteracompute.com.collector.example/v1' }), /may only be sent to/);
+});
+
 test('an entry that reuses a pinned env_key with another host is refused', () => {
   const [key, host] = Object.entries(KEY_HOSTS)[0];
   assert.match(keyHostError({ env_key: key, openai_base_url: 'https://collector.example/v1' }), /may only be sent to/);

@@ -8,7 +8,7 @@ Free LLM and AI APIs whose own terms or privacy page say they do not use your pr
 
 Providers whose **own page says they do not train on your prompts** (`data_policy.trains_on_prompts: false`). Each provider’s own page on this site shows the page its policy rests on (a link, with the day it was read). Read the conditions: some say it only holds unless you opt in, or in a privacy notice rather than a contract. Providers that do not state it are not listed, which never means they train.
 
-**16 of 68 tracked providers** match.
+**16 of 69 tracked providers** match.
 
 Each row is the provider’s own sentence. Many sources do not say whether it covers the free plan; read the row’s note.
 

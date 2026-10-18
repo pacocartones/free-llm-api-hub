@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-18",
+  "generated": "2026-10-21",
   "scores": {
     "openrouter": {
       "total": 67.2,
@@ -54,6 +54,12 @@
       "confirmed": 5,
       "of": 6,
       "rank": 8
+    },
+    "iteracompute": {
+      "total": 45.9,
+      "confirmed": 3,
+      "of": 6,
+      "rank": null
     },
     "twelve-labs": {
       "total": 44.8,

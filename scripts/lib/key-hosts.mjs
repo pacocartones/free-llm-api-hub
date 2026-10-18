@@ -16,6 +16,7 @@ export const KEY_HOSTS = Object.freeze({
   GROQ_API_KEY: 'api.groq.com',
   HF_TOKEN: 'router.huggingface.co',
   HUNYUAN_API_KEY: 'tokenhub.tencentmaas.com',
+  ITERACOMPUTE_API_KEY: 'api.iteracompute.com',
   JINA_API_KEY: 'api.jina.ai',
   MISTRAL_API_KEY: 'api.mistral.ai',
   MODELSCOPE_API_KEY: 'api-inference.modelscope.cn',
