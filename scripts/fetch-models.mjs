@@ -64,16 +64,16 @@ async function getJson(url, headers) {
 // ModelScope: https://modelscope.cn/models
 export const PREFERRED_MODELS = {
   'nvidia-nim': [
-    'meta/llama-3.1-8b-instruct',
-    'nvidia/llama-3.1-nemotron-70b-instruct',
-    'deepseek-ai/deepseek-r1',
-    'mistralai/mistral-7b-instruct-v0.3',
+    'deepseek-ai/deepseek-v4-flash-0731',
+    'meta/llama-3.3-70b-instruct',
+    'nvidia/nemotron-3-super-120b-a12b',
+    'openai/gpt-oss-120b',
   ],
   modelscope: [
-    'Qwen/Qwen2.5-72B-Instruct',
-    'deepseek-ai/DeepSeek-R1',
-    'deepseek-ai/DeepSeek-V3',
-    'Qwen/Qwen2.5-Coder-32B-Instruct',
+    'deepseek-ai/DeepSeek-V4-Flash-0731',
+    'MiniMax/MiniMax-M3',
+    'Qwen/Qwen3.5-397B-A17B',
+    'ZhipuAI/GLM-5.2',
   ],
 };
 
