@@ -155,6 +155,8 @@ Commit messages: AI-assisted contributions are welcome when you have verified th
 
 A human maintainer reviews and is responsible for every merge. Automated review comments (CodeRabbit) are advisory: a person makes the call, and you don't need to reply to the bot. We resolve every review conversation, from people or bots, before merging, either by changing the code or by noting why not.
 
+If your pull request falls behind `main`, we update it before merging. When that update only changes regenerated files, the review still holds: it is tied to the patch of the files you changed under `data/`, `scripts/` and `docs/`, and we check that this patch is exactly the one we reviewed. If any of those lines changes, the pull request is reviewed again. The *Dataset integrity* check has to be green either way.
+
 ## Hacktoberfest
 
 October is Hacktoberfest month, but Hacktoberfest 2026 no longer rewards pull requests (it is about learning and building with open-source AI), so a pull request here does not earn Hacktoberfest swag or points, and we do not promise any. Contributions are welcome all year. The [good first issues](https://github.com/pacocartones/free-llm-api-hub/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) are the best place to start (see [Good first issues](#good-first-issues) for what qualifies). Your name goes in [CONTRIBUTORS.md](CONTRIBUTORS.md) when a pull request is merged.
