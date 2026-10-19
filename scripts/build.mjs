@@ -507,7 +507,7 @@ const pageHero = ({ crumbs, h1, lede = '', afterTitle = '', extra = '', cls = 'm
 
 const siteHeader = (p) => `<header class="site-header"><div class="wrap header-inner">
 <a class="brand" href="${p}" aria-label="Free LLM API Hub — home"><svg class="logo-mark"><use href="#logo"/></svg><span class="brand-name">Free LLM API <span class="grad">Hub</span></span></a>
-<nav class="nav" id="primary-nav" aria-label="Primary"><a href="${p}guides-and-collections/">${IC('ic-book')}Guides &amp; Collections</a><a href="${p}compare/">${IC('ic-grid')}Compare</a><a class="nav-best" href="${p}best/" title="The top 10 by score, recomputed from the data at every build">${IC('ic-spark')}The Best</a></nav>
+<nav class="nav" id="primary-nav" aria-label="Primary"><a href="${p}guides-and-collections/">${IC('ic-book')}Guides &amp; Collections</a><a class="nav-best" href="${p}best/" title="The top 10 by score, recomputed from the data at every build">${IC('ic-spark')}The Best</a><a href="${p}submit/">${IC('ic-rocket')}Submit</a></nav>
 <div class="header-actions">
 <button class="icon-btn nav-toggle" id="navToggle" aria-label="Open menu" aria-expanded="false" aria-controls="primary-nav"><svg class="i menu" aria-hidden="true"><use href="#ic-menu"/></svg><svg class="i close" aria-hidden="true"><use href="#ic-close"/></svg></button>
 <a class="icon-btn" href="${REPO}" target="_blank" rel="noopener"><span class="sr-only">Star on GitHub</span>${GH_ICON}<span class="star-count" data-stars>★</span></a>
@@ -516,10 +516,10 @@ const siteHeader = (p) => `<header class="site-header"><div class="wrap header-i
 
 const siteFooter = (p) => `<footer class="site-footer"><div class="wrap footer-top">
 <div class="footer-brand"><a class="foot-brand-link" href="${p}" aria-label="Free LLM API Hub — home"><svg class="logo-mark"><use href="#logo"/></svg><span class="brand-name">Free LLM API <span class="grad">Hub</span></span></a><p>The <strong>continuously-verified</strong>, <strong>machine-readable</strong> dataset of <strong>free LLM &amp; AI-model APIs</strong> and <strong>trial credits</strong> — every entry <strong>dated</strong>, <strong>sourced</strong>, and <strong>free of dead links</strong>.</p><img class="trust-badge" src="${p}badge-verified.svg" alt="Verified providers" width="${BADGE_W}" height="20" loading="lazy"><a class="star-btn" href="${REPO}" target="_blank" rel="noopener"><span class="sb-label">${GH_ICON} Star on GitHub</span><span class="sb-count" data-stars>★</span></a></div>
-<div class="footer-col"><h2 class="footer-h">Explore</h2><a href="${p}#explorer">Interactive explorer</a><a href="${p}models/">Free model index</a><a href="${p}guides-and-collections/">Guides &amp; collections</a><a href="${p}programs/startups">Startup credits</a><a href="${p}programs/research">Student &amp; research credits</a><a href="${p}free-gpu/">Free GPU compute</a><a href="${p}coding-tools/">Free AI coding tools</a></div>
+<div class="footer-col"><h2 class="footer-h">Explore</h2><a href="${p}models/">Free model index</a><a href="${p}guides-and-collections/">Guides &amp; collections</a><a href="${p}programs/startups">Startup credits</a><a href="${p}programs/research">Student &amp; research credits</a><a href="${p}free-gpu/">Free GPU compute</a><a href="${p}coding-tools/">Free AI coding tools</a></div>
 <div class="footer-col"><h2 class="footer-h">Data</h2><a href="${p}providers.json">providers.json</a><a href="${p}api/">JSON API</a><a href="${p}llms.txt">llms.txt</a><a href="${p}data-policy/">Who trains on your data</a><a href="${p}coverage/">Data coverage</a></div>
-<div class="footer-col"><h2 class="footer-h">Project</h2><a href="${p}updates">Updates</a><a href="${p}changes/">What changed</a><a href="${REPO}/blob/main/docs/methodology.md">Methodology</a><a href="${REPO}/blob/main/CONTRIBUTING.md">Contributing</a><a href="${p}agreements/">Agreements</a></div>
-</div><div class="wrap footer-bottom"><p>Independent, community-maintained — not affiliated with any provider listed. Terms change without notice; always confirm against each provider's own docs. MIT licensed.</p><p class="foot-legal"><a href="${p}legal/privacy">Privacy</a> · <a href="${p}legal/terms">Terms</a></p><p class="foot-email"><a href="mailto:admin@freellmapihub.com">admin@freellmapihub.com</a></p></div></footer>`;
+<div class="footer-col"><h2 class="footer-h">Project</h2><a href="${p}updates">Updates</a><a href="${p}changes/">What changed</a><a href="${p}submit/">Submit</a><a href="${REPO}/blob/main/docs/methodology.md">Methodology</a><a href="${REPO}/blob/main/CONTRIBUTING.md">Contributing</a><a href="${p}agreements/">Agreements</a></div>
+</div><div class="wrap footer-bottom"><p>Terms change without notice; always confirm against each provider's own docs. MIT licensed.</p><p class="foot-legal"><a href="${p}legal/privacy">Privacy</a> · <a href="${p}legal/terms">Terms</a></p><p class="foot-email"><a href="mailto:admin@freellmapihub.com">admin@freellmapihub.com</a></p></div></footer>`;
 
 // Full page wrapper for generated (collection) pages. `p` is the path prefix to the site root.
 // Theme guard — runs before first paint to avoid the white flash. ONE source, shared by
@@ -1823,6 +1823,33 @@ writeFileSync(
   htmlPage({ title: 'How the score works · Free LLM API Hub', desc: 'The parameters, weights and rules behind the Free LLM API Hub top 10: what is measured, what is editorial, and that being a partner scores nothing.', canonical: SITE + '/best/methodology/', main: methodMain, prefix: '../../' })
 );
 
+// ---------- /submit/ — how to ask us to add, review or correct something ----------
+// No form and no email address on purpose: this site is static (no backend), and every request is a public GitHub issue, so
+// anyone can see what was asked and what was decided. The links open the issue forms in .github/ISSUE_TEMPLATE/.
+const issueForm = (template) => `${REPO}/issues/new?template=${template}`;
+const submitRequests = [
+  ['Propose a new provider', 'A free tier or a trial-credit LLM API that is not tracked yet. We list what the provider\'s own documentation states.', 'new-provider.yml', 'Propose a provider'],
+  ['Report a wrong or stale entry', 'A limit, a requirement or a link that no longer matches the provider\'s own documentation.', 'inaccuracy.yml', 'Report a correction'],
+  ['Companies and providers', 'Ask us to review your provider or one of its models, or to talk about working together. Money never changes a score.', 'partner-request.yml', 'Contact us about your company'],
+];
+mkdirSync(join(ROOT, 'site/submit'), { recursive: true });
+writeFileSync(
+  join(ROOT, 'site/submit/index.html'),
+  htmlPage({
+    title: 'Submit a provider, a correction or a request · Free LLM API Hub',
+    desc: 'Ask us to add a free LLM API, correct an entry or review your company. Every request is a public GitHub issue; there is no form and no email.',
+    canonical: SITE + '/submit/',
+    main:
+      pageHero({ crumbs: `<a href="../">Home</a> / Submit`, h1: `Submit`, lede: `Ask us to add, review or correct something. Each request is a public GitHub issue, so anyone can see what was asked and what was decided.` }) +
+      `<main id="main"><div class="wrap prose">` +
+      submitRequests.map(([h, text, template, cta]) => `<section><h2>${htmlEsc(h)}</h2><p>${text}</p><p><a class="btn primary" href="${issueForm(template)}" target="_blank" rel="noopener">${htmlEsc(cta)}</a></p></section>`).join('\n') +
+      `<section><h2>Anything else</h2><p>Questions, ideas and open-ended suggestions go to the <a href="${REPO}/discussions" target="_blank" rel="noopener">GitHub discussions</a>.</p></section>` +
+      `<p class="muted">Every entry is checked against the provider's own documentation; see how in the <a href="${REPO}/blob/main/docs/methodology.md" target="_blank" rel="noopener">methodology</a>.</p>` +
+      `</div></main>`,
+    prefix: '../',
+  })
+);
+
 // ---------- /coverage/ — what the dataset does not know yet, as a task board ----------
 const fieldCoverage = coverage(providers);
 mkdirSync(join(ROOT, 'site/coverage'), { recursive: true });
@@ -2001,6 +2028,7 @@ const sitemapEntries = [
   [`${SITE}/best/`, data.generated],
   [`${SITE}/best/methodology/`, data.generated],
   [`${SITE}/coverage/`, data.generated],
+  [`${SITE}/submit/`, data.generated],
   [`${SITE}/data-policy/`, data.generated],
   [`${SITE}/agreements/`, AGREEMENTS.generated],
   [`${SITE}/free-gpu/`, freeGpu.generated],

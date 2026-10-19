@@ -1348,14 +1348,14 @@ test('mobile sort select shows a placeholder for sorts it does not offer', () =>
   run('name', -1); assert.equal(sel.value, 'custom');
 });
 
-test('home: search box, Compare in the menu, and the star count rendered at build', () => {
+test('home: search box, Submit in the menu, and the star count rendered at build', () => {
   run(['scripts/build.mjs']);
   const index = readFileSync(join(ROOT, 'site/index.html'), 'utf8');
   assert.match(index, /<input type="search" id="q"[^>]*>/);
   assert.match(index, /<label class="sr-only" for="q">/);
   for (const page of [index, readFileSync(join(ROOT, 'site/compare/index.html'), 'utf8'), readFileSync(join(ROOT, 'site/p/groq.html'), 'utf8')]) {
     const nav = page.slice(page.indexOf('id="primary-nav"'), page.indexOf('</nav>', page.indexOf('id="primary-nav"')));
-    assert.match(nav, /href="(\.\.\/)?compare\/"/);
+    assert.match(nav, /href="(\.\.\/)?submit\/"/);
   }
   const { stars } = JSON.parse(readFileSync(join(ROOT, 'data/repo-stats.json'), 'utf8'));
   assert.ok(Number.isInteger(stars));
@@ -1405,14 +1405,14 @@ test('the client makes no GitHub API call and the home search covers model names
   assert.ok(searchText(groq).includes(groq.models_free[0].toLowerCase()), 'a real provider is found by one of its models');
 });
 
-test('header menu: only Guides & Collections, Compare and The Best (highlighted); Models and API live in the footer', () => {
+test('header menu: only Guides & Collections, The Best (highlighted) and Submit; Models and API live in the footer', () => {
   run(['scripts/build.mjs']);
   const pages = ['site/index.html', 'site/compare/index.html', 'site/p/groq.html', 'site/models/index.html', 'site/guides-and-collections/index.html'];
   for (const rel of pages) {
     const html = readFileSync(join(ROOT, rel), 'utf8');
     const nav = html.slice(html.indexOf('id="primary-nav"'), html.indexOf('</nav>', html.indexOf('id="primary-nav"')));
     const hrefs = [...nav.matchAll(/<a [^>]*href="([^"]+)"/g)].map((m) => m[1].replace(/^(\.\.\/)+|^\.\//, ''));
-    assert.deepEqual(hrefs, ['guides-and-collections/', 'compare/', 'best/'], `${rel}: the header menu is exactly Guides & Collections, Compare, The Best`);
+    assert.deepEqual(hrefs, ['guides-and-collections/', 'best/', 'submit/'], `${rel}: the header menu is exactly Guides & Collections, The Best, Submit`);
     assert.match(nav, /<a class="nav-best" href="[^"]*best\/"[^>]*>.*The Best<\/a>/s, `${rel}: The Best carries the highlight class`);
     assert.equal((nav.match(/class="nav-best"/g) || []).length, 1, `${rel}: only one highlighted entry`);
     const footer = html.slice(html.indexOf('<footer'));
@@ -1423,9 +1423,9 @@ test('header menu: only Guides & Collections, Compare and The Best (highlighted)
 test('footer columns: where each link lives, and no GitHub star entry in Project', () => {
   run(['scripts/build.mjs']);
   const expected = {
-    Explore: ['#explorer', 'models/', 'guides-and-collections/', 'programs/startups', 'programs/research', 'free-gpu/', 'coding-tools/'],
+    Explore: ['models/', 'guides-and-collections/', 'programs/startups', 'programs/research', 'free-gpu/', 'coding-tools/'],
     Data: ['providers.json', 'api/', 'llms.txt', 'data-policy/', 'coverage/'],
-    Project: ['updates', 'changes/', 'docs/methodology.md', 'CONTRIBUTING.md', 'agreements/'],
+    Project: ['updates', 'changes/', 'submit/', 'docs/methodology.md', 'CONTRIBUTING.md', 'agreements/'],
   };
   for (const rel of ['site/index.html', 'site/compare/index.html', 'site/p/groq.html', 'site/legal/privacy.html']) {
     const html = readFileSync(join(ROOT, rel), 'utf8');
@@ -1838,6 +1838,48 @@ test('the 404 page is built with the shared header, menu and footer and root-abs
   assert.ok(script, 'the path read-out script');
   const hash = "'sha256-" + createHash('sha256').update(script[1]).digest('base64') + "'";
   assert.ok(html.includes(hash), 'the path read-out is pinned by hash in the CSP: ' + hash);
+});
+
+test('the menu has Guides & Collections, The Best and Submit, and the footer no longer carries the removed entries', () => {
+  // Mutant: put Compare back in the menu, or the «Interactive explorer» link or the «Independent, community-maintained» line back in
+  // the footer; this test turns red.
+  const home = readFileSync(join(ROOT, 'site/index.html'), 'utf8');
+  const best = readFileSync(join(ROOT, 'site/best/index.html'), 'utf8');
+  for (const [name, html] of [['home', home], ['best', best]]) {
+    const nav = html.match(/<nav class="nav" id="primary-nav"[\s\S]*?<\/nav>/);
+    assert.ok(nav, name + ': the menu');
+    const labels = [...nav[0].matchAll(/<a [^>]*>(?:<svg[\s\S]*?<\/svg>)?([^<]+)<\/a>/g)].map((m) => m[1].replace(/&amp;/g, '&').trim());
+    assert.deepEqual(labels, ['Guides & Collections', 'The Best', 'Submit'], name + ': the menu entries');
+    assert.ok(!/Interactive explorer/.test(html), name + ': no «Interactive explorer» link');
+    assert.ok(!/Independent, community-maintained/.test(html), name + ': no «Independent, community-maintained» line');
+    assert.ok(/<a href="[^"]*submit\/">Submit<\/a>/.test(html), name + ': Submit in the footer');
+  }
+});
+
+test('/submit/ links to the GitHub issue forms and publishes neither an email address nor a form', () => {
+  // The site is static: a request is a public GitHub issue. The shared footer already carries the legal contact address, so the check
+  // is on the page's own content (the hero and <main>), not the whole file. Mutant: add a mailto: link or a <form> to the page; red.
+  const html = readFileSync(join(ROOT, 'site/submit/index.html'), 'utf8');
+  const own = html.slice(html.indexOf('<section class="page-hero'), html.indexOf('<footer class="site-footer">'));
+  assert.ok(own.length > 500, 'the page content');
+  for (const t of ['new-provider.yml', 'inaccuracy.yml', 'partner-request.yml']) {
+    assert.ok(own.includes('/issues/new?template=' + t), 'a link to the form ' + t);
+    assert.ok(existsSync(join(ROOT, '.github/ISSUE_TEMPLATE', t)), 'the form file ' + t + ' exists');
+  }
+  assert.ok(!/mailto:/.test(own), 'no email address');
+  assert.ok(!/<form[\s>]/.test(own), 'no form');
+  assert.ok(readFileSync(join(ROOT, 'site/sitemap.xml'), 'utf8').includes('/submit/'), 'in the sitemap');
+});
+
+test('the green header keeps AA contrast: white 7:1 and the muted text 4.5:1 on the bar', () => {
+  const css = readFileSync(join(ROOT, 'site/styles.css'), 'utf8');
+  const token = (n) => { const m = css.match(new RegExp('--' + n + ':\\s*(#[0-9a-fA-F]{6})')); assert.ok(m, 'the token --' + n); return m[1]; };
+  const lum = (hex) => { const c = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255).map((v) => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4)); return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]; };
+  const ratio = (a, b) => { const [x, y] = [lum(a), lum(b)].sort((p, q) => q - p); return (x + 0.05) / (y + 0.05); };
+  const bar = token('header-bar');
+  assert.ok(ratio(token('on-header'), bar) >= 7, 'white on the bar');
+  assert.ok(ratio(token('on-header-muted'), bar) >= 4.5, 'muted text on the bar');
+  assert.ok(ratio(token('on-header-accent'), bar) >= 4.5, 'the accent word of the brand on the bar');
 });
 
 test('internal links in the built site resolve to a page (no 404)', () => {

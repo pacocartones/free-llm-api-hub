@@ -1,0 +1,39 @@
+name: 🤝 Company or partner request
+description: Ask us to review your provider or a model, correct your entry, or talk about working together.
+title: "[company] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Everything here is checked against the provider's own public documentation, and **money never changes a score**. Please link that documentation so a reviewer can check it.
+  - type: input
+    id: company
+    attributes:
+      label: Company or provider name
+      placeholder: "e.g. Acme Inference"
+    validations:
+      required: true
+  - type: dropdown
+    id: ask
+    attributes:
+      label: What would you like?
+      options:
+        - Review our provider or one of its models
+        - List our provider (it is not tracked yet)
+        - Correct our entry
+        - Talk about working together
+    validations:
+      required: true
+  - type: input
+    id: docs
+    attributes:
+      label: Link to your public documentation
+      description: The page that states the free tier, limits or terms in question.
+      placeholder: "https://"
+    validations:
+      required: true
+  - type: textarea
+    id: details
+    attributes:
+      label: Anything else we should know
+      description: Keep it short. Do not paste API keys or private data.

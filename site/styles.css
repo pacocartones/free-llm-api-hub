@@ -38,6 +38,13 @@
   --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
   --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, Roboto, Helvetica, Arial, sans-serif;
   --header-h: 60px;
+  /* The header bar is green in both themes; white on #0b5d38 is 7.96:1, the muted text 6.15:1 (scripts/build.test.mjs checks them). */
+  --header-bar: #0b5d38;
+  --on-header: #ffffff;
+  --on-header-muted: #d6e6dd;
+  --on-header-accent: #b8f5d6;
+  --on-header-line: rgba(255, 255, 255, .34);
+  --on-header-hover: rgba(255, 255, 255, .14);
   --radius: 10px;
 }
 [data-theme="light"] {
@@ -97,10 +104,14 @@ svg.i { width: 15px; height: 15px; flex: none; vertical-align: -2px; }
 /* ---------- header ---------- */
 .site-header {
   position: sticky; top: 0; z-index: 50; height: var(--header-h);
-  background: var(--header-bg);
-  backdrop-filter: saturate(130%) blur(10px);
-  border-bottom: 1px solid var(--border);
+  background: var(--header-bar);
+  border-bottom: 1px solid rgba(0, 0, 0, .28);
 }
+.site-header .brand { color: var(--on-header); }
+.site-header .brand .grad { color: var(--on-header-accent); }
+.site-header .icon-btn { background: var(--on-header-hover); border-color: var(--on-header-line); color: var(--on-header); }
+.site-header .icon-btn:hover { background: rgba(255, 255, 255, .24); border-color: var(--on-header); color: var(--on-header); }
+.site-header .icon-btn .star-count, .site-header .icon-btn:hover .star-count { color: var(--on-header-muted); }
 .header-inner { height: var(--header-h); display: flex; align-items: center; gap: 22px; }
 .brand { display: inline-flex; align-items: center; gap: 10px; color: var(--text); }
 .brand:hover { text-decoration: none; }
@@ -135,6 +146,9 @@ svg.i { width: 15px; height: 15px; flex: none; vertical-align: -2px; }
 .header-actions { margin-left: auto; display: flex; align-items: center; gap: 8px; }
 /* Desktop: logo on the left, the menu centred on the page, the star counter and the theme toggle on the right. */
 @media (min-width: 901px) {
+  .nav a { color: var(--on-header-muted); }
+  .nav a:hover { color: var(--on-header); background: var(--on-header-hover); }
+  .nav a.nav-best, .nav a.nav-best:hover { color: var(--accent); }
   .header-inner { display: grid; grid-template-columns: 1fr auto 1fr; }
   .nav { margin-left: 0; justify-self: center; }
   .header-actions { margin-left: 0; justify-self: end; }
