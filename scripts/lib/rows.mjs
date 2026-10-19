@@ -28,6 +28,34 @@ export const ICON = (id) => `<svg class="i" aria-hidden="true"><use href="#${id}
 // here because the client fetch path bypasses that guarantee.
 export const SLUG_RE = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 
+// «The catch» column: a closed vocabulary of short tags derived from fields the record already has (the three requirements, the
+// expiry and a published daily cap). The free text of the record (`notes`) stays on the provider page, reachable by the link of the
+// cell and by the title of the cell. The list below is the whole vocabulary; a test fails if a tag outside it appears.
+export const CATCH_LABELS = ['Card required', 'Phone required', 'Evaluation only', 'Expires', 'Daily cap', 'Unconfirmed'];
+
+/** @returns {{label: string, title: string}[]} */
+export function catchTags(p) {
+  const tags = [];
+  if (p.card_required === true) tags.push({ label: 'Card required', title: 'A credit card is required to sign up' });
+  if (p.phone_required === true) tags.push({ label: 'Phone required', title: 'Phone verification is required' });
+  if (p.commercial_ok === false) tags.push({ label: 'Evaluation only', title: 'Commercial use is not allowed' });
+  if (p.expires) tags.push({ label: 'Expires', title: 'Expires: ' + p.expires });
+  const fl = p.free_limits || {};
+  const caps = [];
+  if (Number.isInteger(fl.requests_per_day)) caps.push(fl.requests_per_day.toLocaleString('en-US') + ' requests per day');
+  if (Number.isInteger(fl.tokens_per_day)) caps.push(fl.tokens_per_day.toLocaleString('en-US') + ' tokens per day');
+  if (caps.length) tags.push({ label: 'Daily cap', title: 'Published daily cap: ' + caps.join(' and ') });
+  if (p.card_required == null || p.phone_required == null || p.commercial_ok == null) tags.push({ label: 'Unconfirmed', title: 'At least one requirement is not confirmed yet' });
+  return tags;
+}
+
+/** The whole «The catch» cell. */
+export function catchCellHtml(p) {
+  const chips = catchTags(p).map((t) => `<span class="catch-tag" title="${htmlEsc(t.title)}">${htmlEsc(t.label)}</span>`).join('');
+  const more = SLUG_RE.test(String(p.slug || '')) ? `<a class="catch-more" href="p/${p.slug}#limits">Details<span class="sr-only"> of ${htmlEsc(p.name)}</span></a>` : '';
+  return `<td class="notes" data-label="The catch"${p.notes ? ` title="${htmlEsc(p.notes)}"` : ''}>${chips}${more}</td>`;
+}
+
 /**
  * One explorer `<tr>`, identical server- and client-side.
  *
@@ -44,10 +72,10 @@ export function explorerRowHtml(p, opts = {}) {
   const isNew = p.added && (nowMs - Date.parse(p.added + 'T00:00:00Z')) / 86400000 <= 45;
 
   let name = SLUG_RE.test(String(p.slug || ''))
-    ? `<a href="p/${p.slug}">${htmlEsc(p.name)}</a>`
+    ? `<a class="name-link" href="p/${p.slug}">${htmlEsc(p.name)}<span class="name-go" aria-hidden="true"> ↗</span></a>`
     : htmlEsc(p.name);
   if (isNew) name += ` <span class="badge b-new" title="Recently added to the hub">NEW</span>`;
-  if (p.best_for) name += `<div class="best">${htmlEsc(p.best_for)}</div>`;
+  if (p.best_for) name += `<div class="best" title="${htmlEsc(p.best_for)}">${htmlEsc(p.best_for)}</div>`;
 
   const typeCell =
     `<span class="badge ${p.category === 'ongoing' ? 'b-ongoing' : 'b-trial'}">${p.category === 'ongoing' ? 'Ongoing' : 'Trial'}</span>` +
@@ -72,8 +100,8 @@ export function explorerRowHtml(p, opts = {}) {
   return `<tr>` +
     `<td class="name" data-label="API">${name}</td>` +
     `<td data-label="Type">${typeCell}</td>` +
-    `<td data-label="What's free">${htmlEsc(p.free_tier)}</td>` +
-    `<td class="notes" data-label="The catch">${htmlEsc(p.notes || '')}</td>` +
+    `<td data-label="What's free"><div class="clamp2" title="${htmlEsc(p.free_tier)}">${htmlEsc(p.free_tier)}</div></td>` +
+    catchCellHtml(p) +
     `<td class="pver" data-label="Verified">${v}</td></tr>`;
 }
 
@@ -115,6 +143,8 @@ window.FLLM_ROWS = (function () {
   const ICON = ${ICON.toString()};
   const SLUG_RE = ${SLUG_RE.toString()};
   const rowHtml = ${explorerRowHtml.toString()};
+  const catchTags = ${catchTags.toString()};
+  const catchCellHtml = ${catchCellHtml.toString()};
   const rowKeyTarget = ${rowKeyTarget.toString()};
   return { rowHtml, rowKeyTarget };
 })();

@@ -20,7 +20,7 @@ import { isoWeek, flattenFieldChanges, groupChangesByWeek, changesRss, xmlEsc, r
 import { monthlyReport, reportMonths, monthEndDate } from './lib/state.mjs';
 import { externalContributors, countExternalContributors, githubProfileUrl } from './lib/contributors.mjs';
 import { buildOgManifest } from './lib/og.mjs';
-import { explorerRowHtml } from './lib/rows.mjs';
+import { explorerRowHtml, catchTags, catchCellHtml, CATCH_LABELS } from './lib/rows.mjs';
 import { labelTables } from './lib/tables.mjs';
 import { markNewTabLinks } from './lib/links.mjs';
 import { bestFactsHtml } from './lib/best-facts.mjs';
@@ -1924,6 +1924,50 @@ test('/best/ layout: three cards per entry, a separator instead of the «Ranks 4
   assert.match(css, /\.best-score \{[^}]*border: 1px solid/, 'the score has a frame');
   assert.match(css, /\.best-rank \{\s*align-self: center/, 'the position is centred on the card');
   assert.match(css, /\.best-intro \{[^}]*text-align: center/, 'the introduction is centred');
+});
+
+test('home table: «The catch» is a closed vocabulary of short tags, the free text is only in the title and on the provider page', () => {
+  // Mutant: put the free text of the record (notes) back in the cell, or add a tag outside the list; this test turns red.
+  const providers = JSON.parse(readFileSync(join(ROOT, 'data/providers.json'), 'utf8')).providers;
+  const seen = new Set();
+  for (const p of providers) {
+    const tags = catchTags(p);
+    for (const t of tags) { assert.ok(CATCH_LABELS.includes(t.label), p.slug + ': tag outside the vocabulary: ' + t.label); seen.add(t.label); }
+    // Two lines at the reference desktop width (a 26% column of a 1480px table is about 380px, 40 characters of the monospace face a
+    // line): the tags and the link must fit in about 80 characters.
+    assert.ok(tags.length <= 4, p.slug + ': at most four tags');
+    assert.ok(tags.reduce((n, t) => n + t.label.length + 2, 0) + 'Details'.length <= 60, p.slug + ': the cell fits in two lines');
+    const cell = catchCellHtml(p);
+    const inner = cell.replace(/^<td[^>]*>/, '').replace(/<\/td>$/, '').replace(/<span class="sr-only">[^<]*<\/span>/g, '');
+    const visible = inner.replace(/<[^>]+>/g, '');
+    if (p.notes) {
+      assert.ok(!visible.includes(p.notes.slice(0, 25)), p.slug + ': the free text is not in the cell');
+      assert.ok(cell.includes(' title="' + htmlEsc(p.notes) + '"'), p.slug + ': the free text is in the title');
+    }
+    assert.match(cell, new RegExp('<a class="catch-more" href="p/' + p.slug + '#limits">Details'), p.slug + ': the link to the provider page');
+  }
+  assert.ok(seen.size >= 3, 'the dataset exercises at least three of the tags');
+  assert.deepEqual(catchTags({ card_required: false, phone_required: false, commercial_ok: true }), [], 'a provider with nothing to warn about has no tag');
+  assert.deepEqual(catchTags({ card_required: true, phone_required: null, commercial_ok: false, expires: '30 days' }).map((t) => t.label), ['Card required', 'Evaluation only', 'Expires', 'Unconfirmed']);
+});
+
+test('home: no good-first-issues button in the hero, a fixed table layout, a link-button name and a pinned header row', () => {
+  const index = readFileSync(join(ROOT, 'site/index.html'), 'utf8');
+  const css = readFileSync(join(ROOT, 'site/styles.css'), 'utf8');
+  assert.ok(!/Contribute: good first issues|contrib-btn/.test(index + css), 'the hero button is gone');
+  assert.match(css, /#table \{ table-layout: fixed; \}/, 'a fixed layout');
+  const widths = [...css.matchAll(/#table th:nth-child\((\d)\) \{ width: (\d+)%; \}/g)];
+  assert.equal(widths.length, 5, 'a width for each of the five columns');
+  assert.equal(widths.reduce((n, m) => n + Number(m[2]), 0), 100, 'the widths add up to 100%');
+  assert.match(css, /#table thead th \{ position: sticky; top: var\(--header-h\);/, 'the header row is pinned under the header');
+  assert.match(css, /#table thead th \{ top: calc\(var\(--header-h\) \+ var\(--controls-h, 120px\)\); \}/, 'and under the filter bar where that is pinned');
+  assert.match(css, /main#explorer > \.wrap, \.controls \.controls-inner \{ max-width: 1480px; \}/, 'a wider table');
+  assert.match(css, /\.hero \.lede \{ max-width: 86ch; \}/, 'a wider lede');
+  const row = explorerRowHtml({ slug: 'acme', name: 'Acme', category: 'ongoing', free_tier: 'Free', notes: 'n', best_for: 'b' });
+  assert.match(row, /<a class="name-link" href="p\/acme">Acme<span class="name-go" aria-hidden="true"> ↗<\/span><\/a>/, 'the name is a link-button');
+  assert.match(row, /<div class="clamp2" title="Free">Free<\/div>/, 'the free text is clamped and complete in the title');
+  assert.ok(!/<img|logo/i.test(row), 'no logo in a row');
+  assert.match(css, /#table tbody tr:focus-within \{ background: var\(--panel\); \}/, 'the row is highlighted on keyboard focus');
 });
 
 test('internal links in the built site resolve to a page (no 404)', () => {
