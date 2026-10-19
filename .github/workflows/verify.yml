@@ -85,12 +85,16 @@ jobs:
       # badge-freshness.json is the one deliberate exception: it is
       # date-relative (the oldest age in days moves daily) and is refreshed on
       # every data/build pass, so it is excluded from the diff below.
-      # Keep this list in sync with the `check` script in package.json.
+      # The list of files is derived from git (scripts/generated-targets.mjs); the `check` script in package.json uses the same.
       - name: Generated files must be in sync with the data
         run: |
           node scripts/build.mjs
-          targets="README.md collections site/index.html site/404.html site/sitemap.xml site/robots.txt docs/credit-programs.md CITATION.cff data/probe-report.json badge-verified.json site/badge-verified.json site/badge-verified.svg derived-fingerprints.json"
-          if git diff --quiet -- $targets; then
+          # The list comes from git (scripts/generated-targets.mjs): every committed page under site/ that the
+          # build writes, so a new page is covered the day it is committed. A page the build writes that was never
+          # `git add`ed is reported too: the deploy would publish it, and no pull request would show it.
+          targets="$(node scripts/generated-targets.mjs)"
+          untracked="$(node scripts/generated-targets.mjs --untracked)"
+          if git diff --quiet -- $targets && [ -z "$untracked" ]; then
             echo "Generated files are in sync with the data."
             echo "Generated files are in sync." >> "$GITHUB_STEP_SUMMARY"
           else
@@ -103,6 +107,10 @@ jobs:
               echo ""
               echo '```'
               git --no-pager diff --stat -- $targets
+              if [ -n "$untracked" ]; then
+                echo "Written by the build and not committed:"
+                echo "$untracked" | tr ' ' '\n'
+              fi
               echo '```'
             } >> "$GITHUB_STEP_SUMMARY"
             exit 1
