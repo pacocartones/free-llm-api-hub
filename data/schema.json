@@ -35,8 +35,7 @@
       "type": "object",
       "additionalProperties": false,
       "required": [
-        "slug", "name", "category", "free_type", "free_tier",
-        "docs_url", "verified", "is_text_llm"
+        "slug", "name", "docs_url", "verified", "is_text_llm"
       ],
       "properties": {
         "slug": {
@@ -47,20 +46,20 @@
         "name": { "type": "string", "minLength": 1 },
         "category": {
           "description": "Primary bucket used to split the README and the site.",
-          "type": "string",
-          "enum": ["ongoing", "trial"]
+          "type": ["string", "null"],
+          "enum": ["ongoing", "trial", null]
         },
         "free_type": {
           "description": "Finer-grained shape of the free access.",
-          "type": "string",
-          "enum": ["perpetual", "renewing-quota", "recurring-credit", "trial-credit"]
+          "type": ["string", "null"],
+          "enum": ["perpetual", "renewing-quota", "recurring-credit", "trial-credit", null]
         },
         "free_tier": {
-          "type": "string",
+          "type": ["string", "null"],
           "description": "What you actually get for free, in concrete terms.",
           "minLength": 1
         },
-        "rate_limits": { "type": "string" },
+        "rate_limits": { "type": ["string", "null"] },
         "notes": {
           "type": "string",
           "description": "The catch: fine print a builder needs before relying on this."
@@ -105,7 +104,7 @@
           "uniqueItems": true
         },
         "is_text_llm": {
-          "type": "boolean",
+          "type": ["boolean", "null"],
           "description": "True when the free offering (free tier or trial credit) gives API access to text/chat language models. False for OCR, text-to-speech, speech-to-text, embeddings-only, image and compute-only services. Explicit on every entry; it makes an entry eligible for the top 10."
         },
         "model_tier": {

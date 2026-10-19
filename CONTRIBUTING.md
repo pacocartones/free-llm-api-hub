@@ -21,7 +21,8 @@ Details follow: [Quick start](#quick-start), [Confirming a single unknown field]
 
 **Your pull request ships its own regenerated files.** After editing `data/providers.json`, run `npm run build` (and `npm run og` if the OG check flags drift) and commit the regenerated files together with the data change. There is no regeneration bot — the required "Dataset integrity" check fails until the derived files are in sync.
 
-Fixing a rate limit means editing one field plus the files regenerated from it — still a small, reviewable diff.
+**Adding a provider scaffold.** To append one unverified row with the canonical field order, run `npm run add-provider -- <slug> "<Name>"`. The command refuses duplicate slugs, leaves unknown facts empty or `null`, reports the fields that still need confirmation from the provider's own docs, and validates the result; fill those fields before treating the row as complete.
+
 
 ## Quick start
 
