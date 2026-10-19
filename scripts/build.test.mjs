@@ -1173,7 +1173,7 @@ test('the monthly state report computes its numbers from the snapshot and histor
   assert.equal(monthEndDate('2028-02'), '2028-02-29');
 });
 
-test('the "Report a change" URL prefills the inaccuracy form and is escaped on the page', () => {
+test('the "Report a change" URL helper prefills the inaccuracy form and is escaped; the provider page no longer shows the button', () => {
   const repo = 'https://github.com/pacocartones/free-llm-api-hub';
   const url = reportChangeUrl({ slug: 'a-b', name: 'A&B "Labs" / 100% #1' }, repo);
   assert.equal(url, `${repo}/issues/new?template=inaccuracy.yml&provider=a-b&title=%5Boutdated%5D%20A%26B%20%22Labs%22%20%2F%20100%25%20%231`);
@@ -1186,8 +1186,7 @@ test('the "Report a change" URL prefills the inaccuracy form and is escaped on t
 
   const page = join(ROOT, 'site/p/groq.html');
   if (!existsSync(page)) run(['scripts/build.mjs']);
-  assert.match(readFileSync(page, 'utf8'),
-    /<a class="btn ghost" href="https:\/\/github\.com\/pacocartones\/free-llm-api-hub\/issues\/new\?template=inaccuracy\.yml&amp;provider=groq&amp;title=%5Boutdated%5D%20Groq"/);
+  assert.doesNotMatch(readFileSync(page, 'utf8'), /Report a change|template=inaccuracy\.yml&amp;provider=groq/, 'the button was removed from the provider page');
 });
 
 test('the change feed and state reports are built but never pinned in derived-fingerprints.json', () => {
@@ -1968,6 +1967,44 @@ test('home: no good-first-issues button in the hero, a fixed table layout, a lin
   assert.match(row, /<div class="clamp2" title="Free">Free<\/div>/, 'the free text is clamped and complete in the title');
   assert.ok(!/<img|logo/i.test(row), 'no logo in a row');
   assert.match(css, /#table tbody tr:focus-within \{ background: var\(--panel\); \}/, 'the row is highlighted on keyboard focus');
+});
+
+test('provider page: the score is visible, no «All providers» link or «Report a change», the history is paged by 5 and the cards have icons', () => {
+  // Mutant: show the old button or link again, drop data-pager, or lose the score line; this test turns red.
+  const html = readFileSync(join(ROOT, 'site/p/groq.html'), 'utf8');
+  const main = html.slice(html.indexOf('<main id="main">'));
+  assert.match(main, /<div class="prov-score"><span class="best-score" title="Out of 100">\d+\.\d \/ 100<\/span>/, 'the score of the provider');
+  assert.match(main, /<a href="\.\.\/best\/methodology\/">how it is computed<\/a>/, 'a link to the method');
+  assert.ok(!/← All providers/.test(main), 'no «← All providers» link');
+  assert.ok(!/Report a change/.test(html), 'no «Report a change» button');
+  assert.match(main, /<ul class="upd-list" data-pager="5">/, 'the history is paged by 5');
+  assert.match(html, /<script src="\.\.\/pager\.js" defer><\/script>/, 'the pager script, same origin');
+  for (const [label, icon] of [['Credit card', 'ic-card'], ['Phone verification', 'ic-phone'], ['Commercial use', 'ic-building']]) {
+    assert.ok(main.includes('<dt><svg class="i" aria-hidden="true"><use href="#' + icon + '"/></svg>' + label + '</dt>'), label + ' card has its icon');
+  }
+  const dp = dataPolicyHtml({ slug: 'x', data_policy: { trains_on_prompts: false, retention: '30 days', source: 'https://example.com/p' } });
+  assert.match(dp, /<dt><svg class="i" aria-hidden="true"><use href="#ic-shield"\/><\/svg>Trains on your prompts<\/dt>/);
+  assert.match(dp, /<dt><svg class="i" aria-hidden="true"><use href="#ic-clock"\/><\/svg>Retention<\/dt>/);
+  const css = readFileSync(join(ROOT, 'site/styles.css'), 'utf8');
+  assert.match(css, /\.prov-reqs \.req \{[^}]*text-align: center/, 'the cards are centred');
+  assert.match(css, /\.prov-summary h2 \{[^}]*font-size: 1\.45rem/, '«What\'s free» is larger');
+});
+
+test('pager.js: pages of 5 rows, the window is clamped, and the script never touches the URL', async () => {
+  const { runInNewContext } = await import('node:vm');
+  const src = readFileSync(join(ROOT, 'site/pager.js'), 'utf8');
+  const sandbox = { module: { exports: {} } };
+  runInNewContext(src, sandbox);
+  const { pageWindow } = sandbox.module.exports;
+  assert.deepEqual({ ...pageWindow(12, 0, 5) }, { from: 0, to: 5, pages: 3, page: 0 });
+  assert.deepEqual({ ...pageWindow(12, 2, 5) }, { from: 10, to: 12, pages: 3, page: 2 });
+  assert.deepEqual({ ...pageWindow(12, 9, 5) }, { from: 10, to: 12, pages: 3, page: 2 }, 'a page past the end is clamped');
+  assert.deepEqual({ ...pageWindow(12, -3, 5) }, { from: 0, to: 5, pages: 3, page: 0 }, 'a negative page is clamped');
+  assert.deepEqual({ ...pageWindow(0, 0, 5) }, { from: 0, to: 0, pages: 1, page: 0 }, 'an empty list');
+  assert.deepEqual({ ...pageWindow(5, 0, 5) }, { from: 0, to: 5, pages: 1, page: 0 }, 'exactly one page');
+  // The URL stays as it is: no history entry, no hash, no query. Mutant: pushState or location.hash in the script; red.
+  assert.ok(!/pushState|replaceState|location\.|\.hash|\.search|history\./.test(src), 'the script does not touch the URL');
+  assert.match(src, /data-pager/, 'it reads the page size from the list');
 });
 
 test('internal links in the built site resolve to a page (no 404)', () => {

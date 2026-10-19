@@ -15,7 +15,7 @@ import * as rows from './lib/rows.mjs';
 import * as sortLib from './lib/sort.mjs';
 import { esc, stripTags } from './lib/escape.mjs';
 import { mineHistoryAndSnapshots, HISTORY_FIELDS } from './lib/history.mjs';
-import { flattenFieldChanges, groupChangesByWeek, changesRss, weekTitle, formatValue, reportChangeUrl } from './lib/changes.mjs';
+import { flattenFieldChanges, groupChangesByWeek, changesRss, weekTitle, formatValue } from './lib/changes.mjs';
 import { monthlyReport, reportMonths, monthEndDate } from './lib/state.mjs';
 import { githubProfileUrl } from './lib/contributors.mjs';
 import { resolveBestEntries, topEntries, PODIUM_SIZE } from './lib/best.mjs';
@@ -975,7 +975,7 @@ const historyHtml = (slug) => {
   const items = all.slice().reverse().map((e) => `<li class="upd"><span class="upd-date">${e.date}</span> <span>${htmlEsc(e.text)}</span></li>`).join('');
   return `<h2>Change history</h2>` +
     `<p class="muted">How this free tier has changed since we started tracking it (${all[0].date}) — generated from the git history of <a href="${REPO}/commits/main/data/providers.json">providers.json</a>.</p>` +
-    `<ul class="upd-list">${items}</ul>`;
+    `<ul class="upd-list" data-pager="5">${items}</ul>`;
 };
 
 const provFlagsHtml = (p) => {
@@ -1024,7 +1024,13 @@ print(resp.choices[0].message.content)</code></pre><p class="muted">…or with c
     quick = `<h2 id="quickstart">Get started</h2><p class="muted">This is a first-party API, not OpenAI-compatible, so there is no drop-in base URL. The endpoint, the key and a working example are in the <a href="${docs}" target="_blank" rel="noopener">official docs</a>.</p>`;
   }
 
-  const summary = `<div class="prov-summary"><h2 id="whats-free">What's free</h2><p>${htmlEsc(p.free_tier)}</p></div>` + requirementsHtml(p);
+  // The score of the provider (lib/score.mjs, the same numbers as /best/ and the API) with its method one click away. Providers that are
+  // not scored (not verified, or outside the freshness window) say so instead of showing a number.
+  const sc = scoreMap[p.slug];
+  const scoreHtml = sc
+    ? `<div class="prov-score"><span class="best-score" title="Out of 100">${sc.total.toFixed(1)} / 100</span><span>Score${sc.rank ? ` · #${sc.rank} on <a href="../best/">The Best</a>` : ''} · ${sc.confirmed} of ${sc.of} inputs confirmed · <a href="../best/methodology/">how it is computed</a></span></div>`
+    : `<div class="prov-score"><span class="muted">No score: only verified providers inside the freshness window are scored · <a href="../best/methodology/">how it is computed</a></span></div>`;
+  const summary = `<div class="prov-summary"><h2 id="whats-free">What's free</h2><p>${htmlEsc(p.free_tier)}</p></div>` + scoreHtml + requirementsHtml(p);
   // Freshness relative to the current day (provider pages are regenerated on deploy, not diff-gated).
   const daysAgo = p.verified && p.last_verified ? ageInDays(p.last_verified, today) : null;
   const verifiedLine = p.verified
@@ -1048,11 +1054,6 @@ print(resp.choices[0].message.content)</code></pre><p class="muted">…or with c
     const host = u.hostname.replace(/^(docs|console|platform|developer|developers|api|dashboard|cloud|build|support|help|inference-docs)\./, '');
     websiteBtn = `<a class="btn website" href="${u.protocol}//${host}" target="_blank" rel="noopener">Visit website ↗</a>`;
   } catch (_) { /* no/invalid docs URL — skip the website button */ }
-  // "Report a change": the inaccuracy issue form, prefilled with this provider
-  // (input id `provider`) and an "[outdated] <name>" title. The URL components
-  // are percent-encoded in reportChangeUrl; htmlEsc makes the & separators safe
-  // inside the attribute.
-  const reportBtn = `<a class="btn ghost" href="${htmlEsc(reportChangeUrl(p, REPO))}" target="_blank" rel="noopener">${IC('ic-flag')}Report a change</a>`;
   // "Compare with …": the static comparisons this provider appears in, plus the
   // interactive view pre-filled with it.
   const comparePeers = suggestedPairs
@@ -1073,7 +1074,7 @@ print(resp.choices[0].message.content)</code></pre><p class="muted">…or with c
       h1: htmlEsc(p.name),
       afterTitle: `<div class="prov-badges"><span class="type">${typeLabel(p)}</span> ${verifiedLine}${probedLine} ${provFlagsHtml(p)}</div>`,
       lede: p.best_for ? htmlEsc(p.best_for) : '',
-      extra: `<div class="prov-actions">${docsBtn}${websiteBtn}${reportBtn}</div>`,
+      extra: `<div class="prov-actions">${docsBtn}${websiteBtn}</div>`,
     }) +
     `<main id="main"><div class="wrap prose prov-prose">` +
     summary +
@@ -1086,7 +1087,6 @@ print(resp.choices[0].message.content)</code></pre><p class="muted">…or with c
     (crossChips ? `<h2>Appears in</h2><div class="colls">${crossChips}</div>` : '') +
     compareHtml +
     historyHtml(p.slug) +
-    `<p class="prov-back"><a href="../#explorer">← All providers</a></p>` +
     `</div></main>`;
   const jsonld = JSON.stringify({
     '@context': 'https://schema.org',
@@ -1107,7 +1107,7 @@ print(resp.choices[0].message.content)</code></pre><p class="muted">…or with c
   });
   writeFileSync(
     join(ROOT, `site/p/${p.slug}.html`),
-    htmlPage({ title: `${p.name} — free tier & limits · Free LLM API Hub`, desc: `${p.name}: ${p.free_tier}`.slice(0, 180), canonical: `${SITE}/p/${p.slug}`, main, jsonld, ogImage: `${SITE}/og/p/${p.slug}.png` })
+    htmlPage({ title: `${p.name} — free tier & limits · Free LLM API Hub`, desc: `${p.name}: ${p.free_tier}`.slice(0, 180), canonical: `${SITE}/p/${p.slug}`, main, jsonld, ogImage: `${SITE}/og/p/${p.slug}.png`, scripts: ['pager.js'] })
   );
 
   // Embeddable per-provider badge. Same rule as the repo badge: the colour tracks

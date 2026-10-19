@@ -464,7 +464,9 @@ pre:hover .pre-copy, .pre-copy:focus-visible { opacity: 1; }
 .prov-card p { margin: 0; font-size: .92rem; }
 .prov-card code { word-break: break-all; }
 .prov-summary { background: color-mix(in srgb, var(--accent) 9%, var(--panel)); border: 1px solid color-mix(in srgb, var(--accent) 30%, var(--border)); border-radius: var(--radius); padding: 20px 22px; margin: 22px 0; }
-.prov-summary h2 { margin: 0 0 6px; font-size: .74rem; text-transform: uppercase; letter-spacing: .06em; color: var(--accent); font-weight: 700; }
+.prov-summary h2 { margin: 0 0 8px; font-size: 1.45rem; color: var(--accent); font-weight: 700; }
+.prov-score { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 14px 0; font-size: .92rem; }
+.prov-score .best-score { margin-left: 0; }
 .prov-summary p { margin: 0; font-size: 1.04rem; line-height: 1.55; }
 .prov-actions { margin-top: 18px; display: flex; flex-wrap: wrap; gap: 10px; }
 /* Provider card hero — centered header, breadcrumbs, badges and actions. */
@@ -647,9 +649,16 @@ p.muted a, .prose p a, .prov-summary p a { text-decoration: underline; text-unde
 /* Provider pages: sections are not numbered (the order is the same on every page) and the requirement flags read as words. */
 .prov-prose h2::before { content: none; }
 .prov-reqs { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px; margin: 14px 0 20px; }
-.prov-reqs .req { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 10px 14px; }
-.prov-reqs dt { font-size: .7rem; text-transform: uppercase; letter-spacing: .06em; color: var(--faint); font-weight: 700; }
-.prov-reqs dd { margin: 4px 0 0; font-size: .95rem; }
+.prov-reqs .req { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 14px; text-align: center; }
+.prov-reqs dt { display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: .7rem; text-transform: uppercase; letter-spacing: .06em; color: var(--faint); font-weight: 700; }
+.prov-reqs dt svg.i { width: 22px; height: 22px; color: var(--accent); }
+.prov-reqs dd { margin: 6px 0 0; font-size: .95rem; }
+/* The change history is paged by site/pager.js (the whole list without JavaScript). */
+.pager { display: flex; align-items: center; justify-content: center; gap: 12px; margin: 8px 0 18px; font-family: var(--font-mono); font-size: .85rem; }
+.pager-btn { height: 32px; padding: 0 12px; border-radius: 8px; border: 1px solid var(--border-strong); background: var(--panel); color: var(--text); font: inherit; cursor: pointer; }
+.pager-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+.pager-btn:disabled { opacity: .45; cursor: default; }
+.pager-status { color: var(--muted); }
 .limits-table { width: 100%; min-width: 0; margin: 12px 0 4px; border-collapse: collapse; }
 .limits-table th, .limits-table td { text-align: left; padding: 7px 14px; border-bottom: 1px solid var(--border); font-size: .92rem; }
 .limits-table th { color: var(--muted); font-weight: 500; }
