@@ -1514,7 +1514,7 @@ test('footer columns: where each link lives, and no GitHub star entry in Project
   const expected = {
     Explore: ['models/', 'guides-and-collections/', 'programs/startups', 'programs/research', 'free-gpu/', 'coding-tools/'],
     Data: ['providers.json', 'api/', 'llms.txt', 'data-policy/', 'coverage/'],
-    Project: ['updates', 'changes/', 'submit/', 'docs/methodology.md', 'CONTRIBUTING.md', 'agreements/'],
+    Project: ['updates', 'changes/', 'submit/', 'methodology/', 'contributing/', 'agreements/'],
   };
   for (const rel of ['site/index.html', 'site/compare/index.html', 'site/p/groq.html', 'site/legal/privacy.html']) {
     const html = readFileSync(join(ROOT, rel), 'utf8');

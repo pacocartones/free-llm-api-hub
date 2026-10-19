@@ -162,7 +162,9 @@ export const markdownToHtml = (md, ctx) => {
       }
       if (bullet(l)) {
         const list = [];
-        while (i < ls.length && (bullet(ls[i]) || (ls[i].trim() && /^\s+/.test(ls[i]) && list.length) || (!ls[i].trim() && i + 1 < ls.length && bullet(ls[i + 1])))) {
+        const first = bullet(l);
+        const sameKind = (line) => { const b = bullet(line); return !b || b[1].length !== first[1].length || /\d/.test(b[2]) === /\d/.test(first[2]); };
+        while (i < ls.length && sameKind(ls[i]) && (bullet(ls[i]) || (ls[i].trim() && /^\s+/.test(ls[i]) && list.length) || (!ls[i].trim() && i + 1 < ls.length && bullet(ls[i + 1]) && sameKind(ls[i + 1])))) {
           if (ls[i].trim()) list.push(ls[i]);
           i++;
         }

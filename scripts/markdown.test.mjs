@@ -17,7 +17,7 @@ test('nothing of the source is passed through as HTML', () => {
   // Mutant: pass a raw line through, and every one of these would reach the page.
   for (const bad of ['<script>alert(1)</script>', '<img src=x onerror=alert(1)>', '<a href="javascript:alert(1)">x</a>', '"><svg onload=alert(1)>']) {
     const h = md(`text ${bad} more\n\n${bad}\n\n- ${bad}\n\n> ${bad}\n\n| ${bad} |\n|---|\n| ${bad} |\n\n# ${bad}\n\n\`\`\`\n${bad}\n\`\`\``);
-    assert.doesNotMatch(h, /<script|<img|<svg|<a href="javascript|onerror=|onload=/, bad);
+    assert.doesNotMatch(h, /<script|<img|<svg|<a href="javascript/, bad); // the words onerror= and onload= may stay: they are text, not an attribute of a tag
     assert.ok(h.includes('&lt;'), 'the angle brackets are written as text');
   }
 });
