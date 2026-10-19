@@ -32,6 +32,7 @@ import { publishableClientConfigs } from './lib/client-config.mjs';
 import * as compareLib from './lib/compare.mjs';
 import { requirementsHtml, limitsHtml, glanceHtml, modelsHtml, dataPolicyHtml } from './lib/provider-sections.mjs';
 import { aboutHtml } from './lib/provider-summaries.mjs';
+import { markdownToHtml } from './lib/markdown.mjs';
 import { bestFactsHtml } from './lib/best-facts.mjs';
 import { providerFigures, expandFigures, injectInlineFigures, figureErrors } from './lib/figures.mjs';
 import { badgeSvg } from './lib/badge-svg.mjs';
@@ -595,7 +596,7 @@ const siteFooter = (p) => `<footer class="site-footer"><div class="wrap footer-t
 <div class="footer-brand"><a class="foot-brand-link" href="${p}" aria-label="Free LLM API Hub — home"><svg class="logo-mark"><use href="#logo"/></svg><span class="brand-name">Free LLM API <span class="grad">Hub</span></span></a><p>The <strong>continuously-verified</strong>, <strong>machine-readable</strong> dataset of <strong>free LLM &amp; AI-model APIs</strong> and <strong>trial credits</strong> — every entry <strong>dated</strong>, <strong>sourced</strong>, and <strong>free of dead links</strong>.</p><img class="trust-badge" src="${p}badge-verified.svg" alt="Verified providers" width="${BADGE_W}" height="20" loading="lazy"><a class="star-btn" href="${REPO}" target="_blank" rel="noopener"><span class="sb-label">${GH_ICON} Star on GitHub</span><span class="sb-count" data-stars>★</span></a></div>
 <div class="footer-col"><h2 class="footer-h">Explore</h2><a href="${p}models/">Free model index</a><a href="${p}guides-and-collections/">Guides &amp; collections</a><a href="${p}programs/startups">Startup credits</a><a href="${p}programs/research">Student &amp; research credits</a><a href="${p}free-gpu/">Free GPU compute</a><a href="${p}coding-tools/">Free AI coding tools</a></div>
 <div class="footer-col"><h2 class="footer-h">Data</h2><a href="${p}providers.json">providers.json</a><a href="${p}api/">JSON API</a><a href="${p}llms.txt">llms.txt</a><a href="${p}data-policy/">Who trains on your data</a><a href="${p}coverage/">Data coverage</a></div>
-<div class="footer-col"><h2 class="footer-h">Project</h2><a href="${p}updates">Updates</a><a href="${p}changes/">What changed</a><a href="${p}submit/">Submit</a><a href="${REPO}/blob/main/docs/methodology.md">Methodology</a><a href="${REPO}/blob/main/CONTRIBUTING.md">Contributing</a><a href="${p}agreements/">Agreements</a></div>
+<div class="footer-col"><h2 class="footer-h">Project</h2><a href="${p}updates">Updates</a><a href="${p}changes/">What changed</a><a href="${p}submit/">Submit</a><a href="${p}methodology/">Methodology</a><a href="${p}contributing/">Contributing</a><a href="${p}agreements/">Agreements</a></div>
 </div><div class="wrap footer-bottom"><p>Terms change without notice; always confirm against each provider's own docs. MIT licensed.</p><p class="foot-legal"><a href="${p}legal/privacy">Privacy</a> · <a href="${p}legal/terms">Terms</a></p><p class="foot-email"><a href="mailto:admin@freellmapihub.com">admin@freellmapihub.com</a></p></div></footer>`;
 
 // Full page wrapper for generated (collection) pages. `p` is the path prefix to the site root.
@@ -1915,6 +1916,30 @@ writeFileSync(
   htmlPage({ title: 'How the score works · Free LLM API Hub', desc: 'The parameters, weights and rules behind the Free LLM API Hub top 10: what is measured, what is editorial, and that being a partner scores nothing.', canonical: SITE + '/best/methodology/', main: methodMain, prefix: '../../' })
 );
 
+// ---------- /methodology/ and /contributing/ — the two documents of the repository, as pages ----------
+// Written from docs/methodology.md and CONTRIBUTING.md with lib/markdown.mjs (no dependency; nothing of the source is passed through as HTML), so the page and
+// the file on GitHub cannot say different things. A relative link of the document becomes a link to the file on GitHub, or to the page when the file has one.
+const DOC_PAGES = [
+  { slug: 'methodology', file: 'docs/methodology.md', title: 'Methodology: how a provider gets on the list · Free LLM API Hub',
+    desc: 'How an entry gets on the list, what verified means and does not mean, and how freshness, sourcing, corrections, model tier and the score work.',
+    h1: 'Methodology', lede: 'How an entry gets on the list, what “verified” means, and what it does not.' },
+  { slug: 'contributing', file: 'CONTRIBUTING.md', title: 'Contributing: add or fix a provider · Free LLM API Hub',
+    desc: 'How to add or fix a provider, report a mistake without a pull request, claim an issue, and what happens to your first pull request.',
+    h1: 'Contributing', lede: 'How to add or fix a provider, step by step.' },
+];
+const DOC_LINKS = { repo: REPO, site: SITE, pages: Object.fromEntries(DOC_PAGES.map((d) => [d.file, `/${d.slug}/`])) };
+for (const d of DOC_PAGES) {
+  mkdirSync(join(ROOT, `site/${d.slug}`), { recursive: true });
+  const body = markdownToHtml(readFileSync(join(ROOT, d.file), 'utf8'), { ...DOC_LINKS, from: d.file }).replace(/^<h1[^>]*>.*?<\/h1>\n?/, '');
+  writeFileSync(join(ROOT, `site/${d.slug}/index.html`), htmlPage({
+    title: d.title, desc: d.desc, canonical: `${SITE}/${d.slug}/`, prefix: '../',
+    main: pageHero({ crumbs: `<a href="../">Home</a> / ${htmlEsc(d.h1)}`, h1: d.h1, lede: d.lede }) +
+      `<main id="main"><div class="wrap prose doc">${body}` +
+      `<p class="muted">This page is written from <a href="${REPO}/blob/main/${d.file}" target="_blank" rel="noopener">${htmlEsc(d.file)}</a> in the repository. To change it, open a pull request there.</p>` +
+      `</div></main>`,
+  }));
+}
+
 // ---------- /submit/ — how to ask us to add, review or correct something ----------
 // No form and no email address on purpose: this site is static (no backend), and every request is a public GitHub issue, so
 // anyone can see what was asked and what was decided. The links open the issue forms in .github/ISSUE_TEMPLATE/.
@@ -1939,7 +1964,7 @@ writeFileSync(
       submitRequests.map(([h, text, template, cta]) => `<section><h2>${htmlEsc(h)}</h2><p>${text}</p><p><a class="btn primary" href="${issueForm(template)}" target="_blank" rel="noopener">${htmlEsc(cta)}</a></p></section>`).join('\n') +
       `<section><h2>Business and partnerships</h2><p>For a partnership, an agreement or a question from a company, write to <strong class="business-email">${BUSINESS_EMAIL}</strong>. Money never changes a score. Corrections and new providers do not go there: use the forms above.</p></section>` +
       `<section><h2>Anything else</h2><p>Questions, ideas and open-ended suggestions go to the <a href="${REPO}/discussions" target="_blank" rel="noopener">GitHub discussions</a>.</p></section>` +
-      `<p class="muted">Every entry is checked against the provider's own documentation; see how in the <a href="${REPO}/blob/main/docs/methodology.md" target="_blank" rel="noopener">methodology</a>.</p>` +
+      `<p class="muted">Every entry is checked against the provider's own documentation; see how in the <a href="../methodology/">methodology</a>.</p>` +
       `</div></main>`,
     prefix: '../',
   })
@@ -2164,6 +2189,7 @@ const sitemapEntries = [
   [`${SITE}/best/methodology/`, data.generated],
   [`${SITE}/coverage/`, data.generated],
   [`${SITE}/submit/`, data.generated],
+  ...DOC_PAGES.map((d) => [`${SITE}/${d.slug}/`, data.generated]),
   [`${SITE}/data-policy/`, data.generated],
   [`${SITE}/agreements/`, AGREEMENTS.generated],
   [`${SITE}/free-gpu/`, freeGpu.generated],

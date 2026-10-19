@@ -767,3 +767,13 @@ p.muted a, .prose p a, .prov-summary p a { text-decoration: underline; text-unde
 .prov-about .about-src { display: block; margin-top: 3px; color: var(--muted); font-size: .8rem; }
 .prov-about a { text-decoration: underline; text-underline-offset: 2px; }
 @media (max-width: 640px) { .prov-about .about-row { grid-template-columns: 1fr; } }
+
+/* /methodology/ and /contributing/: the documents of the repository (lib/markdown.mjs). Links inside text are underlined: they must not rely on colour alone. */
+.doc a { text-decoration: underline; text-underline-offset: 2px; }
+.doc pre { overflow-x: auto; }
+.doc code { font-family: var(--font-mono); font-size: .9em; }
+.doc blockquote { margin: 14px 0; padding: 2px 16px; border-left: 3px solid var(--accent); color: var(--muted); }
+.doc .table-wrap { overflow-x: auto; margin: 14px 0; }
+.doc h3 { margin-top: 28px; }
+.doc ol { padding-left: 1.4em; margin: 12px 0; }
+.doc ol li { color: var(--muted); }
