@@ -1856,17 +1856,22 @@ test('the menu has Guides & Collections, The Best and Submit, and the footer no 
   }
 });
 
-test('/submit/ links to the GitHub issue forms and publishes neither an email address nor a form', () => {
-  // The site is static: a request is a public GitHub issue. The shared footer already carries the legal contact address, so the check
-  // is on the page's own content (the hero and <main>), not the whole file. Mutant: add a mailto: link or a <form> to the page; red.
+test('/submit/ links to the GitHub issue forms, has no form, and publishes one address only, as text, for business', () => {
+  // The site is static: a data request is a public GitHub issue. The one address is for business and partnerships. It is plain text
+  // (no mailto link), and it is the address the legal pages already publish. The shared footer carries it too, so the check is on the
+  // page's own content (the hero and <main>). Mutant: add a second address, a mailto: link or a <form>; this test turns red.
   const html = readFileSync(join(ROOT, 'site/submit/index.html'), 'utf8');
   const own = html.slice(html.indexOf('<section class="page-hero'), html.indexOf('<footer class="site-footer">'));
   assert.ok(own.length > 500, 'the page content');
-  for (const t of ['new-provider.yml', 'inaccuracy.yml', 'partner-request.yml']) {
+  for (const t of ['new-provider.yml', 'inaccuracy.yml']) {
     assert.ok(own.includes('/issues/new?template=' + t), 'a link to the form ' + t);
     assert.ok(existsSync(join(ROOT, '.github/ISSUE_TEMPLATE', t)), 'the form file ' + t + ' exists');
   }
-  assert.ok(!/mailto:/.test(own), 'no email address');
+  assert.ok(!own.includes('partner-request'), 'a partnership is not discussed in a public issue');
+  const addresses = [...new Set(own.match(/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g) || [])];
+  assert.deepEqual(addresses, ['admin@freellmapihub.com'], 'one address, the one the legal pages already publish');
+  assert.match(own, /<h2>Business and partnerships<\/h2><p>[^<]*<strong class="business-email">admin@freellmapihub\.com<\/strong>/, 'under the business heading, as text');
+  assert.ok(!/mailto:/.test(own), 'plain text, no mailto link');
   assert.ok(!/<form[\s>]/.test(own), 'no form');
   assert.ok(readFileSync(join(ROOT, 'site/sitemap.xml'), 'utf8').includes('/submit/'), 'in the sitemap');
 });

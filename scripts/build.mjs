@@ -1830,19 +1830,22 @@ const issueForm = (template) => `${REPO}/issues/new?template=${template}`;
 const submitRequests = [
   ['Propose a new provider', 'A free tier or a trial-credit LLM API that is not tracked yet. We list what the provider\'s own documentation states.', 'new-provider.yml', 'Propose a provider'],
   ['Report a wrong or stale entry', 'A limit, a requirement or a link that no longer matches the provider\'s own documentation.', 'inaccuracy.yml', 'Report a correction'],
-  ['Companies and providers', 'Ask us to review your provider or one of its models, or to talk about working together. Money never changes a score.', 'partner-request.yml', 'Contact us about your company'],
 ];
+// The one address on this page, for business and partnerships only (the address the legal pages already publish). It is plain text, with no
+// mailto link: a provider should not have to talk about agreements in a public issue. Data requests stay on the public forms.
+const BUSINESS_EMAIL = 'admin@freellmapihub.com';
 mkdirSync(join(ROOT, 'site/submit'), { recursive: true });
 writeFileSync(
   join(ROOT, 'site/submit/index.html'),
   htmlPage({
     title: 'Submit a provider, a correction or a request · Free LLM API Hub',
-    desc: 'Ask us to add a free LLM API, correct an entry or review your company. Every request is a public GitHub issue; there is no form and no email.',
+    desc: 'Ask us to add a free LLM API or correct an entry through public GitHub issues. Companies and partnerships have one business address.',
     canonical: SITE + '/submit/',
     main:
-      pageHero({ crumbs: `<a href="../">Home</a> / Submit`, h1: `Submit`, lede: `Ask us to add, review or correct something. Each request is a public GitHub issue, so anyone can see what was asked and what was decided.` }) +
+      pageHero({ crumbs: `<a href="../">Home</a> / Submit`, h1: `Submit`, lede: `Ask us to add, review or correct something. Data requests are public GitHub issues, so anyone can see what was asked and what was decided. Business and partnerships have one address.` }) +
       `<main id="main"><div class="wrap prose">` +
       submitRequests.map(([h, text, template, cta]) => `<section><h2>${htmlEsc(h)}</h2><p>${text}</p><p><a class="btn primary" href="${issueForm(template)}" target="_blank" rel="noopener">${htmlEsc(cta)}</a></p></section>`).join('\n') +
+      `<section><h2>Business and partnerships</h2><p>For a partnership, an agreement or a question from a company, write to <strong class="business-email">${BUSINESS_EMAIL}</strong>. Money never changes a score. Corrections and new providers do not go there: use the forms above.</p></section>` +
       `<section><h2>Anything else</h2><p>Questions, ideas and open-ended suggestions go to the <a href="${REPO}/discussions" target="_blank" rel="noopener">GitHub discussions</a>.</p></section>` +
       `<p class="muted">Every entry is checked against the provider's own documentation; see how in the <a href="${REPO}/blob/main/docs/methodology.md" target="_blank" rel="noopener">methodology</a>.</p>` +
       `</div></main>`,
