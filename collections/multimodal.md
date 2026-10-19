@@ -67,6 +67,6 @@ Free tiers that reach **beyond plain text** — vision, image, audio/speech, emb
 
 ---
 
-Other collections: [Free LLM APIs with no credit card](no-credit-card.md) · [Free LLM APIs with no phone verification](no-phone.md) · [Free LLM APIs for commercial use](commercial-use.md) · [OpenAI-compatible free LLM APIs](openai-compatible.md) · [Permanently free LLM APIs](always-free.md) · [Free multimodal LLM APIs](multimodal.md) · [Free LLM APIs that say they do not train on your prompts](no-training.md)
+Other collections: [Free LLM APIs with no credit card](no-credit-card.md) · [Free LLM APIs with no phone verification](no-phone.md) · [Free LLM APIs for commercial use](commercial-use.md) · [OpenAI-compatible free LLM APIs](openai-compatible.md) · [Permanently free LLM APIs](always-free.md) · [Free multimodal LLM APIs](multimodal.md) · [Free LLM APIs that say they do not train on your prompts](no-training.md) · [Free LLM APIs whose free tier renews](renewing-free-tier.md) · [Free LLM APIs with a free signup credit](free-signup-credit.md)
 
 _Generated from [providers.json](../data/providers.json). Terms change without notice — always confirm against each provider's own docs._
