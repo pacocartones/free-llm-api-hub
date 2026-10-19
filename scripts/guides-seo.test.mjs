@@ -23,7 +23,7 @@ before(() => { execFileSync(process.execPath, [join(ROOT, 'scripts/build.mjs')],
 
 test('every guide opens with a direct answer of 40 to 55 words that states its own count', () => {
   const slugs = guides();
-  assert.equal(slugs.length, 7);
+  assert.equal(slugs.length, 9);
   for (const slug of slugs) {
     const html = read(slug);
     const a = html.match(/<p class="answer"><strong>([^<]*)<\/strong><\/p>/);
@@ -92,7 +92,7 @@ const colls = () => readdirSync(join(ROOT, 'site/collections')).filter((f) => f.
 
 test('every collection opens with a direct answer of 40 to 55 words and a meta description that start from its live count', () => {
   const slugs = colls();
-  assert.equal(slugs.length, 7);
+  assert.equal(slugs.length, 9);
   for (const slug of slugs) {
     const html = readColl(slug);
     const a = html.match(/<p class="answer"><strong>([^<]*)<\/strong><\/p>/);
@@ -139,7 +139,7 @@ test('a provider named in a collection text is a row of that collection table', 
   }
 });
 
-test('the hub has a direct answer, a title and a description from its live counts, and CollectionPage, BreadcrumbList and FAQPage that list all fourteen pages', () => {
+test('the hub has a direct answer, a title and a description from its live counts, and CollectionPage, BreadcrumbList and FAQPage that list all eighteen pages', () => {
   const html = readFileSync(join(ROOT, 'site/guides-and-collections/index.html'), 'utf8');
   const a = stripTags(html.match(/<p class="answer"><strong>([^<]*)<\/strong><\/p>/)[1]);
   assert.ok(words(a) >= 40 && words(a) <= 55, `${words(a)} words`);
@@ -150,7 +150,7 @@ test('the hub has a direct answer, a title and a description from its live count
   assert.ok(title.length <= 60, `title ${title.length} characters`);
   const graph = jsonld(html)['@graph'];
   const page = graph.find((g) => g['@type'] === 'CollectionPage');
-  assert.equal(page.mainEntity.itemListElement.length, 14);
+  assert.equal(page.mainEntity.itemListElement.length, 18);
   for (const e of page.mainEntity.itemListElement) {
     const path = e.url.replace('https://freellmapihub.com/', '');
     const file = path.startsWith('guides/') ? `site/${path}.html` : `site/${path}.html`;
