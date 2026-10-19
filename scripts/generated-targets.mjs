@@ -29,12 +29,15 @@ export const isGenerated = (path) => path.startsWith('site/') && !NOT_BUILD_OUTP
 
 export const generatedTargets = (trackedSiteFiles) => [...STATIC_TARGETS, ...trackedSiteFiles.filter(isGenerated).sort()];
 
-const git = (args) => execFileSync('git', args, { encoding: 'utf8' }).split('\n').filter(Boolean);
+// `-z`: git ends each path with a NUL and writes it as it is. Without it git puts a path with a non-ASCII
+// character in quotes ("caf\303\251.html"), which matches no file, and the gate would skip it without a word.
+export const parseNul = (out) => out.split('\0').filter(Boolean);
+const git = (args) => parseNul(execFileSync('git', args, { encoding: 'utf8' }));
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   if (process.argv.includes('--untracked')) {
-    console.log(git(['ls-files', '--others', '--exclude-standard', '--', 'site/']).filter(isGenerated).join(' '));
+    console.log(git(['ls-files', '-z', '--others', '--exclude-standard', '--', 'site/']).filter(isGenerated).join(' '));
   } else {
-    console.log(generatedTargets(git(['ls-files', '--', 'site/'])).join(' '));
+    console.log(generatedTargets(git(['ls-files', '-z', '--', 'site/'])).join(' '));
   }
 }

@@ -8,7 +8,7 @@ import { mkdirSync, writeFileSync, rmSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { makeTmpDir } from './lib/tmp.mjs';
-import { isGenerated, generatedTargets, STATIC_TARGETS } from './generated-targets.mjs';
+import { isGenerated, generatedTargets, parseNul, STATIC_TARGETS } from './generated-targets.mjs';
 
 const SCRIPT = join(dirname(fileURLToPath(import.meta.url)), 'generated-targets.mjs');
 
@@ -57,7 +57,17 @@ test('in a repository: a committed page is a target, a hand change to it turns t
     assert.equal(run('--untracked'), 'site/second-page/index.html', 'the new page is reported, the ignored one is not');
     git('add', 'site/second-page/index.html');
     assert.equal(run('--untracked'), '');
+    // A page whose path has a non-ASCII character: git would quote it without -z and the gate would never see it.
+    write('site/café/index.html', '<p>café</p>');
+    assert.equal(run('--untracked'), 'site/café/index.html', 'an uncommitted page with an accent in its path is reported');
+    git('add', 'site/café/index.html'); git('commit', '-q', '-m', 'accent');
+    assert.ok(run().split(' ').includes('site/café/index.html'), 'a committed page with an accent in its path is a target');
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
+});
+
+test('parseNul splits on NUL, keeps spaces and quotes inside a path, and drops the empty tail', () => {
+  assert.deepEqual(parseNul('site/a b/index.html\0site/"q"/index.html\0'), ['site/a b/index.html', 'site/"q"/index.html']);
+  assert.deepEqual(parseNul(''), []);
 });
