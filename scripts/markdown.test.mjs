@@ -85,7 +85,7 @@ test('/methodology/ and /contributing/: linked from the footer, in the sitemap, 
       if (href.startsWith('#')) assert.ok(ids.has(href.slice(1)), `${slug}: the anchor ${href} exists`);
       else assert.match(href, /^(https:\/\/|\.\.\/|\/)/, `${slug}: ${href}`);
     }
-    assert.equal((main.match(/<pre><code>/g) || []).length, Math.floor((src.match(/^```/gm) || []).length / 2), `${slug}: one block of code for each fenced block`);
+    assert.equal((main.match(/<pre><code>/g) || []).length, Math.floor((src.match(/^[ \t>]*```/gm) || []).length / 2), `${slug}: one block of code for each fenced block`);
   }
   assert.match(read('site/methodology/index.html'), /<table class="model-table">/, 'the table of the methodology is a table');
 });
