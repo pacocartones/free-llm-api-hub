@@ -74,7 +74,8 @@ test('a provider named in a guide FAQ or intro is a row of that guide table, so 
       const name = p.name;
       if (name.length < 4) continue;
       if (new RegExp(`\\b${name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`).test(prose)) {
-        assert.ok(table.includes(`>${name}<`), `${slug}: the text names ${name} but it is not in the table`);
+        // The table is HTML: a name with an ampersand (W&B Inference) is written escaped in the cell.
+        assert.ok(table.includes(`>${name}<`) || table.includes(`>${name.replace(/&/g, '&amp;')}<`), `${slug}: the text names ${name} but it is not in the table`);
       }
     }
   }
