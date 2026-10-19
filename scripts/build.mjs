@@ -24,7 +24,7 @@ import { coverage, coverageMainHtml } from './lib/coverage.mjs';
 import { freeGpuMainHtml } from './lib/free-gpu.mjs';
 import { labelTables } from './lib/tables.mjs';
 import { markNewTabLinks } from './lib/links.mjs';
-import { codingToolsMainHtml } from './lib/free-coding-tools.mjs';
+import { codingToolsMainHtml, codingToolMainHtml, codingToolTitle, codingToolDescription } from './lib/free-coding-tools.mjs';
 import { dataPolicyRows, dataPolicyMainHtml } from './lib/data-policy-page.mjs';
 import { quotesReportHtml } from './lib/quotes-report.mjs';
 import { SCORE_WEIGHTS, EDITORIAL_WEIGHT, EDITORIAL_DEFAULT, MATH_INPUTS, MIN_CONFIRMED, TOP_SIZE, EDITORIAL_NOTE_THRESHOLD, STABILITY_MIN_DAYS, STABILITY_MIN_SAMPLES, rankProviders, editorialRating } from './lib/score.mjs';
@@ -1884,6 +1884,46 @@ writeFileSync(
   })
 );
 
+// One page per tool: /coding-tools/<slug>/. The same data as the list, with the sentence, the source and the day of each value, and the
+// values the tool's page does not state shown as «Not stated».
+const CODING_TOOL_PAGES = [
+  ...codingTools.entries.map((e) => ({ e, group: 'free', generated: codingTools.generated })),
+  ...codingToolsOwnKey.entries.map((e) => ({ e, group: 'own-key', generated: codingToolsOwnKey.generated })),
+];
+for (const { e, group } of CODING_TOOL_PAGES) {
+  if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(e.slug)) throw new Error('coding tool slug is not kebab-case: ' + e.slug);
+  const canonical = `${SITE}/coding-tools/${e.slug}/`;
+  const jsonld = JSON.stringify({
+    '@context': 'https://schema.org',
+    '@graph': [
+      { '@type': 'WebPage', name: codingToolTitle(e.name), url: canonical, isPartOf: { '@type': 'WebPage', name: 'Free AI coding tools', url: `${SITE}/coding-tools/` } },
+      {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Free LLM API Hub', item: `${SITE}/` },
+          { '@type': 'ListItem', position: 2, name: 'Free AI coding tools', item: `${SITE}/coding-tools/` },
+          { '@type': 'ListItem', position: 3, name: e.name, item: canonical },
+        ],
+      },
+    ],
+  });
+  mkdirSync(join(ROOT, `site/coding-tools/${e.slug}`), { recursive: true });
+  writeFileSync(
+    join(ROOT, `site/coding-tools/${e.slug}/index.html`),
+    htmlPage({
+      title: codingToolTitle(e.name),
+      desc: codingToolDescription(e),
+      canonical,
+      main:
+        pageHero({ crumbs: `<a href="../../">Home</a> / <a href="../">Free AI coding tools</a> / ${htmlEsc(e.name)}`, h1: htmlEsc(e.name), lede: `What the tool's own page says about a free plan, with the sentence and the day it was read.` }) +
+        codingToolMainHtml(e, { prefix: '../../', group, others: CODING_TOOL_PAGES.map((x) => x.e).filter((o) => o.slug !== e.slug) }),
+      jsonld,
+      prefix: '../../',
+      styles: ['tables.css'],
+    })
+  );
+}
+
 // ---------- /data-policy/ — who trains on your data, with the provider's own words ----------
 // Reads data_policy only. A row without a recorded sentence says so; "not confirmed" is never "no".
 mkdirSync(join(ROOT, 'site/data-policy'), { recursive: true });
@@ -2034,6 +2074,7 @@ const sitemapEntries = [
   [`${SITE}/agreements/`, AGREEMENTS.generated],
   [`${SITE}/free-gpu/`, freeGpu.generated],
   [`${SITE}/coding-tools/`, codingTools.generated],
+  ...CODING_TOOL_PAGES.map(({ e, generated }) => [`${SITE}/coding-tools/${e.slug}/`, generated]),
   [`${SITE}/api/`, data.generated],
   [`${SITE}/changes/`, data.generated],
   [`${SITE}/programs/`, programs.generated],

@@ -44,13 +44,70 @@ export function codingToolsCounts(section) {
   return { tools: section.entries.length, stated, total };
 }
 
-function entriesHtml(section) {
+function entriesHtml(section, prefix = '../') {
   return section.entries.map((e) => {
     const url = safeHttp(e.url);
     const name = url ? `<a href="${htmlEsc(url)}" target="_blank" rel="noopener">${htmlEsc(e.name)}</a>` : htmlEsc(e.name);
     const claims = Object.keys(LABELS).map((f) => claimHtml(e.slug, f, e.claims[f])).join('');
-    return `<section class="gpu-entry" id="${SLUG_RE.test(e.slug) ? e.slug : ''}"><h3>${name} <span class="muted">· ${htmlEsc(KIND_LABEL[e.kind] || e.kind)}</span></h3><dl class="gpu-claims">${claims}</dl></section>`;
+    return `<section class="gpu-entry" id="${SLUG_RE.test(e.slug) ? e.slug : ''}"><h3>${name} <span class="muted">· ${htmlEsc(KIND_LABEL[e.kind] || e.kind)}</span></h3><dl class="gpu-claims">${claims}</dl>${SLUG_RE.test(e.slug) ? `<p class="muted"><a href="${prefix}coding-tools/${e.slug}/">The page of ${htmlEsc(e.name)} →</a></p>` : ''}</section>`;
   }).join('');
+}
+
+// ---- one page per tool (/coding-tools/<slug>/) ----
+// Built only from the entry: the values the tool's own page states (each with its sentence, its source and the day it was read) and, apart,
+// the values it does not state, which read «Not stated» and are never «no». Nothing is added, ranked or interpreted.
+
+/** The title of the page of a tool: at most 60 characters, the name first. */
+export function codingToolTitle(name) {
+  const full = `${name} free plan · Free LLM API Hub`;
+  return full.length <= 60 ? full : `${name} free plan`;
+}
+
+/** The description of the page: the first sentence the tool's page states about free access, after its name and kind. */
+export function codingToolDescription(entry) {
+  // A fixed sentence: a quoted line of a pricing page makes a poor search snippet. The quotes are on the page.
+  return `${entry.name} (${KIND_LABEL[entry.kind] || entry.kind}): what its own page says about the free plan, quoted, with the source and the day read.`;
+}
+
+/** The distinct source pages of an entry, with the days they were read. */
+export function codingToolSources(entry) {
+  const seen = new Map();
+  for (const f of Object.keys(LABELS)) for (const q of entry.claims[f].quotes) {
+    const src = safeHttp(q.source);
+    if (!src) continue;
+    const days = seen.get(src) || new Set();
+    days.add(q.read);
+    seen.set(src, days);
+  }
+  return [...seen].map(([src, days]) => ({ src, days: [...days].sort() }));
+}
+
+/** @param {object} entry  @param {{prefix?: string, group?: string, others?: object[]}} opts  prefix to the site root */
+export function codingToolMainHtml(entry, { prefix = '../../', group = 'free', others = [] } = {}) {
+  const url = safeHttp(entry.url);
+  const stated = Object.keys(LABELS).filter((f) => entry.claims[f].state === 'stated');
+  const unstated = Object.keys(LABELS).filter((f) => entry.claims[f].state !== 'stated');
+  const claims = (fields) => `<dl class="gpu-claims">${fields.map((f) => claimHtml(entry.slug, f, entry.claims[f])).join('')}</dl>`;
+  const sources = codingToolSources(entry);
+  const where = group === 'own-key'
+    ? 'This tool is free itself while the model behind it is paid for with your own key or a free API.'
+    : 'This tool says it has a free plan.';
+  return '<main id="main"><div class="wrap prose">' +
+    `<p>${htmlEsc(KIND_LABEL[entry.kind] || entry.kind)}. ${where}${url ? ` <a href="${htmlEsc(url)}" target="_blank" rel="noopener">The tool's own page ↗</a>.` : ''} ` +
+    'It is <strong>not part of the ranking</strong> of free LLM APIs, and each value below is written only where the tool\'s own page says it.</p>' +
+    '<h2 id="stated">What its page states</h2>' +
+    (stated.length ? claims(stated) : '<p class="muted">Nothing is stated yet.</p>') +
+    '<h2 id="not-stated">What its page does not say</h2>' +
+    '<p><strong>Not stated</strong> is never the same as <em>no</em>: it means the page does not say it, so we do not write it.</p>' +
+    (unstated.length ? claims(unstated) : '<p class="muted">Everything is stated.</p>') +
+    '<h2 id="sources">Sources</h2>' +
+    (sources.length
+      ? `<ul class="plain">${sources.map((x) => `<li><a href="${htmlEsc(x.src)}" target="_blank" rel="noopener">${htmlEsc(x.src)}</a> · read ${x.days.map(htmlEsc).join(', ')}</li>`).join('')}</ul>`
+      : '<p class="muted">No source page is quoted.</p>') +
+    (others.length
+      ? `<h2 id="others">Other free AI coding tools</h2><div class="colls">${others.filter((o) => SLUG_RE.test(o.slug)).map((o) => `<a href="${prefix}coding-tools/${o.slug}/">${htmlEsc(o.name)}</a>`).join('')}</div>`
+      : '') +
+    '</div></main>';
 }
 
 const notesHtml = (section) => (section.notes || []).map((n) =>
@@ -66,12 +123,12 @@ function ownKeyHtml(ownKey, prefix) {
     'The same rule holds: a value is written only where the tool\'s own page says it, and <strong>Not stated</strong> is never <em>no</em>.</p>' +
     `<p class="muted">${c.tools} tools listed; ${c.stated} of ${c.total} values rest on a sentence from the tool's own page.</p>` +
     claimsTableHtml({ id: 'own', entries: ownKey.entries, labels: LABELS, kindLabel: (k) => KIND_LABEL[k] || k, subject: 'tool' }) +
-    entriesHtml(ownKey) + notesHtml(ownKey);
+    entriesHtml(ownKey, prefix) + notesHtml(ownKey);
 }
 
 export function codingToolsMainHtml(section, { prefix = '../', repo = '', ownKey = null } = {}) {
   const c = codingToolsCounts(section);
-  const entries = entriesHtml(section);
+  const entries = entriesHtml(section, prefix);
   const notes = notesHtml(section);
   return '<main id="main"><div class="wrap prose">' +
     '<h2>What each tool says about free access</h2>' +
