@@ -359,15 +359,16 @@ pre:hover .pre-copy, .pre-copy:focus-visible { opacity: 1; }
 .coll-card p { margin: 0; color: var(--muted); font-size: .88rem; }
 /* /best — the top 10 by score */
 .best-wrap { max-width: 46rem; }
-.best-intro { color: var(--muted); line-height: 1.65; margin: 0 0 26px; max-width: 66ch; }
+.best-intro { color: var(--muted); line-height: 1.65; margin: 0 auto 26px; max-width: 66ch; text-align: center; }
 .best-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
 .best-item {
-  display: grid; grid-template-columns: 3.2rem 1fr; gap: 16px; align-items: start;
+  display: grid; grid-template-columns: 3.2rem 1fr; gap: 16px; align-items: center;
   background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius);
   padding: 16px 18px;
 }
 .best-item:hover { border-color: color-mix(in srgb, var(--accent) 40%, var(--border)); }
 .best-rank {
+  align-self: center; text-align: center;
   font-family: var(--font-mono); font-weight: 800; font-size: 1.7rem; line-height: 1;
   color: color-mix(in srgb, var(--accent) 78%, transparent);
   text-shadow: 0 0 18px color-mix(in srgb, var(--accent) 45%, transparent);
@@ -388,12 +389,28 @@ pre:hover .pre-copy, .pre-copy:focus-visible { opacity: 1; }
   border: 1px solid color-mix(in srgb, var(--accent) 36%, transparent);
   border-radius: 999px; padding: 2px 9px; font-family: var(--font-mono);
 }
-.best-why { margin: 0 0 8px; color: var(--text); line-height: 1.6; }
-.best-meta { margin: 0; color: var(--muted); font-size: .85rem; font-family: var(--font-mono); display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: center; }
 .best-note { margin-top: 18px; line-height: 1.6; }
-.best-section { font-size: 1rem; margin: 26px 0 12px; color: var(--muted); font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
-.best-score { font-family: var(--font-mono); font-weight: 700; font-size: .85rem; color: var(--accent); margin-left: auto; }
+.best-section { font-size: 1rem; margin: 26px 0 12px; color: var(--muted); font-weight: 700; letter-spacing: .04em; text-transform: uppercase; text-align: center; }
+.best-sep { border: 0; height: 1px; width: 7.5rem; margin: 24px auto; background: var(--border-strong); }
+.best-score {
+  font-family: var(--font-mono); font-weight: 700; font-size: .85rem; color: var(--accent); margin-left: auto;
+  border: 1px solid color-mix(in srgb, var(--accent) 50%, var(--border)); border-radius: 8px; padding: 3px 10px;
+  background: color-mix(in srgb, var(--accent) 9%, transparent);
+}
+.best-flag { font-size: .7rem; font-family: var(--font-mono); color: var(--muted); border: 1px dashed var(--border-strong); border-radius: 999px; padding: 1px 8px; }
 .best-editorial { margin: 0 0 8px; color: var(--muted); line-height: 1.55; font-size: .9rem; }
+/* The three cards of an entry: Free quota, Rate limit and Requirements (scripts/lib/best-facts.mjs). */
+.best-facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 10px; }
+.best-fact { background: var(--panel-2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; min-width: 0; }
+.best-fact-h { margin: 0 0 6px; font-size: .72rem; font-family: var(--font-mono); font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.best-fact-v { margin: 0 0 6px; font-size: .88rem; line-height: 1.45; overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+.best-fact-src { margin: 0; font-size: .75rem; color: var(--muted); font-family: var(--font-mono); }
+.best-req-list { list-style: none; margin: 0 0 6px; padding: 0; display: flex; flex-direction: column; gap: 5px; font-size: .88rem; }
+.best-req-list li { display: flex; align-items: center; gap: 7px; }
+.best-req-list svg.i { width: 15px; height: 15px; flex: none; color: var(--accent); }
+.best-req-list .best-req-unknown { color: var(--muted); }
+.best-req-list .best-req-unknown svg.i { color: var(--muted); }
+@media (max-width: 720px) { .best-facts { grid-template-columns: 1fr; } }
 .best-podium { border-color: color-mix(in srgb, var(--accent) 45%, var(--border)); }
 .best-podium-1 { background: color-mix(in srgb, var(--accent) 7%, var(--panel)); }
 .best-weights { border-collapse: collapse; margin: 0 0 18px; }

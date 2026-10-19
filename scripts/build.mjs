@@ -31,6 +31,7 @@ import { SCORE_WEIGHTS, EDITORIAL_WEIGHT, EDITORIAL_DEFAULT, MATH_INPUTS, MIN_CO
 import { publishableClientConfigs } from './lib/client-config.mjs';
 import * as compareLib from './lib/compare.mjs';
 import { requirementsHtml, limitsHtml, glanceHtml, modelsHtml, dataPolicyHtml } from './lib/provider-sections.mjs';
+import { bestFactsHtml } from './lib/best-facts.mjs';
 import { providerFigures, expandFigures, injectInlineFigures, figureErrors } from './lib/figures.mjs';
 import { badgeSvg } from './lib/badge-svg.mjs';
 
@@ -1745,18 +1746,15 @@ const bestIntroHtml = htmlEsc(BEST.intro).replace(/`([^`]+)`/g, '<code>$1</code>
 const scoreTxt = (x) => x.toFixed(1);
 const bestCard = (e) => {
   const { rank, p, podium } = e;
-  const ver = p.verified
-    ? '<span class="v ok">' + IC('ic-check') + ' verified ' + htmlEsc(p.last_verified) + '</span>'
-    : '<span class="v warn">' + IC('ic-warn') + ' unverified</span>';
   const note = EDITORIAL.ratings?.[p.slug]?.note;
+  // The score has a frame and the position is centred on the card; the third row (verified date, inputs confirmed, one-line
+  // description) is replaced by three cards of fields of the record: Free quota, Rate limit and Requirements (lib/best-facts.mjs).
   return '<li class="best-item' + (podium ? ' best-podium best-podium-' + rank : '') + '"><div class="best-rank" aria-hidden="true">' + String(rank).padStart(2, '0') + '</div><div class="best-body">' +
     '<div class="best-head"><h2><a href="../p/' + p.slug + '">' + htmlEsc(p.name) + '</a></h2>' +
+    (e.boundary ? '<span class="best-flag" title="The model tier of this provider sits near a threshold of the score; it is flagged, never penalised">tier near a threshold</span>' : '') +
     '<span class="best-score" title="Out of 100">' + scoreTxt(e.total) + ' / 100</span></div>' +
-    '<p class="best-why">' + htmlEsc(p.free_tier) + '</p>' +
     (note ? '<p class="best-editorial">' + htmlEsc(note) + '</p>' : '') +
-    '<p class="best-meta">' + ver + ' <span class="sep">·</span> ' + e.confirmed + ' of ' + e.of + ' inputs confirmed' +
-    (e.boundary ? ' <span class="sep">·</span> model tier near a threshold' : '') +
-    (p.best_for ? ' <span class="sep">·</span> ' + htmlEsc(p.best_for) : '') + '</p>' +
+    bestFactsHtml(p, IC) +
     '</div></li>';
 };
 const podiumHtml = topList.filter((e) => e.podium).map(bestCard).join('\n');
@@ -1785,7 +1783,7 @@ const bestMain =
   '<main id="main"><div class="wrap">' +
   '<p class="best-intro">' + bestIntroHtml + '</p>' +
   '<h2 class="best-section">The podium</h2><ol class="best-list best-podium-list">' + podiumHtml + '</ol>' +
-  (restHtml ? '<h2 class="best-section">Ranks ' + (PODIUM_SIZE + 1) + ' to ' + topList.length + '</h2><ol class="best-list" start="' + (PODIUM_SIZE + 1) + '">' + restHtml + '</ol>' : '') +
+  (restHtml ? '<hr class="best-sep" aria-hidden="true"><h2 class="sr-only">Ranks ' + (PODIUM_SIZE + 1) + ' to ' + topList.length + '</h2><ol class="best-list" start="' + (PODIUM_SIZE + 1) + '">' + restHtml + '</ol>' : '') +
   '<p class="count best-note">' + (topList.length < TOP_SIZE ? 'Only ' + topList.length + ' providers meet the minimum evidence today; the list is never padded to ' + TOP_SIZE + '. ' : '') +
   'Computed from the data on ' + htmlEsc(data.generated) + ' — <a href="methodology/">how the score works</a>. Every provider links to its full verified profile.</p>' +
   '</div></main>';

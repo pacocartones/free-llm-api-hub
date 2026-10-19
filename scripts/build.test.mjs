@@ -23,6 +23,7 @@ import { buildOgManifest } from './lib/og.mjs';
 import { explorerRowHtml } from './lib/rows.mjs';
 import { labelTables } from './lib/tables.mjs';
 import { markNewTabLinks } from './lib/links.mjs';
+import { bestFactsHtml } from './lib/best-facts.mjs';
 import { weeklyPacing, weeklyBatch, WEEKLY_CAP, MIN_AGE_DAYS } from './lib/pacing.mjs';
 import { clientConfigProviders, openaiClients, litellmYaml, MODEL_PLACEHOLDER } from './lib/client-config.mjs';
 import { requirementsHtml, limitsHtml, glanceHtml, modelsHtml, dataPolicyHtml } from './lib/provider-sections.mjs';
@@ -1885,6 +1886,44 @@ test('the green header keeps AA contrast: white 7:1 and the muted text 4.5:1 on 
   assert.ok(ratio(token('on-header'), bar) >= 7, 'white on the bar');
   assert.ok(ratio(token('on-header-muted'), bar) >= 4.5, 'muted text on the bar');
   assert.ok(ratio(token('on-header-accent'), bar) >= 4.5, 'the accent word of the brand on the bar');
+});
+
+test('best-facts: the three cards show fields of the record as they are, and a missing field reads «not stated»', () => {
+  // Mutant: a card with a hard-coded value, or a guess when the field is empty; this test turns red.
+  const icon = (id) => '<i data-icon="' + id + '"></i>';
+  const p = { name: 'Acme', free_tier: '10k <b>tokens</b>/day', rate_limits: '5 RPM', card_required: false, phone_required: true, commercial_ok: null, docs_url: 'https://acme.example/docs', last_verified: '2026-10-08' };
+  const html = bestFactsHtml(p, icon);
+  assert.equal((html.match(/class="best-fact[ "]/g) || []).length, 3, 'three cards');
+  assert.match(html, /Free quota<\/h3><p class="best-fact-v" title="10k &lt;b&gt;tokens&lt;\/b&gt;\/day">10k &lt;b&gt;tokens&lt;\/b&gt;\/day<\/p>/, 'the free_tier text, escaped');
+  assert.match(html, /Rate limit<\/h3><p class="best-fact-v" title="5 RPM">5 RPM<\/p>/, 'the rate_limits text');
+  assert.equal((html.match(/Checked 2026-10-08 · <a href="https:\/\/acme\.example\/docs"/g) || []).length, 3, 'each card carries the date and the source of the record');
+  assert.match(html, /data-icon="ic-nocard"[^>]*><\/i><span>No credit card<\/span>/);
+  assert.match(html, /data-icon="ic-phone"[^>]*><\/i><span>Phone verification<\/span>/);
+  assert.match(html, /best-req-unknown"><i data-icon="ic-building"><\/i><span>Commercial use: not stated<\/span>/, 'an unknown flag is said, not guessed');
+  const empty = bestFactsHtml({ name: 'Bare', free_tier: '', rate_limits: null, card_required: null, phone_required: null, commercial_ok: null }, icon);
+  assert.equal((empty.match(/best-fact-v muted">not stated</g) || []).length, 2, 'both text cards read not stated');
+  assert.match(empty, /Not yet verified/);
+  assert.ok(!/<a href/.test(empty), 'no source link without docs_url');
+  assert.ok(!/javascript:/.test(bestFactsHtml({ ...p, docs_url: 'javascript:alert(1)' }, icon)), 'an unsafe URL is dropped');
+});
+
+test('/best/ layout: three cards per entry, a separator instead of the «Ranks 4 to N» title, a framed score', () => {
+  const best = readFileSync(join(ROOT, 'site/best/index.html'), 'utf8');
+  const items = best.match(/<li class="best-item[\s\S]*?<\/li>/g) || [];
+  assert.ok(items.length >= 1, 'entries');
+  for (const li of items) {
+    assert.equal((li.match(/class="best-fact[ "]/g) || []).length, 3, 'three cards in every entry');
+    assert.ok(!/inputs confirmed|best-meta|best-why/.test(li), 'the old third row is gone');
+    assert.match(li, /class="best-score" title="Out of 100">[\d.]+ \/ 100<\/span>/, 'the score element that the stylesheet frames');
+  }
+  assert.ok(!/<h2 class="best-section">Ranks /.test(best), 'no visible «Ranks 4 to N» title');
+  if (items.length > 3) {
+    assert.match(best, /<hr class="best-sep" aria-hidden="true"><h2 class="sr-only">Ranks 4 to \d+<\/h2>/, 'a separator, and the heading kept for screen readers');
+  }
+  const css = readFileSync(join(ROOT, 'site/styles.css'), 'utf8');
+  assert.match(css, /\.best-score \{[^}]*border: 1px solid/, 'the score has a frame');
+  assert.match(css, /\.best-rank \{\s*align-self: center/, 'the position is centred on the card');
+  assert.match(css, /\.best-intro \{[^}]*text-align: center/, 'the introduction is centred');
 });
 
 test('internal links in the built site resolve to a page (no 404)', () => {
