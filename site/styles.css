@@ -750,3 +750,11 @@ p.muted a, .prose p a, .prov-summary p a { text-decoration: underline; text-unde
 .nf .msg .path { color: var(--text); }
 .nf p { color: var(--muted); max-width: 46ch; margin: 8px auto 26px; }
 .nf .cta { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }
+
+/* The state report of a month (build.mjs): three tiles sized by their content, no room reserved below them. */
+.stats.stats-month { grid-template-columns: repeat(3, 1fr); align-items: start; min-height: 0; margin-bottom: 18px; }
+@media (max-width: 640px) { .stats.stats-month { grid-template-columns: 1fr; } }
+.month-summary { max-width: 70ch; margin: 0 auto 22px; text-align: center; }
+/* /changes/: one table by year and month; a month without a revision is dimmed. */
+.months-table th[scope="rowgroup"] { vertical-align: top; text-align: left; font-family: var(--font-mono); }
+.months-table tr.empty td { color: var(--muted); }

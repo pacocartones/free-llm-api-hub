@@ -17,7 +17,7 @@ import { freshnessBadge, freshnessColor, freshnessStatus, recScore, SLA_DAYS, DU
 import { esc, stripTags } from './lib/escape.mjs';
 import { mineProviderHistory, assertHistoryPlausible, historyFromRevisions } from './lib/history.mjs';
 import { isoWeek, flattenFieldChanges, groupChangesByWeek, changesRss, xmlEsc, reportChangeUrl } from './lib/changes.mjs';
-import { monthlyReport, reportMonths, monthEndDate } from './lib/state.mjs';
+import { monthlyReport, reportMonths, monthEndDate, fillMonths, monthSummary, monthBrief } from './lib/state.mjs';
 import { externalContributors, countExternalContributors, githubProfileUrl } from './lib/contributors.mjs';
 import { buildOgManifest } from './lib/og.mjs';
 import { explorerRowHtml, catchTags, catchCellHtml, CATCH_LABELS } from './lib/rows.mjs';
@@ -1173,6 +1173,95 @@ test('the monthly state report computes its numbers from the snapshot and histor
   assert.equal(monthEndDate('2028-02'), '2028-02-29');
 });
 
+test('fillMonths: every month from the first to the last revision; a month without one repeats the month before', () => {
+  const may = [{ slug: 'a' }], aug = [{ slug: 'a' }, { slug: 'b' }];
+  const m = fillMonths({ '2026-05': { date: '2026-05-20', providers: may }, '2026-08': { date: '2026-08-14', providers: aug } });
+  assert.deepEqual(m.map((x) => [x.month, x.carried]), [['2026-05', false], ['2026-06', true], ['2026-07', true], ['2026-08', false]]);
+  // Mutant: copy the snapshot of the NEXT revision into a gap, and June would already know provider b.
+  assert.equal(m[1].snapshot, may, 'June repeats May, not August');
+  assert.equal(m[2].snapshot, may);
+  assert.equal(m[1].snapshotDate, '2026-05-20');
+  assert.deepEqual(m.map((x) => x.asOf), ['2026-05-31', '2026-06-30', '2026-07-31', '2026-08-14'], 'past months at their end, the newest at its last revision');
+  assert.deepEqual(m.map((x) => x.inProgress), [false, false, false, true], 'only the newest month, and only before its end');
+  assert.equal(fillMonths({ '2026-08': { date: '2026-08-31', providers: [] } })[0].inProgress, false, 'a revision on the last day closes the month');
+  assert.deepEqual(fillMonths({ '2025-11': { date: '2025-11-02', providers: [] }, '2026-02': { date: '2026-02-03', providers: [] } }).map((x) => x.month),
+    ['2025-11', '2025-12', '2026-01', '2026-02'], 'across the new year');
+  assert.deepEqual(fillMonths({}), []);
+  // The newest month is the month of the last revision, never the clock: the same input gives the same output.
+  assert.deepEqual(fillMonths({ '2026-05': { date: '2026-05-20', providers: may } }), fillMonths({ '2026-05': { date: '2026-05-20', providers: may } }));
+});
+
+test('a carried month reports no change and nothing added, whatever the dates of its snapshot say', () => {
+  const snapshot = [{ slug: 'a', name: 'A', verified: true, last_verified: '2026-05-10', added: '2026-06-10' }];
+  const history = { a: [{ kind: 'changed', date: '2026-05-12', fields: ['rate_limits'], changes: [{ field: 'rate_limits', from: 'x', to: 'y' }] }] };
+  const june = monthlyReport({ month: '2026-06', asOf: monthEndDate('2026-06'), snapshot, historyBySlug: history, addedBySlug: { a: '2026-06-10' }, carried: true });
+  assert.equal(june.fieldChanges, 0);
+  assert.deepEqual(june.added, [], 'a provider with an added date inside a month that has no revision is not "added in" it');
+  assert.equal(june.carried, true);
+  const may = monthlyReport({ month: '2026-05', asOf: monthEndDate('2026-05'), snapshot, historyBySlug: history, addedBySlug: { a: '2026-06-10' } });
+  assert.equal(may.fieldChanges, 1);
+  assert.ok(june.freshness.medianDays > may.freshness.medianDays, 'the age grows: it is measured at the end of the later month');
+});
+
+test('the summary of a month is built from the figures of its report: singular, plural, zero, the change in points, and carried', () => {
+  const base = { month: '2026-07', carried: false, inProgress: false, fieldChanges: 3, providersChanged: [1, 2], added: [1], verifiedShare: 0.8 };
+  const prev = { month: '2026-06', verifiedShare: 0.75 };
+  assert.equal(monthSummary(base, prev), 'In July 2026 there were 3 field changes across 2 providers, 1 added, and 80% of the providers were verified (+5 points on June 2026).');
+  assert.match(monthSummary({ ...base, fieldChanges: 1, providersChanged: [1] }, prev), /there was 1 field change across 1 provider, /);
+  assert.match(monthSummary({ ...base, fieldChanges: 0, providersChanged: [], added: [] }, prev), /there were no field changes, none added, /);
+  assert.match(monthSummary({ ...base, verifiedShare: 0.7 }, prev), /\(−5 points on June 2026\)/);
+  assert.match(monthSummary({ ...base, verifiedShare: 0.7504 }, prev), /\(no change on June 2026\)/, 'under a tenth of a point is no change');
+  assert.match(monthSummary({ ...base, verifiedShare: 0.76 }, prev), /\(\+1 point on June 2026\)/, 'one point is singular');
+  assert.doesNotMatch(monthSummary(base, null), /points?|no change/, 'the first month has nothing to compare with');
+  assert.match(monthSummary({ ...base, carried: true }, prev), /^No revision of providers\.json was committed in July 2026, so nothing changed/);
+  assert.equal(monthBrief({ ...base, carried: true }), 'no changes');
+  assert.equal(monthBrief(base), '3 field changes, 1 added');
+  assert.equal(monthBrief({ ...base, fieldChanges: 0, added: [] }), 'no field changes');
+  assert.equal(monthBrief({ ...base, inProgress: true, asOf: '2026-07-14' }), '3 field changes, 1 added · in progress, data to 2026-07-14');
+});
+
+test('/changes/ is one table by year and month with every month in a row; each month page has three tiles, its summary and what moved in order', () => {
+  run(['scripts/build.mjs']);
+  const page = readFileSync(join(ROOT, 'site/changes/index.html'), 'utf8');
+  assert.doesNotMatch(page, /Week by week|id="weeks"/);
+  const table = page.slice(page.indexOf('<table class="model-table months-table">'), page.indexOf('</table>', page.indexOf('months-table')));
+  // Every month between the first and the last is a row, newest first, with no gap: each month is the one before the one above it.
+  const months = [...table.matchAll(/href="\.\.\/state\/(\d{4}-\d{2})\/"/g)].map((m) => m[1]);
+  assert.ok(months.length >= 2);
+  const before = (mo) => { const [y, n] = mo.split('-').map(Number); return n === 1 ? `${y - 1}-12` : `${y}-${String(n - 1).padStart(2, '0')}`; };
+  for (let i = 1; i < months.length; i++) assert.equal(months[i], before(months[i - 1]), `no month missing or out of order after ${months[i - 1]}`);
+  // The year is a group cell that spans exactly the months of that year.
+  const groups = [...table.matchAll(/<th scope="rowgroup" rowspan="(\d+)">(\d{4})<\/th>/g)].map((m) => [m[2], Number(m[1])]);
+  assert.deepEqual(groups.map((g) => g[0]), [...new Set(months.map((m) => m.slice(0, 4)))], 'years, newest first, once each');
+  for (const [year, n] of groups) assert.equal(n, months.filter((m) => m.startsWith(year)).length, `the group of ${year} spans its months`);
+  // A month without a revision reads "no changes" and is a row of its own with its page.
+  const rows = table.split('<tr').slice(2);
+  for (const row of rows) {
+    const month = row.match(/state\/(\d{4}-\d{2})\//)[1];
+    assert.ok(existsSync(join(ROOT, `site/state/${month}/index.html`)), `the page of ${month} exists`);
+    assert.equal(/class="empty"/.test(row), /no changes/.test(row), `${month}: dimmed if and only if it says "no changes"`);
+    assert.match(row, new RegExp(`aria-label="[A-Za-z]+ ${month.slice(0, 4)}: `), `${month}: the link says its month and year`);
+  }
+  for (const month of months) {
+    const html = readFileSync(join(ROOT, `site/state/${month}/index.html`), 'utf8');
+    const main = html.slice(html.indexOf('<main id="main">'));
+    const tiles = [...main.matchAll(/<div class="stat"><svg class="si" aria-hidden="true">/g)];
+    assert.equal(tiles.length, 3, `${month}: three tiles, each with a decorative icon`);
+    const changes = Number(main.match(/<div class="num">(\d+)<\/div><div class="lbl">field changes? this month/)[1]);
+    const moved = main.slice(main.indexOf('What moved in'), main.indexOf('Providers by category'));
+    const dates = [...moved.matchAll(/<tr><td class="notes">(\d{4}-\d{2}-\d{2})<\/td>/g)].map((m) => m[1]);
+    assert.equal(dates.length, changes, `${month}: the rows of "What moved" are the field changes of the figure`);
+    assert.ok(dates.every((d) => d.startsWith(month + '-')), `${month}: only changes of that month`);
+    assert.deepEqual(dates, [...dates].sort(), `${month}: in the order they happened`);
+    const said = main.match(/class="month-summary">[^<]*?there (?:was|were) (no|\d+) field change/);
+    if (said) assert.equal(said[1] === 'no' ? 0 : Number(said[1]), changes, `${month}: the sentence uses the figure of the tile`);
+    assert.ok(/class="month-summary"/.test(main), `${month}: has its summary`);
+  }
+  const css = readFileSync(join(ROOT, 'site/styles.css'), 'utf8');
+  assert.match(css, /\.stats\.stats-month \{[^}]*min-height: 0/, 'no room reserved under the tiles of a month (the home reserves it for its script)');
+  assert.match(css, /\.stats\.stats-month \{[^}]*align-items: start/);
+});
+
 test('the "Report a change" URL helper prefills the inaccuracy form and is escaped; the provider page no longer shows the button', () => {
   const repo = 'https://github.com/pacocartones/free-llm-api-hub';
   const url = reportChangeUrl({ slug: 'a-b', name: 'A&B "Labs" / 100% #1' }, repo);
@@ -1220,7 +1309,7 @@ test('the change feed and state reports are built but never pinned in derived-fi
   assert.match(stateRedirect, /<meta name="robots" content="noindex">/);
   const changesPage = readFileSync(join(ROOT, 'site/changes/index.html'), 'utf8');
   assert.match(changesPage, /<section id="months">/);
-  assert.match(changesPage, /<section id="weeks">/);
+  assert.doesNotMatch(changesPage, /id="weeks"|Week by week|href="#weeks"/, 'the weekly section and its button are gone; the feed stays');
   for (const month of months) assert.match(changesPage, new RegExp(`href="\\.\\./state/${month}/"`), `the month ${month} is linked from the one page`);
   assert.doesNotMatch(sitemap, /\/state\/\d{4}-\d{2}\//, 'per-month URLs depend on commit dates, so they stay out of the drift-gated sitemap');
 });

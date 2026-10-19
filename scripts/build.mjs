@@ -16,7 +16,7 @@ import * as sortLib from './lib/sort.mjs';
 import { esc, stripTags } from './lib/escape.mjs';
 import { mineHistoryAndSnapshots, HISTORY_FIELDS } from './lib/history.mjs';
 import { flattenFieldChanges, groupChangesByWeek, changesRss, weekTitle, formatValue } from './lib/changes.mjs';
-import { monthlyReport, reportMonths, monthEndDate } from './lib/state.mjs';
+import { monthlyReport, reportMonths, monthEndDate, monthName, monthLabel, pct, monthSummary, monthBrief } from './lib/state.mjs';
 import { githubProfileUrl } from './lib/contributors.mjs';
 import { resolveBestEntries, topEntries, PODIUM_SIZE } from './lib/best.mjs';
 import { agreementsTableHtml, sponsoredBlockHtml, disclosureHtml, inForce, NOT_IN_DATA_SENTENCE, MACHINE_SENTENCE } from './lib/agreements.mjs';
@@ -1239,24 +1239,31 @@ if (commits.length) {
 // derived-fingerprints.json (isGitLogDerived). Without git they render empty.
 const nameBySlug = Object.fromEntries(providers.map((p) => [p.slug, p.name]));
 const currentSlugs = new Set(providers.map((p) => p.slug));
-const changeWeeks = groupChangesByWeek(flattenFieldChanges(historyBySlug, nameBySlug), { weeks: 12 });
+const changeWeeks = groupChangesByWeek(flattenFieldChanges(historyBySlug, nameBySlug), { weeks: 12 }); // the feed only: the page is by month
 const provLink = (slug, name, prefix) => currentSlugs.has(slug) ? `<a href="${prefix}p/${slug}">${htmlEsc(name)}</a>` : htmlEsc(name);
 
 writeFileSync(join(ROOT, 'site/changes.xml'), changesRss(changeWeeks, { site: SITE }));
 
-const changeRowHtml = (c) =>
-  `<tr><td class="notes">${c.date}</td><td class="name">${provLink(c.slug, c.name, '../')}</td><td>${htmlEsc(c.label)}</td>` +
+const changeRowHtml = (c, prefix = '../') =>
+  `<tr><td class="notes">${c.date}</td><td class="name">${provLink(c.slug, c.name, prefix)}</td><td>${htmlEsc(c.label)}</td>` +
   `<td class="notes">${htmlEsc(formatValue(c.from))}</td><td>${htmlEsc(formatValue(c.to))}</td></tr>`;
 
-const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-const monthLabel = (month) => `${MONTH_NAMES[Number(month.slice(5, 7)) - 1]} ${month.slice(0, 4)}`;
-const pct = (x) => `${Math.round(x * 1000) / 10}%`;
 const addedBySlug = Object.fromEntries(providers.filter((p) => p.added).map((p) => [p.slug, p.added]));
 const stateMonths = reportMonths(monthEndSnapshots);
-const stateReports = stateMonths.map((m) => ({ ...monthlyReport({ ...m, historyBySlug, addedBySlug }), snapshotDate: monthEndSnapshots[m.month].date }));
+const stateReports = stateMonths.map((m) => ({ ...monthlyReport({ ...m, historyBySlug, addedBySlug }), snapshotDate: m.snapshotDate }));
+const allFieldChanges = flattenFieldChanges(historyBySlug, nameBySlug);
 const kvTable = (head, rowsArr) =>
   `<table class="model-table"><thead><tr>${head.map((h) => `<th>${htmlEsc(h)}</th>`).join('')}</tr></thead><tbody>` +
   rowsArr.map((r) => `<tr>${r.map((v, i) => `<td${i === 0 ? ' class="name"' : ''}>${v}</td>`).join('')}</tr>`).join('') + `</tbody></table>`;
+const statIcon = (icon, num, lbl) => `<div class="stat"><svg class="si" aria-hidden="true"><use href="#${icon}"/></svg><div class="num">${num}</div><div class="lbl">${lbl}</div></div>`;
+// What moved in a month, in the order it happened: the field changes of that month, oldest first.
+const movedSection = (r) => {
+  const label = monthLabel(r.month);
+  const moved = allFieldChanges.filter((c) => c.date.startsWith(r.month + '-')).sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0)); // stable: the name and field order inside a day is kept
+  return `<h2>What moved in ${label}</h2>` + (moved.length
+    ? `<table class="model-table"><thead><tr><th>Date</th><th>Provider</th><th>Field</th><th>From</th><th>To</th></tr></thead><tbody>\n${moved.map((c) => changeRowHtml(c, '../../')).join('\n')}\n</tbody></table>`
+    : `<p class="muted">No field changes in ${label}.</p>`);
+};
 const stat = (num, lbl) => `<div class="stat"><div class="num">${num}</div><div class="lbl">${lbl}</div></div>`;
 
 rmSync(join(ROOT, 'site/state'), { recursive: true, force: true });
@@ -1267,9 +1274,17 @@ stateReports.forEach((r, i) => {
   const next = stateReports[i + 1];
   const days = (d) => (d === null ? '—' : `${d}d`);
   const main =
-    pageHero({ crumbs: `<a href="../../">Home</a> / <a href="../../changes/#months">What changed</a> / ${label}`, h1: `State of free LLM APIs — ${label}`, lede: `Computed from the last revision of providers.json committed in ${label} (${r.snapshotDate}) and the git-mined change history. Ages are measured as of ${r.asOf}.` }) +
+    pageHero({ crumbs: `<a href="../../">Home</a> / <a href="../../changes/#months">What changed</a> / ${label}`, h1: `State of free LLM APIs — ${label}`, lede: r.carried
+      ? `No revision of providers.json was committed in ${label}: the figures repeat the last revision, of ${r.snapshotDate}, and ages are measured at the end of ${label}, ${r.asOf}.`
+      : `Computed from the last revision of providers.json committed in ${label} (${r.snapshotDate}) and the git-mined change history. Ages are measured as of ${r.asOf}.${r.inProgress ? ' The month is still in progress: the data reach ' + r.asOf + '.' : ''}` }) +
     `<main id="main"><div class="wrap prose">` +
-    `<div class="stats">${stat(r.total, 'providers')}${stat(pct(r.verifiedShare), 'verified')}${stat(days(r.freshness.medianDays), 'median verification age')}${stat(r.fieldChanges, 'field changes this month')}</div>` +
+    `<div class="stats stats-month">` +
+    statIcon('ic-shield', `${r.verified} of ${r.total}`, `providers verified (${pct(r.verifiedShare)})`) +
+    statIcon('ic-clock', days(r.freshness.medianDays), 'median verification age') +
+    statIcon('ic-refresh', r.fieldChanges, r.fieldChanges === 1 ? 'field change this month' : 'field changes this month') +
+    `</div>` +
+    `<p class="month-summary">${htmlEsc(monthSummary(r, prev))}</p>` +
+    movedSection(r) +
     `<h2>Providers by category</h2>` +
     kvTable(['Category', 'Providers'], [['Ongoing free tier', r.byCategory.ongoing], ['Trial credit', r.byCategory.trial], ['Total', r.total]]) +
     `<h2>Providers by modality</h2><p class="muted">A provider counts once for every modality it offers free.</p>` +
@@ -1281,15 +1296,11 @@ stateReports.forEach((r, i) => {
       [`Oldest verification, as of ${r.asOf}`, days(r.freshness.oldestDays)],
       [`Median verification age, as of ${r.asOf}`, days(r.freshness.medianDays)],
     ]) +
-    `<h2>Field changes in ${label}</h2>` +
-    `<p>${r.fieldChanges} field ${r.fieldChanges === 1 ? 'change' : 'changes'} across ${r.providersChanged.length} ${r.providersChanged.length === 1 ? 'provider' : 'providers'}.</p>` +
-    (r.providersChanged.length
-      ? kvTable(['Provider', 'Fields changed'], r.providersChanged.map((c) => [provLink(c.slug, c.name, '../../'), htmlEsc(c.fields.map((f) => HISTORY_FIELDS[f] || f).join(', '))]))
-      : '') +
     `<h2>Providers added in ${label}</h2>` +
     (r.added.length
       ? kvTable(['Provider', 'Added'], r.added.map((a) => [provLink(a.slug, a.name, '../../'), a.added]))
       : `<p class="muted">No provider in the snapshot has an <code>added</code> date in ${label}.</p>`) +
+    `<p class="muted">The data: <a href="../../api/v1/changes.json">api/v1/changes.json</a> has every field change, with its date, before and after.</p>` +
     `<nav class="pagination" aria-label="State reports">` +
     (prev ? `<a href="../${prev.month}/" rel="prev">← ${monthLabel(prev.month)}</a>` : '<span aria-hidden="true"></span>') +
     `<span><a href="../../changes/#months">All months</a></span>` +
@@ -1302,33 +1313,39 @@ stateReports.forEach((r, i) => {
     canonical: `${SITE}/state/${r.month}/`, main, prefix: '../../',
   }));
 });
-// /changes/ is the one page for what changed: the months (the state reports) and the weeks. /state/ redirects to it.
+// /changes/ is the one page for what changed: one table, by year and month, newest first. Every month between the first
+// and the last revision is listed (a month without a revision says "no changes"); each links to its report, which holds
+// the detail, in order. /state/ redirects to it. The weekly feed (changes.xml) stays for those who subscribe.
+const monthsByYear = new Map();
+for (const r of [...stateReports].reverse()) {
+  const year = r.month.slice(0, 4);
+  if (!monthsByYear.has(year)) monthsByYear.set(year, []);
+  monthsByYear.get(year).push(r);
+}
+const monthRowHtml = (r, yearCell) => {
+  const brief = monthBrief(r);
+  return `<tr${r.carried ? ' class="empty"' : ''}>${yearCell}` +
+    `<td class="name"><a href="../state/${r.month}/" aria-label="${monthLabel(r.month)}: ${htmlEsc(brief)}">${monthName(r.month)}</a></td>` +
+    `<td>${r.total}</td><td>${pct(r.verifiedShare)}</td><td>${r.fieldChanges}</td><td>${r.added.length}</td><td class="notes">${htmlEsc(brief)}</td></tr>`;
+};
 const monthsTable = stateReports.length
-  ? kvTable(['Month', 'Providers', 'Verified', 'Field changes', 'Added'],
-    [...stateReports].reverse().map((r) => [`<a href="../state/${r.month}/">${monthLabel(r.month)}</a>`, r.total, pct(r.verifiedShare), r.fieldChanges, r.added.length]))
+  ? `<table class="model-table months-table"><thead><tr><th>Year</th><th>Month</th><th>Providers</th><th>Verified</th><th>Field changes</th><th>Added</th><th>Summary</th></tr></thead><tbody>\n` +
+    [...monthsByYear].map(([year, list]) => list.map((r, i) => monthRowHtml(r, i === 0 ? `<th scope="rowgroup" rowspan="${list.length}">${year}</th>` : '')).join('\n')).join('\n') +
+    `\n</tbody></table>`
   : `<p class="muted">No history available.</p>`;
 const changesMain =
-  pageHero({ crumbs: `<a href="../">Home</a> / <a href="../updates">Updates</a> / What changed`, h1: `What changed`, lede: `Field-level changes to the free tiers we track (what's free, rate limits, the catch and the card, phone, commercial-use and OpenAI-compatibility flags), week by week, and one state report for each month. Mined from the git history of <a href="${REPO}/commits/main/data/providers.json">providers.json</a>. Subscribe via <a href="../changes.xml">RSS</a> or read the <a href="../api/v1/changes.json">JSON</a>.`, extra: `<nav class="colls" aria-label="On this page"><a href="#months">Month by month</a><a href="#weeks">Week by week</a></nav>` }) +
+  pageHero({ crumbs: `<a href="../">Home</a> / <a href="../updates">Updates</a> / What changed`, h1: `What changed`, lede: `Field-level changes to the free tiers we track (what's free, rate limits, the catch and the card, phone, commercial-use and OpenAI-compatibility flags), month by month. Mined from the git history of <a href="${REPO}/commits/main/data/providers.json">providers.json</a>. Subscribe via <a href="../changes.xml">RSS</a> or read the <a href="../api/v1/changes.json">JSON</a>.` }) +
   `<main id="main"><div class="wrap prose">` +
   `<section id="months"><h2>Month by month</h2>` +
-  `<p>One report per month with a committed change to providers.json: provider counts by category and modality, verified share, verification age, field changes and providers added. Every figure is computed from the data and its git history.</p>` +
+  `<p>One report per month, from the first to the latest: provider counts by category and modality, verified share, verification age, and every field change and provider added, in the order they happened. A month with no committed revision of providers.json says so. Every figure is computed from the data and its git history.</p>` +
   monthsTable + `</section>` +
-  `<section id="weeks"><h2>Week by week</h2>` +
-  `<p>Grouped by ISO week, newest first. Covers the last 12 weeks up to the newest change.</p>` +
-  (changeWeeks.length
-    ? changeWeeks.map((g) =>
-      `<section id="${g.week}"><h3>${htmlEsc(weekTitle(g))}</h3>` +
-      `<table class="model-table"><thead><tr><th>Date</th><th>Provider</th><th>Field</th><th>From</th><th>To</th></tr></thead><tbody>\n` +
-      g.changes.map(changeRowHtml).join('\n') + `\n</tbody></table></section>`).join('\n')
-    : `<p class="muted">No field-level changes in the mined history.</p>`) +
-  `</section>` +
   `<p class="prov-back"><a href="../updates">← All updates</a></p>` +
   `</div></main>`;
 rmSync(join(ROOT, 'site/changes'), { recursive: true, force: true });
 mkdirSync(join(ROOT, 'site/changes'), { recursive: true });
 writeFileSync(join(ROOT, 'site/changes/index.html'), htmlPage({
   title: 'What changed · Free LLM API Hub',
-  desc: 'What changed in the free LLM API dataset: field-level changes week by week (free tier, rate limits, the catch and access flags, before and after) and a state report for each month.',
+  desc: 'What changed in the free LLM API dataset, month by month: field-level changes (free tier, rate limits, the catch and access flags, before and after) and a state report for each month.',
   canonical: `${SITE}/changes/`, main: changesMain, prefix: '../',
   feeds: [{ title: 'Free LLM API Hub — what changed, week by week', href: 'changes.xml' }],
 }));
