@@ -30,7 +30,7 @@ export const resolveLink = (target, { repo, site, pages = {}, from = '' }) => {
   const [pathOnly, query = ''] = pathPart.split('?');
   const parts = (from ? from.split('/').slice(0, -1) : []);
   for (const seg of pathOnly.split('/')) {
-    if (seg === '..') { if (parts.length) parts.pop(); else parts.push('..'); } else if (seg && seg !== '.') parts.push(seg);
+    if (seg === '..') { if (parts.length && parts[parts.length - 1] !== '..') parts.pop(); else parts.push('..'); } else if (seg && seg !== '.') parts.push(seg);
   }
   if (parts[0] === '..') {
     // ../../issues/new?template=x.yml, as written for a page one level down in GitHub: it is the issues of the repository

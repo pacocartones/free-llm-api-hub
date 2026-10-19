@@ -49,7 +49,7 @@ test('the blocks: headings with GitHub ids (each id once), lists nested, numbere
   assert.match(h, /<blockquote><p>quoted more<\/p><\/blockquote>/);
   assert.match(h, /<hr>/);
   assert.match(h, /<table class="model-table"><thead><tr><th>h1<\/th><th>h2<\/th><\/tr><\/thead><tbody><tr><td>a<\/td><td>b \| c<\/td><\/tr><\/tbody><\/table>/);
-  assert.match(h, /<pre><code>const x = "&lt;b&gt;";<\/code><\/pre>/);
+  assert.match(h, /<pre><code>const x = &quot;&lt;b&gt;&quot;;<\/code><\/pre>/);
 });
 
 test('/methodology/ and /contributing/: linked from the footer, in the sitemap, titled and described, and they say what the files say', () => {
@@ -72,9 +72,10 @@ test('/methodology/ and /contributing/: linked from the footer, in the sitemap, 
     // It says what the file says: every heading of the file is a heading of the page, and no marker of the source is left.
     const src = readFileSync(join(ROOT, file), 'utf8');
     const main = page.slice(page.indexOf('<main id="main">'));
+    const decode = (t) => t.replace(/<[^>]+>/g, '').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
+    const onPage = new Set([...main.matchAll(/<h[2-3] id="[^"]*">(.*?)<\/h[2-3]>/g)].map((m) => decode(m[1])));
     for (const m of src.matchAll(/^#{2,3}\s+(.*?)\s*$/gm)) {
-      const text = m[1].replace(/[`*]/g, '').replace(/&/g, '&amp;').replace(/"/g, '&quot;');
-      assert.ok(main.includes(text), `${slug}: the heading "${m[1]}" is on the page`);
+      assert.ok(onPage.has(m[1].replace(/[`*]/g, '')), `${slug}: the heading "${m[1]}" is on the page`);
     }
     assert.doesNotMatch(main.replace(/<pre>[\s\S]*?<\/pre>|<code>[\s\S]*?<\/code>/g, ''), /\*\*|^#{1,6} |\]\(/m, `${slug}: no markdown left over`);
     // Every link of the page is https, a path of the site or an anchor that exists; none opens a script.
