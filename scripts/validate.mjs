@@ -23,6 +23,7 @@ import { hasHiddenChars } from './lib/hidden-chars.mjs';
 import { quoteErrors } from './lib/quotes.mjs';
 import { reportErrors } from './lib/quotes-report.mjs';
 import { keyHostErrors } from './lib/key-hosts.mjs';
+import { summaryErrors } from './lib/provider-summaries.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const FILE = process.argv[2] ? resolve(process.argv[2]) : join(ROOT, 'data/providers.json');
@@ -343,6 +344,12 @@ try {
 try {
   errors.push(...editorialErrors(JSON.parse(readFileSync(join(ROOT, 'data/editorial.json'), 'utf8')), data.providers));
 } catch (e) { errors.push('editorial.json: ' + e.message); }
+
+// ---------- provider summaries (data/provider-summaries.json) ----------
+// Each line of a summary is sourced, dated and taken from the provider's own pages.
+try {
+  errors.push(...summaryErrors(JSON.parse(readFileSync(join(ROOT, 'data/provider-summaries.json'), 'utf8')), data.providers));
+} catch (e) { errors.push('provider-summaries.json: ' + e.message); }
 
 // ---------- nothing paid in the dataset ----------
 // The `partner` field is retired: the schema allows no extra property on a provider, so it fails there. Relations with

@@ -31,6 +31,7 @@ import { SCORE_WEIGHTS, EDITORIAL_WEIGHT, EDITORIAL_DEFAULT, MATH_INPUTS, MIN_CO
 import { publishableClientConfigs } from './lib/client-config.mjs';
 import * as compareLib from './lib/compare.mjs';
 import { requirementsHtml, limitsHtml, glanceHtml, modelsHtml, dataPolicyHtml } from './lib/provider-sections.mjs';
+import { aboutHtml } from './lib/provider-summaries.mjs';
 import { bestFactsHtml } from './lib/best-facts.mjs';
 import { providerFigures, expandFigures, injectInlineFigures, figureErrors } from './lib/figures.mjs';
 import { badgeSvg } from './lib/badge-svg.mjs';
@@ -40,6 +41,7 @@ const FRESH_DAYS = SLA_DAYS; // the freshness SLA, defined once in lib/rules.mjs
 
 const data = JSON.parse(readFileSync(join(ROOT, 'data/providers.json'), 'utf8'));
 const providers = data.providers;
+const summaryBySlug = new Map(JSON.parse(readFileSync(join(ROOT, 'data/provider-summaries.json'), 'utf8')).summaries.map((x) => [x.id, x]));
 // Counts quoted in prose come from the data, never from a typed number (lib/figures.mjs).
 const FIGS = providerFigures(providers);
 
@@ -1156,6 +1158,7 @@ print(resp.choices[0].message.content)</code></pre><p class="muted">…or with c
     glanceHtml(p, typeLabel(p)) +
     modelsHtml(p) +
     dataPolicyHtml(p) +
+    aboutHtml(summaryBySlug.get(p.slug), p.name) +
     disclosureHtml(AGREEMENTS_FILE, p.slug) +
     quick +
     (crossChips ? `<h2>Appears in</h2><div class="colls">${crossChips}</div>` : '') +

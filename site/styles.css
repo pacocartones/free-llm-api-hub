@@ -758,3 +758,12 @@ p.muted a, .prose p a, .prov-summary p a { text-decoration: underline; text-unde
 /* /changes/: one table by year and month; a month without a revision is dimmed. */
 .months-table th[scope="rowgroup"] { vertical-align: top; text-align: left; font-family: var(--font-mono); }
 .months-table tr.empty td { color: var(--muted); }
+
+/* The "About" block of a provider page: each line with its source and the day it was read. */
+.prov-about { display: grid; gap: 0; margin: 0 0 12px; }
+.prov-about .about-row { display: grid; grid-template-columns: 9rem 1fr; gap: 4px 16px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+.prov-about dt { color: var(--muted); font-size: .8rem; font-family: var(--font-mono); text-transform: uppercase; letter-spacing: .05em; }
+.prov-about dd { margin: 0; overflow-wrap: anywhere; }
+.prov-about .about-src { display: block; margin-top: 3px; color: var(--muted); font-size: .8rem; }
+.prov-about a { text-decoration: underline; text-underline-offset: 2px; }
+@media (max-width: 640px) { .prov-about .about-row { grid-template-columns: 1fr; } }
