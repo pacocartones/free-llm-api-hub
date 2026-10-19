@@ -1139,6 +1139,29 @@ const legalPage = (slug, title, bodyHtml) => {
   );
 };
 
+// ---------- 404 ----------
+// GitHub Pages serves this one file for ANY missing path (/contributing/, /a/b/c), so a relative prefix would resolve against the
+// missing URL and lose the styles, the menu and the footer. It is built with the same header and footer as every page and the
+// root-absolute prefix '/'. The path read-out below is pinned by hash in the CSP: change its text and recompute the hash.
+const NOT_FOUND_PATH_SCRIPT = `<script>try{document.getElementById('path').textContent=location.pathname.replace('/free-llm-api-hub','')||'/';}catch(e){}</script>`;
+writeFileSync(
+  join(ROOT, 'site/404.html'),
+  htmlPage({
+    title: '404 — Free LLM API Hub',
+    desc: "That page isn't part of the dataset. It may have moved, or never existed. The data, though, is very much alive.",
+    canonical: `${SITE}/404`,
+    prefix: '/',
+    noindex: true,
+    main: `<main id="main" class="wrap nf">
+<div class="code">404</div>
+<p class="msg">&gt; command not found: <span class="path" id="path">/…</span><span class="caret" aria-hidden="true"></span></p>
+<p>That page isn't part of the dataset. It may have moved, or never existed. The data, though, is very much alive.</p>
+<div class="cta"><a class="btn primary" href="/">← Back home</a><a class="btn ghost" href="/#explorer">Browse providers</a><a class="btn ghost" href="/collections/">Collections</a></div>
+${NOT_FOUND_PATH_SCRIPT}
+</main>`,
+  })
+);
+
 legalPage('privacy', 'Privacy', `
 <p>This site is a static, open-source reference operated by ${ORG} It has no user accounts, no ads, and no third-party analytics or tracking.</p>
 <h2>What we store</h2>

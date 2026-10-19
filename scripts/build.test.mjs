@@ -1822,6 +1822,24 @@ test('every page meta description fits a search snippet (<= 155 characters)', ()
   assert.ok(seen > 100, 'the check reached the generated pages');
 });
 
+test('the 404 page is built with the shared header, menu and footer and root-absolute assets', () => {
+  // GitHub Pages serves 404.html for ANY missing path (/contributing/, /a/b/c): a relative asset would resolve against the missing
+  // URL, and the page used to ship a hand-written header with no menu and a one-line footer. Mutant: build it with a relative
+  // prefix, or drop the shared header or footer; this test turns red.
+  const html = readFileSync(join(ROOT, 'site/404.html'), 'utf8');
+  assert.match(html, /<header class="site-header">/, 'the shared header');
+  assert.match(html, /<nav class="nav" id="primary-nav"/, 'the menu');
+  assert.match(html, /<footer class="site-footer"><div class="wrap footer-top">/, 'the shared footer with its columns');
+  assert.match(html, /<link rel="stylesheet" href="\/styles\.css">/, 'the stylesheet by a root-absolute path');
+  assert.match(html, /<script src="\/site\.js"><\/script>/, 'site.js by a root-absolute path');
+  assert.match(html, /<meta name="robots" content="noindex">/);
+  assert.ok(!/(?:href|src)="\.\.?\//.test(html), 'no relative ../ asset or link: it would break from any depth');
+  const script = html.match(/<script>(try\{document\.getElementById\('path'\)[^<]*)<\/script>/);
+  assert.ok(script, 'the path read-out script');
+  const hash = "'sha256-" + createHash('sha256').update(script[1]).digest('base64') + "'";
+  assert.ok(html.includes(hash), 'the path read-out is pinned by hash in the CSP: ' + hash);
+});
+
 test('internal links in the built site resolve to a page (no 404)', () => {
   const siteDir = join(ROOT, 'site');
   const exists = (urlPath) => {
