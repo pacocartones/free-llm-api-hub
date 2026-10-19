@@ -31,7 +31,7 @@ export const SLUG_RE = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 // «The catch» column: a closed vocabulary of short tags derived from fields the record already has (the three requirements, the
 // expiry and a published daily cap). The free text of the record (`notes`) stays on the provider page, reachable by the link of the
 // cell and by the title of the cell. The list below is the whole vocabulary; a test fails if a tag outside it appears.
-export const CATCH_LABELS = ['Card required', 'Phone required', 'Evaluation only', 'Expires', 'Daily cap', 'Unconfirmed'];
+export const CATCH_LABELS = ['Card required', 'Phone required', 'Evaluation only', 'Expires', 'Daily cap', 'Not stated'];
 
 /** @returns {{label: string, title: string}[]} */
 export function catchTags(p) {
@@ -45,7 +45,7 @@ export function catchTags(p) {
   if (Number.isInteger(fl.requests_per_day)) caps.push(fl.requests_per_day.toLocaleString('en-US') + ' requests per day');
   if (Number.isInteger(fl.tokens_per_day)) caps.push(fl.tokens_per_day.toLocaleString('en-US') + ' tokens per day');
   if (caps.length) tags.push({ label: 'Daily cap', title: 'Published daily cap: ' + caps.join(' and ') });
-  if (p.card_required == null || p.phone_required == null || p.commercial_ok == null) tags.push({ label: 'Unconfirmed', title: 'At least one requirement is not confirmed yet' });
+  if (p.card_required == null || p.phone_required == null || p.commercial_ok == null) tags.push({ label: 'Not stated', title: 'At least one requirement is not stated' });
   return tags;
 }
 

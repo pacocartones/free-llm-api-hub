@@ -1948,7 +1948,7 @@ test('home table: «The catch» is a closed vocabulary of short tags, the free t
   }
   assert.ok(seen.size >= 3, 'the dataset exercises at least three of the tags');
   assert.deepEqual(catchTags({ card_required: false, phone_required: false, commercial_ok: true }), [], 'a provider with nothing to warn about has no tag');
-  assert.deepEqual(catchTags({ card_required: true, phone_required: null, commercial_ok: false, expires: '30 days' }).map((t) => t.label), ['Card required', 'Evaluation only', 'Expires', 'Unconfirmed']);
+  assert.deepEqual(catchTags({ card_required: true, phone_required: null, commercial_ok: false, expires: '30 days' }).map((t) => t.label), ['Card required', 'Evaluation only', 'Expires', 'Not stated']);
 });
 
 test('home: no good-first-issues button in the hero, a fixed table layout, a link-button name and a pinned header row', () => {
