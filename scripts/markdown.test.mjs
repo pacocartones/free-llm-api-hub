@@ -71,7 +71,7 @@ test('/methodology/ and /contributing/: linked from the footer, in the sitemap, 
     assert.ok(page.includes(`<link rel="canonical" href="https://freellmapihub.com/${slug}/">`), `${slug}: canonical`);
     // It says what the file says: every heading of the file is a heading of the page, and no marker of the source is left.
     const src = readFileSync(join(ROOT, file), 'utf8');
-    const main = page.slice(page.indexOf('<main id="main">'));
+    const main = page.slice(page.indexOf('<main id="main">'), page.indexOf('</main>')); // the document, not the footer of the site
     const decode = (t) => t.replace(/<[^>]+>/g, '').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
     const onPage = new Set([...main.matchAll(/<h[2-3] id="[^"]*">(.*?)<\/h[2-3]>/g)].map((m) => decode(m[1])));
     for (const m of src.matchAll(/^#{2,3}\s+(.*?)\s*$/gm)) {
