@@ -1975,6 +1975,8 @@ test('provider page: the score is visible, no «All providers» link or «Report
   const main = html.slice(html.indexOf('<main id="main">'));
   assert.match(main, /<div class="prov-score"><span class="best-score" title="Out of 100">\d+\.\d \/ 100<\/span>/, 'the score of the provider');
   assert.match(main, /<a href="\.\.\/best\/methodology\/">how it is computed<\/a>/, 'a link to the method');
+  // Mutant: drop the underline and the links in the score line rely on colour alone, which Lighthouse fails (link-in-text-block).
+  assert.match(readFileSync(join(ROOT, 'site/styles.css'), 'utf8'), /\.prov-score a \{[^}]*text-decoration: underline/, 'the links of the score line are underlined');
   assert.ok(!/← All providers/.test(main), 'no «← All providers» link');
   assert.ok(!/Report a change/.test(html), 'no «Report a change» button');
   assert.match(main, /<ul class="upd-list" data-pager="5">/, 'the history is paged by 5');

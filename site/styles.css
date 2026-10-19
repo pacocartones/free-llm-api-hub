@@ -467,6 +467,7 @@ pre:hover .pre-copy, .pre-copy:focus-visible { opacity: 1; }
 .prov-summary h2 { margin: 0 0 8px; font-size: 1.45rem; color: var(--accent); font-weight: 700; }
 .prov-score { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 14px 0; font-size: .92rem; }
 .prov-score .best-score { margin-left: 0; }
+.prov-score a { text-decoration: underline; text-underline-offset: 2px; } /* a link inside running text must not rely on colour alone (Lighthouse: link-in-text-block) */
 .prov-summary p { margin: 0; font-size: 1.04rem; line-height: 1.55; }
 .prov-actions { margin-top: 18px; display: flex; flex-wrap: wrap; gap: 10px; }
 /* Provider card hero — centered header, breadcrumbs, badges and actions. */
