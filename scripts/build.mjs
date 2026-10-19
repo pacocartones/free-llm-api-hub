@@ -1751,7 +1751,7 @@ const bestCard = (e) => {
   // description) is replaced by three cards of fields of the record: Free quota, Rate limit and Requirements (lib/best-facts.mjs).
   return '<li class="best-item' + (podium ? ' best-podium best-podium-' + rank : '') + '"><div class="best-rank" aria-hidden="true">' + String(rank).padStart(2, '0') + '</div><div class="best-body">' +
     '<div class="best-head"><h2><a href="../p/' + p.slug + '">' + htmlEsc(p.name) + '</a></h2>' +
-    (e.boundary ? '<span class="best-flag" title="The model tier of this provider sits near a threshold of the score; it is flagged, never penalised">tier near a threshold</span>' : '') +
+    (e.boundary ? '<span class="best-flag" title="The model tier of this provider sits near a threshold of the score; it is flagged, never penalized">tier near a threshold</span>' : '') +
     '<span class="best-score" title="Out of 100">' + scoreTxt(e.total) + ' / 100</span></div>' +
     (note ? '<p class="best-editorial">' + htmlEsc(note) + '</p>' : '') +
     bestFactsHtml(p, IC) +

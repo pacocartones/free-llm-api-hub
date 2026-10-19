@@ -1898,7 +1898,7 @@ test('best-facts: the three cards show fields of the record as they are, and a m
   assert.match(html, /Rate limit<\/h3><p class="best-fact-v" title="5 RPM">5 RPM<\/p>/, 'the rate_limits text');
   assert.equal((html.match(/Checked 2026-10-08 · <a href="https:\/\/acme\.example\/docs"/g) || []).length, 3, 'each card carries the date and the source of the record');
   assert.match(html, /data-icon="ic-nocard"[^>]*><\/i><span>No credit card<\/span>/);
-  assert.match(html, /data-icon="ic-phone"[^>]*><\/i><span>Phone verification<\/span>/);
+  assert.match(html, /data-icon="ic-phone"[^>]*><\/i><span>Phone required<\/span>/);
   assert.match(html, /best-req-unknown"><i data-icon="ic-building"><\/i><span>Commercial use: not stated<\/span>/, 'an unknown flag is said, not guessed');
   const empty = bestFactsHtml({ name: 'Bare', free_tier: '', rate_limits: null, card_required: null, phone_required: null, commercial_ok: null }, icon);
   assert.equal((empty.match(/best-fact-v muted">not stated</g) || []).length, 2, 'both text cards read not stated');
