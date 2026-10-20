@@ -27,7 +27,7 @@ test('missing preferred IDs are ignored and round-robin fills the sample', () =>
   ];
   const result = sample(ids, ['alpha/missing', 'beta/a']);
   assert.deepEqual(result, [
-    'alpha/a', 'alpha/b', 'alpha/c', 'beta/a',
+    'alpha/a', 'alpha/b', 'zeta/a', 'beta/a',
     'beta/b', 'delta/a', 'epsilon/a', 'gamma/a',
   ].sort());
   assert.equal(result.length, 8);

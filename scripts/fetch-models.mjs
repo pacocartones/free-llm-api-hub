@@ -13,8 +13,8 @@
 // (e.g. GROQ_API_KEY). Without it, that provider is left untouched — never
 // blanked. Fetched IDs are real; nothing here is guessed.
 
-import { readFileSync, writeFileSync } from 'node:fs';
-import { pathToFileURL } from 'node:url';
+import { readFileSync, writeFileSync, realpathSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import { serialize, roundTripError } from './_serialize.mjs';
 import { keyHostError } from './lib/key-hosts.mjs';
 
@@ -243,7 +243,7 @@ async function main() {
 }
 
 // Importing this module in tests must not trigger network requests or mutate data.
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+if (process.argv[1] && realpathSync(process.argv[1]) === realpathSync(fileURLToPath(import.meta.url))) {
   main().catch((e) => {
     console.error(e);
     process.exit(1);
