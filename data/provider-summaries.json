@@ -944,7 +944,7 @@
       "good_for": "Converting images and PDFs to text over an API.",
       "operator": "a9t9 software GmbH",
       "owner": "a9t9 software GmbH",
-      "origin": "Germany (offices in Heidelberg and Walldorf)",
+      "origin": "Germany (office in Heidelberg; postal address in Walldorf)",
       "sources": [
         {
           "url": "https://ocr.space/ocrapi",
@@ -1131,7 +1131,7 @@
     },
     {
       "id": "poolside",
-      "what": "Poolside builds open-weight agentic coding models (Laguna xs 2.1 and Laguna s 2.1) and offers an API and CLI for them.",
+      "what": "Poolside builds open-weight agentic coding models (Laguna xs 2.1 and Laguna s 2.1); its page links to using them on OpenRouter and Vercel AI Gateway.",
       "good_for": "Coding assistance and agentic coding workflows with Poolside's own models.",
       "operator": "",
       "owner": "",
