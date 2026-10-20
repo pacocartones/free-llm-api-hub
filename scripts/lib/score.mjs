@@ -93,7 +93,7 @@ export function inputFractions(p, stability = null) {
     // Friction is one requirement with two parts, and a part that is known already informs: it counts as confirmed
     // when at least one of card_required and phone_required is known (the Owner's reading); the unknown part scores neutral.
     friction: { frac: frictionAny ? mapSigned(frictionSigned) : 0.5, known: frictionAny },
-    commercial: { frac: p.commercial_ok == null ? 0.5 : p.commercial_ok ? 1 : 0, known: p.commercial_ok != null },
+    commercial: { frac: p.commercial_ok === true ? 1 : p.commercial_ok === false ? 0 : 0.5, known: p.commercial_ok === true || p.commercial_ok === false },
     openai: { frac: p.openai_compatible === true ? 1 : 0, known: p.openai_compatible != null },
     stability: known(stability),
   };

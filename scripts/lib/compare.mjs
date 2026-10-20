@@ -86,6 +86,7 @@ export function selectComparePairs(ranked, opts = {}) {
 export function triStateHtml(v, yes, no) {
   if (v === true) return `<span class="tri tri-yes">${htmlEsc(yes)}</span>`;
   if (v === false) return `<span class="tri tri-no">${htmlEsc(no)}</span>`;
+  if (v === 'conditional') return `<span class="tri tri-cond">conditional</span>`;
   return '<span class="tri tri-unk">not confirmed</span>';
 }
 
@@ -127,7 +128,13 @@ export function compareTableHtml(list, opts = {}) {
     ['The catch', (p) => cell(p.notes || '—')],
     ['Credit card', (p) => triStateHtml(p.card_required, 'required', 'not required')],
     ['Phone verification', (p) => triStateHtml(p.phone_required, 'required', 'not required')],
-    ['Commercial use', (p) => triStateHtml(p.commercial_ok, 'allowed', 'not allowed (eval only)')],
+    ['Commercial use', (p) => {
+      if (p.commercial_ok === 'conditional') {
+        const cond = p.commercial_ok_condition ? `<div class="cmp-sub">${cell(p.commercial_ok_condition)}</div>` : '';
+        return `<span class="tri tri-cond">conditional</span>${cond}`;
+      }
+      return triStateHtml(p.commercial_ok, 'allowed', 'not allowed (eval only)');
+    }],
     ['OpenAI-compatible', (p) => triStateHtml(p.openai_compatible, 'yes', 'no') +
       (p.openai_base_url ? `<div class="cmp-sub"><code>${cell(p.openai_base_url)}</code></div>` : '')],
     ['Modalities', (p) => cell((p.modalities || []).join(', ') || '—')],

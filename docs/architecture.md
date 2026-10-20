@@ -59,7 +59,8 @@ Per-provider fields (in serializer order):
 | `docs_url` | url | **primary source** — provider's own page. Required when `verified:true`. Also drives the "Visit website" button. |
 | `phone_required` | true/false/null | null = not confirmed |
 | `card_required` | true/false/null | |
-| `commercial_ok` | true/false/null | |
+| `commercial_ok` | true/false/null, or `"conditional"` in the dataset | null = not confirmed. `"conditional"` (dataset 2.12.0) = permitted only under the conditions in `commercial_ok_condition`; `/api/v1/` serves it as `null`, and the score and `/coverage/` count it as not confirmed |
+| `commercial_ok_condition` | string \| null | the condition itself, required when `commercial_ok` is `"conditional"`, null or absent otherwise; served on `/api/v1/` |
 | `openai_compatible` | true/false/null | |
 | `openai_base_url` | url \| null | only when `openai_compatible !== false` |
 | `is_text_llm` | boolean (required) | free offering gives text/chat LLM API access; eligibility for the top 10 |

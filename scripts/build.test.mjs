@@ -2819,6 +2819,70 @@ test('the no-training collection carries the plan header and a plan mark on ever
   assert.ok(!other.includes('plan: not checked yet') && !other.includes('plan not named') && !other.includes(header), 'other collections are unchanged');
 });
 
+test('commercial_ok "conditional" is excluded from commercial-use collection and rendered on card', () => {
+  run(['scripts/build.mjs']);
+  const providers = JSON.parse(readFileSync(DATA, 'utf8')).providers;
+  const commMd = readFileSync(join(ROOT, 'collections/commercial-use.md'), 'utf8');
+  const commHtml = readFileSync(join(ROOT, 'site/collections/commercial-use.html'), 'utf8');
+  for (const p of providers.filter((p) => p.commercial_ok !== true)) {
+    assert.ok(!commMd.includes(`**[${p.name}]`), `${p.name} should not be in commercial-use.md`);
+    assert.ok(!commHtml.includes(`href="../p/${p.slug}"`), `${p.slug} should not be in commercial-use.html`);
+  }
+  const hordePage = readFileSync(join(ROOT, 'site/p/ai-horde.html'), 'utf8');
+  assert.ok(hordePage.includes('commercial OK (conditional)'), 'AI Horde page must show conditional commercial flag');
+  assert.ok(hordePage.includes('Per-model licence'), 'AI Horde page must show the condition reason');
+});
+
+test('no /api/v1/ JSON contains "conditional" as a commercial_ok value, and emits commercial_ok_condition', () => {
+  run(['scripts/build.mjs']);
+  const v1 = join(ROOT, 'site/api/v1');
+  const findJsonFiles = (dir) => {
+    let out = [];
+    for (const ent of readdirSync(dir, { withFileTypes: true })) {
+      const full = join(dir, ent.name);
+      if (ent.isDirectory()) out.push(...findJsonFiles(full));
+      else if (ent.isFile() && ent.name.endsWith('.json') && !ent.name.endsWith('.schema.json') && ent.name !== 'schema.json') {
+        out.push(full);
+      }
+    }
+    return out;
+  };
+  const files = findJsonFiles(v1);
+  assert.ok(files.length > 0, 'api v1 has generated json files');
+  for (const f of files) {
+    const raw = readFileSync(f, 'utf8');
+    assert.ok(!raw.includes('"commercial_ok": "conditional"'), `${f} must not contain "conditional" as commercial_ok`);
+    const parsed = JSON.parse(raw);
+    const list = Array.isArray(parsed.providers) ? parsed.providers : Array.isArray(parsed.picks) ? parsed.picks : [];
+    for (const p of list) {
+      if ('commercial_ok' in p) {
+        assert.notEqual(p.commercial_ok, 'conditional', `${f} (${p.slug}): commercial_ok must not be "conditional"`);
+        assert.ok(p.commercial_ok === true || p.commercial_ok === false || p.commercial_ok === null, `${f}: commercial_ok must be tri-state`);
+      }
+    }
+  }
+  const horde = JSON.parse(readFileSync(join(v1, 'providers.json'), 'utf8')).providers.find((p) => p.slug === 'ai-horde');
+  assert.equal(horde.commercial_ok, null, 'ai-horde commercial_ok must be null in /api/v1/');
+  assert.ok(horde.commercial_ok_condition, 'ai-horde commercial_ok_condition must be present in /api/v1/');
+
+  // changes.json carries the before/after value of every field, so it is the one place where
+  // 'conditional' can reach /api/v1/ without being a provider field. The walk is over every row,
+  // not only the commercial_ok ones, on purpose: 'conditional' is only ever a commercial_ok value,
+  // so the blanket rule is the same rule and it never goes vacuous if the published 12-week window
+  // no longer holds a commercial_ok change.
+  const changesFile = join(v1, 'changes.json');
+  const rows = ((JSON.parse(readFileSync(changesFile, 'utf8')).weeks) || []).flatMap((w) => w.changes || []);
+  assert.ok(rows.length > 0, 'changes.json publishes change rows, so this walk is not vacuous');
+  for (const c of rows) {
+    for (const k of ['from', 'to'])
+      assert.notEqual(c[k], 'conditional', `changes.json: the ${c.field} change of ${c.slug} must not carry "conditional" in "${k}"`);
+    if (c.field === 'commercial_ok')
+      for (const k of ['from', 'to'])
+        assert.ok(c[k] === true || c[k] === false || c[k] === null, `changes.json: commercial_ok "${k}" must be true, false or null`);
+  }
+  assert.ok(!/"(from|to)": "conditional"/.test(readFileSync(changesFile, 'utf8')), 'changes.json: no from/to holds the string "conditional"');
+});
+
 // The point of the private copy: the builds of this file must not write in the tree of the repository, or they race
 // with the builds of the other test files, which is what failed in CI (ENOTEMPTY on site/p).
 test('the builds of this file leave the generated folders of the repository untouched', () => {

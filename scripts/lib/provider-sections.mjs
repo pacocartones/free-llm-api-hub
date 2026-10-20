@@ -28,11 +28,14 @@ const safeUrl = (u) => (/^https?:\/\//i.test(String(u || '')) ? htmlEsc(u) : '')
 
 /** What a visitor must give to start: three flags, each yes / no / "not confirmed" written out. */
 export function requirementsHtml(p) {
-  const row = (icon, label, v, yes, no) => `<div class="req"><dt>${ICON(icon)}${label}</dt><dd>${triStateHtml(v, yes, no)}</dd></div>`;
+  const row = (icon, label, v, yes, no, extra = '') => `<div class="req"><dt>${ICON(icon)}${label}</dt><dd>${triStateHtml(v, yes, no)}${extra}</dd></div>`;
+  const commExtra = p.commercial_ok === 'conditional' && p.commercial_ok_condition
+    ? `<div class="req-condition">${htmlEsc(p.commercial_ok_condition)}</div>`
+    : '';
   return `<dl class="prov-reqs" aria-label="What you need to start">` +
     row('ic-card', 'Credit card', p.card_required, 'required', 'not required') +
     row('ic-phone', 'Phone verification', p.phone_required, 'required', 'not required') +
-    row('ic-building', 'Commercial use', p.commercial_ok, 'allowed', 'evaluation only') +
+    row('ic-building', 'Commercial use', p.commercial_ok, 'allowed', 'evaluation only', commExtra) +
     `</dl>`;
 }
 

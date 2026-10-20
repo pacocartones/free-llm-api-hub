@@ -13,7 +13,7 @@ const verifiedTextLlm = (p) => p.verified === true && p.is_text_llm === true;
 export const COVERAGE_FIELDS = Object.freeze([
   { key: 'card_required', label: 'Credit card required?', population: 'all verified providers', inPop: (p) => p.verified === true, has: (p) => p.card_required != null },
   { key: 'phone_required', label: 'Phone verification required?', population: 'all verified providers', inPop: (p) => p.verified === true, has: (p) => p.phone_required != null },
-  { key: 'commercial_ok', label: 'Commercial use allowed?', population: 'all verified providers', inPop: (p) => p.verified === true, has: (p) => p.commercial_ok != null },
+  { key: 'commercial_ok', label: 'Commercial use allowed?', population: 'all verified providers', inPop: (p) => p.verified === true, has: (p) => typeof p.commercial_ok === 'boolean' },
   { key: 'openai_compatible', label: 'OpenAI-compatible endpoint?', population: 'all verified providers', inPop: (p) => p.verified === true, has: (p) => p.openai_compatible != null },
   { key: 'model_tier', label: 'Model quality tier', population: 'verified text LLMs that are not one-time trial credits', inPop: (p) => verifiedTextLlm(p) && p.free_type !== 'trial-credit', has: (p) => Number.isInteger(p.model_tier) },
   { key: 'free_limits', label: 'Published free limits', population: 'verified text LLMs that are not one-time trial credits', inPop: (p) => verifiedTextLlm(p) && p.free_type !== 'trial-credit', has: (p) => p.free_limits != null },

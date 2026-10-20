@@ -82,6 +82,7 @@ const provSub = (p) => {
   const bits = [p.category === 'ongoing' ? 'Ongoing free tier' : 'Trial credit'];
   if (p.card_required === false) bits.push('no card');
   if (p.commercial_ok === true) bits.push('commercial OK');
+  if (p.commercial_ok === 'conditional') bits.push('commercial OK (conditional)');
   if (p.openai_compatible === true) bits.push('OpenAI-compatible');
   return bits.join(' · ');
 };

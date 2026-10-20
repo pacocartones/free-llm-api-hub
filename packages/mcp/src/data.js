@@ -23,7 +23,8 @@ export function normalizeDataset(raw, origin) {
       throw new Error(`${origin}: provider entry without slug/name`);
     }
     const { env_key, ...rest } = p;
-    return rest;
+    const commercial_ok = rest.commercial_ok === 'conditional' ? null : rest.commercial_ok;
+    return { ...rest, commercial_ok };
   });
   return {
     version: raw.version ?? null,

@@ -1,7 +1,7 @@
 {
   "$schema": "./schema.json",
-  "version": "2.11.0",
-  "generated": "2026-10-18",
+  "version": "2.12.0",
+  "generated": "2026-10-20",
   "source": "https://github.com/pacocartones/free-llm-api-hub",
   "note": "Canonical dataset. README tables, badge-freshness.json and the interactive site are all generated from this file — do not hand-edit them. `verified: true` means the core facts (tier, limits, key catch, link) were independently confirmed against the provider's own docs on `last_verified`. `verified: false` means sourced from community tracking and not yet independently re-confirmed here — treat those as indicative. Attribute fields (openai_compatible, modalities, best_for) are progressively backfilled and may be null.",
   "providers": [
@@ -789,7 +789,7 @@
       "free_type": "perpetual",
       "free_tier": "Free crowdsourced text & image generation; anonymous API key '0000000000' (no registration), or register to earn kudos for priority",
       "rate_limits": "Queue-based priority via kudos (no fixed quota); anonymous requests get lowest priority under load",
-      "notes": "Community-powered volunteer network — model availability and speed vary with worker supply, so it is not a fixed-SLA service. No card, no phone. Kudos never expire and cannot be sold. Commercial use is allowed, subject to each model's individual licence (aihorde.net UI displays 'Commercial use: allowed' or 'Pick something else if you plan to sell what you make or use it in a business').",
+      "notes": "Community-powered volunteer network — model availability and speed vary with worker supply, so it is not a fixed-SLA service. No card, no phone. Kudos never expire and cannot be sold. Commercial use is conditional: each model carries its own licence (aihorde.net UI displays 'Commercial use: allowed' or 'Pick something else if you plan to sell what you make or use it in a business'), and per the AI Horde FAQ (https://aihorde.net/faq), paid services built on the API must give back to the Horde at least as much as they take.",
       "best_for": "Anonymous, no-signup free generation (variable speed)",
       "modalities": ["text", "image"],
       "models_free": null,
@@ -797,13 +797,14 @@
       "docs_url": "https://aihorde.net/",
       "phone_required": false,
       "card_required": false,
-      "commercial_ok": null,
+      "commercial_ok": "conditional",
+      "commercial_ok_condition": "Per-model licence (some models forbid commercial use) and paid services using the API must give back to the Horde at least as much as they take.",
       "openai_compatible": false,
       "openai_base_url": null,
       "is_text_llm": true,
       "model_tier": null,
       "verified": true,
-      "last_verified": "2026-10-14"
+      "last_verified": "2026-10-15"
     },
     {
       "slug": "modelscope",

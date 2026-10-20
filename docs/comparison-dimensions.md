@@ -4,12 +4,13 @@ Every field in [`data/providers.json`](../data/providers.json), defined. The dat
 
 ## Tri-state convention
 
-`phone_required`, `card_required`, `commercial_ok` and `openai_compatible` are **tri-state**:
+`phone_required`, `card_required`, and `openai_compatible` are **tri-state** (`true` / `false` / `null`). `commercial_ok` additionally accepts `"conditional"` when commercial use is permitted subject to documented conditions (e.g. per-model licences or give-back rules) recorded in `commercial_ok_condition` and `notes`.
 
 | Value | Meaning |
 |---|---|
 | `true` | Confirmed yes |
 | `false` | Confirmed no |
+| `"conditional"` | Permitted subject to documented conditions (`commercial_ok` only) |
 | `null` | Not yet confirmed — **not** the same as "no" |
 
 Filters treat `null` conservatively: "No card required" matches only `card_required: false`, never `null`.
@@ -18,7 +19,7 @@ Three consequences the rest of the project has to honour, or the tri-state is de
 
 - **Both confirmed states get a pill.** Every surface that renders a flag — the README tables, the collection tables, the explorer, the provider pages — shows a badge for `true` *and* for `false`. Absence of a pill therefore means `null` and nothing else. A confirmed card wall must never render the same as an unknown one.
 - **`null` never scores as `false`.** In the "Recommended" ranking ([`scripts/lib/rules.mjs`](../scripts/lib/rules.mjs)) a confirmed `false` earns points, a confirmed `true` loses the same points, and `null` scores zero — it sits *between* the two, because that is what not knowing is worth.
-- **A `null` is a task, not a verdict.** Resolving one against a primary source is the highest-value contribution to this dataset. Current gaps: `phone_required` 41/68, `commercial_ok` 31/68, `card_required` 7/68.
+- **A `null` is a task, not a verdict.** Resolving one against a primary source is the highest-value contribution to this dataset. Current gaps: `phone_required` 41/68, `commercial_ok` 30/68, `card_required` 7/68.
 
 ## Fields
 
@@ -39,7 +40,8 @@ Three consequences the rest of the project has to honour, or the tri-state is de
 | `docs_url` | string | Primary source — the provider's own pricing/rate-limit page. Empty only for ⚠️ unverified entries. |
 | `phone_required` | tri-state | Does signup require phone verification? |
 | `card_required` | tri-state | Is a payment method required to use the free access? |
-| `commercial_ok` | tri-state | Is production/commercial use permitted on the free tier? |
+| `commercial_ok` | tri-state \| `"conditional"` | Is production/commercial use permitted on the free tier? Accepts `"conditional"` when permitted subject to documented conditions (e.g. per-model licences, give-back rules). |
+| `commercial_ok_condition` | string \| null | When `commercial_ok` is `"conditional"`, a concise explanation of the conditions. `null` or absent otherwise. |
 | `openai_compatible` | tri-state | Does it expose an OpenAI-compatible endpoint (drop-in `base_url`)? |
 | `openai_base_url` | string \| null | The OpenAI-compatible base URL to pass to the SDK, when confirmed against official docs. Placeholders like `{account_id}` mark per-account path segments. `null` until backfilled. |
 | `models_free` | string[] \| null | A **sample** of model IDs available on the free tier. Attribute field — sampled and may change; not part of the verified core claim. `null` where not populated. |
