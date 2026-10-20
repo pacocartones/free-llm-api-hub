@@ -13,7 +13,8 @@
 // (e.g. GROQ_API_KEY). Without it, that provider is left untouched — never
 // blanked. Fetched IDs are real; nothing here is guessed.
 
-import { readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync, realpathSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import { serialize, roundTripError } from './_serialize.mjs';
 import { keyHostError } from './lib/key-hosts.mjs';
 
@@ -26,14 +27,18 @@ const TIMEOUT = 20000;
 // Deterministic, publisher-diverse sample: round-robin across the vendor
 // prefix (before "/") so the sample reads as a representative spread rather
 // than an alphabetical clump of one vendor. Final list is sorted.
-const sample = (ids) => {
+export const sample = (ids, preferred = []) => {
+  const available = new Set(ids.filter(Boolean));
+  // Preferences are advisory: only use IDs returned by the current catalog.
+  // Deduplicate them, preserve the configured order, and respect the sample cap.
+  const out = [...new Set(preferred)].filter((id) => available.has(id)).slice(0, SAMPLE);
+  const selected = new Set(out);
   const groups = new Map();
-  for (const id of [...new Set(ids.filter(Boolean))].sort()) {
+  for (const id of [...new Set(ids.filter(Boolean))].filter((id) => !selected.has(id)).sort()) {
     const pub = id.includes('/') ? id.slice(0, id.indexOf('/')) : id;
     (groups.get(pub) || groups.set(pub, []).get(pub)).push(id);
   }
   const keys = [...groups.keys()].sort();
-  const out = [];
   for (let i = 0; out.length < SAMPLE && keys.some((k) => groups.get(k).length); i++) {
     const g = groups.get(keys[i % keys.length]);
     if (g.length) out.push(g.shift());
@@ -53,10 +58,30 @@ async function getJson(url, headers) {
   }
 }
 
-// A standard OpenAI-shaped /models list that needs no key.
-const openaiPublic = (url) => async () => {
-  const d = await getJson(url);
-  return sample((d.data || []).map((m) => m.id));
+// Model IDs are listed in each provider's own public catalogues. Keep these
+// lists short and explicit; sample() ignores IDs absent from the live response.
+// NVIDIA: https://build.nvidia.com/models
+// ModelScope: https://modelscope.cn/models
+export const PREFERRED_MODELS = {
+  'nvidia-nim': [
+    'deepseek-ai/deepseek-v4-flash-0731',
+    'meta/llama-3.3-70b-instruct',
+    'nvidia/nemotron-3-super-120b-a12b',
+    'openai/gpt-oss-120b',
+  ],
+  modelscope: [
+    'deepseek-ai/DeepSeek-V4-Flash-0731',
+    'MiniMax/MiniMax-M3',
+    'Qwen/Qwen3.5-397B-A17B',
+    'ZhipuAI/GLM-5.2',
+  ],
+};
+
+// A standard OpenAI-shaped /models list that needs no key. The JSON fetcher is
+// injectable so tests can exercise selection without making a real network call.
+export const openaiPublic = (url, preferred = [], fetchJson = getJson) => async () => {
+  const d = await fetchJson(url);
+  return sample((d.data || []).map((m) => m.id), preferred);
 };
 
 // Public endpoints — no API key required.
@@ -71,8 +96,8 @@ const PUBLIC = {
     return sample(d.filter((m) => m.tier === 'anonymous').map((m) => m.name));
   },
   // Free credit / free-inference tiers with public OpenAI-shaped catalogs.
-  'nvidia-nim': openaiPublic('https://integrate.api.nvidia.com/v1/models'),
-  modelscope: openaiPublic('https://api-inference.modelscope.cn/v1/models'),
+  'nvidia-nim': openaiPublic('https://integrate.api.nvidia.com/v1/models', PREFERRED_MODELS['nvidia-nim']),
+  modelscope: openaiPublic('https://api-inference.modelscope.cn/v1/models', PREFERRED_MODELS.modelscope),
   // Typhoon's /models is public and returns a bare array, not the OpenAI
   // {data: [...]} shape — handle both so the extractor survives a shape change.
   typhoon: async () => {
@@ -217,7 +242,10 @@ async function main() {
   }
 }
 
-main().catch((e) => {
-  console.error(e);
-  process.exit(1);
-});
+// Importing this module in tests must not trigger network requests or mutate data.
+if (process.argv[1] && realpathSync(process.argv[1]) === realpathSync(fileURLToPath(import.meta.url))) {
+  main().catch((e) => {
+    console.error(e);
+    process.exit(1);
+  });
+}
