@@ -77,14 +77,14 @@
           ]
         },
         {
-          "url": "https://www.ai21.com/terms-of-use/",
+          "url": "https://www.ai21.com/terms-of-service/",
           "fetched_at": "2026-10-19T19:01:16Z",
           "supports": [
             "operator"
           ]
         },
         {
-          "url": "https://www.ai21.com/privacy-policy/",
+          "url": "https://www.ai21.com/terms-policies/privacy-policy/",
           "fetched_at": "2026-10-19T19:01:16Z",
           "supports": [
             "operator",
@@ -225,7 +225,7 @@
           ]
         },
         {
-          "url": "https://www.camb.ai/terms",
+          "url": "https://www.camb.ai/terms-conditions",
           "fetched_at": "2026-10-19T19:01:38Z",
           "supports": [
             "operator"
@@ -242,7 +242,7 @@
       "origin": "",
       "sources": [
         {
-          "url": "https://docs.cartesia.ai/",
+          "url": "https://docs.cartesia.ai/get-started/overview",
           "fetched_at": "2026-10-19T19:01:38Z",
           "supports": [
             "what",
@@ -250,7 +250,7 @@
           ]
         },
         {
-          "url": "https://cartesia.ai/legal/terms",
+          "url": "https://www.cartesia.ai/legal/terms",
           "fetched_at": "2026-10-19T19:01:38Z",
           "supports": [
             "operator"
@@ -267,7 +267,7 @@
       "origin": "",
       "sources": [
         {
-          "url": "https://inference-docs.cerebras.ai/introduction",
+          "url": "https://inference-docs.cerebras.ai/",
           "fetched_at": "2026-10-19T19:01:11Z",
           "supports": [
             "what",
@@ -516,15 +516,15 @@
     },
     {
       "id": "groq",
-      "what": "A cloud service for fast AI inference, built around Groq's LPU chips.",
-      "good_for": "Serving AI inference at scale.",
+      "what": "A cloud service for fast AI inference; the page calls Groq the premier neocloud for fast inference and says it pioneered the LPU.",
+      "good_for": "Running AI inference at scale; the page says Groq makes inference work at scale.",
       "operator": "Groq LLC",
       "owner": "",
       "origin": "",
       "sources": [
         {
-          "url": "https://groq.com/about-us",
-          "fetched_at": "2026-10-19",
+          "url": "https://groq.com/",
+          "fetched_at": "2026-10-19T23:53Z",
           "supports": [
             "what",
             "good_for"
@@ -706,8 +706,8 @@
           ]
         },
         {
-          "url": "https://www.mixedbread.com/about",
-          "fetched_at": "2026-10-19T19:01Z",
+          "url": "https://www.mixedbread.com/careers",
+          "fetched_at": "2026-10-19T23:53Z",
           "supports": [
             "origin"
           ]
@@ -915,14 +915,14 @@
     {
       "id": "nvidia-nim",
       "what": "NVIDIA NIM are microservices that accelerate the deployment of foundation models on any cloud or data center; build.nvidia.com offers NIM APIs to try, with free inference on leading models.",
-      "good_for": "Trying and prototyping with NVIDIA-hosted models through a free inference endpoint.",
+      "good_for": "Trying leading models through NVIDIA NIM APIs, with free inference, to build generative AI apps.",
       "operator": "NVIDIA Corporation",
       "owner": "",
       "origin": "",
       "sources": [
         {
           "url": "https://build.nvidia.com/",
-          "fetched_at": "2026-10-19T19:01:54Z",
+          "fetched_at": "2026-10-19T23:53Z",
           "supports": [
             "what",
             "good_for",
@@ -968,14 +968,14 @@
     {
       "id": "ollama-cloud",
       "what": "Ollama Cloud lets you run models in Ollama's cloud from your apps or terminal, with no model or app download required.",
-      "good_for": "Running larger open models in the cloud through the Ollama workflow or its API.",
+      "good_for": "Using cloud models from apps, the terminal, coding agents through a launch command, or the API.",
       "operator": "Ollama Inc.",
       "owner": "",
       "origin": "",
       "sources": [
         {
           "url": "https://docs.ollama.com/cloud",
-          "fetched_at": "2026-10-19T19:01:42Z",
+          "fetched_at": "2026-10-19T23:53Z",
           "supports": [
             "what",
             "good_for"
@@ -1041,8 +1041,8 @@
           ]
         },
         {
-          "url": "https://www.ovhcloud.com/en/legal/",
-          "fetched_at": "2026-10-19T19:25:41Z",
+          "url": "https://www.ovhcloud.com/en/terms-and-conditions/",
+          "fetched_at": "2026-10-19T23:53Z",
           "supports": [
             "operator"
           ]
@@ -1086,7 +1086,7 @@
     {
       "id": "pinecone-inference",
       "what": "Pinecone is a fully managed vector database built for AI; its Inference offers embedding and reranking models hosted by Pinecone.",
-      "good_for": "Generating embeddings and reranking results for retrieval-augmented generation without running the models yourself.",
+      "good_for": "Using embedding and reranking models hosted by Pinecone, so you do not run them yourself.",
       "operator": "Pinecone Systems, Inc.",
       "owner": "",
       "origin": "San Francisco, CA",
@@ -1102,7 +1102,7 @@
         },
         {
           "url": "https://docs.pinecone.io/models/overview",
-          "fetched_at": "2026-10-19T19:05:53Z",
+          "fetched_at": "2026-10-19T23:53Z",
           "supports": [
             "what",
             "good_for"
@@ -1171,7 +1171,7 @@
           ]
         },
         {
-          "url": "https://www.retellai.com/terms-of-service",
+          "url": "https://www.retellai.com/legal/terms-of-service",
           "fetched_at": "2026-10-19T19:02:30Z",
           "supports": [
             "operator"
@@ -1214,7 +1214,7 @@
       "origin": "",
       "sources": [
         {
-          "url": "https://rime.ai/",
+          "url": "https://www.rime.ai/",
           "fetched_at": "2026-10-19T19:02:38Z",
           "supports": [
             "what",
@@ -1377,14 +1377,14 @@
     {
       "id": "speechmatics",
       "what": "Speech API: foundational speech technology that providers can integrate into their own stack.",
-      "good_for": "Accurately understanding speech across age, gender, accent and dialect; unlocking value from audio and video.",
+      "good_for": "Speech recognition for companies' own products; the page says its aim is to understand every voice and calls its Speech API the most inclusive and accurate ever released.",
       "operator": "",
       "owner": "",
       "origin": "The page names Dr Tony Robinson, who pioneered neural networks for speech recognition at Cambridge University in the 1980s; headquarters, legal entity and founding year not stated on this page.",
       "sources": [
         {
           "url": "https://www.speechmatics.com/company/about-speechmatics",
-          "fetched_at": "2026-10-19T19:02:22Z",
+          "fetched_at": "2026-10-19T23:53Z",
           "supports": [
             "what",
             "good_for",
@@ -1402,7 +1402,7 @@
       "origin": "Tencent was founded in 1998 and is headquartered in Shenzhen, China.",
       "sources": [
         {
-          "url": "https://cloud.tencent.com/product/hunyuan",
+          "url": "https://cloud.tencent.com/product/tclm",
           "fetched_at": "2026-10-19T19:02:22Z",
           "supports": [
             "what",
@@ -1411,7 +1411,7 @@
           ]
         },
         {
-          "url": "https://www.tencent.com/en-us/about.html",
+          "url": "https://www.tencent.com/who-we-are/",
           "fetched_at": "2026-10-19T19:02:22Z",
           "supports": [
             "origin"
@@ -1428,7 +1428,7 @@
       "origin": "Offices in San Francisco, Seoul, New York, London and Pangyo; headquarters, founders and founding year not stated on the page.",
       "sources": [
         {
-          "url": "https://www.twelvelabs.io/company",
+          "url": "https://www.twelvelabs.io/about-us",
           "fetched_at": "2026-10-19T19:02:22Z",
           "supports": [
             "what",
@@ -1734,7 +1734,7 @@
           ]
         },
         {
-          "url": "https://www.zhipuai.cn/",
+          "url": "https://www.zhipuai.cn/zh",
           "fetched_at": "2026-10-19",
           "supports": [
             "owner",
