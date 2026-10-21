@@ -15,8 +15,8 @@ import * as rows from './lib/rows.mjs';
 import * as sortLib from './lib/sort.mjs';
 import { esc, stripTags } from './lib/escape.mjs';
 import { mineHistoryAndSnapshots, HISTORY_FIELDS } from './lib/history.mjs';
-import { flattenFieldChanges, groupChangesByWeek, changesRss, weekTitle, formatValue, reportChangeUrl } from './lib/changes.mjs';
-import { monthlyReport, reportMonths, monthEndDate } from './lib/state.mjs';
+import { flattenFieldChanges, groupChangesByWeek, changesRss, weekTitle, formatValue } from './lib/changes.mjs';
+import { monthlyReport, reportMonths, monthEndDate, monthName, monthLabel, pct, monthSummary, monthBrief } from './lib/state.mjs';
 import { githubProfileUrl } from './lib/contributors.mjs';
 import { resolveBestEntries, topEntries, PODIUM_SIZE } from './lib/best.mjs';
 import { agreementsTableHtml, sponsoredBlockHtml, disclosureHtml, inForce, NOT_IN_DATA_SENTENCE, MACHINE_SENTENCE } from './lib/agreements.mjs';
@@ -24,13 +24,16 @@ import { coverage, coverageMainHtml } from './lib/coverage.mjs';
 import { freeGpuMainHtml } from './lib/free-gpu.mjs';
 import { labelTables } from './lib/tables.mjs';
 import { markNewTabLinks } from './lib/links.mjs';
-import { codingToolsMainHtml } from './lib/free-coding-tools.mjs';
+import { codingToolsMainHtml, codingToolMainHtml, codingToolTitle, codingToolDescription } from './lib/free-coding-tools.mjs';
 import { dataPolicyRows, dataPolicyMainHtml } from './lib/data-policy-page.mjs';
 import { quotesReportHtml } from './lib/quotes-report.mjs';
 import { SCORE_WEIGHTS, EDITORIAL_WEIGHT, EDITORIAL_DEFAULT, MATH_INPUTS, MIN_CONFIRMED, TOP_SIZE, EDITORIAL_NOTE_THRESHOLD, STABILITY_MIN_DAYS, STABILITY_MIN_SAMPLES, rankProviders, editorialRating } from './lib/score.mjs';
 import { publishableClientConfigs } from './lib/client-config.mjs';
 import * as compareLib from './lib/compare.mjs';
 import { requirementsHtml, limitsHtml, glanceHtml, modelsHtml, dataPolicyHtml } from './lib/provider-sections.mjs';
+import { aboutHtml } from './lib/provider-summaries.mjs';
+import { markdownToHtml } from './lib/markdown.mjs';
+import { bestFactsHtml } from './lib/best-facts.mjs';
 import { providerFigures, expandFigures, injectInlineFigures, figureErrors } from './lib/figures.mjs';
 import { badgeSvg } from './lib/badge-svg.mjs';
 
@@ -39,6 +42,7 @@ const FRESH_DAYS = SLA_DAYS; // the freshness SLA, defined once in lib/rules.mjs
 
 const data = JSON.parse(readFileSync(join(ROOT, 'data/providers.json'), 'utf8'));
 const providers = data.providers;
+const summaryBySlug = new Map(JSON.parse(readFileSync(join(ROOT, 'data/provider-summaries.json'), 'utf8')).summaries.map((x) => [x.id, x]));
 // Counts quoted in prose come from the data, never from a typed number (lib/figures.mjs).
 const FIGS = providerFigures(providers);
 
@@ -224,6 +228,40 @@ const COLLECTIONS = [
       { q: 'How do I report a mistake?', a: 'Open an issue on GitHub with the row and the evidence; the maintainers re-read the provider’s own page.' },
     ],
   },
+  {
+    slug: 'renewing-free-tier',
+    answer: '{n} of {total} tracked providers give a free allowance that renews: a daily or monthly quota or credit that resets, not a one-time balance. Renewing does not mean unlimited — limits are hard and some tiers are evaluation-only, so read the Type and catch columns. The list is a live filter.',
+    metaDesc: '{n} AI APIs whose free allowance renews instead of running out once, filtered live from a dated dataset. Dataset of {date}.',
+    title: 'Free LLM APIs whose free tier renews',
+    h1: 'Free LLM APIs with a renewing free allowance',
+    desc: 'LLM and AI APIs whose free allowance resets (daily, monthly or per minute) instead of running out once — a live slice of a verified dataset.',
+    intro: 'Providers whose free access **renews**: a quota (`free_type: renewing-quota`) or a credit (`free_type: recurring-credit`) that resets on a schedule. One-time signup credits and permanently free models are listed in other collections. A renewing allowance can still be evaluation-only (for example Cohere) — read the catch.',
+    filter: (p) => p.free_type === 'renewing-quota' || p.free_type === 'recurring-credit',
+    guides: ['free-llm-api-without-credit-card', 'openai-compatible-free-apis'],
+    faq: [
+      { q: 'Which free LLM APIs reset their limits?', a: 'The providers on this page: their free allowance renews on a schedule rather than being a one-time credit.' },
+      { q: 'Is a renewing allowance the same as permanently free?', a: 'No. Permanently free (see that collection) means models priced at $0 with no trial window; a renewing allowance resets and may change or carry commercial restrictions.' },
+      { q: 'How often does this list change?', a: 'It is a live filter of the dataset: it is regenerated whenever the dataset changes, and every row shows the day its source was read.' },
+      { q: 'How do I report a mistake?', a: 'Open an issue on GitHub with the row and the evidence; the maintainers re-read the provider’s own page.' },
+    ],
+  },
+  {
+    slug: 'free-signup-credit',
+    answer: '{n} of {total} tracked providers start you with a one-time credit or token balance rather than a renewing quota. It is the right choice for a prototype or an evaluation, and it ends: check whether it expires and whether a card is needed.',
+    metaDesc: '{n} AI APIs that start with a one-time free credit, filtered live from a dated dataset. Dataset of {date}.',
+    title: 'Free LLM APIs with a free signup credit',
+    h1: 'Free LLM APIs that start with a free credit',
+    desc: 'AI APIs that give a one-time free credit or token balance at signup, which runs out instead of renewing — a live slice of a verified dataset.',
+    intro: 'Providers whose free access is a **one-time credit** (`free_type: trial-credit`): it is spent, not renewed. Renewing allowances are in their own collection. Some credits expire, with windows from 30 days to a year in the dataset, and a provider that has not been re-verified is left out.',
+    filter: (p) => p.free_type === 'trial-credit' && p.verified,
+    guides: ['free-llm-api-without-credit-card'],
+    faq: [
+      { q: 'Do free signup credits expire?', a: 'Some do, with windows from 30 days to a year in the dataset; others say the credit does not expire. Each row shows the catch.' },
+      { q: 'Is a signup credit the same as a free tier?', a: 'No. A credit is a balance that runs out; a free tier renews or is permanent. See the renewing and permanently free collections.' },
+      { q: 'How often does this list change?', a: 'It is a live filter of the dataset: it is regenerated whenever the dataset changes, and every row shows the day its source was read.' },
+      { q: 'How do I report a mistake?', a: 'Open an issue on GitHub with the row and the evidence; the maintainers re-read the provider’s own page.' },
+    ],
+  },
 ];
 
 // SEO guides — intent-matched landing pages generated from the data. Declared
@@ -361,6 +399,46 @@ const GUIDES = [
       { q: 'Is there a free OCR API?', a: 'Yes — OCR.space, Unstructured, Nutrient and LlamaParse all offer free OCR / document parsing, several with thousands of pages a month.' },
       { q: 'What’s the best free API to parse PDFs for RAG?', a: 'Unstructured (10,000 free pages to start) and LlamaParse (10,000 credits a month) are built specifically to turn documents into clean, chunked text for RAG.' },
       { q: 'Can free OCR handle tables and handwriting?', a: 'Some do — providers such as Nutrient extract tables, key-values and handwriting. Check each provider page for the exact free-tier capabilities.' },
+    ],
+  },
+  {
+    slug: 'free-reranking-apis',
+    answer: '{n} providers in the verified dataset include a reranker in their free access. Cohere and Pinecone give an allowance that renews (Cohere’s free key is for evaluation only; Pinecone’s is 500 rerank requests a month); Jina AI, Mixedbread, Voyage AI and Contextual AI give a one-time balance. Read the catch first.',
+    metaDesc: '{n} free reranking APIs with limits, commercial-use flags and catches compared. Dataset of {date}; each row is dated.',
+    card: 'Reranking',
+    blurb: 'Free rerank tiers for search and RAG.',
+    h1: 'Free reranking APIs for search and RAG',
+    title: 'Free reranking APIs (rerank) · Free LLM API Hub',
+    desc: 'Verified reranking APIs with a free tier or starting credit, with limits, commercial-use flags and catches side by side.',
+    lede: 'Yes — several providers in the dataset include a reranker in a free tier or a starting credit, most of them as a one-time balance.',
+    intro: `<p>A reranker reorders the passages a search or embedding step returns, and it is the cheapest quality gain in most RAG systems. The providers below list a reranker inside their <strong>free tier or starting credit</strong>.</p><p>Read two things per row: whether the allowance <em>renews</em> or is a one-time balance, and whether <em>commercial use</em> is allowed — Cohere’s free key explicitly is not. The pricing pages of Voyage AI and Pinecone disagree with themselves about which rerankers the free plan covers, and the catch of their rows says so.</p>`,
+    filter: (p) => (p.modalities || []).includes('rerank') && p.verified,
+    query: '#explorer',
+    pick: 'jina-ai',
+    faq: [
+      { q: 'Is there a free reranking API?', a: 'Yes. Jina AI, Mixedbread, Voyage AI and Contextual AI give a one-time free balance that covers their rerankers with no card, and Pinecone offers 500 rerank requests a month on its Starter plan. Cohere’s free key also includes rerank but is for evaluation only.' },
+      { q: 'Can I use a free reranker in production?', a: 'Only where the row says commercial use is allowed (Jina AI and Mixedbread today). Cohere forbids it on a trial key, and for Pinecone, Voyage AI and Contextual AI the dataset records no commercial-use statement.' },
+      { q: 'Does a free reranker renew?', a: 'Two do: Cohere and Pinecone give an allowance that resets (Pinecone’s is 500 rerank requests a month). The credits of Jina AI, Mixedbread, Voyage AI and Contextual AI are one-time grants.' },
+    ],
+  },
+  {
+    slug: 'free-vision-apis',
+    answer: 'Yes. {n} providers in the verified dataset include an image-understanding model in their free access. Google Gemini, OpenRouter and Z.ai need no card; Moondream renews a $5 credit each month; Tencent’s offer runs until 2026-12-31. This guide is about reading images; for generating them see the image-generation guide.',
+    metaDesc: '{n} free vision APIs for captioning, visual Q&A and detection, with limits and catches compared. Dataset of {date}.',
+    card: 'Vision',
+    blurb: 'Free image-understanding tiers: describe, query, detect.',
+    h1: 'Free vision APIs — image understanding',
+    title: 'Free vision & image-understanding APIs · Free LLM API Hub',
+    desc: 'Verified APIs that read images (captioning, visual question answering, detection) with a free tier or starting credit. Limits and catches compared.',
+    lede: 'Several providers let you send an image to a model at no cost — from Gemini’s free quota to Moondream’s monthly credit.',
+    intro: `<p>Vision models take an image and answer about it: caption it, answer a question, find an object. The providers below list a <strong>vision-capable model</strong> in a free tier or starting credit.</p><p>Check whether the allowance <em>renews</em>, whether <em>commercial use</em> is allowed (ModelScope says no) and what the catch is — for example, Twelve Labs analyses video rather than chatting about stills, and Tencent has moved its Hunyuan models to a new platform.</p>`,
+    filter: (p) => (p.modalities || []).includes('vision') && p.verified,
+    query: '#explorer',
+    pick: 'google-gemini',
+    faq: [
+      { q: 'Is there a free API to analyse images?', a: 'Yes. Google Gemini and OpenRouter have free tiers with no card, Z.ai lists its GLM-4.6V-Flash vision model at $0 permanently, and Moondream gives $5 of credit each month.' },
+      { q: 'Is a free vision API okay for commercial use?', a: 'Check each row. The dataset records commercial use as allowed for Google Gemini, OpenRouter, Z.ai, Ollama Cloud and W&B Inference, and as not allowed for ModelScope; for Moondream, Tencent and Twelve Labs it records no commercial-use statement.' },
+      { q: 'What is the difference between vision and image generation?', a: 'Vision reads an image and returns text. Image generation makes a new image from text; see the free image-generation guide for that.' },
     ],
   },
 ];
@@ -507,7 +585,7 @@ const pageHero = ({ crumbs, h1, lede = '', afterTitle = '', extra = '', cls = 'm
 
 const siteHeader = (p) => `<header class="site-header"><div class="wrap header-inner">
 <a class="brand" href="${p}" aria-label="Free LLM API Hub — home"><svg class="logo-mark"><use href="#logo"/></svg><span class="brand-name">Free LLM API <span class="grad">Hub</span></span></a>
-<nav class="nav" id="primary-nav" aria-label="Primary"><a href="${p}guides-and-collections/">${IC('ic-book')}Guides &amp; Collections</a><a href="${p}compare/">${IC('ic-grid')}Compare</a><a class="nav-best" href="${p}best/" title="The top 10 by score, recomputed from the data at every build">${IC('ic-spark')}The Best</a></nav>
+<nav class="nav" id="primary-nav" aria-label="Primary"><a href="${p}guides-and-collections/">${IC('ic-book')}Guides &amp; Collections</a><a class="nav-best" href="${p}best/" title="The top 10 by score, recomputed from the data at every build">${IC('ic-spark')}The Best</a><a href="${p}submit/">${IC('ic-rocket')}Submit</a></nav>
 <div class="header-actions">
 <button class="icon-btn nav-toggle" id="navToggle" aria-label="Open menu" aria-expanded="false" aria-controls="primary-nav"><svg class="i menu" aria-hidden="true"><use href="#ic-menu"/></svg><svg class="i close" aria-hidden="true"><use href="#ic-close"/></svg></button>
 <a class="icon-btn" href="${REPO}" target="_blank" rel="noopener"><span class="sr-only">Star on GitHub</span>${GH_ICON}<span class="star-count" data-stars>★</span></a>
@@ -516,10 +594,10 @@ const siteHeader = (p) => `<header class="site-header"><div class="wrap header-i
 
 const siteFooter = (p) => `<footer class="site-footer"><div class="wrap footer-top">
 <div class="footer-brand"><a class="foot-brand-link" href="${p}" aria-label="Free LLM API Hub — home"><svg class="logo-mark"><use href="#logo"/></svg><span class="brand-name">Free LLM API <span class="grad">Hub</span></span></a><p>The <strong>continuously-verified</strong>, <strong>machine-readable</strong> dataset of <strong>free LLM &amp; AI-model APIs</strong> and <strong>trial credits</strong> — every entry <strong>dated</strong>, <strong>sourced</strong>, and <strong>free of dead links</strong>.</p><img class="trust-badge" src="${p}badge-verified.svg" alt="Verified providers" width="${BADGE_W}" height="20" loading="lazy"><a class="star-btn" href="${REPO}" target="_blank" rel="noopener"><span class="sb-label">${GH_ICON} Star on GitHub</span><span class="sb-count" data-stars>★</span></a></div>
-<div class="footer-col"><h2 class="footer-h">Explore</h2><a href="${p}#explorer">Interactive explorer</a><a href="${p}models/">Free model index</a><a href="${p}guides-and-collections/">Guides &amp; collections</a><a href="${p}programs/startups">Startup credits</a><a href="${p}programs/research">Student &amp; research credits</a><a href="${p}free-gpu/">Free GPU compute</a><a href="${p}coding-tools/">Free AI coding tools</a></div>
+<div class="footer-col"><h2 class="footer-h">Explore</h2><a href="${p}models/">Free model index</a><a href="${p}guides-and-collections/">Guides &amp; collections</a><a href="${p}programs/startups">Startup credits</a><a href="${p}programs/research">Student &amp; research credits</a><a href="${p}free-gpu/">Free GPU compute</a><a href="${p}coding-tools/">Free AI coding tools</a></div>
 <div class="footer-col"><h2 class="footer-h">Data</h2><a href="${p}providers.json">providers.json</a><a href="${p}api/">JSON API</a><a href="${p}llms.txt">llms.txt</a><a href="${p}data-policy/">Who trains on your data</a><a href="${p}coverage/">Data coverage</a></div>
-<div class="footer-col"><h2 class="footer-h">Project</h2><a href="${p}updates">Updates</a><a href="${p}changes/">What changed</a><a href="${REPO}/blob/main/docs/methodology.md">Methodology</a><a href="${REPO}/blob/main/CONTRIBUTING.md">Contributing</a><a href="${p}agreements/">Agreements</a></div>
-</div><div class="wrap footer-bottom"><p>Independent, community-maintained — not affiliated with any provider listed. Terms change without notice; always confirm against each provider's own docs. MIT licensed.</p><p class="foot-legal"><a href="${p}legal/privacy">Privacy</a> · <a href="${p}legal/terms">Terms</a></p><p class="foot-email"><a href="mailto:admin@freellmapihub.com">admin@freellmapihub.com</a></p></div></footer>`;
+<div class="footer-col"><h2 class="footer-h">Project</h2><a href="${p}updates">Updates</a><a href="${p}changes/">What changed</a><a href="${p}submit/">Submit</a><a href="${p}methodology/">Methodology</a><a href="${p}contributing/">Contributing</a><a href="${p}agreements/">Agreements</a></div>
+</div><div class="wrap footer-bottom"><p>Terms change without notice; always confirm against each provider's own docs. MIT licensed.</p><p class="foot-legal"><a href="${p}legal/privacy">Privacy</a> · <a href="${p}legal/terms">Terms</a></p><p class="foot-email"><a href="mailto:admin@freellmapihub.com">admin@freellmapihub.com</a></p></div></footer>`;
 
 // Full page wrapper for generated (collection) pages. `p` is the path prefix to the site root.
 // Theme guard — runs before first paint to avoid the white flash. ONE source, shared by
@@ -974,7 +1052,7 @@ const historyHtml = (slug) => {
   const items = all.slice().reverse().map((e) => `<li class="upd"><span class="upd-date">${e.date}</span> <span>${htmlEsc(e.text)}</span></li>`).join('');
   return `<h2>Change history</h2>` +
     `<p class="muted">How this free tier has changed since we started tracking it (${all[0].date}) — generated from the git history of <a href="${REPO}/commits/main/data/providers.json">providers.json</a>.</p>` +
-    `<ul class="upd-list">${items}</ul>`;
+    `<ul class="upd-list" data-pager="5">${items}</ul>`;
 };
 
 const provFlagsHtml = (p) => {
@@ -1023,7 +1101,13 @@ print(resp.choices[0].message.content)</code></pre><p class="muted">…or with c
     quick = `<h2 id="quickstart">Get started</h2><p class="muted">This is a first-party API, not OpenAI-compatible, so there is no drop-in base URL. The endpoint, the key and a working example are in the <a href="${docs}" target="_blank" rel="noopener">official docs</a>.</p>`;
   }
 
-  const summary = `<div class="prov-summary"><h2 id="whats-free">What's free</h2><p>${htmlEsc(p.free_tier)}</p></div>` + requirementsHtml(p);
+  // The score of the provider (lib/score.mjs, the same numbers as /best/ and the API) with its method one click away. Providers that are
+  // not scored (not verified, or outside the freshness window) say so instead of showing a number.
+  const sc = scoreMap[p.slug];
+  const scoreHtml = sc
+    ? `<div class="prov-score"><span class="best-score" title="Out of 100">${sc.total.toFixed(1)} / 100</span><span>Score${sc.rank ? ` · #${sc.rank} on <a href="../best/">The Best</a>` : ''} · ${sc.confirmed} of ${sc.of} inputs confirmed · <a href="../best/methodology/">how it is computed</a></span></div>`
+    : `<div class="prov-score"><span class="muted">No score: only verified providers inside the freshness window are scored · <a href="../best/methodology/">how it is computed</a></span></div>`;
+  const summary = `<div class="prov-summary"><h2 id="whats-free">What's free</h2><p>${htmlEsc(p.free_tier)}</p></div>` + scoreHtml + requirementsHtml(p);
   // Freshness relative to the current day (provider pages are regenerated on deploy, not diff-gated).
   const daysAgo = p.verified && p.last_verified ? ageInDays(p.last_verified, today) : null;
   const verifiedLine = p.verified
@@ -1047,11 +1131,6 @@ print(resp.choices[0].message.content)</code></pre><p class="muted">…or with c
     const host = u.hostname.replace(/^(docs|console|platform|developer|developers|api|dashboard|cloud|build|support|help|inference-docs)\./, '');
     websiteBtn = `<a class="btn website" href="${u.protocol}//${host}" target="_blank" rel="noopener">Visit website ↗</a>`;
   } catch (_) { /* no/invalid docs URL — skip the website button */ }
-  // "Report a change": the inaccuracy issue form, prefilled with this provider
-  // (input id `provider`) and an "[outdated] <name>" title. The URL components
-  // are percent-encoded in reportChangeUrl; htmlEsc makes the & separators safe
-  // inside the attribute.
-  const reportBtn = `<a class="btn ghost" href="${htmlEsc(reportChangeUrl(p, REPO))}" target="_blank" rel="noopener">${IC('ic-flag')}Report a change</a>`;
   // "Compare with …": the static comparisons this provider appears in, plus the
   // interactive view pre-filled with it.
   const comparePeers = suggestedPairs
@@ -1072,7 +1151,7 @@ print(resp.choices[0].message.content)</code></pre><p class="muted">…or with c
       h1: htmlEsc(p.name),
       afterTitle: `<div class="prov-badges"><span class="type">${typeLabel(p)}</span> ${verifiedLine}${probedLine} ${provFlagsHtml(p)}</div>`,
       lede: p.best_for ? htmlEsc(p.best_for) : '',
-      extra: `<div class="prov-actions">${docsBtn}${websiteBtn}${reportBtn}</div>`,
+      extra: `<div class="prov-actions">${docsBtn}${websiteBtn}</div>`,
     }) +
     `<main id="main"><div class="wrap prose prov-prose">` +
     summary +
@@ -1080,12 +1159,12 @@ print(resp.choices[0].message.content)</code></pre><p class="muted">…or with c
     glanceHtml(p, typeLabel(p)) +
     modelsHtml(p) +
     dataPolicyHtml(p) +
+    aboutHtml(summaryBySlug.get(p.slug), p.name) +
     disclosureHtml(AGREEMENTS_FILE, p.slug) +
     quick +
     (crossChips ? `<h2>Appears in</h2><div class="colls">${crossChips}</div>` : '') +
     compareHtml +
     historyHtml(p.slug) +
-    `<p class="prov-back"><a href="../#explorer">← All providers</a></p>` +
     `</div></main>`;
   const jsonld = JSON.stringify({
     '@context': 'https://schema.org',
@@ -1106,7 +1185,7 @@ print(resp.choices[0].message.content)</code></pre><p class="muted">…or with c
   });
   writeFileSync(
     join(ROOT, `site/p/${p.slug}.html`),
-    htmlPage({ title: `${p.name} — free tier & limits · Free LLM API Hub`, desc: `${p.name}: ${p.free_tier}`.slice(0, 180), canonical: `${SITE}/p/${p.slug}`, main, jsonld, ogImage: `${SITE}/og/p/${p.slug}.png` })
+    htmlPage({ title: `${p.name} — free tier & limits · Free LLM API Hub`, desc: `${p.name}: ${p.free_tier}`.slice(0, 180), canonical: `${SITE}/p/${p.slug}`, main, jsonld, ogImage: `${SITE}/og/p/${p.slug}.png`, scripts: ['pager.js'] })
   );
 
   // Embeddable per-provider badge. Same rule as the repo badge: the colour tracks
@@ -1138,6 +1217,29 @@ const legalPage = (slug, title, bodyHtml) => {
     htmlPage({ title: `${title} · Free LLM API Hub`, desc: `${title} for Free LLM API Hub, operated by ${ORG}`, canonical: `${SITE}/legal/${slug}`, main, noindex: true })
   );
 };
+
+// ---------- 404 ----------
+// GitHub Pages serves this one file for ANY missing path (/contributing/, /a/b/c), so a relative prefix would resolve against the
+// missing URL and lose the styles, the menu and the footer. It is built with the same header and footer as every page and the
+// root-absolute prefix '/'. The path read-out below is pinned by hash in the CSP: change its text and recompute the hash.
+const NOT_FOUND_PATH_SCRIPT = `<script>try{document.getElementById('path').textContent=location.pathname.replace('/free-llm-api-hub','')||'/';}catch(e){}</script>`;
+writeFileSync(
+  join(ROOT, 'site/404.html'),
+  htmlPage({
+    title: '404 — Free LLM API Hub',
+    desc: "That page isn't part of the dataset. It may have moved, or never existed. The data, though, is very much alive.",
+    canonical: `${SITE}/404`,
+    prefix: '/',
+    noindex: true,
+    main: `<main id="main" class="wrap nf">
+<div class="code">404</div>
+<p class="msg">&gt; command not found: <span class="path" id="path">/…</span><span class="caret" aria-hidden="true"></span></p>
+<p>That page isn't part of the dataset. It may have moved, or never existed. The data, though, is very much alive.</p>
+<div class="cta"><a class="btn primary" href="/">← Back home</a><a class="btn ghost" href="/#explorer">Browse providers</a><a class="btn ghost" href="/collections/">Collections</a></div>
+${NOT_FOUND_PATH_SCRIPT}
+</main>`,
+  })
+);
 
 legalPage('privacy', 'Privacy', `
 <p>This site is a static, open-source reference operated by ${ORG} It has no user accounts, no ads, and no third-party analytics or tracking.</p>
@@ -1215,24 +1317,31 @@ if (commits.length) {
 // derived-fingerprints.json (isGitLogDerived). Without git they render empty.
 const nameBySlug = Object.fromEntries(providers.map((p) => [p.slug, p.name]));
 const currentSlugs = new Set(providers.map((p) => p.slug));
-const changeWeeks = groupChangesByWeek(flattenFieldChanges(historyBySlug, nameBySlug), { weeks: 12 });
+const changeWeeks = groupChangesByWeek(flattenFieldChanges(historyBySlug, nameBySlug), { weeks: 12 }); // the feed only: the page is by month
 const provLink = (slug, name, prefix) => currentSlugs.has(slug) ? `<a href="${prefix}p/${slug}">${htmlEsc(name)}</a>` : htmlEsc(name);
 
 writeFileSync(join(ROOT, 'site/changes.xml'), changesRss(changeWeeks, { site: SITE }));
 
-const changeRowHtml = (c) =>
-  `<tr><td class="notes">${c.date}</td><td class="name">${provLink(c.slug, c.name, '../')}</td><td>${htmlEsc(c.label)}</td>` +
+const changeRowHtml = (c, prefix = '../') =>
+  `<tr><td class="notes">${c.date}</td><td class="name">${provLink(c.slug, c.name, prefix)}</td><td>${htmlEsc(c.label)}</td>` +
   `<td class="notes">${htmlEsc(formatValue(c.from))}</td><td>${htmlEsc(formatValue(c.to))}</td></tr>`;
 
-const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-const monthLabel = (month) => `${MONTH_NAMES[Number(month.slice(5, 7)) - 1]} ${month.slice(0, 4)}`;
-const pct = (x) => `${Math.round(x * 1000) / 10}%`;
 const addedBySlug = Object.fromEntries(providers.filter((p) => p.added).map((p) => [p.slug, p.added]));
 const stateMonths = reportMonths(monthEndSnapshots);
-const stateReports = stateMonths.map((m) => ({ ...monthlyReport({ ...m, historyBySlug, addedBySlug }), snapshotDate: monthEndSnapshots[m.month].date }));
+const stateReports = stateMonths.map((m) => ({ ...monthlyReport({ ...m, historyBySlug, addedBySlug }), snapshotDate: m.snapshotDate }));
+const allFieldChanges = flattenFieldChanges(historyBySlug, nameBySlug);
 const kvTable = (head, rowsArr) =>
   `<table class="model-table"><thead><tr>${head.map((h) => `<th>${htmlEsc(h)}</th>`).join('')}</tr></thead><tbody>` +
   rowsArr.map((r) => `<tr>${r.map((v, i) => `<td${i === 0 ? ' class="name"' : ''}>${v}</td>`).join('')}</tr>`).join('') + `</tbody></table>`;
+const statIcon = (icon, num, lbl) => `<div class="stat"><svg class="si" aria-hidden="true"><use href="#${icon}"/></svg><div class="num">${num}</div><div class="lbl">${lbl}</div></div>`;
+// What moved in a month, in the order it happened: the field changes of that month, oldest first.
+const movedSection = (r) => {
+  const label = monthLabel(r.month);
+  const moved = allFieldChanges.filter((c) => c.date.startsWith(r.month + '-')).sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0)); // stable: the name and field order inside a day is kept
+  return `<h2>What moved in ${label}</h2>` + (moved.length
+    ? `<table class="model-table"><thead><tr><th>Date</th><th>Provider</th><th>Field</th><th>From</th><th>To</th></tr></thead><tbody>\n${moved.map((c) => changeRowHtml(c, '../../')).join('\n')}\n</tbody></table>`
+    : `<p class="muted">No field changes in ${label}.</p>`);
+};
 const stat = (num, lbl) => `<div class="stat"><div class="num">${num}</div><div class="lbl">${lbl}</div></div>`;
 
 rmSync(join(ROOT, 'site/state'), { recursive: true, force: true });
@@ -1243,9 +1352,17 @@ stateReports.forEach((r, i) => {
   const next = stateReports[i + 1];
   const days = (d) => (d === null ? '—' : `${d}d`);
   const main =
-    pageHero({ crumbs: `<a href="../../">Home</a> / <a href="../../changes/#months">What changed</a> / ${label}`, h1: `State of free LLM APIs — ${label}`, lede: `Computed from the last revision of providers.json committed in ${label} (${r.snapshotDate}) and the git-mined change history. Ages are measured as of ${r.asOf}.` }) +
+    pageHero({ crumbs: `<a href="../../">Home</a> / <a href="../../changes/#months">What changed</a> / ${label}`, h1: `State of free LLM APIs — ${label}`, lede: r.carried
+      ? `No revision of providers.json was committed in ${label}: the figures repeat the last revision, of ${r.snapshotDate}, and ages are measured at the end of ${label}, ${r.asOf}.`
+      : `Computed from the last revision of providers.json committed in ${label} (${r.snapshotDate}) and the git-mined change history. Ages are measured as of ${r.asOf}.${r.inProgress ? ' The month is still in progress: the data reach ' + r.asOf + '.' : ''}` }) +
     `<main id="main"><div class="wrap prose">` +
-    `<div class="stats">${stat(r.total, 'providers')}${stat(pct(r.verifiedShare), 'verified')}${stat(days(r.freshness.medianDays), 'median verification age')}${stat(r.fieldChanges, 'field changes this month')}</div>` +
+    `<div class="stats stats-month">` +
+    statIcon('ic-shield', `${r.verified} of ${r.total}`, `providers verified (${pct(r.verifiedShare)})`) +
+    statIcon('ic-clock', days(r.freshness.medianDays), 'median verification age') +
+    statIcon('ic-refresh', r.fieldChanges, r.fieldChanges === 1 ? 'field change this month' : 'field changes this month') +
+    `</div>` +
+    `<p class="month-summary">${htmlEsc(monthSummary(r, prev))}</p>` +
+    movedSection(r) +
     `<h2>Providers by category</h2>` +
     kvTable(['Category', 'Providers'], [['Ongoing free tier', r.byCategory.ongoing], ['Trial credit', r.byCategory.trial], ['Total', r.total]]) +
     `<h2>Providers by modality</h2><p class="muted">A provider counts once for every modality it offers free.</p>` +
@@ -1257,15 +1374,11 @@ stateReports.forEach((r, i) => {
       [`Oldest verification, as of ${r.asOf}`, days(r.freshness.oldestDays)],
       [`Median verification age, as of ${r.asOf}`, days(r.freshness.medianDays)],
     ]) +
-    `<h2>Field changes in ${label}</h2>` +
-    `<p>${r.fieldChanges} field ${r.fieldChanges === 1 ? 'change' : 'changes'} across ${r.providersChanged.length} ${r.providersChanged.length === 1 ? 'provider' : 'providers'}.</p>` +
-    (r.providersChanged.length
-      ? kvTable(['Provider', 'Fields changed'], r.providersChanged.map((c) => [provLink(c.slug, c.name, '../../'), htmlEsc(c.fields.map((f) => HISTORY_FIELDS[f] || f).join(', '))]))
-      : '') +
     `<h2>Providers added in ${label}</h2>` +
     (r.added.length
       ? kvTable(['Provider', 'Added'], r.added.map((a) => [provLink(a.slug, a.name, '../../'), a.added]))
       : `<p class="muted">No provider in the snapshot has an <code>added</code> date in ${label}.</p>`) +
+    `<p class="muted">The data: <a href="../../api/v1/changes.json">api/v1/changes.json</a> has every field change, with its date, before and after.</p>` +
     `<nav class="pagination" aria-label="State reports">` +
     (prev ? `<a href="../${prev.month}/" rel="prev">← ${monthLabel(prev.month)}</a>` : '<span aria-hidden="true"></span>') +
     `<span><a href="../../changes/#months">All months</a></span>` +
@@ -1278,33 +1391,39 @@ stateReports.forEach((r, i) => {
     canonical: `${SITE}/state/${r.month}/`, main, prefix: '../../',
   }));
 });
-// /changes/ is the one page for what changed: the months (the state reports) and the weeks. /state/ redirects to it.
+// /changes/ is the one page for what changed: one table, by year and month, newest first. Every month between the first
+// and the last revision is listed (a month without a revision says "no changes"); each links to its report, which holds
+// the detail, in order. /state/ redirects to it. The weekly feed (changes.xml) stays for those who subscribe.
+const monthsByYear = new Map();
+for (const r of [...stateReports].reverse()) {
+  const year = r.month.slice(0, 4);
+  if (!monthsByYear.has(year)) monthsByYear.set(year, []);
+  monthsByYear.get(year).push(r);
+}
+const monthRowHtml = (r, yearCell) => {
+  const brief = monthBrief(r);
+  return `<tr${r.carried ? ' class="empty"' : ''}>${yearCell}` +
+    `<td class="name"><a href="../state/${r.month}/" aria-label="${monthLabel(r.month)}: ${htmlEsc(brief)}">${monthName(r.month)}</a></td>` +
+    `<td>${r.total}</td><td>${pct(r.verifiedShare)}</td><td>${r.fieldChanges}</td><td>${r.added.length}</td><td class="notes">${htmlEsc(brief)}</td></tr>`;
+};
 const monthsTable = stateReports.length
-  ? kvTable(['Month', 'Providers', 'Verified', 'Field changes', 'Added'],
-    [...stateReports].reverse().map((r) => [`<a href="../state/${r.month}/">${monthLabel(r.month)}</a>`, r.total, pct(r.verifiedShare), r.fieldChanges, r.added.length]))
+  ? `<table class="model-table months-table"><thead><tr><th>Year</th><th>Month</th><th>Providers</th><th>Verified</th><th>Field changes</th><th>Added</th><th>Summary</th></tr></thead><tbody>\n` +
+    [...monthsByYear].map(([year, list]) => list.map((r, i) => monthRowHtml(r, i === 0 ? `<th scope="rowgroup" rowspan="${list.length}">${year}</th>` : '')).join('\n')).join('\n') +
+    `\n</tbody></table>`
   : `<p class="muted">No history available.</p>`;
 const changesMain =
-  pageHero({ crumbs: `<a href="../">Home</a> / <a href="../updates">Updates</a> / What changed`, h1: `What changed`, lede: `Field-level changes to the free tiers we track (what's free, rate limits, the catch and the card, phone, commercial-use and OpenAI-compatibility flags), week by week, and one state report for each month. Mined from the git history of <a href="${REPO}/commits/main/data/providers.json">providers.json</a>. Subscribe via <a href="../changes.xml">RSS</a> or read the <a href="../api/v1/changes.json">JSON</a>.`, extra: `<nav class="colls" aria-label="On this page"><a href="#months">Month by month</a><a href="#weeks">Week by week</a></nav>` }) +
+  pageHero({ crumbs: `<a href="../">Home</a> / <a href="../updates">Updates</a> / What changed`, h1: `What changed`, lede: `Field-level changes to the free tiers we track (what's free, rate limits, the catch and the card, phone, commercial-use and OpenAI-compatibility flags), month by month. Mined from the git history of <a href="${REPO}/commits/main/data/providers.json">providers.json</a>. Subscribe via <a href="../changes.xml">RSS</a> or read the <a href="../api/v1/changes.json">JSON</a>.` }) +
   `<main id="main"><div class="wrap prose">` +
   `<section id="months"><h2>Month by month</h2>` +
-  `<p>One report per month with a committed change to providers.json: provider counts by category and modality, verified share, verification age, field changes and providers added. Every figure is computed from the data and its git history.</p>` +
+  `<p>One report per month, from the first to the latest: provider counts by category and modality, verified share, verification age, and every field change and provider added, in the order they happened. A month with no committed revision of providers.json says so. Every figure is computed from the data and its git history.</p>` +
   monthsTable + `</section>` +
-  `<section id="weeks"><h2>Week by week</h2>` +
-  `<p>Grouped by ISO week, newest first. Covers the last 12 weeks up to the newest change.</p>` +
-  (changeWeeks.length
-    ? changeWeeks.map((g) =>
-      `<section id="${g.week}"><h3>${htmlEsc(weekTitle(g))}</h3>` +
-      `<table class="model-table"><thead><tr><th>Date</th><th>Provider</th><th>Field</th><th>From</th><th>To</th></tr></thead><tbody>\n` +
-      g.changes.map(changeRowHtml).join('\n') + `\n</tbody></table></section>`).join('\n')
-    : `<p class="muted">No field-level changes in the mined history.</p>`) +
-  `</section>` +
   `<p class="prov-back"><a href="../updates">← All updates</a></p>` +
   `</div></main>`;
 rmSync(join(ROOT, 'site/changes'), { recursive: true, force: true });
 mkdirSync(join(ROOT, 'site/changes'), { recursive: true });
 writeFileSync(join(ROOT, 'site/changes/index.html'), htmlPage({
   title: 'What changed · Free LLM API Hub',
-  desc: 'What changed in the free LLM API dataset: field-level changes week by week (free tier, rate limits, the catch and access flags, before and after) and a state report for each month.',
+  desc: 'What changed in the free LLM API dataset, month by month: field-level changes (free tier, rate limits, the catch and access flags, before and after) and a state report for each month.',
   canonical: `${SITE}/changes/`, main: changesMain, prefix: '../',
   feeds: [{ title: 'Free LLM API Hub — what changed, week by week', href: 'changes.xml' }],
 }));
@@ -1722,18 +1841,15 @@ const bestIntroHtml = htmlEsc(BEST.intro).replace(/`([^`]+)`/g, '<code>$1</code>
 const scoreTxt = (x) => x.toFixed(1);
 const bestCard = (e) => {
   const { rank, p, podium } = e;
-  const ver = p.verified
-    ? '<span class="v ok">' + IC('ic-check') + ' verified ' + htmlEsc(p.last_verified) + '</span>'
-    : '<span class="v warn">' + IC('ic-warn') + ' unverified</span>';
   const note = EDITORIAL.ratings?.[p.slug]?.note;
+  // The score has a frame and the position is centred on the card; the third row (verified date, inputs confirmed, one-line
+  // description) is replaced by three cards of fields of the record: Free quota, Rate limit and Requirements (lib/best-facts.mjs).
   return '<li class="best-item' + (podium ? ' best-podium best-podium-' + rank : '') + '"><div class="best-rank" aria-hidden="true">' + String(rank).padStart(2, '0') + '</div><div class="best-body">' +
     '<div class="best-head"><h2><a href="../p/' + p.slug + '">' + htmlEsc(p.name) + '</a></h2>' +
+    (e.boundary ? '<span class="best-flag" title="The model tier of this provider sits near a threshold of the score; it is flagged, never penalized">tier near a threshold</span>' : '') +
     '<span class="best-score" title="Out of 100">' + scoreTxt(e.total) + ' / 100</span></div>' +
-    '<p class="best-why">' + htmlEsc(p.free_tier) + '</p>' +
     (note ? '<p class="best-editorial">' + htmlEsc(note) + '</p>' : '') +
-    '<p class="best-meta">' + ver + ' <span class="sep">·</span> ' + e.confirmed + ' of ' + e.of + ' inputs confirmed' +
-    (e.boundary ? ' <span class="sep">·</span> model tier near a threshold' : '') +
-    (p.best_for ? ' <span class="sep">·</span> ' + htmlEsc(p.best_for) : '') + '</p>' +
+    bestFactsHtml(p, IC) +
     '</div></li>';
 };
 const podiumHtml = topList.filter((e) => e.podium).map(bestCard).join('\n');
@@ -1762,7 +1878,7 @@ const bestMain =
   '<main id="main"><div class="wrap">' +
   '<p class="best-intro">' + bestIntroHtml + '</p>' +
   '<h2 class="best-section">The podium</h2><ol class="best-list best-podium-list">' + podiumHtml + '</ol>' +
-  (restHtml ? '<h2 class="best-section">Ranks ' + (PODIUM_SIZE + 1) + ' to ' + topList.length + '</h2><ol class="best-list" start="' + (PODIUM_SIZE + 1) + '">' + restHtml + '</ol>' : '') +
+  (restHtml ? '<hr class="best-sep" aria-hidden="true"><h2 class="sr-only">Ranks ' + (PODIUM_SIZE + 1) + ' to ' + topList.length + '</h2><ol class="best-list" start="' + (PODIUM_SIZE + 1) + '">' + restHtml + '</ol>' : '') +
   '<p class="count best-note">' + (topList.length < TOP_SIZE ? 'Only ' + topList.length + ' providers meet the minimum evidence today; the list is never padded to ' + TOP_SIZE + '. ' : '') +
   'Computed from the data on ' + htmlEsc(data.generated) + ' — <a href="methodology/">how the score works</a>. Every provider links to its full verified profile.</p>' +
   '</div></main>';
@@ -1800,6 +1916,60 @@ writeFileSync(
   htmlPage({ title: 'How the score works · Free LLM API Hub', desc: 'The parameters, weights and rules behind the Free LLM API Hub top 10: what is measured, what is editorial, and that being a partner scores nothing.', canonical: SITE + '/best/methodology/', main: methodMain, prefix: '../../' })
 );
 
+// ---------- /methodology/ and /contributing/ — the two documents of the repository, as pages ----------
+// Written from docs/methodology.md and CONTRIBUTING.md with lib/markdown.mjs (no dependency; nothing of the source is passed through as HTML), so the page and
+// the file on GitHub cannot say different things. A relative link of the document becomes a link to the file on GitHub, or to the page when the file has one.
+const DOC_PAGES = [
+  { slug: 'methodology', file: 'docs/methodology.md', title: 'Methodology: how a provider gets on the list · Free LLM API Hub',
+    desc: 'How an entry gets on the list, what verified means and does not mean, and how freshness, sourcing, corrections, model tier and the score work.',
+    h1: 'Methodology', lede: 'How an entry gets on the list, what “verified” means, and what it does not.' },
+  { slug: 'contributing', file: 'CONTRIBUTING.md', title: 'Contributing: add or fix a provider · Free LLM API Hub',
+    desc: 'How to add or fix a provider, report a mistake without a pull request, claim an issue, and what happens to your first pull request.',
+    h1: 'Contributing', lede: 'How to add or fix a provider, step by step.' },
+];
+const DOC_LINKS = { repo: REPO, site: SITE, pages: Object.fromEntries(DOC_PAGES.map((d) => [d.file, `/${d.slug}/`])) };
+for (const d of DOC_PAGES) {
+  mkdirSync(join(ROOT, `site/${d.slug}`), { recursive: true });
+  const body = markdownToHtml(readFileSync(join(ROOT, d.file), 'utf8'), { ...DOC_LINKS, from: d.file }).replace(/^<h1[^>]*>.*?<\/h1>\n?/, '');
+  writeFileSync(join(ROOT, `site/${d.slug}/index.html`), htmlPage({
+    title: d.title, desc: d.desc, canonical: `${SITE}/${d.slug}/`, prefix: '../',
+    main: pageHero({ crumbs: `<a href="../">Home</a> / ${htmlEsc(d.h1)}`, h1: d.h1, lede: d.lede }) +
+      `<main id="main"><div class="wrap prose doc">${body}` +
+      `<p class="muted">This page is written from <a href="${REPO}/blob/main/${d.file}" target="_blank" rel="noopener">${htmlEsc(d.file)}</a> in the repository. To change it, open a pull request there.</p>` +
+      `</div></main>`,
+  }));
+}
+
+// ---------- /submit/ — how to ask us to add, review or correct something ----------
+// No form and no email address on purpose: this site is static (no backend), and every request is a public GitHub issue, so
+// anyone can see what was asked and what was decided. The links open the issue forms in .github/ISSUE_TEMPLATE/.
+const issueForm = (template) => `${REPO}/issues/new?template=${template}`;
+const submitRequests = [
+  ['Propose a new provider', 'A free tier or a trial-credit LLM API that is not tracked yet. We list what the provider\'s own documentation states.', 'new-provider.yml', 'Propose a provider'],
+  ['Report a wrong or stale entry', 'A limit, a requirement or a link that no longer matches the provider\'s own documentation.', 'inaccuracy.yml', 'Report a correction'],
+];
+// The one address on this page, for business and partnerships only (the address the legal pages already publish). It is plain text, with no
+// mailto link: a provider should not have to talk about agreements in a public issue. Data requests stay on the public forms.
+const BUSINESS_EMAIL = 'admin@freellmapihub.com';
+mkdirSync(join(ROOT, 'site/submit'), { recursive: true });
+writeFileSync(
+  join(ROOT, 'site/submit/index.html'),
+  htmlPage({
+    title: 'Submit a provider, a correction or a request · Free LLM API Hub',
+    desc: 'Ask us to add a free LLM API or correct an entry through public GitHub issues. Companies and partnerships have one business address.',
+    canonical: SITE + '/submit/',
+    main:
+      pageHero({ crumbs: `<a href="../">Home</a> / Submit`, h1: `Submit`, lede: `Ask us to add, review or correct something. Data requests are public GitHub issues, so anyone can see what was asked and what was decided. Business and partnerships have one address.` }) +
+      `<main id="main"><div class="wrap prose">` +
+      submitRequests.map(([h, text, template, cta]) => `<section><h2>${htmlEsc(h)}</h2><p>${text}</p><p><a class="btn primary" href="${issueForm(template)}" target="_blank" rel="noopener">${htmlEsc(cta)}</a></p></section>`).join('\n') +
+      `<section><h2>Business and partnerships</h2><p>For a partnership, an agreement or a question from a company, write to <strong class="business-email">${BUSINESS_EMAIL}</strong>. Money never changes a score. Corrections and new providers do not go there: use the forms above.</p></section>` +
+      `<section><h2>Anything else</h2><p>Questions, ideas and open-ended suggestions go to the <a href="${REPO}/discussions" target="_blank" rel="noopener">GitHub discussions</a>.</p></section>` +
+      `<p class="muted">Every entry is checked against the provider's own documentation; see how in the <a href="../methodology/">methodology</a>.</p>` +
+      `</div></main>`,
+    prefix: '../',
+  })
+);
+
 // ---------- /coverage/ — what the dataset does not know yet, as a task board ----------
 const fieldCoverage = coverage(providers);
 mkdirSync(join(ROOT, 'site/coverage'), { recursive: true });
@@ -1832,6 +2002,46 @@ writeFileSync(
     styles: ['tables.css'],
   })
 );
+
+// One page per tool: /coding-tools/<slug>/. The same data as the list, with the sentence, the source and the day of each value, and the
+// values the tool's page does not state shown as «Not stated».
+const CODING_TOOL_PAGES = [
+  ...codingTools.entries.map((e) => ({ e, group: 'free', generated: codingTools.generated })),
+  ...codingToolsOwnKey.entries.map((e) => ({ e, group: 'own-key', generated: codingToolsOwnKey.generated })),
+];
+for (const { e, group } of CODING_TOOL_PAGES) {
+  if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(e.slug)) throw new Error('coding tool slug is not kebab-case: ' + e.slug);
+  const canonical = `${SITE}/coding-tools/${e.slug}/`;
+  const jsonld = JSON.stringify({
+    '@context': 'https://schema.org',
+    '@graph': [
+      { '@type': 'WebPage', name: codingToolTitle(e.name), url: canonical, isPartOf: { '@type': 'WebPage', name: 'Free AI coding tools', url: `${SITE}/coding-tools/` } },
+      {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Free LLM API Hub', item: `${SITE}/` },
+          { '@type': 'ListItem', position: 2, name: 'Free AI coding tools', item: `${SITE}/coding-tools/` },
+          { '@type': 'ListItem', position: 3, name: e.name, item: canonical },
+        ],
+      },
+    ],
+  });
+  mkdirSync(join(ROOT, `site/coding-tools/${e.slug}`), { recursive: true });
+  writeFileSync(
+    join(ROOT, `site/coding-tools/${e.slug}/index.html`),
+    htmlPage({
+      title: codingToolTitle(e.name),
+      desc: codingToolDescription(e),
+      canonical,
+      main:
+        pageHero({ crumbs: `<a href="../../">Home</a> / <a href="../">Free AI coding tools</a> / ${htmlEsc(e.name)}`, h1: htmlEsc(e.name), lede: `What the tool's own page says about a free plan, with the sentence and the day it was read.` }) +
+        codingToolMainHtml(e, { prefix: '../../', group, others: CODING_TOOL_PAGES.map((x) => x.e).filter((o) => o.slug !== e.slug) }),
+      jsonld,
+      prefix: '../../',
+      styles: ['tables.css'],
+    })
+  );
+}
 
 // ---------- /data-policy/ — who trains on your data, with the provider's own words ----------
 // Reads data_policy only. A row without a recorded sentence says so; "not confirmed" is never "no".
@@ -1978,10 +2188,13 @@ const sitemapEntries = [
   [`${SITE}/best/`, data.generated],
   [`${SITE}/best/methodology/`, data.generated],
   [`${SITE}/coverage/`, data.generated],
+  [`${SITE}/submit/`, data.generated],
+  ...DOC_PAGES.map((d) => [`${SITE}/${d.slug}/`, data.generated]),
   [`${SITE}/data-policy/`, data.generated],
   [`${SITE}/agreements/`, AGREEMENTS.generated],
   [`${SITE}/free-gpu/`, freeGpu.generated],
   [`${SITE}/coding-tools/`, codingTools.generated],
+  ...CODING_TOOL_PAGES.map(({ e, generated }) => [`${SITE}/coding-tools/${e.slug}/`, generated]),
   [`${SITE}/api/`, data.generated],
   [`${SITE}/changes/`, data.generated],
   [`${SITE}/programs/`, programs.generated],

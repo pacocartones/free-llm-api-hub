@@ -9,7 +9,8 @@ import addFormats from 'ajv-formats';
 import { privateTree } from './lib/private-tree.mjs';
 import { codingToolsErrors, CLAIM_FIELDS, KINDS } from './lib/coding-tools.mjs';
 import { hasHiddenChars } from './lib/hidden-chars.mjs';
-import { codingToolsMainHtml, codingToolsCounts } from './lib/free-coding-tools.mjs';
+import { codingToolsMainHtml, codingToolsCounts, codingToolTitle, codingToolDescription } from './lib/free-coding-tools.mjs';
+import { htmlEsc } from './lib/rows.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const providers = JSON.parse(readFileSync(join(ROOT, 'data/providers.json'), 'utf8')).providers;
@@ -291,4 +292,53 @@ test('hidden characters: the two validators use the shared file and neither defi
     assert.match(src, /from '\.\/(lib\/)?hidden-chars\.mjs'/, `${name} does not import the shared definition`);
     assert.doesNotMatch(src, /HIDDEN_CHARS_RE\s*=/, `${name} defines its own pattern`);
   }
+});
+
+// ---- one page per tool (/coding-tools/<slug>/) ----
+const ownKeySection = () => JSON.parse(readFileSync(join(ROOT, 'data/coding-tools-own-key.json'), 'utf8'));
+
+test('each tool has its own page, with its sentences, sources and days, and what it does not state apart', () => {
+  // Mutant: drop a tool from the pages, drop a quotation, or show a value that is not stated as «no»; this test turns red.
+  buildSite();
+  const tools = [...section().entries, ...ownKeySection().entries];
+  const dirs = readdirSync(join(out(), 'site/coding-tools'), { withFileTypes: true }).filter((d) => d.isDirectory()).map((d) => d.name).sort();
+  assert.deepEqual(dirs, tools.map((t) => t.slug).sort(), 'one page per tool, and no other');
+  const sitemap = readFileSync(join(out(), 'site/sitemap.xml'), 'utf8');
+  for (const t of tools) {
+    const html = readFileSync(join(out(), `site/coding-tools/${t.slug}/index.html`), 'utf8');
+    const title = html.match(/<title>([^<]*)<\/title>/)[1];
+    assert.ok(title.length <= 60, `${t.slug}: title of at most 60 characters (${title.length})`);
+    const desc = html.match(/<meta name="description" content="([^"]*)"/)[1];
+    assert.ok(desc.length >= 70 && desc.length <= 155, `${t.slug}: description of 70 to 155 characters (${desc.length})`);
+    assert.ok(html.includes(`<link rel="canonical" href="https://freellmapihub.com/coding-tools/${t.slug}/">`), `${t.slug}: its own canonical`);
+    assert.ok(sitemap.includes(`/coding-tools/${t.slug}/`), `${t.slug}: in the sitemap`);
+    const main = html.slice(html.indexOf('<main id="main">'));
+    const statedAt = main.indexOf('id="stated"'), notStatedAt = main.indexOf('id="not-stated"'), sourcesAt = main.indexOf('id="sources"');
+    assert.ok(statedAt > 0 && notStatedAt > statedAt && sourcesAt > notStatedAt, `${t.slug}: the three sections, in order`);
+    for (const [field, c] of Object.entries(t.claims)) {
+      for (const q of c.quotes) {
+        assert.ok(main.includes(htmlEsc(q.text)), `${t.slug}: the sentence of ${field} is on the page`);
+        assert.ok(main.includes(`read ${q.read}`), `${t.slug}: the day it was read`);
+        assert.ok(main.includes(new URL(q.source).hostname), `${t.slug}: the page it comes from`);
+      }
+      const at = main.indexOf(`id="${t.slug}-${field}"`);
+      assert.ok(at > 0, `${t.slug}: ${field} is shown`);
+      if (c.state !== 'stated') {
+        assert.ok(at > notStatedAt && at < sourcesAt, `${t.slug}: ${field} is under «does not say»`);
+        assert.match(main.slice(at, at + 400), /<span class="gpu-unstated">Not stated<\/span>/, `${t.slug}: ${field} reads Not stated`);
+      } else assert.ok(at < notStatedAt, `${t.slug}: ${field} is under «states»`);
+    }
+    assert.ok(!/<dd>\s*(No|no)\b/.test(main), `${t.slug}: a value that is not stated never reads «no»`);
+    const jsonld = JSON.parse(html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1].replace(/\\u003c/g, '<'));
+    assert.equal(jsonld['@graph'].find((n) => n['@type'] === 'BreadcrumbList').itemListElement.length, 3, `${t.slug}: breadcrumb of three`);
+  }
+  const list = readFileSync(join(out(), 'site/coding-tools/index.html'), 'utf8');
+  for (const t of tools) assert.ok(list.includes(`href="../coding-tools/${t.slug}/"`), `the list links the page of ${t.slug}`);
+});
+
+test('the title and the description of a tool page are bounded and built from the entry', () => {
+  assert.equal(codingToolTitle('Zed'), 'Zed free plan · Free LLM API Hub');
+  assert.ok(codingToolTitle('A tool with an extremely long product name that goes on').length <= 60 || !codingToolTitle('A tool with an extremely long product name that goes on').includes('Free LLM API Hub'), 'a long name drops the suffix');
+  const e = entry({ name: 'Acme', kind: 'editor' });
+  assert.match(codingToolDescription(e), /^Acme \(editor\): /);
 });

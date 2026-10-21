@@ -17,12 +17,13 @@ import { freshnessBadge, freshnessColor, freshnessStatus, recScore, SLA_DAYS, DU
 import { esc, stripTags } from './lib/escape.mjs';
 import { mineProviderHistory, assertHistoryPlausible, historyFromRevisions } from './lib/history.mjs';
 import { isoWeek, flattenFieldChanges, groupChangesByWeek, changesRss, xmlEsc, reportChangeUrl } from './lib/changes.mjs';
-import { monthlyReport, reportMonths, monthEndDate } from './lib/state.mjs';
+import { monthlyReport, reportMonths, monthEndDate, fillMonths, monthSummary, monthBrief } from './lib/state.mjs';
 import { externalContributors, countExternalContributors, githubProfileUrl } from './lib/contributors.mjs';
 import { buildOgManifest } from './lib/og.mjs';
-import { explorerRowHtml } from './lib/rows.mjs';
+import { explorerRowHtml, catchTags, catchCellHtml, CATCH_LABELS } from './lib/rows.mjs';
 import { labelTables } from './lib/tables.mjs';
 import { markNewTabLinks } from './lib/links.mjs';
+import { bestFactsHtml } from './lib/best-facts.mjs';
 import { weeklyPacing, weeklyBatch, WEEKLY_CAP, MIN_AGE_DAYS } from './lib/pacing.mjs';
 import { clientConfigProviders, openaiClients, litellmYaml, MODEL_PLACEHOLDER } from './lib/client-config.mjs';
 import { requirementsHtml, limitsHtml, glanceHtml, modelsHtml, dataPolicyHtml } from './lib/provider-sections.mjs';
@@ -1172,7 +1173,96 @@ test('the monthly state report computes its numbers from the snapshot and histor
   assert.equal(monthEndDate('2028-02'), '2028-02-29');
 });
 
-test('the "Report a change" URL prefills the inaccuracy form and is escaped on the page', () => {
+test('fillMonths: every month from the first to the last revision; a month without one repeats the month before', () => {
+  const may = [{ slug: 'a' }], aug = [{ slug: 'a' }, { slug: 'b' }];
+  const m = fillMonths({ '2026-05': { date: '2026-05-20', providers: may }, '2026-08': { date: '2026-08-14', providers: aug } });
+  assert.deepEqual(m.map((x) => [x.month, x.carried]), [['2026-05', false], ['2026-06', true], ['2026-07', true], ['2026-08', false]]);
+  // Mutant: copy the snapshot of the NEXT revision into a gap, and June would already know provider b.
+  assert.equal(m[1].snapshot, may, 'June repeats May, not August');
+  assert.equal(m[2].snapshot, may);
+  assert.equal(m[1].snapshotDate, '2026-05-20');
+  assert.deepEqual(m.map((x) => x.asOf), ['2026-05-31', '2026-06-30', '2026-07-31', '2026-08-14'], 'past months at their end, the newest at its last revision');
+  assert.deepEqual(m.map((x) => x.inProgress), [false, false, false, true], 'only the newest month, and only before its end');
+  assert.equal(fillMonths({ '2026-08': { date: '2026-08-31', providers: [] } })[0].inProgress, false, 'a revision on the last day closes the month');
+  assert.deepEqual(fillMonths({ '2025-11': { date: '2025-11-02', providers: [] }, '2026-02': { date: '2026-02-03', providers: [] } }).map((x) => x.month),
+    ['2025-11', '2025-12', '2026-01', '2026-02'], 'across the new year');
+  assert.deepEqual(fillMonths({}), []);
+  // The newest month is the month of the last revision, never the clock: the same input gives the same output.
+  assert.deepEqual(fillMonths({ '2026-05': { date: '2026-05-20', providers: may } }), fillMonths({ '2026-05': { date: '2026-05-20', providers: may } }));
+});
+
+test('a carried month reports no change and nothing added, whatever the dates of its snapshot say', () => {
+  const snapshot = [{ slug: 'a', name: 'A', verified: true, last_verified: '2026-05-10', added: '2026-06-10' }];
+  const history = { a: [{ kind: 'changed', date: '2026-05-12', fields: ['rate_limits'], changes: [{ field: 'rate_limits', from: 'x', to: 'y' }] }] };
+  const june = monthlyReport({ month: '2026-06', asOf: monthEndDate('2026-06'), snapshot, historyBySlug: history, addedBySlug: { a: '2026-06-10' }, carried: true });
+  assert.equal(june.fieldChanges, 0);
+  assert.deepEqual(june.added, [], 'a provider with an added date inside a month that has no revision is not "added in" it');
+  assert.equal(june.carried, true);
+  const may = monthlyReport({ month: '2026-05', asOf: monthEndDate('2026-05'), snapshot, historyBySlug: history, addedBySlug: { a: '2026-06-10' } });
+  assert.equal(may.fieldChanges, 1);
+  assert.ok(june.freshness.medianDays > may.freshness.medianDays, 'the age grows: it is measured at the end of the later month');
+});
+
+test('the summary of a month is built from the figures of its report: singular, plural, zero, the change in points, and carried', () => {
+  const base = { month: '2026-07', carried: false, inProgress: false, fieldChanges: 3, providersChanged: [1, 2], added: [1], verifiedShare: 0.8 };
+  const prev = { month: '2026-06', verifiedShare: 0.75 };
+  assert.equal(monthSummary(base, prev), 'In July 2026 there were 3 field changes across 2 providers, 1 added, and 80% of the providers were verified (+5 points on June 2026).');
+  assert.match(monthSummary({ ...base, fieldChanges: 1, providersChanged: [1] }, prev), /there was 1 field change across 1 provider, /);
+  assert.match(monthSummary({ ...base, fieldChanges: 0, providersChanged: [], added: [] }, prev), /there were no field changes, none added, /);
+  assert.match(monthSummary({ ...base, verifiedShare: 0.7 }, prev), /\(−5 points on June 2026\)/);
+  assert.match(monthSummary({ ...base, verifiedShare: 0.7504 }, prev), /\(no change on June 2026\)/, 'under a tenth of a point is no change');
+  assert.match(monthSummary({ ...base, verifiedShare: 0.76 }, prev), /\(\+1 point on June 2026\)/, 'one point is singular');
+  assert.doesNotMatch(monthSummary(base, null), /points?|no change/, 'the first month has nothing to compare with');
+  assert.match(monthSummary({ ...base, carried: true }, prev), /^No revision of providers\.json was committed in July 2026, so nothing changed/);
+  assert.equal(monthBrief({ ...base, carried: true }), 'no changes');
+  assert.equal(monthBrief(base), '3 field changes, 1 added');
+  assert.equal(monthBrief({ ...base, fieldChanges: 0, added: [] }), 'no field changes');
+  assert.equal(monthBrief({ ...base, inProgress: true, asOf: '2026-07-14' }), '3 field changes, 1 added · in progress, data to 2026-07-14');
+});
+
+test('/changes/ is one table by year and month with every month in a row; each month page has three tiles, its summary and what moved in order', () => {
+  run(['scripts/build.mjs']);
+  const page = readFileSync(join(ROOT, 'site/changes/index.html'), 'utf8');
+  assert.doesNotMatch(page, /Week by week|id="weeks"/);
+  const table = page.slice(page.indexOf('<table class="model-table months-table">'), page.indexOf('</table>', page.indexOf('months-table')));
+  // Every month between the first and the last is a row, newest first, with no gap: each month is the one before the one above it.
+  const months = [...table.matchAll(/href="\.\.\/state\/(\d{4}-\d{2})\/"/g)].map((m) => m[1]);
+  assert.ok(months.length >= 2);
+  const before = (mo) => { const [y, n] = mo.split('-').map(Number); return n === 1 ? `${y - 1}-12` : `${y}-${String(n - 1).padStart(2, '0')}`; };
+  for (let i = 1; i < months.length; i++) assert.equal(months[i], before(months[i - 1]), `no month missing or out of order after ${months[i - 1]}`);
+  // The year is a group cell that spans exactly the months of that year.
+  const groups = [...table.matchAll(/<th scope="rowgroup" rowspan="(\d+)">(\d{4})<\/th>/g)].map((m) => [m[2], Number(m[1])]);
+  assert.deepEqual(groups.map((g) => g[0]), [...new Set(months.map((m) => m.slice(0, 4)))], 'years, newest first, once each');
+  for (const [year, n] of groups) assert.equal(n, months.filter((m) => m.startsWith(year)).length, `the group of ${year} spans its months`);
+  // A month without a revision reads "no changes" and is a row of its own with its page.
+  const rows = table.split('<tr').slice(2);
+  for (const row of rows) {
+    const month = row.match(/state\/(\d{4}-\d{2})\//)[1];
+    assert.ok(existsSync(join(ROOT, `site/state/${month}/index.html`)), `the page of ${month} exists`);
+    assert.equal(/class="empty"/.test(row), /no changes/.test(row), `${month}: dimmed if and only if it says "no changes"`);
+    assert.match(row, new RegExp(`aria-label="[A-Za-z]+ ${month.slice(0, 4)}: `), `${month}: the link says its month and year`);
+  }
+  for (const month of months) {
+    const html = readFileSync(join(ROOT, `site/state/${month}/index.html`), 'utf8');
+    const main = html.slice(html.indexOf('<main id="main">'));
+    const tiles = [...main.matchAll(/<div class="stat"><svg class="si" aria-hidden="true">/g)];
+    assert.equal(tiles.length, 3, `${month}: three tiles, each with a decorative icon`);
+    const changes = Number(main.match(/<div class="num">(\d+)<\/div><div class="lbl">field changes? this month/)[1]);
+    const moved = main.slice(main.indexOf('What moved in'), main.indexOf('Providers by category'));
+    const dates = [...moved.matchAll(/<tr><td class="notes">(\d{4}-\d{2}-\d{2})<\/td>/g)].map((m) => m[1]);
+    assert.equal(dates.length, changes, `${month}: the rows of "What moved" are the field changes of the figure`);
+    assert.ok(dates.every((d) => d.startsWith(month + '-')), `${month}: only changes of that month`);
+    assert.deepEqual(dates, [...dates].sort(), `${month}: in the order they happened`);
+    const said = main.match(/class="month-summary">[^<]*?there (?:was|were) (no|\d+) field change/);
+    if (said) assert.equal(said[1] === 'no' ? 0 : Number(said[1]), changes, `${month}: the sentence uses the figure of the tile`);
+    assert.ok(/class="month-summary"/.test(main), `${month}: has its summary`);
+  }
+  const css = readFileSync(join(ROOT, 'site/styles.css'), 'utf8');
+  assert.match(css, /\.stats\.stats-month \{[^}]*min-height: 0/, 'no room reserved under the tiles of a month (the home reserves it for its script)');
+  assert.match(css, /\.stats\.stats-month \{[^}]*align-items: start/);
+});
+
+test('the "Report a change" URL helper prefills the inaccuracy form and is escaped; the provider page no longer shows the button', () => {
   const repo = 'https://github.com/pacocartones/free-llm-api-hub';
   const url = reportChangeUrl({ slug: 'a-b', name: 'A&B "Labs" / 100% #1' }, repo);
   assert.equal(url, `${repo}/issues/new?template=inaccuracy.yml&provider=a-b&title=%5Boutdated%5D%20A%26B%20%22Labs%22%20%2F%20100%25%20%231`);
@@ -1185,8 +1275,7 @@ test('the "Report a change" URL prefills the inaccuracy form and is escaped on t
 
   const page = join(ROOT, 'site/p/groq.html');
   if (!existsSync(page)) run(['scripts/build.mjs']);
-  assert.match(readFileSync(page, 'utf8'),
-    /<a class="btn ghost" href="https:\/\/github\.com\/pacocartones\/free-llm-api-hub\/issues\/new\?template=inaccuracy\.yml&amp;provider=groq&amp;title=%5Boutdated%5D%20Groq"/);
+  assert.doesNotMatch(readFileSync(page, 'utf8'), /Report a change|template=inaccuracy\.yml&amp;provider=groq/, 'the button was removed from the provider page');
 });
 
 test('the change feed and state reports are built but never pinned in derived-fingerprints.json', () => {
@@ -1220,7 +1309,7 @@ test('the change feed and state reports are built but never pinned in derived-fi
   assert.match(stateRedirect, /<meta name="robots" content="noindex">/);
   const changesPage = readFileSync(join(ROOT, 'site/changes/index.html'), 'utf8');
   assert.match(changesPage, /<section id="months">/);
-  assert.match(changesPage, /<section id="weeks">/);
+  assert.doesNotMatch(changesPage, /id="weeks"|Week by week|href="#weeks"/, 'the weekly section and its button are gone; the feed stays');
   for (const month of months) assert.match(changesPage, new RegExp(`href="\\.\\./state/${month}/"`), `the month ${month} is linked from the one page`);
   assert.doesNotMatch(sitemap, /\/state\/\d{4}-\d{2}\//, 'per-month URLs depend on commit dates, so they stay out of the drift-gated sitemap');
 });
@@ -1348,14 +1437,14 @@ test('mobile sort select shows a placeholder for sorts it does not offer', () =>
   run('name', -1); assert.equal(sel.value, 'custom');
 });
 
-test('home: search box, Compare in the menu, and the star count rendered at build', () => {
+test('home: search box, Submit in the menu, and the star count rendered at build', () => {
   run(['scripts/build.mjs']);
   const index = readFileSync(join(ROOT, 'site/index.html'), 'utf8');
   assert.match(index, /<input type="search" id="q"[^>]*>/);
   assert.match(index, /<label class="sr-only" for="q">/);
   for (const page of [index, readFileSync(join(ROOT, 'site/compare/index.html'), 'utf8'), readFileSync(join(ROOT, 'site/p/groq.html'), 'utf8')]) {
     const nav = page.slice(page.indexOf('id="primary-nav"'), page.indexOf('</nav>', page.indexOf('id="primary-nav"')));
-    assert.match(nav, /href="(\.\.\/)?compare\/"/);
+    assert.match(nav, /href="(\.\.\/)?submit\/"/);
   }
   const { stars } = JSON.parse(readFileSync(join(ROOT, 'data/repo-stats.json'), 'utf8'));
   assert.ok(Number.isInteger(stars));
@@ -1405,14 +1494,14 @@ test('the client makes no GitHub API call and the home search covers model names
   assert.ok(searchText(groq).includes(groq.models_free[0].toLowerCase()), 'a real provider is found by one of its models');
 });
 
-test('header menu: only Guides & Collections, Compare and The Best (highlighted); Models and API live in the footer', () => {
+test('header menu: only Guides & Collections, The Best (highlighted) and Submit; Models and API live in the footer', () => {
   run(['scripts/build.mjs']);
   const pages = ['site/index.html', 'site/compare/index.html', 'site/p/groq.html', 'site/models/index.html', 'site/guides-and-collections/index.html'];
   for (const rel of pages) {
     const html = readFileSync(join(ROOT, rel), 'utf8');
     const nav = html.slice(html.indexOf('id="primary-nav"'), html.indexOf('</nav>', html.indexOf('id="primary-nav"')));
     const hrefs = [...nav.matchAll(/<a [^>]*href="([^"]+)"/g)].map((m) => m[1].replace(/^(\.\.\/)+|^\.\//, ''));
-    assert.deepEqual(hrefs, ['guides-and-collections/', 'compare/', 'best/'], `${rel}: the header menu is exactly Guides & Collections, Compare, The Best`);
+    assert.deepEqual(hrefs, ['guides-and-collections/', 'best/', 'submit/'], `${rel}: the header menu is exactly Guides & Collections, The Best, Submit`);
     assert.match(nav, /<a class="nav-best" href="[^"]*best\/"[^>]*>.*The Best<\/a>/s, `${rel}: The Best carries the highlight class`);
     assert.equal((nav.match(/class="nav-best"/g) || []).length, 1, `${rel}: only one highlighted entry`);
     const footer = html.slice(html.indexOf('<footer'));
@@ -1423,9 +1512,9 @@ test('header menu: only Guides & Collections, Compare and The Best (highlighted)
 test('footer columns: where each link lives, and no GitHub star entry in Project', () => {
   run(['scripts/build.mjs']);
   const expected = {
-    Explore: ['#explorer', 'models/', 'guides-and-collections/', 'programs/startups', 'programs/research', 'free-gpu/', 'coding-tools/'],
+    Explore: ['models/', 'guides-and-collections/', 'programs/startups', 'programs/research', 'free-gpu/', 'coding-tools/'],
     Data: ['providers.json', 'api/', 'llms.txt', 'data-policy/', 'coverage/'],
-    Project: ['updates', 'changes/', 'docs/methodology.md', 'CONTRIBUTING.md', 'agreements/'],
+    Project: ['updates', 'changes/', 'submit/', 'methodology/', 'contributing/', 'agreements/'],
   };
   for (const rel of ['site/index.html', 'site/compare/index.html', 'site/p/groq.html', 'site/legal/privacy.html']) {
     const html = readFileSync(join(ROOT, rel), 'utf8');
@@ -1820,6 +1909,193 @@ test('every page meta description fits a search snippet (<= 155 characters)', ()
     assert.ok(n <= 155, `${f.slice(ROOT.length + 1)}: description is ${n} characters`);
   }
   assert.ok(seen > 100, 'the check reached the generated pages');
+});
+
+test('the 404 page is built with the shared header, menu and footer and root-absolute assets', () => {
+  // GitHub Pages serves 404.html for ANY missing path (/contributing/, /a/b/c): a relative asset would resolve against the missing
+  // URL, and the page used to ship a hand-written header with no menu and a one-line footer. Mutant: build it with a relative
+  // prefix, or drop the shared header or footer; this test turns red.
+  const html = readFileSync(join(ROOT, 'site/404.html'), 'utf8');
+  assert.match(html, /<header class="site-header">/, 'the shared header');
+  assert.match(html, /<nav class="nav" id="primary-nav"/, 'the menu');
+  assert.match(html, /<footer class="site-footer"><div class="wrap footer-top">/, 'the shared footer with its columns');
+  assert.match(html, /<link rel="stylesheet" href="\/styles\.css">/, 'the stylesheet by a root-absolute path');
+  assert.match(html, /<script src="\/site\.js"><\/script>/, 'site.js by a root-absolute path');
+  assert.match(html, /<meta name="robots" content="noindex">/);
+  assert.ok(!/(?:href|src)="\.\.?\//.test(html), 'no relative ../ asset or link: it would break from any depth');
+  const script = html.match(/<script>(try\{document\.getElementById\('path'\)[^<]*)<\/script>/);
+  assert.ok(script, 'the path read-out script');
+  const hash = "'sha256-" + createHash('sha256').update(script[1]).digest('base64') + "'";
+  assert.ok(html.includes(hash), 'the path read-out is pinned by hash in the CSP: ' + hash);
+});
+
+test('the menu has Guides & Collections, The Best and Submit, and the footer no longer carries the removed entries', () => {
+  // Mutant: put Compare back in the menu, or the «Interactive explorer» link or the «Independent, community-maintained» line back in
+  // the footer; this test turns red.
+  const home = readFileSync(join(ROOT, 'site/index.html'), 'utf8');
+  const best = readFileSync(join(ROOT, 'site/best/index.html'), 'utf8');
+  for (const [name, html] of [['home', home], ['best', best]]) {
+    const nav = html.match(/<nav class="nav" id="primary-nav"[\s\S]*?<\/nav>/);
+    assert.ok(nav, name + ': the menu');
+    const labels = [...nav[0].matchAll(/<a [^>]*>(?:<svg[\s\S]*?<\/svg>)?([^<]+)<\/a>/g)].map((m) => m[1].replace(/&amp;/g, '&').trim());
+    assert.deepEqual(labels, ['Guides & Collections', 'The Best', 'Submit'], name + ': the menu entries');
+    assert.ok(!/Interactive explorer/.test(html), name + ': no «Interactive explorer» link');
+    assert.ok(!/Independent, community-maintained/.test(html), name + ': no «Independent, community-maintained» line');
+    assert.ok(/<a href="[^"]*submit\/">Submit<\/a>/.test(html), name + ': Submit in the footer');
+  }
+});
+
+test('/submit/ links to the GitHub issue forms, has no form, and publishes one address only, as text, for business', () => {
+  // The site is static: a data request is a public GitHub issue. The one address is for business and partnerships. It is plain text
+  // (no mailto link), and it is the address the legal pages already publish. The shared footer carries it too, so the check is on the
+  // page's own content (the hero and <main>). Mutant: add a second address, a mailto: link or a <form>; this test turns red.
+  const html = readFileSync(join(ROOT, 'site/submit/index.html'), 'utf8');
+  const own = html.slice(html.indexOf('<section class="page-hero'), html.indexOf('<footer class="site-footer">'));
+  assert.ok(own.length > 500, 'the page content');
+  for (const t of ['new-provider.yml', 'inaccuracy.yml']) {
+    assert.ok(own.includes('/issues/new?template=' + t), 'a link to the form ' + t);
+    assert.ok(existsSync(join(ROOT, '.github/ISSUE_TEMPLATE', t)), 'the form file ' + t + ' exists');
+  }
+  assert.ok(!own.includes('partner-request'), 'a partnership is not discussed in a public issue');
+  const addresses = [...new Set(own.match(/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g) || [])];
+  assert.deepEqual(addresses, ['admin@freellmapihub.com'], 'one address, the one the legal pages already publish');
+  assert.match(own, /<h2>Business and partnerships<\/h2><p>[^<]*<strong class="business-email">admin@freellmapihub\.com<\/strong>/, 'under the business heading, as text');
+  assert.ok(!/mailto:/.test(own), 'plain text, no mailto link');
+  assert.ok(!/<form[\s>]/.test(own), 'no form');
+  assert.ok(readFileSync(join(ROOT, 'site/sitemap.xml'), 'utf8').includes('/submit/'), 'in the sitemap');
+});
+
+test('the green header keeps AA contrast: white 7:1 and the muted text 4.5:1 on the bar', () => {
+  const css = readFileSync(join(ROOT, 'site/styles.css'), 'utf8');
+  const token = (n) => { const m = css.match(new RegExp('--' + n + ':\\s*(#[0-9a-fA-F]{6})')); assert.ok(m, 'the token --' + n); return m[1]; };
+  const lum = (hex) => { const c = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255).map((v) => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4)); return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]; };
+  const ratio = (a, b) => { const [x, y] = [lum(a), lum(b)].sort((p, q) => q - p); return (x + 0.05) / (y + 0.05); };
+  const bar = token('header-bar');
+  assert.ok(ratio(token('on-header'), bar) >= 7, 'white on the bar');
+  assert.ok(ratio(token('on-header-muted'), bar) >= 4.5, 'muted text on the bar');
+  assert.ok(ratio(token('on-header-accent'), bar) >= 4.5, 'the accent word of the brand on the bar');
+});
+
+test('best-facts: the three cards show fields of the record as they are, and a missing field reads «not stated»', () => {
+  // Mutant: a card with a hard-coded value, or a guess when the field is empty; this test turns red.
+  const icon = (id) => '<i data-icon="' + id + '"></i>';
+  const p = { name: 'Acme', free_tier: '10k <b>tokens</b>/day', rate_limits: '5 RPM', card_required: false, phone_required: true, commercial_ok: null, docs_url: 'https://acme.example/docs', last_verified: '2026-10-08' };
+  const html = bestFactsHtml(p, icon);
+  assert.equal((html.match(/class="best-fact[ "]/g) || []).length, 3, 'three cards');
+  assert.match(html, /Free quota<\/h3><p class="best-fact-v" title="10k &lt;b&gt;tokens&lt;\/b&gt;\/day">10k &lt;b&gt;tokens&lt;\/b&gt;\/day<\/p>/, 'the free_tier text, escaped');
+  assert.match(html, /Rate limit<\/h3><p class="best-fact-v" title="5 RPM">5 RPM<\/p>/, 'the rate_limits text');
+  assert.equal((html.match(/Checked 2026-10-08 · <a href="https:\/\/acme\.example\/docs"/g) || []).length, 3, 'each card carries the date and the source of the record');
+  assert.match(html, /data-icon="ic-nocard"[^>]*><\/i><span>No credit card<\/span>/);
+  assert.match(html, /data-icon="ic-phone"[^>]*><\/i><span>Phone required<\/span>/);
+  assert.match(html, /best-req-unknown"><i data-icon="ic-building"><\/i><span>Commercial use: not stated<\/span>/, 'an unknown flag is said, not guessed');
+  const empty = bestFactsHtml({ name: 'Bare', free_tier: '', rate_limits: null, card_required: null, phone_required: null, commercial_ok: null }, icon);
+  assert.equal((empty.match(/best-fact-v muted">not stated</g) || []).length, 2, 'both text cards read not stated');
+  assert.match(empty, /Not yet verified/);
+  assert.ok(!/<a href/.test(empty), 'no source link without docs_url');
+  assert.ok(!/javascript:/.test(bestFactsHtml({ ...p, docs_url: 'javascript:alert(1)' }, icon)), 'an unsafe URL is dropped');
+});
+
+test('/best/ layout: three cards per entry, a separator instead of the «Ranks 4 to N» title, a framed score', () => {
+  const best = readFileSync(join(ROOT, 'site/best/index.html'), 'utf8');
+  const items = best.match(/<li class="best-item[\s\S]*?<\/li>/g) || [];
+  assert.ok(items.length >= 1, 'entries');
+  for (const li of items) {
+    assert.equal((li.match(/class="best-fact[ "]/g) || []).length, 3, 'three cards in every entry');
+    assert.ok(!/inputs confirmed|best-meta|best-why/.test(li), 'the old third row is gone');
+    assert.match(li, /class="best-score" title="Out of 100">[\d.]+ \/ 100<\/span>/, 'the score element that the stylesheet frames');
+  }
+  assert.ok(!/<h2 class="best-section">Ranks /.test(best), 'no visible «Ranks 4 to N» title');
+  if (items.length > 3) {
+    assert.match(best, /<hr class="best-sep" aria-hidden="true"><h2 class="sr-only">Ranks 4 to \d+<\/h2>/, 'a separator, and the heading kept for screen readers');
+  }
+  const css = readFileSync(join(ROOT, 'site/styles.css'), 'utf8');
+  assert.match(css, /\.best-score \{[^}]*border: 1px solid/, 'the score has a frame');
+  assert.match(css, /\.best-rank \{\s*align-self: center/, 'the position is centred on the card');
+  assert.match(css, /\.best-intro \{[^}]*text-align: center/, 'the introduction is centred');
+});
+
+test('home table: «The catch» is a closed vocabulary of short tags, the free text is only in the title and on the provider page', () => {
+  // Mutant: put the free text of the record (notes) back in the cell, or add a tag outside the list; this test turns red.
+  const providers = JSON.parse(readFileSync(join(ROOT, 'data/providers.json'), 'utf8')).providers;
+  const seen = new Set();
+  for (const p of providers) {
+    const tags = catchTags(p);
+    for (const t of tags) { assert.ok(CATCH_LABELS.includes(t.label), p.slug + ': tag outside the vocabulary: ' + t.label); seen.add(t.label); }
+    // Two lines at the reference desktop width (a 26% column of a 1480px table is about 380px, 40 characters of the monospace face a
+    // line): the tags and the link must fit in about 80 characters.
+    assert.ok(tags.length <= 4, p.slug + ': at most four tags');
+    assert.ok(tags.reduce((n, t) => n + t.label.length + 2, 0) + 'Details'.length <= 60, p.slug + ': the cell fits in two lines');
+    const cell = catchCellHtml(p);
+    const inner = cell.replace(/^<td[^>]*>/, '').replace(/<\/td>$/, '').replace(/<span class="sr-only">[^<]*<\/span>/g, '');
+    const visible = inner.replace(/<[^>]+>/g, '');
+    if (p.notes) {
+      assert.ok(!visible.includes(p.notes.slice(0, 25)), p.slug + ': the free text is not in the cell');
+      assert.ok(cell.includes(' title="' + htmlEsc(p.notes) + '"'), p.slug + ': the free text is in the title');
+    }
+    assert.match(cell, new RegExp('<a class="catch-more" href="p/' + p.slug + '#limits">Details'), p.slug + ': the link to the provider page');
+  }
+  assert.ok(seen.size >= 3, 'the dataset exercises at least three of the tags');
+  assert.deepEqual(catchTags({ card_required: false, phone_required: false, commercial_ok: true }), [], 'a provider with nothing to warn about has no tag');
+  assert.deepEqual(catchTags({ card_required: true, phone_required: null, commercial_ok: false, expires: '30 days' }).map((t) => t.label), ['Card required', 'Evaluation only', 'Expires', 'Not stated']);
+});
+
+test('home: no good-first-issues button in the hero, a fixed table layout, a link-button name and a pinned header row', () => {
+  const index = readFileSync(join(ROOT, 'site/index.html'), 'utf8');
+  const css = readFileSync(join(ROOT, 'site/styles.css'), 'utf8');
+  assert.ok(!/Contribute: good first issues|contrib-btn/.test(index + css), 'the hero button is gone');
+  assert.match(css, /#table \{ table-layout: fixed; \}/, 'a fixed layout');
+  const widths = [...css.matchAll(/#table th:nth-child\((\d)\) \{ width: (\d+)%; \}/g)];
+  assert.equal(widths.length, 5, 'a width for each of the five columns');
+  assert.equal(widths.reduce((n, m) => n + Number(m[2]), 0), 100, 'the widths add up to 100%');
+  assert.match(css, /#table thead th \{ position: sticky; top: var\(--header-h\);/, 'the header row is pinned under the header');
+  assert.match(css, /#table thead th \{ top: calc\(var\(--header-h\) \+ var\(--controls-h, 120px\)\); \}/, 'and under the filter bar where that is pinned');
+  assert.match(css, /main#explorer > \.wrap, \.controls \.controls-inner \{ max-width: 1480px; \}/, 'a wider table');
+  assert.match(css, /\.hero \.lede \{ max-width: 86ch; \}/, 'a wider lede');
+  const row = explorerRowHtml({ slug: 'acme', name: 'Acme', category: 'ongoing', free_tier: 'Free', notes: 'n', best_for: 'b' });
+  assert.match(row, /<a class="name-link" href="p\/acme">Acme<span class="name-go" aria-hidden="true"> ↗<\/span><\/a>/, 'the name is a link-button');
+  assert.match(row, /<div class="clamp2" title="Free">Free<\/div>/, 'the free text is clamped and complete in the title');
+  assert.ok(!/<img|logo/i.test(row), 'no logo in a row');
+  assert.match(css, /#table tbody tr:focus-within \{ background: var\(--panel\); \}/, 'the row is highlighted on keyboard focus');
+});
+
+test('provider page: the score is visible, no «All providers» link or «Report a change», the history is paged by 5 and the cards have icons', () => {
+  // Mutant: show the old button or link again, drop data-pager, or lose the score line; this test turns red.
+  const html = readFileSync(join(ROOT, 'site/p/groq.html'), 'utf8');
+  const main = html.slice(html.indexOf('<main id="main">'));
+  assert.match(main, /<div class="prov-score"><span class="best-score" title="Out of 100">\d+\.\d \/ 100<\/span>/, 'the score of the provider');
+  assert.match(main, /<a href="\.\.\/best\/methodology\/">how it is computed<\/a>/, 'a link to the method');
+  // Mutant: drop the underline and the links in the score line rely on colour alone, which Lighthouse fails (link-in-text-block).
+  assert.match(readFileSync(join(ROOT, 'site/styles.css'), 'utf8'), /\.prov-score a \{[^}]*text-decoration: underline/, 'the links of the score line are underlined');
+  assert.ok(!/← All providers/.test(main), 'no «← All providers» link');
+  assert.ok(!/Report a change/.test(html), 'no «Report a change» button');
+  assert.match(main, /<ul class="upd-list" data-pager="5">/, 'the history is paged by 5');
+  assert.match(html, /<script src="\.\.\/pager\.js" defer><\/script>/, 'the pager script, same origin');
+  for (const [label, icon] of [['Credit card', 'ic-card'], ['Phone verification', 'ic-phone'], ['Commercial use', 'ic-building']]) {
+    assert.ok(main.includes('<dt><svg class="i" aria-hidden="true"><use href="#' + icon + '"/></svg>' + label + '</dt>'), label + ' card has its icon');
+  }
+  const dp = dataPolicyHtml({ slug: 'x', data_policy: { trains_on_prompts: false, retention: '30 days', source: 'https://example.com/p' } });
+  assert.match(dp, /<dt><svg class="i" aria-hidden="true"><use href="#ic-shield"\/><\/svg>Trains on your prompts<\/dt>/);
+  assert.match(dp, /<dt><svg class="i" aria-hidden="true"><use href="#ic-clock"\/><\/svg>Retention<\/dt>/);
+  const css = readFileSync(join(ROOT, 'site/styles.css'), 'utf8');
+  assert.match(css, /\.prov-reqs \.req \{[^}]*text-align: center/, 'the cards are centred');
+  assert.match(css, /\.prov-summary h2 \{[^}]*font-size: 1\.45rem/, '«What\'s free» is larger');
+});
+
+test('pager.js: pages of 5 rows, the window is clamped, and the script never touches the URL', async () => {
+  const { runInNewContext } = await import('node:vm');
+  const src = readFileSync(join(ROOT, 'site/pager.js'), 'utf8');
+  const sandbox = { module: { exports: {} } };
+  runInNewContext(src, sandbox);
+  const { pageWindow } = sandbox.module.exports;
+  assert.deepEqual({ ...pageWindow(12, 0, 5) }, { from: 0, to: 5, pages: 3, page: 0 });
+  assert.deepEqual({ ...pageWindow(12, 2, 5) }, { from: 10, to: 12, pages: 3, page: 2 });
+  assert.deepEqual({ ...pageWindow(12, 9, 5) }, { from: 10, to: 12, pages: 3, page: 2 }, 'a page past the end is clamped');
+  assert.deepEqual({ ...pageWindow(12, -3, 5) }, { from: 0, to: 5, pages: 3, page: 0 }, 'a negative page is clamped');
+  assert.deepEqual({ ...pageWindow(0, 0, 5) }, { from: 0, to: 0, pages: 1, page: 0 }, 'an empty list');
+  assert.deepEqual({ ...pageWindow(5, 0, 5) }, { from: 0, to: 5, pages: 1, page: 0 }, 'exactly one page');
+  // The URL stays as it is: no history entry, no hash, no query. Mutant: pushState or location.hash in the script; red.
+  assert.ok(!/pushState|replaceState|location\.|\.hash|\.search|history\./.test(src), 'the script does not touch the URL');
+  assert.match(src, /data-pager/, 'it reads the page size from the list');
 });
 
 test('internal links in the built site resolve to a page (no 404)', () => {

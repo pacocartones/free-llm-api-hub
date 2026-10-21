@@ -4,7 +4,7 @@
 // appear only with the provider page they come from and the day they were read, and a section with nothing
 // to show is left out (or reduced to one line) instead of repeating filler on every page.
 
-import { htmlEsc } from './rows.mjs';
+import { htmlEsc, ICON } from './rows.mjs';
 import { triStateHtml } from './compare.mjs';
 import { expiryHtml } from './expiry.mjs';
 
@@ -28,11 +28,11 @@ const safeUrl = (u) => (/^https?:\/\//i.test(String(u || '')) ? htmlEsc(u) : '')
 
 /** What a visitor must give to start: three flags, each yes / no / "not confirmed" written out. */
 export function requirementsHtml(p) {
-  const row = (label, v, yes, no) => `<div class="req"><dt>${label}</dt><dd>${triStateHtml(v, yes, no)}</dd></div>`;
+  const row = (icon, label, v, yes, no) => `<div class="req"><dt>${ICON(icon)}${label}</dt><dd>${triStateHtml(v, yes, no)}</dd></div>`;
   return `<dl class="prov-reqs" aria-label="What you need to start">` +
-    row('Credit card', p.card_required, 'required', 'not required') +
-    row('Phone verification', p.phone_required, 'required', 'not required') +
-    row('Commercial use', p.commercial_ok, 'allowed', 'evaluation only') +
+    row('ic-card', 'Credit card', p.card_required, 'required', 'not required') +
+    row('ic-phone', 'Phone verification', p.phone_required, 'required', 'not required') +
+    row('ic-building', 'Commercial use', p.commercial_ok, 'allowed', 'evaluation only') +
     `</dl>`;
 }
 
@@ -88,7 +88,7 @@ export function dataPolicyHtml(p) {
   if (!dp || typeof dp !== 'object') return '';
   const src = safeUrl(dp.source);
   return `<h2 id="data-policy">Data policy</h2><dl class="prov-reqs">` +
-    `<div class="req"><dt>Trains on your prompts</dt><dd>${triStateHtml(dp.trains_on_prompts, 'yes', 'no')}</dd></div>` +
-    `<div class="req"><dt>Retention</dt><dd>${dp.retention ? htmlEsc(dp.retention) : '<span class="tri tri-unk">not confirmed</span>'}</dd></div></dl>` +
+    `<div class="req"><dt>${ICON('ic-shield')}Trains on your prompts</dt><dd>${triStateHtml(dp.trains_on_prompts, 'yes', 'no')}</dd></div>` +
+    `<div class="req"><dt>${ICON('ic-clock')}Retention</dt><dd>${dp.retention ? htmlEsc(dp.retention) : '<span class="tri tri-unk">not confirmed</span>'}</dd></div></dl>` +
     (src ? `<p class="muted">Source: <a href="${src}" target="_blank" rel="noopener">the provider's page</a>.</p>` : '');
 }
