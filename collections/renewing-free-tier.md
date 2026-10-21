@@ -8,7 +8,7 @@ LLM and AI APIs whose free allowance resets (daily, monthly or per minute) inste
 
 Providers whose free access **renews**: a quota (`free_type: renewing-quota`) or a credit (`free_type: recurring-credit`) that resets on a schedule. One-time signup credits and permanently free models are listed in other collections. A renewing allowance can still be evaluation-only (for example Cohere) — read the catch.
 
-**29 of 68 tracked providers** match.
+**30 of 69 tracked providers** match.
 
 | Provider | Type | What's free | The catch | Verified |
 |---|---|---|---|---|
@@ -41,6 +41,7 @@ Providers whose free access **renews**: a quota (`free_type: renewing-quota`) or
 | **[Photoroom](https://www.photoroom.com/api/pricing)**<br><sub>💳 no card</sub> | Ongoing | 10 free production calls on the Remove Background API (one-time) plus 1,000 sandbox calls/month on the Image Editing API (watermarked) | No credit card required. Sandbox output is watermarked (for testing); the 10 production calls return clean output. Image editing/generation (AI backgrounds, relighting, shadows). | ✅ 2026-10-08 |
 | **[Veryfi](https://www.veryfi.com/pricing/)**<br><sub>💳 no card · 🏢 commercial OK</sub> | Ongoing | Free Forever plan: up to 100 documents/month — OCR plus structured data extraction (receipts, invoices, and 100+ document types) | No credit card required. The 'Free Forever' 100 docs/mo tier is the standing free tier (a separate 14-day trial unlocks paid features). Proprietary OCR / document-intelligence REST API. | ✅ 2026-10-08 |
 | **[Datalab (Marker / Surya)](https://documentation.datalab.to/)**<br><sub>💳 no card · 📵 no phone</sub> | Ongoing | $20/month (work email) or $10/month (personal email) free usage allowance — OCR in 90+ languages, PDF-to-markdown, tables, forms and structured extraction | Landing page still advertises a $5 signup credit, but the billing page describes the current free tier as a recurring monthly allowance ($20/mo work email, $10/mo personal, no card, 25 req/min) “designed to let you run a complete proof of concept before committing to a paid plan” — no explicit statement on commercial use of the hosted API. The self-hosted OSS weights carry a separate restriction (research/personal/startups under $2M ARR/funding). Signup does not require a phone number; checked via Google signup flow on 2026-10-02. | ✅ 2026-10-02 |
+| **[IteraCompute](https://iteracompute.com/free/)**<br><sub>💳 no card · 🔌 OpenAI-compat</sub> | Ongoing | Qwen3.8-27B: 30,000,000 tokens per account per UTC calendar month; 128K total context and 8,192 maximum output tokens | Verified email or Google sign-in and an API key required; no card or recharge. Shared best-effort capacity may queue; no uptime or latency SLA. Input, cached input and output (including reasoning) count across all API keys. Resets at 00:00 UTC on the first of each month; no rollover or automatic paid overage; exhausted monthly quota returns 429. This entry covers the no-recharge Qwen tier; Kimi K3 Free requires at least $10 cumulative net recharge. Qwen's 256K context requires Pro ($50 cumulative net recharge); the no-recharge tier remains 128K. Free-tier terms: https://iteracompute.com/free-tier-terms/ | ✅ 2026-10-21 |
 
 ---
 

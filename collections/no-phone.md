@@ -8,7 +8,7 @@ LLM APIs whose signup needs no SMS/phone verification — a live slice of a cont
 
 Providers you can sign up for **without phone verification** (`phone_required: false`). Providers that gate signup behind a phone number, or whose rule is not known, are left out.
 
-**22 of 68 tracked providers** match.
+**22 of 69 tracked providers** match.
 
 | Provider | Type | What's free | The catch | Verified |
 |---|---|---|---|---|

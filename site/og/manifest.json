@@ -1,14 +1,14 @@
 {
-  "collections/no-credit-card.png": "7688b6ef52555962d008fff894223582c484517cea7da49ee67800adc7fc8866",
+  "collections/no-credit-card.png": "c837649cce43f2729138e72cc315207057ac82599a59be72765a477f22d14a54",
   "collections/no-phone.png": "785f3ec7eb32f30b90cd0fcf3657d388b5ff4297f2f9716ff66e9b69c05ddd09",
   "collections/commercial-use.png": "670671cd97404156226e507973f2ab8330d3022ca96e0c93bdbdb320c41adcaf",
-  "collections/openai-compatible.png": "76a50887d8f1c2e9301755428990ad81479ee21c25b43215cf524541e0503269",
+  "collections/openai-compatible.png": "7a61b53701befdae0eeeffaecc73f14e20b537bb0f8b91ad7c2936dc63562b25",
   "collections/always-free.png": "ef2d127de37b942baad06145e54b0c619a1f22327b2ebbcfbec78f5564afe39d",
   "collections/multimodal.png": "41cfc0d1f2d127b04555b7246d84019b4d27710a3f3aff6e7764375b1e06e05d",
-  "collections/renewing-free-tier.png": "35135aaa6cc23891b40cb3f378c53a17a1127210ce60e125ccf03efcfdaec458",
+  "collections/renewing-free-tier.png": "624b60c58c9d8bfb6ff1886c2fd605d2adeb6ea4da576068201b6c6958ce93f4",
   "collections/free-signup-credit.png": "c6f3ac57944a531490cd39902d0f777715fd005efac9a30622d5f5205e7f6894",
-  "guides/free-llm-api-without-credit-card.png": "35135aaa6cc23891b40cb3f378c53a17a1127210ce60e125ccf03efcfdaec458",
-  "guides/openai-compatible-free-apis.png": "76a50887d8f1c2e9301755428990ad81479ee21c25b43215cf524541e0503269",
+  "guides/free-llm-api-without-credit-card.png": "624b60c58c9d8bfb6ff1886c2fd605d2adeb6ea4da576068201b6c6958ce93f4",
+  "guides/openai-compatible-free-apis.png": "7a61b53701befdae0eeeffaecc73f14e20b537bb0f8b91ad7c2936dc63562b25",
   "guides/free-llm-api-no-signup.png": "6b51d431df5d7f141cbececcf79edf3dd861c3b4069f0b11661a3eefacbba918",
   "guides/free-embeddings-apis.png": "3fdba35f04dc8c462986c992bcf875546257113072a909c162f7e470e581e278",
   "guides/free-speech-to-text-apis.png": "5f9c4ab08cac7457e9111a30e4664920607ea2c115a1433d7be98e97e64244ca",
@@ -16,7 +16,7 @@
   "guides/free-reranking-apis.png": "e7f6c011776e8db7cd330b54174fd76f7d0216b612387a5ffcfb81e6f0919683",
   "guides/free-vision-apis.png": "19581e27de7ced00ff1ce50b2047e7a567c76b1cbaebabe5ef03f7c3017bb5b7",
   "guides/free-ocr-document-ai-apis.png": "2c624232cdd221771294dfbb310aca000a0df6ac8b66b696d90ef06fdefb64a3",
-  "models.png": "f39fc085804862aa938b819d735580a5fbf43bd186ce0efa1751f45ec19335f5",
+  "models.png": "257d520b4d8e8f7aab7d56291901c7b4983fe99e4df6c57702772b0aafa7a65f",
   "p/google-gemini.png": "66bc18a46077e4ab4a824fedc91d3e0346df88a85c79825e9505b4aba31ebae5",
   "p/groq.png": "a883183537e0c6129bbfa136fe321c18387682c82368678cb9290f41e83f6774",
   "p/openrouter.png": "7f0337726e04ad361cb6ee1c17bb73ee83ca0deeb0bda730f77a0008a712a52f",
@@ -84,5 +84,6 @@
   "p/retell-ai.png": "5da83e52986e95f1235d1c89ec3393096d6fa7203235a9967f8ba4ac7f7e29d5",
   "p/datalab.png": "5c37c0a7b6228f08eb0e9276269783c6c95aad74c13b0e0e9e8b4337571562c3",
   "p/wandb-inference.png": "847158f3ec01ac41d6cce7ef7e02acece511dc9e8e6dab1c03de226ff53a03f1",
-  "p/typhoon.png": "ab3a8c55cbe716fe820fb3f9d21cd2a8fa1fb875a517c0cf59e16a5a5b9db9f9"
+  "p/typhoon.png": "ab3a8c55cbe716fe820fb3f9d21cd2a8fa1fb875a517c0cf59e16a5a5b9db9f9",
+  "p/iteracompute.png": "40c90c3187393a059ef507c7795546fdc200f7a0fce9cd71a06c435444ba633b"
 }
