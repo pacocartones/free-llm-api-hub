@@ -22,7 +22,7 @@ A living, maintainer-facing checklist of concrete follow-ups. Direction and prin
 - ✅ **Per-page OG images for `/models/` and `/guides/`.** `og.mjs` generalized (`tagSvg`) to render one per guide + one for the model index; wired via `ogImage` in build.mjs.
 - ✅ **Mobile navigation.** Added an accessible hamburger toggle (in the shared `site.js`, so identical on the homepage and every generated page) that drops the nav down as a panel below 900px; closes on link-follow / Escape / outside-click. Also surfaced **Guides** in the primary nav (was footer/hero-only).
 - ✅ **Guides ↔ collections cross-links** and ✅ **FAQ blocks** (with `FAQPage` JSON-LD) on the higher-traffic collections.
-- ✅ **Two new modality guides** — image generation + OCR/document-AI (7 guides total), mapping onto the new providers.
+- ✅ **Two new modality guides** — image generation + OCR/document-AI (seven guides as of 2026-10-25), mapping onto the new providers.
 - ✅ **Explorer table polish** — desktop zebra striping, sortable-column affordance, width cap on the widest column, and a **NEW** marker (via the `added` field, rendered by the shared row code in both SSR and client).
 - ✅ **Per-provider OG images** — `og.mjs` renders one per provider (`site/og/p/<slug>.png`), wired via `ogImage` in build.mjs and verified by `check-og.mjs`.
 
