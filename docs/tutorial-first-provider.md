@@ -108,6 +108,22 @@ Then find the `generated` field near the top of the file. It must cover the newe
 
 If your `last_verified` is newer than it, the validator refuses — because the sitemap, the API and the citation would otherwise expose a stale "as of" date.
 
+### Data policy (added in v2.11.0)
+
+`data_policy` records what the provider itself says about your prompts on this free access: whether it trains on them and how long it keeps them. Add it to your entry as one more field, on one line, like the rest of the object:
+
+```json
+"data_policy": {"trains_on_prompts": false, "retention": null, "source": "https://www.ai21.com/privacy-policy", "checked": "2026-10-29", "quote": "Consistent with our Terms of Service, and unless otherwise agreed in writing or required to provide the Services, we do not use your inputs or outputs to train AI21's foundational or generally available AI models.", "plan_named": false}
+```
+
+Three rules trip people up:
+
+1. **The entry must sit on one line**, like the others, or `npm test` fails with `serializer does not round-trip`.
+2. **`trains_on_prompts` and `retention` stay `null` when the page says nothing** — never guess `false`. `retention` is a period such as `"30 days"` or `"not stored"`; `null` means not stated.
+3. **Commit the regenerated files with the data change**: run `npm run build`, and `npm run check` must leave no diff.
+
+The full definition — `source`, `checked`, `quote`, `note` and `plan_named` included — is the `data_policy` entry in [`data/schema.json`](../data/schema.json).
+
 ## Step 4 — Pass the validator
 
 ```bash
