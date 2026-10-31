@@ -1,7 +1,7 @@
 {
   "$schema": "./schema.json",
   "version": "2.11.0",
-  "generated": "2026-10-18",
+  "generated": "2026-10-31",
   "source": "https://github.com/pacocartones/free-llm-api-hub",
   "note": "Canonical dataset. README tables, badge-freshness.json and the interactive site are all generated from this file — do not hand-edit them. `verified: true` means the core facts (tier, limits, key catch, link) were independently confirmed against the provider's own docs on `last_verified`. `verified: false` means sourced from community tracking and not yet independently re-confirmed here — treat those as indicative. Attribute fields (openai_compatible, modalities, best_for) are progressively backfilled and may be null.",
   "providers": [
@@ -420,7 +420,7 @@
       "notes": "Card not required for the trial credit itself, required once it expires",
       "best_for": "Jamba long-context models on a $10 trial",
       "modalities": ["text"],
-      "models_free": null,
+      "models_free": ["jamba-large", "jamba-mini"],
       "expires": "3 months",
       "docs_url": "https://docs.ai21.com/docs/usage-cost",
       "phone_required": null,
