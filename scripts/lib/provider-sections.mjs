@@ -13,6 +13,7 @@ const FREE_TYPE_LABEL = {
   perpetual: 'Free with no end date',
   'recurring-credit': 'Credit that renews',
   'trial-credit': 'One-time trial credit',
+  promotion: 'Time-limited promotion',
 };
 
 const LIMIT_UNITS = [

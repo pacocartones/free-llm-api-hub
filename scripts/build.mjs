@@ -1364,7 +1364,7 @@ stateReports.forEach((r, i) => {
     `<p class="month-summary">${htmlEsc(monthSummary(r, prev))}</p>` +
     movedSection(r) +
     `<h2>Providers by category</h2>` +
-    kvTable(['Category', 'Providers'], [['Ongoing free tier', r.byCategory.ongoing], ['Trial credit', r.byCategory.trial], ['Total', r.total]]) +
+    kvTable(['Category', 'Providers'], [['Ongoing free tier', r.byCategory.ongoing], ['Trials and promotions', r.byCategory.trial], ['Total', r.total]]) +
     `<h2>Providers by modality</h2><p class="muted">A provider counts once for every modality it offers free.</p>` +
     kvTable(['Modality', 'Providers'], r.byModality.map((m) => [htmlEsc(m.modality), m.count])) +
     `<h2>Verification and freshness</h2>` +
@@ -1795,7 +1795,7 @@ const programCount = programs.startups.length + programs.research.length;
 const llmsSummary = `A continuously-verified, machine-readable dataset of free-tier and trial-credit LLM (and adjacent AI-model) APIs for developers. Every entry is dated and sourced to the provider's own docs.`;
 const llmsTxt =
   `# Free LLM API Hub\n\n> ${llmsSummary}\n\n` +
-  `${total} providers (${ongoing.length} ongoing free tiers, ${trial.length} trial credits) and ${programCount} apply-to-get credit programs. Dataset v${data.version}. Terms change often — always confirm against each provider's own docs, linked from every entry. This whole site is static and machine-readable.\n\n` +
+  `${total} providers (${ongoing.length} ongoing free tiers, ${trial.length} trials and promotions) and ${programCount} apply-to-get credit programs. Dataset v${data.version}. Terms change often — always confirm against each provider's own docs, linked from every entry. This whole site is static and machine-readable.\n\n` +
   `## Dataset\n` +
   `- [Full dataset, JSON](${SITE}/api/v1/providers.json): every provider, all fields\n` +
   `- [JSON Schema](${REPO}/blob/main/data/schema.json)\n` +

@@ -79,7 +79,7 @@ console.log('model-index OG: 1 rendered.');
 // per-provider OG
 mkdirSync(join(ROOT, 'site/og/p'), { recursive: true });
 const provSub = (p) => {
-  const bits = [p.category === 'ongoing' ? 'Ongoing free tier' : 'Trial credit'];
+  const bits = [p.free_type === 'promotion' ? 'Time-limited promotion' : p.category === 'ongoing' ? 'Ongoing free tier' : 'Trial credit'];
   if (p.card_required === false) bits.push('no card');
   if (p.commercial_ok === true) bits.push('commercial OK');
   if (p.openai_compatible === true) bits.push('OpenAI-compatible');

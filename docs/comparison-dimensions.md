@@ -26,7 +26,7 @@ Three consequences the rest of the project has to honour, or the tri-state is de
 |---|---|---|
 | `slug` | string | Stable, unique, kebab-case identifier. Never renamed or reused — safe to reference externally. |
 | `name` | string | Human-readable provider name. |
-| `category` | `ongoing` \| `trial` | Primary bucket. Splits the README and the explorer. Follows `free_type`: `trial-credit` is `trial`, every renewing or perpetual type is `ongoing` (enforced by `validate.mjs`). |
+| `category` | `ongoing` \| `trial` | Primary bucket. Splits the README and the explorer. Follows `free_type`: `trial-credit` and `promotion` are `trial`; renewing or perpetual types without an overall end date are `ongoing` (enforced by `validate.mjs`). |
 | `free_type` | enum | Finer shape of the free access (see below). |
 | `free_tier` | string | What you actually get for free, in concrete terms. |
 | `rate_limits` | string | Published limits — RPM/RPD/TPM/TPD, or an explicit "not published publicly." |
@@ -61,6 +61,7 @@ Three consequences the rest of the project has to honour, or the tri-state is de
 | `renewing-quota` | A quota that resets on a daily/monthly cycle. | Gemini, Groq, Cloudflare Workers AI |
 | `recurring-credit` | A credit balance that tops up each month. | Modal, HuggingFace Inference Providers |
 | `trial-credit` | A one-time balance granted on signup. | Baseten, Fireworks, Nebius |
+| `promotion` | Free access with a fixed end date; an allowance may reset during the promotion. Requires `expires`; separate from permanent tiers and one-time signup credit. | Time-limited monthly token promotion |
 
 ## Attribute fields vs. the verified claim
 

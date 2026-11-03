@@ -53,7 +53,7 @@
         "free_type": {
           "description": "Finer-grained shape of the free access.",
           "type": "string",
-          "enum": ["perpetual", "renewing-quota", "recurring-credit", "trial-credit"]
+          "enum": ["perpetual", "renewing-quota", "recurring-credit", "trial-credit", "promotion"]
         },
         "free_tier": {
           "type": "string",

@@ -15,7 +15,7 @@ const sha256 = (s) => createHash('sha256').update(s, 'utf8').digest('hex');
 // scripts/og.mjs). Adding a field here means it also gets rendered there — and
 // every change to these fields changes the image, so the fingerprint is exact
 // with no false positives (e.g. a weekly last_verified bump does NOT stale an OG).
-export const PROVIDER_OG_FIELDS = ['name', 'category', 'card_required', 'commercial_ok', 'openai_compatible'];
+export const PROVIDER_OG_FIELDS = ['name', 'category', 'free_type', 'card_required', 'commercial_ok', 'openai_compatible'];
 
 export const providerOgFingerprint = (p) => sha256(JSON.stringify(PROVIDER_OG_FIELDS.map((f) => p[f])));
 

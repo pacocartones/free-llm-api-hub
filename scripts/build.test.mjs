@@ -2848,3 +2848,21 @@ test('the private copy of a worktree with a relative gitdir still sees the histo
   assert.match(readFileSync(join(copy, '.git'), 'utf8'), /^gitdir: \//, 'the copy points at the gitdir by an absolute path');
   assert.equal(git(copy, 'log', '--format=%s').trim(), 'first', 'the copy sees the history');
 });
+
+
+test('time-limited promotions use the trial bucket and require a visible expiry', () => {
+  const configure = (d) => {
+    const p = d.providers.find((x) => x.free_type === 'trial-credit' && !x.no_expiry);
+    p.free_type = 'promotion';
+    p.category = 'trial';
+    p.expires = '2026-11-24 08:00 UTC';
+    return p;
+  };
+  assert.equal(validateAfter((d) => { configure(d); }), true);
+  assert.equal(validateAfter((d) => { configure(d).expires = null; }), false);
+  assert.equal(validateAfter((d) => { configure(d).category = 'ongoing'; }), false);
+  const page = glanceHtml({ free_type: 'promotion', category: 'trial', expires: '2026-11-24 08:00 UTC' }, 'Trial');
+  assert.match(page, /Time-limited promotion/);
+  assert.match(page, /2026-11-24 08:00 UTC/);
+  assert.doesNotMatch(page, /One-time trial credit|Free with no end date/);
+});
