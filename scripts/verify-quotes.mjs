@@ -12,7 +12,7 @@ import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { quoteErrors } from './lib/quotes.mjs';
-import { READ_HEADERS } from './lib/page-text.mjs';
+import { readHeaders } from './lib/page-text.mjs';
 import { verifyEntries, buildReport, reportErrors } from './lib/quotes-report.mjs';
 import { fetchPublicUrl } from './lib/public-fetch.mjs';
 
@@ -28,10 +28,10 @@ if (errors.length) { console.error(errors.join('\n')); process.exit(1); }
 if (flag('--offline')) { console.log(`quotes: consistent with the data (${registry.entries.length} entries; offline, this does not read any page)`); process.exit(0); }
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-async function readPage(url) {
+async function readPage(url, lang = 'en') {
   await sleep(700); // one request at a time, and not in a hurry
   try {
-    const res = await fetchPublicUrl(url, { headers: READ_HEADERS, timeoutMs: 30000 });
+    const res = await fetchPublicUrl(url, { headers: readHeaders(lang), timeoutMs: 30000 });
     return { status: res.status, html: await res.text(), contentLanguage: res.headers.get('content-language') || '' };
   } catch (e) { return { error: String((e && e.message) || e).slice(0, 80) }; }
 }

@@ -3,8 +3,10 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
-import { htmlToText, decodeEntities, collapse, sha256, absenceHits, ABSENCE_TERMS, METHOD, READ_HEADERS, declaredLanguage, sameLanguage, judgeReading } from './lib/page-text.mjs';
+import * as pageText from './lib/page-text.mjs';
 import { quoteErrors, noteSpans, claimsPageAbsence, totalHits } from './lib/quotes.mjs';
+
+const { htmlToText, decodeEntities, collapse, sha256, absenceHits, ABSENCE_TERMS, METHOD, READ_HEADERS, methodFor, readHeaders, declaredLanguage, sameLanguage, judgeReading } = pageText;
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -22,9 +24,22 @@ test('absence hits: whole words, any case, plan and plans, not royalty-free as a
   assert.equal(absenceHits('royalty-free').free, 1, 'a hyphen is a word boundary, so royalty-free counts: the check errs on the side of finding');
   assert.deepEqual(absenceHits('nothing here'), { free: 0, trial: 0, paid: 0, plan: 0 });
 });
-test('the request: English, recorded in the method', () => {
+test('the request: English by default, or the entry language, recorded in the method', () => {
+  assert.equal(typeof readHeaders, 'function');
+  assert.equal(typeof methodFor, 'function');
   assert.match(READ_HEADERS['Accept-Language'], /^en/);
+  assert.equal(readHeaders('en'), READ_HEADERS);
+  assert.equal(readHeaders('zh')['Accept-Language'], 'zh');
+  assert.equal(readHeaders('zh-CN')['Accept-Language'], 'zh-CN,zh;q=0.9');
   assert.match(METHOD, /requested in English/);
+  assert.equal(methodFor('en'), METHOD);
+  assert.match(methodFor('zh'), /Accept-Language zh/);
+});
+test('register: a non-English entry carries the method of its own language', () => {
+  const w = world();
+  for (const e of w.registry.entries) { e.lang = 'zh'; e.method = methodFor('zh'); }
+  assert.deepEqual(quoteErrors(w.data, w.registry), []);
+  assert.match(errs((x) => { x.registry.entries[0].lang = 'zh'; x.registry.entries[0].method = METHOD; }), /method/);
 });
 test('language: declared by header or html lang, compared by its first subtag, undeclared accepted', () => {
   assert.equal(declaredLanguage('<html lang="es-419">', ''), 'es-419');
@@ -115,7 +130,6 @@ test('the real register is consistent with the real data (consistency only: it d
   const withQuote = data.providers.filter((p) => p.data_policy && p.data_policy.quote).length;
   assert.equal(registry.entries.filter((e) => e.kind === 'sentence').length, withQuote, 'one sentence entry for every row that has a quote');
   assert.match(registry.note, /consistency only/i);
-  for (const e of registry.entries) assert.equal(e.lang, 'en');
 });
 test('the data-policy page may exempt a phrase between guillemets only because the register has it', () => {
   const data = JSON.parse(readFileSync(join(ROOT, 'data/providers.json'), 'utf8'));

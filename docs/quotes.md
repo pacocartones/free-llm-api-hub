@@ -34,8 +34,8 @@ free, trial, paid or other plan": what was measured, no more.
 
 ## Reading a page
 
-Pages are requested with `Accept-Language: en-US` (`READ_HEADERS`): at least one site (ai.google.dev) answers a Spanish copy to a request
-with no language. The text is made as `scripts/lib/page-text.mjs` says: scripts and styles removed, tags replaced by a space, character
+Pages are requested with the language of the entry: English as `Accept-Language: en-US,en;q=0.9`, or the code given with `--lang` (for
+example `zh-CN,zh;q=0.9`). At least one site (ai.google.dev) answers a Spanish copy to a request with no language, so the language is always asked for. The text is made as `scripts/lib/page-text.mjs` says: scripts and styles removed, tags replaced by a space, character
 references decoded, white space collapsed. Curly quotes and apostrophes are kept as the page spells them.
 
 ## Adding or changing a row: `npm run quotes:add`
@@ -46,7 +46,13 @@ Write the `data_policy` of the provider in `data/providers.json` (its `quote`, `
 npm run quotes:add -- <slug>
 ```
 
-The command reads the source page in English and writes the entries of that provider in `data/quotes.json`: the sentence, each phrase of the note
+For a page in another language, give its language code:
+
+```
+npm run quotes:add -- <slug> --lang zh
+```
+
+The command reads the source page in that language and writes the entries of that provider in `data/quotes.json`: the sentence, each phrase of the note
 between « », and the absence check if the note says something about the whole page. It writes the day, the hash and the method itself; you never
 type them. Then run `npm test`.
 
@@ -55,7 +61,7 @@ type them. Then run `npm test`.
 - If a phrase comes from **another page** (for example a FAQ), say so: `npm run quotes:add -- <slug> --passage-url "<the phrase>=<its address>"`.
 - If the note says something about the **whole page** ("the page has no mention of ..."), the command counts free, trial, paid and plan on the
   page; if any is there it refuses and tells you to say what the sentence or the clause names instead.
-- A page that answers an error, needs scripts, or declares another language cannot be read this way; the message says so. Do not paste the
+- A page that answers an error, needs scripts, or declares a different language cannot be read this way; the message says so. Do not paste the
   entry by hand: open the pull request and say that the page could not be read, and a maintainer will read it from the server.
 - To change a row that already has entries, change the row and run the command again: it replaces the entries of that provider and touches no
   other.
