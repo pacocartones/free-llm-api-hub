@@ -21,7 +21,7 @@ const RULE_CASES = [
   ['openai_base_url requires openai_compatible', 'an OpenAI endpoint on a provider marked incompatible', (d) => { provider(d).openai_compatible = false; }, 'openai_base_url is set but openai_compatible is false'],
   ['probe_status requires last_probed', 'a probe result with no probe date', (d) => { provider(d).probe_status = 'live'; provider(d).last_probed = null; }, 'probe_status set but last_probed missing'],
   ['model_tier and model_tier_source go together', 'a typed tier with no cited source', (d) => { provider(d).model_tier_source = null; }, 'model_tier_source must be object'],
-  ['model_tier matches the cited rating', 'a tier that does not match its source rating', (d) => { provider(d).model_tier = 0; }, 'does not match the cited rating'],
+  ['model_tier matches the cited rating', 'a tier that does not match its source rating', (d) => { const p = provider(d); p.model_tier = (p.model_tier + 1) % 5; }, 'does not match the cited rating'],
   ['model_tier_source has the minimum votes', 'a leaderboard rating below the vote floor', (d) => { provider(d).model_tier_source.votes = 1; }, 'model_tier_source/votes must be >= 1000'],
   ['model_tier_source.ci surrounds the rating', 'a confidence interval that excludes the rating', (d) => { const src = provider(d).model_tier_source; src.ci = [src.rating + 1, src.rating + 2]; }, 'model_tier_source.ci must be [lower, upper] around the rating'],
   ['model_tier_source.boundary matches the interval', 'a boundary flag that contradicts the interval', (d) => { provider(d).model_tier_source.boundary = !provider(d).model_tier_source.boundary; }, 'model_tier_source.boundary must be'],
@@ -33,12 +33,12 @@ const RULE_CASES = [
   ['data_policy states training or retention', 'a policy row that records no policy', (d) => { provider(d).data_policy.trains_on_prompts = null; provider(d).data_policy.retention = null; provider(d).data_policy.quote = null; }, 'data_policy must state trains_on_prompts or retention'],
   ['data_policy.checked is not after generated', 'a policy checked after the dataset date', (d) => { provider(d).data_policy.checked = '2999-01-01'; }, 'data_policy.checked must be a date not after the dataset'],
   ['data_policy text has no hidden characters', 'a copied policy sentence with a zero-width character', (d) => { provider(d).data_policy.quote = 'Prompts are not retained\u200b.'; }, 'must not contain control, bidirectional or zero-width characters'],
-  ['data_policy quote goes with a stated part', 'a quote that does not say what it supports', (d) => { provider(d).data_policy.trains_on_prompts = null; provider(d).data_policy.retention = null; }, 'a data_policy sentence goes with a stated part'],
+  ['data_policy quote goes with a stated part', 'a quote that does not say what it supports', (d) => { const p = provider(d); p.data_policy.quote = 'A policy sentence.'; p.data_policy.trains_on_prompts = null; p.data_policy.retention = null; }, 'a data_policy sentence goes with a stated part'],
   ['no_expiry applies only to trial credit', 'a no-expiry statement on an ongoing tier', (d) => { provider(d).no_expiry = { source: 'https://example.com/terms', checked: '2026-10-01', quote: 'Credits do not expire.' }; }, 'no_expiry applies only to a one-time trial credit'],
   ['no_expiry and expires do not contradict', 'a no-expiry statement beside an expiry date', (d) => { const p = trialProvider(d); p.expires = '2027-01-01'; p.no_expiry = { source: 'https://example.com/terms', checked: '2026-10-01', quote: 'Credits do not expire.' }; }, 'no_expiry and a non-null expires contradict each other'],
   ['no_expiry.checked is not after generated', 'a no-expiry source checked after the dataset date', (d) => { trialProvider(d).no_expiry = { source: 'https://example.com/terms', checked: '2999-01-01', quote: 'Credits do not expire.' }; }, 'no_expiry.checked must be a date not after the dataset'],
   ['verified entries have last_verified', 'a verified claim with no verification date', (d) => { provider(d).verified = true; provider(d).last_verified = null; }, 'last_verified must be string'],
-  ['unverified entries have no last_verified', 'a stale verification date on an unverified row', (d) => { provider(d).verified = false; provider(d).last_verified = '2026-10-01'; }, 'unverified entry must have last_verified: null'],
+  ['unverified entries have no last_verified', 'a stale verification date on an unverified row', (d) => { const p = provider(d); p.verified = false; p.last_verified = '2026-10-01'; }, 'unverified entry must have last_verified: null'],
 ];
 
 const REPORT_CASES = [
