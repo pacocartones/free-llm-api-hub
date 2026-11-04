@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { entriesFor, mergeRegistry, readText } from './lib/quotes-add.mjs';
 import { quoteErrors } from './lib/quotes.mjs';
-import { sha256, METHOD } from './lib/page-text.mjs';
+import { sha256, METHOD, methodFor } from './lib/page-text.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const filler = 'filler words so that the page has some text. '.repeat(10);
@@ -62,10 +62,22 @@ test('readText: refuses a page in another language, a page with no text and an e
   const res = (status, body, lang = '') => async () => new Response(body, { status, headers: lang ? { 'Content-Language': lang } : {} });
   const html = (lang, t) => `<html lang="${lang}"><body><p>${t} ${filler}</p></body></html>`;
   assert.equal((await readText('https://x.example', res(200, html('en', 'We do not train.')))).ok, true);
-  assert.match((await readText('https://x.example', res(200, html('es-419', 'No entrenamos.')))).why, /not English/);
+  assert.match((await readText('https://x.example', res(200, html('es-419', 'No entrenamos.')))).why, /not en/);
   assert.match((await readText('https://x.example', res(200, '<html><div id="root"></div></html>'))).why, /needs scripts/);
   assert.match((await readText('https://x.example', res(403, 'no'))).why, /HTTP 403/);
   assert.match((await readText('https://x.example', async () => { throw new Error('ECONNRESET'); })).why, /ECONNRESET/);
+});
+test('readText and entriesFor: a requested non-English language is sent, accepted and recorded', async () => {
+  const html = `<html lang="zh"><body><p>我们不会使用客户内容训练模型。 ${'filler words so that the page has some text. '.repeat(10)}</p></body></html>`;
+  const seen = [];
+  const read = async (url, options) => { seen.push(options.headers['Accept-Language']); return new Response(html, { status: 200 }); };
+  const page = await readText('https://x.example/zh', read, 'zh');
+  assert.equal(page.ok, true);
+  assert.deepEqual(seen, ['zh']);
+  const { entries, problems } = await entriesFor('acme', { source: 'https://x.example/zh', quote: '我们不会使用客户内容训练模型。', note: '' }, async () => page, { today: '2026-10-15', lang: 'zh' });
+  assert.deepEqual(problems, []);
+  assert.equal(entries[0].lang, 'zh');
+  assert.equal(entries[0].method, methodFor('zh'));
 });
 
 // the whole path of the command, with the page stubbed: read, make, merge, check
@@ -87,7 +99,8 @@ test('the whole path: entries made from a page, merged into the register, pass t
 test('the command: usage errors do not touch the register', () => {
   const run = (...a) => spawnSync('node', [join(ROOT, 'scripts/quotes-add.mjs'), ...a], { encoding: 'utf8' });
   const before = readFileSync(join(ROOT, 'data/quotes.json'), 'utf8');
-  const none = run(); assert.equal(none.status, 2); assert.match(none.stderr, /usage/);
+  const none = run(); assert.equal(none.status, 2); assert.match(none.stderr, /--lang <code>/);
+  const badLang = run('acme', '--lang', 'x'); assert.equal(badLang.status, 2); assert.match(badLang.stderr, /--lang <code>/);
   const nobody = run('nobody-at-all'); assert.equal(nobody.status, 2); assert.match(nobody.stderr, /no provider with that slug/);
   assert.equal(readFileSync(join(ROOT, 'data/quotes.json'), 'utf8'), before);
 });

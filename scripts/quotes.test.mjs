@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
-import { htmlToText, decodeEntities, collapse, sha256, absenceHits, ABSENCE_TERMS, METHOD, READ_HEADERS, declaredLanguage, sameLanguage, judgeReading } from './lib/page-text.mjs';
+import { htmlToText, decodeEntities, collapse, sha256, absenceHits, ABSENCE_TERMS, METHOD, READ_HEADERS, methodFor, readHeaders, declaredLanguage, sameLanguage, judgeReading } from './lib/page-text.mjs';
 import { quoteErrors, noteSpans, claimsPageAbsence, totalHits } from './lib/quotes.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -22,9 +22,14 @@ test('absence hits: whole words, any case, plan and plans, not royalty-free as a
   assert.equal(absenceHits('royalty-free').free, 1, 'a hyphen is a word boundary, so royalty-free counts: the check errs on the side of finding');
   assert.deepEqual(absenceHits('nothing here'), { free: 0, trial: 0, paid: 0, plan: 0 });
 });
-test('the request: English, recorded in the method', () => {
+test('the request: English by default, or the entry language, recorded in the method', () => {
   assert.match(READ_HEADERS['Accept-Language'], /^en/);
+  assert.equal(readHeaders('en'), READ_HEADERS);
+  assert.equal(readHeaders('zh')['Accept-Language'], 'zh');
+  assert.equal(readHeaders('zh-CN')['Accept-Language'], 'zh-CN,zh;q=0.9');
   assert.match(METHOD, /requested in English/);
+  assert.equal(methodFor('en'), METHOD);
+  assert.match(methodFor('zh'), /Accept-Language zh/);
 });
 test('language: declared by header or html lang, compared by its first subtag, undeclared accepted', () => {
   assert.equal(declaredLanguage('<html lang="es-419">', ''), 'es-419');
@@ -68,6 +73,12 @@ test('register: the sentence, the passages and the claims each have to match, by
   assert.match(errs((w) => { w.data.providers[0].data_policy.note = 'No passage.'; }), /does not carry/, 'a passage no note uses is an orphan');
   assert.match(errs((w) => { w.registry.entries[1].text = 'training'; }), /no such passage/, 'case counts');
   assert.match(errs((w) => { w.data.providers[0].data_policy.note = 'Section «Training» and «Training».'; }), /twice/);
+});
+test('register: a non-English entry carries the method of its own language', () => {
+  const w = world();
+  for (const e of w.registry.entries) { e.lang = 'zh'; e.method = methodFor('zh'); }
+  assert.deepEqual(quoteErrors(w.data, w.registry), []);
+  assert.match(errs((x) => { x.registry.entries[0].lang = 'zh'; x.registry.entries[0].method = METHOD; }), /method/);
 });
 test('register: every entry has its fields in order', () => {
   assert.match(errs((w) => { w.registry.entries[0].source_url = 'http://example.com/terms'; }), /https/);

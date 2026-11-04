@@ -15,14 +15,14 @@ const STAMP_RE = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/;
 
 /** Reads every source once (many entries share a page) and judges each entry against it.
  * @param {Array} entries the entries of data/quotes.json
- * @param {(url: string) => Promise<{status?: number, html?: string, contentLanguage?: string, error?: string}>} readPage
+ * @param {(url: string, lang: string) => Promise<{status?: number, html?: string, contentLanguage?: string, error?: string}>} readPage
  * @returns {Promise<Array<{id: string, result: string, page_changed: boolean|null}>>} */
 export async function verifyEntries(entries, readPage) {
   const pages = new Map();
-  const read = async (url) => { if (!pages.has(url)) pages.set(url, await readPage(url)); return pages.get(url); };
+  const read = async (url, lang) => { const key = `${lang}\0${url}`; if (!pages.has(key)) pages.set(key, await readPage(url, lang)); return pages.get(key); };
   const out = [];
   for (const e of entries) {
-    const reading = await read(e.source_url);
+    const reading = await read(e.source_url, e.lang);
     if (e.kind === 'absence_check') {
       // the claim "the page has none of the four words" holds only while the count is zero in a page that was really read
       const judged = judgeReading(reading, '', e.lang);

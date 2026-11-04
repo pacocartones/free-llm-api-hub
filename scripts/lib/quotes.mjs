@@ -5,7 +5,7 @@
 // source page, the day it was read and how the page text was made. It does NOT prove that the page says that today, or ever did:
 // that needs a reading with the network (npm run verify-quotes). Nothing here may be described as "verified by CI".
 import { hasHiddenChars } from './hidden-chars.mjs';
-import { ABSENCE_TERMS, METHOD } from './page-text.mjs';
+import { ABSENCE_TERMS, methodFor } from './page-text.mjs';
 
 export const KINDS = ['sentence', 'note_passage', 'absence_check'];
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
@@ -39,7 +39,7 @@ export function quoteErrors(data, registry) {
     if (!KINDS.includes(e.kind)) { fail(`${where}: unknown kind ${JSON.stringify(e.kind)}`); continue; }
     if (!/^https:\/\/[^\s]+$/.test(e.source_url || '')) fail(`${where}: source_url must be an https address`);
     if (!DATE_RE.test(e.read_on || '') || e.read_on > data.generated) fail(`${where}: read_on must be a date not after the dataset's generated date`);
-    if (e.method !== METHOD) fail(`${where}: method must be the one in scripts/lib/page-text.mjs`);
+    if (e.method !== methodFor(e.lang || 'en')) fail(`${where}: method must be the one in scripts/lib/page-text.mjs for its language`);
     if (!/^[a-z]{2,3}(-[A-Za-z0-9]+)*$/.test(e.lang || '')) fail(`${where}: lang must be the language of the passage and of the page it is read in (for example en)`);
     if (e.page_sha256 !== null && !SHA_RE.test(e.page_sha256 || '')) fail(`${where}: page_sha256 must be null (page not read) or 64 hex characters`);
     if (e.kind === 'absence_check') {

@@ -2,7 +2,7 @@
 // re-reads the sources later, so a quote is compared with a page the same way both times.
 //
 // Method (recorded in each entry of data/quotes.json as `method`):
-//   0. the page is requested with READ_HEADERS (English);
+//   0. the page is requested with the registered language (English for the existing register);
 //   1. drop <script>, <style>, <noscript>, <template> and <svg> elements and HTML comments;
 //   2. replace every other tag by a space;
 //   3. decode character references (numeric ones, and the named ones in NAMED; any other named reference is left as it is);
@@ -12,9 +12,23 @@ import { createHash } from 'node:crypto';
 
 export const METHOD = 'html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed';
 
+/** The recorded reading method for a language. English keeps the exact method string the register already uses. */
+export function methodFor(lang = 'en') {
+  if (sameLanguage(lang, 'en')) return METHOD;
+  return `html-text-v1: page requested with Accept-Language ${lang}, tags removed, character references decoded, white space collapsed`;
+}
+
 /** How a page is requested, by the register builder and by the verify script alike. A page that negotiates its language by address or
- * by header (ai.google.dev answered a Spanish copy once) is read in English, which is the language the quotes are in. */
+ * by header is read in the language of the entry (English for the existing register). */
 export const READ_HEADERS = { 'User-Agent': 'free-llm-api-hub-quote-reader (+https://github.com/pacocartones/free-llm-api-hub)', 'Accept-Language': 'en-US,en;q=0.9', Accept: 'text/html,application/xhtml+xml,*/*;q=0.8' };
+
+/** Request headers for one language. A regional code asks for it, then its base language. */
+export function readHeaders(lang = 'en') {
+  if (sameLanguage(lang, 'en')) return READ_HEADERS;
+  const code = String(lang);
+  const base = code.split(/[-_]/)[0];
+  return { ...READ_HEADERS, 'Accept-Language': code.toLowerCase() === base.toLowerCase() ? code : `${code},${base};q=0.9` };
+}
 
 const NAMED = {
   amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ', ensp: ' ', emsp: ' ', thinsp: ' ',

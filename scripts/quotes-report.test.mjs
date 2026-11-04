@@ -6,7 +6,7 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { verifyEntries, buildReport, reportErrors, reportCoverage, reportAge, quotesReportHtml, AMBER_DAYS, RED_DAYS, PERSISTENT_RUNS, RESULTS } from './lib/quotes-report.mjs';
-import { METHOD, READ_HEADERS, htmlToText, sha256 } from './lib/page-text.mjs';
+import { METHOD, READ_HEADERS, methodFor, readHeaders, htmlToText, sha256 } from './lib/page-text.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const filler = 'filler words so that the page has some text. '.repeat(10);
@@ -45,21 +45,40 @@ test('verifyEntries: an absence check holds only while the four words stay at ze
   assert.equal((await verifyEntries([abs], mk('blocked', 403)))[0].result, 'unreachable', 'an unread page proves nothing, in either direction');
   assert.equal((await verifyEntries([abs], mk(page('es', 'Nada'))))[0].result, 'other_language');
 });
+test('verifyEntries: the same address is read once per language, not once for every language', async () => {
+  const pages = {
+    'en': { status: 200, html: page('en', 'We do not train.') },
+    'zh': { status: 200, html: page('zh', '我们不会使用客户内容训练模型。') },
+  };
+  const reads = []; const readPage = async (u, lang) => { reads.push([u, lang]); return pages[lang]; };
+  const entries = [
+    entry('a.sentence', 'We do not train.', 'https://a.example/x'),
+    entry('b.sentence', '我们不会使用客户内容训练模型。', 'https://a.example/x', { lang: 'zh', method: methodFor('zh') }),
+  ];
+  assert.deepEqual((await verifyEntries(entries, readPage)).map((x) => x.result), ['ok', 'ok']);
+  assert.deepEqual(reads, [['https://a.example/x', 'en'], ['https://a.example/x', 'zh']]);
+});
 test('verifyEntries against a real HTTP server on this machine: the language header is sent and a Spanish answer is not "expired"', async () => {
   const seen = [];
   const server = createServer((req, res) => {
     seen.push(req.headers['accept-language']);
     if (req.url === '/ok') { res.writeHead(200, { 'Content-Type': 'text/html' }); res.end(page('en', 'We do not train.')); }
     else if (req.url === '/lang') { res.writeHead(200, { 'Content-Type': 'text/html', 'Content-Language': 'es' }); res.end(page('', 'No entrenamos.')); }
+    else if (req.url === '/zh') { res.writeHead(200, { 'Content-Type': 'text/html', 'Content-Language': 'zh' }); res.end(page('', '我们不会使用客户内容训练模型。')); }
     else { res.writeHead(403); res.end('no'); }
   }).listen(0, '127.0.0.1');
   await new Promise((r) => server.once('listening', r));
   const base = `http://127.0.0.1:${server.address().port}`;
-  const readPage = async (u) => { const res = await fetch(u, { headers: READ_HEADERS }); return { status: res.status, html: await res.text(), contentLanguage: res.headers.get('content-language') || '' }; };
+  const readPage = async (u, lang = 'en') => { const res = await fetch(u, { headers: readHeaders(lang) }); return { status: res.status, html: await res.text(), contentLanguage: res.headers.get('content-language') || '' }; };
   try {
-    const out = await verifyEntries([entry('a.sentence', 'We do not train.', `${base}/ok`), entry('b.sentence', 'We do not train.', `${base}/lang`), entry('c.sentence', 'x', `${base}/blocked`)], readPage);
-    assert.deepEqual(out.map((o) => o.result), ['ok', 'other_language', 'unreachable']);
-    assert.ok(seen.every((h) => /^en/.test(h)), 'every request asked for English');
+    const out = await verifyEntries([
+      entry('a.sentence', 'We do not train.', `${base}/ok`),
+      entry('b.sentence', 'We do not train.', `${base}/lang`),
+      entry('c.sentence', 'x', `${base}/blocked`),
+      entry('d.sentence', '我们不会使用客户内容训练模型。', `${base}/zh`, { lang: 'zh', method: methodFor('zh') }),
+    ], readPage);
+    assert.deepEqual(out.map((o) => o.result), ['ok', 'other_language', 'unreachable', 'ok']);
+    assert.deepEqual(seen, ['en-US,en;q=0.9', 'en-US,en;q=0.9', 'en-US,en;q=0.9', 'zh']);
   } finally { server.close(); }
 });
 
