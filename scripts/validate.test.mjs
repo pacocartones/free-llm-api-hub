@@ -3,9 +3,10 @@ import assert from 'node:assert/strict';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { makeTmpDir } from './lib/tmp.mjs';
 
-const ROOT = new URL('..', import.meta.url).pathname;
+const ROOT = fileURLToPath(new URL('..', import.meta.url));
 const DATA = JSON.parse(readFileSync(join(ROOT, 'data/providers.json'), 'utf8'));
 const VALIDATE = join(ROOT, 'scripts/validate.mjs');
 
@@ -44,12 +45,20 @@ const REPORT_CASES = [
   ['probe-report.probed_at is a date', 'an unreadable probe-report date', (r) => { r.probed_at = 'today'; }, 'probe-report: probed_at must be YYYY-MM-DD'],
   ['probe-report.results is an array', 'a probe report whose results are not a list', (r) => { r.results = {}; }, 'probe-report: results must be an array'],
   ['probe-report slugs are current providers', 'a stale provider left in the probe report', (r) => { r.results = [{ slug: 'retired-provider' }]; r.count = 1; }, 'probe-report: "retired-provider" is not a current provider'],
-  ['probe-report slugs are unique', 'a duplicate provider in the probe report', (r) => { const slug = r.results[0].slug; r.results = [{ slug }, { slug }]; r.count = 2; }, 'probe-report: duplicate slug "google-gemini"'],
+  ['probe-report slugs are unique', 'a duplicate provider in the probe report', (r) => { const slug = r.results[0].slug; r.results = [{ slug }, { slug }]; r.count = 2; }, (r) => `probe-report: duplicate slug "${r.results[0].slug}"`],
   ['probe-report.count equals results.length', 'a count that disagrees with the report rows', (r) => { r.count = r.results.length + 1; }, 'probe-report: count'],
 ];
 
 function provider(data) {
-  return data.providers.find((p) => p.slug === 'google-gemini');
+  return data.providers.find((p) =>
+    p.openai_base_url &&
+    p.openai_compatible === true &&
+    p.is_text_llm === true &&
+    typeof p.model_tier === 'number' &&
+    p.model_tier_source &&
+    p.data_policy &&
+    p.verified === true
+  );
 }
 
 function trialProvider(data) {
@@ -100,7 +109,8 @@ for (const [rule, protects, mutate, message] of REPORT_CASES) {
     mutate(report);
     const result = runValidate(data, report);
     assert.notEqual(result.status, 0, result.output);
-    assert.match(result.output, new RegExp(escapeRegExp(message)));
+    const expected = typeof message === 'function' ? message(report) : message;
+    assert.match(result.output, new RegExp(escapeRegExp(expected)));
   });
 }
 
