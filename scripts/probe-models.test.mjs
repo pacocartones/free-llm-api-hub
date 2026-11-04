@@ -3,12 +3,13 @@ import assert from 'node:assert/strict';
 import { cpSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { join } from 'node:path';
-import { pathToFileURL } from 'node:url';
 import { makeTmpDir } from './lib/tmp.mjs';
 import { serialize } from './_serialize.mjs';
+import { KEY_HOSTS } from './lib/key-hosts.mjs';
 
 const data = JSON.parse(readFileSync(new URL('../data/providers.json', import.meta.url), 'utf8'));
-const provider = data.providers.find((p) => p.slug === 'iteracompute');
+const [envKey, host] = Object.entries(KEY_HOSTS)[0];
+const provider = { slug: 'probe-fixture', env_key: envKey, openai_base_url: `https://${host}/v1`, models_free: ['fixture/free-model'], modalities: ['text'] };
 
 for (const mode of ['auth-only', 'success', 'failure']) {
   test(`write-enabled ${mode} probes preserve curated free models`, () => {
@@ -19,21 +20,21 @@ for (const mode of ['auth-only', 'success', 'failure']) {
     const file = join(root, 'data/providers.json');
     writeFileSync(file, serialize({ ...data, providers: [provider] }));
     const requests = join(root, 'requests.jsonl');
-    const mock = join(root, 'mock.mjs');
-    writeFileSync(mock, `import { appendFileSync } from 'node:fs';
+    const mock = join(root, 'mock.cjs');
+    writeFileSync(mock, `const { appendFileSync } = require('node:fs');
 globalThis.fetch = async (url, options) => {
   if (String(url).endsWith('/models'))
-    return Response.json({ data: [{ id: 'aaa/paid-model' }, { id: 'qwen/qwen3.8-27b' }] });
+    return new Response(JSON.stringify({ data: [{ id: 'aaa/paid-model' }, { id: ${JSON.stringify(provider.models_free[0])} }] }), { headers: { 'content-type': 'application/json' } });
   const body = JSON.parse(options.body);
   appendFileSync(${JSON.stringify(requests)}, JSON.stringify(body.model) + '\\n');
-  return Response.json(${mode === 'failure' ? "{ error: { message: 'invalid request' } }" : '{ usage: { completion_tokens: 1 } }'}, { status: ${mode === 'failure' ? 400 : 200} });
+  return new Response(JSON.stringify(${mode === 'failure' ? "{ error: { message: 'invalid request' } }" : '{ usage: { completion_tokens: 1 } }'}), { status: ${mode === 'failure' ? 400 : 200} });
 };
 `);
     for (let attempt = 0; attempt < 2; attempt++) {
       const result = spawnSync(process.execPath, [
-        '--import', pathToFileURL(mock).href, join(root, 'scripts/probe.mjs'),
-        '--write', '--only=iteracompute', ...(mode === 'auth-only' ? ['--auth-only'] : []),
-      ], { env: { PATH: process.env.PATH, ITERACOMPUTE_API_KEY: 'fake-test-key' }, encoding: 'utf8' });
+        '--require', mock, join(root, 'scripts/probe.mjs'),
+        '--write', `--only=${provider.slug}`, ...(mode === 'auth-only' ? ['--auth-only'] : []),
+      ], { env: { PATH: process.env.PATH, [provider.env_key]: 'fake-test-key' }, encoding: 'utf8' });
       assert.equal(result.status, 0, result.stderr);
       const updated = JSON.parse(readFileSync(file, 'utf8')).providers[0];
       assert.deepEqual(updated.models_free, provider.models_free);

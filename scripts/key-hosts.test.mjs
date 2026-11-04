@@ -4,7 +4,6 @@ import { readFileSync, cpSync, mkdirSync, writeFileSync } from 'node:fs';
 import { spawn, spawnSync } from 'node:child_process';
 import http from 'node:http';
 import { join } from 'node:path';
-import { pathToFileURL } from 'node:url';
 import { makeTmpDir } from './lib/tmp.mjs';
 import { publishableClientConfigs, openaiClients, litellmYaml } from './lib/client-config.mjs';
 import { serialize } from './_serialize.mjs';
@@ -18,13 +17,12 @@ test('every provider with a key and a base URL in the dataset is pinned to its o
   for (const p of keyed) assert.equal(keyHostError(p), null, p.slug);
 });
 
-test('IteraCompute client configs pin the API host and list only the free model', () => {
-  const provider = data.providers.find((p) => p.slug === 'iteracompute');
-  assert.ok(provider);
-  assert.equal(KEY_HOSTS.ITERACOMPUTE_API_KEY, 'api.iteracompute.com');
+test('client configs preserve a curated free-model sample on a pinned host', () => {
+  const [envKey, host] = Object.entries(KEY_HOSTS)[0];
+  const provider = { slug: 'free-fixture', name: 'Free fixture', env_key: envKey, openai_base_url: `https://${host}/v1`, openai_compatible: true, verified: true, models_free: ['fixture/free-model'] };
   assert.equal(keyHostError(provider), null);
-  assert.deepEqual(provider.models_free, ['qwen/qwen3.8-27b']);
-  assert.match(keyHostError({ ...provider, openai_base_url: 'https://api.iteracompute.com.collector.example/v1' }), /may only be sent to/);
+  assert.deepEqual(openaiClients([provider])[0].models_free, provider.models_free);
+  assert.match(keyHostError({ ...provider, openai_base_url: `https://${host}.collector.example/v1` }), /may only be sent to/);
 });
 
 test('an entry that reuses a pinned env_key with another host is refused', () => {
@@ -63,9 +61,9 @@ async function keysSentToACollector(script, provider, { moveHost = true } = {}) 
   mkdirSync(join(root, 'data'));
   const providers = moveHost ? data.providers.map((p) => (p.slug === provider.slug ? { ...p, openai_base_url: 'https://collector.example/v1' } : p)) : data.providers;
   writeFileSync(join(root, 'data', 'providers.json'), serialize({ ...data, providers }));
-  const divert = join(root, 'divert.mjs');
+  const divert = join(root, 'divert.cjs');
   writeFileSync(divert, `const real = globalThis.fetch;\nglobalThis.fetch = (url, opts) => real('http://127.0.0.1:${server.address().port}/', opts);\n`);
-  const child = spawn(process.execPath, ['--import', pathToFileURL(divert).href, join(root, 'scripts', script), '--auth-only', `--only=${provider.slug}`],
+  const child = spawn(process.execPath, ['--require', divert, join(root, 'scripts', script), '--auth-only', `--only=${provider.slug}`],
     { env: { PATH: process.env.PATH, [provider.env_key]: 'fake-key-for-the-test' }, stdio: 'ignore' });
   await new Promise((resolve) => child.on('exit', resolve));
   await new Promise((resolve) => server.close(resolve));

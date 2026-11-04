@@ -2851,11 +2851,21 @@ test('the private copy of a worktree with a relative gitdir still sees the histo
 
 
 test('expanded provider text identifies promotions separately from trial credit', () => {
-  run(['scripts/build.mjs']);
-  const text = readFileSync(join(ROOT, 'site/llms-full.txt'), 'utf8');
-  const promotions = JSON.parse(readFileSync(DATA, 'utf8')).providers.filter((p) => p.free_type === 'promotion');
-  assert.ok(promotions.length > 0);
-  for (const p of promotions) assert.ok(text.includes(`### ${p.name} — Time-limited promotion\n`));
+  const before = readFileSync(DATA, 'utf8');
+  const fixture = JSON.parse(before);
+  const promotion = fixture.providers[0];
+  promotion.category = 'trial';
+  promotion.free_type = 'promotion';
+  promotion.expires = '2030-01-01 08:00 UTC';
+  delete promotion.no_expiry;
+  try {
+    writeFileSync(DATA, serialize(fixture));
+    run(['scripts/build.mjs']);
+    const text = readFileSync(join(ROOT, 'site/llms-full.txt'), 'utf8');
+    assert.ok(text.includes(`### ${promotion.name} — Time-limited promotion\n`));
+  } finally {
+    writeFileSync(DATA, before);
+  }
 });
 
 test('time-limited promotions use the trial bucket and require a visible expiry', () => {
