@@ -8,7 +8,7 @@ import { htmlEsc, ICON } from './rows.mjs';
 import { triStateHtml } from './compare.mjs';
 import { expiryHtml } from './expiry.mjs';
 
-const FREE_TYPE_LABEL = {
+export const FREE_TYPE_LABEL = {
   'renewing-quota': 'Free quota that renews',
   perpetual: 'Free with no end date',
   'recurring-credit': 'Credit that renews',
@@ -61,7 +61,7 @@ export function glanceHtml(p, typeLabel) {
   const mods = (p.modalities || []).join(', ') || 'not listed';
   const base = p.openai_base_url ? `<code>${htmlEsc(p.openai_base_url)}</code>` : 'Not OpenAI-compatible: see the official docs';
   const rows = [
-    ['Plan', `${htmlEsc(typeLabel)}${p.category === 'ongoing' ? ' free tier' : ' credit'}`],
+    ['Plan', p.free_type === 'promotion' ? htmlEsc(FREE_TYPE_LABEL.promotion) : `${htmlEsc(typeLabel)}${p.category === 'ongoing' ? ' free tier' : ' credit'}`],
     ['How it renews', htmlEsc(FREE_TYPE_LABEL[p.free_type] || p.free_type || 'not recorded')],
     ['Expires', expiryHtml(p)],
     ['Modalities', htmlEsc(mods)],

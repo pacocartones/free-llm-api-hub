@@ -30,7 +30,7 @@ import { quotesReportHtml } from './lib/quotes-report.mjs';
 import { SCORE_WEIGHTS, EDITORIAL_WEIGHT, EDITORIAL_DEFAULT, MATH_INPUTS, MIN_CONFIRMED, TOP_SIZE, EDITORIAL_NOTE_THRESHOLD, STABILITY_MIN_DAYS, STABILITY_MIN_SAMPLES, rankProviders, editorialRating } from './lib/score.mjs';
 import { publishableClientConfigs } from './lib/client-config.mjs';
 import * as compareLib from './lib/compare.mjs';
-import { requirementsHtml, limitsHtml, glanceHtml, modelsHtml, dataPolicyHtml } from './lib/provider-sections.mjs';
+import { requirementsHtml, limitsHtml, glanceHtml, modelsHtml, dataPolicyHtml, FREE_TYPE_LABEL } from './lib/provider-sections.mjs';
 import { aboutHtml } from './lib/provider-summaries.mjs';
 import { markdownToHtml } from './lib/markdown.mjs';
 import { bestFactsHtml } from './lib/best-facts.mjs';
@@ -1817,7 +1817,7 @@ const provBlock = (p) => {
     `commercial use: ${yn(p.commercial_ok, 'allowed', 'not allowed')}`,
     `OpenAI-compatible: ${yn(p.openai_compatible, 'yes', 'no')}${p.openai_base_url ? ` (base ${p.openai_base_url})` : ''}`,
   ].join('; ');
-  return `### ${p.name} — ${p.category === 'ongoing' ? 'ongoing free tier' : 'trial credit'}\n` +
+  return `### ${p.name} — ${p.free_type === 'promotion' ? FREE_TYPE_LABEL.promotion : p.category === 'ongoing' ? 'ongoing free tier' : 'trial credit'}\n` +
     `- Free: ${p.free_tier}\n` +
     `- Rate limits: ${p.rate_limits || 'not specified'}\n` +
     `- The catch: ${p.notes || '—'}\n` +

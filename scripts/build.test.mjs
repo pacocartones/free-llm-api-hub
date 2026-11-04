@@ -2850,6 +2850,14 @@ test('the private copy of a worktree with a relative gitdir still sees the histo
 });
 
 
+test('expanded provider text identifies promotions separately from trial credit', () => {
+  run(['scripts/build.mjs']);
+  const text = readFileSync(join(ROOT, 'site/llms-full.txt'), 'utf8');
+  const promotions = JSON.parse(readFileSync(DATA, 'utf8')).providers.filter((p) => p.free_type === 'promotion');
+  assert.ok(promotions.length > 0);
+  for (const p of promotions) assert.ok(text.includes(`### ${p.name} — Time-limited promotion\n`));
+});
+
 test('time-limited promotions use the trial bucket and require a visible expiry', () => {
   const configure = (d) => {
     const p = d.providers.find((x) => x.free_type === 'trial-credit' && !x.no_expiry);
@@ -2863,6 +2871,7 @@ test('time-limited promotions use the trial bucket and require a visible expiry'
   assert.equal(validateAfter((d) => { configure(d).category = 'ongoing'; }), false);
   const page = glanceHtml({ free_type: 'promotion', category: 'trial', expires: '2026-11-24 08:00 UTC' }, 'Trial');
   assert.match(page, /Time-limited promotion/);
+  assert.match(page, /Plan<\/span><span class="meta-v">Time-limited promotion<\/span>/);
   assert.match(page, /2026-11-24 08:00 UTC/);
-  assert.doesNotMatch(page, /One-time trial credit|Free with no end date/);
+  assert.doesNotMatch(page, /Trial credit|One-time trial credit|Free with no end date/);
 });

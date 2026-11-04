@@ -2,7 +2,7 @@
 //
 // Philosophy: don't just trust the docs — call the free tier and record that it
 // answered. Writes `last_probed` + `probe_status` (independent of the docs-based
-// `verified`) and refreshes `models_free`. Emits data/probe-report.json.
+// `verified`). Preserves the curated `models_free` list. Emits data/probe-report.json.
 //
 //   node scripts/probe.mjs                 # dry run, report only
 //   node scripts/probe.mjs --write         # persist results to the dataset
@@ -28,29 +28,12 @@ import { keyHostError } from './lib/key-hosts.mjs';
 const FILE = new URL('../data/providers.json', import.meta.url);
 const REPORT = new URL('../data/probe-report.json', import.meta.url);
 const TIMEOUT = 25000;
-const SAMPLE = 8;
 const TODAY = new Date().toISOString().slice(0, 10);
 
 const args = process.argv.slice(2);
 const WRITE = args.includes('--write');
 const AUTH_ONLY = args.includes('--auth-only');
 const ONLY = (args.find((a) => a.startsWith('--only=')) || '').slice(7).split(',').filter(Boolean);
-
-// publisher-diverse, deterministic sample (mirrors fetch-models.mjs)
-const sample = (ids) => {
-  const groups = new Map();
-  for (const id of [...new Set(ids.filter(Boolean))].sort()) {
-    const pub = id.includes('/') ? id.slice(0, id.indexOf('/')) : id;
-    (groups.get(pub) || groups.set(pub, []).get(pub)).push(id);
-  }
-  const keys = [...groups.keys()].sort();
-  const out = [];
-  for (let i = 0; out.length < SAMPLE && keys.some((k) => groups.get(k).length); i++) {
-    const g = groups.get(keys[i % keys.length]);
-    if (g.length) out.push(g.shift());
-  }
-  return out.sort();
-};
 
 async function req(url, opts = {}) {
   const ctrl = new AbortController();
@@ -174,7 +157,6 @@ async function main() {
     if (WRITE) {
       p.last_probed = TODAY;
       p.probe_status = r.status;
-      if (r.models.length) p.models_free = sample(r.models);
       changed++;
     }
     const rl = Object.keys(r.rate_limit).length ? ` rl:${Object.entries(r.rate_limit).map(([k, v]) => k.replace('x-ratelimit-', '') + '=' + v).join(',')}` : '';
