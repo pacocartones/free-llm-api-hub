@@ -28,6 +28,7 @@ import { weeklyPacing, weeklyBatch, WEEKLY_CAP, MIN_AGE_DAYS } from './lib/pacin
 import { clientConfigProviders, openaiClients, litellmYaml, MODEL_PLACEHOLDER } from './lib/client-config.mjs';
 import { requirementsHtml, limitsHtml, glanceHtml, modelsHtml, dataPolicyHtml } from './lib/provider-sections.mjs';
 import { compareTableHtml, comparisonCategory, sameComparisonCategory, selectComparePairs, COMPARE_PAGE_CAP, COMPARE_PER_PROVIDER_CAP, COMPARE_MAX as COMPARE_MAX_SLOTS } from './lib/compare.mjs';
+import { providersCsv } from './lib/provider-csv.mjs';
 
 const REPO = join(dirname(fileURLToPath(import.meta.url)), '..');
 // The builds of this file run in a private copy of the tree (see lib/private-tree.mjs): `node --test` runs the test
@@ -250,6 +251,7 @@ const GENERATED = [
   'README.md',
   'badge-freshness.json',
   'site/index.html',
+  'site/providers.csv',
 ];
 const hashAll = () =>
   GENERATED.map((f) => createHash('sha256').update(readFileSync(join(ROOT, f))).digest('hex')).join('|');
@@ -266,9 +268,12 @@ test('the public surface omits retired exports and home redundancies, while upda
 
   const index = readFileSync(join(ROOT, 'site/index.html'), 'utf8');
   assert.doesNotMatch(index, /Recently re-verified/);
-  assert.doesNotMatch(index, /providers[.]csv|providers[.]yaml|CSV export|YAML export|JSON Schema/);
+  assert.doesNotMatch(index, /providers[.]yaml|CSV export|YAML export|JSON Schema/);
   assert.doesNotMatch(readFileSync(join(ROOT, 'site/explorer.js'), 'utf8'), /Could not load providers[.]json[.]/);
-  for (const rel of ['data/providers.csv', 'data/providers.yaml', 'site/providers.csv', 'site/providers.yaml']) {
+  const data = JSON.parse(readFileSync(DATA, 'utf8'));
+  const publicProviders = data.providers.map(({ env_key, ...rest }) => rest);
+  assert.equal(readFileSync(join(ROOT, 'site/providers.csv'), 'utf8'), providersCsv({ version: data.version, generated: data.generated, providers: publicProviders }), 'site/providers.csv matches the public projection');
+  for (const rel of ['data/providers.csv', 'data/providers.yaml', 'site/providers.yaml']) {
     assert.equal(existsSync(join(ROOT, rel)), false, `${rel} must not survive the retired export feature`);
   }
 
