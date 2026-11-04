@@ -5,7 +5,7 @@
 // source page, the day it was read and how the page text was made. It does NOT prove that the page says that today, or ever did:
 // that needs a reading with the network (npm run verify-quotes). Nothing here may be described as "verified by CI".
 import { hasHiddenChars } from './hidden-chars.mjs';
-import { ABSENCE_TERMS, methodFor } from './page-text.mjs';
+import { ABSENCE_TERMS, methodFor, sameLanguage } from './page-text.mjs';
 
 export const KINDS = ['sentence', 'note_passage', 'absence_check'];
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
@@ -43,6 +43,7 @@ export function quoteErrors(data, registry) {
     if (!/^[a-z]{2,3}(-[A-Za-z0-9]+)*$/.test(e.lang || '')) fail(`${where}: lang must be the language of the passage and of the page it is read in (for example en)`);
     if (e.page_sha256 !== null && !SHA_RE.test(e.page_sha256 || '')) fail(`${where}: page_sha256 must be null (page not read) or 64 hex characters`);
     if (e.kind === 'absence_check') {
+      if (!sameLanguage('en', e.lang || 'en')) fail(`${where}: absence checks are English-only for now`);
       if (JSON.stringify(e.terms) !== JSON.stringify(ABSENCE_TERMS)) fail(`${where}: terms must be exactly ${ABSENCE_TERMS.join(', ')}`);
       if (e.hits !== null && !(e.hits && ABSENCE_TERMS.every((t) => Number.isInteger(e.hits[t]) && e.hits[t] >= 0))) fail(`${where}: hits must be null or a count for each term`);
       if ((e.hits === null) !== (e.page_sha256 === null)) fail(`${where}: hits and page_sha256 are both null (page not read) or both set`);

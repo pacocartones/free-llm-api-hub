@@ -60,7 +60,8 @@ type them. Then run `npm test`.
   (curly quotes and apostrophes included).
 - If a phrase comes from **another page** (for example a FAQ), say so: `npm run quotes:add -- <slug> --passage-url "<the phrase>=<its address>"`.
 - If the note says something about the **whole page** ("the page has no mention of ..."), the command counts free, trial, paid and plan on the
-  page; if any is there it refuses and tells you to say what the sentence or the clause names instead.
+  page; if any is there it refuses and tells you to say what the sentence or the clause names instead. That absence check is English-only for now:
+  on a page in another language, narrow the note to what the sentence or clause says instead of registering a whole-page absence.
 - A page that answers an error, needs scripts, or declares a different language cannot be read this way; the message says so. Do not paste the
   entry by hand: open the pull request and say that the page could not be read, and a maintainer will read it from the server.
 - To change a row that already has entries, change the row and run the command again: it replaces the entries of that provider and touches no

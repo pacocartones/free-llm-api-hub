@@ -43,6 +43,8 @@ test('entriesFor: a claim about the whole page is backed by a count of zero, or 
   assert.match(some.problems.join(), /says something about the whole page.*free/); assert.deepEqual(some.entries, []);
   const scoped = await entriesFor('acme', { ...policy, note: 'The sentence names no plan.' }, async () => pageOf('There is a free trial.'), opts);
   assert.deepEqual([scoped.problems, scoped.entries], [[], []], 'a claim about the sentence needs no check');
+  const zh = await entriesFor('acme', policy, async () => pageOf('页面没有提到方案。'), { ...opts, lang: 'zh' });
+  assert.match(zh.problems.join(), /absence checks are English-only/); assert.deepEqual(zh.entries, [], 'a Chinese page cannot certify the English absence terms');
 });
 test('entriesFor: a page that cannot be read gives the reason, and nothing is written', async () => {
   const { entries, problems } = await entriesFor('acme', { source: 'https://a.example/t', quote: 'x', note: '' }, async () => ({ ok: false, why: 'https://a.example/t answered HTTP 403' }), opts);
