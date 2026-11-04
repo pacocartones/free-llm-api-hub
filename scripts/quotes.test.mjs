@@ -114,6 +114,7 @@ test('register: a claim about the whole page needs an absence check at zero in t
   assert.match(errs((w) => { claim(w); w.registry.entries.push(check({ free: 0, trial: 0, paid: 0, plan: 0 }, { page_sha256: null })); }), /both null/);
   assert.match(errs((w) => { claim(w); w.registry.entries.push(check({ free: 0, trial: 0, paid: 0, plan: 0 }, { text: 'x' })); }), /no text/);
   assert.match(errs((w) => { claim(w); w.registry.entries.push(check({ free: 0, trial: 0, paid: 0, plan: 0 }, { source_url: 'https://example.com/other' })); }), /another source/);
+  assert.match(errs((w) => { claim(w); w.registry.entries.push(check({ free: 0, trial: 0, paid: 0, plan: 0 }, { lang: 'zh', method: methodFor('zh') })); }), /English-only/, 'a non-English absence claim is refused until its terms are language-aware');
 });
 test('claims about the whole page: which sentences count, and which are limited to the sentence and cannot be tested', () => {
   for (const yes of ['The page names no plan.', 'The page names no free plan; the clause speaks of x.', 'The policy has no mention of a free, trial, paid or other plan.', 'the page names no plan, so the free plan is neither included nor excluded', 'The terms have no mention of plans.']) assert.equal(claimsPageAbsence(yes), true, yes);

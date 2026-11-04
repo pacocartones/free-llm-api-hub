@@ -51,12 +51,15 @@ export async function entriesFor(slug, policy, read, { today, passageUrls = {}, 
     entries.push(make('note_passage', i + 1, { text }, url, pg));
   }
   if (claimsPageAbsence(policy.note)) {
-    const pg = await page(policy.source);
-    if (!pg.ok) problems.push(pg.why);
+    if (!sameLanguage('en', lang)) problems.push(`the note of ${slug} says something about the whole page; absence checks are English-only for now, so narrow the note to the sentence or clause it names`);
     else {
-      const hits = absenceHits(pg.text);
-      if (totalHits(hits) > 0) problems.push(`the note of ${slug} says something about the whole page, and the page has ${JSON.stringify(hits)} of ${ABSENCE_TERMS.join(', ')}: say what the sentence or the clause names, not the page`);
-      else entries.push({ id: `${slug}.absence_check`, slug, kind: 'absence_check', terms: ABSENCE_TERMS, hits, source_url: policy.source, read_on: today, lang, method: methodFor(lang), page_sha256: sha256(pg.text) });
+      const pg = await page(policy.source);
+      if (!pg.ok) problems.push(pg.why);
+      else {
+        const hits = absenceHits(pg.text);
+        if (totalHits(hits) > 0) problems.push(`the note of ${slug} says something about the whole page, and the page has ${JSON.stringify(hits)} of ${ABSENCE_TERMS.join(', ')}: say what the sentence or the clause names, not the page`);
+        else entries.push({ id: `${slug}.absence_check`, slug, kind: 'absence_check', terms: ABSENCE_TERMS, hits, source_url: policy.source, read_on: today, lang, method: methodFor(lang), page_sha256: sha256(pg.text) });
+      }
     }
   }
   return { entries, problems };
