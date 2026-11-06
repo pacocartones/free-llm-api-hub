@@ -25,7 +25,7 @@
   "site/api/v1/perpetual.json": "591f416b3ce4721d34af09d986878e53a64efbc7f9af9dd56134b33bff5a72bc",
   "site/api/v1/programs.json": "7fd5fdfaccd00623aa702a3e39633eb8bc3e71f057092fa2ec51a8efeb549eed",
   "site/api/v1/providers.json": "a43e86ec874b7b920bd1e82458123fc8ec92517502a01ab0f2e16e551c5c3891",
-  "site/api/v1/schema.json": "c6867b61c3b18bd98bd713c10f4a4b7f34f15426f56677d0a563e391c4838e51",
+  "site/api/v1/schema.json": "109ed8df67fc579ecad8c7120d019bc244054894d0458636e6a5d1e5dc24c850",
   "site/api/v1/score.json": "d59ca12723d7a21444462df0554dc9c9a6db1e4e08d5f24410940c3cd53e2fd0",
   "site/api/v1/score.schema.json": "6557b4e6e7e113b1dc5a57bf8498d51486c3179f42dd8e2e2cd632172d8c49e2",
   "site/api/v1/trial.json": "49073a6d294ad90d908a066dd4b48c52375aeccfef07bba63de1215c1425165c",
@@ -35,8 +35,8 @@
   "site/collections/commercial-use.html": "54deb4488eeb962c464e8cd0cd910640d9b65b93322d32b2d5700806d2c4e193",
   "site/collections/free-signup-credit.html": "15c4c23e9ce2d574190ca26f83acf9728c61df43cc9e3ccfd2f69fa349fea429",
   "site/collections/index.html": "c10151110b56c7458597586e5c7eba5a8b42e2ed6a2706c4aa2a037c486315f4",
-  "site/collections/multimodal.html": "451faffc6f8b0352cd464802f72f5f70e2d4fdd513362725a956e9a538d4b9ef",
-  "site/collections/no-credit-card.html": "03a54829ffae7f9fabdc706f01a4fe732f4889b66703b3fcb40615f2c5a4b7b6",
+  "site/collections/multimodal.html": "80296d7feaf5c83bcf84272bb4e4ce5d519c8269174db50bd754c3e387d4ce17",
+  "site/collections/no-credit-card.html": "74d613a84e0ab38bffcdb71427992278d33dff0301c80291743bfcac0cce273b",
   "site/collections/no-phone.html": "8fd2a71ff8262c6d3edea3f928ee7201d46991af905033f00fb46893cf694200",
   "site/collections/no-training.html": "1f7ac18963723d2a19a1a50e4a661e75d877f9ca5bab62b5a8876153e1598204",
   "site/collections/openai-compatible.html": "775b78374a0efaec8c6e40ccfb036eb61341bfe9e2e6258247738cc302756ee5",
@@ -93,7 +93,7 @@
   "site/programs/startups.html": "ffd252cd4d351e87582f925d61444d9e5a5aeaab2ea75cf970efa6bc17e16ee9",
   "site/providers.json": "81c6e69560deba195a49ec6d95bbd5f833f2dcac147b35057a5e0c3d58e32114",
   "site/shared-compare.js": "ff83c525f62cb11df49f1686db5dd26ffa4216a92bab5de2316e539e9fc65c08",
-  "site/shared-rows.js": "b062d6fa4298a4a449a7d875e41086281474b2c1a76e9257b6c49648604d9bbd",
+  "site/shared-rows.js": "f9d9875b42ad740e6898c25fdb9eefa7be3a9f95f3c8fa6500d9d8e8c3349b99",
   "site/shared-rules.js": "417f2a8fc8b94bb367b3317d0208077c5788d3d268ff5d7c5cedd807a63cdb1f",
   "site/shared-sort.js": "fbbaace17447958ac05f8652c7b00d951a7dce7e9a6ed103ce0fb9beaf7e17d1"
 }
