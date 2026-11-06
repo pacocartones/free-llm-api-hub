@@ -59,14 +59,14 @@ function tagSvg(label, title, subtitle) {
 mkdirSync(join(ROOT, 'site/og/collections'), { recursive: true });
 for (const c of COLLS) {
   const count = providers.filter(c.filter).length;
-  render(tagSvg('COLLECTION', c.title, `${count} verified free APIs · dated · sourced · machine-readable`), join(ROOT, `site/og/collections/${c.slug}.png`));
+  render(tagSvg('COLLECTION', c.title, `${count} listed free APIs · dated · sourced · machine-readable`), join(ROOT, `site/og/collections/${c.slug}.png`));
 }
 console.log(`per-collection OG: ${COLLS.length} rendered.`);
 
 mkdirSync(join(ROOT, 'site/og/guides'), { recursive: true });
 for (const g of GUIDES) {
   const count = providers.filter(g.filter).length;
-  render(tagSvg('GUIDE', g.title, `${count} verified providers · pick one and build`), join(ROOT, `site/og/guides/${g.slug}.png`));
+  render(tagSvg('GUIDE', g.title, `${count} listed providers · pick one and build`), join(ROOT, `site/og/guides/${g.slug}.png`));
 }
 console.log(`per-guide OG: ${GUIDES.length} rendered.`);
 
