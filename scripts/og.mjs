@@ -10,6 +10,7 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 // Collection/guide filter lists and the data fingerprints live in lib/og.mjs,
 // shared with the CI check (scripts/check-og.mjs) so both always agree.
 import { COLLS, GUIDES, buildOgManifest } from './lib/og.mjs';
+import { FREE_TYPE_LABEL } from './lib/provider-sections.mjs';
 const { Resvg } = await import('@resvg/resvg-js');
 const render = (svg, out) => {
   const png = new Resvg(Buffer.isBuffer(svg) ? svg : Buffer.from(svg), { fitTo: { mode: 'width', value: 1200 } }).render().asPng();
@@ -78,8 +79,9 @@ console.log('model-index OG: 1 rendered.');
 
 // per-provider OG
 mkdirSync(join(ROOT, 'site/og/p'), { recursive: true });
+/** Summarize access type and signup requirements on the provider's social preview. */
 const provSub = (p) => {
-  const bits = [p.free_type === 'promotion' ? 'Time-limited promotion' : p.category === 'ongoing' ? 'Ongoing free tier' : 'Trial credit'];
+  const bits = [p.free_type === 'promotion' ? FREE_TYPE_LABEL.promotion : p.category === 'ongoing' ? 'Ongoing free tier' : 'Trial credit'];
   if (p.card_required === false) bits.push('no card');
   if (p.commercial_ok === true) bits.push('commercial OK');
   if (p.openai_compatible === true) bits.push('OpenAI-compatible');

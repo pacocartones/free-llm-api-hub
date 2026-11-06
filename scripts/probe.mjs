@@ -119,6 +119,7 @@ async function probeOpenAI(p, key) {
   return { authOk, models, model, status, latency_ms: inf.ms, tps, http: inf.status, rate_limit: pickRateLimit(inf.headers), inference: true };
 }
 
+/** Probe configured providers and optionally persist status, preserving curated free models. */
 async function main() {
   if (args.includes('--self-test')) {
     const err = roundTripError(readFileSync(FILE, 'utf8'));

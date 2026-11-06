@@ -11,7 +11,7 @@ The two are independent on purpose — a provider can be doc-verified but not ye
 Per provider (`scripts/probe.mjs`, `npm run probe`):
 
 - **auth** — does the key authenticate against `/models`? (distinguishes `401/403` = wrong key from `200`).
-- **models** — the live `/models` result is recorded in the probe report; the curated `models_free` list is preserved.
+- **models** — the count of models returned by `/models` is recorded in the probe report; the curated `models_free` list is preserved.
 - **inference** — one minimal real call (chat `max_tokens:1`, or an embeddings call for embeddings-first providers). A `200` with a valid body ⇒ the free tier is genuinely usable right now.
 - **latency & tokens/sec** — measured from the call + `usage`, feeding an honest (measured, not claimed) speed signal.
 - **rate-limit headers** — `x-ratelimit-*`, `retry-after` straight from the API — the real current limits, not scraped prose.
