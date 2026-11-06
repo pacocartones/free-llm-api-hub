@@ -2877,12 +2877,14 @@ test('time-limited promotions use the trial bucket and require a visible expiry'
     return p;
   };
   assert.equal(validateAfter((d) => { configure(d); }), true);
-  for (const expires of ['2026-11-24T00:00:00-08:00', '2028-02-29T23:59:59Z'])
+  for (const expires of ['2026-11-24T00:00:00-08:00', '2028-02-29T23:59:59Z',
+    '2016-12-31T23:59:60Z', '2017-01-01T00:59:60+01:00'])
     assert.equal(validateAfter((d) => { configure(d).expires = expires; }), true, expires);
   for (const expires of [null, '', ' ', 'not-a-date', '2026-11-24', '2026-11-24T08:00:00',
     '2026-99-99T08:00:00Z', '2026-02-29T08:00:00Z', '2026-02-30T08:00:00Z',
     '2026-04-31T08:00:00Z', '2026-11-24T25:00:00Z', '2026-11-24T08:60:00Z',
     '2026-11-24T08:00:61Z', '2026-11-24T08:00:00+24:00', '2026-11-24T08:00:00+08:60',
+    '2026-11-24T24:59:60+01:00', '2026-11-24T99:59:60+04:00', '2026-11-24T23:60:60+00:01',
     'February 30, 2026', 'November 24, 2026 at 00:00 Pacific Time (08:00 UTC)'])
     assert.equal(validateAfter((d) => { configure(d).expires = expires; }), false, String(expires));
   assert.equal(validateAfter((d) => { delete configure(d).expires; }), false);
