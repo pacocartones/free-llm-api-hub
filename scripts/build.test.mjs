@@ -2868,7 +2868,7 @@ test('expanded provider text identifies promotions separately from trial credit'
     const page = readFileSync(join(ROOT, `site/p/${promotion.slug}.html`), 'utf8');
     assert.match(page, /prov-badges"><span class="type">Promotion<\/span>/);
     const collection = readFileSync(join(ROOT, 'collections/no-credit-card.md'), 'utf8');
-    const row = collection.split('\n').find((line) => line.startsWith(`| [${promotion.name}](`));
+    const row = collection.split('\n').find((line) => line.includes(`[${promotion.name}](`));
     assert.match(row, /\| Promotion \|/);
   } finally {
     writeFileSync(DATA, before);
