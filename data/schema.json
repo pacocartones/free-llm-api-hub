@@ -53,7 +53,7 @@
         "free_type": {
           "description": "Finer-grained shape of the free access.",
           "type": "string",
-          "enum": ["perpetual", "renewing-quota", "recurring-credit", "trial-credit"]
+          "enum": ["perpetual", "renewing-quota", "recurring-credit", "trial-credit", "promotion"]
         },
         "free_tier": {
           "type": "string",
@@ -80,7 +80,7 @@
         },
         "expires": {
           "type": ["string", "null"],
-          "description": "Validity window for time-limited offers, e.g. '30 days'. null for perpetual/renewing tiers."
+          "description": "Validity window, e.g. '30 days' for trial credits. Promotions require a fixed RFC 3339 date-time with timezone. null for perpetual/renewing tiers."
         },
         "docs_url": {
           "type": "string",
@@ -199,6 +199,13 @@
         }
       },
       "allOf": [
+        {
+          "if": { "properties": { "free_type": { "const": "promotion" } } },
+          "then": {
+            "required": ["expires"],
+            "properties": { "expires": { "type": "string", "format": "date-time", "pattern": "[Tt]([01][0-9]|2[0-3]):[0-5][0-9]:" } }
+          }
+        },
         {
           "if": { "required": ["model_tier"], "properties": { "model_tier": { "type": "integer" } } },
           "then": { "required": ["model_tier_source"], "properties": { "model_tier_source": { "type": "object" } } }

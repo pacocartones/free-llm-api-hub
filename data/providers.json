@@ -1,7 +1,7 @@
 {
   "$schema": "./schema.json",
   "version": "2.11.0",
-  "generated": "2026-10-18",
+  "generated": "2026-11-03",
   "source": "https://github.com/pacocartones/free-llm-api-hub",
   "note": "Canonical dataset. README tables, badge-freshness.json and the interactive site are all generated from this file — do not hand-edit them. `verified: true` means the core facts (tier, limits, key catch, link) were independently confirmed against the provider's own docs on `last_verified`. `verified: false` means sourced from community tracking and not yet independently re-confirmed here — treat those as indicative. Attribute fields (openai_compatible, modalities, best_for) are progressively backfilled and may be null.",
   "providers": [
@@ -1691,6 +1691,33 @@
       "verified": true,
       "last_verified": "2026-10-08",
       "data_policy": {"trains_on_prompts":true,"retention":null,"plan_named":false,"source":"https://opentyphoon.ai/tac","checked":"2026-10-17","quote":"The Applicant hereby perpetually grants, on a royalty-free basis, the Company the right to use such Input and the Intellectual Property Rights relating thereto for the purpose of providing the Services, developing and training the Company's Artificial Intelligence models","note":"Terms permit Input for «developing and training the Company's Artificial Intelligence models»; no retention period is stated. FAQ: «Yes, we are collecting usage data from the Typhoon API. We use this data to improve the model and the API.» The FAQ does not specify prompt training or retention."}
+    },
+    {
+      "slug": "iteracompute",
+      "name": "IteraCompute",
+      "category": "trial",
+      "free_type": "promotion",
+      "free_tier": "Time-limited Qwen3.8-27B promotion: up to 30M tokens per account per UTC calendar month; 128K total context and 8,192 maximum output tokens",
+      "rate_limits": "160,000 TPM; no daily token quota or additional free-tier RPM limit",
+      "notes": "Promotion ends November 24, 2026 at 00:00 Pacific Time (08:00 UTC). No permanent free availability is promised. Verified email or Google sign-in and an API key required; no card or recharge. Monthly allowance resets at 00:00 UTC on the first, only while the promotion is active; it is not a one-time signup credit. Input, cached input and output including reasoning share the account quota. No daily token quota, rollover or automatic paid overage; exhausted allowance returns 429. Shared capacity may queue; no SLA. Provider-affiliated submission; independent maintainer verification requested. Source checked 2026-11-03: https://iteracompute.com/free/",
+      "best_for": "Trying Qwen during a time-limited no-card promotion",
+      "modalities": ["text", "vision"],
+      "models_free": ["qwen/qwen3.8-27b"],
+      "expires": "2026-11-24T08:00:00Z",
+      "docs_url": "https://iteracompute.com/free/",
+      "phone_required": null,
+      "card_required": false,
+      "commercial_ok": null,
+      "openai_compatible": true,
+      "openai_base_url": "https://api.iteracompute.com/v1",
+      "env_key": "ITERACOMPUTE_API_KEY",
+      "is_text_llm": true,
+      "model_tier": null,
+      "free_limits": {"tokens_per_month":30000000,"scope":"qwen/qwen3.8-27b, no-recharge Free tier; account-wide input and output including reasoning","source":"https://iteracompute.com/free/","checked":"2026-11-03"},
+      "verified": false,
+      "last_verified": null,
+      "added": "2026-10-18",
+      "data_policy": null
     }
   ]
 }

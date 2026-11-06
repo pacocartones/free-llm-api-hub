@@ -31,7 +31,6 @@ const data = JSON.parse(readFileSync(FILE, 'utf8'));
 const schema = JSON.parse(readFileSync(join(ROOT, 'data/schema.json'), 'utf8'));
 
 const CATEGORIES = ['ongoing', 'trial'];
-const FREE_TYPES = ['perpetual', 'renewing-quota', 'recurring-credit', 'trial-credit'];
 const MODALITIES = ['text', 'vision', 'image', 'audio', 'embeddings', 'rerank', 'ocr'];
 const TRISTATE = [true, false, null];
 const SLUG_RE = /^[a-z0-9]+(-[a-z0-9]+)*$/;
@@ -62,7 +61,7 @@ function formatSchemaError(error) {
 // restating it there. Keep Ajv strict for unsupported schema features while
 // allowing that valid cross-branch refinement.
 const ajv = new Ajv2020({ allErrors: true, strict: true, strictTypes: false, validateFormats: true });
-addFormats(ajv, ['date', 'uri']);
+addFormats(ajv, ['date', 'date-time', 'uri']);
 const validateSchema = ajv.compile(schema);
 if (!validateSchema(data)) {
   const schemaErrors = (validateSchema.errors ?? []).map(formatSchemaError);
@@ -110,7 +109,6 @@ for (const p of data.providers ?? []) {
 
   check(typeof p.name === 'string' && p.name.length > 0, `${id}: name required`);
   check(CATEGORIES.includes(p.category), `${id}: category must be one of ${CATEGORIES.join('/')}`);
-  check(FREE_TYPES.includes(p.free_type), `${id}: free_type must be one of ${FREE_TYPES.join('/')}`);
   check(typeof p.free_tier === 'string' && p.free_tier.length > 0, `${id}: free_tier required`);
   check(typeof p.verified === 'boolean', `${id}: verified must be boolean`);
 
@@ -129,7 +127,7 @@ for (const p of data.providers ?? []) {
   // is ongoing. The two fields split the README, the explorer and the
   // collections, so they must not disagree.
   if (p.free_type !== undefined && p.category !== undefined) {
-    const expected = p.free_type === 'trial-credit' ? 'trial' : 'ongoing';
+    const expected = ['trial-credit', 'promotion'].includes(p.free_type) ? 'trial' : 'ongoing';
     check(p.category === expected, `${id}: free_type "${p.free_type}" belongs in category "${expected}" (got "${p.category}")`);
   }
 

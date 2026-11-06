@@ -8,7 +8,7 @@ LLM and AI APIs whose free allowance resets (daily, monthly or per minute) inste
 
 Providers whose free access **renews**: a quota (`free_type: renewing-quota`) or a credit (`free_type: recurring-credit`) that resets on a schedule. One-time signup credits and permanently free models are listed in other collections. A renewing allowance can still be evaluation-only (for example Cohere) — read the catch.
 
-**29 of 68 tracked providers** match.
+**29 of 69 tracked providers** match.
 
 | Provider | Type | What's free | The catch | Verified |
 |---|---|---|---|---|

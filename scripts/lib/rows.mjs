@@ -78,7 +78,7 @@ export function explorerRowHtml(p, opts = {}) {
   if (p.best_for) name += `<div class="best" title="${htmlEsc(p.best_for)}">${htmlEsc(p.best_for)}</div>`;
 
   const typeCell =
-    `<span class="badge ${p.category === 'ongoing' ? 'b-ongoing' : 'b-trial'}">${p.category === 'ongoing' ? 'Ongoing' : 'Trial'}</span>` +
+    `<span class="badge ${p.category === 'ongoing' ? 'b-ongoing' : 'b-trial'}">${p.free_type === 'promotion' ? 'Promotion' : p.category === 'ongoing' ? 'Ongoing' : 'Trial'}</span>` +
     `<div class="fmini">${FLAG_PAIRS.filter(([k, v]) => p[k] === v)
       .map(([, , ic, t]) => `<span class="fmini-i" role="img" title="${t}" aria-label="${t}">${ICON(ic)}</span>`)
       .join('')}</div>`;

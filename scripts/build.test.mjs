@@ -2848,3 +2848,60 @@ test('the private copy of a worktree with a relative gitdir still sees the histo
   assert.match(readFileSync(join(copy, '.git'), 'utf8'), /^gitdir: \//, 'the copy points at the gitdir by an absolute path');
   assert.equal(git(copy, 'log', '--format=%s').trim(), 'first', 'the copy sees the history');
 });
+
+
+test('expanded provider text identifies promotions separately from trial credit', () => {
+  const before = readFileSync(DATA, 'utf8');
+  const fixture = JSON.parse(before);
+  const promotion = fixture.providers[0];
+  promotion.category = 'trial';
+  promotion.free_type = 'promotion';
+  promotion.expires = '2030-01-01T08:00:00Z';
+  promotion.card_required = false;
+  delete promotion.no_expiry;
+  try {
+    writeFileSync(DATA, serialize(fixture));
+    run(['scripts/build.mjs']);
+    const text = readFileSync(join(ROOT, 'site/llms-full.txt'), 'utf8');
+    assert.ok(text.includes(`### ${promotion.name} — Time-limited promotion\n`));
+    assert.match(explorerRowHtml(promotion), /badge b-trial">Promotion<\/span>/);
+    const page = readFileSync(join(ROOT, `site/p/${promotion.slug}.html`), 'utf8');
+    assert.match(page, /prov-badges"><span class="type">Promotion<\/span>/);
+    const collection = readFileSync(join(ROOT, 'collections/no-credit-card.md'), 'utf8');
+    const row = collection.split('\n').find((line) => line.includes(`[${promotion.name}](`));
+    assert.match(row, /\| Promotion \|/);
+  } finally {
+    writeFileSync(DATA, before);
+  }
+});
+
+test('time-limited promotions use the trial bucket and require a visible expiry', () => {
+  const configure = (d) => {
+    const p = d.providers.find((x) => x.free_type === 'trial-credit' && !x.no_expiry);
+    p.free_type = 'promotion';
+    p.category = 'trial';
+    p.expires = '2026-11-24T08:00:00Z';
+    return p;
+  };
+  assert.equal(validateAfter((d) => { configure(d); }), true);
+  for (const expires of ['2026-11-24T00:00:00-08:00', '2028-02-29T23:59:59Z',
+    '2016-12-31T23:59:60Z', '2017-01-01T00:59:60+01:00'])
+    assert.equal(validateAfter((d) => { configure(d).expires = expires; }), true, expires);
+  for (const expires of [null, '', ' ', 'not-a-date', '2026-11-24', '2026-11-24T08:00:00',
+    '2026-99-99T08:00:00Z', '2026-02-29T08:00:00Z', '2026-02-30T08:00:00Z',
+    '2026-04-31T08:00:00Z', '2026-11-24T25:00:00Z', '2026-11-24T08:60:00Z',
+    '2026-11-24T08:00:61Z', '2026-11-24T08:00:00+24:00', '2026-11-24T08:00:00+08:60',
+    '2026-11-24T24:59:60+01:00', '2026-11-24T99:59:60+04:00', '2026-11-24T23:60:60+00:01',
+    'February 30, 2026', 'November 24, 2026 at 00:00 Pacific Time (08:00 UTC)'])
+    assert.equal(validateAfter((d) => { configure(d).expires = expires; }), false, String(expires));
+  assert.equal(validateAfter((d) => { delete configure(d).expires; }), false);
+  assert.equal(validateAfter((d) => { configure(d).category = 'ongoing'; }), false);
+  assert.equal(validateAfter((d) => {
+    d.providers.find((p) => p.free_type === 'trial-credit' && !p.no_expiry).expires = '30 days';
+  }), true);
+  const page = glanceHtml({ free_type: 'promotion', category: 'trial', expires: '2026-11-24T08:00:00Z' }, 'Trial');
+  assert.match(page, /Time-limited promotion/);
+  assert.match(page, /Plan<\/span><span class="meta-v">Time-limited promotion<\/span>/);
+  assert.match(page, /2026-11-24T08:00:00Z/);
+  assert.doesNotMatch(page, /Trial credit|One-time trial credit|Free with no end date/);
+});

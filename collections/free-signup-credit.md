@@ -8,7 +8,7 @@ AI APIs that give a one-time free credit or token balance at signup, which runs 
 
 Providers whose free access is a **one-time credit** (`free_type: trial-credit`): it is spent, not renewed. Renewing allowances are in their own collection. Some credits expire, with windows from 30 days to a year in the dataset, and a provider that has not been re-verified is left out.
 
-**33 of 68 tracked providers** match.
+**33 of 69 tracked providers** match.
 
 | Provider | Type | What's free | The catch | Verified |
 |---|---|---|---|---|

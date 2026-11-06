@@ -18,7 +18,7 @@ Three consequences the rest of the project has to honour, or the tri-state is de
 
 - **Both confirmed states get a pill.** Every surface that renders a flag — the README tables, the collection tables, the explorer, the provider pages — shows a badge for `true` *and* for `false`. Absence of a pill therefore means `null` and nothing else. A confirmed card wall must never render the same as an unknown one.
 - **`null` never scores as `false`.** In the "Recommended" ranking ([`scripts/lib/rules.mjs`](../scripts/lib/rules.mjs)) a confirmed `false` earns points, a confirmed `true` loses the same points, and `null` scores zero — it sits *between* the two, because that is what not knowing is worth.
-- **A `null` is a task, not a verdict.** Resolving one against a primary source is the highest-value contribution to this dataset. Current gaps: `phone_required` 41/68, `commercial_ok` 31/68, `card_required` 7/68.
+- **A `null` is a task, not a verdict.** Resolving one against a primary source is the highest-value contribution to this dataset. Current gaps: `phone_required` 42/69, `commercial_ok` 32/69, `card_required` 7/69.
 
 ## Fields
 
@@ -26,7 +26,7 @@ Three consequences the rest of the project has to honour, or the tri-state is de
 |---|---|---|
 | `slug` | string | Stable, unique, kebab-case identifier. Never renamed or reused — safe to reference externally. |
 | `name` | string | Human-readable provider name. |
-| `category` | `ongoing` \| `trial` | Primary bucket. Splits the README and the explorer. Follows `free_type`: `trial-credit` is `trial`, every renewing or perpetual type is `ongoing` (enforced by `validate.mjs`). |
+| `category` | `ongoing` \| `trial` | Primary bucket. Splits the README and the explorer. Follows `free_type`: `trial-credit` and `promotion` are `trial`; renewing or perpetual types without an overall end date are `ongoing` (enforced by `validate.mjs`). |
 | `free_type` | enum | Finer shape of the free access (see below). |
 | `free_tier` | string | What you actually get for free, in concrete terms. |
 | `rate_limits` | string | Published limits — RPM/RPD/TPM/TPD, or an explicit "not published publicly." |
@@ -61,6 +61,7 @@ Three consequences the rest of the project has to honour, or the tri-state is de
 | `renewing-quota` | A quota that resets on a daily/monthly cycle. | Gemini, Groq, Cloudflare Workers AI |
 | `recurring-credit` | A credit balance that tops up each month. | Modal, HuggingFace Inference Providers |
 | `trial-credit` | A one-time balance granted on signup. | Baseten, Fireworks, Nebius |
+| `promotion` | Free access with a fixed end date; an allowance may reset during the promotion. Requires `expires`; separate from permanent tiers and one-time signup credit. | Time-limited monthly token promotion |
 
 ## Attribute fields vs. the verified claim
 

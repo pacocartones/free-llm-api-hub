@@ -10,6 +10,10 @@ npm ci --ignore-scripts
 
 ## Cadence
 
+### Dated promotion review
+
+On **November 24, 2026 at 08:00 UTC**, re-check the IteraCompute Qwen promotion against https://iteracompute.com/free/. Its published offer ends at that time. Remove the entry and its free-model sample unless a new offer is independently verified. Run `npm run build && npm run og && npm test && npm run check`, commit the regenerated output and submit the correction. The date is a manual maintenance checkpoint, not an automatic renewal or evidence of a replacement offer.
+
 - **Weekly:** aim for one pass a week (Mondays ~10:00 Madrid works well), but nothing enforces it — the badge and the worklist only move when the data moves, and `npm run reverify` sizes its batch to clear the 90-day SLA without a cliff.
 - **Freshness SLA:** every verified entry is re-confirmed against the provider's own docs within **90 days**. The badge is graded on the *oldest* entry against that SLA, so it turns amber the moment one row goes past 60 days and red the moment one goes past 90 — it slips before the list does.
 
