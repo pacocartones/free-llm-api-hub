@@ -61,7 +61,7 @@ function formatSchemaError(error) {
 // restating it there. Keep Ajv strict for unsupported schema features while
 // allowing that valid cross-branch refinement.
 const ajv = new Ajv2020({ allErrors: true, strict: true, strictTypes: false, validateFormats: true });
-addFormats(ajv, ['date', 'uri']);
+addFormats(ajv, ['date', 'date-time', 'uri']);
 const validateSchema = ajv.compile(schema);
 if (!validateSchema(data)) {
   const schemaErrors = (validateSchema.errors ?? []).map(formatSchemaError);
@@ -109,9 +109,6 @@ for (const p of data.providers ?? []) {
 
   check(typeof p.name === 'string' && p.name.length > 0, `${id}: name required`);
   check(CATEGORIES.includes(p.category), `${id}: category must be one of ${CATEGORIES.join('/')}`);
-  if (p.free_type === 'promotion') {
-    check(typeof p.expires === 'string' && p.expires.trim().length > 0, `${id}: a time-limited promotion must state its expiry`);
-  }
   check(typeof p.free_tier === 'string' && p.free_tier.length > 0, `${id}: free_tier required`);
   check(typeof p.verified === 'boolean', `${id}: verified must be boolean`);
 

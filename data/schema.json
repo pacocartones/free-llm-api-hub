@@ -80,7 +80,7 @@
         },
         "expires": {
           "type": ["string", "null"],
-          "description": "Validity window for time-limited offers, e.g. '30 days'. null for perpetual/renewing tiers."
+          "description": "Validity window, e.g. '30 days' for trial credits. Promotions require a fixed RFC 3339 date-time with timezone. null for perpetual/renewing tiers."
         },
         "docs_url": {
           "type": "string",
@@ -199,6 +199,13 @@
         }
       },
       "allOf": [
+        {
+          "if": { "properties": { "free_type": { "const": "promotion" } } },
+          "then": {
+            "required": ["expires"],
+            "properties": { "expires": { "type": "string", "format": "date-time" } }
+          }
+        },
         {
           "if": { "required": ["model_tier"], "properties": { "model_tier": { "type": "integer" } } },
           "then": { "required": ["model_tier_source"], "properties": { "model_tier_source": { "type": "object" } } }

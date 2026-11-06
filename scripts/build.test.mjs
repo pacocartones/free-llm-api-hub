@@ -2856,7 +2856,7 @@ test('expanded provider text identifies promotions separately from trial credit'
   const promotion = fixture.providers[0];
   promotion.category = 'trial';
   promotion.free_type = 'promotion';
-  promotion.expires = '2030-01-01 08:00 UTC';
+  promotion.expires = '2030-01-01T08:00:00Z';
   delete promotion.no_expiry;
   try {
     writeFileSync(DATA, serialize(fixture));
@@ -2873,15 +2873,26 @@ test('time-limited promotions use the trial bucket and require a visible expiry'
     const p = d.providers.find((x) => x.free_type === 'trial-credit' && !x.no_expiry);
     p.free_type = 'promotion';
     p.category = 'trial';
-    p.expires = '2026-11-24 08:00 UTC';
+    p.expires = '2026-11-24T08:00:00Z';
     return p;
   };
   assert.equal(validateAfter((d) => { configure(d); }), true);
-  assert.equal(validateAfter((d) => { configure(d).expires = null; }), false);
+  for (const expires of ['2026-11-24T00:00:00-08:00', '2028-02-29T23:59:59Z'])
+    assert.equal(validateAfter((d) => { configure(d).expires = expires; }), true, expires);
+  for (const expires of [null, '', ' ', 'not-a-date', '2026-11-24', '2026-11-24T08:00:00',
+    '2026-99-99T08:00:00Z', '2026-02-29T08:00:00Z', '2026-02-30T08:00:00Z',
+    '2026-04-31T08:00:00Z', '2026-11-24T25:00:00Z', '2026-11-24T08:60:00Z',
+    '2026-11-24T08:00:61Z', '2026-11-24T08:00:00+24:00', '2026-11-24T08:00:00+08:60',
+    'February 30, 2026', 'November 24, 2026 at 00:00 Pacific Time (08:00 UTC)'])
+    assert.equal(validateAfter((d) => { configure(d).expires = expires; }), false, String(expires));
+  assert.equal(validateAfter((d) => { delete configure(d).expires; }), false);
   assert.equal(validateAfter((d) => { configure(d).category = 'ongoing'; }), false);
-  const page = glanceHtml({ free_type: 'promotion', category: 'trial', expires: '2026-11-24 08:00 UTC' }, 'Trial');
+  assert.equal(validateAfter((d) => {
+    d.providers.find((p) => p.free_type === 'trial-credit' && !p.no_expiry).expires = '30 days';
+  }), true);
+  const page = glanceHtml({ free_type: 'promotion', category: 'trial', expires: '2026-11-24T08:00:00Z' }, 'Trial');
   assert.match(page, /Time-limited promotion/);
   assert.match(page, /Plan<\/span><span class="meta-v">Time-limited promotion<\/span>/);
-  assert.match(page, /2026-11-24 08:00 UTC/);
+  assert.match(page, /2026-11-24T08:00:00Z/);
   assert.doesNotMatch(page, /Trial credit|One-time trial credit|Free with no end date/);
 });
