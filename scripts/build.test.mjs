@@ -2857,12 +2857,19 @@ test('expanded provider text identifies promotions separately from trial credit'
   promotion.category = 'trial';
   promotion.free_type = 'promotion';
   promotion.expires = '2030-01-01T08:00:00Z';
+  promotion.card_required = false;
   delete promotion.no_expiry;
   try {
     writeFileSync(DATA, serialize(fixture));
     run(['scripts/build.mjs']);
     const text = readFileSync(join(ROOT, 'site/llms-full.txt'), 'utf8');
     assert.ok(text.includes(`### ${promotion.name} — Time-limited promotion\n`));
+    assert.match(explorerRowHtml(promotion), /badge b-trial">Promotion<\/span>/);
+    const page = readFileSync(join(ROOT, `site/p/${promotion.slug}.html`), 'utf8');
+    assert.match(page, /prov-badges"><span class="type">Promotion<\/span>/);
+    const collection = readFileSync(join(ROOT, 'collections/no-credit-card.md'), 'utf8');
+    const row = collection.split('\n').find((line) => line.startsWith(`| [${promotion.name}](`));
+    assert.match(row, /\| Promotion \|/);
   } finally {
     writeFileSync(DATA, before);
   }

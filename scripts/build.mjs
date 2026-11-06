@@ -444,7 +444,8 @@ const GUIDES = [
 ];
 
 const collRows = (c) => providers.filter(c.filter);
-const typeLabel = (p) => (p.category === 'ongoing' ? 'Ongoing' : 'Trial');
+/** Keep fixed-end promotions distinct from ongoing access and one-time trials. */
+const typeLabel = (p) => (p.free_type === 'promotion' ? 'Promotion' : p.category === 'ongoing' ? 'Ongoing' : 'Trial');
 
 // Markdown table for a collection. With opts.baseUrl, the 2nd column shows the
 // OpenAI base URL instead of the tier type (used on the openai-compatible page).
