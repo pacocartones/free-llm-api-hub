@@ -120,7 +120,7 @@ export function compareTableHtml(list, opts = {}) {
   const cell = (s) => htmlEsc(s);
   const safeUrl = (u) => (/^https?:\/\//i.test(String(u || '')) ? String(u) : '');
   const fields = [
-    ['Type', (p) => cell((p.category === 'ongoing' ? 'Ongoing free tier' : 'Trial credit') + (p.free_type ? ' · ' + p.free_type : ''))],
+    ['Type', (p) => cell(p.free_type === 'promotion' ? 'Time-limited promotion' : (p.category === 'ongoing' ? 'Ongoing free tier' : 'Trial credit') + (p.free_type ? ' · ' + p.free_type : ''))],
     ["What's free", (p) => cell(p.free_tier || '—')],
     ['Rate limits', (p) => cell(p.rate_limits || 'not specified')],
     ['Expires', (p) => expiryHtml(p)],
