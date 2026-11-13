@@ -437,7 +437,7 @@ const GUIDES = [
     pick: 'google-gemini',
     faq: [
       { q: 'Is there a free API to analyse images?', a: 'Yes. Google Gemini and OpenRouter have free tiers with no card, Z.ai lists its GLM-4.6V-Flash vision model at $0 permanently, and Moondream gives $5 of credit each month.' },
-      { q: 'Is a free vision API okay for commercial use?', a: 'Check each row. The dataset records commercial use as allowed for Google Gemini, OpenRouter, Z.ai, Ollama Cloud and W&B Inference, and as not allowed for ModelScope; for Moondream, Tencent and Twelve Labs it records no commercial-use statement.' },
+      { q: 'Is a free vision API okay for commercial use?', a: 'Check each row. The dataset records commercial use as allowed for Google Gemini, OpenRouter, Z.ai and W&B Inference, and as not allowed for ModelScope; for Moondream, Tencent and Twelve Labs it records no commercial-use statement.' },
       { q: 'What is the difference between vision and image generation?', a: 'Vision reads an image and returns text. Image generation makes a new image from text; see the free image-generation guide for that.' },
     ],
   },
@@ -697,6 +697,8 @@ const BLURB = {
   'always-free': '$0 models, no trial clock',
   'multimodal': 'vision, audio, embeddings',
   'no-training': 'says it does not train on your prompts (some only without opt-in)',
+  'renewing-free-tier': 'free quotas or credits that reset',
+  'free-signup-credit': 'one-time signup credits, not renewing allowances',
 };
 const collectionsIndexMd = COLLECTIONS.map((c) => {
   const n = collRows(c).length;

@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-18",
+  "generated": "2026-11-13",
   "scores": {
     "openrouter": {
       "total": 67.2,
@@ -93,12 +93,6 @@
     },
     "pinecone-inference": {
       "total": 37.2,
-      "confirmed": 3,
-      "of": 6,
-      "rank": null
-    },
-    "ollama-cloud": {
-      "total": 37.1,
       "confirmed": 3,
       "of": 6,
       "rank": null

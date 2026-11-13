@@ -24,6 +24,7 @@ import { quoteErrors } from './lib/quotes.mjs';
 import { reportErrors } from './lib/quotes-report.mjs';
 import { keyHostErrors } from './lib/key-hosts.mjs';
 import { summaryErrors } from './lib/provider-summaries.mjs';
+import { publicHttpsUrlError } from './lib/public-fetch.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const FILE = process.argv[2] ? resolve(process.argv[2]) : join(ROOT, 'data/providers.json');
@@ -45,6 +46,8 @@ const seenNames = new Set();
 function check(cond, msg) {
   if (!cond) errors.push(msg);
 }
+
+const isPublicHttpsUrl = (value) => publicHttpsUrlError(value) === null;
 
 function jsonPointer(path, property) {
   const escapedProperty = String(property).replace(/~/g, '~0').replace(/\//g, '~1');
@@ -193,7 +196,7 @@ for (const p of data.providers ?? []) {
     const dp = p.data_policy;
     check(dp.trains_on_prompts != null || dp.retention != null, `${id}: data_policy must state trains_on_prompts or retention (an all-null policy records nothing)`);
     check(DATE_RE.test(dp.checked || '') && dp.checked <= data.generated, `${id}: data_policy.checked must be a date not after the dataset's generated date`);
-    check(URL_RE.test(dp.source || ''), `${id}: data_policy.source must be the provider's page (http/https)`);
+    check(isPublicHttpsUrl(dp.source), `${id}: data_policy.source must be the provider's public HTTPS page`);
     // The provider's own sentence and its condition: plain text only (no control, bidirectional or zero-width characters).
     for (const [k, max] of [['quote', 400], ['note', 300]]) {
       if (dp[k] == null) continue;
@@ -217,7 +220,7 @@ for (const p of data.providers ?? []) {
   // Integrity core: a verified entry must carry a dated, real source link.
   if (p.verified) {
     check(DATE_RE.test(p.last_verified || ''), `${id}: verified entry needs a YYYY-MM-DD last_verified`);
-    check(URL_RE.test(p.docs_url || ''), `${id}: verified entry needs a real docs_url (primary source)`);
+    check(isPublicHttpsUrl(p.docs_url), `${id}: verified entry needs a public HTTPS docs_url (primary source)`);
   } else {
     check(p.last_verified === null, `${id}: unverified entry must have last_verified: null`);
   }
