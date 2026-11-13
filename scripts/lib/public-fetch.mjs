@@ -34,7 +34,6 @@ function requestLifecycle(externalSignal, timeoutMs) {
   const controller = new AbortController();
   const timeoutError = new DOMException(`documentation request exceeded ${timeoutMs}ms deadline`, 'TimeoutError');
   const timer = setTimeout(() => controller.abort(timeoutError), timeoutMs);
-  timer.unref?.();
   const forwardAbort = () => controller.abort(
     externalSignal.reason || new DOMException('documentation request aborted', 'AbortError')
   );

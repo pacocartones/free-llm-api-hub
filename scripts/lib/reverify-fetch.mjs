@@ -75,7 +75,6 @@ export const fetchDocs = async (p, {
 } = {}) => {
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), timeoutMs);
-  timer.unref?.();
   try {
     const res = await fetchImpl(p.docs_url, {
       signal: ctrl.signal,
