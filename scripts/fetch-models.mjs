@@ -16,6 +16,9 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { serialize, roundTripError } from './_serialize.mjs';
 import { keyHostError } from './lib/key-hosts.mjs';
+import {
+  assertCredentialFree, configuredCredentials, safeModelIds, UnsafeProviderOutputError,
+} from './lib/provider-output-safety.mjs';
 
 const FILE = new URL('../data/providers.json', import.meta.url);
 const SAMPLE = 8; // cap: models_free is a *sample*, not the full catalog
@@ -56,7 +59,7 @@ async function getJson(url, headers) {
 // A standard OpenAI-shaped /models list that needs no key.
 const openaiPublic = (url) => async () => {
   const d = await getJson(url);
-  return sample((d.data || []).map((m) => m.id));
+  return (d.data || []).map((m) => m.id);
 };
 
 // Public endpoints — no API key required.
@@ -64,11 +67,11 @@ const PUBLIC = {
   openrouter: async () => {
     const d = await getJson('https://openrouter.ai/api/v1/models');
     // Keep only genuinely-free models (the :free suffix), a diverse spread.
-    return sample(d.data.map((m) => m.id).filter((id) => id.endsWith(':free')));
+    return d.data.map((m) => m.id).filter((id) => typeof id === 'string' && id.endsWith(':free'));
   },
   pollinations: async () => {
     const d = await getJson('https://text.pollinations.ai/models');
-    return sample(d.filter((m) => m.tier === 'anonymous').map((m) => m.name));
+    return d.filter((m) => m.tier === 'anonymous').map((m) => m.name);
   },
   // Free credit / free-inference tiers with public OpenAI-shaped catalogs.
   'nvidia-nim': openaiPublic('https://integrate.api.nvidia.com/v1/models'),
@@ -78,11 +81,11 @@ const PUBLIC = {
   typhoon: async () => {
     const d = await getJson('https://api.opentyphoon.ai/v1/models');
     const list = Array.isArray(d) ? d : (d.data || []);
-    return sample(list.map((m) => m.id));
+    return list.map((m) => m.id);
   },
   'ollama-cloud': async () => {
     const d = await getJson('https://ollama.com/api/tags');
-    return sample((d.models || []).map((m) => m.name));
+    return (d.models || []).map((m) => m.name);
   },
 };
 
@@ -115,7 +118,7 @@ async function openaiModels(baseUrl, key) {
   const d = await getJson(`${baseUrl.replace(/\/$/, '')}/models`, {
     Authorization: `Bearer ${key}`,
   });
-  return sample((d.data || []).map((m) => m.id));
+  return (d.data || []).map((m) => m.id);
 }
 
 // --- self-test: serializer must round-trip the file byte-for-byte -----------
@@ -158,6 +161,7 @@ async function main() {
 
   const write = args.includes('--write');
   const data = JSON.parse(readFileSync(FILE, 'utf8'));
+  const credentials = configuredCredentials(data.providers);
   const bySlug = Object.fromEntries(data.providers.map((p) => [p.slug, p]));
 
   const jobs = [];
@@ -187,7 +191,7 @@ async function main() {
   let changed = 0;
   for (const { slug, run } of jobs) {
     try {
-      const ids = await run();
+      const ids = sample(safeModelIds(await run(), credentials));
       if (!ids.length) {
         console.log(`- ${slug}: endpoint returned no usable IDs, left unchanged`);
         continue;
@@ -202,13 +206,16 @@ async function main() {
         changed++;
       }
     } catch (e) {
+      if (e instanceof UnsafeProviderOutputError) throw e;
       console.log(`✗ ${slug}: fetch failed (${e.message}), left unchanged`);
     }
   }
 
   if (write && changed) {
     data.generated = new Date().toISOString().slice(0, 10);
-    writeFileSync(FILE, serialize(data));
+    const out = serialize(data);
+    assertCredentialFree(out, credentials);
+    writeFileSync(FILE, out);
     console.log(`\n→ wrote data/providers.json (${changed} provider(s) updated). Now run: npm run build`);
   } else if (changed) {
     console.log(`\n${changed} provider(s) would change. Re-run with --write to apply.`);

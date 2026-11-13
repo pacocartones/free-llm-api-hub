@@ -36,7 +36,7 @@ The probe reads keys from `process.env[env_key]` (each provider declares its `en
    ```
    With Infisical on `127.0.0.1`, the secrets never traverse the network.
 
-`scripts/probe-cron.sh` wraps this for the weekly VPS cron (probe → model refresh → validate → build → push), publishing without spending GitHub Actions minutes.
+`scripts/probe-cron.sh` wraps this for the weekly VPS cron (probe → model refresh → validate → build), then leaves the complete diff unstaged for human review and a pull request.
 
 ## Worked walkthrough (local, first run)
 
