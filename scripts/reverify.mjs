@@ -18,7 +18,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { SLA_DAYS, ageInDays } from './lib/rules.mjs';
 import { weeklyPacing, weeklyBatch } from './lib/pacing.mjs';
-import { fetchPublicUrl } from './lib/public-fetch.mjs';
+import { fetchDocs } from './lib/reverify-fetch.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const OUT = join(ROOT, '.freebuff', 'reverify');
@@ -39,38 +39,6 @@ const today = new Date();
 const ageOf = (p) => ageInDays(p.last_verified, today);
 const n = batchSize ?? weeklyPacing(verified.map(ageOf), SLA_DAYS).size;
 const batch = batchSize ? verified.slice(0, n) : weeklyBatch(verified, ageOf, SLA_DAYS, n);
-
-// Single-pass entity decode: one regex + callback, so entities are never
-// double-unescaped (e.g. &amp;amp; -> &amp;, not &).
-const ENTITIES = { '&amp;': '&', '&lt;': '<', '&gt;': '>', '&quot;': '"', '&#39;': "'", '&nbsp;': ' ' };
-const decodeEntities = (s) => s.replace(/&(?:amp|lt|gt|quot|#39|nbsp);/g, (m) => ENTITIES[m] || m);
-const stripHtml = (html) => {
-  // Tolerant of whitespace AND stray attributes inside tags (e.g. <script >,
-  // </script bar>), so a malformed end tag cannot leave script content behind.
-  const s = decodeEntities(
-    html
-      .replace(/<script\b[^>]*>[\s\S]*?<\/script[^>]*>/gi, ' ')
-      .replace(/<style\b[^>]*>[\s\S]*?<\/style[^>]*>/gi, ' ')
-      .replace(/<[^>]+>/g, ' ')
-      .replace(/\s+/g, ' ')
-  ).trim();
-  return s.length > 6000 ? s.slice(0, 6000) + '…' : s;
-};
-
-const fetchDocs = async (p) => {
-  try {
-    const res = await fetchPublicUrl(p.docs_url, {
-      signal: AbortSignal.timeout(20000),
-      headers: { 'user-agent': 'Mozilla/5.0 (compatible; free-llm-api-hub-reverify/1.0)' },
-    });
-    const ct = res.headers.get('content-type') || '';
-    if (!res.ok) return { status: `HTTP ${res.status}`, text: '' };
-    const body = await res.text();
-    return { status: String(res.status), text: /html|text|markdown/.test(ct) ? stripHtml(body) : '(non-text body — review manually)' };
-  } catch (e) {
-    return { status: `fetch error: ${e.name === 'AbortError' || e.name === 'TimeoutError' ? 'timeout' : e.message}`, text: '' };
-  }
-};
 
 console.log(`Re-verification batch — ${batch.length} of ${verified.length} verified (oldest first):\n`);
 for (const p of batch) {
