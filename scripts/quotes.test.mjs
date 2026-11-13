@@ -70,7 +70,7 @@ test('register: the sentence, the passages and the claims each have to match, by
   assert.match(errs((w) => { w.data.providers[0].data_policy.note = 'Section «Training» and «Training».'; }), /twice/);
 });
 test('register: every entry has its fields in order', () => {
-  assert.match(errs((w) => { w.registry.entries[0].source_url = 'http://example.com/terms'; }), /https/);
+  assert.match(errs((w) => { w.registry.entries[0].source_url = 'http://example.com/terms'; }), /HTTPS/i);
   assert.match(errs((w) => { w.registry.entries[0].read_on = '2999-01-01'; }), /read_on/);
   assert.match(errs((w) => { w.registry.entries[0].read_on = 'yesterday'; }), /read_on/);
   assert.match(errs((w) => { w.registry.entries[0].method = 'by eye'; }), /method/);

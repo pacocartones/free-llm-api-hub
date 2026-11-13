@@ -2,15 +2,57 @@
 // checked in the same DNS lookup that supplies the socket, and every redirect
 // comes back through this module before another connection is opened.
 import { lookup as dnsLookup } from 'node:dns';
-import { request as httpsRequest } from 'node:https';
+import { Agent as HttpsAgent, request as httpsRequest } from 'node:https';
 import { isIP } from 'node:net';
+import { Readable } from 'node:stream';
 
 const REDIRECT_STATUSES = new Set([301, 302, 303, 307, 308]);
 const MAX_REDIRECTS = 5;
+const MAX_RESPONSE_BYTES = 2 * 1024 * 1024;
+const REQUEST_TIMEOUT_MS = 30000;
 const SENSITIVE_HEADERS = new Set(['authorization', 'cookie', 'host', 'proxy-authorization']);
 
 export class UnsafeUrlError extends Error {
   constructor(message) { super(message); this.name = 'UnsafeUrlError'; }
+}
+
+export class ResponseTooLargeError extends Error {
+  constructor(maxBytes) {
+    super(`response exceeds ${maxBytes}-byte limit`);
+    this.name = 'ResponseTooLargeError';
+  }
+}
+
+export class UnsupportedContentEncodingError extends Error {
+  constructor(encoding) {
+    super(`unsupported Content-Encoding: ${encoding}`);
+    this.name = 'UnsupportedContentEncodingError';
+  }
+}
+
+function requestLifecycle(externalSignal, timeoutMs) {
+  const controller = new AbortController();
+  const timeoutError = new DOMException(`documentation request exceeded ${timeoutMs}ms deadline`, 'TimeoutError');
+  const timer = setTimeout(() => controller.abort(timeoutError), timeoutMs);
+  timer.unref?.();
+  const forwardAbort = () => controller.abort(
+    externalSignal.reason || new DOMException('documentation request aborted', 'AbortError')
+  );
+  if (externalSignal?.aborted) forwardAbort();
+  else externalSignal?.addEventListener('abort', forwardAbort, { once: true });
+  let cleaned = false;
+  return {
+    signal: controller.signal,
+    cleanup() {
+      if (cleaned) return;
+      cleaned = true;
+      clearTimeout(timer);
+      externalSignal?.removeEventListener('abort', forwardAbort);
+    },
+    normalize(error) {
+      return controller.signal.aborted ? (controller.signal.reason || error) : error;
+    },
+  };
 }
 
 function isPublicIpv4(address) {
@@ -137,8 +179,6 @@ export function createPublicLookup(resolver = dnsLookup) {
   };
 }
 
-const publicLookup = createPublicLookup();
-
 function checkedHeaders(headers) {
   const clean = {};
   let acceptsEncoding = false;
@@ -162,36 +202,86 @@ function responseHeaders(headers) {
   };
 }
 
-async function responseText(response) {
-  const chunks = [];
-  for await (const chunk of response) {
-    chunks.push(chunk);
-  }
-  return Buffer.concat(chunks).toString('utf8');
+function declaredLength(headers) {
+  const value = responseHeaders(headers).get('content-length');
+  if (!/^\d+$/.test(value || '')) return null;
+  try { return BigInt(value); } catch { return null; }
 }
 
-async function requestHop(input, { headers, signal }, redirects) {
+function boundedBody(response, maxBytes, lifecycle) {
+  const reader = Readable.toWeb(response).getReader();
+  let bytesRead = 0;
+  return new ReadableStream({
+    async pull(controller) {
+      try {
+        const { done, value } = await reader.read();
+        if (done) { lifecycle.cleanup(); controller.close(); return; }
+        if (value.byteLength > maxBytes - bytesRead) {
+          const error = new ResponseTooLargeError(maxBytes);
+          response.destroy(error);
+          try { await reader.cancel(error); } catch { /* preserve the size error */ }
+          lifecycle.cleanup();
+          controller.error(error);
+          return;
+        }
+        bytesRead += value.byteLength;
+        controller.enqueue(value);
+      } catch (error) {
+        lifecycle.cleanup();
+        controller.error(lifecycle.normalize(error));
+      }
+    },
+    async cancel(reason) {
+      response.destroy(reason instanceof Error ? reason : undefined);
+      try { await reader.cancel(reason); } catch { /* cancellation remains best effort */ }
+      finally { lifecycle.cleanup(); }
+    },
+  });
+}
+
+async function requestHop(input, { headers, maxBytes }, redirects, transport, lifecycle) {
   const url = parsePublicHttpsUrl(input);
   return new Promise((resolve, reject) => {
-    const request = httpsRequest(url, { method: 'GET', headers, lookup: publicLookup, signal }, (response) => {
+    const request = transport.requestImpl(url, {
+      method: 'GET',
+      headers,
+      lookup: transport.lookup,
+      agent: transport.agent,
+      signal: lifecycle.signal,
+    }, (response) => {
       const location = response.headers.location;
       if (location && REDIRECT_STATUSES.has(response.statusCode)) {
-        response.resume();
+        response.destroy();
         if (redirects >= MAX_REDIRECTS) { reject(new UnsafeUrlError(`documentation request exceeded ${MAX_REDIRECTS} redirects`)); return; }
         let next;
         try { next = resolvePublicRedirect(url, location); }
         catch (error) { reject(error); return; }
-        requestHop(next, { headers, signal }, redirects + 1).then(resolve, reject);
+        requestHop(next, { headers, maxBytes }, redirects + 1, transport, lifecycle).then(resolve, reject);
         return;
       }
-      let textPromise;
+      const encoding = responseHeaders(response.headers).get('content-encoding')?.trim() || '';
+      if (encoding && encoding.toLowerCase() !== 'identity') {
+        const error = new UnsupportedContentEncodingError(encoding);
+        response.destroy();
+        reject(error);
+        return;
+      }
+      const length = declaredLength(response.headers);
+      if (length !== null && length > BigInt(maxBytes)) {
+        const error = new ResponseTooLargeError(maxBytes);
+        response.destroy();
+        reject(error);
+        return;
+      }
+      const bodyResponse = new Response(boundedBody(response, maxBytes, lifecycle));
       resolve({
         status: response.statusCode || 0,
         ok: response.statusCode >= 200 && response.statusCode < 300,
         url: url.href,
         redirected: redirects > 0,
         headers: responseHeaders(response.headers),
-        text: () => { textPromise ??= responseText(response); return textPromise; },
+        body: bodyResponse.body,
+        text: () => bodyResponse.text(),
       });
     });
     request.on('error', reject);
@@ -199,7 +289,32 @@ async function requestHop(input, { headers, signal }, redirects) {
   });
 }
 
-/** Fetch-like GET for public documentation, with address-pinned DNS and manual redirects. */
-export function fetchPublicUrl(input, { headers = {}, signal } = {}) {
-  return requestHop(input, { headers: checkedHeaders(headers), signal }, 0);
+/** Creates a fetch-like GET whose owned agent cannot inherit global proxy or pooling behavior. */
+export function createPublicFetch({
+  requestImpl = httpsRequest,
+  resolver = dnsLookup,
+  agent = new HttpsAgent({ keepAlive: false }),
+} = {}) {
+  const transport = { requestImpl, lookup: createPublicLookup(resolver), agent };
+  return (input, {
+    headers = {},
+    signal,
+    maxBytes = MAX_RESPONSE_BYTES,
+    timeoutMs = REQUEST_TIMEOUT_MS,
+  } = {}) => {
+    const lifecycle = requestLifecycle(signal, timeoutMs);
+    return Promise.resolve().then(() => requestHop(
+      input,
+      { headers: checkedHeaders(headers), maxBytes },
+      0,
+      transport,
+      lifecycle
+    )).catch((error) => {
+      lifecycle.cleanup();
+      throw lifecycle.normalize(error);
+    });
+  };
 }
+
+/** Fetch-like GET for public documentation, with address-pinned DNS and manual redirects. */
+export const fetchPublicUrl = createPublicFetch();
