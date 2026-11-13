@@ -113,14 +113,16 @@ If your `last_verified` is newer than it, the validator refuses — because the 
 `data_policy` records what the provider itself says about your prompts on this free access: whether it trains on them and how long it keeps them. Add it to your entry as one more field, on one line, like the rest of the object:
 
 ```json
-"data_policy": {"trains_on_prompts": false, "retention": null, "source": "https://www.ai21.com/privacy-policy", "checked": "2026-10-29", "quote": "Consistent with our Terms of Service, and unless otherwise agreed in writing or required to provide the Services, we do not use your inputs or outputs to train AI21's foundational or generally available AI models.", "plan_named": false}
+"data_policy": {"trains_on_prompts": false, "retention": null, "source": "https://www.ai21.com/terms-policies/privacy-policy/", "checked": "2026-10-15", "quote": "Consistent with our Terms of Service, and unless otherwise agreed in writing or required to provide the Services, we do not use your inputs or outputs to train AI21’s foundational or generally available AI models.", "plan_named": false}
 ```
 
-Three rules trip people up:
+A few rules trip people up:
 
 1. **The entry must sit on one line**, like the others, or `npm test` fails with `serializer does not round-trip`.
 2. **`trains_on_prompts` and `retention` stay `null` when the page says nothing** — never guess `false`. `retention` is a period such as `"30 days"` or `"not stored"`; `null` means not stated.
-3. **Commit the regenerated files with the data change**: run `npm run build`, and `npm run check` must leave no diff.
+3. **`checked` is the day you read that source, not today by default** — the example above carries the day `https://www.ai21.com/terms-policies/privacy-policy/` was read (`2026-10-15`). Replace it with your own reading day, and never with a date after `generated`.
+4. **At least one of the two must be stated.** A `data_policy` whose `trains_on_prompts` and `retention` are both `null` records nothing, so the validator refuses it (`data_policy must state trains_on_prompts or retention`). If the page says neither, leave `data_policy` out of the entry — or set it to `null` — rather than writing an all-`null` object.
+5. **Commit the regenerated files with the data change**: run `npm run build`, and `npm run check` must leave no diff.
 
 The full definition — `source`, `checked`, `quote`, `note` and `plan_named` included — is the `data_policy` entry in [`data/schema.json`](../data/schema.json).
 
