@@ -22,7 +22,7 @@ A living, maintainer-facing checklist of concrete follow-ups. Direction and prin
 - ✅ **Per-page OG images for `/models/` and `/guides/`.** `og.mjs` generalized (`tagSvg`) to render one per guide + one for the model index; wired via `ogImage` in build.mjs.
 - ✅ **Mobile navigation.** Added an accessible hamburger toggle (in the shared `site.js`, so identical on the homepage and every generated page) that drops the nav down as a panel below 900px; closes on link-follow / Escape / outside-click. Also surfaced **Guides** in the primary nav (was footer/hero-only).
 - ✅ **Guides ↔ collections cross-links** and ✅ **FAQ blocks** (with `FAQPage` JSON-LD) on the higher-traffic collections.
-- ✅ **Two new modality guides** — image generation + OCR/document-AI (seven guides as of 2026-10-25), mapping onto the new providers.
+- ✅ **Two new modality guides** — image generation + OCR/document-AI (nine guides as of 2026-10-25), mapping onto the new providers.
 - ✅ **Explorer table polish** — desktop zebra striping, sortable-column affordance, width cap on the widest column, and a **NEW** marker (via the `added` field, rendered by the shared row code in both SSR and client).
 - ✅ **Per-provider OG images** — `og.mjs` renders one per provider (`site/og/p/<slug>.png`), wired via `ogImage` in build.mjs and verified by `check-og.mjs`.
 
@@ -91,7 +91,7 @@ only what confirms.
 
 - ✅ `models_free` with an automated live refresh (`scripts/fetch-models.mjs`); the providers that publish a `/models` list carry it in `models_free` (OpenRouter, Pollinations, NVIDIA NIM, ModelScope, Ollama Cloud, plus the key-gated Groq/Cerebras/SambaNova/Scaleway when keys are set).
 - ✅ Searchable [free model index](https://freellmapihub.com/models/) (`/models/`).
-- ✅ Seven data-generated [SEO guides & collections](https://freellmapihub.com/guides-and-collections/) with editorial top picks + `FAQPage` structured data.
+- ✅ Data-generated [SEO guides & collections](https://freellmapihub.com/guides-and-collections/) with editorial top picks + `FAQPage` structured data.
 - ✅ Credit programs split into two standalone pages (startups / students & research).
 - ✅ Provider pages: prominent free-models block, modality-aware quickstart with a real model, freshness read-out, cross-links to guides & collections.
 
