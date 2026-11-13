@@ -185,6 +185,10 @@ GitHub holds workflow runs from a **first-time contributor** until a maintainer 
 - **Maintainers' branch names:** `<type>/<short-slug>`, lower case with hyphens, where the type is
   the conventional-commit type: `feat/`, `fix/`, `docs/`, `data/`, `test/`, `ci/`, `chore/` or `refactor/`. Example: `fix/sitemap-canonical`. Branch names
   describe the change, not who made it or an internal ticket. Reserved: `main`, `changeset-release/main` and `bot/*`.
+- **Codex Security branches:** the generated format `codex-security/arp_<32 lowercase hexadecimal characters>`
+  is accepted for branches in this repository. Other `codex-security/*` names must follow the normal
+  naming rule instead. This is a branch-name exception only: it does not authenticate the tool or author,
+  approve the patch, or exempt maintainer commits from the identity and attribution rules below.
 - **Dependabot branches:** `dependabot/*` is exempt from the naming rule only when the pull request
   author is `dependabot[bot]`. A human using that prefix is still checked; the commit identity and
   attribution rules still apply to maintainer commits in a Dependabot pull request.
