@@ -187,6 +187,21 @@ test('a compressed response is rejected explicitly and destroyed instead of deco
   assert.equal(calls[0].options.headers['accept-encoding'], 'identity');
 });
 
+test('callers cannot opt the bounded transport into compressed representations', async () => {
+  let requested = false;
+  const fetchImpl = publicFetch.createPublicFetch({
+    requestImpl() { requested = true; throw new Error('request must not start'); },
+    resolver: (_hostname, _options, callback) => callback(null, [{ address: '93.184.216.34', family: 4 }]),
+    agent: {},
+  });
+
+  await assert.rejects(
+    fetchImpl('https://docs.example.com/readme', { headers: { 'Accept-Encoding': 'gzip' } }),
+    /Accept-Encoding must be identity/
+  );
+  assert.equal(requested, false);
+});
+
 test('one total deadline remains active while the final response body stalls', { timeout: 500 }, async () => {
   const calls = [];
   const source = responseStream({ headers: { 'content-type': 'text/plain' }, end: false });
@@ -202,4 +217,53 @@ test('one total deadline remains active while the final response body stalls', {
   clearTimeout(fallback);
   assert.equal(source.destroyed, true);
   assert.equal(calls[0].request.destroyed, true);
+});
+
+test('a legitimate UTF-8 body exactly at the cap survives split code points', async () => {
+  const calls = [];
+  const encoded = new TextEncoder().encode('Hello €');
+  const source = responseStream({
+    headers: { 'content-type': 'text/plain', 'content-length': String(encoded.byteLength) },
+    chunks: [encoded.slice(0, 7), encoded.slice(7, 8), encoded.slice(8)],
+  });
+  const fetchImpl = publicFetch.createPublicFetch({
+    requestImpl: queuedRequest([source], calls),
+    resolver: (_hostname, _options, callback) => callback(null, [{ address: '93.184.216.34', family: 4 }]),
+    agent: {},
+  });
+
+  const response = await fetchImpl('https://docs.example.com/readme', { maxBytes: encoded.byteLength });
+  assert.equal(await response.text(), 'Hello €');
+});
+
+test('cancelling the exposed body destroys the live response', async () => {
+  const calls = [];
+  const source = responseStream({ headers: { 'content-type': 'text/plain' }, end: false });
+  const fetchImpl = publicFetch.createPublicFetch({
+    requestImpl: queuedRequest([source], calls),
+    resolver: (_hostname, _options, callback) => callback(null, [{ address: '93.184.216.34', family: 4 }]),
+    agent: {},
+  });
+
+  const response = await fetchImpl('https://docs.example.com/readme');
+  await response.body.cancel('not needed');
+  assert.equal(source.destroyed, true);
+});
+
+test('a public redirect destroys the prior body and keeps one deadline for the final hop', { timeout: 500 }, async () => {
+  const calls = [];
+  const redirect = responseStream({ status: 302, headers: { location: '/final' }, end: false });
+  const final = responseStream({ headers: { 'content-type': 'text/plain' }, end: false });
+  const fetchImpl = publicFetch.createPublicFetch({
+    requestImpl: queuedRequest([redirect, final], calls),
+    resolver: (_hostname, _options, callback) => callback(null, [{ address: '93.184.216.34', family: 4 }]),
+    agent: {},
+  });
+
+  const response = await fetchImpl('https://docs.example.com/start', { timeoutMs: 10 });
+  await assert.rejects(response.text(), (error) => error?.name === 'TimeoutError');
+  assert.equal(redirect.destroyed, true);
+  assert.equal(final.destroyed, true);
+  assert.equal(calls.length, 2);
+  assert.equal(calls[1].url.href, 'https://docs.example.com/final');
 });

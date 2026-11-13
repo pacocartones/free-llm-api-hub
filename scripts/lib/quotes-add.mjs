@@ -8,11 +8,17 @@ const KIND_ORDER = { sentence: 0, note_passage: 1, absence_check: 2 };
 
 /** Reads a page the way verify-quotes does. @returns {Promise<{ok: boolean, text?: string, why?: string}>} */
 export async function readText(url, fetchImpl = fetchPublicUrl) {
-  let res;
-  try { res = await fetchImpl(url, { headers: READ_HEADERS, signal: AbortSignal.timeout(30000) }); }
+  let res; let html;
+  try {
+    res = await fetchImpl(url, { headers: READ_HEADERS, timeoutMs: 30000 });
+    if (res.ok) html = await res.text();
+  }
   catch (e) { return { ok: false, why: `could not read ${url}: ${String((e && e.message) || e).slice(0, 80)}` }; }
-  if (!res.ok) return { ok: false, why: `${url} answered HTTP ${res.status}` };
-  const html = await res.text(); const text = htmlToText(html);
+  if (!res.ok) {
+    try { res.body?.cancel()?.catch(() => {}); } catch { /* the page is already being abandoned */ }
+    return { ok: false, why: `${url} answered HTTP ${res.status}` };
+  }
+  const text = htmlToText(html);
   if (text.length < 200) return { ok: false, why: `${url} gave only ${text.length} characters of text (a page that needs scripts cannot be read this way)` };
   const lang = declaredLanguage(html, res.headers.get('content-language'));
   if (!sameLanguage('en', lang)) return { ok: false, why: `${url} declares the language ${lang}, not English: the quote would not be compared with the page it is in` };

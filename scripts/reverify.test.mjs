@@ -5,11 +5,11 @@ import { fetchDocs } from './lib/reverify-fetch.mjs';
 const provider = { docs_url: 'https://provider.example/docs' };
 const encoder = new TextEncoder();
 
-const responseFrom = (chunks, headers = { 'content-type': 'text/html' }, onCancel = () => {}) => new Response(
+const responseFrom = (chunks, headers = { 'content-type': 'text/html' }, onCancel = () => {}, { keepOpen = false } = {}) => new Response(
   new ReadableStream({
     pull(controller) {
       if (chunks.length) controller.enqueue(chunks.shift());
-      else controller.close();
+      else if (!keepOpen) controller.close();
     },
     cancel: onCancel,
   }),
@@ -39,7 +39,7 @@ test('an oversized Content-Length is rejected before reading and cancels the bod
   const fetchImpl = async () => responseFrom([], {
     'content-type': 'text/plain',
     'content-length': '101',
-  }, () => { cancelled = true; });
+  }, () => { cancelled = true; }, { keepOpen: true });
 
   const result = await fetchDocs(provider, { fetchImpl, maxBytes: 100 });
   assert.deepEqual(result, { status: 'fetch error: response exceeds 100-byte limit', text: '' });
@@ -51,7 +51,8 @@ test('a streamed body without Content-Length is cancelled as soon as it crosses 
   const fetchImpl = async () => responseFrom(
     [encoder.encode('1234'), encoder.encode('56')],
     { 'content-type': 'text/plain' },
-    () => { cancelled = true; }
+    () => { cancelled = true; },
+    { keepOpen: true }
   );
 
   const result = await fetchDocs(provider, { fetchImpl, maxBytes: 5 });
@@ -68,4 +69,37 @@ test('a legitimate bounded body is decoded across chunks and extracted as before
 
   const result = await fetchDocs(provider, { fetchImpl, maxBytes: encoded.byteLength });
   assert.deepEqual(result, { status: '200', text: 'Hello € & friends' });
+});
+
+test('fetchDocs passes the same byte cap and total deadline into the public transport', async () => {
+  let options;
+  const fetchImpl = async (_url, received) => {
+    options = received;
+    return responseFrom([encoder.encode('okay')], { 'content-type': 'text/plain' });
+  };
+
+  const result = await fetchDocs(provider, { fetchImpl, timeoutMs: 1234, maxBytes: 8 });
+  assert.deepEqual(result, { status: '200', text: 'okay' });
+  assert.equal(options.timeoutMs, 1234);
+  assert.equal(options.maxBytes, 8);
+});
+
+test('a cancellation promise that never settles cannot hold fetchDocs open', { timeout: 500 }, async () => {
+  let cancelled = false;
+  const fetchImpl = async () => ({
+    status: 413,
+    ok: false,
+    headers: new Headers({ 'content-type': 'text/plain' }),
+    body: {
+      cancel() {
+        cancelled = true;
+        return new Promise(() => {});
+      },
+    },
+  });
+
+  const fallback = new Promise((resolve) => setTimeout(() => resolve({ fallback: true }), 100));
+  const result = await Promise.race([fetchDocs(provider, { fetchImpl }), fallback]);
+  assert.deepEqual(result, { status: 'HTTP 413', text: '' });
+  assert.equal(cancelled, true);
 });

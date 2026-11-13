@@ -184,7 +184,12 @@ function checkedHeaders(headers) {
   let acceptsEncoding = false;
   for (const [name, value] of Object.entries(headers || {})) {
     if (SENSITIVE_HEADERS.has(name.toLowerCase())) throw new UnsafeUrlError(`documentation requests must not send the ${name} header`);
-    if (name.toLowerCase() === 'accept-encoding') acceptsEncoding = true;
+    if (name.toLowerCase() === 'accept-encoding') {
+      if (String(value).trim().toLowerCase() !== 'identity') {
+        throw new UnsafeUrlError('Accept-Encoding must be identity for bounded documentation reads');
+      }
+      acceptsEncoding = true;
+    }
     clean[name] = value;
   }
   // Native fetch decoded compressed bodies; request identity so this small
