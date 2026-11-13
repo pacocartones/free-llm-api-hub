@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # probe-cron.sh — the VPS-side weekly runner. Colocated with a self-hosted
 # Infisical, it live-tests every provider whose key is in the secrets folder,
-# refreshes the dataset, rebuilds the site, and publishes — with ZERO GitHub
-# Actions minutes.
+# refreshes the dataset and rebuilds the site, leaving a diff for review without
+# spending GitHub Actions minutes.
 #
 # Prereqs on the VPS (once):
 #   - node >= 18, git, and the Infisical CLI installed.
@@ -14,7 +14,7 @@
 #         INFISICAL_PROJECT_ID=...
 #         INFISICAL_ENV=prod
 #         INFISICAL_PATH=/free-llm-api-hub
-#   - A git remote with push rights (deploy key or PAT), and the repo cloned.
+#   - A full repository clone with a readable git remote.
 #
 # Cron example (Mondays 08:10 UTC):
 #   10 8 * * 1  /path/to/repo/scripts/probe-cron.sh >> /var/log/flah-probe.log 2>&1
@@ -22,6 +22,12 @@ set -euo pipefail
 
 REPO_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$REPO_DIR"
+
+# Never mix generated maintenance output with an operator's existing changes.
+if [ -n "$(git status --porcelain)" ]; then
+  echo "probe-cron: refusing to run with a dirty working tree" >&2
+  exit 1
+fi
 
 # Load the Machine-Identity creds (root-only file, not in the repo).
 [ -f /etc/free-llm-api-hub.env ] && . /etc/free-llm-api-hub.env
@@ -36,16 +42,19 @@ infisical run \
   --path "${INFISICAL_PATH:-/free-llm-api-hub}" \
   -- node scripts/probe.mjs --write
 
-# Also refresh the public model catalogs, then validate + build.
-node scripts/fetch-models.mjs --write || true
+# Also refresh the public model catalogs, then validate + build. Unsafe provider
+# metadata is fatal: do not prepare a partial publication candidate around it.
+node scripts/fetch-models.mjs --write
 node scripts/validate.mjs
 node scripts/build.mjs
 
-# Commit data changes (probe report, models, statuses) to main.
-if ! git diff --quiet; then
-  git add -A
-  git -c user.name='flah-bot' -c user.email='bot@localhost' commit -m "data: weekly live-probe + model refresh [skip ci]"
-  git push origin main
+# Keep generated output local until a human has reviewed the complete diff and
+# opened a pull request. In particular, this script never stages or publishes
+# files produced while provider credentials are present.
+if ! git diff --quiet || [ -n "$(git ls-files --others --exclude-standard)" ]; then
+  echo "probe-cron: maintenance diff ready; review it and open a pull request"
+else
+  echo "probe-cron: no maintenance changes"
 fi
 
 # Publish the built site to the gh-pages branch (deploy-from-branch = 0 Actions).

@@ -96,7 +96,7 @@ The serializer **skips absent keys**, so new optional fields only appear on prov
 - **`check-og.mjs`** (CI) — every committed OG PNG must exist AND match the dataset: recomputes the fingerprints in `site/og/manifest.json` from `data/providers.json`. Pure Node, with no image-rendering dependency, so it checks the fingerprint without rendering images.
 - **`check-history.mjs`** (CI) — cheaply validates the git-mined per-provider history (two git processes, no build) before the full test suite.
 - **`check-links.mjs`** (`npm run links`, part of `npm test`) — validates INTERNAL markdown links (relative doc-to-doc paths) only. Never touches the network. The external `docs_url` sweep is a local on-demand pass in the [update playbook](update-playbook.md); genuine failures (not 401/403/405/429 bot-blocks) open a "broken link" issue.
-- **`probe-cron.sh`** — the VPS weekly cron alternative (Infisical → probe → models → build → push), for a zero-Actions-minutes setup.
+- **`probe-cron.sh`** — the VPS weekly cron helper (Infisical → probe → models → build → reviewed diff). It never stages or pushes generated output; a human opens the pull request.
 
 npm scripts: `build, validate, links, worklist, reverify, models, discover, probe, og, test (validate + links + test suites), check (validate + build + diff-gate), check-live (committed sitemap vs deployed), smoke-live (every published sitemap URL answers 200)`.
 
