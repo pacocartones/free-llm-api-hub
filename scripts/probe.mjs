@@ -24,6 +24,10 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import assert from 'node:assert/strict';
 import { serialize, roundTripError } from './_serialize.mjs';
 import { keyHostError } from './lib/key-hosts.mjs';
+import {
+  assertCredentialFree, configuredCredentials, RATE_LIMIT_HEADERS,
+  safeModelIds, safeRateLimits,
+} from './lib/provider-output-safety.mjs';
 
 const FILE = new URL('../data/providers.json', import.meta.url);
 const REPORT = new URL('../data/probe-report.json', import.meta.url);
@@ -68,16 +72,11 @@ async function req(url, opts = {}) {
   }
 }
 
-const RL_HEADERS = [
-  'x-ratelimit-limit-requests', 'x-ratelimit-remaining-requests',
-  'x-ratelimit-limit-tokens', 'x-ratelimit-remaining-tokens',
-  'x-ratelimit-reset-requests', 'retry-after',
-];
-const pickRateLimit = (headers) => {
+const pickRateLimit = (headers, credentials) => {
   const o = {};
   if (!headers) return o;
-  for (const h of RL_HEADERS) { const v = headers.get(h); if (v != null) o[h] = v; }
-  return o;
+  for (const h of RATE_LIMIT_HEADERS) { const v = headers.get(h); if (v != null) o[h] = v; }
+  return safeRateLimits(o, credentials);
 };
 
 // Map an HTTP outcome to a probe_status. 402/insufficient-balance ⇒ the free
@@ -99,18 +98,21 @@ function classifyAuthOnly(status, json) {
   return status === 200 ? 'auth-ok' : classify(status, json);
 }
 
-async function probeOpenAI(p, key) {
+async function probeOpenAI(p, key, credentials) {
   const base = p.openai_base_url.replace(/\/$/, '');
   const auth = { Authorization: `Bearer ${key}` };
   const m = await req(`${base}/models`, { headers: auth });
   const authOk = m.status !== 401 && m.status !== 403;
-  const models = (m.json && Array.isArray(m.json.data) ? m.json.data.map((x) => x.id) : []).filter(Boolean);
+  const modelIds = m.json && Array.isArray(m.json.data) ? m.json.data.map((x) => x && x.id).filter(Boolean) : [];
+  const models = safeModelIds(modelIds, credentials);
 
   if (AUTH_ONLY) {
+    const rateLimit = pickRateLimit(m.headers, credentials);
+    assertCredentialFree([...models, ...Object.values(rateLimit)].join(''), credentials);
     return {
       authOk, models, model: null,
       status: authOk ? classifyAuthOnly(m.status, m.json) : 'auth-failed',
-      latency_ms: m.ms, tps: null, http: m.status, rate_limit: pickRateLimit(m.headers), inference: false,
+      latency_ms: m.ms, tps: null, http: m.status, rate_limit: rateLimit, inference: false,
     };
   }
 
@@ -133,7 +135,9 @@ async function probeOpenAI(p, key) {
   const ct = inf.json && inf.json.usage && inf.json.usage.completion_tokens;
   if (status === 'live' && ct && inf.ms) tps = +(ct / (inf.ms / 1000)).toFixed(1);
 
-  return { authOk, models, model, status, latency_ms: inf.ms, tps, http: inf.status, rate_limit: pickRateLimit(inf.headers), inference: true };
+  const rateLimit = pickRateLimit(inf.headers, credentials);
+  assertCredentialFree([...models, ...Object.values(rateLimit)].join(''), credentials);
+  return { authOk, models, model, status, latency_ms: inf.ms, tps, http: inf.status, rate_limit: rateLimit, inference: true };
 }
 
 async function main() {
@@ -154,6 +158,7 @@ async function main() {
   }
 
   const data = JSON.parse(readFileSync(FILE, 'utf8'));
+  const credentials = configuredCredentials(data.providers);
   const targets = data.providers.filter((p) => p.env_key && (!ONLY.length || ONLY.includes(p.slug)));
   const results = [];
   let changed = 0, noKey = 0, noAdapter = 0;
@@ -165,7 +170,7 @@ async function main() {
     const hostError = keyHostError(p);
     if (hostError) { results.push({ slug: p.slug, env_key: p.env_key, key_present: true, status: 'host-not-pinned' }); console.log(`· ${p.slug.padEnd(22)} host-not-pinned (${hostError})`); continue; }
 
-    const r = await probeOpenAI(p, key);
+    const r = await probeOpenAI(p, key, credentials);
     results.push({
       slug: p.slug, env_key: p.env_key, key_present: true, http: r.http, status: r.status,
       auth_ok: r.authOk, models: r.models.length, model_used: r.model,
@@ -184,6 +189,8 @@ async function main() {
   const report = { probed_at: TODAY, auth_only: AUTH_ONLY, count: results.length, results };
   if (WRITE) {
     const out = serialize(data);
+    assertCredentialFree(out, credentials);
+    assertCredentialFree(report, credentials);
     try { JSON.parse(out); } catch (e) { console.error('✗ refusing to write, invalid JSON:', e.message); process.exit(1); }
     writeFileSync(FILE, out);
     writeFileSync(REPORT, JSON.stringify(report, null, 2) + '\n');
