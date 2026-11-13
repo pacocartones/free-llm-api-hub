@@ -12,7 +12,7 @@ const SCRIPT = join(dirname(fileURLToPath(import.meta.url)), 'check-commit-polic
 const NOREPLY = '253313177+pacocartones@users.noreply.github.com';
 const skip = process.platform === 'win32' ? 'bash script, checked on Linux' : false;
 
-function run({ name, email, message = 'change', branch, headRepo }) {
+function run({ name, email, message = 'change', branch, headRepo, prAuthor = 'someone', actor = 'someone' }) {
   const dir = makeTmpDir('commit-policy-');
   const git = (args, env = {}) => execFileSync('git', args, { cwd: dir, env: { ...process.env, ...env }, encoding: 'utf8' }).trim();
   git(['init', '-q']);
@@ -21,13 +21,16 @@ function run({ name, email, message = 'change', branch, headRepo }) {
   git(['commit', '-q', '--allow-empty', '-m', message], {
     GIT_AUTHOR_NAME: name, GIT_AUTHOR_EMAIL: email, GIT_COMMITTER_NAME: name, GIT_COMMITTER_EMAIL: email,
   });
-  const env = { ...process.env, GITHUB_HEAD_REF: '', GITHUB_EVENT_PATH: '', GITHUB_REPOSITORY: 'pacocartones/free-llm-api-hub' };
+  const env = { ...process.env, GITHUB_ACTOR: actor, GITHUB_HEAD_REF: '', GITHUB_EVENT_PATH: '', GITHUB_REPOSITORY: 'pacocartones/free-llm-api-hub' };
   if (branch) {
     const event = join(dir, 'event.json');
-    writeFileSync(event, JSON.stringify({ pull_request: { head: { repo: { full_name: headRepo } } } }));
+    writeFileSync(event, JSON.stringify({ pull_request: { user: { login: prAuthor }, head: { repo: { full_name: headRepo } } } }));
     Object.assign(env, { GITHUB_HEAD_REF: branch, GITHUB_EVENT_PATH: event });
   }
-  return spawnSync('bash', [SCRIPT, base, 'HEAD'], { cwd: dir, env, encoding: 'utf8' }).status;
+  const result = spawnSync('bash', [SCRIPT, base, 'HEAD'], { cwd: dir, env, encoding: 'utf8' });
+  if (result.error) throw result.error;
+  assert.notEqual(result.status, null, result.stderr);
+  return result.status;
 }
 
 test('a maintainer commit with the noreply identity passes', { skip }, () => {
@@ -55,4 +58,45 @@ test('a branch of this repository must follow the naming rule; a fork branch is 
   assert.equal(run({ name: 'Paco Cartones', email: NOREPLY, branch: 'feat/hero', headRepo: own }), 0);
   assert.equal(run({ name: 'Someone Else', email: 'someone@example.com', branch: 'web/hero', headRepo: 'someone/free-llm-api-hub' }), 0);
   assert.equal(run({ name: 'Paco', email: 'paco@example.com', branch: 'Patch-1', headRepo: 'paco/free-llm-api-hub' }), 0);
+});
+
+// The nine open Dependabot branches that exposed the naming-rule regression.
+const dependabotBranches = [
+  'dependabot/npm_and_yarn/packages/mcp/hono-4.13.18',
+  'dependabot/npm_and_yarn/packages/mcp/hono/node-server-2.1.8',
+  'dependabot/npm_and_yarn/packages/mcp/modelcontextprotocol/sdk-1.32.2',
+  'dependabot/npm_and_yarn/packages/mcp/ip-address-10.7.5',
+  'dependabot/npm_and_yarn/packages/mcp/body-parser-2.4.0',
+  'dependabot/npm_and_yarn/tools/lighthouse/fast-uri-3.1.9',
+  'dependabot/npm_and_yarn/fast-uri-3.1.9',
+  'dependabot/npm_and_yarn/packages/mcp/fast-uri-3.1.9',
+  'dependabot/github_actions/actions-1b1ce9824d',
+];
+const dependabot = {
+  name: 'dependabot[bot]', email: '49699333+dependabot[bot]@users.noreply.github.com',
+  headRepo: 'pacocartones/free-llm-api-hub', prAuthor: 'dependabot[bot]',
+};
+
+for (const branch of dependabotBranches) {
+  test(`Dependabot's own branch passes: ${branch}`, { skip }, () => {
+    assert.equal(run({ ...dependabot, branch }), 0);
+  });
+}
+
+test('the dependabot prefix alone does not exempt a human, another bot or a missing PR author', { skip }, () => {
+  for (const prAuthor of ['someone', 'renovate[bot]', null]) {
+    assert.equal(run({ ...dependabot, prAuthor, branch: dependabotBranches[0], actor: 'dependabot[bot]' }), 1);
+  }
+});
+
+test('Dependabot is not exempt outside its branch namespace', { skip }, () => {
+  for (const branch of ['web/hero', 'dependabot-lookalike/update', 'dependabot']) {
+    assert.equal(run({ ...dependabot, branch }), 1);
+  }
+});
+
+test('a Dependabot PR still enforces maintainer identity and attribution rules', { skip }, () => {
+  const pr = { ...dependabot, branch: dependabotBranches[0] };
+  assert.equal(run({ ...pr, name: 'agent:free-llm-api-hub', email: NOREPLY }), 1);
+  assert.equal(run({ ...pr, name: 'Paco Cartones', email: NOREPLY, message: 'change\n\nCo-Authored-By: Claude <noreply@anthropic.com>' }), 1);
 });
