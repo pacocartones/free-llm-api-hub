@@ -185,6 +185,9 @@ GitHub holds workflow runs from a **first-time contributor** until a maintainer 
 - **Maintainers' branch names:** `<type>/<short-slug>`, lower case with hyphens, where the type is
   the conventional-commit type: `feat/`, `fix/`, `docs/`, `data/`, `test/`, `ci/`, `chore/` or `refactor/`. Example: `fix/sitemap-canonical`. Branch names
   describe the change, not who made it or an internal ticket. Reserved: `main`, `changeset-release/main` and `bot/*`.
+- **Dependabot branches:** `dependabot/*` is exempt from the naming rule only when the pull request
+  author is `dependabot[bot]`. A human using that prefix is still checked; the commit identity and
+  attribution rules still apply to maintainer commits in a Dependabot pull request.
 - **What happens to branches:** in this repository, merged and closed pull requests keep their
   commits and the branch is deleted afterwards; branches in your fork are yours.
 - **Commit identity:** maintainers commit as
