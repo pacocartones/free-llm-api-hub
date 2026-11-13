@@ -122,6 +122,10 @@ for (const p of data.providers ?? []) {
 
   if (p.models_free !== undefined && p.models_free !== null) {
     check(Array.isArray(p.models_free) && p.models_free.every((m) => typeof m === 'string'), `${id}: models_free must be an array of strings or null`);
+    if (Array.isArray(p.models_free)) {
+      for (const model of p.models_free)
+        check(typeof model !== 'string' || !hasHiddenChars(model), `${id}: models_free must not contain control, bidirectional or zero-width characters`);
+    }
   }
 
   // category follows free_type: a one-time signup balance is a trial; a free
@@ -142,6 +146,7 @@ for (const p of data.providers ?? []) {
   // openai_base_url: null, or an http(s) URL; and it only makes sense when the API is OpenAI-compatible.
   if (p.openai_base_url !== undefined && p.openai_base_url !== null) {
     check(typeof p.openai_base_url === 'string' && URL_RE.test(p.openai_base_url), `${id}: openai_base_url must be an http(s) URL or null`);
+    check(typeof p.openai_base_url !== 'string' || !hasHiddenChars(p.openai_base_url), `${id}: openai_base_url must not contain control, bidirectional or zero-width characters`);
     check(p.openai_compatible !== false, `${id}: openai_base_url is set but openai_compatible is false`);
   }
 
