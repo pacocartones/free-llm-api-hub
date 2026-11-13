@@ -10,6 +10,7 @@
 #  3. On a pull request from a branch of this repository, the branch name follows CONTRIBUTING
 #     ("Branch names and commit identity"). Branches in contributors' forks are not checked;
 #     Dependabot's own dependabot/* branches are exempt from the naming rule only.
+#     Codex Security's codex-security/arp_<32 lowercase hex> format is accepted for naming only.
 # Usage: scripts/check-commit-policy.sh <base-sha> <head-sha>
 set -euo pipefail
 
@@ -21,7 +22,7 @@ maintainer_names='^(pacocartones|paco cartones|maintainer|agent:.*)$'
 maintainer_emails='(^|\+)pacocartones@users\.noreply\.github\.com$|@hq\.local$'
 maintainer_name='Paco Cartones'
 maintainer_email='253313177+pacocartones@users.noreply.github.com'
-branch_pattern='^((feat|fix|docs|data|test|ci|chore|refactor)/[a-z0-9][a-z0-9-]*|changeset-release/main|bot/[a-z0-9][a-z0-9/-]*)$'
+branch_pattern='^((feat|fix|docs|data|test|ci|chore|refactor)/[a-z0-9][a-z0-9-]*|changeset-release/main|bot/[a-z0-9][a-z0-9/-]*|codex-security/arp_[0-9a-f]{32})$'
 
 fail=0
 while IFS= read -r sha; do
@@ -53,7 +54,7 @@ if [ -n "${GITHUB_HEAD_REF:-}" ] && [ -n "${GITHUB_EVENT_PATH:-}" ] && [ -f "$GI
     dependabot_branch=1
   fi
   if [ "$head_repo" = "${GITHUB_REPOSITORY:-}" ] && [ "$dependabot_branch" -eq 0 ] && ! printf '%s' "$GITHUB_HEAD_REF" | grep -Eq "$branch_pattern"; then
-    echo "::error title=Branch name::The branch name '$GITHUB_HEAD_REF' does not follow the pattern <type>/<short-slug> (types: feat, fix, docs, data, test, ci, chore, refactor; lowercase letters, digits and hyphens). Example: fix/sitemap-canonical. Rename the branch and push again; pull requests from forks are not checked."
+    echo "::error title=Branch name::The branch name '$GITHUB_HEAD_REF' does not follow the naming policy in CONTRIBUTING.md (Branch names and commit identity). Use <type>/<short-slug> (types: feat, fix, docs, data, test, ci, chore, refactor; lowercase letters, digits and hyphens), for example fix/sitemap-canonical. The Codex Security format is codex-security/arp_<32 lowercase hex characters>. Rename the branch and push again; pull requests from forks are not checked."
     fail=1
   fi
 fi
