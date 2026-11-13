@@ -181,6 +181,44 @@ test('weekly batch orders entries oldest verification first', () => {
   assert.deepEqual(slugsInSection(md, "### 📅 This week's batch"), ['older-entry', 'younger-entry']);
 });
 
+test('capped 140-entry cohort warns without promising that weekly batches prevent its cliff', () => {
+  const providers = Array.from({ length: 140 }, (_, i) => ({
+    slug: `cohort-${i}`,
+    name: `Cohort ${i}`,
+    verified: true,
+    last_verified: '2026-07-30', // 80 days old: all 140 cross the SLA together in 10 days
+  }));
+  const md = stalenessWorklist(providers, NOW);
+  const cliff = md.split('\n').find((line) => line.startsWith('> ⛰️ **Cliff watch:**'));
+  const batchNote = md.split('\n').find((line) => line.startsWith('_The 11 oldest verifications'));
+
+  assert.match(md, /> ⚠️ \*\*Behind pace:\*\* even 11 re-verifications a week will not keep every entry inside the SLA/);
+  assert.equal(slugsInSection(md, "### 📅 This week's batch").length, 11);
+  assert.match(cliff, /140 entries/);
+  assert.match(cliff, /capped at 11; completing it may not spread every entry before then/);
+  assert.doesNotMatch(cliff, /doing every batch spreads them out before then/);
+  assert.match(batchNote, /one batch a week cannot keep every entry inside the 90-day SLA/);
+  assert.doesNotMatch(batchNote, /Doing one batch every week keeps every entry inside/);
+  assert.doesNotMatch(batchNote, /no week inherits a cliff/);
+});
+
+test('reachable cohort retains the weekly SLA explanation', () => {
+  const providers = Array.from({ length: 20 }, (_, i) => ({
+    slug: `reachable-${i}`,
+    name: `Reachable ${i}`,
+    verified: true,
+    last_verified: '2026-07-30',
+  }));
+  const md = stalenessWorklist(providers, NOW);
+  const cliff = md.split('\n').find((line) => line.startsWith('> ⛰️ **Cliff watch:**'));
+  const batchNote = md.split('\n').find((line) => line.startsWith('_The 10 oldest verifications'));
+
+  assert.doesNotMatch(md, /\*\*Behind pace:\*\*/);
+  assert.equal(slugsInSection(md, "### 📅 This week's batch").length, 10);
+  assert.match(cliff, /doing every batch spreads them out before then/);
+  assert.match(batchNote, /Doing one batch every week keeps every entry inside/);
+});
+
 test('empty dataset renders placeholder text for all sections and zero summary', () => {
   const md = stalenessWorklist([], NOW);
   assert.match(md, /\*\*Summary:\*\* 🔴 0 overdue · 🟡 0 due soon · ⚠️ 0 never verified · ✅ 0 fresh\./);
