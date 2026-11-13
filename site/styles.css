@@ -634,9 +634,9 @@ p.muted a, .prose p a, .prov-summary p a { text-decoration: underline; text-unde
 
 /* Narrow phones: the brand and the three header buttons must fit without the theme toggle leaving the viewport. */
 @media (max-width: 420px) {
-  .header-inner { gap: 10px; }
+  .header-inner { gap: 10px; padding-inline: 12px; }
   .brand { gap: 8px; }
-  .brand-name { font-size: .85rem; }
+  .brand-name { font-size: .78rem; }
   .header-actions { gap: 6px; }
 }
 /* At 320 CSS px (WCAG 1.4.10) the brand and three buttons were 23px too wide: the star count is dropped, the link keeps its label. */
