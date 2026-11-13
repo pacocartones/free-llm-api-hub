@@ -6,6 +6,7 @@
 // that needs a reading with the network (npm run verify-quotes). Nothing here may be described as "verified by CI".
 import { hasHiddenChars } from './hidden-chars.mjs';
 import { ABSENCE_TERMS, METHOD } from './page-text.mjs';
+import { publicHttpsUrlError } from './public-fetch.mjs';
 
 export const KINDS = ['sentence', 'note_passage', 'absence_check'];
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
@@ -37,7 +38,7 @@ export function quoteErrors(data, registry) {
     if (seen.has(e.id)) fail(`${where}: duplicate id`); seen.add(e.id);
     if (!withPolicy.has(e.slug)) { fail(`${where}: provider "${e.slug}" has no data_policy`); continue; }
     if (!KINDS.includes(e.kind)) { fail(`${where}: unknown kind ${JSON.stringify(e.kind)}`); continue; }
-    if (!/^https:\/\/[^\s]+$/.test(e.source_url || '')) fail(`${where}: source_url must be an https address`);
+    if (publicHttpsUrlError(e.source_url)) fail(`${where}: source_url must be a public HTTPS address`);
     if (!DATE_RE.test(e.read_on || '') || e.read_on > data.generated) fail(`${where}: read_on must be a date not after the dataset's generated date`);
     if (e.method !== METHOD) fail(`${where}: method must be the one in scripts/lib/page-text.mjs`);
     if (!/^[a-z]{2,3}(-[A-Za-z0-9]+)*$/.test(e.lang || '')) fail(`${where}: lang must be the language of the passage and of the page it is read in (for example en)`);
