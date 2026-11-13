@@ -9,6 +9,7 @@
 #     never a tool or agent name.
 #  3. On a pull request from a branch of this repository, the branch name follows CONTRIBUTING
 #     ("Branch names and commit identity"). Branches in contributors' forks are not checked;
+#     Dependabot's own dependabot/* branches are exempt from the naming rule only.
 #     Codex Security's codex-security/arp_<32 lowercase hex> format is accepted for naming only.
 # Usage: scripts/check-commit-policy.sh <base-sha> <head-sha>
 set -euo pipefail
@@ -47,7 +48,12 @@ done < <(git rev-list --no-merges "${base}..${head}")
 # Rule 3: branch name, only for a pull request whose head branch lives in this repository.
 if [ -n "${GITHUB_HEAD_REF:-}" ] && [ -n "${GITHUB_EVENT_PATH:-}" ] && [ -f "$GITHUB_EVENT_PATH" ]; then
   head_repo="$(jq -r '.pull_request.head.repo.full_name // empty' "$GITHUB_EVENT_PATH")"
-  if [ "$head_repo" = "${GITHUB_REPOSITORY:-}" ] && ! printf '%s' "$GITHUB_HEAD_REF" | grep -Eq "$branch_pattern"; then
+  pr_author="$(jq -r '.pull_request.user.login // empty' "$GITHUB_EVENT_PATH")"
+  dependabot_branch=0
+  if [ "$pr_author" = 'dependabot[bot]' ] && [[ "$GITHUB_HEAD_REF" == dependabot/* ]]; then
+    dependabot_branch=1
+  fi
+  if [ "$head_repo" = "${GITHUB_REPOSITORY:-}" ] && [ "$dependabot_branch" -eq 0 ] && ! printf '%s' "$GITHUB_HEAD_REF" | grep -Eq "$branch_pattern"; then
     echo "::error title=Branch name::The branch name '$GITHUB_HEAD_REF' does not follow the naming policy in CONTRIBUTING.md (Branch names and commit identity). Use <type>/<short-slug> (types: feat, fix, docs, data, test, ci, chore, refactor; lowercase letters, digits and hyphens), for example fix/sitemap-canonical. The Codex Security format is codex-security/arp_<32 lowercase hex characters>. Rename the branch and push again; pull requests from forks are not checked."
     fail=1
   fi

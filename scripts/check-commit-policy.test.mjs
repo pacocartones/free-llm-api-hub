@@ -123,3 +123,64 @@ test('a branch of this repository must follow the naming rule; a fork branch is 
   assert.equal(run({ name: 'Someone Else', email: 'someone@example.com', branch: 'web/hero', headRepo: 'someone/free-llm-api-hub' }), 0);
   assert.equal(run({ name: 'Paco', email: 'paco@example.com', branch: 'Patch-1', headRepo: 'paco/free-llm-api-hub' }), 0);
 });
+
+// The nine open Dependabot branches that exposed the naming-rule regression.
+const dependabotBranches = [
+  'dependabot/npm_and_yarn/packages/mcp/hono-4.13.18',
+  'dependabot/npm_and_yarn/packages/mcp/hono/node-server-2.1.8',
+  'dependabot/npm_and_yarn/packages/mcp/modelcontextprotocol/sdk-1.32.2',
+  'dependabot/npm_and_yarn/packages/mcp/ip-address-10.7.5',
+  'dependabot/npm_and_yarn/packages/mcp/body-parser-2.4.0',
+  'dependabot/npm_and_yarn/tools/lighthouse/fast-uri-3.1.9',
+  'dependabot/npm_and_yarn/fast-uri-3.1.9',
+  'dependabot/npm_and_yarn/packages/mcp/fast-uri-3.1.9',
+  'dependabot/github_actions/actions-1b1ce9824d',
+];
+const dependabot = {
+  name: 'dependabot[bot]', email: '49699333+dependabot[bot]@users.noreply.github.com',
+  headRepo: 'pacocartones/free-llm-api-hub', prAuthor: 'dependabot[bot]',
+};
+
+for (const branch of dependabotBranches) {
+  test(`Dependabot's own branch passes: ${branch}`, { skip }, () => {
+    assert.equal(run({ ...dependabot, branch }), 0);
+  });
+}
+
+test('the dependabot prefix alone does not exempt a human, another bot or a missing PR author', { skip }, () => {
+  for (const prAuthor of ['someone', 'renovate[bot]', null]) {
+    assert.equal(run({ ...dependabot, prAuthor, branch: dependabotBranches[0], actor: 'dependabot[bot]' }), 1);
+  }
+});
+
+test('Dependabot is not exempt outside its branch namespace', { skip }, () => {
+  for (const branch of ['web/hero', 'dependabot-lookalike/update', 'dependabot']) {
+    assert.equal(run({ ...dependabot, branch }), 1);
+  }
+});
+
+test('a Dependabot PR still enforces maintainer identity and attribution rules', { skip }, () => {
+  const pr = { ...dependabot, branch: dependabotBranches[0] };
+  assert.equal(run({ ...pr, name: 'agent:free-llm-api-hub', email: NOREPLY }), 1);
+  assert.equal(run({ ...pr, name: 'Paco Cartones', email: NOREPLY, message: 'change\n\nCo-Authored-By: Claude <noreply@anthropic.com>' }), 1);
+});
+
+test('Dependabot author gating and Codex Security naming compose without cross-exemptions', { skip }, () => {
+  const cases = [
+    { branch: dependabotBranches[0], prAuthor: 'dependabot[bot]', want: 0 },
+    { branch: dependabotBranches[0], prAuthor: 'pacocartones', want: 1 },
+    { branch: dependabotBranches[0], prAuthor: 'LeonMAG', want: 1 },
+    { branch: dependabotBranches[0], prAuthor: null, want: 1 },
+    { branch: securityBranches[0], prAuthor: 'dependabot[bot]', want: 0 },
+    { branch: securityBranches[0], prAuthor: 'pacocartones', want: 0 },
+    { branch: securityBranches[0], prAuthor: 'LeonMAG', want: 0 },
+    { branch: 'codex-security/fix-network', prAuthor: 'dependabot[bot]', want: 1 },
+    { branch: 'web/hero', prAuthor: 'dependabot[bot]', want: 1 },
+    { branch: 'dependabot-lookalike/update', prAuthor: 'dependabot[bot]', want: 1 },
+  ];
+  for (const { branch, prAuthor, want } of cases) {
+    const pr = { ...securityPr, branch, prAuthor, actor: 'dependabot[bot]' };
+    assert.equal(run(pr), want, `${prAuthor}: ${branch}`);
+    assert.equal(run({ ...pr, headRepo: 'someone/free-llm-api-hub' }), 0, `fork: ${branch}`);
+  }
+});
