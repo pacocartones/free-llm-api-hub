@@ -697,6 +697,8 @@ const BLURB = {
   'always-free': '$0 models, no trial clock',
   'multimodal': 'vision, audio, embeddings',
   'no-training': 'says it does not train on your prompts (some only without opt-in)',
+  'renewing-free-tier': 'free quotas or credits that reset',
+  'free-signup-credit': 'one-time signup credits, not renewing allowances',
 };
 const collectionsIndexMd = COLLECTIONS.map((c) => {
   const n = collRows(c).length;
