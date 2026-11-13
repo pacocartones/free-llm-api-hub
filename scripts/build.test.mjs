@@ -529,6 +529,22 @@ test('no tracked file carries a personal mailbox address', () => {
   assert.deepEqual(hits, [], 'files that contain a personal mailbox address (names only; the address is never printed)');
 });
 
+test('every README collection has a generated description', () => {
+  run(['scripts/build.mjs']);
+  const readme = readFileSync(join(ROOT, 'README.md'), 'utf8');
+  const rows = readme.split('\n').filter((line) => /^- \*\*\[.+\]\(collections\//.test(line));
+  const collections = readdirSync(join(ROOT, 'collections')).filter((file) => file.endsWith('.md') && file !== 'README.md');
+  assert.equal(rows.length, collections.length);
+  for (const row of rows) {
+    const description = row.match(/ — (.*?) · \[live page/);
+    assert.ok(description?.[1].trim(), `missing description: ${row}`);
+    assert.doesNotMatch(description[1], /^(undefined|null)$/, row);
+  }
+  for (const slug of ['renewing-free-tier', 'free-signup-credit']) {
+    assert.ok(rows.some((row) => row.includes(`(collections/${slug}.md)`)), `${slug} is listed`);
+  }
+});
+
 test('the README Contributors section lists every contributor in data/contributors.json', () => {
   const readme = readFileSync(join(ROOT, 'README.md'), 'utf8');
   const people = JSON.parse(readFileSync(join(ROOT, 'data/contributors.json'), 'utf8')).contributors || [];
