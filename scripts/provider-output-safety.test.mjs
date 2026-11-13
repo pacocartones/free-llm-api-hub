@@ -12,8 +12,9 @@ const rejects = (fn) => assert.throws(fn, (error) =>
 
 test('configured credentials include every provider key present in the environment', () => {
   const providers = [{ env_key: 'FIRST_KEY' }, { env_key: 'SECOND_KEY' }, { env_key: 'ABSENT_KEY' }];
-  assert.deepEqual(configuredCredentials(providers, { FIRST_KEY: 'first-secret', SECOND_KEY: 'second-secret' }),
-    ['first-secret', 'second-secret']);
+  assert.deepEqual(configuredCredentials(providers, { FIRST_KEY: 'first-secret-value', SECOND_KEY: 'second-secret-value' }),
+    ['first-secret-value', 'second-secret-value']);
+  rejects(() => configuredCredentials(providers, { FIRST_KEY: 'too-short' }));
 });
 
 test('ordinary model IDs retain their existing syntax and order', () => {

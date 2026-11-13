@@ -1,7 +1,9 @@
 // Provider responses are untrusted even when the request went to a pinned host:
 // a compromised endpoint can reflect its Authorization value into model IDs or
 // headers that maintenance scripts publish. Keep the publication boundary here
-// so every credential-bearing caller applies the same rules.
+// so every credential-bearing caller applies the same rules. These checks cover
+// configured values and explicit encodings; they do not claim to recognize every
+// reversible transformation of attacker-controlled metadata.
 
 const MODEL_ID_RE = /^(?=.{1,200}$)[A-Za-z0-9@][A-Za-z0-9._+:/@-]*$/;
 const RATE_LIMIT_RE = /^(?=.{1,128}$)(?=.*\d)[A-Za-z0-9-][A-Za-z0-9 .,:/+_=-]*$/;
@@ -26,9 +28,11 @@ export class UnsafeProviderOutputError extends Error {
 }
 
 export function configuredCredentials(providers, env = process.env) {
-  return [...new Set(providers
+  const credentials = [...new Set(providers
     .map((p) => p.env_key && env[p.env_key])
     .filter((value) => typeof value === 'string' && value.length > 0))];
+  if (credentials.some((credential) => compact(credential).length < COMPACT_SECRET_MIN)) unsafe();
+  return credentials;
 }
 
 function encodings(secret) {

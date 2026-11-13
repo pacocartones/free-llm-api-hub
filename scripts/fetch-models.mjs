@@ -24,6 +24,8 @@ const FILE = new URL('../data/providers.json', import.meta.url);
 const SAMPLE = 8; // cap: models_free is a *sample*, not the full catalog
 const TIMEOUT = 20000;
 
+class ProviderFetchError extends Error {}
+
 // --- extractors: each returns a de-duped, sorted sample of real model IDs -----
 
 // Deterministic, publisher-diverse sample: round-robin across the vendor
@@ -48,9 +50,19 @@ async function getJson(url, headers) {
   const ctrl = new AbortController();
   const t = setTimeout(() => ctrl.abort(), TIMEOUT);
   try {
-    const res = await fetch(url, { headers, signal: ctrl.signal });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return await res.json();
+    try {
+      const res = await fetch(url, { headers, signal: ctrl.signal });
+      if (!res.ok) throw new ProviderFetchError(`HTTP ${res.status}`);
+      try {
+        return await res.json();
+      } catch {
+        throw new ProviderFetchError('invalid JSON');
+      }
+    } catch (error) {
+      if (error instanceof ProviderFetchError) throw error;
+      if (error && error.name === 'AbortError') throw new ProviderFetchError('request timed out');
+      throw new ProviderFetchError('request failed');
+    }
   } finally {
     clearTimeout(t);
   }
@@ -135,9 +147,17 @@ function selfTest() {
   // unnoticed until the provider's sample is stale (the ollama-cloud case).
   const { providers } = JSON.parse(readFileSync(FILE, 'utf8'));
   const slugs = new Set(providers.map((p) => p.slug));
+  const bySlug = Object.fromEntries(providers.map((p) => [p.slug, p]));
   const orphaned = [...Object.keys(PUBLIC), ...Object.keys(KEYED)].filter((s) => !slugs.has(s));
   if (orphaned.length) {
     console.error('✗ extractor slug(s) not in data/providers.json: ' + orphaned.join(', ') + ' — remove the extractor or restore the provider.');
+    process.exit(1);
+  }
+  const keyDrift = Object.entries(KEYED)
+    .filter(([slug, envVar]) => bySlug[slug].env_key !== envVar)
+    .map(([slug, envVar]) => `${slug}: extractor ${envVar}, dataset ${bySlug[slug].env_key || '(missing)'}`);
+  if (keyDrift.length) {
+    console.error('✗ keyed extractor env mismatch:\n  ' + keyDrift.join('\n  '));
     process.exit(1);
   }
   const registered = Object.keys(PUBLIC).sort();
@@ -162,6 +182,10 @@ async function main() {
   const write = args.includes('--write');
   const data = JSON.parse(readFileSync(FILE, 'utf8'));
   const credentials = configuredCredentials(data.providers);
+  const logCredentialFree = (message) => {
+    assertCredentialFree(message, credentials);
+    console.log(message);
+  };
   const bySlug = Object.fromEntries(data.providers.map((p) => [p.slug, p]));
 
   const jobs = [];
@@ -191,23 +215,24 @@ async function main() {
   let changed = 0;
   for (const { slug, run } of jobs) {
     try {
-      const ids = sample(safeModelIds(await run(), credentials));
+      const ids = safeModelIds(sample(safeModelIds(await run(), credentials)), credentials);
       if (!ids.length) {
-        console.log(`- ${slug}: endpoint returned no usable IDs, left unchanged`);
+        logCredentialFree(`- ${slug}: endpoint returned no usable IDs, left unchanged`);
         continue;
       }
       const prev = bySlug[slug].models_free;
       const same = Array.isArray(prev) && prev.length === ids.length && prev.every((v, i) => v === ids[i]);
       bySlug[slug].models_free = ids;
       if (same) {
-        console.log(`= ${slug}: ${ids.length} models (unchanged)`);
+        logCredentialFree(`= ${slug}: ${ids.length} models (unchanged)`);
       } else {
-        console.log(`✓ ${slug}: ${ids.length} models — ${ids.join(', ')}`);
+        logCredentialFree(`✓ ${slug}: ${ids.length} models — ${ids.join(', ')}`);
         changed++;
       }
     } catch (e) {
       if (e instanceof UnsafeProviderOutputError) throw e;
-      console.log(`✗ ${slug}: fetch failed (${e.message}), left unchanged`);
+      const reason = e instanceof ProviderFetchError ? e.message : 'invalid response';
+      logCredentialFree(`✗ ${slug}: fetch failed (${reason}), left unchanged`);
     }
   }
 
@@ -216,11 +241,11 @@ async function main() {
     const out = serialize(data);
     assertCredentialFree(out, credentials);
     writeFileSync(FILE, out);
-    console.log(`\n→ wrote data/providers.json (${changed} provider(s) updated). Now run: npm run build`);
+    logCredentialFree(`\n→ wrote data/providers.json (${changed} provider(s) updated). Now run: npm run build`);
   } else if (changed) {
-    console.log(`\n${changed} provider(s) would change. Re-run with --write to apply.`);
+    logCredentialFree(`\n${changed} provider(s) would change. Re-run with --write to apply.`);
   } else {
-    console.log('\nNo changes.');
+    logCredentialFree('\nNo changes.');
   }
 }
 

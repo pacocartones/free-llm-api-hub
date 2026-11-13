@@ -15,10 +15,11 @@
 // domain), a .env, or a CI secret. A provider is probed ONLY if its key is
 // present in the environment — so running with no keys is a safe no-op.
 //
-// SAFETY: keys are used only in Authorization headers. They are never logged,
-// never written to the dataset or the report, never committed. Footprint is one
-// /models call + one 1-token inference per provider (skip the latter with
-// --auth-only).
+// SAFETY: the script never deliberately logs or writes key values. Provider
+// metadata is constrained and checked against configured credentials before
+// output, but it remains untrusted and the resulting logs/diff require review.
+// Footprint is one /models call + one 1-token inference per provider (skip the
+// latter with --auth-only).
 
 import { readFileSync, writeFileSync } from 'node:fs';
 import assert from 'node:assert/strict';
@@ -159,6 +160,10 @@ async function main() {
 
   const data = JSON.parse(readFileSync(FILE, 'utf8'));
   const credentials = configuredCredentials(data.providers);
+  const logCredentialFree = (message) => {
+    assertCredentialFree(message, credentials);
+    console.log(message);
+  };
   const targets = data.providers.filter((p) => p.env_key && (!ONLY.length || ONLY.includes(p.slug)));
   const results = [];
   let changed = 0, noKey = 0, noAdapter = 0;
@@ -183,7 +188,8 @@ async function main() {
       changed++;
     }
     const rl = Object.keys(r.rate_limit).length ? ` rl:${Object.entries(r.rate_limit).map(([k, v]) => k.replace('x-ratelimit-', '') + '=' + v).join(',')}` : '';
-    console.log(`${r.status === 'live' ? '✓' : '·'} ${p.slug.padEnd(22)} ${String(r.status).padEnd(13)} http=${r.http} ${r.latency_ms}ms models=${r.models.length}${r.tps ? ` ${r.tps}tok/s` : ''}${rl}`);
+    const message = `${r.status === 'live' ? '✓' : '·'} ${p.slug.padEnd(22)} ${String(r.status).padEnd(13)} http=${r.http} ${r.latency_ms}ms models=${r.models.length}${r.tps ? ` ${r.tps}tok/s` : ''}${rl}`;
+    logCredentialFree(message);
   }
 
   const report = { probed_at: TODAY, auth_only: AUTH_ONLY, count: results.length, results };
@@ -194,9 +200,9 @@ async function main() {
     try { JSON.parse(out); } catch (e) { console.error('✗ refusing to write, invalid JSON:', e.message); process.exit(1); }
     writeFileSync(FILE, out);
     writeFileSync(REPORT, JSON.stringify(report, null, 2) + '\n');
-    console.log(`\n→ wrote ${changed} probe result(s) to the dataset + data/probe-report.json. Now: npm run build`);
+    logCredentialFree(`\n→ wrote ${changed} probe result(s) to the dataset + data/probe-report.json. Now: npm run build`);
   } else {
-    console.log(`\n${results.filter((r) => r.status === 'live').length} live · ${noKey} no-key · ${noAdapter} no-adapter (of ${results.length}). Re-run with --write to persist.`);
+    logCredentialFree(`\n${results.filter((r) => r.status === 'live').length} live · ${noKey} no-key · ${noAdapter} no-adapter (of ${results.length}). Re-run with --write to persist.`);
   }
 }
 
