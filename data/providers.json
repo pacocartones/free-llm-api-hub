@@ -1,7 +1,7 @@
 {
   "$schema": "./schema.json",
   "version": "2.11.0",
-  "generated": "2026-10-18",
+  "generated": "2026-11-13",
   "source": "https://github.com/pacocartones/free-llm-api-hub",
   "note": "Canonical dataset. README tables, badge-freshness.json and the interactive site are all generated from this file — do not hand-edit them. `verified: true` means the core facts (tier, limits, key catch, link) were independently confirmed against the provider's own docs on `last_verified`. `verified: false` means sourced from community tracking and not yet independently re-confirmed here — treat those as indicative. Attribute fields (openai_compatible, modalities, best_for) are progressively backfilled and may be null.",
   "providers": [
@@ -715,7 +715,7 @@
       "free_type": "trial-credit",
       "free_tier": "One-time $5 credit across serverless models (GPT-OSS-120B, Claude, Llama), vision, embeddings and image generation",
       "rate_limits": "15 requests/second global default (CONN_THROTTLED on exceed)",
-      "notes": "Could not be re-verified on 2026-10-08: docs.clarifai.com no longer resolves and www.clarifai.com does not respond. Nebius has announced that Clarifai's core team joined Nebius and that it licensed Clarifai's inference technology. Treat this entry as likely discontinued. Previously recorded: SMS phone verification to claim a one-time $5 credit that expired 30 days after grant.",
+      "notes": "Could not be re-verified on 2026-11-13: docs.clarifai.com did not resolve and clarifai.com timed out. An indexed copy of Clarifai's billing page describes a one-time $5 welcome credit after phone verification that expires after 30 days; current signup and API availability remain unconfirmed. Nebius announced that Clarifai's core team joined it and licensed inference technology; that does not establish whether Clarifai's service has ended.",
       "best_for": "Multimodal (LLM + vision) models on a $5 credit",
       "modalities": ["text", "vision", "embeddings", "image"],
       "models_free": null,
