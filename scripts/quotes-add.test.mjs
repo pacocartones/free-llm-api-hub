@@ -67,6 +67,27 @@ test('readText: refuses a page in another language, a page with no text and an e
   assert.match((await readText('https://x.example', res(403, 'no'))).why, /HTTP 403/);
   assert.match((await readText('https://x.example', async () => { throw new Error('ECONNRESET'); })).why, /ECONNRESET/);
 });
+test('readText: a bounded-body or encoding failure remains a per-page read error', async () => {
+  const result = await readText('https://x.example', async () => ({
+    ok: true,
+    status: 200,
+    headers: new Headers(),
+    text: async () => { throw new Error('response exceeds 2097152-byte limit'); },
+  }));
+  assert.deepEqual(result, {
+    ok: false,
+    why: 'could not read https://x.example: response exceeds 2097152-byte limit',
+  });
+});
+test('readText: an HTTP failure cancels its still-open response body', async () => {
+  let cancelled = false;
+  const response = new Response(new ReadableStream({
+    cancel() { cancelled = true; },
+  }), { status: 403 });
+  const result = await readText('https://x.example', async () => response);
+  assert.deepEqual(result, { ok: false, why: 'https://x.example answered HTTP 403' });
+  assert.equal(cancelled, true);
+});
 
 // the whole path of the command, with the page stubbed: read, make, merge, check
 test('the whole path: entries made from a page, merged into the register, pass the consistency check; a row nobody wrote entries for does not', async () => {
