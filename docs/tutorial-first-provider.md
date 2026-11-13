@@ -113,7 +113,7 @@ If your `last_verified` is newer than it, the validator refuses — because the 
 `data_policy` records what the provider itself says about your prompts on this free access: whether it trains on them and how long it keeps them. Add it to your entry as one more field, on one line, like the rest of the object:
 
 ```json
-"data_policy": {"trains_on_prompts": false, "retention": null, "source": "https://www.ai21.com/terms-policies/privacy-policy/", "checked": "2026-10-15", "quote": "Consistent with our Terms of Service, and unless otherwise agreed in writing or required to provide the Services, we do not use your inputs or outputs to train AI21’s foundational or generally available AI models.", "plan_named": false}
+"data_policy": {"trains_on_prompts":false,"retention":null,"source":"https://www.ai21.com/terms-policies/privacy-policy/","checked":"2026-10-15","quote":"Consistent with our Terms of Service, and unless otherwise agreed in writing or required to provide the Services, we do not use your inputs or outputs to train AI21’s foundational or generally available AI models.","plan_named":false}
 ```
 
 A few rules trip people up:
