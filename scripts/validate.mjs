@@ -109,6 +109,10 @@ for (const p of data.providers ?? []) {
   seenNames.add(p.name);
 
   check(typeof p.name === 'string' && p.name.length > 0, `${id}: name required`);
+  for (const field of ['name', 'docs_url', 'openai_base_url']) {
+    const value = p[field];
+    check(value == null || typeof value !== 'string' || !hasHiddenChars(value), `${id}: ${field} must not contain control, bidirectional or zero-width characters`);
+  }
   check(CATEGORIES.includes(p.category), `${id}: category must be one of ${CATEGORIES.join('/')}`);
   check(FREE_TYPES.includes(p.free_type), `${id}: free_type must be one of ${FREE_TYPES.join('/')}`);
   check(typeof p.free_tier === 'string' && p.free_tier.length > 0, `${id}: free_tier required`);
