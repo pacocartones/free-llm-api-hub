@@ -15,23 +15,23 @@ npm ci --ignore-scripts
 
 ## Layer 1 — the re-verification batch (local script)
 
-[`scripts/reverify.mjs`](../scripts/reverify.mjs) (`npm run reverify`) picks the oldest verifications (sized to clear the SLA), fetches each provider's own `docs_url`, and writes a review dossier per provider to `.freebuff/reverify/<slug>.md` (gitignored — local only):
+[`scripts/reverify.mjs`](../scripts/reverify.mjs) (`npm run reverify`) picks the oldest verifications (sized to clear the SLA). Its default mode prints the worklist without fetching remote content. A human can explicitly fetch each provider's `docs_url` into `.freebuff/reverify-human-only/<slug>.md` (gitignored — local only):
 
 ```bash
-npm run reverify              # this week's batch (oldest first)
-npm run reverify -- --batch 12     # override the batch size
-npm run reverify -- --no-fetch     # offline: just print the batch
+npm run reverify                                  # safe worklist; no remote fetch
+npm run reverify -- --batch 12                    # override the worklist size
+npm run reverify -- --fetch-for-human-review      # human reviewer only: fetch dossiers
 ```
 
-The script never edits the data: an agent (or a human) reads each dossier, compares the fetched docs against `data/providers.json`, and drafts the edit. Fetch failures, SPAs and non-text bodies are flagged in the dossier — those are reviewed manually.
+The script never edits the data. Dossiers contain provider-controlled prose and are strictly human-review material: never paste them into an LLM context or let a tool-capable agent read them. A human compares the fetched docs against `data/providers.json` and drafts the edit. Fetch failures, SPAs and non-text bodies are flagged in the dossier for that human review.
 
 ### Paced re-verification batches
 
 Start each weekly pass with `npm run worklist`. It prints this week's oldest verified providers — a batch sized by `scripts/lib/pacing.mjs` (at most 11 a week), so the 90-day freshness SLA is spread across small, regular batches instead of becoming a large end-of-quarter cleanup. If the worklist flags a cliff of entries that share a verification date, take the larger batch it recommends.
 
-Run `npm run reverify` for the normal weekly batch, or pass the worklist size explicitly (for example, `npm run reverify -- --batch 12`) when clearing a larger one. The script fetches each provider's primary `docs_url` and saves a local review dossier at `.freebuff/reverify/<slug>.md`; it does not change `data/providers.json` itself.
+Run `npm run reverify` for the normal weekly worklist, or pass the worklist size explicitly (for example, `npm run reverify -- --batch 12`) when clearing a larger one. A human reviewer then adds `--fetch-for-human-review` to fetch each provider's primary `docs_url` into `.freebuff/reverify-human-only/<slug>.md`; the script does not change `data/providers.json` itself.
 
-Keep one batch in one focused PR. Review the dossiers, update the affected entries in `data/providers.json`, then run:
+Keep one batch in one focused PR. A human reviews the dossiers and updates the affected entries in `data/providers.json`. Only after that trusted edit exists may local automation run:
 
 ```bash
 npm run build && npm run og && npm test
@@ -41,7 +41,7 @@ Commit the data change and generated files together, and open one PR for that ba
 
 ## Layer 2 — the weekly pass
 
-For each provider on the worklist (`npm run worklist`, or just the reverify batch):
+For each provider on the worklist (`npm run worklist`, or just the reverify batch), a human performs steps 1–3:
 
 1. **Open the provider's own docs** (the `docs` link in the item). Third-party summaries don't count.
 2. **Compare against `data/providers.json`:** free tier, rate limits, credit amount/expiry, and the catches (`card_required`, `phone_required`, `commercial_ok`, `openai_compatible`); re-read `trains_on_prompts`, `retention`, and [`data_policy`](../data/schema.json), including its `source` and `checked` date, on the provider's own page, the one the row's `source` points to (usually its terms of service or privacy policy).
@@ -81,9 +81,11 @@ npm run probe -- --write --auth-only
 
 See [live-testing.md](live-testing.md) for setup.
 
-## Layer 3 — agentic acceleration
+## Layer 3 — capability boundary
 
-The weekly pass is designed to be driven by an agent (e.g. a scheduled Claude Code / Freebuff session): run `npm run reverify`, read the dossiers in `.freebuff/reverify/`, verify the claims against the fetched docs, draft the `data/providers.json` edit, run `npm run build && npm test`, and open the PR for a human to merge. The reverify script is the agent's entry point; everything it needs lands in the local dossiers.
+Remote documentation and trusted repository actions are separate phases. Provider pages and the dossiers derived from them are untrusted input. Only a human reviewer may fetch and read a dossier, decide which claims it supports, and make the corresponding `data/providers.json` edit.
+
+After that human-authored edit exists, an agent may perform repository-local mechanical work such as regeneration and validation, but its context must exclude `.freebuff/reverify-human-only/` and provider pages. It must not fetch or follow links while handling the batch. If automated document extraction is introduced later, it must run in a separate secretless, read-only sandbox with no shell, repository, GitHub, or general network tools; its narrow structured result must go to a human reviewer, never directly to the tool-capable action stage.
 
 ## Layer 4 — public security-data stewardship
 
