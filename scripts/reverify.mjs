@@ -18,6 +18,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { SLA_DAYS, ageInDays } from './lib/rules.mjs';
 import { weeklyPacing, weeklyBatch } from './lib/pacing.mjs';
+import { fetchPublicUrl } from './lib/public-fetch.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const OUT = join(ROOT, '.freebuff', 'reverify');
@@ -58,19 +59,16 @@ const stripHtml = (html) => {
 
 const fetchDocs = async (p) => {
   try {
-    const ctrl = new AbortController();
-    const t = setTimeout(() => ctrl.abort(), 20000);
-    const res = await fetch(p.docs_url, {
-      signal: ctrl.signal,
+    const res = await fetchPublicUrl(p.docs_url, {
+      signal: AbortSignal.timeout(20000),
       headers: { 'user-agent': 'Mozilla/5.0 (compatible; free-llm-api-hub-reverify/1.0)' },
     });
-    clearTimeout(t);
     const ct = res.headers.get('content-type') || '';
     if (!res.ok) return { status: `HTTP ${res.status}`, text: '' };
     const body = await res.text();
     return { status: String(res.status), text: /html|text|markdown/.test(ct) ? stripHtml(body) : '(non-text body — review manually)' };
   } catch (e) {
-    return { status: `fetch error: ${e.name === 'AbortError' ? 'timeout' : e.message}`, text: '' };
+    return { status: `fetch error: ${e.name === 'AbortError' || e.name === 'TimeoutError' ? 'timeout' : e.message}`, text: '' };
   }
 };
 
