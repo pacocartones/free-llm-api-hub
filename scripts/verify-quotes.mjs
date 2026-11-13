@@ -14,6 +14,7 @@ import { dirname, join } from 'node:path';
 import { quoteErrors } from './lib/quotes.mjs';
 import { READ_HEADERS } from './lib/page-text.mjs';
 import { verifyEntries, buildReport, reportErrors } from './lib/quotes-report.mjs';
+import { fetchPublicUrl } from './lib/public-fetch.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const args = process.argv.slice(2);
@@ -30,7 +31,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 async function readPage(url) {
   await sleep(700); // one request at a time, and not in a hurry
   try {
-    const res = await fetch(url, { headers: READ_HEADERS, redirect: 'follow', signal: AbortSignal.timeout(30000) });
+    const res = await fetchPublicUrl(url, { headers: READ_HEADERS, timeoutMs: 30000 });
     return { status: res.status, html: await res.text(), contentLanguage: res.headers.get('content-language') || '' };
   } catch (e) { return { error: String((e && e.message) || e).slice(0, 80) }; }
 }

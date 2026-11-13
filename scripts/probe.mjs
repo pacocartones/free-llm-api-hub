@@ -15,15 +15,20 @@
 // domain), a .env, or a CI secret. A provider is probed ONLY if its key is
 // present in the environment — so running with no keys is a safe no-op.
 //
-// SAFETY: keys are used only in Authorization headers. They are never logged,
-// never written to the dataset or the report, never committed. Footprint is one
-// /models call + one 1-token inference per provider (skip the latter with
-// --auth-only).
+// SAFETY: the script never deliberately logs or writes key values. Provider
+// metadata is constrained and checked against configured credentials before
+// output, but it remains untrusted and the resulting logs/diff require review.
+// Footprint is one /models call + one 1-token inference per provider (skip the
+// latter with --auth-only).
 
 import { readFileSync, writeFileSync } from 'node:fs';
 import assert from 'node:assert/strict';
 import { serialize, roundTripError } from './_serialize.mjs';
 import { keyHostError } from './lib/key-hosts.mjs';
+import {
+  assertCredentialFree, configuredCredentials, RATE_LIMIT_HEADERS,
+  safeModelIds, safeRateLimits,
+} from './lib/provider-output-safety.mjs';
 
 const FILE = new URL('../data/providers.json', import.meta.url);
 const REPORT = new URL('../data/probe-report.json', import.meta.url);
@@ -68,16 +73,11 @@ async function req(url, opts = {}) {
   }
 }
 
-const RL_HEADERS = [
-  'x-ratelimit-limit-requests', 'x-ratelimit-remaining-requests',
-  'x-ratelimit-limit-tokens', 'x-ratelimit-remaining-tokens',
-  'x-ratelimit-reset-requests', 'retry-after',
-];
-const pickRateLimit = (headers) => {
+const pickRateLimit = (headers, credentials) => {
   const o = {};
   if (!headers) return o;
-  for (const h of RL_HEADERS) { const v = headers.get(h); if (v != null) o[h] = v; }
-  return o;
+  for (const h of RATE_LIMIT_HEADERS) { const v = headers.get(h); if (v != null) o[h] = v; }
+  return safeRateLimits(o, credentials);
 };
 
 // Map an HTTP outcome to a probe_status. 402/insufficient-balance ⇒ the free
@@ -99,18 +99,21 @@ function classifyAuthOnly(status, json) {
   return status === 200 ? 'auth-ok' : classify(status, json);
 }
 
-async function probeOpenAI(p, key) {
+async function probeOpenAI(p, key, credentials) {
   const base = p.openai_base_url.replace(/\/$/, '');
   const auth = { Authorization: `Bearer ${key}` };
   const m = await req(`${base}/models`, { headers: auth });
   const authOk = m.status !== 401 && m.status !== 403;
-  const models = (m.json && Array.isArray(m.json.data) ? m.json.data.map((x) => x.id) : []).filter(Boolean);
+  const modelIds = m.json && Array.isArray(m.json.data) ? m.json.data.map((x) => x && x.id).filter(Boolean) : [];
+  const models = safeModelIds(modelIds, credentials);
 
   if (AUTH_ONLY) {
+    const rateLimit = pickRateLimit(m.headers, credentials);
+    assertCredentialFree([...models, ...Object.values(rateLimit)].join(''), credentials);
     return {
       authOk, models, model: null,
       status: authOk ? classifyAuthOnly(m.status, m.json) : 'auth-failed',
-      latency_ms: m.ms, tps: null, http: m.status, rate_limit: pickRateLimit(m.headers), inference: false,
+      latency_ms: m.ms, tps: null, http: m.status, rate_limit: rateLimit, inference: false,
     };
   }
 
@@ -133,7 +136,9 @@ async function probeOpenAI(p, key) {
   const ct = inf.json && inf.json.usage && inf.json.usage.completion_tokens;
   if (status === 'live' && ct && inf.ms) tps = +(ct / (inf.ms / 1000)).toFixed(1);
 
-  return { authOk, models, model, status, latency_ms: inf.ms, tps, http: inf.status, rate_limit: pickRateLimit(inf.headers), inference: true };
+  const rateLimit = pickRateLimit(inf.headers, credentials);
+  assertCredentialFree([...models, ...Object.values(rateLimit)].join(''), credentials);
+  return { authOk, models, model, status, latency_ms: inf.ms, tps, http: inf.status, rate_limit: rateLimit, inference: true };
 }
 
 async function main() {
@@ -154,6 +159,11 @@ async function main() {
   }
 
   const data = JSON.parse(readFileSync(FILE, 'utf8'));
+  const credentials = configuredCredentials(data.providers);
+  const logCredentialFree = (message) => {
+    assertCredentialFree(message, credentials);
+    console.log(message);
+  };
   const targets = data.providers.filter((p) => p.env_key && (!ONLY.length || ONLY.includes(p.slug)));
   const results = [];
   let changed = 0, noKey = 0, noAdapter = 0;
@@ -165,7 +175,7 @@ async function main() {
     const hostError = keyHostError(p);
     if (hostError) { results.push({ slug: p.slug, env_key: p.env_key, key_present: true, status: 'host-not-pinned' }); console.log(`· ${p.slug.padEnd(22)} host-not-pinned (${hostError})`); continue; }
 
-    const r = await probeOpenAI(p, key);
+    const r = await probeOpenAI(p, key, credentials);
     results.push({
       slug: p.slug, env_key: p.env_key, key_present: true, http: r.http, status: r.status,
       auth_ok: r.authOk, models: r.models.length, model_used: r.model,
@@ -178,18 +188,21 @@ async function main() {
       changed++;
     }
     const rl = Object.keys(r.rate_limit).length ? ` rl:${Object.entries(r.rate_limit).map(([k, v]) => k.replace('x-ratelimit-', '') + '=' + v).join(',')}` : '';
-    console.log(`${r.status === 'live' ? '✓' : '·'} ${p.slug.padEnd(22)} ${String(r.status).padEnd(13)} http=${r.http} ${r.latency_ms}ms models=${r.models.length}${r.tps ? ` ${r.tps}tok/s` : ''}${rl}`);
+    const message = `${r.status === 'live' ? '✓' : '·'} ${p.slug.padEnd(22)} ${String(r.status).padEnd(13)} http=${r.http} ${r.latency_ms}ms models=${r.models.length}${r.tps ? ` ${r.tps}tok/s` : ''}${rl}`;
+    logCredentialFree(message);
   }
 
   const report = { probed_at: TODAY, auth_only: AUTH_ONLY, count: results.length, results };
   if (WRITE) {
     const out = serialize(data);
+    assertCredentialFree(out, credentials);
+    assertCredentialFree(report, credentials);
     try { JSON.parse(out); } catch (e) { console.error('✗ refusing to write, invalid JSON:', e.message); process.exit(1); }
     writeFileSync(FILE, out);
     writeFileSync(REPORT, JSON.stringify(report, null, 2) + '\n');
-    console.log(`\n→ wrote ${changed} probe result(s) to the dataset + data/probe-report.json. Now: npm run build`);
+    logCredentialFree(`\n→ wrote ${changed} probe result(s) to the dataset + data/probe-report.json. Now: npm run build`);
   } else {
-    console.log(`\n${results.filter((r) => r.status === 'live').length} live · ${noKey} no-key · ${noAdapter} no-adapter (of ${results.length}). Re-run with --write to persist.`);
+    logCredentialFree(`\n${results.filter((r) => r.status === 'live').length} live · ${noKey} no-key · ${noAdapter} no-adapter (of ${results.length}). Re-run with --write to persist.`);
   }
 }
 
