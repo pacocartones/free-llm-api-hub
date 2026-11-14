@@ -116,6 +116,9 @@ for (const p of data.providers ?? []) {
   seenNames.add(p.name);
 
   check(typeof p.name === 'string' && p.name.length > 0, `${id}: name required`);
+  if ('playground_url' in p) {
+    check(typeof p.docs_url === 'string' && p.docs_url.trim().length > 0, `${id}: playground_url requires a non-empty docs_url`);
+  }
   for (const field of ['name', 'docs_url', 'openai_base_url']) {
     const value = p[field];
     check(value == null || typeof value !== 'string' || !hasHiddenChars(value), `${id}: ${field} must not contain control, bidirectional or zero-width characters`);

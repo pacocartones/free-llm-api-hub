@@ -59,6 +59,15 @@ test('serializer round-trips data/providers.json byte-exactly', () => {
   assert.equal(roundTripError(readFileSync(DATA, 'utf8')), null);
 });
 
+test('playground_url survives canonical serialization', () => {
+  const data = JSON.parse(readFileSync(DATA, 'utf8'));
+  data.providers[0].playground_url = 'https://example.com/playground?model=a&mode=b';
+  delete data.providers[1].playground_url;
+  const saved = JSON.parse(serialize(data));
+  assert.equal(saved.providers[0].playground_url, 'https://example.com/playground?model=a&mode=b');
+  assert.equal(Object.hasOwn(saved.providers[1], 'playground_url'), false);
+});
+
 test('serializer ORDER matches the JSON Schema provider properties', () => {
   const schema = JSON.parse(readFileSync(join(ROOT, 'data/schema.json'), 'utf8'));
   const providerKeys = Object.keys(schema.$defs.provider.properties);
@@ -68,6 +77,44 @@ test('serializer ORDER matches the JSON Schema provider properties', () => {
     providerKeys.sort(),
     'serializer ORDER and provider schema properties must stay in sync',
   );
+});
+
+test('provider playground action is conditional and preserved in public JSON', () => {
+  const raw = readFileSync(DATA, 'utf8');
+  const data = JSON.parse(raw);
+  const [first, second] = data.providers;
+  first.playground_url = 'https://example.com/playground?model=a&mode=b';
+  delete second.playground_url;
+  try {
+    writeFileSync(DATA, serialize(data));
+    run(['scripts/build.mjs']);
+    const present = readFileSync(join(ROOT, 'site/p', `${first.slug}.html`), 'utf8');
+    assert.equal((present.match(/>Try it ↗/g) || []).length, 1);
+    assert.ok(present.includes('<a class="btn" href="https://example.com/playground?model=a&amp;mode=b" target="_blank" rel="noopener">Try it ↗<span class="sr-only"> (opens in a new tab)</span></a>'));
+    assert.ok(present.includes(`href="${htmlEsc(first.docs_url)}" target="_blank" rel="noopener">Official docs ↗`));
+    assert.match(present, /class="btn website"[^>]*>Visit website ↗/);
+    const absent = readFileSync(join(ROOT, 'site/p', `${second.slug}.html`), 'utf8');
+    assert.doesNotMatch(absent, />Try it ↗/);
+
+    for (const file of ['site/providers.json', 'site/api/v1/providers.json']) {
+      const published = JSON.parse(readFileSync(join(ROOT, file), 'utf8'));
+      assert.equal(published.providers.find((p) => p.slug === first.slug).playground_url, 'https://example.com/playground?model=a&mode=b');
+      assert.equal(Object.hasOwn(published.providers.find((p) => p.slug === second.slug), 'playground_url'), false);
+    }
+    const schema = JSON.parse(readFileSync(join(ROOT, 'site/api/v1/schema.json'), 'utf8'));
+    const field = schema.$defs.provider.properties.playground_url;
+    assert.equal(field.type, 'string');
+    assert.equal(field.format, 'uri');
+    assert.equal(field.pattern, '^https://');
+    const ajv = new Ajv2020({ allErrors: true, strict: true, strictTypes: false });
+    addFormats(ajv, ['date', 'uri']);
+    const validate = ajv.compile(schema);
+    const payload = JSON.parse(readFileSync(join(ROOT, 'site/api/v1/providers.json'), 'utf8'));
+    assert.equal(validate(payload), true, JSON.stringify(validate.errors));
+  } finally {
+    writeFileSync(DATA, raw);
+    run(['scripts/build.mjs']);
+  }
 });
 
 test('validate passes on the real dataset', () => {
