@@ -861,12 +861,12 @@
       "name": "Pinecone Inference",
       "category": "ongoing",
       "free_type": "renewing-quota",
-      "free_tier": "Starter (free) plan: 5M embedding tokens/month per model (llama-text-embed-v2, multilingual-e5-large, pinecone-sparse-english-v0) and 500 rerank requests/month (bge-reranker-v2-m3; the rate-limits doc also lists pinecone-rerank-v0 at 500)",
+      "free_tier": "Starter base allowance: 5M embedding tokens/month per model (llama-text-embed-v2, multilingual-e5-large, pinecone-sparse-english-v0) and 500 rerank requests/month for bge-reranker-v2-m3; temporary promotions excluded",
       "rate_limits": "Starter: 5M embedding tokens/mo per model; 250K embedding tokens/min per model (passage); 500 rerank requests/mo and 60 rerank requests/min per model; 100 inference requests/s and 2,000/min per project",
-      "notes": "Monthly limits are hard: reaching one returns 429 and you must upgrade (no pay-as-you-go overage on Starter). The pricing page lists only bge-reranker-v2-m3 as included on Starter while the rate-limits doc also lists pinecone-rerank-v0 at 500 — an internal inconsistency. Not OpenAI-compatible. Card requirement for Starter not stated on the pricing page or docs. No card was required at signup when last confirmed (2026-08); the current pages do not mention it.",
+      "notes": "Base allowances only: the temporary embedding-token increase through 2026-12-31 is excluded. Monthly quotas are hard limits (429 on exhaustion). Pricing includes only bge-reranker-v2-m3 on Starter; the rate-limit docs also list pinecone-rerank-v0, so it is excluded from the sample. Phone and free-tier commercial permission remain unconfirmed. The historical no-card signup observation was not re-tested. Sources: https://www.pinecone.io/pricing/ and https://docs.pinecone.io/reference/api/database-limits/rate-limits (read 2026-11-14).",
       "best_for": "Free embeddings + rerank for RAG (5M tokens/mo per model)",
       "modalities": ["embeddings", "rerank"],
-      "models_free": null,
+      "models_free": ["llama-text-embed-v2", "multilingual-e5-large", "pinecone-sparse-english-v0", "bge-reranker-v2-m3"],
       "expires": null,
       "docs_url": "https://www.pinecone.io/pricing/",
       "phone_required": null,
@@ -877,9 +877,10 @@
       "env_key": "PINECONE_API_KEY",
       "is_text_llm": false,
       "model_tier": null,
-      "free_limits": {"tokens_per_month":5000000,"requests_per_month":500,"scope":"Starter plan: 5M embedding tokens per month for each of llama-text-embed-v2, multilingual-e5-large and pinecone-sparse-english-v0; 500 rerank requests per month for bge-reranker-v2-m3; Starter plan limits as listed on the pricing page, which Pinecone can change","source":"https://www.pinecone.io/pricing/","checked":"2026-10-09"},
+      "free_limits": {"tokens_per_month":5000000,"requests_per_month":500,"scope":"Starter base allowance, excluding temporary promotions: 5M embedding tokens/month for each of llama-text-embed-v2, multilingual-e5-large and pinecone-sparse-english-v0; 500 rerank requests/month for bge-reranker-v2-m3","source":"https://www.pinecone.io/pricing/","checked":"2026-11-14"},
       "verified": true,
-      "last_verified": "2026-10-08"
+      "last_verified": "2026-11-14",
+      "data_policy": {"trains_on_prompts":false,"retention":null,"source":"https://www.pinecone.io/legal/2025.1_Pinecone%20AI%20Services%20Addendum.pdf","checked":"2026-11-14","quote":null,"note":"AI Services Addendum section 5: Customer Data includes Inputs and Outputs. The no-training restriction concerns Models made available to other Pinecone customers; the clause does not name Starter. Retention is not specified by this clause.","plan_named":false}
     },
     {
       "slug": "twelve-labs",
