@@ -26,7 +26,8 @@ jobs:
     permissions:
       contents: read
     outputs:
-      needed: ${{ steps.decide.outputs.needed }}
+      npm_needed: ${{ steps.decide.outputs.npm_needed }}
+      mcp_needed: ${{ steps.decide.outputs.mcp_needed }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -36,17 +37,12 @@ jobs:
         run: git merge-base --is-ancestor "$GITHUB_SHA" origin/main || { echo "::error::tag $GITHUB_REF_NAME points at a commit that is not on main"; exit 1; }
       - id: decide
         working-directory: packages/mcp
-        run: |
-          name=$(node -p "require('./package.json').name")
-          version=$(node -p "require('./package.json').version")
-          [ "mcp-v$version" = "$GITHUB_REF_NAME" ] || { echo "::error::tag $GITHUB_REF_NAME does not match package version $version"; exit 1; }
-          [ "$(node -p "require('./server.json').version")" = "$version" ] || { echo "::error::server.json version differs"; exit 1; }
-          if npm view "$name@$version" version >/dev/null 2>&1; then echo "needed=false" >> "$GITHUB_OUTPUT"; else echo "needed=true" >> "$GITHUB_OUTPUT"; fi
+        run: bash ../../scripts/check-mcp-release.sh
 
   test:
     # Tests run in a job WITHOUT id-token, so installing dependencies can never touch the publishing identity.
     needs: check
-    if: ${{ needs.check.outputs.needed == 'true' }}
+    if: ${{ needs.check.outputs.npm_needed == 'true' || needs.check.outputs.mcp_needed == 'true' }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -67,7 +63,7 @@ jobs:
 
   publish:
     needs: [check, test]
-    if: ${{ needs.check.outputs.needed == 'true' }}
+    if: ${{ needs.check.outputs.npm_needed == 'true' || needs.check.outputs.mcp_needed == 'true' }}
     # Human gate: required reviewer on the environment "release-mcp"; the npm
     # trusted publisher names this workflow file and this environment too.
     environment: release-mcp
@@ -85,7 +81,11 @@ jobs:
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 24 # npm 11, required for trusted publishing (>= 11.5.1)
+      - id: decide
+        name: Refresh registry state before publishing
+        run: bash ../../scripts/check-mcp-release.sh
       - name: Publish with provenance
+        if: ${{ steps.decide.outputs.npm_needed == 'true' }}
         run: npm publish --provenance --access public
       - name: Verify what was published
         run: |
@@ -94,6 +94,7 @@ jobs:
           npm install --ignore-scripts "$(node -p "require('$GITHUB_WORKSPACE/packages/mcp/package.json').name")@$(node -p "require('$GITHUB_WORKSPACE/packages/mcp/package.json').version")"
           npm audit signatures
       - name: Install mcp-publisher (pinned, checksum verified)
+        if: ${{ steps.decide.outputs.mcp_needed == 'true' }}
         working-directory: ${{ runner.temp }}
         env:
           V: v1.8.1
@@ -103,6 +104,7 @@ jobs:
           echo "$SHA256  p.tgz" | sha256sum -c -
           tar xzf p.tgz mcp-publisher
       - name: Publish to the MCP registry
+        if: ${{ steps.decide.outputs.mcp_needed == 'true' }}
         run: |
           "$RUNNER_TEMP/mcp-publisher" login github-oidc
           "$RUNNER_TEMP/mcp-publisher" publish
