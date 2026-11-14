@@ -420,7 +420,7 @@
       "notes": "Card not required for the trial credit itself, required once it expires",
       "best_for": "Jamba long-context models on a $10 trial",
       "modalities": ["text"],
-      "models_free": null,
+      "models_free": ["jamba-large", "jamba-mini"],
       "expires": "3 months",
       "docs_url": "https://docs.ai21.com/docs/usage-cost",
       "phone_required": null,
