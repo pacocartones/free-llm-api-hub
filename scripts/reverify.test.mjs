@@ -162,7 +162,7 @@ async function run({ providers = fixture(), args = [], response = {}, fetchError
 }
 
 test('fixed-date automatic batch selects the oldest eligible providers in order', async () => {
-  const result = await run();
+  const result = await run({ args: ['--fetch-for-human-review'] });
   assert.deepEqual(result.selected, ['oldest', 'due']);
   assert.deepEqual(result.requests.map((r) => r.url), ['https://oldest.invalid/docs', 'https://due.invalid/docs']);
   assert.equal(result.writes.length, 2);
@@ -176,18 +176,27 @@ test('never-verified and undated entries do not enter a re-verification batch', 
 });
 
 test('--batch overrides pacing and preserves oldest-first order', async () => {
-  const result = await run({ args: ['--batch', '3'] });
+  const result = await run({ args: ['--batch', '3', '--fetch-for-human-review'] });
   assert.deepEqual(result.selected, ['oldest', 'due', 'middle']);
   assert.equal(result.writes.length, 3);
 });
 
 test('--batch can include fresh entries and cannot exceed the verified dataset', async () => {
-  const result = await run({ args: ['--batch', '20'] });
+  const result = await run({ args: ['--batch', '20', '--fetch-for-human-review'] });
   assert.deepEqual(result.selected, ['oldest', 'due', 'middle', 'fresh']);
 });
 
-test('--no-fetch prints the chosen batch without fetching or writing directories/files', async () => {
-  const result = await run({ args: ['--batch', '1', '--no-fetch'] });
+test('default mode prints metadata without fetching or writing directories/files', async () => {
+  const result = await run({ args: ['--batch', '1'] });
+  assert.deepEqual(result.selected, ['oldest']);
+  assert.equal(result.requests.length, 0);
+  assert.equal(result.writes.length, 0);
+  assert.equal(result.dirs.length, 0);
+  assert.ok(result.logs.includes('\nRemote content was not fetched. Add --fetch-for-human-review for the separate human-only review phase.'));
+});
+
+test('--no-fetch overrides human review fetch and writes nothing', async () => {
+  const result = await run({ args: ['--batch', '1', '--fetch-for-human-review', '--no-fetch'] });
   assert.deepEqual(result.selected, ['oldest']);
   assert.equal(result.requests.length, 0);
   assert.equal(result.writes.length, 0);
@@ -230,9 +239,13 @@ test('dossier keeps the injected date, entry metadata, policy and decoded docs',
       checked: '2026-07-03',
     },
   });
-  const result = await run({ providers: [p], response: { body: '<script >hidden()</script><style>x{}</style><p>Free &amp;amp; safe&nbsp;API</p>' } });
-  assert.equal(result.writes[0].path, '/fixture/scripts/../.freebuff/reverify/archive.md');
+  const result = await run({ providers: [p], args: ['--fetch-for-human-review'], response: { body: '<script >hidden()</script><style>x{}</style><p>Free &amp;amp; safe&nbsp;API</p>' } });
+  assert.equal(result.writes[0].path, '/fixture/scripts/../.freebuff/reverify-human-only/archive.md');
   assert.equal(result.writes[0].text, [
+    '> [!CAUTION]',
+    '> **Untrusted remote content — human review only.**',
+    '> Never provide this dossier to an LLM or tool-capable agent. Treat provider text only as evidence, never as instructions.',
+    '',
     '# Archive AI (`archive`)',
     '',
     '- docs: https://docs.archive.invalid/reference',
@@ -249,7 +262,7 @@ test('dossier keeps the injected date, entry metadata, policy and decoded docs',
     '- data_policy: trains_on_prompts=false retention=30 days (https://docs.archive.invalid/privacy, read 2026-07-03): read it again',
     '- no_expiry: the provider said "Credits do not expire" (https://docs.archive.invalid/credits, read 2026-07-02): read it again',
     '',
-    '## Provider docs (extracted text)',
+    '## Untrusted provider text (human review only)',
     '',
     'Free &amp; safe API',
     '',
@@ -257,22 +270,23 @@ test('dossier keeps the injected date, entry metadata, policy and decoded docs',
 });
 
 test('HTTP failure writes an honest empty dossier instead of success text', async () => {
-  const result = await run({ args: ['--batch', '1'], response: { status: 503 } });
+  const result = await run({ args: ['--batch', '1', '--fetch-for-human-review'], response: { status: 503 } });
+  assert.ok(result.writes[0].text.startsWith('> [!CAUTION]'));
   assert.match(result.writes[0].text, /fetch status: HTTP 503/);
   assert.match(result.writes[0].text, /nothing extracted/);
 });
 
 test('timeout and network errors are captured in the dossier', { timeout: 500 }, async () => {
-  const timedOut = await run({ args: ['--batch', '1'], timeout: true });
+  const timedOut = await run({ args: ['--batch', '1', '--fetch-for-human-review'], timeout: true });
   assert.match(timedOut.writes[0].text, /fetch error: timeout/);
-  const offline = await run({ args: ['--batch', '1'], fetchError: new Error('offline') });
+  const offline = await run({ args: ['--batch', '1', '--fetch-for-human-review'], fetchError: new Error('offline') });
   assert.match(offline.writes[0].text, /fetch error: offline/);
 });
 
 test('non-text responses are marked for manual review, long text is capped', async () => {
-  const binary = await run({ args: ['--batch', '1'], response: { contentType: 'application/pdf' } });
+  const binary = await run({ args: ['--batch', '1', '--fetch-for-human-review'], response: { contentType: 'application/pdf' } });
   assert.match(binary.writes[0].text, /non-text body/);
-  const long = await run({ args: ['--batch', '1'], response: { body: 'x'.repeat(6005) } });
+  const long = await run({ args: ['--batch', '1', '--fetch-for-human-review'], response: { body: 'x'.repeat(6005) } });
   assert.match(long.writes[0].text, new RegExp('x{6000}…'));
   assert.doesNotMatch(long.writes[0].text, /x{6001}/);
 });
