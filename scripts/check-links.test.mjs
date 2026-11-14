@@ -2,12 +2,13 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync, spawnSync } from 'node:child_process';
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
+import { dirname, join, relative } from 'node:path';
 import { makeTmpDir } from './lib/tmp.mjs';
 
 const script = readFileSync(new URL('./check-links.mjs', import.meta.url), 'utf8');
 function fixture(file, markdown) {
-  const root = makeTmpDir('doc-links-');
+  const root = join(makeTmpDir('doc-links-'), 'repo');
+  mkdirSync(root);
   const write = (path, text) => {
     mkdirSync(dirname(join(root, path)), { recursive: true });
     writeFileSync(join(root, path), text);
@@ -43,6 +44,55 @@ test('external links, anchors and GitHub issue shortcuts stay offline; ignored f
   const { write, run } = fixture('README.md', '[web](https://example.invalid/)\n[mail](mailto:a@example.invalid)\n[heading](#title)\n[issue](../../issues/new?template=inaccuracy.yml)');
   write('.gitignore', 'node_modules/\n');
   write('node_modules/example/README.md', '[missing](missing.md)');
+  const result = run();
+  assert.equal(result.status, 0, result.stdout + result.stderr);
+});
+
+
+test('absolute local paths are rejected even when the file exists inside the repository', () => {
+  const { root, write, run } = fixture('README.md', '');
+  const target = join(root, 'CONTRIBUTING.md').replaceAll('\\', '/');
+  write('README.md', `[absolute](${target})`);
+  const result = run();
+  assert.equal(result.status, 1, result.stdout + result.stderr);
+  assert.match(result.stderr, /absolute path/);
+});
+
+test('parent traversal cannot escape ROOT into an existing sibling with the same name prefix', () => {
+  const { root, write, run } = fixture('README.md', '');
+  const outside = root + '-outside';
+  mkdirSync(outside);
+  const file = join(outside, 'existing.md');
+  writeFileSync(file, '# Outside');
+  const target = relative(root, file).replaceAll('\\', '/');
+  write('README.md', `[escape](${target})`);
+  const result = run();
+  assert.equal(result.status, 1, result.stdout + result.stderr);
+  assert.match(result.stderr, /outside repository/);
+});
+
+test('encoded traversal and GitHub-looking paths do not bypass the root boundary', () => {
+  const { write, run } = fixture('README.md', '');
+  for (const target of ['%2e%2e/outside.md', '..%5coutside.md', '../../issues/../../../outside.md']) {
+    write('README.md', `[escape](${target})`);
+    const result = run();
+    assert.equal(result.status, 1, target);
+    assert.match(result.stderr, /outside repository/, target);
+  }
+});
+
+test('POSIX, drive, rooted and UNC absolute paths are rejected on every operating system', () => {
+  const { write, run } = fixture('README.md', '');
+  for (const target of ['/tmp/outside.md', 'C:/outside.md', String.raw`C:\outside.md`, String.raw`\outside.md`, String.raw`\\server\share\outside.md`, '%2Ftmp/outside.md', '%5C%5Cserver%5Cshare%5Coutside.md']) {
+    write('README.md', `[absolute](${target})`);
+    const result = run();
+    assert.equal(result.status, 1, target);
+    assert.match(result.stderr, /absolute path/, target);
+  }
+});
+
+test('parent links inside ROOT and Windows separators remain valid', () => {
+  const { run } = fixture('docs/nested/runbook.md', '[parent](../../README.md)\n[windows](..\\..\\README.md)');
   const result = run();
   assert.equal(result.status, 0, result.stdout + result.stderr);
 });

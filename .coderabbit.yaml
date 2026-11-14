@@ -8,10 +8,11 @@ reviews:
   auto_review:
     enabled: true
     drafts: false
-    # The maintainers' own pull requests are not reviewed automatically; every pull request
-    # from an outside contributor still is (owner's decision, 2026-10-17).
+    # Both maintainers' pull requests are excluded from automatic review;
+    # outside contributors remain eligible.
     ignore_usernames:
       - pacocartones
+      - LeonMAG
   path_filters:
     - "!data/**"
     - "!dist/**"

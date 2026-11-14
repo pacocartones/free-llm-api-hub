@@ -40,8 +40,8 @@ The workflows below do not write to `main` directly. Their checked-in triggers a
 | `release-mcp.yml` | `mcp-v*` tag | job-scoped `contents: read` and `id-token: write` — publishes to npm and the MCP registry after environment approval |
 | `welcome.yml` | first issue or pull request opened | job-scoped `issues: write`, `pull-requests: write` — posts a comment without checking out pull-request code |
 | `first-merge-thanks.yml` | pull request closed | job-scoped `pull-requests: write` — comments only after a first outside contribution is merged; does not check out pull-request code |
+| `weekly-worklist.yml` | weekly schedule, manual on trusted `main` | job-scoped `contents: read`, `issues: write` — refreshes issue #4 metadata only |
 | `issue-assign.yml` | issue comment | job-scoped `issues: write` — handles `/take` and `/release` without checking out repository code |
-| `weekly-worklist.yml` | Monday schedule, manual on main | job-scoped `contents: read`, `issues: write` — checks out trusted main and replaces issue #4's generated worklist; no provider requests or verification |
 
 No workflow that checks out or executes fork pull-request code has repository-content write permissions
 or repository secrets. CodeQL requests `security-events: write` only for code-scanning results;
@@ -50,7 +50,7 @@ with narrowly scoped write tokens and never check out or execute the fork's code
 
 Derived files are regenerated locally and committed by the author in the same PR. Write-capable
 automation is limited to site and package publication, security-result upload, release tagging,
-and issue or pull-request comments/assignment, plus the main-only weekly issue worklist refresh. The comment and assignment workflows never check
+and issue metadata or pull-request comments/assignment. The comment and assignment workflows never check
 out or execute pull-request code.
 All checkouts disable persisted credentials. Release tagging supplies the token only to
 its explicit tag push; no credential is stored in the workspace Git configuration.

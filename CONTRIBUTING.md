@@ -56,7 +56,7 @@ Run these commands from the repository root after installing dependencies. Follo
 
 | Change | Local validation before opening a PR |
 | --- | --- |
-| Hand-written docs or issue/PR template text | `npm run links`, then preview the changed Markdown or form and open its links. The link checker checks local paths in tracked and non-ignored new Markdown files, including nested docs and package READMEs; it does not validate GitHub forms, external issue searches or heading anchors. |
+| Hand-written docs or issue/PR template text | `npm run links`, then preview the changed Markdown or form and open its links. The link checker checks local paths in tracked and non-ignored new Markdown files, including nested docs and package READMEs. Absolute paths and paths escaping the repository are rejected; it does not validate GitHub forms, external issue searches or heading anchors. |
 | Provider data or build inputs (including `CONTRIBUTING.md`, which generates the site's contributing page) | `npm run build && npm test`; commit your changes and regenerated files, then run `npm run check` (it compares generated output with the committed version). Run `npm run og` too if the OG check flags drift. |
 | Code | `npm test`, plus the focused check named in the issue. If the change affects generated output, also follow the build-input row above. |
 

@@ -1,5 +1,6 @@
 #!/usr/bin/env node
-// Regenerates every derived artifact from the single source of truth: data/providers.json.
+// Regenerates derived artifacts from canonical datasets, companion metadata and authored inputs.
+// See docs/architecture.md for source inputs, generated regions and separate OG generation.
 //   - README provider tables (between AUTOGEN markers)
 //   - badge-freshness.json (root, for the shields.io endpoint badge)
 //   - site/providers.json so the interactive site ships the data

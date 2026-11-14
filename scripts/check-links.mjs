@@ -7,7 +7,7 @@
 import { readFileSync, existsSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { dirname, join, resolve } from 'node:path';
+import { dirname, join, resolve, relative, isAbsolute, sep, win32 } from 'node:path';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -28,7 +28,9 @@ for (const file of files) {
   while ((m = LINK_RE.exec(md))) {
     let target = m[1].trim();
     // External destinations and GitHub shortcuts have no repository-local file.
-    if (/^(https?:|mailto:|#)/i.test(target) || /^\.\.\/\.\.\/(issues|discussions|pull)(?:[/?#]|$)/.test(target)) continue;
+    if (/^(https?:|mailto:|#)/i.test(target)) continue;
+    // Only documented GitHub destinations are shortcuts, never arbitrary traversal.
+    if (/^\.\.\/\.\.\/(?:issues(?:\/(?:new|[1-9]\d*))?|pull\/[1-9]\d*|discussions(?:\/[1-9]\d*)?)(?:[?#].*)?$/.test(target)) continue;
     target = target.split(/[?#]/)[0];
     try { target = decodeURIComponent(target); } catch {
       broken.push(`${file} → ${m[1]} (invalid percent encoding)`);
@@ -36,7 +38,18 @@ for (const file of files) {
     }
     if (!target) continue;
     checked++;
-    const resolved = resolve(baseDir, target);
+    // Check both path grammars on every host so Windows paths cannot slip
+    // through Linux CI. Normalize separators before resolving parent segments.
+    if (isAbsolute(target) || win32.isAbsolute(target) || /^[a-z]:/i.test(target)) {
+      broken.push(`${file} → ${m[1]} (absolute path)`);
+      continue;
+    }
+    const resolved = resolve(baseDir, target.replaceAll('\\', '/'));
+    const fromRoot = relative(ROOT, resolved);
+    if (fromRoot === '..' || fromRoot.startsWith('..' + sep) || isAbsolute(fromRoot)) {
+      broken.push(`${file} → ${m[1]} (outside repository)`);
+      continue;
+    }
     if (!existsSync(resolved)) broken.push(`${file} → ${m[1]}`);
   }
 }
