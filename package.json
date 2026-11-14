@@ -5,6 +5,8 @@
   "description": "A continuously-verified dataset of free-tier and trial-credit LLM API providers for developers.",
   "type": "module",
   "scripts": {
+    "changelog-draft": "node scripts/changelog-draft.mjs",
+    "release-snapshot": "node scripts/release-snapshot.mjs",
     "build": "node scripts/build.mjs",
     "sync-main": "node scripts/sync-main.mjs",
     "validate": "node scripts/validate.mjs",
