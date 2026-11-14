@@ -6,7 +6,7 @@ import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-export function runCommand(command, args, { cwd }) {
+export function runCommand(command, args, { cwd, signal }) {
   return new Promise(resolveResult => {
     const child = spawn(command, args, { cwd, shell: false, windowsHide: true });
     let stdout = '', stderr = '', error;
@@ -14,7 +14,13 @@ export function runCommand(command, args, { cwd }) {
     child.stdout.on('data', chunk => { stdout += chunk; });
     child.stderr.on('data', chunk => { stderr += chunk; });
     child.on('error', err => { error = err; });
-    child.on('close', (status, signal) => resolveResult({ status, signal, stdout, stderr, error }));
+    const stop = () => child.kill(signal.reason);
+    signal?.addEventListener('abort', stop, { once: true });
+    if (signal?.aborted) stop();
+    child.on('close', (status, childSignal) => {
+      signal?.removeEventListener('abort', stop);
+      resolveResult({ status, signal: childSignal, stdout, stderr, error });
+    });
   });
 }
 
@@ -46,7 +52,18 @@ const STATUS = ['status', '--porcelain=v1', '-z', '--untracked-files=all', '--ig
 export async function syncMain({ cwd = process.cwd(), run = runCommand, log = console.log, error = console.error } = {}) {
   cwd = resolve(cwd);
   let phase = 'preflight', initial, target, started = false, committing = false, rebuilt = false;
-  const git = args => run('git', ['--literal-pathspecs', ...args], { cwd });
+  let cleaning = false;
+  const controller = new AbortController();
+  const onInt = () => controller.abort('SIGINT'), onTerm = () => controller.abort('SIGTERM');
+  process.on('SIGINT', onInt); process.on('SIGTERM', onTerm);
+  const interrupted = () => { if (!cleaning && controller.signal.aborted) throw new Error(`Interrupted by ${controller.signal.reason}`); };
+  const command = async (executable, args) => {
+    interrupted();
+    const result = await run(executable, args, { cwd, signal: cleaning ? undefined : controller.signal });
+    interrupted();
+    return result;
+  };
+  const git = args => command('git', ['--literal-pathspecs', ...args]);
   const checked = async args => {
     const result = await git(args);
     if (result.error || result.status !== 0) {
@@ -111,7 +128,7 @@ export async function syncMain({ cwd = process.cwd(), run = runCommand, log = co
       if ((await checked(['ls-files', '--unmerged', '-z']))) throw new Error('Unresolved index entries remain');
       const beforeBuild = (await checked(['write-tree'])).trim();
       phase = 'build';
-      const built = await run(process.execPath, ['scripts/build.mjs'], { cwd });
+      const built = await command(process.execPath, ['scripts/build.mjs']);
       if (built.error || built.status !== 0) throw new Error(`Build failed: ${built.error?.message || built.signal || built.stderr || built.status}`);
       const beforePaths = parseNul(await checked(['ls-tree', '-r', '--name-only', '-z', beforeBuild]));
       if (beforePaths.includes('badge-freshness.json')) {
@@ -138,21 +155,43 @@ export async function syncMain({ cwd = process.cwd(), run = runCommand, log = co
     if (await head() === initial.head || await marker()) throw new Error('Commit did not finish');
     return success(rebuilt ? 'Committed rebuilt generated-conflict merge of origin/main.' : 'Committed clean merge of origin/main.');
   } catch (err) {
+    // All subprocesses have closed before recovery starts. Ignore the cancellation
+    // for read-only ownership checks and the single bounded abort attempt.
+    cleaning = true;
     error(`sync-main failed during ${phase}: ${err.message}`);
-    if (committing) { error('Inspect git status; fix identity or hook errors and retry git commit. The resolved merge is retained.'); return 1; }
     try {
+      if (committing) {
+        if (await head() !== initial.head) error('HEAD changed during commit; inspect git log and git status. No rollback was attempted.');
+        else if (await owned()) error('Inspect git status; fix identity or hook errors and retry git commit. The resolved merge is retained.');
+        else error('Merge ownership changed; inspect git status before any recovery.');
+        return 1;
+      }
       if (await owned()) {
         await checked(['merge', '--abort']);
         if (await head() !== initial.head || await branch() !== initial.branch || (await checked(['write-tree'])).trim() !== initial.tree || await checked(STATUS) !== initial.status) {
           throw new Error('Local state differs after abort; inspect git status');
         }
         error('Merge aborted; original HEAD, index and status restored.');
+      } else if (started) {
+        error('No owned merge to abort; inspect git status. No history was rewritten.');
       }
     } catch (cleanup) { error(`Cleanup failed: ${cleanup.message}. Inspect git status; if a merge remains, run git merge --abort.`); }
+    if (started) {
+      try {
+        const remaining = new Set([...parseNul(await checked(['diff', '--name-only', '--no-renames', '-z'])),
+          ...parseNul(await checked(['ls-files', '--others', '--exclude-standard', '-z']))]);
+        if (remaining.size) error(`Files retained for inspection: ${[...remaining].map(p => JSON.stringify(p)).join(', ')}`);
+      } catch (inspection) { error(`Could not inspect retained files: ${inspection.message}`); }
+    }
     return 1;
+  } finally {
+    process.removeListener('SIGINT', onInt); process.removeListener('SIGTERM', onTerm);
   }
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  process.exitCode = await syncMain();
+  if (process.argv.length !== 2) {
+    console.error('sync-main takes no arguments; it merges the configured origin/main.');
+    process.exitCode = 1;
+  } else process.exitCode = await syncMain();
 }

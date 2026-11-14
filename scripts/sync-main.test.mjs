@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import * as sync from './sync-main.mjs';
-import { spawnSync } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import { mkdirSync, readFileSync, writeFileSync, rmSync, existsSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -227,6 +227,115 @@ for (const mode of ['120000', '160000']) {
     assert.deepEqual(snapshot(f.cwd), f.initial);
   });
 }
+
+const failure = (text = 'injected failure') => ({ status: 128, signal: null, stdout: '', stderr: text });
+for (const fault of ['missing Git', 'fetch', 'merge', 'checkout', 'build', 'stage', 'signal', 'abort']) {
+  test(`command failure: ${fault}`, async t => {
+    const f = fixture(t); prove(f, ['derived-fingerprints.json']);
+    let injected = false;
+    const r = await invoke(f, (command, args, options) => {
+      if (fault === 'abort' && args.includes('--abort')) return failure('abort rejected');
+      const matches = fault === 'missing Git' || (fault === 'fetch' && args.includes('fetch')) || (fault === 'merge' && args.includes('--no-commit')) ||
+        (['checkout', 'abort'].includes(fault) && args.includes('checkout')) || (['build', 'signal'].includes(fault) && command === process.execPath) || (fault === 'stage' && args.includes('add') && args.includes('-A'));
+      if (!injected && matches) {
+        injected = true;
+        if (fault === 'build') write(f.cwd, 'site/page/index.html', 'partial build');
+        if (fault === 'missing Git') return { ...failure(), error: Object.assign(new Error('Git missing'), { code: 'ENOENT' }) };
+        if (fault === 'signal') return { ...failure(), status: null, signal: 'SIGTERM' };
+        return failure();
+      }
+    });
+    assert.equal(r.code, 1); assert.ok(injected); assertSafeTrace(r.trace); assert.ok(!has(r.trace, 'commit'));
+    assert.match(r.messages, new RegExp(`during ${fault === 'missing Git' ? 'preflight' : ['checkout', 'abort'].includes(fault) ? 'resolve' : fault === 'signal' ? 'build' : fault}`));
+    if (fault === 'abort') { assert.match(r.messages, /injected failure/); assert.match(r.messages, /abort rejected/); assert.match(r.messages, /git merge --abort/); }
+    else if (!['build', 'stage'].includes(fault)) assert.deepEqual(snapshot(f.cwd), f.initial);
+    else { assert.equal(git(f.cwd, 'rev-parse', 'HEAD'), f.initial.head); assert.match(r.messages, /inspect|Inspect/); }
+  });
+}
+
+for (const kind of ['identity', 'hook', 'landed']) {
+  test(`commit failure ${kind} preserves inspectable state`, async t => {
+    const f = fixture(t); prove(f, ['derived-fingerprints.json']);
+    if (kind === 'hook') {
+      write(f.base, 'hooks/pre-commit', '#!/bin/sh\necho hook-rejected >&2\nexit 1\n');
+      if (process.platform !== 'win32') execute('chmod', ['+x', join(f.base, 'hooks/pre-commit')], { cwd: f.cwd });
+      git(f.cwd, 'config', 'core.hooksPath', join(f.base, 'hooks'));
+    }
+    const r = await invoke(f, (command, args, options) => {
+      if (kind === 'identity' && args.includes('commit')) { git(f.cwd, 'config', '--unset', 'user.email'); git(f.cwd, 'config', '--unset', 'user.name'); git(f.cwd, 'config', 'user.useConfigOnly', 'true'); }
+      if (kind === 'landed' && args.includes('commit')) { const real = execute(command, args, options); assert.equal(real.status, 0); return failure('post-command error'); }
+    });
+    assert.equal(r.code, 1); assert.match(r.messages, /during commit/); assert.ok(!has(r.trace, '--abort'));
+    if (kind === 'landed') { assertMerged(f); assert.match(r.messages, /HEAD changed/); }
+    else { assert.equal(git(f.cwd, 'rev-parse', 'HEAD'), f.initial.head); assert.equal(git(f.cwd, 'rev-parse', 'MERGE_HEAD').trim(), f.target); assert.match(r.messages, /retry git commit/); }
+  });
+}
+
+test('ownership mismatch refuses abort and commit', async t => {
+  const f = fixture(t); prove(f, ['derived-fingerprints.json']);
+  const r = await invoke(f, (command, args, options) => {
+    if (args.includes('--no-commit')) { const real = execute(command, args, options); write(f.cwd, '.git/MERGE_HEAD', f.initial.head); return real; }
+  });
+  assert.equal(r.code, 1); assert.match(r.messages, /ownership/); assert.ok(!has(r.trace, '--abort')); assert.ok(!has(r.trace, 'commit')); assert.ok(!has(r.trace, 'checkout'));
+});
+
+test('failed build reports exact new outputs without deleting ignored files', async t => {
+  const f = fixture(t); prove(f, ['derived-fingerprints.json']);
+  write(f.cwd, 'ignored/keep.txt', 'keep');
+  const r = await invoke(f, command => {
+    if (command === process.execPath) { write(f.cwd, 'site/new-page/index.html', 'partial'); return failure('build stopped'); }
+  });
+  assert.equal(r.code, 1); assert.match(r.messages, /site\/new-page\/index.html/);
+  assert.equal(readFileSync(join(f.cwd, 'ignored/keep.txt'), 'utf8'), 'keep');
+  assert.equal(readFileSync(join(f.cwd, 'site/new-page/index.html'), 'utf8'), 'partial');
+  assert.ok(!has(r.trace, 'commit'));
+});
+
+test('child interruption waits for close and cannot stage or commit', async t => {
+  const f = fixture(t); prove(f, ['derived-fingerprints.json']);
+  const before = process.listenerCount('SIGTERM');
+  const trace = [], messages = [];
+  const run = async (command, args, options) => {
+    trace.push({ command, args });
+    if (command === process.execPath) {
+      setTimeout(() => process.emit('SIGTERM'), 100);
+      const result = await sync.runCommand(command, ['-e', 'setTimeout(()=>{},500)'], options);
+      assert.notEqual(result.status, 0);
+      return result;
+    }
+    return execute(command, args, options);
+  };
+  const code = await sync.syncMain({ cwd: f.cwd, run, log: m => messages.push(m), error: m => messages.push(m) });
+  assert.equal(code, 1); assert.match(messages.join('\n'), /SIGTERM/); assert.ok(!has(trace, 'commit'));
+  const afterBuild = trace.slice(trace.findIndex(c => c.command === process.execPath) + 1);
+  assert.ok(!has(afterBuild, 'add')); assert.deepEqual(snapshot(f.cwd), f.initial);
+  assert.equal(process.listenerCount('SIGTERM'), before);
+});
+
+test('package exposes sync-main and retains build and Node contracts', () => {
+  const pkg = JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8'));
+  assert.equal(pkg.scripts['sync-main'], 'node scripts/sync-main.mjs');
+  assert.equal(pkg.scripts.build, 'node scripts/build.mjs'); assert.equal(pkg.engines.node, '>=18');
+});
+for (const source of [false, true]) {
+  test(`actual CLI ${source ? 'aborts source conflict' : 'rebuilds generated conflict'}`, t => {
+    const f = fixture(t, { source }); prove(f, source ? ['data/providers.json', 'derived-fingerprints.json'] : ['derived-fingerprints.json']);
+    const result = execute(process.execPath, [join(ROOT, 'scripts/sync-main.mjs')], { cwd: f.cwd });
+    assert.equal(result.status, source ? 1 : 0, result.stderr);
+    if (source) { assert.match(result.stderr, /data\/providers.json/); assert.deepEqual(snapshot(f.cwd), f.initial); }
+    else { assertMerged(f); assert.match(result.stdout, /OG files were not regenerated/); assert.match(result.stdout, /rebuilt generated-conflict/); }
+  });
+}
+test('import has no side effects and unknown CLI arguments fail before fetch', t => {
+  const f = fixture(t);
+  const script = join(ROOT, 'scripts/sync-main.mjs');
+  const imported = execute(process.execPath, ['--input-type=module', '-e', `await import(${JSON.stringify(pathToFileURL(script).href)})`], { cwd: f.cwd });
+  assert.equal(imported.status, 0, imported.stderr); assert.deepEqual(snapshot(f.cwd), f.initial);
+  assert.ok(!existsSync(join(f.cwd, '.git/FETCH_HEAD')));
+  const args = execute(process.execPath, [script, '--remote=evil'], { cwd: f.cwd });
+  assert.equal(args.status, 1); assert.match(args.stderr, /arguments/); assert.deepEqual(snapshot(f.cwd), f.initial);
+  assert.ok(!existsSync(join(f.cwd, '.git/FETCH_HEAD')));
+});
 
 test('generated policy expands exact indexed files', () => {
   const allowed = ['README.md', 'derived-fingerprints.json', 'collections/a.md', 'site/new-page/index.html', 'site/café/index.html', 'site/[ab]/index.html'];
