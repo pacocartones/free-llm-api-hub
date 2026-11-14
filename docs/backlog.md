@@ -39,11 +39,15 @@ not be cleanly cited to the provider's own page _today_, or is card/region-gated
 Re-check each against the [inclusion criteria](inclusion-criteria.md); promote
 only what confirms.
 
-- [ ] **MiniMax** (LLM) — OpenAI-compatible confirmed (`https://api.minimax.io/v1`,
-  also an Anthropic-compatible path), internationally reachable email signup, but
-  **no free-trial credit is documented** on its pricing/docs pages (campaign-
-  dependent). The most-wanted net-new LLM — confirm a citable free tier (or probe
-  a fresh signup) before adding. Also Anthropic-compatible worth noting.
+- [ ] **MiniMax** (LLM) — re-verified 2026-11-14 against its pricing page
+  (https://platform.minimax.io/docs/pricing/overview): pay-as-you-go only
+  ("pay for what you use", all prices in USD); no free tier or trial credit is
+  stated, and on-page search for "trial"/"free trial" finds nothing. A tutorial
+  page mentions a "free quota" for new pay-as-you-go users but gives no amount,
+  expiry or conditions and links to the sign-in-gated console, so it cannot be
+  cited. Add only if a concrete, citable free tier or trial credit appears.
+  OpenAI-compatible (`https://api.minimax.io/v1`, also an Anthropic-compatible
+  path), internationally reachable email signup.
 - ✅ **Upstage** (Solar LLM + Document Parse/OCR) — now a provider in the dataset (re-verified 2026-10-08).
 - ✅ **Veryfi** (OCR) — now a provider in the dataset (re-verified 2026-10-08).
 - [ ] **Replicate** (image/video) — "run select models for free… after a bit
