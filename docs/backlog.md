@@ -70,10 +70,13 @@ only what confirms.
   model, big catalog), ByteDance Volcengine/Doubao, StepFun, SenseNova — real free
   tiers but mainland phone/ID gates make them poor fits for an international
   builder audience. Revisit if any drops the ID wall for overseas devs.
+
 - [ ] **Explicitly NOT free (do not add; leave in "Notably NOT free" thinking):**
-  Moonshot/Kimi intl (needs ≥$1 recharge), Chutes, Together AI &
-  Hyperbolic (historic signup credit no longer documented — recheck later),
+  Moonshot/Kimi intl (needs ≥$1 recharge), Chutes, Together AI
+  (official billing article requires a minimum $5 credit purchase; checked
+  2026-11-14, see [source review](sources.md#checked-with-what-each-page-says)),
   Parasail, GMICloud, Inference.net, Lepton (folded into NVIDIA), Nomic (pivoted).
+
 
 ## Discovery & research infrastructure
 
