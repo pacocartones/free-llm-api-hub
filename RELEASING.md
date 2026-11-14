@@ -19,8 +19,9 @@ publication process (rule 4).
    OK for that release, from CI with provenance (`.github/workflows/release-mcp.yml`: tag
    `mcp-vX.Y.Z`, environment `release-mcp` with a required reviewer, npm trusted publishing, no token).
    The package has its own SemVer, independent of the dataset's; `server.json` carries the same
-   version. Until the owner enables it the package stays `"private": true` and the workflow does
-   nothing.
+   version. The package metadata permits public publication; CI publication remains
+   disabled unless the owner enables NPM_PUBLISH_ENABLED=true, and still
+   requires the release approval and protected-environment checks above.
 5. **Notes:** written from the pull requests merged between the previous tag and this one, in
    English. Every pull request that changes something for users is cited by number; related ones
    may share a line. An entry for an outside contributor ends with

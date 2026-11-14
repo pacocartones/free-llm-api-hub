@@ -7,35 +7,70 @@ Notable changes to the dataset and the project. Format based on [Keep a Changelo
 
 ## [Unreleased]
 
-### Corrected
-- **Corrección:** the notes of the data policy rows of Voyage AI, Cartesia, Retell AI and LlamaParse said "the page names no plan". That was wrong: a search of each page for the words free, trial, paid and plan finds them (Cartesia: section 2.6 "Free Trials"; Retell AI: section 7 "Beta, evaluation, and trial services"; LlamaParse: section 6 "Payments, Billing, and Subscription Plans"). The Voyage AI note mattered most: its opt-out clause says that, if you opt out, "any credits or tokens for free usage of the Service may be automatically void", so the clause does name free usage and its `plan_named` is now `true`. What changes: those four notes, plus the ones of Scaleway and Moondream, now say only what was checked (the sentence or the clause names no plan, with the nearby section where there is one); `plan_named` is now set on the rows that had a sentence and no value (AssemblyAI `true`, ElevenLabs `false`, Cartesia `false`, Retell AI `false`). A statement about the whole page is kept only where the search finds none of the four words (AI21 and Fireworks AI).
-
-### Changed
-- **`/changes/` is now the one page for what changed**, with a section «Month by month» (the index of the monthly state reports) and a section «Week by week» (what it showed before). `/state/` is a redirect page to `/changes/#months` (GitHub Pages cannot send a server redirect, so it is a meta refresh with a canonical link, as `/collections/` and `/guides/` already are); the reports keep their URLs `/state/YYYY-MM/`, `/state/` leaves the sitemap and the footer entry «Monthly state report» goes. A test now checks that every internal link of every built page points to a file that exists.
+Candidate dataset v2.14.0. These changes are after the immutable v2.13.0
+snapshot; this section does not imply that a new tag or release is published.
+No breaking dataset or API shape changes. Provider availability, sampled model
+IDs and confirmed values can change as sources are re-verified.
 
 ### Added
-- **`commercial_ok: "conditional"` and `commercial_ok_condition`** (dataset 2.12.0): the canonical dataset can record commercial use permitted only under documented provider conditions. API v1 preserves its existing `boolean | null` contract by projecting `"conditional"` to `null` while retaining the condition field, including in slices, picks and change values. Scoring and coverage treat it as unconfirmed, and commercial collections still contain only `commercial_ok: true`. First entry: AI Horde, based on its per-model licences and official FAQ give-back rule (#327).
-- **`data/quotes.json` and the consistency check of the passages** (a register, not part of the API): every sentence a data policy row quotes, every phrase of a note between « » and every claim that a whole page names no plan has an entry with its page, the day it was read and how the text was made. CI checks that the register and the data agree, offline; it does not check that the page says that now (see `docs/quotes.md`). The reading is done in English: a Spanish copy of a page is never an "expired" passage.
-- **`/api/v1/score.json` and `/api/v1/score.schema.json`**: the whole FLLMAPIHUB score (every eligible provider, with its parts and its confirmed inputs) in the stable API, with a JSON Schema at a stable URL. Contract v1, documented in `docs/api.md`. A new file, not a change to the dataset shape, so the dataset `version` does not change.
-- **`data/sponsorships.json` and the page `/agreements/`** (a new file and a new page, not part of the API): every paid relationship has a row in the file, shown on `/agreements/` with a visible “Sponsored” label, and every relationship without money is a “Disclosure” line on the provider page. Nothing in the file reaches the score, `/api/v1/`, `llms.txt`, `providers.json`, the structured data of a page or the ranking. The only addition to the sitemap is the URL of `/agreements/`, which is not paid content. The validator rejects the words that the labels do not use (featured, partner, recommended).
-- **`data_policy`** (dataset 2.11.0, a new optional field): what the provider itself says about your prompts on the free access, whether it trains on them (`trains_on_prompts`) and how long it keeps them (`retention`), with the provider's `source` and the day it was `checked`. No provider has one yet; the provider page shows a *Data policy* section only when the field is set, and a value is added only from the provider's own page.
-- **`data_policy.plan_named`** (an optional field of `data_policy`, additive on `/api/v1/`): whether the provider's sentence about training names the free or trial plan (`true`), was read and does not (`false`), or was not checked (`null` or absent). `false` never means the free plan is covered, nor that it is not. The 13 providers that say they do not train now carry `false`, read one by one on 2026-10-15; the no-training collection marks each row "plan not named in the source".
-- **`no_expiry`** (dataset 2.10.0, a new optional field): on a one-time trial credit, the provider's own statement that the credit does not expire, with its `source`, the day it was `checked` and the `quote`. Until now a trial credit with no end date was ambiguous (the provider says it does not expire, or nothing is known). First entries: Deepgram and Sarvam AI, from what each provider's own pages say (not from the terms a customer signs), read 2026-10-09; Sarvam's passage is on the rate-limits page of its docs, and its pricing page agrees. Nanonets stays *not confirmed*: its pages define credits in general as never expiring but say nothing about the sign-up credit. The provider page and the comparison show it and the API carries it; a trial credit with neither `expires` nor `no_expiry` now reads *not confirmed* on both pages (comparisons used to say *no expiry*).
+
+- The application-based Alibaba Cloud AI Catalyst Program in the separate
+  credit-programme catalogue, rather than the free API provider dataset (#594).
+  Thanks @abhi478jeetur-rgb.
+- Five Sarvam AI serverless model samples compatible with the shared `/v2`
+  endpoint, an official catalogue link and vision discovery. The `/v1`-only
+  conversational variant is excluded from this shared-endpoint sample and explained in the provider notes (#626). Thanks @harshkanhat.
+- Four Pinecone Starter model samples and four SiliconFlow China free-model
+  samples, with qualified prompt-policy evidence. OVHcloud gains confirmed
+  anonymous access without a signup phone and qualified prompt-policy evidence
+  (#630, #631, #632). Unknown commercial permission, quotas and retention stay
+  unknown where the sources do not establish them.
+- Local provider changelog and reproducible release-snapshot preparation
+  commands, and an automatically generated schema field reference (#616, #628).
+
+### Changed and fixed
+
+- Re-verified Datalab, Gemini, Groq, OpenRouter, Workers AI, Cohere, Cerebras and
+  Mistral against official sources. Datalab's conflicting quotas are disclosed
+  and its structured quota cleared; its opt-in training and result retention are
+  recorded. Workers AI gains a qualified retention policy. OpenRouter loses
+  retired model samples; Cerebras trial expiry and model-specific limits are
+  clarified without temporary uplifts. Gemini notes the announced December 1
+  API migration. Unknown fields remain unknown (#620).
+- Discovery guides show verified providers and verification dates and
+  distinguish image editing from generation (#621).
+- Explained the source and limitations of Model quality scoring (#592).
+  Thanks @duy-dev-26.
+- Documented public-access boundaries for Together AI, Hyperbolic and DeepSeek
+  (#610). Thanks @teotiabhumik-ship-it.
+- Documented DeepInfra's billing requirement without adding an unsupported
+  free allowance (#622). Thanks @Rishankgupta08.
+- Clarified Ollama Cloud's unconfirmed card requirement and recorded the
+  InclusionAI verification result (#623, #625). Thanks @harshkanhat.
+- Kept MiniMax in the backlog: its official tutorial mentions a free quota but
+  does not publish sufficient grant terms (#624, incorporating evidence from
+  #634). Thanks @harshkanhat and @abhi478jeetur-rgb.
+- Recorded Replicate's verified free-allowance limitation in the backlog (#598).
+- Safer generated-conflict synchronization, and correct handling of mixed-case
+  HTML raw-text elements and closing-tag syntax (#593, #596, #597).
+- Clarified MCP boundaries and prepared gated npm/Registry distribution. Local
+  MCP installations now require Node 22.14.0 or later; this dataset preparation
+  does not publish an MCP package (#618, #629).
+- Strengthened accessibility and security checks and clarified contribution
+  and release guidance (#590, #614, #619, #627).
 
 ### Removed
-- **Mistral (La Plateforme)** (`mistral`): [official usage limits](https://docs.mistral.ai/admin/billing-usage/usage-limits), read 2026-11-14, say Free mode does not include API access and API keys require billing activation and pay-as-you-go. Removed under the inclusion criteria; the free Studio/Vibe budget is not a free developer API.
-- **`partner` and `partner_note`** (two optional provider properties added to the schema in 2.11.0, released on 13 October 2026, and withdrawn after it): no provider ever carried them (none in `providers.json` of v2.11.0, no commit with `partner: true`) and no response of `/api/v1/` ever contained either one. What changes for a reader of the API: the published `/api/v1/schema.json` loses those two properties, `validate` now rejects both fields, and the `intro` of `/api/v1/best.json` says "Money adds nothing to the score" instead of "Being a partner adds nothing to the score". This is a withdrawal from a published v1 schema, even though no value changes; it is also written in `docs/api.md`. Paid relations live in `data/sponsorships.json`.
-- **LMNT** (`lmnt`): lmnt.com now says "LMNT has shut down" and the docs URL no longer resolves (checked 2026-10-08). Removed under the inclusion criteria: an entry leaves when the provider ends free access entirely.
 
-### Data
-- **Weekly re-verification — 2026-11-14 (#4), eight providers.** Re-read official tier, quota and available policy sources for Datalab, Gemini, Groq, OpenRouter, Workers AI, Cohere, Cerebras and Mistral. Seven retained rows receive the current verification date. Datalab's contradictory 10/5 versus 25/25 request limits are disclosed and its structured quota is cleared; its opt-in training and result-retention policy are recorded. Workers AI gains its new qualified standard-inference retention policy. OpenRouter loses retired sampled model IDs and its historical model count. Cerebras now explicitly stops at trial expiry/exhaustion and has model-specific limits; its temporary Qwen total-token uplift is excluded. Gemini notes the announced December 1 migration of its deprecated 2.5 Pro/Flash APIs. Unknown fields remain unknown.
-- **Free limits, batch 1 (2026-10-09).** OCR.space, OVHcloud AI Endpoints, Twelve Labs, Datalab and Pinecone Inference gain `free_limits`, each with the provider's own page and the day it was read. Datalab's own page gives 10 requests per minute and 5 concurrent on the free tier, not 25: the entry's `rate_limits` text now follows it.
-- **Re-verification — batch 3B (2026-10-08).** Jina AI, Mixedbread, Ollama Cloud, ModelScope, OCR.space, LlamaParse, Nanonets, Moondream, Nutrient and Photoroom were re-checked against their own pages. Corrections:
-  - Ollama Cloud's free plan is now credit-based with a monthly reset. The 5-hour and weekly limits are gone.
-  - ModelScope's free calls are now paid in daily "Magicubes".
-  - OCR.space's Engine 3 quota is now 1,000 a month.
-  - Moondream publishes 2 requests per second.
-  - Nutrient has a new docs URL.
+- Mistral (`mistral`): its [official usage limits](https://docs.mistral.ai/admin/billing-usage/usage-limits), checked 2026-11-14, say Free
+  mode does not include API access; API keys require billing activation and
+  pay-as-you-go (#620). Free Studio/Vibe budgets are not a free developer API.
+
+### Consumer notes
+
+- Do not assume that `mistral` remains present, sampled model IDs are stable or
+  Datalab has a confirmed structured request quota.
+- Local MCP users must upgrade Node separately. Dataset and MCP versions and
+  publication approvals remain independent.
 
 ## [2.13.0] — 2026-11-14
 
@@ -52,6 +87,42 @@ Changes from the v2.12.0 tag to the existing v2.13.0 tag at `74ebf8d23b644ce6532
 - MCP remote JSON loading uses a total deadline; partial publication recovery is independent per destination (#576, #578). This dataset tag does not publish an MCP package.
 - The first-provider tutorial explains data policy and quote registration. (#507). Thanks @Logic769.
 - Contribution paths and repository automation were clarified, the weekly verification worklist was refreshed from main, the next improvement sprint was documented, test-harness listeners are closed, and Lighthouse was updated (#575, #579, #587, #581, #577, #580).
+
+
+## Historical notes already present in v2.13.0
+
+These retained entries span earlier versions and were previously listed under
+Unreleased. They are already present in the immutable v2.13.0 snapshot and are
+not additions in v2.14.0. Their time-relative wording is kept for traceability;
+it does not describe the current catalogue.
+
+### Corrected
+- **Corrección:** the notes of the data policy rows of Voyage AI, Cartesia, Retell AI and LlamaParse said "the page names no plan". That was wrong: a search of each page for the words free, trial, paid and plan finds them (Cartesia: section 2.6 "Free Trials"; Retell AI: section 7 "Beta, evaluation, and trial services"; LlamaParse: section 6 "Payments, Billing, and Subscription Plans"). The Voyage AI note mattered most: its opt-out clause says that, if you opt out, "any credits or tokens for free usage of the Service may be automatically void", so the clause does name free usage and its `plan_named` is now `true`. What changes: those four notes, plus the ones of Scaleway and Moondream, now say only what was checked (the sentence or the clause names no plan, with the nearby section where there is one); `plan_named` is now set on the rows that had a sentence and no value (AssemblyAI `true`, ElevenLabs `false`, Cartesia `false`, Retell AI `false`). A statement about the whole page is kept only where the search finds none of the four words (AI21 and Fireworks AI).
+
+### Changed
+- **`/changes/` is now the one page for what changed**, with a section «Month by month» (the index of the monthly state reports) and a section «Week by week» (what it showed before). `/state/` is a redirect page to `/changes/#months` (GitHub Pages cannot send a server redirect, so it is a meta refresh with a canonical link, as `/collections/` and `/guides/` already are); the reports keep their URLs `/state/YYYY-MM/`, `/state/` leaves the sitemap and the footer entry «Monthly state report» goes. A test now checks that every internal link of every built page points to a file that exists.
+
+### Added
+- **`commercial_ok: "conditional"` and `commercial_ok_condition`** (dataset 2.12.0): the canonical dataset can record commercial use permitted only under documented provider conditions. API v1 preserves its existing `boolean | null` contract by projecting `"conditional"` to `null` while retaining the condition field, including in slices, picks and change values. Scoring and coverage treat it as unconfirmed, and commercial collections still contain only `commercial_ok: true`. First entry: AI Horde, based on its per-model licences and official FAQ give-back rule (#327).
+- **`data/quotes.json` and the consistency check of the passages** (a register, not part of the API): every sentence a data policy row quotes, every phrase of a note between « » and every claim that a whole page names no plan has an entry with its page, the day it was read and how the text was made. CI checks that the register and the data agree, offline; it does not check that the page says that now (see `docs/quotes.md`). The reading is done in English: a Spanish copy of a page is never an "expired" passage.
+- **`/api/v1/score.json` and `/api/v1/score.schema.json`**: the whole FLLMAPIHUB score (every eligible provider, with its parts and its confirmed inputs) in the stable API, with a JSON Schema at a stable URL. Contract v1, documented in `docs/api.md`. A new file, not a change to the dataset shape, so the dataset `version` does not change.
+- **`data/sponsorships.json` and the page `/agreements/`** (a new file and a new page, not part of the API): every paid relationship has a row in the file, shown on `/agreements/` with a visible “Sponsored” label, and every relationship without money is a “Disclosure” line on the provider page. Nothing in the file reaches the score, `/api/v1/`, `llms.txt`, `providers.json`, the structured data of a page or the ranking. The only addition to the sitemap is the URL of `/agreements/`, which is not paid content. The validator rejects the words that the labels do not use (featured, partner, recommended).
+- **`data_policy`** (dataset 2.11.0, a new optional field): what the provider itself says about your prompts on the free access, whether it trains on them (`trains_on_prompts`) and how long it keeps them (`retention`), with the provider's `source` and the day it was `checked`. No provider has one yet; the provider page shows a *Data policy* section only when the field is set, and a value is added only from the provider's own page.
+- **`data_policy.plan_named`** (an optional field of `data_policy`, additive on `/api/v1/`): whether the provider's sentence about training names the free or trial plan (`true`), was read and does not (`false`), or was not checked (`null` or absent). `false` never means the free plan is covered, nor that it is not. The 13 providers that say they do not train now carry `false`, read one by one on 2026-10-15; the no-training collection marks each row "plan not named in the source".
+- **`no_expiry`** (dataset 2.10.0, a new optional field): on a one-time trial credit, the provider's own statement that the credit does not expire, with its `source`, the day it was `checked` and the `quote`. Until now a trial credit with no end date was ambiguous (the provider says it does not expire, or nothing is known). First entries: Deepgram and Sarvam AI, from what each provider's own pages say (not from the terms a customer signs), read 2026-10-09; Sarvam's passage is on the rate-limits page of its docs, and its pricing page agrees. Nanonets stays *not confirmed*: its pages define credits in general as never expiring but say nothing about the sign-up credit. The provider page and the comparison show it and the API carries it; a trial credit with neither `expires` nor `no_expiry` now reads *not confirmed* on both pages (comparisons used to say *no expiry*).
+
+### Removed
+- **`partner` and `partner_note`** (two optional provider properties added to the schema in 2.11.0, released on 13 October 2026, and withdrawn after it): no provider ever carried them (none in `providers.json` of v2.11.0, no commit with `partner: true`) and no response of `/api/v1/` ever contained either one. What changes for a reader of the API: the published `/api/v1/schema.json` loses those two properties, `validate` now rejects both fields, and the `intro` of `/api/v1/best.json` says "Money adds nothing to the score" instead of "Being a partner adds nothing to the score". This is a withdrawal from a published v1 schema, even though no value changes; it is also written in `docs/api.md`. Paid relations live in `data/sponsorships.json`.
+- **LMNT** (`lmnt`): lmnt.com now says "LMNT has shut down" and the docs URL no longer resolves (checked 2026-10-08). Removed under the inclusion criteria: an entry leaves when the provider ends free access entirely.
+
+### Data
+- **Free limits, batch 1 (2026-10-09).** OCR.space, OVHcloud AI Endpoints, Twelve Labs, Datalab and Pinecone Inference gain `free_limits`, each with the provider's own page and the day it was read. Datalab's own page gives 10 requests per minute and 5 concurrent on the free tier, not 25: the entry's `rate_limits` text now follows it.
+- **Re-verification — batch 3B (2026-10-08).** Jina AI, Mixedbread, Ollama Cloud, ModelScope, OCR.space, LlamaParse, Nanonets, Moondream, Nutrient and Photoroom were re-checked against their own pages. Corrections:
+  - Ollama Cloud's free plan is now credit-based with a monthly reset. The 5-hour and weekly limits are gone.
+  - ModelScope's free calls are now paid in daily "Magicubes".
+  - OCR.space's Engine 3 quota is now 1,000 a month.
+  - Moondream publishes 2 requests per second.
+  - Nutrient has a new docs URL.
 
 ## [2.9.1] — 2026-10-08
 
@@ -336,6 +407,8 @@ Ground-up redesign into a data-first, continuously-verified open dataset.
 
 - Initial curated list: README tables, a root `providers.json`, an interactive explorer, a freshness badge, and a weekly link-check workflow.
 
-[Unreleased]: https://github.com/pacocartones/free-llm-api-hub/compare/v2.8.0...HEAD
+[Unreleased]: https://github.com/pacocartones/free-llm-api-hub/compare/v2.13.0...HEAD
 [2.8.0]: https://github.com/pacocartones/free-llm-api-hub/compare/v2.7.0...v2.8.0
 [2.7.0]: https://github.com/pacocartones/free-llm-api-hub/compare/v2.6.0...v2.7.0
+
+[2.13.0]: https://github.com/pacocartones/free-llm-api-hub/compare/v2.12.0...v2.13.0
