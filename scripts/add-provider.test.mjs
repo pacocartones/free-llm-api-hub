@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { copyFileSync, existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { copyFileSync, existsSync, mkdirSync, readFileSync, utimesSync, writeFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -8,6 +8,7 @@ import { makeTmpDir } from './lib/tmp.mjs';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 const SCRIPT = join(ROOT, 'scripts/add-provider.mjs');
+const TODAY = '2026-11-14';
 
 function workspace() {
   const dir = makeTmpDir('add-provider-');
@@ -25,6 +26,8 @@ function run({ dataFile, draftDir }, slug, name) {
       ...process.env,
       ADD_PROVIDER_DATA_FILE: dataFile,
       ADD_PROVIDER_DRAFT_DIR: draftDir,
+      ADD_PROVIDER_TODAY: TODAY,
+      VALIDATE_TODAY: TODAY,
     },
   });
   return { ...result, output: `${result.stdout}${result.stderr}` };
@@ -59,8 +62,8 @@ test('add-provider keeps an invalid scaffold as a local draft, then appends it o
   assert.equal(readFileSync(work.dataFile, 'utf8'), before);
   assert.ok(existsSync(draftPath(work, 'example-ai')), 'the editable draft must remain on disk');
   assert.match(scaffold.output, /draft .*example-ai\.json/i);
-  assert.match(scaffold.output, /category, free_type, free_tier, rate_limits, docs_url/);
-  assert.match(scaffold.output, /phone_required, card_required, commercial_ok, openai_compatible, is_text_llm/);
+  assert.match(scaffold.output, /required fields to complete: category, free_type, free_tier, rate_limits, docs_url, is_text_llm/);
+  assert.match(scaffold.output, /optional facts that may remain unknown: phone_required, card_required, commercial_ok, openai_compatible/);
   assert.match(scaffold.output, /validation failed/i);
 
   const draft = JSON.parse(readFileSync(draftPath(work, 'example-ai'), 'utf8'));
@@ -129,4 +132,63 @@ test('add-provider runs cross-dataset slug checks before replacing providers.jso
   assert.match(result.output, /shares its slug with a provider/);
   assert.equal(readFileSync(work.dataFile, 'utf8'), before);
   assert.ok(existsSync(draftPath(work, 'github-copilot-free')));
+});
+
+test('add-provider requires core facts but accepts unknown tri-state facts', () => {
+  const work = workspace();
+  const before = readFileSync(work.dataFile, 'utf8');
+  run(work, 'required-facts', 'Required Facts');
+  completeDraft(work, 'required-facts', { docs_url: '   ' });
+
+  const missing = run(work, 'required-facts', 'Required Facts');
+  assert.equal(missing.status, 1, missing.output);
+  assert.match(missing.output, /required fields still missing: docs_url/);
+  assert.equal(readFileSync(work.dataFile, 'utf8'), before);
+
+  completeDraft(work, 'required-facts');
+  const added = run(work, 'required-facts', 'Required Facts');
+  assert.equal(added.status, 0, added.output);
+  const provider = JSON.parse(readFileSync(work.dataFile, 'utf8')).providers.at(-1);
+  for (const field of ['phone_required', 'card_required', 'commercial_ok', 'openai_compatible']) {
+    assert.equal(provider[field], null, `${field} may remain unknown`);
+  }
+});
+
+test('add-provider stamps added and generated before validating a provider verified today', () => {
+  const work = workspace();
+  run(work, 'verified-today', 'Verified Today');
+  completeDraft(work, 'verified-today', {
+    verified: true,
+    last_verified: TODAY,
+  });
+
+  const result = run(work, 'verified-today', 'Verified Today');
+  assert.equal(result.status, 0, result.output);
+  const data = JSON.parse(readFileSync(work.dataFile, 'utf8'));
+  assert.equal(data.generated, TODAY);
+  assert.equal(data.providers.at(-1).added, TODAY);
+  assert.equal(data.providers.at(-1).last_verified, TODAY);
+});
+
+test('add-provider refuses an active repository lock and recovers a stale one', () => {
+  const work = workspace();
+  const before = readFileSync(work.dataFile, 'utf8');
+  run(work, 'locked-provider', 'Locked Provider');
+  completeDraft(work, 'locked-provider');
+  const lock = `${work.dataFile}.add-provider.lock`;
+  mkdirSync(lock);
+  writeFileSync(join(lock, 'owner.json'), `${JSON.stringify({ pid: process.pid, acquired_at: new Date().toISOString() })}\n`);
+
+  const blocked = run(work, 'locked-provider', 'Locked Provider');
+  assert.equal(blocked.status, 1, blocked.output);
+  assert.match(blocked.output, /another add-provider process holds the dataset lock/);
+  assert.equal(readFileSync(work.dataFile, 'utf8'), before);
+  assert.ok(existsSync(draftPath(work, 'locked-provider')));
+
+  const old = new Date(Date.now() - 10 * 60 * 1000);
+  utimesSync(lock, old, old);
+  const recovered = run(work, 'locked-provider', 'Locked Provider');
+  assert.equal(recovered.status, 0, recovered.output);
+  assert.equal(existsSync(lock), false, 'the recovered lock must be cleaned up');
+  assert.equal(JSON.parse(readFileSync(work.dataFile, 'utf8')).providers.at(-1).slug, 'locked-provider');
 });
