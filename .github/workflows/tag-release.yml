@@ -14,7 +14,8 @@ on:
     branches: [main]
     paths:
       - 'data/providers.json'
-  workflow_dispatch: {}
+  # Intentionally no workflow_dispatch: a manual run can select an unreviewed
+  # ref, while this workflow can publish official tags with contents:write.
 
 # No permissions at workflow level; the one job below asks for what it needs.
 permissions: {}

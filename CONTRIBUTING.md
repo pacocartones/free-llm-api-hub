@@ -1,23 +1,23 @@
 # Contributing
 
-The entire value of this project is that its data can be trusted. Every contribution should make the dataset **more accurate, better sourced, or more current** — that's the bar.
+The core value of this project is trustworthy data. Contributions should make it **more accurate, better sourced, easier to use, or more current** — that's the bar.
 
 Thanks for helping. Here's how it works.
 
 ## Your first contribution, step by step
 
-Each issue says which files to edit; for a data issue:
+Each issue names the files to edit and the check to run. Start with an unclaimed task:
 
-1. Pick a [good first issue](https://github.com/pacocartones/free-llm-api-hub/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) (small, answered from the provider's public pages).
-2. Read the provider's own page, copy the exact sentence and note the day you read it (UTC).
-3. Fork, edit [`data/providers.json`](data/providers.json), run `npm ci --ignore-scripts` once, then `npm run build && npm test`, and commit the regenerated files with your change.
-4. Open the pull request and say which page you read and when. If you are not sure, say what you found and what you could not confirm: a partial answer is useful.
+1. Pick a [good first issue](https://github.com/pacocartones/free-llm-api-hub/contribute). For a docs or code issue, comment `/take` before starting; a `good first issue` labelled `data` does not need a claim. See [Claiming an issue](#claiming-an-issue).
+2. If the issue verifies a provider fact (in data or docs), read the provider's official page, copy the supporting sentence and note the day you read it (UTC). Otherwise, inspect the current page or behavior and the files named in the issue.
+3. Fork, edit **the files named in that issue**, run `npm ci --ignore-scripts` once, then run **its named check**. Data changes usually need `npm run build && npm test` and the regenerated files; a docs-only issue may ask for a different check.
+4. Open the pull request with the check result and what you changed. For a provider claim, include its source and date; if the source is unclear, say what you could and could not confirm.
 
 Details follow: [Quick start](#quick-start), [Confirming a single unknown field](#confirming-a-single-unknown-field) and [Claiming an issue](#claiming-an-issue).
 
-## The one rule that matters
+## For provider data, edit the source
 
-> **Edit the data, not the docs.** The single source of truth is [`data/providers.json`](data/providers.json). The README tables, the freshness badge, the `collections/` markdown, and the whole interactive site (explorer, per-provider pages, collection pages, badges, sitemap) are all *generated* from it.
+For a **provider data correction**, edit [`data/providers.json`](data/providers.json), not a generated page. The README tables, the freshness badge, the `collections/` markdown, and the whole interactive site (explorer, per-provider pages, collection pages, badges, sitemap) are generated from it. A docs or code issue names its own source files.
 
 **Your pull request ships its own regenerated files.** After editing `data/providers.json`, run `npm run build` (and `npm run og` if the OG check flags drift) and commit the regenerated files together with the data change. There is no regeneration bot — the required "Dataset integrity" check fails until the derived files are in sync.
 
@@ -32,8 +32,9 @@ cd free-llm-api-hub
 # install the locked development tools once:
 npm ci --ignore-scripts
 
-# edit data/providers.json, then:
-npm test          # validate the dataset against the integrity rules
+# edit the files named in your issue, then run the check it names
+# for a provider data correction, this is usually:
+npm run build && npm test
 ```
 
 That's the whole loop. `npm ci --ignore-scripts` installs the locked development tools for JSON Schema validation and local social-image generation without running package lifecycle scripts. The shipped site has no runtime dependencies. The Node version used in CI is pinned in [`.nvmrc`](.nvmrc); anything ≥18 works locally.
@@ -134,7 +135,7 @@ We read every pull request and reply as soon as we can. A reply is a real answer
 
 An issue carries the `good first issue` label only if all of these hold:
 
-1. **No third-party account or payment.** The answer comes from public pages. (This is why `phone_required` questions are not good first issues: most providers don't document it, and answering needs a sign-up. They live in the [#7](https://github.com/pacocartones/free-llm-api-hub/issues/7) checklist instead.)
+1. **No third-party account or payment.** Provider facts can be checked on public official pages; docs and code tasks can be done from the public repository and site. (This is why `phone_required` questions are not good first issues: most providers don't document it, and answering needs a sign-up. They live in the [#7](https://github.com/pacocartones/free-llm-api-hub/issues/7) checklist instead.)
 2. **One or two files**, named in the issue.
 3. **A named check** that must pass, for example `npm run build && npm test`, or `npm run check` for `data/` changes.
 4. **Under about two hours** for someone new to the repository.
@@ -185,6 +186,13 @@ GitHub holds workflow runs from a **first-time contributor** until a maintainer 
 - **Maintainers' branch names:** `<type>/<short-slug>`, lower case with hyphens, where the type is
   the conventional-commit type: `feat/`, `fix/`, `docs/`, `data/`, `test/`, `ci/`, `chore/` or `refactor/`. Example: `fix/sitemap-canonical`. Branch names
   describe the change, not who made it or an internal ticket. Reserved: `main`, `changeset-release/main` and `bot/*`.
+- **Codex Security branches:** the generated format `codex-security/arp_<32 lowercase hexadecimal characters>`
+  is accepted for branches in this repository. Other `codex-security/*` names must follow the normal
+  naming rule instead. This is a branch-name exception only: it does not authenticate the tool or author,
+  approve the patch, or exempt maintainer commits from the identity and attribution rules below.
+- **Dependabot branches:** `dependabot/*` is exempt from the naming rule only when the pull request
+  author is `dependabot[bot]`. A human using that prefix is still checked; the commit identity and
+  attribution rules still apply to maintainer commits in a Dependabot pull request.
 - **What happens to branches:** in this repository, merged and closed pull requests keep their
   commits and the branch is deleted afterwards; branches in your fork are yours.
 - **Commit identity:** maintainers commit as

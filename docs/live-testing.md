@@ -22,7 +22,7 @@ These collapse into **`probe_status`**: `live` · `auth-ok` · `auth-failed` · 
 
 ## Secrets — transport-agnostic by design
 
-The probe reads keys from `process.env[env_key]` (each provider declares its `env_key` in `data/providers.json`). It does **not** care how they got there — so any injector works. Keys are used only in `Authorization` headers; they are never logged, written to the dataset, or committed.
+The probe reads keys from `process.env[env_key]` (each provider declares its `env_key` in `data/providers.json`). It does **not** care how they got there — so any injector works. The script sends keys only in `Authorization` headers and never deliberately logs or writes their values. Provider-controlled model IDs and rate-limit headers are allowlisted and checked for configured values and explicit encodings before output, but no finite check can recognize every reversible transformation. Treat probe logs and generated diffs as sensitive, review them, and rotate any credential suspected of exposure.
 
 **Active path: local environment.** Copy [`.env.example`](../.env.example) to `.env` (gitignored), fill in the keys you have, then run `node --env-file=.env scripts/probe.mjs --write`. The probe picks up whatever `process.env[env_key]` names are set — any subset works, so you can probe one provider at a time, and missing keys are simply skipped. `--auth-only` deliberately records `auth-ok`, not `live`, because it does not perform inference; to earn the **live-tested** badge, run without it (one 1-token call per provider).
 
@@ -36,7 +36,7 @@ The probe reads keys from `process.env[env_key]` (each provider declares its `en
    ```
    With Infisical on `127.0.0.1`, the secrets never traverse the network.
 
-`scripts/probe-cron.sh` wraps this for the weekly VPS cron (probe → model refresh → validate → build → push), publishing without spending GitHub Actions minutes.
+`scripts/probe-cron.sh` wraps this for the weekly VPS cron (probe → model refresh → validate → build), then leaves the complete diff unstaged for human review and a pull request.
 
 ## Worked walkthrough (local, first run)
 

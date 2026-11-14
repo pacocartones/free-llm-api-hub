@@ -141,7 +141,7 @@ test('built with a paid row and a disclosure: the text is on the agreements page
       if (statSync(f).isDirectory()) { walk(f); continue; }
       if (!/\.(html|json|txt|xml|md|yaml|js|css)$/.test(n)) continue;
       const t = readFileSync(f, 'utf8');
-      if (/ZORBITSENTINEL|Zorbit Labs|DISCLOSEDCO/.test(t)) hits.push(relative(ROOT, f));
+      if (/ZORBITSENTINEL|Zorbit Labs|DISCLOSEDCO/.test(t)) hits.push(relative(ROOT, f).replaceAll('\\', '/'));
     }
   };
   for (const d of ['site', 'collections', '.']) if (d !== '.') walk(join(ROOT, d));

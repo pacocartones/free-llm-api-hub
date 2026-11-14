@@ -4,12 +4,108 @@ import { readFileSync } from 'node:fs';
 import { Script, createContext } from 'node:vm';
 import { SLA_DAYS, ageInDays } from './lib/rules.mjs';
 import { weeklyPacing, weeklyBatch } from './lib/pacing.mjs';
+import { fetchDocs } from './lib/reverify-fetch.mjs';
+
+const transportProvider = { docs_url: 'https://provider.example/docs' };
+const encoder = new TextEncoder();
+const responseFrom = (chunks, headers = { 'content-type': 'text/html' }, onCancel = () => {}, { keepOpen = false } = {}) => new Response(
+  new ReadableStream({
+    pull(controller) {
+      if (chunks.length) controller.enqueue(chunks.shift());
+      else if (!keepOpen) controller.close();
+    },
+    cancel: onCancel,
+  }),
+  { status: 200, headers }
+);
+
+test('the total deadline remains active while the response body stalls', async () => {
+  let aborted = false;
+  const fetchImpl = async (_url, { signal }) => new Response(new ReadableStream({
+    start(controller) {
+      const fallback = setTimeout(() => controller.close(), 200);
+      signal.addEventListener('abort', () => {
+        clearTimeout(fallback);
+        aborted = true;
+        controller.error(new DOMException('aborted', 'AbortError'));
+      }, { once: true });
+    },
+  }), { status: 200, headers: { 'content-type': 'text/plain' } });
+  const result = await fetchDocs(transportProvider, { fetchImpl, timeoutMs: 10, maxBytes: 100 });
+  assert.deepEqual(result, { status: 'fetch error: timeout', text: '' });
+  assert.equal(aborted, true);
+});
+
+test('an oversized Content-Length is rejected before reading and cancels the body', async () => {
+  let cancelled = false;
+  const fetchImpl = async () => responseFrom([], {
+    'content-type': 'text/plain',
+    'content-length': '101',
+  }, () => { cancelled = true; }, { keepOpen: true });
+  const result = await fetchDocs(transportProvider, { fetchImpl, maxBytes: 100 });
+  assert.deepEqual(result, { status: 'fetch error: response exceeds 100-byte limit', text: '' });
+  assert.equal(cancelled, true);
+});
+
+test('a streamed body without Content-Length is cancelled as soon as it crosses the byte cap', async () => {
+  let cancelled = false;
+  const fetchImpl = async () => responseFrom(
+    [encoder.encode('1234'), encoder.encode('56')],
+    { 'content-type': 'text/plain' },
+    () => { cancelled = true; },
+    { keepOpen: true }
+  );
+  const result = await fetchDocs(transportProvider, { fetchImpl, maxBytes: 5 });
+  assert.deepEqual(result, { status: 'fetch error: response exceeds 5-byte limit', text: '' });
+  assert.equal(cancelled, true);
+});
+
+test('a legitimate bounded body is decoded across chunks and extracted as before', async () => {
+  const encoded = encoder.encode('<p>Hello € &amp; friends</p>');
+  const fetchImpl = async () => responseFrom(
+    [encoded.slice(0, 10), encoded.slice(10, 12), encoded.slice(12)],
+    { 'content-type': 'text/html', 'content-length': String(encoded.byteLength) }
+  );
+  const result = await fetchDocs(transportProvider, { fetchImpl, maxBytes: encoded.byteLength });
+  assert.deepEqual(result, { status: '200', text: 'Hello € & friends' });
+});
+
+test('fetchDocs passes the same byte cap and total deadline into the public transport', async () => {
+  let options;
+  const fetchImpl = async (_url, received) => {
+    options = received;
+    return responseFrom([encoder.encode('okay')], { 'content-type': 'text/plain' });
+  };
+  const result = await fetchDocs(transportProvider, { fetchImpl, timeoutMs: 1234, maxBytes: 8 });
+  assert.deepEqual(result, { status: '200', text: 'okay' });
+  assert.equal(options.timeoutMs, 1234);
+  assert.equal(options.maxBytes, 8);
+});
+
+test('a cancellation promise that never settles cannot hold fetchDocs open', { timeout: 500 }, async () => {
+  let cancelled = false;
+  const fetchImpl = async () => ({
+    status: 413,
+    ok: false,
+    headers: new Headers({ 'content-type': 'text/plain' }),
+    body: {
+      cancel() {
+        cancelled = true;
+        return new Promise(() => {});
+      },
+    },
+  });
+  const fallback = new Promise((resolve) => setTimeout(() => resolve({ fallback: true }), 100));
+  const result = await Promise.race([fetchDocs(transportProvider, { fetchImpl }), fallback]);
+  assert.deepEqual(result, { status: 'HTTP 413', text: '' });
+  assert.equal(cancelled, true);
+});
 
 // Run the CLI itself with its imports supplied by the harness. Nothing touches
 // providers.json, the real clock, the output directory, or a provider's network.
 const source = readFileSync(new URL('./reverify.mjs', import.meta.url), 'utf8');
 const imports = [...source.matchAll(/^import .+ from '([^']+)';$/gm)].map((m) => m[1]);
-assert.deepEqual(imports, ['node:fs', 'node:path', 'node:url', './lib/rules.mjs', './lib/pacing.mjs']);
+assert.deepEqual(imports, ['node:fs', 'node:path', 'node:url', './lib/rules.mjs', './lib/pacing.mjs', './lib/reverify-fetch.mjs']);
 const script = new Script(`(async () => {\n${source.replace(/^#!.*\n/, '').replace(/^import .+;\n/gm, '').replaceAll('import.meta.url', "'file:///fixture/scripts/reverify.mjs'")}\n})()`);
 const NOW = new Date('2026-10-28T12:00:00Z');
 const provider = (slug, date, extra = {}) => ({
@@ -24,44 +120,45 @@ const fixture = () => [
   provider('middle', '2026-09-01'),
 ];
 
-async function run({ providers = fixture(), args = [], response = {}, fetchError } = {}) {
-  const logs = [], writes = [], requests = [], dirs = [], timers = [];
-  let cleared = 0;
+async function run({ providers = fixture(), args = [], response = {}, fetchError, timeout = false } = {}) {
+  const logs = [], writes = [], requests = [], dirs = [];
   class FixedDate extends Date {
     constructor(...args) { super(...(args.length ? args : [NOW.getTime()])); }
     static now() { return NOW.getTime(); }
   }
   const exit = {};
+  const fetchImpl = async (url, options) => {
+    requests.push({ url, options });
+    if (timeout) {
+      return new Promise((resolve, reject) => {
+        options.signal.addEventListener('abort', () => reject(options.signal.reason), { once: true });
+      });
+    }
+    if (fetchError) throw fetchError;
+    return new Response(response.body ?? '<p>Free API</p>', {
+      status: response.status ?? 200,
+      headers: { 'content-type': response.contentType ?? 'text/html' },
+    });
+  };
   const context = createContext({
     Date: FixedDate, SLA_DAYS, ageInDays: (date, now = NOW) => ageInDays(date, now),
     weeklyPacing, weeklyBatch,
+    fetchDocs: (p) => fetchDocs(p, { fetchImpl, timeoutMs: timeout ? 10 : 20000 }),
     dirname: () => '/fixture/scripts', join: (...parts) => parts.join('/'), fileURLToPath: () => '/fixture/scripts/reverify.mjs',
     readFileSync: (path, encoding) => {
       assert.equal(path, '/fixture/scripts/../data/providers.json');
       assert.equal(encoding, 'utf8');
       return JSON.stringify({ providers });
     },
-    mkdirSync: (...args) => dirs.push(args),
+    mkdirSync: (...values) => dirs.push(values),
     writeFileSync: (path, text) => writes.push({ path, text }),
     process: { argv: ['node', 'reverify.mjs', ...args], exit: (code) => { assert.equal(code, 0); throw exit; } },
     console: { log: (line) => logs.push(line) },
-    AbortController,
-    setTimeout: (fn, delay) => { assert.equal(delay, 20000); timers.push(fn); return timers.length; },
-    clearTimeout: () => { cleared++; },
-    fetch: async (url, options) => {
-      requests.push({ url, options });
-      if (fetchError) throw fetchError;
-      return {
-        ok: response.ok ?? true, status: response.status ?? 200,
-        headers: { get: () => response.contentType ?? 'text/html' },
-        text: async () => response.body ?? '<p>Free API</p>',
-      };
-    },
   });
   try { await script.runInContext(context, { timeout: 1000 }); }
   catch (error) { if (error !== exit) throw error; }
   const selected = logs.filter((line) => line.startsWith('- ')).map((line) => line.match(/\(([^)]+)\)/)[1]);
-  return { logs, writes, requests, dirs, timers, cleared, selected };
+  return { logs, writes, requests, dirs, selected, fetchImpl };
 }
 
 test('fixed-date automatic batch selects the oldest eligible providers in order', async () => {
@@ -117,20 +214,19 @@ test('dossier keeps the injected date, entry metadata, policy and decoded docs',
   assert.match(result.writes[0].text, /trains_on_prompts=false retention=30 days/);
   assert.match(result.writes[0].text, /Free &amp; safe API/);
   assert.doesNotMatch(result.writes[0].text, /hidden\(\)|x\{\}/);
-  assert.equal(result.cleared, 1);
 });
 
 test('HTTP failure writes an honest empty dossier instead of success text', async () => {
-  const result = await run({ args: ['--batch', '1'], response: { ok: false, status: 503 } });
+  const result = await run({ args: ['--batch', '1'], response: { status: 503 } });
   assert.match(result.writes[0].text, /fetch status: HTTP 503/);
   assert.match(result.writes[0].text, /nothing extracted/);
 });
 
 test('timeout and network errors are captured in the dossier', async () => {
-  for (const [fetchError, expected] of [[{ name: 'AbortError' }, /fetch error: timeout/], [new Error('offline'), /fetch error: offline/]]) {
-    const result = await run({ args: ['--batch', '1'], fetchError });
-    assert.match(result.writes[0].text, expected);
-  }
+  const timedOut = await run({ args: ['--batch', '1'], timeout: true });
+  assert.match(timedOut.writes[0].text, /fetch error: timeout/);
+  const offline = await run({ args: ['--batch', '1'], fetchError: new Error('offline') });
+  assert.match(offline.writes[0].text, /fetch error: offline/);
 });
 
 test('non-text responses are marked for manual review, long text is capped', async () => {
