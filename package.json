@@ -6,6 +6,7 @@
   "type": "module",
   "scripts": {
     "build": "node scripts/build.mjs",
+    "sync-main": "node scripts/sync-main.mjs",
     "validate": "node scripts/validate.mjs",
     "verify-quotes": "node scripts/verify-quotes.mjs",
     "quotes:add": "node scripts/quotes-add.mjs",
