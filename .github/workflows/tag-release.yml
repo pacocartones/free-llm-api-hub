@@ -2,7 +2,7 @@ name: Tag release
 
 # Creates the annotated tag `vX.Y.Z` when the dataset version in
 # data/providers.json advances. Idempotent: if the tag already exists the job
-# is a no-op, so running on every data change is harmless.
+# is accepted only if annotated at this event commit on main; mismatches fail.
 #
 # Why a workflow and not a hand-run `git tag`? The tag kept lagging behind
 # main (v2.9.0 shipped, then more re-verification landed untagged) because a
@@ -35,23 +35,8 @@ jobs:
         id: version
         run: echo "value=$(node -p "require('./data/providers.json').version")" >> "$GITHUB_OUTPUT"
 
-      - name: Create tag if missing
+      - name: Verify or create the dataset tag
         env:
           DATASET_VERSION: ${{ steps.version.outputs.value }}
           GH_TOKEN: ${{ github.token }}
-        run: |
-          V="v${DATASET_VERSION}"
-          git check-ref-format "refs/tags/$V"
-          if git ls-remote --tags origin "$V" | grep -q "refs/tags/$V"; then
-            echo "tag $V already exists — nothing to do"
-            exit 0
-          fi
-          # An annotated tag needs a tagger identity; the runner has none.
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git tag -a "$V" -m "Dataset $V"
-          # Supply authentication only to this push; never store it in Git config.
-          auth="$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)"
-          echo "::add-mask::$auth"
-          git -c "http.https://github.com/.extraheader=AUTHORIZATION: basic $auth" push origin "refs/tags/$V"
-          echo "created and pushed tag $V"
+        run: bash scripts/tag-release.sh

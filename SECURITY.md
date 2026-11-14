@@ -33,7 +33,7 @@ Fourteen workflows run against this repository; none of them writes to `main` di
 | `mcp-ci.yml` | pull request and push to `main` when the MCP package or its workflow changes | `contents: read` — cannot write anything |
 | `ai-trailer-alert.yml` | push to `main` | `contents: read` — reports only |
 | `pages.yml` | relevant push to `main`, daily schedule, manual | `contents: read`, `pages: write`, `id-token: write` — publishes the site |
-| `codeql.yml` | every pull request, push to `main`, weekly schedule, manual | job-scoped `contents: read`, `actions: read`, `security-events: write` — code scanning |
+| `codeql.yml` | every pull request, weekly schedule, manual | job-scoped `contents: read`, `actions: read`, `security-events: write` — code scanning |
 | `scorecard.yml` | push to `main`, weekly schedule, branch-protection change, manual | workflow default `read-all`; analysis job: `security-events: write`, `id-token: write` — publishes security results |
 | `tag-release.yml` | push to `main` (data/providers.json) | `contents: write` — pushes the annotated `vX.Y.Z` tag when the dataset version advances; never writes to `main` |
 | `release-mcp.yml` | `mcp-v*` tag | job-scoped `contents: read` and `id-token: write` — publishes to npm and the MCP registry after environment approval |
@@ -54,12 +54,29 @@ out or execute pull-request code.
 All checkouts disable persisted credentials. Release tagging supplies the token only to
 its explicit tag push; no credential is stored in the workspace Git configuration.
 CodeQL runs one JavaScript/TypeScript analysis with no build or dependency installation;
-feature-branch pushes do not create a second scan alongside the PR. Superseded runs for
+it does not analyze Actions workflow YAML. There is no push trigger, so merging a PR
+does not duplicate its scan. Superseded runs for
 the same PR/ref and event are cancelled. Weekly and manual scans remain available.
 See [required checks](CONTRIBUTING.md#required-checks) for the documented check contract
 and the distinction between workflow definitions and live branch protection.
 The model-sample backfill (`npm run models`) runs locally and on-demand, never in Actions.
 A change to `scripts/` is reviewed as code, not as data.
+
+## Release tag integrity and follow-up settings
+
+For a dataset release, the checked-out commit must equal `GITHUB_SHA` and be
+reachable from the refreshed `origin/main`. An existing `vX.Y.Z` tag is accepted
+only if the remote object is annotated and resolves to exactly that commit;
+a lightweight tag, a different commit or unavailable remote state fails the job.
+Tags are never moved to make a mismatch pass. Changing provider data without
+advancing its version will therefore fail if that version's tag already points
+to an earlier commit; resolve the version/release deliberately rather than
+rewriting a published snapshot.
+
+Follow-up for a repository owner: configure an external tag ruleset for `v*` to
+restrict creation to the authorized release path and prevent updates/deletions,
+reviewing necessary bypass permissions. This PR does not apply those settings;
+workflow checks alone do not prevent a user or another token from moving tags.
 
 ## Notes for users of the data
 

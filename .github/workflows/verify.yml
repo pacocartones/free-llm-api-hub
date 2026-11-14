@@ -76,7 +76,7 @@ jobs:
       # The explorer XSS regression suite (js/xss-through-dom) ships in
       # explorer.test.mjs and must gate pull requests exactly like npm test does
       # locally. These runtime checks complement CodeQL static analysis on
-      # pull requests and main.
+      # pull requests and the weekly main scan.
       - name: Run the pipeline test suite
         run: node scripts/run-tests.mjs
 

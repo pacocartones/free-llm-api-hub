@@ -1,11 +1,10 @@
 name: CodeQL
 
 on:
-  # PRs scan the merge candidate; only main pushes scan the integrated code.
-  # Do not also scan feature-branch pushes or filter out required PR checks.
+  # Scan JavaScript/TypeScript in the PR merge candidate, plus weekly on main.
+  # No push trigger: merging a reviewed PR should not duplicate its scan.
+  # No path filters: keep the PR signal available for every change.
   pull_request:
-  push:
-    branches: [main]
   schedule:
     # 04:00 UTC every Monday.
     - cron: '0 4 * * 1'
