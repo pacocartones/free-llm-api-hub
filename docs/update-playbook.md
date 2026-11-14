@@ -15,23 +15,23 @@ npm ci --ignore-scripts
 
 ## Layer 1 — the re-verification batch (local script)
 
-[`scripts/reverify.mjs`](../scripts/reverify.mjs) (`npm run reverify`) picks the oldest verifications (sized to clear the SLA), fetches each provider's own `docs_url`, and writes a review dossier per provider to `.freebuff/reverify/<slug>.md` (gitignored — local only):
+[`scripts/reverify.mjs`](../scripts/reverify.mjs) (`npm run reverify`) picks the oldest verifications (sized to clear the SLA). Its default mode prints the worklist without fetching remote content. A human can explicitly fetch each provider's `docs_url` into the operating system's temporary `free-llm-api-hub/reverify-human-only/` directory, outside the repository worktree:
 
 ```bash
-npm run reverify              # this week's batch (oldest first)
-npm run reverify -- --batch 12     # override the batch size
-npm run reverify -- --no-fetch     # offline: just print the batch
+npm run reverify                                  # safe worklist; no remote fetch
+npm run reverify -- --batch 12                    # override the worklist size
+npm run reverify -- --fetch-for-human-review      # human reviewer only: fetch dossiers
 ```
 
-The script never edits the data: an agent (or a human) reads each dossier, compares the fetched docs against `data/providers.json`, and drafts the edit. Fetch failures, SPAs and non-text bodies are flagged in the dossier — those are reviewed manually.
+The script never edits the data. Dossiers contain provider-controlled prose and are strictly human-review material: never paste them into an LLM context or let a tool-capable agent read them. A human compares the fetched docs against `data/providers.json` and drafts the edit. This is a procedural trust boundary that reduces accidental exposure, not filesystem-enforced isolation.
 
 ### Paced re-verification batches
 
 Start each weekly pass with `npm run worklist`. It prints this week's oldest verified providers — a batch sized by `scripts/lib/pacing.mjs` (at most 11 a week), so the 90-day freshness SLA is spread across small, regular batches instead of becoming a large end-of-quarter cleanup. If the worklist flags a cliff of entries that share a verification date, take the larger batch it recommends.
 
-Run `npm run reverify` for the normal weekly batch, or pass the worklist size explicitly (for example, `npm run reverify -- --batch 12`) when clearing a larger one. The script fetches each provider's primary `docs_url` and saves a local review dossier at `.freebuff/reverify/<slug>.md`; it does not change `data/providers.json` itself.
+Run `npm run reverify` for the normal weekly worklist, or pass its size explicitly when clearing a larger one. A human reviewer then adds `--fetch-for-human-review` to fetch primary sources outside the checkout.
 
-Keep one batch in one focused PR. Review the dossiers, update the affected entries in `data/providers.json`, then run:
+Keep one batch in one focused PR. A human reviews the dossiers and updates `data/providers.json`. Only after that trusted edit exists may local automation run:
 
 ```bash
 npm run build && npm run og && npm test
@@ -71,6 +71,18 @@ For each provider on the worklist (`npm run worklist`, or just the reverify batc
 - Watch the usual movers: Gemini limits, Cloudflare Neuron pricing, and any "trial credit" amounts (these change most often). The model *lists* (OpenRouter, Groq, Cerebras, etc.) are refreshed locally by `npm run models -- --write` (there is no scheduled backfill job) — then `npm run build && npm run og && npm test`, commit and PR; you only need to eyeball which models moved.
 - Backfill attribute fields still `null`: `openai_base_url`, and any missing `openai_compatible` / `modalities`.
 
+### Optional: external source sweep
+
+Run `npm run check-sources` when you want to check the source links themselves. It collects each provider's `docs_url` and the external links in [`docs/sources.md`](sources.md), requests each once with a bounded `GET`, waits 15 seconds at most, and sends at most two requests per second with the `free-llm-api-hub-source-check` User-Agent. Requests use the repository's public-URL transport, which rejects private destinations and revalidates DNS and every redirect.
+
+The output starts with `Checked N source URLs.`. If every URL answers, it prints `✓ no dead or unreachable sources found.` and exits 0. Otherwise it prints a Markdown table with these columns and exits 1:
+
+| status | source | url | wayback |
+| --- | --- | --- | --- |
+| HTTP status, `timeout`, or the fetch error | the data file and slug, or `docs/sources.md` | the URL checked | the closest available Wayback snapshot, or `-` |
+
+The script writes nothing to the repository and is not part of `npm test` or CI, so a provider or Archive.org outage never fails a build.
+
 ### Optional: live probe
 
 [`scripts/probe.mjs`](../scripts/probe.mjs) (`npm run probe`) live-tests each free tier with a real key from `process.env[env_key]` and writes `last_probed`/`probe_status`. Run it locally whenever you have keys handy (any subset; providers without a key are skipped):
@@ -81,9 +93,11 @@ npm run probe -- --write --auth-only
 
 See [live-testing.md](live-testing.md) for setup.
 
-## Layer 3 — agentic acceleration
+## Layer 3 — capability boundary
 
-The weekly pass is designed to be driven by an agent (e.g. a scheduled Claude Code / Freebuff session): run `npm run reverify`, read the dossiers in `.freebuff/reverify/`, verify the claims against the fetched docs, draft the `data/providers.json` edit, run `npm run build && npm test`, and open the PR for a human to merge. The reverify script is the agent's entry point; everything it needs lands in the local dossiers.
+Remote documentation and trusted repository actions are separate phases. Only a human reviewer may fetch and read a dossier, decide which claims it supports, and make the corresponding `data/providers.json` edit.
+
+After that human-authored edit exists, copy or commit only that edit into a fresh worktree that has never contained review dossiers. An agent may perform repository-local mechanical work there, but it must not receive the temporary dossier directory, provider pages, or the original review checkout. Existing clones may still contain legacy `.freebuff/reverify/` or `.freebuff/reverify-human-only/` directories; never use such a clone for the agent phase. This clean-worktree handoff is required because a filename, warning, or `.gitignore` rule is not a capability boundary.
 
 ## Layer 4 — public security-data stewardship
 

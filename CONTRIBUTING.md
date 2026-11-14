@@ -23,6 +23,8 @@ For a **provider data correction**, edit [`data/providers.json`](data/providers.
 
 Fixing a rate limit means editing one field plus the files regenerated from it — still a small, reviewable diff.
 
+**Adding a provider.** Run `npm run add-provider -- <slug> "<Name>"`. The first run writes an intentionally invalid local draft under `.freebuff/provider-drafts/` and separates the core fields that must be completed from tri-state facts that may legitimately remain unknown; it does not change `data/providers.json`. Fill the draft from the provider's own docs, keeping `verified: false` and `last_verified: null` until the evidence is complete, then run the same command again. The command serializes `added` and advances `generated` to the installation day, appending the row only after the full validator accepts it, including category/free-type and cross-dataset slug checks. A repository-local lock prevents two invocations from replacing the dataset concurrently.
+
 ## Quick start
 
 ```bash

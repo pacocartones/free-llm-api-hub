@@ -28,6 +28,10 @@ import { publicHttpsUrlError } from './lib/public-fetch.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const FILE = process.argv[2] ? resolve(process.argv[2]) : join(ROOT, 'data/providers.json');
+// Fixture paths intentionally skip cross-dataset checks. add-provider instead
+// marks its temporary path as a proposal so it receives every production check
+// before it can replace the canonical dataset.
+const FIXTURE_MODE = Boolean(process.argv[2]) && process.env.VALIDATE_PROPOSAL !== '1';
 const data = JSON.parse(readFileSync(FILE, 'utf8'));
 const schema = JSON.parse(readFileSync(join(ROOT, 'data/schema.json'), 'utf8'));
 
@@ -265,7 +269,7 @@ try {
 // ---------- gpu-compute.json (Free GPU compute: a section apart from the ranking) ----------
 // Skipped for fixture runs (argv[2]), like best.json: a fixture providers.json must not be failed by it.
 let gpuComputeCount = 0;
-if (!process.argv[2]) {
+if (!FIXTURE_MODE) {
   try {
     const gpu = JSON.parse(readFileSync(join(ROOT, 'data/gpu-compute.json'), 'utf8'));
     const gpuSchema = JSON.parse(readFileSync(join(ROOT, 'data/gpu-compute.schema.json'), 'utf8'));
@@ -280,7 +284,7 @@ if (!process.argv[2]) {
 
 // ---------- coding-tools.json (Free AI coding tools: a section apart from the ranking) ----------
 // Skipped for fixture runs (argv[2]) like gpu-compute.json.
-if (!process.argv[2]) {
+if (!FIXTURE_MODE) {
   try {
     const toolsSchema = JSON.parse(readFileSync(join(ROOT, 'data/coding-tools.schema.json'), 'utf8'));
     const toolsAjv = new Ajv2020({ allErrors: true, strict: true });
@@ -301,7 +305,7 @@ if (!process.argv[2]) {
 // ---------- quotes.json (the register of the passages the data_policy rows quote) ----------
 // Consistency only, offline: the sentence of each row, each phrase of a note between guillemets and each claim about a whole page
 // have an entry. It does not say the page says that today (npm run verify-quotes reads the pages). Skipped for fixture runs (argv[2]).
-if (!process.argv[2]) {
+if (!FIXTURE_MODE) {
   try { errors.push(...quoteErrors(data, JSON.parse(readFileSync(join(ROOT, 'data/quotes.json'), 'utf8')))); }
   catch (e) { errors.push('quotes.json: ' + e.message); }
   // the weekly report of verify-quotes is optional; when it is there it has to agree with the register
@@ -317,7 +321,7 @@ if (!process.argv[2]) {
 // by the on-disk ranking (a fixture that un-verifies typhoon would otherwise
 // trip this instead of the rule under test). The dedicated tests in
 // build.test.mjs exercise bestPickErrors against fabricated lists.
-if (!process.argv[2]) {
+if (!FIXTURE_MODE) {
   try {
     const best = JSON.parse(readFileSync(join(ROOT, 'data/best.json'), 'utf8'));
     for (const e of bestPickErrors(best, data.providers ?? [])) errors.push(e);
