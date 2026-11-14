@@ -10,7 +10,7 @@ Columns, in order:
 
 `dataset_version`, `dataset_generated`, `slug`, `name`, `category`, `free_type`, `free_tier`, `rate_limits`, `notes`, `best_for`, `expires`, `docs_url`, `phone_required`, `card_required`, `commercial_ok`, `openai_compatible`, `openai_base_url`, `is_text_llm`, `model_tier`, `verified`, `last_verified`, `added`, `last_probed`, `probe_status`
 
-The values `true` and `false` stay as those words. An empty cell means `null`, absent, or not recorded; it never means `false` or `0`. Text is UTF-8 CSV, with commas, quotes and line breaks quoted as CSV requires.
+The values `true` and `false` stay as those words. An empty cell means `null`, absent, or not recorded; it never means `false` or `0`. To prevent spreadsheet formula execution, a string cell whose first non-whitespace character is `=`, `+`, `-`, or `@` gets a leading apostrophe before CSV quoting; numbers, booleans and empty cells keep their normal representation. Text is UTF-8 CSV, with commas, quotes and line breaks quoted as CSV requires.
 
 These fields are omitted because they are arrays, nested objects, or operational details, and flattening them would hide conditions or provenance: `modalities`, `models_free`, `model_tier_source`, `free_limits`, `no_expiry`, `data_policy`, `env_key`.
 

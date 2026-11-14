@@ -40,7 +40,7 @@ export const PROVIDER_CSV_OMITTED = [
 
 const cell = (value) => {
   if (value === null || value === undefined) return '';
-  const text = String(value);
+  const text = typeof value === 'string' && /^\s*[=+@-]/.test(value) ? `'${value}` : String(value);
   return /[",\r\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
 };
 

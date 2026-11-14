@@ -65,6 +65,42 @@ test('providersCsv: exact scalar header, one row per provider, true/false/unknow
   for (const omitted of PROVIDER_CSV_OMITTED) assert.equal(PROVIDER_CSV_COLUMNS.includes(omitted), false, `${omitted} is documented as omitted`);
 });
 
+test('providersCsv neutralizes spreadsheet formula prefixes in string cells, including after leading whitespace', () => {
+  const rows = parseCsv(providersCsv({
+    version: '9.9.9',
+    generated: '2026-11-03',
+    providers: [{
+      slug: 'formula-prefixes',
+      name: '=1+1',
+      category: '+cmd',
+      free_type: '-cmd',
+      free_tier: '@cmd',
+      rate_limits: ' =1+1',
+      notes: '\t+cmd',
+      best_for: '  -cmd',
+      expires: '\t @cmd',
+      phone_required: true,
+      card_required: false,
+      commercial_ok: null,
+      model_tier: -1,
+    }],
+  }));
+  const provider = Object.fromEntries(PROVIDER_CSV_COLUMNS.map((column, index) => [column, rows[1][index]]));
+
+  assert.equal(provider.name, "'=1+1");
+  assert.equal(provider.category, "'+cmd");
+  assert.equal(provider.free_type, "'-cmd");
+  assert.equal(provider.free_tier, "'@cmd");
+  assert.equal(provider.rate_limits, "' =1+1");
+  assert.equal(provider.notes, "'\t+cmd");
+  assert.equal(provider.best_for, "'  -cmd");
+  assert.equal(provider.expires, "'\t @cmd");
+  assert.equal(provider.phone_required, 'true');
+  assert.equal(provider.card_required, 'false');
+  assert.equal(provider.commercial_ok, '');
+  assert.equal(provider.model_tier, '-1');
+});
+
 test('providersCsv on the real dataset: every public provider appears once, including unverified rows, and env_key is not a column', () => {
   const data = JSON.parse(readFileSync(join(ROOT, 'data/providers.json'), 'utf8'));
   const publicProviders = data.providers.map(({ env_key, ...rest }) => rest);
