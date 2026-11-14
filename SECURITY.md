@@ -24,20 +24,31 @@ Out of scope:
 
 ## Automation and permissions
 
-Four workflows run against this repository; none of them writes to `main` directly:
+Thirteen workflows run against this repository; none of them writes to `main` directly:
 
 | Workflow | Trigger | Token permissions |
 |---|---|---|
-| `verify.yml` | pull request, push to `main`, manual | `contents: read` — cannot write anything |
-| `pages.yml` | push to `main`, manual | `contents: read`, `pages: write` — publishes the site |
-| `codeql.yml` | weekly schedule, manual | `contents: read` (job: `security-events: write`) — code scanning |
+| `verify.yml` | pull request, relevant `data/**` or `scripts/**` push to `main`, manual | `contents: read` — cannot write anything |
+| `commit-policy.yml`, `lighthouse.yml` | pull request (Lighthouse also supports manual runs) | `contents: read` — cannot write anything |
+| `mcp-ci.yml` | pull request and push to `main` when the MCP package or its workflow changes | `contents: read` — cannot write anything |
+| `ai-trailer-alert.yml` | push to `main` | `contents: read` — reports only |
+| `pages.yml` | relevant push to `main`, daily schedule, manual | `contents: read`, `pages: write`, `id-token: write` — publishes the site |
+| `codeql.yml` | weekly schedule, manual | job-scoped `contents: read`, `actions: read`, `security-events: write` — code scanning |
+| `scorecard.yml` | push to `main`, weekly schedule, branch-protection change, manual | workflow default `read-all`; analysis job: `security-events: write`, `id-token: write` — publishes security results |
 | `tag-release.yml` | push to `main` (data/providers.json) | `contents: write` — pushes the annotated `vX.Y.Z` tag when the dataset version advances; never writes to `main` |
+| `release-mcp.yml` | `mcp-v*` tag | job-scoped `contents: read` and `id-token: write` — publishes to npm and the MCP registry after environment approval |
+| `welcome.yml` | first issue or pull request opened | job-scoped `issues: write`, `pull-requests: write` — posts a comment without checking out pull-request code |
+| `first-merge-thanks.yml` | pull request closed | job-scoped `pull-requests: write` — comments only after a first outside contribution is merged; does not check out pull-request code |
+| `issue-assign.yml` | issue comment | job-scoped `issues: write` — handles `/take` and `/release` without checking out repository code |
 
-A pull request from a fork therefore never runs with a token that can write to this
-repository, and never has access to repository secrets.
+No workflow that checks out or executes fork pull-request code has repository-write permissions
+or repository secrets. The `pull_request_target` comment workflows run trusted base-branch logic
+with narrowly scoped write tokens and never check out or execute the fork's code.
 
-Derived files are regenerated locally and committed by the author in the same PR; the only
-write-capable automation is the release tagger (an annotated tag only, via `tag-release.yml`).
+Derived files are regenerated locally and committed by the author in the same PR. Write-capable
+automation is limited to site and package publication, security-result upload, release tagging,
+and issue or pull-request comments/assignment. The comment and assignment workflows never check
+out or execute pull-request code.
 The model-sample backfill (`npm run models`) runs locally and on-demand, never in Actions.
 A change to `scripts/` is reviewed as code, not as data.
 
