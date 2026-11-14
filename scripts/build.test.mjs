@@ -26,6 +26,7 @@ import { markNewTabLinks } from './lib/links.mjs';
 import { bestFactsHtml } from './lib/best-facts.mjs';
 import { weeklyPacing, weeklyBatch, WEEKLY_CAP, MIN_AGE_DAYS } from './lib/pacing.mjs';
 import { clientConfigProviders, openaiClients, litellmYaml, MODEL_PLACEHOLDER } from './lib/client-config.mjs';
+import { hasHiddenChars } from './lib/hidden-chars.mjs';
 import { requirementsHtml, limitsHtml, glanceHtml, modelsHtml, dataPolicyHtml } from './lib/provider-sections.mjs';
 import { compareTableHtml, comparisonCategory, sameComparisonCategory, selectComparePairs, COMPARE_PAGE_CAP, COMPARE_PER_PROVIDER_CAP, COMPARE_MAX as COMPARE_MAX_SLOTS } from './lib/compare.mjs';
 import { codeHtmlEsc, curlChatQuickstart, posixShellQuote, pythonChatQuickstart, pythonEmbeddingsQuickstart, pythonStringLiteral } from './lib/quickstart.mjs';
@@ -129,6 +130,21 @@ test('validate rejects a verified entry with no last_verified date', () => {
   const fixture = tmpFile('providers.json');
   writeFileSync(fixture, JSON.stringify(data));
   assert.equal(exitOk(['scripts/validate.mjs', fixture]), false);
+});
+
+test('validate rejects line-breaking and hidden characters in client-config metadata', () => {
+  const hidden = ['\r', '\n', '\u0085', '\u2028', '\u2029', '\u202e', '\u200b'];
+  for (const field of ['name', 'docs_url', 'openai_base_url']) {
+    for (const char of hidden) {
+      const data = JSON.parse(readFileSync(DATA, 'utf8'));
+      const provider = data.providers.find((p) => typeof p.openai_base_url === 'string');
+      assert.ok(provider, 'fixture needs a provider eligible for client configuration');
+      provider[field] += char;
+      const fixture = tmpFile('providers.json');
+      writeFileSync(fixture, JSON.stringify(data));
+      assert.equal(exitOk(['scripts/validate.mjs', fixture]), false, `${field} accepted ${JSON.stringify(char)}`);
+    }
+  }
 });
 
 for (const [label, value] of [
@@ -929,6 +945,7 @@ test('footer star button is block-level so its margin-top is not inert', () => {
 // JSON strings — so the test parses that grammar strictly, line by line, and
 // fails on any line outside it.
 function parseLitellm(yaml) {
+  assert.doesNotMatch(yaml, /[\r\u0085\u2028\u2029]/u, 'LF is the only physical line separator');
   const lines = yaml.split('\n');
   assert.equal(lines.at(-1), '', 'file ends with a newline');
   const entries = [];
@@ -1006,6 +1023,28 @@ test('litellm.yaml quotes values so YAML-special characters stay literal', () =>
   const tricky = [{ ...ccBase, slug: 'tricky', name: 'Tricky', openai_base_url: 'https://t.test/v1', env_key: 'T_KEY', models_free: ['a: b # c', 'say "hi"'] }];
   const entries = parseLitellm(litellmYaml({ version: '1.0.0', generated: '2026-01-01', providers: tricky }));
   assert.deepEqual(entries.map((e) => e.litellm_params.model), ['openai/a: b # c', 'openai/say "hi"']);
+});
+
+test('litellm.yaml escapes hidden comment text before it can create YAML structure', () => {
+  const injected = [{
+    ...ccBase,
+    slug: 'trusted',
+    name: 'Trusted\r  - model_name: "attacker/model"\n    litellm_params:',
+    docs_url: 'https://example.com/\u0085\u2028\u2029\u202e\u200bdocs',
+    openai_base_url: 'https://trusted.test/v1',
+    env_key: 'TRUSTED_API_KEY',
+    models_free: ['safe-model'],
+  }];
+  const yaml = litellmYaml({ version: '1.0.0\rmalicious', generated: '2026-01-01\u2028malicious', providers: injected });
+  assert.equal(yaml.split('\n').some(hasHiddenChars), false, 'generated YAML contains no hidden comment characters');
+  assert.match(yaml, /Trusted\\u\{d\}  - model_name: "attacker\/model"\\u\{a\}/);
+  const entries = parseLitellm(yaml);
+  assert.deepEqual(entries.map((e) => e.model_name), ['trusted/safe-model']);
+  assert.deepEqual(entries[0].litellm_params, {
+    model: 'openai/safe-model',
+    api_base: 'https://trusted.test/v1',
+    api_key: 'os.environ/TRUSTED_API_KEY',
+  });
 });
 
 const decodeShellWord = (word) => {
