@@ -80,6 +80,17 @@
    "page_sha256": "b0880ab5f91f2cc4c500b66e7bd079d7a35b90fb73c41059d735c0d26cf07be3"
   },
   {
+   "id": "siliconflow.sentence",
+   "slug": "siliconflow",
+   "kind": "sentence",
+   "text": "不会将您的业务数据用于任何大模型的预训练、微调或其他商业用途",
+   "source_url": "https://docs.siliconflow.cn/docs/legals/privacy-policy",
+   "read_on": "2026-11-14",
+   "lang": "cn",
+   "method": "html-text-v1: page requested with Accept-Language cn, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "2b1f6094bc6b9be389829567109f290c41ed0f0504bbc3a385e4ff9e908486e1"
+  },
+  {
    "id": "fireworks-ai.sentence",
    "slug": "fireworks-ai",
    "kind": "sentence",
