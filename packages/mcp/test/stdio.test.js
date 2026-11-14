@@ -28,6 +28,8 @@ test('stdio server lists its tools and answers calls', async (t) => {
     'dataset_info', 'get_provider', 'openai_client_config', 'search_providers',
   ]);
   for (const tool of tools) {
+    assert.equal(tool.annotations.readOnlyHint, true);
+    assert.equal(tool.annotations.idempotentHint, true);
     assert.match(tool.description, /terms change/, `${tool.name} description must warn that terms change`);
     assert.match(tool.description, /authoritative/, `${tool.name} description must say docs are authoritative`);
     assert.match(tool.description, /not confirmed/, `${tool.name} description must explain null`);
@@ -51,6 +53,9 @@ test('stdio server lists its tools and answers calls', async (t) => {
   const cfgBody = JSON.parse(cfg.content[0].text);
   assert.equal(cfgBody.env_var, 'ALPHA_PUBLISHED_KEY');
   assert.equal(cfgBody.base_url, 'https://api.alpha.example/openai/v1');
+
+  const invalid = await client.callTool({ name: 'search_providers', arguments: { modality: 'unsupported' } });
+  assert.equal(invalid.isError, true, 'invalid tool input is rejected by the MCP schema');
 
   const bad = await client.callTool({ name: 'get_provider', arguments: { slug: 'nope' } });
   assert.equal(bad.isError, true);

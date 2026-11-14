@@ -42,6 +42,9 @@ npx -y free-llm-api-hub-mcp --data ./providers.json --clients ./openai-clients.j
 
 ## Client configuration
 
+For product boundaries, stable limitations and the canonical distribution checklist, see the
+[productization audit](https://github.com/pacocartones/free-llm-api-hub/blob/main/docs/mcp-productization.md).
+
 Claude Desktop (`claude_desktop_config.json`), from a local checkout:
 
 ```json
@@ -58,6 +61,63 @@ Claude Desktop (`claude_desktop_config.json`), from a local checkout:
 Once published, replace `command`/`args` with `"command": "npx", "args": ["-y", "free-llm-api-hub-mcp"]`. To pin local files, add `"env": { "FLAH_DATA": "/absolute/path/to/providers.json", "FLAH_CLIENTS": "/absolute/path/to/openai-clients.json" }`.
 
 Any other MCP host that launches stdio servers takes the same three things: the command (`node`), the arguments (the path to `src/index.js`, optionally `--data <path>` and `--clients <path>`), and optionally the `FLAH_DATA` / `FLAH_CLIENTS` environment variables.
+
+### Codex
+
+For a Codex installation supporting local stdio servers, configure its MCP settings
+(for example `~/.codex/config.toml`):
+
+```toml
+[mcp_servers.free-llm-api-hub]
+command = "node"
+args = ["/absolute/path/to/free-llm-api-hub/packages/mcp/src/index.js"]
+```
+
+See [Codex MCP configuration](https://developers.openai.com/codex/mcp/).
+The path and dependencies must be available in the environment running the server;
+a local desktop configuration does not provision Codex Cloud.
+
+### Claude Code
+
+Claude Desktop uses the JSON example above. For Claude Code:
+
+```bash
+claude mcp add --transport stdio free-llm-api-hub -- node /absolute/path/to/free-llm-api-hub/packages/mcp/src/index.js
+```
+
+See [Claude Code MCP configuration](https://code.claude.com/docs/en/mcp).
+Remote/web connectors need a supported remote transport; this package offers stdio.
+
+### VS Code with the Copilot harness
+
+For new configuration, use `.mcp.json` at the workspace root or the personal file
+`$COPILOT_HOME/mcp-config.json` (`~/.copilot/mcp-config.json` when `COPILOT_HOME` is
+unset). Both use a top-level `mcpServers` object:
+
+```json
+{
+  "mcpServers": {
+    "free-llm-api-hub": {
+      "command": "node",
+      "args": ["/absolute/path/to/free-llm-api-hub/packages/mcp/src/index.js"]
+    }
+  }
+}
+```
+
+Use **Chat: Open Customizations → MCP Servers → Add Server** in a Copilot session.
+The guided workspace-root destination requires `chat.mcp.workspaceRootConfig.enabled`;
+existing workspace-root files remain available when that setting is off. In remote
+or container sessions, paths must be accessible where the server runs.
+
+Legacy `.vscode/mcp.json` and profile `mcp.json` use `servers` and belong to the
+**deprecated Local harness**. Do not use them for new Copilot configuration; eligible
+existing definitions can be forwarded, but Copilot does not read those files directly.
+Follow the [official configuration reference](https://code.visualstudio.com/docs/agents/reference/mcp-configuration)
+for migration, authentication and configuration availability.
+
+For each host, follow its enablement/trust flow and call `dataset_info` to verify an
+actual tool call. These examples are not host certification or an extension install.
 
 ## Tools
 

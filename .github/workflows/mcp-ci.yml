@@ -3,10 +3,10 @@ name: MCP package CI
 # Runs the tests of packages/mcp on every pull request and push that touches it.
 on:
   pull_request:
-    paths: ['packages/mcp/**', '.github/workflows/mcp-ci.yml']
+    paths: ['packages/mcp/**', '.github/workflows/mcp-ci.yml', '.github/workflows/release-mcp.yml', 'scripts/check-mcp-release.sh', 'scripts/release-mcp.test.mjs']
   push:
     branches: [main]
-    paths: ['packages/mcp/**', '.github/workflows/mcp-ci.yml']
+    paths: ['packages/mcp/**', '.github/workflows/mcp-ci.yml', '.github/workflows/release-mcp.yml', 'scripts/check-mcp-release.sh', 'scripts/release-mcp.test.mjs']
 
 permissions:
   contents: read
@@ -32,6 +32,8 @@ jobs:
           node-version: ${{ matrix.node }}
       - run: npm ci --ignore-scripts
       - run: npm test
+      - name: Offline release decisions
+        run: node --test ../../scripts/release-mcp.test.mjs
       - name: server.json against the registry schema
         run: npm run validate:server-json
       - name: What would be published
