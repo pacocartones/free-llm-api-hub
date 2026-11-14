@@ -743,10 +743,7 @@
       "rate_limits": "Current Pay as you go pricing lists 3 concurrent requests; a limit for free cloud usage is not confirmed",
       "notes": "Checked 2026-11-14 (UTC): the current official pricing page describes a $0 pay-as-you-go account and per-token cloud model billing, while the official Cloud/API docs require an API key for hosted requests. None of the public official pages checked states whether a payment card is required to create or use the free account, so card_required remains null. Local model use is separate from hosted cloud API access.",
       "best_for": "Cloud-hosted open models with the Ollama workflow",
-      "modalities": [
-        "text",
-        "vision"
-      ],
+      "modalities": ["text", "vision"],
       "models_free": null,
       "expires": null,
       "docs_url": "https://ollama.com/pricing",
@@ -760,15 +757,7 @@
       "model_tier": null,
       "verified": false,
       "last_verified": null,
-      "data_policy": {
-        "trains_on_prompts": false,
-        "retention": null,
-        "source": "https://docs.ollama.com/cloud",
-        "checked": "2026-10-15",
-        "quote": "Ollama processes cloud prompts and responses to answer your requests. We do not use them to train models.",
-        "note": "The page names no plan in this sentence.",
-        "plan_named": false
-      }
+      "data_policy": {"trains_on_prompts":false,"retention":null,"source":"https://docs.ollama.com/cloud","checked":"2026-10-15","quote":"Ollama processes cloud prompts and responses to answer your requests. We do not use them to train models.","note":"The page names no plan in this sentence.","plan_named":false}
     },
     {
       "slug": "ai-horde",
