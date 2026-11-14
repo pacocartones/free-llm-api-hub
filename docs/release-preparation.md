@@ -1,38 +1,35 @@
-# Dataset release audit and preparation (#608)
+# Preparing dataset releases
 
-Observed 2026-11-14 against main `46b93b5` (GitHub REST releases endpoint,
-all pages, and a full clone's `refs/tags`). This is a dated observation, not a
-claim that every tag is an approved release. No release was created or changed.
+This is the stable local preparation procedure. Tags pin data; GitHub Releases
+and uploaded snapshot assets are separate. A tag does not prove green CI or
+owner approval. Never move an existing tag or bulk-publish missing releases.
 
-| Dataset tags | GitHub Release | Uploaded assets |
-| --- | --- | --- |
-| v2.1.0, v2.2.0 | Published | None |
-| v2.3.0, v2.4.0, v2.5.0, v2.6.0, v2.7.0, v2.8.0, v2.9.0 | Absent | None |
-| v2.9.1 | Published | None |
-| v2.10.0 | Absent | None |
-| v2.11.0 | Published | None |
-| v2.12.0, v2.13.0 | Absent | None |
+## Fetch official dataset tags
 
-There are 14 dataset tags, four published releases and ten tags without a
-release. GitHub's automatically generated source archives are not uploaded
-snapshot assets. No published release has JSON/CSV/schema/checksum assets.
-`data/providers.json` is 2.13.0; package.json and package-lock.json still say
-2.11.0. The dataset version is authoritative under RELEASING.md; this task
-neither bumps versions nor changes tags. CHANGELOG.md's last dated version is
-2.9.1 and Unreleased still includes tagged work, as #608 describes. Its existing
-prose and contributor credits are retained for editorial reconciliation.
+Use a full clone whose `origin` is the official repository. Fetch main and an
+explicit, pruned copy of origin tags before either CLI:
 
-`Tag release` only creates a tag on a data push. It does not publish releases,
-upload assets, or gate tagging on the completion of the verification workflow.
-Tag presence alone therefore proves neither CI success nor owner approval.
-The tag creation date can differ from the release publication date (notably
-v2.11.0); do not invent changelog dates from either one without reviewing the
-actual snapshot. Do not bulk-backfill releases or move existing tags.
+```bash
+git remote get-url origin
+git fetch --no-tags --prune origin \
+  "+refs/heads/main:refs/remotes/origin/main" \
+  "+refs/tags/*:refs/remotes/origin/tags/*"
+```
+
+The separate `refs/remotes/origin/tags/` namespace is the local snapshot of
+official origin tags. It must be refreshed using that exact refspec: ordinary
+`git fetch --tags` is insufficient. The CLIs never fetch or modify refs themselves.
+Arbitrary local `refs/tags/` cannot become a baseline. A candidate must have a
+strict dataset SemVer name, match `data/providers.json.version` at its commit,
+and belong to fetched `origin/main`. Changelog candidates must also be reachable
+from HEAD; the highest coherent version wins. Missing/unusable fetched tags
+fail explicitly. This trusts the configured official origin and the last fetch,
+not a signature or a live guarantee that the remote has not changed.
 
 ## Local, reviewable preparation
 
-1. Fetch main and tags in a full clone. Select an existing dataset tag explicitly
-   and record its full commit (`git rev-parse vX.Y.Z^{commit}`). Check its version,
+1. Fetch as above. Select an existing dataset tag explicitly and record its
+   full commit (`git rev-parse refs/remotes/origin/tags/vX.Y.Z^{commit}`). Check its version,
    membership in main and green CI at that exact commit. A current main build is
    not verification of a historical tag.
 2. In a separate checkout of that exact commit, run `npm ci --ignore-scripts`,
@@ -47,10 +44,15 @@ actual snapshot. Do not bulk-backfill releases or move existing tags.
    sha256sum -c SHA256SUMS
    ```
 
-   Choose a new directory: the tool refuses to overwrite one. It resolves an
-   existing tag, checks ancestry against fetched `origin/main`, checks the
+   Choose a new directory: the tool refuses to overwrite one. It resolves a
+   fetched origin tag, checks ancestry against fetched `origin/main`, checks the
    dataset version, and reads JSON/schema directly from that immutable commit.
    Dirty working data never becomes a snapshot. It makes no network requests.
+   Run from a committed tooling checkout: modifications or staged changes to
+   `scripts/release-snapshot.mjs`, `scripts/lib/provider-csv.mjs`,
+   `scripts/lib/release-tags.mjs` or `package.json` are rejected. Each required
+   generator must be tracked. Unrelated working data is ignored, since the
+   snapshot reads its data from the resolved tag commit.
 
    - `providers.canonical.json`: byte-exact tagged `data/providers.json`.
    - `providers.json`: dataset JSON with `env_key` removed, matching the site's
@@ -59,15 +61,22 @@ actual snapshot. Do not bulk-backfill releases or move existing tags.
      tooling checkout's formatter and columns; nested data remains in JSON and
      formula-like strings retain spreadsheet escaping.
    - `schema.json`: byte-exact tagged canonical schema for the dataset JSON.
-   - `snapshot.json`: tag, full commit, version and file roles.
+   - `snapshot.json`: tag, full data commit, full `toolingCommit`, `nodeVersion`,
+     dataset version and file roles.
    - `SHA256SUMS`: sorted SHA-256 hashes of every other asset.
 
-   Record the tooling commit as well as the data commit in the review. Old tags
+   To reproduce, check out the manifest's `toolingCommit` in a clean full clone,
+   use its recorded Node version, fetch official tags as above, and run the same
+   command for the recorded tag. Verify the resolved data commit equals the
+   manifest's `commit` (do not accept a moved tag), then compare `SHA256SUMS`.
+   Both commits and Node version are part of artifact identity; identical data
+   prepared by another tooling commit intentionally yields a different manifest.
+   Record both commits in the review. Old tags
    can have different schema shapes; independently validate the JSON against
    its tagged schema before approval. Checksums establish byte identity, not
    signatures, provenance or CI success.
 4. Reconcile CHANGELOG.md manually. `npm run changelog-draft` starts at the highest
-   reachable dataset version, so it intentionally does not reconstruct missing
+   reachable coherent fetched-origin dataset version, so it intentionally does not reconstruct missing
    historical releases. For a past release review the previous-tag comparison,
    merged PRs and original notes. Cite every user-facing PR and preserve `Thanks
    @user` using the merged PR author, never the squash committer. Do not treat
@@ -83,11 +92,3 @@ actual snapshot. Do not bulk-backfill releases or move existing tags.
    automatic tag-creation option. No publication workflow or write token is
    introduced here; the local tools require no secrets. Never auto-promote old
    tags or silently fill the release gap.
-
-To repeat the observation without writes:
-
-```bash
-git fetch origin main --tags
-git tag --list 'v*' --sort=version:refname
-gh api repos/pacocartones/free-llm-api-hub/releases --paginate --jq '.[] | {tag_name, draft, published_at, assets: [.assets[].name]}'
-```

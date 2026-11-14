@@ -3,16 +3,15 @@
 import { execFileSync } from 'node:child_process';
 import { pathToFileURL } from 'node:url';
 import { readProviderRevisions, historyFromRevisions, HISTORY_FIELDS } from './lib/history.mjs';
+import { latestOfficialDatasetTag, ORIGIN_TAGS } from './lib/release-tags.mjs';
 import { flattenFieldChanges } from './lib/changes.mjs';
 
 const git = (cwd, ...args) => execFileSync('git', args, { cwd, encoding: 'utf8' }).trim();
 const markdown = (value) => JSON.stringify(value ?? null).replace(/[\\`*_{}[\]<>#|]/g, '\\$&');
 export function changelogDraft(cwd = process.cwd()) {
   if (git(cwd, 'rev-parse', '--is-shallow-repository') !== 'false') throw new Error('Full git history required (fetch-depth: 0).');
-  const tags = git(cwd, 'tag', '--merged', 'HEAD', '--sort=-version:refname').split('\n').filter(t => /^v\d+\.\d+\.\d+$/.test(t));
-  if (!tags.length) throw new Error('No reachable dataset tag vX.Y.Z found.');
-  const tag = tags[0];
-  const after = new Set(git(cwd, 'rev-list', `${tag}..HEAD`).split('\n').filter(Boolean));
+  const tag = latestOfficialDatasetTag(cwd);
+  const after = new Set(git(cwd, 'rev-list', `${ORIGIN_TAGS}${tag}..HEAD`).split('\n').filter(Boolean));
   const revisions = readProviderRevisions(cwd);
   const baseline = [...revisions].reverse().find(r => !after.has(r.hash));
   if (!baseline) throw new Error('No provider history at the starting tag.');
