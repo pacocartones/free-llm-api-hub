@@ -10,6 +10,110 @@ const ROOT = fileURLToPath(new URL('..', import.meta.url));
 const DATA = JSON.parse(readFileSync(join(ROOT, 'data/providers.json'), 'utf8'));
 const VALIDATE = join(ROOT, 'scripts/validate.mjs');
 
+// Check/error-site inventory at main 46b93b5 (source line | diagnostic/protection | evidence).
+// Count call sites, not loop iterations or rules inside imported helpers. Schema
+// rejection is NOT evidence for a later hand-written check: the existing tier
+// pairing, vote-floor, verified-date and commercial-condition cases stop in Ajv.
+// 93 sites total; 35 have targeted direct cases below;
+// 58 have no dedicated direct case in this file. Imported helpers may
+// have their own unit tests; this is not a repository-wide coverage percentage.
+// The shared hidden-character loop has two new fixtures but counts as one site.
+// | validate.mjs line | Diagnostic or delegated protection | Evidence |
+// | --- | --- | --- |
+// | 81 | top-level: version must be semver | no dedicated direct case |
+// | 82 | top-level: generated must be YYYY-MM-DD | no dedicated direct case |
+// | 87 | top-level: generated (${data.generated}) is after today in UTC (${todayUtc}); write the dates of the dataset in UTC (date -u +%F) | existing case |
+// | 89 | top-level: providers must be a non-empty array | no dedicated direct case |
+// | 91 | keyHostErrors: API keys stay on their pinned hosts | no dedicated direct case |
+// | 106 | top-level: generated (${data.generated}) is older than the newest last_verified/added (${newest}) — bump it in data/providers.json | existing case |
+// | 112 | ${id}: slug must be kebab-case | no dedicated direct case |
+// | 113 | ${id}: duplicate slug | no dedicated direct case |
+// | 115 | ${id}: duplicate name | new isolated case |
+// | 118 | ${id}: name required | no dedicated direct case |
+// | 120 | ${id}: playground_url requires a non-empty docs_url | existing case |
+// | 124 | ${id}: ${field} must not contain control, bidirectional or zero-width characters | new isolated case |
+// | 126 | ${id}: category must be one of ${CATEGORIES.join('/')} | no dedicated direct case |
+// | 127 | ${id}: free_type must be one of ${FREE_TYPES.join('/')} | no dedicated direct case |
+// | 128 | ${id}: free_tier required | no dedicated direct case |
+// | 129 | ${id}: verified must be boolean | no dedicated direct case |
+// | 132 | ${id}: ${f} must be true/false/null | no dedicated direct case |
+// | 134 | ${id}: commercial_ok must be true/false/null or "conditional" | no dedicated direct case |
+// | 136 | ${id}: commercial_ok is conditional, so commercial_ok_condition is required | no dedicated direct case |
+// | 138 | ${id}: commercial_ok_condition only allowed when commercial_ok is "conditional" | no dedicated direct case |
+// | 142 | ${id}: unknown modality "${m}" | no dedicated direct case |
+// | 145 | ${id}: models_free must be an array of strings or null | no dedicated direct case |
+// | 148 | ${id}: models_free must not contain control, bidirectional or zero-width characters | new isolated case |
+// | 153 | ${id}: models_url must be the provider's public HTTPS model catalogue | new isolated case |
+// | 162 | ${id}: free_type "${p.free_type}" belongs in category "${expected}" (got "${p.category}") | existing case |
+// | 169 | ${id}: rate_limits must give a limit with a unit, or say the provider publishes none (got: "${String(p.rate_limits).slice(0, 60)}") | existing case |
+// | 173 | ${id}: openai_base_url must be an http(s) URL or null | no dedicated direct case |
+// | 174 | ${id}: openai_base_url must not contain control, bidirectional or zero-width characters | no dedicated direct case |
+// | 175 | ${id}: openai_base_url is set but openai_compatible is false | existing case |
+// | 180 | ${id}: env_key must be an UPPER_SNAKE env var name | new isolated case |
+// | 184 | ${id}: added must be YYYY-MM-DD | no dedicated direct case |
+// | 188 | ${id}: last_probed must be YYYY-MM-DD or null | no dedicated direct case |
+// | 191 | ${id}: invalid probe_status | no dedicated direct case |
+// | 192 | ${id}: probe_status set but last_probed missing | existing case |
+// | 198 | ${id}: is_text_llm must be true or false on every entry | no dedicated direct case |
+// | 201 | ${id}: model_tier and model_tier_source go together (both set or both null) | no dedicated direct case |
+// | 203 | ${id}: model_tier ${tier} does not match the cited rating ${src.rating} (expected ${tierForRating(src.rating)}) | existing case |
+// | 204 | ${id}: the rated row needs at least ${MODEL_TIER_MIN_VOTES} votes | no dedicated direct case |
+// | 205 | ${id}: model_tier_source.ci must be [lower, upper] around the rating | existing case |
+// | 206 | ${id}: model_tier_source.boundary must be ${nearBoundary(src.ci)} for ci ${JSON.stringify(src.ci)} (crosses or is within 5 points of a threshold) | existing case |
+// | 207 | ${id}: model_tier only applies to a text-LLM offer | existing case |
+// | 208 | ${id}: a one-time trial credit is not continuous free access, so it carries no model_tier | existing case |
+// | 209 | ${id}: model_tier_source.snapshot must be a date not after the dataset's generated date | existing case |
+// | 212 | ${id}: a one-time trial credit is not continuous free access, so it carries no free_limits | existing case |
+// | 213 | ${id}: free_limits.checked must be a date not after the dataset's generated date | existing case |
+// | 214 | ${id}: free_limits.source must be the provider's page (http/https) | no dedicated direct case |
+// | 220 | ${id}: data_policy must state trains_on_prompts or retention (an all-null policy records nothing) | existing case |
+// | 221 | ${id}: data_policy.checked must be a date not after the dataset's generated date | existing case |
+// | 222 | ${id}: data_policy.source must be the provider's public HTTPS page | new isolated case |
+// | 226 | ${id}: data_policy.${k} must be text of 1 to ${max} characters | no dedicated direct case |
+// | 227 | ${id}: data_policy.${k} must not contain control, bidirectional or zero-width characters | existing case |
+// | 229 | ${id}: a data_policy sentence goes with a stated part | existing case |
+// | 231 | ${id}: data_policy.plan_named must be true, false or null | no dedicated direct case |
+// | 236 | ${id}: no_expiry applies only to a one-time trial credit (on a continuous free tier a null expires already means no end) | existing case |
+// | 237 | ${id}: no_expiry and a non-null expires contradict each other | existing case |
+// | 238 | ${id}: no_expiry.checked must be a date not after the dataset's generated date | existing case |
+// | 239 | ${id}: no_expiry.source must be the provider's page (http/https) | no dedicated direct case |
+// | 240 | ${id}: no_expiry.quote must be the passage, 1 to 300 characters | no dedicated direct case |
+// | 245 | ${id}: verified entry needs a YYYY-MM-DD last_verified | no dedicated direct case |
+// | 246 | ${id}: verified entry needs a public HTTPS docs_url (primary source) | new isolated case |
+// | 248 | ${id}: unverified entry must have last_verified: null | existing case |
+// | 264 | programs.json: "${group}" must be a non-empty array | no dedicated direct case |
+// | 268 | programs/${id}: name, what and who are required | no dedicated direct case |
+// | 269 | programs/${id}: url must be http(s) | no dedicated direct case |
+// | 270 | programs/${id}: funds must be yes/partial/no | no dedicated direct case |
+// | 271 | programs/${id}: research entries need an audience | no dedicated direct case |
+// | 274 | programs.json read/parse failure | no dedicated direct case |
+// | 286 | gpu-compute.json: ${e.instancePath \|\| '/'} ${e.message} | no dedicated direct case |
+// | 287 | gpuComputeErrors: GPU offer consistency | no dedicated direct case |
+// | 289 | gpu-compute.json read/parse failure | no dedicated direct case |
+// | 305 | ${file}: ${e.instancePath \|\| '/'} ${e.message} | no dedicated direct case |
+// | 306 | codingToolsErrors: coding-tool offer consistency | no dedicated direct case |
+// | 307 | ${file}: the slug ${e.slug} is in both coding-tools files | no dedicated direct case |
+// | 309 | coding-tools.json read/parse failure | no dedicated direct case |
+// | 316 | quoteErrors: policy passages match the quote register | no dedicated direct case |
+// | 317 | quotes.json read/parse failure | no dedicated direct case |
+// | 321 | reportErrors: optional quotes report matches the register | no dedicated direct case |
+// | 322 | quotes-report.json read/parse failure | no dedicated direct case |
+// | 334 | bestPickErrors: editorial picks are current, verified providers | no dedicated direct case |
+// | 336 | best.json read/parse failure | no dedicated direct case |
+// | 351 | probe-report: probed_at must be YYYY-MM-DD | existing case |
+// | 352 | probe-report: results must be an array | existing case |
+// | 354 | probe-report: "${r.slug}" is not a current provider (stale entry) | existing case |
+// | 355 | probe-report: duplicate slug "${r.slug}" | existing case |
+// | 358 | probe-report: count (${report.count}) must equal results.length (${(report.results ?? []).length}) | existing case |
+// | 359 | probe-report.json read/parse failure | no dedicated direct case |
+// | 370 | figureErrors: prose provider counts agree with the dataset | no dedicated direct case |
+// | 375 | editorialErrors: editorial rating consistency | no dedicated direct case |
+// | 376 | editorial.json read/parse failure | no dedicated direct case |
+// | 381 | summaryErrors: dated, provider-owned summary sources | no dedicated direct case |
+// | 382 | provider-summaries.json read/parse failure | no dedicated direct case |
+// | 388 | agreementsErrors: sponsorship disclosure consistency | no dedicated direct case |
+// | 389 | sponsorships.json read/parse failure | no dedicated direct case |
+
 // Each row names the rule in validate.mjs and the bad claim or inconsistent
 // state it protects. The runner below mutates only that part of a fixture and
 // asserts on the message validate prints.
@@ -40,6 +144,37 @@ const RULE_CASES = [
   ['verified entries have last_verified', 'a verified claim with no verification date', (d) => { provider(d).verified = true; provider(d).last_verified = null; }, 'last_verified must be string'],
   ['unverified entries have no last_verified', 'a stale verification date on an unverified row', (d) => { const p = provider(d); p.verified = false; p.last_verified = '2026-10-01'; }, 'unverified entry must have last_verified: null'],
 ];
+
+// Additional rule | protects | minimal mutation | exact diagnostic.
+// These fixtures pass JSON Schema first and must produce exactly one integrity
+// error. Removing the named check therefore makes its case fail, even when a
+// different gate could reject the same input for another reason.
+const INTEGRITY_CASES = [
+  ['duplicate name', 'distinct provider identities', (p, d) => { p.name = d.providers.find((row) => row.slug !== p.slug).name; }, 'duplicate name'],
+  ['name hidden characters', 'visible provider labels', (p) => { p.name += '\u200b'; }, 'name must not contain control, bidirectional or zero-width characters'],
+  ['docs_url hidden characters', 'unambiguous source links', (p) => { p.verified = false; p.last_verified = null; p.docs_url += '\u200b'; }, 'docs_url must not contain control, bidirectional or zero-width characters'],
+  ['models_free hidden characters', 'copyable model identifiers', (p) => { p.models_free = ['example-model\u200b']; }, 'models_free must not contain control, bidirectional or zero-width characters'],
+  ['env_key syntax', 'usable environment variable names', (p) => { p.openai_base_url = null; p.env_key = 'api-key'; }, 'env_key must be an UPPER_SNAKE env var name'],
+  ['models_url public HTTPS', 'public model catalogues', (p) => { p.models_url = 'https://127.0.0.1/models'; }, "models_url must be the provider's public HTTPS model catalogue"],
+  ['data_policy.source public HTTPS', 'public policy evidence', (p) => { p.data_policy.source = 'https://127.0.0.1/policy'; }, "data_policy.source must be the provider's public HTTPS page"],
+  ['verified docs_url public HTTPS', 'public primary verification sources', (p) => { p.docs_url = p.docs_url.replace(/^https:/, 'http:'); }, 'verified entry needs a public HTTPS docs_url (primary source)'],
+];
+
+for (const [rule, protects, mutate, diagnostic] of INTEGRITY_CASES) {
+  test(`validate integrity: ${rule} (${protects})`, () => {
+    const data = structuredClone(DATA);
+    // Mutate a later row so a duplicate name is reported on this row.
+    const p = provider({ providers: [...data.providers].reverse() });
+    assert.ok(p, 'dataset needs a verified, ranked text provider with policy evidence');
+    mutate(p, data);
+    const result = runValidate(data);
+    assert.equal(result.status, 1, result.output);
+    assert.deepEqual(result.output.trim().split(/\r?\n/).map((line) => line.trim()), [
+      '✗ validation failed (1 issue):',
+      `- ${p.slug}: ${diagnostic}`,
+    ]);
+  });
+}
 
 const REPORT_CASES = [
   ['probe-report.probed_at is a date', 'an unreadable probe-report date', (r) => { r.probed_at = 'today'; }, 'probe-report: probed_at must be YYYY-MM-DD'],
