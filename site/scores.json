@@ -133,6 +133,12 @@
       "of": 6,
       "rank": null
     },
+    "ovhcloud-ai-endpoints": {
+      "total": 36.5,
+      "confirmed": 2,
+      "of": 6,
+      "rank": null
+    },
     "pollinations": {
       "total": 36.5,
       "confirmed": 2,
@@ -194,12 +200,6 @@
       "rank": null
     },
     "moondream": {
-      "total": 33.9,
-      "confirmed": 2,
-      "of": 6,
-      "rank": null
-    },
-    "ovhcloud-ai-endpoints": {
       "total": 33.9,
       "confirmed": 2,
       "of": 6,

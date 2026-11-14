@@ -1,6 +1,6 @@
 {
   "collections/no-credit-card.png": "02d20bbd7e394ad5999a4cebabac9619732c343a4cac99470c03e23ba2bdc2bc",
-  "collections/no-phone.png": "785f3ec7eb32f30b90cd0fcf3657d388b5ff4297f2f9716ff66e9b69c05ddd09",
+  "collections/no-phone.png": "535fa30d7e25dd8a49f1536779734ec8286108d115da5045d77f3b4185d8f790",
   "collections/commercial-use.png": "670671cd97404156226e507973f2ab8330d3022ca96e0c93bdbdb320c41adcaf",
   "collections/openai-compatible.png": "9f14025af0065b30e47e23ebb3b491d39ae8ed17d33739e5ff3827ffb3634953",
   "collections/always-free.png": "ef2d127de37b942baad06145e54b0c619a1f22327b2ebbcfbec78f5564afe39d",
@@ -9,7 +9,7 @@
   "collections/free-signup-credit.png": "c6f3ac57944a531490cd39902d0f777715fd005efac9a30622d5f5205e7f6894",
   "guides/free-llm-api-without-credit-card.png": "59e19706d51d39f66711c2653cd7eb1291c94d9b55eb14bda74ce4dc636d015a",
   "guides/openai-compatible-free-apis.png": "c6f3ac57944a531490cd39902d0f777715fd005efac9a30622d5f5205e7f6894",
-  "guides/free-llm-api-no-signup.png": "6b51d431df5d7f141cbececcf79edf3dd861c3b4069f0b11661a3eefacbba918",
+  "guides/free-llm-api-no-signup.png": "3fdba35f04dc8c462986c992bcf875546257113072a909c162f7e470e581e278",
   "guides/free-embeddings-apis.png": "6b51d431df5d7f141cbececcf79edf3dd861c3b4069f0b11661a3eefacbba918",
   "guides/free-speech-to-text-apis.png": "5f9c4ab08cac7457e9111a30e4664920607ea2c115a1433d7be98e97e64244ca",
   "guides/free-image-generation-apis.png": "4a44dc15364204a80fe80e9039455cc1608281820fe2b24f1e5233ade6af1dd5",

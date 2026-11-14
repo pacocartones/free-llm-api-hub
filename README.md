@@ -107,12 +107,12 @@ Focused, always-current collections — each is generated from the dataset and h
 
 <!-- AUTOGEN:collections:start -->
 - **[Free LLM APIs with no credit card](collections/no-credit-card.md)** (55) — start without a payment method · [live page ↗](https://freellmapihub.com/collections/no-credit-card)
-- **[Free LLM APIs with no phone verification](collections/no-phone.md)** (22) — no SMS/phone verification · [live page ↗](https://freellmapihub.com/collections/no-phone)
+- **[Free LLM APIs with no phone verification](collections/no-phone.md)** (23) — no SMS/phone verification · [live page ↗](https://freellmapihub.com/collections/no-phone)
 - **[Free LLM APIs for commercial use](collections/commercial-use.md)** (27) — safe to ship, not eval-only · [live page ↗](https://freellmapihub.com/collections/commercial-use)
 - **[OpenAI-compatible free LLM APIs](collections/openai-compatible.md)** (35) — drop-in OpenAI SDK swap · [live page ↗](https://freellmapihub.com/collections/openai-compatible)
 - **[Permanently free LLM APIs](collections/always-free.md)** (5) — $0 models, no trial clock · [live page ↗](https://freellmapihub.com/collections/always-free)
 - **[Free multimodal LLM APIs](collections/multimodal.md)** (52) — vision, audio, embeddings · [live page ↗](https://freellmapihub.com/collections/multimodal)
-- **[Free LLM APIs that say they do not train on your prompts](collections/no-training.md)** (16) — says it does not train on your prompts (some only without opt-in) · [live page ↗](https://freellmapihub.com/collections/no-training)
+- **[Free LLM APIs that say they do not train on your prompts](collections/no-training.md)** (17) — says it does not train on your prompts (some only without opt-in) · [live page ↗](https://freellmapihub.com/collections/no-training)
 - **[Free LLM APIs whose free tier renews](collections/renewing-free-tier.md)** (28) — free quotas or credits that reset · [live page ↗](https://freellmapihub.com/collections/renewing-free-tier)
 - **[Free LLM APIs with a free signup credit](collections/free-signup-credit.md)** (33) — one-time signup credits, not renewing allowances · [live page ↗](https://freellmapihub.com/collections/free-signup-credit)
 <!-- AUTOGEN:collections:end -->
