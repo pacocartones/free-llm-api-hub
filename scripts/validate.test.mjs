@@ -14,8 +14,8 @@ const VALIDATE = join(ROOT, 'scripts/validate.mjs');
 // Count call sites, not loop iterations or rules inside imported helpers. Schema
 // rejection is NOT evidence for a later hand-written check: the existing tier
 // pairing, vote-floor, verified-date and commercial-condition cases stop in Ajv.
-// 93 sites total; 35 have targeted direct cases below;
-// 58 have no dedicated direct case in this file. Imported helpers may
+// 93 sites total; 36 have targeted direct cases below;
+// 57 have no dedicated direct case in this file. Imported helpers may
 // have their own unit tests; this is not a repository-wide coverage percentage.
 // The shared hidden-character loop has two new fixtures but counts as one site.
 // | validate.mjs line | Diagnostic or delegated protection | Evidence |
@@ -24,7 +24,7 @@ const VALIDATE = join(ROOT, 'scripts/validate.mjs');
 // | 82 | top-level: generated must be YYYY-MM-DD | no dedicated direct case |
 // | 87 | top-level: generated (${data.generated}) is after today in UTC (${todayUtc}); write the dates of the dataset in UTC (date -u +%F) | existing case |
 // | 89 | top-level: providers must be a non-empty array | no dedicated direct case |
-// | 91 | keyHostErrors: API keys stay on their pinned hosts | no dedicated direct case |
+// | 91 | keyHostErrors: API keys stay on their pinned hosts | new isolated case |
 // | 106 | top-level: generated (${data.generated}) is older than the newest last_verified/added (${newest}) — bump it in data/providers.json | existing case |
 // | 112 | ${id}: slug must be kebab-case | no dedicated direct case |
 // | 113 | ${id}: duplicate slug | no dedicated direct case |
@@ -327,6 +327,24 @@ test('validate accepts conditional commercial use only with a non-empty conditio
   const rejectedMisplaced = runValidate(misplaced);
   assert.notEqual(rejectedMisplaced.status, 0, rejectedMisplaced.output);
   assert.match(rejectedMisplaced.output, /commercial_ok_condition/);
+});
+
+test('validate rejects an OpenAI-compatible endpoint outside the API key host pin', () => {
+  const data = structuredClone(DATA);
+  const p = data.providers.find((row) => row.env_key && row.openai_base_url);
+  assert.ok(p, 'dataset needs a provider with a pinned API key and OpenAI-compatible endpoint');
+  const pinnedHost = new URL(p.openai_base_url).hostname;
+
+  const valid = runValidate(data);
+  assert.equal(valid.status, 0, valid.output);
+
+  p.openai_base_url = 'https://untrusted.example/v1';
+  const rejected = runValidate(data);
+  assert.equal(rejected.status, 1, rejected.output);
+  assert.deepEqual(rejected.output.trim().split(/\\r?\\n/).map((line) => line.trim()), [
+    '✗ validation failed (1 issue):',
+    `- ${p.slug}: ${p.env_key} may only be sent to ${pinnedHost}, not untrusted.example`,
+  ]);
 });
 
 function escapeRegExp(text) {
