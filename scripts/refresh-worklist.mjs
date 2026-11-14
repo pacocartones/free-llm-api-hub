@@ -8,7 +8,7 @@ import { stalenessWorklist } from './staleness.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const ENDPOINT = 'repos/pacocartones/free-llm-api-hub/issues/4';
-const PROCESS_OPTIONS = { encoding: 'utf8', timeout: 30000, maxBuffer: 1024 * 1024 };
+const PROCESS_OPTIONS = { encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'], timeout: 30000, maxBuffer: 1024 * 1024 };
 
 export function worklistIssueBody(providers, now, sourceSha) {
   if (!(now instanceof Date) || !Number.isFinite(+now)) throw new Error('Invalid clock');

@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
@@ -153,4 +153,65 @@ test('import has no CLI side effects and unknown CLI arguments fail', () => {
   })();
   assert.notEqual(result.status, 0);
   assert.match(result.stderr, /Unknown argument/);
+});
+
+test('weekly workflow publishes only trusted main with narrowly scoped permissions', () => {
+  const workflow = readFileSync(join(ROOT, '.github/workflows/weekly-worklist.yml'), 'utf8');
+  assert.match(workflow, /\n  schedule:\s*\n    - cron: ['"]17 9 \* \* 1['"]/);
+  assert.match(workflow, /\n  workflow_dispatch: \{\}/);
+  assert.match(workflow, /\npermissions: \{\}/);
+  assert.match(workflow, /\nconcurrency:\s*\n  group: weekly-worklist\s*\n  cancel-in-progress: false/);
+  assert.match(workflow, /if: \$\{\{ github\.repository == 'pacocartones\/free-llm-api-hub' && github\.ref == 'refs\/heads\/main' \}\}/);
+  assert.match(workflow, /timeout-minutes: 5/);
+  assert.match(workflow, /\n    permissions:\s*\n      contents: read\s*\n      issues: write/);
+  assert.match(workflow, /actions\/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1/);
+  assert.match(workflow, /with:\s*\n          ref: main\s*\n          persist-credentials: false/);
+  assert.match(workflow, /actions\/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1/);
+  assert.match(workflow, /node-version-file: \.nvmrc/);
+  const focused = 'run: node --test scripts/refresh-worklist.test.mjs scripts/staleness.test.mjs';
+  const publish = 'run: node scripts/refresh-worklist.mjs --write';
+  assert.ok(workflow.includes(focused));
+  assert.ok(workflow.indexOf(focused) < workflow.indexOf(publish));
+  const steps = workflow.split(/\n      - /);
+  const tokenSteps = steps.filter((step) => step.includes('GH_TOKEN'));
+  assert.equal(tokenSteps.length, 1);
+  assert.ok(tokenSteps[0].includes(publish));
+  assert.match(tokenSteps[0], /GH_TOKEN: \$\{\{ github\.token \}\}/);
+  assert.equal((workflow.match(/github\.token/g) || []).length, 1);
+  assert.doesNotMatch(workflow, /pull_request|pull_request_target|contents: write|npm (?:ci|install)|fetch-for-human-review|reverify\.mjs|fetch-models|probe\.mjs|verify-quotes|check-sources/);
+  assert.doesNotMatch(workflow, /continue-on-error|\|\|\s*true/);
+  for (const line of workflow.split('\n').filter((line) => line.trimStart().startsWith('run:'))) {
+    assert.ok(!line.includes('${{'), 'commands must not interpolate event or issue data');
+  }
+});
+
+test('write CLI bounds subprocesses and keeps child diagnostics private', () => {
+  const output = spawnSync(process.execPath, ['--input-type=module', '-e', `
+    import assert from 'node:assert/strict';
+    import childProcess from 'node:child_process';
+    import { syncBuiltinESMExports } from 'node:module';
+    import { pathToFileURL } from 'node:url';
+    let ghCalls = 0;
+    childProcess.execFileSync = (command, args, options) => {
+      assert.equal(options.encoding, 'utf8');
+      assert.equal(options.timeout, 30000);
+      assert.equal(options.maxBuffer, 1024 * 1024);
+      assert.deepEqual(options.stdio, ['pipe', 'pipe', 'pipe']);
+      assert.ok(!options.shell);
+      if (command === 'git') {
+        assert.deepEqual(args, ['rev-parse', 'HEAD']);
+        return ${JSON.stringify(SHA)} + '\\n';
+      }
+      assert.equal(command, 'gh');
+      ghCalls++;
+      throw new Error('fake-secret-token in child diagnostic');
+    };
+    syncBuiltinESMExports();
+    process.argv = [process.execPath, ${JSON.stringify(CLI)}, '--write'];
+    await import(pathToFileURL(process.argv[1]));
+    assert.equal(ghCalls, 1);
+  `], { cwd: ROOT, encoding: 'utf8', stdio: 'pipe' });
+  assert.equal(output.status, 1);
+  assert.equal(output.stdout, '');
+  assert.equal(output.stderr, 'Worklist refresh failed. Check arguments, git HEAD, and access to open issue #4.\n');
 });
