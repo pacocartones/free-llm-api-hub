@@ -44,6 +44,7 @@ only what confirms.
   **no free-trial credit is documented** on its pricing/docs pages (campaign-
   dependent). The most-wanted net-new LLM — confirm a citable free tier (or probe
   a fresh signup) before adding. Also Anthropic-compatible worth noting.
+
 - ✅ **Upstage** (Solar LLM + Document Parse/OCR) — now a provider in the dataset (re-verified 2026-10-08).
 - ✅ **Veryfi** (OCR) — now a provider in the dataset (re-verified 2026-10-08).
 - [ ] **Replicate** (image/video) — re-verified 2026-11-14 against its pricing
@@ -67,8 +68,12 @@ only what confirms.
   model, big catalog), ByteDance Volcengine/Doubao, StepFun, SenseNova — real free
   tiers but mainland phone/ID gates make them poor fits for an international
   builder audience. Revisit if any drops the ID wall for overseas devs.
+
 - [ ] **Explicitly NOT free (do not add; leave in "Notably NOT free" thinking):**
-  Moonshot/Kimi intl (needs ≥$1 recharge), DeepInfra, Chutes, Together AI
+
+  Moonshot/Kimi intl (needs ≥$1 recharge), DeepInfra (card or prepayment is
+  required before any service use; checked 2026-11-14 against the
+  [official pricing page](https://deepinfra.com/pricing)), Chutes, Together AI
   (official billing article requires a minimum $5 credit purchase; checked
   2026-11-14, see [source review](sources.md#checked-with-what-each-page-says)),
   Parasail, GMICloud, Inference.net, Lepton (folded into NVIDIA), Nomic (pivoted).
