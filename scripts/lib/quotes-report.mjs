@@ -15,14 +15,14 @@ const STAMP_RE = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/;
 
 /** Reads every source once (many entries share a page) and judges each entry against it.
  * @param {Array} entries the entries of data/quotes.json
- * @param {(url: string) => Promise<{status?: number, html?: string, contentLanguage?: string, error?: string}>} readPage
+ * @param {(url: string, lang: string) => Promise<{status?: number, html?: string, contentLanguage?: string, error?: string}>} readPage
  * @returns {Promise<Array<{id: string, result: string, page_changed: boolean|null}>>} */
 export async function verifyEntries(entries, readPage) {
   const pages = new Map();
-  const read = async (url) => { if (!pages.has(url)) pages.set(url, await readPage(url)); return pages.get(url); };
+  const read = async (url, lang) => { const key = `${lang}\0${url}`; if (!pages.has(key)) pages.set(key, await readPage(url, lang)); return pages.get(key); };
   const out = [];
   for (const e of entries) {
-    const reading = await read(e.source_url);
+    const reading = await read(e.source_url, e.lang);
     if (e.kind === 'absence_check') {
       // the claim "the page has none of the four words" holds only while the count is zero in a page that was really read
       const judged = judgeReading(reading, '', e.lang);
@@ -87,7 +87,7 @@ export function reportAge(report, nowMs) {
 }
 
 const RESULT_TEXT = {
-  expired: 'not found: the page was read in English and the passage is no longer in it. A person decides what changes',
+  expired: 'not found: the page was read in its recorded language and the passage is no longer in it. A person decides what changes',
   unreachable: 'not read from the server: no page came (an error, a block, or a page that needs scripts)',
   other_language: 'not compared: the page came in another language',
 };
@@ -97,7 +97,7 @@ const LEVEL_TEXT = { none: 'No report has been recorded yet.', ok: 'The report i
 export function quotesReportHtml(report, registry, nowMs) {
   const age = reportAge(report, nowMs);
   const head = '<h2 id="quotes-check">Do the quoted pages still say it?</h2>' +
-    '<p>Every quoted sentence and passage is read again on its page once a week, from the server, in English. Only what is listed below needs a person: a passage the page no longer carries, or a page that could not be read.</p>';
+    '<p>Every quoted sentence and passage is read again on its page once a week, from the server, in its recorded language. Only what is listed below needs a person: a passage the page no longer carries, or a page that could not be read.</p>';
   if (!report || age.level === 'none') return `${head}<p class="dp-check" data-level="none" data-ran-at="">${LEVEL_TEXT.none}</p>`;
   const byId = new Map((registry.entries || []).map((e) => [e.id, e]));
   const cov = reportCoverage(report, registry);
