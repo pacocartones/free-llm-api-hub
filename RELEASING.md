@@ -74,3 +74,12 @@ npm ci && npm run check
 ```
 
 The notes of each release give the commit and the sha256 of `data/providers.json` at the tag.
+
+## Prepare snapshot assets without publishing
+
+Use `npm run release-snapshot -- vX.Y.Z /new/output/directory` from a full
+clone with an up-to-date `origin/main`. It creates tagged canonical JSON,
+public JSON, scalar CSV, the tagged schema, a commit manifest and SHA-256
+checksums locally. It never creates a tag or GitHub Release. Follow the
+[preparation and approval procedure](docs/release-audit-608.md) for validation
+at the exact tag, notes and contributor credits before owner approval.
