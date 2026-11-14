@@ -2486,8 +2486,12 @@ test('conditional commercial use is visible in UI, excluded from commercial coll
 
   const commercialMd = readFileSync(join(ROOT, 'collections/commercial-use.md'), 'utf8');
   const commercialHtml = readFileSync(join(ROOT, 'site/collections/commercial-use.html'), 'utf8');
+  const commercial = raw.providers.find((p) => p.commercial_ok === true && p.docs_url);
+  assert.ok(commercial, 'a confirmed commercial provider with docs is required');
+  assert.ok(commercialMd.includes(`**[${commercial.name}]`));
+  assert.ok(commercialHtml.includes(`href="${commercial.docs_url}"`));
   assert.ok(!commercialMd.includes(`**[${conditional.name}]`));
-  assert.ok(!commercialHtml.includes(`href="../p/${conditional.slug}"`));
+  assert.ok(!commercialHtml.includes(`href="${conditional.docs_url}"`));
 
   const v1 = join(ROOT, 'site/api/v1');
   const jsonFiles = (dir) => readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
