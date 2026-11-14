@@ -1,6 +1,6 @@
 # Contributing
 
-The entire value of this project is that its data can be trusted. Every contribution should make the dataset **more accurate, better sourced, or more current** — that's the bar.
+The core value of this project is trustworthy data. Contributions should make it **more accurate, better sourced, easier to use, or more current** — that's the bar.
 
 Thanks for helping. Here's how it works.
 
@@ -9,9 +9,9 @@ Thanks for helping. Here's how it works.
 Each issue names the files to edit and the check to run. Start with an unclaimed task:
 
 1. Pick a [good first issue](https://github.com/pacocartones/free-llm-api-hub/contribute). For a docs or code issue, comment `/take` before starting; a `good first issue` labelled `data` does not need a claim. See [Claiming an issue](#claiming-an-issue).
-2. Read the official page named in the issue, copy the sentence that supports your finding, and note the day you read it (UTC).
+2. If the issue verifies a provider fact (in data or docs), read the provider's official page, copy the supporting sentence and note the day you read it (UTC). Otherwise, inspect the current page or behavior and the files named in the issue.
 3. Fork, edit **the files named in that issue**, run `npm ci --ignore-scripts` once, then run **its named check**. Data changes usually need `npm run build && npm test` and the regenerated files; a docs-only issue may ask for a different check.
-4. Open the pull request with the source, date and check result. If the source is unclear, say what you could and could not confirm.
+4. Open the pull request with the check result and what you changed. For a provider claim, include its source and date; if the source is unclear, say what you could and could not confirm.
 
 Details follow: [Quick start](#quick-start), [Confirming a single unknown field](#confirming-a-single-unknown-field) and [Claiming an issue](#claiming-an-issue).
 
@@ -135,7 +135,7 @@ We read every pull request and reply as soon as we can. A reply is a real answer
 
 An issue carries the `good first issue` label only if all of these hold:
 
-1. **No third-party account or payment.** The answer comes from public pages. (This is why `phone_required` questions are not good first issues: most providers don't document it, and answering needs a sign-up. They live in the [#7](https://github.com/pacocartones/free-llm-api-hub/issues/7) checklist instead.)
+1. **No third-party account or payment.** Provider facts can be checked on public official pages; docs and code tasks can be done from the public repository and site. (This is why `phone_required` questions are not good first issues: most providers don't document it, and answering needs a sign-up. They live in the [#7](https://github.com/pacocartones/free-llm-api-hub/issues/7) checklist instead.)
 2. **One or two files**, named in the issue.
 3. **A named check** that must pass, for example `npm run build && npm test`, or `npm run check` for `data/` changes.
 4. **Under about two hours** for someone new to the repository.
