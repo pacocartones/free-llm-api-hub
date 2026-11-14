@@ -194,12 +194,12 @@
       "name": "SiliconFlow",
       "category": "ongoing",
       "free_type": "perpetual",
-      "free_tier": "China platform (siliconflow.cn): several models permanently free at ¥0 (e.g. Qwen/Qwen2.5-7B-Instruct, tencent/Hunyuan-MT-7B, BAAI embeddings and rerankers). The international platform (siliconflow.com) lists no $0 LLMs and gives $1 in free credits instead",
+      "free_tier": "China platform (siliconflow.cn): models marked free on the public pricing page, including Hunyuan-MT-7B, Xing4.0-29B and BAAI embedding models; no signup-credit allowance is used for this sample",
       "rate_limits": "Fixed per-model limits for free models; generic docs cite ranges of 1,000-10,000 RPM and 50,000-5,000,000 TPM depending on model tier — exact limits shown in-account",
-      "notes": "Free models live on the China platform and need real-name authentication to use all of them; accepted documents are a mainland ID card, HK/Macao or Taiwan travel permits, HK/Macao/Taiwan residence permits or a Chinese permanent-residence card for foreigners. Signup is by phone number; some virtual-carrier number ranges are blocked.",
+      "notes": "China platform requires real-name authentication for all free models and phone registration; the accepted documents are listed in the authentication FAQ. Free-model IDs come only from models explicitly marked free at https://www.siliconflow.cn/pricing (read 2026-11-14). Per-model free quotas are fixed but not mapped to exact numbers in the public rate-limit table, so free_limits stays unknown. Terms permit internal business use but also address third-party services; commercial use of the hosted free tier remains unconfirmed.",
       "best_for": "Permanently-free open models, no trial clock",
       "modalities": ["text", "embeddings"],
-      "models_free": null,
+      "models_free": ["tencent/Hunyuan-MT-7B", "XingChenAGI/Xing4.0-29B", "BAAI/bge-m3", "BAAI/bge-large-en-v1.5"],
       "expires": null,
       "docs_url": "https://docs.siliconflow.cn/docs/userguide/faqs/rate-limit-and-upgradation",
       "phone_required": true,
@@ -211,7 +211,8 @@
       "is_text_llm": true,
       "model_tier": null,
       "verified": true,
-      "last_verified": "2026-10-08"
+      "last_verified": "2026-11-14",
+      "data_policy": {"trains_on_prompts":false,"retention":"API inputs/outputs destroyed or unrecoverable on compute nodes immediately after inference; operational logs separate","source":"https://docs.siliconflow.cn/docs/legals/privacy-policy","checked":"2026-11-14","quote":"不会将您的业务数据用于任何大模型的预训练、微调或其他商业用途","note":"API business inputs/outputs, distinct from billing and usage logs. Legal, product-rule and requested troubleshooting exceptions apply; automated content safety checks are disclosed. The quoted clause does not name a plan.","plan_named":false}
     },
     {
       "slug": "zai-glm",
