@@ -48,20 +48,54 @@ async function keysSentToACollector(script, provider, { moveHost = true } = {}) 
     res.writeHead(200, { 'content-type': 'application/json' });
     res.end('{"data":[]}');
   });
-  await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
-  const root = makeTmpDir('flah-keyhost-');
-  for (const name of ['probe.mjs', 'fetch-models.mjs', '_serialize.mjs', 'lib/key-hosts.mjs', 'lib/provider-output-safety.mjs'])
-    cpSync(new URL(name, import.meta.url), join(root, 'scripts', name));
-  mkdirSync(join(root, 'data'));
-  const providers = moveHost ? data.providers.map((p) => (p.slug === provider.slug ? { ...p, openai_base_url: 'https://collector.example/v1' } : p)) : data.providers;
-  writeFileSync(join(root, 'data', 'providers.json'), serialize({ ...data, providers }));
-  const divert = join(root, 'divert.mjs');
-  writeFileSync(divert, `const real = globalThis.fetch;\nglobalThis.fetch = (url, opts) => real('http://127.0.0.1:${server.address().port}/', opts);\n`);
-  const child = spawn(process.execPath, ['--import', pathToFileURL(divert).href, join(root, 'scripts', script), '--auth-only', `--only=${provider.slug}`],
-    { env: { PATH: process.env.PATH, [provider.env_key]: 'fake-key-for-the-test' }, stdio: 'ignore' });
-  await new Promise((resolve) => child.on('exit', resolve));
-  await new Promise((resolve) => server.close(resolve));
-  return withAuth;
+  try {
+    await new Promise((resolve, reject) => server.once('error', reject).listen(0, '127.0.0.1', resolve));
+    const root = makeTmpDir('flah-keyhost-');
+    for (const name of ['probe.mjs', 'fetch-models.mjs', '_serialize.mjs', 'lib/key-hosts.mjs', 'lib/provider-output-safety.mjs'])
+      cpSync(new URL(name, import.meta.url), join(root, 'scripts', name));
+    mkdirSync(join(root, 'data'));
+    const providers = moveHost ? data.providers.map((p) => (p.slug === provider.slug ? { ...p, openai_base_url: 'https://collector.example/v1' } : p)) : data.providers;
+    writeFileSync(join(root, 'data', 'providers.json'), serialize({ ...data, providers }));
+    const divert = join(root, 'divert.mjs');
+    writeFileSync(divert, `const real = globalThis.fetch;\nglobalThis.fetch = (url, opts) => real('http://127.0.0.1:${server.address().port}/', opts);\n`);
+    const child = spawn(process.execPath, ['--import', pathToFileURL(divert).href, join(root, 'scripts', script), '--auth-only', `--only=${provider.slug}`],
+      { env: { PATH: process.env.PATH, [provider.env_key]: 'fake-key-for-the-test' }, stdio: 'ignore' });
+    await new Promise((resolve, reject) => child.once('error', reject).once('exit', resolve));
+    return withAuth;
+  } finally {
+    await new Promise((resolve) => server.close(resolve));
+  }
+}
+
+for (const stage of ['temporary directory creation', 'child preparation']) {
+  test(`the harness closes its listener after a failure in ${stage}`, async () => {
+    const invalidTmp = join(makeTmpDir('flah-keyhost-cleanup-'), 'not-a-directory');
+    writeFileSync(invalidTmp, 'file');
+    const envBefore = Object.fromEntries(['TMPDIR', 'TMP', 'TEMP'].map((key) => [key, process.env[key]]));
+    const provider = { ...data.providers.find((p) => p.slug === 'groq') };
+    const failure = new Error('child preparation failed');
+    if (stage === 'child preparation')
+      Object.defineProperty(provider, 'env_key', { get() { throw failure; } });
+    const createServer = http.createServer;
+    let server;
+    http.createServer = (...args) => (server = createServer(...args));
+    try {
+      if (stage === 'temporary directory creation')
+        for (const key of Object.keys(envBefore)) process.env[key] = invalidTmp;
+      await assert.rejects(keysSentToACollector('probe.mjs', provider), (error) =>
+        stage === 'temporary directory creation' ? error.syscall === 'mkdtemp' : error === failure);
+      assert.ok(server, 'the failure happened after a real server was created');
+      assert.equal(server.listening, false, 'the rejected harness must release its listener');
+    } finally {
+      http.createServer = createServer;
+      for (const [key, value] of Object.entries(envBefore)) {
+        if (value === undefined) delete process.env[key];
+        else process.env[key] = value;
+      }
+      // A failing regression must not itself keep the test process alive.
+      if (server?.listening) await new Promise((resolve) => server.close(resolve));
+    }
+  });
 }
 
 test('the probe does not send a pinned key to a host read from the dataset', async () => {
