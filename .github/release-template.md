@@ -40,6 +40,6 @@ npm ci --ignore-scripts
 npm test && npm run check
 ```
 
-See [release preparation](../docs/release-preparation.md) for reproduction from
+See [release preparation](https://github.com/pacocartones/free-llm-api-hub/blob/main/docs/release-preparation.md) for reproduction from
 the recorded tooling commit and Node version. Keep the data commit and tooling
 commit distinct; neither checksums nor a tag replace CI and owner approval.
