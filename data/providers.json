@@ -83,7 +83,7 @@
       "free_limits": {"requests_per_minute":20,"requests_per_day":50,"scope":"free models, accounts with under 10 credits purchased lifetime (1,000 requests/day once 10+ credits are purchased); table not readable in a plain fetch, figures are those of the entry's own verification","source":"https://openrouter.ai/docs/api-reference/limits","checked":"2026-10-08"},
       "verified": true,
       "last_verified": "2026-10-08",
-      "data_policy": null
+      "data_policy": {"trains_on_prompts":null,"retention":"OpenRouter: opt-in, CSAM/legal or Safety Retention exceptions; upstream retention varies","source":"https://openrouter.ai/docs/guides/privacy/data-collection","checked":"2026-11-14","quote":"OpenRouter retains prompts only when you opt in, or when retention is needed for CSAM review, reporting, and related legal preservation. Requests to Safety Retention endpoints are the exception: OpenRouter or the provider may retain prompts and responses from any request, only to prevent abuse, and not for training.","note":"Router-level retention only; upstream policies vary by provider. Training stays unknown across routes. Routing controls: «There are separate settings for paid and free models.»","plan_named":false}
     },
     {
       "slug": "cloudflare-workers-ai",
