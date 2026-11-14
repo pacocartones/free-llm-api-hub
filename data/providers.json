@@ -952,7 +952,8 @@
       "model_tier": null,
       "free_limits": {"requests_per_day":500,"scope":"free OCR API key, per IP address","source":"https://ocr.space/OCRAPI","checked":"2026-10-09"},
       "verified": true,
-      "last_verified": "2026-10-08"
+      "last_verified": "2026-10-08",
+      "playground_url": "https://ocr.space/"
     },
     {
       "slug": "llamaparse",

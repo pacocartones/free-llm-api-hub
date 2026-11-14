@@ -114,6 +114,59 @@ for (const [rule, protects, mutate, message] of REPORT_CASES) {
   });
 }
 
+test('playground_url accepts HTTPS and remains optional', () => {
+  const data = structuredClone(DATA);
+  const p = provider(data);
+  p.playground_url = 'https://example.com/playground?model=a&mode=b';
+  const present = runValidate(data);
+  assert.equal(present.status, 0, present.output);
+  delete p.playground_url;
+  const absent = runValidate(data);
+  assert.equal(absent.status, 0, absent.output);
+});
+
+test('playground_url rejects invalid present values', () => {
+  for (const value of ['http://example.com/playground', 'ftp://example.com/playground', 'javascript:alert(1)', '/playground', '', 'not a URI', null, 7, {}]) {
+    const data = structuredClone(DATA);
+    const p = provider(data);
+    p.playground_url = value;
+    const result = runValidate(data);
+    assert.notEqual(result.status, 0, `${JSON.stringify(value)}: ${result.output}`);
+    assert.ok(result.output.includes(`/providers/${data.providers.indexOf(p)}/playground_url`), result.output);
+  }
+});
+
+test('playground_url requires non-empty docs_url on unverified rows', () => {
+  const data = structuredClone(DATA);
+  // Its API and summary sources share a domain, keeping empty-doc controls
+  // independent of the existing provider-summary ownership rule.
+  const p = data.providers.find((row) => row.slug === 'groq');
+  p.verified = false;
+  p.last_verified = null;
+  p.playground_url = 'https://example.com/playground';
+  const accepted = runValidate(data);
+  assert.equal(accepted.status, 0, accepted.output);
+
+  for (const docs of ['', '   ']) {
+    const invalid = structuredClone(data);
+    invalid.providers.find((row) => row.slug === p.slug).docs_url = docs;
+    const rejected = runValidate(invalid);
+    assert.notEqual(rejected.status, 0, rejected.output);
+    assert.ok(rejected.output.includes(`${p.slug}: playground_url requires a non-empty docs_url`), rejected.output);
+  }
+
+  const missing = structuredClone(data);
+  delete missing.providers.find((row) => row.slug === p.slug).docs_url;
+  const rejectedMissing = runValidate(missing);
+  assert.notEqual(rejectedMissing.status, 0, rejectedMissing.output);
+  assert.ok(rejectedMissing.output.includes(`/providers/${data.providers.indexOf(p)}/docs_url must have required property 'docs_url'`), rejectedMissing.output);
+
+  delete p.playground_url;
+  p.docs_url = '';
+  const noPlayground = runValidate(data);
+  assert.equal(noPlayground.status, 0, noPlayground.output);
+});
+
 test('the fixture harness leaves a valid fixture valid', () => {
   const data = structuredClone(DATA);
   const result = runValidate(data);

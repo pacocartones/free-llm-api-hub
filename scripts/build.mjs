@@ -1103,6 +1103,7 @@ for (const p of providers) {
         ? ` <span class="v warn" title="The key authenticated but the free tier appears gone">${IC('ic-warn')} free tier unconfirmed live</span>`
         : ''));
   const docsBtn = p.docs_url ? `<a class="btn primary" href="${htmlEsc(p.docs_url)}" target="_blank" rel="noopener">Official docs ↗</a>` : '';
+  const playgroundBtn = p.playground_url ? `<a class="btn" href="${htmlEsc(p.playground_url)}" target="_blank" rel="noopener">Try it ↗</a>` : '';
   // "Visit website": the provider's main site, derived from the docs URL by stripping
   // common docs/console/api subdomains so it points at the marketing homepage.
   let websiteBtn = '';
@@ -1131,7 +1132,7 @@ for (const p of providers) {
       h1: htmlEsc(p.name),
       afterTitle: `<div class="prov-badges"><span class="type">${typeLabel(p)}</span> ${verifiedLine}${probedLine} ${provFlagsHtml(p)}</div>`,
       lede: p.best_for ? htmlEsc(p.best_for) : '',
-      extra: `<div class="prov-actions">${docsBtn}${websiteBtn}</div>`,
+      extra: `<div class="prov-actions">${docsBtn}${websiteBtn}${playgroundBtn}</div>`,
     }) +
     `<main id="main"><div class="wrap prose prov-prose">` +
     summary +

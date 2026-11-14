@@ -93,6 +93,12 @@
           "type": "string",
           "description": "Primary source: the provider's own pricing/rate-limit docs. Empty string only for flagged-unverified entries."
         },
+        "playground_url": {
+          "type": "string",
+          "format": "uri",
+          "pattern": "^https://",
+          "description": "Provider-owned no-code playground, linked from the provider's own docs or console. Omit when unrecorded; requires a non-empty docs_url."
+        },
         "phone_required": { "$ref": "#/$defs/tristate" },
         "card_required": { "$ref": "#/$defs/tristate" },
         "commercial_ok": { "$ref": "#/$defs/commercial_ok_value" },
