@@ -45,8 +45,6 @@ only what confirms.
   dependent). The most-wanted net-new LLM — confirm a citable free tier (or probe
   a fresh signup) before adding. Also Anthropic-compatible worth noting.
 
-- [ ] **DeepInfra** (LLM) — its [official pricing page](https://deepinfra.com/pricing) states that a   card or prepayment is required before service use (checked 2026-11-14 UTC). This confirms a billing requirement, but does not establish whether a separate free tier or trial credit exists. Keep its free-access status unconfirmed pending explicit provider evidence.
-
 - ✅ **Upstage** (Solar LLM + Document Parse/OCR) — now a provider in the dataset (re-verified 2026-10-08).
 - ✅ **Veryfi** (OCR) — now a provider in the dataset (re-verified 2026-10-08).
 - [ ] **Replicate** (image/video) — re-verified 2026-11-14 against its pricing
@@ -73,7 +71,9 @@ only what confirms.
 
 - [ ] **Explicitly NOT free (do not add; leave in "Notably NOT free" thinking):**
 
-  Moonshot/Kimi intl (needs ≥$1 recharge), Chutes, Together AI
+  Moonshot/Kimi intl (needs ≥$1 recharge), DeepInfra (card or prepayment is
+  required before any service use; checked 2026-11-14 against the
+  [official pricing page](https://deepinfra.com/pricing)), Chutes, Together AI
   (official billing article requires a minimum $5 credit purchase; checked
   2026-11-14, see [source review](sources.md#checked-with-what-each-page-says)),
   Parasail, GMICloud, Inference.net, Lepton (folded into NVIDIA), Nomic (pivoted).
@@ -86,7 +86,6 @@ only what confirms.
   documented" classification. No recurring allowance or promotion is stated.
   Review remaining inclusion requirements and terms before adding a provider;
   see the [dated source review and scope](sources.md#checked-with-what-each-page-says).
-
 
 ## Discovery & research infrastructure
 

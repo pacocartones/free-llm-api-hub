@@ -94,6 +94,7 @@ The primary keyword is **"free LLM API"**. Direct competitors on that head term:
   ripienaar/free-for-dev.
 
 ## Checked, with what each page says
+
 _Checked: 2026-11-14._
 
 Well-known providers checked for free API access or trial credit, with the quoted statement from each provider's own public documentation, the source URL, and the UTC date read.
