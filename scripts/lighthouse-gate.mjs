@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// lighthouse-gate.mjs — serve site/ locally, run Lighthouse on nine pages and
+// lighthouse-gate.mjs — serve site/ locally, run Lighthouse on sixteen pages and
 // fail when accessibility or performance drops below the thresholds in
 // lib/lighthouse-gate.mjs. Needs the runner from tools/lighthouse (npm ci there)
 // and a Chrome binary in CHROME_PATH. Nothing is published and nothing leaves the machine.
@@ -8,7 +8,7 @@ import { readFileSync, existsSync, statSync, rmSync, readdirSync } from 'node:fs
 import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, extname, normalize } from 'node:path';
-import { evaluate, medianReport } from './lib/lighthouse-gate.mjs';
+import { evaluate, medianReport, THRESHOLDS } from './lib/lighthouse-gate.mjs';
 import { makeTmpDir } from './lib/tmp.mjs';
 
 // Every Lighthouse run gets its own Chrome profile directory and its own process group.
@@ -90,7 +90,11 @@ const base = `http://127.0.0.1:${server.address().port}`;
 const providers = JSON.parse(readFileSync(join(ROOT, 'data/providers.json'), 'utf8')).providers;
 const sample = providers.find((p) => existsSync(join(SITE, 'p', `${p.slug}.html`)));
 if (!sample) { console.error('No generated provider page under site/p/: run `node scripts/build.mjs` first.'); process.exit(1); }
-const pages = ['/', '/best/', '/coverage/', '/free-gpu/', '/coding-tools/', '/compare/', '/data-policy/', '/guides-and-collections/', `/p/${sample.slug}.html`];
+const pages = ['/', '/best/', '/coverage/', '/free-gpu/', '/coding-tools/', '/compare/', '/data-policy/', '/guides-and-collections/', `/p/${sample.slug}.html`,
+  '/collections/no-credit-card.html', '/collections/openai-compatible.html',
+  '/guides/free-llm-api-no-signup.html', '/guides/free-embeddings-apis.html',
+  '/guides/free-ocr-document-ai-apis.html', '/guides/free-speech-to-text-apis.html',
+  '/guides/free-image-generation-apis.html'];
 const lighthouse = join(ROOT, 'tools/lighthouse/node_modules/.bin/lighthouse');
 const RUNS = 3;
 const failures = [];
@@ -102,7 +106,7 @@ try {
       try {
         const out = await runLighthouse(lighthouse, [
           base + page, '--output=json', '--quiet',
-          '--only-categories=accessibility,performance',
+          '--only-categories=accessibility,performance,seo',
           `--chrome-flags=--headless --no-sandbox --user-data-dir=${PROFILE}`,
         ]);
         reports.push(JSON.parse(out));
@@ -115,8 +119,8 @@ try {
     if (reports.length < RUNS) continue;
     const report = medianReport(reports);
     const all = reports.map((r) => r.categories?.performance?.score).join('/');
-    console.log(`${page}: median of ${RUNS} runs: performance ${report.categories.performance?.score} (runs ${all}), accessibility ${report.categories.accessibility?.score}`);
-    failures.push(...evaluate(page, report, undefined, baseline));
+    console.log(`${page}: median of ${RUNS} runs: performance ${report.categories.performance?.score} (runs ${all}), accessibility ${report.categories.accessibility?.score}, SEO ${report.categories.seo?.score}`);
+    failures.push(...evaluate(page, report, { ...THRESHOLDS, seo: 1 }, baseline));
   }
 } finally {
   server.close();
@@ -126,4 +130,4 @@ if (failures.length) {
   console.error(failures.join('\n'));
   process.exit(1);
 }
-console.log('OK — Lighthouse accessibility and performance within thresholds.');
+console.log('OK — Lighthouse accessibility, performance and SEO within thresholds.');

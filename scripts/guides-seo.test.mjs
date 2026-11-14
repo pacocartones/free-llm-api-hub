@@ -161,3 +161,57 @@ test('the hub has a direct answer, a title and a description from its live count
   const visible = stripTags(html.replace(/<script[\s\S]*?<\/script>/g, '')).replace(/\s+/g, ' ');
   for (const q of graph.find((g) => g['@type'] === 'FAQPage').mainEntity) assert.ok(visible.includes(q.acceptedAnswer.text), q.name);
 });
+
+test('image guide describes editing as well as generation, matching the broad image modality', () => {
+  const html = read('free-image-generation-apis');
+  assert.match(html, /<h1>Free image APIs — generation and editing<\/h1>/);
+  assert.match(html, /Not every image API generates images/);
+});
+
+test('discovery pages have unique metadata, self canonicals and exactly one sitemap entry', () => {
+  const sitemap = readFileSync(join(ROOT, 'site/sitemap.xml'), 'utf8');
+  const titles = new Set(), descriptions = new Set();
+  for (const [section, slugs] of [['guides', guides()], ['collections', colls()]]) {
+    for (const slug of slugs) {
+      const html = section === 'guides' ? read(slug) : readColl(slug);
+      const url = `https://freellmapihub.com/${section}/${slug}`;
+      assert.equal((html.match(/<link rel="canonical"/g) || []).length, 1, url);
+      assert.ok(html.includes(`<link rel="canonical" href="${url}"`), url);
+      assert.equal(sitemap.split(`<loc>${url}</loc>`).length - 1, 1, url);
+      assert.doesNotMatch(html, /<meta name="robots" content="noindex/);
+      for (const [pattern, seen] of [[/<title>([^<]*)<\/title>/, titles], [/<meta name="description" content="([^"]*)"/, descriptions]]) {
+        const value = html.match(pattern)[1];
+        assert.ok(!seen.has(value), `duplicate metadata: ${value}`);
+        seen.add(value);
+      }
+    }
+  }
+});
+
+test('guides claiming verified providers exclude unverified dataset rows', () => {
+  for (const slug of guides()) {
+    const table = read(slug).match(/<tbody>([\s\S]*?)<\/tbody>/)[1];
+    for (const p of list.filter((p) => !p.verified)) {
+      assert.ok(!table.includes(`../p/${p.slug}`), `${slug} presents ${p.name} as verified`);
+    }
+  }
+});
+
+test('guide social-preview counts agree with the visible verified-provider tables', async () => {
+  const { GUIDES } = await import('./lib/og.mjs');
+  for (const g of GUIDES) {
+    const count = Number(read(g.slug).match(/<p class="count"><strong>(\d+)<\/strong>/)[1]);
+    assert.equal(list.filter(g.filter).length, count, g.slug);
+  }
+});
+
+test('each verified guide row displays its actual source-verification date', () => {
+  for (const slug of guides()) {
+    const table = read(slug).match(/<tbody>([\s\S]*?)<\/tbody>/)[1];
+    for (const row of table.matchAll(/<tr>([\s\S]*?)<\/tr>/g)) {
+      const provider = list.find((p) => row[1].includes(`../p/${p.slug}\"`));
+      assert.ok(provider, `${slug}: unknown provider row`);
+      assert.ok(row[1].includes(`<time datetime="${provider.last_verified}">${provider.last_verified}</time>`), `${slug}: missing date for ${provider.name}`);
+    }
+  }
+});

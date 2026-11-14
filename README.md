@@ -64,6 +64,22 @@ Primarily **free LLM (text) APIs** — plus the adjacent model APIs a builder re
 
 Filter any category live in the [interactive explorer](https://freellmapihub.com/) or the [multimodal collection](collections/multimodal.md).
 
+## Browse by API requirement
+
+The [guides and collections](https://freellmapihub.com/guides-and-collections/) compare dated provider rows, limits and catches.
+
+| Requirement | Compare |
+|---|---|
+| No payment card | [No-card tiers and trials](https://freellmapihub.com/collections/no-credit-card) |
+| No signup | [Account requirements explained](https://freellmapihub.com/guides/free-llm-api-no-signup) — no phone and no card does **not** mean no account |
+| OpenAI SDK | [OpenAI-compatible endpoints](https://freellmapihub.com/collections/openai-compatible) — feature support can differ |
+| Embeddings / RAG | [Embedding APIs](https://freellmapihub.com/guides/free-embeddings-apis) |
+| OCR / documents | [OCR and document parsing](https://freellmapihub.com/guides/free-ocr-document-ai-apis) |
+| Voice | [Speech-to-text and text-to-speech](https://freellmapihub.com/guides/free-speech-to-text-apis) |
+| Images | [Image generation and editing](https://freellmapihub.com/guides/free-image-generation-apis) — check which operations each tier includes |
+
+Video generation is not currently a tracked modality in the dataset. There is no verified video comparison here; image or vision support does not establish video-generation access.
+
 ## TL;DR — pick by what you actually need
 
 Each pick links to its full verified profile on the live site.
@@ -143,7 +159,7 @@ Worth saying plainly. As of the last verification pass, **OpenAI, Anthropic and 
 
 For genuinely free access to strong models, your best bets here are **Gemini** (frontier-class) and the free open-weight models on **Groq, OpenRouter, Cloudflare and Z.ai** (SiliconFlow's free models are on its China platform and need real-name verification).
 
-Retired or removed after re-verification: **Mistral** ([Free mode no longer includes API access](https://docs.mistral.ai/admin/billing-usage/usage-limits); API keys require billing activation and pay-as-you-go, checked 2026-11-14), **GitHub Models** (fully retired by GitHub on 2026-07-30 — playground, catalog and inference API shut down for all customers), **Cerebras** (now listed as a trial credit: the ongoing free tier became a payment-method-gated $5/30-day trial), **Inference.net** (the free tier is gateway/observability only, not free model tokens), and **Hyperbolic** (requires a $5 minimum deposit before any use).
+Retired or removed after re-verification: **Mistral** ([Free mode no longer includes API access](https://docs.mistral.ai/admin/billing-usage/usage-limits); API keys require billing activation and pay-as-you-go, checked 2026-11-14), **GitHub Models** (fully retired by GitHub on 2026-07-30 — playground, catalog and inference API shut down for all customers), **Cerebras** (now listed as a trial credit: the ongoing free tier became a payment-method-gated $5/30-day trial), **Inference.net** (the free tier is gateway/observability only, not free model tokens), and **Hyperbolic** (not included pending a complete inclusion review; the [current public-access check](docs/sources.md#checked-with-what-each-page-says) supersedes the earlier deposit finding).
 
 ## How verification works
 
