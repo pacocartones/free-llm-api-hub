@@ -148,3 +148,7 @@ This is the human provider-verification pass. A successful metadata publication 
 ---
 
 _[← Docs index](README.md) · [Main README](../README.md)_
+
+## Draft the next changelog
+
+Before editing `[Unreleased]`, run `npm run changelog-draft` from a full clone at the repository root. It prints a deterministic Markdown draft since the highest reachable coherent dataset SemVer tag (`vX.Y.Z`) from the explicitly fetched origin-tag namespace (fetch instructions below); MCP tags are ignored. It reuses the provider-history miner and the field-level `changes.json` event shape, without the API feed's 12-week cutoff. Copy and edit the output: add removals, schema and untracked-field changes, merged PR references and `Thanks @author` credits from the PR author. Preserve existing contributor credits. The command writes no files and neither bumps a version nor publishes anything. See [release preparation](release-preparation.md).
