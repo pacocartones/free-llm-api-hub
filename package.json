@@ -9,6 +9,7 @@
     "validate": "node scripts/validate.mjs",
     "verify-quotes": "node scripts/verify-quotes.mjs",
     "quotes:add": "node scripts/quotes-add.mjs",
+    "add-provider": "node scripts/add-provider.mjs",
     "links": "node scripts/check-links.mjs",
     "worklist": "node scripts/staleness.mjs",
     "reverify": "node scripts/reverify.mjs",
