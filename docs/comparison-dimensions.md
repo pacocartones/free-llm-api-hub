@@ -46,6 +46,7 @@ Three consequences the rest of the project has to honour, or the tri-state is de
 | `openai_compatible` | tri-state | Does it expose an OpenAI-compatible endpoint (drop-in `base_url`)? |
 | `openai_base_url` | string \| null | The OpenAI-compatible base URL to pass to the SDK, when confirmed against official docs. Placeholders like `{account_id}` mark per-account path segments. `null` until backfilled. |
 | `models_free` | string[] \| null | A **sample** of model IDs available on the free tier. Attribute field — sampled and may change; not part of the verified core claim. `null` where not populated. |
+| `models_url` | string | Optional public HTTPS link to the provider's own model catalogue. It may include paid models; use `models_free` for the sampled free-tier subset. Absence means no catalogue URL has been verified. |
 | `is_text_llm` | boolean | Does the free offering (free tier or trial credit) give API access to text/chat language models? Explicit on every entry. `false` for OCR, TTS, STT, embeddings-only, image and compute-only services. Makes an entry eligible for the top 10. |
 | `model_tier` | integer 0-4 \| null | Quality tier of the best free model with a public rating, derived from `model_tier_source.rating` ([thresholds](methodology.md#model-tier)). `null` = no source; never estimated. Trial-credit offers are not rated. |
 | `model_tier_source` | object \| null | The provider's model, the exact LMArena row it maps to, that row's rating, votes and snapshot date. Present iff `model_tier` is. |

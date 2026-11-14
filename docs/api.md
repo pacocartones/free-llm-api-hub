@@ -8,7 +8,7 @@ The [static JSON API](https://freellmapihub.com/api/) serves the dataset as file
 
 Columns, in order:
 
-`dataset_version`, `dataset_generated`, `slug`, `name`, `category`, `free_type`, `free_tier`, `rate_limits`, `notes`, `best_for`, `expires`, `docs_url`, `phone_required`, `card_required`, `commercial_ok`, `commercial_ok_condition`, `openai_compatible`, `openai_base_url`, `is_text_llm`, `model_tier`, `verified`, `last_verified`, `added`, `last_probed`, `probe_status`
+`dataset_version`, `dataset_generated`, `slug`, `name`, `category`, `free_type`, `free_tier`, `rate_limits`, `notes`, `best_for`, `expires`, `docs_url`, `models_url`, `phone_required`, `card_required`, `commercial_ok`, `commercial_ok_condition`, `openai_compatible`, `openai_base_url`, `is_text_llm`, `model_tier`, `verified`, `last_verified`, `added`, `last_probed`, `probe_status`
 
 The values `true`, `false`, and `conditional` stay as those words. For a conditional answer, `commercial_ok_condition` carries the documented reason in its own column. An empty cell means `null`, absent, or not recorded; it never means `false` or `0`. To prevent spreadsheet formula execution, a string cell whose first non-whitespace character is `=`, `+`, `-`, or `@` gets a leading apostrophe before CSV quoting; numbers, booleans and empty cells keep their normal representation. Text is UTF-8 CSV, with commas, quotes and line breaks quoted as CSV requires.
 

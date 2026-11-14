@@ -1761,6 +1761,12 @@ test('provider sections: honest empty states, numbers only with source and date,
   assert.match(modelsHtml(base), /Free models: not listed yet\./);
   assert.doesNotMatch(modelsHtml(base), /<h2/);
   assert.match(modelsHtml({ ...base, models_free: ['a/b'] }), /<h2 id="models">Free models/);
+  const catalogOnly = modelsHtml({ ...base, models_url: 'https://example.com/models' });
+  assert.match(catalogOnly, /<h2 id="models">Free models/);
+  assert.match(catalogOnly, /href="https:\/\/example\.com\/models"[^>]*>Browse the official model catalogue/);
+  const sampledCatalog = modelsHtml({ ...base, models_free: ['a/b'], models_url: 'https://example.com/models?a=1&b=2' });
+  assert.match(sampledCatalog, /href="https:\/\/example\.com\/models\?a=1&amp;b=2"/);
+  assert.doesNotMatch(modelsHtml({ ...base, models_url: 'javascript:alert(1)' }), /javascript:/, 'an unsafe catalogue URL never becomes a link');
   // data policy: the slot for REPO-064 is empty until a provider has the field
   assert.equal(dataPolicyHtml(base), '');
   const dp = dataPolicyHtml({ ...base, data_policy: { trains_on_prompts: false, retention: '30 days', source: 'https://example.com/p' } });
@@ -1939,6 +1945,23 @@ test('quickstart fields reject hidden characters before publication', () => {
   assert.equal(validateAfter((data) => { provider(data).openai_base_url += '\nhttps://evil.example'; }), false, 'a base URL cannot add a copied source line');
   assert.equal(validateAfter((data) => { provider(data).models_free[0] += '\u202e'; }), false, 'a model cannot visually reorder copied source');
   assert.equal(validateAfter((data) => { provider(data).models_free[0] = "model'with-quote"; }), true, 'visible punctuation remains valid and is handled by context encoders');
+});
+
+test('models_url is an optional public HTTPS URL', () => {
+  const first = (data) => data.providers[0];
+  assert.equal(validateAfter((data) => { first(data).models_url = 'not a URL'; }), false);
+  assert.equal(validateAfter((data) => { first(data).models_url = 'http://example.com/models'; }), false, 'catalogues must use public HTTPS');
+  assert.equal(validateAfter((data) => { first(data).models_url = 'https://example.com/models'; }), true);
+});
+
+test('exactly three providers seed models_url from their official catalogues', () => {
+  const { providers } = JSON.parse(readFileSync(DATA, 'utf8'));
+  const seeded = providers.filter((p) => Object.hasOwn(p, 'models_url')).map((p) => [p.slug, p.models_url]);
+  assert.deepEqual(seeded, [
+    ['google-gemini', 'https://ai.google.dev/gemini-api/docs/models'],
+    ['groq', 'https://console.groq.com/docs/models'],
+    ['mistral', 'https://docs.mistral.ai/models'],
+  ]);
 });
 
 // A `generated` after today in UTC is what a contributor in a time zone ahead of UTC writes at the end of their day (2026-10-16 when it is still

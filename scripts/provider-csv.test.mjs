@@ -34,7 +34,7 @@ test('providersCsv: exact scalar header, one row per provider, true/false/unknow
     providers: [
       {
         slug: 'alpha', name: 'Alpha, Inc.', category: 'ongoing', free_type: 'perpetual', free_tier: 'Free "basic"\nplan', rate_limits: '10 requests/minute', notes: 'Café - नमस्ते', best_for: null,
-        expires: null, docs_url: 'https://alpha.example/docs', phone_required: true, card_required: false, commercial_ok: null, openai_compatible: true,
+        expires: null, docs_url: 'https://alpha.example/docs', models_url: 'https://alpha.example/models', phone_required: true, card_required: false, commercial_ok: null, openai_compatible: true,
         openai_base_url: 'https://alpha.example/v1', models_free: ['alpha-large'], is_text_llm: true, model_tier: 2, model_tier_source: { rating: 1000 },
         free_limits: { requests_per_day: 10 }, no_expiry: null, data_policy: { trains_on_prompts: false }, verified: false, last_verified: null, added: '2026-01-01', last_probed: null, probe_status: null,
       },
@@ -56,6 +56,7 @@ test('providersCsv: exact scalar header, one row per provider, true/false/unknow
   assert.equal(bySlug.alpha.name, 'Alpha, Inc.');
   assert.equal(bySlug.alpha.free_tier, 'Free "basic"\nplan');
   assert.equal(bySlug.alpha.notes, 'Café - नमस्ते');
+  assert.equal(bySlug.alpha.models_url, 'https://alpha.example/models');
   assert.equal(bySlug.alpha.phone_required, 'true');
   assert.equal(bySlug.alpha.card_required, 'false');
   assert.equal(bySlug.alpha.commercial_ok, '', 'unknown stays empty, never false');
