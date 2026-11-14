@@ -50,7 +50,7 @@ Changes from the v2.12.0 tag to the existing v2.13.0 tag at `74ebf8d23b644ce6532
 - OpenRouter retention-policy evidence and upstream scope (#583).
 - Source checks include provider claim evidence and avoid a cancellation-stream race (#574, #585).
 - MCP remote JSON loading uses a total deadline; partial publication recovery is independent per destination (#576, #578). This dataset tag does not publish an MCP package.
-- The first-provider tutorial explains data policy and quote registration. Thanks @Logic769 (#507).
+- The first-provider tutorial explains data policy and quote registration. (#507). Thanks @Logic769.
 - Contribution paths and repository automation were clarified, the weekly verification worklist was refreshed from main, the next improvement sprint was documented, test-harness listeners are closed, and Lighthouse was updated (#575, #579, #587, #581, #577, #580).
 
 ## [2.9.1] — 2026-10-08
