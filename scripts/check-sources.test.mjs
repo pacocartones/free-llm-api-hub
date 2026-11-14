@@ -20,6 +20,25 @@ const streamResponse = ({ status = 200, headers = {}, chunks = [], end = true } 
   return response;
 };
 
+const bufferedFetch = (chunks) => createPublicFetch({
+  requestImpl: (_url, _options, callback) => {
+    const request = new EventEmitter();
+    request.end = () => queueMicrotask(() => {
+      const response = new PassThrough();
+      response.statusCode = 200;
+      response.headers = {};
+      for (const chunk of chunks) response.write(chunk);
+      response.end();
+      callback(response);
+    });
+    request.destroy = () => {};
+    return request;
+  },
+  resolver: (_hostname, _options, callback) => callback(null, [{ address: '93.184.216.34', family: 4 }]),
+  agent: {},
+});
+const nextTurn = () => new Promise((resolve) => setImmediate(resolve));
+
 test('collectSources: provider docs and external docs/sources links are collected once, internal links ignored', () => {
   const providers = [
     { slug: 'alpha', docs_url: 'https://alpha.example/docs.' },
@@ -204,6 +223,12 @@ test('checkOne uses one bounded GET and cancels the response body it does not in
   assert.equal(cancelled, true);
 });
 
+test('checkOne cancels a body the transport already buffered without crashing the sweep', async () => {
+  const result = await checkOne('https://docs.example.com', { fetchImpl: bufferedFetch(['<html>docs</html>']) });
+  await nextTurn();
+  assert.deepEqual(result, { url: 'https://docs.example.com', ok: true, status: 200 });
+});
+
 test('the default checker rejects a private target without consulting native fetch', async () => {
   const originalFetch = globalThis.fetch;
   let nativeFetchCalled = false;
@@ -270,6 +295,12 @@ test('Wayback parsing stops at its byte cap and cancels the oversized body', asy
 
   assert.equal(await waybackSnapshot('https://dead.example', { fetchImpl, maxBytes: 5 }), null);
   assert.equal(cancelled, true);
+});
+
+test('Wayback parsing stops at its byte cap on a buffered transport body without crashing the sweep', async () => {
+  const fetchImpl = bufferedFetch(Array.from({ length: 6 }, () => 'x'.repeat(16 * 1024)));
+  assert.equal(await waybackSnapshot('https://dead.example', { fetchImpl }), null);
+  await nextTurn();
 });
 
 test('external cancellation stops the source sweep instead of continuing to Wayback', async () => {

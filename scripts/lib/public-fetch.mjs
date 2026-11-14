@@ -222,6 +222,7 @@ function boundedBody(response, maxBytes, lifecycle) {
         if (done) { lifecycle.cleanup(); controller.close(); return; }
         if (value.byteLength > maxBytes - bytesRead) {
           const error = new ResponseTooLargeError(maxBytes);
+          response.pause();
           response.destroy(error);
           try { await reader.cancel(error); } catch { /* preserve the size error */ }
           lifecycle.cleanup();
@@ -236,6 +237,7 @@ function boundedBody(response, maxBytes, lifecycle) {
       }
     },
     async cancel(reason) {
+      response.pause();
       response.destroy(reason instanceof Error ? reason : undefined);
       try { await reader.cancel(reason); } catch { /* cancellation remains best effort */ }
       finally { lifecycle.cleanup(); }
