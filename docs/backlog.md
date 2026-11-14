@@ -46,6 +46,15 @@ only what confirms.
   a fresh signup) before adding. Also Anthropic-compatible worth noting.
 - ✅ **Upstage** (Solar LLM + Document Parse/OCR) — now a provider in the dataset (re-verified 2026-10-08).
 - ✅ **Veryfi** (OCR) — now a provider in the dataset (re-verified 2026-10-08).
+- [ ] **Inception Labs** (text LLM API) — checked 2026-11-14 UTC for
+  [issue #604](https://github.com/pacocartones/free-llm-api-hub/issues/604).
+  Its docs label rate limits “Free Tier”, but the FAQ describes a **one-time**
+  100-million-token credit, not a renewing allowance. The provider also announces
+  API shutdown after **2026-12-28**. Held out under this review's stable-access
+  requirement; do not promote the rate-limit column into an ongoing free quota.
+  See the [dated official-source assessment](inception-labs-604.md) for quotes,
+  pricing, terms, privacy and unresolved fields. Reconsider only with official
+  evidence of a stable replacement offer.
 - [ ] **Replicate** (image/video) — re-verified 2026-11-14 against its pricing
   page, billing docs and terms (§2.2(c)): "run select models for free… after a
   bit you'll be asked to set up billing", but no page states a concrete
