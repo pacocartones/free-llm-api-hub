@@ -179,7 +179,7 @@ AI-assisted contributions are welcome. Please read [AI_POLICY.md](AI_POLICY.md):
 
 Replies in this repository's issues, pull requests and discussions are prepared by an AI agent working under the supervision of the repository owner.
 
-Commit messages: AI-assisted contributions are welcome when you have verified the change (see above). You do not need to remove a trailer your tool adds, and you can commit under any email address. Commits written by the maintainers carry no AI attribution trailers and use GitHub noreply addresses; the *Commit policy* check on pull requests enforces that for maintainer identities only. When we squash-merge, we drop AI `Co-authored-by` lines from the final message so `main` stays clean; your authorship stays.
+Commit messages: AI-assisted contributions are welcome when you have verified the change (see above). You do not need to remove a trailer your tool adds, and you can commit under any email address. The current *Commit policy* check recognizes Paco/`pacocartones` and legacy maintainer/agent identity patterns, enforces the Paco noreply identity for those matches, and rejects AI attribution trailers on them. It does not yet enforce LeonMAG's identity; that governance work is separate. When we squash-merge, we drop AI `Co-authored-by` lines from the final message so `main` stays clean; your authorship stays.
 
 ## Review
 
@@ -188,6 +188,28 @@ A human maintainer reviews and is responsible for every merge. Automated review 
 If your pull request falls behind `main`, we update it before merging; you can use [Updating your branch from main](#updating-your-branch-from-main) to sync it locally. When that update only changes regenerated files, the review still holds: it is tied to the patch of the files you changed under `data/`, `scripts/` and `docs/`, and we check that this patch is exactly the one we reviewed. If any of those lines changes, the pull request is reviewed again. The *Dataset integrity* check has to be green either way.
 
 Contributions here are voluntary. We don't pay for comments, reviews or other work that nobody asked for, and a request for payment in an issue or a pull request gets no reply and doesn't change how we review it.
+
+### Required checks
+
+The four required checks on `main` (confirmed with `gh pr checks --required` on
+2026-11-14) are:
+
+- `Dataset integrity`
+- `Windows tests`
+- `commit policy`
+- `Lighthouse accessibility and performance`
+
+All four report on every PR without path filters. CodeQL additionally reports
+`Analyze (javascript-typescript)` on every PR, plus weekly and manual scans; it is
+not currently a required check. It scans JavaScript/TypeScript code, not Actions
+workflow YAML. There is no push trigger, avoiding a second scan when a PR merges.
+`mcp tests (node 18)` and `mcp tests (node 22)` run only when the MCP package or its
+workflow changes, so they must not be unconditional required checks.
+
+Live GitHub settings remain authoritative. This change does not modify branch
+protection or rulesets. Preserve existing controls when reconciling their check
+names; a required PR check must not use path filters that leave it permanently
+pending. Security policy and token permissions are in [SECURITY.md](SECURITY.md).
 
 ## Hacktoberfest
 
@@ -206,7 +228,7 @@ GitHub holds workflow runs from a **first-time contributor** until a maintainer 
 ## Maintainer notes
 
 - **No regeneration bot — the author ships the derived files.** There is no `bot/regenerate`: `main` requires the "Dataset integrity" check, and a change is complete when its regenerated files are committed in the same PR. After editing `data/providers.json` (or `data/programs.json`), run `npm run build` (and `npm run og` if the OG check flags drift), commit the regenerated files together with the data change, and push. The "Dataset integrity" check fails until they are in sync.
-- **Provider maintenance is not scheduled.** Re-verification, model samples and the live probe are local on-demand tasks — see [docs/update-playbook.md](docs/update-playbook.md). GitHub Actions does run the site deployment daily to refresh its build-time star count, plus weekly CodeQL and OpenSSF Scorecard scans; none of those jobs changes provider claims.
+- **Provider maintenance is not scheduled.** Re-verification, model samples and the live probe are local on-demand tasks — see [docs/update-playbook.md](docs/update-playbook.md). GitHub Actions does run the site deployment daily to refresh its build-time star count, plus CodeQL on pull requests and weekly, and weekly OpenSSF Scorecard scans; none of those jobs changes provider claims.
 
 ### Branch names and commit identity
 
@@ -224,9 +246,10 @@ GitHub holds workflow runs from a **first-time contributor** until a maintainer 
   attribution rules still apply to maintainer commits in a Dependabot pull request.
 - **What happens to branches:** in this repository, merged and closed pull requests keep their
   commits and the branch is deleted afterwards; branches in your fork are yours.
-- **Commit identity:** maintainers commit as
+- **Commit identity:** Paco commits as
   `Paco Cartones <253313177+pacocartones@users.noreply.github.com>` (how the project is maintained,
   including the part done by AI agents under human oversight, is described in the README ([How this project is maintained](README.md#how-this-project-is-maintained))), and
-  `scripts/check-commit-policy.sh` checks maintainer commits only. If you do not want your email in
+  `scripts/check-commit-policy.sh` currently enforces Paco/legacy maintainer patterns only,
+  not LeonMAG's identity. This CI change does not alter either maintainer's identity or that policy. If you do not want your email in
   the public history, use your GitHub noreply address
   ([how](https://docs.github.com/en/account-and-profile/setting-up-and-managing-your-personal-account-on-github/managing-email-preferences/setting-your-commit-email-address)).
