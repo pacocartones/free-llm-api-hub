@@ -3,7 +3,7 @@
 // is committed is compared, that a hand change to it turns the gate red, and that a page nobody committed is reported.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
 import { mkdirSync, writeFileSync, rmSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -11,6 +11,7 @@ import { makeTmpDir } from './lib/tmp.mjs';
 import { isGenerated, generatedTargets, parseNul, STATIC_TARGETS } from './generated-targets.mjs';
 
 const SCRIPT = join(dirname(fileURLToPath(import.meta.url)), 'generated-targets.mjs');
+const CHECK = join(dirname(fileURLToPath(import.meta.url)), 'check-generated.mjs');
 
 test('what is generated: the pages, feeds, badges and data under site/; not the scripts, styles, fonts, images or the domain file', () => {
   for (const f of ['site/index.html', 'site/404.html', 'site/sitemap.xml', 'site/robots.txt', 'site/scores.json', 'site/badge-verified.svg',
@@ -70,4 +71,35 @@ test('in a repository: a committed page is a target, a hand change to it turns t
 test('parseNul splits on NUL, keeps spaces and quotes inside a path, and drops the empty tail', () => {
   assert.deepEqual(parseNul('site/a b/index.html\0site/"q"/index.html\0'), ['site/a b/index.html', 'site/"q"/index.html']);
   assert.deepEqual(parseNul(''), []);
+});
+
+test('the portable drift command exits clean only while generated outputs match', () => {
+  const dir = makeTmpDir('flah-check-generated-');
+  const git = (...a) => execFileSync('git', a, { cwd: dir, encoding: 'utf8' });
+  const run = () => spawnSync(process.execPath, [CHECK], { cwd: dir, encoding: 'utf8' });
+  const write = (rel, text) => { mkdirSync(join(dir, dirname(rel)), { recursive: true }); writeFileSync(join(dir, rel), text); };
+  try {
+    git('init', '-q');
+    git('config', 'user.email', 'test@example.invalid'); git('config', 'user.name', 'test');
+    write('.gitignore', 'site/p/\n');
+    write('site/new-page/index.html', '<p>built</p>');
+    git('add', '-A'); git('commit', '-q', '-m', 'base');
+
+    assert.equal(run().status, 0, 'matching committed outputs pass');
+
+    write('site/new-page/index.html', '<p>drift</p>');
+    assert.equal(run().status, 1, 'tracked generated drift fails');
+    git('checkout', '--', 'site/new-page/index.html');
+
+    write('site/second-page/index.html', '<p>new</p>');
+    const untracked = run();
+    assert.equal(untracked.status, 1, 'untracked generated output fails');
+    assert.match(`${untracked.stdout}${untracked.stderr}`, /site\/second-page\/index\.html/);
+    rmSync(join(dir, 'site/second-page'), { recursive: true, force: true });
+
+    write('site/p/ignored.html', '<p>ignored</p>');
+    assert.equal(run().status, 0, 'ignored generated output does not fail the gate');
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
 });
