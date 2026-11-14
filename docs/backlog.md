@@ -61,9 +61,11 @@ only what confirms.
 - ✅ **Speech tail:** Voicegain, Smallest.ai, Retell AI and Camb.ai are all providers in the dataset (re-verified 2026-10-08).
 - [ ] **From `npm run discover` (2026-07-31):** `inclusionai` (InclusionAI /
   Ant Group — Ling/Bailing models appear free on OpenRouter) shows free models we
-  don't cover. Checked 2026-11-14 (UTC): InclusionAI's official GitHub organization
+  don't cover. Checked 2026-11-14 (UTC): InclusionAI's
+  [verified official GitHub organization](https://github.com/inclusionAI)
   describes its work as open-source models and research and links to its model
-  hubs; the public official pages checked did not document a first-party hosted
+  hubs; neither that profile nor the
+  [official website](https://inclusion-ai.org/) documented a first-party hosted
   inference API, pricing, or a direct free-tier signup. Aggregator availability
   alone does not meet the inclusion criteria, so keep this as an unconfirmed
   lead rather than adding a provider. Recheck if InclusionAI publishes direct
