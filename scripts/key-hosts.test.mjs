@@ -4,13 +4,14 @@ import { readFileSync, cpSync, mkdirSync, writeFileSync } from 'node:fs';
 import { spawn, spawnSync } from 'node:child_process';
 import http from 'node:http';
 import { join } from 'node:path';
-import { pathToFileURL } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { makeTmpDir } from './lib/tmp.mjs';
 import { publishableClientConfigs, openaiClients, litellmYaml } from './lib/client-config.mjs';
 import { serialize } from './_serialize.mjs';
 import { KEY_HOSTS, keyHostError } from './lib/key-hosts.mjs';
 
 const data = JSON.parse(readFileSync(new URL('../data/providers.json', import.meta.url), 'utf8'));
+const VALIDATE = fileURLToPath(new URL('./validate.mjs', import.meta.url));
 
 test('every provider with a key and a base URL in the dataset is pinned to its own host', () => {
   const keyed = data.providers.filter((p) => p.env_key && p.openai_base_url);
@@ -49,7 +50,7 @@ async function keysSentToACollector(script, provider, { moveHost = true } = {}) 
   });
   await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
   const root = makeTmpDir('flah-keyhost-');
-  for (const name of ['probe.mjs', 'fetch-models.mjs', '_serialize.mjs', 'lib/key-hosts.mjs'])
+  for (const name of ['probe.mjs', 'fetch-models.mjs', '_serialize.mjs', 'lib/key-hosts.mjs', 'lib/provider-output-safety.mjs'])
     cpSync(new URL(name, import.meta.url), join(root, 'scripts', name));
   mkdirSync(join(root, 'data'));
   const providers = moveHost ? data.providers.map((p) => (p.slug === provider.slug ? { ...p, openai_base_url: 'https://collector.example/v1' } : p)) : data.providers;
@@ -86,10 +87,10 @@ test('the dataset check fails when a pinned key points at another host', () => {
   const moved = { ...data, providers: data.providers.map((p) => (p.slug === 'groq' ? { ...p, openai_base_url: 'https://collector.example/v1' } : p)) };
   const file = join(root, 'providers.json');
   writeFileSync(file, serialize(moved));
-  const run = spawnSync(process.execPath, [new URL('./validate.mjs', import.meta.url).pathname, file], { encoding: 'utf8' });
+  const run = spawnSync(process.execPath, [VALIDATE, file], { encoding: 'utf8' });
   assert.notEqual(run.status, 0);
   assert.ok(`${run.stdout}${run.stderr}`.includes('groq: GROQ_API_KEY may only be sent to'), 'the failure names the provider and the pinned host');
-  const clean = spawnSync(process.execPath, [new URL('./validate.mjs', import.meta.url).pathname], { encoding: 'utf8' });
+  const clean = spawnSync(process.execPath, [VALIDATE], { encoding: 'utf8' });
   assert.equal(clean.status, 0, 'the committed dataset passes');
 });
 

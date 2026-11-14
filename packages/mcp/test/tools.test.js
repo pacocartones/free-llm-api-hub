@@ -23,6 +23,11 @@ test('loader strips env_key and keeps version/generated', () => {
   assert.ok(data.providers.every((p) => !('env_key' in p)));
 });
 
+test('local loader exposes only coarse source metadata', () => {
+  assert.equal(data.source, 'local_override');
+  assert.equal(clients.source, 'local_override');
+});
+
 test('loader caches: the second call returns the same object without fetching again', async () => {
   let calls = 0;
   const fetchImpl = async () => {
@@ -34,6 +39,7 @@ test('loader caches: the second call returns the same object without fetching ag
   const b = await load();
   assert.equal(a, b);
   assert.equal(calls, 1);
+  assert.equal(a.source, 'https://example.invalid/providers.json');
 });
 
 test('loader does not cache a failure', async () => {
@@ -219,6 +225,7 @@ test('dataset_info: version, counts and freshness', () => {
   const r = datasetInfo(data);
   assert.equal(r.version, '9.9.9');
   assert.equal(r.generated, '2026-10-01');
+  assert.equal(r.source, 'local_override');
   assert.deepEqual(
     { providers: r.counts.providers, ongoing: r.counts.ongoing, trial: r.counts.trial, verified: r.counts.verified, unverified: r.counts.unverified, openai_client_ready: r.counts.openai_client_ready },
     { providers: 4, ongoing: 3, trial: 1, verified: 3, unverified: 1, openai_client_ready: 1 },
