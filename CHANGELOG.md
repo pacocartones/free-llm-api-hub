@@ -14,8 +14,6 @@ Notable changes to the dataset and the project. Format based on [Keep a Changelo
 - **`/changes/` is now the one page for what changed**, with a section «Month by month» (the index of the monthly state reports) and a section «Week by week» (what it showed before). `/state/` is a redirect page to `/changes/#months` (GitHub Pages cannot send a server redirect, so it is a meta refresh with a canonical link, as `/collections/` and `/guides/` already are); the reports keep their URLs `/state/YYYY-MM/`, `/state/` leaves the sitemap and the footer entry «Monthly state report» goes. A test now checks that every internal link of every built page points to a file that exists.
 
 ### Added
-- **`playground_url`** (dataset 2.13.0): an optional HTTPS URL for a provider-owned no-code playground, with a conditional "Try it" button on provider pages and publication in provider JSON. First entry: OCR.space, from its own API docs and online form, read 2026-11-14. The CSV columns are unchanged (#570).
-- **`models_url`** (dataset 2.13.0): an optional public HTTPS link to the provider's own model catalogue, kept separate from the sampled free-tier IDs in `models_free`. Provider pages show the official catalogue link without implying every catalogue model is free. First entries: Google Gemini, Groq and Mistral, checked on their official model pages on 2026-11-14.
 - **`commercial_ok: "conditional"` and `commercial_ok_condition`** (dataset 2.12.0): the canonical dataset can record commercial use permitted only under documented provider conditions. API v1 preserves its existing `boolean | null` contract by projecting `"conditional"` to `null` while retaining the condition field, including in slices, picks and change values. Scoring and coverage treat it as unconfirmed, and commercial collections still contain only `commercial_ok: true`. First entry: AI Horde, based on its per-model licences and official FAQ give-back rule (#327).
 - **`data/quotes.json` and the consistency check of the passages** (a register, not part of the API): every sentence a data policy row quotes, every phrase of a note between « » and every claim that a whole page names no plan has an entry with its page, the day it was read and how the text was made. CI checks that the register and the data agree, offline; it does not check that the page says that now (see `docs/quotes.md`). The reading is done in English: a Spanish copy of a page is never an "expired" passage.
 - **`/api/v1/score.json` and `/api/v1/score.schema.json`**: the whole FLLMAPIHUB score (every eligible provider, with its parts and its confirmed inputs) in the stable API, with a JSON Schema at a stable URL. Contract v1, documented in `docs/api.md`. A new file, not a change to the dataset shape, so the dataset `version` does not change.
@@ -38,6 +36,22 @@ Notable changes to the dataset and the project. Format based on [Keep a Changelo
   - OCR.space's Engine 3 quota is now 1,000 a month.
   - Moondream publishes 2 requests per second.
   - Nutrient has a new docs URL.
+
+## [2.13.0] — 2026-11-14
+
+Changes from the v2.12.0 tag to the existing v2.13.0 tag at `74ebf8d23b644ce65323c56e88b2ff41a569b985`. Later corrections on main remain Unreleased; the tag is never moved.
+
+### Added
+- Optional provider-owned `playground_url` links and “Try it” buttons, first sourced for OCR.space (#588).
+- Optional official `models_url` catalogue links, first sourced for Gemini, Groq and Mistral (#591). The CSV gains a `models_url` column; consumers should use column names. The JSON additions are optional and do not imply that every catalogue model is free.
+- Explorer and JSON API entry points in the homepage hero (#582).
+
+### Changed and fixed
+- OpenRouter retention-policy evidence and upstream scope (#583).
+- Source checks include provider claim evidence and avoid a cancellation-stream race (#574, #585).
+- MCP remote JSON loading uses a total deadline; partial publication recovery is independent per destination (#576, #578). This dataset tag does not publish an MCP package.
+- The first-provider tutorial explains data policy and quote registration. (#507). Thanks @Logic769.
+- Contribution paths and repository automation were clarified, the weekly verification worklist was refreshed from main, the next improvement sprint was documented, test-harness listeners are closed, and Lighthouse was updated (#575, #579, #587, #581, #577, #580).
 
 ## [2.9.1] — 2026-10-08
 
