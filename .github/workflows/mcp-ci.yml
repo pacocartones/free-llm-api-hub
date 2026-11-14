@@ -18,7 +18,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node: [18, 22]
+        node: [22, 24]
     timeout-minutes: 10
     defaults:
       run:
@@ -36,5 +36,5 @@ jobs:
         run: node --test ../../scripts/release-mcp.test.mjs
       - name: server.json against the registry schema
         run: npm run validate:server-json
-      - name: What would be published
-        run: npm pack --dry-run
+      - name: Pack, install and exercise the actual npm archive
+        run: npm run test:pack

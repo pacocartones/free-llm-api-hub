@@ -20,7 +20,7 @@ const TERMS =
   'are authoritative, and last_verified says when the entry was last checked against them. ' +
   'Tri-state fields are true / false / null, and null means "not confirmed", never "no".';
 
-const READ_ONLY = { readOnlyHint: true, openWorldHint: false, idempotentHint: true };
+const READ_ONLY = { readOnlyHint: true, openWorldHint: true, idempotentHint: true };
 
 function ok(value) {
   return { content: [{ type: 'text', text: JSON.stringify(value, null, 2) }] };
