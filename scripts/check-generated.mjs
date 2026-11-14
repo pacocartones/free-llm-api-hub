@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Portable generated-output drift gate used by `npm run check`.
 import { execFileSync, spawnSync } from 'node:child_process';
-import { generatedTargets, isGenerated, parseNul } from './generated-targets.mjs';
+import { generatedTargets, isGeneratedOutput, parseNul, STATIC_TARGETS } from './generated-targets.mjs';
 
 const gitPaths = (args) => parseNul(execFileSync('git', args, { encoding: 'utf8' }));
 const targets = generatedTargets(gitPaths(['ls-files', '-z', '--', 'site/']));
@@ -9,7 +9,7 @@ const diff = spawnSync('git', ['diff', '--exit-code', '--', ...targets], { stdio
 
 if (diff.status !== 0) process.exit(1);
 
-const untracked = gitPaths(['ls-files', '-z', '--others', '--exclude-standard', '--', 'site/']).filter(isGenerated);
+const untracked = gitPaths(['ls-files', '-z', '--others', '--exclude-standard', '--', 'site/', ...STATIC_TARGETS]).filter(isGeneratedOutput);
 if (untracked.length) {
   console.error('Written by the build and not committed:');
   for (const path of untracked) console.error(path);

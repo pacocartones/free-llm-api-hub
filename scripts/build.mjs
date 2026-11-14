@@ -41,6 +41,7 @@ import { providerFigures, expandFigures, injectInlineFigures, figureErrors } fro
 import { badgeSvg } from './lib/badge-svg.mjs';
 import { codeHtmlEsc, curlChatQuickstart, pythonChatQuickstart, pythonEmbeddingsQuickstart, pythonStringLiteral } from './lib/quickstart.mjs';
 import { providersCsv } from './lib/provider-csv.mjs';
+import { writeSchemaDocs } from './schema-docs.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const FRESH_DAYS = SLA_DAYS; // the freshness SLA, defined once in lib/rules.mjs
@@ -780,6 +781,9 @@ readme = injectInlineFigures(readme, FIGS);
 }
 
 writeFileSync(join(ROOT, 'README.md'), readme);
+
+// The field reference follows the schema, without hand-maintained descriptions.
+writeSchemaDocs();
 
 // Counts in the field reference follow the data, just like README tables.
 const dimensionsPath = join(ROOT, 'docs/comparison-dimensions.md');

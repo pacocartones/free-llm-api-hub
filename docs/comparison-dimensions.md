@@ -2,6 +2,8 @@
 
 Every field in [`data/providers.json`](../data/providers.json), defined. The dataset is validated against [`data/schema.json`](../data/schema.json) on every change.
 
+For the generated field types, nullability, required keys and schema descriptions, see the [provider schema reference](schema.md). The guidance below explains the comparison conventions and integrity rules.
+
 ## Tri-state convention
 
 `phone_required`, `card_required`, and `openai_compatible` are **tri-state**. `commercial_ok` additionally accepts `"conditional"` when the provider permits commercial use only under conditions recorded in `commercial_ok_condition`:
