@@ -3,6 +3,7 @@
 //   - README provider tables (between AUTOGEN markers)
 //   - badge-freshness.json (root, for the shields.io endpoint badge)
 //   - site/providers.json so the interactive site ships the data
+//   - site/providers.csv, the documented scalar projection for spreadsheets
 // Zero dependencies. Run with: node scripts/build.mjs   (or `npm run build`)
 
 import { readFileSync, writeFileSync, mkdirSync, readdirSync, rmSync, existsSync } from 'node:fs';
@@ -37,6 +38,7 @@ import { bestFactsHtml } from './lib/best-facts.mjs';
 import { providerFigures, expandFigures, injectInlineFigures, figureErrors } from './lib/figures.mjs';
 import { badgeSvg } from './lib/badge-svg.mjs';
 import { codeHtmlEsc, curlChatQuickstart, pythonChatQuickstart, pythonEmbeddingsQuickstart, pythonStringLiteral } from './lib/quickstart.mjs';
+import { providersCsv } from './lib/provider-csv.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const FRESH_DAYS = SLA_DAYS; // the freshness SLA, defined once in lib/rules.mjs
@@ -868,7 +870,8 @@ writeFileSync(join(ROOT, 'site/badge-verified.svg'), verifiedBadge.svg);
 // ---------- ship data with the site ----------
 mkdirSync(join(ROOT, 'site'), { recursive: true });
 writeFileSync(join(ROOT, 'site/providers.json'), JSON.stringify({ ...data, providers: publicProviders }, null, 2) + '\n');
-for (const rel of ['data/providers.csv', 'data/providers.yaml', 'site/providers.csv', 'site/providers.yaml']) {
+writeFileSync(join(ROOT, 'site/providers.csv'), providersCsv({ version: data.version, generated: data.generated, providers: publicProviders }));
+for (const rel of ['data/providers.csv', 'data/providers.yaml', 'site/providers.yaml']) {
   rmSync(join(ROOT, rel), { force: true });
 }
 
