@@ -58,6 +58,16 @@ test('normalizeDataset rejects a file without providers', () => {
   assert.throws(() => normalizeDataset({ version: '1' }, 'x.json'), /no "providers" array/);
 });
 
+test('local and API datasets expose the same v1-safe conditional commercial value while preserving its reason', () => {
+  const base = { slug: 'conditional', name: 'Conditional', commercial_ok_condition: 'Per-model licence.' };
+  const local = normalizeDataset({ providers: [{ ...base, commercial_ok: 'conditional', env_key: 'SECRET_NAME' }] }, 'local');
+  const api = normalizeDataset({ providers: [{ ...base, commercial_ok: null }] }, 'api');
+  assert.deepEqual(local.providers, api.providers);
+  assert.equal(local.providers[0].commercial_ok, null);
+  assert.equal(local.providers[0].commercial_ok_condition, 'Per-model licence.');
+  assert.equal('env_key' in local.providers[0], false);
+});
+
 test('normalizeClients rejects a file without clients or with an incomplete entry', () => {
   assert.throws(() => normalizeClients({ providers: [] }, 'c.json'), /no "clients" array/);
   assert.throws(() => normalizeClients({ clients: [{ slug: 'x', base_url: 'https://x' }] }, 'c.json'), /without slug\/base_url\/env_key/);

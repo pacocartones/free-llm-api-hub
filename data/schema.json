@@ -31,6 +31,13 @@
       "description": "true / false / null, where null means 'not yet confirmed'.",
       "type": ["boolean", "null"]
     },
+    "commercial_ok_value": {
+      "description": "true / false / null, or 'conditional' when commercial use depends on conditions recorded in commercial_ok_condition.",
+      "anyOf": [
+        { "$ref": "#/$defs/tristate" },
+        { "const": "conditional" }
+      ]
+    },
     "provider": {
       "type": "object",
       "additionalProperties": false,
@@ -88,7 +95,11 @@
         },
         "phone_required": { "$ref": "#/$defs/tristate" },
         "card_required": { "$ref": "#/$defs/tristate" },
-        "commercial_ok": { "$ref": "#/$defs/tristate" },
+        "commercial_ok": { "$ref": "#/$defs/commercial_ok_value" },
+        "commercial_ok_condition": {
+          "type": ["string", "null"],
+          "description": "Condition summary when commercial_ok is 'conditional'. Required and non-blank for that value; null or absent otherwise."
+        },
         "openai_compatible": { "$ref": "#/$defs/tristate" },
         "openai_base_url": {
           "type": ["string", "null"],
@@ -199,6 +210,14 @@
         }
       },
       "allOf": [
+        {
+          "if": { "required": ["commercial_ok"], "properties": { "commercial_ok": { "const": "conditional" } } },
+          "then": {
+            "required": ["commercial_ok_condition"],
+            "properties": { "commercial_ok_condition": { "type": "string", "pattern": "\\S" } }
+          },
+          "else": { "properties": { "commercial_ok_condition": { "type": "null" } } }
+        },
         {
           "if": { "required": ["model_tier"], "properties": { "model_tier": { "type": "integer" } } },
           "then": { "required": ["model_tier_source"], "properties": { "model_tier_source": { "type": "object" } } }

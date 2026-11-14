@@ -31,6 +31,9 @@ import { requirementsHtml, limitsHtml, glanceHtml, modelsHtml, dataPolicyHtml } 
 import { compareTableHtml, comparisonCategory, sameComparisonCategory, selectComparePairs, COMPARE_PAGE_CAP, COMPARE_PER_PROVIDER_CAP, COMPARE_MAX as COMPARE_MAX_SLOTS } from './lib/compare.mjs';
 import { codeHtmlEsc, curlChatQuickstart, posixShellQuote, pythonChatQuickstart, pythonEmbeddingsQuickstart, pythonStringLiteral } from './lib/quickstart.mjs';
 import { providersCsv } from './lib/provider-csv.mjs';
+import { projectApiV1Changes, toApiV1ChangeValue, toApiV1Provider } from './lib/api-v1.mjs';
+import Ajv2020 from 'ajv/dist/2020.js';
+import addFormats from 'ajv-formats';
 
 const REPO = join(dirname(fileURLToPath(import.meta.url)), '..');
 // The builds of this file run in a private copy of the tree (see lib/private-tree.mjs): `node --test` runs the test
@@ -843,6 +846,7 @@ test('an unconfirmed flag ranks between a confirmed yes and a confirmed no', () 
   const unknown = recScore({ ...base, card_required: null });
   const yes = recScore({ ...base, card_required: true });
   assert.ok(no > unknown && unknown > yes, `expected ${no} > ${unknown} > ${yes}`);
+  assert.equal(recScore({ ...base, commercial_ok: 'conditional' }), recScore({ ...base, commercial_ok: null }), 'conditional is neutral in recommended ordering');
 });
 
 // ---------- CI workflows must not run `gh pr view` (no bot logic) ----------
@@ -1089,7 +1093,7 @@ test('quickstarts preserve ordinary chat, embeddings and copied HTML output', ()
   assert.equal(decodeCodeHtml(codeHtmlEsc(curl)), curl, 'browser-decoded code remains the safely quoted shell program');
 });
 
-test('the built client configs match the dataset, are registered, and the schema is published verbatim', () => {
+test('the built client configs match the dataset, are registered, and publish the v1 schema', () => {
   const v1 = join(ROOT, 'site/api/v1');
   if (!existsSync(join(v1, 'litellm.yaml'))) run(['scripts/build.mjs']);
   const data = JSON.parse(readFileSync(DATA, 'utf8'));
@@ -1119,7 +1123,9 @@ test('the built client configs match the dataset, are registered, and the schema
   assert.equal(index.endpoints['openai-clients'], 'v1/openai-clients.json');
   assert.equal(index.endpoints.schema, 'v1/schema.json');
 
-  assert.ok(readFileSync(join(v1, 'schema.json')).equals(readFileSync(join(ROOT, 'data/schema.json'))), 'schema.json is a byte copy of data/schema.json');
+  const apiSchema = JSON.parse(readFileSync(join(v1, 'schema.json'), 'utf8'));
+  assert.equal(apiSchema.$id, 'https://freellmapihub.com/api/v1/schema.json');
+  assert.deepEqual(apiSchema.$defs.provider.properties.commercial_ok, { $ref: '#/$defs/tristate' });
 
   const page = readFileSync(join(ROOT, 'site/api/index.html'), 'utf8');
   for (const needle of ['v1/litellm.yaml', 'v1/openai-clients.json', 'v1/schema.json', 'docs/api.md', 'from openai import OpenAI']) {
@@ -1161,6 +1167,23 @@ test('history revisions carry field-level from/to values for the change feed', (
   assert.deepEqual(Object.keys(monthEnd), ['2026-06', '2026-07']);
   assert.equal(monthEnd['2026-07'].date, '2026-07-20', 'the month-end snapshot is the last revision of the month');
   assert.equal(monthEnd['2026-07'].providers.length, 3);
+});
+
+test('conditional commercial history keeps its reason and API v1 drops the projected null-to-null flag before grouping', () => {
+  const before = prov('conditional');
+  const after = prov('conditional', { commercial_ok: 'conditional', commercial_ok_condition: 'Per-model licence.' });
+  const { historyBySlug } = historyFromRevisions([rev('2026-10-01', [before]), rev('2026-10-08', [after])]);
+  assert.deepEqual(historyBySlug.conditional[1].changes, [
+    { field: 'commercial_ok', from: null, to: 'conditional' },
+    { field: 'commercial_ok_condition', from: null, to: 'Per-model licence.' },
+  ]);
+  const projected = projectApiV1Changes(flattenFieldChanges(historyBySlug, { conditional: 'Conditional' }));
+  assert.deepEqual(projected.map(({ field, from, to }) => ({ field, from, to })), [
+    { field: 'commercial_ok_condition', from: null, to: 'Per-model licence.' },
+  ]);
+  const weeks = groupChangesByWeek(projected);
+  assert.equal(weeks[0].count, 1);
+  assert.equal(weeks[0].changes.length, 1);
 });
 
 test('weekly grouping: newest week first, newest change first, 12-week window anchored on the newest change', () => {
@@ -2100,6 +2123,24 @@ test('best-facts: the three cards show fields of the record as they are, and a m
   assert.ok(!/javascript:/.test(bestFactsHtml({ ...p, docs_url: 'javascript:alert(1)' }, icon)), 'an unsafe URL is dropped');
 });
 
+test('explorer rows and best facts show conditional commercial use with its escaped condition', () => {
+  const p = {
+    slug: 'conditional', name: 'Conditional', category: 'ongoing', free_type: 'perpetual', free_tier: 'Free', rate_limits: '10 rpm', notes: 'Catch',
+    card_required: false, phone_required: false, commercial_ok: 'conditional', commercial_ok_condition: 'Per-model <licence> applies.',
+    verified: true, last_verified: '2026-10-08', docs_url: 'https://example.com/terms',
+  };
+  const row = explorerRowHtml(p, { now: '2026-10-08' });
+  assert.match(row, /aria-label="commercial conditional"/);
+  assert.match(row, /Conditional/);
+  assert.ok(row.includes('Per-model &lt;licence&gt; applies.'));
+  assert.doesNotMatch(row, /Not stated/);
+
+  const facts = bestFactsHtml(p, (id) => `<i>${id}</i>`);
+  assert.match(facts, /best-req-conditional/);
+  assert.match(facts, /Commercial use conditional: Per-model &lt;licence&gt; applies\./);
+  assert.doesNotMatch(facts, /Commercial use: not stated/);
+});
+
 test('/best/ layout: three cards per entry, a separator instead of the «Ranks 4 to N» title, a framed score', () => {
   const best = readFileSync(join(ROOT, 'site/best/index.html'), 'utf8');
   const items = best.match(/<li class="best-item[\s\S]*?<\/li>/g) || [];
@@ -2419,6 +2460,94 @@ test('/coverage/ escapes hostile provider text and refuses a non-http docs link'
   assert.ok(!/href="javascript:/i.test(out), 'a javascript: docs link is never an href');
   assert.match(out, /no official docs link/);
   assert.equal(coverageOf([{ ...evil, verified: false }]).every((r) => r.total === 0), true, 'an unverified provider counts in no population');
+});
+
+test('/coverage/ treats conditional commercial use as open, not confirmed', () => {
+  const provider = { slug: 'conditional', name: 'Conditional', docs_url: 'https://example.com/terms', verified: true, commercial_ok: 'conditional' };
+  const row = coverageOf([provider]).find((entry) => entry.key === 'commercial_ok');
+  assert.equal(row.total, 1);
+  assert.equal(row.confirmed, 0);
+  assert.deepEqual(row.open.map((p) => p.slug), ['conditional']);
+});
+
+test('conditional commercial use is visible in UI, excluded from commercial collections, and projected safely through API v1', () => {
+  run(['scripts/build.mjs']);
+  const raw = JSON.parse(readFileSync(DATA, 'utf8'));
+  const conditional = raw.providers.find((p) => p.commercial_ok === 'conditional');
+  assert.ok(conditional, 'the raw dataset carries a conditional provider');
+  assert.ok(conditional.commercial_ok_condition, 'the raw dataset preserves the condition');
+
+  const providerPage = readFileSync(join(ROOT, 'site/p', `${conditional.slug}.html`), 'utf8');
+  assert.match(providerPage, /conditional/);
+  assert.ok(providerPage.includes(htmlEsc(conditional.commercial_ok_condition)), 'provider page shows the escaped condition');
+  const compare = compareTableHtml([conditional, raw.providers.find((p) => p.slug !== conditional.slug)]);
+  assert.match(compare, /tri-cond">conditional/);
+  assert.ok(compare.includes(htmlEsc(conditional.commercial_ok_condition)), 'compare view shows the escaped condition');
+
+  const commercialMd = readFileSync(join(ROOT, 'collections/commercial-use.md'), 'utf8');
+  const commercialHtml = readFileSync(join(ROOT, 'site/collections/commercial-use.html'), 'utf8');
+  const commercial = raw.providers.find((p) => p.commercial_ok === true && p.docs_url);
+  assert.ok(commercial, 'a confirmed commercial provider with docs is required');
+  assert.ok(commercialMd.includes(`**[${commercial.name}]`));
+  assert.ok(commercialHtml.includes(`href="${commercial.docs_url}"`));
+  assert.ok(!commercialMd.includes(`**[${conditional.name}]`));
+  assert.ok(!commercialHtml.includes(`href="${conditional.docs_url}"`));
+
+  const v1 = join(ROOT, 'site/api/v1');
+  const jsonFiles = (dir) => readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+    const full = join(dir, entry.name);
+    if (entry.isDirectory()) return jsonFiles(full);
+    return entry.isFile() && entry.name.endsWith('.json') && !entry.name.endsWith('.schema.json') && entry.name !== 'schema.json' ? [full] : [];
+  });
+  for (const file of jsonFiles(v1)) {
+    const value = JSON.parse(readFileSync(file, 'utf8'));
+    const walk = (node) => {
+      if (!node || typeof node !== 'object') return;
+      if (Object.hasOwn(node, 'commercial_ok')) assert.ok([true, false, null].includes(node.commercial_ok), `${file}: commercial_ok keeps the v1 type`);
+      for (const child of Object.values(node)) walk(child);
+    };
+    walk(value);
+  }
+  const apiProvider = JSON.parse(readFileSync(join(v1, 'providers.json'), 'utf8')).providers.find((p) => p.slug === conditional.slug);
+  assert.equal(apiProvider.commercial_ok, null);
+  assert.equal(apiProvider.commercial_ok_condition, conditional.commercial_ok_condition);
+  const changes = JSON.parse(readFileSync(join(v1, 'changes.json'), 'utf8')).weeks.flatMap((week) => week.changes || []);
+  assert.ok(changes.length > 0, 'changes.json has rows to inspect');
+  for (const change of changes) {
+    assert.notEqual(change.from, 'conditional');
+    assert.notEqual(change.to, 'conditional');
+    if (change.field === 'commercial_ok') {
+      assert.ok([true, false, null].includes(change.from));
+      assert.ok([true, false, null].includes(change.to));
+    }
+  }
+});
+
+test('the API v1 projector maps conditional provider and change values to null without losing the reason', () => {
+  const raw = { slug: 'conditional', commercial_ok: 'conditional', commercial_ok_condition: 'Per-model licence.' };
+  assert.deepEqual(toApiV1Provider(raw), { ...raw, commercial_ok: null });
+  assert.equal(raw.commercial_ok, 'conditional', 'projection does not mutate the canonical row');
+  assert.equal(toApiV1ChangeValue('commercial_ok', 'conditional'), null);
+  for (const value of [true, false, null]) assert.equal(toApiV1ChangeValue('commercial_ok', value), value);
+  assert.equal(toApiV1ChangeValue('notes', 'conditional'), 'conditional', 'only the retyped v1 field is projected');
+});
+
+test('/api/v1/schema.json validates provider-list payloads and keeps commercial_ok boolean or null', () => {
+  run(['scripts/build.mjs']);
+  const schema = JSON.parse(readFileSync(join(ROOT, 'site/api/v1/schema.json'), 'utf8'));
+  const payload = JSON.parse(readFileSync(join(ROOT, 'site/api/v1/providers.json'), 'utf8'));
+  const ajv = new Ajv2020({ allErrors: true, strict: true, strictTypes: false });
+  addFormats(ajv, ['date', 'uri']);
+  const validate = ajv.compile(schema);
+  assert.equal(validate(payload), true, JSON.stringify(validate.errors));
+  const conditional = payload.providers.find((p) => p.commercial_ok_condition);
+  assert.ok(conditional, 'the payload exercises a projected conditional provider');
+  assert.equal(conditional.commercial_ok, null);
+
+  const broken = structuredClone(payload);
+  broken.providers.find((p) => p.slug === conditional.slug).commercial_ok = 'conditional';
+  assert.equal(validate(broken), false, 'v1 schema rejects the canonical-only value');
+  assert.equal(validate(payload), true, 'the condition remains valid beside null');
 });
 
 test('/coverage/ says how to propose one value, is in the sitemap with an absolute canonical and is linked from both footers', () => {

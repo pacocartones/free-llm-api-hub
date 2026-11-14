@@ -8,9 +8,9 @@ The [static JSON API](https://freellmapihub.com/api/) serves the dataset as file
 
 Columns, in order:
 
-`dataset_version`, `dataset_generated`, `slug`, `name`, `category`, `free_type`, `free_tier`, `rate_limits`, `notes`, `best_for`, `expires`, `docs_url`, `phone_required`, `card_required`, `commercial_ok`, `openai_compatible`, `openai_base_url`, `is_text_llm`, `model_tier`, `verified`, `last_verified`, `added`, `last_probed`, `probe_status`
+`dataset_version`, `dataset_generated`, `slug`, `name`, `category`, `free_type`, `free_tier`, `rate_limits`, `notes`, `best_for`, `expires`, `docs_url`, `phone_required`, `card_required`, `commercial_ok`, `commercial_ok_condition`, `openai_compatible`, `openai_base_url`, `is_text_llm`, `model_tier`, `verified`, `last_verified`, `added`, `last_probed`, `probe_status`
 
-The values `true` and `false` stay as those words. An empty cell means `null`, absent, or not recorded; it never means `false` or `0`. To prevent spreadsheet formula execution, a string cell whose first non-whitespace character is `=`, `+`, `-`, or `@` gets a leading apostrophe before CSV quoting; numbers, booleans and empty cells keep their normal representation. Text is UTF-8 CSV, with commas, quotes and line breaks quoted as CSV requires.
+The values `true`, `false`, and `conditional` stay as those words. For a conditional answer, `commercial_ok_condition` carries the documented reason in its own column. An empty cell means `null`, absent, or not recorded; it never means `false` or `0`. To prevent spreadsheet formula execution, a string cell whose first non-whitespace character is `=`, `+`, `-`, or `@` gets a leading apostrophe before CSV quoting; numbers, booleans and empty cells keep their normal representation. Text is UTF-8 CSV, with commas, quotes and line breaks quoted as CSV requires.
 
 These fields are omitted because they are arrays, nested objects, or operational details, and flattening them would hide conditions or provenance: `modalities`, `models_free`, `model_tier_source`, `free_limits`, `no_expiry`, `data_policy`, `env_key`.
 
@@ -31,6 +31,7 @@ What is *not* guaranteed: the order of providers in a list, the exact contents o
 - **`data_policy`** (dataset 2.11.0): an optional object with `trains_on_prompts` (boolean or `null`), `retention` (string or `null`), `source`, `checked`, and an optional `plan_named` (boolean or `null`): whether the sentence names the free or trial plan: `true` = it does, to cover or to exclude it; `false` = the source was read and does not name it in that sentence (never that the plan is covered, nor that it is not); `null` or absent = not checked. Absent or `null` means nobody has recorded it. It appears in the provider objects the API serves; consumers that ignore unknown fields are unaffected.
 - **`model_tier` / `model_tier_source`** (dataset 2.10.0): optional `model_tier` integer from 0 to 4, with `model_tier_source` an optional object containing the provider's model, the exact LMArena row it maps to, that row's rating, its two-number 95% confidence interval `ci`, votes, snapshot date, and `boundary` (boolean): whether the interval crosses or approaches a tier threshold. `model_tier` and `model_tier_source` are `null` or absent when there is no public rating source; `model_tier_source` is present if and only if `model_tier` is. It appears in the provider objects the API serves; consumers that ignore unknown fields are unaffected.
 - **`free_limits`** (dataset 2.10.0): an optional object with optional positive-integer `requests_per_second/minute/day/month` and `tokens_per_day/month` limits as published by the provider, an optional `scope`, and required `source` (an HTTP(S) URL) and `checked` (a date). An omitted limit field means no value is recorded for that unit; `null` or absent for the object means the provider publishes no numeric free limits. Numbers are never converted between units. It appears in the provider objects the API serves; consumers that ignore unknown fields are unaffected.
+- **`commercial_ok_condition`** (dataset 2.12.0): an optional string explaining provider conditions on commercial use. The canonical dataset uses `commercial_ok: "conditional"` with this field, but every `/api/v1/` provider object and every `commercial_ok` value in `changes.json` projects that value to `null`, preserving v1's `boolean | null` type. The condition string remains present, so consumers can distinguish a documented condition from a wholly unconfirmed answer without retyping the existing field.
 
 ### The score: `/api/v1/score.json`
 
@@ -153,7 +154,7 @@ Every API object carries `version` and `generated`, copied from `data/providers.
 - **A new major `version`** is reserved for a breaking change to the shape, and is the release that introduces the next API path. The API path counts breaking changes to the API; it does not repeat the dataset's major number.
 - **`generated`** is the date of the last dataset change (`YYYY-MM-DD`). Generated files are byte-stable for a given dataset: nothing in them depends on the day the build ran.
 
-The JSON Schema the dataset is validated against is published at [`/api/v1/schema.json`](https://freellmapihub.com/api/v1/schema.json), a byte-for-byte copy of [`data/schema.json`](../data/schema.json).
+The provider-list payloads (`providers.json`, slices and modality lists) are described by [`/api/v1/schema.json`](https://freellmapihub.com/api/v1/schema.json). It is generated from [`data/schema.json`](../data/schema.json), but keeps the v1 representation: `commercial_ok` is `boolean | null`, while `commercial_ok_condition` may accompany `null`. The canonical schema remains wider and accepts `"conditional"`.
 
 ## Pinning a snapshot
 

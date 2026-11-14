@@ -101,6 +101,23 @@ test('providersCsv neutralizes spreadsheet formula prefixes in string cells, inc
   assert.equal(provider.model_tier, '-1');
 });
 
+test('providersCsv keeps a conditional commercial-use reason in its own scalar column', () => {
+  const rows = parseCsv(providersCsv({
+    version: '9.9.9',
+    generated: '2026-11-14',
+    providers: [{
+      slug: 'conditional-provider',
+      commercial_ok: 'conditional',
+      commercial_ok_condition: 'Per-model licence, including "give back" terms.',
+    }],
+  }));
+  const provider = Object.fromEntries(PROVIDER_CSV_COLUMNS.map((column, index) => [column, rows[1][index]]));
+
+  assert.equal(PROVIDER_CSV_COLUMNS.indexOf('commercial_ok_condition'), PROVIDER_CSV_COLUMNS.indexOf('commercial_ok') + 1);
+  assert.equal(provider.commercial_ok, 'conditional');
+  assert.equal(provider.commercial_ok_condition, 'Per-model licence, including "give back" terms.');
+});
+
 test('providersCsv on the real dataset: every public provider appears once, including unverified rows, and env_key is not a column', () => {
   const data = JSON.parse(readFileSync(join(ROOT, 'data/providers.json'), 'utf8'));
   const publicProviders = data.providers.map(({ env_key, ...rest }) => rest);

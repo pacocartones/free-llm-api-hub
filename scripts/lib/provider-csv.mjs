@@ -17,6 +17,7 @@ export const PROVIDER_CSV_COLUMNS = [
   'phone_required',
   'card_required',
   'commercial_ok',
+  'commercial_ok_condition',
   'openai_compatible',
   'openai_base_url',
   'is_text_llm',

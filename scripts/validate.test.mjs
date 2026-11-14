@@ -120,6 +120,27 @@ test('the fixture harness leaves a valid fixture valid', () => {
   assert.equal(result.status, 0, result.output);
 });
 
+test('validate accepts conditional commercial use only with a non-empty condition', () => {
+  const valid = structuredClone(DATA);
+  const conditional = provider(valid);
+  conditional.commercial_ok = 'conditional';
+  conditional.commercial_ok_condition = 'Only models whose licences permit commercial use.';
+  const accepted = runValidate(valid);
+  assert.equal(accepted.status, 0, accepted.output);
+
+  const missing = structuredClone(valid);
+  delete provider(missing).commercial_ok_condition;
+  const rejectedMissing = runValidate(missing);
+  assert.notEqual(rejectedMissing.status, 0, rejectedMissing.output);
+  assert.match(rejectedMissing.output, /commercial_ok_condition/);
+
+  const misplaced = structuredClone(DATA);
+  provider(misplaced).commercial_ok_condition = 'This must not accompany true.';
+  const rejectedMisplaced = runValidate(misplaced);
+  assert.notEqual(rejectedMisplaced.status, 0, rejectedMisplaced.output);
+  assert.match(rejectedMisplaced.output, /commercial_ok_condition/);
+});
+
 function escapeRegExp(text) {
   return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }

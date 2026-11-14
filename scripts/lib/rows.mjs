@@ -31,7 +31,7 @@ export const SLUG_RE = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 // «The catch» column: a closed vocabulary of short tags derived from fields the record already has (the three requirements, the
 // expiry and a published daily cap). The free text of the record (`notes`) stays on the provider page, reachable by the link of the
 // cell and by the title of the cell. The list below is the whole vocabulary; a test fails if a tag outside it appears.
-export const CATCH_LABELS = ['Card required', 'Phone required', 'Evaluation only', 'Expires', 'Daily cap', 'Not stated'];
+export const CATCH_LABELS = ['Card required', 'Phone required', 'Evaluation only', 'Conditional', 'Expires', 'Daily cap', 'Not stated'];
 
 /** @returns {{label: string, title: string}[]} */
 export function catchTags(p) {
@@ -39,6 +39,10 @@ export function catchTags(p) {
   if (p.card_required === true) tags.push({ label: 'Card required', title: 'A credit card is required to sign up' });
   if (p.phone_required === true) tags.push({ label: 'Phone required', title: 'Phone verification is required' });
   if (p.commercial_ok === false) tags.push({ label: 'Evaluation only', title: 'Commercial use is not allowed' });
+  if (p.commercial_ok === 'conditional') tags.push({
+    label: 'Conditional',
+    title: `Commercial use is conditional${p.commercial_ok_condition ? ': ' + p.commercial_ok_condition : ''}`,
+  });
   if (p.expires) tags.push({ label: 'Expires', title: 'Expires: ' + p.expires });
   const fl = p.free_limits || {};
   const caps = [];

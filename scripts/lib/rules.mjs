@@ -46,6 +46,7 @@ export const FLAG_PAIRS = [
   ['card_required', false, 'ic-nocard', 'no card'], ['card_required', true, 'ic-card', 'card'],
   ['phone_required', false, 'ic-nophone', 'no phone'], ['phone_required', true, 'ic-phone', 'phone'],
   ['commercial_ok', true, 'ic-building', 'commercial'], ['commercial_ok', false, 'ic-flask', 'eval only'],
+  ['commercial_ok', 'conditional', 'ic-building', 'commercial conditional'],
   ['openai_compatible', true, 'ic-code', 'OpenAI-compat'],
 ];
 
