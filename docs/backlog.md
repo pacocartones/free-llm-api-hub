@@ -68,9 +68,19 @@ only what confirms.
   tiers but mainland phone/ID gates make them poor fits for an international
   builder audience. Revisit if any drops the ID wall for overseas devs.
 - [ ] **Explicitly NOT free (do not add; leave in "Notably NOT free" thinking):**
-  Moonshot/Kimi intl (needs ≥$1 recharge), DeepInfra, Chutes, Together AI &
-  Hyperbolic (historic signup credit no longer documented — recheck later),
+  Moonshot/Kimi intl (needs ≥$1 recharge), DeepInfra, Chutes, Together AI
+  (official billing article requires a minimum $5 credit purchase; checked
+  2026-11-14, see [source review](sources.md#checked-with-what-each-page-says)),
   Parasail, GMICloud, Inference.net, Lepton (folded into NVIDIA), Nomic (pivoted).
+
+- [ ] **Hyperbolic — documented $1 credit; inclusion review pending.** The
+  [inference overview](https://hyperbolic.ai/docs/inference/overview) read
+  2026-11-14 states that personal Free Tier accounts can use inference after
+  phone verification, which adds $1 credit; the balance must be above zero.
+  This supersedes the earlier GPU-cloud-only check and the "credit no longer
+  documented" classification. No recurring allowance or promotion is stated.
+  Review remaining inclusion requirements and terms before adding a provider;
+  see the [dated source review and scope](sources.md#checked-with-what-each-page-says).
 
 ## Discovery & research infrastructure
 
