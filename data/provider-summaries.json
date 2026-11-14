@@ -657,38 +657,6 @@
       ]
     },
     {
-      "id": "mistral",
-      "what": "Frontier open-weight models you own and control; the company says its mission is to make frontier AI open to all.",
-      "good_for": "Customizing models with Forge, deploying with Studio, and running on-prem, in your VPC or on Mistral's cloud.",
-      "operator": "Mistral AI (the pages show \"© 2026 Mistral AI\"; legal form not stated there)",
-      "owner": "",
-      "origin": "",
-      "sources": [
-        {
-          "url": "https://mistral.ai/",
-          "fetched_at": "2026-10-19",
-          "supports": [
-            "what",
-            "good_for"
-          ]
-        },
-        {
-          "url": "https://mistral.ai/about/",
-          "fetched_at": "2026-10-19T19:01Z",
-          "supports": [
-            "what"
-          ]
-        },
-        {
-          "url": "https://legal.mistral.ai/terms/get-started/",
-          "fetched_at": "2026-10-19T19:01Z",
-          "supports": [
-            "operator"
-          ]
-        }
-      ]
-    },
-    {
       "id": "mixedbread",
       "what": "Turns PDFs, decks, videos, code, Slack and Drive into evidence an agent can act on, with fewer tokens.",
       "good_for": "Making agents work on your own data: search over documents, code, video and podcast archives, agent memory and RAG.",

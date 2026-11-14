@@ -8,7 +8,6 @@
     "cloudflare-workers-ai": { "score": 15, "note": "" },
     "cohere": { "score": 15, "note": "" },
     "cerebras": { "score": 15, "note": "" },
-    "mistral": { "score": 15, "note": "" },
     "huggingface": { "score": 15, "note": "" },
     "siliconflow": { "score": 15, "note": "" },
     "zai-glm": { "score": 15, "note": "" },

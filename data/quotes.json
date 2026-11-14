@@ -50,12 +50,12 @@
    "id": "cloudflare-workers-ai.sentence",
    "slug": "cloudflare-workers-ai",
    "kind": "sentence",
-   "text": "Cloudflare does not use your Customer Content to (1) train any AI models made available on Workers AI or (2) improve any Cloudflare or third-party services, and would not do so unless we received your explicit consent.",
+   "text": "Cloudflare does not use Customer Content processed by Workers AI to train AI models.",
    "source_url": "https://developers.cloudflare.com/workers-ai/platform/data-usage/",
-   "read_on": "2026-10-15",
+   "read_on": "2026-11-14",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
-   "page_sha256": "af92d21e1594885b0ba9baf7d1f8983e25a45062faad91761bd87d342b4c26f3"
+   "page_sha256": "f9e4341fc44612c724684a17f89cbc1ad332f90f7874fae875edc058f9da0980"
   },
   {
    "id": "cerebras.sentence",
@@ -78,17 +78,6 @@
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "b0880ab5f91f2cc4c500b66e7bd079d7a35b90fb73c41059d735c0d26cf07be3"
-  },
-  {
-   "id": "mistral.sentence",
-   "slug": "mistral",
-   "kind": "sentence",
-   "text": "As stated during subscription, we may use your data (input and output) to train our artificial intelligence models.",
-   "source_url": "https://help.mistral.ai/en/articles/347617-do-you-use-my-user-data-to-train-your-artificial-intelligence-models",
-   "read_on": "2026-10-15",
-   "lang": "en",
-   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
-   "page_sha256": "4fed33d3c67b8756c3b474483dd9686507dbee02cc3df00114d7cbfd119bcc69"
   },
   {
    "id": "fireworks-ai.sentence",
@@ -628,6 +617,17 @@
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "3a54549fbc652bc6ad70a202a3f172564af25a0dd7b6033f8c086121af52b475"
+  },
+  {
+   "id": "datalab.sentence",
+   "slug": "datalab",
+   "kind": "sentence",
+   "text": "Conversion results are automatically deleted from Datalab servers about one day after processing completes.",
+   "source_url": "https://documentation.datalab.to/platform/security",
+   "read_on": "2026-11-14",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "e4412aa18f7c43a853c8472a478409217bcb95dd3f05b88ecb3827137bb322b1"
   },
   {
    "id": "typhoon.sentence",

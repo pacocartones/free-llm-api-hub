@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="860" height="392" viewBox="0 0 860 392" role="img" aria-label="Terminal demo — querying the Free LLM API Hub static API: curl freellmapihub.com/api/v1/no-card.json returns Google Gemini, Groq, Cloudflare Workers AI, OpenRouter, Mistral AI">
+<svg xmlns="http://www.w3.org/2000/svg" width="860" height="392" viewBox="0 0 860 392" role="img" aria-label="Terminal demo — querying the Free LLM API Hub static API: curl freellmapihub.com/api/v1/no-card.json returns Google Gemini, Groq, Cloudflare Workers AI, OpenRouter, Cohere">
   <style>
     text { font-family: ui-monospace, "SF Mono", "Cascadia Code", "JetBrains Mono", Menlo, Consolas, monospace; font-size: 17px; }
     .fg { fill: #d8e2dc; } .accent { fill: #3fce8f; } .muted { fill: #8a998f; } .dim { fill: #5b6a61; }
@@ -27,7 +27,7 @@
   <text x="30" y="194" class="line d4 fg">Groq</text>
   <text x="30" y="224" class="line d5 fg">Cloudflare Workers AI</text>
   <text x="30" y="254" class="line d6 fg">OpenRouter</text>
-  <text x="30" y="284" class="line d7 fg">Mistral AI</text>
+  <text x="30" y="284" class="line d7 fg">Cohere</text>
 
   <text x="30" y="326" class="line d8 dim"># 60+ verified free tiers · dated · sourced · machine-readable</text>
   <text x="30" y="360" class="line d9"><tspan class="accent">$</tspan> <tspan class="caret">▋</tspan></text>
