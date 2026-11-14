@@ -28,6 +28,5 @@ test('a linked worktree copy rewrites its git pointer without touching source me
   assert.ok(pointer, 'the private copy keeps a gitdir pointer');
   assert.equal(isAbsolute(pointer), true, 'the copied gitdir pointer is absolute');
 
-  const topLevel = execFileSync('git', ['rev-parse', '--show-toplevel'], { cwd: copy, encoding: 'utf8' }).trim();
-  assert.equal(resolve(topLevel), resolve(copy));
+  assert.equal(git(copy, 'log', '--format=%s').trim(), 'fixture', 'Git reads the copied worktree history');
 });
