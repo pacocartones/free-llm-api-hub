@@ -36,12 +36,14 @@ checkout and dependencies must exist wherever the host launches the server.
   execution. The server needs no provider key and never executes inference.
 - Search has no pagination or response size bound. Exclusion counts stop at the first
   failing flag per entry, rather than independently counting every active filter.
-- Tool annotations are hints, not access controls. Review `openWorldHint` before
-  release because the default loader fetches external static JSON.
+- Tool annotations are hints, not access controls. `openWorldHint: true` reflects
+  default HTTPS dataset loading; it does not imply inference or write capabilities.
 
 ## Canonical distribution checklist
 
-Keep publication disabled until the maintainers complete the relevant checks.
+Keep `NPM_PUBLISH_ENABLED` unset or false until the maintainers complete the relevant
+checks. The package itself is publishable; the workflow switch and protected environment
+control automated release. [Release setup](mcp-release.md) defines the external steps.
 [GOVERNANCE.md](../GOVERNANCE.md) defines maintainer roles; repository roles do
 not imply npm ownership, Registry namespace rights or marketplace publisher access.
 
@@ -53,9 +55,9 @@ not imply npm ownership, Registry namespace rights or marketplace publisher acce
   release tests; the commands and CI matrix live in [MCP CI](../.github/workflows/mcp-ci.yml).
 - [ ] Resolve cross-snapshot behavior and large-response limits before claiming
   stronger guarantees than the implementation provides.
-- [ ] Confirm the final npm name and ownership, align package/lockfile/manifest
-  metadata, and verify the first-publication bootstrap supported by npm. Review
-  [trusted publishing](https://docs.npmjs.com/trusted-publishers/) and provenance.
+- [ ] Confirm npm ownership and the first-publication bootstrap, then align package,
+  lockfile and manifest metadata. Follow [release setup](mcp-release.md) for OIDC
+  and provenance prerequisites.
 - [ ] Verify external release controls: npm trusted publisher binding, Registry
   namespace/OIDC authorization, required human reviewers on `release-mcp`, and
   branch/tag protections. Referencing an environment in YAML does not create its
