@@ -8,11 +8,11 @@ AI APIs that give a one-time free credit or token balance at signup, which runs 
 
 Providers whose free access is a **one-time credit** (`free_type: trial-credit`): it is spent, not renewed. Renewing allowances are in their own collection. Some credits expire, with windows from 30 days to a year in the dataset, and a provider that has not been re-verified is left out.
 
-**33 of 68 tracked providers** match.
+**33 of 67 tracked providers** match.
 
 | Provider | Type | What's free | The catch | Verified |
 |---|---|---|---|---|
-| **[Cerebras](https://inference-docs.cerebras.ai/support/rate-limits)**<br><sub>💳 card required · 🏢 commercial OK · 🔌 OpenAI-compat</sub> | Trial | $5 in free credits for new accounts, usable across all public models | A verified payment method is required to activate Playground/API access (no charge until you buy credits). Credits expire 30 days after grant; whether any free access persists past expiry is not stated | ✅ 2026-10-08 |
+| **[Cerebras](https://inference-docs.cerebras.ai/support/rate-limits)**<br><sub>💳 card required · 🏢 commercial OK · 🔌 OpenAI-compat</sub> | Trial | $5 in free credits for new accounts, usable across all public models | A verified payment method is required to activate Playground/API access; no charge until you separately purchase credits. The one-time $5 trial credit expires 30 days after grant. API and Playground access stop when it expires or is exhausted; there is no permanently free tier | ✅ 2026-11-14 |
 | **[Fireworks AI](https://docs.fireworks.ai/faq-new/billing-pricing/)**<br><sub>💳 no card · 🔌 OpenAI-compat</sub> | Trial | $1 trial credit | Fireworks uses prepaid credits. After the $1 credit is exhausted, add a payment method and credits (or enable auto top-up) to continue; account limits can rise with spend | ✅ 2026-10-08 |
 | **[Baseten](https://www.baseten.co/pricing/)**<br><sub>🔌 OpenAI-compat</sub> | Trial | New accounts receive free credits; Baseten's current pricing page does not state the amount | Basic is $0/month, pay as you go. Current pricing confirms new-account credits but does not publish an amount or expiration date. Model APIs are priced per token; dedicated deployments are priced by compute time. | ✅ 2026-10-08 |
 | **[Nebius AI Studio](https://docs.tokenfactory.nebius.com)**<br><sub>💳 card required · 📵 no phone · 🏢 commercial OK · 🔌 OpenAI-compat</sub> | Trial | $1 trial credit, valid for 30 days | Product renamed to "Nebius Token Factory"; a bank card is required to set up billing | ✅ 2026-10-08 |

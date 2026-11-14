@@ -1954,13 +1954,12 @@ test('models_url is an optional public HTTPS URL', () => {
   assert.equal(validateAfter((data) => { first(data).models_url = 'https://example.com/models'; }), true);
 });
 
-test('exactly three providers seed models_url from their official catalogues', () => {
+test('active providers retain models_url from their official catalogues', () => {
   const { providers } = JSON.parse(readFileSync(DATA, 'utf8'));
   const seeded = providers.filter((p) => Object.hasOwn(p, 'models_url')).map((p) => [p.slug, p.models_url]);
   assert.deepEqual(seeded, [
     ['google-gemini', 'https://ai.google.dev/gemini-api/docs/models'],
     ['groq', 'https://console.groq.com/docs/models'],
-    ['mistral', 'https://docs.mistral.ai/models'],
   ]);
 });
 

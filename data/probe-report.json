@@ -1,7 +1,7 @@
 {
   "probed_at": "2026-08-02",
   "auth_only": true,
-  "count": 63,
+  "count": 62,
   "results": [
     {
       "slug": "google-gemini",
@@ -36,12 +36,6 @@
     {
       "slug": "cerebras",
       "env_key": "CEREBRAS_API_KEY",
-      "key_present": false,
-      "status": "skipped-no-key"
-    },
-    {
-      "slug": "mistral",
-      "env_key": "MISTRAL_API_KEY",
       "key_present": false,
       "status": "skipped-no-key"
     },
