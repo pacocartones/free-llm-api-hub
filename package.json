@@ -12,6 +12,7 @@
     "add-provider": "node scripts/add-provider.mjs",
     "links": "node scripts/check-links.mjs",
     "worklist": "node scripts/staleness.mjs",
+    "worklist:refresh": "node scripts/refresh-worklist.mjs",
     "reverify": "node scripts/reverify.mjs",
     "models": "node scripts/fetch-models.mjs",
     "discover": "node scripts/discover.mjs",

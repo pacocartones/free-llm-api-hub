@@ -1,6 +1,6 @@
 # Update playbook
 
-How this list stays current — the routine that keeps the freshness badge green. There is **no GitHub Actions** in this flow: everything below runs locally, on demand, on a machine you control. Nothing in this project depends on Actions minutes.
+How this list stays current — the routine that keeps the freshness badge green. Provider verification and dataset regeneration run locally, on demand, on a machine you control. The one maintenance exception is [weekly issue publication](../.github/workflows/weekly-worklist.yml): Actions replaces issue #4's generated worklist from repository metadata without visiting provider sources or verifying any provider claim.
 
 Before the first pass in a clone, install the locked local development tools without running package lifecycle scripts:
 
@@ -10,7 +10,8 @@ npm ci --ignore-scripts
 
 ## Cadence
 
-- **Weekly:** aim for one pass a week (Mondays ~10:00 Madrid works well), but nothing enforces it — the badge and the worklist only move when the data moves, and `npm run reverify` sizes its batch to clear the 90-day SLA without a cliff.
+- **Weekly human verification:** aim for one pass a week (Mondays ~10:00 Madrid works well); `npm run reverify` sizes its batch to clear the 90-day SLA without a cliff. Publishing a current worklist does not complete this pass or clear the backlog.
+- **Weekly issue publication:** Mondays at 09:17 UTC (10:17 Madrid in winter / 11:17 in summer), best effort. The main-only workflow refreshes issue #4 from current main and the actual UTC date; age arithmetic changes even when the dataset does not. Schedules can be delayed or disabled; use the recovery procedure below.
 - **Freshness SLA:** every verified entry is re-confirmed against the provider's own docs within **90 days**. The badge is graded on the *oldest* entry against that SLA, so it turns amber the moment one row goes past 60 days and red the moment one goes past 90 — it slips before the list does.
 
 ## Layer 1 — the re-verification batch (local script)
@@ -29,6 +30,8 @@ The script never edits the data. Dossiers contain provider-controlled prose and 
 
 Start each weekly pass with `npm run worklist`. It prints this week's oldest verified providers — a batch sized by `scripts/lib/pacing.mjs` (at most 11 a week), so the 90-day freshness SLA is spread across small, regular batches instead of becoming a large end-of-quarter cleanup. If the worklist flags a cliff of entries that share a verification date, take the larger batch it recommends.
 
+[Issue #4](https://github.com/pacocartones/free-llm-api-hub/issues/4) publishes the same renderer with a UTC refresh date and an immutable link to the checked-out dataset commit. Its **entire body is generated and replaced on refresh**, including resetting checkboxes. Keep discussion in comments. Checked boxes are not evidence of completed verification; only human-reviewed, supported dataset edits establish it.
+
 Run `npm run reverify` for the normal weekly worklist, or pass its size explicitly when clearing a larger one. A human reviewer then adds `--fetch-for-human-review` to fetch primary sources outside the checkout.
 
 Keep one batch in one focused PR. A human reviews the dossiers and updates `data/providers.json`. Only after that trusted edit exists may local automation run:
@@ -38,6 +41,20 @@ npm run build && npm run og && npm test
 ```
 
 Commit the data change and generated files together, and open one PR for that batch.
+
+### Recover a stale issue worklist
+
+Use a clean checkout of current trusted main. Preview first, compare the report with `npm run worklist`, then explicitly publish using existing `gh` authentication (or `GH_TOKEN`):
+
+```bash
+npm run worklist
+npm run worklist:refresh                  # preview only; no GitHub access required
+npm run worklist:refresh -- --write       # replace only issue #4's body
+```
+
+The publisher reads the dataset, captures one clock, and resolves provenance from `git rev-parse HEAD`. It skips identical bodies and fails visibly on missing/closed issues, pull requests, invalid API replies or denied writes; it never creates or reopens an issue. It preserves the title, state, labels, assignees and comments. A maintainer can also manually dispatch `weekly-worklist.yml` on main and inspect the run result; forks and other refs cannot publish. Weekly and manual runs are serialized.
+
+Publication never changes `generated`, `last_verified`, `verified`, `data_policy.checked`, quotes, probes or site/badge artifacts. It makes no provider requests and collects no evidence. A current issue date does not prove availability, prices, quotas, access, privacy, retention or no-expiry claims; those remain the human review work below.
 
 ## Layer 2 — the weekly pass
 
@@ -118,6 +135,8 @@ volume. See GitHub's [advisory-database contribution guidance](https://github.co
 for its current requirements.
 
 ## Definition of done for a weekly pass
+
+This is the human provider-verification pass. A successful metadata publication alone satisfies none of these verification requirements.
 
 - Worklist 🔴 overdue count is back to **0**.
 - No dead `docs_url` in the batch (re-verification opens them anyway).

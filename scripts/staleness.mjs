@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Emits a Markdown re-verification worklist from data/providers.json.
-// On-demand local tool (no scheduled workflow): turns the 90-day freshness policy
-// into an actionable checklist for the next re-verification pass. Report-only (never fails).
+// Local renderer also used by the scheduled issue publisher: turns the 90-day
+// freshness policy into an actionable checklist. Report-only (never fails).
 // Run with: node scripts/staleness.mjs
 
 import { readFileSync } from 'node:fs';
