@@ -7,7 +7,7 @@ body:
     attributes:
       value: |
         Thanks for keeping this accurate — that's the entire value of the project.
-        Please point to the provider's **own official docs**, not a third-party summary. See [CONTRIBUTING.md](../blob/main/CONTRIBUTING.md).
+        Please point to the provider's **own official docs**, not a third-party summary. See [CONTRIBUTING.md](https://github.com/pacocartones/free-llm-api-hub/blob/main/CONTRIBUTING.md).
   - type: input
     id: provider
     attributes:
