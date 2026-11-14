@@ -1,5 +1,5 @@
 {
-  "site/api/index.html": "ca9942d68cc9f68422ac99262fc6654c33011ac5dbc4cdc4cdc26e4cf2613418",
+  "site/api/index.html": "9ee80ec285c4e80e49743734636e1b119655684a453fa0b94db2b2865f72ba19",
   "site/api/v1/best.json": "6d599590cc72965503a94cd4f71a2677ce1a00d72e3b6f65686440129061af45",
   "site/api/v1/coding-tools-own-key.json": "1266c51a2c0be4c2c8625898547f3e51758443c5bcb21151b8307fcb0af8fffd",
   "site/api/v1/coding-tools-own-key.schema.json": "ca74bab03dec82c446af51e61dd7a8373fc75d5f07ddfbf1711ef8d9cbc4a13e",
@@ -25,7 +25,7 @@
   "site/api/v1/perpetual.json": "c004cdce77040e5a536f858f14811b37dd1dbb5a899ae2dd598b482e8ff71768",
   "site/api/v1/programs.json": "4dc7fc0c73817f3638d4511ecb538cf523c5ca0c47e30f61b348b30a127f728b",
   "site/api/v1/providers.json": "cf291aeb57a900be939a3a0ffeb496f4c8a82901d825d57c19a0b97a7646fbd2",
-  "site/api/v1/schema.json": "2ade9046e786d7b16554f7a40ad10d2cdf0a007f77c990f466a72a0fde116c06",
+  "site/api/v1/schema.json": "60e37d82cec11d1fbfbea8d7cfe1eeb25b01012a11d13111264b9bc03fc21108",
   "site/api/v1/score.json": "752874ab24d5daa8658da9c31ac8139fbb773a204d844946081234907a97c1a1",
   "site/api/v1/score.schema.json": "6557b4e6e7e113b1dc5a57bf8498d51486c3179f42dd8e2e2cd632172d8c49e2",
   "site/api/v1/trial.json": "dbc50006e646c9c240a1b3a0b34457e05cd04fd3c456a2917dc2bf264c60bdf9",
@@ -93,7 +93,7 @@
   "site/programs/startups.html": "ffd252cd4d351e87582f925d61444d9e5a5aeaab2ea75cf970efa6bc17e16ee9",
   "site/providers.json": "62547260b85a741c59ccdd00ce3b03a04296237851d2ce469ea5406a2adf510b",
   "site/shared-compare.js": "123330f1d7abe0bd1167940589028f1c726aefa805e9e54ae04a2baa1c150060",
-  "site/shared-rows.js": "b062d6fa4298a4a449a7d875e41086281474b2c1a76e9257b6c49648604d9bbd",
-  "site/shared-rules.js": "e88799521a8742e7908527f31749c983d85a929c6e89566724b918c574c64cf6",
+  "site/shared-rows.js": "a5c2569b3cedc5d42de300e6cefebe0bbb6e5b7fd22ccabebc746c1873c7389c",
+  "site/shared-rules.js": "e515b6afb1ae358891870bfac316cb35186545ecccdd04330397ec909f8cea49",
   "site/shared-sort.js": "fbbaace17447958ac05f8652c7b00d951a7dce7e9a6ed103ce0fb9beaf7e17d1"
 }

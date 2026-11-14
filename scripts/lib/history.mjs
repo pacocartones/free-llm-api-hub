@@ -12,6 +12,7 @@ import { execSync, spawnSync } from 'node:child_process';
 export const HISTORY_FIELDS = {
   free_tier: 'free tier', rate_limits: 'rate limits', notes: 'the catch',
   free_type: 'free type', commercial_ok: 'commercial-use terms',
+  commercial_ok_condition: 'commercial-use condition',
   card_required: 'card requirement', phone_required: 'phone requirement',
   openai_compatible: 'OpenAI compatibility',
 };

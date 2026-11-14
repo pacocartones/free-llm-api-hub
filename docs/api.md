@@ -8,9 +8,9 @@ The [static JSON API](https://freellmapihub.com/api/) serves the dataset as file
 
 Columns, in order:
 
-`dataset_version`, `dataset_generated`, `slug`, `name`, `category`, `free_type`, `free_tier`, `rate_limits`, `notes`, `best_for`, `expires`, `docs_url`, `phone_required`, `card_required`, `commercial_ok`, `openai_compatible`, `openai_base_url`, `is_text_llm`, `model_tier`, `verified`, `last_verified`, `added`, `last_probed`, `probe_status`
+`dataset_version`, `dataset_generated`, `slug`, `name`, `category`, `free_type`, `free_tier`, `rate_limits`, `notes`, `best_for`, `expires`, `docs_url`, `phone_required`, `card_required`, `commercial_ok`, `commercial_ok_condition`, `openai_compatible`, `openai_base_url`, `is_text_llm`, `model_tier`, `verified`, `last_verified`, `added`, `last_probed`, `probe_status`
 
-The values `true` and `false` stay as those words. An empty cell means `null`, absent, or not recorded; it never means `false` or `0`. To prevent spreadsheet formula execution, a string cell whose first non-whitespace character is `=`, `+`, `-`, or `@` gets a leading apostrophe before CSV quoting; numbers, booleans and empty cells keep their normal representation. Text is UTF-8 CSV, with commas, quotes and line breaks quoted as CSV requires.
+The values `true`, `false`, and `conditional` stay as those words. For a conditional answer, `commercial_ok_condition` carries the documented reason in its own column. An empty cell means `null`, absent, or not recorded; it never means `false` or `0`. To prevent spreadsheet formula execution, a string cell whose first non-whitespace character is `=`, `+`, `-`, or `@` gets a leading apostrophe before CSV quoting; numbers, booleans and empty cells keep their normal representation. Text is UTF-8 CSV, with commas, quotes and line breaks quoted as CSV requires.
 
 These fields are omitted because they are arrays, nested objects, or operational details, and flattening them would hide conditions or provenance: `modalities`, `models_free`, `model_tier_source`, `free_limits`, `no_expiry`, `data_policy`, `env_key`.
 
@@ -154,7 +154,7 @@ Every API object carries `version` and `generated`, copied from `data/providers.
 - **A new major `version`** is reserved for a breaking change to the shape, and is the release that introduces the next API path. The API path counts breaking changes to the API; it does not repeat the dataset's major number.
 - **`generated`** is the date of the last dataset change (`YYYY-MM-DD`). Generated files are byte-stable for a given dataset: nothing in them depends on the day the build ran.
 
-The JSON Schema the dataset is validated against is published at [`/api/v1/schema.json`](https://freellmapihub.com/api/v1/schema.json), a byte-for-byte copy of [`data/schema.json`](../data/schema.json).
+The provider-list payloads (`providers.json`, slices and modality lists) are described by [`/api/v1/schema.json`](https://freellmapihub.com/api/v1/schema.json). It is generated from [`data/schema.json`](../data/schema.json), but keeps the v1 representation: `commercial_ok` is `boolean | null`, while `commercial_ok_condition` may accompany `null`. The canonical schema remains wider and accepts `"conditional"`.
 
 ## Pinning a snapshot
 

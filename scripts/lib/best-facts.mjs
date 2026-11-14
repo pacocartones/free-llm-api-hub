@@ -27,10 +27,13 @@ const flag = (icon, v, yes, no, unknown) => {
 
 /** @returns {string} the three cards, as one block */
 export function bestFactsHtml(p, icon) {
+  const commercial = p.commercial_ok === 'conditional'
+    ? `<li class="best-req-conditional">${icon('ic-building')}<span>Commercial use conditional${p.commercial_ok_condition ? ': ' + htmlEsc(p.commercial_ok_condition) : ''}</span></li>`
+    : flag(icon, p.commercial_ok, ['ic-building', 'Commercial use allowed'], ['ic-flask', 'Evaluation only'], ['ic-building', 'Commercial use: not stated']);
   const requirements = `<div class="best-fact best-req"><h3 class="best-fact-h">Requirements</h3><ul class="best-req-list">` +
     flag(icon, p.card_required, ['ic-card', 'Credit card required'], ['ic-nocard', 'No credit card'], ['ic-card', 'Credit card: not stated']) +
     flag(icon, p.phone_required, ['ic-phone', 'Phone required'], ['ic-nophone', 'Phone not required'], ['ic-phone', 'Phone: not stated']) +
-    flag(icon, p.commercial_ok, ['ic-building', 'Commercial use allowed'], ['ic-flask', 'Evaluation only'], ['ic-building', 'Commercial use: not stated']) +
+    commercial +
     `</ul>${source(p)}</div>`;
   return `<div class="best-facts">${textCard('Free quota', p.free_tier, p)}${textCard('Rate limit', p.rate_limits, p)}${requirements}</div>`;
 }

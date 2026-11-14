@@ -31,7 +31,9 @@ import { requirementsHtml, limitsHtml, glanceHtml, modelsHtml, dataPolicyHtml } 
 import { compareTableHtml, comparisonCategory, sameComparisonCategory, selectComparePairs, COMPARE_PAGE_CAP, COMPARE_PER_PROVIDER_CAP, COMPARE_MAX as COMPARE_MAX_SLOTS } from './lib/compare.mjs';
 import { codeHtmlEsc, curlChatQuickstart, posixShellQuote, pythonChatQuickstart, pythonEmbeddingsQuickstart, pythonStringLiteral } from './lib/quickstart.mjs';
 import { providersCsv } from './lib/provider-csv.mjs';
-import { toApiV1ChangeValue, toApiV1Provider } from './lib/api-v1.mjs';
+import { projectApiV1Changes, toApiV1ChangeValue, toApiV1Provider } from './lib/api-v1.mjs';
+import Ajv2020 from 'ajv/dist/2020.js';
+import addFormats from 'ajv-formats';
 
 const REPO = join(dirname(fileURLToPath(import.meta.url)), '..');
 // The builds of this file run in a private copy of the tree (see lib/private-tree.mjs): `node --test` runs the test
@@ -1091,7 +1093,7 @@ test('quickstarts preserve ordinary chat, embeddings and copied HTML output', ()
   assert.equal(decodeCodeHtml(codeHtmlEsc(curl)), curl, 'browser-decoded code remains the safely quoted shell program');
 });
 
-test('the built client configs match the dataset, are registered, and the schema is published verbatim', () => {
+test('the built client configs match the dataset, are registered, and publish the v1 schema', () => {
   const v1 = join(ROOT, 'site/api/v1');
   if (!existsSync(join(v1, 'litellm.yaml'))) run(['scripts/build.mjs']);
   const data = JSON.parse(readFileSync(DATA, 'utf8'));
@@ -1121,7 +1123,9 @@ test('the built client configs match the dataset, are registered, and the schema
   assert.equal(index.endpoints['openai-clients'], 'v1/openai-clients.json');
   assert.equal(index.endpoints.schema, 'v1/schema.json');
 
-  assert.ok(readFileSync(join(v1, 'schema.json')).equals(readFileSync(join(ROOT, 'data/schema.json'))), 'schema.json is a byte copy of data/schema.json');
+  const apiSchema = JSON.parse(readFileSync(join(v1, 'schema.json'), 'utf8'));
+  assert.equal(apiSchema.$id, 'https://freellmapihub.com/api/v1/schema.json');
+  assert.deepEqual(apiSchema.$defs.provider.properties.commercial_ok, { $ref: '#/$defs/tristate' });
 
   const page = readFileSync(join(ROOT, 'site/api/index.html'), 'utf8');
   for (const needle of ['v1/litellm.yaml', 'v1/openai-clients.json', 'v1/schema.json', 'docs/api.md', 'from openai import OpenAI']) {
@@ -1163,6 +1167,23 @@ test('history revisions carry field-level from/to values for the change feed', (
   assert.deepEqual(Object.keys(monthEnd), ['2026-06', '2026-07']);
   assert.equal(monthEnd['2026-07'].date, '2026-07-20', 'the month-end snapshot is the last revision of the month');
   assert.equal(monthEnd['2026-07'].providers.length, 3);
+});
+
+test('conditional commercial history keeps its reason and API v1 drops the projected null-to-null flag before grouping', () => {
+  const before = prov('conditional');
+  const after = prov('conditional', { commercial_ok: 'conditional', commercial_ok_condition: 'Per-model licence.' });
+  const { historyBySlug } = historyFromRevisions([rev('2026-10-01', [before]), rev('2026-10-08', [after])]);
+  assert.deepEqual(historyBySlug.conditional[1].changes, [
+    { field: 'commercial_ok', from: null, to: 'conditional' },
+    { field: 'commercial_ok_condition', from: null, to: 'Per-model licence.' },
+  ]);
+  const projected = projectApiV1Changes(flattenFieldChanges(historyBySlug, { conditional: 'Conditional' }));
+  assert.deepEqual(projected.map(({ field, from, to }) => ({ field, from, to })), [
+    { field: 'commercial_ok_condition', from: null, to: 'Per-model licence.' },
+  ]);
+  const weeks = groupChangesByWeek(projected);
+  assert.equal(weeks[0].count, 1);
+  assert.equal(weeks[0].changes.length, 1);
 });
 
 test('weekly grouping: newest week first, newest change first, 12-week window anchored on the newest change', () => {
@@ -2102,6 +2123,24 @@ test('best-facts: the three cards show fields of the record as they are, and a m
   assert.ok(!/javascript:/.test(bestFactsHtml({ ...p, docs_url: 'javascript:alert(1)' }, icon)), 'an unsafe URL is dropped');
 });
 
+test('explorer rows and best facts show conditional commercial use with its escaped condition', () => {
+  const p = {
+    slug: 'conditional', name: 'Conditional', category: 'ongoing', free_type: 'perpetual', free_tier: 'Free', rate_limits: '10 rpm', notes: 'Catch',
+    card_required: false, phone_required: false, commercial_ok: 'conditional', commercial_ok_condition: 'Per-model <licence> applies.',
+    verified: true, last_verified: '2026-10-08', docs_url: 'https://example.com/terms',
+  };
+  const row = explorerRowHtml(p, { now: '2026-10-08' });
+  assert.match(row, /aria-label="commercial conditional"/);
+  assert.match(row, /Conditional/);
+  assert.ok(row.includes('Per-model &lt;licence&gt; applies.'));
+  assert.doesNotMatch(row, /Not stated/);
+
+  const facts = bestFactsHtml(p, (id) => `<i>${id}</i>`);
+  assert.match(facts, /best-req-conditional/);
+  assert.match(facts, /Commercial use conditional: Per-model &lt;licence&gt; applies\./);
+  assert.doesNotMatch(facts, /Commercial use: not stated/);
+});
+
 test('/best/ layout: three cards per entry, a separator instead of the «Ranks 4 to N» title, a framed score', () => {
   const best = readFileSync(join(ROOT, 'site/best/index.html'), 'utf8');
   const items = best.match(/<li class="best-item[\s\S]*?<\/li>/g) || [];
@@ -2487,6 +2526,24 @@ test('the API v1 projector maps conditional provider and change values to null w
   assert.equal(toApiV1ChangeValue('commercial_ok', 'conditional'), null);
   for (const value of [true, false, null]) assert.equal(toApiV1ChangeValue('commercial_ok', value), value);
   assert.equal(toApiV1ChangeValue('notes', 'conditional'), 'conditional', 'only the retyped v1 field is projected');
+});
+
+test('/api/v1/schema.json validates provider-list payloads and keeps commercial_ok boolean or null', () => {
+  run(['scripts/build.mjs']);
+  const schema = JSON.parse(readFileSync(join(ROOT, 'site/api/v1/schema.json'), 'utf8'));
+  const payload = JSON.parse(readFileSync(join(ROOT, 'site/api/v1/providers.json'), 'utf8'));
+  const ajv = new Ajv2020({ allErrors: true, strict: true, strictTypes: false });
+  addFormats(ajv, ['date', 'uri']);
+  const validate = ajv.compile(schema);
+  assert.equal(validate(payload), true, JSON.stringify(validate.errors));
+  const conditional = payload.providers.find((p) => p.commercial_ok_condition);
+  assert.ok(conditional, 'the payload exercises a projected conditional provider');
+  assert.equal(conditional.commercial_ok, null);
+
+  const broken = structuredClone(payload);
+  broken.providers.find((p) => p.slug === conditional.slug).commercial_ok = 'conditional';
+  assert.equal(validate(broken), false, 'v1 schema rejects the canonical-only value');
+  assert.equal(validate(payload), true, 'the condition remains valid beside null');
 });
 
 test('/coverage/ says how to propose one value, is in the sitemap with an absolute canonical and is linked from both footers', () => {

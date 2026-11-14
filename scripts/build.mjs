@@ -22,7 +22,7 @@ import { githubProfileUrl } from './lib/contributors.mjs';
 import { resolveBestEntries, topEntries, PODIUM_SIZE } from './lib/best.mjs';
 import { agreementsTableHtml, sponsoredBlockHtml, disclosureHtml, inForce, NOT_IN_DATA_SENTENCE, MACHINE_SENTENCE } from './lib/agreements.mjs';
 import { coverage, coverageMainHtml } from './lib/coverage.mjs';
-import { toApiV1ChangeValue, toApiV1Provider } from './lib/api-v1.mjs';
+import { apiV1ProviderSchema, projectApiV1Changes, toApiV1Provider } from './lib/api-v1.mjs';
 import { freeGpuMainHtml } from './lib/free-gpu.mjs';
 import { labelTables } from './lib/tables.mjs';
 import { markNewTabLinks } from './lib/links.mjs';
@@ -1297,7 +1297,9 @@ if (commits.length) {
 // derived-fingerprints.json (isGitLogDerived). Without git they render empty.
 const nameBySlug = Object.fromEntries(providers.map((p) => [p.slug, p.name]));
 const currentSlugs = new Set(providers.map((p) => p.slug));
-const changeWeeks = groupChangesByWeek(flattenFieldChanges(historyBySlug, nameBySlug), { weeks: 12 }); // the feed only: the page is by month
+const allFieldChanges = flattenFieldChanges(historyBySlug, nameBySlug);
+const changeWeeks = groupChangesByWeek(allFieldChanges, { weeks: 12 }); // the human feed: the page is by month
+const apiV1ChangeWeeks = groupChangesByWeek(projectApiV1Changes(allFieldChanges), { weeks: 12 });
 const provLink = (slug, name, prefix) => currentSlugs.has(slug) ? `<a href="${prefix}p/${slug}">${htmlEsc(name)}</a>` : htmlEsc(name);
 
 writeFileSync(join(ROOT, 'site/changes.xml'), changesRss(changeWeeks, { site: SITE }));
@@ -1309,7 +1311,6 @@ const changeRowHtml = (c, prefix = '../') =>
 const addedBySlug = Object.fromEntries(providers.filter((p) => p.added).map((p) => [p.slug, p.added]));
 const stateMonths = reportMonths(monthEndSnapshots);
 const stateReports = stateMonths.map((m) => ({ ...monthlyReport({ ...m, historyBySlug, addedBySlug }), snapshotDate: m.snapshotDate }));
-const allFieldChanges = flattenFieldChanges(historyBySlug, nameBySlug);
 const kvTable = (head, rowsArr) =>
   `<table class="model-table"><thead><tr>${head.map((h) => `<th>${htmlEsc(h)}</th>`).join('')}</tr></thead><tbody>` +
   rowsArr.map((r) => `<tr>${r.map((v, i) => `<td${i === 0 ? ' class="name"' : ''}>${v}</td>`).join('')}</tr>`).join('') + `</tbody></table>`;
@@ -1576,7 +1577,7 @@ writeApi('programs.json', { ...apiBase, startups: programs.startups, research: p
 // its published shape (date, kind, fields, text).
 const historyPublic = Object.fromEntries(Object.entries(historyBySlug).map(([slug, events]) => [slug, events.map(({ changes, ...e }) => e)]));
 writeApi('history.json', { ...apiBase, description: 'Per-provider change history mined from the git log of providers.json.', history: historyPublic });
-writeApi('changes.json', { ...apiBase, description: 'Field-level provider changes (from/to), grouped by ISO week, newest first: the last 12 weeks ending at the newest change. Mined from the git log of providers.json.', weeks: changeWeeks.map(({ week, start, end, count, changes }) => ({ week, start, end, count, changes: changes.map(({ date, slug, name, field, from, to }) => ({ date, slug, name, field, from: toApiV1ChangeValue(field, from), to: toApiV1ChangeValue(field, to) })) })) });
+writeApi('changes.json', { ...apiBase, description: 'Field-level provider changes (from/to), grouped by ISO week, newest first: the last 12 weeks ending at the newest change. Mined from the git log of providers.json.', weeks: apiV1ChangeWeeks.map(({ week, start, end, count, changes }) => ({ week, start, end, count, changes: changes.map(({ date, slug, name, field, from, to }) => ({ date, slug, name, field, from, to })) })) });
 writeApi('best.json', { ...apiBase, description: 'The top 10 free LLM APIs by the FLLMAPIHUB score, in rank order, with the score and its parts. Never padded to ten. Every pick carries its full verified profile. Method: ' + SITE + '/best/methodology/', updated: data.generated, count: topList.length, picks: topList.map((e) => ({ rank: e.rank, podium: e.podium, score: Math.round(e.total * 10) / 10, math: Math.round(e.math * 10) / 10, editorial: Math.round(e.editorial * 10) / 10, confirmed: e.confirmed, of: e.of, parts: Object.fromEntries(Object.entries(e.parts).map(([k, v]) => [k, Math.round(v * 10) / 10])), tier_near_threshold: e.boundary, ...toApiV1Provider(e.p) })) });
 // /api/v1/score.json: the whole score, not only the top 10. Same numbers as best.json (one rounding rule, one source).
 const r1 = (x) => Math.round(x * 10) / 10;
@@ -1681,7 +1682,8 @@ try {
 const clientList = clientConfigs.clients;
 writeApi('openai-clients.json', { ...apiBase, description: 'Base URL, API-key env var name and sampled free models for every verified OpenAI-compatible provider. Plug into any OpenAI SDK; confirm free-tier terms in docs_url first.', count: clientList.length, clients: clientList });
 writeFileSync(join(ROOT, 'site/api/v1/litellm.yaml'), clientConfigs.yaml);
-writeFileSync(join(ROOT, 'site/api/v1/schema.json'), readFileSync(join(ROOT, 'data/schema.json')));
+const canonicalProviderSchema = JSON.parse(readFileSync(join(ROOT, 'data/schema.json'), 'utf8'));
+writeApi('schema.json', apiV1ProviderSchema(canonicalProviderSchema));
 const apiEndpoints = {
   providers: 'v1/providers.json',
   programs: 'v1/programs.json',
@@ -1752,7 +1754,7 @@ const apiDocMain =
   apiRow('JSON Schema of coding-tools-own-key.json (contract v1)', 'coding-tools-own-key.schema.json', null) +
   apiRow('Field-level provider changes by ISO week (last 12 weeks)', 'changes.json', null) +
   apiRow('Endpoint manifest', 'index.json', null) +
-  apiRow('JSON Schema of the dataset (copy of data/schema.json)', 'schema.json', null) +
+  apiRow('JSON Schema of API v1 provider-list payloads', 'schema.json', null) +
   apiRow('OpenAI SDK settings per verified OpenAI-compatible provider', 'openai-clients.json', clientList.length) +
   apiRow('LiteLLM proxy config (model_list) for the same providers', 'litellm.yaml', clientList.length) +
   `</tbody></table>` +
