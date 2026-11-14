@@ -92,7 +92,20 @@ The primary keyword is **"free LLM API"**. Direct competitors on that head term:
 - **Free GPU / self-hosting compute** → the
   [self-hosting](self-hosting-on-free-compute.md) companion. Lead:
   ripienaar/free-for-dev.
+## Checked, with what each page says
 
+### 2026-11-14 (UTC)
+
+- **DeepInfra — Billing:** The official pricing page
+  states: "You have to add a card or pre-pay or you
+  won't be able to use our services."
+
+  [Official pricing page](https://deepinfra.com/pricing).
+  Read on 2026-11-14 UTC.
+
+  This confirms that users must add a card or pre-pay
+  before using the service. The page does not establish
+  whether a separate free tier or trial credit is available.
 ---
 
 _[← Docs index](README.md) · [Main README](../README.md)_
