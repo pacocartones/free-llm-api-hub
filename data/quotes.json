@@ -25,6 +25,28 @@
    "page_sha256": "544a0f7b12ebfe9831d7f816b6107a73f90b492561a607af7486ecac41be2f37"
   },
   {
+   "id": "openrouter.sentence",
+   "slug": "openrouter",
+   "kind": "sentence",
+   "text": "OpenRouter retains prompts only when you opt in, or when retention is needed for CSAM review, reporting, and related legal preservation. Requests to Safety Retention endpoints are the exception: OpenRouter or the provider may retain prompts and responses from any request, only to prevent abuse, and not for training.",
+   "source_url": "https://openrouter.ai/docs/guides/privacy/data-collection",
+   "read_on": "2026-11-14",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "9aa916fe1d3a40940583cd20bb78ee7ee5cb93c52584d199ae39fd26dca4ad58"
+  },
+  {
+   "id": "openrouter.note_passage.1",
+   "slug": "openrouter",
+   "kind": "note_passage",
+   "text": "There are separate settings for paid and free models.",
+   "source_url": "https://openrouter.ai/docs/guides/privacy/provider-logging",
+   "read_on": "2026-11-14",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "a4c888930fed39df8249a4c8ce568aecb965f4f55e4c1cbcea975abae2ff248f"
+  },
+  {
    "id": "cloudflare-workers-ai.sentence",
    "slug": "cloudflare-workers-ai",
    "kind": "sentence",
