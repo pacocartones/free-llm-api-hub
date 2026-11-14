@@ -28,6 +28,7 @@ test('stdio server lists its tools and answers calls', async (t) => {
     'dataset_info', 'get_provider', 'openai_client_config', 'search_providers',
   ]);
   for (const tool of tools) {
+    assert.equal(tool.annotations.openWorldHint, true, `${tool.name} can fetch external static JSON`);
     assert.equal(tool.annotations.readOnlyHint, true);
     assert.equal(tool.annotations.idempotentHint, true);
     assert.match(tool.description, /terms change/, `${tool.name} description must warn that terms change`);

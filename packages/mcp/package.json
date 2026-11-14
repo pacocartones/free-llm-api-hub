@@ -1,7 +1,6 @@
 {
   "name": "free-llm-api-hub-mcp",
   "version": "0.1.0",
-  "private": true,
   "description": "MCP server over the free-llm-api-hub dataset: search free-tier LLM API providers, read an entry, and get an OpenAI-client config.",
   "license": "MIT",
   "type": "module",
@@ -11,15 +10,17 @@
   "files": [
     "src/",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "server.json"
   ],
   "scripts": {
     "start": "node src/index.js",
     "test": "node --test test/tools.test.js test/stdio.test.js test/forward-compat.test.js",
-    "validate:server-json": "node scripts/validate-server-json.mjs"
+    "validate:server-json": "node scripts/validate-server-json.mjs",
+    "test:pack": "node --test test/pack.test.js"
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=22.14.0"
   },
   "repository": {
     "type": "git",
@@ -45,7 +46,8 @@
   ],
   "publishConfig": {
     "access": "public",
-    "provenance": true
+    "provenance": true,
+    "registry": "https://registry.npmjs.org/"
   },
   "devDependencies": {
     "ajv": "8.20.0"
