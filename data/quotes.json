@@ -80,6 +80,17 @@
    "page_sha256": "b0880ab5f91f2cc4c500b66e7bd079d7a35b90fb73c41059d735c0d26cf07be3"
   },
   {
+   "id": "ovhcloud-ai-endpoints.sentence",
+   "slug": "ovhcloud-ai-endpoints",
+   "kind": "sentence",
+   "text": "Your data is never used to train our models, and we only keep what is strictly necessary for billing.",
+   "source_url": "https://www.ovhcloud.com/en/public-cloud/ai-endpoints/",
+   "read_on": "2026-11-14",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "92ca50869c95a2219780753baca345d29c4fdfbbe3def083d1ecb743e15842d5"
+  },
+  {
    "id": "fireworks-ai.sentence",
    "slug": "fireworks-ai",
    "kind": "sentence",

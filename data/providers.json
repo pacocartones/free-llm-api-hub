@@ -270,13 +270,13 @@
       "free_type": "perpetual",
       "free_tier": "Seven models are currently listed as Free: two Qwen3Guard moderation models, Stable Diffusion XL and four NVIDIA Riva TTS voices; access is available anonymously or with an API key tied to a Public Cloud project",
       "rate_limits": "Anonymous access: 2 requests/min per IP per model. Authenticated (API key): 400 requests/min per project per model. Exceeding either returns HTTP 429",
-      "notes": "European provider (France), relevant for EU data-sovereignty/GDPR-conscious use. The authenticated tier needs a valid payment method on the project (though \"Free\" models themselves don't charge); anonymous access needs neither an account nor a card. A separate general $200 Public Cloud trial voucher also exists but is unrelated to this free-model tier",
+      "notes": "Anonymous access uses no account, API key or signup phone; the 2 requests/min limit is per IP and model. Authenticated API keys require a Public Cloud project with a valid payment method. Commercial permission for the hosted free-model tier is not confirmed; individual model licences are separate. Sources: https://docs.ovhcloud.com/en/guides/public-cloud/ai-machine-learning/ai-endpoints-capabilities and https://docs.ovhcloud.com/en/guides/public-cloud/ai-machine-learning/ai-endpoints-getting-started (read 2026-11-14).",
       "best_for": "EU-hosted, no-account access to open models",
       "modalities": ["text", "image", "audio"],
       "models_free": ["Qwen3Guard-Gen-8B", "Qwen3Guard-Gen-0.6B", "stable-diffusion-xl-base-v10", "nvr-tts-de-de", "nvr-tts-es-es", "nvr-tts-it-it", "nvr-tts-en-us"],
       "expires": null,
       "docs_url": "https://www.ovhcloud.com/en/public-cloud/ai-endpoints/catalog/",
-      "phone_required": null,
+      "phone_required": false,
       "card_required": false,
       "commercial_ok": null,
       "openai_compatible": true,
@@ -284,9 +284,10 @@
       "env_key": "OVHCLOUD_API_KEY",
       "is_text_llm": false,
       "model_tier": null,
-      "free_limits": {"requests_per_minute":2,"scope":"anonymous access, per IP and per model. With an API access key the page gives 400 requests per minute per Public Cloud project and per model, but the getting-started guide says keys from projects without a payment method (Discovery mode) cannot use the service, so that figure needs a project with a payment method","source":"https://docs.ovhcloud.com/en/guides/public-cloud/ai-machine-learning/ai-endpoints-capabilities","checked":"2026-10-09"},
+      "free_limits": {"requests_per_minute":2,"scope":"anonymous access, per IP and per model. With an API access key the page gives 400 requests per minute per Public Cloud project and per model, but the getting-started guide says keys from projects without a payment method (Discovery mode) cannot use the service, so that figure needs a project with a payment method","source":"https://docs.ovhcloud.com/en/guides/public-cloud/ai-machine-learning/ai-endpoints-capabilities","checked":"2026-11-14"},
       "verified": true,
-      "last_verified": "2026-10-08"
+      "last_verified": "2026-11-14",
+      "data_policy": {"trains_on_prompts":false,"retention":"Zero data retention; only data strictly necessary for billing is kept","source":"https://www.ovhcloud.com/en/public-cloud/ai-endpoints/","checked":"2026-11-14","quote":"Your data is never used to train our models, and we only keep what is strictly necessary for billing.","note":"Product-level statement for AI Endpoints. The page separately states zero data retention; billing data is kept. The quoted sentence does not name the free tier.","plan_named":false}
     },
     {
       "slug": "fireworks-ai",
