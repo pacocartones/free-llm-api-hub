@@ -2188,6 +2188,7 @@ test('the green header keeps AA contrast: white 7:1 and the muted text 4.5:1 on 
   assert.ok(ratio(token('on-header'), bar) >= 7, 'white on the bar');
   assert.ok(ratio(token('on-header-muted'), bar) >= 4.5, 'muted text on the bar');
   assert.ok(ratio(token('on-header-accent'), bar) >= 4.5, 'the accent word of the brand on the bar');
+  assert.match(css, /\.site-header \.icon-btn \.star-count, \.site-header \.icon-btn:hover \.star-count \{ color: var\(--on-header\); \}/, 'the small star count stays AA over the translucent button backgrounds');
 });
 
 test('best-facts: the three cards show fields of the record as they are, and a missing field reads «not stated»', () => {
@@ -3005,6 +3006,13 @@ test('links: markNewTabLinks adds a screen-reader note to every link that opens 
   assert.match(out, /y <b>bold<\/b><span class="sr-only"> \(opens in a new tab\)<\/span><\/a>/, 'inner markup is kept');
   assert.match(out, /<script>var s = '<a target="_blank">in a script<\/a>';<\/script>/, 'a script is untouched');
   assert.equal(markNewTabLinks(out), out, 'applying it twice changes nothing');
+});
+
+test('links: markNewTabLinks leaves mixed-case SCRIPT and STYLE blocks untouched', () => {
+  const input = '<ScRiPt>const sample = \'<a target="_blank">script text</a>\';</sCrIpT><STYLE>.x::after{content:"<a target=\\"_blank\\">style text</a>"}</sTyLe><a target="_blank" href="https://example.test">outside</a>';
+  const out = markNewTabLinks(input);
+  assert.ok(out.startsWith(input.slice(0, input.indexOf('<a target="_blank" href='))), 'script and style text is byte-for-byte unchanged');
+  assert.match(out, /outside<span class="sr-only"> \(opens in a new tab\)<\/span><\/a>$/);
 });
 
 test('links: on every generated page, each link that opens a new tab carries the note, and the coverage tasks name their provider', () => {

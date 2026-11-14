@@ -62,6 +62,12 @@ Run these commands from the repository root after installing dependencies. Follo
 
 CI runs the full integrity suite on every PR, including docs-only changes. Paste your local commands and their results in the PR; a focused check is useful evidence, and a check you could not run needs an explanation. See [the first-fork checks note](#your-first-pr-from-a-fork-the-checks-may-wait) if CI is waiting for approval.
 
+### Updating your branch from main
+
+Commit all your work first, including new files, and check that `origin` names the repository whose `main` you intend to merge. Run `npm run sync-main` from your full clone on an attached branch. It fetches `origin/main` and merges it; conflicts confined to the shared generated-file list are rebuilt and committed locally. Any source or OG conflict aborts the merge with the conflicting files listed and restores your original local state. Already-current branches, fast-forwards and clean merges need no automatic rebuild. The helper never pushes.
+
+OG files are left for you to check: run `node scripts/check-og.mjs`; if it reports drift, run `npm run og` and commit the resulting OG files yourself. Run `npm test` and the normal generated drift check, `npm run check`, before submitting. If a commit fails, inspect `git status`, fix the identity or hook error and retry `git commit`. After an interruption or cleanup failure, inspect `git status` and the reported files; use `git merge --abort` if a merge remains and you want to abandon it. New build outputs are retained for inspection. This local helper runs repository build code and your normal Git hooks; use it only in a repository you trust, not as a privileged workflow for untrusted PRs.
+
 > **You need the full git history.** `npm test` and `npm run build` mine the per-provider change history from `git log` (see [docs/architecture.md](docs/architecture.md)), so they require a **full clone** — not a shallow clone (`git clone --depth 1`), not a tarball download, and `git` must be on your `PATH`. Without full history the suite fails with a message like:
 >
 > ```text
@@ -179,7 +185,7 @@ Commit messages: AI-assisted contributions are welcome when you have verified th
 
 A human maintainer reviews and is responsible for every merge. Automated review comments (CodeRabbit) are advisory: a person makes the call, and you don't need to reply to the bot. We resolve every review conversation, from people or bots, before merging, either by changing the code or by noting why not.
 
-If your pull request falls behind `main`, we update it before merging. When that update only changes regenerated files, the review still holds: it is tied to the patch of the files you changed under `data/`, `scripts/` and `docs/`, and we check that this patch is exactly the one we reviewed. If any of those lines changes, the pull request is reviewed again. The *Dataset integrity* check has to be green either way.
+If your pull request falls behind `main`, we update it before merging; you can use [Updating your branch from main](#updating-your-branch-from-main) to sync it locally. When that update only changes regenerated files, the review still holds: it is tied to the patch of the files you changed under `data/`, `scripts/` and `docs/`, and we check that this patch is exactly the one we reviewed. If any of those lines changes, the pull request is reviewed again. The *Dataset integrity* check has to be green either way.
 
 Contributions here are voluntary. We don't pay for comments, reviews or other work that nobody asked for, and a request for payment in an issue or a pull request gets no reply and doesn't change how we review it.
 
