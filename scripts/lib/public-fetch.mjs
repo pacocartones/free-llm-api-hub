@@ -4,7 +4,6 @@
 import { lookup as dnsLookup } from 'node:dns';
 import { Agent as HttpsAgent, request as httpsRequest } from 'node:https';
 import { isIP } from 'node:net';
-import { Readable } from 'node:stream';
 
 const REDIRECT_STATUSES = new Set([301, 302, 303, 307, 308]);
 const MAX_REDIRECTS = 5;
@@ -213,17 +212,18 @@ function declaredLength(headers) {
 }
 
 function boundedBody(response, maxBytes, lifecycle) {
-  const reader = Readable.toWeb(response).getReader();
+  const iterator = response[Symbol.asyncIterator]();
   let bytesRead = 0;
+  let cancelled = false;
   return new ReadableStream({
     async pull(controller) {
       try {
-        const { done, value } = await reader.read();
+        const { done, value } = await iterator.next();
+        if (cancelled) return;
         if (done) { lifecycle.cleanup(); controller.close(); return; }
         if (value.byteLength > maxBytes - bytesRead) {
           const error = new ResponseTooLargeError(maxBytes);
           response.destroy(error);
-          try { await reader.cancel(error); } catch { /* preserve the size error */ }
           lifecycle.cleanup();
           controller.error(error);
           return;
@@ -232,13 +232,13 @@ function boundedBody(response, maxBytes, lifecycle) {
         controller.enqueue(value);
       } catch (error) {
         lifecycle.cleanup();
-        controller.error(lifecycle.normalize(error));
+        if (!cancelled) controller.error(lifecycle.normalize(error));
       }
     },
-    async cancel(reason) {
+    cancel(reason) {
+      cancelled = true;
       response.destroy(reason instanceof Error ? reason : undefined);
-      try { await reader.cancel(reason); } catch { /* cancellation remains best effort */ }
-      finally { lifecycle.cleanup(); }
+      lifecycle.cleanup();
     },
   });
 }

@@ -1,5 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
 import { EventEmitter } from 'node:events';
 import { PassThrough } from 'node:stream';
 import * as publicFetch from './lib/public-fetch.mjs';
@@ -248,6 +249,37 @@ test('cancelling the exposed body destroys the live response', async () => {
   const response = await fetchImpl('https://docs.example.com/readme');
   await response.body.cancel('not needed');
   assert.equal(source.destroyed, true);
+});
+
+test('late native data after cancellation cannot enqueue into a closed web-stream controller', () => {
+  const child = spawnSync(process.execPath, ['--input-type=module', '--eval', `
+    import { EventEmitter } from 'node:events';
+    import { PassThrough } from 'node:stream';
+    import { createPublicFetch } from './scripts/lib/public-fetch.mjs';
+    const source = new PassThrough();
+    source.statusCode = 200;
+    source.headers = {};
+    source.destroy = function () {
+      setImmediate(() => this.emit('data', Buffer.from('late')));
+      return this;
+    };
+    const requestImpl = (_url, _options, callback) => {
+      const request = new EventEmitter();
+      request.end = () => queueMicrotask(() => callback(source));
+      request.destroy = () => {};
+      return request;
+    };
+    const fetchImpl = createPublicFetch({
+      requestImpl,
+      resolver: (_hostname, _options, callback) => callback(null, [{ address: '93.184.216.34', family: 4 }]),
+      agent: {},
+    });
+    const response = await fetchImpl('https://docs.example.com');
+    await response.body.cancel('not needed');
+    await new Promise((resolve) => setImmediate(resolve));
+  `], { cwd: process.cwd(), encoding: 'utf8', timeout: 5000 });
+
+  assert.equal(child.status, 0, child.stderr);
 });
 
 test('a public redirect destroys the prior body and keeps one deadline for the final hop', { timeout: 500 }, async () => {
