@@ -1,6 +1,6 @@
 {
-  "generated": "2026-07-31",
-  "note": "Apply-to-get credit programs (startup + student/research). Kept separate from providers.json (which is self-serve, verified free APIs) because these need an application and are highly volatile. `funds`: 'yes' = first-party LLM-API credits, 'partial' = cloud/compute credits usable for managed LLM APIs, 'no' = training/perks or adjacent infra only. Confirmed against each program's own page on 2026-07-30/31.",
+  "generated": "2026-11-14",
+  "note": "Apply-to-get credit programs (startup + student/research). Kept separate from providers.json (which is self-serve, verified free APIs) because these need an application and are highly volatile. `funds`: 'yes' = first-party LLM-API credits, 'partial' = cloud/compute credits usable for managed LLM APIs, 'no' = training/perks or adjacent infra only. The original catalogue was confirmed against official program pages on 2026-07-30/31; later entries are checked when added or refreshed, with the latest catalogue change on 2026-11-14.",
   "startups": [
     { "name": "AWS Activate", "url": "https://aws.amazon.com/activate/", "what": "Up to $200k AWS credits (marketing max; self-serve tier far smaller); explicitly redeemable on Bedrock LLMs", "funds": "partial", "who": "Any stage; top tiers need a referral from an approved AWS Activate provider" },
     { "name": "Microsoft for Startups Founders Hub", "url": "https://www.microsoft.com/en-us/startups", "what": "Up to $150k Azure credits (unlocked across tiers); covers Azure OpenAI", "funds": "partial", "who": "Software startups; no stage/funding threshold; services-only firms excluded" },

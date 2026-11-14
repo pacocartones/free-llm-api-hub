@@ -10,7 +10,7 @@ They're genuinely valuable, but different enough that they're kept **out of the 
 - They're **volatile** — amounts, tiers and terms change often; "up to $X" is usually a marketing maximum, not what a self-serve applicant gets.
 - Most give **cloud-wide credits** (usable *for* LLM APIs, but not LLM-specific) rather than first-party model-API credits.
 
-> Confirmed against each program's own page on **2026-07-30**. Always re-check the current terms before you rely on one.
+> The original catalogue was confirmed against official program pages on **2026-07-30/31**; later entries are checked when added or refreshed. Latest catalogue change: **2026-11-14**. Always re-check the current terms before you rely on one.
 
 **"Funds LLM API?"** — ✅ first-party LLM-API credits · ◐ cloud/compute credits usable for managed LLM APIs (Bedrock, Vertex AI, Azure OpenAI…) · ✖ training / perks only.
 
