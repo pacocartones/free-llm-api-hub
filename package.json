@@ -21,7 +21,8 @@
     "stars": "node scripts/refresh-stars.mjs",
     "check": "node scripts/validate.mjs && node scripts/build.mjs && node scripts/check-generated.mjs",
     "check-live": "node scripts/check-sitemap-live.mjs",
-    "smoke-live": "node scripts/smoke-live.mjs"
+    "smoke-live": "node scripts/smoke-live.mjs",
+    "check-sources": "node scripts/check-sources.mjs"
   },
   "engines": {
     "node": ">=18"

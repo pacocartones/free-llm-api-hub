@@ -71,6 +71,18 @@ For each provider on the worklist (`npm run worklist`, or just the reverify batc
 - Watch the usual movers: Gemini limits, Cloudflare Neuron pricing, and any "trial credit" amounts (these change most often). The model *lists* (OpenRouter, Groq, Cerebras, etc.) are refreshed locally by `npm run models -- --write` (there is no scheduled backfill job) — then `npm run build && npm run og && npm test`, commit and PR; you only need to eyeball which models moved.
 - Backfill attribute fields still `null`: `openai_base_url`, and any missing `openai_compatible` / `modalities`.
 
+### Optional: external source sweep
+
+Run `npm run check-sources` when you want to check the source links themselves. It collects each provider's `docs_url` and the external links in [`docs/sources.md`](sources.md), requests each once with a bounded `GET`, waits 15 seconds at most, and sends at most two requests per second with the `free-llm-api-hub-source-check` User-Agent. Requests use the repository's public-URL transport, which rejects private destinations and revalidates DNS and every redirect.
+
+The output starts with `Checked N source URLs.`. If every URL answers, it prints `✓ no dead or unreachable sources found.` and exits 0. Otherwise it prints a Markdown table with these columns and exits 1:
+
+| status | source | url | wayback |
+| --- | --- | --- | --- |
+| HTTP status, `timeout`, or the fetch error | the data file and slug, or `docs/sources.md` | the URL checked | the closest available Wayback snapshot, or `-` |
+
+The script writes nothing to the repository and is not part of `npm test` or CI, so a provider or Archive.org outage never fails a build.
+
 ### Optional: live probe
 
 [`scripts/probe.mjs`](../scripts/probe.mjs) (`npm run probe`) live-tests each free tier with a real key from `process.env[env_key]` and writes `last_probed`/`probe_status`. Run it locally whenever you have keys handy (any subset; providers without a key are skipped):
