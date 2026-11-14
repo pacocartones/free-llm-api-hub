@@ -93,6 +93,18 @@ The primary keyword is **"free LLM API"**. Direct competitors on that head term:
   [self-hosting](self-hosting-on-free-compute.md) companion. Lead:
   ripienaar/free-for-dev.
 
+## Checked, with what each page says
+
+_Checked: 2026-11-14._
+
+Well-known providers checked for free API access or trial credit, with the quoted statement from each provider's own public documentation, the source URL, and the UTC date read.
+
+| Provider | What the page says | Quoted sentence from provider docs | Source URL | Checked (UTC) |
+|---|---|---|---|---|
+| Together AI | No free tier stated on limits page; serverless is best-effort, provisioned throughput for committed capacity | "In most cases, you can use Together AI serverless inference without encountering rate limits. Rate limiting may occasionally occur with high request volumes or large bursts of traffic." | [docs.together.ai/docs/rate-limits](https://docs.together.ai/docs/rate-limits) | 2026-11-14 |
+| Hyperbolic | Free Tier inference available after phone verification; adds $1 trial credit (updated from 2026-10-17 check which only covered GPU cloud docs) | "Personal accounts on the Free Tier can use inference after you verify a phone number. Verifying also adds a $1 credit." | [hyperbolic.ai/docs/inference/overview](https://hyperbolic.ai/docs/inference/overview) | 2026-11-14 |
+| DeepSeek | Prices only; billed per 1M tokens against topped-up or granted balance, search and fetch billed per 1,000 uses | "Model prices are listed in units of per 1M tokens. A token, the smallest unit of text that the model recognizes, can be a word, a number, or even a punctuation mark. We bill model usage based on the total number of input and output tokens by the model." | [api-docs.deepseek.com/quick_start/pricing](https://api-docs.deepseek.com/quick_start/pricing) | 2026-11-14 |
+
 ---
 
 _[← Docs index](README.md) · [Main README](../README.md)_
