@@ -49,9 +49,9 @@ only what confirms.
 - [ ] **Replicate** (image/video) — "run select models for free… after a bit
   you'll be asked to set up billing"; no card to start but the free amount isn't
   quantified. Add only if a concrete allowance can be cited.
-- [ ] **Alibaba Cloud (Catalyst) Startup** program — page is JS-rendered/blank to
-  fetch; agent-sourced ~$120k credits + Qwen Model Studio. Confirm the page and
-  terms, then add to [programs](credit-programs.md).
+- ✅ **Alibaba Cloud AI Catalyst Program** — now a program in the dataset
+  (page read 2026-11-14: "Up to 2B free Model Studio tokens. Up to $120k cloud
+  credits support. POC coupons."; validity and eligibility not stated on the page).
 - [ ] **OCR / doc-AI tail** (each has a real free/trial tier per research, held to
   avoid tilting the dataset into an OCR directory): Datalab, Reducto, ABBYY Cloud
   OCR SDK, Parsio, Airparser, Extracta.ai, Pen-to-Print. Add selectively if a gap

@@ -37,6 +37,7 @@ They're genuinely valuable, but different enough that they're kept **out of the 
 | **[DigitalOcean Hatch](https://www.digitalocean.com/hatch)** | Up to ~$10k/mo credit limit over 12 mo (amount varies); base credits exclude GPU Droplets — select startups invited to apply for separate GPU credits | ◐ via cloud | AI-native startups that raised ≤$10M; business email required |
 | **[Pinecone Startup Program](https://www.pinecone.io/startup-program/)** | Free Standard tier + Pro Support + usage credits (amount not published); vector DB / RAG infra, not model inference | ✖ perks only | &lt;100 employees, Series A or earlier; no VC referral required |
 | **[Weaviate Startup Deal](https://weaviate.io/startup-deal)** | Discounted Weaviate Cloud access (terms not published); vector DB / RAG infra | ✖ perks only | Early-stage with a partner-program / VC affiliation (e.g. YC, Techstars) |
+| **[Alibaba Cloud AI Catalyst Program](https://www.alibabacloud.com/en/startup/ai)** | Up to $120k cloud credits support + up to 2B free Model Studio tokens; POC coupons | ✅ LLM API | Startups applying through the program's online form; eligibility criteria not stated on the page |
 <!-- AUTOGEN:startups:end -->
 
 ## For students & researchers
