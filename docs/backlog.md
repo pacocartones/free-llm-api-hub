@@ -40,10 +40,14 @@ Re-check each against the [inclusion criteria](inclusion-criteria.md); promote
 only what confirms.
 
 - [ ] **MiniMax** (LLM) — OpenAI-compatible confirmed (`https://api.minimax.io/v1`,
-  also an Anthropic-compatible path), internationally reachable email signup, but
-  **no free-trial credit is documented** on its pricing/docs pages (campaign-
-  dependent). The most-wanted net-new LLM — confirm a citable free tier (or probe
-  a fresh signup) before adding. Also Anthropic-compatible worth noting.
+  also an Anthropic-compatible path), internationally reachable email signup.
+  Checked 2026-11-14 (UTC): the official API pricing page lists pay-as-you-go
+  usage deducted from a funded account balance, while the Token Plan page lists
+  paid subscriptions and purchasable credit packs. The paid-services agreement
+  describes API access as balance/resource-package funded and mentions vouchers
+  only as promotional exceptions; no generally available free API tier or trial
+  credit is documented on the official pages checked. Recheck if MiniMax
+  publishes an explicit signup grant. Also Anthropic-compatible worth noting.
 - ✅ **Upstage** (Solar LLM + Document Parse/OCR) — now a provider in the dataset (re-verified 2026-10-08).
 - ✅ **Veryfi** (OCR) — now a provider in the dataset (re-verified 2026-10-08).
 - [ ] **Replicate** (image/video) — re-verified 2026-11-14 against its pricing
