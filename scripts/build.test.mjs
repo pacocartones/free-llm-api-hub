@@ -3015,6 +3015,14 @@ test('links: markNewTabLinks leaves mixed-case SCRIPT and STYLE blocks untouched
   assert.match(out, /outside<span class="sr-only"> \(opens in a new tab\)<\/span><\/a>$/);
 });
 
+test('links: markNewTabLinks leaves raw-text blocks with browser-tolerated end tags untouched', () => {
+  const input = '<ScRiPt>const sample = \'<a target="_blank">script text</a>\';</sCrIpT data-end="x"><STYLE>.x::after{content:"<a target=\\"_blank\\">style text</a>"}</sTyLe ><a target="_blank" href="https://example.test">outside</a>';
+  const outside = input.indexOf('<a target="_blank" href=');
+  const out = markNewTabLinks(input);
+  assert.equal(out.slice(0, outside), input.slice(0, outside), 'script and style text, including their tolerated end tags, is byte-for-byte unchanged');
+  assert.match(out, /outside<span class="sr-only"> \(opens in a new tab\)<\/span><\/a>$/);
+});
+
 test('links: on every generated page, each link that opens a new tab carries the note, and the coverage tasks name their provider', () => {
   const walk = (dir) => readdirSync(dir).flatMap((n) => { const p = join(dir, n); return statSync(p).isDirectory() ? walk(p) : p.endsWith('.html') ? [p] : []; });
   let seen = 0;
