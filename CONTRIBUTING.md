@@ -6,18 +6,18 @@ Thanks for helping. Here's how it works.
 
 ## Your first contribution, step by step
 
-Each issue says which files to edit; for a data issue:
+Each issue names the files to edit and the check to run. Start with an unclaimed task:
 
-1. Pick a [good first issue](https://github.com/pacocartones/free-llm-api-hub/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) (small, answered from the provider's public pages).
-2. Read the provider's own page, copy the exact sentence and note the day you read it (UTC).
-3. Fork, edit [`data/providers.json`](data/providers.json), run `npm ci --ignore-scripts` once, then `npm run build && npm test`, and commit the regenerated files with your change.
-4. Open the pull request and say which page you read and when. If you are not sure, say what you found and what you could not confirm: a partial answer is useful.
+1. Pick a [good first issue](https://github.com/pacocartones/free-llm-api-hub/contribute). For a docs or code issue, comment `/take` before starting; a `good first issue` labelled `data` does not need a claim. See [Claiming an issue](#claiming-an-issue).
+2. Read the official page named in the issue, copy the sentence that supports your finding, and note the day you read it (UTC).
+3. Fork, edit **the files named in that issue**, run `npm ci --ignore-scripts` once, then run **its named check**. Data changes usually need `npm run build && npm test` and the regenerated files; a docs-only issue may ask for a different check.
+4. Open the pull request with the source, date and check result. If the source is unclear, say what you could and could not confirm.
 
 Details follow: [Quick start](#quick-start), [Confirming a single unknown field](#confirming-a-single-unknown-field) and [Claiming an issue](#claiming-an-issue).
 
-## The one rule that matters
+## For provider data, edit the source
 
-> **Edit the data, not the docs.** The single source of truth is [`data/providers.json`](data/providers.json). The README tables, the freshness badge, the `collections/` markdown, and the whole interactive site (explorer, per-provider pages, collection pages, badges, sitemap) are all *generated* from it.
+For a **provider data correction**, edit [`data/providers.json`](data/providers.json), not a generated page. The README tables, the freshness badge, the `collections/` markdown, and the whole interactive site (explorer, per-provider pages, collection pages, badges, sitemap) are generated from it. A docs or code issue names its own source files.
 
 **Your pull request ships its own regenerated files.** After editing `data/providers.json`, run `npm run build` (and `npm run og` if the OG check flags drift) and commit the regenerated files together with the data change. There is no regeneration bot — the required "Dataset integrity" check fails until the derived files are in sync.
 
@@ -32,8 +32,9 @@ cd free-llm-api-hub
 # install the locked development tools once:
 npm ci --ignore-scripts
 
-# edit data/providers.json, then:
-npm test          # validate the dataset against the integrity rules
+# edit the files named in your issue, then run the check it names
+# for a provider data correction, this is usually:
+npm run build && npm test
 ```
 
 That's the whole loop. `npm ci --ignore-scripts` installs the locked development tools for JSON Schema validation and local social-image generation without running package lifecycle scripts. The shipped site has no runtime dependencies. The Node version used in CI is pinned in [`.nvmrc`](.nvmrc); anything ≥18 works locally.
