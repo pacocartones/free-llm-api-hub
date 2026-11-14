@@ -7,7 +7,16 @@
 
 export const THRESHOLDS = Object.freeze({ accessibility: 0.95, performance: 0.8 });
 
-export function evaluate(url, report, thresholds = THRESHOLDS) {
+const EXEMPT_NULL_MODES = new Set(['informative', 'manual', 'notApplicable']);
+
+function auditNodes(audit) {
+  return (audit?.details?.items ?? [])
+    .slice(0, 3)
+    .map((item) => String(item?.node?.snippet ?? item?.node?.selector ?? '').replace(/\s+/g, ' ').trim().slice(0, 160))
+    .filter(Boolean);
+}
+
+export function evaluate(url, report, thresholds = THRESHOLDS, baseline = {}) {
   const failures = [];
   const categories = (report && report.categories) || {};
   for (const [name, minimum] of Object.entries(thresholds)) {
@@ -18,6 +27,26 @@ export function evaluate(url, report, thresholds = THRESHOLDS) {
       failures.push(`${url}: ${name} ${score.toFixed(2)} is below ${minimum.toFixed(2)}`);
     }
   }
+
+  const allowed = new Set(baseline[url] ?? []);
+  const auditFailures = new Map();
+  const runs = report?.auditRuns ?? (report ? [report] : []);
+  for (const run of runs) {
+    for (const ref of run?.categories?.accessibility?.auditRefs ?? []) {
+      if (ref.weight === 0) continue;
+      const audit = run?.audits?.[ref.id];
+      if (!audit || (typeof audit.score !== 'number' && !EXEMPT_NULL_MODES.has(audit.scoreDisplayMode))) {
+        auditFailures.set(ref.id, `${url}: accessibility audit ${ref.id} returned no score`);
+        continue;
+      }
+      if (allowed.has(ref.id)) continue;
+      if (typeof audit.score === 'number' && audit.score < 1) {
+        const nodes = auditNodes(audit);
+        auditFailures.set(ref.id, `${url}: new accessibility audit ${ref.id} failed${nodes.length ? ` — ${nodes.join(' | ')}` : ''}`);
+      }
+    }
+  }
+  failures.push(...auditFailures.values());
   return failures;
 }
 
@@ -35,5 +64,7 @@ export function medianReport(reports) {
     const mid = sorted.length >> 1;
     categories[name] = { score: sorted.length % 2 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2 };
   }
-  return { categories };
+  // Retain the raw reports so audit-level failures from any run cannot be hidden
+  // by a healthy median category score.
+  return { categories, auditRuns: reports };
 }
