@@ -28,6 +28,7 @@ import { weeklyPacing, weeklyBatch, WEEKLY_CAP, MIN_AGE_DAYS } from './lib/pacin
 import { clientConfigProviders, openaiClients, litellmYaml, MODEL_PLACEHOLDER } from './lib/client-config.mjs';
 import { requirementsHtml, limitsHtml, glanceHtml, modelsHtml, dataPolicyHtml } from './lib/provider-sections.mjs';
 import { compareTableHtml, comparisonCategory, sameComparisonCategory, selectComparePairs, COMPARE_PAGE_CAP, COMPARE_PER_PROVIDER_CAP, COMPARE_MAX as COMPARE_MAX_SLOTS } from './lib/compare.mjs';
+import { codeHtmlEsc, curlChatQuickstart, posixShellQuote, pythonChatQuickstart, pythonEmbeddingsQuickstart, pythonStringLiteral } from './lib/quickstart.mjs';
 
 const REPO = join(dirname(fileURLToPath(import.meta.url)), '..');
 // The builds of this file run in a private copy of the tree (see lib/private-tree.mjs): `node --test` runs the test
@@ -1007,6 +1008,42 @@ test('litellm.yaml quotes values so YAML-special characters stay literal', () =>
   assert.deepEqual(entries.map((e) => e.litellm_params.model), ['openai/a: b # c', 'openai/say "hi"']);
 });
 
+const decodeShellWord = (word) => {
+  if (/^[A-Za-z0-9_@%+=:,./-]+$/.test(word)) return word;
+  assert.ok(word.startsWith("'") && word.endsWith("'"), `not one quoted shell word: ${word}`);
+  return word.slice(1, -1).split("'\\''").join("'");
+};
+const decodeCodeHtml = (text) => text.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
+
+test('quickstarts keep contributor values inside Python, JSON and shell argument boundaries', () => {
+  const base = 'https://evil.example/v1"; __import__("os").system("id") #/$(id)';
+  const model = "model'; id; #\nnext";
+  const python = pythonChatQuickstart(base, model);
+  const literals = [...python.matchAll(/(?:base_url|model)=("(?:[^"\\]|\\.)*")/g)].map((m) => JSON.parse(m[1]));
+  assert.deepEqual(literals, [base, model], 'both hostile values remain complete Python string values');
+  assert.equal(pythonStringLiteral('line\n\u2028next'), '"line\\n\\u2028next"', 'line separators become Python escapes, not source lines');
+
+  const curl = curlChatQuickstart(base, model);
+  const curlLines = curl.split('\n');
+  const endpointWord = curlLines[0].slice('curl '.length, -2);
+  const bodyWord = curlLines.find((line) => line.startsWith('  -d ')).slice('  -d '.length);
+  assert.equal(decodeShellWord(endpointWord), `${base}/chat/completions`, 'the complete endpoint remains one shell word');
+  assert.deepEqual(JSON.parse(decodeShellWord(bodyWord)), { model, messages: [{ role: 'user', content: 'Hello!' }] }, 'the request remains one quoted JSON argument');
+  assert.equal(posixShellQuote('https://api.example/v1'), 'https://api.example/v1', 'an inert URL stays readable');
+});
+
+test('quickstarts preserve ordinary chat, embeddings and copied HTML output', () => {
+  const base = 'https://api.example/v1';
+  const model = 'org/model:free';
+  assert.match(pythonChatQuickstart(base, model), /base_url="https:\/\/api\.example\/v1"[\s\S]*model="org\/model:free"/);
+  assert.match(pythonEmbeddingsQuickstart(base, model), /client\.embeddings\.create\(model="org\/model:free", input="Hello world"\)/);
+  const curl = curlChatQuickstart(base, model, { apiKeyVariable: 'YOUR_FREE_API_KEY', spacedJson: true });
+  assert.match(curl, /^curl https:\/\/api\.example\/v1\/chat\/completions \\/);
+  assert.match(curl, /Bearer \$YOUR_FREE_API_KEY/);
+  assert.equal(codeHtmlEsc('<tag>&'), '&lt;tag&gt;&amp;', 'HTML encoding preserves decoded clipboard text without creating markup');
+  assert.equal(decodeCodeHtml(codeHtmlEsc(curl)), curl, 'browser-decoded code remains the safely quoted shell program');
+});
+
 test('the built client configs match the dataset, are registered, and the schema is published verbatim', () => {
   const v1 = join(ROOT, 'site/api/v1');
   if (!existsSync(join(v1, 'litellm.yaml'))) run(['scripts/build.mjs']);
@@ -1765,6 +1802,13 @@ const validateAfter = (mutate) => {
   writeFileSync(fixture, JSON.stringify(data));
   return exitOk(['scripts/validate.mjs', fixture]);
 };
+
+test('quickstart fields reject hidden characters before publication', () => {
+  const provider = (data) => data.providers.find((p) => p.openai_base_url && p.models_free?.length);
+  assert.equal(validateAfter((data) => { provider(data).openai_base_url += '\nhttps://evil.example'; }), false, 'a base URL cannot add a copied source line');
+  assert.equal(validateAfter((data) => { provider(data).models_free[0] += '\u202e'; }), false, 'a model cannot visually reorder copied source');
+  assert.equal(validateAfter((data) => { provider(data).models_free[0] = "model'with-quote"; }), true, 'visible punctuation remains valid and is handled by context encoders');
+});
 
 // A `generated` after today in UTC is what a contributor in a time zone ahead of UTC writes at the end of their day (2026-10-16 when it is still
 // 2026-10-15 in UTC). It must fail, with the way to write the day.
