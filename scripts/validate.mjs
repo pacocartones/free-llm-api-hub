@@ -23,6 +23,8 @@ import { hasHiddenChars } from './lib/hidden-chars.mjs';
 import { quoteErrors } from './lib/quotes.mjs';
 import { reportErrors } from './lib/quotes-report.mjs';
 import { keyHostErrors } from './lib/key-hosts.mjs';
+import { summaryErrors } from './lib/provider-summaries.mjs';
+import { publicHttpsUrlError } from './lib/public-fetch.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const FILE = process.argv[2] ? resolve(process.argv[2]) : join(ROOT, 'data/providers.json');
@@ -44,6 +46,8 @@ const seenNames = new Set();
 function check(cond, msg) {
   if (!cond) errors.push(msg);
 }
+
+const isPublicHttpsUrl = (value) => publicHttpsUrlError(value) === null;
 
 function jsonPointer(path, property) {
   const escapedProperty = String(property).replace(/~/g, '~0').replace(/\//g, '~1');
@@ -108,6 +112,10 @@ for (const p of data.providers ?? []) {
   seenNames.add(p.name);
 
   check(typeof p.name === 'string' && p.name.length > 0, `${id}: name required`);
+  for (const field of ['name', 'docs_url', 'openai_base_url']) {
+    const value = p[field];
+    check(value == null || typeof value !== 'string' || !hasHiddenChars(value), `${id}: ${field} must not contain control, bidirectional or zero-width characters`);
+  }
   check(CATEGORIES.includes(p.category), `${id}: category must be one of ${CATEGORIES.join('/')}`);
   check(FREE_TYPES.includes(p.free_type), `${id}: free_type must be one of ${FREE_TYPES.join('/')}`);
   check(typeof p.free_tier === 'string' && p.free_tier.length > 0, `${id}: free_tier required`);
@@ -121,6 +129,10 @@ for (const p of data.providers ?? []) {
 
   if (p.models_free !== undefined && p.models_free !== null) {
     check(Array.isArray(p.models_free) && p.models_free.every((m) => typeof m === 'string'), `${id}: models_free must be an array of strings or null`);
+    if (Array.isArray(p.models_free)) {
+      for (const model of p.models_free)
+        check(typeof model !== 'string' || !hasHiddenChars(model), `${id}: models_free must not contain control, bidirectional or zero-width characters`);
+    }
   }
 
   // category follows free_type: a one-time signup balance is a trial; a free
@@ -141,6 +153,7 @@ for (const p of data.providers ?? []) {
   // openai_base_url: null, or an http(s) URL; and it only makes sense when the API is OpenAI-compatible.
   if (p.openai_base_url !== undefined && p.openai_base_url !== null) {
     check(typeof p.openai_base_url === 'string' && URL_RE.test(p.openai_base_url), `${id}: openai_base_url must be an http(s) URL or null`);
+    check(typeof p.openai_base_url !== 'string' || !hasHiddenChars(p.openai_base_url), `${id}: openai_base_url must not contain control, bidirectional or zero-width characters`);
     check(p.openai_compatible !== false, `${id}: openai_base_url is set but openai_compatible is false`);
   }
 
@@ -188,7 +201,7 @@ for (const p of data.providers ?? []) {
     const dp = p.data_policy;
     check(dp.trains_on_prompts != null || dp.retention != null, `${id}: data_policy must state trains_on_prompts or retention (an all-null policy records nothing)`);
     check(DATE_RE.test(dp.checked || '') && dp.checked <= data.generated, `${id}: data_policy.checked must be a date not after the dataset's generated date`);
-    check(URL_RE.test(dp.source || ''), `${id}: data_policy.source must be the provider's page (http/https)`);
+    check(isPublicHttpsUrl(dp.source), `${id}: data_policy.source must be the provider's public HTTPS page`);
     // The provider's own sentence and its condition: plain text only (no control, bidirectional or zero-width characters).
     for (const [k, max] of [['quote', 400], ['note', 300]]) {
       if (dp[k] == null) continue;
@@ -212,7 +225,7 @@ for (const p of data.providers ?? []) {
   // Integrity core: a verified entry must carry a dated, real source link.
   if (p.verified) {
     check(DATE_RE.test(p.last_verified || ''), `${id}: verified entry needs a YYYY-MM-DD last_verified`);
-    check(URL_RE.test(p.docs_url || ''), `${id}: verified entry needs a real docs_url (primary source)`);
+    check(isPublicHttpsUrl(p.docs_url), `${id}: verified entry needs a public HTTPS docs_url (primary source)`);
   } else {
     check(p.last_verified === null, `${id}: unverified entry must have last_verified: null`);
   }
@@ -343,6 +356,12 @@ try {
 try {
   errors.push(...editorialErrors(JSON.parse(readFileSync(join(ROOT, 'data/editorial.json'), 'utf8')), data.providers));
 } catch (e) { errors.push('editorial.json: ' + e.message); }
+
+// ---------- provider summaries (data/provider-summaries.json) ----------
+// Each line of a summary is sourced, dated and taken from the provider's own pages.
+try {
+  errors.push(...summaryErrors(JSON.parse(readFileSync(join(ROOT, 'data/provider-summaries.json'), 'utf8')), data.providers));
+} catch (e) { errors.push('provider-summaries.json: ' + e.message); }
 
 // ---------- nothing paid in the dataset ----------
 // The `partner` field is retired: the schema allows no extra property on a provider, so it fails there. Relations with

@@ -116,6 +116,16 @@ try {
     const all = reports.map((r) => r.categories?.performance?.score).join('/');
     console.log(`${page}: median of ${RUNS} runs: performance ${report.categories.performance?.score} (runs ${all}), accessibility ${report.categories.accessibility?.score}`);
     failures.push(...evaluate(page, report));
+    // When the page is below a threshold, name the audits that cost the points and the first elements they point at.
+    if (evaluate(page, report).length) {
+      const run = reports.find((r) => r.categories?.accessibility?.score === report.categories.accessibility?.score) ?? reports[0];
+      for (const ref of run.categories?.accessibility?.auditRefs ?? []) {
+        const audit = run.audits?.[ref.id];
+        if (!audit || audit.score === null || audit.score >= 1 || ref.weight === 0) continue;
+        const nodes = (audit.details?.items ?? []).slice(0, 3).map((item) => String(item.node?.snippet ?? item.node?.selector ?? '').replace(/\s+/g, ' ').slice(0, 160));
+        console.log(`  failed audit ${ref.id} (weight ${ref.weight}): ${audit.title}${nodes.length ? ` — ${nodes.join(' | ')}` : ''}`);
+      }
+    }
   }
 } finally {
   server.close();

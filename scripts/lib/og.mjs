@@ -27,6 +27,8 @@ export const COLLS = [
   { slug: 'openai-compatible', title: 'OpenAI-compatible free APIs', filter: (p) => p.openai_compatible === true },
   { slug: 'always-free', title: 'Permanently free LLM APIs', filter: (p) => p.free_type === 'perpetual' },
   { slug: 'multimodal', title: 'Free multimodal AI APIs', filter: (p) => (p.modalities || []).some((m) => m !== 'text') },
+  { slug: 'renewing-free-tier', title: 'Free LLM APIs · renewing allowance', filter: (p) => p.free_type === 'renewing-quota' || p.free_type === 'recurring-credit' },
+  { slug: 'free-signup-credit', title: 'Free LLM APIs · signup credit', filter: (p) => p.free_type === 'trial-credit' && p.verified },
 ];
 
 // Guides and the model index share the same OG template. Keep filters in sync
@@ -38,6 +40,8 @@ export const GUIDES = [
   { slug: 'free-embeddings-apis', title: 'Free embeddings APIs for RAG', filter: (p) => (p.modalities || []).includes('embeddings') },
   { slug: 'free-speech-to-text-apis', title: 'Free speech APIs · STT & TTS', filter: (p) => (p.modalities || []).includes('audio') },
   { slug: 'free-image-generation-apis', title: 'Free image generation APIs', filter: (p) => (p.modalities || []).includes('image') },
+  { slug: 'free-reranking-apis', title: 'Free reranking APIs for RAG', filter: (p) => (p.modalities || []).includes('rerank') && p.verified },
+  { slug: 'free-vision-apis', title: 'Free vision APIs · image understanding', filter: (p) => (p.modalities || []).includes('vision') && p.verified },
   { slug: 'free-ocr-document-ai-apis', title: 'Free OCR & document AI APIs', filter: (p) => (p.modalities || []).includes('ocr') },
 ];
 

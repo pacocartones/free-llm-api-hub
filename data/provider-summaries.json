@@ -1,0 +1,1747 @@
+{
+  "version": "1",
+  "exceptions": {
+    "modelscope": {
+      "modelscope.ai": "The home page of the service itself on its international address; the docs_url of the record is on modelscope.cn."
+    },
+    "siliconflow": {
+      "siliconflow.com": "The company's own site, its home page and About page; the docs_url of the record is on siliconflow.cn."
+    },
+    "speechify": {
+      "speechify.com": "The company's own About page, which names Speechify Inc; the docs_url of the record is on speechify.ai."
+    },
+    "pollinations": {
+      "github.com": "The project's own repository, pollinations/pollinations, which is where this open-source service is published."
+    },
+    "voicegain": {
+      "raw.githubusercontent.com": "The Terms of Service file of the provider's own repository, voicegain/platform, pinned to a commit."
+    },
+    "voyage-ai": {
+      "mongodb.com": "The press release of MongoDB, the owner, announcing the acquisition of Voyage AI: the statement of the owner itself."
+    },
+    "zai-glm": {
+      "zhipuai.cn": "The site of Zhipu, the company that owns the product, which lists Z.ai among its products."
+    }
+  },
+  "summaries": [
+    {
+      "id": "ai-horde",
+      "what": "A free, community-run distributed cluster where volunteers share their computers to generate images and text.",
+      "good_for": "Generating images and text through a free REST API used by independent front ends, bots and integrations.",
+      "operator": "Haidra, a volunteer-run non-profit association (ASBL).",
+      "owner": "",
+      "origin": "Luxembourg",
+      "sources": [
+        {
+          "url": "https://aihorde.net/",
+          "fetched_at": "2026-10-19T19:00:46Z",
+          "supports": [
+            "what",
+            "good_for",
+            "operator"
+          ]
+        },
+        {
+          "url": "https://aihorde.net/mission",
+          "fetched_at": "2026-10-19T19:01:01Z",
+          "supports": [
+            "what",
+            "good_for",
+            "operator",
+            "origin"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ai21",
+      "what": "A platform offering AI21's foundation models (such as Jamba) through a REST API, Python SDK, playground and major cloud providers.",
+      "good_for": "Long-document question answering, retrieval-augmented generation, classification and chat with AI21 models.",
+      "operator": "AI21 Labs Ltd.",
+      "owner": "",
+      "origin": "Tel Aviv, Israel",
+      "sources": [
+        {
+          "url": "https://docs.ai21.com/docs/usage-cost",
+          "fetched_at": "2026-10-19T19:00:46Z",
+          "supports": [
+            "what"
+          ]
+        },
+        {
+          "url": "https://docs.ai21.com/docs/overview",
+          "fetched_at": "2026-10-19T19:01:49Z",
+          "supports": [
+            "what",
+            "good_for"
+          ]
+        },
+        {
+          "url": "https://www.ai21.com/terms-of-service/",
+          "fetched_at": "2026-10-19T19:01:16Z",
+          "supports": [
+            "operator"
+          ]
+        },
+        {
+          "url": "https://www.ai21.com/terms-policies/privacy-policy/",
+          "fetched_at": "2026-10-19T19:01:16Z",
+          "supports": [
+            "operator",
+            "origin"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "alibaba-model-studio",
+      "what": "Alibaba Cloud's one-stop model service platform offering Qwen and third-party LLMs via Qwen and OpenAI-compatible APIs.",
+      "good_for": "Calling Qwen and other LLMs from code, including migrating existing OpenAI code by changing key, base URL and model.",
+      "operator": "Alibaba Cloud (Singapore) Private Limited by default, or a regional Alibaba Cloud entity depending on billing address.",
+      "owner": "",
+      "origin": "",
+      "sources": [
+        {
+          "url": "https://www.alibabacloud.com/help/en/model-studio/new-free-quota",
+          "fetched_at": "2026-10-19T19:00:46Z",
+          "supports": [
+            "what"
+          ]
+        },
+        {
+          "url": "https://www.alibabacloud.com/help/en/model-studio/what-is-model-studio",
+          "fetched_at": "2026-10-19T19:01:01Z",
+          "supports": [
+            "what",
+            "good_for"
+          ]
+        },
+        {
+          "url": "https://www.alibabacloud.com/help/en/legal/latest/alibaba-cloud-international-website-membership-agreement",
+          "fetched_at": "2026-10-19T19:02:01Z",
+          "supports": [
+            "operator"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "arli-ai",
+      "what": "An AI inference platform providing LLM and image-generation API endpoints on monthly plans.",
+      "good_for": "Running open LLMs through an OpenAI-compatible API from chat/roleplay frontends and coding agents.",
+      "operator": "Arli AI",
+      "owner": "",
+      "origin": "",
+      "sources": [
+        {
+          "url": "https://www.arliai.com/",
+          "fetched_at": "2026-10-19T19:01:37Z",
+          "supports": [
+            "what",
+            "good_for"
+          ]
+        },
+        {
+          "url": "https://www.arliai.com/pricing",
+          "fetched_at": "2026-10-19T19:00:46Z",
+          "supports": [
+            "what"
+          ]
+        },
+        {
+          "url": "https://www.arliai.com/terms",
+          "fetched_at": "2026-10-19T19:01:01Z",
+          "supports": [
+            "what",
+            "operator"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "assemblyai",
+      "what": "A hosted Voice AI API offering pre-recorded and streaming speech-to-text, voice agent orchestration and LLM access.",
+      "good_for": "Transcribing recorded or live audio and video, and building voice agents.",
+      "operator": "AssemblyAI, Inc.",
+      "owner": "",
+      "origin": "",
+      "sources": [
+        {
+          "url": "https://www.assemblyai.com/docs",
+          "fetched_at": "2026-10-19T19:01:38Z",
+          "supports": [
+            "what",
+            "good_for"
+          ]
+        },
+        {
+          "url": "https://www.assemblyai.com/legal/terms-of-service",
+          "fetched_at": "2026-10-19T19:01:38Z",
+          "supports": [
+            "operator"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "baseten",
+      "what": "A hosted inference platform for running AI models in production.",
+      "good_for": "Deploying custom, fine-tuned and open-source models, calling hosted model APIs, and running training jobs.",
+      "operator": "Baseten Labs, Inc.",
+      "owner": "",
+      "origin": "",
+      "sources": [
+        {
+          "url": "https://www.baseten.co/pricing/",
+          "fetched_at": "2026-10-19T19:00:53Z",
+          "supports": [
+            "what",
+            "good_for"
+          ]
+        },
+        {
+          "url": "https://www.baseten.co/terms-and-conditions/",
+          "fetched_at": "2026-10-19T19:01:38Z",
+          "supports": [
+            "operator"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "camb-ai",
+      "what": "A platform and API for AI audio: text-to-speech, dubbing, translation and transcription.",
+      "good_for": "Building voice AI with the MARS text-to-speech API, plus dubbing, translation and transcription APIs.",
+      "operator": "ENTO.AI FZ-LLC",
+      "owner": "",
+      "origin": "",
+      "sources": [
+        {
+          "url": "https://www.camb.ai/pricing",
+          "fetched_at": "2026-10-19T19:00:53Z",
+          "supports": [
+            "what",
+            "good_for"
+          ]
+        },
+        {
+          "url": "https://www.camb.ai/terms-conditions",
+          "fetched_at": "2026-10-19T19:01:38Z",
+          "supports": [
+            "operator"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cartesia",
+      "what": "An API for real-time voice models: text-to-speech, speech-to-text and voice agents.",
+      "good_for": "Streaming low-latency speech synthesis, real-time transcription, voice cloning and building voice agents.",
+      "operator": "Cartesia AI, Inc.",
+      "owner": "",
+      "origin": "",
+      "sources": [
+        {
+          "url": "https://docs.cartesia.ai/get-started/overview",
+          "fetched_at": "2026-10-19T19:01:38Z",
+          "supports": [
+            "what",
+            "good_for"
+          ]
+        },
+        {
+          "url": "https://www.cartesia.ai/legal/terms",
+          "fetched_at": "2026-10-19T19:01:38Z",
+          "supports": [
+            "operator"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cerebras",
+      "what": "A hosted inference API (Cerebras Inference) for running AI models, designed to be mostly compatible with OpenAI's client libraries.",
+      "good_for": "Real-time AI responses for coding, reasoning, voice and agentic workloads.",
+      "operator": "Cerebras Systems Inc.",
+      "owner": "",
+      "origin": "",
+      "sources": [
+        {
+          "url": "https://inference-docs.cerebras.ai/",
+          "fetched_at": "2026-10-19T19:01:11Z",
+          "supports": [
+            "what",
+            "good_for"
+          ]
+        },
+        {
+          "url": "https://www.cerebras.ai/terms-of-service",
+          "fetched_at": "2026-10-19T19:01:11Z",
+          "supports": [
+            "operator"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cloudflare-workers-ai",
+      "what": "A serverless service for running machine learning models on GPUs on Cloudflare's global network.",
+      "good_for": "Calling hosted open-source models from your own code for tasks such as text generation, image classification and object detection.",
+      "operator": "Cloudflare, Inc.",
+      "owner": "",
+      "origin": "San Francisco, California, United States",
+      "sources": [
+        {
+          "url": "https://developers.cloudflare.com/workers-ai/",
+          "fetched_at": "2026-10-19T19:01:11Z",
+          "supports": [
+            "what",
+            "good_for"
+          ]
+        },
+        {
+          "url": "https://www.cloudflare.com/terms/",
+          "fetched_at": "2026-10-19T19:05:40Z",
+          "supports": [
+            "operator",
+            "origin"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cohere",
+      "what": "A hosted API offering large language models such as Command, Rerank and Embed.",
+      "good_for": "Building LLM-powered applications such as conversational agents, search, classification and RAG.",
+      "operator": "Cohere Inc.",
+      "owner": "",
+      "origin": "Canada",
+      "sources": [
+        {
+          "url": "https://docs.cohere.com/docs/the-cohere-platform",
+          "fetched_at": "2026-10-19T19:05:40Z",
+          "supports": [
+            "what",
+            "good_for"
+          ]
+        },
+        {
+          "url": "https://cohere.com/terms-of-use",
+          "fetched_at": "2026-10-19T19:01:11Z",
+          "supports": [
+            "operator"
+          ]
+        },
+        {
+          "url": "https://cohere.com/privacy",
+          "fetched_at": "2026-10-19T19:05:40Z",
+          "supports": [
+            "origin"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "contextual-ai",
+      "what": "A context layer platform for building AI agents that reason over technical documents and institutional knowledge.",
+      "good_for": "Automating responses to technical inquiries, diagnosing errors in large log files, producing IP and compliance research reports, enterprise knowledge search, and extracting structured data from large document sets.",
+      "operator": "Contextual AI",
+      "owner": "",
+      "origin": "",
+      "sources": [
+        {
+          "url": "https://contextual.ai/",
+          "fetched_at": "2026-10-19",
+          "supports": [
+            "what",
+            "good_for",
+            "operator"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "datalab",
+      "what": "A document intelligence service with models and a platform for parsing, extracting, segmenting and evaluating documents.",
+      "good_for": "Training data pipelines, RAG indexing, audit and compliance, and agentic workflows.",
+      "operator": "Datalab, an applied document intelligence R&D lab",
+      "owner": "",
+      "origin": "Manhattan, NY",
+      "sources": [
+        {
+          "url": "https://www.datalab.to/",
+          "fetched_at": "2026-10-19",
+          "supports": [
+            "what",
+            "good_for",
+            "operator",
+            "origin"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "deepgram",
+      "what": "A voice AI company offering speech-to-text, text-to-speech, audio intelligence and a voice agent API.",
+      "good_for": "Contact centers, speech analytics, conversational AI and medical transcription.",
+      "operator": "Deepgram, Inc.",
+      "owner": "",
+      "origin": "Founded in 2015",
+      "sources": [
+        {
+          "url": "https://deepgram.com/about",
+          "fetched_at": "2026-10-19",
+          "supports": [
+            "what",
+            "good_for",
+            "origin"
+          ]
+        },
+        {
+          "url": "https://deepgram.com/terms",
+          "fetched_at": "2026-10-19",
+          "supports": [
+            "operator"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "elevenlabs",
+      "what": "An AI research and product company focused on voice and audio technology.",
+      "good_for": "Voice and chat agents for customer support and sales (ElevenAgents), generating and editing speech, music and video (ElevenCreative), and adding voice to products through an API (ElevenAPI).",
+      "operator": "Eleven Labs Inc.",
+      "owner": "",
+      "origin": "",
+      "sources": [
+        {
+          "url": "https://elevenlabs.io/about",
+          "fetched_at": "2026-10-19",
+          "supports": [
+            "what",
+            "good_for"
+          ]
+        },
+        {
+          "url": "https://elevenlabs.io/terms-of-use",
+          "fetched_at": "2026-10-19",
+          "supports": [
+            "operator"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "fireworks-ai",
+      "what": "A platform for training and serving open models.",
+      "good_for": "Training, inference (serverless, on-demand and reserved deployments) and routing across open and closed models.",
+      "operator": "Fireworks AI, Inc.",
+      "owner": "",
+      "origin": "",
+      "sources": [
+        {
+          "url": "https://fireworks.ai/",
+          "fetched_at": "2026-10-19",
+          "supports": [
+            "what",
+            "good_for",
+            "operator"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "fish-audio",
+      "what": "An AI text-to-speech and voice cloning platform.",
+      "good_for": "Video voiceovers, audiobook narration, character voices, conversational chatbots and avatar lipsync.",
+      "operator": "Hanabi AI Inc., a Delaware corporation",
+      "owner": "",
+      "origin": "",
+      "sources": [
+        {
+          "url": "https://fish.audio/",
+          "fetched_at": "2026-10-19",
+          "supports": [
+            "what",
+            "good_for"
+          ]
+        },
+        {
+          "url": "https://fish.audio/terms/",
+          "fetched_at": "2026-10-19",
+          "supports": [
+            "operator"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "gladia",
+      "what": "Audio infrastructure to record, transcribe and enrich audio through a single API.",
+      "good_for": "Multilingual transcription with built-in audio intelligence (speaker diarization, sentiment analysis, named entity recognition, summaries) for meeting assistants, CCaaS, voice agents, and content and media.",
+      "operator": "Gladia",
+      "owner": "",
+      "origin": "Headquartered in the EU (city and country not stated)",
+      "sources": [
+        {
+          "url": "https://www.gladia.io/",
+          "fetched_at": "2026-10-19",
+          "supports": [
+            "what",
+            "good_for",
+            "operator",
+            "origin"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "google-gemini",
+      "what": "The Gemini API, for integrating Gemini generative models into applications.",
+      "good_for": "Generating text and images, analysing multimodal inputs and building conversational agents.",
+      "operator": "Google",
+      "owner": "",
+      "origin": "",
+      "sources": [
+        {
+          "url": "https://ai.google.dev/gemini-api/docs",
+          "fetched_at": "2026-10-19",
+          "supports": [
+            "what",
+            "good_for",
+            "operator"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "groq",
+      "what": "A cloud service for fast AI inference; the page calls Groq the premier neocloud for fast inference and says it pioneered the LPU.",
+      "good_for": "Running AI inference at scale; the page says Groq makes inference work at scale.",
+      "operator": "Groq LLC",
+      "owner": "",
+      "origin": "",
+      "sources": [
+        {
+          "url": "https://groq.com/",
+          "fetched_at": "2026-10-19T23:53Z",
+          "supports": [
+            "what",
+            "good_for"
+          ]
+        },
+        {
+          "url": "https://groq.com/terms-of-use",
+          "fetched_at": "2026-10-19",
+          "supports": [
+            "operator"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "huggingface",
+      "what": "An AI community platform hosting models, datasets, Spaces and inference services.",
+      "good_for": "Sharing and using machine learning models, datasets and apps; its stated mission is to democratize good machine learning, one commit at a time.",
+      "operator": "Hugging Face, Inc., a Delaware corporation",
+      "owner": "",
+      "origin": "",
+      "sources": [
+        {
+          "url": "https://huggingface.co/huggingface",
+          "fetched_at": "2026-10-19",
+          "supports": [
+            "what",
+            "good_for"
+          ]
+        },
+        {
+          "url": "https://huggingface.co/terms-of-service",
+          "fetched_at": "2026-10-19",
+          "supports": [
+            "operator"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "hume-ai",
+      "what": "Data, speech models, evaluation frameworks and human preference pipelines for emotionally aware voice AI.",
+      "good_for": "Teams building foundation models, fine-tuning voice agents or evaluating production voice systems.",
+      "operator": "Hume AI, Inc.",
+      "owner": "",
+      "origin": "",
+      "sources": [
+        {
+          "url": "https://www.hume.ai/about",
+          "fetched_at": "2026-10-19",
+          "supports": [
+            "what",
+            "good_for",
+            "operator"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ibm-watsonx",
+      "what": "IBM's AI platform for AI-powered insights and governed data.",
+      "good_for": "Building AI applications in a developer studio, managing and integrating data, deploying AI assistants and agents, and governing AI risk.",
+      "operator": "IBM",
+      "owner": "",
+      "origin": "",
+      "sources": [
+        {
+          "url": "https://www.ibm.com/products/watsonx",
+          "fetched_at": "2026-10-19",
+          "supports": [
+            "what",
+            "good_for",
+            "operator"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "jina-ai",
+      "what": "Search AI company that provides embeddings, rerankers, readers and small language models.",
+      "good_for": "Building search applications that return relevant, grounded, multimodal and multilingual results.",
+      "operator": "Jina AI GmbH, Prinzessinnenstraße 19-20, 10969 Berlin, Germany",
+      "owner": "Elastic N.V. (acquired Jina AI GmbH on 9 October 2025)",
+      "origin": "Berlin, Germany; founded in 2020 by Han Xiao",
+      "sources": [
+        {
+          "url": "https://jina.ai/about-us/",
+          "fetched_at": "2026-10-19T19:02Z",
+          "supports": [
+            "what",
+            "good_for",
+            "owner",
+            "origin"
+          ]
+        },
+        {
+          "url": "https://jina.ai/legal",
+          "fetched_at": "2026-10-19T19:03Z",
+          "supports": [
+            "operator",
+            "owner",
+            "origin"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "llamaparse",
+      "what": "AI parsing tool that turns complex layouts, tables, charts, handwriting, checkboxes and images into clean markdown.",
+      "good_for": "Parsing and extracting complex documents (PDFs, spreadsheets, images) into AI-ready data; the page says it is designed for developers.",
+      "operator": "LlamaIndex, Inc.",
+      "owner": "",
+      "origin": "",
+      "sources": [
+        {
+          "url": "https://www.llamaindex.ai/llamaparse",
+          "fetched_at": "2026-10-19",
+          "supports": [
+            "what",
+            "good_for"
+          ]
+        },
+        {
+          "url": "https://www.llamaindex.ai/legal/terms-of-service",
+          "fetched_at": "2026-10-19T19:03Z",
+          "supports": [
+            "operator"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "mistral",
+      "what": "Frontier open-weight models you own and control; the company says its mission is to make frontier AI open to all.",
+      "good_for": "Customizing models with Forge, deploying with Studio, and running on-prem, in your VPC or on Mistral's cloud.",
+      "operator": "Mistral AI (the pages show \"© 2026 Mistral AI\"; legal form not stated there)",
+      "owner": "",
+      "origin": "",
+      "sources": [
+        {
+          "url": "https://mistral.ai/",
+          "fetched_at": "2026-10-19",
+          "supports": [
+            "what",
+            "good_for"
+          ]
+        },
+        {
+          "url": "https://mistral.ai/about/",
+          "fetched_at": "2026-10-19T19:01Z",
+          "supports": [
+            "what"
+          ]
+        },
+        {
+          "url": "https://legal.mistral.ai/terms/get-started/",
+          "fetched_at": "2026-10-19T19:01Z",
+          "supports": [
+            "operator"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "mixedbread",
+      "what": "Turns PDFs, decks, videos, code, Slack and Drive into evidence an agent can act on, with fewer tokens.",
+      "good_for": "Making agents work on your own data: search over documents, code, video and podcast archives, agent memory and RAG.",
+      "operator": "mixedbread ai inc.",
+      "owner": "",
+      "origin": "San Francisco",
+      "sources": [
+        {
+          "url": "https://www.mixedbread.com/",
+          "fetched_at": "2026-10-19T19:01Z",
+          "supports": [
+            "what",
+            "good_for",
+            "operator"
+          ]
+        },
+        {
+          "url": "https://www.mixedbread.com/careers",
+          "fetched_at": "2026-10-19T23:53Z",
+          "supports": [
+            "origin"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "modal",
+      "what": "Cloud infrastructure for teams that develop, train and serve AI applications at scale.",
+      "good_for": "Teams that develop, train and serve AI applications at scale.",
+      "operator": "Modal Labs, Inc., a Delaware corporation",
+      "owner": "",
+      "origin": "",
+      "sources": [
+        {
+          "url": "https://modal.com/",
+          "fetched_at": "2026-10-19",
+          "supports": [
+            "what",
+            "good_for"
+          ]
+        },
+        {
+          "url": "https://modal.com/legal/terms",
+          "fetched_at": "2026-10-19T19:01Z",
+          "supports": [
+            "operator"
+          ]
+        },
+        {
+          "url": "https://modal.com/company",
+          "fetched_at": "2026-10-19T19:01Z",
+          "supports": [
+            "operator"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "modelscope",
+      "what": "An open-source model community offering models, datasets and interactive demos in one place.",
+      "good_for": "",
+      "operator": "",
+      "owner": "",
+      "origin": "",
+      "sources": [
+        {
+          "url": "https://modelscope.ai/home",
+          "fetched_at": "2026-10-19T19:02Z",
+          "supports": [
+            "what"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "moondream",
+      "what": "A production vision language model.",
+      "good_for": "Building, fine-tuning and deploying visual AI that works on real-world edge cases.",
+      "operator": "M87 Labs, Inc.",
+      "owner": "",
+      "origin": "Seattle, WA, USA (notice address in its terms; the footer says \"Proudly built in the USA\")",
+      "sources": [
+        {
+          "url": "https://moondream.ai/",
+          "fetched_at": "2026-10-19",
+          "supports": [
+            "what",
+            "good_for",
+            "operator"
+          ]
+        },
+        {
+          "url": "https://moondream.ai/terms",
+          "fetched_at": "2026-10-19T19:03Z",
+          "supports": [
+            "operator",
+            "origin"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "nanonets",
+      "what": "Automates messy manual processes, including accounts payable, claims processing and order management, and delivers clean data to systems of record.",
+      "good_for": "Enterprises that need clean data in systems of record such as SAP and Salesforce; the page says it is trusted by 10,000+ enterprises.",
+      "operator": "Nano Net Technologies Inc.",
+      "owner": "",
+      "origin": "",
+      "sources": [
+        {
+          "url": "https://nanonets.com/",
+          "fetched_at": "2026-10-19T19:03Z",
+          "supports": [
+            "what",
+            "good_for"
+          ]
+        },
+        {
+          "url": "https://legal.nanonets.com/terms",
+          "fetched_at": "2026-10-19T19:02Z",
+          "supports": [
+            "operator"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "nebius",
+      "what": "A purpose-built AI cloud, engineered from silicon to API.",
+      "good_for": "Building and scaling AI workloads faster.",
+      "operator": "Nebius B.V.",
+      "owner": "",
+      "origin": "Amsterdam (the company page says it is headquartered there and listed on Nasdaq as NBIS)",
+      "sources": [
+        {
+          "url": "https://nebius.com/",
+          "fetched_at": "2026-10-19T19:02Z",
+          "supports": [
+            "what",
+            "good_for",
+            "operator"
+          ]
+        },
+        {
+          "url": "https://nebius.com/about",
+          "fetched_at": "2026-10-19T19:02Z",
+          "supports": [
+            "operator",
+            "origin"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "nlpcloud",
+      "what": "An AI platform for natural language processing tasks such as NER, sentiment analysis, text classification, summarization, question answering, text generation and translation.",
+      "good_for": "Doing natural language processing in your own applications through an API.",
+      "operator": "Alpine Connection LLC",
+      "owner": "",
+      "origin": "New York, NY, USA (mailing address in its privacy policy)",
+      "sources": [
+        {
+          "url": "https://nlpcloud.com/",
+          "fetched_at": "2026-10-19T19:56Z",
+          "supports": [
+            "what",
+            "good_for"
+          ]
+        },
+        {
+          "url": "https://nlpcloud.com/privacy.html",
+          "fetched_at": "2026-10-19T19:56Z",
+          "supports": [
+            "operator",
+            "origin"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "novita",
+      "what": "Provides 200+ model APIs, custom deployment, GPU instances and serverless GPUs.",
+      "good_for": "Accessing 200+ AI models with one API and launching agent sandboxes and GPU instances; the page says it is built for developers and priced for startups.",
+      "operator": "",
+      "owner": "",
+      "origin": "",
+      "sources": [
+        {
+          "url": "https://novita.ai/",
+          "fetched_at": "2026-10-19T19:02Z",
+          "supports": [
+            "what",
+            "good_for"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "nutrient",
+      "what": "Turns knowledge trapped in documents into action with AI data extraction, document tools and controls for agentic workflows.",
+      "good_for": "Extracting data from documents and running document workflows.",
+      "operator": "PSPDFKit GmbH (named as the data controller for the Nutrient API)",
+      "owner": "",
+      "origin": "Vienna, Austria (the controller's address in its privacy policy)",
+      "sources": [
+        {
+          "url": "https://www.nutrient.io/",
+          "fetched_at": "2026-10-19T19:02Z",
+          "supports": [
+            "what",
+            "good_for"
+          ]
+        },
+        {
+          "url": "https://www.nutrient.io/legal/privacy/",
+          "fetched_at": "2026-10-19T19:02Z",
+          "supports": [
+            "operator",
+            "origin"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "nvidia-nim",
+      "what": "NVIDIA NIM are microservices that accelerate the deployment of foundation models on any cloud or data center; build.nvidia.com offers NIM APIs to try, with free inference on leading models.",
+      "good_for": "Trying leading models through NVIDIA NIM APIs, with free inference, to build generative AI apps.",
+      "operator": "NVIDIA Corporation",
+      "owner": "",
+      "origin": "",
+      "sources": [
+        {
+          "url": "https://build.nvidia.com/",
+          "fetched_at": "2026-10-19T23:53Z",
+          "supports": [
+            "what",
+            "good_for",
+            "operator"
+          ]
+        },
+        {
+          "url": "https://docs.nvidia.com/nim/",
+          "fetched_at": "2026-10-19T19:01:58Z",
+          "supports": [
+            "what"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ocr-space",
+      "what": "OCR.space is a service offering a free OCR API and online OCR: the API parses images and multi-page PDFs and returns the extracted text as JSON.",
+      "good_for": "Converting images and PDFs to text over an API.",
+      "operator": "a9t9 software GmbH",
+      "owner": "a9t9 software GmbH",
+      "origin": "Germany (office in Heidelberg; postal address in Walldorf)",
+      "sources": [
+        {
+          "url": "https://ocr.space/ocrapi",
+          "fetched_at": "2026-10-19T19:01:37Z",
+          "supports": [
+            "what",
+            "good_for"
+          ]
+        },
+        {
+          "url": "https://ocr.space/about",
+          "fetched_at": "2026-10-19T19:01:39Z",
+          "supports": [
+            "operator",
+            "owner",
+            "origin"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ollama-cloud",
+      "what": "Ollama Cloud lets you run models in Ollama's cloud from your apps or terminal, with no model or app download required.",
+      "good_for": "Using cloud models from apps, the terminal, coding agents through a launch command, or the API.",
+      "operator": "Ollama Inc.",
+      "owner": "",
+      "origin": "",
+      "sources": [
+        {
+          "url": "https://docs.ollama.com/cloud",
+          "fetched_at": "2026-10-19T23:53Z",
+          "supports": [
+            "what",
+            "good_for"
+          ]
+        },
+        {
+          "url": "https://ollama.com/terms",
+          "fetched_at": "2026-10-19T19:01:44Z",
+          "supports": [
+            "operator"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "openrouter",
+      "what": "OpenRouter is an AI gateway and LLM marketplace that started in early 2023, with 80+ providers and 500+ models behind one interface.",
+      "good_for": "Reaching many providers' models through one API and avoiding vendor lock-in.",
+      "operator": "OpenRouter, Inc.",
+      "owner": "",
+      "origin": "Started in early 2023",
+      "sources": [
+        {
+          "url": "https://openrouter.ai/about",
+          "fetched_at": "2026-10-19T19:01:31Z",
+          "supports": [
+            "what",
+            "good_for",
+            "origin"
+          ]
+        },
+        {
+          "url": "https://openrouter.ai/terms",
+          "fetched_at": "2026-10-19T19:01:32Z",
+          "supports": [
+            "operator"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ovhcloud-ai-endpoints",
+      "what": "OVHcloud AI Endpoints offers serverless AI model usage via API, with a model catalogue that can be tried for free.",
+      "good_for": "Calling open AI models over an API hosted by a European cloud provider, with a free sandbox playground.",
+      "operator": "OVH SAS (OVHcloud)",
+      "owner": "",
+      "origin": "France; founded in 1999",
+      "sources": [
+        {
+          "url": "https://www.ovhcloud.com/en/public-cloud/ai-endpoints/",
+          "fetched_at": "2026-10-19T19:01:49Z",
+          "supports": [
+            "what",
+            "good_for"
+          ]
+        },
+        {
+          "url": "https://www.ovhcloud.com/en/about-us/",
+          "fetched_at": "2026-10-19T19:01:50Z",
+          "supports": [
+            "operator",
+            "origin"
+          ]
+        },
+        {
+          "url": "https://www.ovhcloud.com/en/terms-and-conditions/",
+          "fetched_at": "2026-10-19T23:53Z",
+          "supports": [
+            "operator"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "photoroom",
+      "what": "Photoroom is a visual-editing product whose Background Remover API removes or replaces image backgrounds at scale; its mission is to give e-commerce businesses superpowers to create visuals.",
+      "good_for": "Cleaning up and producing product images for e-commerce, programmatically.",
+      "operator": "Photoroom SAS",
+      "owner": "",
+      "origin": "Paris, France",
+      "sources": [
+        {
+          "url": "https://www.photoroom.com/api",
+          "fetched_at": "2026-10-19T19:02:02Z",
+          "supports": [
+            "what",
+            "good_for"
+          ]
+        },
+        {
+          "url": "https://www.photoroom.com/about",
+          "fetched_at": "2026-10-19T19:02:00Z",
+          "supports": [
+            "what",
+            "origin"
+          ]
+        },
+        {
+          "url": "https://www.photoroom.com/legal/terms-and-conditions",
+          "fetched_at": "2026-10-19T19:02:03Z",
+          "supports": [
+            "operator",
+            "origin"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pinecone-inference",
+      "what": "Pinecone is a fully managed vector database built for AI; its Inference offers embedding and reranking models hosted by Pinecone.",
+      "good_for": "Using embedding and reranking models hosted by Pinecone, so you do not run them yourself.",
+      "operator": "Pinecone Systems, Inc.",
+      "owner": "",
+      "origin": "San Francisco, CA",
+      "sources": [
+        {
+          "url": "https://www.pinecone.io/",
+          "fetched_at": "2026-10-19T19:02:07Z",
+          "supports": [
+            "what",
+            "operator",
+            "origin"
+          ]
+        },
+        {
+          "url": "https://docs.pinecone.io/models/overview",
+          "fetched_at": "2026-10-19T23:53Z",
+          "supports": [
+            "what",
+            "good_for"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pollinations",
+      "what": "pollinations.ai is an open-source generative AI platform with APIs for text, image, video, audio, 3D and embeddings generation, powering 500+ community projects.",
+      "good_for": "Prototyping with an open, multi-modal generative API.",
+      "operator": "",
+      "owner": "",
+      "origin": "Berlin",
+      "sources": [
+        {
+          "url": "https://github.com/pollinations/pollinations",
+          "fetched_at": "2026-10-19T19:05:53Z",
+          "supports": [
+            "what",
+            "good_for",
+            "origin"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "poolside",
+      "what": "Poolside builds open-weight agentic coding models (Laguna xs 2.1 and Laguna s 2.1); its page links to using them on OpenRouter and Vercel AI Gateway.",
+      "good_for": "Coding assistance and agentic coding workflows with Poolside's own models.",
+      "operator": "",
+      "owner": "",
+      "origin": "San Francisco; founded in April 2023",
+      "sources": [
+        {
+          "url": "https://poolside.ai/",
+          "fetched_at": "2026-10-19T19:02:19Z",
+          "supports": [
+            "what",
+            "good_for"
+          ]
+        },
+        {
+          "url": "https://poolside.ai/research",
+          "fetched_at": "2026-10-19T19:05:53Z",
+          "supports": [
+            "origin"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "retell-ai",
+      "what": "Retell AI is a platform to build, deploy and manage AI voice agents that automate phone calls.",
+      "good_for": "Building voice agents that answer and place phone calls.",
+      "operator": "Retell AI Inc.",
+      "owner": "",
+      "origin": "",
+      "sources": [
+        {
+          "url": "https://www.retellai.com/",
+          "fetched_at": "2026-10-19T19:02:25Z",
+          "supports": [
+            "what",
+            "good_for"
+          ]
+        },
+        {
+          "url": "https://www.retellai.com/legal/terms-of-service",
+          "fetched_at": "2026-10-19T19:02:30Z",
+          "supports": [
+            "operator"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "rev-ai",
+      "what": "Rev AI is a speech-to-text API with async and streaming transcription, plus topic extraction, sentiment analysis and language identification.",
+      "good_for": "Transcribing recorded or live audio in 57+ languages; new accounts get free credits equivalent to 5 hours of Reverb ASR.",
+      "operator": "Rev",
+      "owner": "",
+      "origin": "",
+      "sources": [
+        {
+          "url": "https://www.rev.ai/",
+          "fetched_at": "2026-10-19T19:02:31Z",
+          "supports": [
+            "what",
+            "good_for",
+            "operator"
+          ]
+        },
+        {
+          "url": "https://www.rev.ai/pricing",
+          "fetched_at": "2026-10-19T19:02:34Z",
+          "supports": [
+            "good_for"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "rime",
+      "what": "Rime makes voice models (text-to-speech) designed for human conversation, for enterprise use and the voice agents of its customers.",
+      "good_for": "Low-latency conversational speech for voice agents and calls, with a developer API and docs.",
+      "operator": "Rime Labs",
+      "owner": "",
+      "origin": "",
+      "sources": [
+        {
+          "url": "https://www.rime.ai/",
+          "fetched_at": "2026-10-19T19:02:38Z",
+          "supports": [
+            "what",
+            "good_for",
+            "operator"
+          ]
+        },
+        {
+          "url": "https://docs.rime.ai/",
+          "fetched_at": "2026-10-19T19:02:44Z",
+          "supports": [
+            "good_for"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "runware",
+      "what": "Inference platform with on-demand model APIs, serverless compute for your own code and dedicated capacity.",
+      "good_for": "Running AI inference at low cost; image, video, audio, 3D and LLMs behind one API (page description).",
+      "operator": "",
+      "owner": "",
+      "origin": "Founded 2023 by Flaviu Rădulescu and Ioana Hreninciuc; the page places its origin in a London flat.",
+      "sources": [
+        {
+          "url": "https://runware.ai/about",
+          "fetched_at": "2026-10-19T19:02:22Z",
+          "supports": [
+            "what",
+            "good_for",
+            "origin"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sambanova",
+      "what": "Designs its own RDU chips, racks and software and delivers them as an inference platform for neocloud operators and enterprises to run in their own data centers.",
+      "good_for": "Running large AI models fast and efficiently, lowering the cost of inference at scale, sovereign AI.",
+      "operator": "SambaNova, Inc.",
+      "owner": "",
+      "origin": "Founded 2017 in Palo Alto, California by Kunle Olukotun, Christopher Ré and Rodrigo Liang (co-founder and CEO); current headquarters not stated on the page.",
+      "sources": [
+        {
+          "url": "https://sambanova.ai/company/about",
+          "fetched_at": "2026-10-19T19:02:22Z",
+          "supports": [
+            "what",
+            "good_for",
+            "operator",
+            "origin"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sarvam-ai",
+      "what": "Full-stack AI platform: voice, content, document, work and coding agents plus APIs for text-to-speech, speech-to-text, document digitisation, translation and models.",
+      "good_for": "Enterprises, governments, developers and startups building on Indian languages and needs.",
+      "operator": "Axonwise Private Limited",
+      "owner": "",
+      "origin": "Founded August 2023 by Dr. Vivek Raghavan and Dr. Pratyush Kumar; the footer address is in Indiranagar, Bengaluru, Karnataka, India.",
+      "sources": [
+        {
+          "url": "https://www.sarvam.ai/about-us",
+          "fetched_at": "2026-10-19T19:02:22Z",
+          "supports": [
+            "what",
+            "good_for",
+            "operator",
+            "origin"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "scaleway",
+      "what": "Europe's sovereign cloud and AI provider; its Generative APIs let users consume AI models through an API call, hosted in Europe.",
+      "good_for": "Helping organizations of all sizes build and scale, including sensitive industries (public sector, healthcare, financial services).",
+      "operator": "Scaleway SAS",
+      "owner": "A subsidiary of the iliad Group.",
+      "origin": "Operates in France, Poland, Italy and the Netherlands; founding year and headquarters not stated on the page.",
+      "sources": [
+        {
+          "url": "https://www.scaleway.com/en/about-us/",
+          "fetched_at": "2026-10-19T19:02:22Z",
+          "supports": [
+            "what",
+            "good_for",
+            "operator",
+            "owner",
+            "origin"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "siliconflow",
+      "what": "AI infrastructure provider: run, fine-tune and deploy 200+ LLMs and multimodal models through APIs.",
+      "good_for": "Coding help, AI agents, retrieval-augmented generation, content creation, assistants and search (its own marketing copy).",
+      "operator": "",
+      "owner": "",
+      "origin": "",
+      "sources": [
+        {
+          "url": "https://www.siliconflow.com/",
+          "fetched_at": "2026-10-19T19:02:22Z",
+          "supports": [
+            "what",
+            "good_for"
+          ]
+        },
+        {
+          "url": "https://www.siliconflow.com/about",
+          "fetched_at": "2026-10-19T19:02:22Z",
+          "supports": [
+            "what"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "smallest-ai",
+      "what": "Realtime voice AI suite: speech-to-text, text-to-speech, speech-to-speech and voice agents.",
+      "good_for": "Real-time voice agents; text-to-speech at about 100 ms latency across 15+ languages and transcription in 38 languages (its own figures).",
+      "operator": "",
+      "owner": "",
+      "origin": "The footer lists an address in San Francisco, California; legal entity, founders and founding year not stated.",
+      "sources": [
+        {
+          "url": "https://smallest.ai/",
+          "fetched_at": "2026-10-19T19:02:22Z",
+          "supports": [
+            "what",
+            "good_for",
+            "origin"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "speechify",
+      "what": "Text-to-speech product with apps, browser extensions, AI voices, dictation and a text-to-speech API.",
+      "good_for": "Reading aloud PDFs, docs and more; voice typing dictation.",
+      "operator": "Speechify Inc",
+      "owner": "",
+      "origin": "",
+      "sources": [
+        {
+          "url": "https://speechify.com/about/",
+          "fetched_at": "2026-10-19T19:02:22Z",
+          "supports": [
+            "what",
+            "good_for",
+            "operator"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "speechmatics",
+      "what": "Speech API: foundational speech technology that providers can integrate into their own stack.",
+      "good_for": "Speech recognition for companies' own products; the page says its aim is to understand every voice and calls its Speech API the most inclusive and accurate ever released.",
+      "operator": "",
+      "owner": "",
+      "origin": "The page names Dr Tony Robinson, who pioneered neural networks for speech recognition at Cambridge University in the 1980s; headquarters, legal entity and founding year not stated on this page.",
+      "sources": [
+        {
+          "url": "https://www.speechmatics.com/company/about-speechmatics",
+          "fetched_at": "2026-10-19T23:53Z",
+          "supports": [
+            "what",
+            "good_for",
+            "origin"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tencent-hunyuan",
+      "what": "Family of general-purpose and multimodal large models developed in-house by Tencent, covering text, image, video, speech and 3D.",
+      "good_for": "Content creation, knowledge Q&A, dialogue, reasoning, math, agents, coding, image, video and 3D generation, speech recognition and translation.",
+      "operator": "Tencent (Tencent Cloud product page; no legal entity named)",
+      "owner": "",
+      "origin": "Tencent was founded in 1998 and is headquartered in Shenzhen, China.",
+      "sources": [
+        {
+          "url": "https://cloud.tencent.com/product/tclm",
+          "fetched_at": "2026-10-19T19:02:22Z",
+          "supports": [
+            "what",
+            "good_for",
+            "operator"
+          ]
+        },
+        {
+          "url": "https://www.tencent.com/who-we-are/",
+          "fetched_at": "2026-10-19T19:02:22Z",
+          "supports": [
+            "origin"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "twelve-labs",
+      "what": "Video-native multimodal AI: foundation models that help machines see, hear and understand the world.",
+      "good_for": "Media and entertainment, advertising, physical AI, security, sports and broadcasting, government.",
+      "operator": "TwelveLabs, Inc.",
+      "owner": "",
+      "origin": "Offices in San Francisco, Seoul, New York, London and Pangyo; headquarters, founders and founding year not stated on the page.",
+      "sources": [
+        {
+          "url": "https://www.twelvelabs.io/about-us",
+          "fetched_at": "2026-10-19T19:02:22Z",
+          "supports": [
+            "what",
+            "good_for",
+            "operator",
+            "origin"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "typhoon",
+      "what": "Research initiative that releases free, Thai-focused AI models together with datasets and tools.",
+      "good_for": "Thai language understanding and cultural context; multimodal work such as Typhoon Audio and Typhoon Vision.",
+      "operator": "SCB DataX Co., Ltd.",
+      "owner": "The team is described as part of SCB 10X, the venture and innovation arm of SCBX; legal ownership not stated.",
+      "origin": "",
+      "sources": [
+        {
+          "url": "https://opentyphoon.ai/about",
+          "fetched_at": "2026-10-19T19:02:22Z",
+          "supports": [
+            "what",
+            "good_for",
+            "operator",
+            "owner"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "unreal-speech",
+      "what": "Low-cost text-to-speech API with streaming, long-form generation and per-word timestamps.",
+      "good_for": "Real-time apps and fast long-form audio generation.",
+      "operator": "",
+      "owner": "",
+      "origin": "The footer says 'Made with love in SF'; legal entity, founders and founding year not stated.",
+      "sources": [
+        {
+          "url": "https://unrealspeech.com/",
+          "fetched_at": "2026-10-19T19:02:22Z",
+          "supports": [
+            "what",
+            "good_for",
+            "origin"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "unstructured",
+      "what": "Converts documents (PDFs, scans, spreadsheets and 50+ file types, per its own page description) into clean, structured data for RAG and AI agents, through an API or MCP.",
+      "good_for": "Preparing documents for RAG and AI-agent pipelines.",
+      "operator": "Unstructured Technologies, Inc. (named as the operator of the websites www.unstructured.io and docs.unstructured.io in its Website Terms of Use, updated 2026-07-09; the page does not say who operates the API service).",
+      "owner": "",
+      "origin": "",
+      "sources": [
+        {
+          "url": "https://unstructured.io/",
+          "fetched_at": "2026-10-19",
+          "supports": [
+            "what",
+            "good_for"
+          ]
+        },
+        {
+          "url": "https://unstructured.io/terms-and-conditions",
+          "fetched_at": "2026-10-19",
+          "supports": [
+            "operator"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "upstage",
+      "what": "Builds large language models (the Solar family) and document-processing engines (Document Parse, Information Extract), per its own site.",
+      "good_for": "Document parsing and extraction, and Solar LLM use in enterprise workflows (insurance, healthcare, finance among its listed industries).",
+      "operator": "Upstage Co., Ltd. (주식회사 업스테이지), the company named in its Terms of Service and in the footer of upstage.ai.",
+      "owner": "",
+      "origin": "Seoul, South Korea: registered address in Gangnam-gu, Seoul; its About page says the team works remotely with hubs in Seoul, San Francisco and Tokyo.",
+      "sources": [
+        {
+          "url": "https://www.upstage.ai/",
+          "fetched_at": "2026-10-19",
+          "supports": [
+            "what",
+            "good_for",
+            "operator",
+            "origin"
+          ]
+        },
+        {
+          "url": "https://www.upstage.ai/about",
+          "fetched_at": "2026-10-19",
+          "supports": [
+            "what",
+            "origin"
+          ]
+        },
+        {
+          "url": "https://www.upstage.ai/terms-of-service",
+          "fetched_at": "2026-10-19",
+          "supports": [
+            "operator"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "vercel-ai-gateway",
+      "what": "A managed gateway to call AI models from any infrastructure: it centralizes credentials, request logs, spend budgets, routing and provider failover (docs page last updated 2026-09-14).",
+      "good_for": "Routing one application across many model providers with logs, budgets and failover.",
+      "operator": "Vercel Inc., which its Terms of Service name as the provider of Vercel's Services.",
+      "owner": "",
+      "origin": "California, United States (inferred only from the governing law of the State of California and the courts of San Francisco County in its Terms of Service; the page read does not state a headquarters).",
+      "sources": [
+        {
+          "url": "https://vercel.com/docs/ai-gateway",
+          "fetched_at": "2026-10-19",
+          "supports": [
+            "what",
+            "good_for"
+          ]
+        },
+        {
+          "url": "https://vercel.com/legal/terms",
+          "fetched_at": "2026-10-19",
+          "supports": [
+            "operator",
+            "origin"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "veryfi",
+      "what": "Document-data extraction: an OCR API, a mobile capture SDK and tools that turn invoices, bills, purchase orders, checks and receipts into structured data in real time.",
+      "good_for": "Extracting structured data from invoices, receipts and similar business documents (accounts payable, expense management, KYC among its listed use cases).",
+      "operator": "Veryfi (the legal entity is not named on the Terms page I read, which points to sales for a tailored agreement).",
+      "owner": "",
+      "origin": "Headquartered in San Mateo, California, United States, per its About page and the footer of its Terms page.",
+      "sources": [
+        {
+          "url": "https://www.veryfi.com/",
+          "fetched_at": "2026-10-19",
+          "supports": [
+            "what",
+            "good_for"
+          ]
+        },
+        {
+          "url": "https://www.veryfi.com/about/",
+          "fetched_at": "2026-10-19",
+          "supports": [
+            "what",
+            "origin"
+          ]
+        },
+        {
+          "url": "https://www.veryfi.com/terms/",
+          "fetched_at": "2026-10-19",
+          "supports": [
+            "operator",
+            "origin"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "voicegain",
+      "what": "A voice-AI company: its home page says it provides the telephony stack (SIP integration) and voice-AI models (STT, TTS, semantic VAD) to build voice agents, plus ASR for VoiceXML IVR platforms; its products include Casey (healthcare payers) and Clara (ambient listening). Its About page says it owns its models and builds the platform for enterprises, and that it was founded in 2020.",
+      "good_for": "Building production voice agents (STT, TTS, SIP/PSTN calls) and contact-center or healthcare voice AI that the customer controls.",
+      "operator": "Resolvity Inc. is named in the Voicegain SaaS Subscription Agreement (last updated 2025-10-09) as the owner and operator of the SaaS Services; the website footer says only ©2026 Voicegain, and no page I read explains the relationship between the two names.",
+      "owner": "",
+      "origin": "",
+      "sources": [
+        {
+          "url": "https://www.voicegain.ai/",
+          "fetched_at": "2026-10-19",
+          "supports": [
+            "what",
+            "good_for"
+          ]
+        },
+        {
+          "url": "https://www.voicegain.ai/about",
+          "fetched_at": "2026-10-19",
+          "supports": [
+            "what"
+          ]
+        },
+        {
+          "url": "https://raw.githubusercontent.com/voicegain/platform/043da5903d3f7b9e9b664bae99c556a5a0d5a3fb/TERMS-OF-SERVICE.md",
+          "fetched_at": "2026-10-19",
+          "supports": [
+            "operator"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "voyage-ai",
+      "what": "Provides embedding models and rerankers (its documentation introduction).",
+      "good_for": "Search and retrieval for AI applications (RAG), as its home page describes it.",
+      "operator": "Voyage AI Innovations, Inc., named in its Terms of Service (last updated 2026-05-27) as the owner and operator of the Service.",
+      "owner": "MongoDB, Inc., which announced the acquisition of Voyage AI on 2025-02-24; its home page presents it as “Voyage AI by MongoDB”.",
+      "origin": "",
+      "sources": [
+        {
+          "url": "https://docs.voyageai.com/docs/introduction",
+          "fetched_at": "2026-10-19",
+          "supports": [
+            "what"
+          ]
+        },
+        {
+          "url": "https://www.voyageai.com/",
+          "fetched_at": "2026-10-19",
+          "supports": [
+            "good_for",
+            "owner"
+          ]
+        },
+        {
+          "url": "https://www.voyageai.com/tos",
+          "fetched_at": "2026-10-19",
+          "supports": [
+            "operator"
+          ]
+        },
+        {
+          "url": "https://www.mongodb.com/company/newsroom/press-releases/mongodb-announces-acquisition-of-voyage-ai",
+          "fetched_at": "2026-10-19",
+          "supports": [
+            "owner"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "wandb-inference",
+      "what": "Serverless Inference: access to open-source foundation models through an OpenAI-compatible API, without signing up for a hosting provider or self-hosting a model.",
+      "good_for": "Calling open-source LLMs from an OpenAI-compatible client without hosting them.",
+      "operator": "Weights and Biases, LLC, a Delaware limited liability company, named as the contracting party in the W&B Master Service Agreement.",
+      "owner": "CoreWeave: the Weights & Biases site says “Weights & Biases is now part of CoreWeave Forge”, and the inference documentation lives in CoreWeave Docs.",
+      "origin": "Delaware limited liability company with its principal place of business in San Francisco, California, United States (Master Service Agreement).",
+      "sources": [
+        {
+          "url": "https://docs.coreweave.com/products/inference/serverless",
+          "fetched_at": "2026-10-19",
+          "supports": [
+            "what",
+            "good_for"
+          ]
+        },
+        {
+          "url": "https://wandb.ai/site/terms/",
+          "fetched_at": "2026-10-19",
+          "supports": [
+            "operator",
+            "origin"
+          ]
+        },
+        {
+          "url": "https://wandb.ai/site/",
+          "fetched_at": "2026-10-19",
+          "supports": [
+            "owner"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "zai-glm",
+      "what": "The Z.ai developer platform for the GLM family of models (the documentation lists GLM-4.7-Flash and GLM-4.5-Flash as free in its pricing table).",
+      "good_for": "Calling GLM text and vision models through an API, with some Flash models listed as free.",
+      "operator": "JINGSHENG HENGXING TECHNOLOGY PTE.LTD, which its Terms of Use (updated 2026-04-14) and Privacy Policy name as the party providing and controlling the Z.ai services.",
+      "owner": "Z.ai is listed among the products of Beijing Zhipu Huazhang Technology Co., Ltd. (北京智谱华章科技股份有限公司) on zhipuai.cn, whose title is “Z.ai”. No page I read says how JINGSHENG HENGXING TECHNOLOGY PTE.LTD relates to that company.",
+      "origin": "Singapore: the operator's registered address is 10 Anson Road, International Plaza, Singapore (Privacy Policy); the parent-brand company listed on zhipuai.cn is in Beijing.",
+      "sources": [
+        {
+          "url": "https://docs.z.ai/guides/overview/pricing",
+          "fetched_at": "2026-10-19",
+          "supports": [
+            "what",
+            "good_for"
+          ]
+        },
+        {
+          "url": "https://docs.z.ai/legal-agreement/terms-of-use",
+          "fetched_at": "2026-10-19",
+          "supports": [
+            "operator"
+          ]
+        },
+        {
+          "url": "https://docs.z.ai/legal-agreement/privacy-policy",
+          "fetched_at": "2026-10-19",
+          "supports": [
+            "operator",
+            "origin"
+          ]
+        },
+        {
+          "url": "https://www.zhipuai.cn/zh",
+          "fetched_at": "2026-10-19",
+          "supports": [
+            "owner",
+            "origin"
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -17,10 +17,15 @@ import { readFileSync, writeFileSync, realpathSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { serialize, roundTripError } from './_serialize.mjs';
 import { keyHostError } from './lib/key-hosts.mjs';
+import {
+  assertCredentialFree, configuredCredentials, safeModelIds, UnsafeProviderOutputError,
+} from './lib/provider-output-safety.mjs';
 
 const FILE = new URL('../data/providers.json', import.meta.url);
 const SAMPLE = 8; // cap: models_free is a *sample*, not the full catalog
 const TIMEOUT = 20000;
+
+class ProviderFetchError extends Error {}
 
 // --- extractors: each returns a de-duped, sorted sample of real model IDs -----
 
@@ -50,24 +55,29 @@ async function getJson(url, headers) {
   const ctrl = new AbortController();
   const t = setTimeout(() => ctrl.abort(), TIMEOUT);
   try {
-    const res = await fetch(url, { headers, signal: ctrl.signal });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return await res.json();
+    try {
+      const res = await fetch(url, { headers, signal: ctrl.signal });
+      if (!res.ok) throw new ProviderFetchError(`HTTP ${res.status}`);
+      try {
+        return await res.json();
+      } catch {
+        throw new ProviderFetchError('invalid JSON');
+      }
+    } catch (error) {
+      if (error instanceof ProviderFetchError) throw error;
+      if (error && error.name === 'AbortError') throw new ProviderFetchError('request timed out');
+      throw new ProviderFetchError('request failed');
+    }
   } finally {
     clearTimeout(t);
   }
 }
 
-// Model IDs are listed in each provider's own public catalogues. Keep these
-// lists short and explicit; sample() ignores IDs absent from the live response.
-// NVIDIA: https://build.nvidia.com/models
-// ModelScope: https://modelscope.cn/models
+// Model IDs verified in the providers' public API catalogues on 2026-11-14.
+// Preferences remain advisory: sample() ignores IDs absent from a live response.
 export const PREFERRED_MODELS = {
   'nvidia-nim': [
-    'deepseek-ai/deepseek-v4-flash-0731',
-    'meta/llama-3.3-70b-instruct',
     'nvidia/nemotron-3-super-120b-a12b',
-    'openai/gpt-oss-120b',
   ],
   modelscope: [
     'deepseek-ai/DeepSeek-V4-Flash-0731',
@@ -78,10 +88,10 @@ export const PREFERRED_MODELS = {
 };
 
 // A standard OpenAI-shaped /models list that needs no key. The JSON fetcher is
-// injectable so tests can exercise selection without making a real network call.
-export const openaiPublic = (url, preferred = [], fetchJson = getJson) => async () => {
+// injectable so tests can exercise retrieval without making a network request.
+export const openaiPublic = (url, fetchJson = getJson) => async () => {
   const d = await fetchJson(url);
-  return sample((d.data || []).map((m) => m.id), preferred);
+  return (d.data || []).map((m) => m.id);
 };
 
 // Public endpoints — no API key required.
@@ -89,25 +99,25 @@ const PUBLIC = {
   openrouter: async () => {
     const d = await getJson('https://openrouter.ai/api/v1/models');
     // Keep only genuinely-free models (the :free suffix), a diverse spread.
-    return sample(d.data.map((m) => m.id).filter((id) => id.endsWith(':free')));
+    return d.data.map((m) => m.id).filter((id) => typeof id === 'string' && id.endsWith(':free'));
   },
   pollinations: async () => {
     const d = await getJson('https://text.pollinations.ai/models');
-    return sample(d.filter((m) => m.tier === 'anonymous').map((m) => m.name));
+    return d.filter((m) => m.tier === 'anonymous').map((m) => m.name);
   },
   // Free credit / free-inference tiers with public OpenAI-shaped catalogs.
-  'nvidia-nim': openaiPublic('https://integrate.api.nvidia.com/v1/models', PREFERRED_MODELS['nvidia-nim']),
-  modelscope: openaiPublic('https://api-inference.modelscope.cn/v1/models', PREFERRED_MODELS.modelscope),
+  'nvidia-nim': openaiPublic('https://integrate.api.nvidia.com/v1/models'),
+  modelscope: openaiPublic('https://api-inference.modelscope.cn/v1/models'),
   // Typhoon's /models is public and returns a bare array, not the OpenAI
   // {data: [...]} shape — handle both so the extractor survives a shape change.
   typhoon: async () => {
     const d = await getJson('https://api.opentyphoon.ai/v1/models');
     const list = Array.isArray(d) ? d : (d.data || []);
-    return sample(list.map((m) => m.id));
+    return list.map((m) => m.id);
   },
   'ollama-cloud': async () => {
     const d = await getJson('https://ollama.com/api/tags');
-    return sample((d.models || []).map((m) => m.name));
+    return (d.models || []).map((m) => m.name);
   },
 };
 
@@ -140,7 +150,7 @@ async function openaiModels(baseUrl, key) {
   const d = await getJson(`${baseUrl.replace(/\/$/, '')}/models`, {
     Authorization: `Bearer ${key}`,
   });
-  return sample((d.data || []).map((m) => m.id));
+  return (d.data || []).map((m) => m.id);
 }
 
 // --- self-test: serializer must round-trip the file byte-for-byte -----------
@@ -157,9 +167,17 @@ function selfTest() {
   // unnoticed until the provider's sample is stale (the ollama-cloud case).
   const { providers } = JSON.parse(readFileSync(FILE, 'utf8'));
   const slugs = new Set(providers.map((p) => p.slug));
+  const bySlug = Object.fromEntries(providers.map((p) => [p.slug, p]));
   const orphaned = [...Object.keys(PUBLIC), ...Object.keys(KEYED)].filter((s) => !slugs.has(s));
   if (orphaned.length) {
     console.error('✗ extractor slug(s) not in data/providers.json: ' + orphaned.join(', ') + ' — remove the extractor or restore the provider.');
+    process.exit(1);
+  }
+  const keyDrift = Object.entries(KEYED)
+    .filter(([slug, envVar]) => bySlug[slug].env_key !== envVar)
+    .map(([slug, envVar]) => `${slug}: extractor ${envVar}, dataset ${bySlug[slug].env_key || '(missing)'}`);
+  if (keyDrift.length) {
+    console.error('✗ keyed extractor env mismatch:\n  ' + keyDrift.join('\n  '));
     process.exit(1);
   }
   const registered = Object.keys(PUBLIC).sort();
@@ -183,6 +201,11 @@ async function main() {
 
   const write = args.includes('--write');
   const data = JSON.parse(readFileSync(FILE, 'utf8'));
+  const credentials = configuredCredentials(data.providers);
+  const logCredentialFree = (message) => {
+    assertCredentialFree(message, credentials);
+    console.log(message);
+  };
   const bySlug = Object.fromEntries(data.providers.map((p) => [p.slug, p]));
 
   const jobs = [];
@@ -212,33 +235,38 @@ async function main() {
   let changed = 0;
   for (const { slug, run } of jobs) {
     try {
-      const ids = await run();
+      const safeIds = safeModelIds(await run(), credentials);
+      const ids = safeModelIds(sample(safeIds, PREFERRED_MODELS[slug]), credentials);
       if (!ids.length) {
-        console.log(`- ${slug}: endpoint returned no usable IDs, left unchanged`);
+        logCredentialFree(`- ${slug}: endpoint returned no usable IDs, left unchanged`);
         continue;
       }
       const prev = bySlug[slug].models_free;
       const same = Array.isArray(prev) && prev.length === ids.length && prev.every((v, i) => v === ids[i]);
       bySlug[slug].models_free = ids;
       if (same) {
-        console.log(`= ${slug}: ${ids.length} models (unchanged)`);
+        logCredentialFree(`= ${slug}: ${ids.length} models (unchanged)`);
       } else {
-        console.log(`✓ ${slug}: ${ids.length} models — ${ids.join(', ')}`);
+        logCredentialFree(`✓ ${slug}: ${ids.length} models — ${ids.join(', ')}`);
         changed++;
       }
     } catch (e) {
-      console.log(`✗ ${slug}: fetch failed (${e.message}), left unchanged`);
+      if (e instanceof UnsafeProviderOutputError) throw e;
+      const reason = e instanceof ProviderFetchError ? e.message : 'invalid response';
+      logCredentialFree(`✗ ${slug}: fetch failed (${reason}), left unchanged`);
     }
   }
 
   if (write && changed) {
     data.generated = new Date().toISOString().slice(0, 10);
-    writeFileSync(FILE, serialize(data));
-    console.log(`\n→ wrote data/providers.json (${changed} provider(s) updated). Now run: npm run build`);
+    const out = serialize(data);
+    assertCredentialFree(out, credentials);
+    writeFileSync(FILE, out);
+    logCredentialFree(`\n→ wrote data/providers.json (${changed} provider(s) updated). Now run: npm run build`);
   } else if (changed) {
-    console.log(`\n${changed} provider(s) would change. Re-run with --write to apply.`);
+    logCredentialFree(`\n${changed} provider(s) would change. Re-run with --write to apply.`);
   } else {
-    console.log('\nNo changes.');
+    logCredentialFree('\nNo changes.');
   }
 }
 

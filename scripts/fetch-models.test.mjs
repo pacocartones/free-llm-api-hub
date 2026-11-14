@@ -1,6 +1,18 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { openaiPublic, sample } from './fetch-models.mjs';
+import { openaiPublic, PREFERRED_MODELS, sample } from './fetch-models.mjs';
+
+test('preferred model configuration contains only IDs verified in the public catalogues', () => {
+  assert.deepEqual(PREFERRED_MODELS['nvidia-nim'], [
+    'nvidia/nemotron-3-super-120b-a12b',
+  ]);
+  assert.deepEqual(PREFERRED_MODELS.modelscope, [
+    'deepseek-ai/DeepSeek-V4-Flash-0731',
+    'MiniMax/MiniMax-M3',
+    'Qwen/Qwen3.5-397B-A17B',
+    'ZhipuAI/GLM-5.2',
+  ]);
+});
 
 test('preferred IDs lead the sample and remaining slots stay publisher-diverse', () => {
   const ids = [
@@ -33,7 +45,7 @@ test('missing preferred IDs are ignored and round-robin fills the sample', () =>
   assert.equal(result.length, 8);
 });
 
-test('openaiPublic uses an injected /models response and is deterministic', async () => {
+test('openaiPublic returns an injected /models response without sampling before safety checks', async () => {
   const calls = [];
   const fetchJson = async (url) => {
     calls.push(url);
@@ -49,18 +61,16 @@ test('openaiPublic uses an injected /models response and is deterministic', asyn
       { id: 'vendor-h/model' },
     ] };
   };
-  const fetchModels = openaiPublic('https://models.example.test/v1/models', [
-    'headline/vendor-b-model', 'popular/vendor-c-model', 'not-in-catalog/model',
-  ], fetchJson);
+  const fetchModels = openaiPublic('https://models.example.test/v1/models', fetchJson);
   const first = await fetchModels();
   const second = await fetchModels();
   assert.deepEqual(first, second);
   assert.deepEqual(first, [
-    'another/vendor-a-model', 'headline/vendor-b-model',
-    'obscure/vendor-a-model', 'popular/vendor-c-model',
+    'obscure/vendor-a-model', 'headline/vendor-b-model',
+    'another/vendor-a-model', 'popular/vendor-c-model',
     'vendor-d/model', 'vendor-e/model', 'vendor-f/model',
-    'vendor-g/model',
-  ].sort());
+    'vendor-g/model', 'vendor-h/model',
+  ]);
   assert.deepEqual(calls, [
     'https://models.example.test/v1/models',
     'https://models.example.test/v1/models',
