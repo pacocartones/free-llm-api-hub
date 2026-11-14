@@ -8,7 +8,7 @@ const NOTE = '<span class="sr-only"> (opens in a new tab)</span>';
 
 export function markNewTabLinks(html) {
   return html
-    .split(/(<script\b[\s\S]*?<\/script>|<style\b[\s\S]*?<\/style>)/g)
+    .split(/(<script\b[\s\S]*?<\/script>|<style\b[\s\S]*?<\/style>)/gi)
     .map((part, i) => (i % 2 === 1 ? part : part.replace(/<a\b([^>]*\btarget="_blank"[^>]*)>([\s\S]*?)<\/a>/g, (m, attrs, inner) => (inner.includes('(opens in a new tab)') ? m : `<a${attrs}>${inner}${NOTE}</a>`))))
     .join('');
 }

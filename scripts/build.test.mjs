@@ -3008,6 +3008,13 @@ test('links: markNewTabLinks adds a screen-reader note to every link that opens 
   assert.equal(markNewTabLinks(out), out, 'applying it twice changes nothing');
 });
 
+test('links: markNewTabLinks leaves mixed-case SCRIPT and STYLE blocks untouched', () => {
+  const input = '<ScRiPt>const sample = \'<a target="_blank">script text</a>\';</sCrIpT><STYLE>.x::after{content:"<a target=\\"_blank\\">style text</a>"}</sTyLe><a target="_blank" href="https://example.test">outside</a>';
+  const out = markNewTabLinks(input);
+  assert.ok(out.startsWith(input.slice(0, input.indexOf('<a target="_blank" href='))), 'script and style text is byte-for-byte unchanged');
+  assert.match(out, /outside<span class="sr-only"> \(opens in a new tab\)<\/span><\/a>$/);
+});
+
 test('links: on every generated page, each link that opens a new tab carries the note, and the coverage tasks name their provider', () => {
   const walk = (dir) => readdirSync(dir).flatMap((n) => { const p = join(dir, n); return statSync(p).isDirectory() ? walk(p) : p.endsWith('.html') ? [p] : []; });
   let seen = 0;
