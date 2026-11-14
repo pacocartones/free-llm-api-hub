@@ -10,7 +10,7 @@ They're genuinely valuable, but different enough that they're kept **out of the 
 - They're **volatile** — amounts, tiers and terms change often; "up to $X" is usually a marketing maximum, not what a self-serve applicant gets.
 - Most give **cloud-wide credits** (usable *for* LLM APIs, but not LLM-specific) rather than first-party model-API credits.
 
-> Confirmed against each program's own page on **2026-07-30**. Always re-check the current terms before you rely on one.
+> The original catalogue was confirmed against official program pages on **2026-07-30/31**; later entries are checked when added or refreshed. Latest catalogue change: **2026-11-14**. Always re-check the current terms before you rely on one.
 
 **"Funds LLM API?"** — ✅ first-party LLM-API credits · ◐ cloud/compute credits usable for managed LLM APIs (Bedrock, Vertex AI, Azure OpenAI…) · ✖ training / perks only.
 
@@ -37,6 +37,7 @@ They're genuinely valuable, but different enough that they're kept **out of the 
 | **[DigitalOcean Hatch](https://www.digitalocean.com/hatch)** | Up to ~$10k/mo credit limit over 12 mo (amount varies); base credits exclude GPU Droplets — select startups invited to apply for separate GPU credits | ◐ via cloud | AI-native startups that raised ≤$10M; business email required |
 | **[Pinecone Startup Program](https://www.pinecone.io/startup-program/)** | Free Standard tier + Pro Support + usage credits (amount not published); vector DB / RAG infra, not model inference | ✖ perks only | &lt;100 employees, Series A or earlier; no VC referral required |
 | **[Weaviate Startup Deal](https://weaviate.io/startup-deal)** | Discounted Weaviate Cloud access (terms not published); vector DB / RAG infra | ✖ perks only | Early-stage with a partner-program / VC affiliation (e.g. YC, Techstars) |
+| **[Alibaba Cloud AI Catalyst Program](https://www.alibabacloud.com/en/startup/ai)** | Up to $120k cloud credits support + up to 2B free Model Studio tokens; POC coupons | ✅ LLM API | Startups applying through the program's online form; eligibility criteria not stated on the page |
 <!-- AUTOGEN:startups:end -->
 
 ## For students & researchers
