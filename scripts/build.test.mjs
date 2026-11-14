@@ -1972,6 +1972,7 @@ test('active providers retain models_url from their official catalogues', () => 
   assert.deepEqual(seeded, [
     ['google-gemini', 'https://ai.google.dev/gemini-api/docs/models'],
     ['groq', 'https://console.groq.com/docs/models'],
+    ['sarvam-ai', 'https://docs.sarvam.ai/api/token-factory/models'],
   ]);
 });
 

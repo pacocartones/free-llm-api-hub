@@ -1137,18 +1137,9 @@
       "rate_limits": "Starter plan: 40 req/min for chat with Sarvam-105B (60 for other default models), STT REST and TTS REST (bulbul:v3: 30 req/min); 20 concurrent STT WebSocket streams; bounded by the ₹100 credit",
       "notes": "One-time signup credit shared across all APIs; credits never expire. Sarvam-M has been deprecated (use Sarvam-105B). Signup credits carry commercial production rights for generated Output. Card/phone requirement not stated in the docs. The docs list limits per plan but do not say explicitly that free-credit accounts are on Starter. India-focused provider (pricing in INR), strong Indic-language models.",
       "best_for": "Indic-language chat + speech via one OpenAI-compatible key",
-      "modalities": [
-        "text",
-        "audio"
-      ],
-      "models_free": [
-        "sarvam-105b",
-        "sarvam-105b-conversations",
-        "glm5.3",
-        "glm5.3-flash",
-        "gemma4",
-        "deepseekv4.1-flash-1017"
-      ],
+      "modalities": ["text", "audio"],
+      "models_free": ["sarvam-105b", "sarvam-105b-conversations", "glm5.3", "glm5.3-flash", "gemma4", "deepseekv4.1-flash-1017"],
+      "models_url": "https://docs.sarvam.ai/api/token-factory/models",
       "expires": null,
       "docs_url": "https://docs.sarvam.ai/api/getting-started/pricing",
       "phone_required": null,
@@ -1159,23 +1150,10 @@
       "env_key": "SARVAM_API_KEY",
       "is_text_llm": true,
       "model_tier": null,
-      "no_expiry": {
-        "source": "https://docs.sarvam.ai/api/getting-started/ratelimits",
-        "checked": "2026-10-09",
-        "quote": "Credits are universal and never expire."
-      },
+      "no_expiry": {"source":"https://docs.sarvam.ai/api/getting-started/ratelimits","checked":"2026-10-09","quote":"Credits are universal and never expire."},
       "verified": true,
       "last_verified": "2026-10-08",
-      "data_policy": {
-        "trains_on_prompts": null,
-        "retention": "Retained indefinitely until a workspace Owner configures a period.",
-        "source": "https://docs.sarvam.ai/api/platform/data-retention",
-        "checked": "2026-10-15",
-        "quote": "Until an Owner sets a retention period, your workspace’s data is retained indefinitely.",
-        "note": "The page describes workspace-level retention for Model APIs, with per-product overrides. The page names no plan.",
-        "plan_named": false
-      },
-      "models_url": "https://docs.sarvam.ai/api/token-factory/models"
+      "data_policy": {"trains_on_prompts":null,"retention":"Retained indefinitely until a workspace Owner configures a period.","source":"https://docs.sarvam.ai/api/platform/data-retention","checked":"2026-10-15","quote":"Until an Owner sets a retention period, your workspace’s data is retained indefinitely.","note":"The page describes workspace-level retention for Model APIs, with per-product overrides. The page names no plan.","plan_named":false}
     },
     {
       "slug": "gladia",
