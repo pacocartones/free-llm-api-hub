@@ -62,7 +62,7 @@ test('the built pages: the table matches the data, tables.css is loaded only by 
   const css = readFileSync(join(ROOT, 'site/tables.css'), 'utf8');
   const loaders = [];
   const walk = (dir) => readdirSync(dir).flatMap((n) => { const f = join(dir, n); return statSync(f).isDirectory() ? (n === 'node_modules' ? [] : walk(f)) : (f.endsWith('.html') ? [f] : []); });
-  for (const f of walk(join(ROOT, 'site'))) if (readFileSync(f, 'utf8').includes('href="../tables.css"')) loaders.push(f.slice(join(ROOT, 'site').length + 1));
+  for (const f of walk(join(ROOT, 'site'))) if (readFileSync(f, 'utf8').includes('href="../tables.css"')) loaders.push(f.slice(join(ROOT, 'site').length + 1).replaceAll('\\', '/'));
   assert.deepEqual(loaders.sort(), ['coding-tools/index.html', 'free-gpu/index.html']);
   for (const [page, file, id] of [['free-gpu', 'data/gpu-compute.json', 'gpu'], ['coding-tools', 'data/coding-tools.json', 'tools']]) {
     const data = JSON.parse(readFileSync(join(ROOT, file), 'utf8'));

@@ -17,12 +17,12 @@ Direction, not dated promises. The north star: stay the **most trustworthy, curr
 
 ## Done recently
 
-- ✅ Cleared the ⚠️ backlog — the three entries whose free API access couldn't be confirmed were removed (see the changelog); the list is now 100% verified.
-- ✅ Backfilled `openai_compatible`, `modalities`, and `openai_base_url` (28 confirmed base URLs).
+- ✅ Removed three entries whose free API access could not be confirmed (see the changelog). Verification status is tracked per provider in `data/providers.json` and can change as entries are re-checked.
+- ✅ Backfilled `openai_compatible`, `modalities`, and `openai_base_url`. To check the current base-URL count, count entries with `openai_base_url` in `data/providers.json`.
 - ✅ Shipped editorial [collections](../collections/README.md) generated from the data: no-card, no-phone, commercial-use, OpenAI-compatible, permanently-free, multimodal.
 - ✅ Per-provider OpenAI base URLs + a runnable quickstart (curl + OpenAI SDK) on the OpenAI-compatible page.
 - ✅ **A static, versioned JSON API** at [/api/v1/](https://freellmapihub.com/api/) — full dataset plus slices by category/constraint/modality, plus `llms.txt`/`llms-full.txt` for agents. No server, no query params.
-- ✅ **Stable release tags per dataset version** — `vX.Y.Z` tagged at each schema/dataset version (latest: `v2.8.0`), so downstream consumers can pin a snapshot.
+- ✅ **Stable release tags per dataset version** — `vX.Y.Z` tagged at each schema/dataset version, so downstream consumers can pin a snapshot. To identify the latest tag, run `git tag --list 'v*' --sort=-v:refname` rather than relying on a hard-coded version.
 - ✅ **`models_free`** sampled model IDs with an automated live refresh from providers' own `/models` endpoints, a searchable [model index](../../models/), and intent-matched [SEO guides](../../guides-and-collections/).
 
 ## Next
