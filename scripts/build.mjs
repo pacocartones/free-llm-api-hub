@@ -22,6 +22,7 @@ import { githubProfileUrl } from './lib/contributors.mjs';
 import { resolveBestEntries, topEntries, PODIUM_SIZE } from './lib/best.mjs';
 import { agreementsTableHtml, sponsoredBlockHtml, disclosureHtml, inForce, NOT_IN_DATA_SENTENCE, MACHINE_SENTENCE } from './lib/agreements.mjs';
 import { coverage, coverageMainHtml } from './lib/coverage.mjs';
+import { toApiV1ChangeValue, toApiV1Provider } from './lib/api-v1.mjs';
 import { freeGpuMainHtml } from './lib/free-gpu.mjs';
 import { labelTables } from './lib/tables.mjs';
 import { markNewTabLinks } from './lib/links.mjs';
@@ -74,6 +75,7 @@ function flags(p) {
   if (p.phone_required === false) parts.push('📵 no phone');
   if (p.phone_required === true) parts.push('📱 phone');
   if (p.commercial_ok === true) parts.push('🏢 commercial OK');
+  if (p.commercial_ok === 'conditional') parts.push('🏢 commercial OK (conditional)');
   if (p.commercial_ok === false) parts.push('🔬 eval only');
   if (p.openai_compatible === true) parts.push('🔌 OpenAI-compat');
   return parts.length ? `<br><sub>${parts.join(' · ')}</sub>` : '';
@@ -513,6 +515,7 @@ function collectionTableHtml(rows, opts = {}) {
     if (p.phone_required === false) parts.push(`${IC('ic-nophone')}no phone`);
     if (p.phone_required === true) parts.push(`${IC('ic-phone')}phone`);
     if (p.commercial_ok === true) parts.push(`${IC('ic-building')}commercial OK`);
+    if (p.commercial_ok === 'conditional') parts.push(`${IC('ic-building')}commercial OK (conditional)`);
     if (p.commercial_ok === false) parts.push(`${IC('ic-flask')}eval only`);
     if (p.openai_compatible === true) parts.push(`${IC('ic-code')}OpenAI-compat`);
     return parts.length ? `<div class="flags">${parts.map((t) => `<span>${t}</span>`).join('')}</div>` : '';
@@ -1048,7 +1051,9 @@ const provFlagsHtml = (p) => {
   const add = (cond, ic, txt) => { if (cond) parts.push(`<span class="flag-badge">${IC(ic)}${txt}</span>`); };
   add(p.card_required === false, 'ic-nocard', 'no card'); add(p.card_required === true, 'ic-card', 'card required');
   add(p.phone_required === false, 'ic-nophone', 'no phone'); add(p.phone_required === true, 'ic-phone', 'phone required');
-  add(p.commercial_ok === true, 'ic-building', 'commercial OK'); add(p.commercial_ok === false, 'ic-flask', 'eval only');
+  add(p.commercial_ok === true, 'ic-building', 'commercial OK');
+  add(p.commercial_ok === 'conditional', 'ic-building', 'commercial OK (conditional)');
+  add(p.commercial_ok === false, 'ic-flask', 'eval only');
   add(p.openai_compatible === true, 'ic-code', 'OpenAI-compatible');
   return parts.join('');
 };
@@ -1562,14 +1567,17 @@ for (const g of GUIDES) {
 mkdirSync(join(ROOT, 'site/api/v1/modality'), { recursive: true });
 const apiBase = { dataset: 'free-llm-api-hub', version: data.version, generated: data.generated, license: 'MIT', homepage: `${SITE}/`, docs: `${SITE}/api/` };
 const writeApi = (rel, obj) => writeFileSync(join(ROOT, `site/api/v1/${rel}`), JSON.stringify(obj, null, 2) + '\n');
-writeApi('providers.json', { ...apiBase, count: publicProviders.length, providers: publicProviders });
+// v1 published commercial_ok as boolean|null. Keep that type stable while the
+// additive commercial_ok_condition field carries the reason for conditional use.
+const apiProviders = publicProviders.map(toApiV1Provider);
+writeApi('providers.json', { ...apiBase, count: apiProviders.length, providers: apiProviders });
 writeApi('programs.json', { ...apiBase, startups: programs.startups, research: programs.research });
 // The field-level before/after values live in changes.json; history.json keeps
 // its published shape (date, kind, fields, text).
 const historyPublic = Object.fromEntries(Object.entries(historyBySlug).map(([slug, events]) => [slug, events.map(({ changes, ...e }) => e)]));
 writeApi('history.json', { ...apiBase, description: 'Per-provider change history mined from the git log of providers.json.', history: historyPublic });
-writeApi('changes.json', { ...apiBase, description: 'Field-level provider changes (from/to), grouped by ISO week, newest first: the last 12 weeks ending at the newest change. Mined from the git log of providers.json.', weeks: changeWeeks.map(({ week, start, end, count, changes }) => ({ week, start, end, count, changes: changes.map(({ date, slug, name, field, from, to }) => ({ date, slug, name, field, from, to })) })) });
-writeApi('best.json', { ...apiBase, description: 'The top 10 free LLM APIs by the FLLMAPIHUB score, in rank order, with the score and its parts. Never padded to ten. Every pick carries its full verified profile. Method: ' + SITE + '/best/methodology/', updated: data.generated, count: topList.length, picks: topList.map((e) => ({ rank: e.rank, podium: e.podium, score: Math.round(e.total * 10) / 10, math: Math.round(e.math * 10) / 10, editorial: Math.round(e.editorial * 10) / 10, confirmed: e.confirmed, of: e.of, parts: Object.fromEntries(Object.entries(e.parts).map(([k, v]) => [k, Math.round(v * 10) / 10])), tier_near_threshold: e.boundary, ...e.p })) });
+writeApi('changes.json', { ...apiBase, description: 'Field-level provider changes (from/to), grouped by ISO week, newest first: the last 12 weeks ending at the newest change. Mined from the git log of providers.json.', weeks: changeWeeks.map(({ week, start, end, count, changes }) => ({ week, start, end, count, changes: changes.map(({ date, slug, name, field, from, to }) => ({ date, slug, name, field, from: toApiV1ChangeValue(field, from), to: toApiV1ChangeValue(field, to) })) })) });
+writeApi('best.json', { ...apiBase, description: 'The top 10 free LLM APIs by the FLLMAPIHUB score, in rank order, with the score and its parts. Never padded to ten. Every pick carries its full verified profile. Method: ' + SITE + '/best/methodology/', updated: data.generated, count: topList.length, picks: topList.map((e) => ({ rank: e.rank, podium: e.podium, score: Math.round(e.total * 10) / 10, math: Math.round(e.math * 10) / 10, editorial: Math.round(e.editorial * 10) / 10, confirmed: e.confirmed, of: e.of, parts: Object.fromEntries(Object.entries(e.parts).map(([k, v]) => [k, Math.round(v * 10) / 10])), tier_near_threshold: e.boundary, ...toApiV1Provider(e.p) })) });
 // /api/v1/score.json: the whole score, not only the top 10. Same numbers as best.json (one rounding rule, one source).
 const r1 = (x) => Math.round(x * 10) / 10;
 const SCORE_SCHEMA_URL = SITE + '/api/v1/score.schema.json';
@@ -1649,12 +1657,12 @@ const API_SLICES = {
   'openai-compatible': (p) => p.openai_compatible === true,
 };
 for (const [name, fn] of Object.entries(API_SLICES)) {
-  const list = publicProviders.filter(fn);
+  const list = publicProviders.filter(fn).map(toApiV1Provider);
   writeApi(`${name}.json`, { ...apiBase, slice: name, count: list.length, providers: list });
 }
 const API_MODS = ['text', 'vision', 'image', 'audio', 'embeddings', 'rerank', 'ocr'];
 for (const m of API_MODS) {
-  const list = publicProviders.filter((p) => (p.modalities || []).includes(m));
+  const list = publicProviders.filter((p) => (p.modalities || []).includes(m)).map(toApiV1Provider);
   writeApi(`modality/${m}.json`, { ...apiBase, modality: m, count: list.length, providers: list });
 }
 // Client configs (LiteLLM proxy + OpenAI SDK) for the verified OpenAI-compatible
@@ -1785,7 +1793,7 @@ const llmsTxt =
   `- [Startup credits](${SITE}/programs/startups)\n- [Student & research credits](${SITE}/programs/research)\n`;
 writeFileSync(join(ROOT, 'site/llms.txt'), llmsTxt);
 
-const yn = (v, yes, no) => v === true ? yes : v === false ? no : 'unknown';
+const yn = (v, yes, no) => v === true ? yes : v === false ? no : v === 'conditional' ? 'conditional' : 'unknown';
 const provBlock = (p) => {
   const gates = [
     `card required: ${yn(p.card_required, 'yes', 'no')}`,

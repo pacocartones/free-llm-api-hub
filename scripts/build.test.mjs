@@ -31,6 +31,7 @@ import { requirementsHtml, limitsHtml, glanceHtml, modelsHtml, dataPolicyHtml } 
 import { compareTableHtml, comparisonCategory, sameComparisonCategory, selectComparePairs, COMPARE_PAGE_CAP, COMPARE_PER_PROVIDER_CAP, COMPARE_MAX as COMPARE_MAX_SLOTS } from './lib/compare.mjs';
 import { codeHtmlEsc, curlChatQuickstart, posixShellQuote, pythonChatQuickstart, pythonEmbeddingsQuickstart, pythonStringLiteral } from './lib/quickstart.mjs';
 import { providersCsv } from './lib/provider-csv.mjs';
+import { toApiV1ChangeValue, toApiV1Provider } from './lib/api-v1.mjs';
 
 const REPO = join(dirname(fileURLToPath(import.meta.url)), '..');
 // The builds of this file run in a private copy of the tree (see lib/private-tree.mjs): `node --test` runs the test
@@ -843,6 +844,7 @@ test('an unconfirmed flag ranks between a confirmed yes and a confirmed no', () 
   const unknown = recScore({ ...base, card_required: null });
   const yes = recScore({ ...base, card_required: true });
   assert.ok(no > unknown && unknown > yes, `expected ${no} > ${unknown} > ${yes}`);
+  assert.equal(recScore({ ...base, commercial_ok: 'conditional' }), recScore({ ...base, commercial_ok: null }), 'conditional is neutral in recommended ordering');
 });
 
 // ---------- CI workflows must not run `gh pr view` (no bot logic) ----------
@@ -2419,6 +2421,72 @@ test('/coverage/ escapes hostile provider text and refuses a non-http docs link'
   assert.ok(!/href="javascript:/i.test(out), 'a javascript: docs link is never an href');
   assert.match(out, /no official docs link/);
   assert.equal(coverageOf([{ ...evil, verified: false }]).every((r) => r.total === 0), true, 'an unverified provider counts in no population');
+});
+
+test('/coverage/ treats conditional commercial use as open, not confirmed', () => {
+  const provider = { slug: 'conditional', name: 'Conditional', docs_url: 'https://example.com/terms', verified: true, commercial_ok: 'conditional' };
+  const row = coverageOf([provider]).find((entry) => entry.key === 'commercial_ok');
+  assert.equal(row.total, 1);
+  assert.equal(row.confirmed, 0);
+  assert.deepEqual(row.open.map((p) => p.slug), ['conditional']);
+});
+
+test('conditional commercial use is visible in UI, excluded from commercial collections, and projected safely through API v1', () => {
+  run(['scripts/build.mjs']);
+  const raw = JSON.parse(readFileSync(DATA, 'utf8'));
+  const conditional = raw.providers.find((p) => p.commercial_ok === 'conditional');
+  assert.ok(conditional, 'the raw dataset carries a conditional provider');
+  assert.ok(conditional.commercial_ok_condition, 'the raw dataset preserves the condition');
+
+  const providerPage = readFileSync(join(ROOT, 'site/p', `${conditional.slug}.html`), 'utf8');
+  assert.match(providerPage, /conditional/);
+  assert.ok(providerPage.includes(htmlEsc(conditional.commercial_ok_condition)), 'provider page shows the escaped condition');
+  const compare = compareTableHtml([conditional, raw.providers.find((p) => p.slug !== conditional.slug)]);
+  assert.match(compare, /tri-cond">conditional/);
+  assert.ok(compare.includes(htmlEsc(conditional.commercial_ok_condition)), 'compare view shows the escaped condition');
+
+  const commercialMd = readFileSync(join(ROOT, 'collections/commercial-use.md'), 'utf8');
+  const commercialHtml = readFileSync(join(ROOT, 'site/collections/commercial-use.html'), 'utf8');
+  assert.ok(!commercialMd.includes(`**[${conditional.name}]`));
+  assert.ok(!commercialHtml.includes(`href="../p/${conditional.slug}"`));
+
+  const v1 = join(ROOT, 'site/api/v1');
+  const jsonFiles = (dir) => readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+    const full = join(dir, entry.name);
+    if (entry.isDirectory()) return jsonFiles(full);
+    return entry.isFile() && entry.name.endsWith('.json') && !entry.name.endsWith('.schema.json') && entry.name !== 'schema.json' ? [full] : [];
+  });
+  for (const file of jsonFiles(v1)) {
+    const value = JSON.parse(readFileSync(file, 'utf8'));
+    const walk = (node) => {
+      if (!node || typeof node !== 'object') return;
+      if (Object.hasOwn(node, 'commercial_ok')) assert.ok([true, false, null].includes(node.commercial_ok), `${file}: commercial_ok keeps the v1 type`);
+      for (const child of Object.values(node)) walk(child);
+    };
+    walk(value);
+  }
+  const apiProvider = JSON.parse(readFileSync(join(v1, 'providers.json'), 'utf8')).providers.find((p) => p.slug === conditional.slug);
+  assert.equal(apiProvider.commercial_ok, null);
+  assert.equal(apiProvider.commercial_ok_condition, conditional.commercial_ok_condition);
+  const changes = JSON.parse(readFileSync(join(v1, 'changes.json'), 'utf8')).weeks.flatMap((week) => week.changes || []);
+  assert.ok(changes.length > 0, 'changes.json has rows to inspect');
+  for (const change of changes) {
+    assert.notEqual(change.from, 'conditional');
+    assert.notEqual(change.to, 'conditional');
+    if (change.field === 'commercial_ok') {
+      assert.ok([true, false, null].includes(change.from));
+      assert.ok([true, false, null].includes(change.to));
+    }
+  }
+});
+
+test('the API v1 projector maps conditional provider and change values to null without losing the reason', () => {
+  const raw = { slug: 'conditional', commercial_ok: 'conditional', commercial_ok_condition: 'Per-model licence.' };
+  assert.deepEqual(toApiV1Provider(raw), { ...raw, commercial_ok: null });
+  assert.equal(raw.commercial_ok, 'conditional', 'projection does not mutate the canonical row');
+  assert.equal(toApiV1ChangeValue('commercial_ok', 'conditional'), null);
+  for (const value of [true, false, null]) assert.equal(toApiV1ChangeValue('commercial_ok', value), value);
+  assert.equal(toApiV1ChangeValue('notes', 'conditional'), 'conditional', 'only the retyped v1 field is projected');
 });
 
 test('/coverage/ says how to propose one value, is in the sitemap with an absolute canonical and is linked from both footers', () => {

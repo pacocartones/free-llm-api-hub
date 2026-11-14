@@ -190,6 +190,14 @@ test('missing data scores zero, or neutral for the two yes/no requirements, and 
   assert.ok(Math.abs((no - empty.parts.friction) - (empty.parts.friction - yes)) < 1e-9, 'symmetric around unknown');
 });
 
+test('conditional commercial use scores exactly like unknown and is not confirmed', () => {
+  const unknown = scoreProvider(blank({ commercial_ok: null }));
+  const conditional = scoreProvider(blank({ commercial_ok: 'conditional', commercial_ok_condition: 'Per-model licence.' }));
+  assert.equal(conditional.parts.commercial, unknown.parts.commercial);
+  assert.equal(conditional.confirmed, unknown.confirmed);
+  assert.equal(inputFractions(blank({ commercial_ok: 'conditional' })).commercial.known, false);
+});
+
 test('limits: only published allowances count, per-minute speed is not converted', () => {
   const lim = (fl) => scoreProvider(blank({ free_limits: { ...fl, source: 'https://x.example/', checked: '2026-10-08' } })).parts.limits;
   assert.equal(lim({ requests_per_minute: 300 }), 0, 'a per-minute speed is not an allowance');
