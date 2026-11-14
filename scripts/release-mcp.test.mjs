@@ -22,7 +22,7 @@ function decisionScript(phase) {
   return block ? block.replace(/^          /gm, '') : decide.match(/^        run: (.+)$/m)[1];
 }
 
-function runDecision({ npm = '200', mcp = '404', privatePackage = false, tag = 'mcp-v1.2.3', serverVersion = '1.2.3', phase = 'check' } = {}) {
+function runDecision({ npm = '200', mcp = '404', privatePackage = false, tag = 'mcp-v1.2.3', serverVersion = '1.2.3', phase = 'check', enabled = 'true' } = {}) {
   const root = makeTmpDir('mcp-release-');
   const dir = join(root, 'packages', 'mcp');
   mkdirSync(dir, { recursive: true });
@@ -51,7 +51,7 @@ printf '%s' "$status"
   const result = spawnSync('bash', ['-e', '-o', 'pipefail', '-c', decisionScript(phase)], {
     cwd: dir, encoding: 'utf8', timeout: 5000,
     env: { ...process.env, PATH: `${dir}:${process.env.PATH}`, GITHUB_OUTPUT: output, GITHUB_REF_NAME: tag,
-      REQUEST_LOG: requests, NPM_STATUS: npm, MCP_STATUS: mcp },
+      REQUEST_LOG: requests, NPM_STATUS: npm, MCP_STATUS: mcp, NPM_PUBLISH_ENABLED: enabled },
   });
   if (result.error) throw result.error;
   return { ...result, outputs: Object.fromEntries(readFileSync(output, 'utf8').trim().split('\n').filter(Boolean).map((line) => line.split('='))),
@@ -125,3 +125,33 @@ for (const mcp of ['404', '200']) {
     assert.equal(condition(mcpStep, initial, fresh), mcp === '404', 'only a still-missing MCP version is published');
   });
 }
+
+for (const phase of ['check', 'publish']) {
+  for (const enabled of ['', 'false', 'TRUE']) {
+    test(`${phase}: public package still requires explicit publication enablement (${JSON.stringify(enabled)})`, { skip }, () => {
+      const result = runDecision({ phase, enabled, npm: '404', mcp: '404' });
+      assert.notEqual(result.status, 0, 'disabled publication must fail before querying registries');
+      assert.deepEqual(result.requests, []);
+    });
+  }
+}
+
+// Exercise the publishing command offline: a source-directory publish must not
+// substitute for the archive tested in the no-OIDC job.
+test('publication consumes the tested archive with provenance and lifecycle scripts disabled', { skip }, () => {
+  const root = makeTmpDir('mcp-publish-command-');
+  const artifacts = join(root, 'mcp-package');
+  mkdirSync(artifacts);
+  const tarball = join(artifacts, 'free-llm-api-hub-mcp-1.2.3.tgz');
+  writeFileSync(tarball, 'fixture archive');
+  const log = join(root, 'args');
+  writeFileSync(join(root, 'npm'), '#!/usr/bin/env bash\nprintf "%s\\n" "$@" > "$ARG_LOG"\n', { mode: 0o755 });
+  const command = steps('publish').find((step) => step.includes('run: npm publish ')).match(/^        run: (.+)$/m)[1];
+  const result = spawnSync('bash', ['-e', '-c', command], { cwd: root, encoding: 'utf8',
+    env: { ...process.env, PATH: `${root}:${process.env.PATH}`, RUNNER_TEMP: root, ARG_LOG: log },
+  });
+  assert.equal(result.status, 0, result.stderr);
+  assert.deepEqual(readFileSync(log, 'utf8').trim().split('\n'), [
+    'publish', tarball, '--ignore-scripts', '--provenance', '--access', 'public',
+  ]);
+});
