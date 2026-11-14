@@ -49,7 +49,11 @@ only what confirms.
   describes API access as balance/resource-package funded and distinguishes
   promotional credits; no generally available free API tier or trial
   credit is documented on the official pages checked. Recheck if MiniMax
-  publishes an explicit signup grant. Also Anthropic-compatible worth noting.
+  publishes explicit public grant terms. The [official Eigent tutorial](https://platform.minimax.io/docs/solutions/eigent#step-1-get-minimax-api-key)
+  mentions a free quota for new pay-as-you-go users, but states no amount,
+  expiry or eligibility conditions; this does not establish a generally available
+  free API offer. Thanks @abhi478jeetur-rgb for identifying this qualification
+  in #634. Also Anthropic-compatible worth noting.
 - ✅ **Upstage** (Solar LLM + Document Parse/OCR) — now a provider in the dataset (re-verified 2026-10-08).
 - ✅ **Veryfi** (OCR) — now a provider in the dataset (re-verified 2026-10-08).
 - [ ] **Replicate** (image/video) — re-verified 2026-11-14 against its pricing
