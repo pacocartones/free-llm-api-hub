@@ -179,7 +179,7 @@ AI-assisted contributions are welcome. Please read [AI_POLICY.md](AI_POLICY.md):
 
 Replies in this repository's issues, pull requests and discussions are prepared by an AI agent working under the supervision of the repository owner.
 
-Commit messages: AI-assisted contributions are welcome when you have verified the change (see above). You do not need to remove a trailer your tool adds, and you can commit under any email address. The owner and internal agent commits checked by `scripts/check-commit-policy.sh` use the canonical owner identity and carry no AI attribution trailers. This check does not impose that identity or a noreply address on LeonMAG; see [Branch names and commit identity](#branch-names-and-commit-identity). Only @pacocartones and @LeonMAG hold maintenance roles and permissions; external contributions do not grant or offer those roles. When we squash-merge, we drop AI `Co-authored-by` lines from the final message so `main` stays clean; your authorship stays.
+Commit messages: AI-assisted contributions are welcome when you have verified the change (see above). Contributors outside the maintainer identity rules below may keep tool-added trailers and use their own email addresses. Commits by either maintainer (as author or committer) must use a documented name/email pair and carry no AI attribution trailers; `scripts/check-commit-policy.sh` checks new non-merge commits in the PR range. See [Branch names and commit identity](#branch-names-and-commit-identity). Only @pacocartones and @LeonMAG hold maintenance roles and permissions; external contributions do not grant or offer those roles. When we squash-merge, we drop AI `Co-authored-by` lines from the final message so `main` stays clean; your authorship stays.
 
 ## Review
 
@@ -246,9 +246,24 @@ GitHub holds workflow runs from a **first-time contributor** until a maintainer 
   attribution rules still apply to maintainer commits in a Dependabot pull request.
 - **What happens to branches:** in this repository, merged and closed pull requests keep their
   commits and the branch is deleted afterwards; branches in your fork are yours.
-- **Commit identity:** the owner's commits use
-  `Paco Cartones <253313177+pacocartones@users.noreply.github.com>` (how the project is maintained,
-  including the part done by AI agents under human oversight, is described in the README ([How this project is maintained](README.md#how-this-project-is-maintained))), and
-  `scripts/check-commit-policy.sh` enforces this canonical identity for Paco/owner and internal agent identities; it does not define a canonical commit identity for LeonMAG or other contributors. The maintainer roster is in [GOVERNANCE.md](GOVERNANCE.md). If you do not want your email in
-  the public history, use your GitHub noreply address
-  ([how](https://docs.github.com/en/account-and-profile/setting-up-and-managing-your-personal-account-on-github/managing-email-preferences/setting-your-commit-email-address)).
+- **Commit identity:** the accepted maintainer name/email pairs are:
+
+  | Maintainer | Commit name | Accepted email |
+  | --- | --- | --- |
+  | @pacocartones | `Paco Cartones` | `253313177+pacocartones@users.noreply.github.com` |
+  | @LeonMAG | `Leon Marcos` | `leonaniagomez@gmail.com` or `261010486+LeonMAG@users.noreply.github.com` |
+
+  Leon's personal-address pair is present in repository history (for example commit `abf4aa8`).
+  [GitHub's public account API](https://api.github.com/users/LeonMAG) confirms name `Leon Marcos`,
+  login `LeonMAG` and account ID `261010486`; the numeric noreply uses GitHub's
+  [documented format](https://docs.github.com/en/account-and-profile/setting-up-and-managing-your-personal-account-on-github/managing-email-preferences/setting-your-commit-email-address).
+  The bare `LeonMAG@users.noreply.github.com` address is not admitted without evidence.
+  The repository mailbox guard allows Leon's exact historical address only in the policy, its tests
+  and this document/generated page; contributor records remain login-only.
+  These are name/email **pairs**: mixing one maintainer's name with the other's address fails.
+  Both author and committer are checked. Recognized account aliases, tool names and internal
+  `@hq.local` addresses trigger the check but are not accepted canonical identities.
+  Both maintainers are subject to the same AI-attribution rule; fork and automation branch-name
+  exceptions do not bypass it. Other contributors keep their own identity and attribution choices.
+  Git metadata checks enforce consistency, not authentication or authorization: the role roster is
+  [GOVERNANCE.md](GOVERNANCE.md), and a human maintainer still reviews every merge.
