@@ -56,7 +56,7 @@ Run these commands from the repository root after installing dependencies. Follo
 
 | Change | Local validation before opening a PR |
 | --- | --- |
-| Hand-written docs or issue/PR template text | `npm run links`, then preview the changed Markdown or form and open its links. The link checker checks local doc file paths; it does not validate GitHub forms, external issue searches or heading anchors. |
+| Hand-written docs or issue/PR template text | `npm run links`, then preview the changed Markdown or form and open its links. The link checker checks local paths in tracked and non-ignored new Markdown files, including nested docs and package READMEs. Absolute paths and paths escaping the repository are rejected; it does not validate GitHub forms, external issue searches or heading anchors. |
 | Provider data or build inputs (including `CONTRIBUTING.md`, which generates the site's contributing page) | `npm run build && npm test`; commit your changes and regenerated files, then run `npm run check` (it compares generated output with the committed version). Run `npm run og` too if the OG check flags drift. |
 | Code | `npm test`, plus the focused check named in the issue. If the change affects generated output, also follow the build-input row above. |
 
@@ -76,7 +76,7 @@ OG files are left for you to check: run `node scripts/check-og.mjs`; if it repor
 > expected >10 providers in the mined history, got 0
 > ```
 >
-> If you cloned shallow, fix it with `git fetch --unshallow`; otherwise just clone normally: `git clone https://github.com/pacocartones/free-llm-api-hub`. CI always checks out the full history (`fetch-depth: 0`), so this only bites local development.
+> If you cloned shallow, fix it with `git fetch --unshallow`; otherwise just clone normally: `git clone https://github.com/pacocartones/free-llm-api-hub`. The root integrity and site-build CI jobs check out the full history (`fetch-depth: 0`); workflows that do not mine history may use shallow checkouts.
 
 If you want to preview how your entry renders on the site before opening the PR:
 
@@ -179,7 +179,7 @@ AI-assisted contributions are welcome. Please read [AI_POLICY.md](AI_POLICY.md):
 
 Replies in this repository's issues, pull requests and discussions are prepared by an AI agent working under the supervision of the repository owner.
 
-Commit messages: AI-assisted contributions are welcome when you have verified the change (see above). You do not need to remove a trailer your tool adds, and you can commit under any email address. The current *Commit policy* check recognizes Paco/`pacocartones` and legacy maintainer/agent identity patterns, enforces the Paco noreply identity for those matches, and rejects AI attribution trailers on them. It does not yet enforce LeonMAG's identity; that governance work is separate. When we squash-merge, we drop AI `Co-authored-by` lines from the final message so `main` stays clean; your authorship stays.
+Commit messages: AI-assisted contributions are welcome when you have verified the change (see above). Contributors outside the maintainer identity rules below may keep tool-added trailers and use their own email addresses. Commits by either maintainer (as author or committer) must use a documented name/email pair and carry no AI attribution trailers; `scripts/check-commit-policy.sh` checks new non-merge commits in the PR range. See [Branch names and commit identity](#branch-names-and-commit-identity). Only @pacocartones and @LeonMAG hold maintenance roles and permissions; external contributions do not grant or offer those roles. When we squash-merge, we drop AI `Co-authored-by` lines from the final message so `main` stays clean; your authorship stays.
 
 ## Review
 
@@ -246,10 +246,24 @@ GitHub holds workflow runs from a **first-time contributor** until a maintainer 
   attribution rules still apply to maintainer commits in a Dependabot pull request.
 - **What happens to branches:** in this repository, merged and closed pull requests keep their
   commits and the branch is deleted afterwards; branches in your fork are yours.
-- **Commit identity:** Paco commits as
-  `Paco Cartones <253313177+pacocartones@users.noreply.github.com>` (how the project is maintained,
-  including the part done by AI agents under human oversight, is described in the README ([How this project is maintained](README.md#how-this-project-is-maintained))), and
-  `scripts/check-commit-policy.sh` currently enforces Paco/legacy maintainer patterns only,
-  not LeonMAG's identity. This CI change does not alter either maintainer's identity or that policy. If you do not want your email in
-  the public history, use your GitHub noreply address
-  ([how](https://docs.github.com/en/account-and-profile/setting-up-and-managing-your-personal-account-on-github/managing-email-preferences/setting-your-commit-email-address)).
+- **Commit identity:** the accepted maintainer name/email pairs are:
+
+  | Maintainer | Commit name | Accepted email |
+  | --- | --- | --- |
+  | @pacocartones | `Paco Cartones` | `253313177+pacocartones@users.noreply.github.com` |
+  | @LeonMAG | `Leon Marcos` | `leonaniagomez@gmail.com` or `261010486+LeonMAG@users.noreply.github.com` |
+
+  Leon's personal-address pair is present in repository history (for example commit `abf4aa8`).
+  [GitHub's public account API](https://api.github.com/users/LeonMAG) confirms name `Leon Marcos`,
+  login `LeonMAG` and account ID `261010486`; the numeric noreply uses GitHub's
+  [documented format](https://docs.github.com/en/account-and-profile/setting-up-and-managing-your-personal-account-on-github/managing-email-preferences/setting-your-commit-email-address).
+  The bare `LeonMAG@users.noreply.github.com` address is not admitted without evidence.
+  The repository mailbox guard allows Leon's exact historical address only in the policy, its tests
+  and this document/generated page; contributor records remain login-only.
+  These are name/email **pairs**: mixing one maintainer's name with the other's address fails.
+  Both author and committer are checked. Recognized account aliases, tool names and internal
+  `@hq.local` addresses trigger the check but are not accepted canonical identities.
+  Both maintainers are subject to the same AI-attribution rule; fork and automation branch-name
+  exceptions do not bypass it. Other contributors keep their own identity and attribution choices.
+  Git metadata checks enforce consistency, not authentication or authorization: the role roster is
+  [GOVERNANCE.md](GOVERNANCE.md), and a human maintainer still reviews every merge.

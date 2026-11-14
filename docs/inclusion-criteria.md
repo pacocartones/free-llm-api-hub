@@ -18,7 +18,11 @@ What earns a spot in the dataset — and what gets rejected. The scope is delibe
 
 ## Scope guardrail — modalities
 
-**Non-text providers never exceed 35% of the dataset.** "Non-text" = a provider whose `modalities` does not include `text` (speech, image, embeddings, rerank and OCR providers). The core promise of this project is free *text* LLM APIs; adjacent modalities are welcome but must stay a minority. Today: **24 / 69 = 35%** — at the cap, so a new non-text entry requires the count to drop (or the cap to be consciously raised), never the other way around.
+**Non-text providers never exceed 35% of the dataset.** "Non-text" = a provider whose `modalities` does not include `text` (speech, image, embeddings, rerank and OCR providers). The core promise of this project is free *text* LLM APIs; adjacent modalities are welcome but must stay a minority. Review the current ratio before adding a non-text entry; this is an editorial guardrail, not a validator-enforced limit. Compute it from the current dataset rather than relying on a dated count:
+
+```bash
+node --input-type=module -e 'import { readFileSync } from "node:fs"; const { providers } = JSON.parse(readFileSync("data/providers.json", "utf8")); const n = providers.filter(p => !p.modalities.includes("text")).length; console.log(`${n}/${providers.length} (${(100*n/providers.length).toFixed(1)}%) non-text`);'
+```
 
 ## What gets rejected
 

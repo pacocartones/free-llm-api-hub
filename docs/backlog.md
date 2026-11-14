@@ -12,10 +12,10 @@ A living, maintainer-facing checklist of concrete follow-ups. Direction and prin
 
 ## Data — model samples (`models_free`)
 
-- [ ] **Backfill the key-gated providers.** Groq, Cerebras, SambaNova and Scaleway expose a standard OpenAI `/models` endpoint but need an API key. Add each as a repo secret (`GROQ_API_KEY`, `CEREBRAS_API_KEY`, `SAMBANOVA_API_KEY`, `SCALEWAY_API_KEY`) — the `fetch-models` script already reads them and will fill `models_free` automatically (locally via `npm run models`; key-gated providers are skipped unless their key is set in the local environment). Until then these keep a conservative hand-picked sample.
+- [ ] **Backfill the key-gated providers.** Groq, Cerebras, SambaNova and Scaleway expose a standard OpenAI `/models` endpoint but need an API key. Set each key in the local environment or local secrets store (`GROQ_API_KEY`, `CEREBRAS_API_KEY`, `SAMBANOVA_API_KEY`, `SCALEWAY_API_KEY`) — the `fetch-models` script already reads them and will fill `models_free` automatically (locally via `npm run models`; key-gated providers are skipped unless their key is set in the local environment). Until then these keep a conservative hand-picked sample.
 - [ ] **Custom fetchers for the non-OpenAI-shaped ones.** Google Gemini (`/v1beta/models?key=`), Z.ai, Cohere (`/v1/models`, needs key), Cloudflare Workers AI (account-scoped model search) each need a small dedicated extractor in `scripts/fetch-models.mjs`.
 - [ ] **Improve NVIDIA NIM / ModelScope sample quality.** The publisher round-robin currently surfaces some obscure models (alphabetical-first per vendor). Consider weighting toward headline models, or a small per-provider curated preference list.
-- [ ] Consider a `models_url` field: the human-browsable model-list page per provider, linked from the provider page and the model index.
+- ✅ **`models_url`** is an optional, validated catalogue URL in the schema and provider pages; see [comparison dimensions](comparison-dimensions.md).
 
 ## Site & SEO
 
@@ -97,7 +97,7 @@ only what confirms.
 ## Bigger bets (under consideration)
 
 - ✅ **Small documented public JSON API over the dataset** — shipped as a *static* versioned API at [`/api/v1/`](https://freellmapihub.com/api/) (full + slices by category/constraint/modality) plus `llms.txt`/`llms-full.txt` for agents. No query params (static hosting); slices cover the common filters.
-- [ ] Free AI **coding tools** as a clearly-separated sibling section (volatile — kept out of the verified self-serve dataset, like the credit-programs and self-hosting companions).
+- ✅ Free AI **coding tools** shipped as a [separate section](https://freellmapihub.com/coding-tools/), backed by `data/coding-tools.json` and `data/coding-tools-own-key.json`; excluded from provider counts and ranking.
 
 ## Recently shipped
 
