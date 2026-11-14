@@ -1,8 +1,8 @@
 # Releasing
 
 How releases of this repository are made and what every release looks like. The same standard
-applies to the maintainer's other public repositories, adapted here to a dataset: there is no
-npm package to publish, so a release is a pinned snapshot of the data.
+applies to the maintainer's other public repositories, adapted here to a dataset: dataset releases pin snapshots of the data. The optional MCP package has a separate, gated
+publication process (rule 4).
 
 ## Rules
 
@@ -70,7 +70,22 @@ A release is a snapshot of `data/providers.json`. To check the one you downloade
 ```bash
 git rev-parse vX.Y.Z^{commit}
 git show vX.Y.Z:data/providers.json | sha256sum
-npm ci && npm run check
+git switch --detach vX.Y.Z
+npm ci --ignore-scripts
+npm test && npm run check
 ```
 
+Use a clean full clone; inspect `git status` before switching revisions. The checks above run against the selected tag, not whichever branch happened to be checked out. `npm run check` excludes the date-relative freshness badge.
+
 The notes of each release give the commit and the sha256 of `data/providers.json` at the tag.
+
+## Prepare snapshot assets without publishing
+
+Use `npm run release-snapshot -- vX.Y.Z /new/output/directory` from a full
+clone after fetching origin main and tags with the explicit refspec in the
+procedure below. Use a committed, clean tooling checkout; its commit and Node
+version are recorded in the snapshot manifest. It creates tagged canonical JSON,
+public JSON, scalar CSV, the tagged schema, a commit manifest and SHA-256
+checksums locally. It never creates a tag or GitHub Release. Follow the
+[preparation and approval procedure](docs/release-preparation.md) for validation
+at the exact tag, notes and contributor credits before owner approval.

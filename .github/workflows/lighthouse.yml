@@ -1,10 +1,14 @@
 name: Lighthouse
 
-# Accessibility and performance budget for the built site.
+# Accessibility, performance and SEO budget for the built site.
 #
 # Serves site/ itself on a free local port and measures what it serves with
-# Lighthouse, on nine pages: the home, /best/, /coverage/, /free-gpu/, /coding-tools/,
-# /compare/, /data-policy/, /guides-and-collections/ and one provider page.
+# Lighthouse, on sixteen pages: the home, /best/, /coverage/, /free-gpu/, /coding-tools/,
+# /compare/, /data-policy/, /guides-and-collections/ and one provider page, plus
+# /collections/no-credit-card.html, /collections/openai-compatible.html,
+# /guides/free-llm-api-no-signup.html, /guides/free-embeddings-apis.html,
+# /guides/free-ocr-document-ai-apis.html, /guides/free-speech-to-text-apis.html
+# and /guides/free-image-generation-apis.html. SEO must score 1.
 # The job fails when a page falls below the thresholds in
 # scripts/lib/lighthouse-gate.mjs. Nothing is published, no secret is used, and
 # the token can only read the repository.
@@ -42,7 +46,7 @@ jobs:
         working-directory: tools/lighthouse
         run: npm ci --ignore-scripts
 
-      - name: Measure the nine pages
+      - name: Measure the sixteen pages
         env:
           CHROME_PATH: /usr/bin/google-chrome
         run: node scripts/lighthouse-gate.mjs

@@ -11,6 +11,9 @@ on:
       # derived-fingerprints.json lives at the repo root, outside the dirs above,
       # but a pin change means the build output shifted — redeploy and re-verify it.
       - 'derived-fingerprints.json'
+      # These authored docs are rendered into /contributing/ and /methodology/.
+      - 'CONTRIBUTING.md'
+      - 'docs/methodology.md'
   # The star counter is read from the GitHub API at every deploy (see the refresh step below), so the site is
   # deployed once a day even when nobody pushes: the number then never ages more than a day.
   schedule:

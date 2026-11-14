@@ -18,7 +18,7 @@ You don't have to tell us you used AI, and it never counts against you. If you'd
 
 ## How we work
 
-We maintain this project with the help of AI agents too, under human oversight. Agents do much of the routine work: re-checking sources, preparing updates, triaging issues and drafting code. A human maintainer reviews and is responsible for every merge. Automated review comments are advisory; a person makes the call.
+We maintain this project with the help of AI agents too, under human oversight. Agents help with repository checks, human-authored updates and code. The re-verification fetch produces human-only dossiers; never pass those pages or dossiers into a tool-capable agent. Follow the clean-worktree handoff in [the update playbook](docs/update-playbook.md). A human maintainer reviews and is responsible for every merge. Automated review comments are advisory; a person makes the call.
 
 ## What we will close
 

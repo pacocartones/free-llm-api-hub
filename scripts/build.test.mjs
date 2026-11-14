@@ -590,16 +590,28 @@ test('contributor data and scripts carry no e-mail address of any kind', () => {
   assert.ok(anyAddress.test('someone@example.invalid'), 'the pattern would catch an address');
 });
 
-test('no tracked file carries a personal mailbox address', () => {
-  // Contributors are identified by GitHub login; fixtures use the reserved .invalid TLD.
-  const personal = /[\w.+-]+@(?:gmail|googlemail|hotmail|outlook|live|yahoo|icloud|proton(?:mail)?|pm)\.[a-z.]+/i;
+test('tracked files reject personal mailboxes except the verified maintainer policy address', () => {
+  // The owner authorized Leon's historical identity in policy/docs only.
+  // Contributor records remain login-only; this is not a general email exemption.
+  const historicalEmail = 'leonaniagomez@gmail.com';
+  const policyFiles = new Set([
+    'CONTRIBUTING.md', 'site/contributing/index.html', 'scripts/check-commit-policy.sh',
+    'scripts/check-commit-policy.test.mjs', 'scripts/build.test.mjs',
+  ]);
+  const personal = /[\w.+-]+@(?:gmail|googlemail|hotmail|outlook|live|yahoo|icloud|proton(?:mail)?|pm)\.[a-z.]+/gi;
+  const unexpected = (rel, text) => [...text.matchAll(personal)].some(([email]) =>
+    !policyFiles.has(rel) || email !== historicalEmail);
+  assert.equal(unexpected('CONTRIBUTING.md', historicalEmail), false);
+  assert.equal(unexpected('data/contributors.json', historicalEmail), true, 'no contributor-data exception');
+  assert.equal(unexpected('CONTRIBUTING.md', historicalEmail.replace('leonaniagomez', 'someone')), true, 'other addresses still fail inside policy files');
+  assert.equal(unexpected('CONTRIBUTING.md', 'prefix' + historicalEmail), true, 'partial address matches are not exempt');
   const files = execFileSync('git', ['ls-files', '-z'], { cwd: ROOT, encoding: 'utf8' }).split('\0').filter(Boolean);
   const hits = [];
   for (const rel of files) {
     if (/\.(png|jpe?g|webp|gif|woff2?|ico)$/i.test(rel)) continue;
-    if (personal.test(readFileSync(join(ROOT, rel), 'utf8'))) hits.push(rel);
+    if (unexpected(rel, readFileSync(join(ROOT, rel), 'utf8'))) hits.push(rel);
   }
-  assert.deepEqual(hits, [], 'files that contain a personal mailbox address (names only; the address is never printed)');
+  assert.deepEqual(hits, [], 'files with unapproved personal mailboxes (names only; addresses are never printed)');
 });
 
 test('every README collection has a generated description', () => {

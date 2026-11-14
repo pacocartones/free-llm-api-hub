@@ -1,14 +1,14 @@
 # Architecture — pipeline, data model, scripts, site, design system
 
-The map for anyone touching the code. The short version: **two files are hand-edited, everything else is generated.**
+The map for anyone touching the code. **Edit canonical inputs and generators; regenerate their outputs.** Provider facts live in `data/providers.json`, but the pipeline also consumes companion datasets, editorial metadata, hand-written documentation and site templates.
 
 ## 1. The data-first pipeline
 
 ```
 data/providers.json   ─┐
 data/programs.json    ─┤──►  scripts/build.mjs  ──►  README.md, badge-freshness.json,
-data/schema.json       │                              collections/*.md, docs/credit-programs.md,
-                       │                              collections/*.md, docs/credit-programs.md,
+data/*schema.json      │                              collections/*.md, docs/credit-programs.md,
+                       │                              docs/comparison-dimensions.md,
                        │                              site/index.html (SSR rows injected),
                        │                              site/{collections,models,guides,p,programs,legal}/,
                        │                              site/guides-and-collections/ (unified hub),
@@ -20,17 +20,19 @@ data/schema.json       │                              collections/*.md, docs/c
                        │                              site/badges/*.json, site/compare/ (compare view),
                        │                              site/shared-rules.js, site/shared-rows.js,
                        │                              site/shared-sort.js, site/shared-compare.js (gitignored)
-                       └──►  everything is DERIVED. Never hand-edit generated files.
+                       └──►  generated regions and outputs; preserve authored inputs.
 ```
 
-- **`data/providers.json`** and **`data/programs.json`** are the ONLY sources you hand-edit.
-- **`scripts/build.mjs`** reads the data and writes everything. It's **idempotent**: running it twice with the same data produces byte-identical output.
+- **Canonical inputs:** `data/providers.json` and `data/programs.json`, plus the companion files listed below. Schema files describe contracts; they are not generated from provider records.
+- **Other build inputs:** `data/best.json`, `data/editorial.json`, `data/provider-summaries.json`, `data/sponsorships.json`, `data/contributors.json`, `data/repo-stats.json`, `data/probe-report.json`, `data/gpu-compute.json`, `data/coding-tools.json` and `data/coding-tools-own-key.json`. Quotes and quote reports are validated evidence records; follow [quotes.md](quotes.md) when changing them.
+- **Hand-written inputs with generated regions or pages:** `README.md`, `site/index.html`, `CITATION.cff`, `docs/credit-programs.md` and `docs/comparison-dimensions.md` retain authored text around generated sections or fields. `CONTRIBUTING.md` and `docs/methodology.md` generate their matching site pages. Edit authored text at its source and run the build. Other docs, scripts, styles and browser code remain hand-maintained.
+- **`scripts/build.mjs`** reads the data and writes everything. It is idempotent for the same inputs, Git history and reference day. Date-relative and history-derived exceptions are described below.
 - **CI:** `verify.yml` installs the locked development tools with lifecycle scripts disabled, then runs `validate` + `check-links` + `check-og` (OG images exist and match the dataset) + `check-history` (git-mined history) + the pipeline tests on every PR, plus a **blocking drift check**: it rebuilds the derived files and fails the PR if they are out of sync with the data. There is no regeneration bot — the author regenerates locally (`npm run build`, and `npm run og` when needed) and commits the results in the same PR, so a change ships complete. The daily deploy (`pages.yml`) refreshes GitHub stars before building and commits nothing. Provider re-verification, badge regeneration, probes and the `models_free` backfill (`npm run models`) stay local and on-demand. **Corollary: nothing may be relative to the *current date*** in committed generated files — everything committed must be byte-stable for a given dataset (the "NEW" badge and the freshness colours are computed from `data.generated`, so they are deterministic and safe in committed files; provider `/p/` pages are gitignored precisely so they can use the current date).
 - **Weekly issue metadata:** `weekly-worklist.yml` runs the dependency-free `refresh-worklist.mjs --write` against trusted main Mondays at 09:17 UTC and on manual main dispatch, serializing runs. It replaces only issue #4's generated body from the shared `stalenessWorklist` renderer, with a UTC date and immutable dataset commit link. Preview locally with `npm run worklist:refresh`; see [manual recovery](update-playbook.md#recover-a-stale-issue-worklist) for delayed or disabled schedules. It makes no provider requests, verifies no claims and edits no dataset or site/badge artifacts. Human review and the clean-worktree handoff remain required for provider changes.
 
   *E2E-verified 2026-08-13 (PR #127): a bare data change without regenerated files fails the drift step (verify run `31746567051`, exit 1, with the remediation instructions in the step summary); pushing the same change with the regenerated files committed passes (run `31746721656`).*
 
-  **The one deliberate exception is `badge-freshness.json`.** It has to be date-relative — a freshness badge that only moves when the data moves is not measuring freshness — so it is committed *and* excluded from both diff-gates (`npm run check` and the drift report list it nowhere). It goes stale between refreshes by design; it is recommitted on every data/build pass (see [update-playbook.md](update-playbook.md)). Nothing may assert that the committed badge equals a freshly built one, because on any day but the last refresh it does not — the test in `build.test.mjs` checks the file is internally consistent instead.
+  **The one deliberate exception is `badge-freshness.json`.** It has to be date-relative — a freshness badge that only moves when the data moves is not measuring freshness — so it is committed *and* excluded from both diff-gates (`npm run check` and the drift report list it nowhere). It goes stale between refreshes by design; it is recommitted on every data/build pass (see [update-playbook.md](update-playbook.md)). Nothing may assert that the committed badge equals a freshly built one on a later day — the test in `build.test.mjs` checks internal consistency instead. The README badge reads this committed snapshot; daily Pages builds do not commit it, so it does not automatically age between committed refreshes.
 
 **The gitignored derived files are pinned too.** `derived-fingerprints.json` (a sha256 of every build output under `site/` that is not tracked by git) is itself a drift-gate target: a change to any gitignored derivative - `models/`, `api/`, `legal/`, `programs/`, `llms.txt`, `shared-rules.js`/`shared-rows.js`, ... - is visible in review and fails CI until the author commits the regenerated fingerprint. The set is derived from `git ls-files site/` at the end of `build.mjs`, so it stays in sync with `.gitignore` automatically. The deliberate exclusions are the date-relative outputs — `site/p/` (provider pages render "verified Xd ago" relative to the current day, the same reason they are gitignored at all) and `site/badges/` (each per-provider badge turns yellow past 60 days and red past the SLA, so its bytes change with the calendar, not the data) — and the git-log-derived files — `updates.html`, `updates/page/*`, `feed.xml`, `api/v1/history.json`, and the weekly change feed and monthly reports mined from the same history (`changes/`, `changes.xml`, `api/v1/changes.json`, `state/`) — whose content embeds the commit hash/subject or dates of the build history, so it shifts across a squash merge and cannot be deterministically pinned (they are regenerated on every deploy).
 
@@ -42,7 +44,7 @@ data/schema.json       │                              collections/*.md, docs/c
 Top level: `{ $schema, version (semver, the dataset release), generated (YYYY-MM-DD), source, note, providers: [...] }`.
 Schema in `data/schema.json`; validated by `scripts/validate.mjs`. Canonical byte-format enforced by `scripts/_serialize.mjs` (the `ORDER` array). **Field order in the file MUST match `ORDER`** or the serializer self-test fails.
 
-Per-provider fields (in serializer order):
+Per-provider fields (grouped for reference; the authoritative serialization order is `ORDER` in `scripts/_serialize.mjs`):
 
 | field | type | notes |
 |---|---|---|
@@ -98,7 +100,7 @@ The serializer **skips absent keys**, so new optional fields only appear on prov
 - **`reverify.mjs`** (`npm run reverify`, `--batch N`, `--fetch-for-human-review`) — prints the local re-verification worklist without network access by default. A human-only opt-in fetches provider prose through the bounded public-URL transport and writes warning-labelled dossiers under the operating system's temporary directory, outside the checkout. Agents may handle only the later human-authored edit in a fresh worktree that never contained current or legacy dossiers.
 - **`check-og.mjs`** (CI) — every committed OG PNG must exist AND match the dataset: recomputes the fingerprints in `site/og/manifest.json` from `data/providers.json`. Pure Node, with no image-rendering dependency, so it checks the fingerprint without rendering images.
 - **`check-history.mjs`** (CI) — cheaply validates the git-mined per-provider history (two git processes, no build) before the full test suite.
-- **`check-links.mjs`** (`npm run links`, part of `npm test`) — validates INTERNAL markdown links (relative doc-to-doc paths) only. Never touches the network. The external `docs_url` sweep is a local on-demand pass in the [update playbook](update-playbook.md); genuine failures (not 401/403/405/429 bot-blocks) open a "broken link" issue.
+- **`check-links.mjs`** (`npm run links`, part of `npm test`) — validates local Markdown file paths across tracked and non-ignored new Markdown files, including nested docs, release instructions, templates and package READMEs. Absolute paths and paths escaping the repository are rejected, including Windows forms on Linux. Query strings and fragments are stripped before checking paths; heading anchors and external destinations are not validated. Never touches the network. The external `docs_url` sweep is a local on-demand pass in the [update playbook](update-playbook.md); genuine failures (not 401/403/405/429 bot-blocks) are reported for human follow-up; the checker does not open issues.
 - **`probe-cron.sh`** — the VPS weekly cron helper (Infisical → probe → models → build → reviewed diff). It never stages or pushes generated output; a human opens the pull request.
 
 npm scripts: `build, validate, links, worklist, worklist:refresh, reverify, models, discover, probe, og, test (validate + links + test suites), check (validate + build + diff-gate), check-live (committed sitemap vs deployed), smoke-live (every published sitemap URL answers 200)`.

@@ -14,7 +14,7 @@ import { fileURLToPath } from 'node:url';
 
 // Files outside site/ that the build writes (README.md, collections/, the docs, the badges and the fingerprints).
 export const STATIC_TARGETS = [
-  'README.md', 'collections', 'docs/credit-programs.md', 'CITATION.cff', 'data/probe-report.json',
+  'README.md', 'collections', 'docs/credit-programs.md', 'docs/comparison-dimensions.md', 'CITATION.cff', 'data/probe-report.json',
   'badge-verified.json', 'derived-fingerprints.json',
 ];
 
