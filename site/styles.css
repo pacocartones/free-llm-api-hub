@@ -111,7 +111,7 @@ svg.i { width: 15px; height: 15px; flex: none; vertical-align: -2px; }
 .site-header .brand .grad { color: var(--on-header-accent); }
 .site-header .icon-btn { background: var(--on-header-hover); border-color: var(--on-header-line); color: var(--on-header); }
 .site-header .icon-btn:hover { background: rgba(255, 255, 255, .24); border-color: var(--on-header); color: var(--on-header); }
-.site-header .icon-btn .star-count, .site-header .icon-btn:hover .star-count { color: var(--on-header-muted); }
+.site-header .icon-btn .star-count, .site-header .icon-btn:hover .star-count { color: var(--on-header); }
 .header-inner { height: var(--header-h); display: flex; align-items: center; gap: 22px; }
 .brand { display: inline-flex; align-items: center; gap: 10px; color: var(--text); }
 .brand:hover { text-decoration: none; }

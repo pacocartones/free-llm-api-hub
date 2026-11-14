@@ -2188,6 +2188,7 @@ test('the green header keeps AA contrast: white 7:1 and the muted text 4.5:1 on 
   assert.ok(ratio(token('on-header'), bar) >= 7, 'white on the bar');
   assert.ok(ratio(token('on-header-muted'), bar) >= 4.5, 'muted text on the bar');
   assert.ok(ratio(token('on-header-accent'), bar) >= 4.5, 'the accent word of the brand on the bar');
+  assert.match(css, /\.site-header \.icon-btn \.star-count, \.site-header \.icon-btn:hover \.star-count \{ color: var\(--on-header\); \}/, 'the small star count stays AA over the translucent button backgrounds');
 });
 
 test('best-facts: the three cards show fields of the record as they are, and a missing field reads «not stated»', () => {
