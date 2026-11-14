@@ -57,7 +57,7 @@ Primarily **free LLM (text) APIs** — plus the adjacent model APIs a builder re
 | **Speech (STT / TTS)** | 26 | Google Gemini API, Groq, Cloudflare Workers AI |
 | **Embeddings** | 13 | Google Gemini API, Cloudflare Workers AI, Cohere |
 | **Image generation** | 11 | Cloudflare Workers AI, HuggingFace, OVHcloud AI Endpoints |
-| **Vision** | 10 | Google Gemini API, OpenRouter, Z.ai |
+| **Vision** | 11 | Google Gemini API, OpenRouter, Z.ai |
 | **OCR / documents** | 8 | OCR.space, LlamaParse, Nanonets |
 | **Rerank** | 6 | Cohere, Jina AI, Mixedbread |
 <!-- AUTOGEN:coverage:end -->

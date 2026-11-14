@@ -2,7 +2,11 @@
 
 An [MCP](https://modelcontextprotocol.io) server over the free-llm-api-hub dataset. An MCP client (Claude Desktop, an IDE agent, any MCP host) can use it to search free-tier and trial-credit LLM API providers, read one entry, and get a ready-to-paste OpenAI-client config.
 
-> **Not published yet.** `package.json` sets `"private": true` so that nothing can be published to npm by accident. Publishing, and the final package name, are a maintainer decision. Until then, run it from a local checkout (see below).
+> **Publication is maintainer-gated.** This package is configured for public npm distribution;
+> that alone does not establish that a version exists on npm or in the MCP Registry.
+> Use a checkout until a maintainer announces a published version. See the
+> [release setup](https://github.com/pacocartones/free-llm-api-hub/blob/main/docs/mcp-release.md)
+> for external ownership, OIDC and review prerequisites.
 
 **Free-tier terms change without notice.** Every result carries the provider's `docs_url` (its own pricing or rate-limit page, which is authoritative) and `last_verified` (the date the entry was last checked against it). Check the docs before relying on a number.
 
@@ -31,13 +35,16 @@ node src/index.js --data ../../data/providers.json   # local dataset
 node src/index.js --data ../../data/providers.json --clients ../../site/api/v1/openai-clients.json
 ```
 
-The server speaks MCP over stdio, so on its own it just waits for a client. Requires Node 18 or later.
+The server speaks MCP over stdio, so on its own it just waits for a client. Requires Node 22.14 or later.
 
-### With npx (once published)
+### With npx (after verifying a published version)
+
+Replace `VERSION` with an announced version shown by `npm view free-llm-api-hub-mcp versions`.
+Pin that version in client configurations too:
 
 ```bash
-npx -y free-llm-api-hub-mcp
-npx -y free-llm-api-hub-mcp --data ./providers.json --clients ./openai-clients.json
+npx -y free-llm-api-hub-mcp@VERSION
+npx -y free-llm-api-hub-mcp@VERSION --data ./providers.json --clients ./openai-clients.json
 ```
 
 ## Client configuration
@@ -58,7 +65,7 @@ Claude Desktop (`claude_desktop_config.json`), from a local checkout:
 }
 ```
 
-Once published, replace `command`/`args` with `"command": "npx", "args": ["-y", "free-llm-api-hub-mcp"]`. To pin local files, add `"env": { "FLAH_DATA": "/absolute/path/to/providers.json", "FLAH_CLIENTS": "/absolute/path/to/openai-clients.json" }`.
+Once published, replace `command`/`args` with `"command": "npx", "args": ["-y", "free-llm-api-hub-mcp@VERSION"]`. To pin local files, add `"env": { "FLAH_DATA": "/absolute/path/to/providers.json", "FLAH_CLIENTS": "/absolute/path/to/openai-clients.json" }`.
 
 Any other MCP host that launches stdio servers takes the same three things: the command (`node`), the arguments (the path to `src/index.js`, optionally `--data <path>` and `--clients <path>`), and optionally the `FLAH_DATA` / `FLAH_CLIENTS` environment variables.
 
@@ -121,7 +128,10 @@ actual tool call. These examples are not host certification or an extension inst
 
 ## Tools
 
-All tools are read-only.
+All tools are read-only and idempotent. They advertise `openWorldHint: true` because
+first use can fetch the published datasets over HTTPS, even though they never call
+provider inference APIs or modify data. Both local overrides avoid those dataset
+fetches. Annotations describe capabilities; they do not grant permissions.
 
 | Tool | Arguments | Returns |
 |---|---|---|
@@ -147,7 +157,19 @@ npm --prefix packages/mcp ci --ignore-scripts
 npm --prefix packages/mcp test
 ```
 
-The tests run the tool logic against `test/fixtures/providers.json` and `test/fixtures/openai-clients.json`, and one end-to-end test spawns the server over stdio with the SDK client. None of them touch the network.
+The unit and stdio tests use local fixtures without network access. Distribution tests
+are separate because installing npm dependencies needs registry access:
+
+```bash
+npm --prefix packages/mcp run validate:server-json
+npm --prefix packages/mcp run test:pack
+```
+
+`test:pack` checks public metadata, packs the actual archive, installs it in a temporary
+consumer directory and calls its installed CLI over stdio with local fixtures. It never
+calls a provider API. CI tests this archive before publication; the release job consumes
+the same uploaded tarball. Source, README, license and Registry manifest ship in the
+package; tests, schemas and fixtures remain in the repository.
 
 ## License
 
