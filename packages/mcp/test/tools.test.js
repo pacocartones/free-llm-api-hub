@@ -54,6 +54,100 @@ test('loader does not cache a failure', async () => {
   assert.deepEqual((await load()).providers, []);
 });
 
+// Bound every await in the remote loader, even when a transport ignores abort.
+for (const [name, create, raw] of [
+  ['providers', createLoader, { providers: [] }],
+  ['clients', createClientsLoader, { clients: [] }],
+]) {
+  for (const phase of ['fetch', 'json']) {
+    test(`${name} loader times out during ${phase}, aborts and retries with a shared cache`, { timeout: 2000 }, async () => {
+      let requests = 0;
+      let signal;
+      let finishOld;
+      let finishRetry;
+      const old = new Promise((resolve) => { finishOld = resolve; });
+      const retry = new Promise((resolve) => { finishRetry = resolve; });
+      const response = { ok: true, json: async () => raw };
+      const load = create({
+        timeoutMs: 25,
+        fetchImpl: async (_url, options) => {
+          requests++;
+          if (requests === 1) {
+            signal = options.signal;
+            return phase === 'fetch' ? old : { ok: true, json: () => old };
+          }
+          return retry;
+        },
+      });
+      const first = load();
+      const concurrent = load();
+      let watchdog;
+      const results = await Promise.race([
+        Promise.allSettled([first, concurrent]),
+        new Promise((resolve) => { watchdog = setTimeout(() => resolve(null), 250); }),
+      ]).finally(() => clearTimeout(watchdog));
+      assert.notEqual(results, null, 'a stalled remote load must settle before the test watchdog');
+      for (const result of results) {
+        assert.equal(result.status, 'rejected');
+        assert.equal(result.reason.name, 'TimeoutError');
+      }
+      assert.equal(signal.aborted, true);
+      assert.equal(requests, 1);
+
+      const next = load();
+      // An obsolete result must not replace or clear the in-flight retry.
+      finishOld(phase === 'fetch' ? response : raw);
+      // Drain the obsolete response without yielding to the retry's timer phase.
+      await new Promise((resolve) => process.nextTick(resolve));
+      const shared = load();
+      finishRetry(response);
+      const [a, b] = await Promise.all([next, shared]);
+      assert.deepEqual(a[name], []);
+      assert.equal(a, b);
+      assert.equal(await load(), a);
+      assert.equal(requests, 2);
+    });
+  }
+}
+
+test('the remote deadline is shared by fetching headers and reading JSON', { timeout: 2000 }, async () => {
+  const { setTimeout: delay } = await import('node:timers/promises');
+  let signal;
+  const load = createLoader({
+    timeoutMs: 100,
+    fetchImpl: async (_url, options) => {
+      signal = options.signal;
+      await delay(60);
+      return { ok: true, json: async () => {
+        await delay(60);
+        return { providers: [] };
+      } };
+    },
+  });
+  await assert.rejects(load(), { name: 'TimeoutError' });
+  assert.equal(signal.aborted, true);
+});
+
+test('concurrent successful remote loads share a result and clear their deadline', async () => {
+  const { setTimeout: delay } = await import('node:timers/promises');
+  let signal;
+  let requests = 0;
+  const load = createLoader({
+    timeoutMs: 25,
+    fetchImpl: async (_url, options) => {
+      requests++;
+      signal = options.signal;
+      return { ok: true, json: async () => ({ providers: [] }) };
+    },
+  });
+  const [a, b] = await Promise.all([load(), load()]);
+  await delay(40);
+  assert.equal(a, b);
+  assert.equal(await load(), a);
+  assert.equal(requests, 1);
+  assert.equal(signal?.aborted, false);
+});
+
 test('normalizeDataset rejects a file without providers', () => {
   assert.throws(() => normalizeDataset({ version: '1' }, 'x.json'), /no "providers" array/);
 });

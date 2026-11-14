@@ -7,6 +7,7 @@ export const API_BASE = 'https://freellmapihub.com/api/v1';
 export const DEFAULT_URL = `${API_BASE}/providers.json`;
 export const DEFAULT_CLIENTS_URL = `${API_BASE}/openai-clients.json`;
 const LOCAL_SOURCE = 'local_override';
+const DEFAULT_TIMEOUT_MS = 20_000;
 
 /**
  * Validate the minimal shape the tools rely on and drop operational fields.
@@ -56,9 +57,10 @@ export function normalizeClients(raw, origin) {
 /**
  * Returns a loader that resolves one JSON file once and caches it, from a
  * local path when given, otherwise from the URL. A failed load is not
- * cached, so a later call can retry.
+ * cached, so a later call can retry. Remote loads have one total deadline
+ * covering both the request and the JSON body, including transports that ignore abort.
  */
-export function createJsonLoader({ path, url, normalize, fetchImpl = globalThis.fetch }) {
+export function createJsonLoader({ path, url, normalize, fetchImpl = globalThis.fetch, timeoutMs = DEFAULT_TIMEOUT_MS }) {
   let cached = null;
   return async function load() {
     if (cached) return cached;
@@ -67,9 +69,26 @@ export function createJsonLoader({ path, url, normalize, fetchImpl = globalThis.
         const text = await readFile(path, 'utf8');
         return normalize(JSON.parse(text), LOCAL_SOURCE);
       }
-      const res = await fetchImpl(url, { headers: { accept: 'application/json' } });
-      if (!res.ok) throw new Error(`GET ${url} answered HTTP ${res.status}`);
-      return normalize(await res.json(), url);
+      const controller = new AbortController();
+      let timer;
+      const deadline = new Promise((_, reject) => {
+        timer = setTimeout(() => {
+          const error = new DOMException(`Remote JSON load timed out after ${timeoutMs}ms`, 'TimeoutError');
+          reject(error);
+          controller.abort(error);
+        }, timeoutMs);
+      });
+      try {
+        const remote = (async () => {
+          const res = await fetchImpl(url, { headers: { accept: 'application/json' }, signal: controller.signal });
+          if (!res.ok) throw new Error(`GET ${url} answered HTTP ${res.status}`);
+          return normalize(await res.json(), url);
+        })();
+        // The race releases callers even if a transport fails to honor abort.
+        return await Promise.race([remote, deadline]);
+      } finally {
+        clearTimeout(timer);
+      }
     })();
     cached = pending;
     try {
@@ -82,11 +101,11 @@ export function createJsonLoader({ path, url, normalize, fetchImpl = globalThis.
 }
 
 /** providers.json loader (--data / FLAH_DATA). */
-export function createLoader({ dataPath, url = DEFAULT_URL, fetchImpl } = {}) {
-  return createJsonLoader({ path: dataPath, url, normalize: normalizeDataset, fetchImpl });
+export function createLoader({ dataPath, url = DEFAULT_URL, fetchImpl, timeoutMs } = {}) {
+  return createJsonLoader({ path: dataPath, url, normalize: normalizeDataset, fetchImpl, timeoutMs });
 }
 
 /** openai-clients.json loader (--clients / FLAH_CLIENTS). */
-export function createClientsLoader({ clientsPath, url = DEFAULT_CLIENTS_URL, fetchImpl } = {}) {
-  return createJsonLoader({ path: clientsPath, url, normalize: normalizeClients, fetchImpl });
+export function createClientsLoader({ clientsPath, url = DEFAULT_CLIENTS_URL, fetchImpl, timeoutMs } = {}) {
+  return createJsonLoader({ path: clientsPath, url, normalize: normalizeClients, fetchImpl, timeoutMs });
 }
