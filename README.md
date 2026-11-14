@@ -18,11 +18,11 @@ Every entry is dated and sourced to the provider's own docs; what we could not c
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 [![Contributors](https://img.shields.io/github/contributors/pacocartones/free-llm-api-hub)](https://github.com/pacocartones/free-llm-api-hub/graphs/contributors)
-[![Hacktoberfest](https://img.shields.io/badge/contribute-good%20first%20issues-9c4668.svg)](https://github.com/pacocartones/free-llm-api-hub/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22)
+[![Good first issues](https://img.shields.io/badge/contribute-good%20first%20issues-9c4668.svg)](https://github.com/pacocartones/free-llm-api-hub/contribute)
 
 **[🔎 Interactive explorer](https://freellmapihub.com/)** &nbsp;·&nbsp; **[📊 Dataset](data/providers.json)** &nbsp;·&nbsp; **[🧪 How we verify](docs/methodology.md)** &nbsp;·&nbsp; **[➕ Add a provider](CONTRIBUTING.md)**
 
-⭐ **Useful? [Star the repo](https://github.com/pacocartones/free-llm-api-hub)** so other builders find it. &nbsp;·&nbsp; 🛠 **Want to help?** Pick a [good first issue](https://github.com/pacocartones/free-llm-api-hub/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) or a [help wanted](https://github.com/pacocartones/free-llm-api-hub/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22) issue; each one names the page to read and the check to run. New here? [CONTRIBUTING.md](CONTRIBUTING.md) is the short version.
+⭐ **Useful? [Star the repo](https://github.com/pacocartones/free-llm-api-hub)** so other builders find it. &nbsp;·&nbsp; 🛠 **Want to help?** Pick a [good first issue](https://github.com/pacocartones/free-llm-api-hub/contribute) or a [help wanted](https://github.com/pacocartones/free-llm-api-hub/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22) issue; follow its named files and check. New here? Start with [CONTRIBUTING.md](CONTRIBUTING.md).
 
 
 </div>
@@ -208,7 +208,7 @@ Self-contained (inline styles, no CSS conflicts). All attributes are optional: `
 Found an outdated limit, a dead link, or a provider that belongs here? You'll keep this useful for everyone.
 
 - **Fastest:** the [structured issue form](../../issues/new?template=inaccuracy.yml) — provider, what changed, a source link.
-- **Or open a PR** editing only [`data/providers.json`](data/providers.json). Run `npm run build` to regenerate the README and badge, and `npm test` to validate. Never hand-edit the tables — they're generated.
+- **For a provider-data correction:** edit [`data/providers.json`](data/providers.json), run `npm run build && npm test`, and commit the generated files with the data. Never hand-edit the tables — they're generated.
 
 Full guidelines, including what counts as an acceptable source: **[CONTRIBUTING.md](CONTRIBUTING.md)**.
 
@@ -218,13 +218,13 @@ Use AI tools if they help you — we do too. We ask for good judgement: understa
 
 ## 🙋 Contributions wanted right now
 
-This dataset is only as good as it is trustworthy, and right now there are `null` fields (= "nobody has confirmed it yet") waiting for a source. Three concrete ways to help, from smallest to biggest:
+Provider facts need checking, and the docs and site need care too. Three ways to help:
 
-1. Grab a [*good first issue*](https://github.com/pacocartones/free-llm-api-hub/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) and answer **a single question** about one provider (e.g. *"what does this provider say it does with your prompts?"*) from its official site, with today's date. Those issues are answered from public pages and name the files and the check to run; there is also a [*help wanted*](https://github.com/pacocartones/free-llm-api-hub/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22) list for larger pieces. A `good first issue` + `data` question is not claimed: just open the pull request when it's ready, because the first correct, sourced answer is merged and a claim would only hold it up.
+1. Pick a [*good first issue*](https://github.com/pacocartones/free-llm-api-hub/contribute). These include provider facts, docs and code; each issue names the files and the check. For a provider fact, including a docs source check, cite the official page and the day you read it (UTC). For code or other docs, follow the issue's evidence and acceptance criteria. A `good first issue` also labelled `data` is not claimed; for other issues, comment `/take` before starting. There is also a [*help wanted*](https://github.com/pacocartones/free-llm-api-hub/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22) list for larger pieces.
 2. Pick a provider from the umbrella issue [**confirm `phone_required`**](https://github.com/pacocartones/free-llm-api-hub/issues/7).
 3. Do the same for [**confirm `commercial_ok`**](https://github.com/pacocartones/free-llm-api-hub/issues/8), reading the provider's terms.
 
-The rule is simple and honest: primary source (the provider's own docs) + a real date, and if you can't find it, leave a yes/no field `null` and tell us what you read. For any other issue, comment `/take` and a bot assigns it to you straight away; `/release` frees it. We read every pull request and reply as soon as we can; see [CONTRIBUTING.md](CONTRIBUTING.md#claiming-an-issue).
+For a provider fact, use the provider's own docs and a real date; if you cannot confirm it, leave the data unchanged and tell us what you read. `/release` frees an issue you claimed. We read every pull request and reply as soon as we can; see [CONTRIBUTING.md](CONTRIBUTING.md#claiming-an-issue).
 
 **October:** help us verify, in the open, which AI APIs are really free. Contributions are welcome all year; Hacktoberfest 2026 no longer rewards pull requests, so none is promised here. One sourced fact beats ten cosmetic edits; see [CONTRIBUTING.md](CONTRIBUTING.md#hacktoberfest).
 
