@@ -189,6 +189,21 @@ If your pull request falls behind `main`, we update it before merging; you can u
 
 Contributions here are voluntary. We don't pay for comments, reviews or other work that nobody asked for, and a request for payment in an issue or a pull request gets no reply and doesn't change how we review it.
 
+### Required checks
+
+`Dataset integrity` is the documented required check. The unfiltered PR workflows also
+report `Windows tests`, `commit policy`, `Lighthouse accessibility and performance`,
+and CodeQL's `Analyze (javascript-typescript)`. CodeQL runs on every PR and on pushes
+to `main`, plus weekly and manual scans; it does not run on feature-branch pushes.
+`mcp tests (node 18)` and `mcp tests (node 22)` run only when the MCP package or its
+workflow changes, so they must not be unconditional required checks.
+
+Workflow definitions do not establish which checks GitHub actually requires. Maintainers
+must inspect the live branch protection/rulesets before reconciling required checks,
+using the exact job names above and preserving all existing controls. This change does
+not modify those settings. A required PR check must not use path filters that leave it
+permanently pending. Security policy and token permissions are in [SECURITY.md](SECURITY.md).
+
 ## Hacktoberfest
 
 October is Hacktoberfest month, but Hacktoberfest 2026 no longer rewards pull requests (it is about learning and building with open-source AI), so a pull request here does not earn Hacktoberfest swag or points, and we do not promise any. Contributions are welcome all year. The [good first issues](https://github.com/pacocartones/free-llm-api-hub/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) are the best place to start (see [Good first issues](#good-first-issues) for what qualifies). Your name goes in [CONTRIBUTORS.md](CONTRIBUTORS.md) when a pull request is merged.
@@ -206,7 +221,7 @@ GitHub holds workflow runs from a **first-time contributor** until a maintainer 
 ## Maintainer notes
 
 - **No regeneration bot — the author ships the derived files.** There is no `bot/regenerate`: `main` requires the "Dataset integrity" check, and a change is complete when its regenerated files are committed in the same PR. After editing `data/providers.json` (or `data/programs.json`), run `npm run build` (and `npm run og` if the OG check flags drift), commit the regenerated files together with the data change, and push. The "Dataset integrity" check fails until they are in sync.
-- **Provider maintenance is not scheduled.** Re-verification, model samples and the live probe are local on-demand tasks — see [docs/update-playbook.md](docs/update-playbook.md). GitHub Actions does run the site deployment daily to refresh its build-time star count, plus weekly CodeQL and OpenSSF Scorecard scans; none of those jobs changes provider claims.
+- **Provider maintenance is not scheduled.** Re-verification, model samples and the live probe are local on-demand tasks — see [docs/update-playbook.md](docs/update-playbook.md). GitHub Actions does run the site deployment daily to refresh its build-time star count, plus CodeQL on pull requests, pushes to `main` and weekly, and weekly OpenSSF Scorecard scans; none of those jobs changes provider claims.
 
 ### Branch names and commit identity
 

@@ -1,11 +1,11 @@
 name: CodeQL
 
 on:
-  # Weekly-only, to keep the Actions minutes budget off the per-PR hot path.
-  # The fast security signal on every change is the explorer XSS regression
-  # suite (scripts/explorer.test.mjs), which already gates every PR inside
-  # verify.yml. This broader static scan runs on a schedule (plus manual
-  # dispatch) instead of on every push and pull request.
+  # PRs scan the merge candidate; only main pushes scan the integrated code.
+  # Do not also scan feature-branch pushes or filter out required PR checks.
+  pull_request:
+  push:
+    branches: [main]
   schedule:
     # 04:00 UTC every Monday.
     - cron: '0 4 * * 1'
@@ -14,10 +14,16 @@ on:
 permissions:
   contents: read
 
+# Cancel obsolete runs for the same PR/ref, keeping each event's results separate.
+concurrency:
+  group: codeql-${{ github.workflow }}-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   analyze:
     name: Analyze (${{ matrix.language }})
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     permissions:
       security-events: write
       actions: read
