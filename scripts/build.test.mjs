@@ -655,6 +655,22 @@ test('the explorer does not claim a column sort before the user chooses one', ()
   assert.match(explorer, /<th data-key="name" scope="col" aria-sort="none"><button type="button" class="th-sort">API<\/button><\/th>/);
 });
 
+test('the homepage hero gives first-time visitors working explorer and JSON API entry points', () => {
+  run(['scripts/build.mjs']);
+  const index = readFileSync(join(ROOT, 'site/index.html'), 'utf8');
+  const hero = index.match(/<section class="hero">([\s\S]*?)<\/section>/)?.[1];
+  assert.ok(hero, 'the homepage has a hero');
+  const start = hero.match(/<nav\b[^>]*aria-label="Get started"[^>]*>([\s\S]*?)<\/nav>/)?.[1];
+  assert.ok(start, 'first-use navigation is available in the hero without JavaScript');
+  assert.match(start, /<a href="#explorer">Browse providers<\/a>/);
+  assert.match(index, /<main id="explorer">/, 'the browse link reaches the existing explorer');
+  assert.match(start, /<a href="api\/">Use the JSON API<\/a>/);
+  const docs = readFileSync(join(ROOT, 'site/api/index.html'), 'utf8');
+  assert.match(docs, /href="v1\/no-card\.json"/, 'API docs link to a ready-to-use dataset slice');
+  const slice = JSON.parse(readFileSync(join(ROOT, 'site/api/v1/no-card.json'), 'utf8'));
+  assert.ok(slice.providers.length > 0, 'the documented first API request returns providers');
+});
+
 test('the explorer homepage leaves the table immediately after its controls', () => {
   const p = join(ROOT, 'site/index.html');
   const index = readFileSync(p, 'utf8');
