@@ -179,7 +179,7 @@ AI-assisted contributions are welcome. Please read [AI_POLICY.md](AI_POLICY.md):
 
 Replies in this repository's issues, pull requests and discussions are prepared by an AI agent working under the supervision of the repository owner.
 
-Commit messages: AI-assisted contributions are welcome when you have verified the change (see above). You do not need to remove a trailer your tool adds, and you can commit under any email address. The current *Commit policy* check recognizes Paco/`pacocartones` and legacy maintainer/agent identity patterns, enforces the Paco noreply identity for those matches, and rejects AI attribution trailers on them. It does not yet enforce LeonMAG's identity; that governance work is separate. When we squash-merge, we drop AI `Co-authored-by` lines from the final message so `main` stays clean; your authorship stays.
+Commit messages: AI-assisted contributions are welcome when you have verified the change (see above). You do not need to remove a trailer your tool adds, and you can commit under any email address. The owner and internal agent commits checked by `scripts/check-commit-policy.sh` use the canonical owner identity and carry no AI attribution trailers. This check does not impose that identity or a noreply address on LeonMAG; see [Branch names and commit identity](#branch-names-and-commit-identity). Only @pacocartones and @LeonMAG hold maintenance roles and permissions; external contributions do not grant or offer those roles. When we squash-merge, we drop AI `Co-authored-by` lines from the final message so `main` stays clean; your authorship stays.
 
 ## Review
 

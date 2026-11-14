@@ -25,4 +25,4 @@ The dataset is MIT-licensed and fully self-contained in this repository — data
 
 ## Maintainer scope
 
-Maintainer authority belongs to the two accounts listed above. Contributing or appearing in the contributor credits does not grant maintainer authority. Contributors are welcome to submit sourced corrections, code and documentation through pull requests.
+Only @pacocartones and @LeonMAG hold maintainer roles and permissions in this repository. External contributions are welcome; they do not grant or offer maintenance roles, repository permissions or maintainer authority. Appearing in contributor credits does not change that boundary. Contributors are welcome to submit sourced corrections, code and documentation through pull requests.
