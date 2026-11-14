@@ -6,6 +6,7 @@ import { readFile } from 'node:fs/promises';
 export const API_BASE = 'https://freellmapihub.com/api/v1';
 export const DEFAULT_URL = `${API_BASE}/providers.json`;
 export const DEFAULT_CLIENTS_URL = `${API_BASE}/openai-clients.json`;
+const LOCAL_SOURCE = 'local_override';
 
 /**
  * Validate the minimal shape the tools rely on and drop operational fields.
@@ -64,7 +65,7 @@ export function createJsonLoader({ path, url, normalize, fetchImpl = globalThis.
     const pending = (async () => {
       if (path) {
         const text = await readFile(path, 'utf8');
-        return normalize(JSON.parse(text), path);
+        return normalize(JSON.parse(text), LOCAL_SOURCE);
       }
       const res = await fetchImpl(url, { headers: { accept: 'application/json' } });
       if (!res.ok) throw new Error(`GET ${url} answered HTTP ${res.status}`);
