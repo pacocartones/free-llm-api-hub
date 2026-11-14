@@ -46,9 +46,11 @@ only what confirms.
   a fresh signup) before adding. Also Anthropic-compatible worth noting.
 - ✅ **Upstage** (Solar LLM + Document Parse/OCR) — now a provider in the dataset (re-verified 2026-10-08).
 - ✅ **Veryfi** (OCR) — now a provider in the dataset (re-verified 2026-10-08).
-- [ ] **Replicate** (image/video) — "run select models for free… after a bit
-  you'll be asked to set up billing"; no card to start but the free amount isn't
-  quantified. Add only if a concrete allowance can be cited.
+- [ ] **Replicate** (image/video) — re-verified 2026-11-14 against its pricing
+  page, billing docs and terms (§2.2(c)): "run select models for free… after a
+  bit you'll be asked to set up billing", but no page states a concrete
+  allowance (credits, runs or time), so it still cannot be cited. Add only if
+  a concrete allowance can be cited.
 - ✅ **Alibaba Cloud AI Catalyst Program** — now a program in the dataset
   (page read 2026-11-14: "Up to 2B free Model Studio tokens. Up to $120k cloud
   credits support. POC coupons."; validity and eligibility not stated on the page).
