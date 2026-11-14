@@ -206,14 +206,54 @@ test('empty dataset is valid both online and offline', async () => {
 });
 
 test('dossier keeps the injected date, entry metadata, policy and decoded docs', async () => {
-  const p = provider('oldest', '2026-07-01', { data_policy: { trains_on_prompts: false, retention: '30 days', source: 'https://oldest.invalid/privacy', checked: '2026-07-01' } });
+  const p = provider('archive', '2026-07-01', {
+    name: 'Archive AI',
+    docs_url: 'https://docs.archive.invalid/reference',
+    free_tier: '1,000 calls/month',
+    rate_limits: '10 RPM / 1,000 RPD',
+    notes: 'Requires email verification',
+    card_required: false,
+    phone_required: true,
+    commercial_ok: true,
+    openai_compatible: false,
+    best_for: 'Batch classification',
+    expires: '2027-01-31',
+    no_expiry: {
+      quote: 'Credits do not expire',
+      source: 'https://docs.archive.invalid/credits',
+      checked: '2026-07-02',
+    },
+    data_policy: {
+      trains_on_prompts: false,
+      retention: '30 days',
+      source: 'https://docs.archive.invalid/privacy',
+      checked: '2026-07-03',
+    },
+  });
   const result = await run({ providers: [p], response: { body: '<script >hidden()</script><style>x{}</style><p>Free &amp;amp; safe&nbsp;API</p>' } });
-  assert.equal(result.writes[0].path, '/fixture/scripts/../.freebuff/reverify/oldest.md');
-  assert.match(result.writes[0].text, /fetched 2026-10-28/);
-  assert.match(result.writes[0].text, /fetch status: 200/);
-  assert.match(result.writes[0].text, /trains_on_prompts=false retention=30 days/);
-  assert.match(result.writes[0].text, /Free &amp; safe API/);
-  assert.doesNotMatch(result.writes[0].text, /hidden\(\)|x\{\}/);
+  assert.equal(result.writes[0].path, '/fixture/scripts/../.freebuff/reverify/archive.md');
+  assert.equal(result.writes[0].text, [
+    '# Archive AI (`archive`)',
+    '',
+    '- docs: https://docs.archive.invalid/reference',
+    '- last_verified: 2026-07-01 (119d ago) · fetched 2026-10-28',
+    '- fetch status: 200',
+    '',
+    '## Current entry',
+    '- free_tier: 1,000 calls/month',
+    '- rate_limits: 10 RPM / 1,000 RPD',
+    '- notes: Requires email verification',
+    '- flags: card=false phone=true commercial=true openai=false',
+    '- best_for: Batch classification',
+    '- expires: 2027-01-31',
+    '- data_policy: trains_on_prompts=false retention=30 days (https://docs.archive.invalid/privacy, read 2026-07-03): read it again',
+    '- no_expiry: the provider said "Credits do not expire" (https://docs.archive.invalid/credits, read 2026-07-02): read it again',
+    '',
+    '## Provider docs (extracted text)',
+    '',
+    'Free &amp; safe API',
+    '',
+  ].join('\n'));
 });
 
 test('HTTP failure writes an honest empty dossier instead of success text', async () => {
@@ -222,7 +262,7 @@ test('HTTP failure writes an honest empty dossier instead of success text', asyn
   assert.match(result.writes[0].text, /nothing extracted/);
 });
 
-test('timeout and network errors are captured in the dossier', async () => {
+test('timeout and network errors are captured in the dossier', { timeout: 500 }, async () => {
   const timedOut = await run({ args: ['--batch', '1'], timeout: true });
   assert.match(timedOut.writes[0].text, /fetch error: timeout/);
   const offline = await run({ args: ['--batch', '1'], fetchError: new Error('offline') });
