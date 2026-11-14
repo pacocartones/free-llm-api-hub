@@ -11,7 +11,7 @@ export const REQUEST_GAP_MS = 500; // sequential requests, at most 2 per second
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const cleanUrl = (url) => url.trim().replace(/[.,;:]+$/, '');
 
-/** Collect provider docs_url values and external links in docs/sources.md, deduplicated by URL. */
+/** Collect provider docs and claim evidence plus external links in docs/sources.md, deduplicated by URL. */
 export function collectSources(providers, sourcesMarkdown) {
   const byUrl = new Map();
   const add = (url, source) => {
@@ -21,7 +21,16 @@ export function collectSources(providers, sourcesMarkdown) {
     const sources = byUrl.get(cleaned).sources;
     if (!sources.includes(source)) sources.push(source);
   };
-  for (const p of providers) add(p.docs_url, `data/providers.json:${p.slug}`);
+  for (const p of providers) {
+    const source = `data/providers.json:${p.slug}`;
+    add(p.docs_url, source);
+    for (const [field, url] of [
+      ['free_limits.source', p.free_limits?.source],
+      ['data_policy.source', p.data_policy?.source],
+      ['no_expiry.source', p.no_expiry?.source],
+      ['model_tier_source.url', p.model_tier_source?.url],
+    ]) add(url, `${source}.${field}`);
+  }
   const patterns = [
     /\[[^\]]*\]\((https?:\/\/[^)\s]+)[^)]*\)/g, // Markdown links
     /<(https?:\/\/[^>\s]+)>/g, // autolinks

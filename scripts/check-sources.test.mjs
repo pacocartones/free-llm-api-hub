@@ -35,6 +35,74 @@ test('collectSources: provider docs and external docs/sources links are collecte
   ]);
 });
 
+// Dropping any of these evidence fields must leave a missing URL in the sweep.
+for (const [field, evidence, sourcePath] of [
+  ['free_limits', { source: 'https://limits.example/free' }, 'free_limits.source'],
+  ['data_policy', { source: 'https://privacy.example/free' }, 'data_policy.source'],
+  ['no_expiry', { source: 'https://terms.example/credit' }, 'no_expiry.source'],
+  ['model_tier_source', { url: 'https://ratings.example/snapshot' }, 'model_tier_source.url'],
+]) {
+  test(`collectSources: includes ${sourcePath} with its field attribution`, () => {
+    const providers = [{
+      slug: 'alpha',
+      docs_url: 'https://alpha.example/docs',
+      openai_base_url: 'https://api.alpha.example/v1',
+      [field]: evidence,
+    }];
+    assert.deepEqual(collectSources(providers, ''), [
+      entry('https://alpha.example/docs', 'data/providers.json:alpha'),
+      entry(evidence.source ?? evidence.url, `data/providers.json:alpha.${sourcePath}`),
+    ]);
+  });
+}
+
+test('collectSources: shared evidence is checked once and keeps every field and provider attribution', () => {
+  const providers = [
+    {
+      slug: 'alpha', docs_url: 'https://shared.example/terms',
+      free_limits: { source: 'https://shared.example/terms' },
+      data_policy: { source: 'https://shared.example/terms' },
+      no_expiry: { source: 'https://shared.example/terms' },
+      model_tier_source: { url: 'https://shared.example/terms' },
+    },
+    { slug: 'beta', docs_url: '', data_policy: { source: 'https://shared.example/terms' } },
+    { slug: 'empty', docs_url: null, free_limits: null, data_policy: null, no_expiry: null, model_tier_source: null },
+  ];
+  const md = '[terms](https://shared.example/terms) and <https://shared.example/terms>';
+  assert.deepEqual(collectSources(providers, md), [{
+    url: 'https://shared.example/terms',
+    sources: [
+      'data/providers.json:alpha',
+      'data/providers.json:alpha.free_limits.source',
+      'data/providers.json:alpha.data_policy.source',
+      'data/providers.json:alpha.no_expiry.source',
+      'data/providers.json:alpha.model_tier_source.url',
+      'data/providers.json:beta.data_policy.source',
+      'docs/sources.md',
+    ],
+  }]);
+});
+
+test('checkSources: a dead expiry evidence link reaches the report even when docs_url is live', async () => {
+  const entries = collectSources([{
+    slug: 'trial',
+    docs_url: 'https://trial.example/docs',
+    no_expiry: { source: 'https://trial.example/terms' },
+  }], '');
+  const results = await checkSources(entries, {
+    fetchImpl: async (url) => {
+      if (url === 'https://trial.example/docs') return response(200);
+      if (url === 'https://trial.example/terms') return response(404);
+      return response(200, '{"archived_snapshots":{}}');
+    },
+    sleepImpl: async () => {},
+  });
+  assert.deepEqual(results.filter((r) => !r.ok).map((r) => [r.url, r.status]), [
+    ['https://trial.example/terms', 404],
+  ]);
+  assert.match(formatReport(results), /HTTP 404 \| data\/providers\.json:trial\.no_expiry\.source \| https:\/\/trial\.example\/terms/);
+});
+
 test('checkSources: a live link uses one bounded request with the descriptive User-Agent and no Wayback call', async () => {
   const calls = [];
   const results = await checkSources([entry('https://live.example')], {

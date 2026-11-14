@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// On-demand external source check: provider docs_url values plus external links in docs/sources.md.
+// On-demand external source check: provider docs and claim evidence plus external links in docs/sources.md.
 // It writes nothing and is intentionally outside npm test and CI, so a third-party outage never fails a build.
 
 import { readFileSync } from 'node:fs';
