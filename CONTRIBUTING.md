@@ -107,7 +107,7 @@ A `data_policy` row also needs its entries in `data/quotes.json` (the sentence, 
 
 - **Something's outdated or wrong:** the [structured issue form](../../issues/new?template=inaccuracy.yml) takes under a minute.
 - **A new provider to add:** the [new-provider form](../../issues/new?template=new-provider.yml).
-- If the link-check (`check-links.mjs`, run on every PR) flags a broken source link, feel free to just comment on the PR or open an [inaccuracy issue](../../issues/new?template=inaccuracy.yml).
+- The PR link check (`check-links.mjs`) validates repository-local targets only. If the on-demand external check (`npm run check-sources`) or a manual visit finds a broken provider source, feel free to comment on the PR or open an [inaccuracy issue](../../issues/new?template=inaccuracy.yml).
 
 ## Style
 
@@ -200,7 +200,7 @@ GitHub holds workflow runs from a **first-time contributor** until a maintainer 
 ## Maintainer notes
 
 - **No regeneration bot — the author ships the derived files.** There is no `bot/regenerate`: `main` requires the "Dataset integrity" check, and a change is complete when its regenerated files are committed in the same PR. After editing `data/providers.json` (or `data/programs.json`), run `npm run build` (and `npm run og` if the OG check flags drift), commit the regenerated files together with the data change, and push. The "Dataset integrity" check fails until they are in sync.
-- **Nothing runs on a schedule.** Re-verification, badge refresh, model samples and the live probe are all local on-demand tasks — see [docs/update-playbook.md](docs/update-playbook.md). This project does not depend on GitHub Actions minutes.
+- **Provider maintenance is not scheduled.** Re-verification, model samples and the live probe are local on-demand tasks — see [docs/update-playbook.md](docs/update-playbook.md). GitHub Actions does run the site deployment daily to refresh its build-time star count, plus weekly CodeQL and OpenSSF Scorecard scans; none of those jobs changes provider claims.
 
 ### Branch names and commit identity
 

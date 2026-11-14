@@ -1,6 +1,5 @@
-# The shipped site has zero runtime dependencies. Keep the small development
-# tooling surface (JSON Schema validation and social-image rendering), along
-# with pinned GitHub Actions, current.
+# The shipped site has zero runtime dependencies. Keep the root development
+# tooling, MCP package, Lighthouse tooling and pinned GitHub Actions current.
 version: 2
 updates:
   - package-ecosystem: github-actions
@@ -29,6 +28,16 @@ updates:
 
   - package-ecosystem: npm
     directory: /packages/mcp
+    schedule:
+      interval: weekly
+      day: monday
+    commit-message:
+      prefix: "chore(deps)"
+    labels:
+      - dependencies
+
+  - package-ecosystem: npm
+    directory: /tools/lighthouse
     schedule:
       interval: weekly
       day: monday
