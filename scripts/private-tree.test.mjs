@@ -1,20 +1,27 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { readFileSync } from 'node:fs';
-import { dirname, isAbsolute, join, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { readFileSync, writeFileSync } from 'node:fs';
+import { isAbsolute, join, resolve } from 'node:path';
 import { privateTree } from './lib/private-tree.mjs';
-
-const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
+import { makeTmpDir } from './lib/tmp.mjs';
 
 test('a linked worktree copy rewrites its git pointer without touching source metadata', () => {
-  const sourceDotGit = readFileSync(join(ROOT, '.git'), 'utf8');
+  const base = makeTmpDir('flah-private-tree-');
+  const git = (cwd, ...args) => execFileSync('git', ['-c', 'user.name=t', '-c', 'user.email=t@example.com', ...args], { cwd, stdio: 'pipe', encoding: 'utf8' });
+  const main = join(base, 'main');
+  git(base, 'init', '-q', main);
+  writeFileSync(join(main, 'fixture.txt'), 'fixture\n');
+  git(main, 'add', 'fixture.txt');
+  git(main, 'commit', '-q', '-m', 'fixture');
+  const worktree = join(base, 'worktree');
+  git(main, 'worktree', 'add', '-q', '--detach', worktree);
+  const sourceDotGit = readFileSync(join(worktree, '.git'), 'utf8');
 
-  const copy = privateTree(ROOT);
+  const copy = privateTree(worktree);
 
-  assert.notEqual(resolve(copy), resolve(ROOT));
-  assert.equal(readFileSync(join(ROOT, '.git'), 'utf8'), sourceDotGit);
+  assert.notEqual(resolve(copy), resolve(worktree));
+  assert.equal(readFileSync(join(worktree, '.git'), 'utf8'), sourceDotGit);
 
   const copiedDotGit = readFileSync(join(copy, '.git'), 'utf8');
   const pointer = /^gitdir:\s*(.+?)\s*$/m.exec(copiedDotGit)?.[1];
