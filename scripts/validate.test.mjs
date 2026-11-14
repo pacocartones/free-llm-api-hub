@@ -341,7 +341,7 @@ test('validate rejects an OpenAI-compatible endpoint outside the API key host pi
   p.openai_base_url = 'https://untrusted.example/v1';
   const rejected = runValidate(data);
   assert.equal(rejected.status, 1, rejected.output);
-  assert.deepEqual(rejected.output.trim().split(/\\r?\\n/).map((line) => line.trim()), [
+  assert.deepEqual(rejected.output.trim().split(/\r?\n/).map((line) => line.trim()), [
     '✗ validation failed (1 issue):',
     `- ${p.slug}: ${p.env_key} may only be sent to ${pinnedHost}, not untrusted.example`,
   ]);
