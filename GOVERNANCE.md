@@ -4,7 +4,7 @@ Lightweight on purpose. This project is small; the rules exist to keep it **trus
 
 ## Roles
 
-- **Maintainer(s)** — review contributions, verify claims against primary sources, and decide what ships. Currently [@pacocartones](https://github.com/pacocartones).
+- **Maintainer(s)** — review contributions, verify claims against primary sources, and decide what ships. The only maintainers are [@pacocartones](https://github.com/pacocartones) and [@LeonMAG](https://github.com/LeonMAG).
 - **Contributors** — anyone opening an issue or PR. Every entry in the dataset exists because someone checked it.
 
 ## How decisions get made
@@ -23,6 +23,6 @@ Lightweight on purpose. This project is small; the rules exist to keep it **trus
 
 The dataset is MIT-licensed and fully self-contained in this repository — data, schema, and the scripts that build everything from it. Anyone can fork and continue it without special access or hidden infrastructure. That's intentional: the project's trustworthiness shouldn't depend on any single person staying around.
 
-## Becoming a maintainer
+## Maintainer scope
 
-Sustained, high-quality contributions — accurate entries, good sourcing, helpful review — are the path. If you're contributing regularly and want to help maintain, open a discussion.
+Maintainer authority belongs to the two accounts listed above. Contributing or appearing in the contributor credits does not grant maintainer authority. Contributors are welcome to submit sourced corrections, code and documentation through pull requests.

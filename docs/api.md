@@ -153,7 +153,7 @@ Every API object carries `version` and `generated`, copied from `data/providers.
 
 - **`version`** is the dataset's [SemVer](https://semver.org/) release version, in lockstep with the `vX.Y.Z` Git tag (it is not a separate schema version). Minor and patch bumps are additive: a new field, a new file, a re-verification release. They stay on `/api/v1/`.
 - **A new major `version`** is reserved for a breaking change to the shape, and is the release that introduces the next API path. The API path counts breaking changes to the API; it does not repeat the dataset's major number.
-- **`generated`** is the date of the last dataset change (`YYYY-MM-DD`). Generated files are byte-stable for a given dataset: nothing in them depends on the day the build ran.
+- **`generated`** is the date of the last dataset change (`YYYY-MM-DD`). Provider-list payloads are byte-stable for fixed inputs. History and change feeds also depend on Git history; date-relative site outputs are described in [Architecture](architecture.md).
 
 The provider-list payloads (`providers.json`, slices and modality lists) are described by [`/api/v1/schema.json`](https://freellmapihub.com/api/v1/schema.json). It is generated from [`data/schema.json`](../data/schema.json), but keeps the v1 representation: `commercial_ok` is `boolean | null`, while `commercial_ok_condition` may accompany `null`. The canonical schema remains wider and accepts `"conditional"`.
 
@@ -165,7 +165,7 @@ The live API always serves the latest data. To pin one, use a Git tag: when `ver
 curl -s https://raw.githubusercontent.com/pacocartones/free-llm-api-hub/v2.9.1/data/providers.json
 ```
 
-or check the tag out and run `npm ci --ignore-scripts && npm run build` to regenerate the exact `/api/v1/` files of that release under `site/api/v1/`.
+or check the tag out and run `npm ci --ignore-scripts && npm run build` to regenerate `/api/v1/` with that release's generator and inputs (history-derived endpoints also depend on the available Git history) under `site/api/v1/`.
 
 ---
 

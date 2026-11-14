@@ -780,6 +780,20 @@ readme = injectInlineFigures(readme, FIGS);
 
 writeFileSync(join(ROOT, 'README.md'), readme);
 
+// Counts in the field reference follow the data, just like README tables.
+const dimensionsPath = join(ROOT, 'docs/comparison-dimensions.md');
+const gapCounts = ['phone_required', 'commercial_ok', 'card_required']
+  .map((key) => `\`${key}\` ${providers.filter((p) => p[key] === null).length}/${providers.length}`)
+  .join(', ');
+const dimensions = readFileSync(dimensionsPath, 'utf8');
+if (!dimensions.includes('<!-- AUTOGEN:flag-gaps:start -->') || !dimensions.includes('<!-- AUTOGEN:flag-gaps:end -->')) {
+  throw new Error('Missing flag-gaps markers in docs/comparison-dimensions.md');
+}
+writeFileSync(dimensionsPath, dimensions.replace(
+  /(<!-- AUTOGEN:flag-gaps:start -->)[\s\S]*?(<!-- AUTOGEN:flag-gaps:end -->)/,
+  `$1\nCurrent gaps: ${gapCounts}.\n$2`,
+));
+
 // ---------- keep CITATION.cff pinned to the dataset it describes ----------
 // The citation metadata is derived, not hand-maintained: it drifted to 2.3.0
 // while the dataset shipped 2.6.0. Same rule as everything else here.

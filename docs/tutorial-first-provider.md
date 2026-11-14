@@ -16,7 +16,7 @@ Time: about 30 minutes. Install the locked development tools once with `npm ci -
 
 We'll use **AI21 Labs** as the worked example: a $10 trial credit on their Jamba long-context models, valid for 3 months, no card required for the trial itself.
 
-> **A note on the example.** AI21 is *already* in the dataset — that's the point. Its real entry demonstrates every shape you'll meet (trial credit, `expires`, tri-state flags, the catch), and every snippet and command output below is the literal, current truth. For the actual exercise, pick any provider that isn't tracked yet and follow the identical steps.
+> **A note on the example.** AI21 is *already* in the dataset — that's the point. Its real entry demonstrates every shape you'll meet (trial credit, `expires`, tri-state flags, the catch), and the snippets illustrate the field shapes; the current record and schema take precedence. Never copy its verification date or claims to another provider without checking that provider's sources. For the actual exercise, pick any provider that isn't tracked yet and follow the identical steps.
 
 ## Before you start
 
@@ -32,13 +32,13 @@ cd free-llm-api-hub
 npm ci --ignore-scripts
 ```
 
-`npm ci --ignore-scripts` installs the locked local tools, including JSON Schema validation, without running package lifecycle scripts. If you already cloned shallow, fix it with `git fetch --unshallow`. The validator fails loudly either way, so you'll know.
+`npm ci --ignore-scripts` installs the locked local tools, including JSON Schema validation, without running package lifecycle scripts. If you already cloned shallow, fix it with `git fetch --unshallow`. The history-dependent tests fail if the clone lacks the required history; the schema validator alone does not detect this.
 
 ## Step 1 — Check it qualifies and isn't already tracked
 
 Two quick checks before touching anything:
 
-1. **Does it earn a spot?** Skim [inclusion-criteria.md](inclusion-criteria.md). The usual rejects: consumer chat UIs, "free with a card on file", vaporware, trials that are just a signup wall with no real quota.
+1. **Does it earn a spot?** Skim [inclusion-criteria.md](inclusion-criteria.md). The usual rejects: consumer chat UIs, "free" that requires a charge before use, vaporware, trials that are just a signup wall with no real quota.
 2. **Is it already there?** Search the dataset:
 
 ```bash
@@ -61,6 +61,8 @@ git checkout -b add-your-provider
 Replace `<your-username>` with your GitHub username. Use a branch name that reflects your contribution, such as `add-<slug>` or `fix-<slug>`.
 
 ## Step 3 — Add the entry
+
+For a new provider, prefer `npm run add-provider -- <slug> "<Name>"` to prepare a draft; complete it from primary sources and run the command again to validate and serialize it. See [the helper contract](../CONTRIBUTING.md#for-provider-data-edit-the-source). The object below explains the fields; it is not a ready-to-paste serialized row.
 
 Open `data/providers.json`. It's one JSON file with a `providers` array — the **single source of truth** for the README tables, the badge, the exports, and the whole site. Everything else is generated from it.
 
@@ -158,21 +160,26 @@ This rewrites the README tables, the freshness badge, the collection pages, and 
 npm run og
 ```
 
-**Never hand-edit the generated files** — edit the data and let the build rewrite them. `npm run build` in a clean checkout is idempotent, so a regenerated file that shows up in your diff means the data changed underneath it. Commit both together.
+**Never hand-edit the generated files** — edit the data and let the build rewrite them. For fixed inputs, Git history and reference day, the build is idempotent. The freshness badge changes with the calendar; see [Architecture](architecture.md) for date-relative and history-derived exceptions. Commit both together.
 
 ## Step 6 — Commit and open the PR
 
 Commit the data change **and** the regenerated files in the same commit — a data PR without its derived files fails CI by design, because there is no regeneration bot:
 
 ```bash
-git add data/providers.json README.md badge-freshness.json CITATION.cff site collections
+git status --short
+git diff
+# Stage the reviewed data and generated outputs, including fingerprints and evidence:
+git add -- data README.md badge-freshness.json badge-verified.json CITATION.cff \
+  derived-fingerprints.json docs/credit-programs.md docs/comparison-dimensions.md site collections
 git commit -m "feat: add your provider"
+npm run check
 git push -u fork add-your-provider
 ```
 
 If you chose a different branch name, use that name in the push command too.
 
-`CITATION.cff` is in that list on purpose: it carries the dataset date, so bumping `generated` rewrites it — skip it and the drift gate fails.
+`CITATION.cff` carries the dataset date; `derived-fingerprints.json` pins ignored build outputs; `data/quotes.json` carries policy evidence. Include every reviewed regenerated artifact. After committing, run `npm run check` to confirm no generated drift before pushing.
 
 Open the pull request. Give it a title that says what changed and a body with the source link and what you confirmed.
 

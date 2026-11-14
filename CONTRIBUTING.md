@@ -56,7 +56,7 @@ Run these commands from the repository root after installing dependencies. Follo
 
 | Change | Local validation before opening a PR |
 | --- | --- |
-| Hand-written docs or issue/PR template text | `npm run links`, then preview the changed Markdown or form and open its links. The link checker checks local doc file paths; it does not validate GitHub forms, external issue searches or heading anchors. |
+| Hand-written docs or issue/PR template text | `npm run links`, then preview the changed Markdown or form and open its links. The link checker checks local paths in tracked and non-ignored new Markdown files, including nested docs and package READMEs; it does not validate GitHub forms, external issue searches or heading anchors. |
 | Provider data or build inputs (including `CONTRIBUTING.md`, which generates the site's contributing page) | `npm run build && npm test`; commit your changes and regenerated files, then run `npm run check` (it compares generated output with the committed version). Run `npm run og` too if the OG check flags drift. |
 | Code | `npm test`, plus the focused check named in the issue. If the change affects generated output, also follow the build-input row above. |
 
@@ -76,7 +76,7 @@ OG files are left for you to check: run `node scripts/check-og.mjs`; if it repor
 > expected >10 providers in the mined history, got 0
 > ```
 >
-> If you cloned shallow, fix it with `git fetch --unshallow`; otherwise just clone normally: `git clone https://github.com/pacocartones/free-llm-api-hub`. CI always checks out the full history (`fetch-depth: 0`), so this only bites local development.
+> If you cloned shallow, fix it with `git fetch --unshallow`; otherwise just clone normally: `git clone https://github.com/pacocartones/free-llm-api-hub`. The root integrity and site-build CI jobs check out the full history (`fetch-depth: 0`); workflows that do not mine history may use shallow checkouts.
 
 If you want to preview how your entry renders on the site before opening the PR:
 
@@ -246,10 +246,9 @@ GitHub holds workflow runs from a **first-time contributor** until a maintainer 
   attribution rules still apply to maintainer commits in a Dependabot pull request.
 - **What happens to branches:** in this repository, merged and closed pull requests keep their
   commits and the branch is deleted afterwards; branches in your fork are yours.
-- **Commit identity:** Paco commits as
+- **Commit identity:** the owner's commits use
   `Paco Cartones <253313177+pacocartones@users.noreply.github.com>` (how the project is maintained,
   including the part done by AI agents under human oversight, is described in the README ([How this project is maintained](README.md#how-this-project-is-maintained))), and
-  `scripts/check-commit-policy.sh` currently enforces Paco/legacy maintainer patterns only,
-  not LeonMAG's identity. This CI change does not alter either maintainer's identity or that policy. If you do not want your email in
+  `scripts/check-commit-policy.sh` enforces this canonical identity for Paco/owner and internal agent identities; it does not define a canonical commit identity for LeonMAG or other contributors. The maintainer roster is in [GOVERNANCE.md](GOVERNANCE.md). If you do not want your email in
   the public history, use your GitHub noreply address
   ([how](https://docs.github.com/en/account-and-profile/setting-up-and-managing-your-personal-account-on-github/managing-email-preferences/setting-your-commit-email-address)).

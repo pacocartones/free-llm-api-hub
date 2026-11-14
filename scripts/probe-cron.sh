@@ -15,6 +15,8 @@
 #         INFISICAL_ENV=prod
 #         INFISICAL_PATH=/free-llm-api-hub
 #   - A full repository clone with a readable git remote.
+#   - Locked root tools installed with npm ci --ignore-scripts; reinstall after
+#     lockfile changes before running this cron (validate.mjs requires Ajv).
 #
 # Cron example (Mondays 08:10 UTC):
 #   10 8 * * 1  /path/to/repo/scripts/probe-cron.sh >> /var/log/flah-probe.log 2>&1

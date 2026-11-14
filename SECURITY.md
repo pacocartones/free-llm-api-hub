@@ -1,6 +1,6 @@
 # Security Policy
 
-This is a data-and-docs repository — a JSON dataset, a static site, and small zero-dependency build scripts. There's no server, no database, and no user data. Still, a few things are worth stating.
+This repository contains JSON datasets, a static site, local maintenance scripts and an optional MCP stdio server in `packages/mcp/`. The published website has no application server or database. Local probes use API keys from the operator's environment; those credentials must never enter datasets, logs or generated output.
 
 ## Reporting a vulnerability
 
@@ -14,7 +14,8 @@ Please **don't** open a public issue for a genuine vulnerability until it's been
 ## Scope
 
 In scope:
-- The build/validation scripts in `scripts/`.
+- The build/validation and maintenance scripts in `scripts/`, including credential handling in probes and model fetches.
+- The MCP stdio server in `packages/mcp/`, its data loading and dependencies.
 - The static site in `site/` (e.g. DOM-injection via dataset content).
 - The GitHub Actions workflows in `.github/workflows/`.
 
@@ -24,7 +25,7 @@ Out of scope:
 
 ## Automation and permissions
 
-Fourteen workflows run against this repository; none of them writes to `main` directly:
+The workflows below do not write to `main` directly. Their checked-in triggers and permissions are defined in [`.github/workflows/`](.github/workflows/); live environment protections and repository settings must be checked separately:
 
 | Workflow | Trigger | Token permissions |
 |---|---|---|
@@ -39,8 +40,8 @@ Fourteen workflows run against this repository; none of them writes to `main` di
 | `release-mcp.yml` | `mcp-v*` tag | job-scoped `contents: read` and `id-token: write` — publishes to npm and the MCP registry after environment approval |
 | `welcome.yml` | first issue or pull request opened | job-scoped `issues: write`, `pull-requests: write` — posts a comment without checking out pull-request code |
 | `first-merge-thanks.yml` | pull request closed | job-scoped `pull-requests: write` — comments only after a first outside contribution is merged; does not check out pull-request code |
-| `weekly-worklist.yml` | weekly schedule, manual on trusted `main` | job-scoped `contents: read`, `issues: write` — refreshes issue #4 metadata only |
 | `issue-assign.yml` | issue comment | job-scoped `issues: write` — handles `/take` and `/release` without checking out repository code |
+| `weekly-worklist.yml` | Monday schedule, manual on main | job-scoped `contents: read`, `issues: write` — checks out trusted main and replaces issue #4's generated worklist; no provider requests or verification |
 
 No workflow that checks out or executes fork pull-request code has repository-content write permissions
 or repository secrets. CodeQL requests `security-events: write` only for code-scanning results;
@@ -49,7 +50,7 @@ with narrowly scoped write tokens and never check out or execute the fork's code
 
 Derived files are regenerated locally and committed by the author in the same PR. Write-capable
 automation is limited to site and package publication, security-result upload, release tagging,
-and issue metadata or pull-request comments/assignment. The comment and assignment workflows never check
+and issue or pull-request comments/assignment, plus the main-only weekly issue worklist refresh. The comment and assignment workflows never check
 out or execute pull-request code.
 All checkouts disable persisted credentials. Release tagging supplies the token only to
 its explicit tag push; no credential is stored in the workspace Git configuration.
@@ -81,5 +82,5 @@ workflow checks alone do not prevent a user or another token from moving tags.
 ## Notes for users of the data
 
 - The dataset contains **only links to public provider documentation**. It never contains API keys, secrets, or credentials — and it never should. Do not submit any.
-- The interactive site is fully static; its only network call is the inlined dataset (with a `raw.githubusercontent.com` fallback). The verified-providers badge is an SVG generated at build and served from this site (no request to `img.shields.io`), and the GitHub star count is written into the pages when the site is built (the deploy reads it from the GitHub API), so the browser makes no GitHub API call for it.
-- The build scripts have **zero runtime dependencies**, which keeps the supply-chain surface minimal by design.
+- The interactive site is fully static. The explorer reads its inlined data without a request, with same-origin `providers.json` and raw GitHub fallbacks when needed. The compare view fetches same-origin `scores.json` and `providers.json`; the embeddable widget fetches the public dataset. The verified-providers badge is an SVG generated at build and served from this site (no request to `img.shields.io`), and the GitHub star count is written into the pages when the site is built (the deploy reads it from the GitHub API), so the browser makes no GitHub API call for it.
+- `scripts/build.mjs` uses Node built-ins and repository modules. Validation uses locked Ajv development dependencies; social-image generation uses `@resvg/resvg-js`. The optional MCP server has runtime dependencies in its own lockfile. Install development tools with `npm ci --ignore-scripts` and review lockfile changes.
