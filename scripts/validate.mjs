@@ -119,7 +119,7 @@ for (const p of data.providers ?? []) {
   if ('playground_url' in p) {
     check(typeof p.docs_url === 'string' && p.docs_url.trim().length > 0, `${id}: playground_url requires a non-empty docs_url`);
   }
-  for (const field of ['name', 'docs_url', 'openai_base_url']) {
+  for (const field of ['name', 'docs_url', 'models_url', 'openai_base_url']) {
     const value = p[field];
     check(value == null || typeof value !== 'string' || !hasHiddenChars(value), `${id}: ${field} must not contain control, bidirectional or zero-width characters`);
   }
@@ -147,6 +147,10 @@ for (const p of data.providers ?? []) {
       for (const model of p.models_free)
         check(typeof model !== 'string' || !hasHiddenChars(model), `${id}: models_free must not contain control, bidirectional or zero-width characters`);
     }
+  }
+
+  if (p.models_url !== undefined) {
+    check(isPublicHttpsUrl(p.models_url), `${id}: models_url must be the provider's public HTTPS model catalogue`);
   }
 
   // category follows free_type: a one-time signup balance is a trial; a free

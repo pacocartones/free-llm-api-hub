@@ -10,7 +10,7 @@
 // don't have it yet.
 export const ORDER = [
   'slug', 'name', 'category', 'free_type', 'free_tier', 'rate_limits', 'notes',
-  'best_for', 'modalities', 'models_free', 'expires', 'docs_url', 'phone_required',
+  'best_for', 'modalities', 'models_free', 'models_url', 'expires', 'docs_url', 'phone_required',
   'card_required', 'commercial_ok', 'commercial_ok_condition', 'openai_compatible', 'openai_base_url', 'env_key',
   'is_text_llm', 'model_tier', 'model_tier_source', 'free_limits', 'no_expiry',
   'verified', 'last_verified', 'added', 'last_probed', 'probe_status', 'data_policy', 'playground_url',

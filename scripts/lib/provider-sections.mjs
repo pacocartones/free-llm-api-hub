@@ -75,11 +75,20 @@ export function glanceHtml(p, typeLabel) {
 
 /** Free models: the sample with a way to pull the live list, or one short line when none is listed. */
 export function modelsHtml(p) {
-  if (!p.models_free || !p.models_free.length) return `<p class="muted models-none">Free models: not listed yet.</p>`;
+  const catalog = safeUrl(p.models_url);
+  const catalogLink = catalog
+    ? `<a href="${catalog}" target="_blank" rel="noopener">Browse the official model catalogue ↗</a>`
+    : '';
+  if (!p.models_free || !p.models_free.length) {
+    if (!catalogLink) return `<p class="muted models-none">Free models: not listed yet.</p>`;
+    return `<h2 id="models">Free models</h2>` +
+      `<p class="muted models-none">A free-model sample is not listed yet. ${catalogLink}</p>`;
+  }
   return `<h2 id="models">Free models <span class="muted">· sample</span></h2>` +
     `<div class="model-chips">${p.models_free.map((m) => `<code>${htmlEsc(m)}</code>`).join('')}</div>` +
-    `<p class="muted">A sample of models reachable on the free tier — the live catalog changes.` +
-    (p.openai_base_url ? ` Pull the current set with <code>GET ${htmlEsc(p.openai_base_url)}/models</code>.` : '') + `</p>`;
+    `<p class="muted">A sample of models reachable on the free tier — the live catalogue changes.` +
+    (p.openai_base_url ? ` Pull the current set with <code>GET ${htmlEsc(p.openai_base_url)}/models</code>.` : '') +
+    (catalogLink ? ` ${catalogLink}` : '') + `</p>`;
 }
 
 /**

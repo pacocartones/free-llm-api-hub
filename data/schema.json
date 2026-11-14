@@ -121,6 +121,11 @@
           "items": { "type": "string" },
           "uniqueItems": true
         },
+        "models_url": {
+          "type": "string",
+          "format": "uri",
+          "description": "The provider's own page for browsing its model catalogue. Optional; absence means no catalogue URL has been verified."
+        },
         "is_text_llm": {
           "type": "boolean",
           "description": "True when the free offering (free tier or trial credit) gives API access to text/chat language models. False for OCR, text-to-speech, speech-to-text, embeddings-only, image and compute-only services. Explicit on every entry; it makes an entry eligible for the top 10."

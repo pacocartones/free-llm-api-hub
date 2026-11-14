@@ -14,6 +14,7 @@ export const PROVIDER_CSV_COLUMNS = [
   'best_for',
   'expires',
   'docs_url',
+  'models_url',
   'phone_required',
   'card_required',
   'commercial_ok',
