@@ -42,6 +42,9 @@ npx -y free-llm-api-hub-mcp --data ./providers.json --clients ./openai-clients.j
 
 ## Client configuration
 
+For product boundaries, client examples, audit findings and release prerequisites, see the
+[productization audit](https://github.com/pacocartones/free-llm-api-hub/blob/main/docs/mcp-productization.md).
+
 Claude Desktop (`claude_desktop_config.json`), from a local checkout:
 
 ```json

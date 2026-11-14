@@ -4,7 +4,7 @@ Lightweight on purpose. This project is small; the rules exist to keep it **trus
 
 ## Roles
 
-- **Maintainer(s)** — review contributions, verify claims against primary sources, and decide what ships. Currently [@pacocartones](https://github.com/pacocartones).
+- **Maintainer(s)** — review contributions, verify claims against primary sources, and decide what ships. Currently only [@pacocartones](https://github.com/pacocartones) and [@LeonMAG](https://github.com/LeonMAG).
 - **Contributors** — anyone opening an issue or PR. Every entry in the dataset exists because someone checked it.
 
 ## How decisions get made
