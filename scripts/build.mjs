@@ -36,6 +36,7 @@ import { markdownToHtml } from './lib/markdown.mjs';
 import { bestFactsHtml } from './lib/best-facts.mjs';
 import { providerFigures, expandFigures, injectInlineFigures, figureErrors } from './lib/figures.mjs';
 import { badgeSvg } from './lib/badge-svg.mjs';
+import { codeHtmlEsc, curlChatQuickstart, pythonChatQuickstart, pythonEmbeddingsQuickstart, pythonStringLiteral } from './lib/quickstart.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const FRESH_DAYS = SLA_DAYS; // the freshness SLA, defined once in lib/rules.mjs
@@ -476,6 +477,8 @@ const QUICKSTART_EXAMPLE = providers.find((p) => p.slug === 'groq' && p.openai_b
 const QS_BASE = QUICKSTART_EXAMPLE ? QUICKSTART_EXAMPLE.openai_base_url : 'https://<provider-base-url>/v1';
 const QS_NAME = QUICKSTART_EXAMPLE ? QUICKSTART_EXAMPLE.name : 'the provider';
 const QS_MODEL = QUICKSTART_EXAMPLE && QUICKSTART_EXAMPLE.slug === 'groq' ? 'llama-3.1-8b-instant' : '<a-free-model>';
+const QS_PYTHON = pythonChatQuickstart(QS_BASE, QS_MODEL);
+const QS_CURL = curlChatQuickstart(QS_BASE, QS_MODEL, { apiKeyVariable: 'YOUR_FREE_API_KEY', spacedJson: true });
 
 const QUICKSTART_MD = `## Quickstart — reuse the OpenAI SDK
 
@@ -484,23 +487,13 @@ Most of these accept the OpenAI SDK with two changes: point \`base_url\` at the 
 ### Python — example: ${QS_NAME}
 
 \`\`\`python
-from openai import OpenAI
-
-client = OpenAI(base_url="${QS_BASE}", api_key="<YOUR_FREE_API_KEY>")
-resp = client.chat.completions.create(
-    model="${QS_MODEL}",
-    messages=[{"role": "user", "content": "Hello!"}],
-)
-print(resp.choices[0].message.content)
+${QS_PYTHON}
 \`\`\`
 
 ### curl
 
 \`\`\`bash
-curl ${QS_BASE}/chat/completions \\
-  -H "Authorization: Bearer $YOUR_FREE_API_KEY" \\
-  -H "Content-Type: application/json" \\
-  -d '{"model": "${QS_MODEL}", "messages": [{"role": "user", "content": "Hello!"}]}'
+${QS_CURL}
 \`\`\`
 
 Swap the \`base_url\` (and a model that provider offers free) for any row above.
@@ -948,17 +941,7 @@ for (const c of COLLECTIONS) {
     `<p class="count"><strong>${rows.length} of ${total}</strong> tracked providers match.</p>` +
     `${c.header ? `<p>${htmlEsc(c.header)}</p>` : ''}${collectionTableHtml(rows, { baseUrl: c.quickstart, rowMark: c.rowMark })}` +
     (c.quickstart
-      ? `<h2>Quickstart — reuse the OpenAI SDK</h2><p class="count">Point <code>base_url</code> at the provider (URLs in the table above) and use its free key. Example: ${htmlEsc(QS_NAME)}.</p><pre><code>from openai import OpenAI
-
-client = OpenAI(base_url="${htmlEsc(QS_BASE)}", api_key="&lt;YOUR_FREE_API_KEY&gt;")
-resp = client.chat.completions.create(
-    model="${htmlEsc(QS_MODEL)}",
-    messages=[{"role": "user", "content": "Hello!"}],
-)
-print(resp.choices[0].message.content)</code></pre><pre><code>curl ${htmlEsc(QS_BASE)}/chat/completions \\
-  -H "Authorization: Bearer $YOUR_FREE_API_KEY" \\
-  -H "Content-Type: application/json" \\
-  -d '{"model": "${htmlEsc(QS_MODEL)}", "messages": [{"role": "user", "content": "Hello!"}]}'</code></pre>`
+      ? `<h2>Quickstart — reuse the OpenAI SDK</h2><p class="count">Point <code>base_url</code> at the provider (URLs in the table above) and use its free key. Example: ${htmlEsc(QS_NAME)}.</p><pre><code>${codeHtmlEsc(QS_PYTHON)}</code></pre><pre><code>${codeHtmlEsc(QS_CURL)}</code></pre>`
       : '') +
     collFaqHtml +
     (guideLinks ? `<h2>Related guides</h2><nav class="colls">${guideLinks}</nav>` : '') +
@@ -1079,25 +1062,12 @@ for (const p of providers) {
   // Quickstart — modality-aware, using the provider's real base URL and a real free model.
   let quick = '';
   if (p.openai_base_url) {
-    const base = htmlEsc(p.openai_base_url);
-    const m = htmlEsc(model);
+    const python = embeddingsFirst
+      ? pythonEmbeddingsQuickstart(p.openai_base_url, model)
+      : pythonChatQuickstart(p.openai_base_url, model);
     quick = embeddingsFirst
-      ? `<h2 id="quickstart">Quickstart — embeddings</h2><pre><code>from openai import OpenAI
-
-client = OpenAI(base_url="${base}", api_key="&lt;YOUR_FREE_API_KEY&gt;")
-resp = client.embeddings.create(model="${m}", input="Hello world")
-print(len(resp.data[0].embedding))</code></pre>`
-      : `<h2 id="quickstart">Quickstart — chat completions</h2><pre><code>from openai import OpenAI
-
-client = OpenAI(base_url="${base}", api_key="&lt;YOUR_FREE_API_KEY&gt;")
-resp = client.chat.completions.create(
-    model="${m}",
-    messages=[{"role": "user", "content": "Hello!"}],
-)
-print(resp.choices[0].message.content)</code></pre><p class="muted">…or with curl:</p><pre><code>curl ${base}/chat/completions \\
-  -H "Authorization: Bearer $API_KEY" \\
-  -H "Content-Type: application/json" \\
-  -d '{"model":"${m}","messages":[{"role":"user","content":"Hello!"}]}'</code></pre>`;
+      ? `<h2 id="quickstart">Quickstart — embeddings</h2><pre><code>${codeHtmlEsc(python)}</code></pre>`
+      : `<h2 id="quickstart">Quickstart — chat completions</h2><pre><code>${codeHtmlEsc(python)}</code></pre><p class="muted">…or with curl:</p><pre><code>${codeHtmlEsc(curlChatQuickstart(p.openai_base_url, model))}</code></pre>`;
   } else {
     const docs = p.docs_url ? htmlEsc(p.docs_url) : '';
     quick = `<h2 id="quickstart">Get started</h2><p class="muted">This is a first-party API, not OpenAI-compatible, so there is no drop-in base URL. The endpoint, the key and a working example are in the <a href="${docs}" target="_blank" rel="noopener">official docs</a>.</p>`;
@@ -1729,24 +1699,25 @@ const apiRow = (label, path, count) => `<tr><td class="name"><a href="v1/${path}
 // so it always names a provider and model that are really in the file.
 const exampleClient = clientList.find((c) => c.models_free && c.models_free.length) || clientList[0];
 const exampleModel = exampleClient && exampleClient.models_free && exampleClient.models_free.length ? exampleClient.models_free[0] : '<model-id>';
+const clientConfigPython = !exampleClient ? '' : `import json, os, urllib.request
+from openai import OpenAI
+
+url = "${SITE}/api/v1/openai-clients.json"
+clients = {c["slug"]: c for c in json.load(urllib.request.urlopen(url))["clients"]}
+c = clients[${pythonStringLiteral(exampleClient.slug)}]
+
+client = OpenAI(base_url=c["base_url"], api_key=os.environ[c["env_key"]])
+reply = client.chat.completions.create(
+    model=${pythonStringLiteral(exampleModel)},
+    messages=[{"role": "user", "content": "Hello"}],
+)
+print(reply.choices[0].message.content)`;
 const clientConfigDocs = !exampleClient ? '' :
   `<h2>Client configs</h2>` +
   `<p>Two generated files turn the dataset into working client configuration for the <strong>${clientList.length} providers</strong> that are verified, OpenAI-compatible and have a known base URL and key variable. Both carry the <em>name</em> of the environment variable for your own key (for example <code>${htmlEsc(exampleClient.env_key)}</code>), never a key. Free-tier terms change without notice: check each provider's <code>docs_url</code> before you depend on it.</p>` +
   `<h3><code>openai-clients.json</code></h3>` +
   `<p>One record per provider: <code>slug</code>, <code>name</code>, <code>base_url</code>, <code>env_key</code>, <code>models_free</code> (a sample, may be <code>null</code>), <code>docs_url</code>, <code>last_verified</code>. With the OpenAI Python SDK:</p>` +
-  `<pre><code>import json, os, urllib.request
-from openai import OpenAI
-
-url = "${SITE}/api/v1/openai-clients.json"
-clients = {c["slug"]: c for c in json.load(urllib.request.urlopen(url))["clients"]}
-c = clients["${htmlEsc(exampleClient.slug)}"]
-
-client = OpenAI(base_url=c["base_url"], api_key=os.environ[c["env_key"]])
-reply = client.chat.completions.create(
-    model="${htmlEsc(exampleModel)}",
-    messages=[{"role": "user", "content": "Hello"}],
-)
-print(reply.choices[0].message.content)</code></pre>` +
+  `<pre><code>${codeHtmlEsc(clientConfigPython)}</code></pre>` +
   `<h3><code>litellm.yaml</code></h3>` +
   `<p>A <a href="https://docs.litellm.ai/docs/proxy/configs" rel="noopener">LiteLLM proxy</a> <code>model_list</code> with one entry per provider and sampled model, named <code>&lt;slug&gt;/&lt;model&gt;</code>. Keys are read with LiteLLM's <code>os.environ/&lt;ENV_KEY&gt;</code> syntax; a provider without a model sample gets one entry whose model id is marked <code># set a model id</code>. Delete the providers you have no key for, then:</p>` +
   `<pre><code>curl -sO ${SITE}/api/v1/litellm.yaml
