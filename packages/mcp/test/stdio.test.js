@@ -1,5 +1,5 @@
 // End to end: spawn the server over stdio with the SDK client, list the tools
-// and call three of them against the fixtures (no network).
+// and call them against the fixtures (no network).
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -35,6 +35,12 @@ test('stdio server lists its tools and answers calls', async (t) => {
   const search = tools.find((x) => x.name === 'search_providers');
   assert.ok(search.inputSchema.properties.no_card);
 
+  const info = await client.callTool({ name: 'dataset_info', arguments: {} });
+  assert.equal(info.isError, undefined);
+  const infoBody = JSON.parse(info.content[0].text);
+  assert.equal(infoBody.source, 'local_override');
+  assert.equal(info.content[0].text.includes(FIXTURE), false);
+
   const res = await client.callTool({ name: 'search_providers', arguments: { no_card: true } });
   assert.equal(res.isError, undefined);
   const body = JSON.parse(res.content[0].text);
@@ -49,4 +55,22 @@ test('stdio server lists its tools and answers calls', async (t) => {
   const bad = await client.callTool({ name: 'get_provider', arguments: { slug: 'nope' } });
   assert.equal(bad.isError, true);
   assert.match(bad.content[0].text, /Unknown provider slug "nope"/);
+});
+
+test('stdio server redacts local loader errors', async (t) => {
+  const missingPath = fileURLToPath(new URL('./fixtures/private/missing-providers.json', import.meta.url));
+  const transport = new StdioClientTransport({
+    command: process.execPath,
+    args: [SERVER, '--data', missingPath],
+    env: { ...process.env },
+    stderr: 'pipe',
+  });
+  const client = new Client({ name: 'flah-mcp-test', version: '0.0.0' });
+  await client.connect(transport);
+  t.after(() => client.close());
+
+  const res = await client.callTool({ name: 'dataset_info', arguments: {} });
+  assert.equal(res.isError, true);
+  assert.equal(res.content[0].text, 'Could not load the dataset.');
+  assert.doesNotMatch(res.content[0].text, /private|missing-providers/);
 });
