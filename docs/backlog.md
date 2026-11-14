@@ -62,8 +62,17 @@ only what confirms.
 - ✅ **Speech tail:** Voicegain, Smallest.ai, Retell AI and Camb.ai are all providers in the dataset (re-verified 2026-10-08).
 - [ ] **From `npm run discover` (2026-07-31):** `inclusionai` (InclusionAI /
   Ant Group — Ling/Bailing models appear free on OpenRouter) shows free models we
-  don't cover — check whether the lab exposes its OWN direct free API tier before
-  adding. (`poolside` is now a provider in the dataset.)
+  don't cover. Checked 2026-11-14 (UTC): InclusionAI's
+  [verified official GitHub organization](https://github.com/inclusionAI)
+  describes its work as open-source models and research and links to its model
+  hubs. The [official website](https://inclusion-ai.org/) could not be fetched
+  during this check, so its contents remain unknown; maintainers should retry
+  the website check. Do not infer whether it documents a hosted inference API,
+  pricing, or a direct free-tier signup until the site can be reviewed.
+  Aggregator availability alone does not meet the inclusion criteria, so keep
+  this as an unconfirmed lead rather than adding a provider. Recheck if
+  InclusionAI publishes direct API documentation. (`poolside` is now a provider
+  in the dataset.)
 - [ ] **Chinese labs (region-gated):** Baidu Qianfan / ERNIE (1M free tokens per
   model, big catalog), ByteDance Volcengine/Doubao, StepFun, SenseNova — real free
   tiers but mainland phone/ID gates make them poor fits for an international
