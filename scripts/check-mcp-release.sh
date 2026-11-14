@@ -2,6 +2,9 @@
 # Run from packages/mcp; emit independent exact-version registry decisions.
 set -euo pipefail
 
+# Check again inside the protected job: reruns must respect a disabled release switch.
+[ "${NPM_PUBLISH_ENABLED:-}" = 'true' ] || { echo "::error::NPM_PUBLISH_ENABLED must be true; publishing is disabled" >&2; exit 1; }
+
 version=$(node -p "require('./package.json').version")
 [ "mcp-v$version" = "$GITHUB_REF_NAME" ] || { echo "::error::tag $GITHUB_REF_NAME does not match package version $version"; exit 1; }
 [ "$(node -p "require('./server.json').version")" = "$version" ] || { echo "::error::server.json version differs"; exit 1; }
