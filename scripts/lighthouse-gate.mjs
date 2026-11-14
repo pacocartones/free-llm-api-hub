@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// lighthouse-gate.mjs — serve site/ locally, run Lighthouse on four pages and
+// lighthouse-gate.mjs — serve site/ locally, run Lighthouse on nine pages and
 // fail when accessibility or performance drops below the thresholds in
 // lib/lighthouse-gate.mjs. Needs the runner from tools/lighthouse (npm ci there)
 // and a Chrome binary in CHROME_PATH. Nothing is published and nothing leaves the machine.
@@ -67,6 +67,7 @@ process.on('exit', cleanup);
 for (const [signal, code] of [['SIGINT', 130], ['SIGTERM', 143]]) process.on(signal, () => { cleanup(); process.exit(code); });
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const SITE = join(ROOT, 'site');
+const baseline = JSON.parse(readFileSync(join(ROOT, 'data/a11y-baseline.json'), 'utf8'));
 const TYPES = { '.html': 'text/html', '.css': 'text/css', '.js': 'text/javascript', '.json': 'application/json', '.svg': 'image/svg+xml', '.xml': 'application/xml', '.woff2': 'font/woff2', '.png': 'image/png' };
 
 function resolveFile(urlPath) {
@@ -89,7 +90,7 @@ const base = `http://127.0.0.1:${server.address().port}`;
 const providers = JSON.parse(readFileSync(join(ROOT, 'data/providers.json'), 'utf8')).providers;
 const sample = providers.find((p) => existsSync(join(SITE, 'p', `${p.slug}.html`)));
 if (!sample) { console.error('No generated provider page under site/p/: run `node scripts/build.mjs` first.'); process.exit(1); }
-const pages = ['/', '/best/', '/coverage/', '/free-gpu/', '/coding-tools/', `/p/${sample.slug}.html`];
+const pages = ['/', '/best/', '/coverage/', '/free-gpu/', '/coding-tools/', '/compare/', '/data-policy/', '/guides-and-collections/', `/p/${sample.slug}.html`];
 const lighthouse = join(ROOT, 'tools/lighthouse/node_modules/.bin/lighthouse');
 const RUNS = 3;
 const failures = [];
@@ -115,17 +116,7 @@ try {
     const report = medianReport(reports);
     const all = reports.map((r) => r.categories?.performance?.score).join('/');
     console.log(`${page}: median of ${RUNS} runs: performance ${report.categories.performance?.score} (runs ${all}), accessibility ${report.categories.accessibility?.score}`);
-    failures.push(...evaluate(page, report));
-    // When the page is below a threshold, name the audits that cost the points and the first elements they point at.
-    if (evaluate(page, report).length) {
-      const run = reports.find((r) => r.categories?.accessibility?.score === report.categories.accessibility?.score) ?? reports[0];
-      for (const ref of run.categories?.accessibility?.auditRefs ?? []) {
-        const audit = run.audits?.[ref.id];
-        if (!audit || audit.score === null || audit.score >= 1 || ref.weight === 0) continue;
-        const nodes = (audit.details?.items ?? []).slice(0, 3).map((item) => String(item.node?.snippet ?? item.node?.selector ?? '').replace(/\s+/g, ' ').slice(0, 160));
-        console.log(`  failed audit ${ref.id} (weight ${ref.weight}): ${audit.title}${nodes.length ? ` — ${nodes.join(' | ')}` : ''}`);
-      }
-    }
+    failures.push(...evaluate(page, report, undefined, baseline));
   }
 } finally {
   server.close();
