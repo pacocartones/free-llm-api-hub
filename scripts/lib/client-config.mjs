@@ -14,6 +14,7 @@
 //
 // Pure functions of their input, so the output is byte-stable for a given
 // dataset (the header uses data.generated, never the current date).
+import { hasHiddenChars } from './hidden-chars.mjs';
 import { keyHostErrors } from './key-hosts.mjs';
 
 /** The providers that get a client config, in dataset order. */
@@ -48,6 +49,14 @@ export const MODEL_PLACEHOLDER = '<model-id>';
 // emitted with JSON.stringify: no YAML escaping rules to get wrong.
 const q = (s) => JSON.stringify(String(s));
 
+// Provider metadata is only descriptive here, but it still shares YAML's
+// physical lines. Validation rejects hidden characters; escaping them again at
+// this sink keeps direct callers from turning a comment into YAML structure.
+const commentText = (value) =>
+  Array.from(String(value), (char) =>
+    hasHiddenChars(char) ? `\\u{${char.codePointAt(0).toString(16)}}` : char,
+  ).join('');
+
 /**
  * LiteLLM proxy config. Shape per the LiteLLM docs:
  *   https://docs.litellm.ai/docs/proxy/configs (model_list, `os.environ/` for keys)
@@ -57,7 +66,7 @@ export function litellmYaml({ version, generated, providers }) {
   const list = clientConfigProviders(providers);
   const out = [
     '# LiteLLM proxy config for the free tiers listed in free-llm-api-hub.',
-    `# Dataset version ${version}, generated ${generated}.`,
+    `# Dataset version ${commentText(version)}, generated ${commentText(generated)}.`,
     '#',
     '# Free-tier terms change without notice. Confirm each provider\'s current',
     '# limits in its own docs (linked above each block) before relying on them.',
@@ -76,7 +85,7 @@ export function litellmYaml({ version, generated, providers }) {
   ];
   for (const p of list) {
     out.push('');
-    out.push(`  # ${p.name} - docs: ${p.docs_url} - last verified ${p.last_verified}`);
+    out.push(`  # ${commentText(p.name)} - docs: ${commentText(p.docs_url)} - last verified ${commentText(p.last_verified)}`);
     if (/[{}]/.test(p.openai_base_url)) {
       out.push('  # api_base contains a {placeholder}: replace it with your own value.');
     }

@@ -9,7 +9,7 @@ import { readFileSync, writeFileSync, existsSync, readdirSync, statSync, rmSync 
 import { tmpFile } from './lib/tmp.mjs';
 import { privateTree } from './lib/private-tree.mjs';
 import { htmlEsc } from './lib/rows.mjs';
-import { join, dirname, relative } from 'node:path';
+import { join, dirname, isAbsolute, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
 import { ORDER, roundTripError, serialize } from './_serialize.mjs';
@@ -26,14 +26,17 @@ import { markNewTabLinks } from './lib/links.mjs';
 import { bestFactsHtml } from './lib/best-facts.mjs';
 import { weeklyPacing, weeklyBatch, WEEKLY_CAP, MIN_AGE_DAYS } from './lib/pacing.mjs';
 import { clientConfigProviders, openaiClients, litellmYaml, MODEL_PLACEHOLDER } from './lib/client-config.mjs';
+import { hasHiddenChars } from './lib/hidden-chars.mjs';
 import { requirementsHtml, limitsHtml, glanceHtml, modelsHtml, dataPolicyHtml } from './lib/provider-sections.mjs';
 import { compareTableHtml, comparisonCategory, sameComparisonCategory, selectComparePairs, COMPARE_PAGE_CAP, COMPARE_PER_PROVIDER_CAP, COMPARE_MAX as COMPARE_MAX_SLOTS } from './lib/compare.mjs';
+import { codeHtmlEsc, curlChatQuickstart, posixShellQuote, pythonChatQuickstart, pythonEmbeddingsQuickstart, pythonStringLiteral } from './lib/quickstart.mjs';
 import { providersCsv } from './lib/provider-csv.mjs';
 
 const REPO = join(dirname(fileURLToPath(import.meta.url)), '..');
 // The builds of this file run in a private copy of the tree (see lib/private-tree.mjs): `node --test` runs the test
 // files in parallel and two builds on the same tree race on site/p.
 const ROOT = privateTree(REPO);
+const slash = (value) => value.replaceAll('\\', '/');
 const DATA = join(ROOT, 'data/providers.json');
 // What the build would touch in the tree of the repository, read before any test runs (see the last test).
 const GENERATED_IN_REPO = ['site/p', 'site/sitemap.xml', 'site/api/v1/index.json', 'site/collections'];
@@ -129,6 +132,21 @@ test('validate rejects a verified entry with no last_verified date', () => {
   const fixture = tmpFile('providers.json');
   writeFileSync(fixture, JSON.stringify(data));
   assert.equal(exitOk(['scripts/validate.mjs', fixture]), false);
+});
+
+test('validate rejects line-breaking and hidden characters in client-config metadata', () => {
+  const hidden = ['\r', '\n', '\u0085', '\u2028', '\u2029', '\u202e', '\u200b'];
+  for (const field of ['name', 'docs_url', 'openai_base_url']) {
+    for (const char of hidden) {
+      const data = JSON.parse(readFileSync(DATA, 'utf8'));
+      const provider = data.providers.find((p) => typeof p.openai_base_url === 'string');
+      assert.ok(provider, 'fixture needs a provider eligible for client configuration');
+      provider[field] += char;
+      const fixture = tmpFile('providers.json');
+      writeFileSync(fixture, JSON.stringify(data));
+      assert.equal(exitOk(['scripts/validate.mjs', fixture]), false, `${field} accepted ${JSON.stringify(char)}`);
+    }
+  }
 });
 
 for (const [label, value] of [
@@ -335,7 +353,7 @@ test('every generated page has the same centred header: crumbs, one title and, w
   const exceptions = new Set(['index.html', '404.html', 'collections/index.html', 'guides/index.html', 'state/index.html']);
   let checked = 0;
   for (const file of walk(join(ROOT, 'site'))) {
-    const rel = relative(join(ROOT, 'site'), file);
+    const rel = slash(relative(join(ROOT, 'site'), file));
     if (exceptions.has(rel) || rel.startsWith('og')) continue;
     const html = readFileSync(file, 'utf8');
     const heroes = html.match(/<section class="page-hero[^"]*">/g) || [];
@@ -532,6 +550,22 @@ test('no tracked file carries a personal mailbox address', () => {
     if (personal.test(readFileSync(join(ROOT, rel), 'utf8'))) hits.push(rel);
   }
   assert.deepEqual(hits, [], 'files that contain a personal mailbox address (names only; the address is never printed)');
+});
+
+test('every README collection has a generated description', () => {
+  run(['scripts/build.mjs']);
+  const readme = readFileSync(join(ROOT, 'README.md'), 'utf8');
+  const rows = readme.split('\n').filter((line) => /^- \*\*\[.+\]\(collections\//.test(line));
+  const collections = readdirSync(join(ROOT, 'collections')).filter((file) => file.endsWith('.md') && file !== 'README.md');
+  assert.equal(rows.length, collections.length);
+  for (const row of rows) {
+    const description = row.match(/ — (.*?) · \[live page/);
+    assert.ok(description?.[1].trim(), `missing description: ${row}`);
+    assert.doesNotMatch(description[1], /^(undefined|null)$/, row);
+  }
+  for (const slug of ['renewing-free-tier', 'free-signup-credit']) {
+    assert.ok(rows.some((row) => row.includes(`(collections/${slug}.md)`)), `${slug} is listed`);
+  }
 });
 
 test('the README Contributors section lists every contributor in data/contributors.json', () => {
@@ -917,6 +951,7 @@ test('footer star button is block-level so its margin-top is not inert', () => {
 // JSON strings — so the test parses that grammar strictly, line by line, and
 // fails on any line outside it.
 function parseLitellm(yaml) {
+  assert.doesNotMatch(yaml, /[\r\u0085\u2028\u2029]/u, 'LF is the only physical line separator');
   const lines = yaml.split('\n');
   assert.equal(lines.at(-1), '', 'file ends with a newline');
   const entries = [];
@@ -994,6 +1029,64 @@ test('litellm.yaml quotes values so YAML-special characters stay literal', () =>
   const tricky = [{ ...ccBase, slug: 'tricky', name: 'Tricky', openai_base_url: 'https://t.test/v1', env_key: 'T_KEY', models_free: ['a: b # c', 'say "hi"'] }];
   const entries = parseLitellm(litellmYaml({ version: '1.0.0', generated: '2026-01-01', providers: tricky }));
   assert.deepEqual(entries.map((e) => e.litellm_params.model), ['openai/a: b # c', 'openai/say "hi"']);
+});
+
+test('litellm.yaml escapes hidden comment text before it can create YAML structure', () => {
+  const injected = [{
+    ...ccBase,
+    slug: 'trusted',
+    name: 'Trusted\r  - model_name: "attacker/model"\n    litellm_params:',
+    docs_url: 'https://example.com/\u0085\u2028\u2029\u202e\u200bdocs',
+    openai_base_url: 'https://trusted.test/v1',
+    env_key: 'TRUSTED_API_KEY',
+    models_free: ['safe-model'],
+  }];
+  const yaml = litellmYaml({ version: '1.0.0\rmalicious', generated: '2026-01-01\u2028malicious', providers: injected });
+  assert.equal(yaml.split('\n').some(hasHiddenChars), false, 'generated YAML contains no hidden comment characters');
+  assert.match(yaml, /Trusted\\u\{d\}  - model_name: "attacker\/model"\\u\{a\}/);
+  const entries = parseLitellm(yaml);
+  assert.deepEqual(entries.map((e) => e.model_name), ['trusted/safe-model']);
+  assert.deepEqual(entries[0].litellm_params, {
+    model: 'openai/safe-model',
+    api_base: 'https://trusted.test/v1',
+    api_key: 'os.environ/TRUSTED_API_KEY',
+  });
+});
+
+const decodeShellWord = (word) => {
+  if (/^[A-Za-z0-9_@%+=:,./-]+$/.test(word)) return word;
+  assert.ok(word.startsWith("'") && word.endsWith("'"), `not one quoted shell word: ${word}`);
+  return word.slice(1, -1).split("'\\''").join("'");
+};
+const decodeCodeHtml = (text) => text.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
+
+test('quickstarts keep contributor values inside Python, JSON and shell argument boundaries', () => {
+  const base = 'https://evil.example/v1"; __import__("os").system("id") #/$(id)';
+  const model = "model'; id; #\nnext";
+  const python = pythonChatQuickstart(base, model);
+  const literals = [...python.matchAll(/(?:base_url|model)=("(?:[^"\\]|\\.)*")/g)].map((m) => JSON.parse(m[1]));
+  assert.deepEqual(literals, [base, model], 'both hostile values remain complete Python string values');
+  assert.equal(pythonStringLiteral('line\n\u2028next'), '"line\\n\\u2028next"', 'line separators become Python escapes, not source lines');
+
+  const curl = curlChatQuickstart(base, model);
+  const curlLines = curl.split('\n');
+  const endpointWord = curlLines[0].slice('curl '.length, -2);
+  const bodyWord = curlLines.find((line) => line.startsWith('  -d ')).slice('  -d '.length);
+  assert.equal(decodeShellWord(endpointWord), `${base}/chat/completions`, 'the complete endpoint remains one shell word');
+  assert.deepEqual(JSON.parse(decodeShellWord(bodyWord)), { model, messages: [{ role: 'user', content: 'Hello!' }] }, 'the request remains one quoted JSON argument');
+  assert.equal(posixShellQuote('https://api.example/v1'), 'https://api.example/v1', 'an inert URL stays readable');
+});
+
+test('quickstarts preserve ordinary chat, embeddings and copied HTML output', () => {
+  const base = 'https://api.example/v1';
+  const model = 'org/model:free';
+  assert.match(pythonChatQuickstart(base, model), /base_url="https:\/\/api\.example\/v1"[\s\S]*model="org\/model:free"/);
+  assert.match(pythonEmbeddingsQuickstart(base, model), /client\.embeddings\.create\(model="org\/model:free", input="Hello world"\)/);
+  const curl = curlChatQuickstart(base, model, { apiKeyVariable: 'YOUR_FREE_API_KEY', spacedJson: true });
+  assert.match(curl, /^curl https:\/\/api\.example\/v1\/chat\/completions \\/);
+  assert.match(curl, /Bearer \$YOUR_FREE_API_KEY/);
+  assert.equal(codeHtmlEsc('<tag>&'), '&lt;tag&gt;&amp;', 'HTML encoding preserves decoded clipboard text without creating markup');
+  assert.equal(decodeCodeHtml(codeHtmlEsc(curl)), curl, 'browser-decoded code remains the safely quoted shell program');
 });
 
 test('the built client configs match the dataset, are registered, and the schema is published verbatim', () => {
@@ -1755,6 +1848,13 @@ const validateAfter = (mutate) => {
   return exitOk(['scripts/validate.mjs', fixture]);
 };
 
+test('quickstart fields reject hidden characters before publication', () => {
+  const provider = (data) => data.providers.find((p) => p.openai_base_url && p.models_free?.length);
+  assert.equal(validateAfter((data) => { provider(data).openai_base_url += '\nhttps://evil.example'; }), false, 'a base URL cannot add a copied source line');
+  assert.equal(validateAfter((data) => { provider(data).models_free[0] += '\u202e'; }), false, 'a model cannot visually reorder copied source');
+  assert.equal(validateAfter((data) => { provider(data).models_free[0] = "model'with-quote"; }), true, 'visible punctuation remains valid and is handled by context encoders');
+});
+
 // A `generated` after today in UTC is what a contributor in a time zone ahead of UTC writes at the end of their day (2026-10-16 when it is still
 // 2026-10-15 in UTC). It must fail, with the way to write the day.
 test('validate: the dates of the dataset are UTC days and none is in the future', () => {
@@ -1866,7 +1966,7 @@ test('figures: a typed count that disagrees with the data is reported, one that 
 test('no source or generated page states a provider count that differs from providers.json', () => {
   const figs = providerFigures(JSON.parse(readFileSync(DATA, 'utf8')).providers);
   // updates/, changes/ and state/ quote git history (old commit subjects), not the dataset
-  const files = ['README.md', 'data/best.json', ...builtPages().map((f) => f.slice(ROOT.length + 1))
+  const files = ['README.md', 'data/best.json', ...builtPages().map((f) => slash(f.slice(ROOT.length + 1)))
     .filter((rel) => !/^site\/(updates|changes|state)(\/|\.html$)/.test(rel))];
   const errs = files.flatMap((rel) => figureErrors(readFileSync(join(ROOT, rel), 'utf8'), figs, rel));
   assert.deepEqual(errs, []);
@@ -2142,7 +2242,7 @@ test('sitemap lists every indexable page except the deliberately omitted ones, w
   const listed = new Set([...sitemap.matchAll(/<loc>https:\/\/freellmapihub\.com\/([^<]*)<\/loc>/g)].map((m) => m[1]));
   const missing = [];
   for (const f of pages) {
-    const rel = f.slice(join(ROOT, 'site').length + 1);
+    const rel = slash(f.slice(join(ROOT, 'site').length + 1));
     if (rel === '404.html' || rel.startsWith('updates/page/') || /^state\/\d{4}-\d{2}\//.test(rel)) continue; // 404 is not a page; pagination follows the commit count (test above)
     const html = readFileSync(f, 'utf8');
     if (/<meta name="robots" content="noindex">/.test(html)) continue; // redirect stubs and legal pages
@@ -2847,9 +2947,11 @@ test('the private copy of a worktree with a relative gitdir still sees the histo
   git(main, 'worktree', 'add', '-q', '--detach', wt);
   // make the gitdir relative, as `git worktree add --relative-paths` does
   const abs = /^gitdir:\s*(.+?)\s*$/m.exec(readFileSync(join(wt, '.git'), 'utf8'))[1];
+  rmSync(join(wt, '.git'));
   writeFileSync(join(wt, '.git'), `gitdir: ${relative(wt, abs)}\n`);
   assert.ok(!/^gitdir: \//.test(readFileSync(join(wt, '.git'), 'utf8')), 'the fixture gitdir is relative');
   const copy = privateTree(wt);
-  assert.match(readFileSync(join(copy, '.git'), 'utf8'), /^gitdir: \//, 'the copy points at the gitdir by an absolute path');
+  const copiedGitdir = /^gitdir:\s*(.+?)\s*$/m.exec(readFileSync(join(copy, '.git'), 'utf8'))[1];
+  assert.equal(isAbsolute(copiedGitdir), true, 'the copy points at the gitdir by an absolute path');
   assert.equal(git(copy, 'log', '--format=%s').trim(), 'first', 'the copy sees the history');
 });

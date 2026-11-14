@@ -52,9 +52,9 @@ export function stalenessWorklist(providers, now = new Date()) {
   }
 
   // Weekly batch: the smallest size that keeps every entry inside the SLA if
-  // each week's batch is done, oldest first, capped at a week of work (see
-  // lib/pacing.mjs). Taking the oldest each week re-verifies part of any
-  // same-day cohort early, which is what spreads it out.
+  // each week's batch is done, oldest first, when that is possible within the
+  // weekly cap (see lib/pacing.mjs). Taking the oldest each week re-verifies
+  // part of any same-day cohort early, which is what spreads it out.
   const verifiedList = providers
     .filter((p) => p.verified && p.last_verified)
     .sort((a, b) => (a.last_verified < b.last_verified ? -1 : 1) || (a.slug < b.slug ? -1 : 1));
@@ -78,12 +78,12 @@ export function stalenessWorklist(providers, now = new Date()) {
     out.push('');
   }
   if (cliff && cliff.crossIn > 0) {
-    out.push(`> ⛰️ **Cliff watch:** ${cliff.n} entries were all verified on ${cliff.d} and cross the ${OVERDUE}-day SLA together around **${cliff.crossOn}** (~${cliff.crossIn} days). The weekly batch is sized (${pacing.size} a week) so that doing every batch spreads them out before then.`);
+    out.push(`> ⛰️ **Cliff watch:** ${cliff.n} entries were all verified on ${cliff.d} and cross the ${OVERDUE}-day SLA together around **${cliff.crossOn}** (~${cliff.crossIn} days). ${pacing.capped ? `The weekly batch is capped at ${pacing.size}; completing it may not spread every entry before then.` : `The weekly batch is sized (${pacing.size} a week) so that doing every batch spreads them out before then.`}`);
     out.push('');
   }
 
   out.push(`### 📅 This week's batch — ${batch.length}`);
-  out.push(`_The ${batch.length} oldest verifications that are at least ${MIN_AGE_DAYS} days old (sized at ${pacing.size}, at most ${WEEKLY_CAP} a week). Doing one batch every week keeps every entry inside the ${OVERDUE}-day SLA and spreads same-day cohorts out, so no week inherits a cliff._`);
+  out.push(`_The ${batch.length} oldest verifications that are at least ${MIN_AGE_DAYS} days old (sized at ${pacing.size}, at most ${WEEKLY_CAP} a week). ${pacing.capped ? `At this cap, one batch a week cannot keep every entry inside the ${OVERDUE}-day SLA; extra re-verifications are needed.` : `Doing one batch every week keeps every entry inside the ${OVERDUE}-day SLA and spreads same-day cohorts out, so no week inherits a cliff.`}_`);
   out.push(batch.map((p) => `- [ ] **${p.name}** (\`${p.slug}\`) — last verified ${p.last_verified} (${ageDays(p.last_verified)} days ago)` + (p.docs_url ? ` · [docs](${p.docs_url})` : '')).join('\n') || '_None._');
   out.push('');
 

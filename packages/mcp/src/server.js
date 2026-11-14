@@ -27,7 +27,7 @@ function ok(value) {
 }
 
 function fail(err) {
-  const message = err instanceof ToolError ? err.message : `Could not load the dataset: ${err.message}`;
+  const message = err instanceof ToolError ? err.message : 'Could not load the dataset.';
   return { isError: true, content: [{ type: 'text', text: message }] };
 }
 
