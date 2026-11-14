@@ -1,8 +1,8 @@
-import { test } from 'node:test';
+import { after, test } from 'node:test';
 import assert from 'node:assert/strict';
 import * as sync from './sync-main.mjs';
-import { spawn, spawnSync } from 'node:child_process';
-import { mkdirSync, readFileSync, writeFileSync, rmSync, existsSync } from 'node:fs';
+import { spawnSync } from 'node:child_process';
+import { cpSync, mkdirSync, readFileSync, writeFileSync, rmSync, existsSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { makeTmpDir } from './lib/tmp.mjs';
@@ -24,16 +24,27 @@ const snapshot = cwd => ({
   index: git(cwd, 'ls-files', '--stage', '-z'), status: status(cwd),
   bytes: git(cwd, 'ls-files', '-z').split('\0').filter(Boolean).map(p => [p, existsSync(join(cwd, p)) ? readFileSync(join(cwd, p)).toString('base64') : null]),
 });
-function fixture(t, { conflict = 'derived-fingerprints.json', source = false, ordinary = '', extraBuild = '', deletion = '' } = {}) {
-  const base = resolve(makeTmpDir('flah-sync-'));
-  t.after(() => rmSync(base, { recursive: true, force: true }));
+
+const preparedRoot = resolve(makeTmpDir('flah-sync-prepared-'));
+const preparedFixtures = new Map();
+let preparedFixtureBuilds = 0;
+after(() => rmSync(preparedRoot, { recursive: true, force: true }));
+
+function preparedFixture(options) {
+  const key = JSON.stringify(options);
+  if (preparedFixtures.has(key)) return preparedFixtures.get(key);
+  preparedFixtureBuilds++;
+  const base = join(preparedRoot, String(preparedFixtureBuilds));
+  mkdirSync(base, { recursive: true });
+  const { conflict, source, ordinary, extraBuild, deletion } = options;
   const origin = join(base, 'origin.git'), seed = join(base, 'seed'), cwd = join(base, 'work');
   git(base, 'init', '--bare', '-q', '--initial-branch=main', origin);
   git(base, 'clone', '-q', origin, seed);
   const configure = dir => {
     git(dir, 'config', 'user.name', 'Fixture'); git(dir, 'config', 'user.email', 'fixture@example.invalid');
     git(dir, 'config', 'core.autocrlf', 'false'); git(dir, 'config', 'commit.gpgSign', 'false');
-    git(dir, 'config', 'core.hooksPath', join(base, 'empty-hooks'));
+    git(dir, 'config', 'core.hooksPath', '../empty-hooks');
+    git(dir, 'remote', 'set-url', 'origin', '../origin.git');
   };
   configure(seed);
   const providers = (a, b) => JSON.stringify({ alpha: a, gap: Array.from({ length: 20 }, (_, i) => i), beta: b }, null, 2) + '\n';
@@ -46,6 +57,7 @@ function fixture(t, { conflict = 'derived-fingerprints.json', source = false, or
   write(seed, 'site/obsolete.html', 'obsolete\n');
   write(seed, conflict, 'base\n');
   if (conflict === 'data/providers.json') write(seed, conflict, providers('base', 'base'));
+  if (source && source !== true) write(seed, source, 'base\n');
   write(seed, 'scripts/generated-targets.mjs', readFileSync(join(ROOT, 'scripts/generated-targets.mjs'), 'utf8'));
   write(seed, 'scripts/build.mjs', `import {readFileSync,writeFileSync,mkdirSync,rmSync} from 'node:fs';
 const data=JSON.parse(readFileSync('data/providers.json','utf8'));
@@ -76,7 +88,20 @@ ${extraBuild}\n`);
     git(seed, 'add', '--', '.'); git(seed, 'commit', '-qm', 'main'); git(seed, 'push', '-q', 'origin', 'main');
   }
   const initial = snapshot(cwd), target = git(seed, 'rev-parse', 'HEAD').trim(), remote = git(origin, 'show-ref');
-  return { cwd, base, origin, seed, initial, target, remote };
+  const prepared = { base, initial, target, remote };
+  preparedFixtures.set(key, prepared);
+  return prepared;
+}
+
+function fixture(t, { conflict = 'derived-fingerprints.json', source = false, ordinary = '', extraBuild = '', deletion = '' } = {}) {
+  const options = { conflict, source, ordinary, extraBuild, deletion };
+  const prepared = preparedFixture(options);
+  const holder = resolve(makeTmpDir('flah-sync-'));
+  const base = join(holder, 'fixture');
+  cpSync(prepared.base, base, { recursive: true });
+  t.after(() => rmSync(holder, { recursive: true, force: true }));
+  const origin = join(base, 'origin.git'), seed = join(base, 'seed'), cwd = join(base, 'work');
+  return { cwd, base, origin, seed, initial: structuredClone(prepared.initial), target: prepared.target, remote: prepared.remote };
 }
 function prove(f, expected) {
   git(f.cwd, 'fetch', '--no-tags', 'origin', 'refs/heads/main:refs/remotes/origin/main');
@@ -87,75 +112,133 @@ function prove(f, expected) {
   git(f.cwd, 'merge', '--abort');
   assert.deepEqual(snapshot(f.cwd), f.initial);
 }
-async function invoke(f, override) {
-  const trace = [], messages = [];
-  const run = async (command, args, options) => {
-    trace.push({ command, args });
-    return await override?.(command, args, options) ?? execute(command, args, options);
-  };
-  const code = await sync.syncMain({ cwd: f.cwd, run, log: m => messages.push(m), error: m => messages.push(m) });
-  return { code, trace, messages: messages.join('\n') };
-}
 const has = (trace, command) => trace.some(c => c.args.includes(command));
+
+const OID = {
+  initial: '1'.repeat(40), target: '2'.repeat(40), merged: '3'.repeat(40), tree: '4'.repeat(40), resolved: '5'.repeat(40),
+};
+const ok = (stdout = '') => ({ status: 0, signal: null, stdout, stderr: '' });
+function unmergedRecords(paths, mode = '100644', stages = [1, 2, 3]) {
+  return paths.flatMap(path => stages.map(stage => `${mode} ${String(stage).repeat(40)} ${stage}\t${path}\0`)).join('');
+}
+async function simulate(t, {
+  conflicts = ['derived-fingerprints.json'], mode = '100644', stages = [1, 2, 3], ordinary = '', statusText = '', shallow = false,
+  sparse = false, detached = false, marker = '', fault = '', modified = ['derived-fingerprints.json', 'site/page/index.html'],
+  untracked = [], commit = 'ok', buildWrite,
+} = {}) {
+  const cwd = resolve(makeTmpDir('flah-sync-sim-'));
+  t.after(() => rmSync(cwd, { recursive: true, force: true }));
+  mkdirSync(join(cwd, '.git'), { recursive: true });
+  if (marker) mkdirSync(join(cwd, '.git', marker), { recursive: true });
+  let head = OID.initial, active = false, resolved = false, injected = false;
+  const trace = [], messages = [];
+  const fail = text => ({ status: 128, signal: null, stdout: '', stderr: text });
+  const run = async (commandName, rawArgs, options) => {
+    trace.push({ command: commandName, args: rawArgs });
+    const args = commandName === 'git' ? rawArgs.slice(1) : rawArgs;
+    const includes = value => args.includes(value);
+    if (fault === 'abort' && includes('--abort')) return fail('abort rejected');
+    const matchesFault = fault === 'missing Git' || (fault === 'fetch' && includes('fetch')) ||
+      (fault === 'merge' && includes('--no-commit')) || (fault === 'checkout' && includes('checkout')) ||
+      (fault === 'build' && commandName === process.execPath) || (fault === 'stage' && includes('add') && includes('-A')) ||
+      (fault === 'signal' && commandName === process.execPath) || (fault === 'abort' && includes('checkout'));
+    if (!injected && matchesFault) {
+      injected = true;
+      if (buildWrite) buildWrite(cwd);
+      if (fault === 'missing Git') return { ...fail('Git missing'), error: Object.assign(new Error('Git missing'), { code: 'ENOENT' }) };
+      if (fault === 'signal') return { ...fail('terminated'), status: null, signal: 'SIGTERM' };
+      return fail('injected failure');
+    }
+    if (commandName === process.execPath) { buildWrite?.(cwd); return ok(); }
+    if (args[0] === 'rev-parse' && includes('--is-inside-work-tree')) return ok('true\n');
+    if (args[0] === 'rev-parse' && includes('--show-toplevel')) return ok(`${cwd}\n`);
+    if (args[0] === 'rev-parse' && includes('--is-shallow-repository')) return ok(`${shallow}\n`);
+    if (args[0] === 'rev-parse' && includes('--git-path')) return ok(`.git/${args.at(-1)}\n`);
+    if (args[0] === 'rev-parse' && includes('HEAD')) return ok(`${head}\n`);
+    if (args[0] === 'rev-parse' && includes('refs/remotes/origin/main^{commit}')) return ok(`${OID.target}\n`);
+    if (args[0] === 'rev-parse' && includes('MERGE_HEAD')) return active ? ok(`${marker === 'ownership' ? OID.initial : OID.target}\n`) : fail('missing');
+    if (args[0] === 'symbolic-ref') return detached ? fail('detached') : ok('feature\n');
+    if (args[0] === 'config' && includes('core.sparseCheckout')) return sparse ? ok('true\n') : { ...ok(), status: 1 };
+    if (args[0] === 'status') return ok(statusText);
+    if (args[0] === 'write-tree') return ok(`${resolved ? OID.resolved : OID.tree}\n`);
+    if (args[0] === 'fetch') return ok();
+    if (includes('merge') && includes('--no-commit')) {
+      if (ordinary === 'noop') return ok();
+      if (ordinary === 'ff') { head = OID.target; return ok(); }
+      active = true;
+      return ordinary === 'clean' ? ok() : fail('conflict');
+    }
+    if (args[0] === 'ls-files' && includes('--unmerged')) return ok(active && !resolved && conflicts.length ? unmergedRecords(conflicts, mode, stages) : '');
+    if (args[0] === 'ls-files' && includes('-z') && !includes('--others')) return ok(['derived-fingerprints.json', 'badge-freshness.json', 'data/providers.json', 'site/page/index.html', ...conflicts].join('\0') + '\0');
+    if (['checkout', 'rm'].includes(args[0])) { resolved = true; return ok(); }
+    if (args[0] === 'add') { if (!includes('-A')) resolved = true; return ok(); }
+    if (args[0] === 'ls-tree') return ok('derived-fingerprints.json\0badge-freshness.json\0data/providers.json\0site/page/index.html\0');
+    if (args[0] === 'restore') return ok();
+    if (args[0] === 'diff' && includes('--cached')) return ok(modified.join('\0') + (modified.length ? '\0' : ''));
+    if (args[0] === 'diff') return ok(modified.join('\0') + (modified.length ? '\0' : ''));
+    if (args[0] === 'ls-files' && includes('--others')) return ok(untracked.join('\0') + (untracked.length ? '\0' : ''));
+    if (args[0] === 'commit') {
+      if (commit === 'identity' || commit === 'hook') return fail(`${commit} rejected`);
+      head = OID.merged; active = false;
+      return commit === 'landed' ? fail('post-command error') : ok();
+    }
+    if (args[0] === 'merge' && includes('--abort')) { active = false; resolved = false; return ok(); }
+    return ok();
+  };
+  const code = await sync.syncMain({ cwd, run, log: value => messages.push(value), error: value => messages.push(value) });
+  return { code, trace, messages: messages.join('\n'), cwd, injected, head, active };
+}
 
 test('fixture proves generated-only conflict before sync', t => {
   const f = fixture(t);
   prove(f, ['derived-fingerprints.json']);
 });
 
-for (const source of [true, 'site/og/manifest.json', 'site/styles.css']) {
-  test(`source conflict abort restores original local state: ${source}`, async t => {
-    const f = fixture(t, { source });
-    const paths = ['derived-fingerprints.json', source === true ? 'data/providers.json' : source];
-    prove(f, paths);
-    const r = await invoke(f);
-    assert.equal(r.code, 1);
-    for (const p of paths) assert.ok(r.messages.includes(p));
+test('identical fixture shapes reuse prepared history without sharing worktrees', t => {
+  const before = preparedFixtureBuilds;
+  const first = fixture(t, { ordinary: 'noop' });
+  const second = fixture(t, { ordinary: 'noop' });
+  assert.equal(preparedFixtureBuilds, before + 1);
+  write(first.cwd, 'new.txt', 'first only');
+  assert.equal(status(second.cwd), '');
+  assert.ok(!existsSync(join(second.cwd, 'new.txt')));
+});
+
+test('source and OG conflicts abort before resolution, build or commit', async t => {
+  for (const source of ['data/providers.json', 'site/og/manifest.json', 'site/styles.css']) {
+    const paths = ['derived-fingerprints.json', source];
+    const r = await simulate(t, { conflicts: paths });
+    assert.equal(r.code, 1, source);
+    assertSafeTrace(r.trace);
+    for (const path of paths) assert.ok(r.messages.includes(path));
     assert.ok(!has(r.trace, 'checkout') && !has(r.trace, 'scripts/build.mjs') && !has(r.trace, 'commit'));
-    assert.deepEqual(snapshot(f.cwd), f.initial);
-    assert.equal(git(f.origin, 'show-ref'), f.remote);
-    assert.equal(execute('git', ['rev-parse', '-q', '--verify', 'MERGE_HEAD'], { cwd: f.cwd }).status, 1);
-  });
-}
+    assert.ok(has(r.trace, '--abort'));
+  }
+});
 
-for (const state of ['staged', 'unstaged', 'untracked', 'merge', 'rebase-merge', 'rebase-apply', 'sequencer', 'CHERRY_PICK_HEAD', 'REVERT_HEAD', 'detached', 'shallow', 'sparse']) {
-  test(`preflight refuses ${state} before fetch`, async t => {
-    const f = fixture(t);
-    if (state === 'staged' || state === 'unstaged') { write(f.cwd, 'README.md', 'work'); if (state === 'staged') git(f.cwd, 'add', '--', 'README.md'); }
-    if (state === 'unstaged') write(f.cwd, 'site/page/index.html', 'work');
-    if (state === 'untracked') write(f.cwd, 'new.txt', 'work');
-    if (state === 'detached') git(f.cwd, 'checkout', '--detach');
-    if (state === 'sparse') git(f.cwd, 'config', 'core.sparseCheckout', 'true');
-    if (state === 'merge') { git(f.cwd, 'fetch', 'origin'); execute('git', ['merge', '--no-commit', f.target], { cwd: f.cwd }); }
-    if (['rebase-merge', 'rebase-apply', 'sequencer'].includes(state)) mkdirSync(join(f.cwd, '.git', state));
-    if (['CHERRY_PICK_HEAD', 'REVERT_HEAD'].includes(state)) write(f.cwd, `.git/${state}`, f.target);
-    if (state === 'shallow') { const dir = join(f.base, 'shallow'); git(f.base, 'clone', '-q', '--depth=1', pathToFileURL(f.origin).href, dir); f.cwd = dir; }
-    const before = snapshot(f.cwd);
-    const r = await invoke(f);
-    assert.equal(r.code, 1); assert.ok(!has(r.trace, 'fetch')); assert.deepEqual(snapshot(f.cwd), before);
-  });
-}
+test('every dirty, operation, detached, shallow and sparse preflight stops before fetch', async t => {
+  const states = ['staged', 'unstaged', 'untracked', 'MERGE_HEAD', 'rebase-merge', 'rebase-apply', 'sequencer', 'CHERRY_PICK_HEAD', 'REVERT_HEAD', 'detached', 'shallow', 'sparse'];
+  for (const state of states) {
+    const r = await simulate(t, {
+      statusText: ['staged', 'unstaged', 'untracked'].includes(state) ? ` ${state}\0` : '',
+      marker: ['MERGE_HEAD', 'rebase-merge', 'rebase-apply', 'sequencer', 'CHERRY_PICK_HEAD', 'REVERT_HEAD'].includes(state) ? state : '',
+      detached: state === 'detached', shallow: state === 'shallow', sparse: state === 'sparse',
+    });
+    assert.equal(r.code, 1, state);
+    assert.ok(!has(r.trace, 'fetch'), state);
+  }
+});
 
-for (const ordinary of ['noop', 'ff', 'clean']) for (const setting of ['', 'only', 'false', 'squash', 'ours']) {
-  test(`ordinary ${ordinary} merge ignores disruptive config ${setting}`, async t => {
-    const f = fixture(t, { ordinary });
-    if (['only', 'false'].includes(setting)) git(f.cwd, 'config', 'merge.ff', setting);
-    if (setting === 'squash' || setting === 'ours') git(f.cwd, 'config', 'branch.feature.mergeOptions', setting === 'ours' ? '-s ours' : '--squash');
-    const r = await invoke(f);
-    assert.equal(r.code, 0, r.messages);
+test('ordinary merge modes use explicit safe options regardless of disruptive config', async t => {
+  for (const ordinary of ['noop', 'ff', 'clean']) {
+    const r = await simulate(t, { ordinary, conflicts: [] });
+    assert.equal(r.code, 0, `${ordinary}: ${r.messages}`);
     assert.ok(!has(r.trace, 'scripts/build.mjs'));
-    const head = git(f.cwd, 'rev-parse', 'HEAD').trim();
-    if (ordinary === 'noop') assert.equal(head, f.initial.head.trim());
-    if (ordinary === 'ff') assert.equal(head, f.target);
-    if (ordinary === 'clean') assert.deepEqual(git(f.cwd, 'show', '-s', '--format=%P', 'HEAD').trim().split(' '), [f.initial.head.trim(), f.target]);
-    assert.equal(status(f.cwd), '');
-  });
-}
-
-test('missing origin and fetch failure preserve local state', async t => {
-  const f = fixture(t); git(f.cwd, 'remote', 'remove', 'origin');
-  const r = await invoke(f);
-  assert.equal(r.code, 1); assert.match(r.messages, /fetch/); assert.deepEqual(snapshot(f.cwd), f.initial);
+    const merge = r.trace.find(entry => entry.args.includes('--no-commit'));
+    for (const option of ['merge.autoStash=false', 'rerere.enabled=false', 'branch.feature.mergeOptions=', '--no-squash', '--no-autostash']) {
+      assert.ok(merge.args.includes(option), `${ordinary}: ${option}`);
+    }
+  }
 });
 
 function assertSafeTrace(trace) {
@@ -177,139 +260,85 @@ function assertMerged(f) {
   assert.equal(git(f.cwd, 'ls-files', '--unmerged', '-z'), '');
 }
 
-test('generated-only sync rebuilds combined data and keeps both parents', async t => {
-  const f = fixture(t); prove(f, ['derived-fingerprints.json']);
-  const r = await invoke(f);
-  assert.equal(r.code, 0, r.messages); assertMerged(f); assertSafeTrace(r.trace);
-  assert.equal(r.trace.filter(c => c.command === process.execPath).length, 1);
+test('literal generated paths remain exact and modify-delete selects the present side', async t => {
+  for (const conflict of ['collections/a b.md', 'site/café/index.html', 'site/[ab]/index.html']) {
+    const r = await simulate(t, { conflicts: [conflict] });
+    assert.equal(r.code, 0, `${conflict}: ${r.messages}`); assertSafeTrace(r.trace);
+    const checkout = r.trace.find(entry => entry.args.includes('checkout'));
+    assert.deepEqual(checkout.args.slice(-2), ['--', conflict]);
+  }
+  for (const [deletion, stages, command] of [['ours', [1, 3], 'checkout'], ['theirs', [1, 2], 'rm']]) {
+    const r = await simulate(t, { conflicts: ['collections/deleted.md'], stages });
+    assert.equal(r.code, 0, `${deletion}: ${r.messages}`);
+    assert.ok(has(r.trace, command), deletion);
+  }
 });
 
-for (const conflict of ['collections/a b.md', 'site/café/index.html', 'site/[ab]/index.html']) {
-  test(`literal generated conflict: ${conflict}`, async t => {
-    const f = fixture(t, { conflict }); prove(f, [conflict]);
-    const r = await invoke(f);
-    assert.equal(r.code, 0, r.messages); assertMerged(f); assertSafeTrace(r.trace);
-    assert.equal(readFileSync(join(f.cwd, conflict), 'utf8'), 'main\n');
-    assert.equal(readFileSync(join(f.cwd, 'site/a/index.html'), 'utf8'), 'incoming sibling\n');
-  });
-}
-for (const deletion of ['ours', 'theirs']) {
-  test(`generated modify-delete conflict: ${deletion}`, async t => {
-    const conflict = 'collections/deleted.md';
-    const f = fixture(t, { conflict, deletion }); prove(f, [conflict]);
-    const r = await invoke(f); assert.equal(r.code, 0, r.messages); assertMerged(f);
-    assert.equal(existsSync(join(f.cwd, conflict)), deletion === 'ours');
-  });
-}
-test('build stages exact new and deleted outputs and preserves merged freshness and source', async t => {
-  const f = fixture(t, { extraBuild: `mkdirSync('site/new-page',{recursive:true}); writeFileSync('site/new-page/index.html','new'); rmSync('site/obsolete.html'); writeFileSync('badge-freshness.json','today');` });
-  prove(f, ['derived-fingerprints.json']);
-  const r = await invoke(f); assert.equal(r.code, 0, r.messages); assertMerged(f); assertSafeTrace(r.trace);
-  assert.equal(git(f.cwd, 'show', 'HEAD:site/new-page/index.html'), 'new');
-  assert.equal(existsSync(join(f.cwd, 'site/obsolete.html')), false);
-  assert.equal(readFileSync(join(f.cwd, 'badge-freshness.json'), 'utf8'), 'incoming badge\n');
-  assert.equal(git(f.cwd, 'show', 'HEAD:docs/incoming.md'), 'incoming source\n');
-});
-test('unexpected build source write fails before staging or commit', async t => {
-  const f = fixture(t, { extraBuild: `writeFileSync('data/providers.json','unexpected');` });
-  prove(f, ['derived-fingerprints.json']);
-  const r = await invoke(f); assert.equal(r.code, 1); assert.match(r.messages, /data\/providers.json/);
-  assert.ok(!has(r.trace, 'commit')); assert.equal(git(f.cwd, 'rev-parse', 'HEAD'), f.initial.head);
+test('build stages only exact generated outputs and restores the freshness badge', async t => {
+  const modified = ['derived-fingerprints.json', 'site/page/index.html', 'site/new-page/index.html'];
+  const r = await simulate(t, { modified, untracked: ['site/new-page/index.html'] });
+  assert.equal(r.code, 0, r.messages); assertSafeTrace(r.trace);
+  assert.ok(r.trace.some(entry => entry.args.includes('restore') && entry.args.includes('badge-freshness.json')));
+  const staged = r.trace.filter(entry => entry.args.includes('-A')).flatMap(entry => entry.args.slice(entry.args.indexOf('--') + 1));
+  assert.deepEqual([...new Set(staged)].sort(), modified.sort());
 });
 
-for (const mode of ['120000', '160000']) {
-  test(`unsupported generated conflict mode ${mode} stops before checkout`, async t => {
-    const f = fixture(t); prove(f, ['derived-fingerprints.json']);
-    const r = await invoke(f, (command, args, options) => {
-      if (args.includes('--unmerged')) { const actual = execute(command, args, options); return { ...actual, stdout: actual.stdout.replace(/100644/g, mode) }; }
-    });
+test('unexpected source build write fails before commit', async t => {
+  const r = await simulate(t, { modified: ['data/providers.json'] });
+  assert.equal(r.code, 1); assert.match(r.messages, /data\/providers.json/); assert.ok(!has(r.trace, 'commit'));
+});
+
+test('unsupported conflict modes stop before checkout and build', async t => {
+  for (const mode of ['120000', '160000']) {
+    const r = await simulate(t, { mode });
     assert.equal(r.code, 1); assert.match(r.messages, /mode/); assert.ok(!has(r.trace, 'checkout')); assert.ok(!has(r.trace, 'scripts/build.mjs'));
-    assert.deepEqual(snapshot(f.cwd), f.initial);
-  });
-}
+  }
+});
 
-const failure = (text = 'injected failure') => ({ status: 128, signal: null, stdout: '', stderr: text });
-for (const fault of ['missing Git', 'fetch', 'merge', 'checkout', 'build', 'stage', 'signal', 'abort']) {
-  test(`command failure: ${fault}`, async t => {
-    const f = fixture(t); prove(f, ['derived-fingerprints.json']);
-    let injected = false;
-    const r = await invoke(f, (command, args, options) => {
-      if (fault === 'abort' && args.includes('--abort')) return failure('abort rejected');
-      const matches = fault === 'missing Git' || (fault === 'fetch' && args.includes('fetch')) || (fault === 'merge' && args.includes('--no-commit')) ||
-        (['checkout', 'abort'].includes(fault) && args.includes('checkout')) || (['build', 'signal'].includes(fault) && command === process.execPath) || (fault === 'stage' && args.includes('add') && args.includes('-A'));
-      if (!injected && matches) {
-        injected = true;
-        if (fault === 'build') write(f.cwd, 'site/page/index.html', 'partial build');
-        if (fault === 'missing Git') return { ...failure(), error: Object.assign(new Error('Git missing'), { code: 'ENOENT' }) };
-        if (fault === 'signal') return { ...failure(), status: null, signal: 'SIGTERM' };
-        return failure();
-      }
-    });
-    assert.equal(r.code, 1); assert.ok(injected); assertSafeTrace(r.trace); assert.ok(!has(r.trace, 'commit'));
+test('command failures stop safely in every phase and abort only an owned merge', async t => {
+  for (const fault of ['missing Git', 'fetch', 'merge', 'checkout', 'build', 'stage', 'signal', 'abort']) {
+    const r = await simulate(t, { fault });
+    assert.equal(r.code, 1, fault); assert.ok(r.injected, fault); assertSafeTrace(r.trace); assert.ok(!has(r.trace, 'commit'), fault);
     assert.match(r.messages, new RegExp(`during ${fault === 'missing Git' ? 'preflight' : ['checkout', 'abort'].includes(fault) ? 'resolve' : fault === 'signal' ? 'build' : fault}`));
     if (fault === 'abort') { assert.match(r.messages, /injected failure/); assert.match(r.messages, /abort rejected/); assert.match(r.messages, /git merge --abort/); }
-    else if (!['build', 'stage'].includes(fault)) assert.deepEqual(snapshot(f.cwd), f.initial);
-    else { assert.equal(git(f.cwd, 'rev-parse', 'HEAD'), f.initial.head); assert.match(r.messages, /inspect|Inspect/); }
-  });
-}
+  }
+});
 
-for (const kind of ['identity', 'hook', 'landed']) {
-  test(`commit failure ${kind} preserves inspectable state`, async t => {
-    const f = fixture(t); prove(f, ['derived-fingerprints.json']);
-    if (kind === 'hook') {
-      write(f.base, 'hooks/pre-commit', '#!/bin/sh\necho hook-rejected >&2\nexit 1\n');
-      if (process.platform !== 'win32') execute('chmod', ['+x', join(f.base, 'hooks/pre-commit')], { cwd: f.cwd });
-      git(f.cwd, 'config', 'core.hooksPath', join(f.base, 'hooks'));
-    }
-    const r = await invoke(f, (command, args, options) => {
-      if (kind === 'identity' && args.includes('commit')) { git(f.cwd, 'config', '--unset', 'user.email'); git(f.cwd, 'config', '--unset', 'user.name'); git(f.cwd, 'config', 'user.useConfigOnly', 'true'); }
-      if (kind === 'landed' && args.includes('commit')) { const real = execute(command, args, options); assert.equal(real.status, 0); return failure('post-command error'); }
-    });
+test('commit failures retain inspectable state and never abort a possibly landed commit', async t => {
+  for (const kind of ['identity', 'hook', 'landed']) {
+    const r = await simulate(t, { ordinary: 'clean', conflicts: [], commit: kind });
     assert.equal(r.code, 1); assert.match(r.messages, /during commit/); assert.ok(!has(r.trace, '--abort'));
-    if (kind === 'landed') { assertMerged(f); assert.match(r.messages, /HEAD changed/); }
-    else { assert.equal(git(f.cwd, 'rev-parse', 'HEAD'), f.initial.head); assert.equal(git(f.cwd, 'rev-parse', 'MERGE_HEAD').trim(), f.target); assert.match(r.messages, /retry git commit/); }
-  });
-}
+    if (kind === 'landed') assert.match(r.messages, /HEAD changed/);
+    else assert.match(r.messages, /retry git commit/);
+  }
+});
 
-test('ownership mismatch refuses abort and commit', async t => {
-  const f = fixture(t); prove(f, ['derived-fingerprints.json']);
-  const r = await invoke(f, (command, args, options) => {
-    if (args.includes('--no-commit')) { const real = execute(command, args, options); write(f.cwd, '.git/MERGE_HEAD', f.initial.head); return real; }
-  });
+test('ownership mismatch refuses abort, resolution and commit', async t => {
+  const r = await simulate(t, { marker: 'ownership' });
   assert.equal(r.code, 1); assert.match(r.messages, /ownership/); assert.ok(!has(r.trace, '--abort')); assert.ok(!has(r.trace, 'commit')); assert.ok(!has(r.trace, 'checkout'));
 });
 
 test('failed build reports exact new outputs without deleting ignored files', async t => {
-  const f = fixture(t); prove(f, ['derived-fingerprints.json']);
-  write(f.cwd, 'ignored/keep.txt', 'keep');
-  const r = await invoke(f, command => {
-    if (command === process.execPath) { write(f.cwd, 'site/new-page/index.html', 'partial'); return failure('build stopped'); }
+  const r = await simulate(t, {
+    fault: 'build', modified: ['site/new-page/index.html'],
+    buildWrite: cwd => { write(cwd, 'ignored/keep.txt', 'keep'); write(cwd, 'site/new-page/index.html', 'partial'); },
   });
   assert.equal(r.code, 1); assert.match(r.messages, /site\/new-page\/index.html/);
-  assert.equal(readFileSync(join(f.cwd, 'ignored/keep.txt'), 'utf8'), 'keep');
-  assert.equal(readFileSync(join(f.cwd, 'site/new-page/index.html'), 'utf8'), 'partial');
+  assert.equal(readFileSync(join(r.cwd, 'ignored/keep.txt'), 'utf8'), 'keep');
+  assert.equal(readFileSync(join(r.cwd, 'site/new-page/index.html'), 'utf8'), 'partial');
   assert.ok(!has(r.trace, 'commit'));
 });
 
-test('child interruption waits for close and cannot stage or commit', async t => {
-  const f = fixture(t); prove(f, ['derived-fingerprints.json']);
+test('child cancellation waits for close; coordinator cannot stage or commit afterwards', async t => {
+  const controller = new AbortController();
+  setTimeout(() => controller.abort('SIGTERM'), 50);
+  const child = await sync.runCommand(process.execPath, ['-e', 'setTimeout(()=>{},500)'], { cwd: ROOT, signal: controller.signal });
+  assert.notEqual(child.status, 0); assert.equal(child.signal, 'SIGTERM');
   const before = process.listenerCount('SIGTERM');
-  const trace = [], messages = [];
-  const run = async (command, args, options) => {
-    trace.push({ command, args });
-    if (command === process.execPath) {
-      setTimeout(() => process.emit('SIGTERM'), 100);
-      const result = await sync.runCommand(command, ['-e', 'setTimeout(()=>{},500)'], options);
-      assert.notEqual(result.status, 0);
-      return result;
-    }
-    return execute(command, args, options);
-  };
-  const code = await sync.syncMain({ cwd: f.cwd, run, log: m => messages.push(m), error: m => messages.push(m) });
-  assert.equal(code, 1); assert.match(messages.join('\n'), /SIGTERM/); assert.ok(!has(trace, 'commit'));
-  const afterBuild = trace.slice(trace.findIndex(c => c.command === process.execPath) + 1);
-  assert.ok(!has(afterBuild, 'add')); assert.deepEqual(snapshot(f.cwd), f.initial);
-  assert.equal(process.listenerCount('SIGTERM'), before);
+  const r = await simulate(t, { fault: 'signal' });
+  assert.equal(r.code, 1); assert.match(r.messages, /SIGTERM/); assert.ok(!has(r.trace, 'commit'));
+  const afterBuild = r.trace.slice(r.trace.findIndex(entry => entry.command === process.execPath) + 1);
+  assert.ok(!has(afterBuild, 'add')); assert.equal(process.listenerCount('SIGTERM'), before);
 });
 
 test('package exposes sync-main and retains build and Node contracts', () => {
@@ -319,7 +348,8 @@ test('package exposes sync-main and retains build and Node contracts', () => {
 });
 for (const source of [false, true]) {
   test(`actual CLI ${source ? 'aborts source conflict' : 'rebuilds generated conflict'}`, t => {
-    const f = fixture(t, { source }); prove(f, source ? ['data/providers.json', 'derived-fingerprints.json'] : ['derived-fingerprints.json']);
+    const f = fixture(t, { source });
+    if (source) prove(f, ['data/providers.json', 'derived-fingerprints.json']);
     const result = execute(process.execPath, [join(ROOT, 'scripts/sync-main.mjs')], { cwd: f.cwd });
     assert.equal(result.status, source ? 1 : 0, result.stderr);
     if (source) { assert.match(result.stderr, /data\/providers.json/); assert.deepEqual(snapshot(f.cwd), f.initial); }
@@ -327,14 +357,13 @@ for (const source of [false, true]) {
   });
 }
 test('import has no side effects and unknown CLI arguments fail before fetch', t => {
-  const f = fixture(t);
+  const cwd = resolve(makeTmpDir('flah-sync-cli-'));
+  t.after(() => rmSync(cwd, { recursive: true, force: true }));
   const script = join(ROOT, 'scripts/sync-main.mjs');
-  const imported = execute(process.execPath, ['--input-type=module', '-e', `await import(${JSON.stringify(pathToFileURL(script).href)})`], { cwd: f.cwd });
-  assert.equal(imported.status, 0, imported.stderr); assert.deepEqual(snapshot(f.cwd), f.initial);
-  assert.ok(!existsSync(join(f.cwd, '.git/FETCH_HEAD')));
-  const args = execute(process.execPath, [script, '--remote=evil'], { cwd: f.cwd });
-  assert.equal(args.status, 1); assert.match(args.stderr, /arguments/); assert.deepEqual(snapshot(f.cwd), f.initial);
-  assert.ok(!existsSync(join(f.cwd, '.git/FETCH_HEAD')));
+  const imported = execute(process.execPath, ['--input-type=module', '-e', `await import(${JSON.stringify(pathToFileURL(script).href)})`], { cwd });
+  assert.equal(imported.status, 0, imported.stderr); assert.ok(!existsSync(join(cwd, '.git')));
+  const args = execute(process.execPath, [script, '--remote=evil'], { cwd });
+  assert.equal(args.status, 1); assert.match(args.stderr, /arguments/); assert.ok(!existsSync(join(cwd, '.git')));
 });
 
 test('generated policy expands exact indexed files', () => {
