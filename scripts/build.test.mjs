@@ -9,7 +9,7 @@ import { readFileSync, writeFileSync, existsSync, readdirSync, statSync, rmSync 
 import { tmpFile } from './lib/tmp.mjs';
 import { privateTree } from './lib/private-tree.mjs';
 import { htmlEsc } from './lib/rows.mjs';
-import { join, dirname, relative } from 'node:path';
+import { join, dirname, isAbsolute, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
 import { ORDER, roundTripError, serialize } from './_serialize.mjs';
@@ -35,6 +35,7 @@ const REPO = join(dirname(fileURLToPath(import.meta.url)), '..');
 // The builds of this file run in a private copy of the tree (see lib/private-tree.mjs): `node --test` runs the test
 // files in parallel and two builds on the same tree race on site/p.
 const ROOT = privateTree(REPO);
+const slash = (value) => value.replaceAll('\\', '/');
 const DATA = join(ROOT, 'data/providers.json');
 // What the build would touch in the tree of the repository, read before any test runs (see the last test).
 const GENERATED_IN_REPO = ['site/p', 'site/sitemap.xml', 'site/api/v1/index.json', 'site/collections'];
@@ -347,7 +348,7 @@ test('every generated page has the same centred header: crumbs, one title and, w
   const exceptions = new Set(['index.html', '404.html', 'collections/index.html', 'guides/index.html', 'state/index.html']);
   let checked = 0;
   for (const file of walk(join(ROOT, 'site'))) {
-    const rel = relative(join(ROOT, 'site'), file);
+    const rel = slash(relative(join(ROOT, 'site'), file));
     if (exceptions.has(rel) || rel.startsWith('og')) continue;
     const html = readFileSync(file, 'utf8');
     const heroes = html.match(/<section class="page-hero[^"]*">/g) || [];
@@ -1960,7 +1961,7 @@ test('figures: a typed count that disagrees with the data is reported, one that 
 test('no source or generated page states a provider count that differs from providers.json', () => {
   const figs = providerFigures(JSON.parse(readFileSync(DATA, 'utf8')).providers);
   // updates/, changes/ and state/ quote git history (old commit subjects), not the dataset
-  const files = ['README.md', 'data/best.json', ...builtPages().map((f) => f.slice(ROOT.length + 1))
+  const files = ['README.md', 'data/best.json', ...builtPages().map((f) => slash(f.slice(ROOT.length + 1)))
     .filter((rel) => !/^site\/(updates|changes|state)(\/|\.html$)/.test(rel))];
   const errs = files.flatMap((rel) => figureErrors(readFileSync(join(ROOT, rel), 'utf8'), figs, rel));
   assert.deepEqual(errs, []);
@@ -2236,7 +2237,7 @@ test('sitemap lists every indexable page except the deliberately omitted ones, w
   const listed = new Set([...sitemap.matchAll(/<loc>https:\/\/freellmapihub\.com\/([^<]*)<\/loc>/g)].map((m) => m[1]));
   const missing = [];
   for (const f of pages) {
-    const rel = f.slice(join(ROOT, 'site').length + 1);
+    const rel = slash(f.slice(join(ROOT, 'site').length + 1));
     if (rel === '404.html' || rel.startsWith('updates/page/') || /^state\/\d{4}-\d{2}\//.test(rel)) continue; // 404 is not a page; pagination follows the commit count (test above)
     const html = readFileSync(f, 'utf8');
     if (/<meta name="robots" content="noindex">/.test(html)) continue; // redirect stubs and legal pages
@@ -2941,9 +2942,11 @@ test('the private copy of a worktree with a relative gitdir still sees the histo
   git(main, 'worktree', 'add', '-q', '--detach', wt);
   // make the gitdir relative, as `git worktree add --relative-paths` does
   const abs = /^gitdir:\s*(.+?)\s*$/m.exec(readFileSync(join(wt, '.git'), 'utf8'))[1];
+  rmSync(join(wt, '.git'));
   writeFileSync(join(wt, '.git'), `gitdir: ${relative(wt, abs)}\n`);
   assert.ok(!/^gitdir: \//.test(readFileSync(join(wt, '.git'), 'utf8')), 'the fixture gitdir is relative');
   const copy = privateTree(wt);
-  assert.match(readFileSync(join(copy, '.git'), 'utf8'), /^gitdir: \//, 'the copy points at the gitdir by an absolute path');
+  const copiedGitdir = /^gitdir:\s*(.+?)\s*$/m.exec(readFileSync(join(copy, '.git'), 'utf8'))[1];
+  assert.equal(isAbsolute(copiedGitdir), true, 'the copy points at the gitdir by an absolute path');
   assert.equal(git(copy, 'log', '--format=%s').trim(), 'first', 'the copy sees the history');
 });
