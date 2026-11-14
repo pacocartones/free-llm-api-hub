@@ -6,7 +6,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Before proposing, please skim [docs/inclusion-criteria.md](../blob/main/docs/inclusion-criteria.md) — it explains what earns a spot and what gets rejected (consumer chat UIs, "free with a card on file", vaporware, etc.).
+        Before proposing, please skim [docs/inclusion-criteria.md](https://github.com/pacocartones/free-llm-api-hub/blob/main/docs/inclusion-criteria.md) — it explains what earns a spot and what gets rejected (consumer chat UIs, "free with a card on file", vaporware, etc.).
   - type: input
     id: name
     attributes:

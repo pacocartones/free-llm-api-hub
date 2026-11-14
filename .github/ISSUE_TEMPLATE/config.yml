@@ -1,5 +1,11 @@
 blank_issues_enabled: true
 contact_links:
+  - name: 🌱 Find your first contribution
+    url: https://github.com/pacocartones/free-llm-api-hub/blob/main/CONTRIBUTING.md#your-first-contribution-step-by-step
+    about: Choose an existing task, learn when to use /take or /release, and find the checks to run.
+  - name: 🛠 Help wanted — next steps
+    url: https://github.com/pacocartones/free-llm-api-hub/issues?q=is%3Aissue+is%3Aopen+no%3Aassignee+label%3A%22help+wanted%22
+    about: Browse larger tasks; read the scope, comments and linked PRs before taking one.
   - name: 📖 How verification works
     url: https://github.com/pacocartones/free-llm-api-hub/blob/main/docs/methodology.md
     about: Before reporting, see what "verified" means and how entries are checked.

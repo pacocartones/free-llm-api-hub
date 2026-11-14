@@ -22,7 +22,7 @@ Every entry is dated and sourced to the provider's own docs; what we could not c
 
 **[🔎 Interactive explorer](https://freellmapihub.com/)** &nbsp;·&nbsp; **[📊 Dataset](data/providers.json)** &nbsp;·&nbsp; **[🧪 How we verify](docs/methodology.md)** &nbsp;·&nbsp; **[➕ Add a provider](CONTRIBUTING.md)**
 
-⭐ **Useful? [Star the repo](https://github.com/pacocartones/free-llm-api-hub)** so other builders find it. &nbsp;·&nbsp; 🛠 **Want to help?** Pick a [good first issue](https://github.com/pacocartones/free-llm-api-hub/contribute) or a [help wanted](https://github.com/pacocartones/free-llm-api-hub/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22) issue; follow its named files and check. New here? Start with [CONTRIBUTING.md](CONTRIBUTING.md).
+⭐ **Useful? [Star the repo](https://github.com/pacocartones/free-llm-api-hub)** so other builders find it. &nbsp;·&nbsp; 🛠 **Want to help?** Pick a [good first issue](https://github.com/pacocartones/free-llm-api-hub/contribute) or a [help wanted](https://github.com/pacocartones/free-llm-api-hub/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22) issue; follow its named files and check. New here? Follow the [first-contribution steps](CONTRIBUTING.md#your-first-contribution-step-by-step).
 
 
 </div>
@@ -207,7 +207,8 @@ Self-contained (inline styles, no CSS conflicts). All attributes are optional: `
 
 Found an outdated limit, a dead link, or a provider that belongs here? You'll keep this useful for everyone.
 
-- **Fastest:** the [structured issue form](../../issues/new?template=inaccuracy.yml) — provider, what changed, a source link.
+- **Your first PR:** [choose a task, coordinate and run its checks](CONTRIBUTING.md#your-first-contribution-step-by-step).
+- **Fastest report:** the [structured issue form](../../issues/new?template=inaccuracy.yml) — provider, what changed, a source link.
 - **For a provider-data correction:** edit [`data/providers.json`](data/providers.json), run `npm run build && npm test`, and commit the generated files with the data. Never hand-edit the tables — they're generated.
 
 Full guidelines, including what counts as an acceptable source: **[CONTRIBUTING.md](CONTRIBUTING.md)**.
@@ -220,7 +221,7 @@ Use AI tools if they help you — we do too. We ask for good judgement: understa
 
 Provider facts need checking, and the docs and site need care too. Three ways to help:
 
-1. Pick a [*good first issue*](https://github.com/pacocartones/free-llm-api-hub/contribute). These include provider facts, docs and code; each issue names the files and the check. For a provider fact, including a docs source check, cite the official page and the day you read it (UTC). For code or other docs, follow the issue's evidence and acceptance criteria. A `good first issue` also labelled `data` is not claimed; for other issues, comment `/take` before starting. There is also a [*help wanted*](https://github.com/pacocartones/free-llm-api-hub/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22) list for larger pieces.
+1. Pick a [*good first issue*](https://github.com/pacocartones/free-llm-api-hub/contribute). These include provider facts, docs and code; each issue names the files and the check. For a provider fact, including a docs source check, cite the official page and the day you read it (UTC). For code or other docs, follow the issue's evidence and acceptance criteria. A `good first issue` also labelled `data` is not claimed; for other issues, comment `/take` before starting. Ready for a larger task? Follow the [path from good first issue to help wanted](CONTRIBUTING.md#from-good-first-issue-to-help-wanted).
 2. Pick a provider from the umbrella issue [**confirm `phone_required`**](https://github.com/pacocartones/free-llm-api-hub/issues/7).
 3. Do the same for [**confirm `commercial_ok`**](https://github.com/pacocartones/free-llm-api-hub/issues/8), reading the provider's terms.
 

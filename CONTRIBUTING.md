@@ -6,14 +6,19 @@ Thanks for helping. Here's how it works.
 
 ## Your first contribution, step by step
 
-Each issue names the files to edit and the check to run. Start with an unclaimed task:
+Start with one small task and keep your pull request focused on its acceptance criteria.
 
-1. Pick a [good first issue](https://github.com/pacocartones/free-llm-api-hub/contribute). For a docs or code issue, comment `/take` before starting; a `good first issue` labelled `data` does not need a claim. See [Claiming an issue](#claiming-an-issue).
-2. If the issue verifies a provider fact (in data or docs), read the provider's official page, copy the supporting sentence and note the day you read it (UTC). Otherwise, inspect the current page or behavior and the files named in the issue.
-3. Fork, edit **the files named in that issue**, run `npm ci --ignore-scripts` once, then run **its named check**. Data changes usually need `npm run build && npm test` and the regenerated files; a docs-only issue may ask for a different check.
-4. Open the pull request with the check result and what you changed. For a provider claim, include its source and date; if the source is unclear, say what you could and could not confirm.
+1. **Choose:** browse [unassigned good first issues](https://github.com/pacocartones/free-llm-api-hub/issues?q=is%3Aissue+is%3Aopen+no%3Aassignee+label%3A%22good+first+issue%22). Read the files, evidence and check named in the issue; check its latest comments and linked pull requests before starting. No assignee does not always mean nobody is working on it. If the scope or check is unclear, ask in that issue first.
+2. **Coordinate:** for a `good first issue` also labelled `data`, do not claim it; the first correct, sourced PR is merged. For other tasks, comment `/take` and check that the bot assigned you before starting. See [Claiming an issue](#claiming-an-issue), including how to release it.
+3. **Prepare:** follow [Quick start](#quick-start) to fork, clone and create your own branch. If the task verifies a provider fact (in data or docs), read the provider's official page, copy the supporting sentence and note the day you read it (UTC). Otherwise, inspect the behavior and files named in the issue.
+4. **Change and check:** edit the source files named in the issue and run its named check. Use [Which checks to run](#which-checks-to-run) for the baseline commands. If the official source does not answer the question, leave the data unchanged and report the link, date and what remains unknown in the issue.
+5. **Submit:** open a pull request against `main`, link the issue, explain the change and include the exact check commands and results. Use a draft PR if you need feedback on unfinished work; say what is missing. If a check cannot run, report the error instead of marking it passed.
 
-Details follow: [Quick start](#quick-start), [Confirming a single unknown field](#confirming-a-single-unknown-field) and [Claiming an issue](#claiming-an-issue).
+### From good first issue to help wanted
+
+After a first contribution, browse [unassigned help wanted issues](https://github.com/pacocartones/free-llm-api-hub/issues?q=is%3Aissue+is%3Aopen+no%3Aassignee+label%3A%22help+wanted%22). These can involve more files, research or design decisions; read the acceptance criteria and propose a small first step in the issue before taking it. You do not need a contribution count or permission to browse or ask questions. Labels can overlap: choose by the task's scope and prerequisites, not by the label alone.
+
+Use the same claim, source and validation rules. Keep one task in progress while learning the repository; if you get stuck, share what you tried and the error or unanswered question. If you stop, `/release` makes an assigned task available again. If neither list has a suitable task, use [Questions & ideas](https://github.com/pacocartones/free-llm-api-hub/discussions) to ask where your skills would help.
 
 ## For provider data, edit the source
 
@@ -27,9 +32,13 @@ Fixing a rate limit means editing one field plus the files regenerated from it �
 
 ## Quick start
 
+[Fork the repository on GitHub](https://github.com/pacocartones/free-llm-api-hub/fork), then clone your fork:
+
 ```bash
-git clone https://github.com/pacocartones/free-llm-api-hub
+# fork the repository on GitHub first, then replace YOUR-USERNAME below:
+git clone https://github.com/YOUR-USERNAME/free-llm-api-hub.git
 cd free-llm-api-hub
+git switch -c docs/my-first-change
 
 # install the locked development tools once:
 npm ci --ignore-scripts
@@ -39,7 +48,19 @@ npm ci --ignore-scripts
 npm run build && npm test
 ```
 
-That's the whole loop. `npm ci --ignore-scripts` installs the locked development tools for JSON Schema validation and local social-image generation without running package lifecycle scripts. The shipped site has no runtime dependencies. The Node version used in CI is pinned in [`.nvmrc`](.nvmrc); anything ≥18 works locally.
+`npm ci --ignore-scripts` installs the locked development tools for JSON Schema validation and local social-image generation without running package lifecycle scripts. The shipped site has no runtime dependencies. Use the Node version pinned in [`.nvmrc`](.nvmrc) (CI uses it too), with `git` on your `PATH`. You can name your fork's branch to match your task; `docs/my-first-change` is only an example.
+
+### Which checks to run
+
+Run these commands from the repository root after installing dependencies. Follow any additional check named in your issue.
+
+| Change | Local validation before opening a PR |
+| --- | --- |
+| Hand-written docs or issue/PR template text | `npm run links`, then preview the changed Markdown or form and open its links. The link checker checks local doc file paths; it does not validate GitHub forms, external issue searches or heading anchors. |
+| Provider data or build inputs (including `CONTRIBUTING.md`, which generates the site's contributing page) | `npm run build && npm test`; commit your changes and regenerated files, then run `npm run check` (it compares generated output with the committed version). Run `npm run og` too if the OG check flags drift. |
+| Code | `npm test`, plus the focused check named in the issue. If the change affects generated output, also follow the build-input row above. |
+
+CI runs the full integrity suite on every PR, including docs-only changes. Paste your local commands and their results in the PR; a focused check is useful evidence, and a check you could not run needs an explanation. See [the first-fork checks note](#your-first-pr-from-a-fork-the-checks-may-wait) if CI is waiting for approval.
 
 > **You need the full git history.** `npm test` and `npm run build` mine the per-provider change history from `git log` (see [docs/architecture.md](docs/architecture.md)), so they require a **full clone** — not a shallow clone (`git clone --depth 1`), not a tarball download, and `git` must be on your `PATH`. Without full history the suite fails with a message like:
 >
@@ -129,7 +150,7 @@ if grep -l -- "$profile" /proc/[0-9]*/cmdline 2>/dev/null | grep -qv "/proc/$$/"
 There are two kinds of issue:
 
 - **Labelled both `good first issue` and `data`** (a data question answered from the provider's own page): don't claim it, open a pull request when it's ready. The first correct, sourced PR is merged. If you found something useful but won't open a PR, post it in the issue with the link and the date; the PR that uses it credits you.
-- **Everything else:** comment `/take` on the issue and a bot assigns it to you straight away, if nobody has it and you have fewer than two open issues assigned. If you can't continue, comment `/release`; that's completely fine, and it frees the issue for someone else. An assigned issue with no activity for two weeks may be offered to another contributor, after a ping. A pull request for an issue assigned to someone else waits for them.
+- **Everything else:** comment `/take` on its own as the first line of an issue comment. A bot assigns it to you if nobody has it and you have fewer than two open issues assigned. Check the assignee and bot reply; if there is no reply, ask in the issue before starting duplicate work. If you can't continue, comment `/release` on its own as the first line; that's completely fine. Check that your assignment was removed so someone else can take it. Share any useful findings or draft PR link when handing it back. An assigned issue with no activity for two weeks may be offered to another contributor, after a ping. A pull request for an issue assigned to someone else waits for them.
 
 We read every pull request and reply as soon as we can. A reply is a real answer (a review, a question or an assignment), not an acknowledgement.
 
@@ -144,7 +165,7 @@ An issue carries the `good first issue` label only if all of these hold:
 5. **Unclaimed:** no assignee and no open pull request linked to it.
 6. **Reviewed by a maintainer in the last 30 days.**
 
-We keep 8 to 12 of them open at a time. When one closes, the next comes from the [#7](https://github.com/pacocartones/free-llm-api-hub/issues/7) and [#8](https://github.com/pacocartones/free-llm-api-hub/issues/8) checklists or from the weekly re-verification batch. If the provider's docs don't answer the question, that is a useful result too: say so in the issue with the link and the date, and the field stays `null`.
+Maintainers can draw new tasks from the [#7](https://github.com/pacocartones/free-llm-api-hub/issues/7) and [#8](https://github.com/pacocartones/free-llm-api-hub/issues/8) checklists or from the weekly re-verification batch. If the provider's docs don't answer the question, that is a useful result too: say so in the issue with the link and the date, and the field stays `null`.
 
 ## Using AI
 

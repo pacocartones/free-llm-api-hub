@@ -12,13 +12,22 @@
 
 ## How I tested it
 
-<!-- For data, code, or docs changes: list the commands you ran and their results. If a relevant check could not run, say why. -->
+<!-- See https://github.com/pacocartones/free-llm-api-hub/blob/main/CONTRIBUTING.md#which-checks-to-run.
+List the exact commands you ran and their results, plus any manual checks.
+For docs/templates, preview the text or form and open the changed links.
+If a relevant check could not run, include the error and why it is blocked. -->
+
+## Remaining work or questions
+
+<!-- Optional: use a draft PR for unfinished work. Say what is missing or where you need feedback; delete this section if ready for review. -->
 
 ## Checklist
 
 <!-- Remove items that do not apply. Leave a check you could not run unchecked and explain above. -->
 
-- [ ] I ran `npm test` and it passed.
+- [ ] I ran the checks for my change in CONTRIBUTING.md and the issue, and recorded commands and results above.
+- [ ] **Code, data or build-input changes:** I ran `npm test` and it passed.
+- [ ] **Docs or template text:** I previewed the changed text and opened its links.
 - [ ] **Data or build-input changes:** I ran `npm run build` (and `npm run og` if the OG check asked for it) and committed the regenerated files.
 - [ ] **Build-input changes:** I ran `npm run check` and it found no drift.
 - [ ] **Data changes:** I edited the canonical data by hand, not the generated files.
