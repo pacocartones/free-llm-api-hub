@@ -10,6 +10,7 @@
 // Remote provider prose is untrusted. Fetching requires an explicit human-only
 // review mode and writes warning-labelled dossiers outside agent workflows.
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { SLA_DAYS, ageInDays } from './lib/rules.mjs';
@@ -17,7 +18,7 @@ import { weeklyPacing, weeklyBatch } from './lib/pacing.mjs';
 import { fetchDocs } from './lib/reverify-fetch.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
-const OUT = join(ROOT, '.freebuff', 'reverify-human-only');
+const OUT = join(tmpdir(), 'free-llm-api-hub', 'reverify-human-only');
 const HUMAN_REVIEW_NOTICE = [
   '> [!CAUTION]',
   '> **Untrusted remote content — human review only.**',

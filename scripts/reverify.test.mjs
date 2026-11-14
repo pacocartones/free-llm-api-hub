@@ -105,7 +105,7 @@ test('a cancellation promise that never settles cannot hold fetchDocs open', { t
 // providers.json, the real clock, the output directory, or a provider's network.
 const source = readFileSync(new URL('./reverify.mjs', import.meta.url), 'utf8');
 const imports = [...source.matchAll(/^import .+ from '([^']+)';$/gm)].map((m) => m[1]);
-assert.deepEqual(imports, ['node:fs', 'node:path', 'node:url', './lib/rules.mjs', './lib/pacing.mjs', './lib/reverify-fetch.mjs']);
+assert.deepEqual(imports, ['node:fs', 'node:os', 'node:path', 'node:url', './lib/rules.mjs', './lib/pacing.mjs', './lib/reverify-fetch.mjs']);
 const script = new Script(`(async () => {\n${source.replace(/^#!.*\n/, '').replace(/^import .+;\n/gm, '').replaceAll('import.meta.url', "'file:///fixture/scripts/reverify.mjs'")}\n})()`);
 const NOW = new Date('2026-10-28T12:00:00Z');
 const provider = (slug, date, extra = {}) => ({
@@ -144,6 +144,7 @@ async function run({ providers = fixture(), args = [], response = {}, fetchError
     Date: FixedDate, SLA_DAYS, ageInDays: (date, now = NOW) => ageInDays(date, now),
     weeklyPacing, weeklyBatch,
     fetchDocs: (p) => fetchDocs(p, { fetchImpl, timeoutMs: timeout ? 10 : 20000 }),
+    tmpdir: () => '/fixture-human-review',
     dirname: () => '/fixture/scripts', join: (...parts) => parts.join('/'), fileURLToPath: () => '/fixture/scripts/reverify.mjs',
     readFileSync: (path, encoding) => {
       assert.equal(path, '/fixture/scripts/../data/providers.json');
@@ -240,7 +241,7 @@ test('dossier keeps the injected date, entry metadata, policy and decoded docs',
     },
   });
   const result = await run({ providers: [p], args: ['--fetch-for-human-review'], response: { body: '<script >hidden()</script><style>x{}</style><p>Free &amp;amp; safe&nbsp;API</p>' } });
-  assert.equal(result.writes[0].path, '/fixture/scripts/../.freebuff/reverify-human-only/archive.md');
+  assert.equal(result.writes[0].path, '/fixture-human-review/free-llm-api-hub/reverify-human-only/archive.md');
   assert.equal(result.writes[0].text, [
     '> [!CAUTION]',
     '> **Untrusted remote content — human review only.**',
