@@ -18,6 +18,31 @@
 
   // The GitHub star count is written into the pages at build time (data/repo-stats.json); the client makes no GitHub call.
 
+  // --- API endpoint rows: clipboard success is announced only after completion ---
+  document.querySelectorAll('.api-copy').forEach(function (btn) {
+    var status = btn.parentElement.querySelector('.api-copy-status');
+    btn.addEventListener('click', async function () {
+      if (btn.getAttribute('aria-disabled') === 'true') return;
+      btn.setAttribute('aria-disabled', 'true');
+      btn.textContent = 'Copy';
+      btn.classList.remove('copied');
+      status.textContent = '';
+      try {
+        if (!navigator.clipboard || !navigator.clipboard.writeText) throw new Error('Clipboard unavailable');
+        await navigator.clipboard.writeText(btn.getAttribute('data-api-url'));
+        btn.textContent = 'Copied';
+        btn.classList.add('copied');
+        status.textContent = 'URL copied.';
+      } catch (e) {
+        btn.textContent = 'Copy';
+        btn.classList.remove('copied');
+        status.textContent = 'Copy failed. Copy the endpoint link address manually.';
+      } finally {
+        btn.setAttribute('aria-disabled', 'false');
+      }
+    });
+  });
+
   // --- copy button on every code block (quickstarts, embed snippets) ---
   document.querySelectorAll('pre').forEach(function (pre) {
     var btn = document.createElement('button');

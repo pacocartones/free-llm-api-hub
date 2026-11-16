@@ -1728,7 +1728,10 @@ const apiEndpoints = {
 writeApi('index.json', { ...apiBase, description: 'Static, versioned JSON over the free-llm-api-hub dataset. Paths are relative to /api/v1/. Regenerated on every dataset change; no query params, no auth, no rate limits.', counts: { providers: publicProviders.length, ongoing: ongoing.length, trial: trial.length, programs: programs.startups.length + programs.research.length }, endpoints: apiEndpoints });
 
 // human-facing API docs page
-const apiRow = (label, path, count) => `<tr><td class="name"><a href="v1/${path}"><code>/api/v1/${path}</code></a></td><td>${htmlEsc(label)}</td><td>${count != null ? count : ''}</td></tr>`;
+const apiRow = (label, path, count) => {
+  const url = `${SITE}/api/v1/${path}`;
+  return `<tr><td class="name"><a href="v1/${htmlEsc(path)}"><code>/api/v1/${htmlEsc(path)}</code></a> <button type="button" class="api-copy" data-api-url="${htmlEsc(url)}" aria-label="Copy endpoint URL: ${htmlEsc(url)}">Copy</button><span class="api-copy-status" role="status"></span></td><td>${htmlEsc(label)}</td><td>${count != null ? count : ''}</td><td class="api-curl"><code>curl --fail --silent --show-error ${htmlEsc(url)}</code></td></tr>`;
+};
 // Client-config section: the example uses the first client with a sampled model,
 // so it always names a provider and model that are really in the file.
 const exampleClient = clientList.find((c) => c.models_free && c.models_free.length) || clientList[0];
@@ -1761,7 +1764,7 @@ litellm --config litellm.yaml</code></pre>` +
 const apiDocMain =
   pageHero({ crumbs: `<a href="../">Home</a> / API`, h1: `Static JSON API`, lede: `The whole dataset as versioned, machine-readable JSON at stable URLs — no server, no query params, no auth, no rate limits. CORS-open, so you can <code>fetch()</code> it straight from the browser. Regenerated on every dataset change (currently v${data.version}).` }) +
   `<main id="main"><div class="wrap prose">` +
-  `<h2>Everything</h2><table class="model-table"><thead><tr><th>Endpoint</th><th>Contents</th><th>Count</th></tr></thead><tbody>` +
+  `<h2>Everything</h2><table class="model-table api-endpoints"><thead><tr><th>Endpoint</th><th>Contents</th><th>Count</th><th>curl example</th></tr></thead><tbody>` +
   apiRow('Full provider dataset (all fields)', 'providers.json', publicProviders.length) +
   apiRow('Apply-to-get credit programs', 'programs.json', programs.startups.length + programs.research.length) +
   apiRow('The top 10 by score, ranked with its parts', 'best.json', topList.length) +
@@ -1779,10 +1782,10 @@ const apiDocMain =
   apiRow('OpenAI SDK settings per verified OpenAI-compatible provider', 'openai-clients.json', clientList.length) +
   apiRow('LiteLLM proxy config (model_list) for the same providers', 'litellm.yaml', clientList.length) +
   `</tbody></table>` +
-  `<h2>Slices (by constraint)</h2><table class="model-table"><thead><tr><th>Endpoint</th><th>Contents</th><th>Count</th></tr></thead><tbody>` +
+  `<h2>Slices (by constraint)</h2><table class="model-table api-endpoints"><thead><tr><th>Endpoint</th><th>Contents</th><th>Count</th><th>curl example</th></tr></thead><tbody>` +
   Object.entries(API_SLICES).map(([n, fn]) => apiRow(`Providers where ${n.replace(/-/g, ' ')}`, `${n}.json`, publicProviders.filter(fn).length)).join('') +
   `</tbody></table>` +
-  `<h2>Slices (by modality)</h2><table class="model-table"><thead><tr><th>Endpoint</th><th>Contents</th><th>Count</th></tr></thead><tbody>` +
+  `<h2>Slices (by modality)</h2><table class="model-table api-endpoints"><thead><tr><th>Endpoint</th><th>Contents</th><th>Count</th><th>curl example</th></tr></thead><tbody>` +
   API_MODS.map((m) => apiRow(`Providers with a free ${m} modality`, `modality/${m}.json`, publicProviders.filter((p) => (p.modalities || []).includes(m)).length)).join('') +
   `</tbody></table>` +
   `<h2>Example</h2><pre><code>curl -s ${SITE}/api/v1/no-card.json | jq '.providers[].name'</code></pre>` +
