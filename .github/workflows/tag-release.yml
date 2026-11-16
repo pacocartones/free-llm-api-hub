@@ -1,8 +1,9 @@
 name: Tag release
 
-# Creates the annotated tag `vX.Y.Z` when the dataset version in
-# data/providers.json advances. Idempotent: if the tag already exists the job
-# is accepted only if annotated at this event commit on main; mismatches fail.
+# Creates the annotated tag `vX.Y.Z` when the dataset version changes across
+# a trusted main push. Ordinary updates with the same version do not touch tags.
+# For a version change, an existing tag is accepted only if annotated at this
+# event commit on main; mismatches fail.
 #
 # Why a workflow and not a hand-run `git tag`? The tag kept lagging behind
 # main (v2.9.0 shipped, then more re-verification landed untagged) because a
@@ -14,6 +15,8 @@ on:
     branches: [main]
     paths:
       - 'data/providers.json'
+      - 'scripts/tag-release.sh'
+      - '.github/workflows/tag-release.yml'
   # Intentionally no workflow_dispatch: a manual run can select an unreviewed
   # ref, while this workflow can publish official tags with contents:write.
 
@@ -38,5 +41,6 @@ jobs:
       - name: Verify or create the dataset tag
         env:
           DATASET_VERSION: ${{ steps.version.outputs.value }}
+          EVENT_BEFORE_SHA: ${{ github.event.before }}
           GH_TOKEN: ${{ github.token }}
         run: bash scripts/tag-release.sh

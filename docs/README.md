@@ -1,6 +1,6 @@
 # Project documentation
 
-How **Free LLM API Hub** works — how entries are verified, what earns a spot, and how the whole thing stays current. The dataset ([`data/providers.json`](../data/providers.json)) is the single source of truth; the README, badge and website are generated from it.
+How **Free LLM API Hub** works — how entries are verified, what earns a spot, and how the whole thing stays current. The dataset ([`data/providers.json`](../data/providers.json)) is the single source of truth; the README's marked data sections, badge and provider pages are generated from it. Companion datasets and authored build inputs are mapped in [Architecture](architecture.md).
 
 ## Start here
 
@@ -17,6 +17,7 @@ How **Free LLM API Hub** works — how entries are verified, what earns a spot, 
 |---|---|
 | [Update playbook](update-playbook.md) | The weekly routine that keeps the freshness badge green |
 | [Freshness SLA](freshness-sla.md) | The 90-day re-verification system: buckets, badge, worklist, reverify batch, verified column |
+| [Quoted passages](quotes.md) | Evidence register, quote updates and offline versus live checks |
 | [Architecture](architecture.md) | The data-first pipeline: what each script does, the data model, the two-places rule |
 | [Static JSON API: stability and versioning](api.md) | What `/api/v1/` guarantees, how `version` relates to the path, and pinning a snapshot by tag |
 | [Discovery sources & competitive map](sources.md) | Where new providers are found, which lists to trust, and how we differ from rivals |
@@ -33,7 +34,7 @@ How **Free LLM API Hub** works — how entries are verified, what earns a spot, 
 
 ## Project & community
 
-[Contributing](../CONTRIBUTING.md) · [Governance](../GOVERNANCE.md) · [Security](../SECURITY.md) · [Code of Conduct](../CODE_OF_CONDUCT.md) · [Changelog](../CHANGELOG.md)
+[Release runbook](../RELEASING.md) · [Contributing](../CONTRIBUTING.md) · [Governance](../GOVERNANCE.md) · [Security](../SECURITY.md) · [Code of Conduct](../CODE_OF_CONDUCT.md) · [Changelog](../CHANGELOG.md)
 
 ---
 

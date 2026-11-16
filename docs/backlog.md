@@ -12,10 +12,10 @@ A living, maintainer-facing checklist of concrete follow-ups. Direction and prin
 
 ## Data — model samples (`models_free`)
 
-- [ ] **Backfill the key-gated providers.** Groq, Cerebras, SambaNova and Scaleway expose a standard OpenAI `/models` endpoint but need an API key. Add each as a repo secret (`GROQ_API_KEY`, `CEREBRAS_API_KEY`, `SAMBANOVA_API_KEY`, `SCALEWAY_API_KEY`) — the `fetch-models` script already reads them and will fill `models_free` automatically (locally via `npm run models`; key-gated providers are skipped unless their key is set in the local environment). Until then these keep a conservative hand-picked sample.
+- [ ] **Backfill the key-gated providers.** Groq, Cerebras, SambaNova and Scaleway expose a standard OpenAI `/models` endpoint but need an API key. Set each key in the local environment or local secrets store (`GROQ_API_KEY`, `CEREBRAS_API_KEY`, `SAMBANOVA_API_KEY`, `SCALEWAY_API_KEY`) — the `fetch-models` script already reads them and will fill `models_free` automatically (locally via `npm run models`; key-gated providers are skipped unless their key is set in the local environment). Until then these keep a conservative hand-picked sample.
 - [ ] **Custom fetchers for the non-OpenAI-shaped ones.** Google Gemini (`/v1beta/models?key=`), Z.ai, Cohere (`/v1/models`, needs key), Cloudflare Workers AI (account-scoped model search) each need a small dedicated extractor in `scripts/fetch-models.mjs`.
 - [ ] **Improve NVIDIA NIM / ModelScope sample quality.** The publisher round-robin currently surfaces some obscure models (alphabetical-first per vendor). Consider weighting toward headline models, or a small per-provider curated preference list.
-- [ ] Consider a `models_url` field: the human-browsable model-list page per provider, linked from the provider page and the model index.
+- ✅ **`models_url`** is an optional, validated catalogue URL in the schema and provider pages; see [comparison dimensions](comparison-dimensions.md).
 
 ## Site & SEO
 
@@ -40,10 +40,20 @@ Re-check each against the [inclusion criteria](inclusion-criteria.md); promote
 only what confirms.
 
 - [ ] **MiniMax** (LLM) — OpenAI-compatible confirmed (`https://api.minimax.io/v1`,
-  also an Anthropic-compatible path), internationally reachable email signup, but
-  **no free-trial credit is documented** on its pricing/docs pages (campaign-
-  dependent). The most-wanted net-new LLM — confirm a citable free tier (or probe
-  a fresh signup) before adding. Also Anthropic-compatible worth noting.
+  also an Anthropic-compatible path), internationally reachable email signup.
+  Checked 2026-11-14 (UTC): the [official API pricing page](https://platform.minimax.io/subscribe/token-plan?tab=api-enterprise)
+  lists pay-as-you-go usage deducted from a funded account balance, while the
+  [Token Plan page](https://platform.minimax.io/subscribe/token-plan) lists paid
+  subscriptions and purchasable credit packs. The
+  [paid-services agreement](https://platform.minimax.io/protocol/paid-agreement)
+  describes API access as balance/resource-package funded and distinguishes
+  promotional credits; no generally available free API tier or trial
+  credit is documented on the official pages checked. Recheck if MiniMax
+  publishes explicit public grant terms. The [official Eigent tutorial](https://platform.minimax.io/docs/solutions/eigent#step-1-get-minimax-api-key)
+  mentions a free quota for new pay-as-you-go users, but states no amount,
+  expiry or eligibility conditions; this does not establish a generally available
+  free API offer. Thanks @abhi478jeetur-rgb for identifying this qualification
+  in #634. Also Anthropic-compatible worth noting.
 - ✅ **Upstage** (Solar LLM + Document Parse/OCR) — now a provider in the dataset (re-verified 2026-10-08).
 - ✅ **Veryfi** (OCR) — now a provider in the dataset (re-verified 2026-10-08).
 - [ ] **Replicate** (image/video) — re-verified 2026-11-14 against its pricing
@@ -61,14 +71,27 @@ only what confirms.
 - ✅ **Speech tail:** Voicegain, Smallest.ai, Retell AI and Camb.ai are all providers in the dataset (re-verified 2026-10-08).
 - [ ] **From `npm run discover` (2026-07-31):** `inclusionai` (InclusionAI /
   Ant Group — Ling/Bailing models appear free on OpenRouter) shows free models we
-  don't cover — check whether the lab exposes its OWN direct free API tier before
-  adding. (`poolside` is now a provider in the dataset.)
+  don't cover. Checked 2026-11-14 (UTC): InclusionAI's
+  [verified official GitHub organization](https://github.com/inclusionAI)
+  describes its work as open-source models and research and links to its model
+  hubs. The [official website](https://inclusion-ai.org/) could not be fetched
+  during this check, so its contents remain unknown; maintainers should retry
+  the website check. Do not infer whether it documents a hosted inference API,
+  pricing, or a direct free-tier signup until the site can be reviewed.
+  Aggregator availability alone does not meet the inclusion criteria, so keep
+  this as an unconfirmed lead rather than adding a provider. Recheck if
+  InclusionAI publishes direct API documentation. (`poolside` is now a provider
+  in the dataset.)
 - [ ] **Chinese labs (region-gated):** Baidu Qianfan / ERNIE (1M free tokens per
   model, big catalog), ByteDance Volcengine/Doubao, StepFun, SenseNova — real free
   tiers but mainland phone/ID gates make them poor fits for an international
   builder audience. Revisit if any drops the ID wall for overseas devs.
+
 - [ ] **Explicitly NOT free (do not add; leave in "Notably NOT free" thinking):**
-  Moonshot/Kimi intl (needs ≥$1 recharge), DeepInfra, Chutes, Together AI
+
+  Moonshot/Kimi intl (needs ≥$1 recharge), DeepInfra (card or prepayment is
+  required before any service use; checked 2026-11-14 against the
+  [official pricing page](https://deepinfra.com/pricing)), Chutes, Together AI
   (official billing article requires a minimum $5 credit purchase; checked
   2026-11-14, see [source review](sources.md#checked-with-what-each-page-says)),
   Parasail, GMICloud, Inference.net, Lepton (folded into NVIDIA), Nomic (pivoted).
@@ -97,7 +120,7 @@ only what confirms.
 ## Bigger bets (under consideration)
 
 - ✅ **Small documented public JSON API over the dataset** — shipped as a *static* versioned API at [`/api/v1/`](https://freellmapihub.com/api/) (full + slices by category/constraint/modality) plus `llms.txt`/`llms-full.txt` for agents. No query params (static hosting); slices cover the common filters.
-- [ ] Free AI **coding tools** as a clearly-separated sibling section (volatile — kept out of the verified self-serve dataset, like the credit-programs and self-hosting companions).
+- ✅ Free AI **coding tools** shipped as a [separate section](https://freellmapihub.com/coding-tools/), backed by `data/coding-tools.json` and `data/coding-tools-own-key.json`; excluded from provider counts and ranking.
 
 ## Recently shipped
 

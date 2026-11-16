@@ -82,7 +82,7 @@ test('a failing audit in any raw run survives the median score envelope', () => 
 
 // The pages the gate measures are written in two places, the script and the comment of the workflow. They must agree,
 // and the pages that carry the tables and the comparison have to be among them.
-test('the gate measures all nine routes, and the workflow says which pages it measures', () => {
+test('the gate measures all sixteen routes, and the workflow says which pages it measures', () => {
   const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
   const script = readFileSync(join(ROOT, 'scripts/lighthouse-gate.mjs'), 'utf8');
   const workflow = readFileSync(join(ROOT, '.github/workflows/lighthouse.yml'), 'utf8');
@@ -93,6 +93,17 @@ test('the gate measures all nine routes, and the workflow says which pages it me
   for (const page of fixed.filter((p) => p !== '/')) assert.ok(workflow.includes(page), `the workflow names ${page}`);
   // one more page than the fixed ones: the provider page comes from the dataset
   const count = fixed.length + 1;
-  const words = { 4: 'four', 5: 'five', 6: 'six', 7: 'seven', 8: 'eight', 9: 'nine' };
+  const words = { 4: 'four', 5: 'five', 6: 'six', 7: 'seven', 8: 'eight', 9: 'nine', 16: 'sixteen' };
   assert.ok(workflow.includes(`on ${words[count]} pages`) && workflow.includes(`Measure the ${words[count]} pages`), `the workflow says ${words[count]} pages`);
+});
+
+// The runner passes this stricter category budget alongside the existing budgets.
+test('SEO budget fails a missing or sub-perfect category', () => {
+  const thresholds = { ...THRESHOLDS, seo: 1 };
+  const r = report(1, 1);
+  assert.deepEqual(evaluate('/guides/example.html', r, thresholds), ['/guides/example.html: seo has no score']);
+  r.categories.seo = { score: 0.92 };
+  assert.equal(evaluate('/', r, thresholds).length, 1);
+  r.categories.seo.score = 1;
+  assert.deepEqual(evaluate('/', r, thresholds), []);
 });

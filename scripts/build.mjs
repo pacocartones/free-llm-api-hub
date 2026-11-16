@@ -1,5 +1,6 @@
 #!/usr/bin/env node
-// Regenerates every derived artifact from the single source of truth: data/providers.json.
+// Regenerates derived artifacts from canonical datasets, companion metadata and authored inputs.
+// See docs/architecture.md for source inputs, generated regions and separate OG generation.
 //   - README provider tables (between AUTOGEN markers)
 //   - badge-freshness.json (root, for the shields.io endpoint badge)
 //   - site/providers.json so the interactive site ships the data
@@ -40,6 +41,7 @@ import { providerFigures, expandFigures, injectInlineFigures, figureErrors } fro
 import { badgeSvg } from './lib/badge-svg.mjs';
 import { codeHtmlEsc, curlChatQuickstart, pythonChatQuickstart, pythonEmbeddingsQuickstart, pythonStringLiteral } from './lib/quickstart.mjs';
 import { providersCsv } from './lib/provider-csv.mjs';
+import { writeSchemaDocs } from './schema-docs.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const FRESH_DAYS = SLA_DAYS; // the freshness SLA, defined once in lib/rules.mjs
@@ -368,15 +370,15 @@ const GUIDES = [
   },
   {
     slug: 'free-image-generation-apis',
-    answer: '{n} providers in the verified dataset offer a free tier or starting credit for text-to-image generation. Allowances are usually images or credits, and the catches that matter are watermarks and commercial-use terms. The Gotchas column flags commercial use; watermark rules are in the notes on each provider page.',
-    metaDesc: '{n} free text-to-image APIs, with limits, watermarks and commercial-use terms compared. Dataset of {date}.',
-    card: 'Image generation',
-    blurb: 'Free text-to-image APIs — Flux, SDXL and more.',
-    h1: 'Free image generation APIs',
-    title: 'Free image generation APIs (Flux, SDXL) · Free LLM API Hub',
-    desc: 'Verified APIs that generate images on a free tier or starting credit — Flux, Stable Diffusion, SDXL and more. Watermarks and commercial terms compared.',
-    lede: 'Free text-to-image APIs, from no-signup endpoints to first-party models on a starting credit.',
-    intro: `<p>Text-to-image is one of the easiest modalities to try for free: several providers host <strong>Flux, Stable Diffusion and SDXL</strong> behind a simple API — some with no signup at all, others with a small starting credit. Every provider below was verified to offer free image generation against its own docs.</p><p>Watch two catches on each provider's page: whether the free output is <em>watermarked</em>, and whether <em>commercial use</em> is allowed — both vary a lot across free image tiers.</p>`,
+    answer: '{n} providers in the verified dataset offer free access or starting credit for image generation or editing. Allowances are usually images or credits, and the catches that matter are watermarks and commercial-use terms. The Gotchas column flags commercial use; watermark rules are in the notes on each provider page.',
+    metaDesc: '{n} free image APIs for generation or editing, with limits and commercial-use terms compared. Dataset of {date}.',
+    card: 'Image APIs',
+    blurb: 'Free image generation and editing APIs.',
+    h1: 'Free image APIs — generation and editing',
+    title: 'Free image APIs — generation & editing · Free LLM API Hub',
+    desc: 'Free image generation and editing APIs, with starting credits, limits and commercial-use terms compared.',
+    lede: 'Free image APIs for generation, editing and background removal.',
+    intro: `<p>Text-to-image is one of the easiest modalities to try for free: several providers host <strong>Flux, Stable Diffusion and SDXL</strong> behind a simple API — some with no signup at all, others with a small starting credit. Not every image API generates images: this table also includes editing and background-removal services. Read each free-tier description to choose the operation you need.</p><p>Watch two catches on each provider's page: whether the free output is <em>watermarked</em>, and whether <em>commercial use</em> is allowed — both vary a lot across free image tiers.</p>`,
     filter: (p) => (p.modalities || []).includes('image'),
     query: '#explorer',
     pick: 'ai-horde',
@@ -779,6 +781,23 @@ readme = injectInlineFigures(readme, FIGS);
 }
 
 writeFileSync(join(ROOT, 'README.md'), readme);
+
+// The field reference follows the schema, without hand-maintained descriptions.
+writeSchemaDocs();
+
+// Counts in the field reference follow the data, just like README tables.
+const dimensionsPath = join(ROOT, 'docs/comparison-dimensions.md');
+const gapCounts = ['phone_required', 'commercial_ok', 'card_required']
+  .map((key) => `\`${key}\` ${providers.filter((p) => p[key] === null).length}/${providers.length}`)
+  .join(', ');
+const dimensions = readFileSync(dimensionsPath, 'utf8');
+if (!dimensions.includes('<!-- AUTOGEN:flag-gaps:start -->') || !dimensions.includes('<!-- AUTOGEN:flag-gaps:end -->')) {
+  throw new Error('Missing flag-gaps markers in docs/comparison-dimensions.md');
+}
+writeFileSync(dimensionsPath, dimensions.replace(
+  /(<!-- AUTOGEN:flag-gaps:start -->)[\s\S]*?(<!-- AUTOGEN:flag-gaps:end -->)/,
+  `$1\nCurrent gaps: ${gapCounts}.\n$2`,
+));
 
 // ---------- keep CITATION.cff pinned to the dataset it describes ----------
 // The citation metadata is derived, not hand-maintained: it drifted to 2.3.0
@@ -1500,12 +1519,13 @@ writeFileSync(join(ROOT, 'site/models/index.html'), htmlPage({
 // ---------- SEO guides: intent-matched landing pages, generated from the data ----------
 mkdirSync(join(ROOT, 'site/guides'), { recursive: true });
 const guideRow = (p) =>
-  `<tr><td class="name"><a href="../p/${p.slug}">${htmlEsc(p.name)}</a></td>` +
+  `<tr><td class="name"><a href="../p/${p.slug}">${htmlEsc(p.name)}</a><br><small>Verified <time datetime="${htmlEsc(p.last_verified)}">${htmlEsc(p.last_verified)}</time></small></td>` +
   `<td>${htmlEsc(p.free_tier)}</td>` +
   `<td class="notes">${htmlEsc(p.rate_limits)}</td>` +
   `<td>${provFlagsHtml(p)}</td></tr>`;
 for (const g of GUIDES) {
-  const list = providers.filter(g.filter);
+  // These pages explicitly promise verified providers; collections still show all tracked rows.
+  const list = providers.filter((p) => p.verified === true && g.filter(p));
   const fill = (t) => t.replaceAll('{n}', String(list.length)).replaceAll('{date}', data.generated);
   const metaDesc = fill(g.metaDesc);
   const twins = COLLECTIONS.filter((c) => (c.guides || []).includes(g.slug));
@@ -1708,7 +1728,10 @@ const apiEndpoints = {
 writeApi('index.json', { ...apiBase, description: 'Static, versioned JSON over the free-llm-api-hub dataset. Paths are relative to /api/v1/. Regenerated on every dataset change; no query params, no auth, no rate limits.', counts: { providers: publicProviders.length, ongoing: ongoing.length, trial: trial.length, programs: programs.startups.length + programs.research.length }, endpoints: apiEndpoints });
 
 // human-facing API docs page
-const apiRow = (label, path, count) => `<tr><td class="name"><a href="v1/${path}"><code>/api/v1/${path}</code></a></td><td>${htmlEsc(label)}</td><td>${count != null ? count : ''}</td></tr>`;
+const apiRow = (label, path, count) => {
+  const url = `${SITE}/api/v1/${path}`;
+  return `<tr><td class="name"><a href="v1/${htmlEsc(path)}"><code>/api/v1/${htmlEsc(path)}</code></a> <button type="button" class="api-copy" data-api-url="${htmlEsc(url)}" aria-label="Copy endpoint URL: ${htmlEsc(url)}">Copy</button><span class="api-copy-status" role="status"></span></td><td>${htmlEsc(label)}</td><td>${count != null ? count : ''}</td><td class="api-curl"><code>curl --fail --silent --show-error ${htmlEsc(url)}</code></td></tr>`;
+};
 // Client-config section: the example uses the first client with a sampled model,
 // so it always names a provider and model that are really in the file.
 const exampleClient = clientList.find((c) => c.models_free && c.models_free.length) || clientList[0];
@@ -1741,7 +1764,7 @@ litellm --config litellm.yaml</code></pre>` +
 const apiDocMain =
   pageHero({ crumbs: `<a href="../">Home</a> / API`, h1: `Static JSON API`, lede: `The whole dataset as versioned, machine-readable JSON at stable URLs — no server, no query params, no auth, no rate limits. CORS-open, so you can <code>fetch()</code> it straight from the browser. Regenerated on every dataset change (currently v${data.version}).` }) +
   `<main id="main"><div class="wrap prose">` +
-  `<h2>Everything</h2><table class="model-table"><thead><tr><th>Endpoint</th><th>Contents</th><th>Count</th></tr></thead><tbody>` +
+  `<h2>Everything</h2><table class="model-table api-endpoints"><thead><tr><th>Endpoint</th><th>Contents</th><th>Count</th><th>curl example</th></tr></thead><tbody>` +
   apiRow('Full provider dataset (all fields)', 'providers.json', publicProviders.length) +
   apiRow('Apply-to-get credit programs', 'programs.json', programs.startups.length + programs.research.length) +
   apiRow('The top 10 by score, ranked with its parts', 'best.json', topList.length) +
@@ -1759,10 +1782,10 @@ const apiDocMain =
   apiRow('OpenAI SDK settings per verified OpenAI-compatible provider', 'openai-clients.json', clientList.length) +
   apiRow('LiteLLM proxy config (model_list) for the same providers', 'litellm.yaml', clientList.length) +
   `</tbody></table>` +
-  `<h2>Slices (by constraint)</h2><table class="model-table"><thead><tr><th>Endpoint</th><th>Contents</th><th>Count</th></tr></thead><tbody>` +
+  `<h2>Slices (by constraint)</h2><table class="model-table api-endpoints"><thead><tr><th>Endpoint</th><th>Contents</th><th>Count</th><th>curl example</th></tr></thead><tbody>` +
   Object.entries(API_SLICES).map(([n, fn]) => apiRow(`Providers where ${n.replace(/-/g, ' ')}`, `${n}.json`, publicProviders.filter(fn).length)).join('') +
   `</tbody></table>` +
-  `<h2>Slices (by modality)</h2><table class="model-table"><thead><tr><th>Endpoint</th><th>Contents</th><th>Count</th></tr></thead><tbody>` +
+  `<h2>Slices (by modality)</h2><table class="model-table api-endpoints"><thead><tr><th>Endpoint</th><th>Contents</th><th>Count</th><th>curl example</th></tr></thead><tbody>` +
   API_MODS.map((m) => apiRow(`Providers with a free ${m} modality`, `modality/${m}.json`, publicProviders.filter((p) => (p.modalities || []).includes(m)).length)).join('') +
   `</tbody></table>` +
   `<h2>Example</h2><pre><code>curl -s ${SITE}/api/v1/no-card.json | jq '.providers[].name'</code></pre>` +

@@ -34,15 +34,15 @@ export const COLLS = [
 // Guides and the model index share the same OG template. Keep filters in sync
 // with GUIDES in scripts/build.mjs.
 export const GUIDES = [
-  { slug: 'free-llm-api-without-credit-card', title: 'Free LLM APIs · no credit card', filter: (p) => p.card_required === false && p.category === 'ongoing' },
-  { slug: 'openai-compatible-free-apis', title: 'Free OpenAI-compatible APIs', filter: (p) => p.openai_compatible === true },
-  { slug: 'free-llm-api-no-signup', title: 'Free APIs · no phone, no card', filter: (p) => p.card_required === false && p.phone_required === false && p.category === 'ongoing' },
-  { slug: 'free-embeddings-apis', title: 'Free embeddings APIs for RAG', filter: (p) => (p.modalities || []).includes('embeddings') },
-  { slug: 'free-speech-to-text-apis', title: 'Free speech APIs · STT & TTS', filter: (p) => (p.modalities || []).includes('audio') },
-  { slug: 'free-image-generation-apis', title: 'Free image generation APIs', filter: (p) => (p.modalities || []).includes('image') },
-  { slug: 'free-reranking-apis', title: 'Free reranking APIs for RAG', filter: (p) => (p.modalities || []).includes('rerank') && p.verified },
-  { slug: 'free-vision-apis', title: 'Free vision APIs · image understanding', filter: (p) => (p.modalities || []).includes('vision') && p.verified },
-  { slug: 'free-ocr-document-ai-apis', title: 'Free OCR & document AI APIs', filter: (p) => (p.modalities || []).includes('ocr') },
+  { slug: 'free-llm-api-without-credit-card', title: 'Free LLM APIs · no credit card', filter: (p) => p.verified === true && p.card_required === false && p.category === 'ongoing' },
+  { slug: 'openai-compatible-free-apis', title: 'Free OpenAI-compatible APIs', filter: (p) => p.verified === true && p.openai_compatible === true },
+  { slug: 'free-llm-api-no-signup', title: 'Free APIs · no phone, no card', filter: (p) => p.verified === true && p.card_required === false && p.phone_required === false && p.category === 'ongoing' },
+  { slug: 'free-embeddings-apis', title: 'Free embeddings APIs for RAG', filter: (p) => p.verified === true && (p.modalities || []).includes('embeddings') },
+  { slug: 'free-speech-to-text-apis', title: 'Free speech APIs · STT & TTS', filter: (p) => p.verified === true && (p.modalities || []).includes('audio') },
+  { slug: 'free-image-generation-apis', title: 'Free image APIs · generation & editing', filter: (p) => p.verified === true && (p.modalities || []).includes('image') },
+  { slug: 'free-reranking-apis', title: 'Free reranking APIs for RAG', filter: (p) => p.verified === true && (p.modalities || []).includes('rerank') },
+  { slug: 'free-vision-apis', title: 'Free vision APIs · image understanding', filter: (p) => p.verified === true && (p.modalities || []).includes('vision') },
+  { slug: 'free-ocr-document-ai-apis', title: 'Free OCR & document AI APIs', filter: (p) => p.verified === true && (p.modalities || []).includes('ocr') },
 ];
 
 // The manifest every data-dependent OG must match: file name -> fingerprint of

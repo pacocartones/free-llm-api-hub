@@ -23,17 +23,17 @@ Direction, not dated promises. The north star: stay the **most trustworthy, curr
 - ✅ Per-provider OpenAI base URLs + a runnable quickstart (curl + OpenAI SDK) on the OpenAI-compatible page.
 - ✅ **A static, versioned JSON API** at [/api/v1/](https://freellmapihub.com/api/) — full dataset plus slices by category/constraint/modality, plus `llms.txt`/`llms-full.txt` for agents. No server, no query params.
 - ✅ **Stable release tags per dataset version** — `vX.Y.Z` tagged at each schema/dataset version, so downstream consumers can pin a snapshot. To identify the latest tag, run `git tag --list 'v*' --sort=-v:refname` rather than relying on a hard-coded version.
-- ✅ **`models_free`** sampled model IDs with an automated live refresh from providers' own `/models` endpoints, a searchable [model index](../../models/), and intent-matched [SEO guides](../../guides-and-collections/).
+- ✅ **`models_free`** sampled model IDs with an automated live refresh from providers' own `/models` endpoints, a searchable [model index](https://freellmapihub.com/models/), and intent-matched [SEO guides](https://freellmapihub.com/guides-and-collections/).
 
 ## Next
 
 - **A "fastest free LLM APIs" collection**, once a defensible speed dimension exists in the data.
 - **Complete the `models_free` backfill** for the key-gated providers — see the [backlog](backlog.md) for the concrete checklist.
 
-## Later (under consideration)
+## Additional shipped companions
 
-- **History / diffs:** track how a provider's free tier changed over time, not just its current state.
-- **Sibling scope, kept separate:** free AI coding tools — valuable but volatile, so it would live as a clearly-separated section rather than diluting the core list. (The [self-hosting on free compute](self-hosting-on-free-compute.md) and [credit programs](credit-programs.md) companion references already follow this pattern: apply-to-get and compute offers are documented adjacent to, but outside, the verified self-serve dataset.)
+- ✅ **History / diffs:** provider histories and `/api/v1/history.json`, plus the [weekly changes feed](https://freellmapihub.com/changes/), are generated from Git history.
+- ✅ **Sibling scope, kept separate:** [free AI coding tools](https://freellmapihub.com/coding-tools/) are a separate section and API, outside provider counts and ranking. (The [self-hosting on free compute](self-hosting-on-free-compute.md) and [credit programs](credit-programs.md) companion references already follow this pattern: apply-to-get and compute offers are documented adjacent to, but outside, the verified self-serve dataset.)
 
 ## Explicitly out of scope
 

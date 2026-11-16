@@ -19,7 +19,7 @@ export const HISTORY_FIELDS = {
 
 // Reads every committed revision of data/providers.json, oldest first, as
 // [{ hash, date, parsed }]. Throws if git is unavailable; callers degrade.
-const readRevisions = (cwd) => {
+export const readProviderRevisions = (cwd) => {
   const log = execSync('git log --reverse --date=short --format=%H%x1f%ad -- data/providers.json', { cwd, encoding: 'utf8', maxBuffer: 1024 * 1024 * 40 }).trim();
   const revs = log ? log.split('\n').map((l) => { const [hash, date] = l.split('\x1f'); return { hash, date }; }) : [];
   // Read every revision's file in ONE process instead of one `git show` spawn
@@ -90,7 +90,7 @@ export const historyFromRevisions = (revisions) => {
 // History plus month-end snapshots in one git pass. Both are {} without git.
 export const mineHistoryAndSnapshots = ({ cwd }) => {
   try {
-    return historyFromRevisions(readRevisions(cwd));
+    return historyFromRevisions(readProviderRevisions(cwd));
   } catch (_) {
     return { historyBySlug: {}, monthEnd: {} }; // no git — the history-derived pages degrade to empty
   }

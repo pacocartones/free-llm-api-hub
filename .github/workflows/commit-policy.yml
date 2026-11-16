@@ -2,7 +2,7 @@ name: Commit policy
 
 # New commits of a pull request only (base..head), never the history before.
 # Fails on maintainer-identity commits with an AI attribution trailer or footer,
-# or without a GitHub noreply address. Contributors are not checked.
+# or without a verified name/email pair for Paco or Leon. Other identities are not checked.
 on:
   pull_request:
 

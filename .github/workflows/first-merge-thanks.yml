@@ -30,7 +30,7 @@ jobs:
         run: |
           set -euo pipefail
           # Maintainers and bots are not thanked here.
-          if [ "$AUTHOR_TYPE" != "User" ] || [ "$AUTHOR" = "pacocartones" ]; then
+          if [ "$AUTHOR_TYPE" != "User" ] || [ "$AUTHOR" = "pacocartones" ] || [ "$AUTHOR" = "LeonMAG" ]; then
             echo "skipped: $AUTHOR is a maintainer or a bot"; exit 0
           fi
           # Count from the pull request list rather than search, which can lag behind a merge
