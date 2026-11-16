@@ -779,3 +779,11 @@ p.muted a, .prose p a, .prov-summary p a { text-decoration: underline; text-unde
 .doc h3 { margin-top: 28px; }
 .doc ol { padding-left: 1.4em; margin: 12px 0; }
 .doc ol li { color: var(--muted); }
+
+/* API docs: endpoint links and manual-copy text stay usable without clipboard access. */
+.api-copy { margin: 4px 0 4px 6px; padding: 3px 8px; border: 1px solid var(--border); border-radius: 6px; background: var(--panel-2); color: var(--text); cursor: pointer; font: inherit; }
+.api-copy:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.api-copy.copied { border-color: var(--green); color: var(--green); }
+.api-copy:disabled { cursor: wait; }
+.api-copy-status { display: block; font-size: .8rem; color: var(--muted); }
+.api-curl code { white-space: normal; overflow-wrap: anywhere; }
