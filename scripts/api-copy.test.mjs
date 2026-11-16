@@ -28,12 +28,13 @@ for (const [path, count] of [['providers.json', 67], ['schema.json', null], ['mo
 function fixture(clipboard) {
   const timers = [], writes = [];
   function button(url) {
-    const events = {};
+    const events = {}, attributes = new Map();
     const status = { textContent: '' }, classes = new Set();
     return {
       textContent: 'Copy', disabled: false,
       classList: { add: x => classes.add(x), remove: x => classes.delete(x), contains: x => classes.has(x) },
-      getAttribute: key => key === 'data-api-url' ? url : null,
+      getAttribute: key => key === 'data-api-url' ? url : (attributes.get(key) ?? null),
+      setAttribute: (key, value) => attributes.set(key, String(value)),
       parentElement: { querySelector: sel => sel === '.api-copy-status' ? status : null },
       addEventListener: (name, fn) => { events[name] = fn; },
       status,
@@ -50,12 +51,13 @@ function fixture(clipboard) {
   return { buttons, timers, writes };
 }
 
-test('copy waits for completion, reports success, then resets', async () => {
+test('copy waits for completion and keeps success until the next attempt', async () => {
   let complete;
   const f = fixture(() => new Promise(resolve => { complete = resolve; }));
   const b = f.buttons[0], pending = b.click();
   assert.equal(b.textContent, 'Copy');
-  assert.equal(b.disabled, true);
+  assert.equal(b.disabled, false, 'keep the native button focusable during copy');
+  assert.equal(b.getAttribute('aria-disabled'), 'true');
   assert.equal(b.classList.contains('copied'), false);
   assert.deepEqual(f.writes, ['https://freellmapihub.com/api/v1/providers.json']);
   complete(); await pending;
@@ -63,9 +65,10 @@ test('copy waits for completion, reports success, then resets', async () => {
   assert.equal(b.classList.contains('copied'), true);
   assert.equal(b.status.textContent, 'URL copied.');
   assert.equal(b.disabled, false);
-  f.timers[0]();
-  assert.equal(b.textContent, 'Copy');
-  assert.equal(b.classList.contains('copied'), false);
+  f.timers.forEach(fn => fn());
+  assert.equal(b.textContent, 'Copied');
+  assert.equal(b.classList.contains('copied'), true);
+  assert.equal(b.status.textContent, 'URL copied.');
 });
 
 test('clipboard rejection leaves a truthful manual-copy path', async () => {
@@ -98,11 +101,46 @@ test('other pages with no API copy buttons remain usable', () => {
   assert.doesNotThrow(() => new Script(source).runInContext(createContext({ document, navigator: {}, setTimeout })));
 });
 
-test('an old reset timer cannot erase feedback from a later attempt', async () => {
-  let attempt = 0;
-  const f = fixture(() => ++attempt === 1 ? Promise.resolve() : Promise.reject(new Error('denied')));
-  await f.buttons[0].click();
-  await f.buttons[0].click();
-  f.timers[0]();
-  assert.equal(f.buttons[0].status.textContent, 'Copy failed. Copy the endpoint link address manually.');
+test('a later attempt clears success while pending and reports its own failure', async () => {
+  let attempt = 0, reject;
+  const f = fixture(() => ++attempt === 1 ? Promise.resolve() : new Promise((resolve, fail) => { reject = fail; }));
+  const b = f.buttons[0];
+  await b.click();
+  const pending = b.click();
+  assert.equal(b.textContent, 'Copy');
+  assert.equal(b.classList.contains('copied'), false);
+  assert.equal(b.status.textContent, '');
+  assert.equal(b.disabled, false, 'keep the native button focusable during copy');
+  assert.equal(b.getAttribute('aria-disabled'), 'true');
+  reject(new Error('denied')); await pending;
+  f.timers.forEach(fn => fn());
+  assert.equal(b.status.textContent, 'Copy failed. Copy the endpoint link address manually.');
+  assert.equal(b.textContent, 'Copy');
+  assert.equal(b.disabled, false);
+});
+
+test('a retry after rejection can succeed without stale error feedback', async () => {
+  let attempt = 0, resolve;
+  const f = fixture(() => ++attempt === 1 ? Promise.reject(new Error('denied')) : new Promise(done => { resolve = done; }));
+  const b = f.buttons[0];
+  await b.click();
+  const pending = b.click();
+  assert.equal(b.status.textContent, '');
+  assert.equal(b.textContent, 'Copy');
+  resolve(); await pending;
+  f.timers.forEach(fn => fn());
+  assert.equal(b.status.textContent, 'URL copied.');
+  assert.equal(b.textContent, 'Copied');
+});
+
+test('pending activation cannot start a second clipboard write', async () => {
+  let complete;
+  const f = fixture(() => new Promise(resolve => { complete = resolve; }));
+  const b = f.buttons[0], pending = b.click();
+  const repeated = b.click();
+  assert.equal(f.writes.length, 1);
+  assert.equal(b.getAttribute('aria-disabled'), 'true');
+  complete(); await pending; await repeated;
+  assert.equal(b.getAttribute('aria-disabled'), 'false');
+  assert.equal(b.textContent, 'Copied');
 });

@@ -784,6 +784,9 @@ p.muted a, .prose p a, .prov-summary p a { text-decoration: underline; text-unde
 .api-copy { margin: 4px 0 4px 6px; padding: 3px 8px; border: 1px solid var(--border); border-radius: 6px; background: var(--panel-2); color: var(--text); cursor: pointer; font: inherit; }
 .api-copy:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .api-copy.copied { border-color: var(--green); color: var(--green); }
-.api-copy:disabled { cursor: wait; }
+.api-copy[aria-disabled="true"] { cursor: wait; }
 .api-copy-status { display: block; font-size: .8rem; color: var(--muted); }
 .api-curl code { white-space: normal; overflow-wrap: anywhere; }
+
+/* Keep the API count heading and values readable on narrow screens. */
+.api-endpoints th:nth-child(3), .api-endpoints td:nth-child(3) { white-space: nowrap; }

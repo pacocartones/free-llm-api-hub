@@ -21,10 +21,11 @@
   // --- API endpoint rows: clipboard success is announced only after completion ---
   document.querySelectorAll('.api-copy').forEach(function (btn) {
     var status = btn.parentElement.querySelector('.api-copy-status');
-    var attempt = 0;
     btn.addEventListener('click', async function () {
-      var current = ++attempt;
-      btn.disabled = true;
+      if (btn.getAttribute('aria-disabled') === 'true') return;
+      btn.setAttribute('aria-disabled', 'true');
+      btn.textContent = 'Copy';
+      btn.classList.remove('copied');
       status.textContent = '';
       try {
         if (!navigator.clipboard || !navigator.clipboard.writeText) throw new Error('Clipboard unavailable');
@@ -32,18 +33,12 @@
         btn.textContent = 'Copied';
         btn.classList.add('copied');
         status.textContent = 'URL copied.';
-        setTimeout(function () {
-          if (current !== attempt) return;
-          btn.textContent = 'Copy';
-          btn.classList.remove('copied');
-          status.textContent = '';
-        }, 1300);
       } catch (e) {
         btn.textContent = 'Copy';
         btn.classList.remove('copied');
         status.textContent = 'Copy failed. Copy the endpoint link address manually.';
       } finally {
-        btn.disabled = false;
+        btn.setAttribute('aria-disabled', 'false');
       }
     });
   });
