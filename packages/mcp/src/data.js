@@ -8,6 +8,41 @@ export const DEFAULT_URL = `${API_BASE}/providers.json`;
 export const DEFAULT_CLIENTS_URL = `${API_BASE}/openai-clients.json`;
 const LOCAL_SOURCE = 'local_override';
 const DEFAULT_TIMEOUT_MS = 20_000;
+// The published providers.json is a few hundred kilobytes; a body far beyond
+// that is not the dataset and must not be buffered into memory.
+export const MAX_REMOTE_BYTES = 8 * 1024 * 1024;
+
+/** Reads a fetch Response as JSON, failing once its body exceeds maxBytes. */
+export async function readBoundedJson(res, maxBytes = MAX_REMOTE_BYTES) {
+  const tooLarge = () => new Error(`remote JSON exceeds the ${maxBytes}-byte limit`);
+  const declared = res.headers?.get?.('content-length')?.trim() || '';
+  if (/^\d+$/.test(declared) && Number(declared) > maxBytes) {
+    try { res.body?.cancel()?.catch(() => {}); } catch { /* already abandoned */ }
+    throw tooLarge();
+  }
+  // Responses without a readable stream (minimal fetch implementations) fall back to json().
+  if (!res.body || typeof res.body.getReader !== 'function') return res.json();
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let text = '';
+  let bytes = 0;
+  try {
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      bytes += value.byteLength;
+      if (bytes > maxBytes) {
+        try { reader.cancel()?.catch(() => {}); } catch { /* report the limit regardless */ }
+        throw tooLarge();
+      }
+      text += decoder.decode(value, { stream: true });
+    }
+    text += decoder.decode();
+  } finally {
+    reader.releaseLock();
+  }
+  return JSON.parse(text);
+}
 
 /**
  * Validate the minimal shape the tools rely on and drop operational fields.
@@ -82,7 +117,7 @@ export function createJsonLoader({ path, url, normalize, fetchImpl = globalThis.
         const remote = (async () => {
           const res = await fetchImpl(url, { headers: { accept: 'application/json' }, signal: controller.signal });
           if (!res.ok) throw new Error(`GET ${url} answered HTTP ${res.status}`);
-          return normalize(await res.json(), url);
+          return normalize(await readBoundedJson(res), url);
         })();
         // The race releases callers even if a transport fails to honor abort.
         return await Promise.race([remote, deadline]);
