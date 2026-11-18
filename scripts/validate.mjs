@@ -246,6 +246,8 @@ for (const p of data.providers ?? []) {
     check(isPublicHttpsUrl(p.docs_url), `${id}: verified entry needs a public HTTPS docs_url (primary source)`);
   } else {
     check(p.last_verified === null, `${id}: unverified entry must have last_verified: null`);
+    // The site turns docs_url into links: an unverified row may leave it empty, never another scheme.
+    check(p.docs_url === '' || /^https:\/\//.test(p.docs_url), `${id}: docs_url must be empty or an https:// URL`);
   }
 }
 
