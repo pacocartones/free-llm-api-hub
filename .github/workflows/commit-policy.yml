@@ -19,8 +19,13 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
+      # The policy script is read from the base commit, not from the pull request:
+      # a pull request must not be able to edit the required check that judges it.
+      # A change to the script itself takes effect once it is merged.
       - name: Check the commits of this pull request
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-        run: bash scripts/check-commit-policy.sh "$BASE_SHA" "$HEAD_SHA"
+        run: |
+          git show "$BASE_SHA:scripts/check-commit-policy.sh" > "$RUNNER_TEMP/check-commit-policy.sh"
+          bash "$RUNNER_TEMP/check-commit-policy.sh" "$BASE_SHA" "$HEAD_SHA"

@@ -54,7 +54,7 @@ export function createServer(load, loadClients) {
         '(not confirmed) are left out and counted in excluded_unconfirmed. ' +
         TERMS,
       inputSchema: {
-        query: z.string().optional().describe('Words to match in name, slug, free tier, rate limits, notes or sampled model IDs (all words must match, case-insensitive).'),
+        query: z.string().max(200).optional().describe('Words to match in name, slug, free tier, rate limits, notes or sampled model IDs (all words must match, case-insensitive).'),
         modality: z.enum(MODALITIES).optional().describe('Only providers offering this modality on the free tier.'),
         category: z.enum(CATEGORIES).optional().describe('"ongoing" (free tier that keeps going) or "trial" (one-off credit).'),
         no_card: z.boolean().optional().describe('true: only providers confirmed NOT to require a credit card. false: only providers confirmed to require one.'),
@@ -76,7 +76,7 @@ export function createServer(load, loadClients) {
         '(yes / no / not confirmed) and the list of unconfirmed fields. An unknown slug is an error. ' +
         TERMS,
       inputSchema: {
-        slug: z.string().describe('Provider slug, e.g. "groq" (see search_providers).'),
+        slug: z.string().max(100).describe('Provider slug, e.g. "groq" (see search_providers).'),
       },
       annotations: READ_ONLY,
     },
@@ -94,8 +94,8 @@ export function createServer(load, loadClients) {
         'is offered (not verified, not OpenAI-compatible or not confirmed, or no base URL). ' +
         TERMS,
       inputSchema: {
-        slug: z.string().describe('Provider slug.'),
-        model: z.string().optional().describe('Model ID to put in the snippet. Use a free chat model from the official docs. Defaults to a sampled model only for text/vision-only providers; mixed or unknown modalities receive no request snippet.'),
+        slug: z.string().max(100).describe('Provider slug.'),
+        model: z.string().max(200).optional().describe('Model ID to put in the snippet. Use a free chat model from the official docs. Defaults to a sampled model only for text/vision-only providers; mixed or unknown modalities receive no request snippet.'),
       },
       annotations: READ_ONLY,
     },
