@@ -4,6 +4,7 @@
   "providers": [
     {
       "slug": "alpha-ai",
+      "is_text_llm": true,
       "name": "Alpha AI",
       "category": "ongoing",
       "free_type": "renewing-quota",

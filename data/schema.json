@@ -106,10 +106,10 @@
           "type": ["string", "null"],
           "description": "Condition summary when commercial_ok is 'conditional'. Required and non-blank for that value; null or absent otherwise."
         },
-        "openai_compatible": { "$ref": "#/$defs/tristate" },
+        "openai_compatible": { "$ref": "#/$defs/tristate", "description": "Whether the listed free offering exposes an OpenAI-compatible endpoint. Paid-only compatibility does not establish this; null means unconfirmed for the free offering." },
         "openai_base_url": {
           "type": ["string", "null"],
-          "description": "OpenAI-compatible base URL for a drop-in SDK swap, when confirmed. null until backfilled."
+          "description": "OpenAI-compatible base URL confirmed for the listed free offering. null when no such endpoint is recorded; paid-only endpoints belong in notes, not free client configurations."
         },
         "env_key": {
           "type": "string",

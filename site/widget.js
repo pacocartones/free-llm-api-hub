@@ -76,8 +76,9 @@
     })
     .then(function (d) {
       var compare = window.FLLM_SORT.comparator;
-      var list = d.providers
-        .filter(function (p) { return p.verified && (!modality || (p.modalities || []).indexOf(modality) >= 0) && (!category || p.category === category); })
+      var verified = d.providers.filter(function (p) { return p.verified === true; });
+      var list = verified
+        .filter(function (p) { return (!modality || (p.modalities || []).indexOf(modality) >= 0) && (!category || p.category === category); })
         .sort(function (a, b) { return compare(sort, SORT_DIRS[sort], a, b); })
         .slice(0, count);
       var box = 'font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif;color:#d8e2dc;background:#0f1512;border:1px solid #232c25;border-radius:10px;padding:14px 16px;max-width:440px;box-sizing:border-box';
@@ -88,7 +89,7 @@
           '<a href="' + SITE + '/p/' + esc(p.slug) + '" target="_blank" rel="noopener" style="color:#d8e2dc;text-decoration:none;font-weight:600">' + esc(p.name) + '</a>' +
           '<div style="color:#808f87;font-size:12px">' + esc((p.free_tier || '').slice(0, 72)) + '</div></div>';
       });
-      html += '<a href="' + SITE + '/" target="_blank" rel="noopener" style="display:inline-block;margin-top:10px;font-size:12px;color:#3fce8f;text-decoration:none">' + list.length + ' of ' + d.providers.length + ' verified · see all →</a>';
+      html += '<a href="' + SITE + '/" target="_blank" rel="noopener" style="display:inline-block;margin-top:10px;font-size:12px;color:#3fce8f;text-decoration:none">' + list.length + ' of ' + verified.length + ' verified · see all →</a>';
       html += '</div>';
       el.innerHTML = html;
     })

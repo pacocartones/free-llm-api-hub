@@ -11,36 +11,30 @@
 // Exit 0 on a healthy state, 1 with the exact image path(s) + fix command.
 import { readFileSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { dirname, join } from 'node:path';
-import { buildOgManifest } from './lib/og.mjs';
+import { dirname, join, resolve } from 'node:path';
+import { buildOgManifest, renderHomeOg } from './lib/og.mjs';
 
-const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
-const { providers } = JSON.parse(readFileSync(join(ROOT, 'data/providers.json'), 'utf8'));
-
-// 1. Every provider must have its PNG committed (unchanged behavior).
-const missing = providers
-  .filter((p) => !existsSync(join(ROOT, `site/og/p/${p.slug}.png`)))
-  .map((p) => p.slug);
-if (missing.length) {
-  console.error(`${missing.length} provider(s) are missing their OG image. Run: npm run og`);
-  for (const s of missing) console.error(`  site/og/p/${s}.png`);
-  process.exit(1);
+// Check the expected roster, never just the manifest's existing entries.
+export function ogIssues(providers, homeSvg, actual, exists) {
+  const expected = buildOgManifest(providers, homeSvg);
+  const missing = Object.keys(expected).filter((file) => !exists(file));
+  const stale = Object.keys(expected).filter((file) => actual?.[file] !== expected[file]);
+  if (homeSvg !== renderHomeOg(homeSvg, providers)) stale.push('../og.svg');
+  return { missing, stale };
 }
 
-// 2. Every data-dependent OG must match the current dataset.
-const expected = buildOgManifest(providers);
-const manifestPath = join(ROOT, 'site/og/manifest.json');
-let actual = {};
-if (existsSync(manifestPath)) {
-  try { actual = JSON.parse(readFileSync(manifestPath, 'utf8')); } catch { /* treated as empty below */ }
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
+  const { providers } = JSON.parse(readFileSync(join(ROOT, 'data/providers.json'), 'utf8'));
+  const homeSvg = readFileSync(join(ROOT, 'site/og.svg'), 'utf8');
+  let actual = {};
+  try { actual = JSON.parse(readFileSync(join(ROOT, 'site/og/manifest.json'), 'utf8')); } catch { /* missing or invalid manifest is stale */ }
+  const { missing, stale } = ogIssues(providers, homeSvg, actual, (file) => existsSync(join(ROOT, 'site/og', file)));
+  for (const [label, files] of [['missing', missing], ['stale', stale]]) {
+    if (!files.length) continue;
+    console.error(`${files.length} OG image(s) are ${label}. Run: npm run og`);
+    for (const file of files) console.error(`  ${join('site/og', file)}`);
+  }
+  if (missing.length || stale.length) process.exitCode = 1;
+  else console.log('OK — all expected OG images exist and match the dataset.');
 }
-const stale = Object.keys(expected).filter((file) => actual[file] !== expected[file]);
-if (stale.length) {
-  console.error(`${stale.length} OG image(s) are stale relative to the dataset. Run: npm run og`);
-  for (const f of stale) console.error(`  site/og/${f}`);
-  process.exit(1);
-}
-
-console.log(
-  `OK — ${providers.length} provider OG images present, ${Object.keys(expected).length} OG images match the dataset.`
-);
