@@ -83,7 +83,7 @@ test('fetch-models refuses a keyed extractor whose env var drifted from the data
   mkdirSync(join(root, 'scripts', 'lib'), { recursive: true });
   mkdirSync(join(root, 'data'));
   for (const name of [
-    'fetch-models.mjs', '_serialize.mjs', 'lib/key-hosts.mjs', 'lib/provider-output-safety.mjs',
+    'fetch-models.mjs', '_serialize.mjs', 'lib/key-hosts.mjs', 'lib/provider-output-safety.mjs', 'lib/bounded-read.mjs',
   ]) cpSync(new URL(name, import.meta.url), join(root, 'scripts', name));
   const source = readFileSync(new URL('../data/providers.json', import.meta.url), 'utf8');
   writeFileSync(join(root, 'data', 'providers.json'), source.replace(
