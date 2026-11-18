@@ -44,13 +44,28 @@
   });
 
   // --- copy button on every code block (quickstarts, embed snippets) ---
+  // One short, visually hidden status line announces the result; the button itself is not a live region.
+  var copyStatus = null;
+  var announceCopy = function (text) {
+    // Announcing is best effort: it must never turn a successful copy into a failure.
+    try {
+      if (!copyStatus) {
+        if (!document.body) return;
+        var region = document.createElement('span');
+        region.className = 'sr-only';
+        region.setAttribute('role', 'status');
+        document.body.appendChild(region);
+        copyStatus = region;
+      }
+      copyStatus.textContent = text;
+    } catch (e) { /* no status line: the button text still reports the result */ }
+  };
   document.querySelectorAll('pre').forEach(function (pre) {
     var btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'pre-copy';
     btn.textContent = 'Copy';
     btn.setAttribute('aria-label', 'Copy code to clipboard');
-    btn.setAttribute('aria-live', 'polite');
     btn.addEventListener('click', async function () {
       if (btn.getAttribute('aria-disabled') === 'true') return;
       btn.setAttribute('aria-disabled', 'true');
@@ -65,16 +80,31 @@
         btn.textContent = 'Copied';
         btn.setAttribute('aria-label', 'Code copied to clipboard');
         btn.classList.add('copied');
+        announceCopy('Code copied.');
       } catch (e) {
         btn.textContent = 'Copy failed';
         btn.title = 'Select the code and copy it manually.';
         btn.setAttribute('aria-label', 'Copy failed. ' + btn.title);
+        announceCopy('Copy failed. Select the code and copy it manually.');
       } finally {
         btn.setAttribute('aria-disabled', 'false');
       }
     });
     pre.appendChild(btn);
   });
+
+  // --- "/" focuses the search box on pages that have one (not while typing elsewhere) ---
+  var search = document.getElementById('q');
+  if (search) {
+    document.addEventListener('keydown', function (e) {
+      if (e.key !== '/' || e.ctrlKey || e.metaKey || e.altKey || e.defaultPrevented) return;
+      var t = e.target;
+      var tag = t && t.tagName ? t.tagName.toLowerCase() : '';
+      if (tag === 'input' || tag === 'textarea' || tag === 'select' || (t && t.isContentEditable)) return;
+      e.preventDefault();
+      search.focus();
+    });
+  }
 
   // --- mobile nav toggle (collapse only after the controls are ready) ---
   var navToggle = document.getElementById('navToggle');

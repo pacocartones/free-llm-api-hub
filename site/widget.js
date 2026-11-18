@@ -14,7 +14,7 @@
   var el = document.getElementById('flh-widget') || document.querySelector('[data-flh-widget]');
   if (!el) return;
   var SITE = 'https://freellmapihub.com';
-  var count = Math.max(1, Math.min(20, parseInt(el.getAttribute('data-count') || '6', 10)));
+  var count = Math.max(1, Math.min(20, parseInt(el.getAttribute('data-count') || '6', 10) || 6));
   var modality = el.getAttribute('data-modality');
   var category = el.getAttribute('data-category');
   if (category !== 'ongoing' && category !== 'trial') category = null;
@@ -27,7 +27,7 @@
   // free-type taxonomy (permanent tiers rank first); 'verified' reads
   // newest-first, and rows with no date sink either way.
   var SORT_DIRS = { recommended: 1, name: 1, category: 1, free_tier: 1, notes: 1, verified: -1 };
-  var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+  var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
 
   // Ranking must come from the ONE source of truth: shared-rules.js is generated
   // by the build from scripts/lib/rules.mjs — the same recScore the explorer and

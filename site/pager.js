@@ -34,8 +34,12 @@
       page = w.page;
       items.forEach(function (li, i) { li.hidden = i < w.from || i >= w.to; });
       status.textContent = (w.from + 1) + '–' + w.to + ' of ' + items.length;
+      var focused = document.activeElement;
       prev.disabled = page === 0;
       next.disabled = page === w.pages - 1;
+      // A disabled button drops focus to <body>; hand it to the other button instead.
+      if (focused === prev && prev.disabled) next.focus();
+      else if (focused === next && next.disabled) prev.focus();
     }
     prev.addEventListener('click', function () { page -= 1; show(); });
     next.addEventListener('click', function () { page += 1; show(); });
