@@ -84,9 +84,14 @@ function flags(p) {
   return parts.length ? `<br><sub>${parts.join(' · ')}</sub>` : '';
 }
 
+// docs_url becomes a link only when it is an https URL. The validator enforces
+// this for every entry; the guard keeps an unexpected value (an empty string,
+// another scheme) from ever turning into a self-link or a script URL.
+const docsHref = (u) => (typeof u === 'string' && /^https:\/\/[^\s]+$/i.test(u) ? u : '');
+
 function nameCell(p) {
   const label = `**${esc(p.name)}**`;
-  const linked = p.docs_url ? `**[${esc(p.name)}](${p.docs_url})**` : label;
+  const linked = docsHref(p.docs_url) ? `**[${esc(p.name)}](${docsHref(p.docs_url)})**` : label;
   return `${linked}${flags(p)}`;
 }
 
@@ -103,7 +108,7 @@ function bestTable(entries) {
   const body = entries
     .map((e) => {
       const { p } = e;
-      const label = p.docs_url ? `**[${esc(p.name)}](${p.docs_url})**` : `**${esc(p.name)}**`;
+      const label = docsHref(p.docs_url) ? `**[${esc(p.name)}](${docsHref(p.docs_url)})**` : `**${esc(p.name)}**`;
       return `| ${e.rank} | ${label}${flags(p)} | ${e.total.toFixed(1)}<br><sub>${e.confirmed} of ${e.of} inputs</sub> | ${esc(p.free_tier)} | ${esc(p.notes)} | ${verifiedCell(p)} |`;
     })
     .join('\n');
@@ -524,8 +529,8 @@ function collectionTableHtml(rows, opts = {}) {
   const col2Head = bu ? 'OpenAI base URL' : 'Type';
   const rowsHtml = rows
     .map((p) => {
-      const name = p.docs_url
-        ? `<a href="${htmlEsc(p.docs_url)}" target="_blank" rel="noopener">${htmlEsc(p.name)}</a>`
+      const name = docsHref(p.docs_url)
+        ? `<a href="${htmlEsc(docsHref(p.docs_url))}" target="_blank" rel="noopener">${htmlEsc(p.name)}</a>`
         : htmlEsc(p.name);
       const v = p.verified
         ? `<span class="v ok">${IC('ic-check')} ${htmlEsc(p.last_verified)}</span>`
@@ -940,7 +945,7 @@ for (const c of COLLECTIONS) {
         name: c.h1,
         description: metaDesc,
         numberOfItems: rows.length,
-        itemListElement: rows.map((p, i) => ({ '@type': 'ListItem', position: i + 1, name: p.name, url: p.docs_url || undefined })),
+        itemListElement: rows.map((p, i) => ({ '@type': 'ListItem', position: i + 1, name: p.name, url: docsHref(p.docs_url) || undefined })),
       },
       {
         '@type': 'BreadcrumbList',
@@ -1100,8 +1105,9 @@ for (const p of providers) {
       ? `<h2 id="quickstart">Quickstart — embeddings</h2><pre><code>${codeHtmlEsc(python)}</code></pre>`
       : `<h2 id="quickstart">Quickstart — chat completions</h2><pre><code>${codeHtmlEsc(python)}</code></pre><p class="muted">…or with curl:</p><pre><code>${codeHtmlEsc(curlChatQuickstart(p.openai_base_url, model))}</code></pre>`;
   } else {
-    const docs = p.docs_url ? htmlEsc(p.docs_url) : '';
-    quick = `<h2 id="quickstart">Get started</h2><p class="muted">No OpenAI-compatible base URL is recorded for this offer. Check the <a href="${docs}" target="_blank" rel="noopener">official docs</a> for endpoints, authentication and examples.</p>`;
+    const docs = docsHref(p.docs_url);
+    const docsLink = docs ? `<a href="${htmlEsc(docs)}" target="_blank" rel="noopener">official docs</a>` : 'official docs';
+    quick = `<h2 id="quickstart">Get started</h2><p class="muted">No OpenAI-compatible base URL is recorded for this offer. Check the ${docsLink} for endpoints, authentication and examples.</p>`;
   }
 
   // The score of the provider (lib/score.mjs, the same numbers as /best/ and the API) with its method one click away. Providers that are
@@ -1125,13 +1131,13 @@ for (const p of providers) {
         : (p.probe_status === 'tier-ended'
         ? ` <span class="v warn" title="The key authenticated but the free tier appears gone">${IC('ic-warn')} free tier unconfirmed live</span>`
         : ''));
-  const docsBtn = p.docs_url ? `<a class="btn primary" href="${htmlEsc(p.docs_url)}" target="_blank" rel="noopener">Official docs ↗</a>` : '';
+  const docsBtn = docsHref(p.docs_url) ? `<a class="btn primary" href="${htmlEsc(docsHref(p.docs_url))}" target="_blank" rel="noopener">Official docs ↗</a>` : '';
   const playgroundBtn = p.playground_url ? `<a class="btn" href="${htmlEsc(p.playground_url)}" target="_blank" rel="noopener">Try it ↗</a>` : '';
   // "Visit website": the provider's main site, derived from the docs URL by stripping
   // common docs/console/api subdomains so it points at the marketing homepage.
   let websiteBtn = '';
   try {
-    const u = new URL(p.docs_url);
+    const u = new URL(docsHref(p.docs_url));
     const host = u.hostname.replace(/^(docs|console|platform|developer|developers|api|dashboard|cloud|build|support|help|inference-docs)\./, '');
     websiteBtn = `<a class="btn website" href="${u.protocol}//${host}" target="_blank" rel="noopener">Visit website ↗</a>`;
   } catch (_) { /* no/invalid docs URL — skip the website button */ }

@@ -11,7 +11,7 @@ The two are independent on purpose — a provider can be doc-verified but not ye
 Per provider (`scripts/probe.mjs`, `npm run probe`):
 
 - **auth** — does the key authenticate against `/models`? (distinguishes `401/403` = wrong key from `200`).
-- **models** — the live `/models` list → refreshes `models_free` with real IDs.
+- **models** — the size of the live `/models` list (reported only; `models_free` is refreshed by `npm run models`, which applies the free-model filters).
 - **inference** — one minimal real call (chat `max_tokens:1`, or an embeddings call for embeddings-first providers). A `200` with a valid body ⇒ the free tier is genuinely usable right now.
 - **latency & tokens/sec** — measured from the call + `usage`, feeding an honest (measured, not claimed) speed signal.
 - **rate-limit headers** — `x-ratelimit-*`, `retry-after` straight from the API — the real current limits, not scraped prose.
@@ -56,7 +56,7 @@ node --env-file=.env scripts/probe.mjs
 #    you should see per-provider rows: missing-key providers skipped,
 #    present-key providers probed (auth + models + inference)
 
-# 4. Persist the results (last_probed / probe_status / models_free + report)
+# 4. Persist the results (last_probed / probe_status + report; models_free is refreshed by `npm run models`)
 node --env-file=.env scripts/probe.mjs --write
 
 # 5. Read the report and review the diff
@@ -76,7 +76,7 @@ To skip inference (near-zero footprint): `node --env-file=.env scripts/probe.mjs
 
 ```bash
 npm run probe                     # dry run: report only, no writes
-node scripts/probe.mjs --write    # persist last_probed/probe_status/models_free + report
+node scripts/probe.mjs --write    # persist last_probed/probe_status + report
 node scripts/probe.mjs --auth-only   # skip inference (near-zero footprint)
 node scripts/probe.mjs --only=groq,cerebras
 ```

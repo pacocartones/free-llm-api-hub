@@ -246,6 +246,8 @@ for (const p of data.providers ?? []) {
     check(isPublicHttpsUrl(p.docs_url), `${id}: verified entry needs a public HTTPS docs_url (primary source)`);
   } else {
     check(p.last_verified === null, `${id}: unverified entry must have last_verified: null`);
+    // The site turns docs_url into links: an unverified row may leave it empty, never another scheme.
+    check(p.docs_url === '' || /^https:\/\//.test(p.docs_url), `${id}: docs_url must be empty or an https:// URL`);
   }
 }
 
@@ -338,8 +340,9 @@ if (!FIXTURE_MODE) {
 }
 
 // ---------- probe-report.json (consistency with the current dataset) ----------
-// The report is a probe artifact, not a build output, so the drift gate never
-// touches it — this is the only place that keeps it honest: every slug must be a
+// The report is a probe artifact, not a build output. The drift gate lists it
+// (generated-targets.mjs) only so an uncommitted probe run is noticed; it never
+// checks the content. This is the only place that keeps it honest: every slug must be a
 // provider that exists TODAY (a stale entry, like the github-models one that
 // survived nine days after the provider was retired, fails here), count must
 // match results, and probed_at must be a date.
