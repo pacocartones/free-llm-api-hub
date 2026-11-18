@@ -44,12 +44,15 @@
   selects.forEach(function (s) { s.addEventListener('change', function () { show(selected()); }); });
 
   // The scores are an addition: if they cannot load, the table still renders without the score rows.
-  var scoresReq = fetch('../scores.json')
+  fetch('../scores.json')
     .then(function (r) { if (!r.ok) throw new Error(String(r.status)); return r.json(); })
-    .then(function (d) { SCORES = (d && d.scores) || null; })
+    .then(function (d) {
+      SCORES = (d && d.scores) || null;
+      if (DATA.length) show(selected());
+    })
     .catch(function () { SCORES = null; });
 
-  scoresReq.then(function () { return fetch('../providers.json'); })
+  fetch('../providers.json')
     .then(function (r) { if (!r.ok) throw new Error(String(r.status)); return r.json(); })
     .then(function (d) {
       DATA = (d && d.providers) || [];

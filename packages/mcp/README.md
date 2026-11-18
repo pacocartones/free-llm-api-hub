@@ -148,7 +148,7 @@ fetches. Annotations describe capabilities; they do not grant permissions.
 - `get_provider` labels null as `not confirmed`;
 - `openai_client_config` says "not confirmed" for a null `openai_compatible`, and "not OpenAI-compatible" only for an explicit false.
 
-The model in the snippets defaults to the first entry of `models_free`, which is a sample and may be out of date.
+Chat snippets require confirmed free text/chat access (`is_text_llm: true`). Other providers still return their published client configuration and official docs, with no invented endpoint. For text/vision-only providers the default model is the first `models_free` sample, which may be out of date; mixed or unknown modalities return configuration and docs only, even with an explicit model, because samples have no endpoint labels. An explicit model must be a free chat model confirmed in the official docs.
 
 ## Tests
 

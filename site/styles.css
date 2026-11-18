@@ -332,9 +332,6 @@ table.sortable thead th:not(.sorted)::after { content: " ⇅"; opacity: .28; fon
 .empty { text-align: center; color: var(--muted); padding: 48px 0; font-family: var(--font-mono); }
 .row-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 9px; }
 .row-actions a.docs-link { font-size: .72rem; color: var(--muted); font-family: var(--font-mono); }
-.copy-btn { display: inline-flex; align-items: center; gap: 6px; background: var(--panel-2); border: 1px solid var(--border); color: var(--muted); padding: 3px 9px; border-radius: 6px; cursor: pointer; font-size: .72rem; font-weight: 600; font-family: var(--font-mono); }
-.copy-btn:hover { border-color: var(--accent); color: var(--accent); }
-.copy-btn.copied { border-color: var(--green); color: var(--green); }
 
 /* ---------- collection / provider pages ---------- */
 .page-hero { position: relative; border-bottom: 1px solid var(--border); overflow: hidden; background-image: radial-gradient(var(--border) 1px, transparent 1px); background-size: 22px 22px; }
@@ -595,7 +592,10 @@ pre:hover .pre-copy, .pre-copy:focus-visible { opacity: 1; }
 /* ---------- responsive ---------- */
 @media (max-width: 860px) { .footer-top { grid-template-columns: 1fr 1fr; } }
 @media (max-width: 900px) {
-  .nav-toggle { display: inline-flex; }
+  .site-header.nav-ready .nav-toggle { display: inline-flex; }
+  /* Without a working toggle, keep the links in the page flow. */
+  .site-header:not(.nav-ready) { position: static; height: auto; }
+  .site-header:not(.nav-ready) .header-inner { height: auto; min-height: var(--header-h); flex-wrap: wrap; padding-top: 12px; gap: 12px; }
   .nav {
     position: absolute; top: var(--header-h); left: 0; right: 0;
     flex-direction: column; align-items: stretch; gap: 2px; margin: 0;
@@ -605,6 +605,7 @@ pre:hover .pre-copy, .pre-copy:focus-visible { opacity: 1; }
     display: none;
   }
   .site-header.nav-open .nav { display: flex; }
+  .site-header:not(.nav-ready) .nav { display: flex; position: static; order: 3; flex-basis: 100%; }
   .nav a { padding: 11px 12px; font-size: .95rem; border-radius: 8px; }
   .nav a.nav-best { padding: 11px 14px; border-radius: 999px; }
 }

@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-14",
+  "generated": "2026-11-17",
   "scores": {
     "openrouter": {
       "total": 67.2,
@@ -61,12 +61,6 @@
       "of": 6,
       "rank": null
     },
-    "assemblyai": {
-      "total": 41,
-      "confirmed": 3,
-      "of": 6,
-      "rank": null
-    },
     "jina-ai": {
       "total": 41,
       "confirmed": 3,
@@ -94,6 +88,12 @@
     "pinecone-inference": {
       "total": 37.2,
       "confirmed": 3,
+      "of": 6,
+      "rank": null
+    },
+    "assemblyai": {
+      "total": 37,
+      "confirmed": 2,
       "of": 6,
       "rank": null
     },

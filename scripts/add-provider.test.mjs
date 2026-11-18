@@ -8,7 +8,7 @@ import { makeTmpDir } from './lib/tmp.mjs';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 const SCRIPT = join(ROOT, 'scripts/add-provider.mjs');
-const TODAY = '2026-11-14';
+const TODAY = JSON.parse(readFileSync(join(ROOT, 'data/providers.json'), 'utf8')).generated;
 
 function workspace() {
   const dir = makeTmpDir('add-provider-');

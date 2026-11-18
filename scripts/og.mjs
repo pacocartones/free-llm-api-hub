@@ -9,7 +9,7 @@ import { dirname, join } from 'node:path';
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 // Collection/guide filter lists and the data fingerprints live in lib/og.mjs,
 // shared with the CI check (scripts/check-og.mjs) so both always agree.
-import { COLLS, GUIDES, buildOgManifest } from './lib/og.mjs';
+import { COLLS, GUIDES, buildOgManifest, renderHomeOg } from './lib/og.mjs';
 const { Resvg } = await import('@resvg/resvg-js');
 const render = (svg, out) => {
   const png = new Resvg(Buffer.isBuffer(svg) ? svg : Buffer.from(svg), { fitTo: { mode: 'width', value: 1200 } }).render().asPng();
@@ -17,12 +17,14 @@ const render = (svg, out) => {
   return png.length;
 };
 
-// site-wide OG (from the hand-authored template)
-let n = render(readFileSync(join(ROOT, 'site/og.svg')), join(ROOT, 'site/og.png'));
+const { providers } = JSON.parse(readFileSync(join(ROOT, 'data/providers.json'), 'utf8'));
+// Keep the editable SVG and its raster preview on the same derived figures.
+const homeSvg = renderHomeOg(readFileSync(join(ROOT, 'site/og.svg'), 'utf8'), providers);
+writeFileSync(join(ROOT, 'site/og.svg'), homeSvg);
+let n = render(homeSvg, join(ROOT, 'site/og.png'));
 console.log(`og.png: ${(n / 1024).toFixed(0)} KB`);
 
 // per-collection OG
-const { providers } = JSON.parse(readFileSync(join(ROOT, 'data/providers.json'), 'utf8'));
 
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 // Wrap a title onto up to two lines at ~26 chars.
@@ -59,7 +61,7 @@ function tagSvg(label, title, subtitle) {
 mkdirSync(join(ROOT, 'site/og/collections'), { recursive: true });
 for (const c of COLLS) {
   const count = providers.filter(c.filter).length;
-  render(tagSvg('COLLECTION', c.title, `${count} verified free APIs · dated · sourced · machine-readable`), join(ROOT, `site/og/collections/${c.slug}.png`));
+  render(tagSvg('COLLECTION', c.title, `${count} providers · dated · sourced · machine-readable`), join(ROOT, `site/og/collections/${c.slug}.png`));
 }
 console.log(`per-collection OG: ${COLLS.length} rendered.`);
 
@@ -92,5 +94,5 @@ console.log(`per-provider OG: ${providers.length} rendered.`);
 
 // Data fingerprints of every image just rendered. Committed alongside the PNGs
 // so CI (scripts/check-og.mjs) can verify each one still matches the dataset.
-writeFileSync(join(ROOT, 'site/og/manifest.json'), JSON.stringify(buildOgManifest(providers), null, 2) + '\n');
-console.log(`manifest: ${Object.keys(buildOgManifest(providers)).length} fingerprints written.`);
+writeFileSync(join(ROOT, 'site/og/manifest.json'), JSON.stringify(buildOgManifest(providers, homeSvg), null, 2) + '\n');
+console.log(`manifest: ${Object.keys(buildOgManifest(providers, homeSvg)).length} fingerprints written.`);

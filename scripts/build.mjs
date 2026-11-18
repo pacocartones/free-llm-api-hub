@@ -32,6 +32,7 @@ import { dataPolicyRows, dataPolicyMainHtml } from './lib/data-policy-page.mjs';
 import { quotesReportHtml } from './lib/quotes-report.mjs';
 import { SCORE_WEIGHTS, EDITORIAL_WEIGHT, EDITORIAL_DEFAULT, MATH_INPUTS, MIN_CONFIRMED, TOP_SIZE, EDITORIAL_NOTE_THRESHOLD, STABILITY_MIN_DAYS, STABILITY_MIN_SAMPLES, rankProviders, editorialRating } from './lib/score.mjs';
 import { publishableClientConfigs } from './lib/client-config.mjs';
+import { COLLECTIONS as SHARED_COLLECTIONS } from './lib/collections.mjs';
 import * as compareLib from './lib/compare.mjs';
 import { requirementsHtml, limitsHtml, glanceHtml, modelsHtml, dataPolicyHtml } from './lib/provider-sections.mjs';
 import { aboutHtml } from './lib/provider-summaries.mjs';
@@ -112,7 +113,7 @@ function bestTable(entries) {
 // ---------- editorial collections (generated from the data) ----------
 const SITE = 'https://freellmapihub.com';
 
-const COLLECTIONS = [
+const COLLECTION_COPY = [
   {
     slug: 'no-credit-card',
     answer: '{n} of {total} tracked providers need no payment method to start. That includes trial credits as well as permanent free tiers, so read the Type column. Each row says what is free and the catch. The list is a live filter and changes when a provider changes its terms.',
@@ -121,7 +122,6 @@ const COLLECTIONS = [
     h1: 'Free LLM APIs with no credit card required',
     desc: 'LLM APIs you can start calling without entering a payment method — filtered live from a continuously-verified dataset.',
     intro: 'Every provider below offers free API access with **no card required** to get started (`card_required: false`, confirmed against their own docs). Rows where the requirement is unknown are excluded rather than assumed.',
-    filter: (p) => p.card_required === false,
     guides: ['free-llm-api-without-credit-card', 'free-llm-api-no-signup'],
     faq: [
       { q: 'Can I use an LLM API for free without a credit card?', a: 'Yes — every provider on this page offers a free tier with no card required, confirmed against its own docs. You are limited by rate, not billing.' },
@@ -138,7 +138,6 @@ const COLLECTIONS = [
     h1: 'Free LLM APIs with no phone number required',
     desc: 'LLM APIs whose signup needs no SMS/phone verification — a live slice of a continuously-verified dataset.',
     intro: 'Providers you can sign up for **without phone verification** (`phone_required: false`). Providers that gate signup behind a phone number, or whose rule is not known, are left out.',
-    filter: (p) => p.phone_required === false,
     guides: ['free-llm-api-no-signup'],
     faq: [
       { q: 'Is there a free LLM API with no phone verification?', a: 'Yes — every provider on this page asks for no phone number at signup, according to its own docs. A provider whose rule is not known is not listed.' },
@@ -155,7 +154,6 @@ const COLLECTIONS = [
     h1: 'Free LLM APIs you can use commercially',
     desc: 'Free LLM API tiers that permit production/commercial use — not restricted to evaluation. Verified against each provider’s terms.',
     intro: 'Free tiers that **allow commercial/production use** (`commercial_ok: true`). Evaluation-only tiers (`commercial_ok: false`) and tiers whose terms do not say are deliberately left out — read their rows in the main list for the restriction.',
-    filter: (p) => p.commercial_ok === true,
     guides: ['openai-compatible-free-apis', 'free-llm-api-without-credit-card'],
     faq: [
       { q: 'Can I use this list in a commercial product?', a: 'Yes. Free LLM API Hub and its dataset are MIT licensed, so you can reuse, fork and adapt them, including commercially. A link back is appreciated but not required. Each provider’s page has a Commercial use line that reads allowed, evaluation only or not confirmed, and the explorer on the home page marks the first two with an icon. Not confirmed means no reading of the provider’s terms has confirmed that commercial use is allowed: some terms do not clearly say so, and for other providers the question is still open. It is not a permission. The data describes other companies’ free tiers, whose terms change without notice, so confirm against the provider’s own docs before you ship. This list is independent: it is not affiliated with, endorsed by or sponsored by any provider on it, and it is not legal advice.' },
@@ -173,7 +171,6 @@ const COLLECTIONS = [
     h1: 'Free LLM APIs with an OpenAI-compatible endpoint',
     desc: 'Free LLM APIs that expose an OpenAI-compatible endpoint — point the OpenAI SDK at a new base_url and you are done.',
     intro: 'These providers expose an **OpenAI-compatible endpoint** (`openai_compatible: true`), so migrating is usually a one-line change: keep the OpenAI SDK, swap `base_url` and `api_key`. Grab each provider’s exact base URL from its linked docs.',
-    filter: (p) => p.openai_compatible === true,
     quickstart: true,
     guides: ['openai-compatible-free-apis'],
     faq: [
@@ -191,7 +188,6 @@ const COLLECTIONS = [
     h1: 'Permanently free LLM APIs (no trial clock)',
     desc: 'LLM APIs with models priced at $0 on an ongoing basis — no trial window counting down. Verified from a live dataset.',
     intro: 'Providers with models that are **free on a permanent basis** (`free_type: perpetual`) — not a trial credit that runs out. Rate limits still apply; check each row.',
-    filter: (p) => p.free_type === 'perpetual',
     faq: [
       { q: 'Are there LLM APIs that are free with no trial clock?', a: 'Yes — the providers on this page list models at $0 on a perpetual basis, according to their own pages. Rate limits still apply.' },
       { q: 'Does permanently free mean free forever?', a: 'No. It describes what the provider says today; prices and limits can change, so every row shows the day it was read.' },
@@ -207,7 +203,6 @@ const COLLECTIONS = [
     h1: 'Free multimodal APIs — vision, audio, embeddings',
     desc: 'Free API tiers that go beyond text: vision, image, audio/speech, embeddings and rerank. A live slice of a verified dataset.',
     intro: 'Free tiers that reach **beyond plain text** — vision, image, audio/speech, embeddings or rerank on the free plan.',
-    filter: (p) => (p.modalities || []).some((m) => m !== 'text'),
     guides: ['free-embeddings-apis', 'free-speech-to-text-apis', 'free-image-generation-apis', 'free-ocr-document-ai-apis'],
     faq: [
       { q: 'Are there free APIs for images, speech and embeddings — not just text?', a: 'Yes — the providers here reach beyond text on their free tier: vision, image generation, speech (STT/TTS), embeddings or rerank. See the modality-specific guides linked above.' },
@@ -227,7 +222,6 @@ const COLLECTIONS = [
     // A row is the provider's own sentence; whether it covers the free plan is a separate fact, shown per row (see planMark).
     header: 'Each row is the provider’s own sentence. Many sources do not say whether it covers the free plan; read the row’s note.',
     rowMark: (p) => planMark(p.data_policy),
-    filter: (p) => p.data_policy?.trains_on_prompts === false,
     faq: [
       { q: 'Which free LLM APIs say they do not train on my prompts?', a: 'The providers on this page, each according to its own terms or privacy page, cited with the day it was read on the provider’s page on this site. The wording differs: for some it holds only while you have not opted in to training, and a privacy notice is not a contract.' },
       { q: 'Does a provider missing from this list train on my data?', a: 'Not necessarily. A provider is missing when its own page says it may train on prompts, says nothing we could cite, or could not be read. Check the provider before you send sensitive data.' },
@@ -243,7 +237,6 @@ const COLLECTIONS = [
     h1: 'Free LLM APIs with a renewing free allowance',
     desc: 'LLM and AI APIs whose free allowance resets (daily, monthly or per minute) instead of running out once — a live slice of a verified dataset.',
     intro: 'Providers whose free access **renews**: a quota (`free_type: renewing-quota`) or a credit (`free_type: recurring-credit`) that resets on a schedule. One-time signup credits and permanently free models are listed in other collections. A renewing allowance can still be evaluation-only (for example Cohere) — read the catch.',
-    filter: (p) => p.free_type === 'renewing-quota' || p.free_type === 'recurring-credit',
     guides: ['free-llm-api-without-credit-card', 'openai-compatible-free-apis'],
     faq: [
       { q: 'Which free LLM APIs reset their limits?', a: 'The providers on this page: their free allowance renews on a schedule rather than being a one-time credit.' },
@@ -260,7 +253,6 @@ const COLLECTIONS = [
     h1: 'Free LLM APIs that start with a free credit',
     desc: 'AI APIs that give a one-time free credit or token balance at signup, which runs out instead of renewing — a live slice of a verified dataset.',
     intro: 'Providers whose free access is a **one-time credit** (`free_type: trial-credit`): it is spent, not renewed. Renewing allowances are in their own collection. Some credits expire, with windows from 30 days to a year in the dataset, and a provider that has not been re-verified is left out.',
-    filter: (p) => p.free_type === 'trial-credit' && p.verified,
     guides: ['free-llm-api-without-credit-card'],
     faq: [
       { q: 'Do free signup credits expire?', a: 'Some do, with windows from 30 days to a year in the dataset; others say the credit does not expire. Each row shows the catch.' },
@@ -270,6 +262,13 @@ const COLLECTIONS = [
     ],
   },
 ];
+
+const COLLECTIONS = SHARED_COLLECTIONS.map(({ slug, filter }) => {
+  const copy = COLLECTION_COPY.find((c) => c.slug === slug);
+  if (!copy) throw new Error(`Missing collection copy: ${slug}`);
+  return { ...copy, filter };
+});
+if (COLLECTION_COPY.length !== COLLECTIONS.length) throw new Error('Collection copy and filters must cover the same collections');
 
 // SEO guides — intent-matched landing pages generated from the data. Declared
 // here (before the provider loop) so provider pages can cross-link to them.
@@ -898,6 +897,9 @@ for (const rel of ['data/providers.csv', 'data/providers.yaml', 'site/providers.
 }
 
 // ---------- generate collection pages (repo markdown + live HTML) ----------
+// These directories contain only generated pages; retired slugs must disappear.
+rmSync(join(ROOT, 'collections'), { recursive: true, force: true });
+rmSync(join(ROOT, 'site/collections'), { recursive: true, force: true });
 mkdirSync(join(ROOT, 'collections'), { recursive: true });
 mkdirSync(join(ROOT, 'site/collections'), { recursive: true });
 
@@ -1039,6 +1041,8 @@ writeFileSync(
 );
 // The old hubs redirect here so existing links and bookmarks keep working.
 const redirectPage = (to) => `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="robots" content="noindex"><meta http-equiv="refresh" content="0; url=${to}"><link rel="canonical" href="${new URL(to, SITE + '/x/').href.replace(/#.*$/, '')}"><title>Redirecting…</title></head><body><p>Moved to <a href="${to}">${to}</a>.</p></body></html>`;
+// Clear generated guides before writing their redirect and current pages.
+rmSync(join(ROOT, 'site/guides'), { recursive: true, force: true });
 mkdirSync(join(ROOT, 'site/guides'), { recursive: true });
 mkdirSync(join(ROOT, 'site/collections'), { recursive: true });
 writeFileSync(join(ROOT, 'site/guides/index.html'), redirectPage('../guides-and-collections/'));
@@ -1097,7 +1101,7 @@ for (const p of providers) {
       : `<h2 id="quickstart">Quickstart — chat completions</h2><pre><code>${codeHtmlEsc(python)}</code></pre><p class="muted">…or with curl:</p><pre><code>${codeHtmlEsc(curlChatQuickstart(p.openai_base_url, model))}</code></pre>`;
   } else {
     const docs = p.docs_url ? htmlEsc(p.docs_url) : '';
-    quick = `<h2 id="quickstart">Get started</h2><p class="muted">This is a first-party API, not OpenAI-compatible, so there is no drop-in base URL. The endpoint, the key and a working example are in the <a href="${docs}" target="_blank" rel="noopener">official docs</a>.</p>`;
+    quick = `<h2 id="quickstart">Get started</h2><p class="muted">No OpenAI-compatible base URL is recorded for this offer. Check the <a href="${docs}" target="_blank" rel="noopener">official docs</a> for endpoints, authentication and examples.</p>`;
   }
 
   // The score of the provider (lib/score.mjs, the same numbers as /best/ and the API) with its method one click away. Providers that are
@@ -2000,6 +2004,7 @@ writeFileSync(
 
 // ---------- /coding-tools/ — free AI coding tools, apart from the ranking ----------
 // Reads data/coding-tools.json only; nothing here enters a provider count, score or collection.
+rmSync(join(ROOT, 'site/coding-tools'), { recursive: true, force: true });
 mkdirSync(join(ROOT, 'site/coding-tools'), { recursive: true });
 writeFileSync(
   join(ROOT, 'site/coding-tools/index.html'),
@@ -2277,6 +2282,8 @@ function deriveFingerprints() {
     for (const entry of readdirSync(dir, { withFileTypes: true })) {
       const abs = join(dir, entry.name);
       const rel = relative(ROOT, abs).split(String.fromCharCode(92)).join('/');
+      // OG assets have their own manifest, including newly generated, untracked images.
+      if (rel === 'site/og') continue;
       if (entry.isDirectory()) walk(abs);
       else if (!tracked.has(rel) && !isDateRelative(rel) && !isGitLogDerived(rel)) {
         out[rel] = createHash('sha256').update(readFileSync(abs)).digest('hex');
