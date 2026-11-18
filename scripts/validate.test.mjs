@@ -157,6 +157,7 @@ const INTEGRITY_CASES = [
   ['env_key syntax', 'usable environment variable names', (p) => { p.openai_base_url = null; p.env_key = 'api-key'; }, 'env_key must be an UPPER_SNAKE env var name'],
   ['models_url public HTTPS', 'public model catalogues', (p) => { p.models_url = 'https://127.0.0.1/models'; }, "models_url must be the provider's public HTTPS model catalogue"],
   ['data_policy.source public HTTPS', 'public policy evidence', (p) => { p.data_policy.source = 'https://127.0.0.1/policy'; }, "data_policy.source must be the provider's public HTTPS page"],
+  ['unverified docs_url scheme', 'links generated from unverified rows', (p) => { p.verified = false; p.last_verified = null; p.docs_url = p.docs_url.replace(/^https:/, 'http:'); }, 'docs_url must be empty or an https:// URL'],
   ['verified docs_url public HTTPS', 'public primary verification sources', (p) => { p.docs_url = p.docs_url.replace(/^https:/, 'http:'); }, 'verified entry needs a public HTTPS docs_url (primary source)'],
 ];
 
