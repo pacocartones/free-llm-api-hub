@@ -203,7 +203,7 @@ All four report on every PR without path filters. CodeQL additionally reports
 `Analyze (javascript-typescript)` on every PR, plus weekly and manual scans; it is
 not currently a required check. It scans JavaScript/TypeScript code, not Actions
 workflow YAML. There is no push trigger, avoiding a second scan when a PR merges.
-`mcp tests (node 18)` and `mcp tests (node 22)` run only when the MCP package or its
+`mcp tests (node 22)` and `mcp tests (node 24)` run only when the MCP package or its
 workflow changes, so they must not be unconditional required checks.
 
 Live GitHub settings remain authoritative. This change does not modify branch
