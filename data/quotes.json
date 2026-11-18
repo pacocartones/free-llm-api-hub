@@ -140,10 +140,10 @@
    "kind": "sentence",
    "text": "Subject to the terms of the DPA, Nebius may access, use, host, cache, store, copy, modify, and otherwise process Input and Output to (a) provide, maintain, monitor, protect, and support the Services, Token Factory Service or (b) train smaller Models used for Speculative Decoding.",
    "source_url": "https://docs.nebius.com/legal/token-factory",
-   "read_on": "2026-10-15",
+   "read_on": "2026-11-17",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
-   "page_sha256": "d98c5e06af8d200e23fa309b354614399e13f51041bcdcb5d86e49f5558c8581"
+   "page_sha256": "ce1c8a07681d48becb7dca3f90bb93c53b1ded7d0157d5b81b998419b06d0dfc"
   },
   {
    "id": "novita.sentence",
@@ -221,6 +221,17 @@
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "3a2697b1e08e9928e6d77198a5c875b6abba4812f9d4c38020a03afe8086bb03"
+  },
+  {
+   "id": "nlpcloud.sentence",
+   "slug": "nlpcloud",
+   "kind": "sentence",
+   "text": "For privacy reasons, we DO NOT keep any data sent to our API.",
+   "source_url": "https://nlpcloud.com/privacy.html",
+   "read_on": "2026-11-17",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "f1171ac6eebcc2d603b61a68252db7717397255318c726cfe2b3d3f34ac6a85c"
   },
   {
    "id": "modal.sentence",
@@ -402,23 +413,12 @@
    "id": "llamaparse.sentence",
    "slug": "llamaparse",
    "kind": "sentence",
-   "text": "We do not train any models on User Content.",
+   "text": "Except as you agree under separate terms accepted under Section 4.4, we do not use User Content to train or fine-tune any artificial intelligence or machine learning model.",
    "source_url": "https://www.llamaindex.ai/terms-of-service",
-   "read_on": "2026-10-15",
+   "read_on": "2026-11-17",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
-   "page_sha256": "79f2c3d983593e673e2cca21afec4e75113c3e1833393bc3a55206aa23a0664e"
-  },
-  {
-   "id": "llamaparse.note_passage.1",
-   "slug": "llamaparse",
-   "kind": "note_passage",
-   "text": "LlamaIndex will only retain such User Content and other data provided by you in S3 for up to 48 hours after processing.",
-   "source_url": "https://www.llamaindex.ai/terms-of-service",
-   "read_on": "2026-10-15",
-   "lang": "en",
-   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
-   "page_sha256": "79f2c3d983593e673e2cca21afec4e75113c3e1833393bc3a55206aa23a0664e"
+   "page_sha256": "4317275db4ad4feef5e00c8733f0d4c79d175cc345c835f8fda556595193438d"
   },
   {
    "id": "moondream.sentence",
@@ -518,28 +518,6 @@
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "57f3bc7b7807b7c0d80c5c1011f0aa620a727f2b4efa6c84753b7d376862c336"
-  },
-  {
-   "id": "rime.sentence",
-   "slug": "rime",
-   "kind": "sentence",
-   "text": "Except for Rime’s limited right to use your Voice Recordings to train a Customer Voice Model (as both terms are defined below) if you choose to use that feature, Rime does not use either the Input or Output to train its AI models.",
-   "source_url": "https://www.rime.ai/terms",
-   "read_on": "2026-10-15",
-   "lang": "en",
-   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
-   "page_sha256": "39bba9b221549afaa686e558ba03e69f81d59efc3e821b36bf5bff8cae5f1492"
-  },
-  {
-   "id": "rime.note_passage.1",
-   "slug": "rime",
-   "kind": "note_passage",
-   "text": "limited by the terms of such trial",
-   "source_url": "https://www.rime.ai/terms",
-   "read_on": "2026-10-15",
-   "lang": "en",
-   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
-   "page_sha256": "39bba9b221549afaa686e558ba03e69f81d59efc3e821b36bf5bff8cae5f1492"
   },
   {
    "id": "voyage-ai.sentence",

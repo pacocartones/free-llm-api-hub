@@ -90,12 +90,12 @@ export function createServer(load, loadClients) {
       description:
         'For a provider listed in the published openai-clients.json (verified, OpenAI-compatible, with a base URL): ' +
         'return its base_url, the API-key environment variable name published there (env_key), and Python and ' +
-        'JavaScript snippets using the official openai SDK. For any other provider, explains why no drop-in config ' +
+        'JavaScript chat snippets only when free text/chat access is confirmed and modalities are limited to text/vision; otherwise returns configuration and official docs without guessing an endpoint. For any other provider, explains why no drop-in config ' +
         'is offered (not verified, not OpenAI-compatible or not confirmed, or no base URL). ' +
         TERMS,
       inputSchema: {
         slug: z.string().describe('Provider slug.'),
-        model: z.string().optional().describe('Model ID to put in the snippet. Defaults to the first sampled free model, which may be out of date.'),
+        model: z.string().optional().describe('Model ID to put in the snippet. Use a free chat model from the official docs. Defaults to a sampled model only for text/vision-only providers; mixed or unknown modalities receive no request snippet.'),
       },
       annotations: READ_ONLY,
     },

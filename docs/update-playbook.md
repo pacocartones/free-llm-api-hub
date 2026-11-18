@@ -60,6 +60,8 @@ Publication never changes `generated`, `last_verified`, `verified`, `data_policy
 
 For each provider on the worklist (`npm run worklist`, or just the reverify batch):
 
+`last_verified` records a human review of the entry's [core facts](methodology.md#what-verified-means). A partial field correction leaves `verified` and `last_verified` unchanged unless that review is also completed. Fetch results, generated files and passing automated checks do not establish human verification.
+
 1. **Open the provider's own docs** (the `docs` link in the item). Third-party summaries don't count.
 2. **Compare against `data/providers.json`:** free tier, rate limits, credit amount/expiry, and the catches (`card_required`, `phone_required`, `commercial_ok`, `openai_compatible`); re-read `trains_on_prompts`, `retention`, and [`data_policy`](../data/schema.json), including its `source` and `checked` date, on the provider's own page, the one the row's `source` points to (usually its terms of service or privacy policy).
 3. **Update the entry:**

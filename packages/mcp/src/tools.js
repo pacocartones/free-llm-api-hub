@@ -160,9 +160,9 @@ function exclusionReasons(p) {
  * resolve unknown slugs and to explain why a provider is not in the list.
  */
 export function openaiClientConfig(data, clients, { slug, model }) {
+  const p = findProvider(data, slug);
   const c = clients.clients.find((x) => x.slug === slug);
   if (!c) {
-    const p = findProvider(data, slug);
     const reasons = exclusionReasons(p);
     if (!reasons.length) {
       reasons.push(
@@ -178,6 +178,21 @@ export function openaiClientConfig(data, clients, { slug, model }) {
       disclaimer: DISCLAIMER,
       available: false,
       reason: `No drop-in OpenAI client config for ${p.name}: ${reasons.join('; ')}. Follow the provider's own docs at ${p.docs_url || '(no docs_url recorded)'} for its API.`,
+    };
+  }
+
+  const chatOnly = Array.isArray(p.modalities) && p.modalities.length > 0 && p.modalities.every((m) => m === 'text' || m === 'vision');
+  if (p.is_text_llm !== true || !chatOnly) {
+    return {
+      slug: c.slug,
+      name: c.name ?? c.slug,
+      docs_url: c.docs_url,
+      last_verified: c.last_verified ?? null,
+      disclaimer: DISCLAIMER,
+      available: true,
+      base_url: c.base_url,
+      env_var: c.env_key,
+      snippet_note: 'No chat example: free text/chat access is unconfirmed or modalities are mixed/unknown. OpenAI compatibility and an untyped model sample do not identify the supported endpoint. Follow docs_url for the request format and model for this API.',
     };
   }
 

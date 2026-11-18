@@ -50,20 +50,37 @@
     btn.className = 'pre-copy';
     btn.textContent = 'Copy';
     btn.setAttribute('aria-label', 'Copy code to clipboard');
-    btn.addEventListener('click', function () {
-      var code = pre.querySelector('code') || pre;
-      var text = code.innerText;
-      var done = function () { btn.textContent = 'Copied'; btn.classList.add('copied'); setTimeout(function () { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 1300); };
-      if (navigator.clipboard) navigator.clipboard.writeText(text).then(done).catch(done); else done();
+    btn.setAttribute('aria-live', 'polite');
+    btn.addEventListener('click', async function () {
+      if (btn.getAttribute('aria-disabled') === 'true') return;
+      btn.setAttribute('aria-disabled', 'true');
+      btn.textContent = 'Copy';
+      btn.title = '';
+      btn.setAttribute('aria-label', 'Copy code to clipboard');
+      btn.classList.remove('copied');
+      try {
+        if (!navigator.clipboard || !navigator.clipboard.writeText) throw new Error('Clipboard unavailable');
+        var code = pre.querySelector('code') || pre;
+        await navigator.clipboard.writeText(code.innerText);
+        btn.textContent = 'Copied';
+        btn.setAttribute('aria-label', 'Code copied to clipboard');
+        btn.classList.add('copied');
+      } catch (e) {
+        btn.textContent = 'Copy failed';
+        btn.title = 'Select the code and copy it manually.';
+        btn.setAttribute('aria-label', 'Copy failed. ' + btn.title);
+      } finally {
+        btn.setAttribute('aria-disabled', 'false');
+      }
     });
     pre.appendChild(btn);
   });
 
-  // --- mobile nav toggle (nav is hidden <=760px until opened) ---
+  // --- mobile nav toggle (collapse only after the controls are ready) ---
   var navToggle = document.getElementById('navToggle');
   var header = document.querySelector('.site-header');
   var primaryNav = document.getElementById('primary-nav');
-  if (navToggle && header) {
+  if (navToggle && header && primaryNav) {
     var setNav = function (open) {
       header.classList.toggle('nav-open', open);
       navToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
@@ -73,7 +90,7 @@
       e.stopPropagation();
       setNav(!header.classList.contains('nav-open'));
     });
-    if (primaryNav) primaryNav.addEventListener('click', function (e) {
+    primaryNav.addEventListener('click', function (e) {
       if (e.target.closest('a')) setNav(false);
     });
     document.addEventListener('keydown', function (e) {
@@ -82,6 +99,7 @@
     document.addEventListener('click', function (e) {
       if (header.classList.contains('nav-open') && !e.target.closest('.site-header')) setNav(false);
     });
+    header.classList.add('nav-ready');
   }
 
   // --- dated banner: leaves the page after its data-until day (UTC, inclusive) ---

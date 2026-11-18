@@ -280,6 +280,41 @@ test('openai_client_config takes base_url and env_key from openai-clients.json',
   assert.match(r.model_note, /sample/);
 });
 
+test('openai_client_config keeps nonchat and unconfirmed APIs usable without inventing chat requests', () => {
+  for (const [modalities, is_text_llm] of [
+    [['audio'], false], [['embeddings'], false], [['ocr', 'text'], false],
+    [['text'], undefined], [['text'], null],
+  ]) {
+    const fixture = structuredClone(data);
+    Object.assign(fixture.providers[0], { modalities, is_text_llm });
+    const r = openaiClientConfig(fixture, clients, { slug: 'alpha-ai', model: 'explicit-model' });
+    assert.equal(r.available, true);
+    assert.equal(r.base_url, clients.clients[0].base_url);
+    assert.equal(r.env_var, clients.clients[0].env_key);
+    assert.equal(r.docs_url, clients.clients[0].docs_url);
+    assert.equal('python' in r, false);
+    assert.equal('javascript' in r, false);
+    assert.equal('model' in r, false);
+    assert.match(r.snippet_note, /Follow docs_url/);
+  }
+});
+
+test('openai_client_config does not turn a mixed-modality first sample into a chat model', () => {
+  const fixture = structuredClone(data);
+  fixture.providers[0].modalities = ['text', 'image', 'audio', 'embeddings'];
+  const mixedClients = structuredClone(clients);
+  mixedClients.clients[0].models_free = ['embedding-model', 'chat-model'];
+  const r = openaiClientConfig(fixture, mixedClients, { slug: 'alpha-ai' });
+  assert.equal('python' in r, false);
+  assert.equal('javascript' in r, false);
+  assert.match(r.snippet_note, /mixed\/unknown/);
+  const explicit = openaiClientConfig(fixture, mixedClients, { slug: 'alpha-ai', model: 'stable-diffusion-xl-base-v10' });
+  assert.equal('python' in explicit, false);
+  assert.equal('javascript' in explicit, false);
+  delete fixture.providers[0].modalities;
+  assert.equal('python' in openaiClientConfig(fixture, mixedClients, { slug: 'alpha-ai' }), false);
+});
+
 test('openai_client_config honours an explicit model and flags an unsampled one', () => {
   const r = openaiClientConfig(data, clients, { slug: 'alpha-ai', model: 'alpha-2' });
   assert.equal(r.model, 'alpha-2');

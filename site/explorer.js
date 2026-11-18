@@ -187,25 +187,6 @@ document.querySelectorAll('thead th[data-key]').forEach(th => {
     render();
   }));
 
-// Copy helpers: ready-to-paste OpenAI snippets.
-function flashCopied(el, label) {
-  if (label != null) { const prev = el.dataset.prev || el.textContent; el.dataset.prev = prev; el.textContent = label; }
-  el.classList.add('copied');
-  setTimeout(() => { el.classList.remove('copied'); if (label != null) el.textContent = el.dataset.prev; }, 1300);
-}
-function copyText(text, el, label) {
-  const done = () => flashCopied(el, label);
-  if (navigator.clipboard) navigator.clipboard.writeText(text).then(done).catch(done); else done();
-}
-function openaiSnippet(base) {
-  const model = base.includes('groq') ? 'llama-3.1-8b-instant' : '<a-free-model>';
-  return `from openai import OpenAI\n\nclient = OpenAI(base_url="${base}", api_key="<YOUR_FREE_API_KEY>")\nresp = client.chat.completions.create(\n    model="${model}",\n    messages=[{"role": "user", "content": "Hello!"}],\n)\nprint(resp.choices[0].message.content)`;
-}
-document.getElementById('tbody').addEventListener('click', e => {
-  const snip = e.target.closest('.copy-btn[data-snippet]');
-  if (snip) { copyText(openaiSnippet(snip.getAttribute('data-snippet')), snip, '✓ Copied'); }
-});
-
 // --- shareable state: sync filters to the URL and restore them on load ---
 const URL_FLAGS = [['nocard', 'f-nocard'], ['nophone', 'f-nophone'], ['commercial', 'f-commercial'], ['text', 'f-text'], ['notrain', 'f-notrain'], ['openai', 'f-openai'], ['verified', 'f-verified']];
 function syncURL() {

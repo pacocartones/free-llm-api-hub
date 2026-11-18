@@ -8,6 +8,9 @@
 // no longer ship a stale social image.
 
 import { createHash } from 'node:crypto';
+import { readFileSync } from 'node:fs';
+import { COLLECTIONS } from './collections.mjs';
+import { injectInlineFigures, providerFigures } from './figures.mjs';
 
 const sha256 = (s) => createHash('sha256').update(s, 'utf8').digest('hex');
 
@@ -19,17 +22,9 @@ export const PROVIDER_OG_FIELDS = ['name', 'category', 'card_required', 'commerc
 
 export const providerOgFingerprint = (p) => sha256(JSON.stringify(PROVIDER_OG_FIELDS.map((f) => p[f])));
 
-// Per-collection OG — keep filters in sync with COLLECTIONS in scripts/build.mjs.
-export const COLLS = [
-  { slug: 'no-credit-card', title: 'Free LLM APIs · no credit card', filter: (p) => p.card_required === false },
-  { slug: 'no-phone', title: 'Free LLM APIs · no phone', filter: (p) => p.phone_required === false },
-  { slug: 'commercial-use', title: 'Free LLM APIs · commercial use', filter: (p) => p.commercial_ok === true },
-  { slug: 'openai-compatible', title: 'OpenAI-compatible free APIs', filter: (p) => p.openai_compatible === true },
-  { slug: 'always-free', title: 'Permanently free LLM APIs', filter: (p) => p.free_type === 'perpetual' },
-  { slug: 'multimodal', title: 'Free multimodal AI APIs', filter: (p) => (p.modalities || []).some((m) => m !== 'text') },
-  { slug: 'renewing-free-tier', title: 'Free LLM APIs · renewing allowance', filter: (p) => p.free_type === 'renewing-quota' || p.free_type === 'recurring-credit' },
-  { slug: 'free-signup-credit', title: 'Free LLM APIs · signup credit', filter: (p) => p.free_type === 'trial-credit' && p.verified },
-];
+export const COLLS = COLLECTIONS.map((c) => ({ ...c, title: c.ogTitle }));
+
+export const renderHomeOg = (svg, providers) => injectInlineFigures(svg, providerFigures(providers));
 
 // Guides and the model index share the same OG template. Keep filters in sync
 // with GUIDES in scripts/build.mjs.
@@ -49,8 +44,8 @@ export const GUIDES = [
 // what it renders. Collections/guides/models render only a count, so their
 // fingerprint is the count (a join+leave with the same net count renders the
 // identical image — correctly not flagged).
-export const buildOgManifest = (providers) => {
-  const og = {};
+export const buildOgManifest = (providers, homeSvg = readFileSync(new URL('../../site/og.svg', import.meta.url), 'utf8')) => {
+  const og = { '../og.png': sha256(renderHomeOg(homeSvg, providers)) };
   for (const c of COLLS) og[`collections/${c.slug}.png`] = sha256(String(providers.filter(c.filter).length));
   for (const g of GUIDES) og[`guides/${g.slug}.png`] = sha256(String(providers.filter(g.filter).length));
   const modelCount = providers.reduce((n, p) => n + (p.models_free || []).length, 0);

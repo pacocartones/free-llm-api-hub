@@ -26,8 +26,8 @@ Descriptions are copied from each property itself. “No description in schema.�
 | `card_required` | boolean | Yes | No | — | No description in schema. |
 | `commercial_ok` | boolean or string | Yes | No | One of: (Type: boolean or null) OR (Value: <code>"conditional"</code>) | No description in schema. |
 | `commercial_ok_condition` | string | Yes | Conditional | — | Condition summary when commercial_ok is 'conditional'. Required and non-blank for that value; null or absent otherwise. |
-| `openai_compatible` | boolean | Yes | No | — | No description in schema. |
-| `openai_base_url` | string | Yes | No | — | OpenAI-compatible base URL for a drop-in SDK swap, when confirmed. null until backfilled. |
+| `openai_compatible` | boolean | Yes | No | — | Whether the listed free offering exposes an OpenAI-compatible endpoint. Paid-only compatibility does not establish this; null means unconfirmed for the free offering. |
+| `openai_base_url` | string | Yes | No | — | OpenAI-compatible base URL confirmed for the listed free offering. null when no such endpoint is recorded; paid-only endpoints belong in notes, not free client configurations. |
 | `env_key` | string | No | No | — | Name of the environment variable holding this provider's API key, used by scripts/probe.mjs (and fetch-models) for live testing. Its presence marks a provider as probeable; the value itself lives only in the secrets store, never here. |
 | `models_free` | array | Yes | No | Unique items; Items: string | Sample of model IDs available on the free tier (attribute; sampled and may change — not part of the verified core claim). |
 | `models_url` | string | No | No | Format: <code>uri</code> | The provider's own page for browsing its model catalogue. Optional; absence means no catalogue URL has been verified. |

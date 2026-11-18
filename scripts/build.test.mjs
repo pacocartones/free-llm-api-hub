@@ -2,7 +2,7 @@
 // Covers: serializer round-trip, validator honesty rules, existing self-tests,
 // build idempotency, one generated README row matching the data, and the
 // generated client configs (LiteLLM + OpenAI SDK) and published JSON Schema.
-import { test } from 'node:test';
+import { before, describe, test } from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { readFileSync, writeFileSync, existsSync, readdirSync, statSync, rmSync } from 'node:fs';
@@ -1474,208 +1474,232 @@ test('the "Report a change" URL helper prefills the inaccuracy form and is escap
   assert.doesNotMatch(readFileSync(page, 'utf8'), /Report a change|template=inaccuracy\.yml&amp;provider=groq/, 'the button was removed from the provider page');
 });
 
-test('the change feed and state reports are built but never pinned in derived-fingerprints.json', () => {
-  run(['scripts/build.mjs']);
-  for (const rel of ['site/changes/index.html', 'site/changes.xml', 'site/api/v1/changes.json', 'site/state/index.html']) {
-    assert.ok(existsSync(join(ROOT, rel)), rel + ' should be generated');
-  }
-  const months = readdirSync(join(ROOT, 'site/state')).filter((f) => /^\d{4}-\d{2}$/.test(f));
-  assert.ok(months.length > 0, 'at least one monthly report');
-  assertWellFormedXml(readFileSync(join(ROOT, 'site/changes.xml'), 'utf8'));
-  const api = JSON.parse(readFileSync(join(ROOT, 'site/api/v1/changes.json'), 'utf8'));
-  assert.ok(api.weeks.length > 0 && api.weeks.length <= 12);
-  for (let i = 1; i < api.weeks.length; i++) assert.ok(api.weeks[i - 1].start > api.weeks[i].start, 'weeks newest first');
-  for (const c of api.weeks[0].changes) assert.deepEqual(Object.keys(c), ['date', 'slug', 'name', 'field', 'from', 'to']);
-  assert.equal(JSON.parse(readFileSync(join(ROOT, 'site/api/v1/index.json'), 'utf8')).endpoints.changes, 'v1/changes.json');
-  const history = JSON.parse(readFileSync(join(ROOT, 'site/api/v1/history.json'), 'utf8')).history;
-  assert.equal(Object.values(history).flat().some((e) => 'changes' in e), false, 'history.json keeps its published shape');
+// These output checks share unchanged inputs; mutation and idempotency tests build separately.
+describe('read-only generated output', () => {
+  before(() => run(['scripts/build.mjs']));
 
-  const pins = Object.keys(JSON.parse(readFileSync(join(ROOT, 'derived-fingerprints.json'), 'utf8')));
-  for (const k of pins) {
-    assert.ok(!k.startsWith('site/changes/') && !k.startsWith('site/state/') && k !== 'site/changes.xml' && k !== 'site/api/v1/changes.json',
-      k + ' is git-log derived and must not be pinned');
-  }
-  const sitemap = readFileSync(join(ROOT, 'site/sitemap.xml'), 'utf8');
-  assert.match(sitemap, /<loc>https:\/\/freellmapihub\.com\/changes\/<\/loc>/);
-  // /state/ is a redirect page to the single page for what changed: it is not listed, and it says where it goes
-  assert.doesNotMatch(sitemap, /<loc>https:\/\/freellmapihub\.com\/state\/<\/loc>/);
-  const stateRedirect = readFileSync(join(ROOT, 'site/state/index.html'), 'utf8');
-  assert.match(stateRedirect, /<meta http-equiv="refresh" content="0; url=\.\.\/changes\/#months">/);
-  assert.match(stateRedirect, /<link rel="canonical" href="https:\/\/freellmapihub\.com\/changes\/">/);
-  assert.match(stateRedirect, /<meta name="robots" content="noindex">/);
-  const changesPage = readFileSync(join(ROOT, 'site/changes/index.html'), 'utf8');
-  assert.match(changesPage, /<section id="months">/);
-  assert.doesNotMatch(changesPage, /id="weeks"|Week by week|href="#weeks"/, 'the weekly section and its button are gone; the feed stays');
-  for (const month of months) assert.match(changesPage, new RegExp(`href="\\.\\./state/${month}/"`), `the month ${month} is linked from the one page`);
-  assert.doesNotMatch(sitemap, /\/state\/\d{4}-\d{2}\//, 'per-month URLs depend on commit dates, so they stay out of the drift-gated sitemap');
-});
-
-test('shared-rules.js runs on its own: every serialised rule resolves its constants', () => {
-  // freeTypeRank reads FREE_TYPE_RANK and freshnessStatus reads SLA_DAYS by
-  // name. Emitted as bare object properties they were out of scope, so the
-  // client comparator threw on every repaint and the explorer never re-sorted
-  // or filtered. Execute the emitted file with nothing else in scope.
-  run(['scripts/build.mjs']);
-  const win = {};
-  new Function('window', readFileSync(join(ROOT, 'site/shared-rules.js'), 'utf8'))(win);
-  const R = win.FLLM_RULES;
-  assert.equal(R.freeTypeRank({ free_type: 'perpetual' }), 0);
-  assert.equal(R.freeTypeRank({ free_type: 'trial-credit' }), 3);
-  assert.equal(R.freeTypeRank({}), 4);
-  assert.equal(R.freshnessStatus(10), freshnessStatus(10));
-  assert.equal(R.freshnessStatus(SLA_DAYS + 1), 'stale');
-  assert.equal(R.freshnessStatus(DUE_SOON_DAYS + 1), 'due');
-  assert.equal(R.recScore({ card_required: false }), recScore({ card_required: false }));
-  assert.equal(R.SLA_DAYS, SLA_DAYS);
-  assert.equal(R.DUE_SOON_DAYS, DUE_SOON_DAYS);
-  assert.ok(Array.isArray(R.FLAG_PAIRS) && R.FLAG_PAIRS.length > 0);
-});
-
-// ---------- provider compare view (#175) ----------
-// Static /compare/<a>-vs-<b>/ pages: a small deterministic set of editorial
-// picks compared pairwise where they share a modality. They are gitignored and
-// pinned in derived-fingerprints.json, and sitemap.xml is drift-gated, so the
-// selection and the bytes must be a pure function of the committed data.
-
-test('compare pairs: only picks sharing a modality, ordered by rank, capped overall and per provider', () => {
-  const mk = (slug, modalities) => ({ slug, name: slug.toUpperCase(), modalities });
-  const ranked = [mk('a', ['text']), mk('b', ['text', 'audio']), mk('c', ['ocr']), mk('d', ['audio']), mk('e', ['text']), mk('f', ['ocr'])];
-  const pairs = selectComparePairs(ranked, { cap: 30, perProvider: 10 });
-  assert.deepEqual(pairs.map((p) => p.path), ['a-vs-b', 'a-vs-e', 'b-vs-d', 'b-vs-e', 'c-vs-f'],
-    'rank-sum order (ties: higher-ranked member first), no pair without a shared modality');
-  assert.deepEqual(pairs.find((p) => p.path === 'b-vs-d').shared, ['audio']);
-  assert.deepEqual(selectComparePairs(ranked, { cap: 2, perProvider: 10 }).map((p) => p.path), ['a-vs-b', 'a-vs-e'], 'overall cap');
-  assert.deepEqual(selectComparePairs(ranked, { cap: 30, perProvider: 1 }).map((p) => p.path), ['a-vs-b', 'c-vs-f'], 'per-provider cap');
-  assert.deepEqual(selectComparePairs(ranked), selectComparePairs(ranked), 'deterministic');
-  assert.deepEqual(selectComparePairs([mk('a', ['text']), { slug: '../x', name: 'X', modalities: ['text'] }]), [], 'a malformed slug never becomes a path');
-});
-
-test('compare pairs on the real ranking: at most 30, unique, shared modality, every page built', () => {
-  const { providers } = JSON.parse(readFileSync(DATA, 'utf8'));
-  const best = JSON.parse(readFileSync(join(ROOT, 'data/best.json'), 'utf8'));
-  const ranked = best.entries.map((e) => providers.find((p) => p.slug === e.slug));
-  const pairs = selectComparePairs(ranked);
-  assert.ok(pairs.length > 0 && pairs.length <= COMPARE_PAGE_CAP, `got ${pairs.length} pairs`);
-  assert.equal(new Set(pairs.map((p) => p.path)).size, pairs.length, 'no duplicate pages');
-  for (const { a, b, shared } of pairs) {
-    assert.ok(shared.length && shared.every((m) => a.modalities.includes(m) && b.modalities.includes(m)), `${a.slug}/${b.slug} share a modality`);
-  }
-  const uses = {};
-  for (const { a, b } of pairs) { uses[a.slug] = (uses[a.slug] || 0) + 1; uses[b.slug] = (uses[b.slug] || 0) + 1; }
-  assert.ok(Object.values(uses).every((n) => n <= COMPARE_PER_PROVIDER_CAP), 'per-provider cap holds');
-
-  run(['scripts/build.mjs']);
-  const sitemap = readFileSync(join(ROOT, 'site/sitemap.xml'), 'utf8');
-  const pins = JSON.parse(readFileSync(join(ROOT, 'derived-fingerprints.json'), 'utf8'));
-  // Dates a compare page may legitimately carry: the ones in the data.
-  const dataDates = new Set(JSON.stringify(providers).match(/\d{4}-\d{2}-\d{2}/g));
-  assert.match(sitemap, /<loc>https:\/\/freellmapihub\.com\/compare\/<\/loc>/);
-  assert.ok(pins['site/compare/index.html'] && pins['site/shared-compare.js'], 'the compare view is pinned');
-  const built = readdirSync(join(ROOT, 'site/compare')).filter((d) => d.includes('-vs-')).sort();
-  assert.deepEqual(built, pairs.map((p) => p.path).sort(), 'exactly the selected pages are built (stale pages are removed)');
-  for (const { a, b, path } of pairs) {
-    const rel = `site/compare/${path}/index.html`;
-    const html = readFileSync(join(ROOT, rel), 'utf8');
-    assert.ok(html.includes(`<link rel="canonical" href="https://freellmapihub.com/compare/${path}/">`), `${rel}: canonical`);
-    assert.ok(sitemap.includes(`<loc>https://freellmapihub.com/compare/${path}/</loc>`), `${rel}: in the sitemap`);
-    assert.match(pins[rel] || '', /^[0-9a-f]{64}$/, `${rel}: pinned in derived-fingerprints.json`);
-    assert.ok(html.includes(`<a href="../../p/${a.slug}">`) && html.includes(`<a href="../../p/${b.slug}">`), `${rel}: links both providers`);
-    assert.ok(!html.includes(`href="../../compare/${path}/"`), `${rel}: does not list itself under other comparisons`);
-    for (const d of html.match(/\d{4}-\d{2}-\d{2}/g) || []) {
-      assert.ok(dataDates.has(d), `${rel}: date ${d} is not from the dataset (pages must not depend on the build day)`);
+  test('every generated collection has an expected social image', async () => {
+    const { buildOgManifest } = await import('./lib/og.mjs');
+    const { providers } = JSON.parse(readFileSync(DATA, 'utf8'));
+    const images = buildOgManifest(providers);
+    const pages = readdirSync(join(ROOT, 'site/collections')).filter((name) => name.endsWith('.html') && name !== 'index.html');
+    assert.ok(pages.length > 0);
+    for (const page of pages) {
+      const image = `collections/${page.replace(/\.html$/, '.png')}`;
+      assert.ok(Object.hasOwn(images, image), `Missing social image: ${image}`);
+      assert.ok(readFileSync(join(ROOT, 'site/collections', page), 'utf8').includes(`/og/${image}`));
     }
-    // provider pages suggest the comparisons they appear in, when both sides share a category
-    for (const s of [a.slug, b.slug]) {
-      const linked = readFileSync(join(ROOT, `site/p/${s}.html`), 'utf8').includes(`href="../compare/${path}/"`);
-      assert.equal(linked, sameComparisonCategory(a, b), `p/${s} ${sameComparisonCategory(a, b) ? 'links' : 'does not suggest'} ${path}`);
-    }
-  }
-});
-
-test('the compare view loads its scripts under the CSP and the null tri-state reads "not confirmed"', () => {
-  run(['scripts/build.mjs']);
-  const index = readFileSync(join(ROOT, 'site/compare/index.html'), 'utf8');
-  assert.match(index, /<script src="\.\.\/shared-compare\.js" defer><\/script>\n<script src="\.\.\/compare\.js" defer><\/script>\n<\/body>/);
-  assert.equal(index.split('<script>').length - 1, 1, 'only the hashed theme guard runs inline');
-  assert.equal((index.match(/<select class="sel" name="p">/g) || []).length, COMPARE_MAX_SLOTS);
-  // ai-horde has commercial_ok: null in the dataset; any page with a null flag
-  // must say so instead of rendering it as "no".
-  const { providers } = JSON.parse(readFileSync(DATA, 'utf8'));
-  const page = readdirSync(join(ROOT, 'site/compare')).find((d) => {
-    if (!d.includes('-vs-')) return false;
-    return d.split('-vs-').some((s) => { const p = providers.find((x) => x.slug === s); return p && p.commercial_ok === null; });
+    assert.equal(pages.length, Object.keys(images).filter((name) => name.startsWith('collections/')).length);
   });
-  assert.ok(page, 'the real set contains a provider with an unconfirmed flag');
-  assert.match(readFileSync(join(ROOT, `site/compare/${page}/index.html`), 'utf8'), /<span class="tri tri-unk">not confirmed<\/span>/);
-});
 
-test('keyboard navigation is client-only: the server-rendered rows carry no tabindex', () => {
-  // Without JS there is no key handler, so SSR rows must not add dead tab stops;
-  // explorer.js assigns the roving tabindex after it repaints.
-  const p = { slug: 'demo', name: 'Demo', category: 'ongoing', verified: true, last_verified: '2026-07-20' };
-  assert.doesNotMatch(explorerRowHtml(p, { now: '2026-08-13' }), /tabindex/);
-  run(['scripts/build.mjs']);
-  const index = readFileSync(join(ROOT, 'site/index.html'), 'utf8');
-  const tbody = index.slice(index.indexOf('<tbody id="tbody">'), index.indexOf('</tbody>'));
-  assert.doesNotMatch(tbody, /tabindex/);
-  assert.match(index, /<caption class="sr-only">[^<]*arrow keys move between providers and Enter opens one\.<\/caption>/);
-});
-
-test('mobile sort select shows a placeholder for sorts it does not offer', () => {
-  // ?sort=notes (or a reversed column) has no matching option; the select must not keep a stale value.
-  const index = readFileSync(join(ROOT, 'site/index.html'), 'utf8');
-  assert.match(index, /<select id="sortSel"[^>]*>\s*<option value="custom" disabled hidden>/);
-  const fn = readFileSync(join(ROOT, 'site/explorer.js'), 'utf8').match(/function syncSortSel\(\) \{[\s\S]*?\n\}/)[0];
-  const sel = { options: [{ value: 'custom', disabled: true }, { value: 'name:1', disabled: false }], value: 'name:1' };
-  const run = (key, dir) => new Function('document', 'sortKey', 'sortDir', fn + '; syncSortSel();')({ getElementById: () => sel }, key, dir);
-  run('notes', 1); assert.equal(sel.value, 'custom');
-  run('name', 1); assert.equal(sel.value, 'name:1');
-  run('name', -1); assert.equal(sel.value, 'custom');
-});
-
-test('home: search box, Submit in the menu, and the star count rendered at build', () => {
-  run(['scripts/build.mjs']);
-  const index = readFileSync(join(ROOT, 'site/index.html'), 'utf8');
-  assert.match(index, /<input type="search" id="q"[^>]*>/);
-  assert.match(index, /<label class="sr-only" for="q">/);
-  for (const page of [index, readFileSync(join(ROOT, 'site/compare/index.html'), 'utf8'), readFileSync(join(ROOT, 'site/p/groq.html'), 'utf8')]) {
-    const nav = page.slice(page.indexOf('id="primary-nav"'), page.indexOf('</nav>', page.indexOf('id="primary-nav"')));
-    assert.match(nav, /href="(\.\.\/)?submit\/"/);
-  }
-  const { stars } = JSON.parse(readFileSync(join(ROOT, 'data/repo-stats.json'), 'utf8'));
-  assert.ok(Number.isInteger(stars));
-  const shown = stars.toLocaleString('en-US');
-  assert.equal([...index.matchAll(/data-stars>([^<]*)</g)].every((m) => m[1] === shown), true, 'every star slot carries the build-time count');
-  const explorer = readFileSync(join(ROOT, 'site/explorer.js'), 'utf8');
-  assert.match(explorer, /getElementById\('q'\)\.addEventListener\('input'/);
-  assert.match(explorer, /params\.set\('q'/);
-});
-
-test('suggested comparisons join one category only; the existing compare pages stay', () => {
-  run(['scripts/build.mjs']);
-  const providers = JSON.parse(readFileSync(DATA, 'utf8')).providers;
-  const bySlug = new Map(providers.map((p) => [p.slug, p]));
-  assert.equal(comparisonCategory({ modalities: ['ocr', 'text'] }), 'ocr');
-  assert.equal(comparisonCategory({ modalities: [] }), null);
-  assert.equal(sameComparisonCategory({ modalities: [] }, { modalities: [] }), false, 'no category is never "the same"');
-  const suggested = (html) => [...html.matchAll(/href="(?:\.\.\/)*compare\/([a-z0-9-]+-vs-[a-z0-9-]+)\/"/g)].map((m) => m[1]);
-  let links = 0;
-  const pages = [join(ROOT, 'site/compare/index.html'), ...readdirSync(join(ROOT, 'site/p')).filter((f) => f.endsWith('.html')).map((f) => join(ROOT, 'site/p', f))];
-  for (const file of pages) {
-    for (const path of suggested(readFileSync(file, 'utf8'))) {
-      const ok = [...path.matchAll(/-vs-/g)].some((m) => {
-        const pa = bySlug.get(path.slice(0, m.index)), pb = bySlug.get(path.slice(m.index + 4));
-        return pa && pb && sameComparisonCategory(pa, pb);
-      });
-      assert.ok(ok, `${path} (linked from ${relative(ROOT, file)}) mixes categories`);
-      links += 1;
+  test('provider pages do not infer incompatibility from a missing free-offer endpoint', () => {
+    const { providers } = JSON.parse(readFileSync(DATA, 'utf8'));
+    const withoutEndpoint = providers.filter((p) => !p.openai_base_url);
+    assert.ok(withoutEndpoint.length > 0);
+    for (const p of withoutEndpoint) {
+      const page = readFileSync(join(ROOT, `site/p/${p.slug}.html`), 'utf8');
+      assert.match(page, /No OpenAI-compatible base URL is recorded for this offer\./, p.slug);
+      assert.doesNotMatch(page, /not OpenAI-compatible, so there is no drop-in base URL/, p.slug);
     }
-  }
-  assert.ok(links > 0, 'some same-category comparisons are still suggested');
-  // the pages of the pairs that are no longer suggested are still published
-  for (const mixed of ['ocr-space-vs-groq', 'speechify-vs-groq']) {
-    assert.ok(existsSync(join(ROOT, `site/compare/${mixed}/index.html`)), `${mixed} page stays`);
-  }
+  });
+
+  test('the change feed and state reports are built but never pinned in derived-fingerprints.json', () => {
+    for (const rel of ['site/changes/index.html', 'site/changes.xml', 'site/api/v1/changes.json', 'site/state/index.html']) {
+      assert.ok(existsSync(join(ROOT, rel)), rel + ' should be generated');
+    }
+    const months = readdirSync(join(ROOT, 'site/state')).filter((f) => /^\d{4}-\d{2}$/.test(f));
+    assert.ok(months.length > 0, 'at least one monthly report');
+    assertWellFormedXml(readFileSync(join(ROOT, 'site/changes.xml'), 'utf8'));
+    const api = JSON.parse(readFileSync(join(ROOT, 'site/api/v1/changes.json'), 'utf8'));
+    assert.ok(api.weeks.length > 0 && api.weeks.length <= 12);
+    for (let i = 1; i < api.weeks.length; i++) assert.ok(api.weeks[i - 1].start > api.weeks[i].start, 'weeks newest first');
+    for (const c of api.weeks[0].changes) assert.deepEqual(Object.keys(c), ['date', 'slug', 'name', 'field', 'from', 'to']);
+    assert.equal(JSON.parse(readFileSync(join(ROOT, 'site/api/v1/index.json'), 'utf8')).endpoints.changes, 'v1/changes.json');
+    const history = JSON.parse(readFileSync(join(ROOT, 'site/api/v1/history.json'), 'utf8')).history;
+    assert.equal(Object.values(history).flat().some((e) => 'changes' in e), false, 'history.json keeps its published shape');
+
+    const pins = Object.keys(JSON.parse(readFileSync(join(ROOT, 'derived-fingerprints.json'), 'utf8')));
+    for (const k of pins) {
+      assert.ok(!k.startsWith('site/changes/') && !k.startsWith('site/state/') && k !== 'site/changes.xml' && k !== 'site/api/v1/changes.json',
+        k + ' is git-log derived and must not be pinned');
+    }
+    const sitemap = readFileSync(join(ROOT, 'site/sitemap.xml'), 'utf8');
+    assert.match(sitemap, /<loc>https:\/\/freellmapihub\.com\/changes\/<\/loc>/);
+    // /state/ is a redirect page to the single page for what changed: it is not listed, and it says where it goes
+    assert.doesNotMatch(sitemap, /<loc>https:\/\/freellmapihub\.com\/state\/<\/loc>/);
+    const stateRedirect = readFileSync(join(ROOT, 'site/state/index.html'), 'utf8');
+    assert.match(stateRedirect, /<meta http-equiv="refresh" content="0; url=\.\.\/changes\/#months">/);
+    assert.match(stateRedirect, /<link rel="canonical" href="https:\/\/freellmapihub\.com\/changes\/">/);
+    assert.match(stateRedirect, /<meta name="robots" content="noindex">/);
+    const changesPage = readFileSync(join(ROOT, 'site/changes/index.html'), 'utf8');
+    assert.match(changesPage, /<section id="months">/);
+    assert.doesNotMatch(changesPage, /id="weeks"|Week by week|href="#weeks"/, 'the weekly section and its button are gone; the feed stays');
+    for (const month of months) assert.match(changesPage, new RegExp(`href="\\.\\./state/${month}/"`), `the month ${month} is linked from the one page`);
+    assert.doesNotMatch(sitemap, /\/state\/\d{4}-\d{2}\//, 'per-month URLs depend on commit dates, so they stay out of the drift-gated sitemap');
+  });
+
+  test('shared-rules.js runs on its own: every serialised rule resolves its constants', () => {
+    // freeTypeRank reads FREE_TYPE_RANK and freshnessStatus reads SLA_DAYS by
+    // name. Emitted as bare object properties they were out of scope, so the
+    // client comparator threw on every repaint and the explorer never re-sorted
+    // or filtered. Execute the emitted file with nothing else in scope.
+    const win = {};
+    new Function('window', readFileSync(join(ROOT, 'site/shared-rules.js'), 'utf8'))(win);
+    const R = win.FLLM_RULES;
+    assert.equal(R.freeTypeRank({ free_type: 'perpetual' }), 0);
+    assert.equal(R.freeTypeRank({ free_type: 'trial-credit' }), 3);
+    assert.equal(R.freeTypeRank({}), 4);
+    assert.equal(R.freshnessStatus(10), freshnessStatus(10));
+    assert.equal(R.freshnessStatus(SLA_DAYS + 1), 'stale');
+    assert.equal(R.freshnessStatus(DUE_SOON_DAYS + 1), 'due');
+    assert.equal(R.recScore({ card_required: false }), recScore({ card_required: false }));
+    assert.equal(R.SLA_DAYS, SLA_DAYS);
+    assert.equal(R.DUE_SOON_DAYS, DUE_SOON_DAYS);
+    assert.ok(Array.isArray(R.FLAG_PAIRS) && R.FLAG_PAIRS.length > 0);
+  });
+
+  // ---------- provider compare view (#175) ----------
+  // Static /compare/<a>-vs-<b>/ pages: a small deterministic set of editorial
+  // picks compared pairwise where they share a modality. They are gitignored and
+  // pinned in derived-fingerprints.json, and sitemap.xml is drift-gated, so the
+  // selection and the bytes must be a pure function of the committed data.
+
+  test('compare pairs: only picks sharing a modality, ordered by rank, capped overall and per provider', () => {
+    const mk = (slug, modalities) => ({ slug, name: slug.toUpperCase(), modalities });
+    const ranked = [mk('a', ['text']), mk('b', ['text', 'audio']), mk('c', ['ocr']), mk('d', ['audio']), mk('e', ['text']), mk('f', ['ocr'])];
+    const pairs = selectComparePairs(ranked, { cap: 30, perProvider: 10 });
+    assert.deepEqual(pairs.map((p) => p.path), ['a-vs-b', 'a-vs-e', 'b-vs-d', 'b-vs-e', 'c-vs-f'],
+      'rank-sum order (ties: higher-ranked member first), no pair without a shared modality');
+    assert.deepEqual(pairs.find((p) => p.path === 'b-vs-d').shared, ['audio']);
+    assert.deepEqual(selectComparePairs(ranked, { cap: 2, perProvider: 10 }).map((p) => p.path), ['a-vs-b', 'a-vs-e'], 'overall cap');
+    assert.deepEqual(selectComparePairs(ranked, { cap: 30, perProvider: 1 }).map((p) => p.path), ['a-vs-b', 'c-vs-f'], 'per-provider cap');
+    assert.deepEqual(selectComparePairs(ranked), selectComparePairs(ranked), 'deterministic');
+    assert.deepEqual(selectComparePairs([mk('a', ['text']), { slug: '../x', name: 'X', modalities: ['text'] }]), [], 'a malformed slug never becomes a path');
+  });
+
+  test('compare pairs on the real ranking: at most 30, unique, shared modality, every page built', () => {
+    const { providers } = JSON.parse(readFileSync(DATA, 'utf8'));
+    const best = JSON.parse(readFileSync(join(ROOT, 'data/best.json'), 'utf8'));
+    const ranked = best.entries.map((e) => providers.find((p) => p.slug === e.slug));
+    const pairs = selectComparePairs(ranked);
+    assert.ok(pairs.length > 0 && pairs.length <= COMPARE_PAGE_CAP, `got ${pairs.length} pairs`);
+    assert.equal(new Set(pairs.map((p) => p.path)).size, pairs.length, 'no duplicate pages');
+    for (const { a, b, shared } of pairs) {
+      assert.ok(shared.length && shared.every((m) => a.modalities.includes(m) && b.modalities.includes(m)), `${a.slug}/${b.slug} share a modality`);
+    }
+    const uses = {};
+    for (const { a, b } of pairs) { uses[a.slug] = (uses[a.slug] || 0) + 1; uses[b.slug] = (uses[b.slug] || 0) + 1; }
+    assert.ok(Object.values(uses).every((n) => n <= COMPARE_PER_PROVIDER_CAP), 'per-provider cap holds');
+
+    const sitemap = readFileSync(join(ROOT, 'site/sitemap.xml'), 'utf8');
+    const pins = JSON.parse(readFileSync(join(ROOT, 'derived-fingerprints.json'), 'utf8'));
+    // Dates a compare page may legitimately carry: the ones in the data.
+    const dataDates = new Set(JSON.stringify(providers).match(/\d{4}-\d{2}-\d{2}/g));
+    assert.match(sitemap, /<loc>https:\/\/freellmapihub\.com\/compare\/<\/loc>/);
+    assert.ok(pins['site/compare/index.html'] && pins['site/shared-compare.js'], 'the compare view is pinned');
+    const built = readdirSync(join(ROOT, 'site/compare')).filter((d) => d.includes('-vs-')).sort();
+    assert.deepEqual(built, pairs.map((p) => p.path).sort(), 'exactly the selected pages are built (stale pages are removed)');
+    for (const { a, b, path } of pairs) {
+      const rel = `site/compare/${path}/index.html`;
+      const html = readFileSync(join(ROOT, rel), 'utf8');
+      assert.ok(html.includes(`<link rel="canonical" href="https://freellmapihub.com/compare/${path}/">`), `${rel}: canonical`);
+      assert.ok(sitemap.includes(`<loc>https://freellmapihub.com/compare/${path}/</loc>`), `${rel}: in the sitemap`);
+      assert.match(pins[rel] || '', /^[0-9a-f]{64}$/, `${rel}: pinned in derived-fingerprints.json`);
+      assert.ok(html.includes(`<a href="../../p/${a.slug}">`) && html.includes(`<a href="../../p/${b.slug}">`), `${rel}: links both providers`);
+      assert.ok(!html.includes(`href="../../compare/${path}/"`), `${rel}: does not list itself under other comparisons`);
+      for (const d of html.match(/\d{4}-\d{2}-\d{2}/g) || []) {
+        assert.ok(dataDates.has(d), `${rel}: date ${d} is not from the dataset (pages must not depend on the build day)`);
+      }
+      // provider pages suggest the comparisons they appear in, when both sides share a category
+      for (const s of [a.slug, b.slug]) {
+        const linked = readFileSync(join(ROOT, `site/p/${s}.html`), 'utf8').includes(`href="../compare/${path}/"`);
+        assert.equal(linked, sameComparisonCategory(a, b), `p/${s} ${sameComparisonCategory(a, b) ? 'links' : 'does not suggest'} ${path}`);
+      }
+    }
+  });
+
+  test('the compare view loads its scripts under the CSP and the null tri-state reads "not confirmed"', () => {
+    const index = readFileSync(join(ROOT, 'site/compare/index.html'), 'utf8');
+    assert.match(index, /<script src="\.\.\/shared-compare\.js" defer><\/script>\n<script src="\.\.\/compare\.js" defer><\/script>\n<\/body>/);
+    assert.equal(index.split('<script>').length - 1, 1, 'only the hashed theme guard runs inline');
+    assert.equal((index.match(/<select class="sel" name="p">/g) || []).length, COMPARE_MAX_SLOTS);
+    // ai-horde has commercial_ok: null in the dataset; any page with a null flag
+    // must say so instead of rendering it as "no".
+    const { providers } = JSON.parse(readFileSync(DATA, 'utf8'));
+    const page = readdirSync(join(ROOT, 'site/compare')).find((d) => {
+      if (!d.includes('-vs-')) return false;
+      return d.split('-vs-').some((s) => { const p = providers.find((x) => x.slug === s); return p && p.commercial_ok === null; });
+    });
+    assert.ok(page, 'the real set contains a provider with an unconfirmed flag');
+    assert.match(readFileSync(join(ROOT, `site/compare/${page}/index.html`), 'utf8'), /<span class="tri tri-unk">not confirmed<\/span>/);
+  });
+
+  test('keyboard navigation is client-only: the server-rendered rows carry no tabindex', () => {
+    // Without JS there is no key handler, so SSR rows must not add dead tab stops;
+    // explorer.js assigns the roving tabindex after it repaints.
+    const p = { slug: 'demo', name: 'Demo', category: 'ongoing', verified: true, last_verified: '2026-07-20' };
+    assert.doesNotMatch(explorerRowHtml(p, { now: '2026-08-13' }), /tabindex/);
+    const index = readFileSync(join(ROOT, 'site/index.html'), 'utf8');
+    const tbody = index.slice(index.indexOf('<tbody id="tbody">'), index.indexOf('</tbody>'));
+    assert.doesNotMatch(tbody, /tabindex/);
+    assert.match(index, /<caption class="sr-only">[^<]*arrow keys move between providers and Enter opens one\.<\/caption>/);
+  });
+
+  test('mobile sort select shows a placeholder for sorts it does not offer', () => {
+    // ?sort=notes (or a reversed column) has no matching option; the select must not keep a stale value.
+    const index = readFileSync(join(ROOT, 'site/index.html'), 'utf8');
+    assert.match(index, /<select id="sortSel"[^>]*>\s*<option value="custom" disabled hidden>/);
+    const fn = readFileSync(join(ROOT, 'site/explorer.js'), 'utf8').match(/function syncSortSel\(\) \{[\s\S]*?\n\}/)[0];
+    const sel = { options: [{ value: 'custom', disabled: true }, { value: 'name:1', disabled: false }], value: 'name:1' };
+    const run = (key, dir) => new Function('document', 'sortKey', 'sortDir', fn + '; syncSortSel();')({ getElementById: () => sel }, key, dir);
+    run('notes', 1); assert.equal(sel.value, 'custom');
+    run('name', 1); assert.equal(sel.value, 'name:1');
+    run('name', -1); assert.equal(sel.value, 'custom');
+  });
+
+  test('home: search box, Submit in the menu, and the star count rendered at build', () => {
+    const index = readFileSync(join(ROOT, 'site/index.html'), 'utf8');
+    assert.match(index, /<input type="search" id="q"[^>]*>/);
+    assert.match(index, /<label class="sr-only" for="q">/);
+    for (const page of [index, readFileSync(join(ROOT, 'site/compare/index.html'), 'utf8'), readFileSync(join(ROOT, 'site/p/groq.html'), 'utf8')]) {
+      const nav = page.slice(page.indexOf('id="primary-nav"'), page.indexOf('</nav>', page.indexOf('id="primary-nav"')));
+      assert.match(nav, /href="(\.\.\/)?submit\/"/);
+    }
+    const { stars } = JSON.parse(readFileSync(join(ROOT, 'data/repo-stats.json'), 'utf8'));
+    assert.ok(Number.isInteger(stars));
+    const shown = stars.toLocaleString('en-US');
+    assert.equal([...index.matchAll(/data-stars>([^<]*)</g)].every((m) => m[1] === shown), true, 'every star slot carries the build-time count');
+    const explorer = readFileSync(join(ROOT, 'site/explorer.js'), 'utf8');
+    assert.match(explorer, /getElementById\('q'\)\.addEventListener\('input'/);
+    assert.match(explorer, /params\.set\('q'/);
+  });
+
+  test('suggested comparisons join one category only; the existing compare pages stay', () => {
+    const providers = JSON.parse(readFileSync(DATA, 'utf8')).providers;
+    const bySlug = new Map(providers.map((p) => [p.slug, p]));
+    assert.equal(comparisonCategory({ modalities: ['ocr', 'text'] }), 'ocr');
+    assert.equal(comparisonCategory({ modalities: [] }), null);
+    assert.equal(sameComparisonCategory({ modalities: [] }, { modalities: [] }), false, 'no category is never "the same"');
+    const suggested = (html) => [...html.matchAll(/href="(?:\.\.\/)*compare\/([a-z0-9-]+-vs-[a-z0-9-]+)\/"/g)].map((m) => m[1]);
+    let links = 0;
+    const pages = [join(ROOT, 'site/compare/index.html'), ...readdirSync(join(ROOT, 'site/p')).filter((f) => f.endsWith('.html')).map((f) => join(ROOT, 'site/p', f))];
+    for (const file of pages) {
+      for (const path of suggested(readFileSync(file, 'utf8'))) {
+        const ok = [...path.matchAll(/-vs-/g)].some((m) => {
+          const pa = bySlug.get(path.slice(0, m.index)), pb = bySlug.get(path.slice(m.index + 4));
+          return pa && pb && sameComparisonCategory(pa, pb);
+        });
+        assert.ok(ok, `${path} (linked from ${relative(ROOT, file)}) mixes categories`);
+        links += 1;
+      }
+    }
+    assert.ok(links > 0, 'some same-category comparisons are still suggested');
+    // the pages of the pairs that are no longer suggested are still published
+    for (const mixed of ['ocr-space-vs-groq', 'speechify-vs-groq']) {
+      assert.ok(existsSync(join(ROOT, `site/compare/${mixed}/index.html`)), `${mixed} page stays`);
+    }
+  });
+
 });
 
 test('the client makes no GitHub API call and the home search covers model names', () => {
@@ -2846,8 +2870,10 @@ test('data_policy lot 3: at least 23 of 68, LlamaParse says it does not train, R
   assert.ok(data.providers.filter((p) => p.data_policy).length >= 23, 'lot 3 raised the covered providers to 23; later lots only add (the exact count is pinned by the latest lot test)');
   const llama = data.providers.find((p) => p.slug === 'llamaparse').data_policy;
   assert.equal(llama.trains_on_prompts, false);
-  assert.equal(llama.quote, 'We do not train any models on User Content.');
-  assert.match(llama.note, /up to 48 hours after processing/, 'the retention sentence is in the note');
+  assert.equal(llama.quote, 'Except as you agree under separate terms accepted under Section 4.4, we do not use User Content to train or fine-tune any artificial intelligence or machine learning model.');
+  assert.match(llama.retention, /<=48h after processing, unless separate terms accepted/, 'temporary processing retention preserves its exception');
+  assert.match(llama.note, /indexes\/pipelines remain until deletion\/account closure/, 'persistent storage is distinguished from temporary processing');
+  assert.match(llama.note, /affirmative admin acceptance, never default/, 'separate terms are opt-in');
   assert.match(llama.note, /names no plan/, 'the note says the page names no plan');
   const retell = data.providers.find((p) => p.slug === 'retell-ai').data_policy;
   assert.equal(retell.trains_on_prompts, true);
@@ -2855,7 +2881,7 @@ test('data_policy lot 3: at least 23 of 68, LlamaParse says it does not train, R
   assert.match(retell.note, /Only if you do not opt out of recording/, 'the condition is in the note');
   for (const dp of [llama, retell]) {
     assert.match(dp.source, /^https:\/\//);
-    assert.equal(dp.checked, '2026-10-15');
+    assert.equal(dp.checked, dp === llama ? '2026-11-17' : '2026-10-15');
   }
 });
 
@@ -2879,10 +2905,12 @@ test('data_policy lot 4: the 13 providers that say they do not train were read f
   for (const p of data.providers.filter((q) => q.data_policy && q.data_policy.trains_on_prompts !== false)) {
     // rows that say it may train were read for the plan later (lots 2, 3, 5 and the correction of the absence claims): true where the
     // clause names the free users or free usage (AssemblyAI, Voyage AI), false where it does not
-    const READ = { assemblyai: true, 'voyage-ai': true, elevenlabs: false, cartesia: false, 'retell-ai': false, deepgram: false, 'arli-ai': false, 'sarvam-ai': false, poolside: false, typhoon: false, openrouter: false };
+    const READ = { assemblyai: true, 'voyage-ai': true, elevenlabs: false, cartesia: false, 'retell-ai': false, deepgram: false, 'arli-ai': false, 'sarvam-ai': false, poolside: false, typhoon: false, openrouter: false, nlpcloud: false };
     if (p.slug in READ) assert.equal(p.data_policy.plan_named, READ[p.slug], `${p.slug}: plan_named as read`);
     else assert.equal(p.data_policy.plan_named, undefined, `${p.slug}: not read for the plan yet, so no value is written`);
   }
+  assert.equal(data.providers.find((p) => p.slug === 'nlpcloud').data_policy.trains_on_prompts, null, 'NLPCloud storage wording does not establish training use');
+  assert.equal(data.providers.find((p) => p.slug === 'rime').data_policy, null, 'Rime policy stays unknown pending source reconciliation');
   const api = JSON.parse(readFileSync(join(ROOT, 'site/api/v1/providers.json'), 'utf8'));
   const row = (api.providers || api).find((p) => p.slug === 'modal');
   assert.equal(row.data_policy.plan_named, false, 'the API carries the new field');
