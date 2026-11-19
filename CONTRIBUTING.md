@@ -191,23 +191,21 @@ Contributions here are voluntary. We don't pay for comments, reviews or other wo
 
 ### Required checks
 
-The four required checks on `main` (confirmed with `gh pr checks --required` on
-2026-11-14) are:
+The five required checks on `main` (branch protection, updated 2026-11-19) are:
 
 - `Dataset integrity`
 - `Windows tests`
 - `commit policy`
 - `Lighthouse accessibility and performance`
+- `Analyze (javascript-typescript)` (CodeQL)
 
-All four report on every PR without path filters. CodeQL additionally reports
-`Analyze (javascript-typescript)` on every PR, plus weekly and manual scans; it is
-not currently a required check. It scans JavaScript/TypeScript code, not Actions
+All five report on every PR without path filters. CodeQL also runs weekly and
+manually. It scans JavaScript/TypeScript code, not Actions
 workflow YAML. There is no push trigger, avoiding a second scan when a PR merges.
 `mcp tests (node 22)` and `mcp tests (node 24)` run only when the MCP package or its
 workflow changes, so they must not be unconditional required checks.
 
-Live GitHub settings remain authoritative. This change does not modify branch
-protection or rulesets. Preserve existing controls when reconciling their check
+Live GitHub settings remain authoritative. Preserve existing controls when reconciling their check
 names; a required PR check must not use path filters that leave it permanently
 pending. Security policy and token permissions are in [SECURITY.md](SECURITY.md).
 
