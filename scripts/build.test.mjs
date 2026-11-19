@@ -410,7 +410,9 @@ test('every generated page has the same centred header: crumbs, one title and, w
     assert.equal(heroes.length, 1, `${rel}: one page header`);
     assert.match(heroes[0], /class="page-hero (?:model-hero|prov-hero)"/, `${rel}: the header is the centred one, not the old left-aligned variant`);
     const hero = html.slice(html.indexOf(heroes[0]), html.indexOf('</section>', html.indexOf(heroes[0])));
-    assert.equal((hero.match(/<nav class="crumbs">/g) || []).length, 1, `${rel}: breadcrumbs`);
+    assert.equal((hero.match(/<nav class="crumbs" aria-label="Breadcrumb">/g) || []).length, 1, `${rel}: labelled breadcrumbs`);
+    // the hero opens the main landmark, so the skip link lands on the page title
+    assert.ok(html.indexOf('<main id="main"') >= 0 && html.indexOf('<main id="main"') < html.indexOf(heroes[0]), `${rel}: the header is inside <main>`);
     assert.equal((hero.match(/<h1>/g) || []).length, 1, `${rel}: one title`);
     checked += 1;
   }
@@ -3150,12 +3152,12 @@ test('home: site.js keeps the banner through 31 October (UTC) and removes it fro
 });
 
 // The collection of providers that say they do not train on prompts is built from
-// data_policy.trains_on_prompts === false and from nothing else: a provider with
+// data_policy.trains_on_prompts === false on verified rows (collections list verified providers only): a provider with
 // true or an unstated policy is never listed, and the page links each row's own source.
 test('the no-training collection lists exactly the providers whose data_policy says false', () => {
   run(['scripts/build.mjs']);
   const providers = JSON.parse(readFileSync(DATA, 'utf8')).providers;
-  const expected = providers.filter((p) => p.data_policy && p.data_policy.trains_on_prompts === false).map((p) => p.slug).sort();
+  const expected = providers.filter((p) => p.verified === true && p.data_policy && p.data_policy.trains_on_prompts === false).map((p) => p.slug).sort();
   assert.ok(expected.length >= 8, 'the card asks for at least 8 before the collection exists');
   const md = readFileSync(join(ROOT, 'collections/no-training.md'), 'utf8');
   const rows = md.split('\n').filter((l) => l.startsWith('| **['));
@@ -3184,7 +3186,7 @@ test('the no-training collection carries the plan header and a plan mark on ever
   const providers = JSON.parse(readFileSync(DATA, 'utf8')).providers;
   const word = (v) => (v === true ? 'plan named in the source' : v === false ? 'plan not named in the source' : 'plan: not checked yet');
   let marks = 0;
-  for (const p of providers.filter((q) => q.data_policy && q.data_policy.trains_on_prompts === false)) {
+  for (const p of providers.filter((q) => q.verified === true && q.data_policy && q.data_policy.trains_on_prompts === false)) {
     const row = rows.find((r) => r.startsWith(`| **[${p.name.split(' (')[0]}`));
     assert.ok(row, `${p.slug} is a row`);
     assert.ok(row.includes(`_${word(p.data_policy.plan_named)}_`), `${p.slug}: the .md mark follows plan_named`);
@@ -3225,4 +3227,19 @@ test('the private copy of a worktree with a relative gitdir still sees the histo
   const copiedGitdir = /^gitdir:\s*(.+?)\s*$/m.exec(readFileSync(join(copy, '.git'), 'utf8'))[1];
   assert.equal(isAbsolute(copiedGitdir), true, 'the copy points at the gitdir by an absolute path');
   assert.equal(git(copy, 'log', '--format=%s').trim(), 'first', 'the copy sees the history');
+});
+
+// Collections list verified providers only (owner decision 2026-11-19): an unverified row stays on its provider page and
+// in the explorer, but no collection page or collection .md lists it.
+test('no collection lists an unverified provider', () => {
+  run(['scripts/build.mjs']);
+  const providers = JSON.parse(readFileSync(DATA, 'utf8')).providers;
+  const unverified = providers.filter((p) => p.verified !== true);
+  assert.ok(unverified.length >= 1, 'the dataset has unverified rows to check against');
+  for (const f of readdirSync(join(ROOT, 'collections')).filter((n) => n.endsWith('.md') && n !== 'README.md')) {
+    const md = readFileSync(join(ROOT, 'collections', f), 'utf8');
+    for (const p of unverified) {
+      assert.ok(!md.includes(`| **[${p.name}`), `${f} lists the unverified ${p.slug}`);
+    }
+  }
 });
