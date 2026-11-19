@@ -7,8 +7,10 @@ Notable changes to the dataset and the project. Format based on [Keep a Changelo
 
 ## [Unreleased]
 
-Candidate dataset v2.14.0. These changes are after the immutable v2.13.0
-snapshot; this section does not imply that a new tag or release is published.
+## [2.14.0] — 2026-11-19
+
+Released as a correction users are relying on: AssemblyAI's paid gateway was
+listed in the free client exports, and Mistral no longer offers a free API.
 No breaking dataset or API shape changes. Provider availability, sampled model
 IDs and confirmed values can change as sources are re-verified.
 
@@ -84,6 +86,10 @@ IDs and confirmed values can change as sources are re-verified.
   #646). Code-block copy buttons are visible on touch screens, copy results
   are announced through one status line, and the change-history pager keeps
   keyboard focus (#648).
+- The repository tooling now requires Node 22, the version CI tests (#651).
+- Documented the required checks, release-tag rulesets and the MCP release
+  environment (#652).
+- The private root `package.json` version now follows the dataset version.
 
 ### Removed
 
@@ -435,7 +441,8 @@ Ground-up redesign into a data-first, continuously-verified open dataset.
 
 - Initial curated list: README tables, a root `providers.json`, an interactive explorer, a freshness badge, and a weekly link-check workflow.
 
-[Unreleased]: https://github.com/pacocartones/free-llm-api-hub/compare/v2.13.0...HEAD
+[Unreleased]: https://github.com/pacocartones/free-llm-api-hub/compare/v2.14.0...HEAD
+[2.14.0]: https://github.com/pacocartones/free-llm-api-hub/compare/v2.13.0...v2.14.0
 [2.8.0]: https://github.com/pacocartones/free-llm-api-hub/compare/v2.7.0...v2.8.0
 [2.7.0]: https://github.com/pacocartones/free-llm-api-hub/compare/v2.6.0...v2.7.0
 
