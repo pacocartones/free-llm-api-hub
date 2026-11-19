@@ -30,7 +30,7 @@
     "check-sources": "node scripts/check-sources.mjs"
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=22"
   },
   "devDependencies": {
     "@resvg/resvg-js": "^2.6.2",
