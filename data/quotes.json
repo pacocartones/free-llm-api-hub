@@ -590,11 +590,11 @@
    "slug": "upstage",
    "kind": "sentence",
    "text": "may be used for service provision and improvement, as well as for research and development of artificial intelligence technologies (including training).",
-   "source_url": "https://www.upstage.ai/terms-of-service/update-may-06-2026",
-   "read_on": "2026-10-15",
+   "source_url": "https://www.upstage.ai/terms-of-service",
+   "read_on": "2026-11-19",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
-   "page_sha256": "75df986dd5918e8ad1183cd8f9ad18dba8677ac15d129c25bf90fd0d72594646"
+   "page_sha256": "44b85514e26fda3834a5030d2763ea37e107fa328fe2261b2e0e7255fe5b8d1f"
   },
   {
    "id": "smallest-ai.sentence",
