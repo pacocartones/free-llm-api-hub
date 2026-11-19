@@ -378,3 +378,29 @@ test('dataset_info: version, counts and freshness', () => {
     { slug: 'beta-cloud', last_verified: '2026-07-01', docs_url: 'https://beta.example/pricing' },
   ]);
 });
+
+test('remote loader rejects a body larger than the byte limit', async () => {
+  const { MAX_REMOTE_BYTES } = await import('../src/data.js');
+  const declared = createLoader({
+    url: 'https://example.invalid/big.json',
+    fetchImpl: async () => new Response('{"providers":[]}', { headers: { 'content-length': String(MAX_REMOTE_BYTES + 1) } }),
+  });
+  await assert.rejects(declared(), /byte limit/);
+
+  const chunk = new Uint8Array(1024 * 1024).fill(32);
+  const streamed = createLoader({
+    url: 'https://example.invalid/stream.json',
+    fetchImpl: async () => new Response(new ReadableStream({
+      pull(controller) { controller.enqueue(chunk); },
+    })),
+  });
+  await assert.rejects(streamed(), /byte limit/);
+});
+
+test('remote loader still parses a normal streamed Response', async () => {
+  const load = createLoader({
+    url: 'https://example.invalid/ok.json',
+    fetchImpl: async () => new Response(JSON.stringify({ providers: [] })),
+  });
+  assert.deepEqual((await load()).providers, []);
+});

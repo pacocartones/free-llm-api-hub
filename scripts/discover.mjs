@@ -18,6 +18,7 @@
 // added. See docs/sources.md.
 
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { discardBody, readBoundedJson } from './lib/bounded-read.mjs';
 
 const PROVIDERS = new URL('../data/providers.json', import.meta.url);
 const SNAPSHOT = new URL('../data/discover-snapshot.json', import.meta.url);
@@ -40,8 +41,11 @@ async function getJson(url) {
   const t = setTimeout(() => ctrl.abort(), TIMEOUT);
   try {
     const res = await fetch(url, { signal: ctrl.signal });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return await res.json();
+    if (!res.ok) {
+      discardBody(res);
+      throw new Error(`HTTP ${res.status}`);
+    }
+    return await readBoundedJson(res);
   } finally {
     clearTimeout(t);
   }

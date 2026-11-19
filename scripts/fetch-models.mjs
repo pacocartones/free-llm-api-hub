@@ -17,6 +17,7 @@ import { readFileSync, writeFileSync, realpathSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { serialize, roundTripError } from './_serialize.mjs';
 import { keyHostError } from './lib/key-hosts.mjs';
+import { discardBody, readBoundedJson, ResponseTooLargeError } from './lib/bounded-read.mjs';
 import {
   assertCredentialFree, configuredCredentials, safeModelIds, UnsafeProviderOutputError,
 } from './lib/provider-output-safety.mjs';
@@ -31,7 +32,11 @@ class ProviderFetchError extends Error {}
 
 // Deterministic, publisher-diverse sample: round-robin across the vendor
 // prefix (before "/") so the sample reads as a representative spread rather
-// than an alphabetical clump of one vendor. Final list is sorted.
+// than an alphabetical clump of one vendor. Publishers are visited largest
+// catalogue first (ties alphabetical): with more publishers than slots, an
+// alphabetical walk only ever reached vendors starting with A–D, so the
+// sample showed niche, older models instead of a provider's main lines.
+// Final list is sorted.
 export const sample = (ids, preferred = []) => {
   const available = new Set(ids.filter(Boolean));
   // Preferences are advisory: only use IDs returned by the current catalog.
@@ -43,7 +48,7 @@ export const sample = (ids, preferred = []) => {
     const pub = id.includes('/') ? id.slice(0, id.indexOf('/')) : id;
     (groups.get(pub) || groups.set(pub, []).get(pub)).push(id);
   }
-  const keys = [...groups.keys()].sort();
+  const keys = [...groups.keys()].sort((a, b) => groups.get(b).length - groups.get(a).length || (a < b ? -1 : a > b ? 1 : 0));
   for (let i = 0; out.length < SAMPLE && keys.some((k) => groups.get(k).length); i++) {
     const g = groups.get(keys[i % keys.length]);
     if (g.length) out.push(g.shift());
@@ -51,16 +56,25 @@ export const sample = (ids, preferred = []) => {
   return out.sort();
 };
 
-async function getJson(url, headers) {
+// Keyed requests refuse redirects so the Authorization header can never be
+// replayed to a host other than the pinned one (lib/key-hosts.mjs). Bodies are
+// read with a byte cap; the fetch implementation is injectable for tests.
+export async function getJson(url, headers, { fetchImpl = fetch } = {}) {
   const ctrl = new AbortController();
   const t = setTimeout(() => ctrl.abort(), TIMEOUT);
+  const keyed = Boolean(headers && Object.keys(headers).some((h) => h.toLowerCase() === 'authorization'));
   try {
     try {
-      const res = await fetch(url, { headers, signal: ctrl.signal });
-      if (!res.ok) throw new ProviderFetchError(`HTTP ${res.status}`);
+      const res = await fetchImpl(url, { headers, signal: ctrl.signal, redirect: keyed ? 'error' : 'follow' });
+      if (!res.ok) {
+        discardBody(res);
+        throw new ProviderFetchError(`HTTP ${res.status}`);
+      }
       try {
-        return await res.json();
-      } catch {
+        return await readBoundedJson(res);
+      } catch (error) {
+        if (error instanceof ResponseTooLargeError) throw new ProviderFetchError('response too large');
+        if (error && error.name === 'AbortError') throw error;
         throw new ProviderFetchError('invalid JSON');
       }
     } catch (error) {

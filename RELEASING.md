@@ -11,7 +11,8 @@ publication process (rule 4).
    providers or pages are minor; re-verifications and corrections are patch.
 2. **Tags:** `vX.Y.Z`, never moved. The tag is created by the `Tag release` workflow, from the
    bump of `version` in `data/providers.json`; nobody tags by hand. A release in GitHub is
-   written on an existing tag.
+   written on an existing tag. The same bump sets the private root `package.json` and
+   `package-lock.json` version to the dataset version; `packages/mcp` keeps its own version.
 3. **Source:** only from `main`, with every check green, from the exact commit the tag points to.
 4. **Approval:** publishing a GitHub release is done by the maintainer, after the owner's OK.
    Nothing is published to a package registry, with one scoped exception: `packages/mcp` (the

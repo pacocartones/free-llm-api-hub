@@ -344,7 +344,7 @@ test('child cancellation waits for close; coordinator cannot stage or commit aft
 test('package exposes sync-main and retains build and Node contracts', () => {
   const pkg = JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8'));
   assert.equal(pkg.scripts['sync-main'], 'node scripts/sync-main.mjs');
-  assert.equal(pkg.scripts.build, 'node scripts/build.mjs'); assert.equal(pkg.engines.node, '>=18');
+  assert.equal(pkg.scripts.build, 'node scripts/build.mjs'); assert.equal(pkg.engines.node, '>=22');
 });
 for (const source of [false, true]) {
   test(`actual CLI ${source ? 'aborts source conflict' : 'rebuilds generated conflict'}`, t => {

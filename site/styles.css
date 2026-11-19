@@ -263,6 +263,7 @@ h1 { font-size: clamp(1.9rem, 4.4vw, 3rem); line-height: 1.1; margin: 0 auto 18p
 
 /* ---------- table ---------- */
 main { padding: 24px 0 80px; }
+main:has(> .page-hero:first-child) { padding-top: 0; } /* the page hero sits inside main (build.mjs landmarkFixes) */
 .footer-brand .trust-badge { margin-top: 14px; }
 #count, .count { color: var(--muted); font-size: .82rem; font-family: var(--font-mono); }
 .filter-count { margin: 8px 0 0; }
@@ -359,8 +360,9 @@ table.sortable thead th:not(.sorted)::after { content: " ⇅"; opacity: .28; fon
 .legal-org { margin-top: 32px; padding-top: 16px; border-top: 1px solid var(--border); font-family: var(--font-mono); font-size: .8rem; color: var(--faint); }
 pre { position: relative; background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; overflow: auto; font-size: .84rem; box-shadow: var(--shadow-sm); }
 pre code { color: var(--text); }
-.pre-copy { position: absolute; top: 8px; right: 8px; background: var(--panel-2); border: 1px solid var(--border); color: var(--muted); padding: 3px 9px; border-radius: 6px; cursor: pointer; font-size: .72rem; font-weight: 600; font-family: var(--font-mono); opacity: 0; transition: opacity .15s, border-color .15s, color .15s; }
-pre:hover .pre-copy, .pre-copy:focus-visible { opacity: 1; }
+.pre-copy { position: absolute; top: 8px; right: 8px; background: var(--panel-2); border: 1px solid var(--border); color: var(--muted); padding: 3px 9px; border-radius: 6px; cursor: pointer; font-size: .72rem; font-weight: 600; font-family: var(--font-mono); opacity: 1; transition: opacity .15s, border-color .15s, color .15s; }
+/* Touch screens have no hover: the button stays visible there. Only a device that can hover hides it until needed. */
+@media (hover: hover) and (pointer: fine) { .pre-copy { opacity: 0; } pre:hover .pre-copy, .pre-copy:focus-visible { opacity: 1; } }
 .pre-copy:hover { border-color: var(--accent); color: var(--accent); }
 .pre-copy.copied { border-color: var(--green); color: var(--green); opacity: 1; }
 :not(pre) > code { background: var(--panel-2); border: 1px solid var(--border); border-radius: 5px; padding: 1px 5px; font-size: .85em; }
@@ -791,3 +793,6 @@ p.muted a, .prose p a, .prov-summary p a { text-decoration: underline; text-unde
 
 /* Keep the API count heading and values readable on narrow screens. */
 .api-endpoints th:nth-child(3), .api-endpoints td:nth-child(3) { white-space: nowrap; }
+/* "Clear all filters" under an empty result (explorer.js creates it on first need). */
+.empty-clear { display: block; margin: -32px auto 40px; }
+.empty-clear[hidden] { display: none; }

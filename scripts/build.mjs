@@ -84,9 +84,14 @@ function flags(p) {
   return parts.length ? `<br><sub>${parts.join(' · ')}</sub>` : '';
 }
 
+// docs_url becomes a link only when it is an https URL. The validator enforces
+// this for every entry; the guard keeps an unexpected value (an empty string,
+// another scheme) from ever turning into a self-link or a script URL.
+const docsHref = (u) => (typeof u === 'string' && /^https:\/\/[^\s]+$/i.test(u) ? u : '');
+
 function nameCell(p) {
   const label = `**${esc(p.name)}**`;
-  const linked = p.docs_url ? `**[${esc(p.name)}](${p.docs_url})**` : label;
+  const linked = docsHref(p.docs_url) ? `**[${esc(p.name)}](${docsHref(p.docs_url)})**` : label;
   return `${linked}${flags(p)}`;
 }
 
@@ -103,7 +108,7 @@ function bestTable(entries) {
   const body = entries
     .map((e) => {
       const { p } = e;
-      const label = p.docs_url ? `**[${esc(p.name)}](${p.docs_url})**` : `**${esc(p.name)}**`;
+      const label = docsHref(p.docs_url) ? `**[${esc(p.name)}](${docsHref(p.docs_url)})**` : `**${esc(p.name)}**`;
       return `| ${e.rank} | ${label}${flags(p)} | ${e.total.toFixed(1)}<br><sub>${e.confirmed} of ${e.of} inputs</sub> | ${esc(p.free_tier)} | ${esc(p.notes)} | ${verifiedCell(p)} |`;
     })
     .join('\n');
@@ -524,8 +529,8 @@ function collectionTableHtml(rows, opts = {}) {
   const col2Head = bu ? 'OpenAI base URL' : 'Type';
   const rowsHtml = rows
     .map((p) => {
-      const name = p.docs_url
-        ? `<a href="${htmlEsc(p.docs_url)}" target="_blank" rel="noopener">${htmlEsc(p.name)}</a>`
+      const name = docsHref(p.docs_url)
+        ? `<a href="${htmlEsc(docsHref(p.docs_url))}" target="_blank" rel="noopener">${htmlEsc(p.name)}</a>`
         : htmlEsc(p.name);
       const v = p.verified
         ? `<span class="v ok">${IC('ic-check')} ${htmlEsc(p.last_verified)}</span>`
@@ -580,7 +585,7 @@ const IC = (id) => `<svg class="i" aria-hidden="true"><use href="#${id}"/></svg>
 // extra markup, centred by the model-hero class. The provider page passes cls 'prov-hero' and puts its badges after
 // the title and its buttons in extra. The home page (hand-written) has its own hero.
 const pageHero = ({ crumbs, h1, lede = '', afterTitle = '', extra = '', cls = 'model-hero' }) =>
-  `<section class="page-hero ${cls}"><div class="wrap"><nav class="crumbs">${crumbs}</nav><h1>${h1}</h1>${afterTitle}${lede ? `<p class="lede">${lede}</p>` : ''}${extra}</div></section>`;
+  `<section class="page-hero ${cls}"><div class="wrap"><nav class="crumbs" aria-label="Breadcrumb">${crumbs}</nav><h1>${h1}</h1>${afterTitle}${lede ? `<p class="lede">${lede}</p>` : ''}${extra}</div></section>`;
 
 const siteHeader = (p) => `<header class="site-header"><div class="wrap header-inner">
 <a class="brand" href="${p}" aria-label="Free LLM API Hub — home"><svg class="logo-mark"><use href="#logo"/></svg><span class="brand-name">Free LLM API <span class="grad">Hub</span></span></a>
@@ -634,6 +639,16 @@ try {
 const withStars = (html) => (STARS ? html.replace(/(data-stars>)[^<]*(<)/g, `$1${STARS}$2`) : html);
 
 function htmlPage(args) { return markNewTabLinks(labelTables(withStars(htmlPageRaw(args)))); }
+
+// Landmarks. A page hero emitted right before <main> moves inside it, so the skip link lands on the page's h1 and the
+// main landmark carries the page title (styles.css drops main's top padding when the hero leads it). Every nav.colls gets
+// an accessible name: the h2 just before it when there is one, else "Collections".
+function landmarkFixes(main) {
+  const withHero = main.replace(/^(\s*)(<section class="page-hero[^"]*">[\s\S]*?<\/section>)\s*(<main id="main"[^>]*>)/, (_m, ws, hero, open) => `${ws}${open}${hero}`);
+  return withHero
+    .replace(/(<h2>([^<]+)<\/h2>)(<nav|<div) class="colls">/g, (_m, h2, text, tag) => (tag === '<nav' ? `${h2}<nav class="colls" aria-label="${text}">` : `${h2}<div class="colls">`))
+    .replace(/<nav class="colls">/g, '<nav class="colls" aria-label="Collections">');
+}
 function htmlPageRaw({ title, desc, canonical, main, jsonld, prefix = '../', noindex = false, ogImage = `${SITE}/og.png`, feeds = [], scripts = [], styles = [] }) {
   // jsonld carries provider names straight from the dataset; writing "<" as
   // the JSON unicode escape (backslash-u-003c) keeps a "</script>" in the
@@ -647,19 +662,22 @@ function htmlPageRaw({ title, desc, canonical, main, jsonld, prefix = '../', noi
 <meta name="description" content="${htmlEsc(fitDescription(desc))}">${noindex ? '\n<meta name="robots" content="noindex">' : ''}
 ${CSP}
 ${THEME_GUARD}
-<link rel="canonical" href="${htmlEsc(canonical)}">
-<link rel="icon" href="${prefix}favicon.svg" type="image/svg+xml">
+${canonical ? `<link rel="canonical" href="${htmlEsc(canonical)}">
+` : ''}<link rel="icon" href="${prefix}favicon.svg" type="image/svg+xml">
 <link rel="preload" href="${prefix}fonts/jetbrains-mono-700.woff2" as="font" type="font/woff2" crossorigin>
 <meta name="theme-color" content="#0a0d0b">
 <meta name="color-scheme" content="dark light">
 <meta property="og:title" content="${htmlEsc(title)}">
 <meta property="og:description" content="${htmlEsc(fitDescription(desc))}">
 <meta property="og:type" content="website">
-<meta property="og:url" content="${htmlEsc(canonical)}">
-<meta property="og:image" content="${ogImage}">
+<meta property="og:site_name" content="Free LLM API Hub">
+${canonical ? `<meta property="og:url" content="${htmlEsc(canonical)}">
+` : ''}<meta property="og:image" content="${ogImage}">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="${htmlEsc(title)}">
+<meta name="twitter:description" content="${htmlEsc(fitDescription(desc))}">
 <meta name="twitter:image" content="${ogImage}">
 <link rel="alternate" type="application/rss+xml" title="Free LLM API Hub — updates" href="${prefix}feed.xml">
 ${feeds.map((f) => `<link rel="alternate" type="application/rss+xml" title="${htmlEsc(f.title)}" href="${prefix}${f.href}">\n`).join('')}<link rel="stylesheet" href="${prefix}styles.css">
@@ -669,7 +687,7 @@ ${styles.map((s) => `<link rel="stylesheet" href="${prefix}${s}">\n`).join('')}$
 <a class="skip-link" href="#main">Skip to content</a>
 ${SPRITE}
 ${siteHeader(prefix)}
-${main}
+${landmarkFixes(main)}
 ${siteFooter(prefix)}
 <script src="${prefix}site.js"></script>
 ${scripts.map((src) => `<script src="${prefix}${src}" defer></script>\n`).join('')}</body>
@@ -940,7 +958,7 @@ for (const c of COLLECTIONS) {
         name: c.h1,
         description: metaDesc,
         numberOfItems: rows.length,
-        itemListElement: rows.map((p, i) => ({ '@type': 'ListItem', position: i + 1, name: p.name, url: p.docs_url || undefined })),
+        itemListElement: rows.map((p, i) => ({ '@type': 'ListItem', position: i + 1, name: p.name, url: docsHref(p.docs_url) || undefined })),
       },
       {
         '@type': 'BreadcrumbList',
@@ -1100,8 +1118,9 @@ for (const p of providers) {
       ? `<h2 id="quickstart">Quickstart — embeddings</h2><pre><code>${codeHtmlEsc(python)}</code></pre>`
       : `<h2 id="quickstart">Quickstart — chat completions</h2><pre><code>${codeHtmlEsc(python)}</code></pre><p class="muted">…or with curl:</p><pre><code>${codeHtmlEsc(curlChatQuickstart(p.openai_base_url, model))}</code></pre>`;
   } else {
-    const docs = p.docs_url ? htmlEsc(p.docs_url) : '';
-    quick = `<h2 id="quickstart">Get started</h2><p class="muted">No OpenAI-compatible base URL is recorded for this offer. Check the <a href="${docs}" target="_blank" rel="noopener">official docs</a> for endpoints, authentication and examples.</p>`;
+    const docs = docsHref(p.docs_url);
+    const docsLink = docs ? `<a href="${htmlEsc(docs)}" target="_blank" rel="noopener">official docs</a>` : 'official docs';
+    quick = `<h2 id="quickstart">Get started</h2><p class="muted">No OpenAI-compatible base URL is recorded for this offer. Check the ${docsLink} for endpoints, authentication and examples.</p>`;
   }
 
   // The score of the provider (lib/score.mjs, the same numbers as /best/ and the API) with its method one click away. Providers that are
@@ -1125,13 +1144,13 @@ for (const p of providers) {
         : (p.probe_status === 'tier-ended'
         ? ` <span class="v warn" title="The key authenticated but the free tier appears gone">${IC('ic-warn')} free tier unconfirmed live</span>`
         : ''));
-  const docsBtn = p.docs_url ? `<a class="btn primary" href="${htmlEsc(p.docs_url)}" target="_blank" rel="noopener">Official docs ↗</a>` : '';
+  const docsBtn = docsHref(p.docs_url) ? `<a class="btn primary" href="${htmlEsc(docsHref(p.docs_url))}" target="_blank" rel="noopener">Official docs ↗</a>` : '';
   const playgroundBtn = p.playground_url ? `<a class="btn" href="${htmlEsc(p.playground_url)}" target="_blank" rel="noopener">Try it ↗</a>` : '';
   // "Visit website": the provider's main site, derived from the docs URL by stripping
   // common docs/console/api subdomains so it points at the marketing homepage.
   let websiteBtn = '';
   try {
-    const u = new URL(p.docs_url);
+    const u = new URL(docsHref(p.docs_url));
     const host = u.hostname.replace(/^(docs|console|platform|developer|developers|api|dashboard|cloud|build|support|help|inference-docs)\./, '');
     websiteBtn = `<a class="btn website" href="${u.protocol}//${host}" target="_blank" rel="noopener">Visit website ↗</a>`;
   } catch (_) { /* no/invalid docs URL — skip the website button */ }
@@ -1232,14 +1251,16 @@ writeFileSync(
   htmlPage({
     title: '404 — Free LLM API Hub',
     desc: "That page isn't part of the dataset. It may have moved, or never existed. The data, though, is very much alive.",
-    canonical: `${SITE}/404`,
+    // A noindex error page has no canonical URL of its own.
+    canonical: null,
     prefix: '/',
     noindex: true,
     main: `<main id="main" class="wrap nf">
-<div class="code">404</div>
+<h1 class="sr-only">Page not found (404)</h1>
+<div class="code" aria-hidden="true">404</div>
 <p class="msg">&gt; command not found: <span class="path" id="path">/…</span><span class="caret" aria-hidden="true"></span></p>
 <p>That page isn't part of the dataset. It may have moved, or never existed. The data, though, is very much alive.</p>
-<div class="cta"><a class="btn primary" href="/">← Back home</a><a class="btn ghost" href="/#explorer">Browse providers</a><a class="btn ghost" href="/collections/">Collections</a></div>
+<div class="cta"><a class="btn primary" href="/">← Back home</a><a class="btn ghost" href="/#explorer">Browse providers</a><a class="btn ghost" href="/guides-and-collections/">Guides &amp; collections</a></div>
 ${NOT_FOUND_PATH_SCRIPT}
 </main>`,
   })
@@ -2174,7 +2195,7 @@ const compareIndexMain =
   pageHero({ crumbs: `<a href="../">Home</a> / Compare`, h1: `Compare free LLM APIs`, lede: `Pick two to four providers to see their free tiers side by side — limits, card, phone and commercial-use requirements, OpenAI compatibility and the date each was last verified. Share the result: the URL keeps your selection.` }) +
   `<main id="main"><div class="wrap prose">` +
   `<form id="compare-form" class="cmp-form" method="get" action="./">${pickerSelects}<button type="submit" class="btn primary">Compare</button></form>` +
-  `<div id="compare-out" class="cmp-out" aria-live="polite"></div>` +
+  `<p id="compare-status" class="sr-only" role="status"></p><div id="compare-out" class="cmp-out"></div>` +
   `<h2>Popular comparisons</h2><nav class="colls">${compareLinksHtml('../')}</nav>` +
   `<p class="prov-back"><a href="../#explorer">← All providers</a></p>` +
   `</div></main>`;

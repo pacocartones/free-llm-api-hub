@@ -74,10 +74,19 @@ advancing its version will therefore fail if that version's tag already points
 to an earlier commit; resolve the version/release deliberately rather than
 rewriting a published snapshot.
 
-Follow-up for a repository owner: configure an external tag ruleset for `v*` to
-restrict creation to the authorized release path and prevent updates/deletions,
-reviewing necessary bypass permissions. This PR does not apply those settings;
-workflow checks alone do not prevent a user or another token from moving tags.
+Repository rulesets (2026-11-19):
+
+- `Immutable release tags` blocks updating and deleting `v*` tags.
+- Their creation is not restricted by a ruleset: the `Tag release` workflow
+  creates them with the workflow token, and GitHub does not accept the Actions
+  app as a bypass actor on a personal repository.
+- `MCP release tags` blocks creating, updating and deleting `mcp-v*` tags for
+  everyone except repository admins.
+- The `release-mcp` environment accepts deployments only from `mcp-v*` tags,
+  and requires a reviewer other than the person who triggered it.
+
+Workflow checks alone do not prevent a user or another token from moving tags;
+these settings do, and live GitHub settings remain authoritative.
 
 ## Notes for users of the data
 

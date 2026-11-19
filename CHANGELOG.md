@@ -7,8 +7,10 @@ Notable changes to the dataset and the project. Format based on [Keep a Changelo
 
 ## [Unreleased]
 
-Candidate dataset v2.14.0. These changes are after the immutable v2.13.0
-snapshot; this section does not imply that a new tag or release is published.
+## [2.14.0] — 2026-11-19
+
+Released as a correction users are relying on: AssemblyAI's paid gateway was
+listed in the free client exports, and Mistral no longer offers a free API.
 No breaking dataset or API shape changes. Provider availability, sampled model
 IDs and confirmed values can change as sources are re-verified.
 
@@ -27,6 +29,9 @@ IDs and confirmed values can change as sources are re-verified.
   unknown where the sources do not establish them.
 - Local provider changelog and reproducible release-snapshot preparation
   commands, and an automatically generated schema field reference (#616, #628).
+- Copy controls and curl examples for every endpoint on the API page (#639).
+- Site: a "Clear all filters" button under an empty result, and "/" to focus
+  the search box (#648, #649).
 
 ### Changed and fixed
 
@@ -58,6 +63,33 @@ IDs and confirmed values can change as sources are re-verified.
   does not publish an MCP package (#618, #629).
 - Strengthened accessibility and security checks and clarified contribution
   and release guidance (#590, #614, #619, #627).
+- Refreshed ten provider entries from official sources: Rime, Cartesia, Gladia,
+  Mixedbread, NLP Cloud, Nutrient, AssemblyAI, Nebius, Sarvam and LlamaParse.
+  Partial corrections keep the overall verification dates. Nebius's historical
+  trial is explicitly unconfirmed, policy exceptions remain visible, and
+  AssemblyAI's paid gateway is excluded from the free client exports (#642).
+- The schema descriptions of `openai_compatible` and `openai_base_url` now say
+  that they describe the listed free offering: paid-only compatibility does
+  not set them (#642). No field was added or removed.
+- MCP chat examples are limited to confirmed text/vision-only offerings, the
+  embed widget counts only verified providers, and mobile navigation works
+  without JavaScript (#642).
+- Validator tests cover API-key host pinning (#637). Thanks @Aaqibhafeezkhan.
+- Maintenance scripts read provider catalogues with a byte limit and never
+  follow a redirect while sending an API key; the free-model sample now
+  spreads across the largest publisher catalogues, and the probe no longer
+  rewrites `models_free` (#643).
+- Documentation links are generated only from `https://` URLs (#644).
+- CI and site hardening: the commit policy runs from the base commit, Pages
+  write permissions are limited to the deploy job, MCP inputs are bounded,
+  and dataset tags are published only when the version changes (#636, #645,
+  #646). Code-block copy buttons are visible on touch screens, copy results
+  are announced through one status line, and the change-history pager keeps
+  keyboard focus (#648).
+- The repository tooling now requires Node 22, the version CI tests (#651).
+- Documented the required checks, release-tag rulesets and the MCP release
+  environment (#652).
+- The private root `package.json` version now follows the dataset version.
 
 ### Removed
 
@@ -71,6 +103,8 @@ IDs and confirmed values can change as sources are re-verified.
   Datalab has a confirmed structured request quota.
 - Local MCP users must upgrade Node separately. Dataset and MCP versions and
   publication approvals remain independent.
+- `openai-clients.json` and the client exports list only endpoints confirmed
+  for the free offering; AssemblyAI's paid gateway is no longer included.
 
 ## [2.13.0] — 2026-11-14
 
@@ -407,7 +441,8 @@ Ground-up redesign into a data-first, continuously-verified open dataset.
 
 - Initial curated list: README tables, a root `providers.json`, an interactive explorer, a freshness badge, and a weekly link-check workflow.
 
-[Unreleased]: https://github.com/pacocartones/free-llm-api-hub/compare/v2.13.0...HEAD
+[Unreleased]: https://github.com/pacocartones/free-llm-api-hub/compare/v2.14.0...HEAD
+[2.14.0]: https://github.com/pacocartones/free-llm-api-hub/compare/v2.13.0...v2.14.0
 [2.8.0]: https://github.com/pacocartones/free-llm-api-hub/compare/v2.7.0...v2.8.0
 [2.7.0]: https://github.com/pacocartones/free-llm-api-hub/compare/v2.6.0...v2.7.0
 

@@ -7,7 +7,10 @@
   var C = window.FLLM_COMPARE;
   var form = document.getElementById('compare-form');
   var out = document.getElementById('compare-out');
+  // A short status line is announced instead of the whole comparison table.
+  var status = document.getElementById('compare-status');
   if (!C || !form || !out) return;
+  function announce(text) { if (status) status.textContent = text; }
   var selects = Array.prototype.slice.call(form.querySelectorAll('select[name="p"]'));
   var DATA = [];
   var SCORES = null;
@@ -18,6 +21,7 @@
     p.className = 'muted';
     p.textContent = text;
     out.appendChild(p);
+    announce(text);
   }
 
   // The selection as a query string, so the same parser handles the picker,
@@ -34,6 +38,7 @@
     if (list.length < C.COMPARE_MIN) { message('Pick at least ' + C.COMPARE_MIN + ' providers to compare.'); return; }
     var opts = SCORES ? { prefix: '../', scores: SCORES } : { prefix: '../' };
     out.innerHTML = C.compareTableHtml(list, opts);
+    announce('Comparing ' + list.map(function (p) { return p.name; }).join(', ') + '.');
   }
 
   function fill(slugs) {

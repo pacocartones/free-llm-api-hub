@@ -25,14 +25,17 @@ concurrency:
   group: pages
   cancel-in-progress: false
 
+# Least privilege: only the deploy job can write Pages or mint an OIDC token.
+# The build job runs repository scripts with GITHUB_TOKEN and gets read access only.
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: read
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -53,6 +56,9 @@ jobs:
           path: site
   deploy:
     needs: build
+    permissions:
+      pages: write
+      id-token: write
     outputs:
       page_url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest

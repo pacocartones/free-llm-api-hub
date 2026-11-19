@@ -2,7 +2,9 @@
 //
 // Philosophy: don't just trust the docs — call the free tier and record that it
 // answered. Writes `last_probed` + `probe_status` (independent of the docs-based
-// `verified`) and refreshes `models_free`. Emits data/probe-report.json.
+// `verified`). Emits data/probe-report.json. It never writes `models_free`: an
+// authenticated /models list is the account's whole catalogue (paid models
+// included), so the free sample is owned by fetch-models.mjs and its filters.
 //
 //   node scripts/probe.mjs                 # dry run, report only
 //   node scripts/probe.mjs --write         # persist results to the dataset
@@ -25,6 +27,7 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import assert from 'node:assert/strict';
 import { serialize, roundTripError } from './_serialize.mjs';
 import { keyHostError } from './lib/key-hosts.mjs';
+import { readBoundedJson } from './lib/bounded-read.mjs';
 import {
   assertCredentialFree, configuredCredentials, RATE_LIMIT_HEADERS,
   safeModelIds, safeRateLimits,
@@ -33,7 +36,6 @@ import {
 const FILE = new URL('../data/providers.json', import.meta.url);
 const REPORT = new URL('../data/probe-report.json', import.meta.url);
 const TIMEOUT = 25000;
-const SAMPLE = 8;
 const TODAY = new Date().toISOString().slice(0, 10);
 
 const args = process.argv.slice(2);
@@ -41,30 +43,16 @@ const WRITE = args.includes('--write');
 const AUTH_ONLY = args.includes('--auth-only');
 const ONLY = (args.find((a) => a.startsWith('--only=')) || '').slice(7).split(',').filter(Boolean);
 
-// publisher-diverse, deterministic sample (mirrors fetch-models.mjs)
-const sample = (ids) => {
-  const groups = new Map();
-  for (const id of [...new Set(ids.filter(Boolean))].sort()) {
-    const pub = id.includes('/') ? id.slice(0, id.indexOf('/')) : id;
-    (groups.get(pub) || groups.set(pub, []).get(pub)).push(id);
-  }
-  const keys = [...groups.keys()].sort();
-  const out = [];
-  for (let i = 0; out.length < SAMPLE && keys.some((k) => groups.get(k).length); i++) {
-    const g = groups.get(keys[i % keys.length]);
-    if (g.length) out.push(g.shift());
-  }
-  return out.sort();
-};
-
+// Every probe request carries the key: refuse redirects so Authorization is
+// never replayed to another host, and cap the body that is read.
 async function req(url, opts = {}) {
   const ctrl = new AbortController();
   const t = setTimeout(() => ctrl.abort(), TIMEOUT);
   const start = Date.now();
   try {
-    const res = await fetch(url, { ...opts, signal: ctrl.signal });
+    const res = await fetch(url, { ...opts, signal: ctrl.signal, redirect: 'error' });
     let json = null;
-    try { json = await res.json(); } catch { /* non-JSON body */ }
+    try { json = await readBoundedJson(res); } catch { /* non-JSON or oversized body */ }
     return { status: res.status, ms: Date.now() - start, headers: res.headers, json };
   } catch (e) {
     return { status: 0, ms: Date.now() - start, headers: null, json: null, error: e.message };
@@ -184,7 +172,6 @@ async function main() {
     if (WRITE) {
       p.last_probed = TODAY;
       p.probe_status = r.status;
-      if (r.models.length) p.models_free = sample(r.models);
       changed++;
     }
     const rl = Object.keys(r.rate_limit).length ? ` rl:${Object.entries(r.rate_limit).map(([k, v]) => k.replace('x-ratelimit-', '') + '=' + v).join(',')}` : '';
