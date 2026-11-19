@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Runs every scripts/*.test.mjs with the Node test runner. It expands the pattern itself, so it works on every Node the project supports
-// (the engines field says 18 and up; `node --test "scripts/*.test.mjs"` needs Node 21 or later) and on Windows.
+// (the engines field says 22 and up, matching .nvmrc and CI) without relying on shell globbing, which differs on Windows.
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
