@@ -135,6 +135,17 @@
    "page_sha256": "c47bfd258ed2f573a44c557ae68a1b679c3e0b5f8267f52957e27c4c7cabae40"
   },
   {
+   "id": "baseten.sentence",
+   "slug": "baseten",
+   "kind": "sentence",
+   "text": "Baseten does not use customer content to train or fine-tune models.",
+   "source_url": "https://www.baseten.co/security/",
+   "read_on": "2026-11-19",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "846bd82b1e5911e170e3dda6695730635e6800dfe9b69b64e722ef373977b5b9"
+  },
+  {
    "id": "nebius.sentence",
    "slug": "nebius",
    "kind": "sentence",

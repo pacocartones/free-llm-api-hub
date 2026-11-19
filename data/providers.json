@@ -337,7 +337,8 @@
       "is_text_llm": true,
       "model_tier": null,
       "verified": true,
-      "last_verified": "2026-10-08"
+      "last_verified": "2026-10-08",
+      "data_policy": {"trains_on_prompts":false,"retention":"Zero data retention for synchronous inference; async inputs held until processing completes, up to 72 hours","source":"https://www.baseten.co/security/","checked":"2026-11-18","quote":"Baseten does not use customer content to train or fine-tune models.","note":"Security page statement covering Model APIs and Dedicated Inference. Synchronous inputs and outputs are not stored; async inputs are held until the request runs, up to 72 hours. Operational metadata is retained separately. The sentence names no plan.","plan_named":false}
     },
     {
       "slug": "nebius",
