@@ -792,3 +792,6 @@ p.muted a, .prose p a, .prov-summary p a { text-decoration: underline; text-unde
 
 /* Keep the API count heading and values readable on narrow screens. */
 .api-endpoints th:nth-child(3), .api-endpoints td:nth-child(3) { white-space: nowrap; }
+/* "Clear all filters" under an empty result (explorer.js creates it on first need). */
+.empty-clear { display: block; margin: -32px auto 40px; }
+.empty-clear[hidden] { display: none; }

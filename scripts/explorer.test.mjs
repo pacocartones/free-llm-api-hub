@@ -205,7 +205,7 @@ test('unverified entries render the warning badge and no date', () => {
 test('the hero shield derives its bucket from FLLM_RULES, not a local copy', () => {
   const src = readFileSync(new URL('../site/explorer.js', import.meta.url), 'utf8');
   // It must consume the shared function…
-  assert.ok(src.includes('const { recScore, SLA_DAYS, DUE_SOON_DAYS, freshnessStatus } = window.FLLM_RULES;'), 'must consume freshnessStatus from FLLM_RULES');
+  assert.ok(src.includes('const { SLA_DAYS, freshnessStatus } = window.FLLM_RULES;'), 'must consume freshnessStatus from FLLM_RULES');
   assert.ok(src.includes('freshnessStatus(oldest)'), 'shield must derive its bucket via the shared function');
   // …and never re-declare the bucket thresholds inline (the drift that made
   // the hero disagree with the badge/worklist possible).
