@@ -3,11 +3,11 @@
  "ran_at": "2026-10-15T17:28:39Z",
  "runner": "server",
  "summary": {
-  "ok": 45,
+  "ok": 43,
   "expired": 0,
   "unreachable": 0,
   "other_language": 0,
-  "total": 45
+  "total": 43
  },
  "results": [
   {
@@ -85,16 +85,6 @@
    "slug": "fireworks-ai",
    "kind": "absence_check",
    "source_url": "https://fireworks.ai/privacy-policy",
-   "read_on": "2026-10-15",
-   "result": "ok",
-   "runs_in_a_row": 0,
-   "page_changed": false
-  },
-  {
-   "id": "nebius.sentence",
-   "slug": "nebius",
-   "kind": "sentence",
-   "source_url": "https://docs.nebius.com/legal/token-factory",
    "read_on": "2026-10-15",
    "result": "ok",
    "runs_in_a_row": 0,
@@ -235,16 +225,6 @@
    "slug": "assemblyai",
    "kind": "note_passage",
    "source_url": "https://www.assemblyai.com/docs/faq/how-to-opt-out-of-data-sharing-for-our-model-improvement-program",
-   "read_on": "2026-10-15",
-   "result": "ok",
-   "runs_in_a_row": 0,
-   "page_changed": false
-  },
-  {
-   "id": "ollama-cloud.sentence",
-   "slug": "ollama-cloud",
-   "kind": "sentence",
-   "source_url": "https://docs.ollama.com/cloud",
    "read_on": "2026-10-15",
    "result": "ok",
    "runs_in_a_row": 0,

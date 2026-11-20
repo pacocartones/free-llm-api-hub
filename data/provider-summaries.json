@@ -126,39 +126,6 @@
       ]
     },
     {
-      "id": "arli-ai",
-      "what": "An AI inference platform providing LLM and image-generation API endpoints on monthly plans.",
-      "good_for": "Running open LLMs through an OpenAI-compatible API from chat/roleplay frontends and coding agents.",
-      "operator": "Arli AI",
-      "owner": "",
-      "origin": "",
-      "sources": [
-        {
-          "url": "https://www.arliai.com/",
-          "fetched_at": "2026-10-19T19:01:37Z",
-          "supports": [
-            "what",
-            "good_for"
-          ]
-        },
-        {
-          "url": "https://www.arliai.com/pricing",
-          "fetched_at": "2026-10-19T19:00:46Z",
-          "supports": [
-            "what"
-          ]
-        },
-        {
-          "url": "https://www.arliai.com/terms",
-          "fetched_at": "2026-10-19T19:01:01Z",
-          "supports": [
-            "what",
-            "operator"
-          ]
-        }
-      ]
-    },
-    {
       "id": "assemblyai",
       "what": "A hosted Voice AI API offering pre-recorded and streaming speech-to-text, voice agent orchestration and LLM access.",
       "good_for": "Transcribing recorded or live audio and video, and building voice agents.",
@@ -565,25 +532,6 @@
       ]
     },
     {
-      "id": "hume-ai",
-      "what": "Data, speech models, evaluation frameworks and human preference pipelines for emotionally aware voice AI.",
-      "good_for": "Teams building foundation models, fine-tuning voice agents or evaluating production voice systems.",
-      "operator": "Hume AI, Inc.",
-      "owner": "",
-      "origin": "",
-      "sources": [
-        {
-          "url": "https://www.hume.ai/about",
-          "fetched_at": "2026-10-19",
-          "supports": [
-            "what",
-            "good_for",
-            "operator"
-          ]
-        }
-      ]
-    },
-    {
       "id": "ibm-watsonx",
       "what": "IBM's AI platform for AI-powered insights and governed data.",
       "good_for": "Building AI applications in a developer studio, managing and integrating data, deploying AI assistants and agents, and governing AI risk.",
@@ -784,33 +732,6 @@
       ]
     },
     {
-      "id": "nebius",
-      "what": "A purpose-built AI cloud, engineered from silicon to API.",
-      "good_for": "Building and scaling AI workloads faster.",
-      "operator": "Nebius B.V.",
-      "owner": "",
-      "origin": "Amsterdam (the company page says it is headquartered there and listed on Nasdaq as NBIS)",
-      "sources": [
-        {
-          "url": "https://nebius.com/",
-          "fetched_at": "2026-10-19T19:02Z",
-          "supports": [
-            "what",
-            "good_for",
-            "operator"
-          ]
-        },
-        {
-          "url": "https://nebius.com/about",
-          "fetched_at": "2026-10-19T19:02Z",
-          "supports": [
-            "operator",
-            "origin"
-          ]
-        }
-      ]
-    },
-    {
       "id": "nlpcloud",
       "what": "An AI platform for natural language processing tasks such as NER, sentiment analysis, text classification, summarization, question answering, text generation and translation.",
       "good_for": "Doing natural language processing in your own applications through an API.",
@@ -929,31 +850,6 @@
             "operator",
             "owner",
             "origin"
-          ]
-        }
-      ]
-    },
-    {
-      "id": "ollama-cloud",
-      "what": "Ollama Cloud lets you run models in Ollama's cloud from your apps or terminal, with no model or app download required.",
-      "good_for": "Using cloud models from apps, the terminal, coding agents through a launch command, or the API.",
-      "operator": "Ollama Inc.",
-      "owner": "",
-      "origin": "",
-      "sources": [
-        {
-          "url": "https://docs.ollama.com/cloud",
-          "fetched_at": "2026-10-19T23:53Z",
-          "supports": [
-            "what",
-            "good_for"
-          ]
-        },
-        {
-          "url": "https://ollama.com/terms",
-          "fetched_at": "2026-10-19T19:01:44Z",
-          "supports": [
-            "operator"
           ]
         }
       ]
