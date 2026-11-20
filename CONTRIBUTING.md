@@ -217,7 +217,7 @@ What gets merged is what makes the data more accurate: a field confirmed from th
 
 ## What happens next
 
-A maintainer re-checks the source link and the claim, then merges. Once your first PR merges, you are credited in the README [Contributors](README.md#contributors) section (a maintainer refreshes it from git history) — there is nothing extra for you to do. See [GOVERNANCE.md](GOVERNANCE.md) for how decisions are made and [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) for community norms. By contributing you agree to license your contribution under the repository's [MIT License](LICENSE).
+A maintainer re-checks the source link and the claim, then merges. Once your first PR merges, you are credited in [CONTRIBUTORS.md](CONTRIBUTORS.md) (a maintainer refreshes it from the merged pull requests) — there is nothing extra for you to do. See [GOVERNANCE.md](GOVERNANCE.md) for how decisions are made and [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) for community norms. By contributing you agree to license your contribution under the repository's [MIT License](LICENSE).
 
 ### Your first PR from a fork: the checks may wait
 
