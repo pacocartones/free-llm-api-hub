@@ -537,7 +537,8 @@
       "is_text_llm": true,
       "model_tier": null,
       "verified": true,
-      "last_verified": "2026-11-20"
+      "last_verified": "2026-11-20",
+      "data_policy": {"trains_on_prompts":true,"retention":"Not stored or used after each API session ends; Fine Tuning API: 30 days user content, 90 days generated content","source":"https://assets.ngc.nvidia.com/products/api-catalog/legal/NVIDIA%20API%20Trial%20Terms%20of%20Service.pdf","checked":"2026-11-20","quote":"User Content and Generated Content to improve NVIDIA products and services, including AI models.","note":"Section 3.3(iv) collects prompts and outputs «to improve NVIDIA products and services, including AI models»; Section 2.3 says NVIDIA «will not store or use User Content or Generated Content at the end of each API Service session», except Fine Tuning retention and security/fraud logging (2.4).","plan_named":true}
     },
     {
       "slug": "vercel-ai-gateway",
