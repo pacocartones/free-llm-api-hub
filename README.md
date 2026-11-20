@@ -124,7 +124,7 @@ Filter any category live in the [interactive explorer](https://freellmapihub.com
 
 ## Notably NOT free
 
-Worth saying plainly. As of the last verification pass, **OpenAI, Anthropic and xAI do not offer an ongoing free API tier.** Several providers people *assume* are free — **Together AI, DeepInfra, Perplexity's API, Replicate, Featherless AI** — currently require a card or prepayment before any API use, per their own docs. Some have handed out small one-time trial credits at various points, but that's changed repeatedly; check each provider's billing page before assuming anything.
+Worth saying plainly. As checked on 2026-11-20 against their own billing docs, **OpenAI, Anthropic and xAI do not offer an ongoing free API tier**: API use is paid in advance with credits and stops when they run out. Their "Free" or "Tier 0" rows are rate-limit tiers, not free usage, and any recurring API credits are promotional or come with paid plans ([quotes](docs/sources.md#checked-with-what-each-page-says)). Several providers people *assume* are free — **Together AI, DeepInfra, Perplexity's API, Replicate, Featherless AI** — currently require a card or prepayment before any API use, per their own docs. Some have handed out small one-time trial credits at various points, but that's changed repeatedly; check each provider's billing page before assuming anything.
 
 For genuinely free access to strong models, your best bets here are **Gemini** (frontier-class) and the free open-weight models on **Groq, OpenRouter, Cloudflare and Z.ai** (SiliconFlow's free models are on its China platform and need real-name verification).
 
