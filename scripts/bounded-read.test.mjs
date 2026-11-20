@@ -23,6 +23,26 @@ test('readBoundedText stops once streamed bytes exceed the limit', async () => {
   await assert.rejects(readBoundedText(chunked(['12345', '67890', 'X']), 10), ResponseTooLargeError);
 });
 
+test('readBoundedText compares a huge declared Content-Length exactly', async () => {
+  const res = chunked(['x'], { 'content-length': '99999999999999999999' });
+  await assert.rejects(readBoundedText(res, 10), ResponseTooLargeError);
+});
+
+test('readBoundedText reads a missing body as empty unless a body is required', async () => {
+  const empty = { headers: new Headers(), body: null };
+  assert.equal(await readBoundedText(empty, 10), '');
+  await assert.rejects(readBoundedText(empty, 10, { requireBody: true }), /not a readable stream/);
+});
+
+test('the source checker and the re-verification fetcher use the shared bounded reader', async () => {
+  const { readFileSync } = await import('node:fs');
+  for (const rel of ['./lib/check-sources.mjs', './lib/reverify-fetch.mjs', './fetch-models.mjs', './discover.mjs']) {
+    const src = readFileSync(new URL(rel, import.meta.url), 'utf8');
+    assert.match(src, /from '\.\/(?:lib\/)?bounded-read\.mjs'/, `${rel} imports the shared reader`);
+    assert.doesNotMatch(src, /getReader\(\)/, `${rel} has no private streaming reader`);
+  }
+});
+
 test('keyed catalogue requests refuse redirects; public ones follow them', async () => {
   const seen = [];
   const fetchImpl = async (url, init) => {

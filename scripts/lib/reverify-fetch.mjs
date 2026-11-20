@@ -1,54 +1,14 @@
 import { fetchPublicUrl } from './public-fetch.mjs';
+import { readBoundedText } from './bounded-read.mjs';
 
 const REQUEST_TIMEOUT_MS = 20000;
 const MAX_RESPONSE_BYTES = 2 * 1024 * 1024;
-
-class ResponseTooLargeError extends Error {
-  constructor(maxBytes) {
-    super(`response exceeds ${maxBytes}-byte limit`);
-    this.name = 'ResponseTooLargeError';
-  }
-}
 
 const cancelBody = (body) => {
   try {
     const cancellation = body?.cancel();
     cancellation?.catch(() => {});
   } catch { /* the response is already being abandoned */ }
-};
-
-const readBoundedText = async (res, maxBytes) => {
-  const contentLength = res.headers.get('content-length');
-  const declaredBytes = contentLength?.trim() || '';
-  if (/^\d+$/.test(declaredBytes) && Number(declaredBytes) > maxBytes) {
-    cancelBody(res.body);
-    throw new ResponseTooLargeError(maxBytes);
-  }
-
-  if (!res.body) return '';
-  const reader = res.body.getReader();
-  const decoder = new TextDecoder();
-  const chunks = [];
-  let bytesRead = 0;
-  try {
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      if (value.byteLength > maxBytes - bytesRead) {
-        try {
-          const cancellation = reader.cancel();
-          cancellation?.catch(() => {});
-        } catch { /* report the limit even if cancellation also fails */ }
-        throw new ResponseTooLargeError(maxBytes);
-      }
-      bytesRead += value.byteLength;
-      chunks.push(decoder.decode(value, { stream: true }));
-    }
-    chunks.push(decoder.decode());
-    return chunks.join('');
-  } finally {
-    reader.releaseLock();
-  }
 };
 
 // Single-pass entity decode: one regex + callback, so entities are never
