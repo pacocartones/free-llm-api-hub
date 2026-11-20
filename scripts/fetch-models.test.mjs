@@ -4,7 +4,12 @@ import { openaiPublic, PREFERRED_MODELS, sample } from './fetch-models.mjs';
 
 test('preferred model configuration contains only IDs verified in the public catalogues', () => {
   assert.deepEqual(PREFERRED_MODELS['nvidia-nim'], [
-    'nvidia/nemotron-3-super-120b-a12b',
+    'google/gemma-3-12b-it',
+    'mistralai/mistral-large-4-1t-a52b',
+    'moonshotai/kimi-k3.1-pro',
+    'nvidia/nemotron-3-ultra-550b-a55b',
+    'nvidia/nemotron-3.5-super-vl-120b-a12b',
+    'z-ai/glm-5.3-flash',
   ]);
   assert.deepEqual(PREFERRED_MODELS.modelscope, [
     'deepseek-ai/DeepSeek-V4-Flash-0731',
