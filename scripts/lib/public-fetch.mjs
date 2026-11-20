@@ -266,6 +266,7 @@ async function requestHop(input, { headers, maxBytes }, redirects, transport, li
       const encoding = responseHeaders(response.headers).get('content-encoding')?.trim() || '';
       if (encoding && encoding.toLowerCase() !== 'identity') {
         const error = new UnsupportedContentEncodingError(encoding);
+        error.status = response.statusCode || 0; // the server answered; callers that only need reachability can use it
         response.destroy();
         reject(error);
         return;
@@ -273,6 +274,7 @@ async function requestHop(input, { headers, maxBytes }, redirects, transport, li
       const length = declaredLength(response.headers);
       if (length !== null && length > BigInt(maxBytes)) {
         const error = new ResponseTooLargeError(maxBytes);
+        error.status = response.statusCode || 0; // the server answered; callers that only need reachability can use it
         response.destroy();
         reject(error);
         return;
