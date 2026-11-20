@@ -7,8 +7,25 @@ Notable changes to the dataset and the project. Format based on [Keep a Changelo
 
 ## [Unreleased]
 
+### Removed
+
+- Arli AI, Nebius and Hume, which no longer offer the free access the dataset
+  listed, and Clarifai and Ollama Cloud, whose free terms no official page now
+  states. All five had been `verified: false`; they move to "Retired or
+  removed" in the README. The dataset has 62 providers, all verified.
+
 ### Changed and fixed
 
+- AI21 Labs re-verified: the trial credit's validity is given as AI21 states
+  it, three months in its docs and 7 days on its pricing page, instead of
+  choosing one; the rate limits are re-confirmed.
+- NVIDIA NIM re-verified: the free credits for prototyping are confirmed, but
+  no credit amount, rate limit or expiry is published, and the cited trial
+  terms page now returns 404. The rate limits and the phone and card
+  requirements become unconfirmed.
+- Novita re-verified: the 90-day validity of the Sandbox credits is not stated
+  on any official page, so `expires` is unset; the commercial-use restriction
+  is re-quoted from the current Terms of Service.
 - AI21 Labs: `commercial_ok` is `false`. Its Terms of Use make a free trial an
   "Evaluation Product" for internal evaluation only (§5.2, §5.3), which covers
   the $10 trial credit. `last_verified` stays 2026-10-08 while AI21's pages

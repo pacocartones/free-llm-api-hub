@@ -331,12 +331,6 @@
       "of": 6,
       "rank": null
     },
-    "nvidia-nim": {
-      "total": 26.8,
-      "confirmed": 3,
-      "of": 6,
-      "rank": null
-    },
     "ibm-watsonx": {
       "total": 26.1,
       "confirmed": 3,
@@ -346,6 +340,12 @@
     "camb-ai": {
       "total": 26,
       "confirmed": 1,
+      "of": 6,
+      "rank": null
+    },
+    "nvidia-nim": {
+      "total": 25.5,
+      "confirmed": 2,
       "of": 6,
       "rank": null
     },

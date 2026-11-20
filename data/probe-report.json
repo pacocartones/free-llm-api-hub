@@ -1,7 +1,7 @@
 {
   "probed_at": "2026-08-02",
   "auth_only": true,
-  "count": 62,
+  "count": 57,
   "results": [
     {
       "slug": "google-gemini",
@@ -82,12 +82,6 @@
       "status": "skipped-no-key"
     },
     {
-      "slug": "nebius",
-      "env_key": "NEBIUS_API_KEY",
-      "key_present": false,
-      "status": "skipped-no-key"
-    },
-    {
       "slug": "novita",
       "env_key": "NOVITA_API_KEY",
       "key_present": false,
@@ -160,24 +154,6 @@
       "status": "skipped-no-key"
     },
     {
-      "slug": "clarifai",
-      "env_key": "CLARIFAI_PAT",
-      "key_present": false,
-      "status": "skipped-no-key"
-    },
-    {
-      "slug": "arli-ai",
-      "env_key": "ARLI_API_KEY",
-      "key_present": false,
-      "status": "skipped-no-key"
-    },
-    {
-      "slug": "ollama-cloud",
-      "env_key": "OLLAMA_API_KEY",
-      "key_present": false,
-      "status": "skipped-no-key"
-    },
-    {
       "slug": "modelscope",
       "env_key": "MODELSCOPE_API_KEY",
       "key_present": false,
@@ -234,12 +210,6 @@
     {
       "slug": "speechify",
       "env_key": "SPEECHIFY_API_KEY",
-      "key_present": false,
-      "status": "skipped-no-key"
-    },
-    {
-      "slug": "hume-ai",
-      "env_key": "HUME_API_KEY",
       "key_present": false,
       "status": "skipped-no-key"
     },
