@@ -95,6 +95,9 @@ const scoreData = () => JSON.parse(readFileSync(DATA, 'utf8'));
 const editorialData = () => JSON.parse(readFileSync(join(ROOT, 'data/editorial.json'), 'utf8'));
 const probeData = () => JSON.parse(readFileSync(join(ROOT, 'data/probe-report.json'), 'utf8'));
 const NOW = new Date('2026-10-08T12:00:00Z');
+// Checks on the real dataset use the dataset's own date: re-verification moves last_verified past the fixed NOW above,
+// and a verification date in the future is (correctly) not fresh.
+const DATA_NOW = () => new Date(`${scoreData().generated}T12:00:00Z`);
 // A provider with five of the six inputs confirmed (everything but stability), so it clears the minimum.
 const confirmed5 = (over = {}) => blank({ model_tier: 2, card_required: false, phone_required: false, commercial_ok: true, openai_compatible: true, free_limits: { requests_per_day: 100, source: 'https://x.example/', checked: '2026-10-08' }, ...over });
 const blank = (over = {}) => ({ slug: 'acme', name: 'Acme', verified: true, last_verified: '2026-10-08', is_text_llm: true, card_required: null, phone_required: null, commercial_ok: null, openai_compatible: null, model_tier: null, ...over });
@@ -221,7 +224,7 @@ test('eligibility: verified, within the freshness SLA, and for the top 10 a text
   assert.deepEqual(rankProviders(list, { now: NOW }).map((r) => r.slug).sort(), ['llm', 'ocr'], 'the full ranking keeps non-LLM providers');
   const many = Array.from({ length: 14 }, (_, i) => confirmed5({ slug: `p${i}`, name: `P${String(i).padStart(2, '0')}` }));
   assert.equal(topProviders(many, { now: NOW }).length, 10, 'the top holds at most ten');
-  const real = topProviders(scoreData().providers, { editorial: editorialData(), probeReport: probeData(), now: NOW });
+  const real = topProviders(scoreData().providers, { editorial: editorialData(), probeReport: probeData(), now: DATA_NOW() });
   assert.ok(real.length > 0 && real.every((r) => r.provider.is_text_llm === true && r.provider.verified === true));
 });
 
@@ -255,7 +258,7 @@ test('the minimum: a provider enters the ranking and the top only with at least 
   assert.deepEqual(rankProviders(list, { now: NOW }).map((r) => r.slug).sort(), ['acme', 'four']);
   assert.deepEqual(topProviders(list, { now: NOW }).map((r) => r.slug).sort(), ['acme', 'four'], 'the top has two entries, not ten');
   assert.deepEqual(rankProviders(list, { now: NOW, minConfirmed: 0 }).map((r) => r.slug).sort(), ['acme', 'four', 'three'], 'review mode lists everyone eligible');
-  const real = topProviders(scoreData().providers, { editorial: editorialData(), probeReport: probeData(), now: NOW });
+  const real = topProviders(scoreData().providers, { editorial: editorialData(), probeReport: probeData(), now: DATA_NOW() });
   assert.ok(real.length <= 10 && real.every((r) => r.confirmed >= MIN_CONFIRMED));
   assert.ok(real.length < 10, 'today fewer than ten text-LLM providers have their quality confirmed, and the top says so by being shorter');
 });

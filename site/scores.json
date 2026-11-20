@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-19",
+  "generated": "2026-11-20",
   "scores": {
     "openrouter": {
       "total": 67.2,
@@ -223,12 +223,6 @@
       "of": 6,
       "rank": null
     },
-    "nebius": {
-      "total": 33.2,
-      "confirmed": 3,
-      "of": 6,
-      "rank": null
-    },
     "ai-horde": {
       "total": 32.5,
       "confirmed": 2,
@@ -362,12 +356,6 @@
       "rank": null
     },
     "fish-audio": {
-      "total": 25.4,
-      "confirmed": 3,
-      "of": 6,
-      "rank": null
-    },
-    "hume-ai": {
       "total": 25.4,
       "confirmed": 3,
       "of": 6,
