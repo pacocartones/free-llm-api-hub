@@ -25,6 +25,11 @@ on:
       - 'scripts/**'
   workflow_dispatch: {}
 
+# A newer push to the same pull request supersedes the older run; pushes to main and manual runs are never cancelled.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 permissions:
   contents: read
 

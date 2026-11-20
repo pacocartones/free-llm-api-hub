@@ -15,7 +15,9 @@ concurrency:
 
 jobs:
   assign:
-    if: ${{ !github.event.issue.pull_request && github.event.issue.state == 'open' && github.event.comment.user.type == 'User' }}
+    # Skip ordinary comments here, before a runner starts: only a comment that mentions /take or /release can be a command.
+    # contains() is case-insensitive, like the parser below, which still checks that the command is the first word.
+    if: ${{ !github.event.issue.pull_request && github.event.issue.state == 'open' && github.event.comment.user.type == 'User' && (contains(github.event.comment.body, '/take') || contains(github.event.comment.body, '/release')) }}
     runs-on: ubuntu-latest
     permissions:
       issues: write
