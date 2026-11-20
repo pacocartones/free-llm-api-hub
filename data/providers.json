@@ -396,7 +396,7 @@
       "category": "trial",
       "free_type": "trial-credit",
       "free_tier": "$15 trial credit",
-      "rate_limits": "Pay-as-you-go: 10 parallel requests (can be increased); no RPM/TPM published",
+      "rate_limits": "Pay-as-you-go (with the $15 free credit): 10 parallel requests (can be increased); the pricing table's Free plan lists 2 parallel requests. No RPM/TPM published for free access: every per-model requests-per-minute row on the Free plan says \"Variable\"",
       "notes": "Corrected: the official registration page does not ask for a phone number, contradicting the earlier listing The pricing page (read in a browser on 2026-11-20) says \"Automatically get a $15 FREE credit\" and \"Parallel requests: 10 (can be increased)\".",
       "best_for": "NLP tasks (NER, classification, summarization) on a $15 trial",
       "modalities": ["text"],
@@ -411,7 +411,6 @@
       "env_key": "NLPCLOUD_API_KEY",
       "is_text_llm": true,
       "model_tier": null,
-      "free_limits": null,
       "verified": true,
       "last_verified": "2026-11-20",
       "data_policy": {"trains_on_prompts":null,"retention":"API data is not stored","source":"https://nlpcloud.com/privacy.html","checked":"2026-11-17","quote":"For privacy reasons, we DO NOT keep any data sent to our API.","note":"The policy says API text is processed and responses returned without storing data. This storage statement does not establish whether data is used for model training. The sentence does not name a free or trial plan.","plan_named":false}
