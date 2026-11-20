@@ -1,24 +1,22 @@
 <div align="center">
 
-<img src="assets/logo-full.svg" alt="Free LLM API Hub" width="240">
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/logo-dark.svg">
+  <img src="assets/logo-light.svg" alt="Free LLM API Hub" width="320">
+</picture>
 
 **A continuously-verified dataset of free LLM & AI-model APIs you can build on.**
 
-Free LLM APIs plus adjacent model APIs — image, speech, embeddings, rerank and OCR. Free tiers, trial credits and no-cost quotas, every entry dated, sourced, and machine-readable.
-Every entry is dated and sourced to the provider's own docs; what we could not confirm is marked. Just what's actually free, and the fine print that bites.
+Free LLM APIs plus adjacent model APIs — image, speech, embeddings, rerank and OCR: free tiers, trial credits and no-cost quotas.
+Every entry is dated and sourced to the provider's own docs, and what we could not confirm is marked. Just what's actually free, and the fine print that bites.
 
 <img src="assets/demo.svg" alt="Terminal demo: curl freellmapihub.com/api/v1/no-card.json returns Google Gemini, Groq, Cloudflare Workers AI, OpenRouter and Cohere" width="740">
 
 [![Verify](https://github.com/pacocartones/free-llm-api-hub/actions/workflows/verify.yml/badge.svg)](https://github.com/pacocartones/free-llm-api-hub/actions/workflows/verify.yml)
-[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/pacocartones/free-llm-api-hub/badge)](https://scorecard.dev/viewer/?uri=github.com/pacocartones/free-llm-api-hub)
 [![Freshness](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/pacocartones/free-llm-api-hub/main/badge-freshness.json)](#how-verification-works)
 [![Verified providers](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/pacocartones/free-llm-api-hub/main/badge-verified.json)](docs/methodology.md)
 [![Website](https://img.shields.io/badge/explorer-freellmapihub.com-0b7285.svg)](https://freellmapihub.com/)
-[![Dataset: JSON](https://img.shields.io/badge/dataset-JSON%20%2B%20schema-blue.svg)](data/providers.json)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
-[![Contributors](https://img.shields.io/github/contributors/pacocartones/free-llm-api-hub)](https://github.com/pacocartones/free-llm-api-hub/graphs/contributors)
-[![Good first issues](https://img.shields.io/badge/contribute-good%20first%20issues-9c4668.svg)](https://github.com/pacocartones/free-llm-api-hub/contribute)
 
 **[🔎 Interactive explorer](https://freellmapihub.com/)** &nbsp;·&nbsp; **[📊 Dataset](data/providers.json)** &nbsp;·&nbsp; **[🧪 How we verify](docs/methodology.md)** &nbsp;·&nbsp; **[➕ Add a provider](CONTRIBUTING.md)**
 
@@ -175,7 +173,10 @@ What "verified" covers and where its limits are: [docs/methodology.md](docs/meth
 
 ## How this project is maintained
 
-The maintainers are [@pacocartones](https://github.com/pacocartones) and [@LeonMAG](https://github.com/LeonMAG). AI agents assist under human oversight with repository checks, human-authored data updates and code. Provider re-verification dossiers are human-review material only; transfer the reviewed edit into a fresh worktree before agent-assisted regeneration, as described in the [playbook](docs/update-playbook.md). Every change still goes through a pull request, a human maintainer reviews it and is responsible for every merge, and every data change carries a link to the provider's own page and the date it was checked. Commit messages carry no AI signature or trailer; this section is where we say it.
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/pacocartones/free-llm-api-hub/badge)](https://scorecard.dev/viewer/?uri=github.com/pacocartones/free-llm-api-hub)
+[![Dataset: JSON](https://img.shields.io/badge/dataset-JSON%20%2B%20schema-blue.svg)](data/providers.json)
+
+The maintainers are [@pacocartones](https://github.com/pacocartones) and [@LeonMAG](https://github.com/LeonMAG). AI agents assist under human oversight with repository checks, human-authored data updates and code. Re-verification is done by a maintainer or, at the owner's request, with AI assistance: official pages are read by isolated read-only fetchers that return verbatim quotes, and the pull request says which method was used ([playbook](docs/update-playbook.md)). Every change still goes through a pull request, a human maintainer reviews it and is responsible for every merge, and every data change carries a link to the provider's own page and the date it was checked. Commit messages carry no AI signature or trailer; this section is where we say it.
 
 ## Use the data
 
@@ -220,6 +221,10 @@ Self-contained (inline styles, no CSS conflicts). All attributes are optional: `
 **Follow changes** — [updates page](https://freellmapihub.com/updates) or the [RSS feed](https://freellmapihub.com/feed.xml).
 
 ## Contributing
+
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+[![Contributors](https://img.shields.io/github/contributors/pacocartones/free-llm-api-hub)](https://github.com/pacocartones/free-llm-api-hub/graphs/contributors)
+[![Good first issues](https://img.shields.io/badge/contribute-good%20first%20issues-9c4668.svg)](https://github.com/pacocartones/free-llm-api-hub/contribute)
 
 Found an outdated limit, a dead link, or a provider that belongs here? You'll keep this useful for everyone.
 

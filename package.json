@@ -21,6 +21,7 @@
     "discover": "node scripts/discover.mjs",
     "probe": "node scripts/probe.mjs",
     "og": "node scripts/og.mjs",
+    "icons": "node scripts/icons.mjs",
     "test": "node scripts/validate.mjs && node scripts/check-links.mjs && node scripts/run-tests.mjs",
     "score": "node scripts/score.mjs",
     "stars": "node scripts/refresh-stars.mjs",

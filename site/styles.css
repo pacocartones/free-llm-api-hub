@@ -97,7 +97,8 @@ svg.i { width: 15px; height: 15px; flex: none; vertical-align: -2px; }
 @keyframes blink { 50% { opacity: 0; } }
 
 /* ---------- logo ---------- */
-.logo-mark { display: block; width: 30px; height: 30px; flex: none; color: var(--accent); transition: transform .15s ease; }
+.logo-mark { display: block; width: 30px; height: 30px; flex: none; color: var(--accent); --logo-ink: var(--bg); transition: transform .15s ease; }
+.site-header .logo-mark { color: var(--on-header-accent); --logo-ink: #0a0d0b; }
 .logo-mark.lg { width: 58px; height: 58px; }
 .brand:hover .logo-mark, .hero-logo:hover .logo-mark, .foot-logo:hover .logo-mark { transform: translateY(-2px); }
 
