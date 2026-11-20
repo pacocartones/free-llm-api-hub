@@ -7,6 +7,13 @@ Notable changes to the dataset and the project. Format based on [Keep a Changelo
 
 ## [Unreleased]
 
+### Changed and fixed
+
+- AI21 Labs: `commercial_ok` is `false`. Its Terms of Use make a free trial an
+  "Evaluation Product" for internal evaluation only (§5.2, §5.3), which covers
+  the $10 trial credit. `last_verified` stays 2026-10-08 while AI21's pages
+  still disagree on how long the credit lasts (#675). Thanks @BloosomNet.
+
 ## [2.14.1] — 2026-11-20
 
 Released as a correction users are relying on: three providers no longer offer
