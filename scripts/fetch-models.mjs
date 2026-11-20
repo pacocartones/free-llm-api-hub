@@ -139,10 +139,6 @@ const PUBLIC = {
     const list = Array.isArray(d) ? d : (d.data || []);
     return list.map((m) => m.id);
   },
-  'ollama-cloud': async () => {
-    const d = await getJson('https://ollama.com/api/tags');
-    return (d.models || []).map((m) => m.name);
-  },
 };
 
 // The canonical registry of providers whose /models endpoint is public. This
@@ -151,12 +147,15 @@ const PUBLIC = {
 // provider went stale for a whole session) or a stale entry otherwise slips
 // through silently. The self-test fails if PUBLIC and this registry diverge,
 // so adding or removing a public extractor is an explicit, reviewed change.
+// ollama-cloud was removed on 2026-11-20: https://ollama.com/api/tags lists the whole public
+// model catalogue, not the models usable on Ollama's free cloud access, so --write would have
+// recorded every model as free (see #455). The provider is also verified: false. Add a new
+// extractor only if Ollama publishes an endpoint that identifies its free subset.
 const PUBLIC_REQUIRED = [
   'openrouter',
   'pollinations',
   'nvidia-nim',
   'modelscope',
-  'ollama-cloud',
   'typhoon',
 ];
 
