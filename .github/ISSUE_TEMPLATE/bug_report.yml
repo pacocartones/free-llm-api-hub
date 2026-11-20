@@ -2,6 +2,7 @@ name: 🐛 Site or API bug
 description: Something on the website, the explorer, the compare view or the /api/v1 files is broken.
 title: "[bug] "
 labels: ["bug"]
+type: Bug
 body:
   - type: markdown
     attributes:

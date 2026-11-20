@@ -2,6 +2,7 @@ name: ➕ Propose a new provider
 description: Suggest a free-tier or trial-credit LLM API that isn't tracked yet.
 title: "[new provider] "
 labels: ["data"]
+type: Data
 body:
   - type: markdown
     attributes:
