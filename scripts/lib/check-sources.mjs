@@ -73,6 +73,8 @@ async function fetchOnce(fetchImpl, url, { timeoutMs, maxBytes, pace, signal, ac
   });
 }
 
+const BODY_ONLY_ERRORS = new Set(['ResponseTooLargeError', 'UnsupportedContentEncodingError']);
+
 /** Check a URL with one bounded GET. The body is not needed and is cancelled immediately. */
 export async function checkOne(url, {
   fetchImpl = fetchPublicUrl,
@@ -94,7 +96,9 @@ export async function checkOne(url, {
     return { url, ok: false, status: response.status || 0, error: `HTTP ${response.status || 0}` };
   } catch (error) {
     throwIfAborted(signal);
-    return { url, ok: false, status: 0, error: errorText(error) };
+    // A 2xx answer whose body is too large or compressed was still reachable: the body is not needed here.
+    if (BODY_ONLY_ERRORS.has(error?.name) && error.status >= 200 && error.status < 300) return { url, ok: true, status: error.status };
+    return { url, ok: false, status: error?.status || 0, error: errorText(error) };
   }
 }
 
