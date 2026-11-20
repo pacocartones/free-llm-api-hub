@@ -32,6 +32,12 @@ Notable changes to the dataset and the project. Format based on [Keep a Changelo
 - Mixedbread gains a prompt `data_policy`: Free Tier data is kept
   indefinitely; whether it trains on it stays unconfirmed, because its privacy
   policy and terms disagree (#681). Thanks @aryankalantri.
+- NVIDIA NIM gains a prompt `data_policy` from its API Trial Terms of Service
+  (PDF): trial prompts and outputs may be used to improve NVIDIA products,
+  including AI models, and are not stored after each session apart from
+  fine-tuning and security logging (#680). Thanks @aryankalantri. The same
+  terms restore the official source for evaluation-only use. The quote
+  register can now read PDF sources (#682).
 - AI21 Labs: `commercial_ok` is `false`. Its Terms of Use make a free trial an
   "Evaluation Product" for internal evaluation only (§5.2, §5.3), which covers
   the $10 trial credit. `last_verified` stays 2026-10-08 while AI21's pages

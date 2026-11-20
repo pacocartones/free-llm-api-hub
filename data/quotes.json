@@ -300,6 +300,39 @@
    "page_sha256": "8da85e4dccfaaaea63f791b192f28d209cfb6d5704522d6f4ebe19ffc12aad27"
   },
   {
+   "id": "nvidia-nim.sentence",
+   "slug": "nvidia-nim",
+   "kind": "sentence",
+   "text": "User Content and Generated Content to improve NVIDIA products and services, including AI models.",
+   "source_url": "https://assets.ngc.nvidia.com/products/api-catalog/legal/NVIDIA%20API%20Trial%20Terms%20of%20Service.pdf",
+   "read_on": "2026-11-20",
+   "lang": "en",
+   "method": "pdf-text-v1: PDF parsed with unpdf (pdf.js), text of all pages joined, white space collapsed",
+   "page_sha256": "3a6dc711bca9e4736db07906481daa0407faf4a11ed216701691e32dfb4459a4"
+  },
+  {
+   "id": "nvidia-nim.note_passage.1",
+   "slug": "nvidia-nim",
+   "kind": "note_passage",
+   "text": "to improve NVIDIA products and services, including AI models",
+   "source_url": "https://assets.ngc.nvidia.com/products/api-catalog/legal/NVIDIA%20API%20Trial%20Terms%20of%20Service.pdf",
+   "read_on": "2026-11-20",
+   "lang": "en",
+   "method": "pdf-text-v1: PDF parsed with unpdf (pdf.js), text of all pages joined, white space collapsed",
+   "page_sha256": "3a6dc711bca9e4736db07906481daa0407faf4a11ed216701691e32dfb4459a4"
+  },
+  {
+   "id": "nvidia-nim.note_passage.2",
+   "slug": "nvidia-nim",
+   "kind": "note_passage",
+   "text": "will not store or use User Content or Generated Content at the end of each API Service session",
+   "source_url": "https://assets.ngc.nvidia.com/products/api-catalog/legal/NVIDIA%20API%20Trial%20Terms%20of%20Service.pdf",
+   "read_on": "2026-11-20",
+   "lang": "en",
+   "method": "pdf-text-v1: PDF parsed with unpdf (pdf.js), text of all pages joined, white space collapsed",
+   "page_sha256": "3a6dc711bca9e4736db07906481daa0407faf4a11ed216701691e32dfb4459a4"
+  },
+  {
    "id": "vercel-ai-gateway.sentence",
    "slug": "vercel-ai-gateway",
    "kind": "sentence",
