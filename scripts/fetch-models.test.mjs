@@ -81,3 +81,15 @@ test('openaiPublic returns an injected /models response without sampling before 
     'https://models.example.test/v1/models',
   ]);
 });
+
+test('the Pollinations extractor keeps regular (not paid-only, not community) models from the current catalogue', async () => {
+  const { pollinationsFreeIds } = await import('./fetch-models.mjs');
+  assert.deepEqual(pollinationsFreeIds({ data: [
+    { id: 'openai/gpt-5.4-nano', paid_only: false, community: false },
+    { id: 'acme/paid-model', paid_only: true, community: false },
+    { id: 'someone/community-bot', paid_only: false, community: true },
+    { id: 'legacy/unknown', community: false },
+  ] }), ['openai/gpt-5.4-nano']);
+  assert.deepEqual(pollinationsFreeIds([]), [], 'a legacy bare array yields nothing');
+  assert.deepEqual(pollinationsFreeIds(null), []);
+});
