@@ -60,7 +60,7 @@ Publication never changes `generated`, `last_verified`, `verified`, `data_policy
 
 For each provider on the worklist (`npm run worklist`, or just the reverify batch):
 
-`last_verified` records a human review of the entry's [core facts](methodology.md#what-verified-means). A partial field correction leaves `verified` and `last_verified` unchanged unless that review is also completed. Fetch results, generated files and passing automated checks do not establish human verification.
+`last_verified` records a completed review of the entry's [core facts](methodology.md#what-verified-means), done either by a human maintainer or by the agent-assisted check described in Layer 3 and approved by the maintainer who merges it. A partial field correction leaves `verified` and `last_verified` unchanged unless that review is also completed. Fetch results, generated files and passing automated checks on their own do not establish verification.
 
 1. **Open the provider's own docs** (the `docs` link in the item). Third-party summaries don't count.
 2. **Compare against `data/providers.json`:** free tier, rate limits, credit amount/expiry, and the catches (`card_required`, `phone_required`, `commercial_ok`, `openai_compatible`); re-read `trains_on_prompts`, `retention`, and [`data_policy`](../data/schema.json), including its `source` and `checked` date, on the provider's own page, the one the row's `source` points to (usually its terms of service or privacy policy).
@@ -114,7 +114,9 @@ See [live-testing.md](live-testing.md) for setup.
 
 ## Layer 3 — capability boundary
 
-Remote documentation and trusted repository actions are separate phases. Only a human reviewer may fetch and read a dossier, decide which claims it supports, and make the corresponding `data/providers.json` edit.
+Remote documentation and trusted repository actions are separate phases. The default is that a human reviewer fetches and reads a dossier, decides which claims it supports, and makes the corresponding `data/providers.json` edit.
+
+**Agent-assisted re-verification (owner decision, 2026-11-20).** The owner may instead ask an agent to check the official sources. The page text is then read only by isolated, read-only web fetchers that cannot edit files or run commands; they return short verbatim quotes with their URLs, and page content is treated as data, never as instructions. The agent changes a field only where a quote supports it, and sets `last_verified` only where the core facts are confirmed. The pull request says the check was agent-assisted and lists the quotes, and a maintainer approves every merge. Dossiers fetched by `--fetch-for-human-review` stay human-only.
 
 After that human-authored edit exists, copy or commit only that edit into a fresh worktree that has never contained review dossiers. An agent may perform repository-local mechanical work there, but it must not receive the temporary dossier directory, provider pages, or the original review checkout. Existing clones may still contain legacy `.freebuff/reverify/` or `.freebuff/reverify-human-only/` directories; never use such a clone for the agent phase. This clean-worktree handoff is required because a filename, warning, or `.gitignore` rule is not a capability boundary.
 

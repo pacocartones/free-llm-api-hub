@@ -17,6 +17,8 @@ An entry is `verified: true` only when its **core facts** were confirmed against
 
 The dataset validator (`scripts/validate.mjs`, run in CI) **rejects** any `verified: true` entry that is missing a `last_verified` date or a real `docs_url`. The honesty rule is enforced by machine, not by good intentions.
 
+Re-verification is done by a maintainer or, at the owner's request, with AI assistance: official pages are read by isolated read-only fetchers that return verbatim quotes, and a maintainer approves every change. Pull requests say which method was used.
+
 ## What "verified" does *not* mean
 
 - It is **not** a real-time guarantee. Terms can change the day after a check. Always confirm against the linked docs before you rely on a tier.
