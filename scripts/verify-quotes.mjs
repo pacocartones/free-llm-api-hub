@@ -15,6 +15,7 @@ import { quoteErrors } from './lib/quotes.mjs';
 import { readHeaders } from './lib/page-text.mjs';
 import { verifyEntries, buildReport, reportErrors } from './lib/quotes-report.mjs';
 import { fetchPublicUrl } from './lib/public-fetch.mjs';
+import { isPdf, pdfToText, responseBytes } from './lib/pdf-text.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const args = process.argv.slice(2);
@@ -32,6 +33,7 @@ async function readPage(url, lang = 'en') {
   await sleep(700); // one request at a time, and not in a hurry
   try {
     const res = await fetchPublicUrl(url, { headers: readHeaders(lang), timeoutMs: 30000 });
+    if (res.ok && isPdf(res.headers.get('content-type'), url)) return { status: res.status, pdfText: await pdfToText(await responseBytes(res)) };
     return { status: res.status, html: await res.text(), contentLanguage: res.headers.get('content-language') || '' };
   } catch (e) { return { error: String((e && e.message) || e).slice(0, 80) }; }
 }

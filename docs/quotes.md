@@ -38,6 +38,13 @@ Pages are requested with the language of the entry: English as `Accept-Language:
 example `zh-CN,zh;q=0.9`). At least one site (ai.google.dev) answers a Spanish copy to a request with no language, so the language is always asked for. The text is made as `scripts/lib/page-text.mjs` says: scripts and styles removed, tags replaced by a space, character
 references decoded, white space collapsed. Curly quotes and apostrophes are kept as the page spells them.
 
+**PDF sources.** Some providers publish their terms only as a PDF (NVIDIA's API Trial Terms, for example). When the answer is
+`application/pdf`, or the address ends in `.pdf`, the text is extracted with `scripts/lib/pdf-text.mjs` (unpdf, a bundled build of
+pdf.js, with script evaluation off): the text of all pages joined, white space collapsed, so a line break inside a sentence reads as
+one space. The entry records the method `pdf-text-v1` instead of `html-text-v1`, and `verify-quotes` re-reads it the same way.
+PDF entries are English-only for now, because a PDF declares no language the way a page does. A scanned PDF (an image with no text
+layer) cannot be read and is reported as such.
+
 ## Adding or changing a row: `npm run quotes:add`
 
 Write the `data_policy` of the provider in `data/providers.json` (its `quote`, `source`, `checked` and, if you have one, a `note`), then run

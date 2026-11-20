@@ -2,7 +2,7 @@
 //
 // It is a data file (data/quotes-report.json) written by a person's run on the server, committed through a normal pull request, and read by the
 // build; nothing regenerates it by itself. The page shows the AGE of the report, because a report nobody renews says nothing.
-import { judgeReading, htmlToText, absenceHits, sha256, METHOD } from './page-text.mjs';
+import { judgeReading, readingText, absenceHits, sha256, METHOD } from './page-text.mjs';
 import { totalHits } from './quotes.mjs';
 import { htmlEsc } from './rows.mjs';
 
@@ -27,12 +27,12 @@ export async function verifyEntries(entries, readPage) {
       // the claim "the page has none of the four words" holds only while the count is zero in a page that was really read
       const judged = judgeReading(reading, '', e.lang);
       let result = judged === 'expired' || judged === 'ok' ? 'ok' : judged; // an empty passage is always "in" the page: only readability and language matter
-      if (result === 'ok' && totalHits(absenceHits(htmlToText(reading.html))) > 0) result = 'expired';
-      out.push({ id: e.id, result, page_changed: result === 'unreachable' || result === 'other_language' || !e.page_sha256 ? null : sha256(htmlToText(reading.html)) !== e.page_sha256 });
+      if (result === 'ok' && totalHits(absenceHits(readingText(reading))) > 0) result = 'expired';
+      out.push({ id: e.id, result, page_changed: result === 'unreachable' || result === 'other_language' || !e.page_sha256 ? null : sha256(readingText(reading)) !== e.page_sha256 });
       continue;
     }
     const result = judgeReading(reading, e.text, e.lang);
-    out.push({ id: e.id, result, page_changed: result === 'unreachable' || result === 'other_language' || !e.page_sha256 ? null : sha256(htmlToText(reading.html)) !== e.page_sha256 });
+    out.push({ id: e.id, result, page_changed: result === 'unreachable' || result === 'other_language' || !e.page_sha256 ? null : sha256(readingText(reading)) !== e.page_sha256 });
   }
   return out;
 }

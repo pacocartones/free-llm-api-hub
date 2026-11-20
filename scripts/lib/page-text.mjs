@@ -12,6 +12,15 @@ import { createHash } from 'node:crypto';
 
 export const METHOD = 'html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed';
 
+/** The reading method of a PDF source (scripts/lib/pdf-text.mjs). PDFs carry no reliable language, so PDF entries are English-only for now. */
+export const PDF_METHOD = 'pdf-text-v1: PDF parsed with unpdf (pdf.js), text of all pages joined, white space collapsed';
+
+/** The page text of a reading: the extracted text of a PDF, or the text of an HTML page. */
+export function readingText(reading) {
+  if (reading && typeof reading.pdfText === 'string') return reading.pdfText;
+  return htmlToText((reading && reading.html) || '');
+}
+
 /** The recorded reading method for a language. English keeps the exact method string the register already uses. */
 export function methodFor(lang = 'en') {
   if (sameLanguage(lang, 'en')) return METHOD;
@@ -88,8 +97,9 @@ export function sameLanguage(expected, declared) {
  * @param {{status?: number, error?: string, html?: string, contentLanguage?: string}} reading */
 export function judgeReading(reading, passage, expectedLang = 'en') {
   if (!reading || reading.error || !(reading.status >= 200 && reading.status < 300)) return 'unreachable';
-  const text = htmlToText(reading.html || '');
+  const text = readingText(reading);
   if (text.length < 200) return 'unreachable';
-  if (!sameLanguage(expectedLang, declaredLanguage(reading.html, reading.contentLanguage))) return 'other_language';
+  // a PDF declares no language the way a page does; PDF entries are English-only (checked in quotes.mjs)
+  if (typeof reading.pdfText !== 'string' && !sameLanguage(expectedLang, declaredLanguage(reading.html, reading.contentLanguage))) return 'other_language';
   return text.includes(collapse(passage)) ? 'ok' : 'expired';
 }
