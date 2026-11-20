@@ -29,7 +29,6 @@
   "site/api/v1/score.json": "b45dc5f8a3913a43916f228e69cd17cf71392893f3cdbf8ade283cb7de56a4e5",
   "site/api/v1/score.schema.json": "6557b4e6e7e113b1dc5a57bf8498d51486c3179f42dd8e2e2cd632172d8c49e2",
   "site/api/v1/trial.json": "ca169c91aabb27c65fedd70d5454b80a9b5057e9687075d99ca08ac1a6bb617a",
-  "site/apple-touch-icon.png": "3d30c56ace36ff22612b3f38079ef0663812889d517ef140e8625ba5d713ce5d",
   "site/best/index.html": "6e93f9c076cffc171e3f5f82626b75b33194d0689e7b13a11110aa0fa03b2ef4",
   "site/best/methodology/index.html": "9de09b442620c093014df436cf72f0adde92feff92db216f2a305960ffe7ae33",
   "site/collections/always-free.html": "d5516161322a08bb4c7a988dcb02312d4ca374f4122149282395919a5a283e73",
@@ -73,7 +72,6 @@
   "site/compare/wandb-inference-vs-moondream/index.html": "183c046c8cf59a2edaf1dcf2c7a00caeb3a497bb5170bce04e174bdb4a4c4c2d",
   "site/compare/wandb-inference-vs-pollinations/index.html": "02f740fa1c7a69b98700994c945912422178bbd10684cc9cc3b028ba6e6d43da",
   "site/compare/wandb-inference-vs-voyage-ai/index.html": "b16c32500b62d43534795d7e98fd6bad02af45a0ab410884edb3b64b18043fdd",
-  "site/favicon-32.png": "4fc5abc3be77f81f648bf3aeecc77ac5564c9db8dc4f461654486fdb40c6c799",
   "site/guides-and-collections/index.html": "52c67de355b1dd86aa103a1ea4ae26a67bbeceb94b78ff6148f272b6d01e9ae2",
   "site/guides/free-embeddings-apis.html": "7a86b82e359b9b8a1037f55734f25bcde58fd07654777e7334861ff0f8585878",
   "site/guides/free-image-generation-apis.html": "92095b4a000f95eee3160b0afd5500cbea18e741ccb9698099b6bf87629843ff",
@@ -85,8 +83,6 @@
   "site/guides/free-vision-apis.html": "88c86b5a30ba19a3452433d879776b89f20257869ab08c668c7679bff1474d46",
   "site/guides/index.html": "c10151110b56c7458597586e5c7eba5a8b42e2ed6a2706c4aa2a037c486315f4",
   "site/guides/openai-compatible-free-apis.html": "c583591d1df4e0ddd555edd3fef9df2cdf8bd67924f164447f63a307165b77f3",
-  "site/icon-192.png": "6e2a3a0c09f9a0531ceb99bee38038ca8c139198c3a75a2ad87d474eb99a84c9",
-  "site/icon-512.png": "45e9328deced1735be70f0d530774c1ad1b20371e9a7fce4c9ce3f1286763ba3",
   "site/legal/privacy.html": "6471153dba97299e3ad5787d7b302359535e52beb05c84d4e320672383eb619a",
   "site/legal/terms.html": "06d14afcf770b186a9b712f5aba8f559fccf60fda77c7df1e73a134585f45466",
   "site/llms-full.txt": "e851d3a776acfc8c34ad656d9275945cb6b2d45de9dcd2f0e62d8764d4a9ab35",
@@ -99,6 +95,5 @@
   "site/shared-compare.js": "123330f1d7abe0bd1167940589028f1c726aefa805e9e54ae04a2baa1c150060",
   "site/shared-rows.js": "a5c2569b3cedc5d42de300e6cefebe0bbb6e5b7fd22ccabebc746c1873c7389c",
   "site/shared-rules.js": "e515b6afb1ae358891870bfac316cb35186545ecccdd04330397ec909f8cea49",
-  "site/shared-sort.js": "fbbaace17447958ac05f8652c7b00d951a7dce7e9a6ed103ce0fb9beaf7e17d1",
-  "site/site.webmanifest": "c48f85de2596329b0d67fdf725b611f26df9fd4137e5fcffca358e10c042dcbf"
+  "site/shared-sort.js": "fbbaace17447958ac05f8652c7b00d951a7dce7e9a6ed103ce0fb9beaf7e17d1"
 }
