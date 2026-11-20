@@ -876,11 +876,46 @@ writeFileSync(join(ROOT, 'site/shared-rows.js'), rows.clientBundle());
 writeFileSync(join(ROOT, 'site/shared-sort.js'), sortLib.clientBundle());
 // env_key is operational (which secret to use) — strip it from anything public.
 const publicProviders = providers.map(({ env_key, ...rest }) => rest);
-const inlineData = `<script type="application/json" id="providers-data">${JSON.stringify({ providers: publicProviders }).replace(/</g, '\\u003c')}</script>`;
+// The home page inlines only the fields the explorer reads (search, filters, sort, rows and stats: site/explorer.js,
+// lib/rows.mjs, lib/sort.mjs, lib/rules.mjs). The full record stays in /providers.json and /api/v1/, which the explorer
+// falls back to if the inline data is missing. data_policy is reduced to trains_on_prompts, the one part the filter reads.
+const HOME_FIELDS = ['slug', 'name', 'category', 'free_type', 'free_tier', 'notes', 'best_for', 'verified', 'last_verified', 'added',
+  'card_required', 'phone_required', 'commercial_ok', 'commercial_ok_condition', 'openai_compatible', 'is_text_llm', 'modalities',
+  'models_free', 'expires'];
+const homeProvider = (p) => {
+  const out = {};
+  for (const k of HOME_FIELDS) if (p[k] !== undefined) out[k] = p[k];
+  const fl = p.free_limits || {};
+  const caps = {};
+  if (Number.isInteger(fl.requests_per_day)) caps.requests_per_day = fl.requests_per_day;
+  if (Number.isInteger(fl.tokens_per_day)) caps.tokens_per_day = fl.tokens_per_day;
+  if (Object.keys(caps).length) out.free_limits = caps;
+  if (p.data_policy && p.data_policy.trains_on_prompts !== undefined) out.data_policy = { trains_on_prompts: p.data_policy.trains_on_prompts };
+  return out;
+};
+const inlineData = `<script type="application/json" id="providers-data">${JSON.stringify({ providers: publicProviders.map(homeProvider) }).replace(/</g, '\\u003c')}</script>`;
+// The four stat tiles are rendered here too, dated by data.generated (deterministic), so they show without JavaScript and
+// without a layout shift; explorer.js repaints them with the visitor's clock. Same markup as renderStats() in explorer.js.
+const STAT_STATUS_WORD = { fresh: 'fresh', due: 'due for re-check', stale: 'stale' };
+const homeStatsHtml = (() => {
+  const genMs = Date.parse(data.generated + 'T00:00:00Z');
+  const ages = providers.filter((p) => p.verified && p.last_verified).map((p) => Math.floor((genMs - Date.parse(p.last_verified + 'T00:00:00Z')) / 86400000));
+  const oldest = ages.length ? Math.max(...ages) : 0;
+  const status = freshnessStatus(oldest);
+  const tiles = [
+    ['ic-database', providers.length, 'providers tracked', ''],
+    ['ic-refresh', providers.filter((p) => p.category === 'ongoing').length, 'ongoing free tiers', ''],
+    ['ic-clock', providers.filter((p) => p.category === 'trial').length, 'trial credits', ''],
+    ['ic-shield', `${oldest}d`, `oldest verification · ${SLA_DAYS}-day SLA`, status],
+  ];
+  return tiles.map(([ic, n, l, c]) =>
+    `<div class="stat ${c}"><svg class="si" aria-hidden="true"><use href="#${ic}"/></svg><div class="num">${n}</div><div class="lbl">${l}${c ? `<span class="sr-only"> (${STAT_STATUS_WORD[c] || c})</span>` : ''}</div></div>`).join('');
+})();
 let indexHtml = readFileSync(join(ROOT, 'site/index.html'), 'utf8');
 indexHtml = inject(indexHtml, 'csp', CSP);
 indexHtml = inject(indexHtml, 'themeguard', THEME_GUARD);
 indexHtml = inject(indexHtml, 'rows', homeRows);
+indexHtml = inject(indexHtml, 'stats', homeStatsHtml);
 indexHtml = inject(indexHtml, 'data', inlineData);
 indexHtml = withStars(indexHtml).replace(/(<img class="trust-badge"[^>]*? width=")\d+(")/, `$1${BADGE_W}$2`);
 writeFileSync(join(ROOT, 'site/index.html'), indexHtml);
