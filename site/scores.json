@@ -169,12 +169,6 @@
       "of": 6,
       "rank": null
     },
-    "ai21": {
-      "total": 33.9,
-      "confirmed": 2,
-      "of": 6,
-      "rank": null
-    },
     "alibaba-model-studio": {
       "total": 33.9,
       "confirmed": 2,
@@ -310,6 +304,12 @@
     "voyage-ai": {
       "total": 29.9,
       "confirmed": 2,
+      "of": 6,
+      "rank": null
+    },
+    "ai21": {
+      "total": 29.4,
+      "confirmed": 3,
       "of": 6,
       "rank": null
     },
