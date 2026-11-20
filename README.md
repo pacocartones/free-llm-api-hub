@@ -22,7 +22,6 @@ Every entry is dated and sourced to the provider's own docs, and what we could n
 
 ⭐ **Useful? [Star the repo](https://github.com/pacocartones/free-llm-api-hub)** so other builders find it. &nbsp;·&nbsp; 🛠 **Want to help?** Pick a [good first issue](https://github.com/pacocartones/free-llm-api-hub/contribute) or a [help wanted](https://github.com/pacocartones/free-llm-api-hub/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22) issue; follow its named files and check. New here? Follow the [first-contribution steps](CONTRIBUTING.md#your-first-contribution-step-by-step).
 
-
 </div>
 
 ---
@@ -86,14 +85,14 @@ Each pick links to its full verified profile on the live site.
 |---|---|---|
 | **The smartest model, free** | [Google Gemini](https://freellmapihub.com/p/google-gemini) | The only genuinely frontier-class model with a real free tier here — not just open weights |
 | **The fastest inference** | [Groq](https://freellmapihub.com/p/groq) or [SambaNova](https://freellmapihub.com/p/sambanova) | Purpose-built inference chips — far faster than typical GPU-served APIs |
-| **The most free volume/day** | [Cloudflare Workers AI](https://freellmapihub.com/p/cloudflare-workers-ai) (10k Neurons) or [OpenRouter](https://freellmapihub.com/p/openrouter) (1k req/day) | Highest ceilings for a side project with real traffic |
+| **The most free volume/day** | [Cloudflare Workers AI](https://freellmapihub.com/p/cloudflare-workers-ai) (10k Neurons) or [OpenRouter](https://freellmapihub.com/p/openrouter) (50 req/day, 1,000 once you have bought $10 of credit) | Highest ceilings for a side project with real traffic |
 | **No card *and* no phone** | [OpenRouter](https://freellmapihub.com/p/openrouter) or [Google Gemini](https://freellmapihub.com/p/google-gemini) | Groq, SiliconFlow and NVIDIA all gate signup behind phone verification |
 | **Open weights** (Llama, DeepSeek, Qwen, GLM) | [OpenRouter](https://freellmapihub.com/p/openrouter) or [Cloudflare Workers AI](https://freellmapihub.com/p/cloudflare-workers-ai) | Widest open-model selection on an ongoing free tier |
 | **Permanently free, no trial clock** | [Z.ai (GLM)](https://freellmapihub.com/p/zai-glm), or [SiliconFlow](https://freellmapihub.com/p/siliconflow) if you can pass China real-name verification | Several models priced at $0 indefinitely, not just for a trial window |
 | **An OpenAI-compatible endpoint** | [Groq](https://freellmapihub.com/p/groq), [OpenRouter](https://freellmapihub.com/p/openrouter), [Cloudflare Workers AI](https://freellmapihub.com/p/cloudflare-workers-ai) | Point the OpenAI SDK at a new `base_url` and you're done |
 | **EU / data-sovereignty hosting** | [OVHcloud](https://freellmapihub.com/p/ovhcloud-ai-endpoints) or [Scaleway](https://freellmapihub.com/p/scaleway) | French/EU providers; OVHcloud even has an anonymous, no-account tier |
 | **Free embeddings & rerank** | [Jina AI](https://freellmapihub.com/p/jina-ai) or [Cohere](https://freellmapihub.com/p/cohere) | 10M free tokens (Jina, OpenAI-compatible) or 1,000 calls/mo (Cohere) |
-| **Free speech-to-text / TTS** | [Deepgram](https://freellmapihub.com/p/deepgram) or [AssemblyAI](https://freellmapihub.com/p/assemblyai) | $200 / $50 in no-card credit for Whisper-class STT and TTS |
+| **Free speech-to-text / TTS** | [Deepgram](https://freellmapihub.com/p/deepgram) or [AssemblyAI](https://freellmapihub.com/p/assemblyai) | $200 (STT and TTS) / $50 (STT) in no-card signup credit |
 | **A bigger one-time credit** | [Deepgram](https://freellmapihub.com/p/deepgram) ($200, speech) or [AI21 Labs](https://freellmapihub.com/p/ai21) ($10 for 3 months, LLMs) | Large one-time credits that start without a card |
 | **Something safe to ship commercially** | [Cloudflare Workers AI](https://freellmapihub.com/p/cloudflare-workers-ai) or [Groq](https://freellmapihub.com/p/groq) | Don't restrict the free tier to personal/eval use, the way Cohere and NVIDIA do |
 
@@ -121,7 +120,8 @@ Every provider also has its own page with the full details and a copy-ready quic
 
 - [What's covered](#whats-covered) — the categories, by the numbers
 - [Browse by need](#browse-by-need) — curated collections by constraint
-- [The best free LLM APIs](#the-best-free-llm-apis) — our top 10 by score
+- [TL;DR](#tldr--pick-by-what-you-actually-need) — pick by what you actually need
+- [The best free LLM APIs](#the-best-free-llm-apis) — the top picks by score
 - [Notably NOT free](#notably-not-free) — so this list doesn't waste your time
 - [How verification works](#how-verification-works) — the trust engine
 - [How this project is maintained](#how-this-project-is-maintained) — agents under human oversight
@@ -196,7 +196,7 @@ curl -s https://raw.githubusercontent.com/pacocartones/free-llm-api-hub/main/dat
 **Pin a snapshot for reproducible builds.** `main` moves; depend on an immutable tag instead:
 
 ```bash
-curl -s https://raw.githubusercontent.com/pacocartones/free-llm-api-hub/v2.11.0/data/providers.json   # v2.11.0 was the latest on 2026-10-17; see Releases
+curl -s https://raw.githubusercontent.com/pacocartones/free-llm-api-hub/v2.14.0/data/providers.json   # v2.14.0 was the latest on 2026-11-20; see Releases
 ```
 
 Tags track the dataset `version` in [`data/providers.json`](data/providers.json) (see [CHANGELOG.md](CHANGELOG.md)) — pin `vX.Y.Z` and bump deliberately. The [live JSON API](https://freellmapihub.com/api/v1/providers.json) always serves the latest `main`.
@@ -223,7 +223,6 @@ Self-contained (inline styles, no CSS conflicts). All attributes are optional: `
 ## Contributing
 
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
-[![Contributors](https://img.shields.io/github/contributors/pacocartones/free-llm-api-hub)](https://github.com/pacocartones/free-llm-api-hub/graphs/contributors)
 [![Good first issues](https://img.shields.io/badge/contribute-good%20first%20issues-9c4668.svg)](https://github.com/pacocartones/free-llm-api-hub/contribute)
 
 Found an outdated limit, a dead link, or a provider that belongs here? You'll keep this useful for everyone.
@@ -238,31 +237,12 @@ Full guidelines, including what counts as an acceptable source: **[CONTRIBUTING.
 
 Use AI tools if they help you — we do too. We ask for good judgement: understand and test what you send, and check every fact at its source. See [AI_POLICY.md](AI_POLICY.md).
 
-## 🙋 Contributions wanted right now
+### Where to start
 
-Provider facts need checking, and the docs and site need care too. Three ways to help:
+1. Pick a [*good first issue*](https://github.com/pacocartones/free-llm-api-hub/contribute). Each one names the files and the check. A `good first issue` also labelled `data` is not claimed; for other issues, comment `/take` before starting (`/release` frees it).
+2. Confirm a provider fact from the umbrella issues: [**`phone_required`**](https://github.com/pacocartones/free-llm-api-hub/issues/7) or [**`commercial_ok`**](https://github.com/pacocartones/free-llm-api-hub/issues/8) (read the provider's terms).
 
-1. Pick a [*good first issue*](https://github.com/pacocartones/free-llm-api-hub/contribute). These include provider facts, docs and code; each issue names the files and the check. For a provider fact, including a docs source check, cite the official page and the day you read it (UTC). For code or other docs, follow the issue's evidence and acceptance criteria. A `good first issue` also labelled `data` is not claimed; for other issues, comment `/take` before starting. Ready for a larger task? Follow the [path from good first issue to help wanted](CONTRIBUTING.md#from-good-first-issue-to-help-wanted).
-2. Pick a provider from the umbrella issue [**confirm `phone_required`**](https://github.com/pacocartones/free-llm-api-hub/issues/7).
-3. Do the same for [**confirm `commercial_ok`**](https://github.com/pacocartones/free-llm-api-hub/issues/8), reading the provider's terms.
-
-For a provider fact, use the provider's own docs and a real date; if you cannot confirm it, leave the data unchanged and tell us what you read. `/release` frees an issue you claimed. We read every pull request and reply as soon as we can; see [CONTRIBUTING.md](CONTRIBUTING.md#claiming-an-issue).
-
-**October:** help us verify, in the open, which AI APIs are really free. Contributions are welcome all year; Hacktoberfest 2026 no longer rewards pull requests, so none is promised here. One sourced fact beats ten cosmetic edits; see [CONTRIBUTING.md](CONTRIBUTING.md#hacktoberfest).
-
-## Contributors
-
-Thanks to everyone who has verified an entry, fixed a link, or improved the project:
-
-<!-- AUTOGEN:contributors:start -->
-- [Jhansi Oruganti](https://github.com/JhansiOruganti-43) — data: confirm Novita AI free tier is not commercial-use allowed ([PR #27](https://github.com/pacocartones/free-llm-api-hub/pull/27))
-- [Victoria Odalo](https://github.com/OdaloV) — docs: verify Clarifai commercial_ok status ([PR #112](https://github.com/pacocartones/free-llm-api-hub/pull/112))
-- [MikeGatsby](https://github.com/MikeGatsby) — data: verify Datalab hosted-API commercial-use terms (no explicit statement found) ([PR #117](https://github.com/pacocartones/free-llm-api-hub/pull/117))
-- [bcabreraike-cmyk](https://github.com/bcabreraike-cmyk) — docs: explain paced re-verification batches ([PR #169](https://github.com/pacocartones/free-llm-api-hub/pull/169))
-- [Swarnabha Nandi](https://github.com/Swarnabha753) — fix: show clear button when sort is changed ([PR #183](https://github.com/pacocartones/free-llm-api-hub/pull/183))
-- [Manan Bharti](https://github.com/mananbharti) — test: check serializer ORDER against the provider schema ([PR #201](https://github.com/pacocartones/free-llm-api-hub/pull/201))
-- [Piyush](https://github.com/piyusshhjangid) — data: verify Datalab phone requirement and free-tier rate limit ([PR #198](https://github.com/pacocartones/free-llm-api-hub/pull/198))
-<!-- AUTOGEN:contributors:end -->
+For a provider fact, cite the provider's own page and the day you read it (UTC); if you cannot confirm it, leave the data unchanged and tell us what you read. Ready for more? Follow the [path from good first issue to help wanted](CONTRIBUTING.md#from-good-first-issue-to-help-wanted).
 
 ## Project docs
 

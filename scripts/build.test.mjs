@@ -18,7 +18,6 @@ import { esc, stripTags } from './lib/escape.mjs';
 import { mineProviderHistory, assertHistoryPlausible, historyFromRevisions } from './lib/history.mjs';
 import { isoWeek, flattenFieldChanges, groupChangesByWeek, changesRss, xmlEsc, reportChangeUrl } from './lib/changes.mjs';
 import { monthlyReport, reportMonths, monthEndDate, fillMonths, monthSummary, monthBrief } from './lib/state.mjs';
-import { externalContributors, countExternalContributors, githubProfileUrl } from './lib/contributors.mjs';
 import { buildOgManifest } from './lib/og.mjs';
 import { explorerRowHtml, catchTags, catchCellHtml, CATCH_LABELS } from './lib/rows.mjs';
 import { labelTables } from './lib/tables.mjs';
@@ -557,41 +556,6 @@ test('the git-mined history miner is plausible directly (no build needed)', () =
   assertHistoryPlausible(history);
 });
 
-test('external contributors exclude the maintainers and bots by login and count one per person', () => {
-  const commits = [
-    { login: 'pacocartones', name: 'pacocartones', subject: 'maintainer' },
-    { login: 'PacoCartones', name: 'Paco', subject: 'maintainer, other case' },
-    { login: 'LeonMAG', name: 'Leon Marcos', subject: 'maintainer' },
-    { login: 'github-actions[bot]', name: 'github-actions[bot]', subject: 'bot' },
-    { login: null, name: 'dependabot[bot]', subject: 'bot without an account' },
-    { login: 'JhansiOruganti-43', name: 'Jhansi Oruganti', subject: 'first' },
-    { login: 'jhansioruganti-43', name: 'Jhansi Oruganti', subject: 'second, same person' },
-    { login: 'another-dev', name: 'Another Dev', subject: 'external' },
-    { login: null, name: 'No Account', subject: 'commit the API could not link' },
-  ];
-  const got = externalContributors(commits);
-  assert.deepEqual(got.map((c) => c.login ?? c.name), ['JhansiOruganti-43', 'another-dev', 'No Account']);
-  assert.equal(got[0].subject, 'first', 'a person is listed with their FIRST commit');
-  assert.equal(countExternalContributors(commits), 3);
-  assert.equal(githubProfileUrl(got[1]), 'https://github.com/another-dev');
-  assert.equal(githubProfileUrl(got[2]), null);
-});
-
-test('external contributors tolerate empty and malformed input', () => {
-  assert.deepEqual(externalContributors([]), []);
-  assert.deepEqual(externalContributors(undefined), []);
-  assert.deepEqual(externalContributors([null, { login: null, name: '', subject: 'x' }, { login: 'a', name: 'A', subject: '' }]), []);
-});
-
-test('contributor data and scripts carry no e-mail address of any kind', () => {
-  // Identity is the GitHub login. Reports name the file, never the address.
-  const anyAddress = /[\w.+-]+@[\w-]+(?:\.[\w-]+)+/;
-  for (const rel of ['data/contributors.json', 'scripts/lib/contributors.mjs', 'scripts/update-contributors.mjs']) {
-    assert.ok(!anyAddress.test(readFileSync(join(ROOT, rel), 'utf8')), `${rel} contains an e-mail address`);
-  }
-  assert.ok(anyAddress.test('someone@example.invalid'), 'the pattern would catch an address');
-});
-
 test('tracked files reject personal mailboxes except the verified maintainer policy address', () => {
   // The owner authorized Leon's historical identity in policy/docs only.
   // Contributor records remain login-only; this is not a general email exemption.
@@ -604,7 +568,7 @@ test('tracked files reject personal mailboxes except the verified maintainer pol
   const unexpected = (rel, text) => [...text.matchAll(personal)].some(([email]) =>
     !policyFiles.has(rel) || email !== historicalEmail);
   assert.equal(unexpected('CONTRIBUTING.md', historicalEmail), false);
-  assert.equal(unexpected('data/contributors.json', historicalEmail), true, 'no contributor-data exception');
+  assert.equal(unexpected('CONTRIBUTORS.md', historicalEmail), true, 'no contributor-list exception');
   assert.equal(unexpected('CONTRIBUTING.md', historicalEmail.replace('leonaniagomez', 'someone')), true, 'other addresses still fail inside policy files');
   assert.equal(unexpected('CONTRIBUTING.md', 'prefix' + historicalEmail), true, 'partial address matches are not exempt');
   const files = execFileSync('git', ['ls-files', '-z'], { cwd: ROOT, encoding: 'utf8' }).split('\0').filter(Boolean);
@@ -632,18 +596,8 @@ test('every README collection has a generated description', () => {
   }
 });
 
-test('the README Contributors section lists every contributor in data/contributors.json', () => {
+test('the README header has no computed stats line', () => {
   const readme = readFileSync(join(ROOT, 'README.md'), 'utf8');
-  const people = JSON.parse(readFileSync(join(ROOT, 'data/contributors.json'), 'utf8')).contributors || [];
-  assert.ok(people.length >= 4, 'expected at least the four known external contributors, got ' + people.length);
-  for (const p of people) assert.ok(readme.includes(p.name), p.name + ' should be listed in the README Contributors section');
-});
-test('the README shows a live contributors badge, not a computed number', () => {
-  // The contributor count used to be computed into the generated stats line and
-  // could go stale between build passes (it did: 2 while the real count was 3).
-  // It is now a shields.io badge that GitHub resolves live on every view.
-  const readme = readFileSync(join(ROOT, 'README.md'), 'utf8');
-  assert.match(readme, /img\.shields\.io\/github\/contributors\/pacocartones\/free-llm-api-hub/);
   assert.doesNotMatch(readme, /independently verified against the provider's own docs/, 'no computed stats line in the README header');
 });
 

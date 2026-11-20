@@ -27,7 +27,7 @@ test('links: https stay, repository paths become GitHub URLs, pages of the site 
   assert.deepEqual(link('https://example.com/a?b=1'), { href: 'https://example.com/a?b=1', external: true });
   assert.deepEqual(link('https://freellmapihub.com/best/'), { href: 'https://freellmapihub.com/best/', external: false });
   assert.deepEqual(link('docs/architecture.md'), { href: `${REPO}/blob/main/docs/architecture.md`, external: true });
-  assert.deepEqual(link('README.md#contributors'), { href: `${REPO}/blob/main/README.md#contributors`, external: true });
+  assert.deepEqual(link('README.md#use-the-data'), { href: `${REPO}/blob/main/README.md#use-the-data`, external: true });
   assert.deepEqual(link('../../issues/new?template=inaccuracy.yml'), { href: `${REPO}/issues/new?template=inaccuracy.yml`, external: true });
   assert.deepEqual(link('docs/methodology.md'), { href: '/methodology/', external: false }, 'a file with a page goes to the page');
   assert.deepEqual(link('../CONTRIBUTING.md', 'docs/methodology.md'), { href: '/contributing/', external: false });

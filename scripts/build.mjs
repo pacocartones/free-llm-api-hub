@@ -19,7 +19,6 @@ import { esc, stripTags } from './lib/escape.mjs';
 import { mineHistoryAndSnapshots, HISTORY_FIELDS } from './lib/history.mjs';
 import { flattenFieldChanges, groupChangesByWeek, changesRss, weekTitle, formatValue } from './lib/changes.mjs';
 import { monthlyReport, reportMonths, monthEndDate, monthName, monthLabel, pct, monthSummary, monthBrief } from './lib/state.mjs';
-import { githubProfileUrl } from './lib/contributors.mjs';
 import { resolveBestEntries, topEntries, PODIUM_SIZE } from './lib/best.mjs';
 import { agreementsTableHtml, sponsoredBlockHtml, disclosureHtml, inForce, NOT_IN_DATA_SENTENCE, MACHINE_SENTENCE } from './lib/agreements.mjs';
 import { coverage, coverageMainHtml } from './lib/coverage.mjs';
@@ -770,30 +769,10 @@ const comparePairs = compareLib.selectComparePairs(bestEntries.map((e) => e.p));
 // Only same-category pairs are suggested (links); every pair keeps its page and sitemap entry.
 const suggestedPairs = comparePairs.filter((cp) => compareLib.sameComparisonCategory(cp.a, cp.b));
 
-// ---------- contributors (rendered from data/contributors.json, which a
-// maintainer refreshes with scripts/update-contributors.mjs after a merge) ----------
-// The list must NOT be mined from git here: this file runs inside the integrity
-// gate on the PR's merge commit, so a contributor's own unmerged commit would
-// rewrite the README and fail the "generated files in sync" step (see #183).
-const CONTRIBUTORS = JSON.parse(readFileSync(join(ROOT, 'data/contributors.json'), 'utf8'));
-const contributorsMd = () => {
-  const people = CONTRIBUTORS.contributors || [];
-  if (!people.length) return '_No external contributors yet — you could be the first._';
-  return people.map(({ name, subject, login }) => {
-    const url = githubProfileUrl({ login });
-    const label = url ? '[' + name + '](' + url + ')' : '**' + name + '**';
-    const prMatch = subject.match(/\(#(\d+)\)\s*$/);
-    const short = prMatch ? subject.slice(0, prMatch.index).trim() : subject;
-    const prLink = prMatch ? ' ([PR #' + prMatch[1] + '](' + REPO + '/pull/' + prMatch[1] + '))' : '';
-    return '- ' + label + ' — ' + short + prLink;
-  }).join('\n');
-};
-
 let readme = readFileSync(join(ROOT, 'README.md'), 'utf8');
 readme = inject(readme, 'coverage', coverageTable);
 readme = inject(readme, 'collections', collectionsIndexMd);
 readme = inject(readme, 'best', bestTable(topList));
-readme = inject(readme, 'contributors', contributorsMd());
 readme = injectInlineFigures(readme, FIGS);
 {
   const stale = figureErrors(readme, FIGS, 'README.md');
