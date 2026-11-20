@@ -1,11 +1,11 @@
 name: OpenSSF Scorecard
 
 on:
-  # Weekly, plus every push to main, so the public score follows the repository.
+  # Weekly. It used to run on every push to main as well (about 270 runs), but the score
+  # only moves with settings and workflows, which the weekly run and the branch_protection_rule
+  # trigger below already cover; run it by hand after a security-relevant change.
   schedule:
     - cron: "27 4 * * 1"
-  push:
-    branches: [main]
   # Re-run on changes to branch protection, which Scorecard scores.
   branch_protection_rule:
   workflow_dispatch:

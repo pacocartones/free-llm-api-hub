@@ -35,7 +35,7 @@ The workflows below do not write to `main` directly. Their checked-in triggers a
 | `ai-trailer-alert.yml` | push to `main` | `contents: read` — reports only |
 | `pages.yml` | relevant push to `main`, daily schedule, manual | `contents: read`, `pages: write`, `id-token: write` — publishes the site |
 | `codeql.yml` | every pull request, weekly schedule, manual | job-scoped `contents: read`, `actions: read`, `security-events: write` — code scanning |
-| `scorecard.yml` | push to `main`, weekly schedule, branch-protection change, manual | workflow default `read-all`; analysis job: `security-events: write`, `id-token: write` — publishes security results |
+| `scorecard.yml` | weekly schedule, branch-protection change, manual | workflow default `read-all`; analysis job: `security-events: write`, `id-token: write` — publishes security results |
 | `tag-release.yml` | push to `main` (data/providers.json) | `contents: write` — pushes the annotated `vX.Y.Z` tag when the dataset version advances; never writes to `main` |
 | `release-mcp.yml` | `mcp-v*` tag | job-scoped `contents: read` and `id-token: write` — publishes to npm and the MCP registry after environment approval |
 | `welcome.yml` | first issue or pull request opened | job-scoped `issues: write`, `pull-requests: write` — posts a comment without checking out pull-request code |
