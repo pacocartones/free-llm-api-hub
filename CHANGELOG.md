@@ -158,6 +158,60 @@ it does not describe the current catalogue.
   - Moondream publishes 2 requests per second.
   - Nutrient has a new docs URL.
 
+## [2.12.0] — 2026-11-14
+
+Backfilled on 2026-11-20 from the merged pull requests between the v2.11.0 and v2.12.0 tags (`769f7d7`). The tag had no release notes; this section summarises its 182 first-parent commits and does not move the tag. Dataset: 68 providers, `generated` 2026-11-14.
+
+### Added
+- `data_policy` grows from a handful of rows to 26 of 68, each from the provider's own page; a register of the quoted passages (`data/quotes.json`), an offline consistency check, `verify-quotes` to re-read them and `quotes:add` to add a provider's entries (#271, #357, #376, #378, #380–#383, #459, #484).
+- `plan_named`: whether the quoted sentence names the free plan (#372). A "does not train on your prompts" collection and explorer filter (#289, #291).
+- Conditional `commercial_ok` with a reason (#327, thanks @Enard52), and commercial-use confirmations for several providers (#401–#403, #406, #412).
+- New pages: `/coverage/` (what the dataset does not know yet) (#264), Free GPU compute (#275, #297) and `/coding-tools/` (#356), apart from the ranking, with their JSON (`/api/v1/free-gpu.json`, `/api/v1/coding-tools.json`) and `/api/v1/score.json` (#263, #299); `/methodology/` and `/contributing/` rendered from the repository documents (#503).
+- Guides for reranking and vision, and collections of renewing allowances and signup credits (#500); a sourced summary on each provider page (#502).
+- A providers CSV, a CLI to scaffold provider rows and an external source-link check (`check-sources`).
+- CI: Lighthouse accessibility and performance budget (#268), OpenSSF Scorecard (#267), commit-policy check (#331), AI-trailer alert (#333), first-issue greetings and first-merge thanks (#338, #475).
+
+### Changed and fixed
+- Accessibility: captions and header scopes on every table, keyboard-reachable filter chips, announced result counts, 320 px reflow, underlined links in running text and visible focus rings (#343, #359–#368).
+- Site: a green header, a shared page hero and footer, `/changes/` as the one page for what changed, a daily deploy that refreshes the star count, and a 404 built with the shared layout (#407, #419, #426, #491, #493).
+- Security: provider metadata is validated at output sinks, bounded document fetches, safer quickstart encoding, LiteLLM YAML comment-injection prevention, release tagging restricted to pushes on main, and redacted local MCP paths.
+- Data: re-verifications including Tencent Hunyuan and SambaNova; Ollama Cloud flagged for re-verification; Clarifai's unverified status explained; Hugging Face Spaces ZeroGPU added to Free GPU compute (#398).
+- `validate` rejects a `generated` date after today (UTC) (#392). Tests run every `scripts/*.test.mjs` on disk, and portably on Windows (#384).
+- Docs: `RELEASING.md` and the release template (#292), branch and identity rules (#470, #472), `CONTRIBUTORS.md` generated from merged pull requests (#332).
+- MCP: a publication path, disabled until the owner approves it (#342); dependency updates.
+
+## [2.11.0] — 2026-10-13
+
+Backfilled on 2026-11-20 from the [v2.11.0 release notes](https://github.com/pacocartones/free-llm-api-hub/releases/tag/v2.11.0), which also cover v2.10.0.
+
+### Added
+- `data_policy` per provider: `trains_on_prompts`, `retention`, `source` and `checked`. A provider that does not state it on a page we could cite stays empty; that does not mean it trains (#254).
+- The top 10 comes from the score, with a podium of three and a public methodology page (#253).
+- `data-category` and `data-sort` attributes for the embeddable widget (#242). Thanks @mananbharti.
+
+### Changed and fixed
+- Tests: the regex tag filters in the build tests are replaced by string search (#252).
+
+## [2.10.0] — 2026-10-10
+
+Backfilled on 2026-11-20 from the v2.11.0 release notes and the 41 commits between the v2.9.1 and v2.10.0 tags. v2.10.0 was tagged without a release notes page.
+
+### Added
+- The FLLMAPIHUB score engine and the public editorial ratings file (#232), with the score inputs per provider (`is_text_llm`, `model_tier`, `free_limits`), each with its source (#231).
+- `no_expiry` for trial credits that the provider says do not expire (#245).
+- `free_limits` for OCR.space, OVHcloud, Twelve Labs, Datalab and Pinecone Inference (#243); a `models_free` sample for Vercel AI Gateway (#238).
+- A provider compare view and static compare pages, and keyboard navigation for the explorer table (#214, #215).
+- LiteLLM and OpenAI client configs, a published schema and an API stability policy (#209).
+- A weekly change feed, a monthly state report and a report-a-change button (#210).
+- An MCP server over the dataset (`packages/mcp`, not published) (#211).
+
+### Changed and fixed
+- Score: friction counts as confirmed when one of its two parts is known (#234).
+- SambaNova Cloud: `card_required` is unconfirmed because its own pages disagree (#233), and other re-verifications (#246, #250, #251).
+- Weekly re-verification batches (#217, #218, #220, #221, #226, #230); LMNT was removed from the dataset (#217).
+- `rate_limits` states limits, never models or prices, and validation enforces it (#216); `category` follows `free_type` (#223).
+- Site: menu and footer reorganised (#239), a complete sitemap with absolute canonicals (#229), Lighthouse accessibility of at least 95 on key pages (#235), no horizontal scroll from 360 to 860 px (#247–#249), explorer filters and sorting fixed (#213).
+
 ## [2.9.1] — 2026-10-08
 
 Dataset snapshot: 24 providers re-verified against their own docs, and the date-dependent CI failure fixed. No schema change.
@@ -447,3 +501,6 @@ Ground-up redesign into a data-first, continuously-verified open dataset.
 [2.7.0]: https://github.com/pacocartones/free-llm-api-hub/compare/v2.6.0...v2.7.0
 
 [2.13.0]: https://github.com/pacocartones/free-llm-api-hub/compare/v2.12.0...v2.13.0
+[2.12.0]: https://github.com/pacocartones/free-llm-api-hub/compare/v2.11.0...v2.12.0
+[2.11.0]: https://github.com/pacocartones/free-llm-api-hub/compare/v2.10.0...v2.11.0
+[2.10.0]: https://github.com/pacocartones/free-llm-api-hub/compare/v2.9.1...v2.10.0
