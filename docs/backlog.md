@@ -89,7 +89,8 @@ only what confirms.
 
 - [ ] **Explicitly NOT free (do not add; leave in "Notably NOT free" thinking):**
 
-  Moonshot/Kimi intl (needs ≥$1 recharge), DeepInfra (card or prepayment is
+  Moonshot/Kimi intl (needs a $1 minimum recharge; the $5 voucher needs $5 of
+  cumulative recharge; checked 2026-11-20, see [sources](sources.md#checked-with-what-each-page-says)), DeepInfra (card or prepayment is
   required before any service use; checked 2026-11-14 against the
   [official pricing page](https://deepinfra.com/pricing)), Chutes, Together AI
   (official billing article requires a minimum $5 credit purchase; checked
