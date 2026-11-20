@@ -437,7 +437,8 @@
       "is_text_llm": true,
       "model_tier": null,
       "verified": true,
-      "last_verified": "2026-11-20"
+      "last_verified": "2026-11-20",
+      "data_policy": {"trains_on_prompts":false,"retention":"Prompts and responses kept no longer than 30 days by default; stateful features kept until deleted by the user","source":"https://www.alibabacloud.com/help/en/model-studio/data-retention-policy","checked":"2026-11-20","quote":"Without your separate consent, we will not use your business data (including inputs, outputs, and files) to train, fine-tune or improve any foundation model.","note":"Section 1 gives the default 30-day retention; section 5.2 states the no-training commitment for business data. The Model Studio FAQ states the same generally: Alibaba Cloud never uses your data for model training. Safety-flagged content may be kept up to 2 years (section 7.2).","plan_named":false}
     },
     {
       "slug": "modal",

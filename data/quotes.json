@@ -234,6 +234,17 @@
    "page_sha256": "f1171ac6eebcc2d603b61a68252db7717397255318c726cfe2b3d3f34ac6a85c"
   },
   {
+   "id": "alibaba-model-studio.sentence",
+   "slug": "alibaba-model-studio",
+   "kind": "sentence",
+   "text": "Without your separate consent, we will not use your business data (including inputs, outputs, and files) to train, fine-tune or improve any foundation model.",
+   "source_url": "https://www.alibabacloud.com/help/en/model-studio/data-retention-policy",
+   "read_on": "2026-11-20",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "3ac8f2d9f84dd737d3cf1ea173d485c52be9519c9ea88b2105ee5fd2322be8f0"
+  },
+  {
    "id": "modal.sentence",
    "slug": "modal",
    "kind": "sentence",
