@@ -46,9 +46,9 @@ function tagSvg(label, title, subtitle) {
   <rect width="1200" height="630" fill="#0a0d0b"/><rect width="1200" height="630" fill="url(#dots)"/><rect width="1200" height="630" fill="url(#glow)"/>
   <rect x="0.5" y="0.5" width="1199" height="629" fill="none" stroke="#1d2a22"/>
   <g transform="translate(80,72)">
-    <rect x="1" y="1" width="52" height="52" rx="14" fill="none" stroke="#3fce8f" stroke-width="2.4" stroke-opacity="0.35"/>
-    <path d="M16 19 L25 27 L16 35" fill="none" stroke="#3fce8f" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
-    <rect x="29" y="33" width="12" height="4" rx="2" fill="#3fce8f"/>
+    <rect x="1" y="1" width="52" height="52" rx="14" fill="#3fce8f"/>
+    <path d="M16 19 L25 27 L16 35" fill="none" stroke="#0a0d0b" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round"/>
+    <rect x="29" y="33" width="12" height="4.2" rx="2.1" fill="#0a0d0b"/>
   </g>
   <text x="152" y="107" fill="#d8e2dc" font-size="29" font-weight="700">free-llm-api-hub</text>
   <text x="80" y="180" fill="#3fce8f" font-size="24" font-weight="700" letter-spacing="6">&gt; ${esc(label)}</text>

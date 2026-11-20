@@ -1,0 +1,21 @@
+{
+  "name": "Free LLM API Hub",
+  "short_name": "LLM API Hub",
+  "description": "A continuously-verified dataset of free LLM & AI-model APIs.",
+  "start_url": "/",
+  "display": "browser",
+  "background_color": "#0a0d0b",
+  "theme_color": "#0a0d0b",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

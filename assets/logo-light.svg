@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 252 40" width="252" height="40" role="img" aria-label="Free LLM API Hub">
+  <g transform="translate(4 4)">
+    <rect width="32" height="32" rx="8" fill="#0a0d0b"/>
+    <rect x="2.5" y="2.5" width="27" height="27" rx="6.5" fill="none" stroke="#3fce8f" stroke-width="1.6" stroke-opacity=".6"/>
+    <path d="M9 11 L14 16 L9 21" fill="none" stroke="#3fce8f" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+    <rect x="16.5" y="19.4" width="7" height="2.4" rx="1.2" fill="#3fce8f"/>
+  </g>
+  <text x="48" y="26.5" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace" font-size="18" font-weight="700" letter-spacing="-0.3">
+    <tspan fill="#161b18">Free LLM API </tspan><tspan fill="#0b7040">Hub</tspan>
+  </text>
+</svg>

@@ -22,6 +22,7 @@ export const STATIC_TARGETS = [
 // the images made by `npm run og` (they have their own check, scripts/check-og.mjs) and the domain file.
 const NOT_BUILD_OUTPUT = [
   /^site\/og\//, /^site\/fonts\//, /^site\/CNAME$/, /^site\/og\.(png|svg)$/, /^site\/favicon\.svg$/,
+  /^site\/(favicon-32|apple-touch-icon|icon-192|icon-512)\.png$/, /^site\/site\.webmanifest$/,
   /\.(js|css)$/,
 ];
 
