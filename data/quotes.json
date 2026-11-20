@@ -366,6 +366,17 @@
    "page_sha256": "d3e92df175183957a1d4ca502bd3461354f35b21ce0a29275f394b8698ea40ee"
   },
   {
+   "id": "mixedbread.sentence",
+   "slug": "mixedbread",
+   "kind": "sentence",
+   "text": "Data collected under the Free Tier is retained indefinitely.",
+   "source_url": "https://www.mixedbread.com/pages/privacy",
+   "read_on": "2026-11-20",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "f3208efd912fef615ceee1886d289d9c82dcbd1078cf55814ec7fa4104438dac"
+  },
+  {
    "id": "runware.sentence",
    "slug": "runware",
    "kind": "sentence",
