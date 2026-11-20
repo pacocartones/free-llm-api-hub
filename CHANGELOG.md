@@ -7,25 +7,33 @@ Notable changes to the dataset and the project. Format based on [Keep a Changelo
 
 ## [Unreleased]
 
+## [2.14.2] — 2026-11-20
+
+Released as a correction users are relying on: five providers whose free
+access could not be confirmed leave the dataset, AI21's trial credit is
+evaluation-only (`commercial_ok: false`), and NVIDIA NIM's rate limits and
+requirements are no longer stated as confirmed. Three providers gain a prompt
+`data_policy`. No dataset or API shape changes.
+
 ### Removed
 
 - Arli AI, Nebius and Hume, which no longer offer the free access the dataset
   listed, and Clarifai and Ollama Cloud, whose free terms no official page now
   states. All five had been `verified: false`; they move to "Retired or
-  removed" in the README. The dataset has 62 providers, all verified.
+  removed" in the README. The dataset has 62 providers, all verified (#677).
 
 ### Changed and fixed
 
 - AI21 Labs re-verified: the trial credit's validity is given as AI21 states
   it, three months in its docs and 7 days on its pricing page, instead of
-  choosing one; the rate limits are re-confirmed.
+  choosing one; the rate limits are re-confirmed (#677).
 - NVIDIA NIM re-verified: the free credits for prototyping are confirmed, but
   no credit amount, rate limit or expiry is published, and the cited trial
   terms page now returns 404. The rate limits and the phone and card
-  requirements become unconfirmed.
+  requirements become unconfirmed (#677).
 - Novita re-verified: the 90-day validity of the Sandbox credits is not stated
   on any official page, so `expires` is unset; the commercial-use restriction
-  is re-quoted from the current Terms of Service.
+  is re-quoted from the current Terms of Service (#677).
 - Alibaba Cloud Model Studio gains a prompt `data_policy`: no training on
   business data without consent, and inference prompts kept no longer than
   30 days by default (#678). Thanks @BloosomNet.
@@ -570,7 +578,8 @@ Ground-up redesign into a data-first, continuously-verified open dataset.
 
 - Initial curated list: README tables, a root `providers.json`, an interactive explorer, a freshness badge, and a weekly link-check workflow.
 
-[Unreleased]: https://github.com/pacocartones/free-llm-api-hub/compare/v2.14.1...HEAD
+[Unreleased]: https://github.com/pacocartones/free-llm-api-hub/compare/v2.14.2...HEAD
+[2.14.2]: https://github.com/pacocartones/free-llm-api-hub/compare/v2.14.1...v2.14.2
 [2.14.1]: https://github.com/pacocartones/free-llm-api-hub/compare/v2.14.0...v2.14.1
 [2.14.0]: https://github.com/pacocartones/free-llm-api-hub/compare/v2.13.0...v2.14.0
 [2.8.0]: https://github.com/pacocartones/free-llm-api-hub/compare/v2.7.0...v2.8.0
