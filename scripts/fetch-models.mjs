@@ -106,6 +106,11 @@ export const PREFERRED_MODELS = {
   ],
 };
 
+// Pollinations: regular models (not paid-only, not community) from the OpenAI-shaped catalogue.
+export const pollinationsFreeIds = (d) => (Array.isArray(d && d.data) ? d.data : [])
+  .filter((m) => m && m.paid_only === false && m.community !== true && typeof m.id === 'string')
+  .map((m) => m.id);
+
 // A standard OpenAI-shaped /models list that needs no key. The JSON fetcher is
 // injectable so tests can exercise retrieval without making a network request.
 export const openaiPublic = (url, fetchJson = getJson) => async () => {
@@ -120,10 +125,10 @@ const PUBLIC = {
     // Keep only genuinely-free models (the :free suffix), a diverse spread.
     return d.data.map((m) => m.id).filter((id) => typeof id === 'string' && id.endsWith(':free'));
   },
-  pollinations: async () => {
-    const d = await getJson('https://text.pollinations.ai/models');
-    return d.filter((m) => m.tier === 'anonymous').map((m) => m.name);
-  },
+  // Pollinations' current OpenAI-shaped catalogue. Its free usage is the Quest balance, which the FAQ says covers
+  // regular models but not paid-only ones; community models are left out of the sample. (The legacy
+  // text.pollinations.ai/models listed a single "anonymous" model, and anonymous access ended on 2026-11-01.)
+  pollinations: async () => pollinationsFreeIds(await getJson('https://gen.pollinations.ai/v1/models')),
   // Free credit / free-inference tiers with public OpenAI-shaped catalogs.
   'nvidia-nim': openaiPublic('https://integrate.api.nvidia.com/v1/models'),
   modelscope: openaiPublic('https://api-inference.modelscope.cn/v1/models'),
