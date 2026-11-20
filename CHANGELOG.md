@@ -29,6 +29,9 @@ Notable changes to the dataset and the project. Format based on [Keep a Changelo
 - Alibaba Cloud Model Studio gains a prompt `data_policy`: no training on
   business data without consent, and inference prompts kept no longer than
   30 days by default (#678). Thanks @BloosomNet.
+- Mixedbread gains a prompt `data_policy`: Free Tier data is kept
+  indefinitely; whether it trains on it stays unconfirmed, because its privacy
+  policy and terms disagree (#681). Thanks @aryankalantri.
 - AI21 Labs: `commercial_ok` is `false`. Its Terms of Use make a free trial an
   "Evaluation Product" for internal evaluation only (§5.2, §5.3), which covers
   the $10 trial credit. `last_verified` stays 2026-10-08 while AI21's pages
