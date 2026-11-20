@@ -187,7 +187,7 @@
       "is_text_llm": false,
       "model_tier": null,
       "verified": true,
-      "last_verified": "2026-10-08"
+      "last_verified": "2026-11-19"
     },
     {
       "slug": "siliconflow",
@@ -237,7 +237,7 @@
       "model_tier": 2,
       "model_tier_source": {"model":"glm-4.7-flash","arena_model":"glm-4.7-flash","match":"exact","rating":1364.9,"ci":[1359.1,1370.6],"votes":11977,"snapshot":"2026-10-02","url":"https://huggingface.co/datasets/lmarena-ai/leaderboard-dataset"},
       "verified": true,
-      "last_verified": "2026-10-08"
+      "last_verified": "2026-11-19"
     },
     {
       "slug": "ibm-watsonx",
@@ -262,7 +262,7 @@
       "model_tier": null,
       "free_limits": {"requests_per_second":2,"tokens_per_month":300000,"scope":"Lite plan: 2 inference requests per second; 300,000 tokens per month for foundation model inference; not re-read in a plain fetch, figures are those of the entry's own verification","source":"https://www.ibm.com/docs/en/watsonx/saas?topic=cloud-watsonxai-runtime-plans","checked":"2026-10-08"},
       "verified": true,
-      "last_verified": "2026-10-08"
+      "last_verified": "2026-11-19"
     },
     {
       "slug": "ovhcloud-ai-endpoints",
@@ -312,7 +312,7 @@
       "is_text_llm": true,
       "model_tier": null,
       "verified": true,
-      "last_verified": "2026-10-08",
+      "last_verified": "2026-11-19",
       "data_policy": {"trains_on_prompts":false,"retention":"Prompt and generation data for open models not logged or stored without opt-in","source":"https://fireworks.ai/privacy-policy","checked":"2026-10-15","quote":"No AI Training on Your Data: We do not use your prompts, training data, or API inputs to train or improve our AI models without your explicit opt-in.","note":"Last modified 2026-08-11. The page names no plan.","plan_named":false}
     },
     {
@@ -337,7 +337,7 @@
       "is_text_llm": true,
       "model_tier": null,
       "verified": true,
-      "last_verified": "2026-10-08",
+      "last_verified": "2026-11-19",
       "data_policy": {"trains_on_prompts":false,"retention":"Zero data retention for synchronous inference; async inputs held until processing completes, up to 72 hours","source":"https://www.baseten.co/security/","checked":"2026-11-18","quote":"Baseten does not use customer content to train or fine-tune models.","note":"Security page statement covering Model APIs and Dedicated Inference. Synchronous inputs and outputs are not stored; async inputs are held until the request runs, up to 72 hours. Operational metadata is retained separately. The sentence names no plan.","plan_named":false}
     },
     {
@@ -397,7 +397,7 @@
       "free_type": "trial-credit",
       "free_tier": "$10 trial credit, valid 3 months",
       "rate_limits": "Jamba Large/Mini: 10 RPS / 200 RPM by default",
-      "notes": "Card not required for the trial credit itself, required once it expires",
+      "notes": "Card not required for the trial credit itself, required once it expires AI21's docs say the $10 credit is good for three months, while https://www.ai21.com/pricing says \"$10 credits for 7 days\" (both read 2026-11-19).",
       "best_for": "Jamba long-context models on a $10 trial",
       "modalities": ["text"],
       "models_free": ["jamba-large", "jamba-mini"],
@@ -445,7 +445,7 @@
       "name": "Alibaba Cloud (Model Studio)",
       "category": "trial",
       "free_type": "trial-credit",
-      "free_tier": "Typically 1,000,000 tokens per model for new users, Singapore region (International deployment scope) only",
+      "free_tier": "Typically 1,000,000 tokens per model for new users, Singapore region (International deployment scope) only; qwen-plus, qwen-flash and qwen-turbo no longer carry a free quota for new users",
       "rate_limits": "Per-model, account-level limits that apply equally to free-quota and paid calls (International): e.g. qwen-plus 600 RPM / 1,000,000 TPM; qwen-flash and qwen-turbo 600 RPM / 5,000,000 TPM; qwen3.6-plus and qwen3.7-plus 15,000 RPM / 5,000,000 TPM. HTTP 429 when a limit is exceeded; HTTP 403 when the free quota is exhausted",
       "notes": "Covers real-time inference only; excludes batch invocation, fine-tuning, model deployment, custom models, PAI-DSW and OSS fees. Account information must be completed before activation. One quota per account (shared with RAM users); re-registering does not grant a new one.",
       "best_for": "Qwen models with a large free token quota (Singapore region)",
@@ -586,7 +586,7 @@
       "is_text_llm": true,
       "model_tier": null,
       "verified": true,
-      "last_verified": "2026-10-08",
+      "last_verified": "2026-11-19",
       "data_policy": {"trains_on_prompts":null,"retention":"Deleted immediately after each request; the gateway does not retain prompts, outputs, or sensitive data","source":"https://vercel.com/i/secure-ai-gateway","checked":"2026-10-15","quote":"The gateway layer does not retain prompts, outputs, or sensitive data, and user data is deleted immediately after a request completes.","note":"Provider-level retention is separate and may vary by routed provider. Provider ZDR is an opt-in add-on for Pro and Enterprise. The feature table describes Disallow Prompt Training as preventing providers from using prompts for model training and marks it as an included security control."}
     },
     {
@@ -687,7 +687,7 @@
       "is_text_llm": false,
       "model_tier": null,
       "verified": true,
-      "last_verified": "2026-10-08"
+      "last_verified": "2026-11-19"
     },
     {
       "slug": "clarifai",
@@ -718,9 +718,9 @@
       "name": "Arli AI",
       "category": "ongoing",
       "free_type": "renewing-quota",
-      "free_tier": "Free plan ($0): text LLMs for testing, max 5 requests every 2 days per model, 12K context, 1 request at a time, delayed responses; no image generation",
+      "free_tier": "Previously recorded (not on the current pricing page): Free plan ($0): text LLMs for testing, max 5 requests every 2 days per model, 12K context, 1 request at a time, delayed responses; no image generation",
       "rate_limits": "5 requests every 2 days per model; 1 request at a time; max 12K context tokens",
-      "notes": "Free tier is heavily rate-limited for testing. Terms and Conditions (https://www.arliai.com/terms, last updated 2026-07-28), Intellectual Property Rights: «All results that you receive in response to your prompts (or other inputs) from models accessible via the Services will collectively be considered \"Your Content.\" You retain full ownership of Your Content to the extent permitted by applicable law and have the right to use Your Content for any purpose.» No clause limits the free plan to personal or non-commercial use; the pricing page presents it as «Test out the Arli platform». Models served are subject to their own licences (Terms, Third-Party Models: «The models accessible through the Services may include open-weight or third-party models that are subject to their own license terms, acceptable use policies, or other restrictions (including, for example, model-specific use policies that may limit certain use cases).»); some open-weight models restrict commercial use. Provider says prompt/output content is not logged or stored; usage metadata may be retained for up to 60 days. Card requirement for the free tier is not stated on the pricing page.",
+      "notes": "Free tier is heavily rate-limited for testing. Terms and Conditions (https://www.arliai.com/terms, last updated 2026-07-28), Intellectual Property Rights: «All results that you receive in response to your prompts (or other inputs) from models accessible via the Services will collectively be considered \"Your Content.\" You retain full ownership of Your Content to the extent permitted by applicable law and have the right to use Your Content for any purpose.» No clause limits the free plan to personal or non-commercial use; the pricing page presents it as «Test out the Arli platform». Models served are subject to their own licences (Terms, Third-Party Models: «The models accessible through the Services may include open-weight or third-party models that are subject to their own license terms, acceptable use policies, or other restrictions (including, for example, model-specific use policies that may limit certain use cases).»); some open-weight models restrict commercial use. Provider says prompt/output content is not logged or stored; usage metadata may be retained for up to 60 days. Card requirement for the free tier is not stated on the pricing page. On 2026-11-19 https://www.arliai.com/pricing listed only paid plans (Core $15/month, Plus $20, Pro $30, Max $160) and no free plan, so the free tier above could not be confirmed.",
       "best_for": "A permanently-free (heavily rate-limited) test tier",
       "modalities": ["text"],
       "models_free": null,
@@ -734,8 +734,8 @@
       "env_key": "ARLI_API_KEY",
       "is_text_llm": true,
       "model_tier": null,
-      "verified": true,
-      "last_verified": "2026-10-08",
+      "verified": false,
+      "last_verified": null,
       "data_policy": {"trains_on_prompts":null,"retention":"Not stored: processed transiently and immediately discarded; usage metadata up to 60 days","source":"https://www.arliai.com/privacy","checked":"2026-10-15","quote":"We do not log, store, or have access to the content of your prompts or the outputs generated by the models","note":"The policy says nothing about training; the free plan is not named in it.","plan_named":false}
     },
     {
@@ -817,10 +817,10 @@
       "name": "Pollinations.ai",
       "category": "trial",
       "free_type": "trial-credit",
-      "free_tier": "Quest Pollen: create an account, complete eligible Quests on the Quests dashboard and claim the rewards; Quest Pollen is spent before paid Pollen on regular (non-paid-only) models. No anonymous/no-key generation — every generation endpoint requires an API key and costs Pollen ($1 ≈ 1 Pollen). Text, image, video, audio, embeddings and 3D models behind one OpenAI-compatible API",
-      "rate_limits": "No per-request rate limits published for sk_ keys; usage is bounded by the Pollen balance (legacy raw pk_ keys: 1 Pollen per IP per hour)",
+      "free_tier": "Quest balance: rewards are claimed on the dashboard (the API docs name an invite-friends quest worth $2 for each invited friend who tops up more than $2); the docs do not state whether Quest balance is spent before paid balance. No anonymous/no-key generation — every generation endpoint requires an API key and costs Pollen ($1 ≈ 1 Pollen). Text, image, video, audio, embeddings and 3D models behind one OpenAI-compatible API",
+      "rate_limits": "No per-request rate limits for sk_ keys; usage is bounded by the balance. Since 2026-11-01 a pk_ key only identifies an app, and requests that send one get HTTP 401",
       "notes": "The old anonymous 1 req/15s and Seed 1 req/5s tiers (and the watermark/nologo scheme) are gone from the current docs; the API moved to gen.pollinations.ai with keys from enter.pollinations.ai. Quest availability and reward amounts change (the dashboard and the linked issue are the source of truth). No credit card needed to try. Paid-only models require Paid Pollen. Section 8 of the Terms of Service says: \"Model licences vary; verify before commercial use.\" This guidance concerns model licences and does not explicitly establish whether the hosted API or free Quest Pollen tier may be used commercially. commercial_ok remains null. Source: https://github.com/pollinations/pollinations/blob/b9bf075ae6d5931758dae3f88604e9c58f3760a3/pollinations.ai/public/legal/TERMS_OF_SERVICE.md (read 2026-10-16). The previous docs_url pointed at the stale master branch; the default branch is main.",
-      "best_for": "OpenAI-compatible multi-modal API funded by Quest Pollen (no card)",
+      "best_for": "OpenAI-compatible multi-modal API funded by Quest balance (no card)",
       "modalities": ["image", "text", "audio"],
       "models_free": null,
       "expires": null,
@@ -893,7 +893,7 @@
       "free_type": "renewing-quota",
       "free_tier": "Free plan: the Marengo 3.5 Embed API (video, audio, image, text and document inputs) and the Pegasus Analyze API at no cost, plus 600 minutes (10 hours) of video indexing in total",
       "rate_limits": "Embed video/audio: 3,000 RPD, 25 RPM; embed text/image: 3,000 RPD, 600 RPM",
-      "notes": "No credit card for the Free plan, but indexed data expires after 90 days unless upgraded. Marengo produces multimodal embeddings. Not OpenAI-compatible.",
+      "notes": "No credit card for the Free plan, but indexed data expires after 90 days unless upgraded. Marengo produces multimodal embeddings. Not OpenAI-compatible. On 2026-11-19 the pricing page did not list the Marengo/Pegasus free allowances or the 600 indexing minutes; its Free column shows 3 GB of storage and a \"Basic\" workload.",
       "best_for": "Free multimodal (video/audio/image/text) embeddings",
       "modalities": ["embeddings", "vision", "audio", "text"],
       "models_free": null,
@@ -918,7 +918,7 @@
       "free_type": "renewing-quota",
       "free_tier": "25,000 conversions/month (Engine 1 & 2) plus 1,000 Engine 3 conversions/month; max 1 MB file, PDFs up to 3 pages",
       "rate_limits": "500 requests per day per IP address",
-      "notes": "Free searchable-PDF output carries a watermark (raw text extraction is unrestricted); the free key needs only an email, no card. Commercial use permitted.",
+      "notes": "Free searchable-PDF output carries a watermark (raw text extraction is unrestricted); the free key needs only an email, no card. Commercial use permitted. Engine 1 is retired; calls to it are redirected to Engine 2 (OCR API page, 2026-11-19).",
       "best_for": "Classic free OCR (25k conversions/mo, no card)",
       "modalities": ["ocr", "text"],
       "models_free": null,
@@ -934,7 +934,7 @@
       "model_tier": null,
       "free_limits": {"requests_per_day":500,"scope":"free OCR API key, per IP address","source":"https://ocr.space/OCRAPI","checked":"2026-10-09"},
       "verified": true,
-      "last_verified": "2026-10-08",
+      "last_verified": "2026-11-19",
       "playground_url": "https://ocr.space/"
     },
     {
@@ -959,7 +959,7 @@
       "is_text_llm": false,
       "model_tier": null,
       "verified": true,
-      "last_verified": "2026-10-08",
+      "last_verified": "2026-11-19",
       "data_policy": {"trains_on_prompts":false,"retention":"Inputs and parse/extraction outputs: <=48h after processing, unless separate terms accepted; persistent data: see note.","source":"https://www.llamaindex.ai/terms-of-service","checked":"2026-11-17","quote":"Except as you agree under separate terms accepted under Section 4.4, we do not use User Content to train or fine-tune any artificial intelligence or machine learning model.","note":"Terms updated Oct 25, 2026. Chosen LlamaCloud indexes/pipelines remain until deletion/account closure. Separate terms require affirmative admin acceptance, never default; declining keeps access. Accepted terms override conflicting Terms/DPA for covered data. The clause names no plan.","plan_named":false}
     },
     {
@@ -984,7 +984,7 @@
       "is_text_llm": false,
       "model_tier": null,
       "verified": true,
-      "last_verified": "2026-10-08"
+      "last_verified": "2026-11-19"
     },
     {
       "slug": "moondream",
@@ -1016,9 +1016,9 @@
       "name": "Speechmatics",
       "category": "trial",
       "free_type": "trial-credit",
-      "free_tier": "Free plan: $100 credit grant on signup (no payment card) for Speech-to-Text; Text-to-Speech lists the first 1 million characters free",
+      "free_tier": "$100 in free credits on signup (no payment card), one balance across Speech-to-Text, add-ons and Text-to-Speech; Text-to-Speech lists the first 1 million characters free",
       "rate_limits": "Free: 2 concurrent real-time sessions; Batch API: 10 new jobs/s and 50 job-status requests/s (bounded by the $100 credit)",
-      "notes": "One-time $100 credit grant, no card required; to go beyond it, add a card and move to Pro (pay-as-you-go). Accounts created before 1 August 2026 received a one-time $25 transition credit. No data logging for model training by default. Terms of Service 3.1 licenses the Software to produce Integrated Products, 4.4 only bars reselling the Software as a standalone product, and 10.3 assigns to the customer all rights in the Transcripts; Free Usage (5.1) is part of the same terms, and no clause limits it to evaluation or non-commercial use.",
+      "notes": "One-time $100 credit grant, no card required; to go beyond it, add a card and move to Pro (pay-as-you-go). Accounts created before 1 August 2026 received a one-time $25 transition credit. No data logging for model training by default. Terms of Service 3.1 licenses the Software to produce Integrated Products, 4.4 only bars reselling the Software as a standalone product, and 10.3 assigns to the customer all rights in the Transcripts; Free Usage (5.1) is part of the same terms, and no clause limits it to evaluation or non-commercial use. The pricing page (2026-11-19) confirms 2 concurrent real-time sessions on Free; the batch figures above are not on it.",
       "best_for": "High-accuracy STT + TTS on a $100 no-card credit",
       "modalities": ["audio"],
       "models_free": null,
@@ -1041,7 +1041,7 @@
       "name": "Speechify API",
       "category": "ongoing",
       "free_type": "renewing-quota",
-      "free_tier": "500K characters/month TTS (hard cap; pauses until next month), catalog voices, streaming and SSML",
+      "free_tier": "500K characters/month TTS (hard cap; pauses until next month), catalog voices, streaming and SSML; Simba 3.5 drops to 333K characters/month from 2026-11-21 (Simba 3.0/3.2 stay at 500K)",
       "rate_limits": "Free: 3 concurrent requests, 1 request/s sustained (burst 10); hard monthly cap, no top-ups",
       "notes": "Commercial use is allowed on the free tier. No credit card required. Free cannot top up and pauses when the monthly balance runs out. Voice cloning is paid-plan only; voice agents are now an enterprise-only product (no free minutes).",
       "best_for": "Free commercial TTS (500K chars/mo)",
@@ -1130,7 +1130,7 @@
       "is_text_llm": false,
       "model_tier": null,
       "verified": true,
-      "last_verified": "2026-10-08",
+      "last_verified": "2026-11-19",
       "data_policy": {"trains_on_prompts":true,"retention":null,"source":"https://elevenlabs.io/terms-of-use","checked":"2026-10-15","quote":"you may opt out of our use of your Content for training at any time by navigating to the 'Data use' menu in the 'Terms and Privacy' section of your ElevenLabs account.","note":"Terms of Service (non-EEA), last updated 09 Oct 2026. The sentence is addressed to every user and does not name a plan; the same terms define Free Users separately. Whether the Data use menu exists on the free plan is not stated.","plan_named":false}
     },
     {
@@ -1157,7 +1157,7 @@
       "model_tier": null,
       "no_expiry": {"source":"https://docs.sarvam.ai/api/getting-started/ratelimits","checked":"2026-10-09","quote":"Credits are universal and never expire."},
       "verified": true,
-      "last_verified": "2026-10-08",
+      "last_verified": "2026-11-19",
       "data_policy": {"trains_on_prompts":null,"retention":"Retained indefinitely until a workspace Owner configures a period.","source":"https://docs.sarvam.ai/api/platform/data-retention","checked":"2026-10-15","quote":"Until an Owner sets a retention period, your workspace’s data is retained indefinitely.","note":"The page describes workspace-level retention for Model APIs, with per-product overrides. The page names no plan.","plan_named":false}
     },
     {
@@ -1166,7 +1166,7 @@
       "category": "trial",
       "free_type": "trial-credit",
       "free_tier": "€50 signup credits valid for one year: approximately 312 async hours on Solaria-3, 185 async hours on Solaria-1, or 73 real-time hours at current rates",
-      "rate_limits": "30 real-time and 25 async concurrent requests (Starter pay-as-you-go plan that carries the €50 credit)",
+      "rate_limits": "30 real-time and 25 async concurrent requests (Self-serve pay-as-you-go plan that carries the €50 credit)",
       "notes": "One-time grant with no monthly reset; prepaid model: top up once the credit is consumed. General Terms of Use (Gladia Inc, https://www.gladia.io/general-terms-of-use-gladia-inc, read 2026-10-17) section 7 licenses Output solely for «internal, personal and commercial purposes», but conditions the licence on «payment of all applicable fees» and does not mention free credits or trials, so commercial use of the signup credit is unconfirmed. Card requirement not explicitly stated on the pricing page.",
       "best_for": "High-accuracy async + real-time transcription to trial",
       "modalities": ["audio"],
@@ -1182,7 +1182,7 @@
       "is_text_llm": false,
       "model_tier": null,
       "verified": true,
-      "last_verified": "2026-10-08"
+      "last_verified": "2026-11-19"
     },
     {
       "slug": "rime",
@@ -1206,7 +1206,7 @@
       "is_text_llm": false,
       "model_tier": null,
       "verified": true,
-      "last_verified": "2026-10-08",
+      "last_verified": "2026-11-19",
       "data_policy": null
     },
     {
@@ -1241,7 +1241,7 @@
       "free_type": "trial-credit",
       "free_tier": "200M free tokens per model on current embedding models (voyage-4-large, voyage-4, voyage-4-lite, voyage-context-4, voyage-code-4) and on the rerankers listed in the price table (rerank-3, rerank-3-lite); voyage-multimodal-3.5 and voyage-multimodal-3 get 200M text tokens + 150B pixels; legacy voyage-finance-2, voyage-law-2 and voyage-code-2 get 50M — a one-time complimentary allotment per account",
       "rate_limits": "No numeric limit published for accounts without a payment method. With a payment method (Tier 1, free tokens still apply), per model: voyage-4 / voyage-code-4 8M TPM, 2,000 RPM; voyage-4-large / voyage-context-4 3M TPM, 2,000 RPM; voyage-4-lite 16M TPM, 2,000 RPM; voyage-multimodal-3.5 2M TPM, 2,000 RPM; rerank-3 / rerank-2.5 2M TPM, 2,000 RPM; rerank-3-lite / rerank-2.5-lite 4M TPM, 2,000 RPM. HTTP 429 on exceed",
-      "notes": "The allotment is a one-time complimentary balance per model, not a renewing monthly quota. Free tokens do not apply to Batch API usage. Voyage's pricing page is internally inconsistent on rerankers: the prose still names the rerank-2.5/rerank-2 families as free, while the price table gives 200M free tokens to rerank-3 and rerank-3-lite and lists rerank-2.5 under older models with no free tokens. No credit card required to claim. Owned by MongoDB — a first-party model provider, not a proxy.",
+      "notes": "The allotment is a one-time complimentary balance per model, not a renewing monthly quota. Free tokens do not apply to Batch API usage. Voyage's pricing page is internally inconsistent on rerankers: the prose still names the rerank-2.5/rerank-2 families as free, while the price table gives 200M free tokens to rerank-3 and rerank-3-lite and lists rerank-2.5 under older models with no free tokens. No credit card required to claim. Owned by MongoDB — a first-party model provider, not a proxy. On 2026-11-19 the pricing page disagreed on rerankers: its table lists rerank-3 and rerank-3-lite with 200M free tokens, while its prose names rerank-2.5/2 and its older-models section says those get no free tokens.",
       "best_for": "Best-in-class embeddings and reranking with a large free allotment",
       "modalities": ["text", "image", "embeddings", "rerank"],
       "models_free": null,
@@ -1304,7 +1304,7 @@
       "is_text_llm": false,
       "model_tier": null,
       "verified": true,
-      "last_verified": "2026-10-08",
+      "last_verified": "2026-11-19",
       "added": "2026-07-31",
       "data_policy": {"trains_on_prompts":true,"retention":null,"source":"https://cartesia.ai/legal/terms.html","checked":"2026-10-15","quote":"You may request that we not use certain categories of Your Content to train our Models by completing this online form","note":"Section «Training Opt-Out». The request covers selected categories and applies only to later use; earlier uses are not affected. The clause is not tied to a plan; the terms treat free trials in a separate section (2.6).","plan_named":false}
     },
@@ -1315,7 +1315,7 @@
       "free_type": "renewing-quota",
       "free_tier": "App Free plan: 8,000 credits/month (~7 min, up to 500 characters per generation). API: the s2.1-pro-free TTS model is $0 through 2026-11-30 under fair-use limits (pay-as-you-go API, no subscription)",
       "rate_limits": "API: 5 concurrent requests (Starter tier, <$100 paid); s2.1-pro-free under unpublished fair-use limits. App Free plan: 500 characters per generation, 8,000 credits/month",
-      "notes": "Free app plan is personal, non-commercial only (commercial use requires Premium). The $0 API model s2.1-pro-free is pitched for testing, prototyping and smaller businesses but has no TTFA/DPA guarantees. No credit card required for the Free plan.",
+      "notes": "Free app plan is personal, non-commercial only (commercial use requires Premium). The $0 API model s2.1-pro-free is pitched for testing, prototyping and smaller businesses but has no TTFA/DPA guarantees. No credit card required for the Free plan. On 2026-11-19 the pricing docs listed s2.1-pro-free at $0 but no longer stated the 2026-11-30 end date or the fair-use limits.",
       "best_for": "Free multilingual TTS with voice cloning for personal projects",
       "modalities": ["audio"],
       "models_free": null,
@@ -1338,7 +1338,7 @@
       "category": "trial",
       "free_type": "trial-credit",
       "free_tier": "Free plan: 5,000 credits one-time (no monthly renewal) across TTS, dubbing, speech and translation tools",
-      "rate_limits": "Not published by the provider; bounded by the one-time 5,000-credit grant",
+      "rate_limits": "API concurrency 1 on the Free plan; no request-rate limit published; bounded by the one-time 5,000-credit grant",
       "notes": "Uses its own MARS voice models (not OpenAI-compatible). Free credits are a one-time grant, not monthly. Per-feature limits (characters per generation, watermarking) are not readable on the current pricing page. Card and commercial terms not stated on the pricing page.",
       "best_for": "Expressive multilingual TTS, STT and dubbing on one free quota",
       "modalities": ["audio"],
@@ -1353,7 +1353,7 @@
       "is_text_llm": false,
       "model_tier": null,
       "verified": true,
-      "last_verified": "2026-10-08",
+      "last_verified": "2026-11-19",
       "added": "2026-07-31"
     },
     {
@@ -1377,7 +1377,7 @@
       "is_text_llm": false,
       "model_tier": null,
       "verified": true,
-      "last_verified": "2026-10-08",
+      "last_verified": "2026-11-19",
       "added": "2026-07-31"
     },
     {
@@ -1419,13 +1419,14 @@
       "docs_url": "https://www.nutrient.io/api/pricing/data-extraction-api/",
       "phone_required": null,
       "card_required": false,
-      "commercial_ok": null,
+      "commercial_ok": "conditional",
+      "commercial_ok_condition": "The free plan allows limited commercial use without a wallet; Starter and Growth list commercial use.",
       "openai_compatible": false,
       "env_key": "NUTRIENT_API_KEY",
       "is_text_llm": false,
       "model_tier": null,
       "verified": true,
-      "last_verified": "2026-10-08",
+      "last_verified": "2026-11-19",
       "added": "2026-07-31"
     },
     {
@@ -1449,7 +1450,7 @@
       "is_text_llm": false,
       "model_tier": null,
       "verified": true,
-      "last_verified": "2026-10-08",
+      "last_verified": "2026-11-19",
       "added": "2026-07-31"
     },
     {
@@ -1484,7 +1485,7 @@
       "category": "trial",
       "free_type": "trial-credit",
       "free_tier": "Free credits for new API accounts, amount not published (Upstage's FAQ mentions free credits; the $10 figure is no longer on its docs or pricing page) — Solar LLM (chat + embeddings) plus Document Parse / OCR / information extraction; basic testing needs no login or card; Studio document agents include 10 free runs each",
-      "rate_limits": "Tier 0 (below the Explore commitment tier): Solar Pro 4 100 RPM / 250,000 TPM; Solar Mini 4 100 RPM / 50,000 TPM; Embeddings 100 RPM / 300,000 TPM; Document OCR 3 requests/second, 500 pages/minute",
+      "rate_limits": "Tier 0 (below the Explore commitment tier): Solar Pro 4 100 RPM / 250,000 TPM; Solar Mini 4 100 RPM / 250,000 TPM (50,000 TPM on legacy tiers); Embeddings 100 RPM / 300,000 TPM; Document OCR 3 requests/second, 500 pages/minute",
       "notes": "The Solar Pro 4 free window (2026-08-05 to 2026-08-11) has ended; standard pricing is $0.30 input / $1.20 output per 1M tokens from 2026-10-11 (UTC), after a 70%-off phase that runs until 2026-10-10. As of 2026-11-19 the getting-started, pricing and FAQ pages (https://console.upstage.ai/docs/resources/faq) publish no signup-credit amount; the FAQ says \"You will not be billed upon registering a payment method as long as you have free credits available\" and \"No login or credit card is required for basic testing.\" Beyond the free credits, API use is pay-per-use, with prepaid commitment tiers from $100/mo adding bonus credit and higher limits. Studio agent runs need no card. A separate institutional grant (up to 1 year of free Solar Pro + Document Parse) exists for eligible schools, hospitals and nonprofits only. Solar Pro 2/3 and Solar Mini are deprecated on 2026-10-30 (KST). Data policy evidence: Terms of Use (effective 2026-09-21), Article 22(6): \"Member Input/Output Data generated through services provided free of charge (excluding services temporarily provided free of charge for promotional purposes in anticipation of paid services) may be used for service provision and improvement, as well as for research and development of artificial intelligence technologies (including training).\" Article 22(5) otherwise excludes training without separate consent, and Article 15(1) says free credits are given under promotional policies; the Getting Started page says Upstage does not store or reuse data sent to its APIs. Privacy Policy, Free Tier API row: \"Until the end of service provision or a separately notified period.\" Whether the signup credit counts as the promotional exception is not stated, so trains_on_prompts stays null (unconfirmed) and only the retention is recorded. Sources read 2026-11-19: https://www.upstage.ai/terms-of-service ; privacy policy read 2026-10-13: https://www.upstage.ai/privacy-policy/updated-aug-26-2026",
       "best_for": "Solar LLM + document OCR behind one OpenAI-compatible key",
       "modalities": ["text", "ocr", "embeddings"],
@@ -1500,7 +1501,7 @@
       "is_text_llm": true,
       "model_tier": null,
       "verified": true,
-      "last_verified": "2026-10-08",
+      "last_verified": "2026-11-19",
       "added": "2026-07-31",
       "data_policy": {"trains_on_prompts":null,"retention":"Until the end of service provision or a separately notified period","source":"https://www.upstage.ai/terms-of-service","checked":"2026-11-19","quote":"may be used for service provision and improvement, as well as for research and development of artificial intelligence technologies (including training).","note":"Terms effective 2026-09-21. Art. 22(6) excludes free services offered temporarily for promotion before paid use; Art. 15(1) grants free credits under promotional policies. Whether the API signup credit is such a service is not stated. Retention comes from the free-tier API row of its data policy."}
     },
@@ -1509,7 +1510,7 @@
       "name": "Veryfi",
       "category": "ongoing",
       "free_type": "renewing-quota",
-      "free_tier": "Free Forever plan: up to 100 documents/month — OCR plus structured data extraction (receipts, invoices, and 100+ document types)",
+      "free_tier": "Free Forever plan: up to 100 documents/month with API access to 100+ document types; the Document to JSON structured extraction is not included on Free",
       "rate_limits": "100 documents/month on the free plan",
       "notes": "No credit card required. The 'Free Forever' 100 docs/mo tier is the standing free tier (a separate 14-day trial unlocks paid features). Proprietary OCR / document-intelligence REST API.",
       "best_for": "Free-forever document OCR (100 docs/mo, no card)",
@@ -1525,7 +1526,7 @@
       "is_text_llm": false,
       "model_tier": null,
       "verified": true,
-      "last_verified": "2026-10-08",
+      "last_verified": "2026-11-19",
       "added": "2026-07-31"
     },
     {
@@ -1573,7 +1574,7 @@
       "is_text_llm": false,
       "model_tier": null,
       "verified": true,
-      "last_verified": "2026-10-08",
+      "last_verified": "2026-11-19",
       "added": "2026-07-31",
       "data_policy": {"trains_on_prompts":false,"retention":null,"source":"https://smallest.ai/terms-of-service","checked":"2026-10-15","quote":"We will not use such User Content or Input to train and improve our Services or to develop new products and services.","note":"Effective 2026-10-13. The terms offer «free or trial versions» (Trial Services); the clause on Your Content does not mention them.","plan_named":false}
     },
@@ -1633,7 +1634,7 @@
       "name": "W&B Inference",
       "category": "trial",
       "free_type": "trial-credit",
-      "free_tier": "Serverless Inference credits on the Free plan \"for a limited time\" (amount not published); Free accounts have a default spending cap of $100/month",
+      "free_tier": "Free plan with a default $100/month spending cap; the pricing page shows \"Free credit for a limited time\" on the Pro plan, not on Free, and publishes no Free credit amount",
       "rate_limits": "No RPM/TPM published; per-project and per-user concurrency limits (HTTP 429 when exceeded); default spending cap $100/month on the Free tier",
       "notes": "W&B Inference is now documented as CoreWeave Forge Serverless Inference (docs.wandb.ai redirects to docs.coreweave.com). The $100/month figure is a default spending cap, not a stated free-credit amount. When credits run out, Free accounts must activate pay-as-you-go on the Billing tab or upgrade; CoreWeave requires prepayment for paid access. Available only from supported geographic locations. OpenAI-compatible endpoint at api.inference.wandb.ai/v1; API keys are created at forge.coreweave.com. The pricing page lists \"$5/mo free credit for a limited time\" only under Pro and \"Billed monthly\" under Free, so the Free amount is unclear.",
       "best_for": "Open-weight frontier models (DeepSeek, Llama, Qwen, GLM, GPT-OSS) behind one unified API with Weave tracing",
@@ -1675,7 +1676,7 @@
       "model_tier": null,
       "free_limits": {"requests_per_second":5,"requests_per_minute":200,"scope":"typhoon-v2.5-30b-a3b-instruct","source":"https://docs.opentyphoon.ai/en/rate-limits/","checked":"2026-10-08"},
       "verified": true,
-      "last_verified": "2026-10-08",
+      "last_verified": "2026-11-19",
       "data_policy": {"trains_on_prompts":true,"retention":null,"plan_named":false,"source":"https://opentyphoon.ai/tac","checked":"2026-10-17","quote":"The Applicant hereby perpetually grants, on a royalty-free basis, the Company the right to use such Input and the Intellectual Property Rights relating thereto for the purpose of providing the Services, developing and training the Company's Artificial Intelligence models","note":"Terms permit Input for «developing and training the Company's Artificial Intelligence models»; no retention period is stated. FAQ: «Yes, we are collecting usage data from the Typhoon API. We use this data to improve the model and the API.» The FAQ does not specify prompt training or retention."}
     }
   ]
