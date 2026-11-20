@@ -2,6 +2,7 @@ name: 🔧 Report an outdated or incorrect entry
 description: A provider's free tier, limits, or link changed and the dataset is behind.
 title: "[outdated] "
 labels: ["data"]
+type: Data
 body:
   - type: markdown
     attributes:
