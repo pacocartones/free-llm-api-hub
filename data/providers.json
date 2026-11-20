@@ -411,6 +411,7 @@
       "env_key": "NLPCLOUD_API_KEY",
       "is_text_llm": true,
       "model_tier": null,
+      "free_limits": null,
       "verified": true,
       "last_verified": "2026-11-20",
       "data_policy": {"trains_on_prompts":null,"retention":"API data is not stored","source":"https://nlpcloud.com/privacy.html","checked":"2026-11-17","quote":"For privacy reasons, we DO NOT keep any data sent to our API.","note":"The policy says API text is processed and responses returned without storing data. This storage statement does not establish whether data is used for model training. The sentence does not name a free or trial plan.","plan_named":false}
