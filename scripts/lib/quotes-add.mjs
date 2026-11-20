@@ -3,20 +3,28 @@
 import { methodFor, readHeaders, htmlToText, collapse, sha256, absenceHits, declaredLanguage, sameLanguage, ABSENCE_TERMS } from './page-text.mjs';
 import { noteSpans, claimsPageAbsence, totalHits } from './quotes.mjs';
 import { fetchPublicUrl } from './public-fetch.mjs';
+import { isPdf, pdfToText, responseBytes } from './pdf-text.mjs';
+import { PDF_METHOD } from './page-text.mjs';
 
 const KIND_ORDER = { sentence: 0, note_passage: 1, absence_check: 2 };
 
 /** Reads a page the way verify-quotes does. @returns {Promise<{ok: boolean, text?: string, why?: string}>} */
 export async function readText(url, fetchImpl = fetchPublicUrl, lang = 'en') {
-  let res; let html;
+  let res; let html; let pdfText;
   try {
     res = await fetchImpl(url, { headers: readHeaders(lang), timeoutMs: 30000 });
-    if (res.ok) html = await res.text();
+    if (res.ok && isPdf(res.headers.get('content-type'), url)) pdfText = await pdfToText(await responseBytes(res));
+    else if (res.ok) html = await res.text();
   }
   catch (e) { return { ok: false, why: `could not read ${url}: ${String((e && e.message) || e).slice(0, 80)}` }; }
   if (!res.ok) {
     try { res.body?.cancel()?.catch(() => {}); } catch { /* the page is already being abandoned */ }
     return { ok: false, why: `${url} answered HTTP ${res.status}` };
+  }
+  if (typeof pdfText === 'string') {
+    if (!sameLanguage('en', lang)) return { ok: false, why: `${url} is a PDF; PDF sources are English-only for now` };
+    if (pdfText.length < 200) return { ok: false, why: `${url} is a PDF with only ${pdfText.length} characters of text (a scanned PDF cannot be read this way)` };
+    return { ok: true, text: pdfText, method: PDF_METHOD };
   }
   const text = htmlToText(html);
   if (text.length < 200) return { ok: false, why: `${url} gave only ${text.length} characters of text (a page that needs scripts cannot be read this way)` };
@@ -36,7 +44,7 @@ export async function entriesFor(slug, policy, read, { today, passageUrls = {}, 
   const problems = []; const entries = [];
   const pages = new Map();
   const page = async (url) => { if (!pages.has(url)) pages.set(url, await read(url)); return pages.get(url); };
-  const make = (kind, n, fields, url, pg) => ({ id: `${slug}.${kind}${n ? `.${n}` : ''}`, slug, kind, ...fields, source_url: url, read_on: today, lang, method: methodFor(lang), page_sha256: sha256(pg.text) });
+  const make = (kind, n, fields, url, pg) => ({ id: `${slug}.${kind}${n ? `.${n}` : ''}`, slug, kind, ...fields, source_url: url, read_on: today, lang, method: pg.method || methodFor(lang), page_sha256: sha256(pg.text) });
   if (typeof policy.quote === 'string' && policy.quote) {
     const pg = await page(policy.source);
     if (!pg.ok) problems.push(pg.why);
@@ -58,7 +66,7 @@ export async function entriesFor(slug, policy, read, { today, passageUrls = {}, 
       else {
         const hits = absenceHits(pg.text);
         if (totalHits(hits) > 0) problems.push(`the note of ${slug} says something about the whole page, and the page has ${JSON.stringify(hits)} of ${ABSENCE_TERMS.join(', ')}: say what the sentence or the clause names, not the page`);
-        else entries.push({ id: `${slug}.absence_check`, slug, kind: 'absence_check', terms: ABSENCE_TERMS, hits, source_url: policy.source, read_on: today, lang, method: methodFor(lang), page_sha256: sha256(pg.text) });
+        else entries.push({ id: `${slug}.absence_check`, slug, kind: 'absence_check', terms: ABSENCE_TERMS, hits, source_url: policy.source, read_on: today, lang, method: pg.method || methodFor(lang), page_sha256: sha256(pg.text) });
       }
     }
   }
