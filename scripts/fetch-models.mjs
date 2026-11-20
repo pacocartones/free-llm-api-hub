@@ -87,11 +87,16 @@ export async function getJson(url, headers, { fetchImpl = fetch } = {}) {
   }
 }
 
-// Model IDs verified in the providers' public API catalogues on 2026-11-14.
+// Model IDs verified in the providers' public API catalogues on 2026-11-20 (nvidia-nim) and 2026-11-14 (modelscope).
 // Preferences remain advisory: sample() ignores IDs absent from a live response.
 export const PREFERRED_MODELS = {
   'nvidia-nim': [
-    'nvidia/nemotron-3-super-120b-a12b',
+    'google/gemma-3-12b-it',
+    'mistralai/mistral-large-4-1t-a52b',
+    'moonshotai/kimi-k3.1-pro',
+    'nvidia/nemotron-3-ultra-550b-a55b',
+    'nvidia/nemotron-3.5-super-vl-120b-a12b',
+    'z-ai/glm-5.3-flash',
   ],
   modelscope: [
     'deepseek-ai/DeepSeek-V4-Flash-0731',
