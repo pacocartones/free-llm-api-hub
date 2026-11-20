@@ -2466,10 +2466,14 @@ test('the narrow-screen rules that keep the pages from scrolling sideways stay i
 });
 
 test('the stat tiles keep a reserved height, so filling them in does not push the page down', () => {
-  // explorer.js writes the tiles after load; Lighthouse on a phone measured a 0.068 shift without the reserved
-  // height and 0 with it (desktop 0.032 and 0). The block is empty in the HTML, so the height lives in the CSS.
+  // Lighthouse on a phone measured a 0.068 shift when explorer.js filled an empty block (0 with the reserved height).
+  // The build now renders the four tiles into the HTML (dated by data.generated) and explorer.js only repaints them;
+  // the reserved height stays as a guard for the repaint.
   const html = readFileSync(join(ROOT, 'site/index.html'), 'utf8');
-  assert.match(html, /<div class="stats" id="stats"[^>]*><\/div>/);
+  const block = html.match(/<div class="stats" id="stats"[^>]*>([\s\S]*?)<!-- AUTOGEN:stats:end --><\/div>/);
+  assert.ok(block, 'the stats block carries its AUTOGEN markers');
+  assert.equal((block[1].match(/<div class="stat /g) || []).length, 4, 'four tiles are in the HTML before any script runs');
+  assert.match(block[1], /providers tracked/);
   const css = readFileSync(join(ROOT, 'site/styles.css'), 'utf8').replace(/\s+/g, ' ');
   assert.match(css, /@media \(scripting: enabled\) \{ \.stats \{ min-height: 157px; \} \}/);
   assert.match(css, /@media \(scripting: enabled\) and \(max-width: 640px\) \{ \.stats \{ min-height: 288px; \} \}/);
