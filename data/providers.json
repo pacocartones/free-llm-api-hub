@@ -822,7 +822,7 @@
       "notes": "The old anonymous 1 req/15s and Seed 1 req/5s tiers (and the watermark/nologo scheme) are gone from the current docs; the API moved to gen.pollinations.ai with keys from enter.pollinations.ai. Quest availability and reward amounts change (the dashboard and the linked issue are the source of truth). No credit card needed to try. Paid-only models require Paid Pollen. Section 8 of the Terms of Service says: \"Model licences vary; verify before commercial use.\" This guidance concerns model licences and does not explicitly establish whether the hosted API or free Quest Pollen tier may be used commercially. commercial_ok remains null. Source: https://github.com/pollinations/pollinations/blob/b9bf075ae6d5931758dae3f88604e9c58f3760a3/pollinations.ai/public/legal/TERMS_OF_SERVICE.md (read 2026-10-16). The previous docs_url pointed at the stale master branch; the default branch is main. Wallet and Quest rules from the FAQ at https://enter.pollinations.ai (read in a browser on 2026-11-20).",
       "best_for": "OpenAI-compatible multi-modal API funded by Quest balance (no card)",
       "modalities": ["image", "text", "audio"],
-      "models_free": null,
+      "models_free": ["black-forest-labs/flux.1-kontext-pro", "deepseek/deepseek-v4-flash", "meta/llama-3.3-70b-instruct", "microsoft/mai-image-2.6", "minimax/minimax-m3", "moonshotai/kimi-k2.6", "openai/gpt-5-nano", "x-ai/grok-4.20"],
       "expires": null,
       "docs_url": "https://gen.pollinations.ai/docs",
       "phone_required": false,
