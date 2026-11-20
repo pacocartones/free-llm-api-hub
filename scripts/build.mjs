@@ -7,6 +7,7 @@
 //   - site/providers.csv, the documented scalar projection for spreadsheets
 // Zero dependencies. Run with: node scripts/build.mjs   (or `npm run build`)
 
+import { shortenProse } from './lib/short-text.mjs';
 import { readFileSync, writeFileSync, mkdirSync, readdirSync, rmSync, existsSync } from 'node:fs';
 import { execSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
@@ -108,7 +109,10 @@ function bestTable(entries) {
     .map((e) => {
       const { p } = e;
       const label = docsHref(p.docs_url) ? `**[${esc(p.name)}](${docsHref(p.docs_url)})**` : `**${esc(p.name)}**`;
-      return `| ${e.rank} | ${label}${flags(p)} | ${e.total.toFixed(1)}<br><sub>${e.confirmed} of ${e.of} inputs</sub> | ${esc(p.free_tier)} | ${esc(p.notes)} | ${verifiedCell(p)} |`;
+      // Long catches are cut at a sentence for the README; the provider page keeps the full text.
+      const catchText = shortenProse(p.notes);
+      const catchCell = esc(catchText.text) + (catchText.shortened ? ` [More ↗](${SITE}/p/${p.slug})` : '');
+      return `| ${e.rank} | ${label}${flags(p)} | ${e.total.toFixed(1)}<br><sub>${e.confirmed} of ${e.of} inputs</sub> | ${esc(p.free_tier)} | ${catchCell} | ${verifiedCell(p)} |`;
     })
     .join('\n');
   return `${head}\n${body}`;

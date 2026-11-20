@@ -293,3 +293,15 @@ test('external cancellation stops the source sweep instead of continuing to Wayb
   );
   assert.equal(requests, 1);
 });
+
+test('checkOne: a 2xx answer that is too large or compressed is reachable, a 4xx one is not', async () => {
+  const failWith = (name, status) => async () => { const e = new Error(name); e.name = name; e.status = status; throw e; };
+  for (const name of ['ResponseTooLargeError', 'UnsupportedContentEncodingError']) {
+    assert.deepEqual(await checkOne('https://docs.example.com/big', { fetchImpl: failWith(name, 200) }), { url: 'https://docs.example.com/big', ok: true, status: 200 });
+    const bad = await checkOne('https://docs.example.com/big', { fetchImpl: failWith(name, 404) });
+    assert.equal(bad.ok, false);
+    assert.equal(bad.status, 404);
+  }
+  const noStatus = await checkOne('https://docs.example.com/big', { fetchImpl: failWith('ResponseTooLargeError', undefined) });
+  assert.equal(noStatus.ok, false, 'without a status the answer is not proven reachable');
+});

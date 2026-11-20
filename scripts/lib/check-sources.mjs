@@ -1,5 +1,6 @@
 // Source-link checking with the network injected, so tests never need a connection.
 
+import { readBoundedText } from './bounded-read.mjs';
 import { fetchPublicUrl } from './public-fetch.mjs';
 
 export const USER_AGENT = 'free-llm-api-hub-source-check/1.0 (+https://github.com/pacocartones/free-llm-api-hub)';
@@ -60,39 +61,6 @@ const cancelBody = (body, reason) => {
   } catch { /* the response is already being abandoned */ }
 };
 
-const readBoundedText = async (response, maxBytes) => {
-  const declared = response.headers?.get?.('content-length')?.trim() || '';
-  if (/^\d+$/.test(declared) && BigInt(declared) > BigInt(maxBytes)) {
-    cancelBody(response.body);
-    throw new Error(`response exceeds ${maxBytes}-byte limit`);
-  }
-  if (!response.body) throw new Error('response body is not a readable stream');
-
-  const reader = response.body.getReader();
-  const decoder = new TextDecoder();
-  const chunks = [];
-  let bytesRead = 0;
-  try {
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      if (value.byteLength > maxBytes - bytesRead) {
-        try {
-          const cancellation = reader.cancel(new Error(`response exceeds ${maxBytes}-byte limit`));
-          cancellation?.catch(() => {});
-        } catch { /* preserve the size error */ }
-        throw new Error(`response exceeds ${maxBytes}-byte limit`);
-      }
-      bytesRead += value.byteLength;
-      chunks.push(decoder.decode(value, { stream: true }));
-    }
-    chunks.push(decoder.decode());
-    return chunks.join('');
-  } finally {
-    reader.releaseLock();
-  }
-};
-
 async function fetchOnce(fetchImpl, url, { timeoutMs, maxBytes, pace, signal, accept }) {
   throwIfAborted(signal);
   await pace();
@@ -104,6 +72,8 @@ async function fetchOnce(fetchImpl, url, { timeoutMs, maxBytes, pace, signal, ac
     headers: { 'User-Agent': USER_AGENT, Accept: accept },
   });
 }
+
+const BODY_ONLY_ERRORS = new Set(['ResponseTooLargeError', 'UnsupportedContentEncodingError']);
 
 /** Check a URL with one bounded GET. The body is not needed and is cancelled immediately. */
 export async function checkOne(url, {
@@ -126,7 +96,9 @@ export async function checkOne(url, {
     return { url, ok: false, status: response.status || 0, error: `HTTP ${response.status || 0}` };
   } catch (error) {
     throwIfAborted(signal);
-    return { url, ok: false, status: 0, error: errorText(error) };
+    // A 2xx answer whose body is too large or compressed was still reachable: the body is not needed here.
+    if (BODY_ONLY_ERRORS.has(error?.name) && error.status >= 200 && error.status < 300) return { url, ok: true, status: error.status };
+    return { url, ok: false, status: error?.status || 0, error: errorText(error) };
   }
 }
 
@@ -151,7 +123,7 @@ export async function waybackSnapshot(url, {
       cancelBody(response.body);
       return null;
     }
-    const data = JSON.parse(await readBoundedText(response, maxBytes));
+    const data = JSON.parse(await readBoundedText(response, maxBytes, { requireBody: true }));
     const closest = data?.archived_snapshots?.closest;
     return closest?.available && typeof closest.url === 'string' ? closest.url : null;
   } catch (error) {

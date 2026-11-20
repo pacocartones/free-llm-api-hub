@@ -92,7 +92,7 @@ For each provider on the worklist (`npm run worklist`, or just the reverify batc
 
 ### Optional: external source sweep
 
-Run `npm run check-sources` when you want to check the source links themselves. It collects each provider's `docs_url` and the external links in [`docs/sources.md`](sources.md), requests each once with a bounded `GET`, waits 15 seconds at most, and sends at most two requests per second with the `free-llm-api-hub-source-check` User-Agent. Requests use the repository's public-URL transport, which rejects private destinations and revalidates DNS and every redirect.
+The [`monthly-checks.yml`](../.github/workflows/monthly-checks.yml) workflow runs this check, `verify-quotes` and the internal link check on the 1st of each month and opens a `Monthly source check` issue when one fails; treat a 403 or timeout from the runner as a lead to re-check from a normal connection. Run `npm run check-sources` when you want to check the source links themselves. It collects each provider's `docs_url` and the external links in [`docs/sources.md`](sources.md), requests each once with a bounded `GET` (a 2xx answer counts as reachable even when its body is too large to read or compressed, because the body is not needed), waits 15 seconds at most, and sends at most two requests per second with the `free-llm-api-hub-source-check` User-Agent. Requests use the repository's public-URL transport, which rejects private destinations and revalidates DNS and every redirect.
 
 The output starts with `Checked N source URLs.`. If every URL answers, it prints `✓ no dead or unreachable sources found.` and exits 0. Otherwise it prints a Markdown table with these columns and exits 1:
 

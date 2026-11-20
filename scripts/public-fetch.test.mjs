@@ -166,7 +166,7 @@ test('an oversized Content-Length is rejected before reading and destroys the bo
 
   await assert.rejects(
     fetchImpl('https://docs.example.com/readme', { maxBytes: 5 }),
-    /exceeds 5-byte limit/
+    (error) => /exceeds 5-byte limit/.test(error.message) && error.status === 200
   );
   assert.equal(source.destroyed, true);
 });
@@ -183,7 +183,7 @@ test('a compressed response is rejected explicitly and destroyed instead of deco
     agent: {},
   });
 
-  await assert.rejects(fetchImpl('https://docs.example.com/readme'), /unsupported Content-Encoding: gzip/);
+  await assert.rejects(fetchImpl('https://docs.example.com/readme'), (error) => /unsupported Content-Encoding: gzip/.test(error.message) && error.status === 200);
   assert.equal(source.destroyed, true);
   assert.equal(calls[0].options.headers['accept-encoding'], 'identity');
 });

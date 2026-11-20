@@ -1,0 +1,38 @@
+name: Monthly source checks
+
+# Runs the checks kept out of CI because they read the network: internal links,
+# provider/evidence URLs and quoted passages. Reports only: it opens or updates one issue
+# with our own URLs, ids and statuses, never page text, and never edits data.
+on:
+  schedule:
+    - cron: '23 6 1 * *' # 1st of each month, UTC; delivery is best effort.
+  workflow_dispatch: {}
+
+permissions: {}
+
+concurrency:
+  group: monthly-checks
+  cancel-in-progress: false
+
+jobs:
+  check:
+    if: ${{ github.repository == 'pacocartones/free-llm-api-hub' && github.ref == 'refs/heads/main' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+      - name: Test the report renderer
+        run: node --test scripts/monthly-checks.test.mjs
+      - name: Run the monthly checks and publish the result
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node scripts/monthly-checks.mjs --publish
