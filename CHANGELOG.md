@@ -7,6 +7,45 @@ Notable changes to the dataset and the project. Format based on [Keep a Changelo
 
 ## [Unreleased]
 
+## [2.14.1] — 2026-11-20
+
+Released as a correction users are relying on: three providers no longer offer
+the free access the dataset listed, and 44 of the 50 entries last verified on
+2026-10-08 were re-checked against their providers' own pages. No dataset or
+API shape changes. Provider availability, sampled model IDs and confirmed
+values can change as sources are re-verified.
+
+### Changed and fixed
+
+- **No longer free, now `verified: false`:** Arli AI (paid plans only), Nebius
+  (no published trial credit) and Hume (no published pricing) (#659, #660).
+- Re-verification of the 2026-10-08 cohort, with every changed fact quoted from
+  the provider's own page (#656, #659, #660, #661). Notable corrections:
+  - Novita prices no LLM at $0.
+  - Upstage no longer publishes a signup-credit amount (#658), and whether it
+    trains on prompts is unconfirmed (#657).
+  - Speechmatics has a single $100 balance; Speechify, W&B, Alibaba, Veryfi,
+    Nutrient, Twelve Labs, Unstructured and Contextual AI terms were corrected.
+  - Pollinations: publishable `pk_` keys return 401 since 2026-11-01.
+- Baseten gains a prompt `data_policy` (#647). Thanks @BloosomNet.
+- `models_free` samples refreshed with the largest-catalogue-first sampler
+  (#662); Pollinations is read from its current public catalogue (#665).
+- Site: the page heading sits inside `main`, navs are labelled, and the
+  collections list only verified providers (#655); the home page inlines only
+  the fields the explorer reads, from 282 KB to 241 KB (#664); a refreshed mark,
+  PNG icons and web manifest, and new social images (#666, #667).
+- README: the TL;DR leads, overlapping sections are merged, the contributors
+  list moves to CONTRIBUTORS.md, and long catches in the top table are cut at a
+  sentence with a link to the full text (#668, #669, #671). OpenRouter's free
+  ceiling is 50 requests a day (1,000 after a $10 credit purchase). The "Notably
+  NOT free" claim about OpenAI, Anthropic and xAI is dated 2026-11-20 with
+  quotes, and Kimi's $1 minimum recharge is recorded (#670).
+- Maintenance: a monthly workflow runs the link, source and quote checks and
+  opens an issue when one fails; `check-sources` no longer reports large or
+  compressed pages as dead (#673). One shared bounded reader, and the
+  ollama-cloud model extractor is removed because its catalogue does not mark
+  the free subset (#672). CHANGELOG sections for 2.10.0 to 2.12.0 (#674).
+
 ## [2.14.0] — 2026-11-19
 
 Released as a correction users are relying on: AssemblyAI's paid gateway was
@@ -495,7 +534,8 @@ Ground-up redesign into a data-first, continuously-verified open dataset.
 
 - Initial curated list: README tables, a root `providers.json`, an interactive explorer, a freshness badge, and a weekly link-check workflow.
 
-[Unreleased]: https://github.com/pacocartones/free-llm-api-hub/compare/v2.14.0...HEAD
+[Unreleased]: https://github.com/pacocartones/free-llm-api-hub/compare/v2.14.1...HEAD
+[2.14.1]: https://github.com/pacocartones/free-llm-api-hub/compare/v2.14.0...v2.14.1
 [2.14.0]: https://github.com/pacocartones/free-llm-api-hub/compare/v2.13.0...v2.14.0
 [2.8.0]: https://github.com/pacocartones/free-llm-api-hub/compare/v2.7.0...v2.8.0
 [2.7.0]: https://github.com/pacocartones/free-llm-api-hub/compare/v2.6.0...v2.7.0
