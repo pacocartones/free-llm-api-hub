@@ -1,7 +1,7 @@
 {
   "$schema": "./schema.json",
   "version": "2.14.2",
-  "generated": "2026-11-20",
+  "generated": "2026-11-21",
   "source": "https://github.com/pacocartones/free-llm-api-hub",
   "note": "Canonical dataset. README tables, badge-freshness.json and the interactive site are all generated from this file — do not hand-edit them. `verified: true` means the core facts (tier, limits, key catch, link) were independently confirmed against the provider's own docs on `last_verified`. `verified: false` means sourced from community tracking and not yet independently re-confirmed here — treat those as indicative. Attribute fields (openai_compatible, modalities, best_for) are progressively backfilled and may be null.",
   "providers": [
@@ -911,8 +911,9 @@
       "env_key": "MOONDREAM_API_KEY",
       "is_text_llm": false,
       "model_tier": null,
+      "free_limits": {"requests_per_second":2,"scope":"Free plan ($5/month credit); 2 requests/sec on the free tier","source":"https://moondream.ai/pricing","checked":"2026-11-21"},
       "verified": true,
-      "last_verified": "2026-10-16",
+      "last_verified": "2026-11-21",
       "data_policy": {"trains_on_prompts":false,"retention":"No longer than necessary to provide the Service","source":"https://moondream.ai/terms","checked":"2026-10-15","quote":"M87 Labs will not use Customer Content or Outputs to Train any model or adapter that is made generally available by M87 Labs (including the base Moondream models), or to Train any model or adapter for the benefit of any third party, except where you explicitly opt in under a separate written agreement.","note":"Commercial use of the free tier is unclear. §4.1: «your internal business or personal purposes»; §4.2: «commercially exploit the Service or any portion of the Service». The terms do not name the free plan.","plan_named":false}
     },
     {
