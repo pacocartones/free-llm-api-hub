@@ -1,7 +1,7 @@
 {
   "$schema": "./schema.json",
   "version": "2.14.2",
-  "generated": "2026-11-20",
+  "generated": "2026-11-22",
   "source": "https://github.com/pacocartones/free-llm-api-hub",
   "note": "Canonical dataset. README tables, badge-freshness.json and the interactive site are all generated from this file — do not hand-edit them. `verified: true` means the core facts (tier, limits, key catch, link) were independently confirmed against the provider's own docs on `last_verified`. `verified: false` means sourced from community tracking and not yet independently re-confirmed here — treat those as indicative. Attribute fields (openai_compatible, modalities, best_for) are progressively backfilled and may be null.",
   "providers": [
@@ -422,7 +422,7 @@
       "free_type": "trial-credit",
       "free_tier": "Typically 1,000,000 tokens per model for new users, Singapore region (International deployment scope) only; qwen-plus, qwen-flash and qwen-turbo no longer carry a free quota for new users",
       "rate_limits": "Per-model, account-level limits (International): e.g. qwen-plus 600 RPM / 1,000,000 TPM; qwen-flash 600 RPM / 5,000,000 TPM; qwen3.6-plus and qwen3.7-plus 15,000 RPM / 5,000,000 TPM. HTTP 429 when a limit is exceeded; HTTP 403 when the free quota is exhausted",
-      "notes": "Covers real-time inference only; excludes batch invocation, fine-tuning, model deployment, custom models, PAI-DSW and OSS fees. Account information must be completed before activation. One quota per account (shared with RAM users); re-registering does not grant a new one.",
+      "notes": "Covers real-time inference only; excludes batch invocation, fine-tuning, model deployment, custom models, PAI-DSW and OSS fees. Account information must be completed before activation. One quota per account (shared with RAM users); re-registering does not grant a new one. Commercial terms: Model Studio Service Agreement (https://terms.alicdn.com/legal-agreement/terms/common_platform_service/20230728213935489/20230728213935489.html, effective 2026-09-02, read 2026-11-22) contemplates developing apps and providing services to others (§4.3.3) and tells users to evaluate carefully before external commercial use (§7.6); it prohibits only reselling the service and training competing products (§4.6), and its free-quota clauses (§3.2.3, §4.7) set no evaluation-only limit. But the service-specific terms (https://help.aliyun.com/en/model-studio/bailian-service-notes, read 2026-11-22) §III.4 and the Trial Features note §5 restrict content generated through 'model trials' to evaluating model performance, 'not for any other purpose, including any commercial purpose' — scoped to trial/experience entrances (Experience Plaza), while the free-quota page (https://www.alibabacloud.com/help/en/model-studio/new-free-quota, read 2026-11-22) itself calls the quota a 'free trial' and the pricing page (https://www.alibabacloud.com/help/en/model-studio/model-pricing, read 2026-11-22) says nothing about commercial or production use. No official sentence settles whether the evaluation-only restriction attaches to free-quota API calls, so commercial_ok remains null.",
       "best_for": "Qwen models with a large free token quota (Singapore region)",
       "modalities": ["text"],
       "models_free": null,
@@ -437,7 +437,7 @@
       "is_text_llm": true,
       "model_tier": null,
       "verified": true,
-      "last_verified": "2026-11-20",
+      "last_verified": "2026-11-22",
       "data_policy": {"trains_on_prompts":false,"retention":"Prompts and responses kept no longer than 30 days by default; stateful features kept until deleted by the user","source":"https://www.alibabacloud.com/help/en/model-studio/data-retention-policy","checked":"2026-11-20","quote":"Without your separate consent, we will not use your business data (including inputs, outputs, and files) to train, fine-tune or improve any foundation model.","note":"Section 1 gives the default 30-day retention; section 5.2 states the no-training commitment for business data. The Model Studio FAQ states the same generally: Alibaba Cloud never uses your data for model training. Safety-flagged content may be kept up to 2 years (section 7.2).","plan_named":false}
     },
     {
