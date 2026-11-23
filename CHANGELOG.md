@@ -7,12 +7,6 @@ Notable changes to the dataset and the project. Format based on [Keep a Changelo
 
 ## [Unreleased]
 
-### Changed and fixed
-
-- Alibaba Cloud Model Studio: `free_limits` now records the OAuth
-  authentication free quota of 2,000 calls per day for model inference,
-  separate from the API-key token quota (#556).
-
 ## [2.14.2] — 2026-11-20
 
 Released as a correction users are relying on: five providers whose free
