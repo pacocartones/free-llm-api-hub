@@ -42,6 +42,31 @@ Notable changes to the dataset and the project. Format based on [Keep a Changelo
   Base Tier, the default for all API keys (10/second once the balance is at
   least $10), cited to the official rate-limits page (#689). Thanks
   @Abhishekkumar071.
+- Re-verification batch (agent-assisted, official pages read 2026-11-24) for
+  Tencent Hunyuan, Groq, OpenRouter, Cloudflare Workers AI and Cohere.
+  `last_verified` is unchanged for all five, because each still records a
+  sign-up fact (card, phone or commercial use) that no current official page
+  states. Within that limit:
+  - Tencent Hunyuan: the TokenHub package can be claimed once per account
+    for each model, and the offer may continue or change after 2026-12-31.
+    Real-name verification is now cited to the quick start, and the backup
+    API hosts are listed. The terms page was re-read and the no-training
+    clause still holds.
+  - Groq: `trains_on_prompts` is now `false`. Its Services Agreement §4.2
+    bars training on inputs and outputs unless the customer allows it. The
+    notes say that qwen/qwen3.8-27b is a Preview model, for evaluation only.
+  - OpenRouter: two `:free` models that are no longer in the catalog are
+    removed from the sample.
+  - Cohere: the pricing page's sentence that trial keys are not for
+    production or commercial use now backs `commercial_ok: false`.
+  - Groq: the Free plan tab of the rate-limits page, read in a browser,
+    shows the same limits as the dataset.
+  - Cloudflare Workers AI: limits, pricing and data policy re-confirmed.
+    `@cf/google/gemma-3-12b-it` and `@cf/meta/llama-3.1-8b-instruct` are
+    gone from the model catalog and leave the sample.
+    `@cf/google/gemma-4-26b-a4b-it`, a free-access model on the pricing page,
+    joins it. `model_tier` moves from 2 to 3 (LMArena snapshot 2026-10-02,
+    gemma-4-26b-a4b, 1437.5).
 
 ## [2.14.2] — 2026-11-20
 
