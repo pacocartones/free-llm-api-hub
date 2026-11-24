@@ -30,13 +30,7 @@ Fixing a rate limit means editing one field plus the files regenerated from it â
 
 **Leave `version` and `generated` alone.** The two lines at the top of `data/providers.json` are the release: `generated` is the day of the dataset release and changes only together with `version`, in a release pull request (see [RELEASING.md](RELEASING.md)). Your dates go in the fields you checked (`last_verified`, `added`, `checked`). The *Dataset integrity* check fails if a data pull request moves `generated`: every pull request used to bump that one line, so any two open data pull requests conflicted on it.
 
-**Describe your change in a changelog fragment, not in `CHANGELOG.md`.** Add one small file, `changes/unreleased/<short-name>.md` (lowercase letters, digits and hyphens), in the changelog's own format:
-
-```markdown
-### Changed and fixed
-
-- Modal re-verified: the Starter plan's monthly credit is still not settled for commercial use (#688).
-```
+**Describe your change in a changelog fragment, not in `CHANGELOG.md`.** Add one small file, `changes/unreleased/<short-name>.md` (lowercase letters, digits and hyphens), in the changelog's own format: a section heading line such as `### Changed and fixed`, a blank line, then one entry per line such as `- Modal re-verified: the Starter plan's monthly credit is still not settled for commercial use (#688).` (see [changes/README.md](changes/README.md)).
 
 Use one or more of the sections `### Added`, `### Changed and fixed`, `### Removed`, `### Breaking changes and upgrade` and `### Security`, each with entries starting with `- `. Write the PR number if you know it; the maintainer adds it and the `Thanks @user` credit otherwise. The release moves every fragment into `CHANGELOG.md` (`npm run release:prepare`), so no two pull requests edit the same lines. A change users would not notice (docs, tests, CI) needs no fragment. `npm test` checks the format.
 
