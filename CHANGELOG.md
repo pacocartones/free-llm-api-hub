@@ -7,6 +7,15 @@ Notable changes to the dataset and the project. Format based on [Keep a Changelo
 
 ## [Unreleased]
 
+### Changed and fixed
+
+- NLP Cloud: `rate_limits` now gives the Free plan's 2 parallel requests
+  next to Pay-as-you-go's 10, and says that no per-minute limit is published
+  for free access (#685). Thanks @Sumit-sourabh45.
+- Modal re-verified: the Starter plan's monthly credit is still not settled
+  for commercial use, because the No-Fee Use Limitations its terms refer to
+  are not published; `commercial_ok` stays unknown (#688). Thanks @BloosomNet.
+
 ## [2.14.2] — 2026-11-20
 
 Released as a correction users are relying on: five providers whose free
