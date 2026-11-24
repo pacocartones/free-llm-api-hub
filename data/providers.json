@@ -681,7 +681,7 @@
       "category": "ongoing",
       "free_type": "perpetual",
       "free_tier": "Free crowdsourced text & image generation; anonymous API key '0000000000' (no registration), or register to earn kudos for priority",
-      "rate_limits": "Queue-based priority via kudos (no fixed quota); anonymous requests get lowest priority under load",
+      "rate_limits": "Queue-based priority via kudos (no fixed daily quota); official service reference sets 2/second and 90/minute per IP on text, chat (configurable default) and image submit routes (2/sec per registered API key; polling 60/min text/chat, 10/min image; default concurrency 30); anonymous requests get lowest priority under load",
       "notes": "Community-powered volunteer network — model availability and speed vary with worker supply, so it is not a fixed-SLA service. No card, no phone. Kudos never expire and cannot be sold. Commercial use is conditional: each model carries its own licence (aihorde.net UI displays 'Commercial use: allowed' or 'Pick something else if you plan to sell what you make or use it in a business'), and the official AI Horde FAQ (https://aihorde.net/faq/) says paid services built on the API must give back to the Horde at least as much as they take.",
       "best_for": "Anonymous, no-signup free generation (variable speed)",
       "modalities": ["text", "image"],
@@ -696,6 +696,7 @@
       "openai_base_url": null,
       "is_text_llm": true,
       "model_tier": null,
+      "free_limits": {"requests_per_second":2,"requests_per_minute":90,"scope":"ordinary IP addresses on text (/v2/generate/text/async), chat (/v2/generate/chat/async, configurable default) and image (/v2/generate/async) submit routes in Haidra-Org/AI-Horde (code defaults unless deployment-overridden; registered API keys also capped at 2 req/sec per key and endpoint, anonymous key '0000000000' shares 60 req/sec per key and endpoint, still bound by the per-IP limits). No daily quota; queue priority uses kudos","source":"https://raw.githubusercontent.com/Haidra-Org/AI-Horde/main/docs/reference/service_limits.md","checked":"2026-11-24"},
       "verified": true,
       "last_verified": "2026-11-14"
     },
