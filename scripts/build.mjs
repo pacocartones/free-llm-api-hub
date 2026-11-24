@@ -39,6 +39,8 @@ import { COLLECTIONS as SHARED_COLLECTIONS } from './lib/collections.mjs';
 import * as compareLib from './lib/compare.mjs';
 import { requirementsHtml, limitsHtml, glanceHtml, modelsHtml, dataPolicyHtml } from './lib/provider-sections.mjs';
 import { aboutHtml } from './lib/provider-summaries.mjs';
+import { fontHead, fingerprintSite } from './lib/assets.mjs';
+import { securityTxt } from './lib/security-txt.mjs';
 import { markdownToHtml } from './lib/markdown.mjs';
 import { bestFactsHtml } from './lib/best-facts.mjs';
 import { providerFigures, expandFigures, injectInlineFigures, figureErrors } from './lib/figures.mjs';
@@ -684,11 +686,12 @@ function htmlPageRaw({ title, desc, canonical, main, jsonld, prefix = '../', noi
 ${CSP}
 ${THEME_GUARD}
 ${canonical ? `<link rel="canonical" href="${htmlEsc(canonical)}">
-` : ''}<link rel="icon" href="${prefix}favicon.svg" type="image/svg+xml">
+` : ''}<link rel="icon" href="${prefix}favicon.ico" sizes="32x32">
+<link rel="icon" href="${prefix}favicon.svg" type="image/svg+xml">
 <link rel="icon" href="${prefix}favicon-32.png" type="image/png" sizes="32x32">
 <link rel="apple-touch-icon" href="${prefix}apple-touch-icon.png">
 <link rel="manifest" href="${prefix}site.webmanifest">
-<link rel="preload" href="${prefix}fonts/jetbrains-mono-700.woff2" as="font" type="font/woff2" crossorigin>
+${fontHead(prefix)}
 <meta name="theme-color" content="#0a0d0b">
 <meta name="color-scheme" content="dark light">
 <meta property="og:title" content="${htmlEsc(title)}">
@@ -920,6 +923,7 @@ const homeStatsHtml = (() => {
 let indexHtml = readFileSync(join(ROOT, 'site/index.html'), 'utf8');
 indexHtml = inject(indexHtml, 'csp', CSP);
 indexHtml = inject(indexHtml, 'themeguard', THEME_GUARD);
+indexHtml = inject(indexHtml, 'fonts', fontHead(''));
 indexHtml = inject(indexHtml, 'rows', homeRows);
 indexHtml = inject(indexHtml, 'stats', homeStatsHtml);
 // The "New here?" strip above the explorer: what the list is, what verified means, how to use it (lib/home-first-use.mjs).
@@ -2411,6 +2415,16 @@ const isDateRelative = (rel) => rel.startsWith('site/p/') || rel.startsWith('sit
 // are excluded for the same reason.
 const isGitLogDerived = (rel) => rel === 'site/feed.xml' || rel === 'site/api/v1/history.json' || rel === 'site/updates.html' || rel.startsWith('site/updates/') ||
   rel === 'site/changes.xml' || rel === 'site/api/v1/changes.json' || rel.startsWith('site/changes/') || rel.startsWith('site/state/') || rel === 'site/sitemap-state.xml';
+// ---------- /.well-known/security.txt ----------
+// RFC 9116 contact file from SECURITY.md's two channels; its Expires date comes from lib/security-txt.mjs, not the clock.
+mkdirSync(join(ROOT, 'site/.well-known'), { recursive: true });
+writeFileSync(join(ROOT, 'site/.well-known/security.txt'), securityTxt({ site: SITE, repo: REPO }));
+
+// ---------- asset fingerprints (?v=<hash8>) ----------
+// Last step that writes HTML: every page now references styles, scripts and fonts with the hash of their bytes
+// (lib/assets.mjs), so they can be cached for a year. It runs before the derived fingerprints so those pin the final pages.
+fingerprintSite(join(ROOT, 'site'));
+
 const derivedFingerprints = deriveFingerprints();
 if (derivedFingerprints) {
   writeFileSync(join(ROOT, 'derived-fingerprints.json'), JSON.stringify(derivedFingerprints, null, 2) + String.fromCharCode(10));
