@@ -9,6 +9,7 @@
 
 import { shortenProse } from './lib/short-text.mjs';
 import { measurementId, analyticsCspSources, consentScript, withAnalytics } from './lib/analytics.mjs';
+import { providerLinkTargets, tagProviderLinks } from './lib/provider-links.mjs';
 import { readFileSync, writeFileSync, mkdirSync, readdirSync, rmSync, existsSync } from 'node:fs';
 import { execSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
@@ -1203,10 +1204,12 @@ for (const p of providers) {
   // "Visit website": the provider's main site, derived from the docs URL by stripping
   // common docs/console/api subdomains so it points at the marketing homepage.
   let websiteBtn = '';
+  let websiteHref = '';
   try {
     const u = new URL(docsHref(p.docs_url));
     const host = u.hostname.replace(/^(docs|console|platform|developer|developers|api|dashboard|cloud|build|support|help|inference-docs)\./, '');
-    websiteBtn = `<a class="btn website" href="${u.protocol}//${host}" target="_blank" rel="noopener">Visit website ↗</a>`;
+    websiteHref = `${u.protocol}//${host}`;
+    websiteBtn = `<a class="btn website" href="${websiteHref}" target="_blank" rel="noopener">Visit website ↗</a>`;
   } catch (_) { /* no/invalid docs URL — skip the website button */ }
   // "Compare with …": the static comparisons this provider appears in, plus the
   // interactive view pre-filled with it.
@@ -1262,7 +1265,7 @@ for (const p of providers) {
   });
   writeFileSync(
     join(ROOT, `site/p/${p.slug}.html`),
-    htmlPage({ title: `${p.name} — free tier & limits · Free LLM API Hub`, desc: `${p.name}: ${p.free_tier}`.slice(0, 180), canonical: `${SITE}/p/${p.slug}`, main, jsonld, ogImage: `${SITE}/og/p/${p.slug}.png`, scripts: ['pager.js'] })
+    htmlPage({ title: `${p.name} — free tier & limits · Free LLM API Hub`, desc: `${p.name}: ${p.free_tier}`.slice(0, 180), canonical: `${SITE}/p/${p.slug}`, main: tagProviderLinks(main, providerLinkTargets(p, { website: websiteHref })), jsonld, ogImage: `${SITE}/og/p/${p.slug}.png`, scripts: ['pager.js'] })
   );
 
   // Embeddable per-provider badge. Same rule as the repo badge: the colour tracks
@@ -1337,7 +1340,7 @@ const privacyAnalytics = GA_ID
 <h3>1. Analytics</h3>
 <ul>
 <li><strong>Purpose:</strong> count visits and see which pages are useful.</li>
-<li><strong>What is collected:</strong> pages viewed, the page you came from, approximate location (country/city, derived from your IP address, which Google Analytics 4 does not log or store), device, browser, screen size and timing of your visit. Cookies: <code>_ga</code> and <code>_ga_&lt;id&gt;</code>, to tell visits apart.</li>
+<li><strong>What is collected:</strong> pages viewed, the page you came from, approximate location (country/city, derived from your IP address, which Google Analytics 4 does not log or store), device, browser, screen size and timing of your visit, and how you use the site: filters and sort order in the provider explorer, what you type in its search box (cut to 60 characters, never sent if it looks like an email address or a phone number), which kind of code snippet you copy, which data files you download, which comparisons and collections you open, and which provider pages you follow. Cookies: <code>_ga</code> and <code>_ga_&lt;id&gt;</code>, to tell visits apart.</li>
 <li><strong>Role of Google:</strong> processor, acting on our instructions under Google's data processing terms.</li>
 </ul>
 <h3>2. Advertising &amp; personalised measurement (Google signals)</h3>
@@ -2280,7 +2283,7 @@ for (const cp of comparePairs) {
   const main =
     pageHero({ crumbs: `<a href="../../">Home</a> / <a href="../">Compare</a> / ${htmlEsc(title)}`, h1: `${htmlEsc(title)}`, lede: `Both offer ${htmlEsc(cp.shared.join(', '))} on their free plan. Every field below comes from the dataset and is checked against each provider's own docs; <em>not confirmed</em> means nobody has confirmed that field yet — not that the answer is no.` }) +
     `<main id="main"><div class="wrap prose">` +
-    compareLib.compareTableHtml([a, b], { prefix: '../../', scores: scoreMap }) +
+    tagProviderLinks(compareLib.compareTableHtml([a, b], { prefix: '../../', scores: scoreMap }), [...providerLinkTargets(a), ...providerLinkTargets(b)]) +
     `<div class="prov-actions" style="margin-top:22px"><a class="btn primary" href="../?compare=${a.slug},${b.slug}">Add a provider to this comparison →</a></div>` +
     `<h2>Other comparisons</h2><nav class="colls">${compareLinksHtml('../../', cp.path)}</nav>` +
     `<p class="prov-back"><a href="../../#explorer">← All providers</a></p>` +

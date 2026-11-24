@@ -131,6 +131,25 @@ Pages:
 
 Client JS: `site/site.js` (loaded on EVERY page) = theme toggle, live GitHub stars (6h cache), "/" to focus search, code-block copy buttons, mobile nav toggle. `site/explorer.js` = homepage explorer logic, including keyboard row navigation (roving tabindex: arrow Up/Down, Home/End, Enter opens the provider page; the movement rule is `rowKeyTarget` in `scripts/lib/rows.mjs`). `site/compare.js` = the compare view picker. `site/widget.js` = the embeddable widget. All scripts run under a hash-based Content-Security-Policy.
 
+### GA4 product events (only with analytics consent)
+
+When analytics is configured (`GA_MEASUREMENT_ID`, see above) and the visitor has granted the **analytics** category, `consent.js` (source `scripts/lib/consent.client.js`) sends these custom events through one delegated listener per event type. Before consent, with only the advertising category, or with everything rejected, `track()` is a no-op. No parameter carries personal data: values come from fixed lists or validated slugs, and the only free text, the explorer's search box, is normalised, cut to 60 characters and dropped when it looks like an email address or a long number.
+
+| Event | Parameters | Fires when |
+| --- | --- | --- |
+| `outbound_provider_click` | `provider` (slug), `link_type` (`docs`, `website`, `playground`, `models`, `limits_source`, `data_policy`) | a link carrying `data-provider` / `data-link` is clicked or middle-clicked. The build adds both attributes (`scripts/lib/provider-links.mjs`) on provider pages and static comparisons. |
+| `copy_snippet` | `snippet` (`curl`, `python`, `env_key`, `embed`, `api_url`, `other`) | a code block's Copy button (the kind is read from the block's first word) or an API endpoint's Copy button |
+| `explorer_filter` | `filter_name` (`category`, `modality`, `no_card`, `no_phone`, `commercial`, `text_only`, `no_training`, `openai_compatible`, `verified`), `filter_value` (`all`/`ongoing`/`trial`, a modality option, or `on`/`off`) | a category button, the modality menu or a filter chip changes |
+| `explorer_sort` | `sort_key` (`recommended`, `name`, `category`, `free_tier`, `notes`, `verified`), `sort_dir` (`asc`/`desc`) | a column header or the sort menu |
+| `compare_view` | `pair` (`a-vs-b` for a static page, `a,b[,c,d]` for a shared `?compare=` link) | once per page view of a comparison |
+| `collection_view` | `collection` (slug) | once per page view of `/collections/<slug>` |
+| `api_download` | `file` (path, such as `providers.json` or `api/v1/litellm.yaml`) | a link to one of the site's own data files: `providers.json`/`.csv`, `api/v1/*.json`/`.yaml`, `llms.txt`, `llms-full.txt`, `badge-*.json` |
+| `site_search` | `search_term` (lower-case, max. 60 characters) | the explorer search box, after 1.5 s without typing, on Enter or when it loses focus; an identical consecutive query is sent once |
+
+In the GA4 stream, enhanced measurement keeps page views on real loads, scrolls, outbound clicks and file downloads. Its "page changes based on browser history events" and "site search" options are **off**: the explorer rewrites its URL with `history.replaceState` on every keystroke, so they would send one page view or search per key. `site_search` replaces that. The custom events add the provider-specific detail under their own names; they do not replace GA's automatic outbound-click and file-download events.
+
+**Mark as key events in GA4:** `outbound_provider_click` (a visitor leaves for a provider, the site's main outcome), `copy_snippet` (a visitor takes code to use a provider) and `api_download` (dataset or API reuse). The others are for understanding behaviour, not outcomes.
+
 ## 5. Design system (`site/styles.css`)
 - Terminal-green identity: `--accent:#3fce8f`, self-hosted JetBrains Mono, CSS vars + `[data-theme]` dark/light (persisted), SVG icon sprite (`ic-*`), `>_`-style prompts, AA contrast.
 - **Header identical on every page** — keep `--header-bg` opaque (a translucent value lets content bleed through the blur).
