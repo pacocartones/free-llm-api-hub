@@ -42,6 +42,7 @@ import { aboutHtml } from './lib/provider-summaries.mjs';
 import { markdownToHtml } from './lib/markdown.mjs';
 import { bestFactsHtml } from './lib/best-facts.mjs';
 import { providerFigures, expandFigures, injectInlineFigures, figureErrors } from './lib/figures.mjs';
+import { firstUseHtml } from './lib/home-first-use.mjs';
 import { badgeSvg } from './lib/badge-svg.mjs';
 import { codeHtmlEsc, curlChatQuickstart, pythonChatQuickstart, pythonEmbeddingsQuickstart, pythonStringLiteral } from './lib/quickstart.mjs';
 import { providersCsv } from './lib/provider-csv.mjs';
@@ -921,6 +922,8 @@ indexHtml = inject(indexHtml, 'csp', CSP);
 indexHtml = inject(indexHtml, 'themeguard', THEME_GUARD);
 indexHtml = inject(indexHtml, 'rows', homeRows);
 indexHtml = inject(indexHtml, 'stats', homeStatsHtml);
+// The "New here?" strip above the explorer: what the list is, what verified means, how to use it (lib/home-first-use.mjs).
+indexHtml = inject(indexHtml, 'firstuse', firstUseHtml(providers, { slaDays: SLA_DAYS }));
 indexHtml = inject(indexHtml, 'data', inlineData);
 // The schema.org Dataset block (Google Dataset Search), from CITATION.cff and the data: lib/dataset-jsonld.mjs.
 indexHtml = inject(indexHtml, 'dataset', datasetJsonLdScript(datasetJsonLd({ data, citation: parseCitation(readFileSync(join(ROOT, 'CITATION.cff'), 'utf8')), site: SITE, asOf: ASOF })));

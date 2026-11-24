@@ -219,15 +219,25 @@ h1 { font-size: clamp(1.9rem, 4.4vw, 3rem); line-height: 1.1; margin: 0 auto 18p
 .stat.stale .num, .stat.stale .si { color: var(--red); }
 .stat .lbl { color: var(--muted); font-size: .78rem; margin-top: 3px; }
 
-/* ---------- trust strip (4 cards) ---------- */
-.trust { border-bottom: 1px solid var(--border); background: var(--bg-elev); }
-.trust-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; padding: 18px 0; }
-.trust-card { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px; background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 15px; }
-.trust-card .ti { width: 26px; height: 26px; color: var(--accent); flex: none; }
-.trust-card b { display: block; color: var(--text); font-family: var(--font-mono); font-size: .82rem; font-weight: 700; letter-spacing: -.01em; }
-.trust-card span { display: block; color: var(--muted); font-size: .77rem; margin-top: 2px; line-height: 1.4; }
-@media (max-width: 760px) { .trust-grid { grid-template-columns: 1fr 1fr; } }
-@media (max-width: 460px) { .trust-grid { grid-template-columns: 1fr; } }
+/* "New here?" strip (lib/home-first-use.mjs): three short cards between the hero and the explorer controls. */
+.first-use { border-bottom: 1px solid var(--border); background: var(--bg-elev); }
+.first-use .wrap { padding-top: 18px; padding-bottom: 18px; }
+.fu-h { margin: 0 0 12px; font-family: var(--font-mono); font-size: .9rem; font-weight: 700; color: var(--text); letter-spacing: -.01em; }
+.fu-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.fu-card { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 15px; }
+.fu-card h3 { display: flex; align-items: center; gap: 8px; margin: 0 0 6px; font-family: var(--font-mono); font-size: .82rem; font-weight: 700; color: var(--text); }
+.fu-card p { margin: 0; color: var(--muted); font-size: .84rem; line-height: 1.5; }
+.fu-card .fu-links { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 8px; font-family: var(--font-mono); font-size: .8rem; }
+.fu-card .fu-links a { text-decoration: underline; text-underline-offset: 2px; }
+.fu-i { width: 18px; height: 18px; color: var(--accent); flex: none; }
+.fu-signal { display: flex; align-items: center; gap: 8px; margin: 12px 0 0; color: var(--muted); font-size: .84rem; }
+@media (max-width: 760px) { .fu-grid { grid-template-columns: 1fr; gap: 8px; } }
+/* Phones: the strip must not push the explorer far down, so the cards are tighter and the icons go. */
+@media (max-width: 480px) {
+  .first-use .wrap { padding-top: 14px; padding-bottom: 14px; }
+  .fu-card { padding: 11px 13px; }
+  .fu-card h3 .fu-i { display: none; }
+}
 
 /* ---------- controls ---------- */
 /* The filter bar stays pinned only where there is room for it (WCAG 2.4.11, 1.4.10): at 360x700 it is 340px tall, at 320x256 taller than
@@ -567,8 +577,8 @@ pre code { color: var(--text); }
 .footer-bottom a { color: var(--muted); }
 
 /* ---------- micro-interactions ---------- */
-.stat, .trust-card, .prov-card { transition: border-color .15s ease, transform .1s ease, box-shadow .15s ease; }
-.trust-card:hover, .stat:hover { border-color: color-mix(in srgb, var(--accent) 38%, var(--border)); transform: translateY(-2px); }
+.stat, .fu-card, .prov-card { transition: border-color .15s ease, transform .1s ease, box-shadow .15s ease; }
+.stat:hover { border-color: color-mix(in srgb, var(--accent) 38%, var(--border)); transform: translateY(-2px); }
 .prov-card:hover { border-color: color-mix(in srgb, var(--accent) 32%, var(--border)); }
 .footer-col a, .nav a, .crumbs a, .colls a { transition: color .12s ease, border-color .12s ease, background .12s ease; }
 .meta-row { transition: background .12s ease; }

@@ -17,7 +17,8 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="manifest" href="site.webmanifest">
 <link rel="preload" href="fonts/jetbrains-mono-700.woff2" as="font" type="font/woff2" crossorigin>
-<meta name="theme-color" content="#0a0d0b">
+<meta name="theme-color" content="#0a0d0b" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f6f8f6" media="(prefers-color-scheme: light)">
 <meta name="color-scheme" content="dark light">
 <meta property="og:title" content="Free LLM API Hub">
 <meta property="og:description" content="A continuously-verified dataset of free LLM APIs and trial credits for developers.">
@@ -260,14 +261,31 @@
   </div>
 </section>
 
-<section class="trust">
-  <div class="wrap trust-grid">
-    <div class="trust-card"><svg class="ti" aria-hidden="true"><use href="#ic-doc"/></svg><div><b>Dated &amp; sourced</b><span>every entry to the provider's own docs</span></div></div>
-    <div class="trust-card"><svg class="ti" aria-hidden="true"><use href="#ic-link"/></svg><div><b>Links checked on every pass</b><span>a local pass re-checks each source link</span></div></div>
-    <div class="trust-card"><svg class="ti" aria-hidden="true"><use href="#ic-gauge"/></svg><div><b>Freshness measured</b><span>computed from the data, not claimed</span></div></div>
-    <div class="trust-card"><svg class="ti" aria-hidden="true"><use href="#ic-flag"/></svg><div><b>Uncertainty flagged</b><span>unconfirmed entries marked, not hidden</span></div></div>
+<!-- AUTOGEN:firstuse:start -->
+<section class="first-use" aria-labelledby="first-use-h">
+  <div class="wrap">
+    <h2 id="first-use-h" class="fu-h">New here? How this list works</h2>
+    <div class="fu-grid">
+      <div class="fu-card">
+        <h3><svg class="fu-i" aria-hidden="true"><use href="#ic-database"/></svg>What this is</h3>
+        <p>An open, MIT-licensed dataset of 64 free LLM and AI-model APIs: 31 ongoing free tiers and 33 trial credits, listed apart. It is independent: not affiliated with or sponsored by any provider on it.</p>
+        <p class="fu-links"><a href="#explorer">Browse the providers</a></p>
+      </div>
+      <div class="fu-card">
+        <h3><svg class="fu-i" aria-hidden="true"><use href="#ic-shield"/></svg>How we verify</h3>
+        <p>63 of 64 entries are verified: the free tier, its limits and its main catch were read on the provider’s own docs on a recorded date. The dates run from <time datetime="2026-10-16">2026-10-16</time> to <time datetime="2026-11-24">2026-11-24</time>. 1 entry could not be confirmed from an official source and is marked ⚠, not hidden.</p>
+        <p class="fu-links"><a href="methodology/">What “verified” means</a></p>
+      </div>
+      <div class="fu-card">
+        <h3><svg class="fu-i" aria-hidden="true"><use href="#ic-doc"/></svg>How to use it</h3>
+        <p>Filter the table by no card, no phone, commercial use or OpenAI-compatible, then open a provider for its limits and sources. The same data is available as JSON. Terms change without notice: confirm with the provider before you ship.</p>
+        <p class="fu-links"><a href="api/">JSON API</a> <a href="changes/">What changed</a></p>
+      </div>
+    </div>
+    <p class="fu-signal"><svg class="fu-i" aria-hidden="true"><use href="#ic-shield"/></svg><span>Oldest verification: <time datetime="2026-10-16">2026-10-16</time>. Each entry is due for a re-check 90 days after its date.</span></p>
   </div>
 </section>
+<!-- AUTOGEN:firstuse:end -->
 
 <div class="controls">
   <div class="wrap controls-inner">
