@@ -7,6 +7,7 @@
 import { htmlEsc, ICON } from './rows.mjs';
 import { triStateHtml } from './compare.mjs';
 import { expiryHtml } from './expiry.mjs';
+import { fieldCheck } from './field-checks.mjs';
 
 const FREE_TYPE_LABEL = {
   'renewing-quota': 'Free quota that renews',
@@ -28,15 +29,28 @@ const safeUrl = (u) => (/^https?:\/\//i.test(String(u || '')) ? htmlEsc(u) : '')
 
 /** What a visitor must give to start: three flags, each yes / no / "not confirmed" written out. */
 export function requirementsHtml(p) {
-  const row = (icon, label, v, yes, no, extra = '') => `<div class="req"><dt>${ICON(icon)}${label}</dt><dd>${triStateHtml(v, yes, no)}${extra}</dd></div>`;
+  const row = (icon, label, field, yes, no, extra = '') => {
+    const check = fieldCheck(p, field);
+    return `<div class="req"><dt>${ICON(icon)}${label}</dt><dd>${triStateHtml(p[field], yes, no, check)}${extra}${checkSourceHtml(check)}</dd></div>`;
+  };
   const commercialCondition = p.commercial_ok === 'conditional' && p.commercial_ok_condition
     ? `<div class="req-condition">${htmlEsc(p.commercial_ok_condition)}</div>`
     : '';
   return `<dl class="prov-reqs" aria-label="What you need to start">` +
-    row('ic-card', 'Credit card', p.card_required, 'required', 'not required') +
-    row('ic-phone', 'Phone verification', p.phone_required, 'required', 'not required') +
-    row('ic-building', 'Commercial use', p.commercial_ok, 'allowed', 'evaluation only', commercialCondition) +
+    row('ic-card', 'Credit card', 'card_required', 'required', 'not required') +
+    row('ic-phone', 'Phone verification', 'phone_required', 'required', 'not required') +
+    row('ic-building', 'Commercial use', 'commercial_ok', 'allowed', 'evaluation only', commercialCondition) +
     `</dl>`;
+}
+
+/** One line under a flag with a recorded check: the pages read and the day (and for stated, the provider's sentence). */
+export function checkSourceHtml(check) {
+  if (!check || !/^\d{4}-\d{2}-\d{2}$/.test(String(check.checked || ''))) return '';
+  const links = (Array.isArray(check.sources) ? check.sources : []).map(safeUrl).filter(Boolean);
+  const pages = links.map((u, i) => `<a href="${u}" target="_blank" rel="noopener">${links.length > 1 ? `page ${i + 1}` : "the provider's page"}</a>`).join(', ');
+  const quote = check.status === 'stated' && check.quote ? `&ldquo;${htmlEsc(check.quote)}&rdquo; ` : '';
+  const lead = check.status === 'stated' ? 'Per' : 'Read';
+  return `<div class="req-source muted">${quote}${pages ? `${lead} ${pages}, ` : ''}checked ${htmlEsc(check.checked)}.${check.note ? ` ${htmlEsc(check.note)}` : ''}</div>`;
 }
 
 /**

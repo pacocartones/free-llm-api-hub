@@ -62,8 +62,8 @@ test('TL;DR flag claims match the dataset', () => {
     assert.equal(p.card_required, false, `${p.slug} is listed as no card`);
     assert.equal(p.phone_required, false, `${p.slug} is listed as no phone`);
   }
-  // "Groq and SiliconFlow gate signup behind phone verification"
-  for (const p of named('groq', 'siliconflow')) assert.equal(p.phone_required, true, `${p.slug} is named as phone-gated`);
+  // "SiliconFlow and Tencent Hunyuan gate signup behind phone verification"
+  for (const p of named('siliconflow', 'tencent-hunyuan')) assert.equal(p.phone_required, true, `${p.slug} is named as phone-gated`);
   for (const p of named(...row('Permanently free').slugs)) assert.equal(p.free_type, 'perpetual', `${p.slug} is listed as permanently free`);
   for (const p of named(...row('OpenAI-compatible endpoint').slugs)) assert.equal(p.openai_compatible, true, `${p.slug} is listed as OpenAI-compatible`);
   for (const p of named(...row('safe to ship commercially').slugs)) assert.equal(p.commercial_ok, true, `${p.slug} is listed as commercial OK`);
