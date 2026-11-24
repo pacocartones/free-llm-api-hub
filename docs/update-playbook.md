@@ -68,12 +68,12 @@ For each provider on the worklist (`npm run worklist`, or just the reverify batc
    - **Re-read `data_policy`:** when the provider's official page states at least one policy detail, set `data_policy.checked` to today whenever the policy information is re-read, even if its value is unchanged. If the page states neither policy detail, leave `data_policy` as `null`; do not guess `false` or record `source` and `checked`. This date records when the policy was checked, separately from `last_verified`, which tracks core-fact verification. If the quoted sentence changes, run `npm run quotes:add -- <slug>`; `npm run verify-quotes` re-reads the quoted pages to confirm the sentences are still present (see [`docs/quotes.md`](quotes.md)).
    - Confirmed → set the current numbers, `verified: true`, `last_verified` = today.
    - Changed → correct the numbers, same as above.
-   - Gone → remove the entry (note it in [CHANGELOG.md](../CHANGELOG.md)) or, if the free tier ended, move the note to the README's "Notably NOT free" section.
+   - Gone → remove the entry (note it in a changelog fragment, `changes/unreleased/<short-name>.md`, see [CONTRIBUTING.md](../CONTRIBUTING.md)) or, if the free tier ended, move the note to the README's "Notably NOT free" section.
    - Couldn't confirm → `verified: false`, `last_verified: null`, explain in `notes`.
-   - **Bump `generated`** (top of `data/providers.json`) to today — the integrity gate rejects any `generated` older than the newest `last_verified`/`added`, so every consumer (sitemap, API, CITATION, llms.txt) ships an honest date.
+   - **Leave `generated` alone.** It is the release date (top of `data/providers.json`) and moves only with `version` in a release pull request (`npm run release:prepare`, see [RELEASING.md](../RELEASING.md)); the integrity gate fails a data pull request that moves it. Dates after today in UTC are rejected.
 4. **Regenerate and check (same PR):**
    ```bash
-   npm run build      # README, badge, exports, collections, site payload
+   npm run build      # README, exports, collections, site payload (the badge goes to site/, not committed)
    npm test           # dataset integrity gate
    npm run og         # regenerate social preview PNGs (counts in subtitles drift)
    npm run worklist   # preview the updated worklist locally (optional)

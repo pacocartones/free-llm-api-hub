@@ -80,8 +80,10 @@ if (!validateSchema(data)) {
 
 if (!/^\d+\.\d+\.\d+$/.test(data.version || '')) errors.push('top-level: version must be semver');
 if (!DATE_RE.test(data.generated || '')) errors.push('top-level: generated must be YYYY-MM-DD');
-// Every date of the dataset is a UTC day, and none is in the future: `generated` is at least the newest last_verified, added and checked, so a
-// `generated` after today's UTC day is a date written in a time zone ahead of UTC (a contributor in Asia at the end of their day).
+// Every date of the dataset is a UTC day, and none is in the future: a date after today's UTC day is a date written in a
+// time zone ahead of UTC (a contributor in Asia at the end of their day). `generated` is the release date and moves only
+// with `version` (scripts/check-release-stamp.mjs); the dates a data change writes (last_verified, added, checked, read_on)
+// are compared with today, not with `generated`, so a data pull request never has to touch that shared line.
 // VALIDATE_TODAY fixes the day for the tests of this rule.
 const todayUtc = process.env.VALIDATE_TODAY || new Date().toISOString().slice(0, 10);
 if (DATE_RE.test(data.generated || '') && data.generated > todayUtc) errors.push(`top-level: generated (${data.generated}) is after today in UTC (${todayUtc}); write the dates of the dataset in UTC (date -u +%F)`);
@@ -89,22 +91,6 @@ if (!Array.isArray(data.providers) || data.providers.length === 0)
   errors.push('top-level: providers must be a non-empty array');
 // A provider key may only be sent to the host pinned for it in code (ADVISORY-007): the client configs hand that base URL to users.
 errors.push(...keyHostErrors(data.providers));
-
-// `generated` must cover the newest verification or addition in the dataset.
-// Every consumer of it — sitemap <lastmod>, /api/v1 index, CITATION.cff and
-// llms.txt — would otherwise ship a date older than the data it describes.
-// Deterministic: compares data-internal dates only, never the wall clock, so
-// CI cannot flake on it. A data PR bumps `generated` alongside its edits.
-{
-  const newest = (data.providers ?? [])
-    .map((p) => [p.last_verified, p.added])
-    .flat()
-    .filter((d) => d && DATE_RE.test(d))
-    .sort()
-    .pop();
-  if (newest && data.generated < newest)
-    errors.push(`top-level: generated (${data.generated}) is older than the newest last_verified/added (${newest}) — bump it in data/providers.json`);
-}
 
 for (const p of data.providers ?? []) {
   const id = p.slug || p.name || '(unknown)';
@@ -182,6 +168,7 @@ for (const p of data.providers ?? []) {
   // added: optional provenance date (when the entry first entered the dataset).
   if (p.added !== undefined) {
     check(DATE_RE.test(p.added || ''), `${id}: added must be YYYY-MM-DD`);
+    check(!DATE_RE.test(p.added || '') || p.added <= todayUtc, `${id}: added (${p.added}) is after today in UTC (${todayUtc}); write the dates of the dataset in UTC (date -u +%F)`);
   }
   // Live-probe fields (independent of docs `verified`).
   if (p.last_probed !== undefined && p.last_probed !== null) {
@@ -206,11 +193,11 @@ for (const p of data.providers ?? []) {
     check((src.boundary === true) === nearBoundary(src.ci), `${id}: model_tier_source.boundary must be ${nearBoundary(src.ci)} for ci ${JSON.stringify(src.ci)} (crosses or is within 5 points of a threshold)`);
     check(p.is_text_llm === true, `${id}: model_tier only applies to a text-LLM offer`);
     check(p.free_type !== 'trial-credit', `${id}: a one-time trial credit is not continuous free access, so it carries no model_tier`);
-    check(DATE_RE.test(src.snapshot || '') && src.snapshot <= data.generated, `${id}: model_tier_source.snapshot must be a date not after the dataset's generated date`);
+    check(DATE_RE.test(src.snapshot || '') && src.snapshot <= todayUtc, `${id}: model_tier_source.snapshot must be a date not after today in UTC`);
   }
   if (p.free_limits != null) {
     check(p.free_type !== 'trial-credit', `${id}: a one-time trial credit is not continuous free access, so it carries no free_limits`);
-    check(DATE_RE.test(p.free_limits.checked || '') && p.free_limits.checked <= data.generated, `${id}: free_limits.checked must be a date not after the dataset's generated date`);
+    check(DATE_RE.test(p.free_limits.checked || '') && p.free_limits.checked <= todayUtc, `${id}: free_limits.checked must be a date not after today in UTC`);
     check(URL_RE.test(p.free_limits.source || ''), `${id}: free_limits.source must be the provider's page (http/https)`);
   }
 
@@ -218,7 +205,7 @@ for (const p of data.providers ?? []) {
   if (p.data_policy != null) {
     const dp = p.data_policy;
     check(dp.trains_on_prompts != null || dp.retention != null, `${id}: data_policy must state trains_on_prompts or retention (an all-null policy records nothing)`);
-    check(DATE_RE.test(dp.checked || '') && dp.checked <= data.generated, `${id}: data_policy.checked must be a date not after the dataset's generated date`);
+    check(DATE_RE.test(dp.checked || '') && dp.checked <= todayUtc, `${id}: data_policy.checked must be a date not after today in UTC`);
     check(isPublicHttpsUrl(dp.source), `${id}: data_policy.source must be the provider's public HTTPS page`);
     // The provider's own sentence and its condition: plain text only (no control, bidirectional or zero-width characters).
     for (const [k, max] of [['quote', 400], ['note', 300]]) {
@@ -235,7 +222,7 @@ for (const p of data.providers ?? []) {
   if (p.no_expiry != null) {
     check(p.free_type === 'trial-credit', `${id}: no_expiry applies only to a one-time trial credit (on a continuous free tier a null expires already means no end)`);
     check(p.expires == null, `${id}: no_expiry and a non-null expires contradict each other`);
-    check(DATE_RE.test(p.no_expiry.checked || '') && p.no_expiry.checked <= data.generated, `${id}: no_expiry.checked must be a date not after the dataset's generated date`);
+    check(DATE_RE.test(p.no_expiry.checked || '') && p.no_expiry.checked <= todayUtc, `${id}: no_expiry.checked must be a date not after today in UTC`);
     check(URL_RE.test(p.no_expiry.source || ''), `${id}: no_expiry.source must be the provider's page (http/https)`);
     check(typeof p.no_expiry.quote === 'string' && p.no_expiry.quote.trim().length >= 1 && p.no_expiry.quote.length <= 300, `${id}: no_expiry.quote must be the passage, 1 to 300 characters`);
   }
@@ -243,6 +230,7 @@ for (const p of data.providers ?? []) {
   // Integrity core: a verified entry must carry a dated, real source link.
   if (p.verified) {
     check(DATE_RE.test(p.last_verified || ''), `${id}: verified entry needs a YYYY-MM-DD last_verified`);
+    check(!DATE_RE.test(p.last_verified || '') || p.last_verified <= todayUtc, `${id}: last_verified (${p.last_verified}) is after today in UTC (${todayUtc}); write the dates of the dataset in UTC (date -u +%F)`);
     check(isPublicHttpsUrl(p.docs_url), `${id}: verified entry needs a public HTTPS docs_url (primary source)`);
   } else {
     check(p.last_verified === null, `${id}: unverified entry must have last_verified: null`);
@@ -315,7 +303,7 @@ if (!FIXTURE_MODE) {
 // Consistency only, offline: the sentence of each row, each phrase of a note between guillemets and each claim about a whole page
 // have an entry. It does not say the page says that today (npm run verify-quotes reads the pages). Skipped for fixture runs (argv[2]).
 if (!FIXTURE_MODE) {
-  try { errors.push(...quoteErrors(data, JSON.parse(readFileSync(join(ROOT, 'data/quotes.json'), 'utf8')))); }
+  try { errors.push(...quoteErrors(data, JSON.parse(readFileSync(join(ROOT, 'data/quotes.json'), 'utf8')), { today: todayUtc })); }
   catch (e) { errors.push('quotes.json: ' + e.message); }
   // the weekly report of verify-quotes is optional; when it is there it has to agree with the register
   try {
@@ -388,7 +376,7 @@ try {
 // The `partner` field is retired: the schema allows no extra property on a provider, so it fails there. Relations with
 // money live in data/sponsorships.json, never in a provider's record.
 try {
-  errors.push(...agreementsErrors(JSON.parse(readFileSync(join(ROOT, 'data/sponsorships.json'), 'utf8')), { slugs: (data.providers ?? []).map((p) => p.slug), generated: data.generated }));
+  errors.push(...agreementsErrors(JSON.parse(readFileSync(join(ROOT, 'data/sponsorships.json'), 'utf8')), { slugs: (data.providers ?? []).map((p) => p.slug), today: todayUtc }));
 } catch (e) { errors.push('sponsorships.json: ' + e.message); }
 
 if (errors.length) {

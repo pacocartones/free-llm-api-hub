@@ -28,7 +28,13 @@ For a **provider data correction**, edit [`data/providers.json`](data/providers.
 
 Fixing a rate limit means editing one field plus the files regenerated from it — still a small, reviewable diff.
 
-**Adding a provider.** Run `npm run add-provider -- <slug> "<Name>"`. The first run writes an intentionally invalid local draft under `.freebuff/provider-drafts/` and separates the core fields that must be completed from tri-state facts that may legitimately remain unknown; it does not change `data/providers.json`. Fill the draft from the provider's own docs, keeping `verified: false` and `last_verified: null` until the evidence is complete, then run the same command again. The command serializes `added` and advances `generated` to the installation day, appending the row only after the full validator accepts it, including category/free-type and cross-dataset slug checks. A repository-local lock prevents two invocations from replacing the dataset concurrently.
+**Leave `version` and `generated` alone.** The two lines at the top of `data/providers.json` are the release: `generated` is the day of the dataset release and changes only together with `version`, in a release pull request (see [RELEASING.md](RELEASING.md)). Your dates go in the fields you checked (`last_verified`, `added`, `checked`). The *Dataset integrity* check fails if a data pull request moves `generated`: every pull request used to bump that one line, so any two open data pull requests conflicted on it.
+
+**Describe your change in a changelog fragment, not in `CHANGELOG.md`.** Add one small file, `changes/unreleased/<short-name>.md` (lowercase letters, digits and hyphens), in the changelog's own format: a section heading line such as `### Changed and fixed`, a blank line, then one entry per line such as `- Modal re-verified: the Starter plan's monthly credit is still not settled for commercial use (#688).` (see [changes/README.md](changes/README.md)).
+
+Use one or more of the sections `### Added`, `### Changed and fixed`, `### Removed`, `### Breaking changes and upgrade` and `### Security`, each with entries starting with `- `. Write the PR number if you know it; the maintainer adds it and the `Thanks @user` credit otherwise. The release moves every fragment into `CHANGELOG.md` (`npm run release:prepare`), so no two pull requests edit the same lines. A change users would not notice (docs, tests, CI) needs no fragment. `npm test` checks the format.
+
+**Adding a provider.** Run `npm run add-provider -- <slug> "<Name>"`. The first run writes an intentionally invalid local draft under `.freebuff/provider-drafts/` and separates the core fields that must be completed from tri-state facts that may legitimately remain unknown; it does not change `data/providers.json`. Fill the draft from the provider's own docs, keeping `verified: false` and `last_verified: null` until the evidence is complete, then run the same command again. The command serializes `added` as the installation day (UTC), leaves `generated` (the release stamp) as it is, appending the row only after the full validator accepts it, including category/free-type and cross-dataset slug checks. A repository-local lock prevents two invocations from replacing the dataset concurrently.
 
 ## Quick start
 
@@ -107,7 +113,7 @@ The same applies to `data_policy`, which records what a provider says about your
 
 A `data_policy` row also needs its entries in `data/quotes.json` (the sentence, each phrase of the note between « », and a check behind any claim about a whole page). You do not write them: after editing the row, run `npm run quotes:add -- <slug>` and then `npm test`. `docs/quotes.md` says what the command does and what to do when a page cannot be read.
 
-**Dates are UTC days.** `last_verified`, `added`, `checked` and `generated` are the day in UTC, written `YYYY-MM-DD` (`date -u +%F` gives it). If your day is already tomorrow in UTC, write today's UTC day, never tomorrow: `npm test` fails on a `generated` that is after today in UTC.
+**Dates are UTC days.** `last_verified`, `added`, `checked` and `generated` are the day in UTC, written `YYYY-MM-DD` (`date -u +%F` gives it). If your day is already tomorrow in UTC, write today's UTC day, never tomorrow: `npm test` fails on any of these dates after today in UTC. `generated` is the release date; a data pull request leaves it as it is.
 
 ## Reporting without a PR
 
@@ -225,6 +231,7 @@ GitHub holds workflow runs from a **first-time contributor** until a maintainer 
 
 ## Maintainer notes
 
+- **Release-only lines.** `version` and `generated` in `data/providers.json`, the version in `package.json`/`package-lock.json`, `date-released` in `CITATION.cff` (built from `generated`) and the move of `changes/unreleased/*.md` into `CHANGELOG.md` change only in a release pull request, prepared with `npm run release:prepare -- X.Y.Z`. The freshness badge is not committed: every deploy builds `site/badge-freshness.json`. Public dates (API `generated`, CSV `dataset_generated`, sitemap) still mean the last dataset change and are derived from the data, so a pull request that records a newer date also rewrites those date lines in the aggregate outputs; they are generated files, so `npm run sync-main` rebuilds them, and two pull requests from the same day write identical lines. What still collides in practice is `derived-fingerprints.json` and, between pull requests from different days, those date lines.
 - **No regeneration bot — the author ships the derived files.** There is no `bot/regenerate`: `main` requires the "Dataset integrity" check, and a change is complete when its regenerated files are committed in the same PR. After editing `data/providers.json` (or `data/programs.json`), run `npm run build` (and `npm run og` if the OG check flags drift), commit the regenerated files together with the data change, and push. The "Dataset integrity" check fails until they are in sync.
 - **Provider maintenance is not scheduled.** Re-verification, model samples and the live probe are local on-demand tasks — see [docs/update-playbook.md](docs/update-playbook.md). GitHub Actions does run the site deployment daily to refresh its build-time star count, plus CodeQL on pull requests and weekly, and weekly OpenSSF Scorecard scans; none of those jobs changes provider claims.
 
