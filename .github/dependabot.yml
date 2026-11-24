@@ -51,9 +51,3 @@ updates:
         update-types:
           - minor
           - patch
-    ignore:
-      # unpdf 2.x requires Node 24; the project stays on Node 22 (.nvmrc) until
-      # that migration, so its major updates would only be closed again.
-      - dependency-name: unpdf
-        update-types:
-          - "version-update:semver-major"
