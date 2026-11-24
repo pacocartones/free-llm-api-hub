@@ -205,6 +205,12 @@
       "of": 6,
       "rank": null
     },
+    "regolo": {
+      "total": 33.9,
+      "confirmed": 2,
+      "of": 6,
+      "rank": null
+    },
     "scaleway": {
       "total": 33.9,
       "confirmed": 2,
@@ -256,6 +262,12 @@
     "gladia": {
       "total": 29.9,
       "confirmed": 2,
+      "of": 6,
+      "rank": null
+    },
+    "google-agent-platform-express": {
+      "total": 29.9,
+      "confirmed": 1,
       "of": 6,
       "rank": null
     },
