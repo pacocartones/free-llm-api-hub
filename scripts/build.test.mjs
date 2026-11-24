@@ -403,7 +403,7 @@ test('every generated page has the same centred header: crumbs, one title and, w
   let checked = 0;
   for (const file of walk(join(ROOT, 'site'))) {
     const rel = slash(relative(join(ROOT, 'site'), file));
-    if (exceptions.has(rel) || rel.startsWith('og')) continue;
+    if (exceptions.has(rel) || rel.startsWith('og') || /^google[0-9a-f]+\.html$/.test(rel)) continue; // the Search Console ownership file is not a page
     const html = readFileSync(file, 'utf8');
     const heroes = html.match(/<section class="page-hero[^"]*">/g) || [];
     assert.equal(heroes.length, 1, `${rel}: one page header`);
@@ -1970,7 +1970,12 @@ test('active providers retain models_url from their official catalogues', () => 
   assert.deepEqual(seeded, [
     ['google-gemini', 'https://ai.google.dev/gemini-api/docs/models'],
     ['groq', 'https://console.groq.com/docs/models'],
+    ['ibm-watsonx', 'https://www.ibm.com/docs/en/watsonx/saas?topic=solutions-supported-foundation-models'],
+    ['fireworks-ai', 'https://fireworks.ai/models'],
+    ['baseten', 'https://docs.baseten.co/inference/model-apis/overview'],
+    ['alibaba-model-studio', 'https://www.alibabacloud.com/help/en/model-studio/model-pricing'],
     ['sarvam-ai', 'https://docs.sarvam.ai/api/token-factory/models'],
+    ['tencent-hunyuan', 'https://cloud.tencent.com/document/product/1823/130051'],
   ]);
 });
 
@@ -2382,6 +2387,7 @@ test('sitemap lists every indexable page except the deliberately omitted ones, w
   for (const f of pages) {
     const rel = slash(f.slice(join(ROOT, 'site').length + 1));
     if (rel === '404.html' || rel.startsWith('updates/page/') || /^state\/\d{4}-\d{2}\//.test(rel)) continue; // 404 is not a page; pagination follows the commit count (test above)
+    if (/^google[0-9a-f]+\.html$/.test(rel)) continue; // Search Console ownership file, not a page
     const html = readFileSync(f, 'utf8');
     if (/<meta name="robots" content="noindex">/.test(html)) continue; // redirect stubs and legal pages
     const path = rel === 'index.html' ? '' : rel.replace(/index\.html$/, '').replace(/\.html$/, '');
