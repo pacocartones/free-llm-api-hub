@@ -85,12 +85,6 @@
       "of": 6,
       "rank": null
     },
-    "pinecone-inference": {
-      "total": 37.2,
-      "confirmed": 3,
-      "of": 6,
-      "rank": null
-    },
     "ibm-watsonx": {
       "total": 37.1,
       "confirmed": 4,
@@ -223,13 +217,13 @@
       "of": 6,
       "rank": null
     },
-    "ai-horde": {
-      "total": 32.5,
+    "pinecone-inference": {
+      "total": 33.3,
       "confirmed": 2,
       "of": 6,
       "rank": null
     },
-    "datalab": {
+    "ai-horde": {
       "total": 32.5,
       "confirmed": 2,
       "of": 6,
@@ -250,6 +244,12 @@
     "baseten": {
       "total": 30,
       "confirmed": 1,
+      "of": 6,
+      "rank": null
+    },
+    "datalab": {
+      "total": 29.9,
+      "confirmed": 2,
       "of": 6,
       "rank": null
     },
