@@ -18,6 +18,8 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join, extname, normalize } from 'node:path';
 import { evaluate, medianReport, parseMode } from './lib/lighthouse-gate.mjs';
 import { makeTmpDir } from './lib/tmp.mjs';
+import { groupModels } from './lib/model-keys.mjs';
+import { isIndexable } from './lib/model-pages.mjs';
 
 let mode;
 try { mode = parseMode(process.argv.slice(2)); } catch (err) { console.error(err.message); process.exit(2); }
@@ -106,6 +108,11 @@ const pages = ['/', '/best/', '/coverage/', '/free-gpu/', '/coding-tools/', '/co
   '/guides/free-llm-api-no-signup.html', '/guides/free-embeddings-apis.html',
   '/guides/free-ocr-document-ai-apis.html', '/guides/free-speech-to-text-apis.html',
   '/guides/free-image-generation-apis.html'];
+// One model page, also from the dataset (model samples rotate): the indexable one listed by the most providers.
+const modelSample = groupModels(providers).filter((g) => isIndexable(g) && existsSync(join(SITE, 'models', g.key, 'index.html')))
+  .sort((a, b) => b.entries.length - a.entries.length || (a.key < b.key ? -1 : 1))[0];
+if (!modelSample) { console.error('No generated model page under site/models/: run `node scripts/build.mjs` first.'); process.exit(1); }
+pages.push(`/models/${modelSample.key}/`);
 const lighthouse = join(ROOT, 'tools/lighthouse/node_modules/.bin/lighthouse');
 const RUNS = mode.runs;
 const failures = [];

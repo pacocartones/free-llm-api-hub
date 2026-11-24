@@ -82,7 +82,7 @@ test('a failing audit in any raw run survives the median score envelope', () => 
 
 // The pages the gate measures are written in two places, the script and the comment of the workflow. They must agree,
 // and the pages that carry the tables and the comparison have to be among them.
-test('the gate measures all sixteen routes, and the workflow says which pages it measures', () => {
+test('the gate measures all seventeen routes, and the workflow says which pages it measures', () => {
   const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
   const script = readFileSync(join(ROOT, 'scripts/lighthouse-gate.mjs'), 'utf8');
   const workflow = readFileSync(join(ROOT, '.github/workflows/lighthouse.yml'), 'utf8');
@@ -91,9 +91,11 @@ test('the gate measures all sixteen routes, and the workflow says which pages it
   const fixed = [...list[1].matchAll(/'(\/[^']*)'/g)].map((m) => m[1]);
   for (const page of ['/free-gpu/', '/coding-tools/', '/compare/', '/data-policy/', '/guides-and-collections/']) assert.ok(fixed.includes(page), `the gate measures ${page}`);
   for (const page of fixed.filter((p) => p !== '/')) assert.ok(workflow.includes(page), `the workflow names ${page}`);
-  // one more page than the fixed ones: the provider page comes from the dataset
-  const count = fixed.length + 1;
-  const words = { 4: 'four', 5: 'five', 6: 'six', 7: 'seven', 8: 'eight', 9: 'nine', 16: 'sixteen' };
+  // two more pages than the fixed ones: the provider page and the model page come from the dataset
+  assert.match(script, /pages\.push\(`\/models\/\$\{modelSample\.key\}\/`\)/, 'the gate measures one model page');
+  assert.ok(workflow.includes('/models/'), 'the workflow names the model page');
+  const count = fixed.length + 2;
+  const words = { 4: 'four', 5: 'five', 6: 'six', 7: 'seven', 8: 'eight', 9: 'nine', 16: 'sixteen', 17: 'seventeen' };
   assert.ok(workflow.includes(`on ${words[count]} pages`) && workflow.includes(`Measure the ${words[count]} pages`), `the workflow says ${words[count]} pages`);
 });
 

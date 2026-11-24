@@ -24,6 +24,8 @@ site/sitemap-state.xml
 site/api/
 site/llms.txt
 site/llms-full.txt
+# Analytics consent banner: built only when GA_MEASUREMENT_ID is set (deploy), never committed
+site/consent.js
 # Freshness badge: moves with the calendar, so it is built on every deploy (daily too) and never committed
 site/badge-freshness.json
 badge-freshness.json
