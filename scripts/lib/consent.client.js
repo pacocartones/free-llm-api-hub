@@ -167,6 +167,13 @@
       else if (a === 'customize') view('custom', true);
       else if (a === 'save') choose({ analytics: switchOn('analytics'), ads: switchOn('ads') });
     });
+    // Escape closes the panel without changing anything, and focus goes back to "Cookie settings". Only once a choice
+    // is stored: on a first visit the banner stays until the visitor picks one of the three answers.
+    banner.addEventListener('keydown', function (e) {
+      if (e.key !== 'Escape' || !readChoice()) return;
+      if (e.preventDefault) e.preventDefault();
+      hide();
+    });
   }
 
   function switches() { return banner.querySelectorAll('[data-cat]'); }

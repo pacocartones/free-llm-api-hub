@@ -119,7 +119,7 @@ function ownKeyHtml(ownKey, prefix) {
   const c = codingToolsCounts(ownKey);
   return '<h2 id="own-key">Tools you connect your own key to</h2>' +
     `<p>${htmlEsc(ownKey.note || 'The tool is free; inference is paid with your own key or a free API.')} ` +
-    `See also: <a href="${prefix}collections/openai-compatible.html">OpenAI-compatible free APIs</a>; <a href="${prefix}#explorer">the interactive explorer</a>. ` +
+    `See also: <a href="${prefix}collections/openai-compatible">OpenAI-compatible free APIs</a>; <a href="${prefix}#explorer">the interactive explorer</a>. ` +
     'The same rule holds: a value is written only where the tool\'s own page says it, and <strong>Not stated</strong> is never <em>no</em>.</p>' +
     `<p class="muted">${c.tools} tools listed; ${c.stated} of ${c.total} values rest on a sentence from the tool's own page.</p>` +
     claimsTableHtml({ id: 'own', entries: ownKey.entries, labels: LABELS, kindLabel: (k) => KIND_LABEL[k] || k, subject: 'tool' }) +

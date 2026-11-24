@@ -108,8 +108,10 @@ export const changesRss = (groups, { site }) => {
     `<guid isPermaLink="false">${xmlEsc(`free-llm-api-hub-changes-${g.week}`)}</guid>` +
     `<pubDate>${new Date(g.lastDate + 'T00:00:00Z').toUTCString()}</pubDate>` +
     `<description>${xmlEsc(weekSummary(g))}</description></item>`).join('\n');
-  return `<?xml version="1.0" encoding="UTF-8"?>\n<rss version="2.0"><channel>\n` +
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel>\n` +
     `    <title>Free LLM API Hub — what changed, week by week</title>\n    <link>${xmlEsc(`${site}/changes/`)}</link>\n` +
+    // The feed's own URL: feed validators ask an RSS 2.0 feed to carry it.
+    `    <atom:link href="${xmlEsc(`${site}/changes.xml`)}" rel="self" type="application/rss+xml"/>\n` +
     `    <description>Field-level changes to free LLM API tiers (free tier, rate limits, the catch, flags), grouped by ISO week.</description>\n` +
     (items ? `${items}\n` : '') + `</channel></rss>\n`;
 };

@@ -198,7 +198,7 @@ test('own-key page: the subsection shows every sentence and links the free APIs,
   buildSite();
   const html = readFileSync(join(out(), 'site/coding-tools/index.html'), 'utf8');
   assert.match(html, /<h2 id="own-key">Tools you connect your own key to<\/h2>/);
-  assert.match(html, /href="\.\.\/collections\/openai-compatible\.html"/);
+  assert.match(html, /href="\.\.\/collections\/openai-compatible"/);
   assert.match(html, /href="\.\.\/#explorer"/);
   for (const e of ownKey().entries) {
     assert.ok(html.includes(esc(e.name)), `${e.name} is missing from the page`);
