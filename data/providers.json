@@ -11,7 +11,7 @@
       "category": "ongoing",
       "free_type": "renewing-quota",
       "free_tier": "Gemini 2.5 Flash, 2.5 Flash-Lite, 2.5 Pro (limited), embeddings, TTS models",
-      "rate_limits": "Sampled Gemini 2.5 model limits are shown only in AI Studio; quotas vary by model and project. Public docs separately publish selected model quotas, including Gemini Decision 1",
+      "rate_limits": "Sampled Gemini 2.5 model limits are shown only in AI Studio; quotas vary by model and project. Public docs separately publish selected model quotas: Gemini Decision 1 on the Decisions API, Free tier 200 RPM, 50,000 TPM, 10,000 RPD (https://ai.google.dev/gemini-api/docs/rate-limits, read 2026-11-23)",
       "notes": "Free-tier prompts/outputs may be used by Google to improve its products outside the UK/CH/EEA/EU. Since the 2026-03-23 terms, only Paid Services may serve API clients to end users in the EEA/CH/UK. Gemini 2.5 Pro and 2.5 Flash are deprecated; the pricing page announces automatic routing to Gemini 3.8 Flash and 3.5 Flash-Lite respectively, billed at their rates, from 2026-12-01",
       "best_for": "The only frontier-class model with a genuine free tier",
       "modalities": ["text", "vision", "embeddings", "audio"],
@@ -912,6 +912,7 @@
       "env_key": "MOONDREAM_API_KEY",
       "is_text_llm": false,
       "model_tier": null,
+      "free_limits": {"requests_per_second":2,"scope":"Base Tier, the default for all API keys (10 req/sec once the account balance is at least $10); usage is also bounded by the Free plan's $5/month credit","source":"https://docs.moondream.ai/rate-limits","checked":"2026-11-24"},
       "verified": true,
       "last_verified": "2026-10-16",
       "data_policy": {"trains_on_prompts":false,"retention":"No longer than necessary to provide the Service","source":"https://moondream.ai/terms","checked":"2026-10-15","quote":"M87 Labs will not use Customer Content or Outputs to Train any model or adapter that is made generally available by M87 Labs (including the base Moondream models), or to Train any model or adapter for the benefit of any third party, except where you explicitly opt in under a separate written agreement.","note":"Commercial use of the free tier is unclear. §4.1: «your internal business or personal purposes»; §4.2: «commercially exploit the Service or any portion of the Service». The terms do not name the free plan.","plan_named":false}
