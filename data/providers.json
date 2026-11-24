@@ -11,7 +11,7 @@
       "category": "ongoing",
       "free_type": "renewing-quota",
       "free_tier": "Gemini 2.5 Flash, 2.5 Flash-Lite, 2.5 Pro (limited), embeddings, TTS models",
-      "rate_limits": "Sampled Gemini 2.5 model limits are shown only in AI Studio; quotas vary by model and project. Public docs separately publish selected model quotas, including Gemini Decision 1",
+      "rate_limits": "Sampled Gemini 2.5 model limits are shown only in AI Studio; quotas vary by model and project. Public docs separately publish selected model quotas: Gemini Decision 1 on the Decisions API, Free tier 200 RPM, 50,000 TPM, 10,000 RPD (https://ai.google.dev/gemini-api/docs/rate-limits, read 2026-11-23)",
       "notes": "Free-tier prompts/outputs may be used by Google to improve its products outside the UK/CH/EEA/EU. Since the 2026-03-23 terms, only Paid Services may serve API clients to end users in the EEA/CH/UK. Gemini 2.5 Pro and 2.5 Flash are deprecated; the pricing page announces automatic routing to Gemini 3.8 Flash and 3.5 Flash-Lite respectively, billed at their rates, from 2026-12-01",
       "best_for": "The only frontier-class model with a genuine free tier",
       "modalities": ["text", "vision", "embeddings", "audio"],
@@ -28,7 +28,6 @@
       "is_text_llm": true,
       "model_tier": 3,
       "model_tier_source": {"model":"gemini-2.5-pro","arena_model":"gemini-2.5-pro","match":"exact","rating":1445.6,"ci":[1443.1,1448],"boundary":true,"votes":124834,"snapshot":"2026-10-02","url":"https://huggingface.co/datasets/lmarena-ai/leaderboard-dataset"},
-      "free_limits": {"requests_per_minute":200,"requests_per_day":10000,"scope":"Free usage tier, Gemini Decision 1 on the Decisions API; the page also publishes 50,000 TPM, which is not a schema field; limits for the 2.5 models in models_free are shown only in AI Studio, not on this page","source":"https://ai.google.dev/gemini-api/docs/rate-limits","checked":"2026-11-23"},
       "verified": true,
       "last_verified": "2026-11-14",
       "data_policy": {"trains_on_prompts":true,"retention":null,"source":"https://ai.google.dev/gemini-api/terms","checked":"2026-11-14","quote":"Google uses the content you submit to the Services and any generated responses to provide, improve, and develop Google products and services and machine learning technologies","note":"Applies to the Unpaid Services; in the EEA, Switzerland and the UK the paid terms also apply to free access. Terms effective 2026-03-23."}
