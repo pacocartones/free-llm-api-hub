@@ -23,6 +23,10 @@ Notable changes to the dataset and the project. Format based on [Keep a Changelo
   processed through the API from model improvement, so `trains_on_prompts`
   is `false` for the free API access; no retention period is stated (#698).
   Thanks @BloosomNet.
+- IBM watsonx: `data_policy` recorded. IBM states it does not use uploaded
+  content or model output to train IBM-developed models; text sent through
+  the Prompt Lab or API is not stored unless saved, and prompt information
+  for up to 500 prompts is kept 30 days (#692). Thanks @BloosomNet.
 - Re-verification batch (agent-assisted, official pages read 2026-11-24) for
   Tencent Hunyuan, Groq, OpenRouter, Cloudflare Workers AI and Cohere.
   `last_verified` is unchanged for all five, because each still records a
@@ -31,7 +35,8 @@ Notable changes to the dataset and the project. Format based on [Keep a Changelo
   - Tencent Hunyuan: the TokenHub package can be claimed once per account
     for each model, and the offer may continue or change after 2026-12-31.
     Real-name verification is now cited to the quick start, and the backup
-    API hosts are listed. The terms page was re-read and the no-training clause still holds.
+    API hosts are listed. The terms page was re-read and the no-training
+    clause still holds.
   - Groq: `trains_on_prompts` is now `false`. Its Services Agreement §4.2
     bars training on inputs and outputs unless the customer allows it. The
     notes say that qwen/qwen3.8-27b is a Preview model, for evaluation only.
