@@ -782,6 +782,28 @@
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "6c6f959b0156ecf8549b8846d173a7d43be68908a894c2cc5df061b541f6be4a"
+  },
+  {
+   "id": "regolo.sentence",
+   "slug": "regolo",
+   "kind": "sentence",
+   "text": "We do not retain, log, or reuse any input or output data processed through our models.",
+   "source_url": "https://regolo.ai/zero-data-retention/",
+   "read_on": "2026-11-24",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "9b36459d8ebb20b4bb889f0ebfde6e0b4638189fbc14e876da11d3ea660aa08c"
+  },
+  {
+   "id": "google-agent-platform-express.sentence",
+   "slug": "google-agent-platform-express",
+   "kind": "sentence",
+   "text": "Google won't use your data to train or fine-tune any AI/ML models without your prior permission or instruction.",
+   "source_url": "https://docs.cloud.google.com/gemini-enterprise-agent-platform/resources/zero-data-retention",
+   "read_on": "2026-11-24",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "2dd683f357d3dfdc36626bec354a421fc02ec2ec1977bf8da66de798d2be30a5"
   }
  ]
 }
