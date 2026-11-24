@@ -39,6 +39,9 @@ export function parseCitation(text) {
   return out;
 }
 
+// The non-text modalities the dataset covers, kept from the hand-written block this replaced (CITATION.cff lists none).
+const MODALITY_KEYWORDS = ['free image api', 'free speech api', 'free embeddings api', 'free ocr api'];
+
 // The fields a reader filters on, named as in data/schema.json. Descriptions follow the schema and docs/api.md.
 export const VARIABLES = [
   ['category', 'Primary bucket: an ongoing free tier or a one-off trial credit.'],
@@ -80,7 +83,7 @@ export function datasetJsonLd({ data, citation, site, asOf }) {
     identifier: repo,
     version: data.version,
     dateModified: asOf,
-    keywords: c.keywords,
+    keywords: [...new Set([...c.keywords, ...MODALITY_KEYWORDS])],
     license: c.license === 'MIT' ? 'https://opensource.org/licenses/MIT' : undefined,
     isAccessibleForFree: true,
     creator: { '@type': 'Person', name: creatorName, url: author.website },
@@ -90,6 +93,7 @@ export function datasetJsonLd({ data, citation, site, asOf }) {
       { '@type': 'DataDownload', name: 'Full dataset, API v1 (JSON)', encodingFormat: 'application/json', contentUrl: `${site}/api/v1/providers.json` },
       { '@type': 'DataDownload', name: 'Full dataset (JSON)', encodingFormat: 'application/json', contentUrl: `${site}/providers.json` },
       { '@type': 'DataDownload', name: 'Scalar fields (CSV)', encodingFormat: 'text/csv', contentUrl: `${site}/providers.csv` },
+      { '@type': 'DataDownload', name: 'Full dataset as Markdown text, for language models (llms-full.txt)', encodingFormat: 'text/plain', contentUrl: `${site}/llms-full.txt` },
     ],
   };
   return JSON.parse(JSON.stringify(obj)); // drops undefined fields

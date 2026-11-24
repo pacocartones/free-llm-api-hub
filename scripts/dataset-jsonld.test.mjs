@@ -65,6 +65,8 @@ test('the home page carries one Dataset block that parses, is valid and points a
   const formats = Object.fromEntries(ld.distribution.map((d) => [d.contentUrl.slice(SITE.length), d.encodingFormat]));
   assert.equal(formats['/api/v1/providers.json'], 'application/json');
   assert.equal(formats['/providers.csv'], 'text/csv');
+  assert.equal(formats['/providers.json'], 'application/json');
+  assert.equal(formats['/llms-full.txt'], 'text/plain');
   assert.equal(ld.sameAs, 'https://github.com/pacocartones/free-llm-api-hub');
 });
 
