@@ -8,7 +8,9 @@ import { makeTmpDir } from './lib/tmp.mjs';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 const SCRIPT = join(ROOT, 'scripts/add-provider.mjs');
-const TODAY = JSON.parse(readFileSync(join(ROOT, 'data/providers.json'), 'utf8')).generated;
+// Today in UTC: every committed date is on or before it. (`generated` is the release stamp and may be older.)
+const TODAY = new Date().toISOString().slice(0, 10);
+const RELEASE_STAMP = JSON.parse(readFileSync(join(ROOT, 'data/providers.json'), 'utf8')).generated;
 
 function workspace() {
   const dir = makeTmpDir('add-provider-');
@@ -154,7 +156,7 @@ test('add-provider requires core facts but accepts unknown tri-state facts', () 
   }
 });
 
-test('add-provider stamps added and generated before validating a provider verified today', () => {
+test('add-provider stamps added, and leaves the release stamp generated alone, before validating a provider verified today', () => {
   const work = workspace();
   run(work, 'verified-today', 'Verified Today');
   completeDraft(work, 'verified-today', {
@@ -165,7 +167,7 @@ test('add-provider stamps added and generated before validating a provider verif
   const result = run(work, 'verified-today', 'Verified Today');
   assert.equal(result.status, 0, result.output);
   const data = JSON.parse(readFileSync(work.dataFile, 'utf8'));
-  assert.equal(data.generated, TODAY);
+  assert.equal(data.generated, RELEASE_STAMP, 'generated moves only with a release');
   assert.equal(data.providers.at(-1).added, TODAY);
   assert.equal(data.providers.at(-1).last_verified, TODAY);
 });

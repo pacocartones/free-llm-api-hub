@@ -11,6 +11,7 @@ import { execFileSync } from 'node:child_process';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { bestPickErrors, assertBestPicks, resolveBestEntries } from './lib/best.mjs';
+import { datasetAsOf } from './lib/release-stamp.mjs';
 
 // The builds of this file run in a private copy of the tree (see lib/private-tree.mjs): `node --test` runs the test
 // files in parallel and two builds on the same tree race on site/p.
@@ -97,7 +98,8 @@ const probeData = () => JSON.parse(readFileSync(join(ROOT, 'data/probe-report.js
 const NOW = new Date('2026-10-08T12:00:00Z');
 // Checks on the real dataset use the dataset's own date: re-verification moves last_verified past the fixed NOW above,
 // and a verification date in the future is (correctly) not fresh.
-const DATA_NOW = () => new Date(`${scoreData().generated}T12:00:00Z`);
+// The build ranks at the dataset's reference day (lib/release-stamp.mjs), never older than its newest verification.
+const DATA_NOW = () => new Date(`${datasetAsOf(scoreData())}T12:00:00Z`);
 // A provider with five of the six inputs confirmed (everything but stability), so it clears the minimum.
 const confirmed5 = (over = {}) => blank({ model_tier: 2, card_required: false, phone_required: false, commercial_ok: true, openai_compatible: true, free_limits: { requests_per_day: 100, source: 'https://x.example/', checked: '2026-10-08' }, ...over });
 const blank = (over = {}) => ({ slug: 'acme', name: 'Acme', verified: true, last_verified: '2026-10-08', is_text_llm: true, card_required: null, phone_required: null, commercial_ok: null, openai_compatible: null, model_tier: null, ...over });
@@ -370,7 +372,7 @@ test('score.json validates against its schema, and a deliberately broken copy fa
 test('score.json lists every eligible provider, best first, and its schema is published at the stable URL', () => {
   const score = scoreApi();
   const data = scoreData();
-  const eligible = rankProviders(data.providers, { editorial: JSON.parse(readFileSync(join(ROOT, 'data/editorial.json'), 'utf8')), probeReport: probeData(), now: new Date(data.generated + 'T12:00:00Z'), minConfirmed: 0 });
+  const eligible = rankProviders(data.providers, { editorial: JSON.parse(readFileSync(join(ROOT, 'data/editorial.json'), 'utf8')), probeReport: probeData(), now: DATA_NOW(), minConfirmed: 0 });
   assert.equal(score.count, score.providers.length);
   assert.equal(score.count, eligible.length, 'every eligible provider is listed');
   assert.deepEqual(score.providers.map((p) => p.slug), eligible.map((r) => r.slug), 'the order is the ranking order');

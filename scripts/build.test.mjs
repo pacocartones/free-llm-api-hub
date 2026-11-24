@@ -232,17 +232,17 @@ test('validate rejects an unverified entry that still carries a date', () => {
   assert.equal(exitOk(['scripts/validate.mjs', fixture]), false);
 });
 
-test('validate rejects a generated date older than the newest verification', () => {
+// `generated` is the release stamp: a data change after the release leaves it older than the newest verification
+// (lib/release-stamp.mjs; check-release-stamp.mjs keeps it from moving without a release). What stays rejected is a
+// verification in the future.
+test('validate accepts a release stamp older than the newest verification, and rejects a verification after today', () => {
   const data = JSON.parse(readFileSync(DATA, 'utf8'));
-  const newest = data.providers
-    .map((p) => [p.last_verified, p.added])
-    .flat()
-    .filter((d) => d && /^\d{4}-\d{2}-\d{2}$/.test(d))
-    .sort()
-    .pop();
-  assert.ok(newest, 'fixture needs at least one dated entry to be meaningful');
   data.generated = '2000-01-01'; // older than every real date in the dataset
   const fixture = tmpFile('providers.json');
+  writeFileSync(fixture, JSON.stringify(data));
+  assert.equal(exitOk(['scripts/validate.mjs', fixture]), true);
+  const p = data.providers.find((x) => x.verified);
+  p.last_verified = '2999-01-01';
   writeFileSync(fixture, JSON.stringify(data));
   assert.equal(exitOk(['scripts/validate.mjs', fixture]), false);
 });
@@ -316,7 +316,7 @@ test('existing script self-tests pass (fetch-models, probe)', () => {
 
 const GENERATED = [
   'README.md',
-  'badge-freshness.json',
+  'site/badge-freshness.json',
   'site/index.html',
   'site/providers.csv',
 ];
@@ -339,7 +339,7 @@ test('the public surface omits retired exports and home redundancies, while upda
   assert.doesNotMatch(readFileSync(join(ROOT, 'site/explorer.js'), 'utf8'), /Could not load providers[.]json[.]/);
   const data = JSON.parse(readFileSync(DATA, 'utf8'));
   const publicProviders = data.providers.map(({ env_key, ...rest }) => rest);
-  assert.equal(readFileSync(join(ROOT, 'site/providers.csv'), 'utf8'), providersCsv({ version: data.version, generated: data.generated, providers: publicProviders }), 'site/providers.csv matches the public projection');
+  assert.equal(readFileSync(join(ROOT, 'site/providers.csv'), 'utf8'), providersCsv({ version: data.version, generated: datasetAsOf(data), providers: publicProviders }), 'site/providers.csv matches the public projection');
   for (const rel of ['data/providers.csv', 'data/providers.yaml', 'site/providers.yaml']) {
     assert.equal(existsSync(join(ROOT, rel)), false, `${rel} must not survive the retired export feature`);
   }
@@ -611,12 +611,13 @@ test('the committed OG manifest matches the current dataset', () => {
 });
 
 import { topEntries } from './lib/best.mjs';
+import { datasetAsOf } from './lib/release-stamp.mjs';
 const topOfData = () => {
   const data = JSON.parse(readFileSync(DATA, 'utf8'));
   return topEntries(data.providers, {
     editorial: JSON.parse(readFileSync(join(ROOT, 'data/editorial.json'), 'utf8')),
     probeReport: JSON.parse(readFileSync(join(ROOT, 'data/probe-report.json'), 'utf8')),
-    now: new Date(data.generated + 'T12:00:00Z'),
+    now: new Date(datasetAsOf(data) + 'T12:00:00Z'),
   });
 };
 
@@ -661,7 +662,7 @@ test('/best shows the podium of three and the methodology page states the rules'
   assert.match(method, /editorial rating/);
   assert.match(method, /30/);
   assert.match(method, /internal rubric behind those ratings is not published/);
-  assert.match(method, new RegExp(`Data of ${JSON.parse(readFileSync(DATA, 'utf8')).generated}`));
+  assert.match(method, new RegExp(`Data of ${datasetAsOf(JSON.parse(readFileSync(DATA, 'utf8')))}`));
   assert.match(readFileSync(join(ROOT, 'site/sitemap.xml'), 'utf8'), /<loc>https:\/\/freellmapihub\.com\/best\/methodology\/<\/loc>/);
 });
 
@@ -826,14 +827,15 @@ test('badge and worklist bucket identically at the 60-day threshold', () => {
   assert.equal(freshnessColor(null), 'yellow');
 });
 
-// Deliberately not compared against a freshly built badge: the committed file
-// ages a day at a time between build passes, and this suite is a
-// blocking check on every pull request. What must always hold is that the file
+// The badge is no longer committed (it moves with the calendar; every deploy rebuilds site/badge-freshness.json).
+// Deliberately not compared against a badge built on another day: what must always hold is that the file
 // is internally consistent — the colour is the one the rule gives to the age the
 // message itself states — which catches a hand-edited or half-migrated badge
 // without turning the clock into a source of red builds.
 test('the shipped badge grades its own stated age by the rule', () => {
-  const onDisk = JSON.parse(readFileSync(join(ROOT, 'badge-freshness.json'), 'utf8'));
+  assert.equal(existsSync(join(ROOT, 'badge-freshness.json')), false, 'the date-relative badge is not committed at the root');
+  const built = join(ROOT, 'site/badge-freshness.json');
+  const onDisk = existsSync(built) ? JSON.parse(readFileSync(built, 'utf8')) : freshnessBadge(JSON.parse(readFileSync(DATA, 'utf8')).providers, new Date()).badge;
   assert.equal(onDisk.schemaVersion, 1);
   assert.equal(onDisk.label, 'freshness');
   const m = onDisk.message.match(/^(\d+)\/(\d+) verified · oldest (\d+)d$/);
@@ -1132,7 +1134,7 @@ test('the built client configs match the dataset, are registered, and publish th
   assert.ok(eligible.length > 0, 'the real dataset has eligible providers');
 
   const yaml = readFileSync(join(v1, 'litellm.yaml'), 'utf8');
-  assert.ok(yaml.includes(`# Dataset version ${data.version}, generated ${data.generated}.`), 'header uses data.version and data.generated');
+  assert.ok(yaml.includes(`# Dataset version ${data.version}, generated ${datasetAsOf(data)}.`), 'header uses data.version and the public data date');
   const entries = parseLitellm(yaml);
   const expectedCount = eligible.reduce((n, p) => n + (p.models_free && p.models_free.length ? p.models_free.length : 1), 0);
   assert.equal(entries.length, expectedCount);
@@ -1141,7 +1143,7 @@ test('the built client configs match the dataset, are registered, and publish th
 
   const clients = JSON.parse(readFileSync(join(v1, 'openai-clients.json'), 'utf8'));
   assert.equal(clients.version, data.version);
-  assert.equal(clients.generated, data.generated);
+  assert.equal(clients.generated, datasetAsOf(data));
   assert.equal(clients.count, eligible.length);
   assert.deepEqual(clients.clients.map((c) => c.slug), eligible.map((p) => p.slug));
   for (const c of clients.clients) assert.match(c.env_key, /^[A-Z][A-Z0-9_]*$/);
@@ -2421,7 +2423,7 @@ test('the narrow-screen rules that keep the pages from scrolling sideways stay i
 
 test('the stat tiles keep a reserved height, so filling them in does not push the page down', () => {
   // Lighthouse on a phone measured a 0.068 shift when explorer.js filled an empty block (0 with the reserved height).
-  // The build now renders the four tiles into the HTML (dated by data.generated) and explorer.js only repaints them;
+  // The build now renders the four tiles into the HTML (dated by the public data date, datasetAsOf) and explorer.js only repaints them;
   // the reserved height stays as a guard for the repaint.
   const html = readFileSync(join(ROOT, 'site/index.html'), 'utf8');
   const block = html.match(/<div class="stats" id="stats"[^>]*>([\s\S]*?)<!-- AUTOGEN:stats:end --><\/div>/);

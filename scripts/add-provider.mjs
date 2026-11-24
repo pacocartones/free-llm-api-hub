@@ -201,7 +201,6 @@ function addProviderLocked(dataFile, draftDir, slug, name) {
   const today = todayUtc();
   provider.added = today;
   const candidate = structuredClone(data);
-  candidate.generated = today;
   candidate.providers.push(provider);
   const temporary = `${dataFile}.add-provider-${process.pid}.tmp`;
   writeFileSync(temporary, serialize(candidate), 'utf8');
