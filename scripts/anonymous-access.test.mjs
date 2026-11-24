@@ -1,12 +1,14 @@
 // anonymous_access (issue #182): the validator rule, the shared collection filter and the generated pages.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { spawnSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { COLLECTIONS } from './lib/collections.mjs';
 import { tmpFile } from './lib/tmp.mjs';
+import { privateTree } from './lib/private-tree.mjs';
+import { esc } from './lib/escape.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const DATA = join(ROOT, 'data/providers.json');
@@ -47,13 +49,16 @@ test('the anonymous-access collection lists exactly the verified providers with 
 });
 
 test('the generated anonymous-access pages quote each provider and keep the shared page structure', () => {
-  const { providers } = data();
+  // site/collections/ is gitignored (built at deploy), so build on a private copy of the tree, as guides-seo.test.mjs does.
+  const TREE = privateTree(ROOT);
+  execFileSync(process.execPath, [join(TREE, 'scripts/build.mjs')], { cwd: TREE, stdio: 'pipe' });
+  const { providers } = JSON.parse(readFileSync(join(TREE, 'data/providers.json'), 'utf8'));
   const rows = providers.filter((p) => p.verified === true && p.anonymous_access);
-  const md = readFileSync(join(ROOT, 'collections/anonymous-access.md'), 'utf8');
-  const html = readFileSync(join(ROOT, 'site/collections/anonymous-access.html'), 'utf8');
+  const md = readFileSync(join(TREE, 'collections/anonymous-access.md'), 'utf8');
+  const html = readFileSync(join(TREE, 'site/collections/anonymous-access.html'), 'utf8');
   assert.match(md, new RegExp(`\\*\\*${rows.length} of \\d+ tracked providers\\*\\* match`));
   for (const p of rows) {
-    assert.ok(md.includes(p.anonymous_access.quote.replace(/\|/g, '\\|')), `${p.slug}: quote in markdown`);
+    assert.ok(md.includes(esc(p.anonymous_access.quote)), `${p.slug}: quote in markdown`);
     assert.ok(md.includes(`(read ${p.anonymous_access.checked})`), `${p.slug}: reading date in markdown`);
     assert.ok(html.includes(`(read ${p.anonymous_access.checked})`), `${p.slug}: reading date in HTML`);
   }
@@ -61,5 +66,5 @@ test('the generated anonymous-access pages quote each provider and keep the shar
   assert.match(html, /<a href="anonymous-access" class="active" aria-current="page">/, 'the collection nav marks the current page');
   assert.match(html, /<link rel="canonical" href="https:\/\/freellmapihub\.com\/collections\/anonymous-access"/);
   assert.match(html, /"@type":"ItemList"/);
-  assert.ok(readFileSync(join(ROOT, 'collections/README.md'), 'utf8').includes('(anonymous-access.md)'), 'listed in the collections hub');
+  assert.ok(readFileSync(join(TREE, 'collections/README.md'), 'utf8').includes('(anonymous-access.md)'), 'listed in the collections hub');
 });
