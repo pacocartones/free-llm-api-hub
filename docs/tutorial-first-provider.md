@@ -21,7 +21,7 @@ We'll use **AI21 Labs** as the worked example: a $10 trial credit on their Jamba
 ## Before you start
 
 - A GitHub account.
-- `git` on your `PATH` and Node.js ≥ 18 (the version used in CI is pinned in [`.nvmrc`](../.nvmrc)).
+- `git` on your `PATH` and Node.js 24 or later (the version used in CI is pinned in [`.nvmrc`](../.nvmrc)).
 - A quick skim of what qualifies: [inclusion-criteria.md](inclusion-criteria.md) and what "verified" means in [methodology.md](methodology.md).
 
 **One gotcha that stops first-timers cold:** the tooling mines per-provider change history from `git log`, so you need a **full clone** — not `--depth 1`, not a tarball download.

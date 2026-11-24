@@ -202,7 +202,7 @@ The five required checks on `main` (branch protection, updated 2026-11-19) are:
 All five report on every PR without path filters. CodeQL also runs weekly and
 manually. It scans JavaScript/TypeScript code, not Actions
 workflow YAML. There is no push trigger, avoiding a second scan when a PR merges.
-`mcp tests (node 22)` and `mcp tests (node 24)` run only when the MCP package or its
+`mcp tests (node 22)`, `mcp tests (node 24)` and `mcp tests (node 26)` run only when the MCP package or its
 workflow changes, so they must not be unconditional required checks.
 
 Live GitHub settings remain authoritative. Preserve existing controls when reconciling their check
