@@ -7,8 +7,9 @@
 import { hasHiddenChars } from './hidden-chars.mjs';
 import { ABSENCE_TERMS, methodFor, sameLanguage, PDF_METHOD } from './page-text.mjs';
 import { publicHttpsUrlError } from './public-fetch.mjs';
+import { speedQuoteId } from './published-speed.mjs';
 
-export const KINDS = ['sentence', 'note_passage', 'absence_check', 'field_sentence'];
+export const KINDS = ['sentence', 'note_passage', 'absence_check', 'field_sentence', 'speed_quote'];
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 const SHA_RE = /^[0-9a-f]{64}$/;
 const SPAN_RE = /«([^»]*)»/g;
@@ -34,6 +35,10 @@ export function quoteErrors(data, registry, { today = new Date().toISOString().s
   const fieldQuotes = new Map();
   for (const p of data.providers || []) for (const [field, c] of Object.entries(p.field_checks || {})) if (c && c.quote != null) fieldQuotes.set(`${p.slug}.${field}.sentence`, { slug: p.slug, field, check: c });
   const fieldSentences = new Map();
+  // speed_quote: the quote of a published_speed entry, id <slug>.speed.<model>.<metric> (see scripts/lib/published-speed.mjs).
+  const speedQuotes = new Map();
+  for (const p of data.providers || []) for (const e of Array.isArray(p.published_speed) ? p.published_speed : []) if (e && e.quote != null) speedQuotes.set(speedQuoteId(p.slug, e), { slug: p.slug, entry: e });
+  const speedEntries = new Map();
   const seen = new Set();
   const by = { sentence: new Map(), note_passage: new Map(), absence_check: new Map() };
   for (const e of registry.entries) {
@@ -44,6 +49,10 @@ export function quoteErrors(data, registry, { today = new Date().toISOString().s
       if (e.id !== `${e.slug}.${e.field}.sentence`) fail(`${where}: a field sentence has the id <slug>.<field>.sentence`);
       if (!fieldQuotes.has(e.id)) { fail(`${where}: provider "${e.slug}" has no field_checks.${e.field} quote`); continue; }
       fieldSentences.set(e.id, e);
+    } else if (e.kind === 'speed_quote') {
+      if (e.id !== `${e.slug}.speed.${e.model}.${e.metric}`) fail(`${where}: a speed quote has the id <slug>.speed.<model>.<metric>`);
+      if (!speedQuotes.has(e.id)) { fail(`${where}: provider "${e.slug}" has no published_speed entry for ${e.model} ${e.metric}`); continue; }
+      speedEntries.set(e.id, e);
     } else if (!withPolicy.has(e.slug)) { fail(`${where}: provider "${e.slug}" has no data_policy`); continue; }
     if (!KINDS.includes(e.kind)) { fail(`${where}: unknown kind ${JSON.stringify(e.kind)}`); continue; }
     if (publicHttpsUrlError(e.source_url)) fail(`${where}: source_url must be a public HTTPS address`);
@@ -64,7 +73,7 @@ export function quoteErrors(data, registry, { today = new Date().toISOString().s
     if (typeof e.text !== 'string' || !e.text.trim() || e.text.length > 400) fail(`${where}: text must be 1 to 400 characters`);
     else if (hasHiddenChars(e.text)) fail(`${where}: text has control, bidirectional or zero-width characters`);
     else if (/\s{2}|^\s|\s$/.test(e.text)) fail(`${where}: text must have its white space collapsed, as the page text is`);
-    if (e.kind === 'field_sentence') { /* matched against its field check below */ }
+    if (e.kind === 'field_sentence' || e.kind === 'speed_quote') { /* matched against its field check or speed entry below */ }
     else if (e.kind === 'sentence') { if (by.sentence.has(e.slug)) fail(`${where}: second sentence for ${e.slug}`); by.sentence.set(e.slug, e); }
     else { if (!by.note_passage.has(e.slug)) by.note_passage.set(e.slug, []); by.note_passage.get(e.slug).push(e); }
   }
@@ -74,6 +83,14 @@ export function quoteErrors(data, registry, { today = new Date().toISOString().s
     else {
       if (s.text !== check.quote) fail(`${slug}: the field_sentence entry ${id} is not byte for byte the quote of field_checks.${field}`);
       if (!Array.isArray(check.sources) || s.source_url !== check.sources[0]) fail(`${slug}: the field_sentence entry ${id} has another source than the first source of field_checks.${field}`);
+    }
+  }
+  for (const [id, { slug, entry }] of speedQuotes) {
+    const s = speedEntries.get(id);
+    if (!s) fail(`${slug}: the quote of published_speed ${entry.model} ${entry.metric} has no speed_quote entry (${id}) in quotes.json`);
+    else {
+      if (s.text !== entry.quote) fail(`${slug}: the speed_quote entry ${id} is not byte for byte the quote of its published_speed entry`);
+      if (s.source_url !== entry.source) fail(`${slug}: the speed_quote entry ${id} has another source than its published_speed entry`);
     }
   }
   for (const [slug, dp] of withPolicy) {

@@ -56,13 +56,13 @@
     },
     {
       "slug": "groq",
-      "why": "Purpose-built LPU inference makes this the lowest-latency free tier for open-weight models — the only catch is phone verification at signup.",
-      "tag": "Fastest inference"
+      "why": "Purpose-built LPU inference for open-weight models, and each model page states its own speed (a provider claim, not our measurement, and not stated for the free tier).",
+      "tag": "Publishes model speeds"
     },
     {
       "slug": "sambanova",
-      "why": "A rate-limited free tier across all models with a commercial license and no card — fast open-model inference without a trial clock counting down.",
-      "tag": "Fast, no card"
+      "why": "A rate-limited free tier across all models with a commercial license and no card — open-model inference without a trial clock counting down.",
+      "tag": "No card, no trial clock"
     },
     {
       "slug": "wandb-inference",

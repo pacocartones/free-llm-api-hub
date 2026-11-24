@@ -26,6 +26,7 @@ import { resolveBestEntries, topEntries, PODIUM_SIZE } from './lib/best.mjs';
 import { agreementsTableHtml, sponsoredBlockHtml, disclosureHtml, inForce, NOT_IN_DATA_SENTENCE, MACHINE_SENTENCE } from './lib/agreements.mjs';
 import { coverage, coverageMainHtml } from './lib/coverage.mjs';
 import { fieldCheck, REASON_LABEL } from './lib/field-checks.mjs';
+import { publishedSpeed, speedFigure } from './lib/published-speed.mjs';
 import { apiV1ProviderSchema, projectApiV1Changes, toApiV1Provider } from './lib/api-v1.mjs';
 import { freeGpuMainHtml } from './lib/free-gpu.mjs';
 import { labelTables } from './lib/tables.mjs';
@@ -37,7 +38,7 @@ import { SCORE_WEIGHTS, EDITORIAL_WEIGHT, EDITORIAL_DEFAULT, MATH_INPUTS, MIN_CO
 import { publishableClientConfigs } from './lib/client-config.mjs';
 import { COLLECTIONS as SHARED_COLLECTIONS } from './lib/collections.mjs';
 import * as compareLib from './lib/compare.mjs';
-import { requirementsHtml, limitsHtml, glanceHtml, modelsHtml, dataPolicyHtml } from './lib/provider-sections.mjs';
+import { requirementsHtml, limitsHtml, glanceHtml, modelsHtml, dataPolicyHtml, speedHtml } from './lib/provider-sections.mjs';
 import { aboutHtml } from './lib/provider-summaries.mjs';
 import { fontHead, fingerprintSite } from './lib/assets.mjs';
 import { securityTxt } from './lib/security-txt.mjs';
@@ -1246,6 +1247,7 @@ for (const p of providers) {
     limitsHtml(p) +
     glanceHtml(p, typeLabel(p)) +
     modelsHtml(p, { modelHref: modelPageHref('../') }) +
+    speedHtml(p) +
     dataPolicyHtml(p) +
     aboutHtml(summaryBySlug.get(p.slug), p.name) +
     disclosureHtml(AGREEMENTS_FILE, p.slug) +
@@ -1986,6 +1988,7 @@ const provBlock = (p) => {
     `- The catch: ${p.notes || '—'}\n` +
     `- Modalities: ${(p.modalities || ['text']).join(', ')}\n` +
     `- Gates: ${gates}\n` +
+    (publishedSpeed(p).length ? `- Published speed (the provider's own figures, not measured by us; not stated for the free tier unless the page says so): ${publishedSpeed(p).map((e) => `${e.model} ${speedFigure(e)} (${e.source}, checked ${e.checked})`).join('; ')}\n` : '') +
     `- Docs: ${p.docs_url}\n` +
     `- Page: ${SITE}/p/${p.slug}\n`;
 };

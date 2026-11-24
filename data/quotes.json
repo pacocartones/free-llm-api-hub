@@ -36,6 +36,32 @@
    "page_sha256": "645fa99e301839336160d9b0387edad3a965dc30e8bed95efb9e54116c2f2f1e"
   },
   {
+   "id": "groq.speed.openai/gpt-oss-20b.output_tokens_per_second",
+   "slug": "groq",
+   "kind": "speed_quote",
+   "model": "openai/gpt-oss-20b",
+   "metric": "output_tokens_per_second",
+   "text": "TOKEN SPEED ~1000 tps",
+   "source_url": "https://console.groq.com/docs/model/openai/gpt-oss-20b",
+   "read_on": "2026-11-24",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "0a93a0be4d596bb3a2c8ec5fb842f3637599e73b9aff312c8e5ff1c4ce5561c3"
+  },
+  {
+   "id": "groq.speed.openai/gpt-oss-120b.output_tokens_per_second",
+   "slug": "groq",
+   "kind": "speed_quote",
+   "model": "openai/gpt-oss-120b",
+   "metric": "output_tokens_per_second",
+   "text": "TOKEN SPEED ~500 tps",
+   "source_url": "https://console.groq.com/docs/model/openai/gpt-oss-120b",
+   "read_on": "2026-11-24",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "8e227f1b41815703fde5e08abac333233fb0564e0c7ada3299be7c515712a6cc"
+  },
+  {
    "id": "openrouter.sentence",
    "slug": "openrouter",
    "kind": "sentence",
@@ -137,6 +163,32 @@
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "2aba6287e39902eab9da378b3dbe62debf9c3b99c2d728b141f6d54f87ee7ee7"
+  },
+  {
+   "id": "cerebras.speed.gpt-oss-120b.output_tokens_per_second",
+   "slug": "cerebras",
+   "kind": "speed_quote",
+   "model": "gpt-oss-120b",
+   "metric": "output_tokens_per_second",
+   "text": "gpt-oss-120b 120 billion 65k / 131k ~3000",
+   "source_url": "https://inference-docs.cerebras.ai/models/overview",
+   "read_on": "2026-11-24",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "7e6c05b30acac3d6811383043cfa0b3199601d8363f1f963c8b58a36b42644b9"
+  },
+  {
+   "id": "cerebras.speed.qwen-3.8-27b.output_tokens_per_second",
+   "slug": "cerebras",
+   "kind": "speed_quote",
+   "model": "qwen-3.8-27b",
+   "metric": "output_tokens_per_second",
+   "text": "qwen-3.8-27b 27 billion 64k / 128k ~1850",
+   "source_url": "https://inference-docs.cerebras.ai/models/overview",
+   "read_on": "2026-11-24",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "7e6c05b30acac3d6811383043cfa0b3199601d8363f1f963c8b58a36b42644b9"
   },
   {
    "id": "huggingface.sentence",
@@ -655,6 +707,19 @@
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "57f3bc7b7807b7c0d80c5c1011f0aa620a727f2b4efa6c84753b7d376862c336"
+  },
+  {
+   "id": "sarvam-ai.speed.deepseekv4.1-flash-1017.output_tokens_per_second",
+   "slug": "sarvam-ai",
+   "kind": "speed_quote",
+   "model": "deepseekv4.1-flash-1017",
+   "metric": "output_tokens_per_second",
+   "text": "It generates more than 200 output tokens per second , against about 80 on deepseekv4.1-flash-1017",
+   "source_url": "https://docs.sarvam.ai/api/token-factory/models/deepseek-v4.1-flash-1017",
+   "read_on": "2026-11-24",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "111e4ae255c3139b488489ef97e06fdf9663b187aed9e7edcea0d3abde7854a8"
   },
   {
    "id": "voyage-ai.sentence",

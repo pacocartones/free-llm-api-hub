@@ -144,6 +144,17 @@ export function compareTableHtml(list, opts = {}) {
       : triStateHtml(p.commercial_ok, 'allowed', 'not allowed (eval only)', p.field_checks && p.field_checks.commercial_ok)],
     ['OpenAI-compatible', (p) => triStateHtml(p.openai_compatible, 'yes', 'no', p.field_checks && p.field_checks.openai_compatible) +
       (p.openai_base_url ? `<div class="cmp-sub"><code>${cell(p.openai_base_url)}</code></div>` : '')],
+    // The provider's own speed figures (published_speed, issue #606). Inlined like the rest because this function is shipped to the
+    // browser as source text; the signs and units match speedFigure in published-speed.mjs (a test keeps them equal).
+    ['Published speed', (p) => {
+      const list = Array.isArray(p.published_speed) ? p.published_speed : [];
+      if (!list.length) return '<span class="tri tri-unk">none recorded</span>';
+      const sign = { exact: '', approx: '~', at_least: '≥', up_to: '≤' };
+      const unit = { output_tokens_per_second: 'tok/s', time_to_first_token_ms: 'ms' };
+      return list.map((e) => `<div><code>${cell(e.model)}</code> ${cell((sign[e.qualifier] || '') + Number(e.value).toLocaleString('en-US') + ' ' + (unit[e.metric] || ''))}` +
+        (safeUrl(e.source) ? ` <a href="${cell(safeUrl(e.source))}" target="_blank" rel="noopener">source</a>` : '') + '</div>').join('') +
+        `<div class="cmp-sub">The provider's own ${list.length > 1 ? 'figures' : 'figure'}, checked ${cell([...new Set(list.map((e) => e.checked))].join(', '))}; not our measurement and not a like-for-like benchmark</div>`;
+    }],
     ['Modalities', (p) => cell((p.modalities || []).join(', ') || '—')],
     ['Free models (sample)', (p) => (p.models_free && p.models_free.length)
       ? p.models_free.map((m) => `<code>${cell(m)}</code>`).join(' ')

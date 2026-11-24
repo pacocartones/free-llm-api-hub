@@ -58,6 +58,24 @@
         "note": { "type": ["string", "null"], "minLength": 1, "maxLength": 300, "description": "What was read and what it says, in plain words; for sources_disagree, what each page says." }
       }
     },
+    "published_speed_entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["model", "metric", "unit", "value", "qualifier", "plan_named", "source", "checked", "quote"],
+      "description": "One speed figure the provider publishes for a model of its own API: the provider's claim under its own conditions, never a measurement by this project and never an estimate.",
+      "properties": {
+        "model": { "type": "string", "minLength": 1, "maxLength": 120, "description": "The model ID as the provider writes it; it must be in the provider's models_free." },
+        "metric": { "enum": ["output_tokens_per_second", "time_to_first_token_ms"], "description": "What the figure measures, as the provider states it." },
+        "unit": { "enum": ["tokens/s", "ms"], "description": "tokens/s for output_tokens_per_second, ms for time_to_first_token_ms." },
+        "value": { "type": "number", "exclusiveMinimum": 0, "description": "The figure exactly as the quote writes it (no rounding, no conversion)." },
+        "qualifier": { "enum": ["exact", "approx", "at_least", "up_to"], "description": "How the quote words the figure: exact (a bare number), approx ('~', 'about'), at_least ('>', 'more than', '+'), up_to ('up to', a peak)." },
+        "conditions": { "type": ["string", "null"], "minLength": 1, "maxLength": 200, "description": "Conditions the provider's page gives for the figure (off-peak, preview, input size), in plain words." },
+        "plan_named": { "type": ["boolean", "null"], "description": "true = the page ties the figure to a plan; false = the page was read and ties it to none (the figure is not stated for the free tier); null = not checked." },
+        "source": { "type": "string", "format": "uri", "pattern": "^https://", "description": "The provider's own page carrying the figure (same site as its docs, models list or API); never a third party, aggregator or benchmark." },
+        "checked": { "type": "string", "format": "date", "description": "The day the page was read (UTC)." },
+        "quote": { "type": "string", "minLength": 1, "maxLength": 300, "description": "The provider's words carrying the figure, as the page text has them. It has a speed_quote entry in data/quotes.json." }
+      }
+    },
     "provider": {
       "type": "object",
       "additionalProperties": false,
@@ -228,6 +246,13 @@
             "commercial_ok": { "$ref": "#/$defs/field_check" },
             "openai_compatible": { "$ref": "#/$defs/field_check" }
           }
+        },
+        "published_speed": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 12,
+          "items": { "$ref": "#/$defs/published_speed_entry" },
+          "description": "Speed figures the provider publishes for models of its free sample, each with the provider's page, the day it was read and its words. Provider claims, not measurements: figures from different providers are not a like-for-like comparison. Absent = not published or not recorded, never 'slow'."
         },
         "verified": {
           "type": "boolean",
