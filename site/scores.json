@@ -91,6 +91,12 @@
       "of": 6,
       "rank": null
     },
+    "ibm-watsonx": {
+      "total": 37.1,
+      "confirmed": 4,
+      "of": 6,
+      "rank": 9
+    },
     "assemblyai": {
       "total": 37,
       "confirmed": 2,
@@ -151,6 +157,12 @@
       "of": 6,
       "rank": null
     },
+    "contextual-ai": {
+      "total": 34.4,
+      "confirmed": 3,
+      "of": 6,
+      "rank": null
+    },
     "speechmatics": {
       "total": 34.4,
       "confirmed": 3,
@@ -188,12 +200,6 @@
       "rank": null
     },
     "moondream": {
-      "total": 33.9,
-      "confirmed": 2,
-      "of": 6,
-      "rank": null
-    },
-    "poolside": {
       "total": 33.9,
       "confirmed": 2,
       "of": 6,
@@ -244,12 +250,6 @@
     "baseten": {
       "total": 30,
       "confirmed": 1,
-      "of": 6,
-      "rank": null
-    },
-    "contextual-ai": {
-      "total": 29.9,
-      "confirmed": 2,
       "of": 6,
       "rank": null
     },
@@ -327,12 +327,6 @@
     },
     "elevenlabs": {
       "total": 28,
-      "confirmed": 3,
-      "of": 6,
-      "rank": null
-    },
-    "ibm-watsonx": {
-      "total": 26.1,
       "confirmed": 3,
       "of": 6,
       "rank": null
