@@ -91,6 +91,12 @@
       "of": 6,
       "rank": null
     },
+    "ibm-watsonx": {
+      "total": 37.1,
+      "confirmed": 4,
+      "of": 6,
+      "rank": 9
+    },
     "assemblyai": {
       "total": 37,
       "confirmed": 2,
@@ -321,12 +327,6 @@
     },
     "elevenlabs": {
       "total": 28,
-      "confirmed": 3,
-      "of": 6,
-      "rank": null
-    },
-    "ibm-watsonx": {
-      "total": 26.1,
       "confirmed": 3,
       "of": 6,
       "rank": null
