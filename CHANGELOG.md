@@ -23,6 +23,25 @@ Notable changes to the dataset and the project. Format based on [Keep a Changelo
   processed through the API from model improvement, so `trains_on_prompts`
   is `false` for the free API access; no retention period is stated (#698).
   Thanks @BloosomNet.
+- IBM watsonx: `data_policy` recorded. IBM states it does not use uploaded
+  content or model output to train IBM-developed models; text sent through
+  the Prompt Lab or API is not stored unless saved, and prompt information
+  for up to 500 prompts is kept 30 days (#692). Thanks @BloosomNet.
+- SambaNova re-verified: the Free Tier now lists only gpt-oss-120b and
+  gemma-4-31B-it (20 RPM / 20 RPD / 200,000 TPD each); DeepSeek-V3.1 and
+  Llama-3.3-70B leave `models_free`, `model_tier` moves from 3 to 2, and the
+  Developer Tier limits are corrected. `commercial_ok` becomes `false`: its
+  docs say all SambaCloud models are Preview models for evaluation, not
+  production (#697). Thanks @BloosomNet.
+- Google Gemini: `rate_limits` now gives the published Free-tier limits of
+  Gemini Decision 1 on the Decisions API (200 RPM, 50,000 TPM, 10,000 RPD).
+  `free_limits` stays absent, because Google publishes no free-tier numbers
+  for the Gemini 2.5 models in `models_free`; those are shown only in AI
+  Studio (#691). Thanks @BloosomNet.
+- Moondream: `free_limits` records the published 2 requests/second of the
+  Base Tier, the default for all API keys (10/second once the balance is at
+  least $10), cited to the official rate-limits page (#689). Thanks
+  @Abhishekkumar071.
 
 ## [2.14.2] — 2026-11-20
 
