@@ -66,6 +66,32 @@
         },
         "card_required": { "state": "not_stated", "quotes": [] }
       }
+    },
+    {
+      "slug": "paperspace-gradient-notebooks",
+      "name": "Paperspace Gradient Notebooks (DigitalOcean)",
+      "url": "https://docs.digitalocean.com/products/paperspace/notebooks/details/features/",
+      "kind": "notebook",
+      "claims": {
+        "gpu_access": {
+          "state": "stated",
+          "quotes": [
+            { "text": "Notebooks include a free GPU plan.", "source": "https://docs.digitalocean.com/products/paperspace/notebooks/details/features/", "read": "2026-11-24" },
+            { "text": "Free machines provide limited CPU and GPU resources for development and testing and can only be used for Notebooks in private workspaces.", "source": "https://docs.digitalocean.com/products/paperspace/pricing/", "read": "2026-11-24" }
+          ]
+        },
+        "quota": {
+          "state": "stated",
+          "quotes": [
+            { "text": "When using free-tier machines, the maximum auto-shutdown timeout is 6 hours.", "source": "https://docs.digitalocean.com/products/paperspace/notebooks/details/features/", "read": "2026-11-24" },
+            { "text": "You can run your notebook only within six-hour sessions on a free instance as the notebook shuts down after six hours of use.", "source": "https://docs.digitalocean.com/products/paperspace/notebooks/getting-started/run-example-notebooks/", "read": "2026-11-24" },
+            { "text": "If you are on the Gradient free tier, stop the notebook instance so that you do not exceed the limit of QTY 1 concurrent running notebooks on the free plan.", "source": "https://docs.digitalocean.com/products/paperspace/notebooks/getting-started/run-example-notebooks/", "read": "2026-11-24" }
+          ]
+        },
+        "credit_amount": { "state": "not_stated", "quotes": [] },
+        "expires": { "state": "not_stated", "quotes": [] },
+        "card_required": { "state": "not_stated", "quotes": [] }
+      }
     }
   ],
   "notes": [
