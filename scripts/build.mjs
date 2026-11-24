@@ -44,6 +44,7 @@ import { codeHtmlEsc, curlChatQuickstart, pythonChatQuickstart, pythonEmbeddings
 import { providersCsv } from './lib/provider-csv.mjs';
 import { writeSchemaDocs } from './schema-docs.mjs';
 import { datasetAsOf } from './lib/release-stamp.mjs';
+import { parseCitation, datasetJsonLd, datasetJsonLdScript } from './lib/dataset-jsonld.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const FRESH_DAYS = SLA_DAYS; // the freshness SLA, defined once in lib/rules.mjs
@@ -912,6 +913,8 @@ indexHtml = inject(indexHtml, 'themeguard', THEME_GUARD);
 indexHtml = inject(indexHtml, 'rows', homeRows);
 indexHtml = inject(indexHtml, 'stats', homeStatsHtml);
 indexHtml = inject(indexHtml, 'data', inlineData);
+// The schema.org Dataset block (Google Dataset Search), from CITATION.cff and the data: lib/dataset-jsonld.mjs.
+indexHtml = inject(indexHtml, 'dataset', datasetJsonLdScript(datasetJsonLd({ data, citation: parseCitation(readFileSync(join(ROOT, 'CITATION.cff'), 'utf8')), site: SITE, asOf: ASOF })));
 indexHtml = withStars(indexHtml).replace(/(<img class="trust-badge"[^>]*? width=")\d+(")/, `$1${BADGE_W}$2`);
 writeFileSync(join(ROOT, 'site/index.html'), indexHtml);
 
@@ -1470,7 +1473,7 @@ const monthsTable = stateReports.length
     `\n</tbody></table>`
   : `<p class="muted">No history available.</p>`;
 const changesMain =
-  pageHero({ crumbs: `<a href="../">Home</a> / <a href="../updates">Updates</a> / What changed`, h1: `What changed`, lede: `Field-level changes to the free tiers we track (what's free, rate limits, the catch and the card, phone, commercial-use and OpenAI-compatibility flags), month by month. Mined from the git history of <a href="${REPO}/commits/main/data/providers.json">providers.json</a>. Subscribe via <a href="../changes.xml">RSS</a> or read the <a href="../api/v1/changes.json">JSON</a>.` }) +
+  pageHero({ crumbs: `<a href="../">Home</a> / <a href="../updates">Updates</a> / What changed`, h1: `What changed`, lede: `Field-level changes to the free tiers we track (what's free, rate limits, the catch and the card, phone, commercial-use and OpenAI-compatibility flags), month by month. Mined from the git history of <a href="${REPO}/commits/main/data/providers.json">providers.json</a>. Subscribe via <a href="../changes.xml">RSS</a> or read the <a href="../api/v1/changes.json">JSON</a>.`, extra: `<div class="prov-actions subscribe"><a class="btn primary" href="../changes.xml" type="application/rss+xml">Subscribe via RSS</a><a class="btn ghost" href="../api/v1/changes.json" type="application/json">Changes as JSON</a></div>` }) +
   `<main id="main"><div class="wrap prose">` +
   `<section id="months"><h2>Month by month</h2>` +
   `<p>One report per month, from the first to the latest: provider counts by category and modality, verified share, verification age, and every field change and provider added, in the order they happened. A month with no committed revision of providers.json says so. Every figure is computed from the data and its git history.</p>` +
