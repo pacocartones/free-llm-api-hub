@@ -7,4 +7,4 @@
   file downloads. No parameter carries personal data. Provider pages and static
   comparisons mark their outbound links with `data-provider` and `data-link`.
   The event names and the recommended key events are listed in
-  `docs/architecture.md`; the privacy page describes them.
+  `docs/architecture.md`; the privacy page describes them (#718).
