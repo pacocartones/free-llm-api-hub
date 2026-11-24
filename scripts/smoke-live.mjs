@@ -15,18 +15,21 @@
 // not answer 200: the Pages edge can take a few seconds to serve a new deploy.
 // pages.yml sets them; see lib/live-retry.mjs.
 import { retryConfig, retryFailing } from './lib/live-retry.mjs';
+import { makeLiveFetch } from './lib/live-fetch.mjs';
 
 let SITE = process.env.FLLM_SITE || 'https://freellmapihub.com';
 while (SITE.endsWith('/')) SITE = SITE.slice(0, -1);
 const TIMEOUT_MS = 20000;
 const CONCURRENCY = 8;
 const RETRY = { ...retryConfig(process.env), log: (line) => console.log(line) };
+// Past the CDN cache: ?deploy=<token per deploy run> on every request and Cache-Control: no-cache (lib/live-fetch.mjs).
+const liveFetch = makeLiveFetch();
 
 async function fetchWithTimeout(url) {
   const ctrl = new AbortController();
   const t = setTimeout(() => ctrl.abort(), TIMEOUT_MS);
   try {
-    return await fetch(url, { signal: ctrl.signal });
+    return await liveFetch(url, { signal: ctrl.signal });
   } finally {
     clearTimeout(t);
   }
