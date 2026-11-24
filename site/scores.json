@@ -13,35 +13,29 @@
       "of": 6,
       "rank": 2
     },
-    "sambanova": {
-      "total": 58.8,
-      "confirmed": 4,
-      "of": 6,
-      "rank": 3
-    },
     "google-gemini": {
       "total": 57.5,
       "confirmed": 4,
       "of": 6,
-      "rank": 4
+      "rank": 3
     },
     "cloudflare-workers-ai": {
       "total": 52,
       "confirmed": 4,
       "of": 6,
-      "rank": 5
+      "rank": 4
     },
     "zai-glm": {
       "total": 52,
       "confirmed": 4,
       "of": 6,
-      "rank": 6
+      "rank": 5
     },
     "modelscope": {
       "total": 51.4,
       "confirmed": 4,
       "of": 6,
-      "rank": 7
+      "rank": 6
     },
     "ocr-space": {
       "total": 47.2,
@@ -53,13 +47,19 @@
       "total": 46.1,
       "confirmed": 5,
       "of": 6,
-      "rank": 8
+      "rank": 7
     },
     "twelve-labs": {
       "total": 44.8,
       "confirmed": 3,
       "of": 6,
       "rank": null
+    },
+    "sambanova": {
+      "total": 44.3,
+      "confirmed": 4,
+      "of": 6,
+      "rank": 8
     },
     "jina-ai": {
       "total": 41,
