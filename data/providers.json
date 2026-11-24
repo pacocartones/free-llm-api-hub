@@ -39,7 +39,7 @@
       "free_type": "renewing-quota",
       "free_tier": "Open-weight models (GPT-OSS, Qwen) plus Whisper, no credit card required",
       "rate_limits": "Free plan examples: openai/gpt-oss-120b, openai/gpt-oss-20b and qwen/qwen3.8-27b: 30 RPM/1K RPD/8K TPM/200K TPD; Whisper models: 20 RPM/2K RPD/7.2K audio seconds/hour and 28.8K/day; limits vary by model",
-      "notes": "Limits apply at the organization level, not per API key. Phone verification required at signup",
+      "notes": "Limits apply at the organization level, not per API key. Phone verification required at signup. qwen/qwen3.8-27b is listed among Preview models, which the models page says are intended for evaluation purposes only",
       "best_for": "Lowest-latency inference for open-weight models",
       "modalities": ["text", "audio"],
       "models_free": ["openai/gpt-oss-120b", "openai/gpt-oss-20b", "qwen/qwen3.8-27b", "whisper-large-v3", "whisper-large-v3-turbo"],
@@ -55,10 +55,10 @@
       "is_text_llm": true,
       "model_tier": 3,
       "model_tier_source": {"model":"qwen/qwen3.8-27b","arena_model":"qwen3.8-27b","match":"variant","rating":1437.7,"ci":[1432.3,1443.1],"votes":18462,"snapshot":"2026-10-02","url":"https://huggingface.co/datasets/lmarena-ai/leaderboard-dataset"},
-      "free_limits": {"requests_per_minute":30,"requests_per_day":1000,"tokens_per_day":200000,"scope":"free plan, each of openai/gpt-oss-120b, openai/gpt-oss-20b and qwen/qwen3.8-27b; limits vary by model","source":"https://console.groq.com/docs/rate-limits","checked":"2026-11-14"},
+      "free_limits": {"requests_per_minute":30,"requests_per_day":1000,"tokens_per_day":200000,"scope":"free plan, each of openai/gpt-oss-120b, openai/gpt-oss-20b and qwen/qwen3.8-27b; limits vary by model","source":"https://console.groq.com/docs/rate-limits","checked":"2026-11-24"},
       "verified": true,
       "last_verified": "2026-11-14",
-      "data_policy": {"trains_on_prompts":null,"retention":"Inference: none by default; abuse/reliability logs up to 30 days or longer by law; stateful features differ","source":"https://console.groq.com/docs/your-data","checked":"2026-11-14","quote":"By default, Groq does not retain customer data for inference requests.","note":"The page covers retention only; it has no sentence about training, so training stays not confirmed."}
+      "data_policy": {"trains_on_prompts":false,"retention":"Inference: none by default; abuse/reliability logs up to 30 days or longer by law; stateful features differ","source":"https://console.groq.com/docs/your-data","checked":"2026-11-24","quote":"By default, Groq does not retain customer data for inference requests.","note":"Training: Services Agreement (modified 2026-06-22) §4.2: «Groq is not permitted to use Inputs or Outputs for training or fine-tuning any AI Model Services or other models» unless the customer allows it. §5.1 covers fee-free services; the Free plan is not named.","plan_named":false}
     },
     {
       "slug": "openrouter",
@@ -67,10 +67,10 @@
       "free_type": "renewing-quota",
       "free_tier": "A rotating set of models with a :free suffix, single API across many providers; availability fluctuates",
       "rate_limits": "20 requests/min; published table: 50 requests/day below 10 credits purchased lifetime, 1,000/day at 10+; docs say the higher daily ceiling starts one credit below the threshold to absorb fees and rounding",
-      "notes": "Terms prohibit reselling API access or developing a competing service; per-model terms still apply. Upstream providers may train on inputs/outputs. Separate settings for free and paid models can exclude providers that train; router-level opt-in logging and safety/legal retention exceptions still apply (official terms, privacy and provider-logging docs read 2026-11-14).",
+      "notes": "Terms prohibit reselling API access or developing a competing service; per-model terms still apply. Upstream providers may train on inputs/outputs. Separate settings for free and paid models can exclude providers that train; router-level opt-in logging and safety/legal retention exceptions still apply (terms, §7 item 4, last updated 2026-08-31, and provider-logging and data-collection docs re-read 2026-11-24; privacy policy read 2026-11-14).",
       "best_for": "Widest model selection behind one no-card key",
       "modalities": ["text", "vision"],
-      "models_free": ["baidu/ernie-5.5-flash-preview:free", "cohere/north-mini-code:free", "dots-studio/dots-3-note-preview:free", "google/gemma-4-26b-a4b-it:free", "inclusionai/ling-3.2-flash:free", "liquid/lfm-3-1.7b:free", "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free", "particle-ai/particle-1:free"],
+      "models_free": ["baidu/ernie-5.5-flash-preview:free", "google/gemma-4-26b-a4b-it:free", "inclusionai/ling-3.2-flash:free", "liquid/lfm-3-1.7b:free", "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free", "particle-ai/particle-1:free"],
       "expires": null,
       "docs_url": "https://openrouter.ai/docs/api-reference/limits",
       "phone_required": false,
@@ -82,10 +82,10 @@
       "is_text_llm": true,
       "model_tier": 4,
       "model_tier_source": {"model":"google/gemma-4-31b-it:free","arena_model":"gemma-4-31b","match":"variant","rating":1452.8,"ci":[1445.4,1460.3],"boundary":true,"votes":6133,"snapshot":"2026-10-02","url":"https://huggingface.co/datasets/lmarena-ai/leaderboard-dataset"},
-      "free_limits": {"requests_per_minute":20,"requests_per_day":50,"scope":"free models; published table: 50 requests/day below 10 credits purchased lifetime, 1,000/day at 10+; docs also describe an early upgrade one credit below the threshold","source":"https://openrouter.ai/docs/api-reference/limits","checked":"2026-11-14"},
+      "free_limits": {"requests_per_minute":20,"requests_per_day":50,"scope":"free models; published table: 50 requests/day below 10 credits purchased lifetime, 1,000/day at 10+; docs also describe an early upgrade one credit below the threshold","source":"https://openrouter.ai/docs/api-reference/limits","checked":"2026-11-24"},
       "verified": true,
       "last_verified": "2026-11-14",
-      "data_policy": {"trains_on_prompts":null,"retention":"OpenRouter: opt-in, CSAM/legal or Safety Retention exceptions; upstream retention varies","source":"https://openrouter.ai/docs/guides/privacy/data-collection","checked":"2026-11-14","quote":"OpenRouter retains prompts only when you opt in, or when retention is needed for CSAM review, reporting, and related legal preservation. Requests to Safety Retention endpoints are the exception: OpenRouter or the provider may retain prompts and responses from any request, only to prevent abuse, and not for training.","note":"Router-level retention only; upstream policies vary by provider. Training stays unknown across routes. Routing controls: «There are separate settings for paid and free models.»","plan_named":false}
+      "data_policy": {"trains_on_prompts":null,"retention":"OpenRouter: opt-in, CSAM/legal or Safety Retention exceptions; upstream retention varies","source":"https://openrouter.ai/docs/guides/privacy/data-collection","checked":"2026-11-24","quote":"OpenRouter retains prompts only when you opt in, or when retention is needed for CSAM review, reporting, and related legal preservation. Requests to Safety Retention endpoints are the exception: OpenRouter or the provider may retain prompts and responses from any request, only to prevent abuse, and not for training.","note":"Router-level retention only; upstream policies vary by provider. Training stays unknown across routes. Routing controls: «There are separate settings for paid and free models.»","plan_named":false}
     },
     {
       "slug": "cloudflare-workers-ai",
@@ -94,10 +94,10 @@
       "free_type": "renewing-quota",
       "free_tier": "10,000 Neurons/day, all account plans",
       "rate_limits": "10,000 Neurons/day (free allocation). Default text generation: 300 requests/min; models requiring paid billing: 20/min with standard billing or 50/min with prepaid AI Gateway credits. Text embeddings: 3,000/min (bge-large-en-v1.5: 1,500/min); speech recognition, text-to-image, translation and image-to-text: 720/min, with model exceptions",
-      "notes": "Resets daily at 00:00 UTC; overage on a Workers Paid plan bills at $0.011/1,000 Neurons. Some models require a paid billing method: Workers Paid or prepaid AI Gateway credits; these are outside no-card free access",
+      "notes": "Resets daily at 00:00 UTC; overage on a Workers Paid plan bills at $0.011/1,000 Neurons. Some models require a paid billing method: Workers Paid or prepaid AI Gateway credits; these are outside no-card free access (nine such models on the pricing page updated 2026-11-18)",
       "best_for": "Highest free daily volume for a real side project",
       "modalities": ["text", "embeddings", "image", "audio"],
-      "models_free": ["@cf/meta/llama-3.3-70b-instruct-fp8-fast", "@cf/meta/llama-3.1-8b-instruct", "@cf/mistralai/mistral-small-3.1-24b-instruct", "@cf/qwen/qwen2.5-coder-32b-instruct", "@cf/deepseek-ai/deepseek-r1-distill-qwen-32b", "@cf/google/gemma-3-12b-it"],
+      "models_free": ["@cf/google/gemma-4-26b-a4b-it", "@cf/meta/llama-3.3-70b-instruct-fp8-fast", "@cf/mistralai/mistral-small-3.1-24b-instruct", "@cf/qwen/qwen2.5-coder-32b-instruct", "@cf/deepseek-ai/deepseek-r1-distill-qwen-32b"],
       "expires": null,
       "docs_url": "https://developers.cloudflare.com/workers-ai/platform/pricing/",
       "phone_required": false,
@@ -107,12 +107,12 @@
       "openai_base_url": "https://api.cloudflare.com/client/v4/accounts/{account_id}/ai/v1",
       "env_key": "CLOUDFLARE_API_TOKEN",
       "is_text_llm": true,
-      "model_tier": 2,
-      "model_tier_source": {"model":"@cf/google/gemma-3-12b-it","arena_model":"gemma-3-12b-it","match":"exact","rating":1341.8,"ci":[1332.2,1351.3],"boundary":true,"votes":3829,"snapshot":"2026-10-02","url":"https://huggingface.co/datasets/lmarena-ai/leaderboard-dataset"},
-      "free_limits": {"requests_per_minute":300,"scope":"default text generation on free-access models; paid-model limits are separate. The daily allowance is 10,000 Neurons, not requests or tokens","source":"https://developers.cloudflare.com/workers-ai/platform/limits/","checked":"2026-11-14"},
+      "model_tier": 3,
+      "model_tier_source": {"model":"@cf/google/gemma-4-26b-a4b-it","arena_model":"gemma-4-26b-a4b","match":"variant","rating":1437.5,"ci":[1430,1444.9],"votes":6081,"snapshot":"2026-10-02","url":"https://huggingface.co/datasets/lmarena-ai/leaderboard-dataset"},
+      "free_limits": {"requests_per_minute":300,"scope":"default text generation on free-access models; paid-model limits are separate. The daily allowance is 10,000 Neurons, not requests or tokens","source":"https://developers.cloudflare.com/workers-ai/platform/limits/","checked":"2026-11-24"},
       "verified": true,
       "last_verified": "2026-11-14",
-      "data_policy": {"trains_on_prompts":false,"retention":"Standard inference: no retention after response; stateful features and safety/security/legal exceptions apply","source":"https://developers.cloudflare.com/workers-ai/platform/data-usage/","checked":"2026-11-14","quote":"Cloudflare does not use Customer Content processed by Workers AI to train AI models.","note":"Applies to Workers AI; storage selected by the customer, stateful features and legal obligations can require retention. Operational metadata excludes Customer Content. The no-training sentence does not name a plan.","plan_named":false}
+      "data_policy": {"trains_on_prompts":false,"retention":"Standard inference: no retention after response; stateful features and safety/security/legal exceptions apply","source":"https://developers.cloudflare.com/workers-ai/platform/data-usage/","checked":"2026-11-24","quote":"Cloudflare does not use Customer Content processed by Workers AI to train AI models.","note":"Applies to Workers AI; storage selected by the customer, stateful features and legal obligations can require retention. Operational metadata excludes Customer Content. The no-training sentence does not name a plan.","plan_named":false}
     },
     {
       "slug": "cohere",
@@ -121,7 +121,7 @@
       "free_type": "renewing-quota",
       "free_tier": "Trial (evaluation) API keys covering chat, embed and rerank",
       "rate_limits": "1,000 API calls/month total; 20 req/min chat; 2,000 inputs/min embed; 10 req/min rerank",
-      "notes": "Free evaluation key; production use requires upgrading to a production key. Cohere privacy policy says trial inputs and outputs may be used for research and product improvement; no trial-specific retention duration is confirmed",
+      "notes": "Free evaluation key; the pricing page says trial keys \"are not permitted to be used for production or commercial purposes\", and production use requires upgrading to a production key. Cohere privacy policy says trial inputs and outputs may be used for research and product improvement; no trial-specific retention duration is confirmed",
       "best_for": "Free embeddings and rerank for RAG prototypes",
       "modalities": ["text", "embeddings", "rerank"],
       "models_free": ["command-a-03-2025", "command-r-plus-08-2024", "command-r-08-2024", "command-r7b-12-2024", "embed-v4.0", "rerank-v3.5"],
@@ -136,7 +136,7 @@
       "is_text_llm": true,
       "model_tier": 2,
       "model_tier_source": {"model":"command-a-03-2025","arena_model":"command-a-03-2025","match":"exact","rating":1353.7,"ci":[1350.2,1357.2],"votes":55467,"snapshot":"2026-10-02","url":"https://huggingface.co/datasets/lmarena-ai/leaderboard-dataset"},
-      "free_limits": {"requests_per_minute":20,"requests_per_month":1000,"scope":"trial key, chat endpoint; 1,000 API calls per month in total","source":"https://docs.cohere.com/docs/rate-limits","checked":"2026-11-14"},
+      "free_limits": {"requests_per_minute":20,"requests_per_month":1000,"scope":"trial key, chat endpoint; 1,000 API calls per month in total","source":"https://docs.cohere.com/docs/rate-limits","checked":"2026-11-24"},
       "verified": true,
       "last_verified": "2026-11-14"
     },
@@ -1096,9 +1096,9 @@
       "name": "Tencent Hunyuan",
       "category": "trial",
       "free_type": "trial-credit",
-      "free_tier": "One-time TokenHub new-user trial (Hunyuan has moved to TokenHub): 1,000,000 free tokens for each language model and each multimodal-understanding model, claimable once per main account; offer runs until 2026-12-31. The legacy Hunyuan free package (1,000,000 tokens shared across text/vision models plus 1,000,000 for Hunyuan-embedding) is no longer offered: the old platform stopped new purchases on 2026-06-30",
-      "rate_limits": "ChatCompletions (Tencent Cloud API): default 5 concurrent requests per account; GetEmbedding: 5 requests/second (both marked pre-offline, expected 2026-12-21). A limit of 20 requests/second for the other Hunyuan APIs is not stated on any official API page checked on 2026-10-15, so it is not confirmed",
-      "notes": "Tencent has moved Hunyuan to TokenHub, its model-service platform. Per Tencent's migration notice, the legacy platform stopped new purchases on 2026-06-30, and its console and APIs were due to close on 2026-09-30; the legacy ChatCompletions and GetEmbedding API pages (updated 2026-09-23) still list an expected shutdown of 2026-12-21, so the two official sources disagree. The four vision models in the old free package (Tencent HY Vision 1.5 Instruct, hunyuan-turbos-vision, hunyuan-t1-vision, hunyuan-turbos-vision-video) left the old platform on 2026-06-22. TokenHub trial: the free quota is used first, unused quota expires, and once it runs out calls stop unless post-paid billing is enabled. The new-user free package page (the docs_url, updated 2026-09-04, read 2026-10-17) gives 1,000,000 tokens with a validity of 1 year for all language models and for all multimodal-understanding models, counted from the day the quota is claimed (the page says 免费额度从领取时起算), after which the unused part expires; the 3-month validity in Tencent's migration notice applies only to the separate free quota for users who complete the migration from the old platform. The same page adds that the validity differs between models, so check the model you plan to use. TokenHub requires Tencent Cloud real-name verification (enterprise or personal) — a practical barrier for many non-China users. openai_base_url is TokenHub's OpenAI-compatible endpoint; the legacy endpoint (api.hunyuan.cloud.tencent.com/v1) belongs to the closed platform. Tencent documents the same two hosts under two domains, one per documentation site: the China site (cloud.tencent.com/document/product/1823/130078, updated 2026-10-13) lists tokenhub.tencentmaas.com (Guangzhou) and tokenhub-intl.tencentmaas.com (Singapore); the international site (intl.cloud.tencent.com/document/product/1300/80632, updated 2026-10-09, AI-translated) lists tokenhub.tencentcloudmaas.com and tokenhub-intl.tencentcloudmaas.com, and a Silicon Valley host. This entry uses the first, as the China-site quick start does. Read 2026-10-17. Commercial-use terms not stated.",
+      "free_tier": "One-time TokenHub new-user trial (Hunyuan has moved to TokenHub): 1,000,000 free tokens for each language model and each multimodal-understanding model; each model's package can be claimed once per account and the quota applies at main-account level; the offer runs until 2026-12-31, after which Tencent says the arrangement may continue or be adjusted. The legacy Hunyuan free package (1,000,000 tokens shared across text/vision models plus 1,000,000 for Hunyuan-embedding) is no longer offered: the old platform stopped new purchases on 2026-06-30",
+      "rate_limits": "ChatCompletions (Tencent Cloud API): default 5 concurrent requests per account; GetEmbedding: 5 requests/second (both still marked pre-offline, expected 2026-12-21, on pages updated 2026-09-23 and re-read 2026-11-24). A limit of 20 requests/second for the other Hunyuan APIs is not stated on any official API page checked on 2026-10-15, so it is not confirmed",
+      "notes": "Tencent has moved Hunyuan to TokenHub, its model-service platform. Per Tencent's migration notice, the legacy platform stopped new purchases on 2026-06-30, and its console and APIs were due to close on 2026-09-30; the legacy ChatCompletions and GetEmbedding API pages (updated 2026-09-23) still list an expected shutdown of 2026-12-21, so the two official sources disagree. The four vision models in the old free package (Tencent HY Vision 1.5 Instruct, hunyuan-turbos-vision, hunyuan-t1-vision, hunyuan-turbos-vision-video) left the old platform on 2026-06-22. TokenHub trial: the free quota is used first, unused quota expires, and once it runs out calls stop unless post-paid billing is enabled. The new-user free package page (the docs_url, updated 2026-11-16, re-read 2026-11-24) gives 1,000,000 tokens with a validity of 1 year for all language models and for all multimodal-understanding models, counted from the day the quota is claimed (the page says 免费额度从领取时起算), after which the unused part expires; the 3-month validity in Tencent's migration notice applies only to the separate free quota for users who complete the migration from the old platform. The same page adds that the validity differs between models, so check the model you plan to use. TokenHub requires Tencent Cloud real-name verification, per its quick start (cloud.tencent.com/document/product/1823/130058, updated 2026-11-13) — a practical barrier for many non-China users. openai_base_url is TokenHub's OpenAI-compatible endpoint; the legacy endpoint (api.hunyuan.cloud.tencent.com/v1) belongs to the closed platform. Tencent documents the same two hosts under two domains, one per documentation site: the China site (cloud.tencent.com/document/product/1823/130078, updated 2026-11-16) lists tokenhub.tencentmaas.com (Guangzhou) and tokenhub-intl.tencentmaas.com (Singapore), plus backup hosts under tencentmaas.cn for when the default is unavailable, and calls must use the endpoint of the region where the service was activated; the international site (intl.cloud.tencent.com/document/product/1300/80632, updated 2026-10-09, AI-translated) lists tokenhub.tencentcloudmaas.com and tokenhub-intl.tencentcloudmaas.com, and a Silicon Valley host. This entry uses the first, as the China-site quick start does. China-site pages re-read 2026-11-24; the international page was last read 2026-10-17. Commercial-use terms not stated.",
       "best_for": "Chinese-language LLM workloads via an OpenAI-compatible endpoint",
       "modalities": ["text", "vision", "embeddings"],
       "models_free": null,
@@ -1114,7 +1114,7 @@
       "model_tier": null,
       "verified": true,
       "last_verified": "2026-10-15",
-      "data_policy": {"trains_on_prompts":false,"retention":"Only as long as needed to provide the service (clause 2.14), subject to legal exceptions","plan_named":false,"source":"https://cloud.tencent.com/document/product/301/129852","checked":"2026-10-18","quote":null,"note":"China-site TokenHub Terms of Service, in force from 2026-09-14. Clause 2.17: Tencent does not use inputs to develop, train, fine-tune or improve its own algorithms, models or services; third-party deployed models (such as DeepSeek) follow their own terms. Quote not registered yet (Chinese page)."}
+      "data_policy": {"trains_on_prompts":false,"retention":"Only as long as needed to provide the service (clause 2.14), subject to legal exceptions","plan_named":false,"source":"https://cloud.tencent.com/document/product/301/129852","checked":"2026-11-24","quote":null,"note":"China-site TokenHub Terms of Service, in force from 2026-09-14. Clause 2.17: Tencent does not use inputs to develop, train, fine-tune or improve its own algorithms, models or services; third-party deployed models (such as DeepSeek) follow their own terms. Quote not registered (page unreadable)."}
     },
     {
       "slug": "voyage-ai",

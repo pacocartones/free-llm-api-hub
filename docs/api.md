@@ -36,7 +36,7 @@ What is *not* guaranteed: the order of providers in a list, the exact contents o
 
 ### The score: `/api/v1/score.json`
 
-[`/api/v1/score.json`](https://freellmapihub.com/api/v1/score.json) is the whole [FLLMAPIHUB score](methodology.md#the-score), not only the top 10 that [`best.json`](https://freellmapihub.com/api/v1/best.json) carries. It lists every eligible provider (verified and inside the freshness window), best score first, with the parts of the score and how many of its inputs the data confirms. The numbers are the same as in `best.json` (one rounding rule, one source), and the file is byte-stable for a given dataset: the scores are computed at `generated`.
+[`/api/v1/score.json`](https://freellmapihub.com/api/v1/score.json) is the whole [FLLMAPIHUB score](methodology.md#the-score), not only the top 10 that [`best.json`](https://freellmapihub.com/api/v1/best.json) carries. It lists every eligible provider (verified and inside the freshness window), best score first, with the parts of the score and how many of its inputs the data confirms. The numbers are the same as in `best.json` (one rounding rule, one source), and the file is byte-stable for a given dataset: the scores are computed at the dataset's reference day, the newest of `generated` and the providers' `last_verified`/`added`.
 
 Its contract is **v1** and is described by a JSON Schema at a stable URL, [`/api/v1/score.schema.json`](https://freellmapihub.com/api/v1/score.schema.json) (the source is [`data/score.schema.json`](../data/score.schema.json)). The file names it in `schema`. The rules above apply: a field named below is never renamed, removed or retyped within v1, new fields may be added, so read only the fields you need and ignore the rest; a breaking change goes to `/api/v2/`.
 
@@ -153,7 +153,7 @@ Every API object carries `version` and `generated`, copied from `data/providers.
 
 - **`version`** is the dataset's [SemVer](https://semver.org/) release version, in lockstep with the `vX.Y.Z` Git tag (it is not a separate schema version). Minor and patch bumps are additive: a new field, a new file, a re-verification release. They stay on `/api/v1/`.
 - **A new major `version`** is reserved for a breaking change to the shape, and is the release that introduces the next API path. The API path counts breaking changes to the API; it does not repeat the dataset's major number.
-- **`generated`** is the date of the last dataset change (`YYYY-MM-DD`). Provider-list payloads are byte-stable for fixed inputs. History and change feeds also depend on Git history; date-relative site outputs are described in [Architecture](architecture.md).
+- **`generated`** is the date of the dataset release (`YYYY-MM-DD`): it changes only together with `version` (before #702 it was the date of the last data change). How fresh one provider is lives in its own `last_verified`, `data_policy.checked` and `free_limits.checked`. Provider-list payloads are byte-stable for fixed inputs. History and change feeds also depend on Git history; date-relative site outputs are described in [Architecture](architecture.md).
 
 The provider-list payloads (`providers.json`, slices and modality lists) are described by [`/api/v1/schema.json`](https://freellmapihub.com/api/v1/schema.json). It is generated from [`data/schema.json`](../data/schema.json), but keeps the v1 representation: `commercial_ok` is `boolean | null`, while `commercial_ok_condition` may accompany `null`. The canonical schema remains wider and accepts `"conditional"`.
 

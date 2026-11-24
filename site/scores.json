@@ -13,14 +13,14 @@
       "of": 6,
       "rank": 2
     },
-    "google-gemini": {
+    "cloudflare-workers-ai": {
       "total": 57.5,
       "confirmed": 4,
       "of": 6,
       "rank": 3
     },
-    "cloudflare-workers-ai": {
-      "total": 52,
+    "google-gemini": {
+      "total": 57.5,
       "confirmed": 4,
       "of": 6,
       "rank": 4
