@@ -2883,7 +2883,7 @@ test('data_policy lot 4: the 13 providers that say they do not train were read f
   for (const p of data.providers.filter((q) => q.data_policy && q.data_policy.trains_on_prompts !== false)) {
     // rows that say it may train were read for the plan later (lots 2, 3, 5 and the correction of the absence claims): true where the
     // clause names the free users or free usage (AssemblyAI, Voyage AI), false where it does not
-    const READ = { assemblyai: true, 'voyage-ai': true, elevenlabs: false, cartesia: false, 'retell-ai': false, deepgram: false, 'arli-ai': false, 'sarvam-ai': false, poolside: false, typhoon: false, openrouter: false, nlpcloud: false, 'nvidia-nim': false };
+    const READ = { assemblyai: true, 'voyage-ai': true, elevenlabs: false, cartesia: false, 'retell-ai': false, deepgram: false, 'arli-ai': false, 'sarvam-ai': false, poolside: false, typhoon: false, openrouter: false, nlpcloud: false, 'nvidia-nim': false, veryfi: false, voicegain: false };
     if (p.slug in READ) assert.equal(p.data_policy.plan_named, READ[p.slug], `${p.slug}: plan_named as read`);
     else assert.equal(p.data_policy.plan_named, undefined, `${p.slug}: not read for the plan yet, so no value is written`);
   }
@@ -2934,7 +2934,10 @@ test('data_policy lot 7: Poolside may train on your Content by its Terms of Use 
   assert.ok(registry.entries.some((e) => e.slug === 'poolside' && e.kind === 'sentence' && e.text === dp.quote), 'the quote has its register entry');
   const md = readFileSync(join(ROOT, 'collections/no-training.md'), 'utf8');
   assert.ok(!md.split('\n').some((l) => l.startsWith('| **[Poolside')), 'Poolside is not in the no-training collection');
-  assert.match(readFileSync(join(ROOT, 'site/data-policy/index.html'), 'utf8'), /Poolside/, 'the data-policy page lists Poolside');
+  // The data-policy page lists verified providers only (dataPolicyRows); Poolside is unverified since 2026-11-24 (hosted inference shutdown notice).
+  const dpPage = readFileSync(join(ROOT, 'site/data-policy/index.html'), 'utf8');
+  if (data.providers.find((p) => p.slug === 'poolside').verified) assert.match(dpPage, /Poolside/, 'the data-policy page lists Poolside');
+  else assert.doesNotMatch(dpPage, /Poolside/, 'an unverified Poolside is not on the data-policy page');
 });
 
 test('data_policy coverage: a floor that only rises, and every recorded row is on the data-policy page', () => {
