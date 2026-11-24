@@ -15,7 +15,7 @@
     },
     "generated": {
       "type": "string",
-      "description": "Date the dataset was last built/serialised (YYYY-MM-DD).",
+      "description": "Date of the dataset release (YYYY-MM-DD). It changes only together with version; data changes between releases leave it as it is. The published API, CSV and site files carry their own generated date: the last dataset change, derived from the newest date in the data.",
       "format": "date"
     },
     "source": { "type": "string", "format": "uri" },

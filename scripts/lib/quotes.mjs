@@ -25,7 +25,7 @@ export function claimsPageAbsence(note) {
 export function totalHits(hits) { return ABSENCE_TERMS.reduce((n, t) => n + (hits && Number.isInteger(hits[t]) ? hits[t] : 0), 0); }
 
 /** @returns {string[]} one line per problem; empty = the register is consistent with the data */
-export function quoteErrors(data, registry) {
+export function quoteErrors(data, registry, { today = new Date().toISOString().slice(0, 10) } = {}) {
   const errors = [];
   const fail = (m) => errors.push(m);
   if (!registry || registry.version !== 1 || !Array.isArray(registry.entries)) return ['quotes.json: needs version 1 and an entries list'];
@@ -39,7 +39,7 @@ export function quoteErrors(data, registry) {
     if (!withPolicy.has(e.slug)) { fail(`${where}: provider "${e.slug}" has no data_policy`); continue; }
     if (!KINDS.includes(e.kind)) { fail(`${where}: unknown kind ${JSON.stringify(e.kind)}`); continue; }
     if (publicHttpsUrlError(e.source_url)) fail(`${where}: source_url must be a public HTTPS address`);
-    if (!DATE_RE.test(e.read_on || '') || e.read_on > data.generated) fail(`${where}: read_on must be a date not after the dataset's generated date`);
+    if (!DATE_RE.test(e.read_on || '') || e.read_on > today) fail(`${where}: read_on must be a date not after today in UTC`);
     if (e.method === PDF_METHOD) { if (!sameLanguage('en', e.lang || 'en')) fail(`${where}: PDF sources are English-only for now`); }
     else if (e.method !== methodFor(e.lang || 'en')) fail(`${where}: method must be the one in scripts/lib/page-text.mjs for its language (or the PDF method)`);
     if (!/^[a-z]{2,3}(-[A-Za-z0-9]+)*$/.test(e.lang || '')) fail(`${where}: lang must be the language of the passage and of the page it is read in (for example en)`);
