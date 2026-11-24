@@ -485,7 +485,7 @@
       "env_key": "SAMBANOVA_API_KEY",
       "is_text_llm": true,
       "model_tier": 2,
-      "model_tier_source": {"model":"gpt-oss-120b","arena_model":"gpt-oss-120b","match":"exact","rating":1351.6,"ci":[1347.2,1356.0],"votes":30018,"snapshot":"2026-10-02","url":"https://huggingface.co/datasets/lmarena-ai/leaderboard-dataset"},
+      "model_tier_source": {"model":"gpt-oss-120b","arena_model":"gpt-oss-120b","match":"exact","rating":1351.6,"ci":[1347.2,1356],"votes":30018,"snapshot":"2026-10-02","url":"https://huggingface.co/datasets/lmarena-ai/leaderboard-dataset"},
       "free_limits": {"requests_per_minute":20,"requests_per_day":20,"tokens_per_day":200000,"scope":"Free Tier (no payment method linked); limits listed per model in the table for gpt-oss-120b and gemma-4-31B-it, enforcement scope not stated","source":"https://docs.sambanova.ai/docs/en/models/rate-limits","checked":"2026-11-24"},
       "verified": true,
       "last_verified": "2026-11-24",
