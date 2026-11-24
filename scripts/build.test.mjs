@@ -1738,6 +1738,18 @@ test('footer columns: where each link lives, and no GitHub star entry in Project
   }
 });
 
+test('provider links carry data-provider and data-link for the opt-in outbound_provider_click event', () => {
+  run(['scripts/build.mjs']);
+  const groq = readFileSync(join(ROOT, 'site/p/groq.html'), 'utf8');
+  assert.match(groq, /<a class="btn primary" href="[^"]+"[^>]* data-provider="groq" data-link="docs">Official docs/);
+  assert.match(groq, /<a class="btn website" href="[^"]+"[^>]* data-provider="groq" data-link="website">/);
+  const tagged = [...groq.matchAll(/data-provider="([^"]*)" data-link="([^"]*)"/g)];
+  assert.ok(tagged.every((m) => m[1] === 'groq' && ['docs', 'website', 'playground', 'models', 'limits_source', 'data_policy'].includes(m[2])), 'only the page provider and known link types');
+  const compareDir = readdirSync(join(ROOT, 'site/compare')).find((n) => n.includes('-vs-'));
+  const cmp = readFileSync(join(ROOT, `site/compare/${compareDir}/index.html`), 'utf8');
+  assert.equal([...cmp.matchAll(/data-link="docs"/g)].length, 2, "both providers' docs links are tagged on a static comparison");
+});
+
 test('no GA_MEASUREMENT_ID (the default): the build emits no analytics code, CSP host, banner or cookie notice change', () => {
   const env = { ...process.env };
   delete env.GA_MEASUREMENT_ID;
