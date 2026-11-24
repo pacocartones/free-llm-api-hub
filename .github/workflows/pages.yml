@@ -91,3 +91,6 @@ jobs:
         run: node scripts/smoke-live.mjs
         env:
           FLLM_SITE: ${{ needs.deploy.outputs.page_url }}
+          # Edge propagation: retry only the URLs that did not answer 200, waiting 10, 20, 40, 60 s.
+          FLLM_LIVE_ATTEMPTS: 5
+          FLLM_LIVE_RETRY_DELAY: 10
