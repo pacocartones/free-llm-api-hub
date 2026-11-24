@@ -788,6 +788,18 @@
    "page_sha256": "76a536b858ef4430c67415493f49d2280f1e902c009bdb176d5356cfb0bd0984"
   },
   {
+   "id": "photoroom.commercial_ok.sentence",
+   "slug": "photoroom",
+   "kind": "field_sentence",
+   "field": "commercial_ok",
+   "text": "We grant Free Accounts a non-exclusive, non-transferable license to access and use the Services, in accordance with the Terms, for your own personal, non commercial purposes.",
+   "source_url": "https://www.photoroom.com/legal/terms-and-conditions",
+   "read_on": "2026-11-24",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "435f0c9bc0bae695f6f54a36cf6b2006210267288d3e8bc0c9e16e1db929201a"
+  },
+  {
    "id": "poolside.sentence",
    "slug": "poolside",
    "kind": "sentence",
