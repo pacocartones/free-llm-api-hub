@@ -403,7 +403,7 @@ test('every generated page has the same centred header: crumbs, one title and, w
   let checked = 0;
   for (const file of walk(join(ROOT, 'site'))) {
     const rel = slash(relative(join(ROOT, 'site'), file));
-    if (exceptions.has(rel) || rel.startsWith('og')) continue;
+    if (exceptions.has(rel) || rel.startsWith('og') || /^google[0-9a-f]+\.html$/.test(rel)) continue; // the Search Console ownership file is not a page
     const html = readFileSync(file, 'utf8');
     const heroes = html.match(/<section class="page-hero[^"]*">/g) || [];
     assert.equal(heroes.length, 1, `${rel}: one page header`);
@@ -2366,6 +2366,7 @@ test('sitemap lists every indexable page except the deliberately omitted ones, w
   for (const f of pages) {
     const rel = slash(f.slice(join(ROOT, 'site').length + 1));
     if (rel === '404.html' || rel.startsWith('updates/page/') || /^state\/\d{4}-\d{2}\//.test(rel)) continue; // 404 is not a page; pagination follows the commit count (test above)
+    if (/^google[0-9a-f]+\.html$/.test(rel)) continue; // Search Console ownership file, not a page
     const html = readFileSync(f, 'utf8');
     if (/<meta name="robots" content="noindex">/.test(html)) continue; // redirect stubs and legal pages
     const path = rel === 'index.html' ? '' : rel.replace(/index\.html$/, '').replace(/\.html$/, '');
