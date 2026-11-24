@@ -187,7 +187,8 @@
       "is_text_llm": false,
       "model_tier": null,
       "verified": true,
-      "last_verified": "2026-11-19"
+      "last_verified": "2026-11-19",
+      "data_policy": {"trains_on_prompts":false,"retention":"Request body and response not stored when routed; debug logs up to 30 days, without user data or tokens","source":"https://huggingface.co/docs/inference-providers/en/security","checked":"2026-11-24","quote":"Hugging Face does not store any user data for training purposes.","note":"Covers requests routed through Inference Providers; the page says the data security policy of each external provider also applies. The sentence names no plan.","plan_named":false}
     },
     {
       "slug": "siliconflow",
@@ -237,7 +238,8 @@
       "model_tier": 2,
       "model_tier_source": {"model":"glm-4.7-flash","arena_model":"glm-4.7-flash","match":"exact","rating":1364.9,"ci":[1359.1,1370.6],"votes":11977,"snapshot":"2026-10-02","url":"https://huggingface.co/datasets/lmarena-ai/leaderboard-dataset"},
       "verified": true,
-      "last_verified": "2026-11-19"
+      "last_verified": "2026-11-19",
+      "data_policy": {"trains_on_prompts":false,"retention":"API inputs and outputs not stored; processed in real time (DPA for business and enterprise API users)","source":"https://docs.z.ai/legal-agreement/terms-of-use","checked":"2026-11-24","quote":"For enterprises and developers using API Services, we will not use your User Content for developing or improving Services unless you explicitly agree to such use.","note":"The same Terms let Z.ai use User Content of individual users to improve its services. Retention comes from the Data Processing Addendum for API Services (section 4(b)) on docs.z.ai. The sentence names no plan.","plan_named":false}
     },
     {
       "slug": "ibm-watsonx",
@@ -1410,7 +1412,8 @@
       "model_tier": null,
       "verified": true,
       "last_verified": "2026-11-19",
-      "added": "2026-07-31"
+      "added": "2026-07-31",
+      "data_policy": {"trains_on_prompts":true,"retention":"Deleted per your configured retention settings; an API endpoint deletes pushed documents at any time","source":"https://www.veryfi.com/privacy/","checked":"2026-11-24","quote":"To deliver and continually improve this service, we may use data you submit, which can include personal data contained in your documents, to train, validate, and improve our proprietary machine learning models.","note":"Veryfi says its models are proprietary and non-generative. Business customers may opt out of training-data use through their agreement, DPA or product configuration where available. The sentence names no plan.","plan_named":false}
     },
     {
       "slug": "voicegain",
@@ -1434,7 +1437,8 @@
       "model_tier": null,
       "verified": true,
       "last_verified": "2026-11-20",
-      "added": "2026-07-31"
+      "added": "2026-07-31",
+      "data_policy": {"trains_on_prompts":null,"retention":"Cloud: set per API request, from 0 seconds to a maximum of 7 days, then deleted","source":"https://raw.githubusercontent.com/voicegain/platform/master/DATA-PROCESSING-ADDENDUM.md","checked":"2026-11-24","quote":"The set retention time can vary from 0 seconds to a maximum of 7 days.","note":"Data Processing Addendum in the official Voicegain repository, linked from the policy page on voicegain.ai. The policy lists using customer audio data to provide, maintain and improve services but does not say whether models are trained on it.","plan_named":false}
     },
     {
       "slug": "smallest-ai",
@@ -1534,7 +1538,8 @@
       "is_text_llm": true,
       "model_tier": null,
       "verified": true,
-      "last_verified": "2026-11-20"
+      "last_verified": "2026-11-20",
+      "data_policy": {"trains_on_prompts":false,"retention":"Zero data retention by default; error diagnostic logs may hold fragments for up to 14 days","source":"https://docs.coreweave.com/products/inference/serverless/privacy-and-security","checked":"2026-11-24","quote":"CoreWeave does not use Inference Content to train models.","note":"W&B Inference is now documented as CoreWeave Serverless Inference. Applies to models hosted and served directly by CoreWeave; optional services such as Agent Lens follow their own retention and data use. The sentence names no plan.","plan_named":false}
     },
     {
       "slug": "typhoon",
