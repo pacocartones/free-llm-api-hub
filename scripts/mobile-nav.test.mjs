@@ -33,20 +33,25 @@ function fixture({ missingToggle = false, missingNav = false, failListener = fal
   return { start, classes, attrs, clicks, events, focused: () => focused };
 }
 
-test('mobile navigation remains visible in flow until its toggle is ready', () => {
+test('mobile navigation: collapsed behind its toggle from the first paint with scripts, in the page flow without them', () => {
   const css = readFileSync(new URL('../site/styles.css', import.meta.url), 'utf8');
-  const start = css.indexOf('@media (max-width: 900px)');
+  const start = css.indexOf('@media (max-width: 900px) {');
   const mobile = css.slice(start, css.indexOf('@media (max-width: 720px)', start));
   assert.match(css, /\.nav-toggle \{ display: none; \}/);
-  assert.match(mobile, /\.site-header\.nav-ready \.nav-toggle \{ display: inline-flex; \}/);
-  assert.match(mobile, /\.site-header:not\(\.nav-ready\) \{ position: static; height: auto; \}/);
-  assert.match(mobile, /\.site-header:not\(\.nav-ready\) \.header-inner \{[^}]*flex-wrap: wrap/);
-  assert.match(mobile, /\.site-header:not\(\.nav-ready\) \.nav \{ display: flex; position: static; order: 3; flex-basis: 100%; \}/);
+  // Waiting for site.js (end of body) to collapse the menu shifted the home's hero by 168px on a phone (CLS 0.188).
+  assert.doesNotMatch(mobile, /nav-ready/, 'nothing on a phone waits for site.js before the first paint');
+  const enhanced = mobile.slice(0, mobile.indexOf('(scripting: none)'));
+  assert.match(enhanced, /\.nav-toggle \{ display: inline-flex; \}/);
+  const noScript = mobile.slice(mobile.indexOf('@media (max-width: 900px) and (scripting: none) {'));
+  assert.match(noScript, /\.nav-toggle \{ display: none; \}/);
+  assert.match(noScript, /\.site-header \{ position: static; height: auto; \}/);
+  assert.match(noScript, /\.site-header \.header-inner \{[^}]*flex-wrap: wrap/);
+  assert.match(noScript, /\.site-header \.nav \{ display: flex; position: static; order: 3; flex-basis: 100%; \}/);
   for (const options of [{ missingToggle: true }, { missingNav: true }, { failListener: true }]) {
     const f = fixture(options);
     if (options.failListener) assert.throws(f.start, /listener setup failed/);
     else f.start();
-    assert.equal(f.classes.has('nav-ready'), false, 'failed or incomplete setup leaves links accessible');
+    assert.equal(f.classes.has('nav-ready'), false, 'failed or incomplete setup does not claim the menu is ready');
   }
 });
 

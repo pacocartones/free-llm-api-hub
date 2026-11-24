@@ -1,6 +1,6 @@
 ### Added
 
-- **`field_checks`: why a yes/no flag holds its value.** A new optional
+- **`field_checks`: why a tri-state flag holds its value.** A new optional
   object on a provider records, for `phone_required`, `card_required`,
   `commercial_ok` and `openai_compatible`, the official pages read, the day,
   and either the provider's sentence (`stated`) or why the flag stays `null`:
@@ -13,7 +13,7 @@
   and nulls resolved without an answer, and the MCP server adds
   `unconfirmed_reasons` and `excluded_unconfirmed_by_reason`. Stated quotes
   are registered in `data/quotes.json` as `field_sentence` entries
-  (`npm run quotes:add -- <slug> --field <flag>`).
+  (`npm run quotes:add -- <slug> --field <flag>`) (#719).
 
 ### Changed and fixed
 
@@ -27,10 +27,12 @@
   `phone_required`; Tencent Hunyuan `card_required`. Cloudflare's
   `card_required: false` ("Start building for free — no credit card
   required.") and Cohere's `card_required: false` and `commercial_ok: false`
-  now carry the provider's sentence. Tencent Hunyuan `phone_required` becomes
-  `true`: Tencent Cloud's sign-up guide binds a mainland China phone number
-  by SMS code. These five entries move `last_verified` to 2026-11-24.
+  now carry the provider's sentence (for Cohere, the pricing page's sentence
+  that trial keys are not for production or commercial use). Tencent Hunyuan
+  `phone_required` becomes `true`: Tencent Cloud's sign-up guide binds a
+  mainland China phone number by SMS code. These five entries, re-verified in
+  #701, move `last_verified` to 2026-11-24 (#719).
 - First recorded reasons for 22 more null flags, all read 2026-11-24, among
   them Modal and Alibaba Cloud Model Studio commercial use (not stated),
-  Hugging Face phone (needs an account, #12) and SambaNova card (pages
-  disagree).
+  Hugging Face phone (needs an account, issue #12) and SambaNova card (pages
+  disagree) (#719).

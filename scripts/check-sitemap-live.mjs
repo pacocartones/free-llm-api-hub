@@ -19,11 +19,14 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { stateSitemapProblems } from './lib/state-sitemap.mjs';
+import { makeLiveFetch } from './lib/live-fetch.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const SITE = (process.env.FLLM_SITE || 'https://freellmapihub.com').replace(/\/$/, '');
 // URLs inside the generated files always carry the canonical origin, whatever host serves them.
 const CANONICAL = 'https://freellmapihub.com';
+// Past the CDN cache: ?deploy=<token per deploy run> on every request and Cache-Control: no-cache (lib/live-fetch.mjs).
+const liveFetch = makeLiveFetch();
 
 async function main() {
   const local = readFileSync(join(ROOT, 'site/sitemap.xml'), 'utf8');
@@ -40,7 +43,7 @@ async function main() {
     let live = null;
     let err = null;
     try {
-      const res = await fetch(`${SITE}/sitemap.xml`, { signal: ctrl.signal });
+      const res = await liveFetch(`${SITE}/sitemap.xml`, { signal: ctrl.signal });
       if (!res.ok) err = `HTTP ${res.status}`;
       else live = await res.text();
     } catch (e) {
@@ -87,7 +90,7 @@ async function getText(url) {
   const ctrl = new AbortController();
   const t = setTimeout(() => ctrl.abort(), 20000);
   try {
-    const res = await fetch(url, { signal: ctrl.signal });
+    const res = await liveFetch(url, { signal: ctrl.signal });
     return { status: res.status, text: res.ok ? await res.text() : '' };
   } catch (e) {
     return { status: 0, text: '', err: e.name === 'AbortError' ? 'timeout' : e.message };

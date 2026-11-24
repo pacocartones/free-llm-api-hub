@@ -43,10 +43,11 @@ Notable changes to the dataset and the project. Format based on [Keep a Changelo
   least $10), cited to the official rate-limits page (#689). Thanks
   @Abhishekkumar071.
 - Re-verification batch (agent-assisted, official pages read 2026-11-24) for
-  Tencent Hunyuan, Groq, OpenRouter, Cloudflare Workers AI and Cohere.
-  `last_verified` is unchanged for all five, because each still records a
-  sign-up fact (card, phone or commercial use) that no current official page
-  states. Within that limit:
+  Tencent Hunyuan, Groq, OpenRouter, Cloudflare Workers AI and Cohere (#701).
+  The sign-up flags (card, phone or commercial use) that no current official
+  page states were then set to `null` with a reason, and the five entries
+  moved `last_verified` to 2026-11-24 (#719, see `field_checks` below).
+  Other changes:
   - Tencent Hunyuan: the TokenHub package can be claimed once per account
     for each model, and the offer may continue or change after 2026-12-31.
     Real-name verification is now cited to the quick start, and the backup
@@ -55,12 +56,10 @@ Notable changes to the dataset and the project. Format based on [Keep a Changelo
   - Groq: `trains_on_prompts` is now `false`. Its Services Agreement §4.2
     bars training on inputs and outputs unless the customer allows it. The
     notes say that qwen/qwen3.8-27b is a Preview model, for evaluation only.
+    The Free plan tab of the rate-limits page, read in a browser, shows the
+    same limits as the dataset.
   - OpenRouter: two `:free` models that are no longer in the catalog are
     removed from the sample.
-  - Cohere: the pricing page's sentence that trial keys are not for
-    production or commercial use now backs `commercial_ok: false`.
-  - Groq: the Free plan tab of the rate-limits page, read in a browser,
-    shows the same limits as the dataset.
   - Cloudflare Workers AI: limits, pricing and data policy re-confirmed.
     `@cf/google/gemma-3-12b-it` and `@cf/meta/llama-3.1-8b-instruct` are
     gone from the model catalog and leave the sample.

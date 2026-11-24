@@ -277,7 +277,8 @@ describe('build with GA_MEASUREMENT_ID set', () => {
       assert.deepEqual([...connect].sort(), ["'self'", 'https://raw.githubusercontent.com', ...GA_HOSTS].sort(), `${rel}: connect-src scope`);
       assert.deepEqual([...script].filter((s) => !s.startsWith("'sha256-")).sort(), ["'self'", 'https://www.googletagmanager.com'].sort(), `${rel}: script-src scope`);
       assert.equal([...script].filter((s) => s.startsWith("'sha256-")).length, 2, `${rel}: the two inline hashes stay`);
-      assert.ok(html.includes(`<script src="${prefix}consent.js" defer></script>`), `${rel}: consent.js with prefix ${prefix}`);
+      const consentTag = html.match(/<script src="([^"]*)consent\.js\?v=[0-9a-f]{8}" defer><\/script>/);
+      assert.ok(consentTag && consentTag[1] === prefix, `${rel}: consent.js (fingerprinted) with prefix ${prefix}`);
       assert.ok(html.includes('data-consent-open>Cookie settings</button>'), `${rel}: footer Cookie settings`);
       const body = html.replace(/<meta http-equiv="Content-Security-Policy"[^>]+>/, '');
       assert.doesNotMatch(body, /googletagmanager|google-analytics|gtag\(/, `${rel}: nothing from Google is referenced in the HTML before consent`);

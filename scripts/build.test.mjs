@@ -1609,7 +1609,7 @@ describe('read-only generated output', () => {
 
   test('the compare view loads its scripts under the CSP and the null tri-state reads "not confirmed"', () => {
     const index = readFileSync(join(ROOT, 'site/compare/index.html'), 'utf8');
-    assert.match(index, /<script src="\.\.\/shared-compare\.js" defer><\/script>\n<script src="\.\.\/compare\.js" defer><\/script>\n<\/body>/);
+    assert.match(index, /<script src="\.\.\/shared-compare\.js\?v=[0-9a-f]{8}" defer><\/script>\n<script src="\.\.\/compare\.js\?v=[0-9a-f]{8}" defer><\/script>\n<\/body>/);
     assert.equal(index.split('<script>').length - 1, 1, 'only the hashed theme guard runs inline');
     assert.equal((index.match(/<select class="sel" name="p">/g) || []).length, COMPARE_MAX_SLOTS);
     // ai-horde has commercial_ok: null in the dataset; any page with a null flag
@@ -2192,8 +2192,8 @@ test('the 404 page is built with the shared header, menu and footer and root-abs
   assert.match(html, /<header class="site-header">/, 'the shared header');
   assert.match(html, /<nav class="nav" id="primary-nav"/, 'the menu');
   assert.match(html, /<footer class="site-footer"><div class="wrap footer-top">/, 'the shared footer with its columns');
-  assert.match(html, /<link rel="stylesheet" href="\/styles\.css">/, 'the stylesheet by a root-absolute path');
-  assert.match(html, /<script src="\/site\.js"><\/script>/, 'site.js by a root-absolute path');
+  assert.match(html, /<link rel="stylesheet" href="\/styles\.css\?v=[0-9a-f]{8}">/, 'the stylesheet by a root-absolute path');
+  assert.match(html, /<script src="\/site\.js\?v=[0-9a-f]{8}"><\/script>/, 'site.js by a root-absolute path');
   assert.match(html, /<meta name="robots" content="noindex">/);
   assert.ok(!/(?:href|src)="\.\.?\//.test(html), 'no relative ../ asset or link: it would break from any depth');
   const script = html.match(/<script>(try\{document\.getElementById\('path'\)[^<]*)<\/script>/);
@@ -2361,7 +2361,7 @@ test('provider page: the score is visible, no «All providers» link or «Report
   assert.ok(!/← All providers/.test(main), 'no «← All providers» link');
   assert.ok(!/Report a change/.test(html), 'no «Report a change» button');
   assert.match(main, /<ul class="upd-list" data-pager="5">/, 'the history is paged by 5');
-  assert.match(html, /<script src="\.\.\/pager\.js" defer><\/script>/, 'the pager script, same origin');
+  assert.match(html, /<script src="\.\.\/pager\.js\?v=[0-9a-f]{8}" defer><\/script>/, 'the pager script, same origin');
   for (const [label, icon] of [['Credit card', 'ic-card'], ['Phone verification', 'ic-phone'], ['Commercial use', 'ic-building']]) {
     assert.ok(main.includes('<dt><svg class="i" aria-hidden="true"><use href="#' + icon + '"/></svg>' + label + '</dt>'), label + ' card has its icon');
   }
