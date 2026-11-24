@@ -86,6 +86,7 @@
     }
     if (!s.analytics) deleteCookies(ANALYTICS_COOKIES);
     if (!s.ads) deleteCookies(ADS_COOKIES);
+    if (s.analytics) pageEvents();
   }
 
   var CSS = '.consent-banner{position:fixed;left:16px;right:16px;bottom:16px;z-index:1000;max-width:660px;margin:0 auto;' +
@@ -204,6 +205,137 @@
     opener = null;
   }
 
+  // ---------- product events ----------
+  // Sent ONLY while the analytics category is granted (track() is a no-op otherwise, and before gtag.js has loaded).
+  // Every parameter comes from a fixed list or a validated slug; the one free text, the site's own search box, is
+  // normalised, truncated to 60 characters and dropped when it looks like personal data. Outbound clicks and file
+  // downloads are still measured by GA's enhanced measurement; these events carry the provider-specific detail under
+  // their own names. History changes (the explorer rewrites its URL on every keystroke) never send a page_view: that
+  // enhanced-measurement option is off in the GA4 stream.
+  var SLUG = /^[a-z0-9][a-z0-9-]{0,63}$/;
+  var LINK_TYPES = ['docs', 'website', 'playground', 'models', 'limits_source', 'data_policy'];
+  var CHIPS = { 'f-nocard': 'no_card', 'f-nophone': 'no_phone', 'f-commercial': 'commercial', 'f-text': 'text_only', 'f-notrain': 'no_training', 'f-openai': 'openai_compatible', 'f-verified': 'verified' };
+  var CATEGORIES = ['all', 'ongoing', 'trial'];
+  var SORT_KEYS = ['recommended', 'name', 'category', 'free_tier', 'notes', 'verified'];
+  var DOWNLOAD = /^\/((providers\.(json|csv))|(api\/v1\/[a-z0-9._-]+\.(json|yaml))|(llms(-full)?\.txt)|(badge-[a-z]+\.json))$/;
+  var SEARCH_IDLE_MS = 1500;
+  var pageSent = false;
+  var lastSearch = '';
+  var searchTimer = null;
+
+  function track(name, params) {
+    if (!current.analytics || !loaded || typeof window.gtag !== 'function') return false;
+    window.gtag('event', name, params);
+    return true;
+  }
+
+  // Page-level events, once per page view, as soon as analytics is granted.
+  function pageEvents() {
+    if (pageSent || !current.analytics || !loaded) return;
+    pageSent = true;
+    var path = String(location.pathname || '/').replace(/\/index\.html$/, '/');
+    var m = /^\/compare\/([a-z0-9-]+-vs-[a-z0-9-]+)\/?$/.exec(path);
+    if (m) track('compare_view', { pair: m[1].slice(0, 100) });
+    else if (/^\/compare\/?$/.test(path)) {
+      var q = /[?&]compare=([^&#]*)/.exec(location.search || '');
+      var slugs = q ? decodeURIComponent(q[1]).split(',').filter(function (s) { return SLUG.test(s); }).slice(0, 4) : [];
+      if (slugs.length >= 2) track('compare_view', { pair: slugs.join(',').slice(0, 100) });
+    }
+    var c = /^\/collections\/([a-z0-9-]+?)(\.html)?$/.exec(path);
+    if (c && c[1] !== 'index') track('collection_view', { collection: c[1] });
+  }
+
+  function normaliseSearch(v) {
+    var t = String(v || '').replace(/\s+/g, ' ').trim().toLowerCase().slice(0, 60).trim();
+    if (!t || /@/.test(t) || /\d{6,}/.test(t)) return '';
+    return t;
+  }
+  function flushSearch() {
+    if (searchTimer) { clearTimeout(searchTimer); searchTimer = null; }
+    var box = document.getElementById('q');
+    var term = box ? normaliseSearch(box.value) : '';
+    if (!term || term === lastSearch) return;
+    if (track('site_search', { search_term: term })) lastSearch = term;
+  }
+
+  function onClick(e) {
+    var t = e.target;
+    if (!t || !t.closest) return;
+    var a = t.closest('a[href]');
+    if (a) {
+      var link = a.getAttribute('data-link');
+      var provider = a.getAttribute('data-provider');
+      if (link && provider && LINK_TYPES.indexOf(link) !== -1 && SLUG.test(provider)) {
+        track('outbound_provider_click', { provider: provider, link_type: link });
+      }
+      var url;
+      try { url = new URL(a.getAttribute('href'), location.href); } catch (err) { url = null; }
+      if (url && url.hostname === location.hostname && DOWNLOAD.test(url.pathname)) {
+        track('api_download', { file: url.pathname.slice(1) });
+      }
+      return;
+    }
+    var copy = t.closest('.pre-copy, .api-copy');
+    if (copy) {
+      var kind = 'api_url';
+      if (copy.classList.contains('pre-copy')) {
+        var pre = copy.closest('pre');
+        var code = pre ? (pre.querySelector('code') || pre).textContent : '';
+        var head = String(code || '').replace(/^\s+/, '');
+        kind = /^curl\b/.test(head) ? 'curl'
+          : /^(from|import)\s/.test(head) ? 'python'
+          : /^(export|set)\s+[A-Z][A-Z0-9_]*=/.test(head) ? 'env_key'
+          : /^<(script|iframe|a|img)\b/i.test(head) ? 'embed'
+          : 'other';
+      }
+      track('copy_snippet', { snippet: kind });
+      return;
+    }
+    var cat = t.closest('#cat button[data-cat]');
+    if (cat) {
+      var v = cat.getAttribute('data-cat');
+      if (CATEGORIES.indexOf(v) !== -1) track('explorer_filter', { filter_name: 'category', filter_value: v });
+      return;
+    }
+    // Sorting by a column header: the explorer's own handler runs first, so aria-sort already holds the new order.
+    var th = t.closest('thead th[data-key]');
+    if (th) {
+      var key = th.getAttribute('data-key');
+      var dir = th.getAttribute('aria-sort') === 'ascending' ? 'asc' : 'desc';
+      if (SORT_KEYS.indexOf(key) !== -1) track('explorer_sort', { sort_key: key, sort_dir: dir });
+    }
+  }
+
+  function onChange(e) {
+    var t = e.target;
+    if (!t || !t.id) return;
+    if (CHIPS[t.id]) { track('explorer_filter', { filter_name: CHIPS[t.id], filter_value: t.checked ? 'on' : 'off' }); return; }
+    if (t.id === 'modality') {
+      if (/^[a-z]{1,20}$/.test(t.value)) track('explorer_filter', { filter_name: 'modality', filter_value: t.value });
+      return;
+    }
+    if (t.id === 'sortSel') {
+      var p = String(t.value).split(':');
+      if (SORT_KEYS.indexOf(p[0]) !== -1) track('explorer_sort', { sort_key: p[0], sort_dir: p[1] === '-1' ? 'desc' : 'asc' });
+    }
+  }
+
+  function listen() {
+    document.addEventListener('click', onClick);
+    // Middle-click opens a provider link in a new tab without a click event.
+    document.addEventListener('auxclick', function (e) { if (e.button === 1) onClick(e); });
+    document.addEventListener('change', onChange);
+    // The search box: sent after 1.5 s without typing, or at once on Enter or when it loses focus; an identical
+    // consecutive query is sent once.
+    document.addEventListener('input', function (e) {
+      if (!e.target || e.target.id !== 'q') return;
+      if (searchTimer) clearTimeout(searchTimer);
+      searchTimer = setTimeout(flushSearch, SEARCH_IDLE_MS);
+    });
+    document.addEventListener('keydown', function (e) { if (e.target && e.target.id === 'q' && e.key === 'Enter') flushSearch(); });
+    document.addEventListener('focusout', function (e) { if (e.target && e.target.id === 'q') flushSearch(); });
+  }
+
   function choose(s) {
     saveChoice(s);
     apply(s);
@@ -221,6 +353,7 @@
       // Reopened from the footer: straight to the two switches, showing the current state.
       links[i].addEventListener('click', function (e) { opener = e.currentTarget; show('custom', true); });
     }
+    listen();
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);

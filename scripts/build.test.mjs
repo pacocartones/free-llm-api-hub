@@ -89,8 +89,9 @@ test('provider playground action is conditional and preserved in public JSON', (
     run(['scripts/build.mjs']);
     const present = readFileSync(join(ROOT, 'site/p', `${first.slug}.html`), 'utf8');
     assert.equal((present.match(/>Try it ↗/g) || []).length, 1);
-    assert.ok(present.includes('<a class="btn" href="https://example.com/playground?model=a&amp;mode=b" target="_blank" rel="noopener">Try it ↗<span class="sr-only"> (opens in a new tab)</span></a>'));
-    assert.ok(present.includes(`href="${htmlEsc(first.docs_url)}" target="_blank" rel="noopener">Official docs ↗`));
+    // the provider links carry data-provider / data-link for the opt-in outbound_provider_click event
+    assert.ok(present.includes(`<a class="btn" href="https://example.com/playground?model=a&amp;mode=b" target="_blank" rel="noopener" data-provider="${first.slug}" data-link="playground">Try it ↗<span class="sr-only"> (opens in a new tab)</span></a>`));
+    assert.ok(present.includes(`href="${htmlEsc(first.docs_url)}" target="_blank" rel="noopener" data-provider="${first.slug}" data-link="docs">Official docs ↗`));
     assert.match(present, /class="btn website"[^>]*>Visit website ↗/);
     const absent = readFileSync(join(ROOT, 'site/p', `${second.slug}.html`), 'utf8');
     assert.doesNotMatch(absent, />Try it ↗/);
@@ -883,9 +884,10 @@ test('an unconfirmed flag ranks between a confirmed yes and a confirmed no', () 
 });
 
 // ---------- CI workflows must not run `gh pr view` (no bot logic) ----------
-// The regenerate bot is gone (2026-08): nothing in CI may decide to create,
-// skip or filter PRs — all maintenance is local. If a workflow ever runs
-// `gh pr view` again it is probably bot logic sneaking back in.
+// The old regenerate bot is gone (2026-08). Its successor, regenerate.yml
+// (docs/regeneration-bot.md), runs on main only and never inspects pull
+// requests; if a workflow ever runs `gh pr view` it is probably bot logic
+// deciding from pull-request content, which stays banned.
 test('no workflow runs `gh pr view` (bot logic is banned from CI)', () => {
   const dir = join(ROOT, '.github/workflows');
   const files = readdirSync(dir).filter((f) => f.endsWith('.yml') || f.endsWith('.yaml'));
@@ -1737,6 +1739,18 @@ test('footer columns: where each link lives, and no GitHub star entry in Project
     }
     assert.ok(!footer.includes('GitHub ★'), `${rel}: the footer has no "GitHub ★" entry`);
   }
+});
+
+test('provider links carry data-provider and data-link for the opt-in outbound_provider_click event', () => {
+  run(['scripts/build.mjs']);
+  const groq = readFileSync(join(ROOT, 'site/p/groq.html'), 'utf8');
+  assert.match(groq, /<a class="btn primary" href="[^"]+"[^>]* data-provider="groq" data-link="docs">Official docs/);
+  assert.match(groq, /<a class="btn website" href="[^"]+"[^>]* data-provider="groq" data-link="website">/);
+  const tagged = [...groq.matchAll(/data-provider="([^"]*)" data-link="([^"]*)"/g)];
+  assert.ok(tagged.every((m) => m[1] === 'groq' && ['docs', 'website', 'playground', 'models', 'limits_source', 'data_policy'].includes(m[2])), 'only the page provider and known link types');
+  const compareDir = readdirSync(join(ROOT, 'site/compare')).find((n) => n.includes('-vs-'));
+  const cmp = readFileSync(join(ROOT, `site/compare/${compareDir}/index.html`), 'utf8');
+  assert.equal([...cmp.matchAll(/data-link="docs"/g)].length, 2, "both providers' docs links are tagged on a static comparison");
 });
 
 test('no GA_MEASUREMENT_ID (the default): the build emits no analytics code, CSP host, banner or cookie notice change', () => {

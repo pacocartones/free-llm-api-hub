@@ -302,6 +302,7 @@ describe('build with GA_MEASUREMENT_ID set', () => {
     assert.match(privacy, /processor/);
     assert.match(privacy, /EU–US Data Privacy Framework/);
     assert.match(privacy, /kept in Google Analytics for 14 months/);
+    assert.match(privacy, /what you type in its search box \(cut to 60 characters/);
     assert.match(privacy, /Cookie settings/);
     assert.match(privacy, /GDPR Art\. 6\(1\)\(a\)/);
     assert.match(privacy, /no request is ever sent to Google/);
