@@ -16,6 +16,8 @@ test('newestProviderDate and datasetAsOf: the newest of the stamp and every last
   assert.equal(datasetAsOf(d), '2026-11-23', 'a verification after the release stamp moves the reference day');
   assert.equal(datasetAsOf(ds('1.0.0', '2026-11-25', [['2026-11-22', null]])), '2026-11-25', 'never older than the stamp');
   assert.equal(datasetAsOf(ds('1.0.0', '2026-11-25')), '2026-11-25', 'no dated provider');
+  const checked = { version: '1.0.0', generated: '2026-11-20', providers: [{ last_verified: '2026-11-21', data_policy: { checked: '2026-11-23' }, free_limits: { checked: '2026-11-22' } }] };
+  assert.equal(datasetAsOf(checked), '2026-11-23', 'a policy-only check is a dataset change too');
 });
 
 test('a data change keeps the release stamp', () => {
@@ -30,7 +32,7 @@ test('a data change keeps the release stamp', () => {
 test('a release sets the stamp to cover the data and never moves it back', () => {
   const base = ds('2.14.2', '2026-11-22', [['2026-11-24', null]]);
   assert.deepEqual(releaseStampErrors(base, ds('2.15.0', '2026-11-25', [['2026-11-24', null]])), []);
-  assert.match(releaseStampErrors(base, ds('2.15.0', '2026-11-22', [['2026-11-24', null]])).join(), /older than the newest last_verified\/added \(2026-11-24\)/);
+  assert.match(releaseStampErrors(base, ds('2.15.0', '2026-11-22', [['2026-11-24', null]])).join(), /older than the newest date in the data \(2026-11-24\)/);
   assert.match(releaseStampErrors(ds('2.14.2', '2026-11-22'), ds('2.15.0', '2026-11-21')).join(), /moves generated back/);
   assert.deepEqual(releaseStampErrors(null, base), [], 'nothing to compare with');
 });

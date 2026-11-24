@@ -49,9 +49,11 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const FRESH_DAYS = SLA_DAYS; // the freshness SLA, defined once in lib/rules.mjs
 
 const data = JSON.parse(readFileSync(join(ROOT, 'data/providers.json'), 'utf8'));
-// `data.generated` is the release stamp: it moves only with `version` (lib/release-stamp.mjs), so the pages that print it
-// stay the same across data pull requests. Ranking needs a day that is never older than the data it ranks (a verification
-// after it would read as "in the future"); that day is derived here and never stored.
+// `data.generated` in data/providers.json is the release stamp: it moves only with `version` (lib/release-stamp.mjs), and only
+// CITATION.cff (`date-released`) prints it. Every public "generated"/"data of" date — the API envelopes, the CSV column,
+// providers.json on the site, llms.txt, sitemap lastmod, "Data of …" lines — and every age the build computes keep their
+// documented meaning, "the date of the last dataset change": ASOF, the newest date recorded in the data (datasetAsOf). It is
+// derived from the committed data only (no clock), so the build stays byte-stable for a given dataset.
 const ASOF = datasetAsOf(data);
 const providers = data.providers;
 const summaryBySlug = new Map(JSON.parse(readFileSync(join(ROOT, 'data/provider-summaries.json'), 'utf8')).summaries.map((x) => [x.id, x]));
@@ -827,11 +829,11 @@ const { historyBySlug, monthEnd: monthEndSnapshots } = mineHistoryAndSnapshots({
 // ---------- server-render the homepage explorer (SEO + no-JS + instant paint) ----------
 // Row markup lives in lib/rows.mjs — the SAME function the client loads as
 // shared-rows.js — so the server render and the browser repaint can never
-// diverge. The build passes data.generated (a stable, committed date) so the
+// diverge. The build passes ASOF (derived from the committed data, never the clock) so the
 // render is deterministic and the drift gate never trips on a calendar boundary.
 const homeRows = [...providers]
   .sort((a, b) => sortLib.comparator('recommended', 1, a, b))
-  .map((p) => rows.explorerRowHtml(p, { now: data.generated }))
+  .map((p) => rows.explorerRowHtml(p, { now: ASOF }))
   .join('\n');
 
 // Emit the browser's copy of the shared rules (recScore + FLAG_PAIRS +
@@ -887,13 +889,12 @@ const homeProvider = (p) => {
 // One provider per line: a data change rewrites only its own provider's line, so two pull requests that edit different
 // providers do not both rewrite one long line of this page.
 const inlineData = `<script type="application/json" id="providers-data">{"providers":[\n${publicProviders.map((p) => JSON.stringify(homeProvider(p))).join(',\n').replace(/</g, '\\u003c')}\n]}</script>`;
-// The four stat tiles are rendered here too, dated by data.generated (deterministic), so they show without JavaScript and
+// The four stat tiles are rendered here too, dated by ASOF (deterministic), so they show without JavaScript and
 // without a layout shift; explorer.js repaints them with the visitor's clock. Same markup as renderStats() in explorer.js.
 const STAT_STATUS_WORD = { fresh: 'fresh', due: 'due for re-check', stale: 'stale' };
 const homeStatsHtml = (() => {
-  const genMs = Date.parse(data.generated + 'T00:00:00Z');
-  // A verification after the release stamp counts as 0 days old (the visitor's clock repaints the real age).
-  const ages = providers.filter((p) => p.verified && p.last_verified).map((p) => Math.max(0, Math.floor((genMs - Date.parse(p.last_verified + 'T00:00:00Z')) / 86400000)));
+  const genMs = Date.parse(ASOF + 'T00:00:00Z');
+  const ages = providers.filter((p) => p.verified && p.last_verified).map((p) => Math.floor((genMs - Date.parse(p.last_verified + 'T00:00:00Z')) / 86400000));
   const oldest = ages.length ? Math.max(...ages) : 0;
   const status = freshnessStatus(oldest);
   const tiles = [
@@ -940,7 +941,7 @@ writeFileSync(join(ROOT, 'site/badge-verified.svg'), verifiedBadge.svg);
 // ---------- ship data with the site ----------
 mkdirSync(join(ROOT, 'site'), { recursive: true });
 writeFileSync(join(ROOT, 'site/providers.json'), JSON.stringify({ ...data, providers: publicProviders }, null, 2) + '\n');
-writeFileSync(join(ROOT, 'site/providers.csv'), providersCsv({ version: data.version, generated: data.generated, providers: publicProviders }));
+writeFileSync(join(ROOT, 'site/providers.csv'), providersCsv({ version: data.version, generated: ASOF, providers: publicProviders }));
 for (const rel of ['data/providers.csv', 'data/providers.yaml', 'site/providers.yaml']) {
   rmSync(join(ROOT, rel), { force: true });
 }
@@ -957,7 +958,7 @@ const collNavMd = COLLECTIONS.map((c) => `[${c.title}](${c.slug}.md)`).join(' ·
 
 for (const c of COLLECTIONS) {
   const rows = collRows(c);
-  const fill = (t) => t.replaceAll('{n}', String(rows.length)).replaceAll('{total}', String(total)).replaceAll('{date}', data.generated);
+  const fill = (t) => t.replaceAll('{n}', String(rows.length)).replaceAll('{total}', String(total)).replaceAll('{date}', ASOF);
   const metaDesc = fill(c.metaDesc);
   const nav = COLLECTIONS.map(
     (o) => `<a href="${o.slug}"${o.slug === c.slug ? ' class="active" aria-current="page"' : ''}>${htmlEsc(o.title)}</a>`
@@ -1063,7 +1064,7 @@ const hubJsonLd = JSON.stringify({
   '@graph': [
     {
       '@type': 'CollectionPage', name: 'Free LLM API guides and collections', description: HUB_META,
-      url: `${SITE}/guides-and-collections/`, dateModified: data.generated,
+      url: `${SITE}/guides-and-collections/`, dateModified: ASOF,
       isPartOf: { '@type': 'WebSite', name: 'Free LLM API Hub', url: `${SITE}/` },
       mainEntity: {
         '@type': 'ItemList', numberOfItems: GUIDES.length + COLLECTIONS.length,
@@ -1582,7 +1583,7 @@ const guideRow = (p) =>
 for (const g of GUIDES) {
   // These pages explicitly promise verified providers; collections still show all tracked rows.
   const list = providers.filter((p) => p.verified === true && g.filter(p));
-  const fill = (t) => t.replaceAll('{n}', String(list.length)).replaceAll('{date}', data.generated);
+  const fill = (t) => t.replaceAll('{n}', String(list.length)).replaceAll('{date}', ASOF);
   const metaDesc = fill(g.metaDesc);
   const twins = COLLECTIONS.filter((c) => (c.guides || []).includes(g.slug));
   const top = (g.pick && list.find((x) => x.slug === g.pick)) ||
@@ -1612,7 +1613,7 @@ for (const g of GUIDES) {
     '@context': 'https://schema.org',
     '@graph': [
       {
-        '@type': 'Article', headline: g.h1, description: metaDesc, dateModified: data.generated,
+        '@type': 'Article', headline: g.h1, description: metaDesc, dateModified: ASOF,
         url: `${SITE}/guides/${g.slug}`, isPartOf: { '@type': 'WebSite', name: 'Free LLM API Hub', url: `${SITE}/` },
       },
       {
@@ -1643,7 +1644,7 @@ for (const g of GUIDES) {
 // that works on static hosting (no server, no query params, CORS-open). Plus
 // llms.txt / llms-full.txt (llmstxt.org) so AI agents can consume the hub directly.
 mkdirSync(join(ROOT, 'site/api/v1/modality'), { recursive: true });
-const apiBase = { dataset: 'free-llm-api-hub', version: data.version, generated: data.generated, license: 'MIT', homepage: `${SITE}/`, docs: `${SITE}/api/` };
+const apiBase = { dataset: 'free-llm-api-hub', version: data.version, generated: ASOF, license: 'MIT', homepage: `${SITE}/`, docs: `${SITE}/api/` };
 const writeApi = (rel, obj) => writeFileSync(join(ROOT, `site/api/v1/${rel}`), JSON.stringify(obj, null, 2) + '\n');
 // v1 published commercial_ok as boolean|null. Keep that type stable while the
 // additive commercial_ok_condition field carries the reason for conditional use.
@@ -1655,7 +1656,7 @@ writeApi('programs.json', { ...apiBase, startups: programs.startups, research: p
 const historyPublic = Object.fromEntries(Object.entries(historyBySlug).map(([slug, events]) => [slug, events.map(({ changes, ...e }) => e)]));
 writeApi('history.json', { ...apiBase, description: 'Per-provider change history mined from the git log of providers.json.', history: historyPublic });
 writeApi('changes.json', { ...apiBase, description: 'Field-level provider changes (from/to), grouped by ISO week, newest first: the last 12 weeks ending at the newest change. Mined from the git log of providers.json.', weeks: apiV1ChangeWeeks.map(({ week, start, end, count, changes }) => ({ week, start, end, count, changes: changes.map(({ date, slug, name, field, from, to }) => ({ date, slug, name, field, from, to })) })) });
-writeApi('best.json', { ...apiBase, description: 'The top 10 free LLM APIs by the FLLMAPIHUB score, in rank order, with the score and its parts. Never padded to ten. Every pick carries its full verified profile. Method: ' + SITE + '/best/methodology/', updated: data.generated, count: topList.length, picks: topList.map((e) => ({ rank: e.rank, podium: e.podium, score: Math.round(e.total * 10) / 10, math: Math.round(e.math * 10) / 10, editorial: Math.round(e.editorial * 10) / 10, confirmed: e.confirmed, of: e.of, parts: Object.fromEntries(Object.entries(e.parts).map(([k, v]) => [k, Math.round(v * 10) / 10])), tier_near_threshold: e.boundary, ...toApiV1Provider(e.p) })) });
+writeApi('best.json', { ...apiBase, description: 'The top 10 free LLM APIs by the FLLMAPIHUB score, in rank order, with the score and its parts. Never padded to ten. Every pick carries its full verified profile. Method: ' + SITE + '/best/methodology/', updated: ASOF, count: topList.length, picks: topList.map((e) => ({ rank: e.rank, podium: e.podium, score: Math.round(e.total * 10) / 10, math: Math.round(e.math * 10) / 10, editorial: Math.round(e.editorial * 10) / 10, confirmed: e.confirmed, of: e.of, parts: Object.fromEntries(Object.entries(e.parts).map(([k, v]) => [k, Math.round(v * 10) / 10])), tier_near_threshold: e.boundary, ...toApiV1Provider(e.p) })) });
 // /api/v1/score.json: the whole score, not only the top 10. Same numbers as best.json (one rounding rule, one source).
 const r1 = (x) => Math.round(x * 10) / 10;
 const SCORE_SCHEMA_URL = SITE + '/api/v1/score.schema.json';
@@ -1751,7 +1752,7 @@ for (const m of API_MODS) {
 // points at a host that is not pinned for it (publishableClientConfigs throws).
 let clientConfigs;
 try {
-  clientConfigs = publishableClientConfigs({ version: data.version, generated: data.generated, providers });
+  clientConfigs = publishableClientConfigs({ version: data.version, generated: ASOF, providers });
 } catch (error) {
   console.error('✗ ' + error.message);
   process.exit(1);
@@ -1894,7 +1895,7 @@ const provBlock = (p) => {
 };
 const llmsFull =
   `# Free LLM API Hub — full provider list\n\n> ${llmsSummary}\n\n` +
-  `${total} providers, dataset v${data.version}, generated ${data.generated}. Confirm every figure against the linked docs.\n\n` +
+  `${total} providers, dataset v${data.version}, generated ${ASOF}. Confirm every figure against the linked docs.\n\n` +
   `## Providers\n\n` +
   providers.map(provBlock).join('\n') + `\n`;
 writeFileSync(join(ROOT, 'site/llms-full.txt'), llmsFull);
@@ -1946,7 +1947,7 @@ const bestMain =
   '<h2 class="best-section">The podium</h2><ol class="best-list best-podium-list">' + podiumHtml + '</ol>' +
   (restHtml ? '<hr class="best-sep" aria-hidden="true"><h2 class="sr-only">Ranks ' + (PODIUM_SIZE + 1) + ' to ' + topList.length + '</h2><ol class="best-list" start="' + (PODIUM_SIZE + 1) + '">' + restHtml + '</ol>' : '') +
   '<p class="count best-note">' + (topList.length < TOP_SIZE ? 'Only ' + topList.length + ' providers meet the minimum evidence today; the list is never padded to ' + TOP_SIZE + '. ' : '') +
-  'Computed from the data on ' + htmlEsc(data.generated) + ' — <a href="methodology/">how the score works</a>. Every provider links to its full verified profile.</p>' +
+  'Computed from the data on ' + htmlEsc(ASOF) + ' — <a href="methodology/">how the score works</a>. Every provider links to its full verified profile.</p>' +
   '</div></main>';
 mkdirSync(join(ROOT, 'site/best'), { recursive: true });
 writeFileSync(
@@ -1961,7 +1962,7 @@ const editorialNeutral = providers.every((p) => editorialRating(EDITORIAL, p.slu
 const methodRows = MATH_INPUTS.map((k) => '<tr><td>' + WEIGHT_LABELS[k] + '</td><td class="num">' + SCORE_WEIGHTS[k] + '</td></tr>').join('') +
   '<tr><td>Editorial rating</td><td class="num">' + EDITORIAL_WEIGHT + '</td></tr>';
 const methodMain =
-  pageHero({ crumbs: `<a href="../../">Home</a> / <a href="../">The best</a> / Methodology`, h1: `How the score works`, lede: `Every provider on /best gets a score from 0 to 100, computed from the data each time the site is built. Data of ${htmlEsc(data.generated)}.` }) +
+  pageHero({ crumbs: `<a href="../../">Home</a> / <a href="../">The best</a> / Methodology`, h1: `How the score works`, lede: `Every provider on /best gets a score from 0 to 100, computed from the data each time the site is built. Data of ${htmlEsc(ASOF)}.` }) +
   '<main id="main"><div class="wrap best-method">' +
   '<h2>The parameters and their weights</h2>' +
   '<table class="best-weights"><thead><tr><th>Part</th><th class="num">Points</th></tr></thead><tbody>' + methodRows + '</tbody></table>' +
@@ -1976,7 +1977,7 @@ const methodMain =
   '<li><strong>The editorial part cannot outweigh the data.</strong> It can move a provider away from ' + EDITORIAL_DEFAULT + ' only by as much as its confirmed inputs allow.</li>' +
   '<li><strong>Stability is not measured yet.</strong> It needs probes over at least ' + STABILITY_MIN_DAYS + ' days (' + STABILITY_MIN_SAMPLES + ' samples); until then it is unmeasured for everyone.</li>' +
   '<li><strong>Deterministic.</strong> The same data gives the same order; ties break by the mathematical score, then by name.</li></ul>' +
-  '<p class="count best-note">Last data update: ' + htmlEsc(data.generated) + '. Full text and every constant: <a href="' + REPO + '/blob/main/docs/methodology.md">docs/methodology.md</a> and <a href="' + REPO + '/blob/main/scripts/lib/score.mjs">scripts/lib/score.mjs</a>.</p>' +
+  '<p class="count best-note">Last data update: ' + htmlEsc(ASOF) + '. Full text and every constant: <a href="' + REPO + '/blob/main/docs/methodology.md">docs/methodology.md</a> and <a href="' + REPO + '/blob/main/scripts/lib/score.mjs">scripts/lib/score.mjs</a>.</p>' +
   '</div></main>';
 mkdirSync(join(ROOT, 'site/best/methodology'), { recursive: true });
 writeFileSync(
@@ -2049,7 +2050,7 @@ writeFileSync(
     canonical: SITE + '/coverage/',
     main:
       pageHero({ crumbs: `<a href="../">Home</a> / Data coverage`, h1: `Data coverage`, lede: `Where the data is thin, and how to add one value. Every gap links the provider's own docs.` }) +
-      coverageMainHtml(fieldCoverage, { repo: REPO, generated: data.generated, prefix: '../' }),
+      coverageMainHtml(fieldCoverage, { repo: REPO, generated: ASOF, prefix: '../' }),
     prefix: '../',
   })
 );
@@ -2123,7 +2124,7 @@ writeFileSync(
     canonical: SITE + '/data-policy/',
     main:
       pageHero({ crumbs: `<a href="../">Home</a> / Who trains on your data`, h1: `Who trains on your data`, lede: `The provider's own sentence about training on prompts, where one is recorded, with its page and the day it was read.` }) +
-      dataPolicyMainHtml(dataPolicyRows(providers), { repo: REPO, generated: data.generated, prefix: '../', quotesCheck: quotesCheckHtml() }),
+      dataPolicyMainHtml(dataPolicyRows(providers), { repo: REPO, generated: ASOF, prefix: '../', quotesCheck: quotesCheckHtml() }),
     prefix: '../',
   })
 );
@@ -2140,9 +2141,9 @@ writeFileSync(
     canonical: SITE + '/agreements/',
     main:
       pageHero({ crumbs: '<a href="../">Home</a> / Agreements', h1: 'Agreements and sponsorship', lede: htmlEsc(NOT_IN_DATA_SENTENCE) }) +
-      '<main id="main"><div class="wrap prose">' + agreementsTableHtml(AGREEMENTS, data.generated) +
+      '<main id="main"><div class="wrap prose">' + agreementsTableHtml(AGREEMENTS, ASOF) +
       '<h2>Where paid items can and cannot appear</h2><p>' + htmlEsc(MACHINE_SENTENCE) + '</p>' +
-      inForce(AGREEMENTS, data.generated).map(sponsoredBlockHtml).join('') +
+      inForce(AGREEMENTS, ASOF).map(sponsoredBlockHtml).join('') +
       '</div></main>',
     prefix: '../',
   })
@@ -2155,7 +2156,7 @@ function quotesCheckHtml() {
   const file = join(ROOT, 'data/quotes-report.json');
   const registry = JSON.parse(readFileSync(join(ROOT, 'data/quotes.json'), 'utf8'));
   const report = existsSync(file) ? JSON.parse(readFileSync(file, 'utf8')) : null;
-  return quotesReportHtml(report, registry, Date.parse(`${data.generated}T12:00:00Z`));
+  return quotesReportHtml(report, registry, Date.parse(`${ASOF}T12:00:00Z`));
 }
 
 // ---------- /free-gpu/ — the Free GPU compute section, apart from the ranking ----------
@@ -2183,7 +2184,7 @@ writeFileSync(
 // current date), because the pages are gitignored and pinned in
 // derived-fingerprints.json.
 writeFileSync(join(ROOT, 'site/shared-compare.js'), compareLib.clientBundle());
-writeFileSync(join(ROOT, 'site/scores.json'), JSON.stringify({ generated: data.generated, scores: scoreMap }, null, 2) + '\n');
+writeFileSync(join(ROOT, 'site/scores.json'), JSON.stringify({ generated: ASOF, scores: scoreMap }, null, 2) + '\n');
 rmSync(join(ROOT, 'site/compare'), { recursive: true, force: true });
 mkdirSync(join(ROOT, 'site/compare'), { recursive: true });
 const compareLinksHtml = (prefix, except = null) => suggestedPairs
@@ -2241,42 +2242,42 @@ writeFileSync(join(ROOT, 'site/compare/index.html'), htmlPage({
 // date: a provider page moves with its last_verified, a collection or compare page with
 // the newest last_verified among the providers it shows, a state report with its month.
 // Every input is committed data, so the drift-gated sitemap stays deterministic.
-const newest = (dates) => dates.filter(Boolean).sort().pop() || data.generated;
+const newest = (dates) => dates.filter(Boolean).sort().pop() || ASOF;
 const lastVerified = (ps) => newest(ps.map((p) => p.last_verified));
 // The monthly state reports are NOT in this drift-gated sitemap: the months that exist
 // follow commit dates, so a PR's own merge commit would add one and fail the gate. They
 // get their own git-derived sitemap (below), advertised from robots.txt and never pinned.
 const stateLastmod = (month, i, all) => {
   const end = monthEndDate(month);
-  return i === all.length - 1 && data.generated < end ? data.generated : end;
+  return i === all.length - 1 && ASOF < end ? ASOF : end;
 };
 const sitemapEntries = [
-  [`${SITE}/`, data.generated],
-  [`${SITE}/models/`, data.generated],
-  [`${SITE}/guides-and-collections/`, data.generated],
-  [`${SITE}/best/`, data.generated],
-  [`${SITE}/best/methodology/`, data.generated],
-  [`${SITE}/coverage/`, data.generated],
-  [`${SITE}/submit/`, data.generated],
-  ...DOC_PAGES.map((d) => [`${SITE}/${d.slug}/`, data.generated]),
-  [`${SITE}/data-policy/`, data.generated],
+  [`${SITE}/`, ASOF],
+  [`${SITE}/models/`, ASOF],
+  [`${SITE}/guides-and-collections/`, ASOF],
+  [`${SITE}/best/`, ASOF],
+  [`${SITE}/best/methodology/`, ASOF],
+  [`${SITE}/coverage/`, ASOF],
+  [`${SITE}/submit/`, ASOF],
+  ...DOC_PAGES.map((d) => [`${SITE}/${d.slug}/`, ASOF]),
+  [`${SITE}/data-policy/`, ASOF],
   [`${SITE}/agreements/`, AGREEMENTS.generated],
   [`${SITE}/free-gpu/`, freeGpu.generated],
   [`${SITE}/coding-tools/`, codingTools.generated],
   ...CODING_TOOL_PAGES.map(({ e, generated }) => [`${SITE}/coding-tools/${e.slug}/`, generated]),
-  [`${SITE}/api/`, data.generated],
-  [`${SITE}/changes/`, data.generated],
+  [`${SITE}/api/`, ASOF],
+  [`${SITE}/changes/`, ASOF],
   [`${SITE}/programs/`, programs.generated],
   [`${SITE}/programs/startups`, programs.generated],
   [`${SITE}/programs/research`, programs.generated],
-  ...GUIDES.map((g) => [`${SITE}/guides/${g.slug}`, data.generated]),
+  ...GUIDES.map((g) => [`${SITE}/guides/${g.slug}`, ASOF]),
   // Only the first updates page: the number of /updates/page/N/ pages follows
   // the commit count, so listing them made the drift-gated sitemap change with
   // every merge, whatever the PR touched. Crawlers reach them via pagination.
-  ...(commits.length ? [[`${SITE}/updates`, data.generated]] : []),
+  ...(commits.length ? [[`${SITE}/updates`, ASOF]] : []),
   ...COLLECTIONS.map((c) => [`${SITE}/collections/${c.slug}`, lastVerified(providers.filter(c.filter))]),
-  ...providers.map((p) => [`${SITE}/p/${p.slug}`, p.last_verified || data.generated]),
-  [`${SITE}/compare/`, data.generated],
+  ...providers.map((p) => [`${SITE}/p/${p.slug}`, p.last_verified || ASOF]),
+  [`${SITE}/compare/`, ASOF],
   ...comparePairs.map((cp) => [`${SITE}/compare/${cp.path}/`, lastVerified([cp.a, cp.b])]),
 ];
 const sitemap =

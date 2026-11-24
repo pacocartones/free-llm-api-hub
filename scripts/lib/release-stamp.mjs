@@ -1,29 +1,35 @@
-// release-stamp.mjs — the dataset's release stamp (`generated`) and the date the build measures ages from.
+// release-stamp.mjs — the dataset's release stamp (`generated` in data/providers.json) and the public data date.
 //
 // `generated` in data/providers.json is the day of the dataset release: it moves only together with `version`
 // (RELEASING.md, `npm run release:prepare`). A data pull request leaves it alone. It used to be bumped by every
-// data pull request, which made that one line — and every derived line that prints it (CITATION.cff, the CSV
-// column, sitemap lastmod, "Data of …") — conflict between any two open data pull requests.
+// data pull request, which put that one line in conflict between any two open data pull requests.
 //
-// The build still needs a reference day that is never older than the data it ranks (a verification after the
-// reference day would read as "in the future" and drop the provider from /best). That day is `datasetAsOf`:
-// the newest of `generated` and every provider's last_verified/added. It is derived, never stored.
+// Consumers keep the meaning documented in docs/api.md: every public `generated` (the /api/v1 envelopes, the CSV
+// column `dataset_generated`, providers.json on the site, llms.txt, sitemap lastmod, "Data of …") is "the date of
+// the last dataset change". The build derives it with `datasetAsOf`: the newest of the release stamp and every date
+// recorded on a provider. It is computed from the committed data only, never from the clock.
 
 export const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
 /** Today's day in UTC, YYYY-MM-DD. `override` (VALIDATE_TODAY in the tests) fixes it. */
 export const utcToday = (override) => override || new Date().toISOString().slice(0, 10);
 
-/** The newest last_verified/added of the providers, or null when none is dated. */
+/** Every date a data change writes on a provider: verification, addition, the checked days of its sourced facts, probes. */
+const providerDates = (p) => [
+  p.last_verified, p.added, p.last_probed,
+  p.data_policy?.checked, p.free_limits?.checked, p.no_expiry?.checked,
+];
+
+/** The newest date recorded on the providers, or null when none is dated. */
 export function newestProviderDate(data) {
   return (data?.providers ?? [])
-    .flatMap((p) => [p.last_verified, p.added])
+    .flatMap(providerDates)
     .filter((d) => typeof d === 'string' && DATE_RE.test(d))
     .sort()
     .pop() ?? null;
 }
 
-/** The reference day of a build: the newest of the release stamp and the provider dates. */
+/** The public date of the data ("last dataset change"): the newest of the release stamp and every provider date. */
 export function datasetAsOf(data) {
   const newest = newestProviderDate(data);
   return newest && newest > data.generated ? newest : data.generated;
@@ -48,7 +54,7 @@ export function releaseStampErrors(base, head) {
   }
   const newest = newestProviderDate(head);
   if (newest && head.generated < newest) {
-    errors.push(`top-level: release ${head.version} has generated ${head.generated}, older than the newest last_verified/added (${newest}); ` +
+    errors.push(`top-level: release ${head.version} has generated ${head.generated}, older than the newest date in the data (${newest}); ` +
       'set it to the release day (npm run release:prepare)');
   }
   if (DATE_RE.test(base.generated || '') && head.generated < base.generated) {

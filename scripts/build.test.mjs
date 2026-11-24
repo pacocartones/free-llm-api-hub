@@ -339,7 +339,7 @@ test('the public surface omits retired exports and home redundancies, while upda
   assert.doesNotMatch(readFileSync(join(ROOT, 'site/explorer.js'), 'utf8'), /Could not load providers[.]json[.]/);
   const data = JSON.parse(readFileSync(DATA, 'utf8'));
   const publicProviders = data.providers.map(({ env_key, ...rest }) => rest);
-  assert.equal(readFileSync(join(ROOT, 'site/providers.csv'), 'utf8'), providersCsv({ version: data.version, generated: data.generated, providers: publicProviders }), 'site/providers.csv matches the public projection');
+  assert.equal(readFileSync(join(ROOT, 'site/providers.csv'), 'utf8'), providersCsv({ version: data.version, generated: datasetAsOf(data), providers: publicProviders }), 'site/providers.csv matches the public projection');
   for (const rel of ['data/providers.csv', 'data/providers.yaml', 'site/providers.yaml']) {
     assert.equal(existsSync(join(ROOT, rel)), false, `${rel} must not survive the retired export feature`);
   }
@@ -662,7 +662,7 @@ test('/best shows the podium of three and the methodology page states the rules'
   assert.match(method, /editorial rating/);
   assert.match(method, /30/);
   assert.match(method, /internal rubric behind those ratings is not published/);
-  assert.match(method, new RegExp(`Data of ${JSON.parse(readFileSync(DATA, 'utf8')).generated}`));
+  assert.match(method, new RegExp(`Data of ${datasetAsOf(JSON.parse(readFileSync(DATA, 'utf8')))}`));
   assert.match(readFileSync(join(ROOT, 'site/sitemap.xml'), 'utf8'), /<loc>https:\/\/freellmapihub\.com\/best\/methodology\/<\/loc>/);
 });
 
@@ -1134,7 +1134,7 @@ test('the built client configs match the dataset, are registered, and publish th
   assert.ok(eligible.length > 0, 'the real dataset has eligible providers');
 
   const yaml = readFileSync(join(v1, 'litellm.yaml'), 'utf8');
-  assert.ok(yaml.includes(`# Dataset version ${data.version}, generated ${data.generated}.`), 'header uses data.version and data.generated');
+  assert.ok(yaml.includes(`# Dataset version ${data.version}, generated ${datasetAsOf(data)}.`), 'header uses data.version and the public data date');
   const entries = parseLitellm(yaml);
   const expectedCount = eligible.reduce((n, p) => n + (p.models_free && p.models_free.length ? p.models_free.length : 1), 0);
   assert.equal(entries.length, expectedCount);
@@ -1143,7 +1143,7 @@ test('the built client configs match the dataset, are registered, and publish th
 
   const clients = JSON.parse(readFileSync(join(v1, 'openai-clients.json'), 'utf8'));
   assert.equal(clients.version, data.version);
-  assert.equal(clients.generated, data.generated);
+  assert.equal(clients.generated, datasetAsOf(data));
   assert.equal(clients.count, eligible.length);
   assert.deepEqual(clients.clients.map((c) => c.slug), eligible.map((p) => p.slug));
   for (const c of clients.clients) assert.match(c.env_key, /^[A-Z][A-Z0-9_]*$/);
@@ -2423,7 +2423,7 @@ test('the narrow-screen rules that keep the pages from scrolling sideways stay i
 
 test('the stat tiles keep a reserved height, so filling them in does not push the page down', () => {
   // Lighthouse on a phone measured a 0.068 shift when explorer.js filled an empty block (0 with the reserved height).
-  // The build now renders the four tiles into the HTML (dated by data.generated) and explorer.js only repaints them;
+  // The build now renders the four tiles into the HTML (dated by the public data date, datasetAsOf) and explorer.js only repaints them;
   // the reserved height stays as a guard for the repaint.
   const html = readFileSync(join(ROOT, 'site/index.html'), 'utf8');
   const block = html.match(/<div class="stats" id="stats"[^>]*>([\s\S]*?)<!-- AUTOGEN:stats:end --><\/div>/);

@@ -1,14 +1,12 @@
 ### Changed and fixed
 
-- **For API and dataset consumers: `generated` now means the date of the dataset
-  release, not the date of the last data change.** It changes only together with
-  `version`, so between releases it stays at the release day while providers
-  keep being re-verified. For how fresh one provider is, read its
-  `last_verified` (and `data_policy.checked`, `free_limits.checked`), not
-  `generated`. The same date is used by `/api/v1/*` (`generated`), the CSV
-  column `dataset_generated`, `date-released` in `CITATION.cff` and the sitemap.
-  No field is added, removed or renamed. Data pull requests no longer edit
-  `generated` or `CHANGELOG.md` (changelog entries are now fragments in
-  `changes/unreleased/`), so open data pull requests stop conflicting on those
-  lines. The README freshness badge is now served by the site and refreshed on
-  every deploy (#702).
+- Data pull requests no longer edit `generated` in `data/providers.json` or
+  `CHANGELOG.md`: in the canonical file `generated` is now the dataset release
+  date and changes only with `version`, and changelog entries are fragments in
+  `changes/unreleased/`. So open data pull requests stop conflicting on those
+  lines. **Nothing changes for API and dataset consumers:** `generated` in
+  `/api/v1/*`, the site's `providers.json`, the CSV column `dataset_generated`,
+  `llms.txt` and the sitemap still means the date of the last dataset change,
+  now derived from the newest date recorded in the data. `date-released` in
+  `CITATION.cff` is now the release date. The README freshness badge is served
+  by the site and refreshed on every deploy (#702).

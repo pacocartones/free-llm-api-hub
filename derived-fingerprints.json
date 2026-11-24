@@ -25,7 +25,7 @@
   "site/api/v1/perpetual.json": "1414b41079cf8ce0f8adda393b069d96aedbe270d32d43c112286f9882ec6bad",
   "site/api/v1/programs.json": "c9d0af6eda713a64b005f8f4c86e30c3a89b5728d9f7a6b6127e8f7a7a459d46",
   "site/api/v1/providers.json": "77a1ddc71a7f809a2c6c1dcfaacce3ddec9c68c5e87394e6c505f69b45c1fd90",
-  "site/api/v1/schema.json": "cbf586505325050b00bf01a29997f25f1396875cb16b8d228eafd48243f2af5e",
+  "site/api/v1/schema.json": "96c027ab649aa6cf3e7bdc7b7e07a6ae699a9717b0b72203c8394a914b49685b",
   "site/api/v1/score.json": "a8e168ff84f8d31fc910542540772e346dcc3124b6b63930a46505ee775a0b8e",
   "site/api/v1/score.schema.json": "6557b4e6e7e113b1dc5a57bf8498d51486c3179f42dd8e2e2cd632172d8c49e2",
   "site/api/v1/trial.json": "d14f48610f65301f281f5a331b682e893b8b81e020a89c46c13fe9a72c128d94",
@@ -94,7 +94,7 @@
   "site/programs/startups.html": "ad5ba58e3eb1efeab20931e88f391f27a450b361c065ba87a309a0634b9bbdd3",
   "site/providers.json": "046bbd2aa969fe19441f18e06d04c251fdee778b12846cb46b57dde6a3f590bb",
   "site/shared-compare.js": "123330f1d7abe0bd1167940589028f1c726aefa805e9e54ae04a2baa1c150060",
-  "site/shared-rows.js": "bc3fb0fb7272185d80c5a37c967ee245ae7e14596ea497c05d1fa9a907fb6e5d",
+  "site/shared-rows.js": "a5c2569b3cedc5d42de300e6cefebe0bbb6e5b7fd22ccabebc746c1873c7389c",
   "site/shared-rules.js": "e515b6afb1ae358891870bfac316cb35186545ecccdd04330397ec909f8cea49",
   "site/shared-sort.js": "fbbaace17447958ac05f8652c7b00d951a7dce7e9a6ed103ce0fb9beaf7e17d1"
 }
