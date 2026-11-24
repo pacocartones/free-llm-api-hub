@@ -8,6 +8,7 @@
 // Zero dependencies. Run with: node scripts/build.mjs   (or `npm run build`)
 
 import { shortenProse } from './lib/short-text.mjs';
+import { measurementId, analyticsCspSources, consentScript, withAnalytics } from './lib/analytics.mjs';
 import { readFileSync, writeFileSync, mkdirSync, readdirSync, rmSync, existsSync } from 'node:fs';
 import { execSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
@@ -625,7 +626,11 @@ const THEME_GUARD = `<script>(function(){try{var t=localStorage.getItem('theme')
 // allows explorer.js's data fallback (raw.githubusercontent).
 // No default-src/style-src on purpose: inline style="" attributes and the 404 <style> stay valid.
 // If you edit THEME_GUARD or 404.html's inline scripts, recompute these hashes or the page breaks silently.
-const CSP = `<meta http-equiv="Content-Security-Policy" content="script-src 'self' 'sha256-r3FnVnP9W/uaNhK9XkZqH3GIfK4TudOQGYTwoNIjGR4=' 'sha256-YzEhxvq2BwovGsg/RCjKkQdwf+LZmTjIkiQcjXCZMHc='; connect-src 'self' https://raw.githubusercontent.com; object-src 'none'; base-uri 'self'">`;
+// Google Analytics (lib/analytics.mjs) adds its hosts here ONLY when GA_MEASUREMENT_ID is set at build time; its banner is
+// the first-party file consent.js ('self'), so no inline hash changes.
+const GA_ID = measurementId();
+const GA_CSP = analyticsCspSources(GA_ID);
+const CSP = `<meta http-equiv="Content-Security-Policy" content="script-src 'self' 'sha256-r3FnVnP9W/uaNhK9XkZqH3GIfK4TudOQGYTwoNIjGR4=' 'sha256-YzEhxvq2BwovGsg/RCjKkQdwf+LZmTjIkiQcjXCZMHc='${GA_CSP.script}; connect-src 'self' https://raw.githubusercontent.com${GA_CSP.connect}; object-src 'none'; base-uri 'self'">`;
 
 // Search engines cut a snippet around 155 characters. Every page's description goes through
 // here, so no page can ship a longer one: cut at a word boundary and end with an ellipsis.
@@ -648,7 +653,7 @@ try {
 } catch { /* no stats file: the placeholder stays */ }
 const withStars = (html) => (STARS ? html.replace(/(data-stars>)[^<]*(<)/g, `$1${STARS}$2`) : html);
 
-function htmlPage(args) { return markNewTabLinks(labelTables(withStars(htmlPageRaw(args)))); }
+function htmlPage(args) { return withAnalytics(markNewTabLinks(labelTables(withStars(htmlPageRaw(args)))), GA_ID, args.prefix ?? '../'); }
 
 // Landmarks. A page hero emitted right before <main> moves inside it, so the skip link lands on the page's h1 and the
 // main landmark carries the page title (styles.css drops main's top padding when the hero leads it). Every nav.colls gets
@@ -913,7 +918,14 @@ indexHtml = inject(indexHtml, 'rows', homeRows);
 indexHtml = inject(indexHtml, 'stats', homeStatsHtml);
 indexHtml = inject(indexHtml, 'data', inlineData);
 indexHtml = withStars(indexHtml).replace(/(<img class="trust-badge"[^>]*? width=")\d+(")/, `$1${BADGE_W}$2`);
-writeFileSync(join(ROOT, 'site/index.html'), indexHtml);
+writeFileSync(join(ROOT, 'site/index.html'), withAnalytics(indexHtml, GA_ID, ''));
+// The consent banner exists only when analytics is configured; without an ID a stale copy is removed.
+{
+  const consentPath = join(ROOT, 'site/consent.js');
+  const consentJs = consentScript(GA_ID);
+  if (consentJs) writeFileSync(consentPath, consentJs);
+  else rmSync(consentPath, { force: true });
+}
 
 // ---------- badge ----------
 // Graded on the oldest verified entry (see freshnessBadge in lib/rules.mjs):
@@ -1298,16 +1310,44 @@ ${NOT_FOUND_PATH_SCRIPT}
   })
 );
 
+// The privacy page says exactly what the build ships: no cookies and no analytics by default; with GA_MEASUREMENT_ID set
+// (lib/analytics.mjs), Google Analytics behind an opt-in banner, described below.
+const privacyIntro = GA_ID
+  ? `<p>This site is a static, open-source reference operated by ${ORG} It has no user accounts and no ads. It uses Google Analytics <strong>only if you accept it</strong> in the banner; until then nothing is loaded from Google and no cookie is set.</p>`
+  : `<p>This site is a static, open-source reference operated by ${ORG} It has no user accounts, no ads, and no third-party analytics or tracking.</p>`;
+const privacyServerItem = GA_ID
+  ? `<li><strong>Nothing on a server of ours.</strong> The site is served as static files by GitHub Pages; there is no backend. No cookies are set unless you accept analytics (see below).</li>`
+  : `<li><strong>Nothing on a server.</strong> The site is served as static files by GitHub Pages; there is no backend and no cookies are set.</li>`;
+const privacyChoiceItem = GA_ID
+  ? `\n<li><strong>Your analytics choice</strong> (accept or reject) is saved only in your browser's local storage, so the banner does not ask again on every page.</li>`
+  : '';
+const privacyAnalytics = GA_ID
+  ? `<h2>Analytics (only with your consent)</h2>
+<p>If you press <strong>Accept</strong> in the cookie banner, the site loads Google Analytics 4 from Google (Google Ireland Limited, for visitors in the EEA, UK and Switzerland; Google LLC elsewhere) to count visits and see which pages are useful. If you press <strong>Reject</strong>, or make no choice, no request is ever sent to Google and no analytics cookie is set.</p>
+<ul>
+<li><strong>What is collected:</strong> pages viewed, the page you came from, approximate location (country/city, derived from your IP address, which Google Analytics 4 does not log or store), device, browser and screen size, and timing of your visit. Google Analytics sets first-party cookies (<code>_ga</code> and <code>_ga_&lt;id&gt;</code>) to tell visits apart.</li>
+<li><strong>What is not:</strong> no advertising features, no Google signals, no ad personalisation, no user ID; consent for advertising storage and ad data stays denied.</li>
+<li><strong>Who processes it:</strong> Google acts as our processor under its Google Ads Data Processing Terms. Data may be transferred to the United States under the EU–US Data Privacy Framework and Google's standard contractual clauses.</li>
+<li><strong>Retention:</strong> event data is kept for 2 months in Google Analytics, then deleted; the cookies expire after at most 2 years, or when you withdraw consent.</li>
+<li><strong>Legal basis:</strong> your consent (GDPR Art. 6(1)(a) and the ePrivacy rules on cookies).</li>
+<li><strong>Withdraw at any time:</strong> press <strong>Cookie settings</strong> at the bottom of any page and choose <strong>Reject</strong>. Tracking stops at once and the Google Analytics cookies are deleted. You can also clear this site's cookies and local storage in your browser.</li>
+</ul>
+<p>You can ask us for access to, correction or deletion of personal data about you, object to its processing, or complain to your data-protection authority.</p>
+`
+  : '';
+const privacyHostingTail = GA_ID
+  ? `We do not use Cloudflare's analytics; the only analytics is the opt-in Google Analytics described above.`
+  : `We do not use Cloudflare's analytics or any other analytics, and this site sets no cookies.`;
 legalPage('privacy', 'Privacy', `
-<p>This site is a static, open-source reference operated by ${ORG} It has no user accounts, no ads, and no third-party analytics or tracking.</p>
+${privacyIntro}
 <h2>What we store</h2>
 <ul>
-<li><strong>Nothing on a server.</strong> The site is served as static files by GitHub Pages; there is no backend and no cookies are set.</li>
-<li><strong>Your theme choice</strong> (light/dark) is saved only in your browser's local storage and never leaves your device.</li>
+${privacyServerItem}
+<li><strong>Your theme choice</strong> (light/dark) is saved only in your browser's local storage and never leaves your device.</li>${privacyChoiceItem}
 <li><strong>The GitHub star count</strong> is read from GitHub's public API by the process that builds the site (at least once a day), not by your browser: no request about it is sent from your device.</li>
 </ul>
-<h2>Hosting</h2>
-<p>Pages, fonts and assets are delivered by GitHub Pages (GitHub, Inc.) through Cloudflare (Cloudflare, Inc.), a content-delivery and security proxy that sits between your browser and GitHub Pages. Both may process standard request metadata (such as your IP address) to serve content, per GitHub's and Cloudflare's privacy statements. We do not use Cloudflare's analytics or any other analytics, and this site sets no cookies.</p>
+${privacyAnalytics}<h2>Hosting</h2>
+<p>Pages, fonts and assets are delivered by GitHub Pages (GitHub, Inc.) through Cloudflare (Cloudflare, Inc.), a content-delivery and security proxy that sits between your browser and GitHub Pages. Both may process standard request metadata (such as your IP address) to serve content, per GitHub's and Cloudflare's privacy statements. ${privacyHostingTail}</p>
 <h2>Contact</h2>
 <p>Questions about privacy? Email <a href="mailto:admin@freellmapihub.com">admin@freellmapihub.com</a>.</p>
 `);

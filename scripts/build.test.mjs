@@ -1709,6 +1709,22 @@ test('footer columns: where each link lives, and no GitHub star entry in Project
   }
 });
 
+test('no GA_MEASUREMENT_ID (the default): the build emits no analytics code, CSP host, banner or cookie notice change', () => {
+  const env = { ...process.env };
+  delete env.GA_MEASUREMENT_ID;
+  execFileSync(process.execPath, ['scripts/build.mjs'], { cwd: ROOT, stdio: 'pipe', env });
+  assert.ok(!existsSync(join(ROOT, 'site/consent.js')), 'no consent.js without an ID');
+  const pages = [];
+  const walk = (dir) => { for (const n of readdirSync(join(ROOT, dir))) { const rel = `${dir}/${n}`; if (statSync(join(ROOT, rel)).isDirectory()) walk(rel); else if (n.endsWith('.html')) pages.push(rel); } };
+  walk('site');
+  assert.ok(pages.length > 50, 'walked the built pages');
+  for (const rel of pages) {
+    const html = readFileSync(join(ROOT, rel), 'utf8');
+    assert.doesNotMatch(html, /googletagmanager|google-analytics|analytics\.google|gtag|consent\.js|data-consent-open|Cookie settings/, `${rel} carries analytics code without an ID`);
+  }
+  assert.match(readFileSync(join(ROOT, 'site/legal/privacy.html'), 'utf8'), /no third-party analytics or tracking/);
+});
+
 test('the privacy page and SECURITY.md say what the star count really does: no GitHub call from the browser', () => {
   run(['scripts/build.mjs']);
   const privacy = readFileSync(join(ROOT, 'site/legal/privacy.html'), 'utf8');
