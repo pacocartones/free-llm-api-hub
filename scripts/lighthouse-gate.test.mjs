@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
-import { evaluate, medianReport, THRESHOLDS } from './lib/lighthouse-gate.mjs';
+import { evaluate, medianReport, parseMode, MODES, THRESHOLDS } from './lib/lighthouse-gate.mjs';
 
 const report = (accessibility, performance) => ({ categories: { accessibility: { score: accessibility }, performance: { score: performance } } });
 
@@ -107,3 +107,74 @@ test('SEO budget fails a missing or sub-perfect category', () => {
   r.categories.seo.score = 1;
   assert.deepEqual(evaluate('/', r, thresholds), []);
 });
+
+// Pull requests get accessibility + SEO in one run; performance (median of three) runs on main and nightly.
+test('the pull-request mode keeps the accessibility and SEO budgets with one run per page', () => {
+  const m = parseMode(['--mode=accessibility-seo']);
+  assert.equal(m.runs, 1);
+  assert.deepEqual([...m.categories], ['accessibility', 'seo']);
+  assert.deepEqual({ ...m.thresholds }, { accessibility: 0.95, seo: 1 });
+  // performance is not judged here, so a slow runner cannot fail a pull request
+  assert.deepEqual(evaluate('/', { categories: { accessibility: { score: 1 }, seo: { score: 1 }, performance: { score: 0.1 } } }, m.thresholds), []);
+  // and an accessibility audit failure still fails with a single run
+  const one = auditReport();
+  one.categories.seo = { score: 1 };
+  assert.match(evaluate('/', medianReport([one]), m.thresholds)[0], /new accessibility audit label failed/);
+});
+
+test('the performance mode keeps the median of three and the 0.80 threshold', () => {
+  const m = parseMode(['--mode=performance']);
+  assert.equal(m.runs, 3);
+  assert.deepEqual([...m.categories], ['performance']);
+  assert.deepEqual({ ...m.thresholds }, { performance: THRESHOLDS.performance });
+  assert.equal(THRESHOLDS.performance, 0.8);
+  assert.deepEqual(evaluate('/', medianReport([report(1, 0.78), report(1, 0.91), report(1, 0.93)]), m.thresholds), []);
+  assert.equal(evaluate('/', medianReport([report(1, 0.78), report(1, 0.79), report(1, 0.93)]), m.thresholds).length, 1);
+});
+
+test('no --mode runs the full single pass, and an unknown mode is refused', () => {
+  const m = parseMode([]);
+  assert.equal(m.name, 'full');
+  assert.equal(m.runs, 3);
+  assert.deepEqual({ ...m.thresholds }, { ...THRESHOLDS, seo: 1 });
+  assert.throws(() => parseMode(['--mode=fast']), /unknown --mode=fast/);
+  assert.throws(() => parseMode(['--mode=toString']), /unknown --mode/);
+  assert.ok(Object.isFrozen(MODES) && Object.isFrozen(MODES.performance.thresholds));
+});
+
+test('the workflow keeps the required check on pull requests and moves performance to main and nightly', () => {
+  const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
+  const wf = readFileSync(join(ROOT, '.github/workflows/lighthouse.yml'), 'utf8').replace(/\r\n/g, '\n');
+  // The body of one job: from its `  id:` line to the next job or the end of the file.
+  const job = (id) => {
+    const start = wf.indexOf(`\n  ${id}:\n`);
+    assert.ok(start !== -1, `job ${id} exists`);
+    const rest = wf.slice(start + id.length + 5);
+    const next = rest.search(/^ {2}[a-z-]+:\n/m);
+    return next === -1 ? rest : rest.slice(0, next);
+  };
+  // Triggers: every pull request (no paths filter, or the required check would never report), main, nightly.
+  assert.match(wf, /^ {2}pull_request:\s*$/m);
+  assert.doesNotMatch(wf, /^\s+paths(-ignore)?:/m);
+  assert.match(wf, /^ {2}push:\n {4}branches: \[main\]$/m);
+  assert.match(wf, /^ {4}- cron: '[^']+ \* \* \*'/m);
+  // The required check name still reports on every pull request, in the deterministic mode.
+  const pr = job('lighthouse');
+  assert.match(pr, /name: Lighthouse accessibility and performance\n/);
+  assert.match(pr, /github\.event_name == 'pull_request'/);
+  assert.match(pr, /lighthouse-gate\.mjs --mode=accessibility-seo/);
+  // Performance never runs on a pull request.
+  const perf = job('performance');
+  assert.match(perf, /if: \$\{\{ github\.event_name != 'pull_request' \}\}/);
+  assert.match(perf, /lighthouse-gate\.mjs --mode=performance/);
+  // Only the report job may write, only issues, only on main, and it runs no repository code.
+  assert.match(wf, /^permissions:\n {2}contents: read$/m);
+  const report = job('report');
+  assert.match(report, /permissions:\n {6}issues: write\n/);
+  assert.match(report, /github\.ref == 'refs\/heads\/main'/);
+  assert.doesNotMatch(report, /actions\/checkout|node scripts/);
+  assert.doesNotMatch(wf, /contents: write|pull-requests: write|secrets\./);
+  // Text from the run reaches the shell only through env, never through an expression inside run:.
+  assert.doesNotMatch(report.split('run: |')[1], /\$\{\{/);
+});
+

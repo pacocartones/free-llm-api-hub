@@ -7,6 +7,37 @@
 
 export const THRESHOLDS = Object.freeze({ accessibility: 0.95, performance: 0.8 });
 
+// The gate runs in two shapes. Accessibility and SEO do not depend on the runner's speed,
+// so one run per page is a stable verdict and pull requests get it in a few minutes.
+// Performance moves between runs on a shared runner, so it keeps the median of three
+// and runs after a merge to main and nightly, where a slow sample costs no contributor a wait.
+// `full` is the old single pass (all three categories, median of three), for local runs.
+export const MODES = Object.freeze({
+  'accessibility-seo': Object.freeze({
+    categories: Object.freeze(['accessibility', 'seo']),
+    runs: 1,
+    thresholds: Object.freeze({ accessibility: THRESHOLDS.accessibility, seo: 1 }),
+  }),
+  performance: Object.freeze({
+    categories: Object.freeze(['performance']),
+    runs: 3,
+    thresholds: Object.freeze({ performance: THRESHOLDS.performance }),
+  }),
+  full: Object.freeze({
+    categories: Object.freeze(['accessibility', 'performance', 'seo']),
+    runs: 3,
+    thresholds: Object.freeze({ ...THRESHOLDS, seo: 1 }),
+  }),
+});
+
+/** Reads `--mode=<name>` from the command line; no flag means `full`. An unknown name throws. */
+export function parseMode(argv = []) {
+  const flag = argv.find((a) => a.startsWith('--mode='));
+  const name = flag ? flag.slice('--mode='.length) : 'full';
+  if (!Object.hasOwn(MODES, name)) throw new Error(`unknown --mode=${name}; use one of: ${Object.keys(MODES).join(', ')}`);
+  return { name, ...MODES[name] };
+}
+
 const EXEMPT_NULL_MODES = new Set(['informative', 'manual', 'notApplicable']);
 
 function auditNodes(audit) {

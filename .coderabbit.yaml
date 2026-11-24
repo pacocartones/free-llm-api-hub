@@ -13,10 +13,29 @@ reviews:
     ignore_usernames:
       - pacocartones
       - LeonMAG
+    # Data pull requests ("data: …", "data(provider): …") change data/, which is
+    # never reviewed here (see path_filters), plus regenerated files and the
+    # changelog. A bot thread on those blocks the merge, because main requires
+    # every conversation to be resolved, without adding a useful review. People
+    # review data PRs against the sources; `@coderabbitai review` still works.
+    ignore_title_keywords:
+      - "data:"
+      - "data("
+  # Not reviewed: the dataset, and generated files that carry no authored text
+  # (site/index.html and README.md keep authored text, so they stay reviewed;
+  # a comment on generated output belongs on its generator or source data).
   path_filters:
     - "!data/**"
     - "!dist/**"
     - "!**/*.min.js"
+    - "!site/**/*.json"
+    - "!site/**/*.csv"
+    - "!site/**/*.xml"
+    - "!site/og/**"
+    - "!collections/**"
+    - "!CITATION.cff"
+    - "!derived-fingerprints.json"
+    - "!badge-*.json"
   path_instructions:
     - path: "**/*.mjs"
       instructions: >
