@@ -14,4 +14,4 @@
   phone not confirmed"; its notes add that API access to the 2.5 models is
   limited to existing users and that 2.5 Pro TTS has no free tier. OVHcloud AI Endpoints'
   data policy was re-read; its Free model labels could not be read, so OVHcloud
-  and Gemini keep their `last_verified`.
+  and Gemini keep their `last_verified` (#723, #725).

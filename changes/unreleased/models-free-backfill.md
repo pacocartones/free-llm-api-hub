@@ -12,4 +12,4 @@
   already cites; the trial-credit offers stay unrated, and no AI Horde model
   maps to an exact Arena row. NLP Cloud, Contextual AI, Upstage and Novita stay `null`:
   no official page read ties their free credits to model IDs, or the docs
-  were unreachable (#455).
+  were unreachable (#712, issue #455).

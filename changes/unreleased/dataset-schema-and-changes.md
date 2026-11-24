@@ -5,6 +5,6 @@
   change, verification date range, the fields a reader filters on, and
   downloads for the API v1 JSON, `providers.json`, the CSV and `llms-full.txt`. A build test
   checks it against Google's required properties and that every download is in
-  the build.
+  the build (#717).
 - The change history is easier to find: the home page links to /changes/ and
-  advertises its RSS feed (`changes.xml`), and /changes/ has a Subscribe button.
+  advertises its RSS feed (`changes.xml`), and /changes/ has a Subscribe button (#717).
