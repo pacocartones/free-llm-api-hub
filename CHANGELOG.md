@@ -23,6 +23,10 @@ Notable changes to the dataset and the project. Format based on [Keep a Changelo
   processed through the API from model improvement, so `trains_on_prompts`
   is `false` for the free API access; no retention period is stated (#698).
   Thanks @BloosomNet.
+- IBM watsonx: `data_policy` recorded. IBM states it does not use uploaded
+  content or model output to train IBM-developed models; text sent through
+  the Prompt Lab or API is not stored unless saved, and prompt information
+  for up to 500 prompts is kept 30 days (#692). Thanks @BloosomNet.
 
 ## [2.14.2] — 2026-11-20
 
