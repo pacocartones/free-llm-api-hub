@@ -1,7 +1,7 @@
 {
   "$schema": "./schema.json",
   "version": "2.14.2",
-  "generated": "2026-11-20",
+  "generated": "2026-11-24",
   "source": "https://github.com/pacocartones/free-llm-api-hub",
   "note": "Canonical dataset. README tables, badge-freshness.json and the interactive site are all generated from this file — do not hand-edit them. `verified: true` means the core facts (tier, limits, key catch, link) were independently confirmed against the provider's own docs on `last_verified`. `verified: false` means sourced from community tracking and not yet independently re-confirmed here — treat those as indicative. Attribute fields (openai_compatible, modalities, best_for) are progressively backfilled and may be null.",
   "providers": [
@@ -713,8 +713,9 @@
       "is_text_llm": true,
       "model_tier": 4,
       "model_tier_source": {"model":"Tencent-Hunyuan/Hy3","arena_model":"hy3","match":"variant","rating":1456,"ci":[1449.5,1462.5],"boundary":true,"votes":10476,"snapshot":"2026-10-02","url":"https://huggingface.co/datasets/lmarena-ai/leaderboard-dataset"},
+      "free_limits": {"requests_per_day":2000,"scope":"Free API-Inference (requires real-name Alibaba Cloud account): up to 2,000 requests/day aggregated across models; individual models dynamically capped up to 200 requests/day; daily usage also bounded by Magicubes (~250/day, ~125-500 calls depending on model tier)","source":"https://www.modelscope.cn/docs/model-service/API-Inference/intro","checked":"2026-11-24"},
       "verified": true,
-      "last_verified": "2026-11-20"
+      "last_verified": "2026-11-24"
     },
     {
       "slug": "pollinations",

@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-20",
+  "generated": "2026-11-24",
   "scores": {
     "openrouter": {
       "total": 67.2,
@@ -7,38 +7,38 @@
       "of": 6,
       "rank": 1
     },
+    "modelscope": {
+      "total": 65.2,
+      "confirmed": 5,
+      "of": 6,
+      "rank": 2
+    },
     "groq": {
       "total": 64.3,
       "confirmed": 5,
       "of": 6,
-      "rank": 2
+      "rank": 3
     },
     "sambanova": {
       "total": 58.8,
       "confirmed": 4,
       "of": 6,
-      "rank": 3
+      "rank": 4
     },
     "google-gemini": {
       "total": 57.5,
       "confirmed": 4,
       "of": 6,
-      "rank": 4
+      "rank": 5
     },
     "cloudflare-workers-ai": {
       "total": 52,
       "confirmed": 4,
       "of": 6,
-      "rank": 5
+      "rank": 6
     },
     "zai-glm": {
       "total": 52,
-      "confirmed": 4,
-      "of": 6,
-      "rank": 6
-    },
-    "modelscope": {
-      "total": 51.4,
       "confirmed": 4,
       "of": 6,
       "rank": 7
