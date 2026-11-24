@@ -1,53 +1,47 @@
 {
   "generated": "2026-11-24",
   "scores": {
-    "openrouter": {
-      "total": 67.2,
-      "confirmed": 5,
-      "of": 6,
-      "rank": 1
-    },
     "groq": {
-      "total": 64.3,
-      "confirmed": 5,
-      "of": 6,
-      "rank": 2
-    },
-    "cloudflare-workers-ai": {
-      "total": 57.5,
+      "total": 62.4,
       "confirmed": 4,
       "of": 6,
-      "rank": 3
+      "rank": 1
     },
     "google-gemini": {
       "total": 57.5,
       "confirmed": 4,
       "of": 6,
-      "rank": 4
+      "rank": 2
+    },
+    "openrouter": {
+      "total": 56.2,
+      "confirmed": 3,
+      "of": 6,
+      "rank": null
     },
     "zai-glm": {
       "total": 52,
       "confirmed": 4,
       "of": 6,
-      "rank": 5
+      "rank": 3
     },
     "modelscope": {
       "total": 51.4,
       "confirmed": 4,
       "of": 6,
-      "rank": 6
+      "rank": 4
+    },
+    "cloudflare-workers-ai": {
+      "total": 50.4,
+      "confirmed": 3,
+      "of": 6,
+      "rank": null
     },
     "ocr-space": {
       "total": 47.2,
       "confirmed": 4,
       "of": 6,
       "rank": null
-    },
-    "cohere": {
-      "total": 46.1,
-      "confirmed": 5,
-      "of": 6,
-      "rank": 7
     },
     "twelve-labs": {
       "total": 44.8,
@@ -59,7 +53,13 @@
       "total": 44.3,
       "confirmed": 4,
       "of": 6,
-      "rank": 8
+      "rank": 5
+    },
+    "cohere": {
+      "total": 43.5,
+      "confirmed": 5,
+      "of": 6,
+      "rank": 6
     },
     "jina-ai": {
       "total": 41,
@@ -95,7 +95,7 @@
       "total": 37.1,
       "confirmed": 4,
       "of": 6,
-      "rank": 9
+      "rank": 7
     },
     "assemblyai": {
       "total": 37,
@@ -205,13 +205,13 @@
       "of": 6,
       "rank": null
     },
-    "scaleway": {
+    "regolo": {
       "total": 33.9,
       "confirmed": 2,
       "of": 6,
       "rank": null
     },
-    "tencent-hunyuan": {
+    "scaleway": {
       "total": 33.9,
       "confirmed": 2,
       "of": 6,
@@ -256,6 +256,12 @@
     "gladia": {
       "total": 29.9,
       "confirmed": 2,
+      "of": 6,
+      "rank": null
+    },
+    "google-agent-platform-express": {
+      "total": 29.9,
+      "confirmed": 1,
       "of": 6,
       "rank": null
     },
@@ -328,6 +334,12 @@
     "elevenlabs": {
       "total": 28,
       "confirmed": 3,
+      "of": 6,
+      "rank": null
+    },
+    "tencent-hunyuan": {
+      "total": 27.4,
+      "confirmed": 2,
       "of": 6,
       "rank": null
     },

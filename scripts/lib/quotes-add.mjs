@@ -6,7 +6,7 @@ import { fetchPublicUrl } from './public-fetch.mjs';
 import { isPdf, pdfToText, responseBytes } from './pdf-text.mjs';
 import { PDF_METHOD } from './page-text.mjs';
 
-const KIND_ORDER = { sentence: 0, note_passage: 1, absence_check: 2 };
+const KIND_ORDER = { sentence: 0, note_passage: 1, absence_check: 2, field_sentence: 3 };
 
 /** Reads a page the way verify-quotes does. @returns {Promise<{ok: boolean, text?: string, why?: string}>} */
 export async function readText(url, fetchImpl = fetchPublicUrl, lang = 'en') {
@@ -73,10 +73,28 @@ export async function entriesFor(slug, policy, read, { today, passageUrls = {}, 
   return { entries, problems };
 }
 
-/** The register with the entries of `slug` replaced by `fresh`, in the order of the dataset (then sentence, passages, absence check). */
-export function mergeRegistry(registry, data, slug, fresh) {
+/**
+ * The field_sentence entry of one stated field check: its quote, read on its first source.
+ * @returns {Promise<{entries: object[], problems: string[]}>}
+ */
+export async function fieldEntriesFor(slug, field, check, read, { today, lang = 'en' }) {
+  if (!check || typeof check.quote !== 'string' || !check.quote) return { entries: [], problems: [`${slug}: field_checks.${field} has no quote`] };
+  const url = Array.isArray(check.sources) ? check.sources[0] : undefined;
+  const pg = await read(url);
+  if (!pg.ok) return { entries: [], problems: [pg.why] };
+  if (!pg.text.includes(collapse(check.quote))) return { entries: [], problems: [`the quote of ${slug} field_checks.${field} is not literally on ${url} (its first source)`] };
+  return { entries: [{ id: `${slug}.${field}.sentence`, slug, kind: 'field_sentence', field, text: check.quote, source_url: url, read_on: today, lang, method: pg.method || methodFor(lang), page_sha256: sha256(pg.text) }], problems: [] };
+}
+
+/**
+ * The register with the entries of `slug` replaced by `fresh`, in the order of the dataset (then sentence, passages, absence check,
+ * field sentences). With `field`, only that field's sentence is replaced; without it, the data_policy entries of the slug are
+ * replaced and its field sentences are kept.
+ */
+export function mergeRegistry(registry, data, slug, fresh, { field } = {}) {
   const order = new Map(data.providers.map((p, i) => [p.slug, i]));
-  const kept = registry.entries.filter((e) => e.slug !== slug);
+  const replaced = (e) => e.slug === slug && (field ? e.id === `${slug}.${field}.sentence` : e.kind !== 'field_sentence');
+  const kept = registry.entries.filter((e) => !replaced(e));
   const all = [...kept, ...fresh];
   all.sort((a, b) => (order.get(a.slug) ?? 1e9) - (order.get(b.slug) ?? 1e9) || KIND_ORDER[a.kind] - KIND_ORDER[b.kind] || a.id.localeCompare(b.id, 'en', { numeric: true }));
   return { ...registry, entries: all };

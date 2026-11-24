@@ -25,6 +25,7 @@ import { reportErrors } from './lib/quotes-report.mjs';
 import { keyHostErrors } from './lib/key-hosts.mjs';
 import { summaryErrors } from './lib/provider-summaries.mjs';
 import { publicHttpsUrlError } from './lib/public-fetch.mjs';
+import { fieldCheckErrors } from './lib/field-checks.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const FILE = process.argv[2] ? resolve(process.argv[2]) : join(ROOT, 'data/providers.json');
@@ -217,6 +218,9 @@ for (const p of data.providers ?? []) {
     // plan_named: whether the sentence itself names the free or trial plan (true), was read and does not (false), or was not checked (null or absent).
     check(dp.plan_named == null || typeof dp.plan_named === 'boolean', `${id}: data_policy.plan_named must be true, false or null`);
   }
+
+  // field_checks: why a tri-state flag holds its value (stated, or the reason a null stays null). See docs/comparison-dimensions.md.
+  errors.push(...fieldCheckErrors(p, { today: todayUtc }));
 
   // no_expiry: the provider's own statement that a one-time trial credit does not expire (see docs/comparison-dimensions.md).
   if (p.no_expiry != null) {

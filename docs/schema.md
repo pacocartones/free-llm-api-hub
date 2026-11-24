@@ -37,6 +37,7 @@ Descriptions are copied from each property itself. “No description in schema.�
 | `free_limits` | object | Yes | No | Min properties: 3; No additional properties | Numeric free limits exactly as the provider publishes them. Null when the provider publishes none; never estimated or converted between units. scope says which models, plan or condition the numbers apply to. |
 | `no_expiry` | object | Yes | No | No additional properties | Present only on a one-time trial credit whose provider says in its own words that the credit does not expire. Null (or absent) means the provider says nothing. expires stays null when this is set; it never carries a literal. |
 | `data_policy` | object | Yes | No | No additional properties | What the provider itself says about your prompts on this free access: whether it trains on them and how long it keeps them. Absent or null means nobody has recorded it, never that the answer is no. At least one of trains_on_prompts and retention is set; a part the provider does not state stays null. |
+| `field_checks` | object | No | No | Min properties: 1; No additional properties | Why a tri-state flag holds its value: the official pages read, the day, and what they said. A flag with no entry here has no recorded check (not_checked), which is never 'no'. |
 | `verified` | boolean | No | Yes | — | true = core facts independently confirmed against the provider's own docs on last_verified. false = sourced from community tracking, flagged for follow-up. |
 | `last_verified` | string | Yes | Conditional | — | Date of the last independent confirmation (YYYY-MM-DD). Must be null when verified is false. |
 | `added` | string | No | No | Format: <code>date</code> | Date (YYYY-MM-DD) the provider first entered the dataset. Optional provenance field; drives a client-side "new" marker on the explorer. Never changes once set. |
@@ -90,6 +91,55 @@ Descriptions are copied from each property itself. “No description in schema.�
 | `data_policy.quote` | string | Yes | No | Min length: 1; max length: 400 | The provider's own sentence about prompts, copied as the page words it (a sentence or two, not a paragraph); never a paraphrase. Absent or null = no sentence recorded yet. |
 | `data_policy.note` | string | Yes | No | Min length: 1; max length: 300 | A condition the sentence carries, in plain words: which plan it applies to, an opt-out, or that it varies by model. Not an interpretation. |
 | `data_policy.plan_named` | boolean | Yes | No | — | true = the sentence (or its clause) names the free or trial plan, to cover it or to exclude it; false = the source was read and does not name it in that sentence; null or absent = not checked. false never means the free plan is covered, nor that it is not. |
+
+## <code>field_checks</code>
+
+| Field | Type (excluding null) | Nullable | Required | Allowed values / constraints | Description |
+| --- | --- | --- | --- | --- | --- |
+| `field_checks.phone_required` | object | No | No | No additional properties | No description in schema. |
+| `field_checks.card_required` | object | No | No | No additional properties | No description in schema. |
+| `field_checks.commercial_ok` | object | No | No | No additional properties | No description in schema. |
+| `field_checks.openai_compatible` | object | No | No | No additional properties | No description in schema. |
+
+## <code>field_checks.phone_required</code>
+
+| Field | Type (excluding null) | Nullable | Required | Allowed values / constraints | Description |
+| --- | --- | --- | --- | --- | --- |
+| `field_checks.phone_required.status` | string | No | Yes | Allowed: <code>"stated"</code>, <code>"source_silent"</code>, <code>"needs_account"</code>, <code>"sources_disagree"</code> | stated = an official page says it (the flag is true, false or 'conditional'); source_silent = the official pages that should say it (pricing, terms, sign-up docs or FAQ) were read and do not; needs_account = the public pages do not say it and only creating an account would tell, which this project does not do; sources_disagree = two official pages contradict each other (at least two sources and a note). The last three go with a null flag. |
+| `field_checks.phone_required.checked` | string | No | Yes | Format: <code>date</code> | The day the pages were read (UTC). |
+| `field_checks.phone_required.sources` | array | No | Yes | Min items: 1; max items: 4; Unique items; Items: string (Format: <code>uri</code>; Pattern: <code>^https://</code>) | The provider's own pages that were read. |
+| `field_checks.phone_required.quote` | string | Yes | No | Min length: 1; max length: 400 | For stated: the provider's own sentence, copied as the page words it, from the first source. It has an entry in data/quotes.json. |
+| `field_checks.phone_required.note` | string | Yes | No | Min length: 1; max length: 300 | What was read and what it says, in plain words; for sources_disagree, what each page says. |
+
+## <code>field_checks.card_required</code>
+
+| Field | Type (excluding null) | Nullable | Required | Allowed values / constraints | Description |
+| --- | --- | --- | --- | --- | --- |
+| `field_checks.card_required.status` | string | No | Yes | Allowed: <code>"stated"</code>, <code>"source_silent"</code>, <code>"needs_account"</code>, <code>"sources_disagree"</code> | stated = an official page says it (the flag is true, false or 'conditional'); source_silent = the official pages that should say it (pricing, terms, sign-up docs or FAQ) were read and do not; needs_account = the public pages do not say it and only creating an account would tell, which this project does not do; sources_disagree = two official pages contradict each other (at least two sources and a note). The last three go with a null flag. |
+| `field_checks.card_required.checked` | string | No | Yes | Format: <code>date</code> | The day the pages were read (UTC). |
+| `field_checks.card_required.sources` | array | No | Yes | Min items: 1; max items: 4; Unique items; Items: string (Format: <code>uri</code>; Pattern: <code>^https://</code>) | The provider's own pages that were read. |
+| `field_checks.card_required.quote` | string | Yes | No | Min length: 1; max length: 400 | For stated: the provider's own sentence, copied as the page words it, from the first source. It has an entry in data/quotes.json. |
+| `field_checks.card_required.note` | string | Yes | No | Min length: 1; max length: 300 | What was read and what it says, in plain words; for sources_disagree, what each page says. |
+
+## <code>field_checks.commercial_ok</code>
+
+| Field | Type (excluding null) | Nullable | Required | Allowed values / constraints | Description |
+| --- | --- | --- | --- | --- | --- |
+| `field_checks.commercial_ok.status` | string | No | Yes | Allowed: <code>"stated"</code>, <code>"source_silent"</code>, <code>"needs_account"</code>, <code>"sources_disagree"</code> | stated = an official page says it (the flag is true, false or 'conditional'); source_silent = the official pages that should say it (pricing, terms, sign-up docs or FAQ) were read and do not; needs_account = the public pages do not say it and only creating an account would tell, which this project does not do; sources_disagree = two official pages contradict each other (at least two sources and a note). The last three go with a null flag. |
+| `field_checks.commercial_ok.checked` | string | No | Yes | Format: <code>date</code> | The day the pages were read (UTC). |
+| `field_checks.commercial_ok.sources` | array | No | Yes | Min items: 1; max items: 4; Unique items; Items: string (Format: <code>uri</code>; Pattern: <code>^https://</code>) | The provider's own pages that were read. |
+| `field_checks.commercial_ok.quote` | string | Yes | No | Min length: 1; max length: 400 | For stated: the provider's own sentence, copied as the page words it, from the first source. It has an entry in data/quotes.json. |
+| `field_checks.commercial_ok.note` | string | Yes | No | Min length: 1; max length: 300 | What was read and what it says, in plain words; for sources_disagree, what each page says. |
+
+## <code>field_checks.openai_compatible</code>
+
+| Field | Type (excluding null) | Nullable | Required | Allowed values / constraints | Description |
+| --- | --- | --- | --- | --- | --- |
+| `field_checks.openai_compatible.status` | string | No | Yes | Allowed: <code>"stated"</code>, <code>"source_silent"</code>, <code>"needs_account"</code>, <code>"sources_disagree"</code> | stated = an official page says it (the flag is true, false or 'conditional'); source_silent = the official pages that should say it (pricing, terms, sign-up docs or FAQ) were read and do not; needs_account = the public pages do not say it and only creating an account would tell, which this project does not do; sources_disagree = two official pages contradict each other (at least two sources and a note). The last three go with a null flag. |
+| `field_checks.openai_compatible.checked` | string | No | Yes | Format: <code>date</code> | The day the pages were read (UTC). |
+| `field_checks.openai_compatible.sources` | array | No | Yes | Min items: 1; max items: 4; Unique items; Items: string (Format: <code>uri</code>; Pattern: <code>^https://</code>) | The provider's own pages that were read. |
+| `field_checks.openai_compatible.quote` | string | Yes | No | Min length: 1; max length: 400 | For stated: the provider's own sentence, copied as the page words it, from the first source. It has an entry in data/quotes.json. |
+| `field_checks.openai_compatible.note` | string | Yes | No | Min length: 1; max length: 300 | What was read and what it says, in plain words; for sources_disagree, what each page says. |
 
 ## Conditional rules
 
