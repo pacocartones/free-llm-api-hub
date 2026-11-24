@@ -1982,12 +1982,15 @@ const provBlock = (p) => {
     `commercial use: ${yn(p.commercial_ok, 'allowed', 'not allowed', fieldCheck(p, 'commercial_ok'))}`,
     `OpenAI-compatible: ${yn(p.openai_compatible, 'yes', 'no', fieldCheck(p, 'openai_compatible'))}${p.openai_base_url ? ` (base ${p.openai_base_url})` : ''}`,
   ].join('; ');
+  // The condition is its own line: Gates uses "; " as its separator and a condition may contain ";" itself.
+  const conditionLine = p.commercial_ok === 'conditional' && p.commercial_ok_condition ? `- Commercial-use condition: ${p.commercial_ok_condition}\n` : '';
   return `### ${p.name} — ${p.category === 'ongoing' ? 'ongoing free tier' : 'trial credit'}\n` +
     `- Free: ${p.free_tier}\n` +
     `- Rate limits: ${p.rate_limits || 'not specified'}\n` +
     `- The catch: ${p.notes || '—'}\n` +
     `- Modalities: ${(p.modalities || ['text']).join(', ')}\n` +
     `- Gates: ${gates}\n` +
+    conditionLine +
     (publishedSpeed(p).length ? `- Published speed (the provider's own figures, not measured by us; not stated for the free tier unless the page says so): ${publishedSpeed(p).map((e) => `${e.model} ${speedFigure(e)} (${e.source}, checked ${e.checked})`).join('; ')}\n` : '') +
     `- Docs: ${p.docs_url}\n` +
     `- Page: ${SITE}/p/${p.slug}\n`;

@@ -2646,6 +2646,25 @@ test('field_checks reach every public surface: provider page, API v1, llms-full.
   }
 });
 
+test('llms-full.txt shows the commercial-use condition of every conditional provider, on its own line after Gates:', () => {
+  run(['scripts/build.mjs']);
+  const { providers } = JSON.parse(readFileSync(DATA, 'utf8'));
+  const full = readFileSync(join(ROOT, 'site/llms-full.txt'), 'utf8');
+  const conditional = providers.filter((p) => p.commercial_ok === 'conditional' && p.commercial_ok_condition);
+  assert.ok(conditional.length >= 1, 'the dataset has a conditional provider with a recorded condition');
+  const blocks = full.split('\n### ').slice(1).map((text) => `### ${text}`);
+  for (const p of conditional) {
+    const block = blocks.find((b) => b.startsWith(`### ${p.name} — `));
+    assert.ok(block, `${p.slug}: its block is in llms-full.txt`);
+    const lines = block.split('\n');
+    const i = lines.findIndex((l) => l === `- Commercial-use condition: ${p.commercial_ok_condition}`);
+    assert.ok(i > 0, `${p.slug}: the condition is its own line with the recorded text`);
+    assert.match(lines[i - 1], /^- Gates: /, `${p.slug}: the line sits directly after Gates:`);
+  }
+  const lines = full.split('\n').filter((l) => l.startsWith('- Commercial-use condition: '));
+  assert.equal(lines.length, conditional.length, 'no other provider carries a condition line');
+});
+
 test('/coverage/ treats conditional commercial use as open, not confirmed', () => {
   const provider = { slug: 'conditional', name: 'Conditional', docs_url: 'https://example.com/terms', verified: true, commercial_ok: 'conditional' };
   const row = coverageOf([provider]).find((entry) => entry.key === 'commercial_ok');
