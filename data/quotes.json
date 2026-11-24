@@ -69,6 +69,42 @@
    "page_sha256": "f9e4341fc44612c724684a17f89cbc1ad332f90f7874fae875edc058f9da0980"
   },
   {
+   "id": "cloudflare-workers-ai.card_required.sentence",
+   "slug": "cloudflare-workers-ai",
+   "kind": "field_sentence",
+   "field": "card_required",
+   "text": "Start building for free — no credit card required.",
+   "source_url": "https://www.cloudflare.com/plans/",
+   "read_on": "2026-11-24",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "eed26388f278a23d6764371732c89b5cfd8fa4f31ed8bd266f1d4c081e4b62b6"
+  },
+  {
+   "id": "cohere.card_required.sentence",
+   "slug": "cohere",
+   "kind": "field_sentence",
+   "field": "card_required",
+   "text": "Individuals who create or access a free trial account to test out our Platform under our standard Terms of Use with no payment method on file.",
+   "source_url": "https://cohere.com/privacy",
+   "read_on": "2026-11-24",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "2d702f85bb2c046c60aa2fb30ca3f2a2876aaadd00bcf8b5b3eb9d6a70685c54"
+  },
+  {
+   "id": "cohere.commercial_ok.sentence",
+   "slug": "cohere",
+   "kind": "field_sentence",
+   "field": "commercial_ok",
+   "text": "API calls made from a Trial API key are free. However, trial keys are rate limited and are not permitted to be used for production or commercial purposes.",
+   "source_url": "https://cohere.com/pricing",
+   "read_on": "2026-11-24",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "c5580a9f57affc391ae077d4ca618039affb2a0a5a90faa92e38478b994409c3"
+  },
+  {
    "id": "cerebras.sentence",
    "slug": "cerebras",
    "kind": "sentence",
@@ -89,6 +125,18 @@
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "c5769f3f283f888f282073f55e8e53e95b8656bcc048326ffcf81a8f3f594d19"
+  },
+  {
+   "id": "cerebras.card_required.sentence",
+   "slug": "cerebras",
+   "kind": "field_sentence",
+   "field": "card_required",
+   "text": "New accounts receive $5 in free credits after adding a verified payment method.",
+   "source_url": "https://inference-docs.cerebras.ai/support/rate-limits",
+   "read_on": "2026-11-24",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "2aba6287e39902eab9da378b3dbe62debf9c3b99c2d728b141f6d54f87ee7ee7"
   },
   {
    "id": "huggingface.sentence",
@@ -738,6 +786,18 @@
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "4757267bf081c58e08343c40f7ad633ef2bbbceba8bc8b54f1d8eb4367d75cee"
+  },
+  {
+   "id": "datalab.card_required.sentence",
+   "slug": "datalab",
+   "kind": "field_sentence",
+   "field": "card_required",
+   "text": "New accounts get a one-time credit to try the API, with no credit card required:",
+   "source_url": "https://documentation.datalab.to/platform/billing",
+   "read_on": "2026-11-24",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "05c59c29514985cc6a5cc263a238194ff28d1501475fe34919bc51b94ec3f703"
   },
   {
    "id": "wandb-inference.sentence",

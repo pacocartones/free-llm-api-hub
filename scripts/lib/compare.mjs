@@ -82,11 +82,21 @@ export function selectComparePairs(ranked, opts = {}) {
 /**
  * A tri-state flag (true / false / null) as escaped HTML. null means nobody
  * has confirmed the field yet — never "no" — so it reads "not confirmed".
+ * `check` is the flag's field_checks entry, if any: a recorded reason replaces
+ * "not confirmed" with that reason and the day it was checked. The words match
+ * REASON_LABEL in field-checks.mjs (a test keeps them equal); they are inlined
+ * because this function is also shipped to the browser as source text.
  */
-export function triStateHtml(v, yes, no) {
+export function triStateHtml(v, yes, no, check) {
   if (v === true) return `<span class="tri tri-yes">${htmlEsc(yes)}</span>`;
   if (v === false) return `<span class="tri tri-no">${htmlEsc(no)}</span>`;
   if (v === 'conditional') return '<span class="tri tri-cond">conditional</span>';
+  const why = { source_silent: 'not stated by the provider', needs_account: 'needs an account to check', sources_disagree: 'provider pages disagree' };
+  const status = check && typeof check === 'object' ? String(check.status) : '';
+  if (Object.prototype.hasOwnProperty.call(why, status)) {
+    const day = /^\d{4}-\d{2}-\d{2}$/.test(String(check.checked || '')) ? ` (checked ${check.checked})` : '';
+    return `<span class="tri tri-unk tri-why" title="Not confirmed: ${htmlEsc(why[status])}">${htmlEsc(why[status] + day)}</span>`;
+  }
   return '<span class="tri tri-unk">not confirmed</span>';
 }
 
@@ -126,13 +136,13 @@ export function compareTableHtml(list, opts = {}) {
     ['Rate limits', (p) => cell(p.rate_limits || 'not specified')],
     ['Expires', (p) => expiryHtml(p)],
     ['The catch', (p) => cell(p.notes || '—')],
-    ['Credit card', (p) => triStateHtml(p.card_required, 'required', 'not required')],
-    ['Phone verification', (p) => triStateHtml(p.phone_required, 'required', 'not required')],
+    ['Credit card', (p) => triStateHtml(p.card_required, 'required', 'not required', p.field_checks && p.field_checks.card_required)],
+    ['Phone verification', (p) => triStateHtml(p.phone_required, 'required', 'not required', p.field_checks && p.field_checks.phone_required)],
     ['Commercial use', (p) => p.commercial_ok === 'conditional'
       ? triStateHtml(p.commercial_ok, 'allowed', 'not allowed (eval only)') +
         (p.commercial_ok_condition ? `<div class="cmp-sub">${cell(p.commercial_ok_condition)}</div>` : '')
-      : triStateHtml(p.commercial_ok, 'allowed', 'not allowed (eval only)')],
-    ['OpenAI-compatible', (p) => triStateHtml(p.openai_compatible, 'yes', 'no') +
+      : triStateHtml(p.commercial_ok, 'allowed', 'not allowed (eval only)', p.field_checks && p.field_checks.commercial_ok)],
+    ['OpenAI-compatible', (p) => triStateHtml(p.openai_compatible, 'yes', 'no', p.field_checks && p.field_checks.openai_compatible) +
       (p.openai_base_url ? `<div class="cmp-sub"><code>${cell(p.openai_base_url)}</code></div>` : '')],
     ['Modalities', (p) => cell((p.modalities || []).join(', ') || '—')],
     ['Free models (sample)', (p) => (p.models_free && p.models_free.length)

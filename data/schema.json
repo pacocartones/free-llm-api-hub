@@ -28,7 +28,7 @@
   },
   "$defs": {
     "tristate": {
-      "description": "true / false / null, where null means 'not yet confirmed'.",
+      "description": "true / false / null, where null means 'not yet confirmed'. field_checks may record why a null stays null.",
       "type": ["boolean", "null"]
     },
     "commercial_ok_value": {
@@ -37,6 +37,26 @@
         { "$ref": "#/$defs/tristate" },
         { "const": "conditional" }
       ]
+    },
+    "field_check": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "checked", "sources"],
+      "description": "One recorded check of a flag against the provider's own pages.",
+      "properties": {
+        "status": {
+          "enum": ["stated", "source_silent", "needs_account", "sources_disagree"],
+          "description": "stated = an official page says it (the flag is true, false or 'conditional'); source_silent = the official pages that should say it (pricing, terms, sign-up docs or FAQ) were read and do not; needs_account = the public pages do not say it and only creating an account would tell, which this project does not do; sources_disagree = two official pages contradict each other (at least two sources and a note). The last three go with a null flag."
+        },
+        "checked": { "type": "string", "format": "date", "description": "The day the pages were read (UTC)." },
+        "sources": {
+          "type": "array", "minItems": 1, "maxItems": 4, "uniqueItems": true,
+          "items": { "type": "string", "format": "uri", "pattern": "^https://" },
+          "description": "The provider's own pages that were read."
+        },
+        "quote": { "type": ["string", "null"], "minLength": 1, "maxLength": 400, "description": "For stated: the provider's own sentence, copied as the page words it, from the first source. It has an entry in data/quotes.json." },
+        "note": { "type": ["string", "null"], "minLength": 1, "maxLength": 300, "description": "What was read and what it says, in plain words; for sources_disagree, what each page says." }
+      }
     },
     "provider": {
       "type": "object",
@@ -195,6 +215,18 @@
             "quote": { "type": ["string", "null"], "minLength": 1, "maxLength": 400, "description": "The provider's own sentence about prompts, copied as the page words it (a sentence or two, not a paragraph); never a paraphrase. Absent or null = no sentence recorded yet." },
             "note": { "type": ["string", "null"], "minLength": 1, "maxLength": 300, "description": "A condition the sentence carries, in plain words: which plan it applies to, an opt-out, or that it varies by model. Not an interpretation." },
             "plan_named": { "type": ["boolean", "null"], "description": "true = the sentence (or its clause) names the free or trial plan, to cover it or to exclude it; false = the source was read and does not name it in that sentence; null or absent = not checked. false never means the free plan is covered, nor that it is not." }
+          }
+        },
+        "field_checks": {
+          "type": "object",
+          "additionalProperties": false,
+          "minProperties": 1,
+          "description": "Why a tri-state flag holds its value: the official pages read, the day, and what they said. A flag with no entry here has no recorded check (not_checked), which is never 'no'.",
+          "properties": {
+            "phone_required": { "$ref": "#/$defs/field_check" },
+            "card_required": { "$ref": "#/$defs/field_check" },
+            "commercial_ok": { "$ref": "#/$defs/field_check" },
+            "openai_compatible": { "$ref": "#/$defs/field_check" }
           }
         },
         "verified": {

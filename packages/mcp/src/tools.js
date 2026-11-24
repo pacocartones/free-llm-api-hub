@@ -27,6 +27,20 @@ function unconfirmedFields(p) {
   return TRISTATE_FIELDS.filter((f) => typeof p[f] !== 'boolean');
 }
 
+/**
+ * Why a tri-state flag is unconfirmed, from the dataset's field_checks (dataset 2.15.0 and later):
+ * source_silent (the provider's pages were read and do not say it), needs_account (only an account would tell),
+ * sources_disagree (two official pages contradict each other), stated (the canonical value is "conditional",
+ * which the API projects to null), or not_checked (no check recorded). Older datasets have no field_checks,
+ * so every unconfirmed flag reads not_checked.
+ */
+export const UNCONFIRMED_REASONS = ['source_silent', 'needs_account', 'sources_disagree', 'stated', 'not_checked'];
+export function unconfirmedReason(p, field) {
+  const c = p && p.field_checks && typeof p.field_checks === 'object' ? p.field_checks[field] : null;
+  const status = c && typeof c === 'object' ? c.status : undefined;
+  return UNCONFIRMED_REASONS.includes(status) ? status : 'not_checked';
+}
+
 function compact(p) {
   return {
     slug: p.slug,
@@ -73,6 +87,7 @@ export function searchProviders(data, args = {}) {
   }
   const tokens = typeof query === 'string' ? query.toLowerCase().split(/\s+/).filter(Boolean) : [];
   const excluded = {};
+  const excludedByReason = {};
   const results = [];
 
   for (const p of data.providers) {
@@ -89,6 +104,9 @@ export function searchProviders(data, args = {}) {
       // Anything that is not an explicit boolean (null, a value added later such as "conditional") is unconfirmed.
       if (typeof value !== 'boolean') {
         excluded[param] = (excluded[param] ?? 0) + 1;
+        const reason = unconfirmedReason(p, field);
+        excludedByReason[param] = excludedByReason[param] ?? {};
+        excludedByReason[param][reason] = (excludedByReason[param][reason] ?? 0) + 1;
         keep = false;
         break;
       }
@@ -108,6 +126,7 @@ export function searchProviders(data, args = {}) {
   };
   if (Object.keys(excluded).length) {
     out.excluded_unconfirmed = excluded;
+    out.excluded_unconfirmed_by_reason = excludedByReason;
     out.excluded_note =
       'These providers were left out because the filtered field is null (not confirmed) for them. ' +
       'They may still qualify: check their docs_url.';
@@ -136,6 +155,7 @@ export function getProvider(data, { slug }) {
     provider: { ...p, docs_url: p.docs_url, last_verified: p.last_verified ?? null },
     flags,
     unconfirmed_fields: unconfirmedFields(p),
+    unconfirmed_reasons: Object.fromEntries(unconfirmedFields(p).map((f) => [f, unconfirmedReason(p, f)])),
     dataset: { version: data.version, generated: data.generated },
     disclaimer: DISCLAIMER,
   };

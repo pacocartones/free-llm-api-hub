@@ -144,8 +144,8 @@ fetches. Annotations describe capabilities; they do not grant permissions.
 
 `phone_required`, `card_required`, `commercial_ok` and `openai_compatible` are true / false / null, and **null means nobody has confirmed it yet**. The server never presents null as false:
 
-- the flag filters of `search_providers` match only confirmed values. `no_card: true` returns providers confirmed not to need a card. Providers whose `card_required` is null are left out and counted in `excluded_unconfirmed`, because they may still qualify;
-- `get_provider` labels null as `not confirmed`;
+- the flag filters of `search_providers` match only confirmed values. `no_card: true` returns providers confirmed not to need a card. Providers whose `card_required` is null are left out and counted in `excluded_unconfirmed`, because they may still qualify. `excluded_unconfirmed_by_reason` splits that count by why the value is unknown (from the dataset's `field_checks`): `source_silent` (the provider's pages were read and do not say it), `needs_account`, `sources_disagree`, `stated` (a "conditional" value, which the API reads as null) or `not_checked`;
+- `get_provider` labels null as `not confirmed` and gives, in `unconfirmed_reasons`, the same reason for each unconfirmed flag;
 - `openai_client_config` says "not confirmed" for a null `openai_compatible`, and "not OpenAI-compatible" only for an explicit false.
 
 Chat snippets require confirmed free text/chat access (`is_text_llm: true`). Other providers still return their published client configuration and official docs, with no invented endpoint. For text/vision-only providers the default model is the first `models_free` sample, which may be out of date; mixed or unknown modalities return configuration and docs only, even with an explicit model, because samples have no endpoint labels. An explicit model must be a free chat model confirmed in the official docs.
