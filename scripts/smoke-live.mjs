@@ -1,4 +1,4 @@
-// smoke-live.mjs — every URL in the PUBLISHED sitemap must answer HTTP 200.
+// smoke-live.mjs — every URL in the PUBLISHED sitemap, /.well-known/security.txt and /favicon.ico must answer HTTP 200.
 //
 // Run after a Pages deploy:
 //   node scripts/smoke-live.mjs            # default: freellmapihub.com
@@ -78,7 +78,10 @@ async function main() {
     process.exitCode = 1;
     return;
   }
-  console.log(`Smoke: ${urls.length} URLs from the published sitemap.`);
+  // Files outside the sitemap that must still be published: the dot-folder one is the first to vanish if the Pages
+  // artifact drops hidden files again (pages.yml, include-hidden-files).
+  urls.push(`${SITE}/.well-known/security.txt`, `${SITE}/favicon.ico`);
+  console.log(`Smoke: ${urls.length - 2} URLs from the published sitemap, plus security.txt and favicon.ico.`);
 
   const results = await retryFailing(urls, checkUrls, RETRY);
   const bad = results.filter((r) => !r.ok);

@@ -59,6 +59,9 @@ jobs:
       - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
           path: site
+          # The action leaves out every file or folder whose name starts with a dot unless asked; without this,
+          # site/.well-known/security.txt was never published. .git and .github stay excluded either way.
+          include-hidden-files: true
   deploy:
     needs: build
     permissions:

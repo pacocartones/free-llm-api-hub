@@ -21,7 +21,7 @@ export const STATIC_TARGETS = [
 // Under site/ these are committed but are not output of the build: hand-written scripts and styles, the fonts,
 // the images made by `npm run og` (they have their own check, scripts/check-og.mjs), the domain file and the Search Console ownership file.
 const NOT_BUILD_OUTPUT = [
-  /^site\/og\//, /^site\/fonts\//, /^site\/CNAME$/, /^site\/og\.(png|svg)$/, /^site\/favicon\.svg$/,
+  /^site\/og\//, /^site\/fonts\//, /^site\/CNAME$/, /^site\/og\.(png|svg)$/, /^site\/favicon\.(svg|ico)$/,
   /^site\/(favicon-32|apple-touch-icon|icon-192|icon-512)\.png$/, /^site\/site\.webmanifest$/, /^site\/google[0-9a-f]+\.html$/,
   /\.(js|css)$/,
 ];

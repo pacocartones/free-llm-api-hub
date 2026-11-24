@@ -1,16 +1,7 @@
 /* Free LLM API Hub — design system. Terminal-dev identity: emerald signal on near-black,
    mono-forward typography (self-hosted JetBrains Mono), modern developer-tool layout. */
 
-@font-face {
-  font-family: 'JetBrains Mono';
-  font-style: normal; font-weight: 500; font-display: swap;
-  src: url('fonts/jetbrains-mono-500.woff2') format('woff2');
-}
-@font-face {
-  font-family: 'JetBrains Mono';
-  font-style: normal; font-weight: 700; font-display: swap;
-  src: url('fonts/jetbrains-mono-700.woff2') format('woff2');
-}
+/* The JetBrains Mono font faces are declared in each page's <head> (scripts/lib/assets.mjs: preloaded, font-display: optional). */
 
 /* ---------- tokens ---------- */
 :root {
@@ -596,10 +587,7 @@ pre code { color: var(--text); }
 /* ---------- responsive ---------- */
 @media (max-width: 860px) { .footer-top { grid-template-columns: 1fr 1fr; } }
 @media (max-width: 900px) {
-  .site-header.nav-ready .nav-toggle { display: inline-flex; }
-  /* Without a working toggle, keep the links in the page flow. */
-  .site-header:not(.nav-ready) { position: static; height: auto; }
-  .site-header:not(.nav-ready) .header-inner { height: auto; min-height: var(--header-h); flex-wrap: wrap; padding-top: 12px; gap: 12px; }
+  .nav-toggle { display: inline-flex; }
   .nav {
     position: absolute; top: var(--header-h); left: 0; right: 0;
     flex-direction: column; align-items: stretch; gap: 2px; margin: 0;
@@ -609,9 +597,18 @@ pre code { color: var(--text); }
     display: none;
   }
   .site-header.nav-open .nav { display: flex; }
-  .site-header:not(.nav-ready) .nav { display: flex; position: static; order: 3; flex-basis: 100%; }
   .nav a { padding: 11px 12px; font-size: .95rem; border-radius: 8px; }
   .nav a.nav-best { padding: 11px 14px; border-radius: 999px; }
+}
+/* Without scripts there is no toggle: the links stay in the page flow, under the brand. With scripts the menu is
+   collapsed behind its button from the first paint. It used to stay open until site.js (the last script of the body)
+   marked the header ready; on the home, whose explorer data makes the page long, the first paint came before that,
+   and the 168px of open links then collapsed and pulled the hero up (layout shift 0.188 on a phone, PageSpeed). */
+@media (max-width: 900px) and (scripting: none) {
+  .nav-toggle { display: none; }
+  .site-header { position: static; height: auto; }
+  .site-header .header-inner { height: auto; min-height: var(--header-h); flex-wrap: wrap; padding-top: 12px; gap: 12px; }
+  .site-header .nav { display: flex; position: static; order: 3; flex-basis: 100%; }
 }
 @media (max-width: 720px) {
   #table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
