@@ -162,11 +162,13 @@ describe('build with GA_MEASUREMENT_ID set', () => {
     for (const [rel, prefix] of PAGES) {
       const html = read(rel);
       const csp = html.match(/http-equiv="Content-Security-Policy" content="([^"]+)"/)[1];
-      const script = csp.match(/script-src ([^;]+)/)[1];
-      const connect = csp.match(/connect-src ([^;]+)/)[1];
-      assert.ok(script.includes('https://www.googletagmanager.com'), `${rel}: script-src allows gtag.js`);
-      for (const h of GA_HOSTS) assert.ok(connect.includes(h), `${rel}: connect-src allows ${h}`);
-      assert.ok(script.includes("'sha256-"), `${rel}: the inline hashes stay`);
+      // Compare whole source tokens of each directive, not substrings of the policy.
+      const sources = (dir) => csp.match(new RegExp(`${dir} ([^;]+)`))[1].trim().split(/\s+/);
+      const script = new Set(sources('script-src'));
+      const connect = new Set(sources('connect-src'));
+      assert.ok(script.has('https://www.googletagmanager.com'), `${rel}: script-src allows gtag.js`);
+      for (const h of GA_HOSTS) assert.ok(connect.has(h), `${rel}: connect-src allows ${h}`);
+      assert.equal([...script].filter((s) => s.startsWith("'sha256-")).length, 2, `${rel}: the two inline hashes stay`);
       assert.ok(html.includes(`<script src="${prefix}consent.js" defer></script>`), `${rel}: consent.js with prefix ${prefix}`);
       assert.ok(html.includes('data-consent-open>Cookie settings</button>'), `${rel}: footer Cookie settings`);
       const body = html.replace(/<meta http-equiv="Content-Security-Policy"[^>]+>/, '');
