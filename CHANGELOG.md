@@ -44,7 +44,14 @@ Notable changes to the dataset and the project. Format based on [Keep a Changelo
     removed from the sample.
   - Cohere: the pricing page's sentence that trial keys are not for
     production or commercial use now backs `commercial_ok: false`.
+  - Groq: the Free plan tab of the rate-limits page, read in a browser,
+    shows the same limits as the dataset.
   - Cloudflare Workers AI: limits, pricing and data policy re-confirmed.
+    `@cf/google/gemma-3-12b-it` and `@cf/meta/llama-3.1-8b-instruct` are
+    gone from the model catalog and leave the sample.
+    `@cf/google/gemma-4-26b-a4b-it`, a free-access model on the pricing page,
+    joins it. `model_tier` moves from 2 to 3 (LMArena snapshot 2026-10-02,
+    gemma-4-26b-a4b, 1437.5).
 
 ## [2.14.2] — 2026-11-20
 
