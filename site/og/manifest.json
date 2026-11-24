@@ -83,5 +83,8 @@
   "p/wandb-inference.png": "847158f3ec01ac41d6cce7ef7e02acece511dc9e8e6dab1c03de226ff53a03f1",
   "p/typhoon.png": "ab3a8c55cbe716fe820fb3f9d21cd2a8fa1fb875a517c0cf59e16a5a5b9db9f9",
   "p/regolo.png": "facefb15f66307a5fff00b4158b0c780b0d648d1df3e8acd5da8a55667949672",
-  "p/google-agent-platform-express.png": "ee0298203ec31558226ef4d2aba3f5b6ec8848b39546352611a720bf20fd237f"
+  "p/google-agent-platform-express.png": "ee0298203ec31558226ef4d2aba3f5b6ec8848b39546352611a720bf20fd237f",
+  "compare.png": "3cc84c49fc277341f5e2cfa8a9161277d9cd5c2acb41e17aee61f007d28bbcec",
+  "coding-tools.png": "7121b6a0dd6b8db3dad2b6d26dccc6f8784c7ebd68c50bd98a60e929485435b5",
+  "api.png": "049c5934d20a11bd72face09dda5260cea1e52b62e5bdf105b70bef671ecd34c"
 }

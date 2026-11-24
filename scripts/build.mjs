@@ -54,6 +54,7 @@ import { datasetAsOf } from './lib/release-stamp.mjs';
 import { parseCitation, datasetJsonLd, datasetJsonLdScript } from './lib/dataset-jsonld.mjs';
 import { groupModels, modelKey } from './lib/model-keys.mjs';
 import { isIndexable, modelPageMainHtml, modelPageTitle, modelPageDescription, modelPageJsonLd } from './lib/model-pages.mjs';
+import { collectionPageJsonLd as pageJsonLd, comparePageJsonLd } from './lib/page-jsonld.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const FRESH_DAYS = SLA_DAYS; // the freshness SLA, defined once in lib/rules.mjs
@@ -137,6 +138,7 @@ function bestTable(entries) {
 
 // ---------- editorial collections (generated from the data) ----------
 const SITE = 'https://freellmapihub.com';
+const collectionPageJsonLd = (args) => pageJsonLd({ site: SITE, ...args });
 
 const COLLECTION_COPY = [
   {
@@ -698,6 +700,9 @@ function landmarkFixes(main) {
     .replace(/(<h2>([^<]+)<\/h2>)(<nav|<div) class="colls">/g, (_m, h2, text, tag) => (tag === '<nav' ? `${h2}<nav class="colls" aria-label="${text}">` : `${h2}<div class="colls">`))
     .replace(/<nav class="colls">/g, '<nav class="colls" aria-label="Collections">');
 }
+// The weekly change feed is the one a reader subscribes to (field-level changes, not commit titles), so every page
+// advertises it: a feed reader looking for <link rel="alternate"> finds it wherever the visitor is.
+const CHANGES_FEED_TITLE = 'Free LLM API Hub — what changed, week by week';
 function htmlPageRaw({ title, desc, canonical, main, jsonld, prefix = '../', noindex = false, ogImage = `${SITE}/og.png`, feeds = [], scripts = [], styles = [] }) {
   // jsonld carries provider names straight from the dataset; writing "<" as
   // the JSON unicode escape (backslash-u-003c) keeps a "</script>" in the
@@ -708,7 +713,7 @@ function htmlPageRaw({ title, desc, canonical, main, jsonld, prefix = '../', noi
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>${htmlEsc(title)}</title>
-<meta name="description" content="${htmlEsc(fitDescription(desc))}">${noindex ? '\n<meta name="robots" content="noindex">' : ''}
+<meta name="description" content="${htmlEsc(fitDescription(desc))}">${noindex ? `\n<meta name="robots" content="${noindex === true ? 'noindex' : htmlEsc(noindex)}">` : ''}
 ${CSP}
 ${THEME_GUARD}
 ${canonical ? `<link rel="canonical" href="${htmlEsc(canonical)}">
@@ -733,6 +738,7 @@ ${canonical ? `<meta property="og:url" content="${htmlEsc(canonical)}">
 <meta name="twitter:description" content="${htmlEsc(fitDescription(desc))}">
 <meta name="twitter:image" content="${ogImage}">
 <link rel="alternate" type="application/rss+xml" title="Free LLM API Hub — updates" href="${prefix}feed.xml">
+<link rel="alternate" type="application/rss+xml" title="${htmlEsc(CHANGES_FEED_TITLE)}" href="${prefix}changes.xml">
 ${feeds.map((f) => `<link rel="alternate" type="application/rss+xml" title="${htmlEsc(f.title)}" href="${prefix}${f.href}">\n`).join('')}<link rel="stylesheet" href="${prefix}styles.css">
 ${styles.map((s) => `<link rel="stylesheet" href="${prefix}${s}">\n`).join('')}${jsonld ? `<script type="application/ld+json">${jsonld.replace(/</g, '\\u003c')}</script>` : ''}
 </head>
@@ -1043,7 +1049,8 @@ for (const c of COLLECTIONS) {
         name: c.h1,
         description: metaDesc,
         numberOfItems: rows.length,
-        itemListElement: rows.map((p, i) => ({ '@type': 'ListItem', position: i + 1, name: p.name, url: docsHref(p.docs_url) || undefined })),
+        // Same-domain URLs: Google drops list items that point to another site, and each provider has its own page here.
+        itemListElement: rows.map((p, i) => ({ '@type': 'ListItem', position: i + 1, name: p.name, url: `${SITE}/p/${p.slug}` })),
       },
       {
         '@type': 'BreadcrumbList',
@@ -1455,15 +1462,21 @@ if (commits.length) {
       `<main id="main"><div class="wrap"><ul class="upd-list">${updItems}</ul>${pagination(page, prefix)}</div></main>`;
     const target = page === 1 ? join(ROOT, 'site/updates.html') : join(ROOT, `site/updates/page/${page}/index.html`);
     if (page > 1) mkdirSync(dirname(target), { recursive: true });
-    writeFileSync(target, htmlPage({ title: `Updates${page > 1 ? ` · Page ${page}` : ''} · Free LLM API Hub`, desc: 'Published changes to the Free LLM API Hub dataset and site.', canonical: `${SITE}/${pageHref(page, '')}`, main: updMain, prefix }));
+    // Page 2 onwards is a thin list of commit titles: crawlers may follow it (noindex,follow) but not index it. Only
+    // page 1 is in the sitemap and carries structured data.
+    writeFileSync(target, htmlPage({
+      title: `Updates${page > 1 ? ` · Page ${page}` : ''} · Free LLM API Hub`, desc: 'Published changes to the Free LLM API Hub dataset and site.', canonical: `${SITE}/${pageHref(page, '')}`, main: updMain, prefix,
+      noindex: page > 1 ? 'noindex,follow' : false,
+      jsonld: page === 1 ? collectionPageJsonLd({ name: 'Updates', url: `${SITE}/updates`, description: 'Published changes to the Free LLM API Hub dataset and site.', crumbs: [['Updates', `${SITE}/updates`]] }) : undefined,
+    }));
   }
 
   const rssItems = commits.slice(0, UPDATES_PER_PAGE)
     .map((c) => `    <item><title>${htmlEsc(c.subject)}</title><link>${REPO}/commit/${c.hash}</link><guid isPermaLink="true">${REPO}/commit/${c.hash}</guid><pubDate>${new Date(c.date + 'T00:00:00Z').toUTCString()}</pubDate></item>`)
     .join('\n');
   const rss =
-    `<?xml version="1.0" encoding="UTF-8"?>\n<rss version="2.0"><channel>\n` +
-    `    <title>Free LLM API Hub — updates</title>\n    <link>${SITE}/</link>\n    <description>Changes to the continuously-verified free LLM &amp; AI-model API dataset.</description>\n` +
+    `<?xml version="1.0" encoding="UTF-8"?>\n<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel>\n` +
+    `    <title>Free LLM API Hub — updates</title>\n    <link>${SITE}/</link>\n    <atom:link href="${SITE}/feed.xml" rel="self" type="application/rss+xml"/>\n    <description>Changes to the continuously-verified free LLM &amp; AI-model API dataset.</description>\n` +
     `${rssItems}\n</channel></rss>\n`;
   writeFileSync(join(ROOT, 'site/feed.xml'), rss);
 }
@@ -1583,8 +1596,11 @@ mkdirSync(join(ROOT, 'site/changes'), { recursive: true });
 writeFileSync(join(ROOT, 'site/changes/index.html'), htmlPage({
   title: 'What changed · Free LLM API Hub',
   desc: 'What changed in the free LLM API dataset, month by month: field-level changes (free tier, rate limits, the catch and access flags, before and after) and a state report for each month.',
-  canonical: `${SITE}/changes/`, main: changesMain, prefix: '../',
-  feeds: [{ title: 'Free LLM API Hub — what changed, week by week', href: 'changes.xml' }],
+  canonical: `${SITE}/changes/`, main: changesMain, prefix: '../', jsonld: collectionPageJsonLd({
+    name: 'What changed', url: `${SITE}/changes/`,
+    description: 'Field-level changes to the free LLM API dataset, month by month.',
+    crumbs: [['Updates', `${SITE}/updates`], ['What changed', `${SITE}/changes/`]],
+  }),
 }));
 // The old index of the monthly reports now lives in /changes/#months; the reports keep their URLs.
 writeFileSync(join(ROOT, 'site/state/index.html'), redirectPage('../changes/#months'));
@@ -1605,8 +1621,9 @@ const researchRowHtml = (r) => `<tr><td class="name"><a href="${htmlEsc(r.url)}"
 const programPage = (slug, h1, lede, tableHead, rowsHtml, extra = '') =>
   htmlPage({
     title: `${h1} · Free LLM API Hub`, desc: stripTags(lede), canonical: `${SITE}/programs/${slug}`,
+    jsonld: collectionPageJsonLd({ type: 'WebPage', name: h1, url: `${SITE}/programs/${slug}`, description: stripTags(lede), crumbs: [['Credit programs', `${SITE}/programs/`], [h1, `${SITE}/programs/${slug}`]] }),
     main:
-      pageHero({ crumbs: `<a href="../">Home</a> / ${htmlEsc(h1)}`, h1: `${htmlEsc(h1)}`, lede: `${lede}` }) +
+      pageHero({ crumbs: `<a href="../">Home</a> / <a href="./">Credit programs</a> / ${htmlEsc(h1)}`, h1: `${htmlEsc(h1)}`, lede: `${lede}` }) +
       `<main id="main"><div class="wrap prose"><p class="count"><strong>${LEGEND}</strong></p>` +
       `<div class="table-scroll" role="region" aria-label="Table of programs" tabindex="0"><table><thead>${tableHead}</thead><tbody>\n${rowsHtml}\n</tbody></table></div>` +
       `<p style="margin-top:24px">Looking for a key to use right now with no application? See the <a href="../#explorer">verified self-serve list</a>.</p>${extra}</div></main>`,
@@ -1632,6 +1649,10 @@ writeFileSync(join(ROOT, 'site/programs/index.html'), htmlPage({
   title: 'Free credit programs for LLM APIs · Free LLM API Hub',
   desc: `${programs.startups.length + programs.research.length} apply-to-get credit programs that can fund LLM and AI-model API usage, for startups and for students and researchers.`,
   canonical: `${SITE}/programs/`,
+  jsonld: collectionPageJsonLd({
+    name: 'Free credit programs', url: `${SITE}/programs/`, crumbs: [['Credit programs', `${SITE}/programs/`]],
+    items: [{ name: 'Free credits for startups', url: `${SITE}/programs/startups` }, { name: 'Free credits for students & researchers', url: `${SITE}/programs/research` }],
+  }),
   main:
     pageHero({ crumbs: `<a href="../">Home</a> / Credit programs`, h1: `Free credit programs`, lede: `Credit programs you apply for, as opposed to the <a href="../#explorer">self-serve free tiers</a> you can call today. Volatile, so confirm the current terms before you rely on one.` }) +
     `<main id="main"><div class="wrap prose"><ul>` +
@@ -1672,6 +1693,13 @@ writeFileSync(join(ROOT, 'site/models/index.html'), htmlPage({
   canonical: `${SITE}/models/`,
   main: modelsMain,
   ogImage: `${SITE}/og/models.png`,
+  // The list is the indexable model pages only (two or more verified providers); the others carry noindex.
+  jsonld: collectionPageJsonLd({
+    name: 'Free model index', url: `${SITE}/models/`,
+    description: `Models available on free LLM and AI-model API tiers, and which provider serves each.`,
+    crumbs: [['Free model index', `${SITE}/models/`]],
+    items: MODEL_GROUPS.filter((g) => isIndexable(g)).map((g) => ({ name: modelPageTitle(g).replace(/ · Free LLM API Hub$/, ''), url: `${SITE}/models/${g.key}/` })),
+  }),
 }));
 
 // One page per model: /models/<key>/ ("Free API for <model>"). The key groups the same model under its different
@@ -1941,7 +1969,7 @@ export ${htmlEsc(exampleClient.env_key)}=...
 litellm --config litellm.yaml</code></pre>` +
   `<p>Point any OpenAI client at the proxy (<code>base_url="http://0.0.0.0:4000"</code>) and request a model by its <code>model_name</code>, e.g. <code>${htmlEsc(`${exampleClient.slug}/${exampleModel}`)}</code>.</p>`;
 const apiDocMain =
-  pageHero({ crumbs: `<a href="../">Home</a> / API`, h1: `Static JSON API`, lede: `The whole dataset as versioned, machine-readable JSON at stable URLs — no server, no query params, no auth, no rate limits. CORS-open, so you can <code>fetch()</code> it straight from the browser. Regenerated on every dataset change (currently v${data.version}).` }) +
+  pageHero({ crumbs: `<a href="../">Home</a> / API`, h1: `Static JSON API`, lede: `The whole dataset as versioned, machine-readable JSON at stable URLs — no server, no query params, no auth, no rate limits. CORS-open, so you can <code>fetch()</code> it straight from the browser with a plain <code>GET</code>; send no custom headers, because the host answers the <code>OPTIONS</code> preflight they trigger with 405. Regenerated on every dataset change (currently v${data.version}).` }) +
   `<main id="main"><div class="wrap prose">` +
   `<h2>Everything</h2><table class="model-table api-endpoints"><thead><tr><th>Endpoint</th><th>Contents</th><th>Count</th><th>curl example</th></tr></thead><tbody>` +
   apiRow('Full provider dataset (all fields)', 'providers.json', publicProviders.length) +
@@ -1976,7 +2004,14 @@ mkdirSync(join(ROOT, 'site/api'), { recursive: true });
 writeFileSync(join(ROOT, 'site/api/index.html'), htmlPage({
   title: 'Static JSON API · Free LLM API Hub',
   desc: 'The free-llm-api-hub dataset as versioned, machine-readable JSON at stable URLs — full dataset plus pre-filtered slices by category, constraint and modality. No auth, no rate limits.',
-  canonical: `${SITE}/api/`, main: apiDocMain, prefix: '../',
+  canonical: `${SITE}/api/`, main: apiDocMain, prefix: '../', ogImage: `${SITE}/og/api.png`,
+  // The Dataset itself is described once, on the home page; this page is about it.
+  jsonld: collectionPageJsonLd({
+    type: 'WebPage', name: 'Static JSON API', url: `${SITE}/api/`,
+    description: 'The free-llm-api-hub dataset as versioned JSON at stable URLs.',
+    about: { '@type': 'Dataset', name: 'Free LLM API Hub', url: `${SITE}/` },
+    crumbs: [['API', `${SITE}/api/`]],
+  }),
 }));
 
 // llms.txt (concise index) + llms-full.txt (every provider expanded) — llmstxt.org
@@ -2194,6 +2229,7 @@ writeFileSync(
       pageHero({ crumbs: `<a href="../">Home</a> / Free AI coding tools`, h1: `Free AI coding tools`, lede: `Coding tools that say they have a free plan. Apart from the ranking, and every value written only where the tool's own page says it.` }) +
       codingToolsMainHtml(codingTools, { prefix: '../', repo: REPO, ownKey: codingToolsOwnKey }),
     prefix: '../',
+    ogImage: `${SITE}/og/coding-tools.png`,
     styles: ['tables.css'],
   })
 );
@@ -2233,6 +2269,7 @@ for (const { e, group } of CODING_TOOL_PAGES) {
         codingToolMainHtml(e, { prefix: '../../', group, others: CODING_TOOL_PAGES.map((x) => x.e).filter((o) => o.slug !== e.slug) }),
       jsonld,
       prefix: '../../',
+      ogImage: `${SITE}/og/coding-tools.png`,
       styles: ['tables.css'],
     })
   );
@@ -2327,18 +2364,10 @@ for (const cp of comparePairs) {
     `<h2>Other comparisons</h2><nav class="colls">${compareLinksHtml('../../', cp.path)}</nav>` +
     `<p class="prov-back"><a href="../../#explorer">← All providers</a></p>` +
     `</div></main>`;
-  const jsonld = JSON.stringify({
-    '@context': 'https://schema.org',
-    '@type': 'BreadcrumbList',
-    itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Free LLM API Hub', item: `${SITE}/` },
-      { '@type': 'ListItem', position: 2, name: 'Compare', item: `${SITE}/compare/` },
-      { '@type': 'ListItem', position: 3, name: title, item: `${SITE}/compare/${cp.path}/` },
-    ],
-  });
+  const jsonld = comparePageJsonLd({ site: SITE, path: cp.path, a, b });
   mkdirSync(join(ROOT, `site/compare/${cp.path}`), { recursive: true });
   writeFileSync(join(ROOT, `site/compare/${cp.path}/index.html`), htmlPage({
-    title: `${title} — free tiers compared · Free LLM API Hub`, desc, canonical: `${SITE}/compare/${cp.path}/`, main, jsonld, prefix: '../../',
+    title: `${title} — free tiers compared · Free LLM API Hub`, desc, canonical: `${SITE}/compare/${cp.path}/`, main, jsonld, prefix: '../../', ogImage: `${SITE}/og/compare.png`,
   }));
 }
 // Interactive view: a picker that also works as a plain GET form without JS
@@ -2348,18 +2377,26 @@ const pickerOptions = [...providers].sort((x, y) => x.name.localeCompare(y.name,
 const pickerSelects = Array.from({ length: compareLib.COMPARE_MAX }, (_, i) =>
   `<label class="cmp-slot"><span>Provider ${i + 1}${i < compareLib.COMPARE_MIN ? '' : ' (optional)'}</span>` +
   `<select class="sel" name="p"><option value="">—</option>${pickerOptions}</select></label>`).join('');
+const otherPairs = comparePairs.filter((cp) => !suggestedPairs.includes(cp));
 const compareIndexMain =
   pageHero({ crumbs: `<a href="../">Home</a> / Compare`, h1: `Compare free LLM APIs`, lede: `Pick two to four providers to see their free tiers side by side — limits, card, phone and commercial-use requirements, OpenAI compatibility and the date each was last verified. Share the result: the URL keeps your selection.` }) +
   `<main id="main"><div class="wrap prose">` +
   `<form id="compare-form" class="cmp-form" method="get" action="./">${pickerSelects}<button type="submit" class="btn primary">Compare</button></form>` +
   `<p id="compare-status" class="sr-only" role="status"></p><div id="compare-out" class="cmp-out"></div>` +
   `<h2>Popular comparisons</h2><nav class="colls">${compareLinksHtml('../')}</nav>` +
+  // Pairs across categories are not suggested from other pages, but each has a page in the sitemap: list them here
+  // so every one is reachable by a link.
+  (otherPairs.length ? `<h2>More comparisons</h2><nav class="colls">${otherPairs.map((cp) => `<a href="../compare/${cp.path}/">${htmlEsc(cp.a.name)} vs ${htmlEsc(cp.b.name)}</a>`).join('')}</nav>` : '') +
   `<p class="prov-back"><a href="../#explorer">← All providers</a></p>` +
   `</div></main>`;
 writeFileSync(join(ROOT, 'site/compare/index.html'), htmlPage({
   title: 'Compare free LLM APIs side by side · Free LLM API Hub',
   desc: 'Compare two to four free LLM and AI-model APIs side by side: free tier, rate limits, card, phone and commercial-use requirements, OpenAI compatibility and verification date.',
-  canonical: `${SITE}/compare/`, main: compareIndexMain, prefix: '../', scripts: ['shared-compare.js', 'compare.js'],
+  canonical: `${SITE}/compare/`, main: compareIndexMain, prefix: '../', scripts: ['shared-compare.js', 'compare.js'], ogImage: `${SITE}/og/compare.png`,
+  jsonld: collectionPageJsonLd({
+    name: 'Compare free LLM APIs', url: `${SITE}/compare/`, crumbs: [['Compare', `${SITE}/compare/`]],
+    items: comparePairs.map((cp) => ({ name: `${cp.a.name} vs ${cp.b.name}`, url: `${SITE}/compare/${cp.path}/` })),
+  }),
 }));
 
 // ---------- sitemap.xml (site SEO) ----------
