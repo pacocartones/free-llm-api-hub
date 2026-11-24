@@ -1,6 +1,6 @@
 name: Lighthouse
 
-# Accessibility, performance and SEO budget for the built site.
+# Accessibility, SEO and performance budget for the built site.
 #
 # Serves site/ itself on a free local port and measures what it serves with
 # Lighthouse, on sixteen pages: the home, /best/, /coverage/, /free-gpu/, /coding-tools/,
@@ -8,10 +8,20 @@ name: Lighthouse
 # /collections/no-credit-card.html, /collections/openai-compatible.html,
 # /guides/free-llm-api-no-signup.html, /guides/free-embeddings-apis.html,
 # /guides/free-ocr-document-ai-apis.html, /guides/free-speech-to-text-apis.html
-# and /guides/free-image-generation-apis.html. SEO must score 1.
-# The job fails when a page falls below the thresholds in
-# scripts/lib/lighthouse-gate.mjs. Nothing is published, no secret is used, and
-# the token can only read the repository.
+# and /guides/free-image-generation-apis.html. The thresholds are in
+# scripts/lib/lighthouse-gate.mjs: accessibility at least 0.95 with no new or
+# unscored accessibility audit, SEO exactly 1, performance at least 0.80.
+#
+# The work is split by how stable each category is on a shared runner:
+#   - Pull requests: accessibility and SEO, one run per page. Both are
+#     deterministic, so one run is the same verdict as three, in about a third
+#     of the time. The job keeps the name of the required check.
+#   - Push to main, nightly and manual runs: performance, median of three runs
+#     per page (one run moves too much: 0.78 and 0.91 on the same commit). A
+#     failure on main opens or updates one issue; a later clean run closes it.
+#
+# No secret is used. The measuring jobs can only read the repository; only the
+# report job, which checks nothing out and runs on main only, can write issues.
 #
 # Lighthouse is installed from tools/lighthouse (its own package.json and
 # lockfile), so the dataset pipeline in the root package.json stays light.
@@ -19,6 +29,10 @@ on:
   # No `paths:` filter, for the same reason as verify.yml: a check that is
   # filtered out never reports.
   pull_request:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '41 3 * * *' # nightly, UTC; delivery is best effort.
   workflow_dispatch: {}
 
 # A newer push to the same pull request supersedes the older run; pushes to main and manual runs are never cancelled.
@@ -31,8 +45,11 @@ permissions:
 
 jobs:
   lighthouse:
+    # Required check on main: keep this name, even though performance now runs in the job below.
     name: Lighthouse accessibility and performance
+    if: ${{ github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -51,7 +68,81 @@ jobs:
         working-directory: tools/lighthouse
         run: npm ci --ignore-scripts
 
-      - name: Measure the sixteen pages
+      - name: Measure the sixteen pages (accessibility and SEO, one run each)
         env:
           CHROME_PATH: /usr/bin/google-chrome
-        run: node scripts/lighthouse-gate.mjs
+        run: node scripts/lighthouse-gate.mjs --mode=accessibility-seo
+
+  performance:
+    name: Lighthouse performance (median of 3)
+    if: ${{ github.event_name != 'pull_request' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    outputs:
+      failures: ${{ steps.measure.outputs.failures }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0 # full history: build.mjs mines per-provider history from git log
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+      - name: Build the site
+        run: node scripts/build.mjs
+      - name: Install Lighthouse (locked, no lifecycle scripts)
+        working-directory: tools/lighthouse
+        run: npm ci --ignore-scripts
+      - name: Measure the sixteen pages (performance, median of three runs)
+        id: measure
+        env:
+          CHROME_PATH: /usr/bin/google-chrome
+        run: node scripts/lighthouse-gate.mjs --mode=performance
+
+  report:
+    name: Report performance on main
+    needs: performance
+    # Main only (push, nightly or a manual run on main), and only when the measurement finished either way.
+    if: ${{ always() && github.repository == 'pacocartones/free-llm-api-hub' && github.ref == 'refs/heads/main' && (needs.performance.result == 'success' || needs.performance.result == 'failure') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      issues: write
+    steps:
+      - name: Open, update or close the performance issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RESULT: ${{ needs.performance.result }}
+          FAILURES: ${{ needs.performance.outputs.failures }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          COMMIT: ${{ github.sha }}
+        run: |
+          title='Lighthouse performance below budget'
+          number=$(gh issue list --state open --search "in:title \"$title\"" --json number,title \
+            --jq "map(select(.title == \"$title\")) | .[0].number // empty")
+          body=$(mktemp)
+          if [ "$RESULT" = failure ]; then
+            {
+              echo "The nightly/main Lighthouse performance check (median of three runs per page, threshold 0.80) failed on \`$COMMIT\`."
+              echo
+              if [ -n "$FAILURES" ]; then
+                echo '```text'
+                printf '%s\n' "$FAILURES" | sed 's/```/` ` `/g'
+                echo '```'
+              else
+                echo 'No budget failure was recorded: the job stopped before measuring (build or install error).'
+              fi
+              echo
+              echo "Run: $RUN_URL"
+            } > "$body"
+            if [ -n "$number" ]; then
+              gh issue comment "$number" --body-file "$body"
+            else
+              gh issue create --title "$title" --label chore --body-file "$body"
+            fi
+          elif [ -n "$number" ]; then
+            printf 'Performance is back within budget on `%s`.\n\nRun: %s\n' "$COMMIT" "$RUN_URL" > "$body"
+            gh issue comment "$number" --body-file "$body"
+            gh issue close "$number" --reason completed
+          fi

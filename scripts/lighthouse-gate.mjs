@@ -1,15 +1,26 @@
 #!/usr/bin/env node
 // lighthouse-gate.mjs — serve site/ locally, run Lighthouse on sixteen pages and
-// fail when accessibility or performance drops below the thresholds in
-// lib/lighthouse-gate.mjs. Needs the runner from tools/lighthouse (npm ci there)
-// and a Chrome binary in CHROME_PATH. Nothing is published and nothing leaves the machine.
+// fail when a category drops below the thresholds in lib/lighthouse-gate.mjs.
+// Needs the runner from tools/lighthouse (npm ci there) and a Chrome binary in
+// CHROME_PATH. Nothing is published and nothing leaves the machine.
+//
+//   node scripts/lighthouse-gate.mjs                          accessibility, performance and SEO, median of 3 (local default)
+//   node scripts/lighthouse-gate.mjs --mode=accessibility-seo  accessibility and SEO, one run per page (pull requests)
+//   node scripts/lighthouse-gate.mjs --mode=performance        performance only, median of 3 (main and nightly)
+//
+// In GitHub Actions the per-page scores go to the job summary, and the failures to the
+// step output `failures`, which lighthouse.yml turns into an issue for main and nightly runs.
 import { createServer } from 'node:http';
-import { readFileSync, existsSync, statSync, rmSync, readdirSync } from 'node:fs';
+import { readFileSync, existsSync, statSync, rmSync, readdirSync, appendFileSync } from 'node:fs';
+import { randomUUID } from 'node:crypto';
 import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, extname, normalize } from 'node:path';
-import { evaluate, medianReport, THRESHOLDS } from './lib/lighthouse-gate.mjs';
+import { evaluate, medianReport, parseMode } from './lib/lighthouse-gate.mjs';
 import { makeTmpDir } from './lib/tmp.mjs';
+
+let mode;
+try { mode = parseMode(process.argv.slice(2)); } catch (err) { console.error(err.message); process.exit(2); }
 
 // Every Lighthouse run gets its own Chrome profile directory and its own process group.
 // Whatever way this script ends (normal exit, failure, Ctrl-C, kill), the groups are
@@ -96,8 +107,10 @@ const pages = ['/', '/best/', '/coverage/', '/free-gpu/', '/coding-tools/', '/co
   '/guides/free-ocr-document-ai-apis.html', '/guides/free-speech-to-text-apis.html',
   '/guides/free-image-generation-apis.html'];
 const lighthouse = join(ROOT, 'tools/lighthouse/node_modules/.bin/lighthouse');
-const RUNS = 3;
+const RUNS = mode.runs;
 const failures = [];
+const summary = [`### Lighthouse (${mode.name}, ${RUNS === 1 ? 'one run' : `median of ${RUNS} runs`} per page)`, '',
+  `| Page | ${mode.categories.join(' | ')} |`, `|---|${mode.categories.map(() => '---|').join('')}`];
 try {
   for (const page of pages) {
     // Asynchronous on purpose: a synchronous child process would block this process's event loop, and the server below could never answer Lighthouse.
@@ -106,7 +119,7 @@ try {
       try {
         const out = await runLighthouse(lighthouse, [
           base + page, '--output=json', '--quiet',
-          '--only-categories=accessibility,performance,seo',
+          `--only-categories=${mode.categories.join(',')}`,
           `--chrome-flags=--headless --no-sandbox --user-data-dir=${PROFILE}`,
         ]);
         reports.push(JSON.parse(out));
@@ -118,16 +131,30 @@ try {
     }
     if (reports.length < RUNS) continue;
     const report = medianReport(reports);
-    const all = reports.map((r) => r.categories?.performance?.score).join('/');
-    console.log(`${page}: median of ${RUNS} runs: performance ${report.categories.performance?.score} (runs ${all}), accessibility ${report.categories.accessibility?.score}, SEO ${report.categories.seo?.score}`);
-    failures.push(...evaluate(page, report, { ...THRESHOLDS, seo: 1 }, baseline));
+    const scores = mode.categories.map((name) => {
+      const runs = RUNS > 1 ? ` (runs ${reports.map((r) => r.categories?.[name]?.score).join('/')})` : '';
+      return `${name} ${report.categories[name]?.score}${runs}`;
+    });
+    console.log(`${page}: ${RUNS === 1 ? 'one run' : `median of ${RUNS} runs`}: ${scores.join(', ')}`);
+    summary.push(`| \`${page}\` | ${mode.categories.map((name) => String(report.categories[name]?.score ?? 'no score')).join(' | ')} |`);
+    failures.push(...evaluate(page, report, mode.thresholds, baseline));
   }
 } finally {
   server.close();
   cleanup();
 }
+// GitHub Actions only: a readable table in the job summary, and the failures as a step
+// output (random heredoc delimiter, so no page text can end the value early).
+if (process.env.GITHUB_STEP_SUMMARY) {
+  if (failures.length) summary.push('', '**Failures**', '', ...failures.map((f) => `- ${f}`));
+  appendFileSync(process.env.GITHUB_STEP_SUMMARY, `${summary.join('\n')}\n`);
+}
+if (process.env.GITHUB_OUTPUT) {
+  const eof = `EOF_${randomUUID()}`;
+  appendFileSync(process.env.GITHUB_OUTPUT, `failures<<${eof}\n${failures.join('\n')}\n${eof}\n`);
+}
 if (failures.length) {
   console.error(failures.join('\n'));
   process.exit(1);
 }
-console.log('OK — Lighthouse accessibility, performance and SEO within thresholds.');
+console.log(`OK — Lighthouse ${mode.categories.join(', ')} within thresholds.`);
