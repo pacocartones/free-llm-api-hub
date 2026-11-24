@@ -220,6 +220,18 @@
             "quote": { "type": "string", "minLength": 1, "maxLength": 300, "description": "The passage, as the page words it (a sentence, not a paragraph)." }
           }
         },
+        "anonymous_access": {
+          "type": ["object", "null"],
+          "additionalProperties": false,
+          "required": ["source", "checked", "quote"],
+          "description": "Present only when the provider's own page says its API can be called with no account: an anonymous endpoint or a shared public key. Null (or absent) means the provider's pages do not say so, never that an account is required.",
+          "properties": {
+            "source": { "type": "string", "format": "uri", "description": "The provider's own page that says it." },
+            "checked": { "type": "string", "format": "date", "description": "The day the passage was read on that page." },
+            "quote": { "type": "string", "minLength": 1, "maxLength": 300, "description": "The passage, as the page words it (a sentence, not a paragraph)." },
+            "note": { "type": ["string", "null"], "minLength": 1, "maxLength": 300, "description": "A condition or caveat the provider's pages attach to anonymous use (lower priority, a per-IP limit, a contradicting sentence), in plain words. Not an interpretation." }
+          }
+        },
         "data_policy": {
           "type": ["object", "null"],
           "additionalProperties": false,

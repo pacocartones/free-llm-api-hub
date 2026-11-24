@@ -36,6 +36,7 @@ export const PROVIDER_CSV_OMITTED = [
   'model_tier_source',
   'free_limits',
   'no_expiry',
+  'anonymous_access',
   'data_policy',
   'env_key',
 ];

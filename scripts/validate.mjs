@@ -235,6 +235,15 @@ for (const p of data.providers ?? []) {
     check(typeof p.no_expiry.quote === 'string' && p.no_expiry.quote.trim().length >= 1 && p.no_expiry.quote.length <= 300, `${id}: no_expiry.quote must be the passage, 1 to 300 characters`);
   }
 
+  // anonymous_access: the provider's own statement that the API can be called with no account (issue #182; see docs/comparison-dimensions.md).
+  if (p.anonymous_access != null) {
+    const aa = p.anonymous_access;
+    check(DATE_RE.test(aa.checked || '') && aa.checked <= todayUtc, `${id}: anonymous_access.checked must be a date not after today in UTC`);
+    check(URL_RE.test(aa.source || ''), `${id}: anonymous_access.source must be the provider's page (http/https)`);
+    check(typeof aa.quote === 'string' && aa.quote.trim().length >= 1 && aa.quote.length <= 300, `${id}: anonymous_access.quote must be the passage, 1 to 300 characters`);
+    check(aa.note == null || (typeof aa.note === 'string' && aa.note.trim().length >= 1 && aa.note.length <= 300), `${id}: anonymous_access.note must be 1 to 300 characters or null`);
+  }
+
   // Integrity core: a verified entry must carry a dated, real source link.
   if (p.verified) {
     check(DATE_RE.test(p.last_verified || ''), `${id}: verified entry needs a YYYY-MM-DD last_verified`);

@@ -75,6 +75,7 @@ Per-provider fields (grouped for reference; the authoritative serialization orde
 | `model_tier` / `model_tier_source` | 0-4 / object, or both null | derived from a cited LMArena rating (thresholds in `lib/model-tier.mjs`); validated against the rating |
 | `free_limits` | object \| null | published numeric limits with `source` and `checked`; never estimated |
 | `no_expiry` | object \| null | trial credits only: the provider's own statement that the credit does not expire, with `source`, `checked` and a short `quote`; validated, never combined with a non-null `expires` |
+| `anonymous_access` | object | null | the provider's own statement that the API works with no account, with `source`, `checked`, a short `quote` and an optional `note`; validated; drives the `anonymous-access` collection |
 | `data_policy` | object \| null | what the provider says about prompts: `trains_on_prompts`, `retention`, with `source` and `checked`; never estimated, shown on the provider page only when set |
 | `env_key` | UPPER_SNAKE | secret NAME for probe/fetch-models. **STRIPPED from all public output** (homepage payload, site/providers.json, /api) except the two client configs (`api/v1/openai-clients.json`, `api/v1/litellm.yaml`), whose purpose is to tell users which variable to put their own key in. Never the value. |
 | `verified` | boolean | true = independently confirmed against own docs on `last_verified` |

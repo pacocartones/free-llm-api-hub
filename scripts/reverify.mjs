@@ -76,6 +76,7 @@ for (const p of batch) {
     `- best_for: ${p.best_for || ''}`,
     `- expires: ${p.expires || ''}`,
     ...(p.data_policy ? [`- data_policy: trains_on_prompts=${p.data_policy.trains_on_prompts} retention=${p.data_policy.retention || ''} (${p.data_policy.source}, read ${p.data_policy.checked}): read it again`] : []),
+    ...(p.anonymous_access ? [`- anonymous_access: the provider said "${p.anonymous_access.quote}" (${p.anonymous_access.source}, read ${p.anonymous_access.checked}): read it again`] : []),
     ...(p.no_expiry ? [`- no_expiry: the provider said "${p.no_expiry.quote}" (${p.no_expiry.source}, read ${p.no_expiry.checked}): read it again`] : []),
     '',
     '## Untrusted provider text (human review only)',

@@ -301,6 +301,7 @@
       "is_text_llm": false,
       "model_tier": null,
       "free_limits": {"requests_per_minute":2,"scope":"anonymous access, per IP and per model. With an API access key the page gives 400 requests per minute per Public Cloud project and per model, but the getting-started guide says keys from projects without a payment method (Discovery mode) cannot use the service, so that figure needs a project with a payment method","source":"https://docs.ovhcloud.com/en/guides/public-cloud/ai-machine-learning/ai-endpoints-capabilities","checked":"2026-11-14"},
+      "anonymous_access": {"source":"https://docs.ovhcloud.com/en/guides/public-cloud/ai-machine-learning/ai-endpoints-capabilities","checked":"2026-11-24","quote":"Anonymous: 2 requests per minute, per IP and per model.","note":"The page gives it as a rate limit; the same page also says users “need to provide an API access key in each request”."},
       "field_checks": {"commercial_ok":{"checked":"2026-11-24","status":"source_silent","sources":["https://www.ovhcloud.com/en/public-cloud/ai-endpoints/","https://www.ovhcloud.com/en/public-cloud/ai-endpoints/catalog/","https://docs.ovhcloud.com/en/guides/public-cloud/ai-machine-learning/ai-endpoints-capabilities","https://docs.ovhcloud.com/en/guides/public-cloud/ai-machine-learning/ai-endpoints-getting-started"],"note":"Product page, catalog and guides do not say whether the free models may be used commercially; model licences are separate"}},
       "verified": true,
       "last_verified": "2026-11-14",
@@ -717,6 +718,7 @@
       "is_text_llm": true,
       "model_tier": null,
       "free_limits": {"requests_per_second":2,"requests_per_minute":90,"scope":"ordinary IP addresses on text (/v2/generate/text/async), chat (/v2/generate/chat/async, configurable default) and image (/v2/generate/async) submit routes in Haidra-Org/AI-Horde (code defaults unless deployment-overridden; registered API keys also capped at 2 req/sec per key and endpoint, anonymous key '0000000000' shares 60 req/sec per key and endpoint, still bound by the per-IP limits). No daily quota; queue priority uses kudos","source":"https://raw.githubusercontent.com/Haidra-Org/AI-Horde/main/docs/reference/service_limits.md","checked":"2026-11-24"},
+      "anonymous_access": {"source":"https://github.com/Haidra-Org/AI-Horde","checked":"2026-11-24","quote":"Anyone can use the AI Horde for free, even anonymously.","note":"The README’s Anonymous Usage section: use the API key 0000000000, no registration needed, lowest priority in the generation queues, and anonymous use may be restricted when the Horde is under high load."},
       "verified": true,
       "last_verified": "2026-11-14"
     },
