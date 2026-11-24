@@ -10,9 +10,9 @@
       "name": "Google Gemini API (AI Studio)",
       "category": "ongoing",
       "free_type": "renewing-quota",
-      "free_tier": "Gemini 2.5 Flash, 2.5 Flash-Lite, 2.5 Pro (limited), embeddings, TTS models",
+      "free_tier": "Gemini 2.5 Flash, 2.5 Flash-Lite, 2.5 Pro (limited), embeddings, 2.5 Flash TTS; API access to the 2.5 models is limited to existing users",
       "rate_limits": "Sampled Gemini 2.5 model limits are shown only in AI Studio; quotas vary by model and project. Public docs separately publish selected model quotas: Gemini Decision 1 on the Decisions API, Free tier 200 RPM, 50,000 TPM, 10,000 RPD (https://ai.google.dev/gemini-api/docs/rate-limits, read 2026-11-23)",
-      "notes": "Free-tier prompts/outputs may be used by Google to improve its products outside the UK/CH/EEA/EU. Since the 2026-03-23 terms, only Paid Services may serve API clients to end users in the EEA/CH/UK. Gemini 2.5 Pro and 2.5 Flash are deprecated; the pricing page announces automatic routing to Gemini 3.8 Flash and 3.5 Flash-Lite respectively, billed at their rates, from 2026-12-01",
+      "notes": "Free-tier prompts/outputs may be used by Google to improve its products outside the UK/CH/EEA/EU. Since the 2026-03-23 terms, only Paid Services may serve API clients to end users in the EEA/CH/UK. Gemini 2.5 Pro and 2.5 Flash are deprecated; the pricing page announces automatic routing to Gemini 3.8 Flash and 3.5 Flash-Lite respectively, billed at their rates, from 2026-12-01. The models page says API access to the 2.5 models is limited to users who actively used them before (no start date given); Gemini 2.5 Flash-Lite is not deprecated. Gemini 2.5 Pro TTS has no free tier (https://ai.google.dev/gemini-api/docs/models and https://ai.google.dev/gemini-api/docs/pricing, read 2026-11-24)",
       "best_for": "The only frontier-class model with a genuine free tier",
       "modalities": ["text", "vision", "embeddings", "audio"],
       "models_free": ["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-2.5-pro"],
@@ -162,8 +162,8 @@
       "is_text_llm": true,
       "model_tier": null,
       "verified": true,
-      "last_verified": "2026-11-14",
-      "data_policy": {"trains_on_prompts":false,"retention":null,"source":"https://www.cerebras.ai/terms-of-service","checked":"2026-11-14","quote":"For clarity, the foregoing does not grant Cerebras the right to use Service Content for the purpose of training or fine-tuning models.","note":"The sentence says the terms do not grant Cerebras the right to use Service Content to train or fine-tune models. Terms effective 2024-08-27. The terms say some parts of the Service «may be provided for free» (Payment clause); they do not tie that to this sentence.","plan_named":false}
+      "last_verified": "2026-11-24",
+      "data_policy": {"trains_on_prompts":false,"retention":null,"source":"https://www.cerebras.ai/terms-of-service","checked":"2026-11-24","quote":"For clarity, the foregoing does not grant Cerebras the right to use Service Content for the purpose of training or fine-tuning models.","note":"The sentence says the terms do not grant Cerebras the right to use Service Content to train or fine-tune models. Terms effective 2024-08-27. The terms say some parts of the Service «may be provided for free» (Payment clause); they do not tie that to this sentence.","plan_named":false}
     },
     {
       "slug": "huggingface",
@@ -293,7 +293,7 @@
       "free_limits": {"requests_per_minute":2,"scope":"anonymous access, per IP and per model. With an API access key the page gives 400 requests per minute per Public Cloud project and per model, but the getting-started guide says keys from projects without a payment method (Discovery mode) cannot use the service, so that figure needs a project with a payment method","source":"https://docs.ovhcloud.com/en/guides/public-cloud/ai-machine-learning/ai-endpoints-capabilities","checked":"2026-11-14"},
       "verified": true,
       "last_verified": "2026-11-14",
-      "data_policy": {"trains_on_prompts":false,"retention":"Zero data retention; only data strictly necessary for billing is kept","source":"https://www.ovhcloud.com/en/public-cloud/ai-endpoints/","checked":"2026-11-14","quote":"Your data is never used to train our models, and we only keep what is strictly necessary for billing.","note":"Product-level statement for AI Endpoints. The page separately states zero data retention; billing data is kept. The quoted sentence does not name the free tier.","plan_named":false}
+      "data_policy": {"trains_on_prompts":false,"retention":"Zero data retention; only data strictly necessary for billing is kept","source":"https://www.ovhcloud.com/en/public-cloud/ai-endpoints/","checked":"2026-11-24","quote":"Your data is never used to train our models, and we only keep what is strictly necessary for billing.","note":"Product-level statement for AI Endpoints. The page separately states zero data retention; billing data is kept. The quoted sentence does not name the free tier.","plan_named":false}
     },
     {
       "slug": "fireworks-ai",
@@ -1500,12 +1500,12 @@
     {
       "slug": "datalab",
       "name": "Datalab (Marker / Surya)",
-      "category": "ongoing",
-      "free_type": "recurring-credit",
-      "free_tier": "$20/month (work email) or $10/month (personal email) free usage allowance for the hosted document AI API",
-      "rate_limits": "Official sources disagree: API limits docs say 10 requests/min and 5 concurrent; pricing says 25 requests/min and 25 concurrent. Exact free-tier request quota is not confirmed",
-      "notes": "Monthly allowance requires no card and resets each 30-day cycle without rollover. Billing and API limits docs disagree with the pricing table on request limits (read 2026-11-14). Commercial permission for the hosted free API remains unconfirmed; self-hosted model licence conditions are separate. Phone requirement was checked via Google signup on 2026-10-02 and was not re-tested in this pass",
-      "best_for": "Open-source-pedigree OCR (Marker/Surya) on a free monthly allowance",
+      "category": "trial",
+      "free_type": "trial-credit",
+      "free_tier": "One-time credit for the hosted document AI API: $10 at signup plus $10 more after adding a card with a work email; $5 plus $5 with a personal email. The credit does not expire",
+      "rate_limits": "Free: 25 requests/min and 25 concurrent requests (the limits docs and the pricing page agree)",
+      "notes": "The signup half of the credit needs no card; the second half requires adding one. Accounts created before the one-time credit keep their monthly usage allowance through 2026-11-30. The docs home page still says new accounts include $5 in free credits, which does not match the billing and pricing pages. Commercial permission for the hosted free credit remains unconfirmed; self-hosted model licence conditions are separate. Phone requirement was checked via Google signup on 2026-10-02 and was not re-tested. Sources: https://documentation.datalab.to/platform/billing, https://documentation.datalab.to/docs/common/limits and https://www.datalab.to/pricing (read 2026-11-24)",
+      "best_for": "Open-source-pedigree OCR (Marker/Surya) on a non-expiring free credit",
       "modalities": ["ocr"],
       "models_free": null,
       "expires": null,
@@ -1518,10 +1518,11 @@
       "is_text_llm": false,
       "model_tier": null,
       "free_limits": null,
+      "no_expiry": {"source":"https://documentation.datalab.to/platform/billing","checked":"2026-11-24","quote":"The credit does not expire."},
       "verified": true,
       "last_verified": "2026-11-14",
       "added": "2026-07-31",
-      "data_policy": {"trains_on_prompts":null,"retention":"Conversion results: deleted about one day after processing; uploaded source-file retention unconfirmed","source":"https://documentation.datalab.to/platform/security","checked":"2026-11-14","quote":"Conversion results are automatically deleted from Datalab servers about one day after processing completes.","note":"Use of documents to improve models is opt-in in team settings; opting in receives discounted rates. Retention statement covers conversion results only. The quoted sentence does not name a plan."}
+      "data_policy": {"trains_on_prompts":null,"retention":"Conversion results: deleted about one day after processing; uploaded source-file retention unconfirmed","source":"https://documentation.datalab.to/platform/security","checked":"2026-11-24","quote":"Conversion results are automatically deleted from Datalab servers about one day after processing completes.","note":"Use of documents to improve models is opt-in in team settings; opting in receives discounted rates. Retention statement covers conversion results only. The quoted sentence does not name a plan."}
     },
     {
       "slug": "wandb-inference",
