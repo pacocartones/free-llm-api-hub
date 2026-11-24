@@ -597,6 +597,17 @@
    "page_sha256": "9399f9854cd2d68dce07f6bcfbdc9f8a785c7d06a3e8930b6cf81789fd32f5ff"
   },
   {
+   "id": "photoroom.sentence",
+   "slug": "photoroom",
+   "kind": "sentence",
+   "text": "For clarity, our model improvement does not apply to the images processed through our Application Programming Interface (API).",
+   "source_url": "https://www.photoroom.com/privacy",
+   "read_on": "2026-11-24",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "76a536b858ef4430c67415493f49d2280f1e902c009bdb176d5356cfb0bd0984"
+  },
+  {
    "id": "poolside.sentence",
    "slug": "poolside",
    "kind": "sentence",

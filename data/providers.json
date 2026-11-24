@@ -1,7 +1,7 @@
 {
   "$schema": "./schema.json",
   "version": "2.14.2",
-  "generated": "2026-11-20",
+  "generated": "2026-11-24",
   "source": "https://github.com/pacocartones/free-llm-api-hub",
   "note": "Canonical dataset. README tables, badge-freshness.json and the interactive site are all generated from this file — do not hand-edit them. `verified: true` means the core facts (tier, limits, key catch, link) were independently confirmed against the provider's own docs on `last_verified`. `verified: false` means sourced from community tracking and not yet independently re-confirmed here — treat those as indicative. Attribute fields (openai_compatible, modalities, best_for) are progressively backfilled and may be null.",
   "providers": [
@@ -1331,7 +1331,8 @@
       "model_tier": null,
       "verified": true,
       "last_verified": "2026-11-19",
-      "added": "2026-07-31"
+      "added": "2026-07-31",
+      "data_policy": {"trains_on_prompts":false,"retention":null,"source":"https://www.photoroom.com/privacy","checked":"2026-11-24","quote":"For clarity, our model improvement does not apply to the images processed through our Application Programming Interface (API).","note":"The policy says uploaded images may train the models, with an account opt-out — except images processed through the API, which are excluded from model improvement. The free access in this dataset is the API.","plan_named":false}
     },
     {
       "slug": "poolside",
