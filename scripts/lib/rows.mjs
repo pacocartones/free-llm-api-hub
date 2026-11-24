@@ -90,7 +90,8 @@ export function explorerRowHtml(p, opts = {}) {
   let v;
   if (p.verified) {
     const date = htmlEsc(p.last_verified || '');
-    const age = p.last_verified ? Math.floor((nowMs - Date.parse(p.last_verified + 'T00:00:00Z')) / 86400000) : null;
+    // Never negative: the build measures from the release stamp, and a verification after it is 0 days old.
+    const age = p.last_verified ? Math.max(0, Math.floor((nowMs - Date.parse(p.last_verified + 'T00:00:00Z')) / 86400000)) : null;
     const st = freshnessStatus(age);
     const cls = st === 'stale' ? 'b-stale' : st === 'due' ? 'b-warn' : 'b-ok';
     const tip = age != null ? ` title="Verified ${age}d ago · ${date}"` : '';

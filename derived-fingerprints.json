@@ -25,10 +25,11 @@
   "site/api/v1/perpetual.json": "eccf94129e3f36c5e288bbc35cd8fa77724f3a510ff2b85fbda98548b6e90fe1",
   "site/api/v1/programs.json": "e97dd1fef617408753480dfd8f2fefbee0b5454a66ac35d3a3b3f86f54a51945",
   "site/api/v1/providers.json": "f518a09921f7421dfe2b59512638e18ed316aa2c3118b754346e34ca8e158c30",
-  "site/api/v1/schema.json": "18cf4d5d73ed34293296c9270ea1b34c3a8f0b12822a2cef4b0062bd15bf159f",
+  "site/api/v1/schema.json": "cbf586505325050b00bf01a29997f25f1396875cb16b8d228eafd48243f2af5e",
   "site/api/v1/score.json": "8e016f3ebe19f55d2ebf2befddea2ccb856f2d5b7d3d7eec157303c9a5abd8af",
   "site/api/v1/score.schema.json": "6557b4e6e7e113b1dc5a57bf8498d51486c3179f42dd8e2e2cd632172d8c49e2",
   "site/api/v1/trial.json": "a203de85fecdd1718c0829e30c353d9681ed87122896ab2d2801df704135711f",
+  "site/badge-freshness.json": "8ffc87bb3dfd381b42725d298a0e5b56ee5d28b3d28236ee84b1416dc90e5a2b",
   "site/best/index.html": "6c4ca123acd1fb131fd6a5f428dcd0d3b0d1917f30bc6dc6e449e7b7f0419a92",
   "site/best/methodology/index.html": "22dab47f2f2d560c772d35385061d30e66c359393378596d2cb4f23449664f20",
   "site/collections/always-free.html": "7fdf92eb378f8f61cee17601e6a7c8b2170018174a2afb6eccdb89a2ced90aa9",
@@ -93,7 +94,7 @@
   "site/programs/startups.html": "ad5ba58e3eb1efeab20931e88f391f27a450b361c065ba87a309a0634b9bbdd3",
   "site/providers.json": "ad744373a2d57cf756b58f53a319f437943e69a6084985dae11bc8d3168e6fda",
   "site/shared-compare.js": "123330f1d7abe0bd1167940589028f1c726aefa805e9e54ae04a2baa1c150060",
-  "site/shared-rows.js": "a5c2569b3cedc5d42de300e6cefebe0bbb6e5b7fd22ccabebc746c1873c7389c",
+  "site/shared-rows.js": "bc3fb0fb7272185d80c5a37c967ee245ae7e14596ea497c05d1fa9a907fb6e5d",
   "site/shared-rules.js": "e515b6afb1ae358891870bfac316cb35186545ecccdd04330397ec909f8cea49",
   "site/shared-sort.js": "fbbaace17447958ac05f8652c7b00d951a7dce7e9a6ed103ce0fb9beaf7e17d1"
 }

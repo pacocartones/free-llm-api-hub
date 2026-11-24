@@ -13,7 +13,7 @@ Every entry is dated and sourced to the provider's own docs, and what we could n
 <img src="assets/demo.svg" alt="Terminal demo: curl freellmapihub.com/api/v1/no-card.json returns Google Gemini, Groq, Cloudflare Workers AI, OpenRouter and Cohere" width="740">
 
 [![Verify](https://github.com/pacocartones/free-llm-api-hub/actions/workflows/verify.yml/badge.svg)](https://github.com/pacocartones/free-llm-api-hub/actions/workflows/verify.yml)
-[![Freshness](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/pacocartones/free-llm-api-hub/main/badge-freshness.json)](#how-verification-works)
+[![Freshness](https://img.shields.io/endpoint?url=https://freellmapihub.com/badge-freshness.json)](#how-verification-works)
 [![Verified providers](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/pacocartones/free-llm-api-hub/main/badge-verified.json)](docs/methodology.md)
 [![Website](https://img.shields.io/badge/explorer-freellmapihub.com-0b7285.svg)](https://freellmapihub.com/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
@@ -136,7 +136,7 @@ Most "free LLM API" lists are a snapshot someone took once and never touched aga
 
 1. **Every verified entry carries a `last_verified` date** and a link to the provider's *own* docs. No date + primary source → it ships as ⚠️ unverified, not as fact.
 2. **A local re-verification pass** ([docs/update-playbook.md](docs/update-playbook.md)) re-checks each provider's own docs on a rolling basis — a dead or changed source is an early warning that a provider changed something.
-3. **The freshness badge is computed from the data,** not written by hand: it is graded on the **oldest** verification in the list, straight from [`providers.json`](data/providers.json). Green while every verified entry is at most 60 days old and at least 70% of rows are verified (see the [freshness rules](docs/freshness-sla.md)), amber once any entry is due for re-verification, red once any entry breaches the 90-day SLA. One forgotten row is enough to move it on rebuild. The README badge reads the last committed `badge-freshness.json`; it can age between committed refreshes even though Pages deploys daily.
+3. **The freshness badge is computed from the data,** not written by hand: it is graded on the **oldest** verification in the list, straight from [`providers.json`](data/providers.json). Green while every verified entry is at most 60 days old and at least 70% of rows are verified (see the [freshness rules](docs/freshness-sla.md)), amber once any entry is due for re-verification, red once any entry breaches the 90-day SLA. One forgotten row is enough to move it on rebuild. The badge reads `badge-freshness.json` from the site, which every deploy rebuilds (at least daily); it is not committed, so it never waits for a pull request.
 4. **The dataset is schema-validated in CI.** A verified entry that's missing its date or source link fails the build — the honesty rule is enforced by machine, not by good intentions. The marked README sections, the badge and the site are generated from the data and checked for drift ([input map](docs/architecture.md)).
 5. **Reporting a stale entry takes under a minute** via a [structured form](../../issues/new?template=inaccuracy.yml) that asks for the provider, what changed and a source link.
 
@@ -175,7 +175,7 @@ Tags track the dataset `version` in [`data/providers.json`](data/providers.json)
 **Vouch for the data from your own README** — embed the live freshness badge:
 
 ```markdown
-[![Free LLM API Hub](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/pacocartones/free-llm-api-hub/main/badge-freshness.json)](https://github.com/pacocartones/free-llm-api-hub)
+[![Free LLM API Hub](https://img.shields.io/endpoint?url=https://freellmapihub.com/badge-freshness.json)](https://github.com/pacocartones/free-llm-api-hub)
 ```
 
 It renders the age of the oldest verified entry at the last committed badge refresh. It does not recompute with each view; use the live explorer for freshness calculated in the browser.

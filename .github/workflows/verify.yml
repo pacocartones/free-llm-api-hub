@@ -54,6 +54,14 @@ jobs:
       - name: Validate dataset against integrity rules
         run: node scripts/validate.mjs
 
+      # `generated` is the release date: it moves only together with `version`
+      # (npm run release:prepare). A data pull request that bumps it would put
+      # the same line in conflict with every other open data pull request.
+      # HEAD^1 is the base branch in the pull request's merge commit, and the
+      # previous main on a push (fetch-depth: 0 above).
+      - name: Release stamp moves only with the version
+        run: node scripts/check-release-stamp.mjs
+
       - name: Check internal documentation links
         run: node scripts/check-links.mjs
 
@@ -87,9 +95,9 @@ jobs:
 
       # The PR must ship its own regenerated files — there is no regeneration
       # bot anymore, so an out-of-sync main would otherwise stay broken.
-      # badge-freshness.json is the one deliberate exception: it is
-      # date-relative (the oldest age in days moves daily) and is refreshed on
-      # every data/build pass, so it is excluded from the diff below.
+      # The freshness badge is date-relative (the oldest age in days moves
+      # daily), so it is not committed at all: the build writes
+      # site/badge-freshness.json and every deploy publishes it.
       # The list of files is derived from git (scripts/generated-targets.mjs); the `check` script in package.json uses the same.
       - name: Generated files must be in sync with the data
         run: |

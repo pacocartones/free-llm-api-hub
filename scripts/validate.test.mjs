@@ -25,7 +25,7 @@ const VALIDATE = join(ROOT, 'scripts/validate.mjs');
 // | 87 | top-level: generated (${data.generated}) is after today in UTC (${todayUtc}); write the dates of the dataset in UTC (date -u +%F) | existing case |
 // | 89 | top-level: providers must be a non-empty array | no dedicated direct case |
 // | 91 | keyHostErrors: API keys stay on their pinned hosts | new isolated case |
-// | 106 | top-level: generated (${data.generated}) is older than the newest last_verified/added (${newest}) — bump it in data/providers.json | existing case |
+// | — | (retired) generated older than the newest last_verified/added: `generated` is the release stamp now, see check-release-stamp.mjs | release-stamp.test.mjs |
 // | 112 | ${id}: slug must be kebab-case | no dedicated direct case |
 // | 113 | ${id}: duplicate slug | no dedicated direct case |
 // | 115 | ${id}: duplicate name | new isolated case |
@@ -62,12 +62,12 @@ const VALIDATE = join(ROOT, 'scripts/validate.mjs');
 // | 206 | ${id}: model_tier_source.boundary must be ${nearBoundary(src.ci)} for ci ${JSON.stringify(src.ci)} (crosses or is within 5 points of a threshold) | existing case |
 // | 207 | ${id}: model_tier only applies to a text-LLM offer | existing case |
 // | 208 | ${id}: a one-time trial credit is not continuous free access, so it carries no model_tier | existing case |
-// | 209 | ${id}: model_tier_source.snapshot must be a date not after the dataset's generated date | existing case |
+// | 209 | ${id}: model_tier_source.snapshot must be a date not after today in UTC | existing case |
 // | 212 | ${id}: a one-time trial credit is not continuous free access, so it carries no free_limits | existing case |
-// | 213 | ${id}: free_limits.checked must be a date not after the dataset's generated date | existing case |
+// | 213 | ${id}: free_limits.checked must be a date not after today in UTC | existing case |
 // | 214 | ${id}: free_limits.source must be the provider's page (http/https) | no dedicated direct case |
 // | 220 | ${id}: data_policy must state trains_on_prompts or retention (an all-null policy records nothing) | existing case |
-// | 221 | ${id}: data_policy.checked must be a date not after the dataset's generated date | existing case |
+// | 221 | ${id}: data_policy.checked must be a date not after today in UTC | existing case |
 // | 222 | ${id}: data_policy.source must be the provider's public HTTPS page | new isolated case |
 // | 226 | ${id}: data_policy.${k} must be text of 1 to ${max} characters | no dedicated direct case |
 // | 227 | ${id}: data_policy.${k} must not contain control, bidirectional or zero-width characters | existing case |
@@ -75,7 +75,7 @@ const VALIDATE = join(ROOT, 'scripts/validate.mjs');
 // | 231 | ${id}: data_policy.plan_named must be true, false or null | no dedicated direct case |
 // | 236 | ${id}: no_expiry applies only to a one-time trial credit (on a continuous free tier a null expires already means no end) | existing case |
 // | 237 | ${id}: no_expiry and a non-null expires contradict each other | existing case |
-// | 238 | ${id}: no_expiry.checked must be a date not after the dataset's generated date | existing case |
+// | 238 | ${id}: no_expiry.checked must be a date not after today in UTC | existing case |
 // | 239 | ${id}: no_expiry.source must be the provider's page (http/https) | no dedicated direct case |
 // | 240 | ${id}: no_expiry.quote must be the passage, 1 to 300 characters | no dedicated direct case |
 // | 245 | ${id}: verified entry needs a YYYY-MM-DD last_verified | no dedicated direct case |
@@ -119,7 +119,8 @@ const VALIDATE = join(ROOT, 'scripts/validate.mjs');
 // asserts on the message validate prints.
 const RULE_CASES = [
   ['generated is a UTC day, never in the future', 'a contributor date ahead of UTC', (d) => { d.generated = '2999-01-01'; }, 'top-level: generated (2999-01-01) is after today in UTC', { VALIDATE_TODAY: '2000-01-02' }],
-  ['generated covers the newest last_verified/added', 'generated date older than the data it describes', (d) => { d.generated = '2000-01-01'; }, 'top-level: generated (2000-01-01) is older than the newest last_verified/added'],
+  ['last_verified is a UTC day, never in the future', 'a verification dated after today', (d) => { const p = provider(d); p.verified = true; p.last_verified = '2999-01-01'; }, 'last_verified (2999-01-01) is after today in UTC'],
+  ['added is a UTC day, never in the future', 'an entry added after today', (d) => { provider(d).added = '2999-01-01'; }, 'added (2999-01-01) is after today in UTC'],
   ['category follows free_type', 'a one-time credit listed as an ongoing free tier', (d) => { trialProvider(d).category = 'ongoing'; }, 'belongs in category "trial" (got "ongoing")'],
   ['rate_limits gives a limit unit or says none is published', 'a model list in the rate-limits field', (d) => { provider(d).rate_limits = 'Various open-weight models'; }, 'rate_limits must give a limit with a unit'],
   ['openai_base_url requires openai_compatible', 'an OpenAI endpoint on a provider marked incompatible', (d) => { provider(d).openai_compatible = false; }, 'openai_base_url is set but openai_compatible is false'],
@@ -131,16 +132,16 @@ const RULE_CASES = [
   ['model_tier_source.boundary matches the interval', 'a boundary flag that contradicts the interval', (d) => { provider(d).model_tier_source.boundary = !provider(d).model_tier_source.boundary; }, 'model_tier_source.boundary must be'],
   ['model_tier applies only to text LLMs', 'a ranked tier on a non-text offer', (d) => { provider(d).is_text_llm = false; }, 'model_tier only applies to a text-LLM offer'],
   ['model_tier does not apply to trial credit', 'a ranked tier on a one-time credit', (d) => { const p = trialProvider(d); p.model_tier = provider(d).model_tier; p.model_tier_source = provider(d).model_tier_source; }, 'a one-time trial credit is not continuous free access, so it carries no model_tier'],
-  ['model_tier_source.snapshot is not after generated', 'a source snapshot newer than the dataset', (d) => { provider(d).model_tier_source.snapshot = '2999-01-01'; }, 'model_tier_source.snapshot must be a date not after the dataset'],
+  ['model_tier_source.snapshot is not after today', 'a source snapshot newer than the dataset', (d) => { provider(d).model_tier_source.snapshot = '2999-01-01'; }, 'model_tier_source.snapshot must be a date not after today in UTC'],
   ['free_limits does not apply to trial credit', 'published recurring limits on a one-time credit', (d) => { trialProvider(d).free_limits = { requests_per_day: 100, source: 'https://example.com/limits', checked: '2026-10-01' }; }, 'a one-time trial credit is not continuous free access, so it carries no free_limits'],
-  ['free_limits.checked is not after generated', 'free-limit numbers checked after the dataset date', (d) => { provider(d).free_limits = { requests_per_day: 100, source: 'https://example.com/limits', checked: '2999-01-01' }; }, 'free_limits.checked must be a date not after the dataset'],
+  ['free_limits.checked is not after today', 'free-limit numbers checked after the dataset date', (d) => { provider(d).free_limits = { requests_per_day: 100, source: 'https://example.com/limits', checked: '2999-01-01' }; }, 'free_limits.checked must be a date not after today in UTC'],
   ['data_policy states training or retention', 'a policy row that records no policy', (d) => { provider(d).data_policy.trains_on_prompts = null; provider(d).data_policy.retention = null; provider(d).data_policy.quote = null; }, 'data_policy must state trains_on_prompts or retention'],
-  ['data_policy.checked is not after generated', 'a policy checked after the dataset date', (d) => { provider(d).data_policy.checked = '2999-01-01'; }, 'data_policy.checked must be a date not after the dataset'],
+  ['data_policy.checked is not after today', 'a policy checked after the dataset date', (d) => { provider(d).data_policy.checked = '2999-01-01'; }, 'data_policy.checked must be a date not after today in UTC'],
   ['data_policy text has no hidden characters', 'a copied policy sentence with a zero-width character', (d) => { provider(d).data_policy.quote = 'Prompts are not retained\u200b.'; }, 'must not contain control, bidirectional or zero-width characters'],
   ['data_policy quote goes with a stated part', 'a quote that does not say what it supports', (d) => { const p = provider(d); p.data_policy.quote = 'A policy sentence.'; p.data_policy.trains_on_prompts = null; p.data_policy.retention = null; }, 'a data_policy sentence goes with a stated part'],
   ['no_expiry applies only to trial credit', 'a no-expiry statement on an ongoing tier', (d) => { provider(d).no_expiry = { source: 'https://example.com/terms', checked: '2026-10-01', quote: 'Credits do not expire.' }; }, 'no_expiry applies only to a one-time trial credit'],
   ['no_expiry and expires do not contradict', 'a no-expiry statement beside an expiry date', (d) => { const p = trialProvider(d); p.expires = '2027-01-01'; p.no_expiry = { source: 'https://example.com/terms', checked: '2026-10-01', quote: 'Credits do not expire.' }; }, 'no_expiry and a non-null expires contradict each other'],
-  ['no_expiry.checked is not after generated', 'a no-expiry source checked after the dataset date', (d) => { trialProvider(d).no_expiry = { source: 'https://example.com/terms', checked: '2999-01-01', quote: 'Credits do not expire.' }; }, 'no_expiry.checked must be a date not after the dataset'],
+  ['no_expiry.checked is not after today', 'a no-expiry source checked after the dataset date', (d) => { trialProvider(d).no_expiry = { source: 'https://example.com/terms', checked: '2999-01-01', quote: 'Credits do not expire.' }; }, 'no_expiry.checked must be a date not after today in UTC'],
   ['verified entries have last_verified', 'a verified claim with no verification date', (d) => { provider(d).verified = true; provider(d).last_verified = null; }, 'last_verified must be string'],
   ['unverified entries have no last_verified', 'a stale verification date on an unverified row', (d) => { const p = provider(d); p.verified = false; p.last_verified = '2026-10-01'; }, 'unverified entry must have last_verified: null'],
 ];
@@ -223,7 +224,8 @@ function runValidate(data, report = validReport(data), env = {}) {
   const result = spawnSync(process.execPath, [VALIDATE, providersFile, reportFile], {
     cwd: ROOT,
     encoding: 'utf8',
-    env: { ...process.env, VALIDATE_TODAY: data.generated, ...env },
+    // The real clock by default: every committed date is on or before today, and the cases use far-future dates.
+    env: { ...process.env, ...env },
   });
   return { ...result, output: `${result.stdout}${result.stderr}` };
 }

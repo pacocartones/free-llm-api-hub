@@ -20,14 +20,14 @@ const isDay = (s) => typeof s === 'string' && DAY_RE.test(s) && !Number.isNaN(Da
 const str = (v, max) => typeof v === 'string' && v.trim().length > 0 && v.length <= max;
 const https = (u) => typeof u === 'string' && /^https:\/\/[^\s]+$/.test(u);
 
-/** Errors of the agreements file; does not throw. `generated` is the dataset's UTC day. */
-export function agreementsErrors(file, { slugs = [], generated } = {}) {
+/** Errors of the agreements file; does not throw. `today` is today's UTC day: no date of the file may be after it. */
+export function agreementsErrors(file, { slugs = [], today } = {}) {
   const errors = [];
   if (!file || typeof file !== 'object' || Array.isArray(file)) return ['the file must be an object'];
   for (const k of Object.keys(file)) if (!['version', 'generated', 'agreements', 'disclosures'].includes(k)) errors.push(`unknown key "${k}"`);
   if (file.version !== 1) errors.push('version must be 1');
   if (!isDay(file.generated)) errors.push('generated must be a day, YYYY-MM-DD');
-  else if (generated && file.generated > generated) errors.push(`generated ${file.generated} is after the dataset day ${generated}`);
+  else if (today && file.generated > today) errors.push(`generated ${file.generated} is after today in UTC (${today})`);
   const ids = new Set();
   const ARR = ['id', 'company', 'type', 'since', 'until', 'receives', 'does_not_receive', 'data_checked_by', 'last_review', 'url', 'text', 'company_wrote_text', 'company_reviewed_text'];
   if (!Array.isArray(file.agreements)) errors.push('agreements must be an array');
@@ -44,7 +44,7 @@ export function agreementsErrors(file, { slugs = [], generated } = {}) {
     if (isDay(a.since) && isDay(a.until) && a.until < a.since) errors.push(`${w}: until is before since`);
     for (const k of ['receives', 'does_not_receive', 'data_checked_by']) if (!str(a[k], 300)) errors.push(`${w}: ${k} is required (1 to 300 characters)`);
     if (!isDay(a.last_review)) errors.push(`${w}: last_review must be a day, YYYY-MM-DD`);
-    else if (generated && a.last_review > generated) errors.push(`${w}: last_review is after the dataset day`);
+    else if (today && a.last_review > today) errors.push(`${w}: last_review is after today in UTC`);
     if (!https(a.url)) errors.push(`${w}: url must be https`);
     if (a.type === 'sponsored_block' || a.type === 'sponsored_section') {
       if (!str(a.text, 600)) errors.push(`${w}: a sponsored text is required (1 to 600 characters)`);

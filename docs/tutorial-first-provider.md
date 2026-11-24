@@ -102,13 +102,15 @@ Every field is defined in [comparison-dimensions.md](comparison-dimensions.md). 
 - **Tri-state flags are about evidence, not vibes.** `card_required: false` means *confirmed* no card; `phone_required: null` means *nobody has confirmed it yet* — which is a task, not an answer.
 - **`verified: true` is a promise.** It means you confirmed the core facts against the provider's own docs *today* — so it ships with a real `docs_url` and a `last_verified` date. If you couldn't fully confirm it, set `verified: false` and `last_verified: null`, and say what's unconfirmed in `notes`. An honestly-flagged uncertain entry beats a confident wrong one.
 
-Then find the `generated` field near the top of the file. It must cover the newest verification or addition in the dataset:
+Leave the `version` and `generated` fields at the top of the file as they are. They are the dataset release: `generated` is the day of the release and changes only together with `version`, in a release pull request. A data pull request that moves `generated` fails the *Dataset integrity* check, because every other open data pull request would conflict on that line. Your dates go in `last_verified`, `added` and `checked`; none may be after today in UTC.
 
-```json
-"generated": "<today, YYYY-MM-DD>"
+Then describe your change for the changelog in a new file, `changes/unreleased/add-your-provider.md` (not in `CHANGELOG.md`):
+
+```markdown
+### Added
+
+- Your Provider: what it gives for free, in one line.
 ```
-
-If your `last_verified` is newer than it, the validator refuses — because the sitemap, the API and the citation would otherwise expose a stale "as of" date.
 
 ### Data policy (added in v2.11.0)
 
@@ -124,7 +126,7 @@ A few rules trip people up:
 
 1. **The entry must sit on one line**, like the others, or `npm test` fails with `serializer does not round-trip`.
 2. **`trains_on_prompts` and `retention` stay `null` when the page says nothing** — never guess `false`. `retention` is a period such as `"30 days"` or `"not stored"`; `null` means not stated.
-3. **`checked` is the day you read that source, not today by default** — the example above carries the day `https://www.ai21.com/terms-policies/privacy-policy/` was read (`2026-10-15`). Replace it with your own reading day, and never with a date after `generated`.
+3. **`checked` is the day you read that source, not today by default** — the example above carries the day `https://www.ai21.com/terms-policies/privacy-policy/` was read (`2026-10-15`). Replace it with your own reading day, and never with a date after today in UTC.
 4. **At least one of the two must be stated.** A `data_policy` whose `trains_on_prompts` and `retention` are both `null` records nothing, so the validator refuses it (`data_policy must state trains_on_prompts or retention (an all-null policy records nothing)`). If the page says neither, leave `data_policy` out of the entry — or set it to `null` — rather than writing an all-`null` object.
 5. **If your `data_policy` has a `quote` or a `note` with passages in «...», register them in `data/quotes.json`.** After editing the row, run `npm run quotes:add -- <slug>`; the command writes the `sentence` entry for a `quote`, and a `note_passage` entry for each passage in «...». Commit the resulting `data/quotes.json`. See [`docs/quotes.md`](quotes.md).
 6. **Commit the regenerated files with the data change**: run `npm run build`, and `npm run check` must leave no diff.
@@ -141,7 +143,7 @@ If the tests fail, inspect the output and fix issues related to your contributio
 
 ```text
 ai21: verified entry needs a YYYY-MM-DD last_verified
-top-level: generated (2026-08-01) is older than the newest last_verified/added (2026-08-14) — bump it in data/providers.json
+top-level: generated changed from 2026-08-01 to 2026-08-14 without a release. Leave "generated": "2026-08-01" as it is: ...
 ```
 
 These are illustrative examples, not guaranteed failures. The dates and provider-specific message may differ in your checkout. Fix data-related validation errors in the data, not by loosening the check. Before opening your PR, investigate any remaining failures and report unrelated baseline failures rather than assuming the full suite passes.
@@ -154,13 +156,13 @@ The dataset is the source; everything else is a projection of it. Regenerate:
 npm run build
 ```
 
-This rewrites the README tables, the freshness badge, the collection pages, and the whole site payload (explorer data, per-provider pages, sitemap). Then, if the OG check flags drift:
+This rewrites the README tables, the collection pages, and the whole site payload (explorer data, per-provider pages, sitemap). Then, if the OG check flags drift:
 
 ```bash
 npm run og
 ```
 
-**Never hand-edit the generated files** — edit the data and let the build rewrite them. For fixed inputs, Git history and reference day, the build is idempotent. The freshness badge changes with the calendar; see [Architecture](architecture.md) for date-relative and history-derived exceptions. Commit both together.
+**Never hand-edit the generated files** — edit the data and let the build rewrite them. For fixed inputs, Git history and reference day, the build is idempotent. The freshness badge changes with the calendar, so it is written to `site/` and never committed; see [Architecture](architecture.md) for date-relative and history-derived exceptions. Commit both together.
 
 ## Step 6 — Commit and open the PR
 
@@ -170,7 +172,7 @@ Commit the data change **and** the regenerated files in the same commit — a da
 git status --short
 git diff
 # Stage the reviewed data and generated outputs, including fingerprints and evidence:
-git add -- data README.md badge-freshness.json badge-verified.json CITATION.cff \
+git add -- data changes README.md badge-verified.json CITATION.cff \
   derived-fingerprints.json docs/credit-programs.md docs/comparison-dimensions.md site collections
 git commit -m "feat: add your provider"
 npm run check
@@ -179,7 +181,7 @@ git push -u fork add-your-provider
 
 If you chose a different branch name, use that name in the push command too.
 
-`CITATION.cff` carries the dataset date; `derived-fingerprints.json` pins ignored build outputs; `data/quotes.json` carries policy evidence. Include every reviewed regenerated artifact. After committing, run `npm run check` to confirm no generated drift before pushing.
+`CITATION.cff` carries the dataset version and release date (unchanged by a data pull request); `derived-fingerprints.json` pins ignored build outputs; `data/quotes.json` carries policy evidence. Include every reviewed regenerated artifact. After committing, run `npm run check` to confirm no generated drift before pushing.
 
 Open the pull request. Give it a title that says what changed and a body with the source link and what you confirmed.
 
@@ -198,7 +200,7 @@ On merge, the entry goes live: the explorer and provider page appear, the badge 
 | `verified: true` with no `last_verified` or no real `docs_url` | Validator rejects | Confirm against the provider's own docs and date it, or set `verified: false` |
 | `verified: false` with a date | Validator rejects (`unverified entry must have last_verified: null`) | Set `last_verified: null`, explain in `notes` |
 | Shallow clone | Test suite fails on history integrity | `git fetch --unshallow` |
-| Forgot to bump `generated` | Validator rejects | Set it to today |
+| Bumped `generated` | "Release stamp" check fails | Put it back as it is on `main`: it changes only in a release |
 | Committed only `data/providers.json` | "Dataset integrity" check fails | Regenerate with `npm run build` and commit the derived files |
 | Marketing language in `free_tier`/`rate_limits` | Reviewer sends it back | Use the exact published numbers, or say "not published" |
 | Renaming or reusing a `slug` | Breaks external references | Slugs are permanent |

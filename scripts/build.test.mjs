@@ -232,17 +232,17 @@ test('validate rejects an unverified entry that still carries a date', () => {
   assert.equal(exitOk(['scripts/validate.mjs', fixture]), false);
 });
 
-test('validate rejects a generated date older than the newest verification', () => {
+// `generated` is the release stamp: a data change after the release leaves it older than the newest verification
+// (lib/release-stamp.mjs; check-release-stamp.mjs keeps it from moving without a release). What stays rejected is a
+// verification in the future.
+test('validate accepts a release stamp older than the newest verification, and rejects a verification after today', () => {
   const data = JSON.parse(readFileSync(DATA, 'utf8'));
-  const newest = data.providers
-    .map((p) => [p.last_verified, p.added])
-    .flat()
-    .filter((d) => d && /^\d{4}-\d{2}-\d{2}$/.test(d))
-    .sort()
-    .pop();
-  assert.ok(newest, 'fixture needs at least one dated entry to be meaningful');
   data.generated = '2000-01-01'; // older than every real date in the dataset
   const fixture = tmpFile('providers.json');
+  writeFileSync(fixture, JSON.stringify(data));
+  assert.equal(exitOk(['scripts/validate.mjs', fixture]), true);
+  const p = data.providers.find((x) => x.verified);
+  p.last_verified = '2999-01-01';
   writeFileSync(fixture, JSON.stringify(data));
   assert.equal(exitOk(['scripts/validate.mjs', fixture]), false);
 });
@@ -316,7 +316,7 @@ test('existing script self-tests pass (fetch-models, probe)', () => {
 
 const GENERATED = [
   'README.md',
-  'badge-freshness.json',
+  'site/badge-freshness.json',
   'site/index.html',
   'site/providers.csv',
 ];
@@ -611,12 +611,13 @@ test('the committed OG manifest matches the current dataset', () => {
 });
 
 import { topEntries } from './lib/best.mjs';
+import { datasetAsOf } from './lib/release-stamp.mjs';
 const topOfData = () => {
   const data = JSON.parse(readFileSync(DATA, 'utf8'));
   return topEntries(data.providers, {
     editorial: JSON.parse(readFileSync(join(ROOT, 'data/editorial.json'), 'utf8')),
     probeReport: JSON.parse(readFileSync(join(ROOT, 'data/probe-report.json'), 'utf8')),
-    now: new Date(data.generated + 'T12:00:00Z'),
+    now: new Date(datasetAsOf(data) + 'T12:00:00Z'),
   });
 };
 
@@ -826,14 +827,15 @@ test('badge and worklist bucket identically at the 60-day threshold', () => {
   assert.equal(freshnessColor(null), 'yellow');
 });
 
-// Deliberately not compared against a freshly built badge: the committed file
-// ages a day at a time between build passes, and this suite is a
-// blocking check on every pull request. What must always hold is that the file
+// The badge is no longer committed (it moves with the calendar; every deploy rebuilds site/badge-freshness.json).
+// Deliberately not compared against a badge built on another day: what must always hold is that the file
 // is internally consistent — the colour is the one the rule gives to the age the
 // message itself states — which catches a hand-edited or half-migrated badge
 // without turning the clock into a source of red builds.
 test('the shipped badge grades its own stated age by the rule', () => {
-  const onDisk = JSON.parse(readFileSync(join(ROOT, 'badge-freshness.json'), 'utf8'));
+  assert.equal(existsSync(join(ROOT, 'badge-freshness.json')), false, 'the date-relative badge is not committed at the root');
+  const built = join(ROOT, 'site/badge-freshness.json');
+  const onDisk = existsSync(built) ? JSON.parse(readFileSync(built, 'utf8')) : freshnessBadge(JSON.parse(readFileSync(DATA, 'utf8')).providers, new Date()).badge;
   assert.equal(onDisk.schemaVersion, 1);
   assert.equal(onDisk.label, 'freshness');
   const m = onDisk.message.match(/^(\d+)\/(\d+) verified · oldest (\d+)d$/);

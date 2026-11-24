@@ -2,7 +2,7 @@
 // Regenerates derived artifacts from canonical datasets, companion metadata and authored inputs.
 // See docs/architecture.md for source inputs, generated regions and separate OG generation.
 //   - README provider tables (between AUTOGEN markers)
-//   - badge-freshness.json (root, for the shields.io endpoint badge)
+//   - site/badge-freshness.json (served by the site, for the shields.io endpoint badge; built on deploy, not committed)
 //   - site/providers.json so the interactive site ships the data
 //   - site/providers.csv, the documented scalar projection for spreadsheets
 // Zero dependencies. Run with: node scripts/build.mjs   (or `npm run build`)
@@ -43,11 +43,16 @@ import { badgeSvg } from './lib/badge-svg.mjs';
 import { codeHtmlEsc, curlChatQuickstart, pythonChatQuickstart, pythonEmbeddingsQuickstart, pythonStringLiteral } from './lib/quickstart.mjs';
 import { providersCsv } from './lib/provider-csv.mjs';
 import { writeSchemaDocs } from './schema-docs.mjs';
+import { datasetAsOf } from './lib/release-stamp.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const FRESH_DAYS = SLA_DAYS; // the freshness SLA, defined once in lib/rules.mjs
 
 const data = JSON.parse(readFileSync(join(ROOT, 'data/providers.json'), 'utf8'));
+// `data.generated` is the release stamp: it moves only with `version` (lib/release-stamp.mjs), so the pages that print it
+// stay the same across data pull requests. Ranking needs a day that is never older than the data it ranks (a verification
+// after it would read as "in the future"); that day is derived here and never stored.
+const ASOF = datasetAsOf(data);
 const providers = data.providers;
 const summaryBySlug = new Map(JSON.parse(readFileSync(join(ROOT, 'data/provider-summaries.json'), 'utf8')).summaries.map((x) => [x.id, x]));
 // Counts quoted in prose come from the data, never from a typed number (lib/figures.mjs).
@@ -761,9 +766,9 @@ const bestEntries = resolveBestEntries(BEST, providers);
 const AGREEMENTS_FILE = JSON.parse(readFileSync(join(ROOT, 'data/sponsorships.json'), 'utf8'));
 const EDITORIAL = JSON.parse(readFileSync(join(ROOT, 'data/editorial.json'), 'utf8'));
 const PROBE_REPORT = JSON.parse(readFileSync(join(ROOT, 'data/probe-report.json'), 'utf8'));
-const topList = topEntries(providers, { editorial: EDITORIAL, probeReport: PROBE_REPORT, now: new Date(data.generated + 'T12:00:00Z') });
+const topList = topEntries(providers, { editorial: EDITORIAL, probeReport: PROBE_REPORT, now: new Date(ASOF + 'T12:00:00Z') });
 // The score of every eligible provider, for the /compare/ tables (static pages and the browser view).
-const rankedAll = rankProviders(providers, { editorial: EDITORIAL, probeReport: PROBE_REPORT, now: new Date(data.generated + 'T12:00:00Z'), minConfirmed: 0 });
+const rankedAll = rankProviders(providers, { editorial: EDITORIAL, probeReport: PROBE_REPORT, now: new Date(ASOF + 'T12:00:00Z'), minConfirmed: 0 });
 const scoreMap = Object.fromEntries(rankedAll
   .map((r) => [r.slug, { total: Math.round(r.total * 10) / 10, confirmed: r.confirmed, of: r.of, rank: topList.find((e) => e.p.slug === r.slug)?.rank ?? null }]));
 // Static /compare/<a>-vs-<b>/ pages (#175): the picks of data/best.json compared pairwise
@@ -879,13 +884,16 @@ const homeProvider = (p) => {
   if (p.data_policy && p.data_policy.trains_on_prompts !== undefined) out.data_policy = { trains_on_prompts: p.data_policy.trains_on_prompts };
   return out;
 };
-const inlineData = `<script type="application/json" id="providers-data">${JSON.stringify({ providers: publicProviders.map(homeProvider) }).replace(/</g, '\\u003c')}</script>`;
+// One provider per line: a data change rewrites only its own provider's line, so two pull requests that edit different
+// providers do not both rewrite one long line of this page.
+const inlineData = `<script type="application/json" id="providers-data">{"providers":[\n${publicProviders.map((p) => JSON.stringify(homeProvider(p))).join(',\n').replace(/</g, '\\u003c')}\n]}</script>`;
 // The four stat tiles are rendered here too, dated by data.generated (deterministic), so they show without JavaScript and
 // without a layout shift; explorer.js repaints them with the visitor's clock. Same markup as renderStats() in explorer.js.
 const STAT_STATUS_WORD = { fresh: 'fresh', due: 'due for re-check', stale: 'stale' };
 const homeStatsHtml = (() => {
   const genMs = Date.parse(data.generated + 'T00:00:00Z');
-  const ages = providers.filter((p) => p.verified && p.last_verified).map((p) => Math.floor((genMs - Date.parse(p.last_verified + 'T00:00:00Z')) / 86400000));
+  // A verification after the release stamp counts as 0 days old (the visitor's clock repaints the real age).
+  const ages = providers.filter((p) => p.verified && p.last_verified).map((p) => Math.max(0, Math.floor((genMs - Date.parse(p.last_verified + 'T00:00:00Z')) / 86400000)));
   const oldest = ages.length ? Math.max(...ages) : 0;
   const status = freshnessStatus(oldest);
   const tiles = [
@@ -912,7 +920,9 @@ writeFileSync(join(ROOT, 'site/index.html'), indexHtml);
 // without months of total silence, so it reported liveness, not freshness.
 const { badge, oldest: oldestAge, median: medianAge } = freshnessBadge(providers, today);
 const color = badge.color;
-writeFileSync(join(ROOT, 'badge-freshness.json'), JSON.stringify(badge, null, 2) + '\n');
+// Served by the site (https://freellmapihub.com/badge-freshness.json), rebuilt by every deploy including the daily one, and
+// gitignored: a file that moves with the calendar is not committed, so no pull request carries it.
+writeFileSync(join(ROOT, 'site/badge-freshness.json'), JSON.stringify(badge, null, 2) + '\n');
 
 // badge-verified.json — live shields.io endpoint badge for the companion doc
 // (docs/credit-programs.md). Deterministic per dataset snapshot (NOT date-relative

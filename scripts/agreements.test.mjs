@@ -15,12 +15,12 @@ const DAY = '2026-10-16';
 const SLUGS = ['alpha', 'beta'];
 const block = (o = {}) => ({ id: 'zorbit-block', company: 'Zorbit Labs', type: 'sponsored_block', since: '2026-10-01', until: null, receives: 'One labelled block on the agreements page.', does_not_receive: 'A place in the ranking, a score or an edit of the data.', data_checked_by: 'Free LLM API Hub, from its own pages.', last_review: '2026-10-10', url: 'https://zorbit.example/', text: 'Zorbit text ZORBITSENTINEL.', company_wrote_text: true, ...o });
 const file = (o = {}) => ({ version: 1, generated: DAY, agreements: [], disclosures: [], ...o });
-const errs = (f) => agreementsErrors(f, { slugs: SLUGS, generated: DAY });
+const errs = (f) => agreementsErrors(f, { slugs: SLUGS, today: DAY });
 
 test('the committed file is valid and empty today: no row, no money', () => {
   const f = JSON.parse(readFileSync(join(REPO, 'data/sponsorships.json'), 'utf8'));
   const data = JSON.parse(readFileSync(join(REPO, 'data/providers.json'), 'utf8'));
-  assert.deepEqual(agreementsErrors(f, { slugs: data.providers.map((p) => p.slug), generated: data.generated }), []);
+  assert.deepEqual(agreementsErrors(f, { slugs: data.providers.map((p) => p.slug), today: new Date().toISOString().slice(0, 10) }), []);
   assert.deepEqual(f.agreements, []);
 });
 
@@ -42,13 +42,13 @@ test('each required thing missing or malformed is named, one test per rule', () 
   bad({ receives: '' }, /receives is required/);
   bad({ does_not_receive: undefined }, /does_not_receive is required/);
   bad({ data_checked_by: '' }, /data_checked_by is required/);
-  bad({ last_review: '2026-10-17' }, /last_review is after the dataset day/);
+  bad({ last_review: '2026-10-17' }, /last_review is after today in UTC/);
   bad({ url: 'http://zorbit.example/' }, /url must be https/);
   bad({ text: '' }, /sponsored text is required/);
   bad({ company_wrote_text: 'yes' }, /company_wrote_text must be true or false/);
   bad({ price: 100 }, /unknown key "price"/);
   assert.match(errs(file({ agreements: [block(), block()] })).join(), /duplicate id/);
-  assert.match(errs(file({ generated: '2026-10-17' })).join(), /after the dataset day/);
+  assert.match(errs(file({ generated: '2026-10-17' })).join(), /after today in UTC/);
   assert.match(errs(file({ disclosures: [{ slug: 'nope', company: 'X', kind: 'free_credit', since: DAY }] })).join(), /not a provider/);
   assert.match(errs(file({ disclosures: [{ slug: 'alpha', company: 'X', kind: 'personal', since: DAY }] })).join(), /needs "relation"/);
   assert.match(errs(file({ disclosures: [{ slug: 'alpha', company: 'X', kind: 'free_credit', relation: 'x', since: DAY }] })).join(), /relation is only for kind personal/);

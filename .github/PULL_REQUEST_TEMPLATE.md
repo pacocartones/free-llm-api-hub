@@ -30,7 +30,8 @@ If a relevant check could not run, include the error and why it is blocked. -->
 - [ ] **Docs or template text:** I previewed the changed text and opened its links.
 - [ ] **Data or build-input changes:** I ran `npm run build` (and `npm run og` if the OG check asked for it) and committed the regenerated files.
 - [ ] **Build-input changes:** I ran `npm run check` and it found no drift.
-- [ ] **Data changes:** I edited the canonical data by hand, not the generated files.
+- [ ] **Data changes:** I edited the canonical data by hand, not the generated files, and left `generated` and `version` as they are (they move only in a release).
+- [ ] **User-visible changes:** I added a changelog fragment `changes/unreleased/<short-name>.md` instead of editing `CHANGELOG.md`.
 - [ ] **Data changes:** for a verified change, I set `verified: true` **with** a `last_verified` date (the day I checked) **and** a real `docs_url`.
 - [ ] **Data changes:** anything I couldn't confirm against the provider's own docs stays `null` or `verified: false`, with a note saying what's unconfirmed.
 - [ ] **`data_policy` changes:** I ran `npm run quotes:add -- <slug>` when required by `docs/quotes.md`.

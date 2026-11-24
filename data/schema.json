@@ -15,7 +15,7 @@
     },
     "generated": {
       "type": "string",
-      "description": "Date the dataset was last built/serialised (YYYY-MM-DD).",
+      "description": "Date of the dataset release (YYYY-MM-DD). It changes only together with version; data changes between releases leave it as it is.",
       "format": "date"
     },
     "source": { "type": "string", "format": "uri" },

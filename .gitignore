@@ -24,6 +24,9 @@ site/sitemap-state.xml
 site/api/
 site/llms.txt
 site/llms-full.txt
+# Freshness badge: moves with the calendar, so it is built on every deploy (daily too) and never committed
+site/badge-freshness.json
+badge-freshness.json
 
 # Local tooling
 .claude/settings.local.json

@@ -12,7 +12,11 @@ publication process (rule 4).
 2. **Tags:** `vX.Y.Z`, never moved. The tag is created by the `Tag release` workflow, from the
    bump of `version` in `data/providers.json`; nobody tags by hand. A release in GitHub is
    written on an existing tag. The same bump sets the private root `package.json` and
-   `package-lock.json` version to the dataset version; `packages/mcp` keeps its own version.
+   `package-lock.json` version to the dataset version; `packages/mcp` keeps its own version. It also
+   sets `generated`, the release date (`date-released` in `CITATION.cff` is built from it), and moves the
+   changelog fragments into `CHANGELOG.md`: see *Prepare the release pull request* below. Those lines
+   change only in a release pull request; a data pull request that moves `generated` fails the
+   *Dataset integrity* check (`scripts/check-release-stamp.mjs`).
 3. **Source:** only from `main`, with every check green, from the exact commit the tag points to.
 4. **Approval:** publishing a GitHub release is done by the maintainer, after the owner's OK.
    Nothing is published to a package registry, with one scoped exception: `packages/mcp` (the
@@ -64,6 +68,30 @@ publication process (rule 4).
 - `### Verify`: how to check the snapshot.
 
 The skeleton is in [`.github/release-template.md`](.github/release-template.md).
+
+## Prepare the release pull request
+
+After the owner's OK for the release (rule 9), from an up-to-date `main` on a branch such as
+`chore/release-x-y-z`:
+
+```bash
+npm run release:prepare -- X.Y.Z   # dated today in UTC; --date YYYY-MM-DD for an earlier day
+```
+
+It refuses a version that is not greater than the current one and a date after today in UTC,
+before the previous release date or before the newest `last_verified`/`added`. Then it, and only it:
+
+- sets `version` and `generated` (the release date) in `data/providers.json`, and the version in the
+  root `package.json` and `package-lock.json`;
+- moves every `changes/unreleased/*.md` fragment, together with anything already under
+  `## [Unreleased]`, under a new `## [X.Y.Z] — <date>` heading of `CHANGELOG.md`, sections in release
+  order, and deletes the fragments it moved.
+
+Write the summary paragraph under the new heading and check the entries against the merged pull
+requests (rule 5, `npm run changelog-draft`), then `npm run build` (`npm run og` if the OG check asks),
+`npm test`, commit and open the pull request. When it merges, `Tag release` tags that commit
+(rule 2). `npm run changelog:collect` moves the fragments under `## [Unreleased]` without a
+release, for a preview.
 
 ## Verify
 
