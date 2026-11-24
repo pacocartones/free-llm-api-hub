@@ -44,6 +44,8 @@ import { codeHtmlEsc, curlChatQuickstart, pythonChatQuickstart, pythonEmbeddings
 import { providersCsv } from './lib/provider-csv.mjs';
 import { writeSchemaDocs } from './schema-docs.mjs';
 import { datasetAsOf } from './lib/release-stamp.mjs';
+import { groupModels, modelKey } from './lib/model-keys.mjs';
+import { isIndexable, modelPageMainHtml, modelPageTitle, modelPageDescription, modelPageJsonLd } from './lib/model-pages.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const FRESH_DAYS = SLA_DAYS; // the freshness SLA, defined once in lib/rules.mjs
@@ -1131,6 +1133,11 @@ const provFlagsHtml = (p) => {
   return parts.join('');
 };
 
+// The model groups behind /models/<key>/ (built in the model index section below); provider pages link to them.
+const MODEL_GROUPS = groupModels(providers);
+const MODEL_PAGE_KEYS = new Set(MODEL_GROUPS.map((g) => g.key));
+const modelPageHref = (prefix) => (id) => { const k = modelKey(id); return k && MODEL_PAGE_KEYS.has(k) ? `${prefix}models/${k}/` : ''; };
+
 for (const p of providers) {
   const inColls = COLLECTIONS.filter((c) => collRows(c).some((x) => x.slug === p.slug));
   const inGuides = GUIDES.filter((g) => g.filter(p));
@@ -1212,7 +1219,7 @@ for (const p of providers) {
     summary +
     limitsHtml(p) +
     glanceHtml(p, typeLabel(p)) +
-    modelsHtml(p) +
+    modelsHtml(p, { modelHref: modelPageHref('../') }) +
     dataPolicyHtml(p) +
     aboutHtml(summaryBySlug.get(p.slug), p.name) +
     disclosureHtml(AGREEMENTS_FILE, p.slug) +
@@ -1556,7 +1563,7 @@ modelIndex.sort((a, b) => a.m.toLowerCase().localeCompare(b.m.toLowerCase()) || 
 const modelProviderCount = providers.filter((p) => p.models_free && p.models_free.length).length;
 const modelRowHtml = ({ m, p }) =>
   `<tr data-s="${htmlEsc((m + ' ' + p.name + ' ' + (p.modalities || []).join(' ')).toLowerCase())}">` +
-  `<td class="name"><code>${htmlEsc(m)}</code></td>` +
+  `<td class="name">${MODEL_PAGE_KEYS.has(modelKey(m)) ? `<a href="${modelKey(m)}/"><code>${htmlEsc(m)}</code></a>` : `<code>${htmlEsc(m)}</code>`}</td>` +
   `<td><a href="../p/${p.slug}">${htmlEsc(p.name)}</a></td>` +
   `<td>${htmlEsc(p.free_type)}</td>` +
   `<td class="notes">${(p.modalities || []).join(', ') || '—'}</td></tr>`;
@@ -1572,6 +1579,27 @@ writeFileSync(join(ROOT, 'site/models/index.html'), htmlPage({
   main: modelsMain,
   ogImage: `${SITE}/og/models.png`,
 }));
+
+// One page per model: /models/<key>/ ("Free API for <model>"). The key groups the same model under its different
+// deployment names (lib/model-keys.mjs, conservative: never a guess); each page shows the exact ID every provider
+// lists, so it only depends on the dataset and stays pinned in derived-fingerprints.json like the index. Stale
+// pages go first: the subfolders are removed and written again, as site/changes and site/state are.
+for (const d of readdirSync(join(ROOT, 'site/models'), { withFileTypes: true })) {
+  if (d.isDirectory()) rmSync(join(ROOT, 'site/models', d.name), { recursive: true, force: true });
+}
+for (const g of MODEL_GROUPS) {
+  mkdirSync(join(ROOT, `site/models/${g.key}`), { recursive: true });
+  writeFileSync(join(ROOT, `site/models/${g.key}/index.html`), htmlPage({
+    title: modelPageTitle(g),
+    desc: modelPageDescription(g),
+    canonical: `${SITE}/models/${g.key}/`,
+    main: modelPageMainHtml(g, { asOf: ASOF, prefix: '../../' }),
+    jsonld: modelPageJsonLd(g, { site: SITE }),
+    prefix: '../../',
+    noindex: !isIndexable(g),
+    ogImage: `${SITE}/og/models.png`,
+  }));
+}
 
 // ---------- SEO guides: intent-matched landing pages, generated from the data ----------
 mkdirSync(join(ROOT, 'site/guides'), { recursive: true });
@@ -2254,6 +2282,7 @@ const stateLastmod = (month, i, all) => {
 const sitemapEntries = [
   [`${SITE}/`, ASOF],
   [`${SITE}/models/`, ASOF],
+  ...MODEL_GROUPS.filter((g) => isIndexable(g)).map((g) => [`${SITE}/models/${g.key}/`, lastVerified(g.entries.map((e) => e.p))]),
   [`${SITE}/guides-and-collections/`, ASOF],
   [`${SITE}/best/`, ASOF],
   [`${SITE}/best/methodology/`, ASOF],
