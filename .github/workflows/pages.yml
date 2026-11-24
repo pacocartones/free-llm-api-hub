@@ -36,6 +36,8 @@ jobs:
     permissions:
       contents: read
       pages: read
+    outputs:
+      indexnow_urls: ${{ steps.indexnow.outputs.urls }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -55,6 +57,14 @@ jobs:
           # repository variable GA_MEASUREMENT_ID (Settings > Secrets and variables > Actions > Variables): then no
           # analytics code is built at all.
           GA_MEASUREMENT_ID: ${{ vars.GA_MEASUREMENT_ID }}
+      # IndexNow, part 1: the live sitemaps are still the previous deploy's, so the URLs this deploy adds or changes
+      # are the difference (scripts/indexnow.mjs, docs/architecture.md). Best effort: the script always exits 0, and
+      # a failure here only means nothing is announced.
+      - name: IndexNow — list the URLs this deploy adds or changes (best effort)
+        id: indexnow
+        continue-on-error: true
+        timeout-minutes: 2
+        run: node scripts/indexnow.mjs --plan
       - uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
       - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
@@ -102,3 +112,30 @@ jobs:
           # Edge propagation: retry only the URLs that did not answer 200, waiting 10, 20, 40, 60 s.
           FLLM_LIVE_ATTEMPTS: 5
           FLLM_LIVE_RETRY_DELAY: 10
+
+  # IndexNow, part 2: once the deploy is verified live, announce those URLs to api.indexnow.org (Bing, Yandex and
+  # the other participating engines). Never fails the deploy: the job is continue-on-error, the script always exits
+  # 0 and every request has a timeout. The key is public by design (site/<key>.txt); no secret is involved.
+  indexnow:
+    name: IndexNow (best effort)
+    needs: [build, verify-live]
+    if: needs.build.outputs.indexnow_urls != '' && needs.build.outputs.indexnow_urls != '[]'
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+      - name: Submit the changed URLs to IndexNow
+        timeout-minutes: 2
+        run: node scripts/indexnow.mjs --submit
+        env:
+          # Passed through the environment, never interpolated into the script.
+          INDEXNOW_URLS: ${{ needs.build.outputs.indexnow_urls }}

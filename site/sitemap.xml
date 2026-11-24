@@ -55,7 +55,7 @@
   <url><loc>https://freellmapihub.com/updates</loc><lastmod>2026-11-24</lastmod></url>
   <url><loc>https://freellmapihub.com/collections/no-credit-card</loc><lastmod>2026-11-24</lastmod></url>
   <url><loc>https://freellmapihub.com/collections/no-phone</loc><lastmod>2026-11-20</lastmod></url>
-  <url><loc>https://freellmapihub.com/collections/commercial-use</loc><lastmod>2026-11-20</lastmod></url>
+  <url><loc>https://freellmapihub.com/collections/commercial-use</loc><lastmod>2026-11-24</lastmod></url>
   <url><loc>https://freellmapihub.com/collections/openai-compatible</loc><lastmod>2026-11-24</lastmod></url>
   <url><loc>https://freellmapihub.com/collections/always-free</loc><lastmod>2026-11-19</lastmod></url>
   <url><loc>https://freellmapihub.com/collections/multimodal</loc><lastmod>2026-11-24</lastmod></url>
@@ -67,7 +67,7 @@
   <url><loc>https://freellmapihub.com/p/openrouter</loc><lastmod>2026-11-24</lastmod></url>
   <url><loc>https://freellmapihub.com/p/cloudflare-workers-ai</loc><lastmod>2026-11-24</lastmod></url>
   <url><loc>https://freellmapihub.com/p/cohere</loc><lastmod>2026-11-24</lastmod></url>
-  <url><loc>https://freellmapihub.com/p/cerebras</loc><lastmod>2026-11-14</lastmod></url>
+  <url><loc>https://freellmapihub.com/p/cerebras</loc><lastmod>2026-11-24</lastmod></url>
   <url><loc>https://freellmapihub.com/p/huggingface</loc><lastmod>2026-11-19</lastmod></url>
   <url><loc>https://freellmapihub.com/p/siliconflow</loc><lastmod>2026-11-14</lastmod></url>
   <url><loc>https://freellmapihub.com/p/zai-glm</loc><lastmod>2026-11-19</lastmod></url>
@@ -92,7 +92,7 @@
   <url><loc>https://freellmapihub.com/p/modelscope</loc><lastmod>2026-11-20</lastmod></url>
   <url><loc>https://freellmapihub.com/p/pollinations</loc><lastmod>2026-11-20</lastmod></url>
   <url><loc>https://freellmapihub.com/p/runware</loc><lastmod>2026-11-20</lastmod></url>
-  <url><loc>https://freellmapihub.com/p/pinecone-inference</loc><lastmod>2026-11-14</lastmod></url>
+  <url><loc>https://freellmapihub.com/p/pinecone-inference</loc><lastmod>2026-11-24</lastmod></url>
   <url><loc>https://freellmapihub.com/p/twelve-labs</loc><lastmod>2026-11-20</lastmod></url>
   <url><loc>https://freellmapihub.com/p/ocr-space</loc><lastmod>2026-11-19</lastmod></url>
   <url><loc>https://freellmapihub.com/p/llamaparse</loc><lastmod>2026-11-19</lastmod></url>
@@ -121,7 +121,7 @@
   <url><loc>https://freellmapihub.com/p/voicegain</loc><lastmod>2026-11-20</lastmod></url>
   <url><loc>https://freellmapihub.com/p/smallest-ai</loc><lastmod>2026-11-19</lastmod></url>
   <url><loc>https://freellmapihub.com/p/retell-ai</loc><lastmod>2026-11-20</lastmod></url>
-  <url><loc>https://freellmapihub.com/p/datalab</loc><lastmod>2026-11-14</lastmod></url>
+  <url><loc>https://freellmapihub.com/p/datalab</loc><lastmod>2026-11-24</lastmod></url>
   <url><loc>https://freellmapihub.com/p/wandb-inference</loc><lastmod>2026-11-20</lastmod></url>
   <url><loc>https://freellmapihub.com/p/typhoon</loc><lastmod>2026-11-19</lastmod></url>
   <url><loc>https://freellmapihub.com/p/regolo</loc><lastmod>2026-11-24</lastmod></url>
@@ -155,6 +155,6 @@
   <url><loc>https://freellmapihub.com/compare/wandb-inference-vs-voyage-ai/</loc><lastmod>2026-11-20</lastmod></url>
   <url><loc>https://freellmapihub.com/compare/deepgram-vs-scaleway/</loc><lastmod>2026-11-20</lastmod></url>
   <url><loc>https://freellmapihub.com/compare/wandb-inference-vs-pollinations/</loc><lastmod>2026-11-20</lastmod></url>
-  <url><loc>https://freellmapihub.com/compare/voyage-ai-vs-pinecone-inference/</loc><lastmod>2026-11-20</lastmod></url>
+  <url><loc>https://freellmapihub.com/compare/voyage-ai-vs-pinecone-inference/</loc><lastmod>2026-11-24</lastmod></url>
   <url><loc>https://freellmapihub.com/compare/wandb-inference-vs-moondream/</loc><lastmod>2026-11-20</lastmod></url>
 </urlset>
