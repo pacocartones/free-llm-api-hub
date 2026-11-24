@@ -119,3 +119,14 @@ public JSON, scalar CSV, the tagged schema, a commit manifest and SHA-256
 checksums locally. It never creates a tag or GitHub Release. Follow the
 [preparation and approval procedure](docs/release-preparation.md) for validation
 at the exact tag, notes and contributor credits before owner approval.
+
+## Mirrors
+
+When a release is published, [`mirror-dataset.yml`](.github/workflows/mirror-dataset.yml) downloads its
+snapshot assets, checks them against `SHA256SUMS` and copies them to a Hugging Face dataset repository and
+to Kaggle (a new dataset version per release), for discovery only: this repository stays the source of
+truth. The Hugging Face card (`README.md`) and Kaggle `dataset-metadata.json` are generated from the
+snapshot and `CITATION.cff` by `scripts/dataset-mirrors.mjs`. Each destination is skipped with a notice
+until its credentials exist: secret `HF_TOKEN` plus variable `HF_DATASET_REPO`; secrets `KAGGLE_USERNAME`
+and `KAGGLE_KEY` (or `KAGGLE_API_TOKEN`), with the optional variable `KAGGLE_DATASET` (default
+`pacocartones/free-llm-api-hub`). To mirror an existing release, run the workflow by hand with its tag.

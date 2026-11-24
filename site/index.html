@@ -31,22 +31,128 @@
 <meta name="twitter:description" content="A continuously-verified dataset of free LLM & AI-model APIs (image, speech, embeddings, OCR) for developers.">
 <meta name="twitter:image" content="https://freellmapihub.com/og.png">
 <link rel="alternate" type="application/rss+xml" title="Free LLM API Hub — updates" href="feed.xml">
+<link rel="alternate" type="application/rss+xml" title="Free LLM API Hub — what changed, week by week" href="changes.xml">
+<!-- AUTOGEN:dataset:start -->
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "Dataset",
   "name": "Free LLM API Hub",
-  "description": "A continuously-verified dataset of LLM API providers with a free tier or trial credits. Every entry dated, sourced to the provider's own docs, and machine-readable.",
+  "alternateName": "Free LLM API Hub — a continuously-verified dataset of free-tier and trial-credit LLM APIs",
+  "description": "A curated, continuously-verified dataset of LLM API providers offering a free tier, permanently-free models, or trial credits for developers. Every entry is dated, sourced to the provider's own documentation, and machine-readable via a JSON dataset validated against a published schema.",
   "url": "https://freellmapihub.com/",
-  "keywords": ["free llm api", "llm api", "free tier", "trial credits", "openai-compatible", "ai api", "free image api", "free speech api", "free embeddings api", "free ocr api"],
+  "sameAs": "https://github.com/pacocartones/free-llm-api-hub",
+  "identifier": "https://github.com/pacocartones/free-llm-api-hub",
+  "version": "2.14.2",
+  "dateModified": "2026-11-24",
+  "keywords": [
+    "free llm api",
+    "llm api",
+    "free tier",
+    "trial credits",
+    "ai api",
+    "developer tools",
+    "openai-compatible",
+    "dataset",
+    "free image api",
+    "free speech api",
+    "free embeddings api",
+    "free ocr api"
+  ],
   "license": "https://opensource.org/licenses/MIT",
   "isAccessibleForFree": true,
-  "creator": { "@type": "Person", "name": "pacocartones", "url": "https://github.com/pacocartones" },
+  "creator": {
+    "@type": "Person",
+    "name": "pacocartones",
+    "url": "https://github.com/pacocartones"
+  },
+  "temporalCoverage": "2026-10-15/2026-11-24",
+  "variableMeasured": [
+    {
+      "@type": "PropertyValue",
+      "name": "category",
+      "description": "Primary bucket: an ongoing free tier or a one-off trial credit."
+    },
+    {
+      "@type": "PropertyValue",
+      "name": "free_type",
+      "description": "Finer-grained shape of the free access: perpetual, renewing quota, recurring credit or trial credit."
+    },
+    {
+      "@type": "PropertyValue",
+      "name": "free_tier",
+      "description": "What you get for free, in concrete terms, as the provider states it."
+    },
+    {
+      "@type": "PropertyValue",
+      "name": "rate_limits",
+      "description": "Free-tier rate limits as the provider states them."
+    },
+    {
+      "@type": "PropertyValue",
+      "name": "card_required",
+      "description": "Whether a payment card is required to use the free access (true, false, or null when not stated)."
+    },
+    {
+      "@type": "PropertyValue",
+      "name": "phone_required",
+      "description": "Whether a phone number is required to sign up (true, false, or null when not stated)."
+    },
+    {
+      "@type": "PropertyValue",
+      "name": "commercial_ok",
+      "description": "Whether the free access may be used commercially (true, false, or null when not stated)."
+    },
+    {
+      "@type": "PropertyValue",
+      "name": "openai_compatible",
+      "description": "Whether the free offering exposes an OpenAI-compatible endpoint (null when unconfirmed)."
+    },
+    {
+      "@type": "PropertyValue",
+      "name": "modalities",
+      "description": "Modalities reachable on the free tier (text, image, audio, embeddings, rerank, OCR, vision)."
+    },
+    {
+      "@type": "PropertyValue",
+      "name": "data_policy.trains_on_prompts",
+      "description": "Whether the provider says it trains on prompts sent through the free access (null when not recorded)."
+    },
+    {
+      "@type": "PropertyValue",
+      "name": "last_verified",
+      "description": "Date the core facts were last confirmed against the provider's own documentation."
+    }
+  ],
   "distribution": [
-    { "@type": "DataDownload", "encodingFormat": "application/json", "contentUrl": "https://freellmapihub.com/providers.json" }
+    {
+      "@type": "DataDownload",
+      "name": "Full dataset, API v1 (JSON)",
+      "encodingFormat": "application/json",
+      "contentUrl": "https://freellmapihub.com/api/v1/providers.json"
+    },
+    {
+      "@type": "DataDownload",
+      "name": "Full dataset (JSON)",
+      "encodingFormat": "application/json",
+      "contentUrl": "https://freellmapihub.com/providers.json"
+    },
+    {
+      "@type": "DataDownload",
+      "name": "Scalar fields (CSV)",
+      "encodingFormat": "text/csv",
+      "contentUrl": "https://freellmapihub.com/providers.csv"
+    },
+    {
+      "@type": "DataDownload",
+      "name": "Full dataset as Markdown text, for language models (llms-full.txt)",
+      "encodingFormat": "text/plain",
+      "contentUrl": "https://freellmapihub.com/llms-full.txt"
+    }
   ]
 }
 </script>
+<!-- AUTOGEN:dataset:end -->
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -136,6 +242,7 @@
       <span class="hl-label">Get started:</span>
       <a href="#explorer">Browse providers</a>
       <a href="api/">Use the JSON API</a>
+      <a href="changes/">See what changed</a>
     </nav>
     <div class="stats" id="stats"><!-- AUTOGEN:stats:start -->
 <div class="stat "><svg class="si" aria-hidden="true"><use href="#ic-database"/></svg><div class="num">64</div><div class="lbl">providers tracked</div></div><div class="stat "><svg class="si" aria-hidden="true"><use href="#ic-refresh"/></svg><div class="num">31</div><div class="lbl">ongoing free tiers</div></div><div class="stat "><svg class="si" aria-hidden="true"><use href="#ic-clock"/></svg><div class="num">33</div><div class="lbl">trial credits</div></div><div class="stat fresh"><svg class="si" aria-hidden="true"><use href="#ic-shield"/></svg><div class="num">40d</div><div class="lbl">oldest verification · 90-day SLA<span class="sr-only"> (fresh)</span></div></div>

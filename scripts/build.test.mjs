@@ -89,8 +89,9 @@ test('provider playground action is conditional and preserved in public JSON', (
     run(['scripts/build.mjs']);
     const present = readFileSync(join(ROOT, 'site/p', `${first.slug}.html`), 'utf8');
     assert.equal((present.match(/>Try it ↗/g) || []).length, 1);
-    assert.ok(present.includes('<a class="btn" href="https://example.com/playground?model=a&amp;mode=b" target="_blank" rel="noopener">Try it ↗<span class="sr-only"> (opens in a new tab)</span></a>'));
-    assert.ok(present.includes(`href="${htmlEsc(first.docs_url)}" target="_blank" rel="noopener">Official docs ↗`));
+    // the provider links carry data-provider / data-link for the opt-in outbound_provider_click event
+    assert.ok(present.includes(`<a class="btn" href="https://example.com/playground?model=a&amp;mode=b" target="_blank" rel="noopener" data-provider="${first.slug}" data-link="playground">Try it ↗<span class="sr-only"> (opens in a new tab)</span></a>`));
+    assert.ok(present.includes(`href="${htmlEsc(first.docs_url)}" target="_blank" rel="noopener" data-provider="${first.slug}" data-link="docs">Official docs ↗`));
     assert.match(present, /class="btn website"[^>]*>Visit website ↗/);
     const absent = readFileSync(join(ROOT, 'site/p', `${second.slug}.html`), 'utf8');
     assert.doesNotMatch(absent, />Try it ↗/);
@@ -883,9 +884,10 @@ test('an unconfirmed flag ranks between a confirmed yes and a confirmed no', () 
 });
 
 // ---------- CI workflows must not run `gh pr view` (no bot logic) ----------
-// The regenerate bot is gone (2026-08): nothing in CI may decide to create,
-// skip or filter PRs — all maintenance is local. If a workflow ever runs
-// `gh pr view` again it is probably bot logic sneaking back in.
+// The old regenerate bot is gone (2026-08). Its successor, regenerate.yml
+// (docs/regeneration-bot.md), runs on main only and never inspects pull
+// requests; if a workflow ever runs `gh pr view` it is probably bot logic
+// deciding from pull-request content, which stays banned.
 test('no workflow runs `gh pr view` (bot logic is banned from CI)', () => {
   const dir = join(ROOT, '.github/workflows');
   const files = readdirSync(dir).filter((f) => f.endsWith('.yml') || f.endsWith('.yaml'));
@@ -1436,6 +1438,35 @@ test('the "Report a change" URL helper prefills the inaccuracy form and is escap
 describe('read-only generated output', () => {
   before(() => run(['scripts/build.mjs']));
 
+  test('model pages: one per model group, indexable ones in the sitemap, the rest noindex, all pinned and linked', async () => {
+    const { groupModels } = await import('./lib/model-keys.mjs');
+    const { isIndexable, MODEL_SAMPLE_CAVEAT } = await import('./lib/model-pages.mjs');
+    const providers = JSON.parse(readFileSync(DATA, 'utf8')).providers;
+    const groups = groupModels(providers);
+    assert.ok(groups.length > 0);
+    const built = readdirSync(join(ROOT, 'site/models'), { withFileTypes: true }).filter((d) => d.isDirectory()).map((d) => d.name).sort();
+    assert.deepEqual(built, groups.map((g) => g.key).sort(), 'exactly one folder per group (stale ones removed)');
+    const sitemap = readFileSync(join(ROOT, 'site/sitemap.xml'), 'utf8');
+    const pins = JSON.parse(readFileSync(join(ROOT, 'derived-fingerprints.json'), 'utf8'));
+    const index = readFileSync(join(ROOT, 'site/models/index.html'), 'utf8');
+    const listed = [...sitemap.matchAll(/<loc>https:\/\/freellmapihub\.com\/models\/([^<]+)\/<\/loc>/g)].map((m) => m[1]);
+    assert.deepEqual(listed.sort(), groups.filter((g) => isIndexable(g)).map((g) => g.key).sort(), 'sitemap parity: only the indexable model pages');
+    const caveat = htmlEsc(MODEL_SAMPLE_CAVEAT);
+    for (const g of groups) {
+      const rel = `site/models/${g.key}/index.html`;
+      const html = readFileSync(join(ROOT, rel), 'utf8');
+      assert.ok(html.includes(`<link rel="canonical" href="https://freellmapihub.com/models/${g.key}/">`), `${rel}: canonical`);
+      assert.ok(html.includes(caveat), `${rel}: sample caveat`);
+      assert.equal(/<meta name="robots" content="noindex">/.test(html), !isIndexable(g), `${rel}: noindex follows the index rule`);
+      assert.match(pins[rel] || '', /^[0-9a-f]{64}$/, `${rel}: pinned`);
+      assert.equal(createHash('sha256').update(readFileSync(join(ROOT, rel))).digest('hex'), pins[rel], `${rel}: pin matches the bytes`);
+      for (const { id, p } of g.entries) assert.ok(html.includes(`<code>${htmlEsc(id)}</code>`) && html.includes(`href="../../p/${p.slug}"`), `${rel}: ${p.slug} row`);
+      assert.ok(index.includes(`href="${g.key}/"`), `/models/ links ${g.key}`);
+      const p = g.entries[0].p;
+      if (existsSync(join(ROOT, `site/p/${p.slug}.html`))) assert.ok(readFileSync(join(ROOT, `site/p/${p.slug}.html`), 'utf8').includes(`href="../models/${g.key}/"`), `/p/${p.slug} links ${g.key}`);
+    }
+  });
+
   test('every generated collection has an expected social image', async () => {
     const { buildOgManifest } = await import('./lib/og.mjs');
     const { providers } = JSON.parse(readFileSync(DATA, 'utf8'));
@@ -1707,6 +1738,34 @@ test('footer columns: where each link lives, and no GitHub star entry in Project
     }
     assert.ok(!footer.includes('GitHub ★'), `${rel}: the footer has no "GitHub ★" entry`);
   }
+});
+
+test('provider links carry data-provider and data-link for the opt-in outbound_provider_click event', () => {
+  run(['scripts/build.mjs']);
+  const groq = readFileSync(join(ROOT, 'site/p/groq.html'), 'utf8');
+  assert.match(groq, /<a class="btn primary" href="[^"]+"[^>]* data-provider="groq" data-link="docs">Official docs/);
+  assert.match(groq, /<a class="btn website" href="[^"]+"[^>]* data-provider="groq" data-link="website">/);
+  const tagged = [...groq.matchAll(/data-provider="([^"]*)" data-link="([^"]*)"/g)];
+  assert.ok(tagged.every((m) => m[1] === 'groq' && ['docs', 'website', 'playground', 'models', 'limits_source', 'data_policy'].includes(m[2])), 'only the page provider and known link types');
+  const compareDir = readdirSync(join(ROOT, 'site/compare')).find((n) => n.includes('-vs-'));
+  const cmp = readFileSync(join(ROOT, `site/compare/${compareDir}/index.html`), 'utf8');
+  assert.equal([...cmp.matchAll(/data-link="docs"/g)].length, 2, "both providers' docs links are tagged on a static comparison");
+});
+
+test('no GA_MEASUREMENT_ID (the default): the build emits no analytics code, CSP host, banner or cookie notice change', () => {
+  const env = { ...process.env };
+  delete env.GA_MEASUREMENT_ID;
+  execFileSync(process.execPath, ['scripts/build.mjs'], { cwd: ROOT, stdio: 'pipe', env });
+  assert.ok(!existsSync(join(ROOT, 'site/consent.js')), 'no consent.js without an ID');
+  const pages = [];
+  const walk = (dir) => { for (const n of readdirSync(join(ROOT, dir))) { const rel = `${dir}/${n}`; if (statSync(join(ROOT, rel)).isDirectory()) walk(rel); else if (n.endsWith('.html')) pages.push(rel); } };
+  walk('site');
+  assert.ok(pages.length > 50, 'walked the built pages');
+  for (const rel of pages) {
+    const html = readFileSync(join(ROOT, rel), 'utf8');
+    assert.doesNotMatch(html, /googletagmanager|google-analytics|analytics\.google|gtag|consent\.js|data-consent-open|Cookie settings/, `${rel} carries analytics code without an ID`);
+  }
+  assert.match(readFileSync(join(ROOT, 'site/legal/privacy.html'), 'utf8'), /no third-party analytics or tracking/);
 });
 
 test('the privacy page and SECURITY.md say what the star count really does: no GitHub call from the browser', () => {
