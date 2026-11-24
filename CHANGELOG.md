@@ -27,6 +27,12 @@ Notable changes to the dataset and the project. Format based on [Keep a Changelo
   content or model output to train IBM-developed models; text sent through
   the Prompt Lab or API is not stored unless saved, and prompt information
   for up to 500 prompts is kept 30 days (#692). Thanks @BloosomNet.
+- SambaNova re-verified: the Free Tier now lists only gpt-oss-120b and
+  gemma-4-31B-it (20 RPM / 20 RPD / 200,000 TPD each); DeepSeek-V3.1 and
+  Llama-3.3-70B leave `models_free`, `model_tier` moves from 3 to 2, and the
+  Developer Tier limits are corrected. `commercial_ok` becomes `false`: its
+  docs say all SambaCloud models are Preview models for evaluation, not
+  production (#697). Thanks @BloosomNet.
 
 ## [2.14.2] — 2026-11-20
 
