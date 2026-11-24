@@ -39,22 +39,27 @@ export function requirementsHtml(p) {
     `</dl>`;
 }
 
+/**
+ * The structured free limits with their source and reading date, or '' when they are missing or
+ * unsourced. Numbers appear only with the provider page they come from and the day they were read.
+ */
+export function freeLimitsTableHtml(p) {
+  const fl = p.free_limits && safeUrl(p.free_limits.source) && /^\d{4}-\d{2}-\d{2}$/.test(String(p.free_limits.checked || '')) ? p.free_limits : null;
+  if (!fl) return '';
+  const rows = LIMIT_UNITS.filter(([k]) => Number.isInteger(fl[k]))
+    .map(([k, unit]) => `<tr><th scope="row">${unit}</th><td>${fl[k].toLocaleString('en-US')}</td></tr>`).join('');
+  const src = safeUrl(fl.source);
+  return `<table class="limits-table"><caption class="sr-only">Free limits as the provider publishes them</caption><tbody>${rows}</tbody></table>` +
+    `<p class="muted limits-src">${htmlEsc(fl.scope || '')}${/[.!?]$/.test(fl.scope || '') || !fl.scope ? '' : '.'}` +
+    (src ? ` Source: <a href="${src}" target="_blank" rel="noopener">the provider's page</a>, read ${htmlEsc(fl.checked)}.` : '') + `</p>`;
+}
+
 /** Free limits: the structured numbers with their source and reading date, then the provider's wording. */
 export function limitsHtml(p) {
-  // Numbers appear only with the provider page they come from and the day they were read.
-  const fl = p.free_limits && safeUrl(p.free_limits.source) && /^\d{4}-\d{2}-\d{2}$/.test(String(p.free_limits.checked || '')) ? p.free_limits : null;
-  let table = '';
-  if (fl) {
-    const rows = LIMIT_UNITS.filter(([k]) => Number.isInteger(fl[k]))
-      .map(([k, unit]) => `<tr><th scope="row">${unit}</th><td>${fl[k].toLocaleString('en-US')}</td></tr>`).join('');
-    const src = safeUrl(fl.source);
-    table = `<table class="limits-table"><caption class="sr-only">Free limits as the provider publishes them</caption><tbody>${rows}</tbody></table>` +
-      `<p class="muted limits-src">${htmlEsc(fl.scope || '')}${/[.!?]$/.test(fl.scope || '') || !fl.scope ? '' : '.'}` +
-      (src ? ` Source: <a href="${src}" target="_blank" rel="noopener">the provider's page</a>, read ${htmlEsc(fl.checked)}.` : '') + `</p>`;
-  }
+  const table = freeLimitsTableHtml(p);
   const prose = p.rate_limits ? `<div class="prov-card"><h3>In the provider's words</h3><p>${htmlEsc(p.rate_limits)}</p></div>` : '';
   const catchCard = p.notes ? `<div class="prov-card"><h3>The catch</h3><p>${htmlEsc(p.notes)}</p></div>` : '';
-  const none = fl ? '' : `<p class="muted">Numeric limits are not recorded in structured form for this provider.</p>`;
+  const none = table ? '' : `<p class="muted">Numeric limits are not recorded in structured form for this provider.</p>`;
   return `<h2 id="limits">Free limits</h2>${table}${none}<div class="prov-grid">${prose}${catchCard}</div>`;
 }
 
@@ -73,8 +78,11 @@ export function glanceHtml(p, typeLabel) {
   return `<div class="prov-meta">${rows.map(([k, v]) => `<div class="meta-row"><span class="meta-k">${k}</span><span class="meta-v">${v}</span></div>`).join('')}</div>`;
 }
 
-/** Free models: the sample with a way to pull the live list, or one short line when none is listed. */
-export function modelsHtml(p) {
+/**
+ * Free models: the sample with a way to pull the live list, or one short line when none is listed.
+ * `modelHref(id)` (optional) returns the link of the model's own page, or '' for an ID that has none.
+ */
+export function modelsHtml(p, { modelHref = () => '' } = {}) {
   const catalog = safeUrl(p.models_url);
   const catalogLink = catalog
     ? `<a href="${catalog}" target="_blank" rel="noopener">Browse the official model catalogue ↗</a>`
@@ -85,7 +93,10 @@ export function modelsHtml(p) {
       `<p class="muted models-none">A free-model sample is not listed yet. ${catalogLink}</p>`;
   }
   return `<h2 id="models">Free models <span class="muted">· sample</span></h2>` +
-    `<div class="model-chips">${p.models_free.map((m) => `<code>${htmlEsc(m)}</code>`).join('')}</div>` +
+    `<div class="model-chips">${p.models_free.map((m) => {
+      const href = modelHref(m);
+      return href ? `<a href="${htmlEsc(href)}"><code>${htmlEsc(m)}</code></a>` : `<code>${htmlEsc(m)}</code>`;
+    }).join('')}</div>` +
     `<p class="muted">A sample of models reachable on the free tier — the live catalogue changes.` +
     (p.openai_base_url ? ` Pull the current set with <code>GET ${htmlEsc(p.openai_base_url)}/models</code>.` : '') +
     (catalogLink ? ` ${catalogLink}` : '') + `</p>`;

@@ -1437,6 +1437,35 @@ test('the "Report a change" URL helper prefills the inaccuracy form and is escap
 describe('read-only generated output', () => {
   before(() => run(['scripts/build.mjs']));
 
+  test('model pages: one per model group, indexable ones in the sitemap, the rest noindex, all pinned and linked', async () => {
+    const { groupModels } = await import('./lib/model-keys.mjs');
+    const { isIndexable, MODEL_SAMPLE_CAVEAT } = await import('./lib/model-pages.mjs');
+    const providers = JSON.parse(readFileSync(DATA, 'utf8')).providers;
+    const groups = groupModels(providers);
+    assert.ok(groups.length > 0);
+    const built = readdirSync(join(ROOT, 'site/models'), { withFileTypes: true }).filter((d) => d.isDirectory()).map((d) => d.name).sort();
+    assert.deepEqual(built, groups.map((g) => g.key).sort(), 'exactly one folder per group (stale ones removed)');
+    const sitemap = readFileSync(join(ROOT, 'site/sitemap.xml'), 'utf8');
+    const pins = JSON.parse(readFileSync(join(ROOT, 'derived-fingerprints.json'), 'utf8'));
+    const index = readFileSync(join(ROOT, 'site/models/index.html'), 'utf8');
+    const listed = [...sitemap.matchAll(/<loc>https:\/\/freellmapihub\.com\/models\/([^<]+)\/<\/loc>/g)].map((m) => m[1]);
+    assert.deepEqual(listed.sort(), groups.filter((g) => isIndexable(g)).map((g) => g.key).sort(), 'sitemap parity: only the indexable model pages');
+    const caveat = htmlEsc(MODEL_SAMPLE_CAVEAT);
+    for (const g of groups) {
+      const rel = `site/models/${g.key}/index.html`;
+      const html = readFileSync(join(ROOT, rel), 'utf8');
+      assert.ok(html.includes(`<link rel="canonical" href="https://freellmapihub.com/models/${g.key}/">`), `${rel}: canonical`);
+      assert.ok(html.includes(caveat), `${rel}: sample caveat`);
+      assert.equal(/<meta name="robots" content="noindex">/.test(html), !isIndexable(g), `${rel}: noindex follows the index rule`);
+      assert.match(pins[rel] || '', /^[0-9a-f]{64}$/, `${rel}: pinned`);
+      assert.equal(createHash('sha256').update(readFileSync(join(ROOT, rel))).digest('hex'), pins[rel], `${rel}: pin matches the bytes`);
+      for (const { id, p } of g.entries) assert.ok(html.includes(`<code>${htmlEsc(id)}</code>`) && html.includes(`href="../../p/${p.slug}"`), `${rel}: ${p.slug} row`);
+      assert.ok(index.includes(`href="${g.key}/"`), `/models/ links ${g.key}`);
+      const p = g.entries[0].p;
+      if (existsSync(join(ROOT, `site/p/${p.slug}.html`))) assert.ok(readFileSync(join(ROOT, `site/p/${p.slug}.html`), 'utf8').includes(`href="../models/${g.key}/"`), `/p/${p.slug} links ${g.key}`);
+    }
+  });
+
   test('every generated collection has an expected social image', async () => {
     const { buildOgManifest } = await import('./lib/og.mjs');
     const { providers } = JSON.parse(readFileSync(DATA, 'utf8'));

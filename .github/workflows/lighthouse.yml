@@ -3,12 +3,13 @@ name: Lighthouse
 # Accessibility, SEO and performance budget for the built site.
 #
 # Serves site/ itself on a free local port and measures what it serves with
-# Lighthouse, on sixteen pages: the home, /best/, /coverage/, /free-gpu/, /coding-tools/,
+# Lighthouse, on seventeen pages: the home, /best/, /coverage/, /free-gpu/, /coding-tools/,
 # /compare/, /data-policy/, /guides-and-collections/ and one provider page, plus
 # /collections/no-credit-card.html, /collections/openai-compatible.html,
 # /guides/free-llm-api-no-signup.html, /guides/free-embeddings-apis.html,
 # /guides/free-ocr-document-ai-apis.html, /guides/free-speech-to-text-apis.html
-# and /guides/free-image-generation-apis.html. The thresholds are in
+# and /guides/free-image-generation-apis.html, plus one model page under /models/
+# (the indexable one listed by the most providers). The thresholds are in
 # scripts/lib/lighthouse-gate.mjs: accessibility at least 0.95 with no new or
 # unscored accessibility audit, SEO exactly 1, performance at least 0.80.
 #
@@ -68,7 +69,7 @@ jobs:
         working-directory: tools/lighthouse
         run: npm ci --ignore-scripts
 
-      - name: Measure the sixteen pages (accessibility and SEO, one run each)
+      - name: Measure the seventeen pages (accessibility and SEO, one run each)
         env:
           CHROME_PATH: /usr/bin/google-chrome
         run: node scripts/lighthouse-gate.mjs --mode=accessibility-seo
@@ -93,7 +94,7 @@ jobs:
       - name: Install Lighthouse (locked, no lifecycle scripts)
         working-directory: tools/lighthouse
         run: npm ci --ignore-scripts
-      - name: Measure the sixteen pages (performance, median of three runs)
+      - name: Measure the seventeen pages (performance, median of three runs)
         id: measure
         env:
           CHROME_PATH: /usr/bin/google-chrome
