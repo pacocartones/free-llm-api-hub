@@ -91,6 +91,17 @@
    "page_sha256": "b0880ab5f91f2cc4c500b66e7bd079d7a35b90fb73c41059d735c0d26cf07be3"
   },
   {
+   "id": "huggingface.sentence",
+   "slug": "huggingface",
+   "kind": "sentence",
+   "text": "Hugging Face does not store any user data for training purposes.",
+   "source_url": "https://huggingface.co/docs/inference-providers/en/security",
+   "read_on": "2026-11-24",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "a0b4acfed26a33e81b21a0872281160a156194696cb94404cb93953423c373cc"
+  },
+  {
    "id": "siliconflow.sentence",
    "slug": "siliconflow",
    "kind": "sentence",
@@ -100,6 +111,17 @@
    "lang": "cn",
    "method": "html-text-v1: page requested with Accept-Language cn, tags removed, character references decoded, white space collapsed",
    "page_sha256": "2b1f6094bc6b9be389829567109f290c41ed0f0504bbc3a385e4ff9e908486e1"
+  },
+  {
+   "id": "zai-glm.sentence",
+   "slug": "zai-glm",
+   "kind": "sentence",
+   "text": "For enterprises and developers using API Services, we will not use your User Content for developing or improving Services unless you explicitly agree to such use.",
+   "source_url": "https://docs.z.ai/legal-agreement/terms-of-use",
+   "read_on": "2026-11-24",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "f5d2dd21f39c0eb00e91089dca2c2d3a5b1f6cb8635a8189bfbb3e422fe8327a"
   },
   {
    "id": "ibm-watsonx.sentence",
@@ -652,6 +674,28 @@
    "page_sha256": "44b85514e26fda3834a5030d2763ea37e107fa328fe2261b2e0e7255fe5b8d1f"
   },
   {
+   "id": "veryfi.sentence",
+   "slug": "veryfi",
+   "kind": "sentence",
+   "text": "To deliver and continually improve this service, we may use data you submit, which can include personal data contained in your documents, to train, validate, and improve our proprietary machine learning models.",
+   "source_url": "https://www.veryfi.com/privacy/",
+   "read_on": "2026-11-24",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "9f56ce536cfe568f0414491ff53d5d4201c9f093d6633ed73cb73509288281ca"
+  },
+  {
+   "id": "voicegain.sentence",
+   "slug": "voicegain",
+   "kind": "sentence",
+   "text": "The set retention time can vary from 0 seconds to a maximum of 7 days.",
+   "source_url": "https://raw.githubusercontent.com/voicegain/platform/master/DATA-PROCESSING-ADDENDUM.md",
+   "read_on": "2026-11-24",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "ba5e7c271e1b2febf0a612ca0e0dc3d69a918245c66fd52961338f22025a3365"
+  },
+  {
    "id": "smallest-ai.sentence",
    "slug": "smallest-ai",
    "kind": "sentence",
@@ -694,6 +738,17 @@
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "e4412aa18f7c43a853c8472a478409217bcb95dd3f05b88ecb3827137bb322b1"
+  },
+  {
+   "id": "wandb-inference.sentence",
+   "slug": "wandb-inference",
+   "kind": "sentence",
+   "text": "CoreWeave does not use Inference Content to train models.",
+   "source_url": "https://docs.coreweave.com/products/inference/serverless/privacy-and-security",
+   "read_on": "2026-11-24",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "1548ca23c669294dff7b31bd3f63b42702d769f7b49a22ee01993d8329a834f1"
   },
   {
    "id": "typhoon.sentence",
