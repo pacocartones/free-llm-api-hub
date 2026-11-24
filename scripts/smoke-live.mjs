@@ -1,4 +1,4 @@
-// smoke-live.mjs — every URL in the PUBLISHED sitemap must answer HTTP 200.
+// smoke-live.mjs — every URL in the PUBLISHED sitemap, /.well-known/security.txt and /favicon.ico must answer HTTP 200.
 //
 // Run after a Pages deploy:
 //   node scripts/smoke-live.mjs            # default: freellmapihub.com
@@ -15,18 +15,21 @@
 // not answer 200: the Pages edge can take a few seconds to serve a new deploy.
 // pages.yml sets them; see lib/live-retry.mjs.
 import { retryConfig, retryFailing } from './lib/live-retry.mjs';
+import { makeLiveFetch } from './lib/live-fetch.mjs';
 
 let SITE = process.env.FLLM_SITE || 'https://freellmapihub.com';
 while (SITE.endsWith('/')) SITE = SITE.slice(0, -1);
 const TIMEOUT_MS = 20000;
 const CONCURRENCY = 8;
 const RETRY = { ...retryConfig(process.env), log: (line) => console.log(line) };
+// Past the CDN cache: ?deploy=<token per deploy run> on every request and Cache-Control: no-cache (lib/live-fetch.mjs).
+const liveFetch = makeLiveFetch();
 
 async function fetchWithTimeout(url) {
   const ctrl = new AbortController();
   const t = setTimeout(() => ctrl.abort(), TIMEOUT_MS);
   try {
-    return await fetch(url, { signal: ctrl.signal });
+    return await liveFetch(url, { signal: ctrl.signal });
   } finally {
     clearTimeout(t);
   }
@@ -78,7 +81,10 @@ async function main() {
     process.exitCode = 1;
     return;
   }
-  console.log(`Smoke: ${urls.length} URLs from the published sitemap.`);
+  // Files outside the sitemap that must still be published: the dot-folder one is the first to vanish if the Pages
+  // artifact drops hidden files again (pages.yml, include-hidden-files).
+  urls.push(`${SITE}/.well-known/security.txt`, `${SITE}/favicon.ico`);
+  console.log(`Smoke: ${urls.length - 2} URLs from the published sitemap, plus security.txt and favicon.ico.`);
 
   const results = await retryFailing(urls, checkUrls, RETRY);
   const bad = results.filter((r) => !r.ok);
