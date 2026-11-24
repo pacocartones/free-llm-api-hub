@@ -6,8 +6,8 @@
 // banner, no script, no extra CSP host, and the privacy page keeps saying the site sets no cookies.
 //
 // With an ID: every page gets site/consent.js (from lib/consent.client.js) and a "Cookie settings" control in the footer,
-// the CSP allows exactly the Google hosts GA4 needs, and the privacy page describes what happens. Nothing from Google
-// loads until the visitor presses Accept (see consent.client.js).
+// the CSP allows exactly the Google hosts GA4 and Google signals need, and the privacy page describes what happens. Nothing
+// from Google loads until the visitor allows analytics or advertising measurement (see consent.client.js).
 
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
@@ -24,12 +24,20 @@ export function measurementId(env = process.env) {
   return id;
 }
 
-/** Extra CSP sources GA4 needs, per directive; empty without an ID. */
+/**
+ * Extra CSP sources GA4 needs, per directive; empty without an ID. The site's policy restricts only script-src and
+ * connect-src (no default-src, img-src or frame-src), so image beacons need no entry. From Google's tag CSP guide
+ * (developers.google.com/tag-platform/security/guides/csp): gtag.js from www.googletagmanager.com; measurement hits to
+ * *.google-analytics.com / *.analytics.google.com; and, with Google signals (the advertising category), the
+ * *.g.doubleclick.net and *.google.com endpoints that guide lists for Analytics with Ads features. Its country domains
+ * (google.<TLD>) are image requests, already allowed; pagead2.googlesyndication.com is for Google Ads conversions,
+ * which this site does not use.
+ */
 export function analyticsCspSources(id) {
   if (!id) return { script: '', connect: '' };
   return {
     script: ' https://www.googletagmanager.com',
-    connect: ' https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com',
+    connect: ' https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com https://*.g.doubleclick.net https://*.google.com',
   };
 }
 

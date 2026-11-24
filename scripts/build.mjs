@@ -1311,26 +1311,38 @@ ${NOT_FOUND_PATH_SCRIPT}
 );
 
 // The privacy page says exactly what the build ships: no cookies and no analytics by default; with GA_MEASUREMENT_ID set
-// (lib/analytics.mjs), Google Analytics behind an opt-in banner, described below.
+// (lib/analytics.mjs), Google Analytics and Google signals behind an opt-in banner with two categories, described below.
 const privacyIntro = GA_ID
-  ? `<p>This site is a static, open-source reference operated by ${ORG} It has no user accounts and no ads. It uses Google Analytics <strong>only if you accept it</strong> in the banner; until then nothing is loaded from Google and no cookie is set.</p>`
+  ? `<p>This site is a static, open-source reference operated by ${ORG} It has no user accounts and shows no ads. It uses Google cookies <strong>only for the categories you allow</strong> in the cookie banner; until you allow one, nothing is loaded from Google and no cookie is set.</p>`
   : `<p>This site is a static, open-source reference operated by ${ORG} It has no user accounts, no ads, and no third-party analytics or tracking.</p>`;
 const privacyServerItem = GA_ID
-  ? `<li><strong>Nothing on a server of ours.</strong> The site is served as static files by GitHub Pages; there is no backend. No cookies are set unless you accept analytics (see below).</li>`
+  ? `<li><strong>Nothing on a server of ours.</strong> The site is served as static files by GitHub Pages; there is no backend. No cookies are set unless you allow a category below.</li>`
   : `<li><strong>Nothing on a server.</strong> The site is served as static files by GitHub Pages; there is no backend and no cookies are set.</li>`;
 const privacyChoiceItem = GA_ID
-  ? `\n<li><strong>Your analytics choice</strong> (accept or reject) is saved only in your browser's local storage, so the banner does not ask again on every page.</li>`
+  ? `\n<li><strong>Your cookie choices</strong> (one per category, with the version of this notice) are saved only in your browser's local storage, so the banner does not ask again on every page; it asks again if this notice changes in substance.</li>`
   : '';
 const privacyAnalytics = GA_ID
-  ? `<h2>Analytics (only with your consent)</h2>
-<p>If you press <strong>Accept</strong> in the cookie banner, the site loads Google Analytics 4 from Google (Google Ireland Limited, for visitors in the EEA, UK and Switzerland; Google LLC elsewhere) to count visits and see which pages are useful. If you press <strong>Reject</strong>, or make no choice, no request is ever sent to Google and no analytics cookie is set.</p>
+  ? `<h2>Cookies from Google (only with your consent)</h2>
+<p>The banner offers two independent categories, both off by default: <strong>Accept all</strong>, <strong>Reject all</strong>, or <strong>Customize</strong> to choose each one. If you allow neither, or make no choice, no request is ever sent to Google. The service is Google Analytics 4, provided by Google Ireland Limited (for visitors in the EEA, UK and Switzerland) or Google LLC (elsewhere).</p>
+<h3>1. Analytics</h3>
 <ul>
-<li><strong>What is collected:</strong> pages viewed, the page you came from, approximate location (country/city, derived from your IP address, which Google Analytics 4 does not log or store), device, browser and screen size, and timing of your visit. Google Analytics sets first-party cookies (<code>_ga</code> and <code>_ga_&lt;id&gt;</code>) to tell visits apart.</li>
-<li><strong>What is not:</strong> no advertising features, no Google signals, no ad personalisation, no user ID; consent for advertising storage and ad data stays denied.</li>
-<li><strong>Who processes it:</strong> Google acts as our processor under its Google Ads Data Processing Terms. Data may be transferred to the United States under the EU–US Data Privacy Framework and Google's standard contractual clauses.</li>
-<li><strong>Retention:</strong> event data is kept for 2 months in Google Analytics, then deleted; the cookies expire after at most 2 years, or when you withdraw consent.</li>
-<li><strong>Legal basis:</strong> your consent (GDPR Art. 6(1)(a) and the ePrivacy rules on cookies).</li>
-<li><strong>Withdraw at any time:</strong> press <strong>Cookie settings</strong> at the bottom of any page and choose <strong>Reject</strong>. Tracking stops at once and the Google Analytics cookies are deleted. You can also clear this site's cookies and local storage in your browser.</li>
+<li><strong>Purpose:</strong> count visits and see which pages are useful.</li>
+<li><strong>What is collected:</strong> pages viewed, the page you came from, approximate location (country/city, derived from your IP address, which Google Analytics 4 does not log or store), device, browser, screen size and timing of your visit. Cookies: <code>_ga</code> and <code>_ga_&lt;id&gt;</code>, to tell visits apart.</li>
+<li><strong>Role of Google:</strong> processor, acting on our instructions under Google's data processing terms.</li>
+</ul>
+<h3>2. Advertising &amp; personalised measurement (Google signals)</h3>
+<ul>
+<li><strong>Purpose:</strong> richer, aggregated audience reports. No ads are shown on this site and we run no ad campaigns.</li>
+<li><strong>What it does:</strong> with Google signals, Google associates your visits with your Google account if you are signed in and have turned on ad personalisation in your Google account. This gives us aggregated, anonymous reports on demographics (age range, gender) and interests, and on use across devices. We never see who you are; reports below Google's privacy thresholds are withheld.</li>
+<li><strong>Consent signals:</strong> this category grants Google's <code>ad_storage</code>, <code>ad_user_data</code> and <code>ad_personalization</code>; without it they stay denied, ad data is redacted and Google signals is off. Advertising cookies Google may set (such as <code>_gcl_*</code>) are deleted when you withdraw.</li>
+<li><strong>Role of Google:</strong> for the data of signed-in users that links to their Google account, Google acts as an independent controller under its own privacy policy (policies.google.com/privacy); for the reports it produces for us, as our processor.</li>
+</ul>
+<h3>For both categories</h3>
+<ul>
+<li><strong>Legal basis:</strong> your consent (GDPR Art. 6(1)(a) and the ePrivacy rules on cookies), given separately for each category.</li>
+<li><strong>International transfers:</strong> data may be transferred to the United States; Google LLC is certified under the EU–US Data Privacy Framework, and Google's standard contractual clauses apply.</li>
+<li><strong>Retention:</strong> event data is kept in Google Analytics for 14 months, then deleted; the cookies expire after at most 2 years, or when you withdraw consent.</li>
+<li><strong>Withdraw at any time:</strong> press <strong>Cookie settings</strong> at the bottom of any page and switch a category off, or choose <strong>Reject all</strong>. The change applies at once and the cookies of that category are deleted. You can also clear this site's cookies and local storage in your browser, and manage ad personalisation in your Google account (myadcenter.google.com).</li>
 </ul>
 <p>You can ask us for access to, correction or deletion of personal data about you, object to its processing, or complain to your data-protection authority.</p>
 `
