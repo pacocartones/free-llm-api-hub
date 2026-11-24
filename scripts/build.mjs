@@ -25,6 +25,7 @@ import { monthlyReport, reportMonths, monthEndDate, monthName, monthLabel, pct, 
 import { resolveBestEntries, topEntries, PODIUM_SIZE } from './lib/best.mjs';
 import { agreementsTableHtml, sponsoredBlockHtml, disclosureHtml, inForce, NOT_IN_DATA_SENTENCE, MACHINE_SENTENCE } from './lib/agreements.mjs';
 import { coverage, coverageMainHtml } from './lib/coverage.mjs';
+import { fieldCheck, REASON_LABEL } from './lib/field-checks.mjs';
 import { apiV1ProviderSchema, projectApiV1Changes, toApiV1Provider } from './lib/api-v1.mjs';
 import { freeGpuMainHtml } from './lib/free-gpu.mjs';
 import { labelTables } from './lib/tables.mjs';
@@ -308,7 +309,7 @@ const GUIDES = [
     filter: (p) => p.card_required === false && p.category === 'ongoing',
     query: '?cat=ongoing&nocard=1#explorer',
     faq: [
-      { q: 'Can I use an LLM API for free without a credit card?', a: 'Yes. Providers such as Google Gemini, Groq, Cloudflare Workers AI and OpenRouter give a free tier with no card required — you are limited by rate, not billing, so you cannot be charged by surprise.' },
+      { q: 'Can I use an LLM API for free without a credit card?', a: 'Yes. Providers such as Google Gemini, Groq and Cloudflare Workers AI give a free tier with no card required — you are limited by rate, not billing, so you cannot be charged by surprise.' },
       { q: 'Will I be charged if I exceed the free limits?', a: 'No. On a no-card free tier you get rate-limited (HTTP 429) rather than billed. You would have to explicitly add a payment method before any spend is possible.' },
       { q: 'Are these free tiers okay for commercial use?', a: 'Some are, some are not — each row shows a commercial-use flag, confirmed against the provider’s own terms.' },
     ],
@@ -450,7 +451,7 @@ const GUIDES = [
   },
   {
     slug: 'free-vision-apis',
-    answer: 'Yes. {n} providers in the verified dataset include an image-understanding model in their free access. Google Gemini, OpenRouter and Z.ai need no card; Moondream renews a $5 credit each month; Tencent’s offer runs until 2026-12-31. This guide is about reading images; for generating them see the image-generation guide.',
+    answer: 'Yes. {n} providers in the verified dataset include an image-understanding model in their free access. Google Gemini and Z.ai need no card; Moondream renews a $5 credit each month; Tencent’s offer runs until 2026-12-31. This guide is about reading images; for generating them see the image-generation guide.',
     metaDesc: '{n} free vision APIs for captioning, visual Q&A and detection, with limits and catches compared. Dataset of {date}.',
     card: 'Vision',
     blurb: 'Free image-understanding tiers: describe, query, detect.',
@@ -463,8 +464,8 @@ const GUIDES = [
     query: '#explorer',
     pick: 'google-gemini',
     faq: [
-      { q: 'Is there a free API to analyse images?', a: 'Yes. Google Gemini and OpenRouter have free tiers with no card, Z.ai lists its GLM-4.6V-Flash vision model at $0 permanently, and Moondream gives $5 of credit each month.' },
-      { q: 'Is a free vision API okay for commercial use?', a: 'Check each row. The dataset records commercial use as allowed for Google Gemini, OpenRouter, Z.ai and W&B Inference, and as not allowed for ModelScope; for Moondream, Tencent and Twelve Labs it records no commercial-use statement.' },
+      { q: 'Is there a free API to analyse images?', a: 'Yes. Google Gemini has a free tier with no card, Z.ai lists its GLM-4.6V-Flash vision model at $0 permanently, and Moondream gives $5 of credit each month.' },
+      { q: 'Is a free vision API okay for commercial use?', a: 'Check each row. The dataset records commercial use as allowed for Google Gemini, Z.ai and W&B Inference, and as not allowed for ModelScope; for OpenRouter, Moondream, Tencent and Twelve Labs it records no commercial-use statement.' },
       { q: 'What is the difference between vision and image generation?', a: 'Vision reads an image and returns text. Image generation makes a new image from text; see the free image-generation guide for that.' },
     ],
   },
@@ -1965,13 +1966,15 @@ const llmsTxt =
   `- [Startup credits](${SITE}/programs/startups)\n- [Student & research credits](${SITE}/programs/research)\n`;
 writeFileSync(join(ROOT, 'site/llms.txt'), llmsTxt);
 
-const yn = (v, yes, no) => v === true ? yes : v === false ? no : v === 'conditional' ? 'conditional' : 'unknown';
+// A null flag with a recorded reason (field_checks) says the reason instead of "unknown".
+const yn = (v, yes, no, check) => v === true ? yes : v === false ? no : v === 'conditional' ? 'conditional'
+  : check && check.status !== 'stated' && REASON_LABEL[check.status] ? `unknown, ${REASON_LABEL[check.status]} (checked ${check.checked})` : 'unknown';
 const provBlock = (p) => {
   const gates = [
-    `card required: ${yn(p.card_required, 'yes', 'no')}`,
-    `phone required: ${yn(p.phone_required, 'yes', 'no')}`,
-    `commercial use: ${yn(p.commercial_ok, 'allowed', 'not allowed')}`,
-    `OpenAI-compatible: ${yn(p.openai_compatible, 'yes', 'no')}${p.openai_base_url ? ` (base ${p.openai_base_url})` : ''}`,
+    `card required: ${yn(p.card_required, 'yes', 'no', fieldCheck(p, 'card_required'))}`,
+    `phone required: ${yn(p.phone_required, 'yes', 'no', fieldCheck(p, 'phone_required'))}`,
+    `commercial use: ${yn(p.commercial_ok, 'allowed', 'not allowed', fieldCheck(p, 'commercial_ok'))}`,
+    `OpenAI-compatible: ${yn(p.openai_compatible, 'yes', 'no', fieldCheck(p, 'openai_compatible'))}${p.openai_base_url ? ` (base ${p.openai_base_url})` : ''}`,
   ].join('; ');
   return `### ${p.name} — ${p.category === 'ongoing' ? 'ongoing free tier' : 'trial credit'}\n` +
     `- Free: ${p.free_tier}\n` +

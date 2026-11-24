@@ -8,6 +8,7 @@ its page, the day it was read and how the page text was made. It holds three kin
 | `sentence` | the `quote` of a row: the provider's own sentence |
 | `note_passage` | a phrase that a `note` puts between « » |
 | `absence_check` | a note that says something about the **whole** page ("the page has no mention of ..."): a count, on the page as it was read, of the four words `free`, `trial`, `paid`, `plan` |
+| `field_sentence` | the `quote` of a stated `field_checks` entry (id `<slug>.<field>.sentence`, with a `field` key), read on the first of its `sources`. Written with `npm run quotes:add -- <slug> --field <flag>`, which replaces only that entry |
 
 Each entry carries `source_url` (https), `read_on`, `lang` (the language of the passage and of the page it is read in), `method` (how the page
 text was made, see `scripts/lib/page-text.mjs`) and `page_sha256` (the hash of that text, or `null` if the page could not be read). Only the
