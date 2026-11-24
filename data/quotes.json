@@ -405,10 +405,10 @@
    "kind": "sentence",
    "text": "Modal will not, except with Customer's prior written consent: (i) train any AI model using Customer Data, or (ii) export Customer Data into, or cause Customer Data to be ingested by, large language models.",
    "source_url": "https://modal.com/legal/terms",
-   "read_on": "2026-10-16",
+   "read_on": "2026-11-24",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
-   "page_sha256": "246080092abebcd77646fc52b62b9e966cda34106c6eacc52ed0ea0532d86b83"
+   "page_sha256": "9516d0ad565591caf3561402c3cf613c5361b4eec7c2067c1489b5dd52842912"
   },
   {
    "id": "modal.note_passage.1",
@@ -416,10 +416,10 @@
    "kind": "note_passage",
    "text": "solely for Customer's internal business",
    "source_url": "https://modal.com/legal/terms",
-   "read_on": "2026-10-16",
+   "read_on": "2026-11-24",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
-   "page_sha256": "246080092abebcd77646fc52b62b9e966cda34106c6eacc52ed0ea0532d86b83"
+   "page_sha256": "9516d0ad565591caf3561402c3cf613c5361b4eec7c2067c1489b5dd52842912"
   },
   {
    "id": "modal.note_passage.2",
@@ -427,10 +427,10 @@
    "kind": "note_passage",
    "text": "No-Fee Use",
    "source_url": "https://modal.com/legal/terms",
-   "read_on": "2026-10-16",
+   "read_on": "2026-11-24",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
-   "page_sha256": "246080092abebcd77646fc52b62b9e966cda34106c6eacc52ed0ea0532d86b83"
+   "page_sha256": "9516d0ad565591caf3561402c3cf613c5361b4eec7c2067c1489b5dd52842912"
   },
   {
    "id": "modal.note_passage.3",
@@ -438,10 +438,22 @@
    "kind": "note_passage",
    "text": "may be subject to certain additional restrictions, limitations and differing terms",
    "source_url": "https://modal.com/legal/terms",
-   "read_on": "2026-10-16",
+   "read_on": "2026-11-24",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
-   "page_sha256": "246080092abebcd77646fc52b62b9e966cda34106c6eacc52ed0ea0532d86b83"
+   "page_sha256": "9516d0ad565591caf3561402c3cf613c5361b4eec7c2067c1489b5dd52842912"
+  },
+  {
+   "id": "modal.card_required.sentence",
+   "slug": "modal",
+   "kind": "field_sentence",
+   "field": "card_required",
+   "text": "Note that you must have a payment method on file in order to use Modal.",
+   "source_url": "https://modal.com/docs/guide/billing",
+   "read_on": "2026-11-24",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "34707fa98d577e107391753a9200238859eeb0aed1aa7c16150ae2fc8b662fc1"
   },
   {
    "id": "sambanova.commercial_ok.sentence",
@@ -626,7 +638,7 @@
    "kind": "sentence",
    "text": "M87 Labs will not use Customer Content or Outputs to Train any model or adapter that is made generally available by M87 Labs (including the base Moondream models), or to Train any model or adapter for the benefit of any third party, except where you explicitly opt in under a separate written agreement.",
    "source_url": "https://moondream.ai/terms",
-   "read_on": "2026-10-16",
+   "read_on": "2026-11-24",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "a7c151d622c571676ef6225174ff69e6e77e071a79c55c9c88dfec0f76f1976a"
@@ -637,7 +649,7 @@
    "kind": "note_passage",
    "text": "your internal business or personal purposes",
    "source_url": "https://moondream.ai/terms",
-   "read_on": "2026-10-16",
+   "read_on": "2026-11-24",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "a7c151d622c571676ef6225174ff69e6e77e071a79c55c9c88dfec0f76f1976a"
@@ -648,10 +660,22 @@
    "kind": "note_passage",
    "text": "commercially exploit the Service or any portion of the Service",
    "source_url": "https://moondream.ai/terms",
-   "read_on": "2026-10-16",
+   "read_on": "2026-11-24",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "a7c151d622c571676ef6225174ff69e6e77e071a79c55c9c88dfec0f76f1976a"
+  },
+  {
+   "id": "moondream.card_required.sentence",
+   "slug": "moondream",
+   "kind": "field_sentence",
+   "field": "card_required",
+   "text": "No credit card required.",
+   "source_url": "https://moondream.ai/",
+   "read_on": "2026-11-24",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "f881da5f601fdbf94595fcb3b37cdb89ebe5c96f5abe24d8b8029dcd90ee40b8"
   },
   {
    "id": "speechmatics.sentence",
