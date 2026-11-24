@@ -212,3 +212,10 @@ test('API v1: field_checks passes through unchanged, is allowed by the v1 schema
   const schema = apiV1ProviderSchema(SCHEMA);
   assert.ok(schema.$defs.provider.properties.field_checks && schema.$defs.field_check, 'the published v1 schema describes the new field');
 });
+
+test('the source links under a flag are underlined, so they do not rely on colour alone (WCAG 1.4.1, Lighthouse link-in-text-block)', () => {
+  const css = readFileSync(join(ROOT, 'site/styles.css'), 'utf8');
+  assert.match(css, /\.req-source a \{[^}]*text-decoration: underline/);
+  // the links are plain anchors inside the req-source block on provider and model pages alike
+  assert.match(requirementsHtml({ slug: 'x', card_required: null, field_checks: { card_required: silent } }), /<div class="req-source muted">Read <a href="https:\/\/example\.com\/terms"/);
+});
