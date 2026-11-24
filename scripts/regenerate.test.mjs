@@ -97,6 +97,8 @@ test('the shadow branch passes the commit-policy branch rule', () => {
   const policy = readFileSync(join(ROOT, 'scripts/check-commit-policy.sh'), 'utf8');
   const pattern = policy.match(/^branch_pattern='([^']+)'$/m)[1];
   assert.match(SHADOW_BRANCH, new RegExp(pattern));
+  // The <type>/<slug> form, not a special-cased prefix.
+  assert.match(SHADOW_BRANCH, /^(feat|fix|docs|data|test|ci|chore|refactor)\/[a-z0-9][a-z0-9-]*$/);
   assert.ok(WORKFLOW.includes(`refs/heads/${SHADOW_BRANCH}`) && WORKFLOW.includes(`--head ${SHADOW_BRANCH}`));
 });
 
@@ -167,6 +169,18 @@ test('publish installs nothing, re-checks the allowlist before minting the token
   const push = publish.split('(REGEN_MODE=push)')[1];
   assert.match(push, /needs\.gate\.outputs\.mode == 'push'/);
   assert.doesNotMatch(push, /--force|-f /);
+});
+
+test('the bot commits as <slug>[bot], which commit policy does not treat as a maintainer identity', () => {
+  const policy = readFileSync(join(ROOT, 'scripts/check-commit-policy.sh'), 'utf8');
+  const names = new RegExp(policy.match(/^maintainer_names='([^']+)'$/m)[1]);
+  const emails = new RegExp(policy.match(/^maintainer_emails='([^']+)'$/m)[1], 'i');
+  const publish = job('publish');
+  assert.match(publish, /git config user\.name "\$\{SLUG\}\[bot\]"/);
+  assert.match(publish, /git config user\.email "\$\{id\}\+\$\{SLUG\}\[bot\]@users\.noreply\.github\.com"/);
+  const slug = 'free-llm-api-hub-regen';
+  assert.doesNotMatch(`${slug}[bot]`, names);
+  assert.doesNotMatch(`123456+${slug}[bot]@users.noreply.github.com`, emails);
 });
 
 test('the bot commit message carries no AI trailer (ai-trailer-alert stays green)', () => {

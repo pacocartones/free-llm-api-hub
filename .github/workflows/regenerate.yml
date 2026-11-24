@@ -3,7 +3,7 @@ name: Regenerate derived files
 # Post-merge regeneration of the derived files (README tables, site pages, CSV, sitemap, fingerprints, OG images).
 # Pull requests change the canonical inputs; this workflow rebuilds the derived files from trusted main and:
 #
-#   REGEN_MODE=shadow  opens (or force-updates) a draft pull request from bot/regenerate, as the GitHub App.
+#   REGEN_MODE=shadow  opens (or force-updates) a draft pull request from chore/regenerate-derived, as the GitHub App.
 #                      While the pull-request drift gate in verify.yml is still blocking, main is already in sync,
 #                      so a shadow pull request means the bot's environment is not deterministic: close it and
 #                      note the cause. Without the App (REGEN_APP_CLIENT_ID unset) it only reports: the diff goes
@@ -198,7 +198,7 @@ jobs:
           BASE: ${{ needs.build.outputs.base }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
-          git push --force "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" HEAD:refs/heads/bot/regenerate
+          git push --force "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" HEAD:refs/heads/chore/regenerate-derived
           body="$(mktemp)"
           {
             echo "Shadow run of the regeneration bot (docs/regeneration-bot.md)."
@@ -210,11 +210,11 @@ jobs:
             echo
             echo '```'; git show --stat --format= HEAD; echo '```'
           } > "$body"
-          number="$(gh pr list --head bot/regenerate --state open --json number --jq '.[0].number // empty')"
+          number="$(gh pr list --head chore/regenerate-derived --state open --json number --jq '.[0].number // empty')"
           if [ -n "$number" ]; then
             gh pr edit "$number" --body-file "$body"
           else
-            gh pr create --draft --base main --head bot/regenerate \
+            gh pr create --draft --base main --head chore/regenerate-derived \
               --title "chore(generated): regenerate derived files (shadow)" --body-file "$body"
           fi
       - name: Push to main (REGEN_MODE=push)

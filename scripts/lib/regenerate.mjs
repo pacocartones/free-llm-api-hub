@@ -10,9 +10,9 @@ import { isGeneratedOutput } from '../generated-targets.mjs';
 // regenerated again (loop guard, second layer after the workflow's `paths` filter).
 export const BOT_COMMIT_PREFIX = 'chore(generated):';
 
-// The branch the shadow pull request comes from. It matches `bot/[a-z0-9][a-z0-9/-]*` in
+// The branch the shadow pull request comes from. It matches the `<type>/<slug>` rule of
 // scripts/check-commit-policy.sh, so the bot's pull request passes the branch-name rule.
-export const SHADOW_BRANCH = 'bot/regenerate';
+export const SHADOW_BRANCH = 'chore/regenerate-derived';
 
 // REGEN_MODE (a repository variable): `shadow` opens a pull request, `push` commits to main (needs the App in the
 // ruleset bypass list). Anything else, unset included, disables the workflow.
