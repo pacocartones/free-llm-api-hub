@@ -1,7 +1,7 @@
 {
   "$schema": "./schema.json",
   "version": "2.14.2",
-  "generated": "2026-11-20",
+  "generated": "2026-11-21",
   "source": "https://github.com/pacocartones/free-llm-api-hub",
   "note": "Canonical dataset. README tables, badge-freshness.json and the interactive site are all generated from this file — do not hand-edit them. `verified: true` means the core facts (tier, limits, key catch, link) were independently confirmed against the provider's own docs on `last_verified`. `verified: false` means sourced from community tracking and not yet independently re-confirmed here — treat those as indicative. Attribute fields (openai_compatible, modalities, best_for) are progressively backfilled and may be null.",
   "providers": [
@@ -447,7 +447,7 @@
       "free_type": "recurring-credit",
       "free_tier": "$30/month recurring credit (Starter plan)",
       "rate_limits": "Starter: 100 containers + 10 GPU concurrency, 5 crons, 1-day log retention",
-      "notes": "Recurring monthly credit, not a one-time trial. Modal is serverless compute you deploy models on, not a hosted model API. A payment method on file is required to use Modal at all. Commercial terms: Modal Terms of Service (https://modal.com/legal/terms, read 2026-10-16) authorize use «solely for Customer's internal business» (reselling direct access prohibited), but Section 1.2 states «No-Fee Use» «may be subject to certain additional restrictions, limitations and differing terms»; the clause does not list them, so whether the Starter plan credit permits production/commercial use is not settled and commercial_ok remains null.",
+      "notes": "Recurring monthly credit, not a one-time trial. Modal is serverless compute you deploy models on, not a hosted model API. A payment method on file is required to use Modal at all. Commercial terms: Modal Terms of Service (https://modal.com/legal/terms, effective May 2026, re-read 2026-11-21) authorize use «solely for Customer's internal business» (reselling direct access prohibited, §1.3), but Section 1.2 states «No-Fee Use» «may be subject to certain additional restrictions, limitations and differing terms» as specified in the corresponding «No-Fee Use Limitations», which Modal does not publish on modal.com; the pricing page (https://modal.com/pricing, read 2026-11-21) describes Starter ($0 + compute, $30/month free credits) as built for «small teams and independent developers» without granting or denying commercial use of the credit. No official sentence settles it, so commercial_ok remains null.",
       "best_for": "Self-hosting open models on free monthly GPU credit",
       "modalities": ["text"],
       "models_free": null,
@@ -461,7 +461,7 @@
       "is_text_llm": false,
       "model_tier": null,
       "verified": true,
-      "last_verified": "2026-10-16",
+      "last_verified": "2026-11-21",
       "data_policy": {"trains_on_prompts":false,"retention":null,"source":"https://modal.com/legal/terms","checked":"2026-10-16","quote":"Modal will not, except with Customer's prior written consent: (i) train any AI model using Customer Data, or (ii) export Customer Data into, or cause Customer Data to be ingested by, large language models.","note":"The terms are written for Customers (businesses): use is «solely for Customer's internal business», while «No-Fee Use» «may be subject to certain additional restrictions, limitations and differing terms»; the clause does not list them.","plan_named":false}
     },
     {
