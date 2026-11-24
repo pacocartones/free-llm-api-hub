@@ -144,7 +144,8 @@
       "free_limits": {"requests_per_minute":20,"requests_per_month":1000,"scope":"trial key, chat endpoint; 1,000 API calls per month in total","source":"https://docs.cohere.com/docs/rate-limits","checked":"2026-11-24"},
       "field_checks": {"phone_required":{"status":"source_silent","checked":"2026-11-24","sources":["https://cohere.com/privacy","https://cohere.com/pricing","https://docs.cohere.com/docs/rate-limits"],"note":"Account creation data is a name, a business email and a password; pricing and rate-limits pages say nothing about a phone"},"card_required":{"status":"stated","checked":"2026-11-24","sources":["https://cohere.com/privacy"],"quote":"Individuals who create or access a free trial account to test out our Platform under our standard Terms of Use with no payment method on file.","note":"The privacy policy defines Trial Users this way; payment information is asked for only to move from a trial to a paid account"},"commercial_ok":{"status":"stated","checked":"2026-11-24","sources":["https://cohere.com/pricing"],"quote":"API calls made from a Trial API key are free. However, trial keys are rate limited and are not permitted to be used for production or commercial purposes."}},
       "verified": true,
-      "last_verified": "2026-11-24"
+      "last_verified": "2026-11-24",
+      "data_policy": {"trains_on_prompts":true,"retention":null,"source":"https://cohere.com/privacy","checked":"2026-11-24","quote":"Section 2.3 (Research and Model Improvement): Analyzing usage patterns and using Trial or Research User Inputs/Outputs to improve the performance and safety of our AI models.","note":"Trial Users are free trial accounts with no payment method on file. Cohere says it takes steps to de-identify inputs and outputs before research use. Retention is stated only for Enterprise Users (generally 30 days), not for Trial Users.","plan_named":true}
     },
     {
       "slug": "cerebras",
