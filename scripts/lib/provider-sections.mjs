@@ -8,6 +8,7 @@ import { htmlEsc, ICON } from './rows.mjs';
 import { triStateHtml } from './compare.mjs';
 import { expiryHtml } from './expiry.mjs';
 import { fieldCheck } from './field-checks.mjs';
+import { publishedSpeed, speedFigure, SPEED_METRICS } from './published-speed.mjs';
 
 const FREE_TYPE_LABEL = {
   'renewing-quota': 'Free quota that renews',
@@ -128,4 +129,25 @@ export function dataPolicyHtml(p) {
     `<div class="req"><dt>${ICON('ic-shield')}Trains on your prompts</dt><dd>${triStateHtml(dp.trains_on_prompts, 'yes', 'no')}</dd></div>` +
     `<div class="req"><dt>${ICON('ic-clock')}Retention</dt><dd>${dp.retention ? htmlEsc(dp.retention) : '<span class="tri tri-unk">not confirmed</span>'}</dd></div></dl>` +
     (src ? `<p class="muted">Source: <a href="${src}" target="_blank" rel="noopener">the provider's page</a>.</p>` : '');
+}
+
+/**
+ * Published speed: each figure the provider publishes for a model of its free sample, with its words, its page and the day it was
+ * read. It says plainly that these are the provider's claims (the project measures nothing, issue #606) and whether the page ties
+ * them to a plan. Nothing at all when the provider publishes no figure: absence is not "slow".
+ */
+export function speedHtml(p) {
+  const list = publishedSpeed(p);
+  if (!list.length) return '';
+  const items = list.map((e) => {
+    const m = SPEED_METRICS[e.metric];
+    const src = safeUrl(e.source);
+    const plan = e.plan_named === false ? ' The page ties this figure to no plan, so it is not stated for the free tier.' : '';
+    return `<li><strong><code>${htmlEsc(e.model)}</code>: ${htmlEsc(speedFigure(e))}</strong> ${m ? htmlEsc(m.label) : ''}` +
+      `<div class="req-source muted">&ldquo;${htmlEsc(e.quote)}&rdquo; ${src ? `Per <a href="${src}" target="_blank" rel="noopener">the provider's page</a>, ` : ''}checked ${htmlEsc(e.checked)}.` +
+      `${e.conditions ? ` ${htmlEsc(e.conditions)}.` : ''}${plan}</div></li>`;
+  }).join('');
+  return `<h2 id="published-speed">Published speed</h2>` +
+    `<p class="muted">The provider's own figures, under its own conditions. We do not measure speed, and figures from different providers are not a like-for-like benchmark.</p>` +
+    `<ul class="speed-list">${items}</ul>`;
 }

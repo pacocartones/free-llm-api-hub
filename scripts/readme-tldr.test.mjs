@@ -27,7 +27,8 @@ const numbers = (text) => [...String(text).matchAll(/\$?(\d[\d,]*(?:\.\d+)?)\s*(
   const v = Number(n.replace(/,/g, ''));
   return unit === 'k' || unit === 'K' ? v * 1000 : unit === 'M' ? v * 1_000_000 : v;
 });
-const factText = (p) => [p.free_tier, p.rate_limits, p.notes, p.expires].filter(Boolean).join(' ');
+// published_speed figures count as facts: the speed row quotes them (published-speed.test.mjs ties that row to the data).
+const factText = (p) => [p.free_tier, p.rate_limits, p.notes, p.expires, ...(p.published_speed || []).map((e) => `${e.model} ${e.value}`)].filter(Boolean).join(' ');
 
 test('every TL;DR row links only verified providers that exist in the dataset', () => {
   const rows = tldrRows();

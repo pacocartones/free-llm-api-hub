@@ -33,7 +33,7 @@ Each pick links to its full verified profile on the live site.
 | I want… | Start with | Why |
 |---|---|---|
 | **The smartest model, free** | [Google Gemini](https://freellmapihub.com/p/google-gemini) | The only genuinely frontier-class model with a real free tier here — not just open weights |
-| **The fastest inference** | [Groq](https://freellmapihub.com/p/groq) or [SambaNova](https://freellmapihub.com/p/sambanova) | Purpose-built inference chips — far faster than typical GPU-served APIs |
+| **Published speed figures** | [Cerebras](https://freellmapihub.com/p/cerebras) or [Groq](https://freellmapihub.com/p/groq) | Each provider's own figure for gpt-oss-120b: ~3,000 tok/s (Cerebras), ~500 tok/s (Groq). Provider claims, not our measurement; neither says it applies to the free tier |
 | **The most free volume/day** | [Cloudflare Workers AI](https://freellmapihub.com/p/cloudflare-workers-ai) (10k Neurons) or [OpenRouter](https://freellmapihub.com/p/openrouter) (50 req/day, 1,000 once you have bought $10 of credit) | Highest ceilings for a side project with real traffic |
 | **No card *and* no phone** | [Google Gemini](https://freellmapihub.com/p/google-gemini) or [Z.ai (GLM)](https://freellmapihub.com/p/zai-glm) | SiliconFlow and Tencent Hunyuan gate signup behind phone verification |
 | **Open weights** (Llama, DeepSeek, Qwen, GLM) | [OpenRouter](https://freellmapihub.com/p/openrouter) or [Cloudflare Workers AI](https://freellmapihub.com/p/cloudflare-workers-ai) | Widest open-model selection on an ongoing free tier |

@@ -28,7 +28,7 @@ A living, maintainer-facing checklist of concrete follow-ups. Direction and prin
 
 ## Dataset / schema
 
-- [ ] `speed_tier` (or tokens/sec) as a defensible, sourced field → enables an honest "fastest free LLM APIs" collection.
+- [x] Speed as a defensible, sourced field: `published_speed` records provider-published figures with a quote (#606). It does not support a "fastest" collection: vendor figures are claims under different conditions, and none is stated for the free tier.
 - ✅ **Stable release tag per dataset `version`** — tagging `vX.Y.Z` at each schema/dataset version so downstream consumers can pin a snapshot (e.g. `v2.5.0`). The `Tag release` workflow now creates the tag when `version` in `data/providers.json` advances; see [RELEASING.md](../RELEASING.md).
 - ✅ **History / diffs** — a "Change history" section on each provider page and `/api/v1/history.json`, mined from the git history of `data/providers.json` by `scripts/lib/history.mjs` (also the `/changes/` feed).
 

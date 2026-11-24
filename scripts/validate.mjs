@@ -26,6 +26,7 @@ import { keyHostErrors } from './lib/key-hosts.mjs';
 import { summaryErrors } from './lib/provider-summaries.mjs';
 import { publicHttpsUrlError } from './lib/public-fetch.mjs';
 import { fieldCheckErrors } from './lib/field-checks.mjs';
+import { publishedSpeedErrors } from './lib/published-speed.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const FILE = process.argv[2] ? resolve(process.argv[2]) : join(ROOT, 'data/providers.json');
@@ -221,6 +222,9 @@ for (const p of data.providers ?? []) {
 
   // field_checks: why a tri-state flag holds its value (stated, or the reason a null stays null). See docs/comparison-dimensions.md.
   errors.push(...fieldCheckErrors(p, { today: todayUtc }));
+
+  // published_speed: the provider's own speed figure for a model of its free sample, quoted from its own page (issue #606; see docs/comparison-dimensions.md).
+  errors.push(...publishedSpeedErrors(p, { today: todayUtc }));
 
   // no_expiry: the provider's own statement that a one-time trial credit does not expire (see docs/comparison-dimensions.md).
   if (p.no_expiry != null) {

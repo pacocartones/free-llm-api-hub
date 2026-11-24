@@ -13,7 +13,7 @@ Direction, not dated promises. The north star: stay the **most trustworthy, curr
 
 - Keep the 90-day freshness bar green; re-verify entries as their dates age.
 - Backfill `openai_base_url` for the remaining OpenAI-compatible entries (most done).
-- Consider a `speed_tier` field so a "fastest free APIs" collection can be generated honestly from data.
+- `published_speed` records the speed a provider publishes, with its words (#606). Vendor figures are not comparable, so there is no "fastest" collection.
 
 ## Done recently
 
@@ -27,7 +27,6 @@ Direction, not dated promises. The north star: stay the **most trustworthy, curr
 
 ## Next
 
-- **A "fastest free LLM APIs" collection**, once a defensible speed dimension exists in the data.
 - **Complete the `models_free` backfill** for the key-gated providers — see the [backlog](backlog.md) for the concrete checklist.
 
 ## Additional shipped companions

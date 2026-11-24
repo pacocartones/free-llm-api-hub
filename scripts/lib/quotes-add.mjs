@@ -6,7 +6,8 @@ import { fetchPublicUrl } from './public-fetch.mjs';
 import { isPdf, pdfToText, responseBytes } from './pdf-text.mjs';
 import { PDF_METHOD } from './page-text.mjs';
 
-const KIND_ORDER = { sentence: 0, note_passage: 1, absence_check: 2, field_sentence: 3 };
+const KIND_ORDER = { sentence: 0, note_passage: 1, absence_check: 2, field_sentence: 3, speed_quote: 4 };
+import { speedQuoteId } from './published-speed.mjs';
 
 /** Reads a page the way verify-quotes does. @returns {Promise<{ok: boolean, text?: string, why?: string}>} */
 export async function readText(url, fetchImpl = fetchPublicUrl, lang = 'en') {
@@ -87,13 +88,32 @@ export async function fieldEntriesFor(slug, field, check, read, { today, lang = 
 }
 
 /**
- * The register with the entries of `slug` replaced by `fresh`, in the order of the dataset (then sentence, passages, absence check,
- * field sentences). With `field`, only that field's sentence is replaced; without it, the data_policy entries of the slug are
- * replaced and its field sentences are kept.
+ * The speed_quote entries of a provider: the quote of each published_speed entry, read on its source.
+ * @returns {Promise<{entries: object[], problems: string[]}>}
  */
-export function mergeRegistry(registry, data, slug, fresh, { field } = {}) {
+export async function speedEntriesFor(slug, list, read, { today, lang = 'en' }) {
+  const entries = []; const problems = [];
+  const pages = new Map();
+  for (const e of Array.isArray(list) ? list : []) {
+    if (!e || typeof e.quote !== 'string' || !e.quote) { problems.push(`${slug}: a published_speed entry has no quote`); continue; }
+    if (!pages.has(e.source)) pages.set(e.source, await read(e.source));
+    const pg = pages.get(e.source);
+    if (!pg.ok) { problems.push(pg.why); continue; }
+    if (!pg.text.includes(collapse(e.quote))) { problems.push(`the published_speed quote of ${slug} for ${e.model} is not literally on ${e.source}`); continue; }
+    entries.push({ id: speedQuoteId(slug, e), slug, kind: 'speed_quote', model: e.model, metric: e.metric, text: e.quote, source_url: e.source, read_on: today, lang, method: pg.method || methodFor(lang), page_sha256: sha256(pg.text) });
+  }
+  return { entries, problems };
+}
+
+/**
+ * The register with the entries of `slug` replaced by `fresh`, in the order of the dataset (then sentence, passages, absence check,
+ * field sentences, speed quotes). With `field`, only that field's sentence is replaced; with `speed`, the slug's speed quotes are
+ * replaced; without either, the data_policy entries of the slug are replaced and its field sentences and speed quotes are kept.
+ */
+export function mergeRegistry(registry, data, slug, fresh, { field, speed } = {}) {
   const order = new Map(data.providers.map((p, i) => [p.slug, i]));
-  const replaced = (e) => e.slug === slug && (field ? e.id === `${slug}.${field}.sentence` : e.kind !== 'field_sentence');
+  const replaced = (e) => e.slug === slug && (speed ? e.kind === 'speed_quote'
+    : field ? e.id === `${slug}.${field}.sentence` : e.kind !== 'field_sentence' && e.kind !== 'speed_quote');
   const kept = registry.entries.filter((e) => !replaced(e));
   const all = [...kept, ...fresh];
   all.sort((a, b) => (order.get(a.slug) ?? 1e9) - (order.get(b.slug) ?? 1e9) || KIND_ORDER[a.kind] - KIND_ORDER[b.kind] || a.id.localeCompare(b.id, 'en', { numeric: true }));
