@@ -5,4 +5,4 @@
   terms are silent) and the sentence behind `commercial_ok: false` (all
   SambaCloud models are Preview models, for evaluation and developer
   experimentation only). Its card requirement still has two official pages that
-  disagree. The free limits, models and notes are unchanged.
+  disagree. The free limits, models and notes are unchanged (#726).
