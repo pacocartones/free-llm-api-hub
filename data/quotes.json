@@ -62,6 +62,19 @@
    "page_sha256": "8e227f1b41815703fde5e08abac333233fb0564e0c7ada3299be7c515712a6cc"
   },
   {
+   "id": "groq.speed.qwen/qwen3.8-27b.output_tokens_per_second",
+   "slug": "groq",
+   "kind": "speed_quote",
+   "model": "qwen/qwen3.8-27b",
+   "metric": "output_tokens_per_second",
+   "text": "TOKEN SPEED ~450+ tps",
+   "source_url": "https://console.groq.com/docs/model/qwen/qwen3.8-27b",
+   "read_on": "2026-11-24",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "5f829877de34d861b1453cbd561ef3f0911fcf91d371d6df21e84c8f65002443"
+  },
+  {
    "id": "openrouter.sentence",
    "slug": "openrouter",
    "kind": "sentence",
@@ -456,6 +469,19 @@
    "page_sha256": "474add61f6efb00213cc7b4cc044bad7214e624cc0665f1a39b2fabc9e48a5a5"
   },
   {
+   "id": "sambanova.speed.gpt-oss-120b.output_tokens_per_second",
+   "slug": "sambanova",
+   "kind": "speed_quote",
+   "model": "gpt-oss-120b",
+   "metric": "output_tokens_per_second",
+   "text": "SambaCloud is running the model at the full 131K context length and at speeds over 700 tokens/seconds/user powered by the SambaNova RDU.",
+   "source_url": "https://sambanova.ai/blog/start-building-with-lightning-fast-gpt-oss-120b-on-sambacloud",
+   "read_on": "2026-11-24",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "7c937debf47c0be8766266fba294564792ebcb44bb7b8f1926ac00d3f49d8ec2"
+  },
+  {
    "id": "scaleway.sentence",
    "slug": "scaleway",
    "kind": "sentence",
@@ -465,6 +491,32 @@
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "8da85e4dccfaaaea63f791b192f28d209cfb6d5704522d6f4ebe19ffc12aad27"
+  },
+  {
+   "id": "scaleway.speed.gpt-oss-120b.output_tokens_per_second",
+   "slug": "scaleway",
+   "kind": "speed_quote",
+   "model": "gpt-oss-120b",
+   "metric": "output_tokens_per_second",
+   "text": "Output token generation speed should be above 100 tokens per second for recent small to medium-sized models (such as gpt-oss-120b or mistral-small-3.2-24b-instruct-2506 )",
+   "source_url": "https://www.scaleway.com/en/docs/generative-apis/faq/",
+   "read_on": "2026-11-24",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "6ec4c179faa295b87aff9d731b08da3d06584b10db637af89e55140390d547e5"
+  },
+  {
+   "id": "scaleway.speed.mistral-small-3.2-24b-instruct-2506.output_tokens_per_second",
+   "slug": "scaleway",
+   "kind": "speed_quote",
+   "model": "mistral-small-3.2-24b-instruct-2506",
+   "metric": "output_tokens_per_second",
+   "text": "Output token generation speed should be above 100 tokens per second for recent small to medium-sized models (such as gpt-oss-120b or mistral-small-3.2-24b-instruct-2506 )",
+   "source_url": "https://www.scaleway.com/en/docs/generative-apis/faq/",
+   "read_on": "2026-11-24",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "6ec4c179faa295b87aff9d731b08da3d06584b10db637af89e55140390d547e5"
   },
   {
    "id": "nvidia-nim.sentence",
