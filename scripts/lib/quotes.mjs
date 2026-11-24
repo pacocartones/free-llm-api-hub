@@ -8,7 +8,7 @@ import { hasHiddenChars } from './hidden-chars.mjs';
 import { ABSENCE_TERMS, methodFor, sameLanguage, PDF_METHOD } from './page-text.mjs';
 import { publicHttpsUrlError } from './public-fetch.mjs';
 
-export const KINDS = ['sentence', 'note_passage', 'absence_check'];
+export const KINDS = ['sentence', 'note_passage', 'absence_check', 'field_sentence'];
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 const SHA_RE = /^[0-9a-f]{64}$/;
 const SPAN_RE = /«([^»]*)»/g;
@@ -30,13 +30,21 @@ export function quoteErrors(data, registry, { today = new Date().toISOString().s
   const fail = (m) => errors.push(m);
   if (!registry || registry.version !== 1 || !Array.isArray(registry.entries)) return ['quotes.json: needs version 1 and an entries list'];
   const withPolicy = new Map((data.providers || []).filter((p) => p.data_policy).map((p) => [p.slug, p.data_policy]));
+  // field_sentence: the quote of a stated field_checks entry, id <slug>.<field>.sentence (see scripts/lib/field-checks.mjs).
+  const fieldQuotes = new Map();
+  for (const p of data.providers || []) for (const [field, c] of Object.entries(p.field_checks || {})) if (c && c.quote != null) fieldQuotes.set(`${p.slug}.${field}.sentence`, { slug: p.slug, field, check: c });
+  const fieldSentences = new Map();
   const seen = new Set();
   const by = { sentence: new Map(), note_passage: new Map(), absence_check: new Map() };
   for (const e of registry.entries) {
     const where = `quotes.json ${e && e.id}`;
     if (!e || typeof e.id !== 'string' || !e.id) { fail('quotes.json: an entry has no id'); continue; }
     if (seen.has(e.id)) fail(`${where}: duplicate id`); seen.add(e.id);
-    if (!withPolicy.has(e.slug)) { fail(`${where}: provider "${e.slug}" has no data_policy`); continue; }
+    if (e.kind === 'field_sentence') {
+      if (e.id !== `${e.slug}.${e.field}.sentence`) fail(`${where}: a field sentence has the id <slug>.<field>.sentence`);
+      if (!fieldQuotes.has(e.id)) { fail(`${where}: provider "${e.slug}" has no field_checks.${e.field} quote`); continue; }
+      fieldSentences.set(e.id, e);
+    } else if (!withPolicy.has(e.slug)) { fail(`${where}: provider "${e.slug}" has no data_policy`); continue; }
     if (!KINDS.includes(e.kind)) { fail(`${where}: unknown kind ${JSON.stringify(e.kind)}`); continue; }
     if (publicHttpsUrlError(e.source_url)) fail(`${where}: source_url must be a public HTTPS address`);
     if (!DATE_RE.test(e.read_on || '') || e.read_on > today) fail(`${where}: read_on must be a date not after today in UTC`);
@@ -56,8 +64,17 @@ export function quoteErrors(data, registry, { today = new Date().toISOString().s
     if (typeof e.text !== 'string' || !e.text.trim() || e.text.length > 400) fail(`${where}: text must be 1 to 400 characters`);
     else if (hasHiddenChars(e.text)) fail(`${where}: text has control, bidirectional or zero-width characters`);
     else if (/\s{2}|^\s|\s$/.test(e.text)) fail(`${where}: text must have its white space collapsed, as the page text is`);
-    if (e.kind === 'sentence') { if (by.sentence.has(e.slug)) fail(`${where}: second sentence for ${e.slug}`); by.sentence.set(e.slug, e); }
+    if (e.kind === 'field_sentence') { /* matched against its field check below */ }
+    else if (e.kind === 'sentence') { if (by.sentence.has(e.slug)) fail(`${where}: second sentence for ${e.slug}`); by.sentence.set(e.slug, e); }
     else { if (!by.note_passage.has(e.slug)) by.note_passage.set(e.slug, []); by.note_passage.get(e.slug).push(e); }
+  }
+  for (const [id, { slug, field, check }] of fieldQuotes) {
+    const s = fieldSentences.get(id);
+    if (!s) fail(`${slug}: the quote of field_checks.${field} has no field_sentence entry (${id}) in quotes.json`);
+    else {
+      if (s.text !== check.quote) fail(`${slug}: the field_sentence entry ${id} is not byte for byte the quote of field_checks.${field}`);
+      if (!Array.isArray(check.sources) || s.source_url !== check.sources[0]) fail(`${slug}: the field_sentence entry ${id} has another source than the first source of field_checks.${field}`);
+    }
   }
   for (const [slug, dp] of withPolicy) {
     const s = by.sentence.get(slug);

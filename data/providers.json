@@ -39,16 +39,16 @@
       "free_type": "renewing-quota",
       "free_tier": "Open-weight models (GPT-OSS, Qwen) plus Whisper, no credit card required",
       "rate_limits": "Free plan examples: openai/gpt-oss-120b, openai/gpt-oss-20b and qwen/qwen3.8-27b: 30 RPM/1K RPD/8K TPM/200K TPD; Whisper models: 20 RPM/2K RPD/7.2K audio seconds/hour and 28.8K/day; limits vary by model",
-      "notes": "Limits apply at the organization level, not per API key. Phone verification required at signup. qwen/qwen3.8-27b is listed among Preview models, which the models page says are intended for evaluation purposes only",
+      "notes": "Limits apply at the organization level, not per API key. qwen/qwen3.8-27b is listed among Preview models, which the models page says are intended for evaluation purposes only",
       "best_for": "Lowest-latency inference for open-weight models",
       "modalities": ["text", "audio"],
       "models_free": ["openai/gpt-oss-120b", "openai/gpt-oss-20b", "qwen/qwen3.8-27b", "whisper-large-v3", "whisper-large-v3-turbo"],
       "models_url": "https://console.groq.com/docs/models",
       "expires": null,
       "docs_url": "https://console.groq.com/docs/rate-limits",
-      "phone_required": true,
+      "phone_required": null,
       "card_required": false,
-      "commercial_ok": true,
+      "commercial_ok": null,
       "openai_compatible": true,
       "openai_base_url": "https://api.groq.com/openai/v1",
       "env_key": "GROQ_API_KEY",
@@ -56,8 +56,9 @@
       "model_tier": 3,
       "model_tier_source": {"model":"qwen/qwen3.8-27b","arena_model":"qwen3.8-27b","match":"variant","rating":1437.7,"ci":[1432.3,1443.1],"votes":18462,"snapshot":"2026-10-02","url":"https://huggingface.co/datasets/lmarena-ai/leaderboard-dataset"},
       "free_limits": {"requests_per_minute":30,"requests_per_day":1000,"tokens_per_day":200000,"scope":"free plan, each of openai/gpt-oss-120b, openai/gpt-oss-20b and qwen/qwen3.8-27b; limits vary by model","source":"https://console.groq.com/docs/rate-limits","checked":"2026-11-24"},
+      "field_checks": {"phone_required":{"status":"source_silent","checked":"2026-11-24","sources":["https://console.groq.com/docs/quickstart","https://console.groq.com/docs/legal/services-agreement","https://groq.com/privacy-policy"],"note":"Quickstart, rate-limits page and Services Agreement do not mention phone verification; the privacy policy only lists a phone number among data that may be collected"},"commercial_ok":{"status":"source_silent","checked":"2026-11-24","sources":["https://console.groq.com/docs/legal/services-agreement","https://console.groq.com/docs/models"],"note":"The Services Agreement (June 22, 2026) is for business use and covers fee-free services, but no sentence allows or forbids commercial use of the Free plan; Preview models are for evaluation only"}},
       "verified": true,
-      "last_verified": "2026-11-14",
+      "last_verified": "2026-11-24",
       "data_policy": {"trains_on_prompts":false,"retention":"Inference: none by default; abuse/reliability logs up to 30 days or longer by law; stateful features differ","source":"https://console.groq.com/docs/your-data","checked":"2026-11-24","quote":"By default, Groq does not retain customer data for inference requests.","note":"Training: Services Agreement (modified 2026-06-22) §4.2: «Groq is not permitted to use Inputs or Outputs for training or fine-tuning any AI Model Services or other models» unless the customer allows it. §5.1 covers fee-free services; the Free plan is not named.","plan_named":false}
     },
     {
@@ -73,9 +74,9 @@
       "models_free": ["baidu/ernie-5.5-flash-preview:free", "google/gemma-4-26b-a4b-it:free", "inclusionai/ling-3.2-flash:free", "liquid/lfm-3-1.7b:free", "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free", "particle-ai/particle-1:free"],
       "expires": null,
       "docs_url": "https://openrouter.ai/docs/api-reference/limits",
-      "phone_required": false,
-      "card_required": false,
-      "commercial_ok": true,
+      "phone_required": null,
+      "card_required": null,
+      "commercial_ok": null,
       "openai_compatible": true,
       "openai_base_url": "https://openrouter.ai/api/v1",
       "env_key": "OPENROUTER_API_KEY",
@@ -83,8 +84,9 @@
       "model_tier": 4,
       "model_tier_source": {"model":"google/gemma-4-31b-it:free","arena_model":"gemma-4-31b","match":"variant","rating":1452.8,"ci":[1445.4,1460.3],"boundary":true,"votes":6133,"snapshot":"2026-10-02","url":"https://huggingface.co/datasets/lmarena-ai/leaderboard-dataset"},
       "free_limits": {"requests_per_minute":20,"requests_per_day":50,"scope":"free models; published table: 50 requests/day below 10 credits purchased lifetime, 1,000/day at 10+; docs also describe an early upgrade one credit below the threshold","source":"https://openrouter.ai/docs/api-reference/limits","checked":"2026-11-24"},
+      "field_checks": {"phone_required":{"status":"source_silent","checked":"2026-11-24","sources":["https://openrouter.ai/terms","https://openrouter.ai/docs/faq","https://openrouter.ai/docs/api-reference/limits"],"note":"Terms (3.1) mention only an email address or other contact information at registration; the FAQ and limits page say nothing about a phone"},"card_required":{"status":"sources_disagree","checked":"2026-11-24","sources":["https://openrouter.ai/terms","https://openrouter.ai/docs/faq","https://openrouter.ai/docs/api-reference/limits"],"note":"Terms (4) say users must currently purchase Credits to make API calls; the FAQ gives new users a small free allowance and the limits page sets free-model limits for accounts with less than 10 credits purchased"},"commercial_ok":{"status":"source_silent","checked":"2026-11-24","sources":["https://openrouter.ai/terms","https://openrouter.ai/docs/faq"],"note":"Terms ban only reselling API access or building a competing service (7) and expect commercial use of the Service in general; the FAQ calls free models usually unsuitable for production. Nothing rules on the free models"}},
       "verified": true,
-      "last_verified": "2026-11-14",
+      "last_verified": "2026-11-24",
       "data_policy": {"trains_on_prompts":null,"retention":"OpenRouter: opt-in, CSAM/legal or Safety Retention exceptions; upstream retention varies","source":"https://openrouter.ai/docs/guides/privacy/data-collection","checked":"2026-11-24","quote":"OpenRouter retains prompts only when you opt in, or when retention is needed for CSAM review, reporting, and related legal preservation. Requests to Safety Retention endpoints are the exception: OpenRouter or the provider may retain prompts and responses from any request, only to prevent abuse, and not for training.","note":"Router-level retention only; upstream policies vary by provider. Training stays unknown across routes. Routing controls: «There are separate settings for paid and free models.»","plan_named":false}
     },
     {
@@ -100,9 +102,9 @@
       "models_free": ["@cf/google/gemma-4-26b-a4b-it", "@cf/meta/llama-3.3-70b-instruct-fp8-fast", "@cf/mistralai/mistral-small-3.1-24b-instruct", "@cf/qwen/qwen2.5-coder-32b-instruct", "@cf/deepseek-ai/deepseek-r1-distill-qwen-32b"],
       "expires": null,
       "docs_url": "https://developers.cloudflare.com/workers-ai/platform/pricing/",
-      "phone_required": false,
+      "phone_required": null,
       "card_required": false,
-      "commercial_ok": true,
+      "commercial_ok": null,
       "openai_compatible": true,
       "openai_base_url": "https://api.cloudflare.com/client/v4/accounts/{account_id}/ai/v1",
       "env_key": "CLOUDFLARE_API_TOKEN",
@@ -110,8 +112,9 @@
       "model_tier": 3,
       "model_tier_source": {"model":"@cf/google/gemma-4-26b-a4b-it","arena_model":"gemma-4-26b-a4b","match":"variant","rating":1437.5,"ci":[1430,1444.9],"votes":6081,"snapshot":"2026-10-02","url":"https://huggingface.co/datasets/lmarena-ai/leaderboard-dataset"},
       "free_limits": {"requests_per_minute":300,"scope":"default text generation on free-access models; paid-model limits are separate. The daily allowance is 10,000 Neurons, not requests or tokens","source":"https://developers.cloudflare.com/workers-ai/platform/limits/","checked":"2026-11-24"},
+      "field_checks": {"phone_required":{"status":"source_silent","checked":"2026-11-24","sources":["https://developers.cloudflare.com/fundamentals/account/create-account/","https://developers.cloudflare.com/workers-ai/platform/pricing/","https://www.cloudflare.com/terms/"],"note":"Account creation asks for an email and a password and verifies the email; no official page says whether a phone is needed"},"card_required":{"status":"stated","checked":"2026-11-24","sources":["https://www.cloudflare.com/plans/","https://developers.cloudflare.com/workers-ai/platform/pricing/"],"quote":"Start building for free — no credit card required.","note":"The Workers AI pricing page gives the free daily Neurons on the Workers Free plan, the default plan"},"commercial_ok":{"status":"source_silent","checked":"2026-11-24","sources":["https://www.cloudflare.com/terms/","https://developers.cloudflare.com/workers-ai/platform/pricing/"],"note":"The Self-Serve Subscription Agreement covers Free Services but no sentence allows or forbids commercial use of the free Workers AI allocation"}},
       "verified": true,
-      "last_verified": "2026-11-14",
+      "last_verified": "2026-11-24",
       "data_policy": {"trains_on_prompts":false,"retention":"Standard inference: no retention after response; stateful features and safety/security/legal exceptions apply","source":"https://developers.cloudflare.com/workers-ai/platform/data-usage/","checked":"2026-11-24","quote":"Cloudflare does not use Customer Content processed by Workers AI to train AI models.","note":"Applies to Workers AI; storage selected by the customer, stateful features and legal obligations can require retention. Operational metadata excludes Customer Content. The no-training sentence does not name a plan.","plan_named":false}
     },
     {
@@ -127,7 +130,7 @@
       "models_free": ["command-a-03-2025", "command-r-plus-08-2024", "command-r-08-2024", "command-r7b-12-2024", "embed-v4.0", "rerank-v3.5"],
       "expires": null,
       "docs_url": "https://docs.cohere.com/docs/rate-limits",
-      "phone_required": false,
+      "phone_required": null,
       "card_required": false,
       "commercial_ok": false,
       "openai_compatible": true,
@@ -137,8 +140,9 @@
       "model_tier": 2,
       "model_tier_source": {"model":"command-a-03-2025","arena_model":"command-a-03-2025","match":"exact","rating":1353.7,"ci":[1350.2,1357.2],"votes":55467,"snapshot":"2026-10-02","url":"https://huggingface.co/datasets/lmarena-ai/leaderboard-dataset"},
       "free_limits": {"requests_per_minute":20,"requests_per_month":1000,"scope":"trial key, chat endpoint; 1,000 API calls per month in total","source":"https://docs.cohere.com/docs/rate-limits","checked":"2026-11-24"},
+      "field_checks": {"phone_required":{"status":"source_silent","checked":"2026-11-24","sources":["https://cohere.com/privacy","https://cohere.com/pricing","https://docs.cohere.com/docs/rate-limits"],"note":"Account creation data is a name, a business email and a password; pricing and rate-limits pages say nothing about a phone"},"card_required":{"status":"stated","checked":"2026-11-24","sources":["https://cohere.com/privacy"],"quote":"Individuals who create or access a free trial account to test out our Platform under our standard Terms of Use with no payment method on file.","note":"The privacy policy defines Trial Users this way; payment information is asked for only to move from a trial to a paid account"},"commercial_ok":{"status":"stated","checked":"2026-11-24","sources":["https://cohere.com/pricing"],"quote":"API calls made from a Trial API key are free. However, trial keys are rate limited and are not permitted to be used for production or commercial purposes."}},
       "verified": true,
-      "last_verified": "2026-11-14"
+      "last_verified": "2026-11-24"
     },
     {
       "slug": "cerebras",
@@ -161,6 +165,7 @@
       "env_key": "CEREBRAS_API_KEY",
       "is_text_llm": true,
       "model_tier": null,
+      "field_checks": {"phone_required":{"status":"source_silent","checked":"2026-11-24","sources":["https://inference-docs.cerebras.ai/support/rate-limits","https://inference-docs.cerebras.ai/console/account-billing","https://www.cerebras.ai/terms-of-service"],"note":"Docs and terms name a verified payment method as the only step before the free credit; nothing about a phone"}},
       "verified": true,
       "last_verified": "2026-11-14",
       "data_policy": {"trains_on_prompts":false,"retention":null,"source":"https://www.cerebras.ai/terms-of-service","checked":"2026-11-14","quote":"For clarity, the foregoing does not grant Cerebras the right to use Service Content for the purpose of training or fine-tuning models.","note":"The sentence says the terms do not grant Cerebras the right to use Service Content to train or fine-tune models. Terms effective 2024-08-27. The terms say some parts of the Service «may be provided for free» (Payment clause); they do not tie that to this sentence.","plan_named":false}
@@ -186,6 +191,7 @@
       "env_key": "HF_TOKEN",
       "is_text_llm": false,
       "model_tier": null,
+      "field_checks": {"phone_required":{"status":"needs_account","checked":"2026-11-24","sources":["https://huggingface.co/join","https://huggingface.co/pricing","https://huggingface.co/docs/inference-providers/en/pricing"],"note":"The sign-up form asks for an email and a password; no public page says whether a phone is asked for later, so only an account would tell (issue 12)"}},
       "verified": true,
       "last_verified": "2026-11-19",
       "data_policy": {"trains_on_prompts":false,"retention":"Request body and response not stored when routed; debug logs up to 30 days, without user data or tokens","source":"https://huggingface.co/docs/inference-providers/en/security","checked":"2026-11-24","quote":"Hugging Face does not store any user data for training purposes.","note":"Covers requests routed through Inference Providers; the page says the data security policy of each external provider also applies. The sentence names no plan.","plan_named":false}
@@ -211,6 +217,7 @@
       "env_key": "SILICONFLOW_API_KEY",
       "is_text_llm": true,
       "model_tier": null,
+      "field_checks": {"commercial_ok":{"status":"source_silent","checked":"2026-11-24","sources":["https://docs.siliconflow.cn/docs/legals/terms-of-service"],"note":"Terms (updated 2026-05-22) allow personal or internal business use (2.1) and put serving third parties at your own risk (3.5); neither clause mentions the free models"}},
       "verified": true,
       "last_verified": "2026-11-14",
       "data_policy": {"trains_on_prompts":false,"retention":"API inputs/outputs destroyed or unrecoverable on compute nodes immediately after inference; operational logs separate","source":"https://docs.siliconflow.cn/docs/legals/privacy-policy","checked":"2026-11-14","quote":"不会将您的业务数据用于任何大模型的预训练、微调或其他商业用途","note":"API business inputs/outputs, distinct from billing and usage logs. Legal, product-rule and requested troubleshooting exceptions apply; automated content safety checks are disclosed. The quoted clause does not name a plan.","plan_named":false}
@@ -317,6 +324,7 @@
       "env_key": "FIREWORKS_API_KEY",
       "is_text_llm": true,
       "model_tier": null,
+      "field_checks": {"phone_required":{"status":"source_silent","checked":"2026-11-24","sources":["https://docs.fireworks.ai/faq-new/billing-pricing/how-much-does-fireworks-cost","https://fireworks.ai/pricing","https://fireworks.ai/terms-of-service"],"note":"Pricing, the billing FAQ, the full docs and the terms (July 10, 2026) have no phone or SMS step"}},
       "verified": true,
       "last_verified": "2026-11-19",
       "data_policy": {"trains_on_prompts":false,"retention":"Prompt and generation data for open models not logged or stored without opt-in","source":"https://fireworks.ai/privacy-policy","checked":"2026-10-15","quote":"No AI Training on Your Data: We do not use your prompts, training data, or API inputs to train or improve our AI models without your explicit opt-in.","note":"Last modified 2026-08-11. The page names no plan.","plan_named":false}
@@ -343,6 +351,7 @@
       "env_key": "BASETEN_API_KEY",
       "is_text_llm": true,
       "model_tier": null,
+      "field_checks": {"phone_required":{"status":"source_silent","checked":"2026-11-24","sources":["https://www.baseten.co/pricing/","https://docs.baseten.co/organization/billing","https://www.baseten.co/terms-and-conditions/"],"note":"Pricing, billing docs and terms say nothing about phone verification"},"card_required":{"status":"source_silent","checked":"2026-11-24","sources":["https://docs.baseten.co/organization/billing","https://www.baseten.co/pricing/","https://www.baseten.co/terms-and-conditions/"],"note":"Billing docs say models are deactivated when credits run out and the workspace has no payment method, which suggests credits work without a card, but no sentence says so"}},
       "verified": true,
       "last_verified": "2026-11-19",
       "data_policy": {"trains_on_prompts":false,"retention":"Zero data retention for synchronous inference; async inputs held until processing completes, up to 72 hours","source":"https://www.baseten.co/security/","checked":"2026-11-18","quote":"Baseten does not use customer content to train or fine-tune models.","note":"Security page statement covering Model APIs and Dedicated Inference. Synchronous inputs and outputs are not stored; async inputs are held until the request runs, up to 72 hours. Operational metadata is retained separately. The sentence names no plan.","plan_named":false}
@@ -368,6 +377,7 @@
       "env_key": "NOVITA_API_KEY",
       "is_text_llm": true,
       "model_tier": null,
+      "field_checks": {"phone_required":{"status":"source_silent","checked":"2026-11-24","sources":["https://docs.novita.ai/guides/quickstart","https://novita.ai/pricing","https://novita.ai/legal/terms-of-service"],"note":"Sign-up is by Google, GitHub or email; docs mention identity verification for some models without naming a phone"}},
       "verified": true,
       "last_verified": "2026-11-20",
       "data_policy": {"trains_on_prompts":false,"retention":null,"source":"https://novita.ai/legal/terms-of-service","checked":"2026-10-15","quote":"By Default, Novita AI will not use your Content to train our own models or to improve the Services.","note":"Updated 2026-08-05. The terms mention free quotas (account section) but do not say this sentence covers them.","plan_named":false}
@@ -393,6 +403,7 @@
       "env_key": "AI21_API_KEY",
       "is_text_llm": true,
       "model_tier": null,
+      "field_checks": {"phone_required":{"status":"source_silent","checked":"2026-11-24","sources":["https://docs.ai21.com/docs/managing-your-account","https://docs.ai21.com/docs/usage-cost","https://www.ai21.com/terms-of-service/"],"note":"Sign-up is by email or an authentication provider; pricing docs and terms do not mention a phone"}},
       "verified": true,
       "last_verified": "2026-11-20",
       "data_policy": {"trains_on_prompts":false,"retention":null,"source":"https://www.ai21.com/terms-policies/privacy-policy/","checked":"2026-10-15","quote":"Consistent with our Terms of Service, and unless otherwise agreed in writing or required to provide the Services, we do not use your inputs or outputs to train AI21’s foundational or generally available AI models.","note":"«Privacy Policy», last updated August 2, 2026. It applies where AI21 acts as controller, «for example, for individual-developer accounts»; for a business customer «that processing is governed by our agreement with the customer». The policy has no mention of a free, trial, paid or other plan.","plan_named":false}
@@ -444,6 +455,7 @@
       "env_key": "DASHSCOPE_API_KEY",
       "is_text_llm": true,
       "model_tier": null,
+      "field_checks": {"commercial_ok":{"status":"source_silent","checked":"2026-11-24","sources":["https://help.aliyun.com/en/model-studio/bailian-service-notes","https://terms.alicdn.com/legal-agreement/terms/common_platform_service/20230728213935489/20230728213935489.html","https://www.alibabacloud.com/help/en/model-studio/new-free-quota"],"note":"The evaluation-only clause covers content from Model Library trials, listed apart from the inference service the free quota pays for; nothing rules on commercial use of free-quota API calls"}},
       "verified": true,
       "last_verified": "2026-11-22",
       "data_policy": {"trains_on_prompts":false,"retention":"Prompts and responses kept no longer than 30 days by default; stateful features kept until deleted by the user","source":"https://www.alibabacloud.com/help/en/model-studio/data-retention-policy","checked":"2026-11-20","quote":"Without your separate consent, we will not use your business data (including inputs, outputs, and files) to train, fine-tune or improve any foundation model.","note":"Section 1 gives the default 30-day retention; section 5.2 states the no-training commitment for business data. The Model Studio FAQ states the same generally: Alibaba Cloud never uses your data for model training. Safety-flagged content may be kept up to 2 years (section 7.2).","plan_named":false}
@@ -468,6 +480,7 @@
       "openai_base_url": null,
       "is_text_llm": false,
       "model_tier": null,
+      "field_checks": {"commercial_ok":{"status":"source_silent","checked":"2026-11-24","sources":["https://modal.com/legal/terms","https://modal.com/pricing"],"note":"Terms (1.2) make no-fee use subject to No-Fee Use Limitations that Modal does not publish; 1.1 limits use to internal business; pricing neither grants nor denies commercial use of the credit"}},
       "verified": true,
       "last_verified": "2026-11-21",
       "data_policy": {"trains_on_prompts":false,"retention":null,"source":"https://modal.com/legal/terms","checked":"2026-10-16","quote":"Modal will not, except with Customer's prior written consent: (i) train any AI model using Customer Data, or (ii) export Customer Data into, or cause Customer Data to be ingested by, large language models.","note":"The terms are written for Customers (businesses): use is «solely for Customer's internal business», while «No-Fee Use» «may be subject to certain additional restrictions, limitations and differing terms»; the clause does not list them.","plan_named":false}
@@ -495,6 +508,7 @@
       "model_tier": 2,
       "model_tier_source": {"model":"gpt-oss-120b","arena_model":"gpt-oss-120b","match":"exact","rating":1351.6,"ci":[1347.2,1356],"votes":30018,"snapshot":"2026-10-02","url":"https://huggingface.co/datasets/lmarena-ai/leaderboard-dataset"},
       "free_limits": {"requests_per_minute":20,"requests_per_day":20,"tokens_per_day":200000,"scope":"Free Tier (no payment method linked); limits listed per model in the table for gpt-oss-120b and gemma-4-31B-it, enforcement scope not stated","source":"https://docs.sambanova.ai/docs/en/models/rate-limits","checked":"2026-11-24"},
+      "field_checks": {"card_required":{"status":"sources_disagree","checked":"2026-11-24","sources":["https://docs.sambanova.ai/docs/en/models/rate-limits","https://cloud.sambanova.ai/plans"],"note":"The rate-limits doc applies the Free Tier when no payment method is linked; the plans page tells Free users to add a payment method and buy credits before their first requests"}},
       "verified": true,
       "last_verified": "2026-11-24",
       "data_policy": null
@@ -545,6 +559,7 @@
       "env_key": "NVIDIA_API_KEY",
       "is_text_llm": true,
       "model_tier": null,
+      "field_checks": {"phone_required":{"status":"source_silent","checked":"2026-11-24","sources":["https://docs.api.nvidia.com/nim/docs/api-quickstart","https://docs.api.nvidia.com/nim/docs/faq","https://build.nvidia.com/"],"note":"The quickstart signs up with an email and a password; build.nvidia.com asks to verify the account without saying how"},"card_required":{"status":"source_silent","checked":"2026-11-24","sources":["https://build.nvidia.com/","https://docs.api.nvidia.com/nim/docs/faq","https://docs.api.nvidia.com/nim/docs/api-quickstart"],"note":"The FAQ says the models are free to prototype with and have no per-token billing, but no page says whether a card is needed"}},
       "verified": true,
       "last_verified": "2026-11-20",
       "data_policy": {"trains_on_prompts":true,"retention":"Not stored or used after each API session ends; Fine Tuning API: 30 days user content, 90 days generated content","source":"https://assets.ngc.nvidia.com/products/api-catalog/legal/NVIDIA%20API%20Trial%20Terms%20of%20Service.pdf","checked":"2026-11-20","quote":"User Content and Generated Content to improve NVIDIA products and services, including AI models.","note":"Free trial terms (paid plans have their own): §3.3(iv) collects prompts and outputs «to improve NVIDIA products and services, including AI models»; §2.3: NVIDIA «will not store or use User Content or Generated Content at the end of each API Service session», bar fine-tuning and security logs.","plan_named":false}
@@ -570,6 +585,7 @@
       "env_key": "VERCEL_AI_GATEWAY_KEY",
       "is_text_llm": true,
       "model_tier": null,
+      "field_checks": {"phone_required":{"status":"source_silent","checked":"2026-11-24","sources":["https://vercel.com/docs/accounts","https://vercel.com/docs/plans/hobby","https://vercel.com/legal/terms"],"note":"Sign-up is by an email one-time password or a Git provider; no page asks for a phone"}},
       "verified": true,
       "last_verified": "2026-11-19",
       "data_policy": {"trains_on_prompts":null,"retention":"Deleted immediately after each request; the gateway does not retain prompts, outputs, or sensitive data","source":"https://vercel.com/i/secure-ai-gateway","checked":"2026-10-15","quote":"The gateway layer does not retain prompts, outputs, or sensitive data, and user data is deleted immediately after a request completes.","note":"Provider-level retention is separate and may vary by routed provider. Provider ZDR is an opt-in add-on for Pro and Enterprise. The feature table describes Disallow Prompt Training as preventing providers from using prompts for model training and marks it as an included security control."}
@@ -1046,6 +1062,7 @@
       "is_text_llm": true,
       "model_tier": null,
       "no_expiry": {"source":"https://docs.sarvam.ai/api/getting-started/ratelimits","checked":"2026-10-09","quote":"Credits are universal and never expire."},
+      "field_checks": {"phone_required":{"status":"source_silent","checked":"2026-11-24","sources":["https://docs.sarvam.ai/api/getting-started/pricing","https://docs.sarvam.ai/api/getting-started/quickstart","https://docs.sarvam.ai/api/platform/faq"],"note":"Free credits go to every verified user on signup, but no page says what the verification involves"},"card_required":{"status":"source_silent","checked":"2026-11-24","sources":["https://docs.sarvam.ai/api/getting-started/pricing","https://docs.sarvam.ai/api/platform/billing"],"note":"Pricing says the credits let you build without upfront cost, but no sentence says whether a card or payment method is needed; billing docs cover cards for top-ups only"}},
       "verified": true,
       "last_verified": "2026-11-19",
       "data_policy": {"trains_on_prompts":null,"retention":"Retained indefinitely until a workspace Owner configures a period.","source":"https://docs.sarvam.ai/api/platform/data-retention","checked":"2026-10-15","quote":"Until an Owner sets a retention period, your workspace’s data is retained indefinitely.","note":"The page describes workspace-level retention for Model APIs, with per-product overrides. The page names no plan.","plan_named":false}
@@ -1071,6 +1088,7 @@
       "env_key": "GLADIA_API_KEY",
       "is_text_llm": false,
       "model_tier": null,
+      "field_checks": {"commercial_ok":{"status":"source_silent","checked":"2026-11-24","sources":["https://www.gladia.io/general-terms-of-use-gladia-inc","https://www.gladia.io/terms-conditions-gladia-inc","https://www.gladia.io/pricing"],"note":"The Output licence for commercial purposes (7) depends on payment of all applicable fees; the terms name the free offer only in a data-deletion clause"}},
       "verified": true,
       "last_verified": "2026-11-19"
     },
@@ -1113,16 +1131,17 @@
       "models_url": "https://cloud.tencent.com/document/product/1823/130051",
       "expires": "1 year",
       "docs_url": "https://cloud.tencent.com/document/product/1823/130053",
-      "phone_required": null,
-      "card_required": false,
+      "phone_required": true,
+      "card_required": null,
       "commercial_ok": null,
       "openai_compatible": true,
       "openai_base_url": "https://tokenhub.tencentmaas.com/v1",
       "env_key": "HUNYUAN_API_KEY",
       "is_text_llm": true,
       "model_tier": null,
+      "field_checks": {"phone_required":{"status":"stated","checked":"2026-11-24","sources":["https://cloud.tencent.com/document/product/378/17985","https://cloud.tencent.com/document/product/1823/130058"],"note":"TokenHub requires a Tencent Cloud account; the sign-up guide binds a phone number with an SMS code in both the WeChat and email flows, and accepts mainland China numbers only"},"card_required":{"status":"source_silent","checked":"2026-11-24","sources":["https://cloud.tencent.com/document/product/1823/130053","https://cloud.tencent.com/document/product/1823/130058","https://cloud.tencent.com/document/product/1823/130104","https://cloud.tencent.com/document/product/378/3629"],"note":"Free package, quick start, FAQ and real-name verification pages say nothing about a card; the quota stops when used up unless post-paid billing is turned on"},"commercial_ok":{"status":"source_silent","checked":"2026-11-24","sources":["https://cloud.tencent.com/document/product/301/129852","https://cloud.tencent.com/document/product/1823/130053"],"note":"TokenHub terms let you integrate the service into your own product (2.5) and own the output (4.3), and defer to third-party terms for their models (4.8); nothing addresses commercial use of the free quota"}},
       "verified": true,
-      "last_verified": "2026-10-15",
+      "last_verified": "2026-11-24",
       "data_policy": {"trains_on_prompts":false,"retention":"Only as long as needed to provide the service (clause 2.14), subject to legal exceptions","plan_named":false,"source":"https://cloud.tencent.com/document/product/301/129852","checked":"2026-11-24","quote":null,"note":"China-site TokenHub Terms of Service, in force from 2026-09-14. Clause 2.17: Tencent does not use inputs to develop, train, fine-tune or improve its own algorithms, models or services; third-party deployed models (such as DeepSeek) follow their own terms. Quote not registered (page unreadable)."}
     },
     {
@@ -1170,6 +1189,7 @@
       "env_key": "CONTEXTUAL_API_KEY",
       "is_text_llm": true,
       "model_tier": null,
+      "field_checks": {"phone_required":{"status":"source_silent","checked":"2026-11-24","sources":["https://contextual.ai/pricing/","https://contextual.ai/legal/terms-of-use","https://contextual.ai/legal/privacy-policy"],"note":"Pricing, terms and docs do not mention phone verification; the privacy policy only lists a phone number among data it may collect"}},
       "verified": true,
       "last_verified": "2026-11-20",
       "added": "2026-07-31"
@@ -1267,6 +1287,7 @@
       "env_key": "REV_AI_API_KEY",
       "is_text_llm": false,
       "model_tier": null,
+      "field_checks": {"commercial_ok":{"status":"source_silent","checked":"2026-11-24","sources":["https://www.rev.com/legal/terms","https://www.rev.ai/pricing"],"note":"Terms allow internal business use under an Order (2.1) and ban service-bureau use (2.2(f)), but never say whether signup free credits are an Order or may be used commercially"}},
       "verified": true,
       "last_verified": "2026-11-19",
       "added": "2026-07-31"
@@ -1392,6 +1413,7 @@
       "env_key": "UPSTAGE_API_KEY",
       "is_text_llm": true,
       "model_tier": null,
+      "field_checks": {"phone_required":{"status":"source_silent","checked":"2026-11-24","sources":["https://www.upstage.ai/privacy-policy","https://console.upstage.ai/docs/resources/faq","https://console.upstage.ai/docs/getting-started"],"note":"The privacy policy lists only an email address and a password as required sign-up data and the FAQ verifies by email code, but no sentence addresses a phone"}},
       "verified": true,
       "last_verified": "2026-11-19",
       "added": "2026-07-31",
@@ -1544,6 +1566,7 @@
       "env_key": "WANDB_API_KEY",
       "is_text_llm": true,
       "model_tier": null,
+      "field_checks": {"phone_required":{"status":"source_silent","checked":"2026-11-24","sources":["https://docs.coreweave.com/products/wandb/quickstart","https://docs.coreweave.com/products/inference/serverless/usage-limits","https://docs.coreweave.com/policies/terms-of-service"],"note":"The account steps are single sign-on or email, email verification, then name, organization and username; no phone step and no statement either way"}},
       "verified": true,
       "last_verified": "2026-11-20",
       "data_policy": {"trains_on_prompts":false,"retention":"Zero data retention by default; error diagnostic logs may hold fragments for up to 14 days","source":"https://docs.coreweave.com/products/inference/serverless/privacy-and-security","checked":"2026-11-24","quote":"CoreWeave does not use Inference Content to train models.","note":"W&B Inference is now documented as CoreWeave Serverless Inference. Applies to models hosted and served directly by CoreWeave; optional services such as Agent Lens follow their own retention and data use. The sentence names no plan.","plan_named":false}
