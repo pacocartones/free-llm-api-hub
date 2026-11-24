@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-20",
+  "generated": "2026-11-24",
   "scores": {
     "openrouter": {
       "total": 67.2,
@@ -13,14 +13,14 @@
       "of": 6,
       "rank": 2
     },
-    "sambanova": {
-      "total": 58.8,
+    "google-gemini": {
+      "total": 57.5,
       "confirmed": 4,
       "of": 6,
       "rank": 3
     },
-    "google-gemini": {
-      "total": 57.5,
+    "sambanova": {
+      "total": 53.3,
       "confirmed": 4,
       "of": 6,
       "rank": 4
