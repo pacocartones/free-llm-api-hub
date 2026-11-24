@@ -15,6 +15,10 @@ Notable changes to the dataset and the project. Format based on [Keep a Changelo
 - Modal re-verified: the Starter plan's monthly credit is still not settled
   for commercial use, because the No-Fee Use Limitations its terms refer to
   are not published; `commercial_ok` stays unknown (#688). Thanks @BloosomNet.
+- Alibaba Cloud Model Studio re-verified: no official sentence says whether
+  the evaluation-only rule for "model trials" covers free-quota API calls, so
+  `commercial_ok` stays unknown and the reading is recorded (#690). Thanks
+  @BloosomNet.
 
 ## [2.14.2] — 2026-11-20
 
