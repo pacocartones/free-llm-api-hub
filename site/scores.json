@@ -271,12 +271,6 @@
       "of": 6,
       "rank": null
     },
-    "photoroom": {
-      "total": 29.9,
-      "confirmed": 2,
-      "of": 6,
-      "rank": null
-    },
     "retell-ai": {
       "total": 29.9,
       "confirmed": 2,
@@ -362,6 +356,12 @@
       "rank": null
     },
     "fish-audio": {
+      "total": 25.4,
+      "confirmed": 3,
+      "of": 6,
+      "rank": null
+    },
+    "photoroom": {
       "total": 25.4,
       "confirmed": 3,
       "of": 6,
