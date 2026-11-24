@@ -23,6 +23,23 @@ Notable changes to the dataset and the project. Format based on [Keep a Changelo
   processed through the API from model improvement, so `trains_on_prompts`
   is `false` for the free API access; no retention period is stated (#698).
   Thanks @BloosomNet.
+- Re-verification batch (agent-assisted, official pages read 2026-11-24) for
+  Tencent Hunyuan, Groq, OpenRouter, Cloudflare Workers AI and Cohere.
+  `last_verified` is unchanged for all five, because each still records a
+  sign-up fact (card, phone or commercial use) that no current official page
+  states. Within that limit:
+  - Tencent Hunyuan: the TokenHub package can be claimed once per account
+    for each model, and the offer may continue or change after 2026-12-31.
+    Real-name verification is now cited to the quick start, and the backup
+    API hosts are listed. The terms page was re-read and the no-training clause still holds.
+  - Groq: `trains_on_prompts` is now `false`. Its Services Agreement §4.2
+    bars training on inputs and outputs unless the customer allows it. The
+    notes say that qwen/qwen3.8-27b is a Preview model, for evaluation only.
+  - OpenRouter: two `:free` models that are no longer in the catalog are
+    removed from the sample.
+  - Cohere: the pricing page's sentence that trial keys are not for
+    production or commercial use now backs `commercial_ok: false`.
+  - Cloudflare Workers AI: limits, pricing and data policy re-confirmed.
 
 ## [2.14.2] — 2026-11-20
 

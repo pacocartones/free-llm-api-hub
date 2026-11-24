@@ -19,10 +19,21 @@
    "kind": "sentence",
    "text": "By default, Groq does not retain customer data for inference requests.",
    "source_url": "https://console.groq.com/docs/your-data",
-   "read_on": "2026-10-15",
+   "read_on": "2026-11-24",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "544a0f7b12ebfe9831d7f816b6107a73f90b492561a607af7486ecac41be2f37"
+  },
+  {
+   "id": "groq.note_passage.1",
+   "slug": "groq",
+   "kind": "note_passage",
+   "text": "Groq is not permitted to use Inputs or Outputs for training or fine-tuning any AI Model Services or other models",
+   "source_url": "https://console.groq.com/docs/legal/services-agreement",
+   "read_on": "2026-11-24",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "645fa99e301839336160d9b0387edad3a965dc30e8bed95efb9e54116c2f2f1e"
   },
   {
    "id": "openrouter.sentence",
