@@ -1,0 +1,126 @@
+name: Mirror dataset
+
+# Copies the snapshot of a published GitHub release (the six files written by
+# scripts/release-snapshot.mjs and attached to the release) to a Hugging Face
+# dataset repository and to Kaggle, for discovery. GitHub stays the source of
+# truth; the mirrors never feed back into the repository.
+#
+# Each destination is optional and skipped with a notice when its credentials
+# are absent, so this workflow is a no-op until the owner adds them:
+#   Hugging Face: secret HF_TOKEN + variable HF_DATASET_REPO (owner/name)
+#   Kaggle:       secrets KAGGLE_USERNAME + KAGGLE_KEY (or KAGGLE_API_TOKEN),
+#                 optional variable KAGGLE_DATASET (owner/slug; default
+#                 pacocartones/free-llm-api-hub)
+# See RELEASING.md, "Mirrors".
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Existing release tag to mirror (vX.Y.Z). Empty = the latest release.'
+        required: false
+        default: ''
+
+# No permissions at workflow level; the job below asks for what it needs.
+permissions: {}
+
+# One sync at a time; a second release waits instead of racing the first.
+concurrency:
+  group: mirror-dataset
+  cancel-in-progress: false
+
+jobs:
+  mirror:
+    name: Mirror release snapshot
+    if: github.event_name == 'workflow_dispatch' || (!github.event.release.prerelease && !github.event.release.draft)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read # check out the tooling and download release assets; nothing else
+    env:
+      # Booleans only: the secret values themselves reach just the step that uses them.
+      HAS_HF: ${{ secrets.HF_TOKEN != '' && vars.HF_DATASET_REPO != '' }}
+      HAS_KAGGLE: ${{ (secrets.KAGGLE_USERNAME != '' && secrets.KAGGLE_KEY != '') || secrets.KAGGLE_API_TOKEN != '' }}
+      HF_DATASET_REPO: ${{ vars.HF_DATASET_REPO }}
+      KAGGLE_DATASET: ${{ vars.KAGGLE_DATASET || 'pacocartones/free-llm-api-hub' }}
+    steps:
+      # Tooling comes from main (the generator may not exist at older tags);
+      # the data comes from the release assets, checked against SHA256SUMS.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+
+      - name: Resolve the release tag
+        id: tag
+        env:
+          EVENT_TAG: ${{ github.event.release.tag_name }}
+          INPUT_TAG: ${{ inputs.tag }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag="${EVENT_TAG:-$INPUT_TAG}"
+          if [ -z "$tag" ]; then tag="$(gh release view -R "$GITHUB_REPOSITORY" --json tagName -q .tagName)"; fi
+          if ! printf '%s' "$tag" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "::error::Not a dataset release tag: $tag"; exit 1
+          fi
+          echo "value=$tag" >> "$GITHUB_OUTPUT"
+
+      - name: Download and check the release snapshot
+        env:
+          TAG: ${{ steps.tag.outputs.value }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release download "$TAG" -R "$GITHUB_REPOSITORY" -D snapshot \
+            -p providers.json -p providers.csv -p providers.canonical.json \
+            -p schema.json -p snapshot.json -p SHA256SUMS
+          (cd snapshot && sha256sum -c SHA256SUMS)
+          node -e 'const s=require("./snapshot/snapshot.json"); if (s.tag !== process.env.TAG) { console.error(`snapshot.json is for ${s.tag}, not ${process.env.TAG}`); process.exit(1); }'
+
+      - name: Build the dataset card and Kaggle metadata
+        run: |
+          node scripts/dataset-mirrors.mjs snapshot cards
+          mkdir hf kaggle
+          cp snapshot/* hf/ && cp cards/README.md hf/
+          cp snapshot/* kaggle/ && cp cards/dataset-metadata.json kaggle/
+
+      - name: Report skipped destinations
+        run: |
+          [ "$HAS_HF" = true ] || echo "::notice::Hugging Face skipped: HF_TOKEN secret or HF_DATASET_REPO variable not set."
+          [ "$HAS_KAGGLE" = true ] || echo "::notice::Kaggle skipped: KAGGLE_USERNAME/KAGGLE_KEY (or KAGGLE_API_TOKEN) secrets not set."
+
+      - name: Upload to Hugging Face
+        if: env.HAS_HF == 'true'
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          TAG: ${{ steps.tag.outputs.value }}
+          HF_HUB_DISABLE_TELEMETRY: '1'
+        run: |
+          python3 -m venv "$RUNNER_TEMP/hf-venv"
+          "$RUNNER_TEMP/hf-venv/bin/pip" install --quiet --disable-pip-version-check "huggingface_hub==2.4.0"
+          "$RUNNER_TEMP/hf-venv/bin/hf" upload "$HF_DATASET_REPO" hf . --repo-type=dataset \
+            --commit-message "Mirror GitHub release $TAG"
+
+      - name: Upload to Kaggle (new dataset version)
+        if: env.HAS_KAGGLE == 'true'
+        env:
+          KAGGLE_USERNAME: ${{ secrets.KAGGLE_USERNAME }}
+          KAGGLE_KEY: ${{ secrets.KAGGLE_KEY }}
+          KAGGLE_API_TOKEN: ${{ secrets.KAGGLE_API_TOKEN }}
+          TAG: ${{ steps.tag.outputs.value }}
+        run: |
+          python3 -m venv "$RUNNER_TEMP/kaggle-venv"
+          "$RUNNER_TEMP/kaggle-venv/bin/pip" install --quiet --disable-pip-version-check "kaggle==2.2.5"
+          k="$RUNNER_TEMP/kaggle-venv/bin/kaggle"
+          # Empty variables would shadow the configured method; drop them.
+          [ -n "$KAGGLE_API_TOKEN" ] || unset KAGGLE_API_TOKEN
+          [ -n "$KAGGLE_USERNAME" ] || unset KAGGLE_USERNAME KAGGLE_KEY
+          if "$k" datasets status "$KAGGLE_DATASET" >/dev/null 2>&1; then
+            "$k" datasets version -p kaggle -m "Mirror of GitHub release $TAG"
+          else
+            # First sync: created private; the owner makes it public after a look.
+            "$k" datasets create -p kaggle
+          fi
