@@ -30,7 +30,8 @@ The workflows below do not write to `main` directly. Their checked-in triggers a
 | Workflow | Trigger | Token permissions |
 |---|---|---|
 | `verify.yml` | pull request, relevant `data/**` or `scripts/**` push to `main`, manual | `contents: read` — cannot write anything |
-| `commit-policy.yml`, `lighthouse.yml` | pull request (Lighthouse also supports manual runs) | `contents: read` — cannot write anything |
+| `commit-policy.yml` | pull request | `contents: read` — cannot write anything |
+| `lighthouse.yml` | pull request (accessibility and SEO), push to `main`, nightly schedule and manual (performance) | `contents: read` for the measuring jobs; the report job, on `main` only and without checking out code, has job-scoped `issues: write` to open, update or close one performance issue |
 | `mcp-ci.yml` | pull request and push to `main` when the MCP package or its workflow changes | `contents: read` — cannot write anything |
 | `ai-trailer-alert.yml` | push to `main` | `contents: read` — reports only |
 | `pages.yml` | relevant push to `main`, daily schedule, manual | `contents: read`, `pages: write`, `id-token: write` — publishes the site |

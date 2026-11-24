@@ -135,7 +135,7 @@ Data PRs are the common case, but scripts and site changes are welcome too. Star
 
 ## Running Lighthouse locally
 
-The CI gate is `node scripts/lighthouse-gate.mjs` (after `npm ci` in `tools/lighthouse` and `node scripts/build.mjs`; it needs a Chrome binary in `CHROME_PATH`). It gives every run its own Chrome profile and process group, and on exit (also on Ctrl-C or a kill) it ends those groups by pid, deletes the profile and checks that nothing still points at it.
+The CI gate is `node scripts/lighthouse-gate.mjs` (after `npm ci` in `tools/lighthouse` and `node scripts/build.mjs`; it needs a Chrome binary in `CHROME_PATH`). On a pull request it runs `--mode=accessibility-seo`: accessibility at least 0.95 with no new or unscored accessibility audit, and SEO exactly 1, one run per page because neither depends on the runner's speed. Performance (at least 0.80, median of three runs per page) runs with `--mode=performance` after a merge to `main` and nightly, and a failure there opens or updates one issue instead of blocking a pull request. Without `--mode` the script checks all three categories with the median of three. It gives every run its own Chrome profile and process group, and on exit (also on Ctrl-C or a kill) it ends those groups by pid, deletes the profile and checks that nothing still points at it.
 
 If you run Lighthouse or Chrome by hand against a local server instead, do it like this so nothing is left running:
 
@@ -202,7 +202,7 @@ The five required checks on `main` (branch protection, updated 2026-11-19) are:
 - `Dataset integrity`
 - `Windows tests`
 - `commit policy`
-- `Lighthouse accessibility and performance`
+- `Lighthouse accessibility and performance` (on pull requests it checks accessibility and SEO; performance runs on `main` and nightly)
 - `Analyze (javascript-typescript)` (CodeQL)
 
 All five report on every PR without path filters. CodeQL also runs weekly and

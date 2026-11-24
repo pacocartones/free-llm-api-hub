@@ -1,5 +1,17 @@
 # The shipped site has zero runtime dependencies. Keep the root development
 # tooling, MCP package, Lighthouse tooling and pinned GitHub Actions current.
+#
+# Every Dependabot PR pays the full PR gate and, with strict up-to-date checks,
+# an "update branch" after each merge, so updates are batched:
+#   - one weekly PR for all GitHub Actions;
+#   - one weekly PR for every npm minor and patch update across the three
+#     lockfiles (/, /packages/mcp, /tools/lighthouse). Lighthouse rides in the
+#     same PR, so it adds no PR of its own; one entry has one schedule, so it
+#     cannot be monthly while it shares the group;
+#   - a major npm update gets its own PR, so a breaking change is reviewed alone.
+# cooldown: a release is only proposed once it is at least seven days old, so a
+# compromised or yanked version has time to be caught upstream first. Security
+# updates are not grouped and do not wait for the schedule.
 version: 2
 updates:
   - package-ecosystem: github-actions
@@ -7,6 +19,8 @@ updates:
     schedule:
       interval: weekly
       day: monday
+    cooldown:
+      default-days: 7
     commit-message:
       prefix: "chore(ci)"
     labels:
@@ -17,31 +31,29 @@ updates:
           - "*"
 
   - package-ecosystem: npm
-    directory: /
+    directories:
+      - /
+      - /packages/mcp
+      - /tools/lighthouse
     schedule:
       interval: weekly
       day: monday
+    cooldown:
+      default-days: 7
     commit-message:
       prefix: "chore(deps)"
     labels:
       - dependencies
-
-  - package-ecosystem: npm
-    directory: /packages/mcp
-    schedule:
-      interval: weekly
-      day: monday
-    commit-message:
-      prefix: "chore(deps)"
-    labels:
-      - dependencies
-
-  - package-ecosystem: npm
-    directory: /tools/lighthouse
-    schedule:
-      interval: weekly
-      day: monday
-    commit-message:
-      prefix: "chore(deps)"
-    labels:
-      - dependencies
+    groups:
+      npm-minor-patch:
+        patterns:
+          - "*"
+        update-types:
+          - minor
+          - patch
+    ignore:
+      # unpdf 2.x requires Node 24; the project stays on Node 22 (.nvmrc) until
+      # that migration, so its major updates would only be closed again.
+      - dependency-name: unpdf
+        update-types:
+          - "version-update:semver-major"
