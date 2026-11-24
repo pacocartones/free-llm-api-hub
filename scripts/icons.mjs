@@ -1,7 +1,9 @@
 // icons.mjs — raster app icons from the brand mark, for browsers and platforms that ignore the SVG favicon
 // (Safari tabs, iOS home screen, Android install). Run by hand when the mark changes: `npm run icons`.
-// Uses @resvg/resvg-js, a devDependency only; the generated PNGs and site.webmanifest are committed.
+// Uses @resvg/resvg-js, a devDependency only; the generated PNGs, favicon.ico (the 32 px PNG in an ICO container) and
+// site.webmanifest are committed.
 import { writeFileSync } from 'node:fs';
+import { pngToIco } from './lib/ico.mjs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
@@ -47,6 +49,10 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
     const png = new Resvg(markSvg(size, { bleed }), { fitTo: { mode: 'width', value: size } }).render().asPng();
     writeFileSync(join(ROOT, 'site', file), png);
     console.log(`wrote site/${file} (${size}px)`);
+    if (file === 'favicon-32.png') {
+      writeFileSync(join(ROOT, 'site', 'favicon.ico'), pngToIco(png));
+      console.log('wrote site/favicon.ico (32px)');
+    }
   }
   writeFileSync(join(ROOT, 'site', 'site.webmanifest'), JSON.stringify(manifest(), null, 2) + '\n');
   console.log('wrote site/site.webmanifest');

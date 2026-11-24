@@ -9,7 +9,9 @@
   `no_expiry`; its free rate limits are 25 requests/min and 25 concurrent, and
   its phone requirement is now unknown (needs an account). Pinecone's card
   requirement is not stated by Pinecone, so `card_required` becomes unknown.
-  Google Gemini's notes add that API access to the 2.5 models is limited to
-  existing users and that 2.5 Pro TTS has no free tier. OVHcloud AI Endpoints'
+  Google does not say whether Gemini signup needs a phone, so its
+  `phone_required` becomes unknown and the README TL;DR lists it as "No card;
+  phone not confirmed"; its notes add that API access to the 2.5 models is
+  limited to existing users and that 2.5 Pro TTS has no free tier. OVHcloud AI Endpoints'
   data policy was re-read; its Free model labels could not be read, so OVHcloud
   and Gemini keep their `last_verified`.

@@ -19,7 +19,7 @@
       "models_url": "https://ai.google.dev/gemini-api/docs/models",
       "expires": null,
       "docs_url": "https://ai.google.dev/gemini-api/docs/rate-limits",
-      "phone_required": false,
+      "phone_required": null,
       "card_required": false,
       "commercial_ok": true,
       "openai_compatible": true,
@@ -28,6 +28,7 @@
       "is_text_llm": true,
       "model_tier": 3,
       "model_tier_source": {"model":"gemini-2.5-pro","arena_model":"gemini-2.5-pro","match":"exact","rating":1445.6,"ci":[1443.1,1448],"boundary":true,"votes":124834,"snapshot":"2026-10-02","url":"https://huggingface.co/datasets/lmarena-ai/leaderboard-dataset"},
+      "field_checks": {"phone_required":{"status":"source_silent","checked":"2026-11-24","sources":["https://aistudio.google.com/docs/api-key","https://aistudio.google.com/docs/pricing","https://aistudio.google.com/docs/terms"],"note":"The API key page mentions only project verification for projects created outside AI Studio; pricing and terms do not mention phone verification"}},
       "verified": true,
       "last_verified": "2026-11-14",
       "data_policy": {"trains_on_prompts":true,"retention":null,"source":"https://ai.google.dev/gemini-api/terms","checked":"2026-11-14","quote":"Google uses the content you submit to the Services and any generated responses to provide, improve, and develop Google products and services and machine learning technologies","note":"Applies to the Unpaid Services; in the EEA, Switzerland and the UK the paid terms also apply to free access. Terms effective 2026-03-23."}
