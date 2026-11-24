@@ -107,6 +107,17 @@
    "page_sha256": "eed26388f278a23d6764371732c89b5cfd8fa4f31ed8bd266f1d4c081e4b62b6"
   },
   {
+   "id": "cohere.sentence",
+   "slug": "cohere",
+   "kind": "sentence",
+   "text": "Section 2.3 (Research and Model Improvement): Analyzing usage patterns and using Trial or Research User Inputs/Outputs to improve the performance and safety of our AI models.",
+   "source_url": "https://cohere.com/privacy",
+   "read_on": "2026-11-24",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "2d702f85bb2c046c60aa2fb30ca3f2a2876aaadd00bcf8b5b3eb9d6a70685c54"
+  },
+  {
    "id": "cohere.card_required.sentence",
    "slug": "cohere",
    "kind": "field_sentence",
