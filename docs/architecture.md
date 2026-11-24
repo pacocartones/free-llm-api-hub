@@ -39,7 +39,7 @@ data/*schema.json      │                              collections/*.md, docs/c
 
 **Lighthouse is split by stability.** `lighthouse.yml` measures sixteen built pages. On every PR the required check runs accessibility and SEO once per page (`scripts/lighthouse-gate.mjs --mode=accessibility-seo`; deterministic, so one run is a stable verdict). Performance, which moves between runs on a shared runner, is judged on the median of three runs per page after each push to `main` and nightly (`--mode=performance`); a failure opens or updates one issue and a later clean run closes it. Thresholds live in `scripts/lib/lighthouse-gate.mjs`.
 
-**Deploys are verified live.** `pages.yml` runs a `verify-live` job after every deploy: it re-checks the sitemap parity against the live site (`npm run check-live`, retrying `FLLM_LIVE_ATTEMPTS` times for edge propagation) and smoke-tests every URL of the published sitemap (`npm run smoke-live`), so a deploy that serves stale or broken pages fails the workflow.
+**Deploys are verified live.** `pages.yml` runs a `verify-live` job after every deploy: it re-checks the sitemap parity against the live site (`npm run check-live`, retrying `FLLM_LIVE_ATTEMPTS` times for edge propagation) and smoke-tests every URL of the published sitemap (`npm run smoke-live`, retrying only the URLs that did not answer 200, with a doubling wait), so a deploy that serves stale or broken pages fails the workflow.
 
 ## 2. Data model
 
