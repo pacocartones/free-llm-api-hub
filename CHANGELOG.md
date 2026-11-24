@@ -7,6 +7,31 @@ Notable changes to the dataset and the project. Format based on [Keep a Changelo
 
 ## [Unreleased]
 
+### Changed and fixed
+
+- NLP Cloud: `rate_limits` now gives the Free plan's 2 parallel requests
+  next to Pay-as-you-go's 10, and says that no per-minute limit is published
+  for free access (#685). Thanks @Sumit-sourabh45.
+- Modal re-verified: the Starter plan's monthly credit is still not settled
+  for commercial use, because the No-Fee Use Limitations its terms refer to
+  are not published; `commercial_ok` stays unknown (#688). Thanks @BloosomNet.
+- Alibaba Cloud Model Studio re-verified: no official sentence says whether
+  the evaluation-only rule for "model trials" covers free-quota API calls, so
+  `commercial_ok` stays unknown and the reading is recorded (#690). Thanks
+  @BloosomNet.
+- PhotoRoom: `data_policy` recorded. Its privacy policy excludes images
+  processed through the API from model improvement, so `trains_on_prompts`
+  is `false` for the free API access; no retention period is stated (#698).
+  Thanks @BloosomNet.
+- IBM watsonx: `data_policy` recorded. IBM states it does not use uploaded
+  content or model output to train IBM-developed models; text sent through
+  the Prompt Lab or API is not stored unless saved, and prompt information
+  for up to 500 prompts is kept 30 days (#692). Thanks @BloosomNet.
+- SambaNova re-verified: the Free Tier now lists only gpt-oss-120b and
+  gemma-4-31B-it (20 RPM / 20 RPD / 200,000 TPD each); DeepSeek-V3.1 and
+  Llama-3.3-70B leave `models_free`, `model_tier` moves from 3 to 2, and the
+  Developer Tier limits are corrected (#697). Thanks @BloosomNet.
+
 ## [2.14.2] — 2026-11-20
 
 Released as a correction users are relying on: five providers whose free
