@@ -38,6 +38,10 @@ Notable changes to the dataset and the project. Format based on [Keep a Changelo
   `free_limits` stays absent, because Google publishes no free-tier numbers
   for the Gemini 2.5 models in `models_free`; those are shown only in AI
   Studio (#691). Thanks @BloosomNet.
+- Moondream: `free_limits` records the published 2 requests/second of the
+  Base Tier, the default for all API keys (10/second once the balance is at
+  least $10), cited to the official rate-limits page (#689). Thanks
+  @Abhishekkumar071.
 
 ## [2.14.2] — 2026-11-20
 
