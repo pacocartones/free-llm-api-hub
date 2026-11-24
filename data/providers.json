@@ -911,9 +911,9 @@
       "env_key": "MOONDREAM_API_KEY",
       "is_text_llm": false,
       "model_tier": null,
-      "free_limits": {"requests_per_second":2,"scope":"Free plan ($5/month credit); 2 requests/sec on the free tier","source":"https://moondream.ai/pricing","checked":"2026-11-21"},
+      "free_limits": {"requests_per_second":2,"scope":"Base Tier, the default for all API keys (10 req/sec once the account balance is at least $10); usage is also bounded by the Free plan's $5/month credit","source":"https://docs.moondream.ai/rate-limits","checked":"2026-11-24"},
       "verified": true,
-      "last_verified": "2026-11-21",
+      "last_verified": "2026-10-16",
       "data_policy": {"trains_on_prompts":false,"retention":"No longer than necessary to provide the Service","source":"https://moondream.ai/terms","checked":"2026-10-15","quote":"M87 Labs will not use Customer Content or Outputs to Train any model or adapter that is made generally available by M87 Labs (including the base Moondream models), or to Train any model or adapter for the benefit of any third party, except where you explicitly opt in under a separate written agreement.","note":"Commercial use of the free tier is unclear. §4.1: «your internal business or personal purposes»; §4.2: «commercially exploit the Service or any portion of the Service». The terms do not name the free plan.","plan_named":false}
     },
     {
