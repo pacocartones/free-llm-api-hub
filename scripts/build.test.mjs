@@ -403,7 +403,7 @@ test('every generated page has the same centred header: crumbs, one title and, w
   let checked = 0;
   for (const file of walk(join(ROOT, 'site'))) {
     const rel = slash(relative(join(ROOT, 'site'), file));
-    if (exceptions.has(rel) || rel.startsWith('og')) continue;
+    if (exceptions.has(rel) || rel.startsWith('og') || /^google[0-9a-f]+\.html$/.test(rel)) continue; // the Search Console ownership file is not a page
     const html = readFileSync(file, 'utf8');
     const heroes = html.match(/<section class="page-hero[^"]*">/g) || [];
     assert.equal(heroes.length, 1, `${rel}: one page header`);
@@ -2371,6 +2371,7 @@ test('sitemap lists every indexable page except the deliberately omitted ones, w
   for (const f of pages) {
     const rel = slash(f.slice(join(ROOT, 'site').length + 1));
     if (rel === '404.html' || rel.startsWith('updates/page/') || /^state\/\d{4}-\d{2}\//.test(rel)) continue; // 404 is not a page; pagination follows the commit count (test above)
+    if (/^google[0-9a-f]+\.html$/.test(rel)) continue; // Search Console ownership file, not a page
     const html = readFileSync(f, 'utf8');
     if (/<meta name="robots" content="noindex">/.test(html)) continue; // redirect stubs and legal pages
     const path = rel === 'index.html' ? '' : rel.replace(/index\.html$/, '').replace(/\.html$/, '');
@@ -2923,7 +2924,10 @@ test('data_policy lot 7: Poolside may train on your Content by its Terms of Use 
   assert.ok(registry.entries.some((e) => e.slug === 'poolside' && e.kind === 'sentence' && e.text === dp.quote), 'the quote has its register entry');
   const md = readFileSync(join(ROOT, 'collections/no-training.md'), 'utf8');
   assert.ok(!md.split('\n').some((l) => l.startsWith('| **[Poolside')), 'Poolside is not in the no-training collection');
-  assert.match(readFileSync(join(ROOT, 'site/data-policy/index.html'), 'utf8'), /Poolside/, 'the data-policy page lists Poolside');
+  // The data-policy page lists verified providers only (dataPolicyRows); Poolside is unverified since 2026-11-24 (hosted inference shutdown notice).
+  const dpPage = readFileSync(join(ROOT, 'site/data-policy/index.html'), 'utf8');
+  if (data.providers.find((p) => p.slug === 'poolside').verified) assert.match(dpPage, /Poolside/, 'the data-policy page lists Poolside');
+  else assert.doesNotMatch(dpPage, /Poolside/, 'an unverified Poolside is not on the data-policy page');
 });
 
 test('data_policy coverage: a floor that only rises, and every recorded row is on the data-policy page', () => {
