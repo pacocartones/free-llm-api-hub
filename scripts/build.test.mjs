@@ -89,8 +89,9 @@ test('provider playground action is conditional and preserved in public JSON', (
     run(['scripts/build.mjs']);
     const present = readFileSync(join(ROOT, 'site/p', `${first.slug}.html`), 'utf8');
     assert.equal((present.match(/>Try it ↗/g) || []).length, 1);
-    assert.ok(present.includes('<a class="btn" href="https://example.com/playground?model=a&amp;mode=b" target="_blank" rel="noopener">Try it ↗<span class="sr-only"> (opens in a new tab)</span></a>'));
-    assert.ok(present.includes(`href="${htmlEsc(first.docs_url)}" target="_blank" rel="noopener">Official docs ↗`));
+    // the provider links carry data-provider / data-link for the opt-in outbound_provider_click event
+    assert.ok(present.includes(`<a class="btn" href="https://example.com/playground?model=a&amp;mode=b" target="_blank" rel="noopener" data-provider="${first.slug}" data-link="playground">Try it ↗<span class="sr-only"> (opens in a new tab)</span></a>`));
+    assert.ok(present.includes(`href="${htmlEsc(first.docs_url)}" target="_blank" rel="noopener" data-provider="${first.slug}" data-link="docs">Official docs ↗`));
     assert.match(present, /class="btn website"[^>]*>Visit website ↗/);
     const absent = readFileSync(join(ROOT, 'site/p', `${second.slug}.html`), 'utf8');
     assert.doesNotMatch(absent, />Try it ↗/);
