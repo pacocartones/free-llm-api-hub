@@ -11,7 +11,7 @@
       "category": "ongoing",
       "free_type": "renewing-quota",
       "free_tier": "Gemini 2.5 Flash, 2.5 Flash-Lite, 2.5 Pro (limited), embeddings, TTS models",
-      "rate_limits": "Sampled Gemini 2.5 model limits are shown only in AI Studio; quotas vary by model and project. Public docs separately publish selected model quotas, including Gemini Decision 1",
+      "rate_limits": "Sampled Gemini 2.5 model limits are shown only in AI Studio; quotas vary by model and project. Public docs separately publish selected model quotas: Gemini Decision 1 on the Decisions API, Free tier 200 RPM, 50,000 TPM, 10,000 RPD (https://ai.google.dev/gemini-api/docs/rate-limits, read 2026-11-23)",
       "notes": "Free-tier prompts/outputs may be used by Google to improve its products outside the UK/CH/EEA/EU. Since the 2026-03-23 terms, only Paid Services may serve API clients to end users in the EEA/CH/UK. Gemini 2.5 Pro and 2.5 Flash are deprecated; the pricing page announces automatic routing to Gemini 3.8 Flash and 3.5 Flash-Lite respectively, billed at their rates, from 2026-12-01",
       "best_for": "The only frontier-class model with a genuine free tier",
       "modalities": ["text", "vision", "embeddings", "audio"],
