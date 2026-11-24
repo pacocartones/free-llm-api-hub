@@ -51,7 +51,7 @@ export function createServer(load, loadClients) {
         'All filters are optional and combine with AND. Returns a compact list ' +
         '(slug, name, category, free_tier, rate_limits, docs_url, last_verified, verified). ' +
         'The flag filters match only explicitly confirmed values: providers whose value is null ' +
-        '(not confirmed) are left out and counted in excluded_unconfirmed. ' +
+        '(not confirmed) are left out and counted in excluded_unconfirmed, and in excluded_unconfirmed_by_reason by why the value is unknown. ' +
         TERMS,
       inputSchema: {
         query: z.string().max(200).optional().describe('Words to match in name, slug, free tier, rate limits, notes or sampled model IDs (all words must match, case-insensitive).'),
@@ -73,7 +73,7 @@ export function createServer(load, loadClients) {
       title: 'Get one provider entry',
       description:
         'Return the full dataset entry for one provider by slug, with its tri-state flags spelled out ' +
-        '(yes / no / not confirmed) and the list of unconfirmed fields. An unknown slug is an error. ' +
+        '(yes / no / not confirmed), the list of unconfirmed fields and, in unconfirmed_reasons, why each is unknown. An unknown slug is an error. ' +
         TERMS,
       inputSchema: {
         slug: z.string().max(100).describe('Provider slug, e.g. "groq" (see search_providers).'),

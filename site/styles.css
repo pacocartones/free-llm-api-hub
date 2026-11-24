@@ -661,6 +661,8 @@ p.muted a, .prose p a, .prov-summary p a { text-decoration: underline; text-unde
 .prov-reqs dt svg.i { width: 22px; height: 22px; color: var(--accent); }
 .prov-reqs dd { margin: 6px 0 0; font-size: .95rem; }
 .prov-reqs .req-condition { font-size: .8rem; color: var(--muted); margin-top: 4px; line-height: 1.35; }
+.prov-reqs .req-source { font-size: .75rem; color: var(--muted); margin-top: 4px; line-height: 1.35; overflow-wrap: anywhere; }
+.req-source a { text-decoration: underline; text-underline-offset: 2px; } /* the pages read for a flag sit inside running text: not colour alone (WCAG 1.4.1; Lighthouse link-in-text-block) */
 /* The change history is paged by site/pager.js (the whole list without JavaScript). */
 .pager { display: flex; align-items: center; justify-content: center; gap: 12px; margin: 8px 0 18px; font-family: var(--font-mono); font-size: .85rem; }
 .pager-btn { height: 32px; padding: 0 12px; border-radius: 8px; border: 1px solid var(--border-strong); background: var(--panel); color: var(--text); font: inherit; cursor: pointer; }

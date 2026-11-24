@@ -52,7 +52,9 @@ test('every current provider and nested property gets exactly one row, in schema
   function collect(properties, prefix = '') {
     for (const [name, value] of Object.entries(properties)) {
       expected.push(prefix + name);
-      if (value.properties) collect(value.properties, `${prefix}${name}.`);
+      // a nested property that is a $ref to a shared object (field_checks entries) is expanded like an inline object
+      const target = value.$ref ? SCHEMA.$defs[value.$ref.split('/').pop()] : value;
+      if (target && target.properties) collect(target.properties, `${prefix}${name}.`);
     }
   }
   // Top-level table first; nested sections follow, each in schema order.

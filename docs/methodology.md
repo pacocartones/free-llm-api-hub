@@ -65,6 +65,8 @@ _[← Docs index](README.md) · [Main README](../README.md)_
 
 `free_limits` follows the same rule: numbers exactly as the provider publishes them, with the page and the day they were read, `null` when it publishes none.
 
+`field_checks` follows the same rule for the four tri-state flags: a check records the provider's pages that were read, the day, and either the provider's sentence (`stated`) or why the flag stays `null`: the pages do not say it (`source_silent`), only an account would tell (`needs_account`), or two official pages disagree (`sources_disagree`). A reason never turns `null` into "no", and the score, filters and collections ignore it. A flag with no recorded check is `not_checked`. See [comparison-dimensions.md](comparison-dimensions.md#why-a-flag-holds-its-value-field_checks).
+
 `data_policy` follows the same rule: the value comes only from the provider's own page, with the page and the day it was read. A missing or `null` object means unrecorded, while `trains_on_prompts: null` inside a recorded object means "not stated" by the provider; values are never estimated or inferred from similar providers. `retention` uses the provider's own wording. See the field definition in [comparison-dimensions.md](comparison-dimensions.md).
 
 ## The score

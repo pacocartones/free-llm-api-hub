@@ -1617,7 +1617,8 @@ describe('read-only generated output', () => {
     const { providers } = JSON.parse(readFileSync(DATA, 'utf8'));
     const page = readdirSync(join(ROOT, 'site/compare')).find((d) => {
       if (!d.includes('-vs-')) return false;
-      return d.split('-vs-').some((s) => { const p = providers.find((x) => x.slug === s); return p && p.commercial_ok === null; });
+      // a null with no recorded reason: one with a reason (field_checks) says the reason instead
+      return d.split('-vs-').some((s) => { const p = providers.find((x) => x.slug === s); return p && p.commercial_ok === null && !(p.field_checks && p.field_checks.commercial_ok); });
     });
     assert.ok(page, 'the real set contains a provider with an unconfirmed flag');
     assert.match(readFileSync(join(ROOT, `site/compare/${page}/index.html`), 'utf8'), /<span class="tri tri-unk">not confirmed<\/span>/);
@@ -2537,14 +2538,17 @@ import { coverageMainHtml, coverage as coverageOf } from './lib/coverage.mjs';
 // A separate path from lib/coverage.mjs on purpose: plain loops and the populations as the card words them.
 const coverageByHand = (providers) => {
   const out = {};
+  // A null flag with a recorded reason (field_checks) is resolved without an answer: not confirmed, and not an open task either.
+  const REASONS = ['source_silent', 'needs_account', 'sources_disagree'];
   const add = (key, inPop, has) => {
-    let total = 0; let confirmed = 0;
+    let total = 0; let confirmed = 0; let resolved = 0;
     for (const p of providers) {
       if (!inPop(p)) continue;
       total += 1;
       if (has(p)) confirmed += 1;
+      else if (p[key] === null && p.field_checks && p.field_checks[key] && REASONS.includes(p.field_checks[key].status)) resolved += 1;
     }
-    out[key] = { total, confirmed, open: total - confirmed };
+    out[key] = { total, confirmed, open: total - confirmed - resolved, resolved };
   };
   const verified = (p) => p.verified === true;
   const verifiedText = (p) => p.verified === true && p.is_text_llm === true;
@@ -2612,6 +2616,36 @@ test('/coverage/ escapes hostile provider text and refuses a non-http docs link'
   assert.equal(coverageOf([{ ...evil, verified: false }]).every((r) => r.total === 0), true, 'an unverified provider counts in no population');
 });
 
+test('field_checks reach every public surface: provider page, API v1, llms-full.txt and /coverage/, but not the CSV', () => {
+  run(['scripts/build.mjs']);
+  const { providers } = JSON.parse(readFileSync(DATA, 'utf8'));
+  const LABEL = { source_silent: 'not stated by the provider', needs_account: 'needs an account to check', sources_disagree: 'provider pages disagree' };
+  const withReason = providers.filter((p) => p.verified === true && Object.entries(p.field_checks || {}).some(([f, c]) => p[f] === null && LABEL[c.status]));
+  assert.ok(withReason.length >= 5, 'the dataset records reasons');
+  const api = new Map(JSON.parse(readFileSync(join(ROOT, 'site/api/v1/providers.json'), 'utf8')).providers.map((p) => [p.slug, p]));
+  const full = readFileSync(join(ROOT, 'site/llms-full.txt'), 'utf8');
+  for (const p of withReason) {
+    assert.deepEqual(api.get(p.slug).field_checks, p.field_checks, `${p.slug}: API v1 carries field_checks unchanged`);
+    const page = readFileSync(join(ROOT, `site/p/${p.slug}.html`), 'utf8');
+    for (const [f, c] of Object.entries(p.field_checks)) {
+      if (p[f] !== null || !LABEL[c.status] || f === 'openai_compatible') continue;
+      assert.ok(page.includes(`${LABEL[c.status]} (checked ${c.checked})`), `${p.slug}.${f}: the page says the reason and the day`);
+      assert.ok(full.includes(`unknown, ${LABEL[c.status]} (checked ${c.checked})`), `${p.slug}.${f}: llms-full.txt says the reason`);
+    }
+  }
+  assert.ok(!readFileSync(join(ROOT, 'site/providers.csv'), 'utf8').split('\n')[0].includes('field_checks'), 'the CSV columns stay the explicit list');
+  const cov = readFileSync(join(ROOT, 'site/coverage/index.html'), 'utf8');
+  for (const f of ['card_required', 'phone_required', 'commercial_ok', 'openai_compatible']) {
+    const pop = providers.filter((p) => p.verified === true);
+    const count = (s) => pop.filter((p) => p[f] === null && p.field_checks && p.field_checks[f] && p.field_checks[f].status === s).length;
+    const notChecked = pop.filter((p) => p[f] === null && !(p.field_checks && p.field_checks[f])).length;
+    const m = cov.match(new RegExp(`<tr id="reasons-${f}">.*?</tr>`));
+    assert.ok(m, `${f}: its reasons row is on /coverage/`);
+    const nums = [...m[0].matchAll(/<td class="num">(\d+)<\/td>/g)].map((x) => +x[1]);
+    assert.deepEqual(nums.slice(2), [notChecked, count('source_silent'), count('needs_account'), count('sources_disagree')], `${f}: not checked and reasons match a recount`);
+  }
+});
+
 test('/coverage/ treats conditional commercial use as open, not confirmed', () => {
   const provider = { slug: 'conditional', name: 'Conditional', docs_url: 'https://example.com/terms', verified: true, commercial_ok: 'conditional' };
   const row = coverageOf([provider]).find((entry) => entry.key === 'commercial_ok');
@@ -2654,7 +2688,8 @@ test('conditional commercial use is visible in UI, excluded from commercial coll
     const walk = (node) => {
       if (!node || typeof node !== 'object') return;
       if (Object.hasOwn(node, 'commercial_ok')) assert.ok([true, false, null].includes(node.commercial_ok), `${file}: commercial_ok keeps the v1 type`);
-      for (const child of Object.values(node)) walk(child);
+      // field_checks is keyed by flag name: its commercial_ok is the check object, not the flag
+      for (const [key, child] of Object.entries(node)) if (key !== 'field_checks') walk(child);
     };
     walk(value);
   }
