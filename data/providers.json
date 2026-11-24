@@ -144,7 +144,8 @@
       "free_limits": {"requests_per_minute":20,"requests_per_month":1000,"scope":"trial key, chat endpoint; 1,000 API calls per month in total","source":"https://docs.cohere.com/docs/rate-limits","checked":"2026-11-24"},
       "field_checks": {"phone_required":{"status":"source_silent","checked":"2026-11-24","sources":["https://cohere.com/privacy","https://cohere.com/pricing","https://docs.cohere.com/docs/rate-limits"],"note":"Account creation data is a name, a business email and a password; pricing and rate-limits pages say nothing about a phone"},"card_required":{"status":"stated","checked":"2026-11-24","sources":["https://cohere.com/privacy"],"quote":"Individuals who create or access a free trial account to test out our Platform under our standard Terms of Use with no payment method on file.","note":"The privacy policy defines Trial Users this way; payment information is asked for only to move from a trial to a paid account"},"commercial_ok":{"status":"stated","checked":"2026-11-24","sources":["https://cohere.com/pricing"],"quote":"API calls made from a Trial API key are free. However, trial keys are rate limited and are not permitted to be used for production or commercial purposes."}},
       "verified": true,
-      "last_verified": "2026-11-24"
+      "last_verified": "2026-11-24",
+      "data_policy": {"trains_on_prompts":true,"retention":null,"source":"https://cohere.com/privacy","checked":"2026-11-24","quote":"Section 2.3 (Research and Model Improvement): Analyzing usage patterns and using Trial or Research User Inputs/Outputs to improve the performance and safety of our AI models.","note":"Trial Users are free trial accounts with no payment method on file. Cohere says it takes steps to de-identify inputs and outputs before research use. Retention is stated only for Enterprise Users (generally 30 days), not for Trial Users.","plan_named":true}
     },
     {
       "slug": "cerebras",
@@ -485,7 +486,7 @@
       "openai_base_url": null,
       "is_text_llm": false,
       "model_tier": null,
-      "field_checks": {"commercial_ok":{"status":"source_silent","checked":"2026-11-24","sources":["https://modal.com/legal/terms","https://modal.com/pricing"],"note":"Terms (1.2) make no-fee use subject to No-Fee Use Limitations that Modal does not publish; 1.1 limits use to internal business; pricing neither grants nor denies commercial use of the credit"}},
+      "field_checks": {"commercial_ok":{"status":"source_silent","checked":"2026-11-24","sources":["https://modal.com/legal/terms","https://modal.com/pricing"],"note":"Terms (1.2) make no-fee use subject to No-Fee Use Limitations that Modal does not publish; 1.1 limits use to internal business; pricing neither grants nor denies commercial use of the credit"},"phone_required":{"status":"source_silent","checked":"2026-11-24","sources":["https://modal.com/docs/guide","https://modal.com/pricing","https://modal.com/legal/terms"],"note":"Guide, pricing and terms do not mention phone verification; the terms list telephone contact details only among personal data processed"}},
       "verified": true,
       "last_verified": "2026-11-21",
       "data_policy": {"trains_on_prompts":false,"retention":null,"source":"https://modal.com/legal/terms","checked":"2026-10-16","quote":"Modal will not, except with Customer's prior written consent: (i) train any AI model using Customer Data, or (ii) export Customer Data into, or cause Customer Data to be ingested by, large language models.","note":"The terms are written for Customers (businesses): use is «solely for Customer's internal business», while «No-Fee Use» «may be subject to certain additional restrictions, limitations and differing terms»; the clause does not list them.","plan_named":false}
@@ -845,6 +846,7 @@
       "is_text_llm": false,
       "model_tier": null,
       "free_limits": {"requests_per_day":3000,"requests_per_minute":25,"scope":"Free plan, Embed API (Marengo 3.5): 3,000 requests per day for video, audio, image and text; 25 requests per minute for video and audio, 600 for image and text. Other APIs have their own limits","source":"https://docs.twelvelabs.io/docs/get-started/rate-limits","checked":"2026-10-09"},
+      "field_checks": {"phone_required":{"status":"source_silent","checked":"2026-11-24","sources":["https://docs.twelvelabs.io/docs/get-started/quickstart","https://www.twelvelabs.io/legal/terms-of-use","https://www.twelvelabs.io/pricing"],"note":"Quickstart and pricing do not mention phone verification; the terms list phone numbers only as account information a user may provide"},"commercial_ok":{"status":"source_silent","checked":"2026-11-24","sources":["https://www.twelvelabs.io/legal/terms-of-use","https://www.twelvelabs.io/pricing"],"note":"Neither the terms nor the pricing page say whether the Free plan may be used commercially"}},
       "verified": true,
       "last_verified": "2026-11-20"
     },
@@ -945,6 +947,7 @@
       "is_text_llm": false,
       "model_tier": null,
       "free_limits": {"requests_per_second":2,"scope":"Base Tier, the default for all API keys (10 req/sec once the account balance is at least $10); usage is also bounded by the Free plan's $5/month credit","source":"https://docs.moondream.ai/rate-limits","checked":"2026-11-24"},
+      "field_checks": {"phone_required":{"status":"source_silent","checked":"2026-11-24","sources":["https://docs.moondream.ai/quickstart/","https://moondream.ai/pricing","https://moondream.ai/terms"],"note":"Quickstart, pricing and terms do not mention phone verification"},"commercial_ok":{"status":"source_silent","checked":"2026-11-24","sources":["https://moondream.ai/terms","https://moondream.ai/pricing"],"note":"Terms 4.1 license the Service for internal business or personal purposes and 4.2 bar commercially exploiting the Service itself; neither page sets a rule for the Free plan credits"}},
       "verified": true,
       "last_verified": "2026-10-16",
       "data_policy": {"trains_on_prompts":false,"retention":"No longer than necessary to provide the Service","source":"https://moondream.ai/terms","checked":"2026-10-15","quote":"M87 Labs will not use Customer Content or Outputs to Train any model or adapter that is made generally available by M87 Labs (including the base Moondream models), or to Train any model or adapter for the benefit of any third party, except where you explicitly opt in under a separate written agreement.","note":"Commercial use of the free tier is unclear. §4.1: «your internal business or personal purposes»; §4.2: «commercially exploit the Service or any portion of the Service». The terms do not name the free plan.","plan_named":false}
@@ -1122,6 +1125,7 @@
       "env_key": "RIME_API_KEY",
       "is_text_llm": false,
       "model_tier": null,
+      "field_checks": {"commercial_ok":{"status":"source_silent","checked":"2026-11-24","sources":["https://www.rime.ai/terms","https://rime.ai/pricing"],"note":"Terms 6.3 say the Free Plan is intended for evaluation and development and bar Caller audio, PHI and third-party personal data on it; 7.2 sets no use restriction, and no clause allows or forbids commercial use"}},
       "verified": true,
       "last_verified": "2026-11-19",
       "data_policy": null
@@ -1173,6 +1177,7 @@
       "env_key": "VOYAGE_API_KEY",
       "is_text_llm": false,
       "model_tier": null,
+      "field_checks": {"phone_required":{"status":"source_silent","checked":"2026-11-24","sources":["https://docs.voyageai.com/docs/api-key-and-installation","https://docs.voyageai.com/docs/faq","https://www.voyageai.com/tos"],"note":"API key setup, FAQ and terms do not mention phone verification"},"commercial_ok":{"status":"source_silent","checked":"2026-11-24","sources":["https://www.voyageai.com/tos","https://docs.voyageai.com/docs/pricing"],"note":"The terms restrict commercial use only of website content; neither the terms nor the pricing page say whether the free token allotment may be used commercially"}},
       "verified": true,
       "last_verified": "2026-11-20",
       "added": "2026-07-31",
@@ -1321,6 +1326,7 @@
       "env_key": "UNSTRUCTURED_API_KEY",
       "is_text_llm": false,
       "model_tier": null,
+      "field_checks": {"commercial_ok":{"status":"source_silent","checked":"2026-11-24","sources":["https://unstructured.io/terms-and-conditions","https://unstructured.io/pricing"],"note":"The terms and conditions cover website content only (personal and non-commercial use of it); the pricing page sets no use rule for the free pages"}},
       "verified": true,
       "last_verified": "2026-11-20",
       "added": "2026-07-31"
@@ -1357,7 +1363,7 @@
       "free_type": "renewing-quota",
       "free_tier": "10 free production calls on the Remove Background API (one-time) plus 1,000 sandbox calls/month on the Image Editing API (watermarked)",
       "rate_limits": "1,000 sandbox calls/month; 10 one-time production calls",
-      "notes": "No credit card required. Sandbox output is watermarked (for testing); the 10 production calls return clean output. Image editing/generation (AI backgrounds, relighting, shadows).",
+      "notes": "No credit card required. Sandbox output is watermarked (for testing); the 10 production calls return clean output. Image editing/generation (AI backgrounds, relighting, shadows). The terms license Free Accounts for personal, non-commercial purposes only.",
       "best_for": "Programmatic background removal and AI image editing to prototype free",
       "modalities": ["image"],
       "models_free": null,
@@ -1365,11 +1371,12 @@
       "docs_url": "https://www.photoroom.com/api/pricing",
       "phone_required": null,
       "card_required": false,
-      "commercial_ok": null,
+      "commercial_ok": false,
       "openai_compatible": false,
       "env_key": "PHOTOROOM_API_KEY",
       "is_text_llm": false,
       "model_tier": null,
+      "field_checks": {"commercial_ok":{"status":"stated","checked":"2026-11-24","sources":["https://www.photoroom.com/legal/terms-and-conditions","https://www.photoroom.com/api/pricing"],"quote":"We grant Free Accounts a non-exclusive, non-transferable license to access and use the Services, in accordance with the Terms, for your own personal, non commercial purposes.","note":"The terms define a Free Account as free or trial access to the Services; the API pricing page offers sandbox calls and 10 free production calls for testing before a paid plan"}},
       "verified": true,
       "last_verified": "2026-11-19",
       "added": "2026-07-31",
@@ -1523,6 +1530,7 @@
       "env_key": "RETELL_API_KEY",
       "is_text_llm": false,
       "model_tier": null,
+      "field_checks": {"phone_required":{"status":"source_silent","checked":"2026-11-24","sources":["https://docs.retellai.com/get-started/quick-start","https://www.retellai.com/legal/terms-of-service","https://www.retellai.com/pricing"],"note":"Quick start and terms do not mention phone verification at sign-up; phone numbers in the terms are numbers bought for calling"},"commercial_ok":{"status":"source_silent","checked":"2026-11-24","sources":["https://www.retellai.com/legal/terms-of-service","https://www.retellai.com/pricing"],"note":"Terms 10.2 license the Service for personal or internal business purposes and section 7 covers trial services without a use limit; nothing rules on the free trial credit"}},
       "verified": true,
       "last_verified": "2026-11-20",
       "added": "2026-07-31",
@@ -1629,6 +1637,7 @@
       "is_text_llm": true,
       "model_tier": null,
       "free_limits": null,
+      "field_checks": {"phone_required":{"status":"source_silent","checked":"2026-11-24","sources":["https://regolo.ai/pricing/","https://regolo.ai/terms-and-conditions/"],"note":"Pricing and terms do not mention phone verification"},"commercial_ok":{"status":"source_silent","checked":"2026-11-24","sources":["https://regolo.ai/terms-and-conditions/","https://regolo.ai/pricing/"],"note":"The terms regulate resale per plan (Pay-Per-Token and flat-rate) without naming the free trial; the pricing page calls the trial full access with no use limit"}},
       "verified": true,
       "last_verified": "2026-11-24",
       "added": "2026-11-24",
