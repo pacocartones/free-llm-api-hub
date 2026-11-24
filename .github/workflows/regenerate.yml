@@ -1,0 +1,262 @@
+name: Regenerate derived files
+
+# Post-merge regeneration of the derived files (README tables, site pages, CSV, sitemap, fingerprints, OG images).
+# Pull requests change the canonical inputs; this workflow rebuilds the derived files from trusted main and:
+#
+#   REGEN_MODE=shadow  opens (or force-updates) a draft pull request from bot/regenerate, as the GitHub App.
+#                      While the pull-request drift gate in verify.yml is still blocking, main is already in sync,
+#                      so a shadow pull request means the bot's environment is not deterministic: close it and
+#                      note the cause. Without the App (REGEN_APP_CLIENT_ID unset) it only reports: the diff goes
+#                      to the step summary and the patch to an artifact.
+#   REGEN_MODE=push    commits to main as the App. Needs the App in the bypass list of the "main merge gate"
+#                      ruleset; see docs/regeneration-bot.md before switching.
+#   anything else      disabled (the default: the variable is unset).
+#
+# Security model:
+# - It never runs pull-request code: only push to main, schedule and workflow_dispatch, always on main's tip.
+#   No pull_request_target.
+# - `build` runs repository scripts and npm dependencies with a read-only token and never sees the App key.
+# - `publish` holds the key (Environment `regenerate`, deployment branch main only), installs nothing,
+#   re-checks the allowlist with a dependency-free script and only runs git and gh.
+# - Loop prevention: the `paths` filter contains no generated target, the gate skips pushes by the bot or whose
+#   tip is a `chore(generated):` commit, and a second run finds an empty diff (idempotent build).
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'data/**'
+      - '!data/probe-report.json' # a generated target: the bot writes it
+      - 'scripts/**'
+      - 'CONTRIBUTING.md'         # rendered into /contributing/
+      - 'docs/methodology.md'     # rendered into /methodology/
+      - '.github/workflows/regenerate.yml'
+  schedule:
+    - cron: '29 4 * * *' # safety net for a missed or rejected run; UTC, best effort
+  workflow_dispatch: {}
+
+# One run at a time. GitHub keeps at most one pending run, and every run checks out the current tip of main,
+# so the pending one covers every merge in between.
+concurrency:
+  group: regenerate
+  cancel-in-progress: false
+
+permissions: {}
+
+jobs:
+  gate:
+    name: Decide whether to regenerate
+    if: ${{ github.repository == 'pacocartones/free-llm-api-hub' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    permissions:
+      contents: read
+    outputs:
+      mode: ${{ steps.gate.outputs.mode }}
+      run: ${{ steps.gate.outputs.run }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+          persist-credentials: false
+          fetch-depth: 1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+      - id: gate
+        name: Mode and loop guard
+        env:
+          REGEN_MODE: ${{ vars.REGEN_MODE }}
+          EVENT: ${{ github.event_name }}
+          ACTOR: ${{ github.actor }}
+          BOT_LOGIN: ${{ vars.REGEN_APP_SLUG && format('{0}[bot]', vars.REGEN_APP_SLUG) || '' }}
+        run: node scripts/regenerate-guard.mjs gate
+
+  build:
+    name: Rebuild and check the derived files
+    needs: gate
+    if: ${{ needs.gate.outputs.run == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    permissions:
+      contents: read
+    outputs:
+      base: ${{ steps.base.outputs.sha }}
+      changed: ${{ steps.diff.outputs.changed }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+          persist-credentials: false
+          fetch-depth: 0 # build.mjs mines per-provider history from git log
+      - id: base
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+      - name: Install the locked development tools (no lifecycle scripts)
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Validate the data as merged
+        run: node scripts/validate.mjs
+      - name: Build
+        run: node scripts/build.mjs
+      - name: Render social images only if they no longer match the data
+        run: node scripts/check-og.mjs || node scripts/og.mjs
+      - name: Every changed path must be a generated target
+        run: |
+          git add -A
+          git diff --cached --name-only -z | node scripts/regenerate-guard.mjs allowlist
+      - name: The build is idempotent (a second build changes nothing)
+        run: |
+          node scripts/build.mjs
+          git diff --exit-code # working tree against the staged first build
+          untracked="$(git ls-files --others --exclude-standard)"
+          if [ -n "$untracked" ]; then echo "::error::the second build wrote new files: $untracked"; exit 1; fi
+      - name: Run the same checks as the pull-request gate on the regenerated tree
+        run: npm test
+      - id: diff
+        name: Write the patch
+        env:
+          APP_CLIENT_ID: ${{ vars.REGEN_APP_CLIENT_ID }}
+          MODE: ${{ needs.gate.outputs.mode }}
+        run: |
+          git diff --cached --binary > "$RUNNER_TEMP/regen.patch"
+          if [ -s "$RUNNER_TEMP/regen.patch" ]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            {
+              echo '### Derived files out of sync with main'
+              echo '```'; git diff --cached --stat; echo '```'
+              if [ -z "$APP_CLIENT_ID" ]; then
+                echo "No GitHub App configured (REGEN_APP_CLIENT_ID): report only, nothing is published. The patch is the \`regen-patch\` artifact."
+              else
+                echo "Publishing in mode \`$MODE\`."
+              fi
+            } >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo 'Derived files already in sync with main.' >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - if: ${{ steps.diff.outputs.changed == 'true' }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: regen-patch
+          path: ${{ runner.temp }}/regen.patch
+          retention-days: 7
+          if-no-files-found: error
+
+  publish:
+    name: Publish the regenerated files
+    needs: [gate, build]
+    if: ${{ needs.build.outputs.changed == 'true' && vars.REGEN_APP_CLIENT_ID != '' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: regenerate # holds REGEN_APP_PRIVATE_KEY; deployment branches: main only
+    permissions:
+      contents: read # the App token, not GITHUB_TOKEN, writes
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.build.outputs.base }}
+          persist-credentials: false
+          fetch-depth: 1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: regen-patch
+          path: ${{ runner.temp }}/regen
+      - name: Apply the patch and re-check the allowlist (no dependencies installed, no token yet)
+        run: |
+          git apply --index --binary "$RUNNER_TEMP/regen/regen.patch"
+          git diff --cached --name-only -z | node scripts/regenerate-guard.mjs allowlist
+      - name: Mint a one-hour App token
+        id: app
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          client-id: ${{ vars.REGEN_APP_CLIENT_ID }}
+          private-key: ${{ secrets.REGEN_APP_PRIVATE_KEY }}
+          permission-contents: write
+          permission-pull-requests: write
+      - name: Commit as the App
+        env:
+          GH_TOKEN: ${{ steps.app.outputs.token }}
+          SLUG: ${{ steps.app.outputs.app-slug }}
+          BASE: ${{ needs.build.outputs.base }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          id="$(gh api "/users/${SLUG}%5Bbot%5D" --jq .id)"
+          git config user.name "${SLUG}[bot]"
+          git config user.email "${id}+${SLUG}[bot]@users.noreply.github.com"
+          printf 'chore(generated): regenerate derived files for %s\n\nSource: %s\nRun: %s\n' "${BASE:0:7}" "$BASE" "$RUN_URL" \
+            | git commit --quiet -F -
+      - name: Open or update the shadow pull request (REGEN_MODE=shadow)
+        if: ${{ needs.gate.outputs.mode == 'shadow' }}
+        env:
+          TOKEN: ${{ steps.app.outputs.token }}
+          GH_TOKEN: ${{ steps.app.outputs.token }} # a pull request opened by the App runs the required checks
+          GH_REPO: ${{ github.repository }}
+          BASE: ${{ needs.build.outputs.base }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          git push --force "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" HEAD:refs/heads/bot/regenerate
+          body="$(mktemp)"
+          {
+            echo "Shadow run of the regeneration bot (docs/regeneration-bot.md)."
+            echo
+            echo "While the pull-request drift gate is still blocking, main should already be in sync, so a diff"
+            echo "here is a determinism bug in the bot's environment. Do not merge: close it and note the cause."
+            echo
+            echo "Source: \`$BASE\`. Run: $RUN_URL"
+            echo
+            echo '```'; git show --stat --format= HEAD; echo '```'
+          } > "$body"
+          number="$(gh pr list --head bot/regenerate --state open --json number --jq '.[0].number // empty')"
+          if [ -n "$number" ]; then
+            gh pr edit "$number" --body-file "$body"
+          else
+            gh pr create --draft --base main --head bot/regenerate \
+              --title "chore(generated): regenerate derived files (shadow)" --body-file "$body"
+          fi
+      - name: Push to main (REGEN_MODE=push)
+        if: ${{ needs.gate.outputs.mode == 'push' }}
+        env:
+          TOKEN: ${{ steps.app.outputs.token }}
+          BASE: ${{ needs.build.outputs.base }}
+        run: |
+          remote="https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          if git push "$remote" HEAD:refs/heads/main; then
+            echo "Pushed $(git rev-parse --short HEAD) to main."
+            exit 0
+          fi
+          tip="$(git ls-remote "$remote" refs/heads/main | cut -f1)"
+          if [ -n "$tip" ] && [ "$tip" != "$BASE" ]; then
+            # Nothing is forced: the run triggered by the newer merge, or the nightly run, regenerates on the new tip.
+            echo "::warning title=main moved::main changed during the build ($BASE -> $tip); nothing was pushed."
+            exit 0
+          fi
+          echo "::error title=Push rejected::main did not move, so the push was refused by branch protection. Is the App in the bypass list of the \"main merge gate\" ruleset? See docs/regeneration-bot.md."
+          exit 1
+
+  report:
+    name: Report a failed regeneration
+    needs: [gate, build, publish]
+    if: ${{ always() && github.repository == 'pacocartones/free-llm-api-hub' && (needs.gate.result == 'failure' || needs.build.result == 'failure' || needs.publish.result == 'failure') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      issues: write
+    steps:
+      - name: Open or update the issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          COMMIT: ${{ github.sha }}
+        run: |
+          title='Regeneration bot failed'
+          number="$(gh issue list --state open --search "in:title \"$title\"" --json number,title \
+            --jq "map(select(.title == \"$title\")) | .[0].number // empty")"
+          body="$(mktemp)"
+          printf 'The regeneration run for `%s` failed; nothing outside the generated targets was written.\n\nRun: %s\n' "$COMMIT" "$RUN_URL" > "$body"
+          if [ -n "$number" ]; then gh issue comment "$number" --body-file "$body"
+          else gh issue create --title "$title" --label chore --label area:ci --body-file "$body"; fi

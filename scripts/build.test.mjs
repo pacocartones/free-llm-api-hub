@@ -883,9 +883,10 @@ test('an unconfirmed flag ranks between a confirmed yes and a confirmed no', () 
 });
 
 // ---------- CI workflows must not run `gh pr view` (no bot logic) ----------
-// The regenerate bot is gone (2026-08): nothing in CI may decide to create,
-// skip or filter PRs — all maintenance is local. If a workflow ever runs
-// `gh pr view` again it is probably bot logic sneaking back in.
+// The old regenerate bot is gone (2026-08). Its successor, regenerate.yml
+// (docs/regeneration-bot.md), runs on main only and never inspects pull
+// requests; if a workflow ever runs `gh pr view` it is probably bot logic
+// deciding from pull-request content, which stays banned.
 test('no workflow runs `gh pr view` (bot logic is banned from CI)', () => {
   const dir = join(ROOT, '.github/workflows');
   const files = readdirSync(dir).filter((f) => f.endsWith('.yml') || f.endsWith('.yaml'));
