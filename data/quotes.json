@@ -381,6 +381,18 @@
    "page_sha256": "246080092abebcd77646fc52b62b9e966cda34106c6eacc52ed0ea0532d86b83"
   },
   {
+   "id": "sambanova.commercial_ok.sentence",
+   "slug": "sambanova",
+   "kind": "field_sentence",
+   "field": "commercial_ok",
+   "text": "All SambaCloud models are Preview models: they are intended for evaluation purposes and developer experimentation only, and should not be used in production environments.",
+   "source_url": "https://docs.sambanova.ai/docs/en/models/rate-limits",
+   "read_on": "2026-11-24",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "474add61f6efb00213cc7b4cc044bad7214e624cc0665f1a39b2fabc9e48a5a5"
+  },
+  {
    "id": "scaleway.sentence",
    "slug": "scaleway",
    "kind": "sentence",
