@@ -533,7 +533,7 @@ test('sitemap.xml lists no paginated updates pages (their count follows the comm
   assert.doesNotMatch(sitemap, /\/updates\/page\//, 'a page count tied to git history would make the drift-gated sitemap change on every merge');
 });
 
-test('derived-fingerprints.json pins gitignored outputs, skips site/p/, site/badges/, tracked and git-log files', () => {
+test('derived-fingerprints.json pins gitignored outputs, skips site/p/, site/badges/, the freshness badge, tracked and git-log files', () => {
   const fp = join(ROOT, 'derived-fingerprints.json');
   if (!existsSync(fp)) run(['scripts/build.mjs']);
   const pins = JSON.parse(readFileSync(fp, 'utf8'));
@@ -548,6 +548,8 @@ test('derived-fingerprints.json pins gitignored outputs, skips site/p/, site/bad
     'site/p/ must not be pinned (date-relative)');
   assert.equal(Object.keys(pins).some((k) => k.startsWith('site/badges/')), false,
     'site/badges/ must not be pinned (colour tracks verification age)');
+  assert.equal(pins['site/badge-freshness.json'], undefined,
+    'site/badge-freshness.json must not be pinned (its oldest age moves every day)');
   assert.equal(Object.keys(pins).some((k) => k.startsWith('site/og/')), false,
     'site/og/ is tracked and diff-gated directly');
   assert.equal(pins['site/index.html'], undefined,
@@ -1814,7 +1816,7 @@ test('provider links carry data-provider and data-link for the opt-in outbound_p
   assert.equal([...cmp.matchAll(/data-link="docs"/g)].length, 2, "both providers' docs links are tagged on a static comparison");
 });
 
-test('no GA_MEASUREMENT_ID (the default): the build emits no analytics code, CSP host, banner or cookie notice change', () => {
+test('no GA_MEASUREMENT_ID (the default): no Google analytics code, Google CSP host, banner or cookie notice change; Cloudflare Web Analytics allowed and described', () => {
   const env = { ...process.env };
   delete env.GA_MEASUREMENT_ID;
   execFileSync(process.execPath, ['scripts/build.mjs'], { cwd: ROOT, stdio: 'pipe', env });
@@ -1827,7 +1829,14 @@ test('no GA_MEASUREMENT_ID (the default): the build emits no analytics code, CSP
     const html = readFileSync(join(ROOT, rel), 'utf8');
     assert.doesNotMatch(html, /googletagmanager|google-analytics|analytics\.google|gtag|consent\.js|data-consent-open|Cookie settings/, `${rel} carries analytics code without an ID`);
   }
-  assert.match(readFileSync(join(ROOT, 'site/legal/privacy.html'), 'utf8'), /no third-party analytics or tracking/);
+  const privacy = readFileSync(join(ROOT, 'site/legal/privacy.html'), 'utf8');
+  assert.match(privacy, /no cookies and no tracking/);
+  assert.match(privacy, /cookieless Cloudflare Web Analytics/);
+  assert.doesNotMatch(privacy, /We do not use Cloudflare's analytics/);
+  // Cloudflare injects the Web Analytics beacon at the edge, so every build must let it through the CSP
+  const csp = readFileSync(join(ROOT, 'site/index.html'), 'utf8').match(/http-equiv="Content-Security-Policy" content="([^"]+)"/)[1];
+  assert.match(csp, /script-src [^;]*https:\/\/static\.cloudflareinsights\.com/);
+  assert.match(csp, /connect-src [^;]*https:\/\/cloudflareinsights\.com/);
 });
 
 test('the privacy page and SECURITY.md say what the star count really does: no GitHub call from the browser', () => {
@@ -2731,6 +2740,33 @@ test('llms-full.txt shows the commercial-use condition of every conditional prov
   }
   const lines = full.split('\n').filter((l) => l.startsWith('- Commercial-use condition: '));
   assert.equal(lines.length, conditional.length, 'no other provider carries a condition line');
+});
+
+test('llms-full.txt gives each provider with a data_policy one prompt data policy line, from trainState', () => {
+  run(['scripts/build.mjs']);
+  const { providers } = JSON.parse(readFileSync(DATA, 'utf8'));
+  const full = readFileSync(join(ROOT, 'site/llms-full.txt'), 'utf8');
+  const blocks = full.split('\n### ').slice(1).map((text) => `### ${text}`);
+  const blockOf = (p) => blocks.find((b) => b.startsWith(`### ${p.name} — `));
+  const policyLines = (p) => blockOf(p).split('\n').filter((l) => l.startsWith('- Prompt data policy: '));
+
+  const said = providers.find((p) => trainState(p) === 'no');
+  assert.ok(said, 'the dataset has a provider whose own sentence says it does not train on prompts');
+  const [saidLine] = policyLines(said);
+  assert.match(saidLine, /trains on prompts: no;/, `${said.slug}: no, from trainState`);
+  assert.ok(saidLine.includes(`(source ${said.data_policy.source}, checked ${said.data_policy.checked})`), `${said.slug}: its source and day`);
+
+  const valueOnly = providers.find((p) => trainState(p) === 'recorded');
+  assert.ok(valueOnly, 'the dataset has a provider with a recorded value but no quote');
+  assert.match(policyLines(valueOnly)[0], /trains on prompts: not confirmed;/, `${valueOnly.slug}: a value alone is not confirmed`);
+
+  const without = providers.find((p) => !p.data_policy);
+  assert.ok(without, 'the dataset has a provider without a data_policy');
+  assert.deepEqual(policyLines(without), [], `${without.slug}: no line, absent is never "no"`);
+
+  const withPolicy = providers.filter((p) => p.data_policy && typeof p.data_policy === 'object');
+  const lines = full.split('\n').filter((l) => l.startsWith('- Prompt data policy: '));
+  assert.equal(lines.length, withPolicy.length, 'exactly one line per provider with a data_policy');
 });
 
 test('/coverage/ treats conditional commercial use as open, not confirmed', () => {
