@@ -17,6 +17,16 @@ const ROOT = privateTree(REPO);
 const SITE = 'https://freellmapihub.com';
 const read = (rel) => readFileSync(join(ROOT, rel), 'utf8');
 const page = (slug) => read(`site/guides/${slug}.html`);
+// Remove <script> blocks (any case, attributes or closing whitespace), repeating until nothing changes,
+// so the visible text never keeps a script that a single pass would leave behind.
+const withoutScripts = (html) => {
+  let out = html;
+  for (let prev = ''; prev !== out; ) {
+    prev = out;
+    out = out.replace(/<script\b[^>]*>[\s\S]*?<\/script\s*>/gi, '');
+  }
+  return out;
+};
 const SLUGS = LONG_GUIDES.map((g) => g.slug);
 
 let providers, notFree;
@@ -50,7 +60,7 @@ describe('every long guide', () => {
       assert.equal(html.match(/<title>([^<]*)<\/title>/)[1], parts.title.replace(/&/g, '&amp;'));
       const desc = html.match(/<meta name="description" content="([^"]*)"/)[1];
       assert.ok(desc.length <= 155, `${g.slug}: description is ${desc.length} characters`);
-      assert.equal(desc, parts.metaDesc.replace(/'/g, "'"), `${g.slug}: the description is the guide's own, not cut`);
+      assert.equal(desc, parts.metaDesc, `${g.slug}: the description is the guide's own, not cut`);
       assert.doesNotMatch(html, /\{n\}/);
       assert.equal(sitemap.split(`<loc>${url}</loc>`).length - 1, 1, `${g.slug}: one sitemap entry`);
       assert.ok(hub.includes(`href="../guides/${g.slug}"`), `${g.slug}: on the hub`);
@@ -70,7 +80,7 @@ describe('every long guide', () => {
       assert.doesNotMatch(JSON.stringify(graph), /"@type":"(Product|Offer|AggregateRating)"/);
       const crumbs = graph.find((n) => n['@type'] === 'BreadcrumbList').itemListElement;
       assert.equal(crumbs[2].item, `${SITE}/guides/${slug}`);
-      const visible = stripTags(html.replace(/<script[\s\S]*?<\/script>/g, '')).replace(/\s+/g, ' ');
+      const visible = stripTags(withoutScripts(html)).replace(/\s+/g, ' ');
       const faq = graph.find((n) => n['@type'] === 'FAQPage').mainEntity;
       assert.ok(faq.length >= 3, `${slug}: at least three questions`);
       for (const q of faq) {
@@ -127,7 +137,7 @@ describe('the lists are the data', () => {
     // Each base URL shown is the provider's own.
     for (const p of usable.filter((x) => x.is_text_llm && x.openai_base_url)) assert.ok(html.includes(`<code>${p.openai_base_url.replace(/&/g, "&amp;").replace(/\//g, "/<wbr>")}</code>`), p.slug);
     // The not-free names come from data/not-free.json.
-    for (const e of notFree.entries.filter((x) => x.group !== 'removed')) assert.ok(html.includes(e.name.replace(/&/g, '&amp;').replace(/'/g, "'")), e.name);
+    for (const e of notFree.entries.filter((x) => x.group !== 'removed')) assert.ok(html.includes(e.name.replace(/&/g, '&amp;')), e.name);
   });
 
   test('OpenAI alternatives: the code examples use a listed provider’s base URL, key variable and free model', () => {
