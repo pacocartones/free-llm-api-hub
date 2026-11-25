@@ -111,19 +111,38 @@ export const weekTitle = (g) =>
 
 // RSS 2.0, one <item> per ISO week. Deterministic: pubDate is the date of the
 // newest change in that week, the guid is the week key.
-export const changesRss = (groups, { site }) => {
-  const items = groups.map((g) =>
-    `    <item><title>${xmlEsc(weekTitle(g))}</title>` +
-    `<link>${xmlEsc(`${site}/changes/#${g.week}`)}</link>` +
-    `<guid isPermaLink="false">${xmlEsc(`free-llm-api-hub-changes-${g.week}`)}</guid>` +
-    `<pubDate>${new Date(g.lastDate + 'T00:00:00Z').toUTCString()}</pubDate>` +
-    `<description>${xmlEsc(weekSummary(g))}</description></item>`).join('\n');
+// `reports`: the published monthly reports ({ title, description, link, guid, date }, lib/monthly-report.mjs), one
+// item each next to the weekly items, newest first.
+export const changesRss = (groups, { site, reports = [] }) => {
+  const weekly = groups.map((g) => ({
+    date: g.lastDate,
+    xml: `    <item><title>${xmlEsc(weekTitle(g))}</title>` +
+      `<link>${xmlEsc(`${site}/changes/#${g.week}`)}</link>` +
+      `<guid isPermaLink="false">${xmlEsc(`free-llm-api-hub-changes-${g.week}`)}</guid>` +
+      `<pubDate>${new Date(g.lastDate + 'T00:00:00Z').toUTCString()}</pubDate>` +
+      `<description>${xmlEsc(weekSummary(g))}</description></item>`,
+  }));
+  const monthly = reports.map((r) => ({
+    date: r.date,
+    xml: `    <item><title>${xmlEsc(r.title)}</title>` +
+      `<link>${xmlEsc(r.link)}</link>` +
+      `<guid isPermaLink="false">${xmlEsc(r.guid)}</guid>` +
+      `<pubDate>${new Date(r.date + 'T00:00:00Z').toUTCString()}</pubDate>` +
+      `<description>${xmlEsc(r.description)}</description></item>`,
+  }));
+  // Weekly items keep their order; a report goes before the first week that is not newer than it.
+  const items = [...weekly];
+  for (const m of [...monthly].sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0))) {
+    const at = items.findIndex((x) => x.date <= m.date);
+    items.splice(at === -1 ? items.length : at, 0, m);
+  }
+  const itemsXml = items.map((x) => x.xml).join('\n');
   return `<?xml version="1.0" encoding="UTF-8"?>\n<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel>\n` +
     `    <title>Free LLM API Hub — what changed, week by week</title>\n    <link>${xmlEsc(`${site}/changes/`)}</link>\n` +
     // The feed's own URL: feed validators ask an RSS 2.0 feed to carry it.
     `    <atom:link href="${xmlEsc(`${site}/changes.xml`)}" rel="self" type="application/rss+xml"/>\n` +
     `    <description>Field-level changes to free LLM API tiers (free tier, rate limits, the catch, flags), grouped by ISO week.</description>\n` +
-    (items ? `${items}\n` : '') + `</channel></rss>\n`;
+    (itemsXml ? `${itemsXml}\n` : '') + `</channel></rss>\n`;
 };
 
 // "Report a change" link for a provider page: GitHub issue forms prefill an
