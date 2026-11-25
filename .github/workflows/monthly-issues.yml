@@ -1,0 +1,39 @@
+name: Monthly contributor issues
+
+# Opens the two recurring contributor issues on the 1st of each month: "Free tier changes — <previous month>" (dataset
+# changes of the month that ended, from the git-mined history) and "New provider candidates — <this month>".
+# Idempotent: an issue with the same title, open or closed, is never opened twice. It never edits data.
+on:
+  schedule:
+    - cron: '37 6 1 * *' # 1st of each month, UTC, after the monthly source checks; delivery is best effort.
+  workflow_dispatch: {}
+
+permissions: {}
+
+concurrency:
+  group: monthly-issues
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: ${{ github.repository == 'pacocartones/free-llm-api-hub' && github.ref == 'refs/heads/main' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+          fetch-depth: 0 # the change history is mined from the git log of data/providers.json
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+      - name: Test the issue rendering and publication contracts
+        run: node --test scripts/monthly-issues.test.mjs
+      - name: Open this month's issues from checked-out main
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node scripts/monthly-issues.mjs --publish
