@@ -143,16 +143,24 @@ test('/quality/ shows the numbers of a separate recount of the committed data', 
   assert.equal(weekTotal + earlier, verified.length, 'the histogram holds every verified entry');
 });
 
-test('/quality/ is in the sitemap, linked from the footer and the methodology, and has WebPage structured data', () => {
+test('/quality/ is in the sitemap (behind the sitemap index), linked from the footer and the methodology, and has WebPage structured data', () => {
   const html = read('site/quality/index.html');
   assert.match(html, /<link rel="canonical" href="https:\/\/freellmapihub\.com\/quality\/">/);
   assert.match(read('site/sitemap.xml'), /<loc>https:\/\/freellmapihub\.com\/quality\/<\/loc>/);
+  assert.match(read('site/sitemap-index.xml'), /<loc>https:\/\/freellmapihub\.com\/sitemap\.xml<\/loc>/);
   assert.match(read('site/index.html'), /<a href="quality\/">Data quality<\/a>/, 'the home footer');
   assert.match(read('site/p/groq.html'), /<a href="\.\.\/quality\/">Data quality<\/a>/, 'the footer of a generated page');
   assert.match(read('site/methodology/index.html'), /href="https:\/\/freellmapihub\.com\/quality\/"/, 'the methodology');
   const ld = JSON.parse(html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1]);
   assert.deepEqual(ld['@graph'].map((n) => n['@type']), ['WebPage', 'BreadcrumbList']);
   assert.equal(ld['@graph'][0].url, `${SITE}/quality/`);
+  // The same site and dataset nodes as every other page (#764): stable @id, publisher and creator.
+  const page = ld['@graph'][0];
+  assert.deepEqual([page.isPartOf['@id'], page.about['@id']], [`${SITE}/#website`, `${SITE}/#dataset`]);
+  for (const r of [page.isPartOf, page.about]) {
+    assert.equal(r.publisher['@id'], `${SITE}/#publisher`);
+    assert.equal(r.creator['@id'], `${SITE}/#creator`);
+  }
   assert.deepEqual(ld['@graph'][1].itemListElement.map((i) => i.item), [`${SITE}/`, `${SITE}/quality/`]);
   assert.doesNotMatch(html.replace(/<script type="application\/(ld\+)?json"[\s\S]*?<\/script>/g, ''), /<script[^>]+src="https?:/, 'no external script');
 });

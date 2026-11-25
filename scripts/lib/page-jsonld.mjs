@@ -4,7 +4,9 @@
 // Only types that describe what the page is (CollectionPage, WebPage, ItemList, BreadcrumbList). No Product, Offer
 // or rating: the dataset does not verify prices or reviews, and the model-page spec (#711) rules them out.
 
-export const SITE_NAME = 'Free LLM API Hub';
+import { SITE_NAME, websiteRef } from './site-entity.mjs';
+
+export { SITE_NAME };
 
 // [[name, url], ...] after the home page, which every trail starts with.
 export const breadcrumbList = (site, crumbs) => ({
@@ -26,7 +28,7 @@ export function collectionPageJsonLd({ site, name, url, description, crumbs, ite
     name,
     url,
     ...(description ? { description } : {}),
-    isPartOf: { '@type': 'WebSite', name: SITE_NAME, url: `${site}/` },
+    isPartOf: websiteRef(site),
     ...(about ? { about } : {}),
     ...(items && items.length ? { mainEntity: itemList(name, items) } : {}),
   };
