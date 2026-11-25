@@ -14,6 +14,18 @@
    "page_sha256": "296d96034f56cc95ddbf4be680e92510a4fd38d651d6499dff2fcfc079305cec"
   },
   {
+   "id": "google-gemini.card_required.sentence",
+   "slug": "google-gemini",
+   "kind": "field_sentence",
+   "field": "card_required",
+   "text": "To access higher tiers, you must set up billing on your project.",
+   "source_url": "https://ai.google.dev/gemini-api/docs/billing",
+   "read_on": "2026-11-25",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "c2e65f691948a01f9abdf12423ecb72703e9066255fa8da5335d9f83ba347bf9"
+  },
+  {
    "id": "groq.sentence",
    "slug": "groq",
    "kind": "sentence",
