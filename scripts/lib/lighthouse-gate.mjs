@@ -99,3 +99,17 @@ export function medianReport(reports) {
   // by a healthy median category score.
   return { categories, auditRuns: reports };
 }
+
+// The production edge (Cloudflare) sends HTML, CSS, JS, JSON, SVG and XML compressed; the gate's local server used to send
+// them raw, so the home page's 270 KB of HTML took seconds to arrive under Lighthouse's simulated mobile network and the
+// score measured the test server, not the site (0.93 locally against 0.99 on the live page). The server compresses the same
+// types the edge does, with the encoding the browser asks for: brotli first, then gzip, else the raw bytes. Fonts and PNG are
+// already compressed and stay as they are.
+const COMPRESSIBLE = /^(text\/|application\/(json|xml|javascript)|image\/svg\+xml)/;
+export function negotiateEncoding(contentType, acceptEncoding = '') {
+  if (!COMPRESSIBLE.test(String(contentType || ''))) return null;
+  const offered = String(acceptEncoding || '').toLowerCase().split(',').map((s) => s.trim().split(';')[0]);
+  if (offered.includes('br')) return 'br';
+  if (offered.includes('gzip')) return 'gzip';
+  return null;
+}

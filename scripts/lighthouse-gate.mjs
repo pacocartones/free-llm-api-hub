@@ -16,7 +16,8 @@ import { randomUUID } from 'node:crypto';
 import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, extname, normalize } from 'node:path';
-import { evaluate, medianReport, parseMode } from './lib/lighthouse-gate.mjs';
+import { evaluate, medianReport, negotiateEncoding, parseMode } from './lib/lighthouse-gate.mjs';
+import { brotliCompressSync, gzipSync } from 'node:zlib';
 import { makeTmpDir } from './lib/tmp.mjs';
 import { groupModels } from './lib/model-keys.mjs';
 import { isIndexable } from './lib/model-pages.mjs';
@@ -93,8 +94,13 @@ function resolveFile(urlPath) {
 const server = createServer((req, res) => {
   const file = resolveFile(req.url);
   if (!file) { res.writeHead(404); res.end('not found'); return; }
-  res.writeHead(200, { 'content-type': TYPES[extname(file)] || 'application/octet-stream' });
-  res.end(readFileSync(file));
+  const type = TYPES[extname(file)] || 'application/octet-stream';
+  // Compressed like the production edge serves it (see negotiateEncoding), so Lighthouse measures the site, not this server.
+  const encoding = negotiateEncoding(type, req.headers['accept-encoding']);
+  const raw = readFileSync(file);
+  const body = encoding === 'br' ? brotliCompressSync(raw) : encoding === 'gzip' ? gzipSync(raw) : raw;
+  res.writeHead(200, { 'content-type': type, ...(encoding ? { 'content-encoding': encoding, vary: 'Accept-Encoding' } : {}) });
+  res.end(body);
 });
 
 await new Promise((ok) => server.listen(0, '127.0.0.1', ok));

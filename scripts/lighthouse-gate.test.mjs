@@ -180,3 +180,17 @@ test('the workflow keeps the required check on pull requests and moves performan
   assert.doesNotMatch(report.split('run: |')[1], /\$\{\{/);
 });
 
+
+test('the gate server compresses what the production edge compresses, with the encoding the browser asks for', async () => {
+  const { negotiateEncoding } = await import('./lib/lighthouse-gate.mjs');
+  const chrome = 'gzip, deflate, br, zstd';
+  assert.equal(negotiateEncoding('text/html', chrome), 'br');
+  assert.equal(negotiateEncoding('text/css', 'gzip'), 'gzip');
+  assert.equal(negotiateEncoding('application/json', 'gzip;q=1.0, br;q=0.5'), 'br');
+  assert.equal(negotiateEncoding('image/svg+xml', chrome), 'br');
+  assert.equal(negotiateEncoding('text/javascript', ''), null, 'no Accept-Encoding: raw bytes');
+  assert.equal(negotiateEncoding('font/woff2', chrome), null, 'fonts are already compressed');
+  assert.equal(negotiateEncoding('image/png', chrome), null, 'PNG is already compressed');
+  const server = readFileSync(join(dirname(fileURLToPath(import.meta.url)), 'lighthouse-gate.mjs'), 'utf8');
+  assert.match(server, /negotiateEncoding\(type, req\.headers\['accept-encoding'\]\)/, 'the local server uses it');
+});
