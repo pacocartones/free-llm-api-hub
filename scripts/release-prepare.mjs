@@ -82,7 +82,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
       const at = args.indexOf('--date');
       const r = prepareRelease(args[0], at >= 0 ? { date: args[at + 1] } : {});
       console.log(`Release ${r.from} → ${r.version}, dated ${r.date}; ${r.fragments.length} changelog fragment(s) collected.`);
-      console.log('Next: write the summary paragraph under the new heading in CHANGELOG.md, run `npm run build && npm test`, commit, and open the release pull request (RELEASING.md).');
+      console.log('Next: write the summary paragraph under the new heading in CHANGELOG.md, run `npm run contributors`, `npm run build && npm test`, commit, and open the release pull request (RELEASING.md).');
     }
   } catch (error) { console.error(`release-prepare: ${error.message}`); process.exitCode = 1; }
 }
