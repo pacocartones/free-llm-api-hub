@@ -17,15 +17,22 @@ const ROOT = privateTree(REPO);
 const SITE = 'https://freellmapihub.com';
 const read = (rel) => readFileSync(join(ROOT, rel), 'utf8');
 const page = (slug) => read(`site/guides/${slug}.html`);
-// Remove <script> blocks (any case, attributes or closing whitespace), repeating until nothing changes,
-// so the visible text never keeps a script that a single pass would leave behind.
+// Drop every <script>…</script> block (any case) by scanning, not by regex, so the visible text keeps no
+// script content. Our own build output is the input; an unclosed <script> drops the rest of the page.
 const withoutScripts = (html) => {
-  let out = html;
-  for (let prev = ''; prev !== out; ) {
-    prev = out;
-    out = out.replace(/<script\b[^>]*>[\s\S]*?<\/script\s*>/gi, '');
+  const lower = html.toLowerCase();
+  let out = '';
+  let i = 0;
+  for (;;) {
+    const open = lower.indexOf('<script', i);
+    if (open === -1) return out + html.slice(i);
+    out += html.slice(i, open);
+    const close = lower.indexOf('</script', open);
+    if (close === -1) return out;
+    const end = lower.indexOf('>', close);
+    if (end === -1) return out;
+    i = end + 1;
   }
-  return out;
 };
 const SLUGS = LONG_GUIDES.map((g) => g.slug);
 
