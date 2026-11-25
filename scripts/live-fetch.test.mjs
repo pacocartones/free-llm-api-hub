@@ -58,10 +58,10 @@ async function requestsOf(script, routes) {
 test('smoke-live: the sitemap, every page it lists and the extra files are all requested past the cache', async () => {
   const seen = await requestsOf(`${SCRIPTS}smoke-live.mjs`, {
     '/sitemap.xml': (port) => `<urlset><url><loc>http://127.0.0.1:${port}/</loc></url><url><loc>http://127.0.0.1:${port}/gone</loc></url></urlset>`,
-    '/': 'home', '/.well-known/security.txt': 'Contact: x', '/favicon.ico': 'ico',
+    '/': 'home', '/.well-known/security.txt': 'Contact: x', '/favicon.ico': 'ico', '/sitemap-index.xml': '<sitemapindex/>',
   });
   const paths = seen.map((r) => new URL(r.url, 'http://x').pathname);
-  for (const p of ['/sitemap.xml', '/', '/gone', '/.well-known/security.txt', '/favicon.ico']) assert.ok(paths.includes(p), `requested ${p}`);
+  for (const p of ['/sitemap.xml', '/', '/gone', '/.well-known/security.txt', '/favicon.ico', '/sitemap-index.xml']) assert.ok(paths.includes(p), `requested ${p}`);
   for (const r of seen) {
     assert.match(r.url, /[?&]deploy=0123456-7\.1(?:-r\d+)?$/, `${r.url} carries the deploy token`);
     assert.equal(r.cacheControl, 'no-cache', `${r.url} asks for no cache`);

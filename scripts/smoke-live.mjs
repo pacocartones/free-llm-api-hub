@@ -83,8 +83,9 @@ async function main() {
   }
   // Files outside the sitemap that must still be published: the dot-folder one is the first to vanish if the Pages
   // artifact drops hidden files again (pages.yml, include-hidden-files).
-  urls.push(`${SITE}/.well-known/security.txt`, `${SITE}/favicon.ico`);
-  console.log(`Smoke: ${urls.length - 2} URLs from the published sitemap, plus security.txt and favicon.ico.`);
+  // The sitemap index is the URL submitted in Search Console, so it must be published too.
+  urls.push(`${SITE}/.well-known/security.txt`, `${SITE}/favicon.ico`, `${SITE}/sitemap-index.xml`);
+  console.log(`Smoke: ${urls.length - 3} URLs from the published sitemap, plus security.txt, favicon.ico and sitemap-index.xml.`);
 
   const results = await retryFailing(urls, checkUrls, RETRY);
   const bad = results.filter((r) => !r.ok);

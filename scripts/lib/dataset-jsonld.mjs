@@ -1,8 +1,10 @@
 // dataset-jsonld.mjs — the schema.org Dataset block on the home page, for Google Dataset Search.
 //
 // Built from the committed data only, so the build stays byte-stable for a given dataset:
-// - identity (title, abstract, keywords, creator, licence, repository) from CITATION.cff, the file the repository
+// - identity (title, abstract, keywords, licence, repository) from CITATION.cff, the file the repository
 //   already uses to say how the dataset is cited — nothing typed twice;
+// - publisher (Tweakeo, Inc., the LICENSE copyright holder) and creator (Paco Cartones, the GitHub account CITATION.cff
+//   lists) from lib/site-entity.mjs, shared with the WebSite node and every page that names the site or the dataset;
 // - version, dateModified and temporalCoverage from data/providers.json (no clock).
 //
 // Google's Dataset guide (developers.google.com/search/docs/appearance/structured-data/dataset) requires `name` and
@@ -10,6 +12,8 @@
 // articles, not for citing the dataset itself, so no `citation` is emitted: CITATION.cff names no article.
 // The GitHub release assets are not listed as a distribution: a release is published by hand after the version bump is
 // tagged (RELEASING.md), so its download URL can 404 for a while after the site deploys with the new version.
+
+import { entityIds, websiteNode, publisherNode, creatorNode } from './site-entity.mjs';
 
 const unquote = (s) => s.trim().replace(/^"(.*)"$/, '$1').replace(/^'(.*)'$/, '$1');
 
@@ -70,11 +74,11 @@ export function datasetJsonLd({ data, citation, site, asOf }) {
   const c = citation;
   const dates = verifiedDates(data);
   const repo = c['repository-code'];
-  const author = c.author ?? {};
-  const creatorName = author.name ?? ([author['given-names'], author['family-names']].filter(Boolean).join(' ') || author.alias);
+  const ids = entityIds(site);
   const obj = {
     '@context': 'https://schema.org',
     '@type': 'Dataset',
+    '@id': ids.dataset,
     name: 'Free LLM API Hub',
     alternateName: c.title,
     description: c.abstract,
@@ -86,7 +90,9 @@ export function datasetJsonLd({ data, citation, site, asOf }) {
     keywords: [...new Set([...c.keywords, ...MODALITY_KEYWORDS])],
     license: c.license === 'MIT' ? 'https://opensource.org/licenses/MIT' : undefined,
     isAccessibleForFree: true,
-    creator: { '@type': 'Person', name: creatorName, url: author.website },
+    publisher: { '@id': ids.publisher },
+    creator: { '@id': ids.creator },
+    isPartOf: { '@id': ids.website },
     temporalCoverage: dates.length ? `${dates[0]}/${dates[dates.length - 1]}` : undefined,
     variableMeasured: VARIABLES.map(([name, description]) => ({ '@type': 'PropertyValue', name, description })),
     distribution: [
@@ -99,6 +105,21 @@ export function datasetJsonLd({ data, citation, site, asOf }) {
   return JSON.parse(JSON.stringify(obj)); // drops undefined fields
 }
 
+/**
+ * The home page's one JSON-LD block: the Dataset with the WebSite, its publisher and its creator, as a @graph so the
+ * `@id` references resolve inside the block.
+ */
+export function homeJsonLd({ data, citation, site, asOf }) {
+  const { '@context': context, ...dataset } = datasetJsonLd({ data, citation, site, asOf });
+  return {
+    '@context': context,
+    '@graph': [dataset, websiteNode({ site, repo: citation['repository-code'] }), publisherNode(site), creatorNode(site)],
+  };
+}
+
+/** The Dataset node of a block: the block itself, or the Dataset in its @graph. */
+export const datasetNode = (ld) => (ld?.['@graph'] ? ld['@graph'].find((n) => n['@type'] === 'Dataset') : ld);
+
 /** The block as it goes into the page: "<" written as \u003c so data can never close the script element. */
 export const datasetJsonLdScript = (obj) =>
   `<script type="application/ld+json">\n${JSON.stringify(obj, null, 2).replace(/</g, '\\u003c')}\n</script>`;
@@ -107,14 +128,20 @@ export const datasetJsonLdScript = (obj) =>
  * Google's requirements plus our own: a list of errors, empty when the block is valid.
  * `siteFile(url)` returns true when a site URL exists in the build.
  */
-export function datasetJsonLdErrors(obj, { site, siteFile }) {
+export function datasetJsonLdErrors(ld, { site, siteFile }) {
   const errors = [];
-  if (obj?.['@context'] !== 'https://schema.org' || obj?.['@type'] !== 'Dataset') errors.push('not a schema.org Dataset');
+  const obj = datasetNode(ld);
+  if (ld?.['@context'] !== 'https://schema.org' || obj?.['@type'] !== 'Dataset') errors.push('not a schema.org Dataset');
   if (typeof obj?.name !== 'string' || !obj.name.trim()) errors.push('name is required');
   const d = obj?.description;
   if (typeof d !== 'string' || d.length < 50 || d.length > 5000) errors.push('description must be 50–5000 characters');
-  for (const k of ['url', 'sameAs', 'license', 'version', 'dateModified', 'temporalCoverage', 'creator', 'keywords', 'variableMeasured']) {
+  for (const k of ['url', 'sameAs', 'license', 'version', 'dateModified', 'temporalCoverage', 'creator', 'publisher', 'keywords', 'variableMeasured']) {
     if (obj?.[k] === undefined) errors.push(`${k} is missing`);
+  }
+  // In a @graph, creator and publisher may be references: each must point at a node of the block that has a name.
+  for (const k of ['creator', 'publisher']) {
+    const ref = obj?.[k]?.['@id'];
+    if (ref && !obj[k].name && !(ld['@graph'] ?? []).some((n) => n['@id'] === ref && n.name)) errors.push(`${k} ${ref} is not a named node of the block`);
   }
   if (obj?.isAccessibleForFree !== true) errors.push('isAccessibleForFree must be true');
   if (obj?.temporalCoverage && !/^\d{4}-\d{2}-\d{2}\/\d{4}-\d{2}-\d{2}$/.test(obj.temporalCoverage)) errors.push('temporalCoverage must be an ISO 8601 interval');
