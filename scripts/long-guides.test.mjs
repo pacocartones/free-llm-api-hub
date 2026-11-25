@@ -1,4 +1,5 @@
-// The long-form guides under /guides/ (lib/long-guides.mjs): they are built and listed everywhere a guide is (hub,
+// The long-form guides under /guides/ (lib/long-guides.mjs), including the four modality guides: they are built and
+// listed everywhere a guide is (hub,
 // sitemap, llms.txt, OG image), every internal link resolves, the FAQ structured data is the visible text, and every
 // list and number on the page is the one the data gives, so the copy cannot outlive the data.
 import { before, describe, test } from 'node:test';
@@ -10,7 +11,10 @@ import { fileURLToPath } from 'node:url';
 import { privateTree } from './lib/private-tree.mjs';
 import { stripTags } from './lib/escape.mjs';
 import { figureErrors, providerFigures } from './lib/figures.mjs';
-import { LONG_GUIDES, longGuidePage, alternativesSets, noCardNoPhone, productionFigures, NO_FREE_MODEL_CALLS } from './lib/long-guides.mjs';
+import {
+  LONG_GUIDES, longGuidePage, alternativesSets, noCardNoPhone, productionFigures, NO_FREE_MODEL_CALLS,
+  modalitySets, speechMentions, dataUseWords, embeddingModel, embeddingsQuickstartProvider, watermarkSentences, MENTIONS_IMAGE_GENERATION,
+} from './lib/long-guides.mjs';
 
 const REPO = join(dirname(fileURLToPath(import.meta.url)), '..');
 const ROOT = privateTree(REPO);
@@ -213,5 +217,170 @@ describe('the copy follows the data', () => {
     const g = LONG_GUIDES.find((x) => x.slug === 'openai-api-alternatives');
     const without = { ...notFree, entries: notFree.entries.filter((e) => e.id !== 'openai') };
     assert.throws(() => longGuidePage(g, { providers, notFree: without }), /openai/);
+  });
+});
+
+// ---------- the modality guides: embeddings, speech, OCR, image generation ----------
+const MODALITY = [
+  { slug: 'free-embeddings-apis', modality: 'embeddings', label: 'Free embedding APIs compared' },
+  { slug: 'free-speech-to-text-apis', modality: 'audio', label: 'Free speech-to-text and text-to-speech APIs compared' },
+  { slug: 'free-ocr-document-ai-apis', modality: 'ocr', label: 'Free OCR and document-parsing APIs compared' },
+];
+const textOf = (html) => stripTags(withoutScripts(html)).replace(/\s+/g, ' ');
+const answerOf = (html) => stripTags(html.match(/<p class="answer"><strong>([\s\S]*?)<\/strong><\/p>/)[1]).replace(/\s+/g, ' ');
+const faqOf = (html) => graphOf(html).find((n) => n['@type'] === 'FAQPage').mainEntity;
+// The cells of one table's rows, keyed by provider slug.
+const tableRows = (html, label) => {
+  const at = html.indexOf(`aria-label="${label}"`);
+  assert.ok(at >= 0, `table "${label}" is on the page`);
+  const body = html.slice(at, html.indexOf('</tbody>', at));
+  return new Map([...body.matchAll(/<tr>([\s\S]*?)<\/tr>/g)].slice(1).map((m) => {
+    const cells = [...m[1].matchAll(/<td[^>]*>([\s\S]*?)<\/td>/g)].map((c) => c[1]);
+    return [cells[0].match(/\.\.\/p\/([a-z0-9-]+)/)[1], cells];
+  }));
+};
+
+describe('the modality guides', () => {
+  test('each table is every verified provider with that modality, except the entries with no free model calls', () => {
+    const verified = providers.filter((p) => p.verified === true);
+    for (const g of MODALITY) {
+      const html = page(g.slug);
+      const want = verified.filter((p) => (p.modalities || []).includes(g.modality) && !NO_FREE_MODEL_CALLS.includes(p.slug));
+      assert.deepEqual(sorted(tableSlugs(html, g.label)), sorted(want.map((p) => p.slug)), g.slug);
+      // An entry left out for giving no free model calls is named, with its own sentence.
+      for (const p of verified.filter((x) => (x.modalities || []).includes(g.modality) && NO_FREE_MODEL_CALLS.includes(x.slug))) {
+        assert.ok(html.includes(`<a href="../p/${p.slug}">`), `${g.slug}: ${p.slug} is named`);
+      }
+      const parts = longGuidePage(LONG_GUIDES.find((x) => x.slug === g.slug), { providers, notFree });
+      assert.equal(parts.count, want.length);
+      assert.ok(parts.title.includes(`(${want.length}, Checked)`), parts.title);
+      assert.match(parts.metaDesc, new RegExp(`(^|The )${want.length} free `));
+      const answer = answerOf(html);
+      assert.ok(answer.startsWith(`${want.length} of the ${verified.length} verified providers`), answer);
+    }
+  });
+
+  test('image generation: the two tables split the image modality by the entry’s own words, and the title counts the first', () => {
+    const html = page('free-image-generation-apis');
+    const image = providers.filter((p) => p.verified === true && (p.modalities || []).includes('image') && !NO_FREE_MODEL_CALLS.includes(p.slug));
+    const words = (p) => [p.free_tier, p.rate_limits, p.notes, p.best_for, ...(p.models_free || [])].filter(Boolean).join(' ');
+    const gen = image.filter((p) => MENTIONS_IMAGE_GENERATION.test(words(p)));
+    const other = image.filter((p) => !gen.includes(p));
+    assert.deepEqual(sorted(tableSlugs(html, 'Free image generation APIs compared')), sorted(gen.map((p) => p.slug)));
+    assert.deepEqual(sorted(tableSlugs(html, 'Other free image APIs')), sorted(other.map((p) => p.slug)));
+    assert.ok(gen.length > 0, 'some entries name image generation');
+    const s = modalitySets(providers);
+    assert.equal(s.imageGeneration.length + s.imageOther.length, image.length);
+    assert.ok(html.includes(`<title>Free Image Generation APIs (${gen.length}, Checked): Limits and Terms</title>`));
+    assert.ok(answerOf(html).startsWith(`${gen.length} of the `) && answerOf(html).includes(`${other.length} more list the image modality`));
+  });
+
+  test('every row’s card, phone, commercial and data-use cells and its check date are the entry’s', () => {
+    const tables = [...MODALITY, { slug: 'free-image-generation-apis', label: 'Free image generation APIs compared' }, { slug: 'free-image-generation-apis', label: 'Other free image APIs' }];
+    const bySlug = new Map(providers.map((p) => [p.slug, p]));
+    const flag = (v) => (v === false ? 'No' : v === true ? 'Yes' : 'Not confirmed');
+    for (const t of tables) {
+      for (const [slug, cells] of tableRows(page(t.slug), t.label)) {
+        const p = bySlug.get(slug);
+        const [card, commercial, data, checked] = cells.slice(-4);
+        assert.ok(stripTags(card).startsWith(`Card: ${flag(p.card_required)}`), `${slug}: card`);
+        assert.ok(stripTags(card).includes(`Phone: ${flag(p.phone_required)}`), `${slug}: phone`);
+        const c = { true: 'Yes', false: 'No', conditional: 'Conditional' }[String(p.commercial_ok)] || 'Not confirmed';
+        assert.ok(stripTags(commercial).startsWith(c), `${slug}: commercial use`);
+        assert.ok(stripTags(data).replace(/&rsquo;|’/g, '’').startsWith(dataUseWords(p)), `${slug}: data use`);
+        assert.ok(checked.includes(`<time datetime="${p.last_verified}">`), `${slug}: checked date`);
+      }
+    }
+  });
+
+  test('speech: the Covers column and the counts in the answer are read from each entry', () => {
+    const html = page('free-speech-to-text-apis');
+    const list = modalitySets(providers).speech;
+    const rows = tableRows(html, 'Free speech-to-text and text-to-speech APIs compared');
+    for (const p of list) {
+      const m = speechMentions(p);
+      const cell = stripTags(rows.get(p.slug)[1]);
+      assert.equal(cell.includes('speech-to-text'), m.stt, `${p.slug}: speech-to-text`);
+      assert.equal(cell.includes('text-to-speech'), m.tts, `${p.slug}: text-to-speech`);
+      if (!m.stt && !m.tts) assert.ok(cell.includes('Not stated in its entry'), p.slug);
+    }
+    const stt = list.filter((p) => speechMentions(p).stt).length;
+    const tts = list.filter((p) => speechMentions(p).tts).length;
+    const both = list.filter((p) => speechMentions(p).stt && speechMentions(p).tts).length;
+    assert.ok(answerOf(html).includes(`${stt} mention speech-to-text (transcription) and ${tts} text-to-speech; ${both} mention both`), answerOf(html));
+  });
+
+  test('embeddings: the quickstart is the repository’s, with a listed provider’s base URL and one of its free embedding models', () => {
+    const html = page('free-embeddings-apis');
+    const list = modalitySets(providers).embeddings;
+    const qs = embeddingsQuickstartProvider(list);
+    assert.ok(qs, 'a provider qualifies today');
+    const py = html.match(/<pre><code class="language-python">([\s\S]*?)<\/code><\/pre>/)[1].replace(/&quot;/g, '"').replace(/&amp;/g, '&');
+    assert.ok(py.includes(`base_url="${qs.openai_base_url}"`), 'its base URL');
+    assert.ok(py.includes(`model="${embeddingModel(qs)}"`) && (qs.models_free || []).includes(embeddingModel(qs)), 'a free model from its entry');
+    assert.ok(py.includes('client.embeddings.create('), 'an embeddings call');
+    assert.ok(list.includes(qs) && qs.openai_compatible === true && qs.verified === true);
+  });
+
+  test('the gotchas count each unconfirmed flag and quote only the entries’ own watermark sentences', () => {
+    const s = modalitySets(providers);
+    const lists = { 'free-embeddings-apis': s.embeddings, 'free-speech-to-text-apis': s.speech, 'free-ocr-document-ai-apis': s.ocr, 'free-image-generation-apis': s.image };
+    const LABEL = { commercial_ok: 'Commercial use', card_required: 'The card requirement', phone_required: 'The phone requirement' };
+    for (const [slug, list] of Object.entries(lists)) {
+      const text = textOf(page(slug));
+      for (const [field, label] of Object.entries(LABEL)) {
+        const n = list.filter((p) => p[field] == null).length;
+        if (n) assert.ok(text.includes(`${label} isn’t confirmed for ${n} of ${list.length}:`), `${slug}: ${field}`);
+        else assert.ok(!text.includes(`${label} isn’t confirmed`), `${slug}: ${field} has no unknowns`);
+      }
+      const noPolicy = list.filter((p) => !p.data_policy).length;
+      if (noPolicy) assert.ok(text.includes(`No quoted data policy is recorded for ${noPolicy} of ${list.length}:`), `${slug}: data policy`);
+      for (const p of list) {
+        for (const sentence of watermarkSentences(p)) assert.ok(`${p.free_tier} ${p.notes}`.includes(sentence), `${p.slug}: quoted as written`);
+      }
+    }
+  });
+
+  test('every FAQ answer that counts or names providers says what the data says', () => {
+    const s = modalitySets(providers);
+    const count = (list, f) => list.filter(f).length;
+    const commercial = (list) => count(list, (p) => p.commercial_ok === true);
+    const answer = (slug, q) => faqOf(page(slug)).find((x) => x.name === q).acceptedAnswer.text;
+    assert.ok(answer('free-embeddings-apis', 'Is there a free embedding API?').startsWith(`Yes. ${s.embeddings.length} of the ${s.verified} verified providers`));
+    assert.ok(answer('free-embeddings-apis', 'Can I use a free embedding API commercially?').startsWith(`${commercial(s.embeddings)} of the ${s.embeddings.length}`));
+    assert.ok(answer('free-ocr-document-ai-apis', 'Can I use a free OCR API commercially?').startsWith(`${commercial(s.ocr)} of the ${s.ocr.length}`));
+    assert.ok(answer('free-image-generation-apis', 'Can I use free AI-generated images commercially?').includes(`${commercial(s.imageGeneration)} of the ${s.imageGeneration.length}`));
+    const tts = s.speech.filter((p) => speechMentions(p).tts);
+    assert.ok(answer('free-speech-to-text-apis', 'Can I use free text-to-speech voices commercially?').startsWith(`Of the ${tts.length} entries that mention text-to-speech, ${commercial(tts)} allow`));
+    for (const p of s.ocr.filter((x) => x.card_required === false)) assert.ok(answer('free-ocr-document-ai-apis', 'Which free OCR API needs no credit card?').includes(p.name.replace(/&/g, '&amp;')), p.slug);
+    for (const p of s.imageGeneration.filter((x) => x.anonymous_access)) assert.ok(answer('free-image-generation-apis', 'Is there a free image generation API?').includes(p.name.replace(/&/g, '&amp;')), p.slug);
+  });
+
+  test('each links to its provider pages, a collection, /compare/ and /not-free/', () => {
+    for (const slug of ['free-embeddings-apis', 'free-speech-to-text-apis', 'free-ocr-document-ai-apis', 'free-image-generation-apis']) {
+      const html = page(slug);
+      assert.match(html, /href="\.\.\/p\/[a-z0-9-]+"/, `${slug}: provider pages`);
+      assert.match(html, /href="\.\.\/collections\/[a-z-]+"/, `${slug}: a collection`);
+      assert.match(html, /href="\.\.\/compare\/\?compare=[a-z0-9-]+,[a-z0-9-]+"/, `${slug}: a comparison`);
+      assert.ok(html.includes('href="../not-free/"'), `${slug}: /not-free/`);
+    }
+  });
+
+  test('removing a provider and flipping its flags changes the modality guides', () => {
+    const guide = (slug) => LONG_GUIDES.find((g) => g.slug === slug);
+    const render = (list) => Object.fromEntries(MODALITY.map((g) => g.slug).concat('free-image-generation-apis').map((slug) => [slug, longGuidePage(guide(slug), { providers: list, notFree })]));
+    const base = render(providers);
+    const changed = providers
+      .filter((p) => p.slug !== 'jina-ai')
+      .map((p) => (p.slug === 'ocr-space' ? { ...p, commercial_ok: false, notes: `${p.notes} Free output is watermarked.` } : p));
+    const next = render(changed);
+    assert.equal(next['free-embeddings-apis'].count, base['free-embeddings-apis'].count - 1);
+    assert.ok(!next['free-embeddings-apis'].body.includes('../p/jina-ai"'));
+    assert.ok(next['free-embeddings-apis'].title.includes(`(${base['free-embeddings-apis'].count - 1}, Checked)`));
+    const ocr = next['free-ocr-document-ai-apis'];
+    const faq = ocr.faq.find((f) => f.q === 'Can I use a free OCR API commercially?').a;
+    assert.match(faq, /OCR\.space doesn’t\./);
+    assert.ok(ocr.faq.find((f) => f.q === 'Does free OCR add a watermark?').a.includes('OCR.space'));
+    assert.notEqual(ocr.body, base['free-ocr-document-ai-apis'].body);
   });
 });
