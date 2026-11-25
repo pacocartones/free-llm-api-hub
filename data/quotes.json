@@ -1040,6 +1040,64 @@
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "2dd683f357d3dfdc36626bec354a421fc02ec2ec1977bf8da66de798d2be30a5"
+  },
+  {
+   "id": "inception.sentence",
+   "slug": "inception",
+   "kind": "sentence",
+   "text": "we may use User Submissions to provide and maintain our Services, comply with applicable law, enforce our terms and policies, and train our models.",
+   "source_url": "https://www.inceptionlabs.ai/docs/terms-of-use",
+   "read_on": "2026-11-25",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "29a3bc3e0a9cd6a667346ba8935f73d714567e87bedf29b7c745e51096350060"
+  },
+  {
+   "id": "inception.card_required.sentence",
+   "slug": "inception",
+   "kind": "field_sentence",
+   "field": "card_required",
+   "text": "Every new account includes 100 million free tokens — no payment details required.",
+   "source_url": "https://docs.inceptionlabs.ai/get-started",
+   "read_on": "2026-11-25",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "2601d939c7a894e11385498a6d254fb0438d8ef62b6bfa4f19cc1a9ed356459d"
+  },
+  {
+   "id": "aion-labs.sentence",
+   "slug": "aion-labs",
+   "kind": "sentence",
+   "text": "the prompts you send through the API or browser chat and the responses you receive are processed to generate the response and returned to you. We do not store them.",
+   "source_url": "https://www.aionlabs.ai/privacy/",
+   "read_on": "2026-11-25",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "209753b06b05289bb6bca30bef191fe33c27e5825d019ace8f64478c87ae492f"
+  },
+  {
+   "id": "aion-labs.card_required.sentence",
+   "slug": "aion-labs",
+   "kind": "field_sentence",
+   "field": "card_required",
+   "text": "Free-tier API keys are activated by verifying a payment card on the Billing page of your dashboard.",
+   "source_url": "https://www.aionlabs.ai/docs/rate-limits/",
+   "read_on": "2026-11-25",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "02fcc85088207f38488fcbd13f8ecea3ac5a9c5f974ec51ddc32115e881ace7d"
+  },
+  {
+   "id": "aion-labs.commercial_ok.sentence",
+   "slug": "aion-labs",
+   "kind": "field_sentence",
+   "field": "commercial_ok",
+   "text": "You may use the Service for any lawful purpose, including commercially — building products on the API, serving your own users and reselling access to the models through a product or API of your own, including an API gateway or model marketplace, as long as your customers authenticate with credentials you issue and are billed by you.",
+   "source_url": "https://www.aionlabs.ai/terms/",
+   "read_on": "2026-11-25",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "1947fa93108fe60af1381216110156c93d996ac6516ec21c7e70deedbbe736a0"
   }
  ]
 }
