@@ -6,6 +6,7 @@ const verifiedOnly = (filter) => (p) => p.verified === true && filter(p);
 export const COLLECTIONS = [
   { slug: 'no-credit-card', ogTitle: 'Free LLM APIs · no credit card', filter: verifiedOnly((p) => p.card_required === false) },
   { slug: 'no-phone', ogTitle: 'Free LLM APIs · no phone', filter: verifiedOnly((p) => p.phone_required === false) },
+  { slug: 'anonymous-access', ogTitle: 'Free AI APIs · no account needed', filter: verifiedOnly((p) => p.anonymous_access != null) },
   { slug: 'commercial-use', ogTitle: 'Free LLM APIs · commercial use', filter: verifiedOnly((p) => p.commercial_ok === true) },
   { slug: 'openai-compatible', ogTitle: 'OpenAI-compatible free APIs', filter: verifiedOnly((p) => p.openai_compatible === true) },
   { slug: 'always-free', ogTitle: 'Permanently free LLM APIs', filter: verifiedOnly((p) => p.free_type === 'perpetual') },

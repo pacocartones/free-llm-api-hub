@@ -87,13 +87,13 @@ test('every guide links to its twin collection when a collection points to it', 
   assert.ok(generated === null || /^\d{4}-\d{2}-\d{2}$/.test(generated));
 });
 
-// ---- the seven collections and the hub ----
+// ---- the ten collections and the hub ----
 const readColl = (slug) => readFileSync(join(ROOT, 'site/collections', `${slug}.html`), 'utf8');
 const colls = () => readdirSync(join(ROOT, 'site/collections')).filter((f) => f.endsWith('.html') && f !== 'index.html').map((f) => f.replace(/\.html$/, ''));
 
 test('every collection opens with a direct answer of 40 to 55 words and a meta description that start from its live count', () => {
   const slugs = colls();
-  assert.equal(slugs.length, 9);
+  assert.equal(slugs.length, 10);
   for (const slug of slugs) {
     const html = readColl(slug);
     const a = html.match(/<p class="answer"><strong>([^<]*)<\/strong><\/p>/);
@@ -140,7 +140,7 @@ test('a provider named in a collection text is a row of that collection table', 
   }
 });
 
-test('the hub has a direct answer, a title and a description from its live counts, and CollectionPage, BreadcrumbList and FAQPage that list all eighteen pages', () => {
+test('the hub has a direct answer, a title and a description from its live counts, and CollectionPage, BreadcrumbList and FAQPage that list all nineteen pages', () => {
   const html = readFileSync(join(ROOT, 'site/guides-and-collections/index.html'), 'utf8');
   const a = stripTags(html.match(/<p class="answer"><strong>([^<]*)<\/strong><\/p>/)[1]);
   assert.ok(words(a) >= 40 && words(a) <= 55, `${words(a)} words`);
@@ -151,7 +151,7 @@ test('the hub has a direct answer, a title and a description from its live count
   assert.ok(title.length <= 60, `title ${title.length} characters`);
   const graph = jsonld(html)['@graph'];
   const page = graph.find((g) => g['@type'] === 'CollectionPage');
-  assert.equal(page.mainEntity.itemListElement.length, 18);
+  assert.equal(page.mainEntity.itemListElement.length, 19);
   for (const e of page.mainEntity.itemListElement) {
     const path = e.url.replace('https://freellmapihub.com/', '');
     const file = path.startsWith('guides/') ? `site/${path}.html` : `site/${path}.html`;

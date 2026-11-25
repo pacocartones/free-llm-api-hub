@@ -36,6 +36,7 @@ Descriptions are copied from each property itself. â€œNo description in schema.â
 | `model_tier_source` | object | Yes | Conditional | No additional properties | Where model_tier comes from: the provider's model, the exact row of the LMArena Arena Leaderboard Dataset (CC-BY-4.0) it maps to, and that row's rating and vote count at the snapshot date. |
 | `free_limits` | object | Yes | No | Min properties: 3; No additional properties | Numeric free limits exactly as the provider publishes them. Null when the provider publishes none; never estimated or converted between units. scope says which models, plan or condition the numbers apply to. |
 | `no_expiry` | object | Yes | No | No additional properties | Present only on a one-time trial credit whose provider says in its own words that the credit does not expire. Null (or absent) means the provider says nothing. expires stays null when this is set; it never carries a literal. |
+| `anonymous_access` | object | Yes | No | No additional properties | Present only when the provider's own page says its API can be called with no account: an anonymous endpoint or a shared public key. Null (or absent) means the provider's pages do not say so, never that an account is required. |
 | `data_policy` | object | Yes | No | No additional properties | What the provider itself says about your prompts on this free access: whether it trains on them and how long it keeps them. Absent or null means nobody has recorded it, never that the answer is no. At least one of trains_on_prompts and retention is set; a part the provider does not state stays null. |
 | `field_checks` | object | No | No | Min properties: 1; No additional properties | Why a tri-state flag holds its value: the official pages read, the day, and what they said. A flag with no entry here has no recorded check (not_checked), which is never 'no'. |
 | `published_speed` | array | No | No | Min items: 1; max items: 12; Items: object (No additional properties) | Speed figures the provider publishes for models of its free sample, each with the provider's page, the day it was read and its words. Provider claims, not measurements: figures from different providers are not a like-for-like comparison. Absent = not published or not recorded, never 'slow'. |
@@ -80,6 +81,15 @@ Descriptions are copied from each property itself. â€œNo description in schema.â
 | `no_expiry.source` | string | No | Yes | Format: <code>uri</code> | The provider's own page that says it. |
 | `no_expiry.checked` | string | No | Yes | Format: <code>date</code> | The day the passage was read on that page. |
 | `no_expiry.quote` | string | No | Yes | Min length: 1; max length: 300 | The passage, as the page words it (a sentence, not a paragraph). |
+
+## <code>anonymous_access</code>
+
+| Field | Type (excluding null) | Nullable | Required | Allowed values / constraints | Description |
+| --- | --- | --- | --- | --- | --- |
+| `anonymous_access.source` | string | No | Yes | Format: <code>uri</code> | The provider's own page that says it. |
+| `anonymous_access.checked` | string | No | Yes | Format: <code>date</code> | The day the passage was read on that page. |
+| `anonymous_access.quote` | string | No | Yes | Min length: 1; max length: 300 | The passage, as the page words it (a sentence, not a paragraph). |
+| `anonymous_access.note` | string | Yes | No | Min length: 1; max length: 300 | A condition or caveat the provider's pages attach to anonymous use (lower priority, a per-IP limit, a contradicting sentence), in plain words. Not an interpretation. |
 
 ## <code>data_policy</code>
 

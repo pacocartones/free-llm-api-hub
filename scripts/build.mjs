@@ -174,6 +174,24 @@ const COLLECTION_COPY = [
     ],
   },
   {
+    slug: 'anonymous-access',
+    answer: '{n} of {total} tracked providers say on their own pages that their API can be called with no account, through an anonymous endpoint or a shared key. Anonymous use has the tightest limits and lowest priority, and each row quotes the sentence it rests on. Providers whose pages do not say so are left out.',
+    metaDesc: '{n} AI APIs whose own pages say they can be called with no account: anonymous endpoint or shared key, each with the quoted sentence. Dataset of {date}.',
+    title: 'Free AI APIs with no account needed',
+    h1: 'Free AI APIs you can call with no account',
+    desc: 'APIs whose own pages say they work with no account at all: an anonymous endpoint or a shared public key. Each row quotes the provider. A live slice of a verified dataset.',
+    intro: 'Providers whose **own page says the API can be called with no account** (`anonymous_access`: the page, the day it was read and the sentence). Expect the lowest limits and queue priority. A provider whose pages do not say it is not listed, which never means it needs an account.',
+    header: 'Each row ends with the provider’s own sentence about anonymous access and any condition its pages attach to it.',
+    rowMark: (p) => anonMark(p.anonymous_access),
+    guides: ['free-llm-api-no-signup'],
+    faq: [
+      { q: 'Can I call an AI API with no account at all?', a: 'Yes, a few providers allow it, according to their own pages: each row on this page quotes the sentence and the day it was read. Anonymous use has the tightest limits and the lowest priority.' },
+      { q: 'Is anonymous access the same as no signup form?', a: 'No. Most providers with no card and no phone still ask for an email or a sign-in; those are in the no-card and no-phone collections. This page lists only APIs that work with no account.' },
+      { q: 'How often does this list change?', a: 'It is a live filter of the dataset: it is regenerated whenever the dataset changes, and every row shows the day its source was read.' },
+      { q: 'How do I report a mistake?', a: 'Open an issue on GitHub with the row and the evidence; the maintainers re-read the provider’s own page.' },
+    ],
+  },
+  {
     slug: 'commercial-use',
     answer: '{n} of {total} tracked free tiers say commercial or production use is allowed, according to each provider’s own terms. Evaluation-only tiers are left out, and so is any tier whose terms do not say. Confirm with the provider before you launch.',
     metaDesc: '{n} free LLM API tiers that allow production use, checked against each provider’s terms. Dataset of {date}.',
@@ -489,6 +507,13 @@ function planMark(dp) {
   return 'plan: not checked yet';
 }
 
+// The row mark of an anonymous_access row: the provider's own sentence, its reading date and any condition, as plain text
+// (both table renderers escape it).
+function anonMark(aa) {
+  if (!aa) return '';
+  return `“${aa.quote}” (read ${aa.checked})${aa.note ? ` — ${aa.note}` : ''}`;
+}
+
 function collectionTableMd(rows, opts = {}) {
   const bu = opts.baseUrl;
   const head = bu
@@ -497,7 +522,7 @@ function collectionTableMd(rows, opts = {}) {
   const body = rows
     .map((p) => {
       const col2 = bu ? (p.openai_base_url ? `\`${esc(p.openai_base_url)}\`` : '_see docs_') : typeLabel(p);
-      const mark = opts.rowMark ? `<br>_${opts.rowMark(p)}_` : '';
+      const mark = opts.rowMark ? `<br>_${esc(opts.rowMark(p))}_` : '';
       return `| ${nameCell(p)}${mark} | ${col2} | ${esc(p.free_tier)} | ${esc(p.notes)} | ${verifiedCell(p)} |`;
     })
     .join('\n');
@@ -743,6 +768,7 @@ function inject(md, name, content) {
 const BLURB = {
   'no-credit-card': 'start without a payment method',
   'no-phone': 'no SMS/phone verification',
+  'anonymous-access': 'call the API with no account at all',
   'commercial-use': 'safe to ship, not eval-only',
   'openai-compatible': 'drop-in OpenAI SDK swap',
   'always-free': '$0 models, no trial clock',
