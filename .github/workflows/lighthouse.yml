@@ -11,7 +11,9 @@ name: Lighthouse
 # and /guides/free-image-generation-apis.html, plus one model page under /models/
 # (the indexable one listed by the most providers). The thresholds are in
 # scripts/lib/lighthouse-gate.mjs: accessibility at least 0.95 with no new or
-# unscored accessibility audit, SEO exactly 1, performance at least 0.80.
+# unscored accessibility audit, SEO exactly 1, performance at least 0.80. Every run
+# also checks each page's font budget (FONT_BUDGET_BYTES in scripts/lib/assets.mjs:
+# 90 KB for the Roboto Flex and DM Mono files a page declares).
 #
 # The work is split by how stable each category is on a shared runner:
 #   - Pull requests: accessibility and SEO, one run per page. Both are

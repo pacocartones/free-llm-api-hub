@@ -1,83 +1,113 @@
-/* Free LLM API Hub — design system. Terminal-dev identity: emerald signal on near-black,
-   mono-forward typography (self-hosted JetBrains Mono), modern developer-tool layout. */
+/* Free LLM API Hub — design system. Brand direction H1 "Fingerprint + Receipts": white or near-black grounds, one hue
+   per modality (graphic fill only, never text), a magenta brand accent, Roboto Flex (variable) for display and text and
+   DM Mono for data. Every colour a component reads is a semantic token below; the contrast tests in
+   scripts/build.test.mjs walk them in both themes. */
 
-/* The JetBrains Mono font faces are declared in each page's <head> (scripts/lib/assets.mjs: preloaded, font-display: optional). */
+/* The font faces (Roboto Flex, DM Mono) are declared in each page's <head> (scripts/lib/assets.mjs: preloaded, font-display: optional). */
 
 /* ---------- tokens ---------- */
+/* :root holds the dark values and [data-theme="light"] the light ones. Light is the default: the theme guard in the
+   <head> picks dark only when the visitor's system asks for it (prefers-color-scheme) or they chose it with the toggle. */
 :root {
   --t-fast: 120ms; --t-base: 200ms; --t-slow: 320ms; --ease: cubic-bezier(.2, .8, .2, 1);
-  --bg: #0a0d0b;
-  --bg-elev: #0c100e;
-  --panel: #0f1512;
-  --panel-2: #131b17;
-  --border: #1d2a22;
-  --border-strong: #2a3c31;
-  --control: #5f7a6b; /* control borders: >= 3:1 against panel-2 (WCAG 1.4.11) */
+  --bg: #0e0e11;
+  --bg-elev: #121216;
+  --panel: #18181d;
+  --panel-2: #1f1f25;
+  --border: #2a2a31;
+  --border-strong: #3a3a43;
+  --control: #71727c; /* control borders: >= 3:1 against panel-2 (WCAG 1.4.11) */
   --control-border: var(--control); /* legacy name: lib/consent.client.js reads it */
-  --text: #d8e2dc;
-  --muted: #96a49b;
-  --faint: #7f8f85; /* >= 5:1 on bg, panel and panel-2 (was 4.09-4.56) */
-  --accent: #3fce8f;
-  --accent-dim: #2aa876;
-  --accent-ink: #05140c;
+  --text: #f3f3f5;
+  --muted: #a6a7b0;
+  --faint: #9a9ba4; /* >= 5:1 on bg, panel and panel-2 */
+  --accent: #ff6b9a; /* brand magenta */
+  --accent-dim: #ff8db2; /* also the accent as TEXT on an accent tint (chips, badges): >= 4.5:1 there */
+  --accent-ink: #0e0e11;
   /* Semantic tokens: components read these, never a raw colour, so a new brand only changes values here.
      ok = confirmed good / fresh, unk = not confirmed / due, bad = confirmed bad / stale, chg = a change in the record,
      trial = the trial-credit category, m-* = one per modality in data/schema.json. Text-bearing ones are checked
      for contrast on bg, panel and panel-2 in both themes by scripts/build.test.mjs. */
-  --ok: #3fce8f;
-  --unk: #e0b24a;
-  --bad: #f2603f;
-  --chg: var(--accent);
-  --trial: var(--muted);
-  --m-text: var(--accent);
-  --m-vision: var(--accent);
-  --m-image: var(--accent);
-  --m-audio: var(--accent);
-  --m-embeddings: var(--accent);
-  --m-rerank: var(--accent);
-  --m-ocr: var(--accent);
+  --ok: #4fd08a;
+  --unk: #f0ba4e;
+  --bad: #ff7a7a;
+  --chg: #8c9eff;
+  --trial: #55c8d4;
+  /* m-*: the modality as TEXT (a label, a chip). Lightened or darkened from the hue so it reaches 4.5:1. */
+  --m-text: #a594ff;
+  --m-vision: #3fd0ee;
+  --m-image: #ff7fb4;
+  --m-audio: #ffb547;
+  --m-embeddings: #4fd08a;
+  --m-rerank: #8cb4ff;
+  --m-ocr: #ff9a5c;
+  /* h-*: the modality as a graphic FILL (aura sectors, dots). The same in both themes and never used for text: it
+     always sits next to the modality's name, so it never carries meaning on its own (WCAG 1.4.1). */
+  --h-text: #7c5cff;
+  --h-vision: #00c2e0;
+  --h-image: #ff4f8b;
+  --h-audio: #ffa31a;
+  --h-embeddings: #2bc48a;
+  --h-rerank: #4c8dff;
+  --h-ocr: #ff7a3d;
   /* Legacy names, kept as aliases. */
   --green: var(--ok);
   --warn: var(--unk);
   --red: var(--bad);
   --shadow-sm: 0 1px 2px rgba(0,0,0,.4);
   --shadow-md: 0 10px 34px rgba(0,0,0,.45);
-  --glow: 0 0 0 1px rgba(63,206,143,.14);
-  --header-bg: rgba(5,7,6,.97);
-  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
-  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, Roboto, Helvetica, Arial, sans-serif;
+  --glow: 0 0 0 1px rgba(255,107,154,.18);
+  --header-bg: rgba(14,14,17,.97);
+  --font-display: 'Roboto Flex', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-sans: 'Roboto Flex', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: 'DM Mono', ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
   --header-h: 60px;
-  /* The header bar is green in both themes; white on #0b5d38 is 7.96:1, the muted text 6.15:1 (scripts/build.test.mjs checks them). */
-  --header-bar: #0b5d38;
-  --on-header: #ffffff;
-  --on-header-muted: #d6e6dd;
-  --on-header-accent: #b8f5d6;
-  --on-header-line: rgba(255, 255, 255, .34);
-  --on-header-hover: rgba(255, 255, 255, .14);
+  /* The header sits on the page ground with a hairline under it (no coloured bar); scripts/build.test.mjs checks its text in both themes. */
+  --header-bar: #0e0e11;
+  --on-header: #f3f3f5;
+  --on-header-muted: #a6a7b0;
+  --on-header-accent: #ff6b9a;
+  --on-header-line: #2a2a31;
+  --on-header-hover: rgba(255, 255, 255, .07);
   --radius: 10px;
 }
 [data-theme="light"] {
-  --bg: #f6f8f6;
-  --bg-elev: #eef2ef;
+  --bg: #fafafa;
+  --bg-elev: #f4f4f6;
   --panel: #ffffff;
-  --panel-2: #eef3f0;
-  --border: #dde5e0;
-  --border-strong: #c3cfc8;
-  --control: #76887e; /* control borders: >= 3:1 against panel-2 (WCAG 1.4.11) */
+  --panel-2: #f1f1f4;
+  --border: #e6e6ea;
+  --border-strong: #d0d0d6;
+  --control: #85868f; /* control borders: >= 3:1 against panel-2 (WCAG 1.4.11) */
   --control-border: var(--control); /* legacy name: lib/consent.client.js reads it */
-  --text: #0e1a13;
-  --muted: #46584e;
-  --faint: #566860;
-  --accent: #0b7040;
-  --accent-dim: #095a33;
+  --text: #0f0f12;
+  --muted: #55565e;
+  --faint: #5c5d66;
+  --accent: #c2255c;
+  --accent-dim: #a11e4c;
   --accent-ink: #ffffff;
-  --ok: #0b7040;
-  --unk: #7d540d;
-  --bad: #b8321c;
-  --shadow-sm: 0 1px 2px rgba(14,26,19,.06);
-  --shadow-md: 0 12px 34px rgba(14,26,19,.10);
-  --glow: 0 0 0 1px rgba(15,138,80,.16);
-  --header-bg: rgba(233,239,235,.97);
+  --ok: #1b7a44;
+  --unk: #8a5700;
+  --bad: #c0262d;
+  --chg: #3550e8;
+  --trial: #0a6a75;
+  --m-text: #5b3fe0;
+  --m-vision: #006f88;
+  --m-image: #b01d63;
+  --m-audio: #8a5200;
+  --m-embeddings: #0f7445;
+  --m-rerank: #1f5fc4;
+  --m-ocr: #a3420c;
+  --shadow-sm: 0 1px 2px rgba(15,15,18,.06);
+  --shadow-md: 0 12px 34px rgba(15,15,18,.10);
+  --glow: 0 0 0 1px rgba(194,37,92,.16);
+  --header-bg: rgba(250,250,250,.97);
+  --header-bar: #fafafa;
+  --on-header: #0f0f12;
+  --on-header-muted: #55565e;
+  --on-header-accent: #c2255c;
+  --on-header-line: #e6e6ea;
+  --on-header-hover: rgba(15, 15, 18, .06);
 }
 
 /* ---------- base ---------- */
@@ -87,8 +117,13 @@ body {
   margin: 0; background: var(--bg); color: var(--text);
   font-family: var(--font-sans); line-height: 1.6;
   -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
+  /* DM Mono ships 400 and 500 only: a bold request uses the 500 face instead of a smeared fake bold. */
+  font-synthesis: style;
 }
-h1, h2, h3, .mono { font-family: var(--font-mono); font-weight: 700; letter-spacing: -.01em; }
+/* Display: Roboto Flex, narrowed and tightened as it grows (the variable wdth axis). */
+h1, h2, h3 { font-family: var(--font-display); font-weight: 750; font-stretch: 88%; letter-spacing: -.02em; }
+h1 { font-weight: 800; font-stretch: 80%; letter-spacing: -.03em; }
+.mono { font-family: var(--font-mono); font-weight: 500; }
 a { color: var(--accent); text-decoration: none; }
 a:hover { text-decoration: underline; }
 /* A link inside running text must not rest on colour alone (WCAG 1.4.1; axe link-in-text-block: the accent against the body text is 1.2:1). */
@@ -108,7 +143,7 @@ svg.i { width: 15px; height: 15px; flex: none; vertical-align: -2px; }
 
 /* ---------- logo ---------- */
 .logo-mark { display: block; width: 30px; height: 30px; flex: none; color: var(--accent); --logo-ink: var(--bg); transition: transform .15s ease; }
-.site-header .logo-mark { color: var(--on-header-accent); --logo-ink: #0a0d0b; }
+.site-header .logo-mark { color: var(--on-header-accent); --logo-ink: var(--header-bar); }
 .logo-mark.lg { width: 58px; height: 58px; }
 .brand:hover .logo-mark, .hero-logo:hover .logo-mark, .foot-logo:hover .logo-mark { transform: translateY(-2px); }
 
@@ -116,19 +151,19 @@ svg.i { width: 15px; height: 15px; flex: none; vertical-align: -2px; }
 .site-header {
   position: sticky; top: 0; z-index: 50; height: var(--header-h);
   background: var(--header-bar);
-  border-bottom: 1px solid rgba(0, 0, 0, .28);
+  border-bottom: 1px solid var(--on-header-line);
 }
 .site-header .brand { color: var(--on-header); }
 .site-header .brand .grad { color: var(--on-header-accent); }
 .site-header .icon-btn { background: var(--on-header-hover); border-color: var(--on-header-line); color: var(--on-header); }
-.site-header .icon-btn:hover { background: rgba(255, 255, 255, .24); border-color: var(--on-header); color: var(--on-header); }
+.site-header .icon-btn:hover { background: var(--on-header-hover); border-color: var(--on-header); color: var(--on-header); }
 .site-header .icon-btn .star-count, .site-header .icon-btn:hover .star-count { color: var(--on-header); }
 .header-inner { height: var(--header-h); display: flex; align-items: center; gap: 22px; }
 .brand { display: inline-flex; align-items: center; gap: 10px; color: var(--text); }
 .brand:hover { text-decoration: none; }
-.brand-name { font-family: var(--font-mono); font-weight: 700; font-size: .98rem; white-space: nowrap; letter-spacing: -.02em; }
+.brand-name { font-family: var(--font-display); font-weight: 650; font-stretch: 112%; font-size: 1rem; white-space: nowrap; letter-spacing: -.01em; }
 .nav { display: flex; gap: 4px; margin-left: 6px; }
-.nav a { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; color: var(--muted); font-size: .88rem; font-family: var(--font-mono); font-weight: 500; padding: 6px 10px; border-radius: 7px; }
+.nav a { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; color: var(--muted); font-size: .88rem; font-family: var(--font-sans); font-weight: 500; padding: 6px 10px; border-radius: 7px; }
 .nav a svg.i { width: 14px; height: 14px; opacity: .8; }
 .nav a:hover svg.i { opacity: 1; }
 .nav a:hover { color: var(--text); background: var(--panel); text-decoration: none; }
@@ -138,12 +173,12 @@ svg.i { width: 15px; height: 15px; flex: none; vertical-align: -2px; }
 .nav a.nav-best {
   position: relative; overflow: hidden; color: var(--accent); font-weight: 700;
   border: 1px solid transparent; border-radius: 999px; padding: 5px 13px;
-  background: linear-gradient(var(--bg), var(--bg)) padding-box, linear-gradient(120deg, var(--accent), #e9b44c) border-box;
+  background: linear-gradient(var(--bg), var(--bg)) padding-box, linear-gradient(120deg, var(--accent), var(--h-audio)) border-box;
 }
 .nav a.nav-best svg.i { opacity: 1; transition: transform .3s cubic-bezier(.2, .8, .2, 1); }
 .nav a.nav-best:hover {
   color: var(--accent); box-shadow: var(--glow);
-  background: linear-gradient(var(--bg), var(--bg)) padding-box, linear-gradient(120deg, #e9b44c, var(--accent)) border-box;
+  background: linear-gradient(var(--bg), var(--bg)) padding-box, linear-gradient(120deg, var(--h-audio), var(--accent)) border-box;
 }
 @media (hover: hover) { .nav a.nav-best:hover svg.i { transform: rotate(20deg) scale(1.1); } }
 @media (prefers-reduced-motion: no-preference) {
@@ -160,7 +195,7 @@ svg.i { width: 15px; height: 15px; flex: none; vertical-align: -2px; }
 .nav-group { position: relative; }
 .nav-group > summary {
   display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; cursor: pointer; list-style: none;
-  color: var(--muted); font-size: .88rem; font-family: var(--font-mono); font-weight: 500; padding: 6px 10px; border-radius: 7px;
+  color: var(--muted); font-size: .88rem; font-family: var(--font-sans); font-weight: 500; padding: 6px 10px; border-radius: 7px;
 }
 .nav-group > summary::-webkit-details-marker { display: none; }
 .nav-group > summary::after { content: "▾"; font-size: .75em; opacity: .8; }
@@ -316,7 +351,7 @@ h1 { font-size: clamp(1.9rem, 4.4vw, 3rem); line-height: 1.1; margin: 0 auto 18p
 .chip { position: relative; }
 .chip input { position: absolute; opacity: 0; width: 100%; height: 100%; inset: 0; margin: 0; cursor: pointer; }
 .chip:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
-.chip.on { background: color-mix(in srgb, var(--accent) 14%, transparent); border-color: var(--accent); color: var(--accent); }
+.chip.on { background: color-mix(in srgb, var(--accent) 14%, transparent); border-color: var(--accent); color: var(--accent-dim); }
 .clear-btn { background: transparent; border: 1px solid var(--control); color: var(--muted); padding: 7px 11px; border-radius: 7px; cursor: pointer; font-size: .8rem; font-weight: 600; font-family: var(--font-mono); }
 .clear-btn:hover { border-color: var(--bad); color: var(--bad); }
 
@@ -325,7 +360,7 @@ h1 { font-size: clamp(1.9rem, 4.4vw, 3rem); line-height: 1.1; margin: 0 auto 18p
 .presets-label { font-family: var(--font-mono); font-size: .72rem; color: var(--faint); text-transform: uppercase; letter-spacing: .06em; }
 .presets button { background: var(--panel-2); border: 1px solid var(--border); color: var(--muted); padding: 5px 11px; border-radius: 999px; cursor: pointer; font-size: .8rem; font-family: var(--font-mono); transition: border-color .12s, color .12s, background .12s; }
 .presets button:hover { border-color: var(--accent); color: var(--accent); }
-.presets button.active { background: color-mix(in srgb, var(--accent) 16%, transparent); border-color: var(--accent); color: var(--accent); }
+.presets button.active { background: color-mix(in srgb, var(--accent) 16%, transparent); border-color: var(--accent); color: var(--accent-dim); }
 
 /* ---------- table ---------- */
 main { padding: 24px 0 80px; }
@@ -370,7 +405,7 @@ tbody tr:hover { background: var(--panel); }
 /* The provider name looks like a link-button (a faint frame and an arrow); the whole row is highlighted on hover and on keyboard focus. */
 .name a.name-link { display: inline-flex; align-items: center; gap: 4px; padding: 2px 9px; border-radius: 7px; border: 1px solid color-mix(in srgb, var(--accent) 30%, var(--border)); background: color-mix(in srgb, var(--accent) 6%, transparent); }
 .name a.name-link .name-go { opacity: .7; }
-.name a.name-link:hover, #table tbody tr:hover .name-link, #table tbody tr:focus-within .name-link { color: var(--accent); border-color: var(--accent); background: color-mix(in srgb, var(--accent) 14%, transparent); }
+.name a.name-link:hover, #table tbody tr:hover .name-link, #table tbody tr:focus-within .name-link { color: var(--accent-dim); border-color: var(--accent); background: color-mix(in srgb, var(--accent) 14%, transparent); }
 .catch-tag { display: inline-block; margin: 0 4px 4px 0; padding: 1px 7px; border-radius: 6px; font-size: .7rem; font-family: var(--font-mono); color: var(--text); border: 1px solid color-mix(in srgb, var(--unk) 45%, transparent); background: color-mix(in srgb, var(--unk) 12%, transparent); }
 .catch-more { font-size: .78rem; font-family: var(--font-mono); white-space: nowrap; }
 /* keyboard row navigation (#174): the focused row gets the same accent ring as every other focusable control */
@@ -383,7 +418,7 @@ table.sortable thead th:not(.sorted)::after { content: " ⇅"; opacity: .28; fon
 .mods { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
 .mods span { font-size: .66rem; color: var(--muted); background: var(--panel-2); border: 1px solid var(--border); border-radius: 4px; padding: 1px 6px; font-family: var(--font-mono); text-transform: uppercase; letter-spacing: .03em; }
 .badge { display: inline-flex; align-items: center; gap: 5px; font-size: .72rem; padding: 2px 8px; border-radius: 6px; white-space: nowrap; font-family: var(--font-mono); }
-.b-ongoing, .type { background: color-mix(in srgb, var(--accent) 12%, transparent); color: var(--accent); border: 1px solid color-mix(in srgb, var(--accent) 32%, transparent); }
+.b-ongoing, .type { background: color-mix(in srgb, var(--accent) 12%, transparent); color: var(--accent-dim); border: 1px solid color-mix(in srgb, var(--accent) 32%, transparent); }
 .type { font-size: .72rem; padding: 2px 8px; border-radius: 6px; font-family: var(--font-mono); }
 .b-trial { background: color-mix(in srgb, var(--trial) 14%, transparent); color: var(--trial); border: 1px solid color-mix(in srgb, var(--trial) 32%, transparent); }
 .b-new { background: var(--accent); color: var(--accent-ink); border: 1px solid var(--accent); font-weight: 700; font-size: .62rem; letter-spacing: .07em; padding: 1px 6px; vertical-align: 2px; }
@@ -416,7 +451,7 @@ table.sortable thead th:not(.sorted)::after { content: " ⇅"; opacity: .28; fon
 .page-hero .prov-actions { justify-content: center; }
 .colls a { font-size: .82rem; padding: 6px 12px; border: 1px solid var(--border); border-radius: 7px; background: var(--panel); color: var(--muted); font-family: var(--font-mono); }
 .colls a:hover { border-color: var(--accent); color: var(--accent); text-decoration: none; }
-.colls a.active { border-color: var(--accent); color: var(--accent); background: color-mix(in srgb, var(--accent) 11%, transparent); }
+.colls a.active { border-color: var(--accent); color: var(--accent-dim); background: color-mix(in srgb, var(--accent) 11%, transparent); }
 .prose { counter-reset: sec; }
 .prose h2 { position: relative; margin-top: 44px; padding-top: 20px; border-top: 1px solid var(--border); font-size: 1.15rem; }
 .prose h2::before { counter-increment: sec; content: counter(sec, decimal-leading-zero) " · "; color: var(--accent); }
@@ -439,7 +474,7 @@ pre code { color: var(--text); }
 .coll-card:hover { border-color: var(--accent); transform: translateY(-2px); text-decoration: none; box-shadow: var(--glow); }
 .coll-card-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 8px; }
 .coll-card-head strong { font-family: var(--font-mono); font-size: 1rem; }
-.coll-card .count { background: color-mix(in srgb, var(--accent) 13%, transparent); color: var(--accent); border: 1px solid color-mix(in srgb, var(--accent) 32%, transparent); border-radius: 999px; padding: 1px 9px; font-size: .74rem; font-weight: 700; }
+.coll-card .count { background: color-mix(in srgb, var(--accent) 13%, transparent); color: var(--accent-dim); border: 1px solid color-mix(in srgb, var(--accent) 32%, transparent); border-radius: 999px; padding: 1px 9px; font-size: .74rem; font-weight: 700; }
 .coll-card p { margin: 0; color: var(--muted); font-size: .88rem; }
 /* /best — the top 10 by score */
 .best-wrap { max-width: 46rem; }
@@ -469,7 +504,7 @@ pre code { color: var(--text); }
 .sponsored-foot, .disclosure { color: var(--muted); font-size: .9rem; }
 .best-tag {
   font-size: .7rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
-  color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent);
+  color: var(--accent-dim); background: color-mix(in srgb, var(--accent) 12%, transparent);
   border: 1px solid color-mix(in srgb, var(--accent) 36%, transparent);
   border-radius: 999px; padding: 2px 9px; font-family: var(--font-mono);
 }
@@ -477,7 +512,7 @@ pre code { color: var(--text); }
 .best-section { font-size: 1rem; margin: 26px 0 12px; color: var(--muted); font-weight: 700; letter-spacing: .04em; text-transform: uppercase; text-align: center; }
 .best-sep { border: 0; height: 1px; width: 7.5rem; margin: 24px auto; background: var(--border-strong); }
 .best-score {
-  font-family: var(--font-mono); font-weight: 700; font-size: .85rem; color: var(--accent); margin-left: auto;
+  font-family: var(--font-mono); font-weight: 700; font-size: .85rem; color: var(--accent-dim); margin-left: auto;
   border: 1px solid color-mix(in srgb, var(--accent) 50%, var(--border)); border-radius: 8px; padding: 3px 10px;
   background: color-mix(in srgb, var(--accent) 9%, transparent);
 }
@@ -514,7 +549,7 @@ pre code { color: var(--text); }
 .cov-pop { display: none; }
 /* /quality/ — the week histogram: a bar beside each number (decoration; the number is the data) */
 .q-barcell { width: 40%; min-width: 60px; padding-left: 12px !important; }
-.q-bar { display: block; height: .7em; min-width: 0; margin-top: .35em; border-radius: 3px; background: var(--accent, #3fce8f); }
+.q-bar { display: block; height: .7em; min-width: 0; margin-top: .35em; border-radius: 3px; background: var(--accent); }
 @media (max-width: 640px) {
   .cov-popcol { display: none; }
   .cov-pop { display: block; font-weight: 400; font-size: .82rem; color: var(--muted); margin-top: 2px; }
@@ -649,7 +684,7 @@ pre code { color: var(--text); }
 .site-footer { border-top: 1px solid var(--border); background: var(--bg-elev); color: var(--muted); font-size: .87rem; }
 .footer-top { display: grid; grid-template-columns: 1.6fr 1fr 1fr 1fr; gap: 28px; padding: 40px 0 30px; }
 .foot-brand-link { display: inline-flex; align-items: center; gap: 10px; margin-bottom: 14px; color: var(--text); font-family: var(--font-mono); font-weight: 700; font-size: 1.02rem; }
-.foot-brand-link .logo-mark { width: 42px; height: 42px; filter: drop-shadow(0 0 8px rgba(63,206,143,.35)); }
+.foot-brand-link .logo-mark { width: 42px; height: 42px; filter: drop-shadow(0 0 8px color-mix(in srgb, var(--accent) 35%, transparent)); }
 .foot-brand-link:hover { text-decoration: none; }
 .footer-brand p { max-width: 38ch; margin: 0; color: color-mix(in srgb, var(--text) 74%, transparent); line-height: 1.6; }
 .footer-brand p strong { color: var(--accent); font-weight: 700; }
