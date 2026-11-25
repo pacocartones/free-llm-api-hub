@@ -83,6 +83,7 @@ Per-provider fields (grouped for reference; the authoritative serialization orde
 | `field_checks` | object (optional) | per tri-state flag, why it holds its value: `status` (`stated`, `source_silent`, `needs_account`, `sources_disagree`), `checked`, `sources`, optional `quote` and `note`; validated (`lib/field-checks.mjs`) |
 | `data_policy` | object \| null | what the provider says about prompts: `trains_on_prompts`, `retention`, with `source` and `checked`, optional `quote`, `note` and `plan_named`; never estimated, shown on the provider page only when set |
 | `playground_url` | https url (optional) | provider-owned no-code playground; requires a non-empty `docs_url`; adds a "Try it" button |
+| `keys_url` / `keys_url_source` | https url (optional, together) | the provider's own page where a signed-up user creates an API key, exactly as its docs link it, and the docs page that links it; never guessed; requires a non-empty `docs_url`; adds a "Get a free key" button between the free limits and the quickstart |
 | `env_key` | UPPER_SNAKE | secret NAME for probe/fetch-models. **STRIPPED from all public output** (homepage payload, site/providers.json, /api) except the two client configs (`api/v1/openai-clients.json`, `api/v1/litellm.yaml`), whose purpose is to tell users which variable to put their own key in. Never the value. |
 | `verified` | boolean | true = independently confirmed against own docs on `last_verified` |
 | `last_verified` | YYYY-MM-DD \| null | must be null when `verified:false` |
@@ -159,18 +160,19 @@ When analytics is configured (`GA_MEASUREMENT_ID`, see above) and the visitor ha
 
 | Event | Parameters | Fires when |
 | --- | --- | --- |
-| `outbound_provider_click` | `provider` (slug), `link_type` (`docs`, `website`, `playground`, `models`, `limits_source`, `data_policy`) | a link carrying `data-provider` / `data-link` is clicked or middle-clicked. The build adds both attributes (`scripts/lib/provider-links.mjs`) on provider pages and static comparisons. |
+| `outbound_provider_click` | `provider` (slug), `link_type` (`docs`, `keys`, `website`, `playground`, `models`, `limits_source`, `data_policy`) | a link carrying `data-provider` / `data-link` is clicked or middle-clicked. The build adds both attributes (`scripts/lib/provider-links.mjs`) on provider pages and static comparisons. |
 | `copy_snippet` | `snippet` (`curl`, `python`, `env_key`, `embed`, `badge`, `citation`, `api_url`, `other`) | a code block's Copy button (the kind is the block's `data-snippet` when it is `embed`, `badge` or `citation`, else read from its first word) or an API endpoint's Copy button |
 | `explorer_filter` | `filter_name` (`category`, `modality`, `no_card`, `no_phone`, `commercial`, `text_only`, `no_training`, `openai_compatible`, `verified`), `filter_value` (`all`/`ongoing`/`trial`, a modality option, or `on`/`off`) | a category button, the modality menu or a filter chip changes |
 | `explorer_sort` | `sort_key` (`recommended`, `name`, `category`, `free_tier`, `notes`, `verified`), `sort_dir` (`asc`/`desc`) | a column header or the sort menu |
 | `compare_view` | `pair` (`a-vs-b` for a static page, `a,b[,c,d]` for a shared `?compare=` link) | once per page view of a comparison |
 | `collection_view` | `collection` (slug) | once per page view of `/collections/<slug>` |
 | `api_download` | `file` (path, such as `providers.json` or `api/v1/litellm.yaml`) | a link to one of the site's own data files: `providers.json`/`.csv`, `api/v1/*.json`/`.yaml`, `llms.txt`, `llms-full.txt`, `badge-*.json` |
+| `repo_click` | `location` (`header`, `footer`, `contribute`, `content`) | a link to this project's GitHub repository (`github.com/pacocartones/free-llm-api-hub`, any path) is clicked or middle-clicked. `location` is the link's `data-repo-location` when it names one from the list; else `header` or `footer` when the link sits in the site header or footer (the Star on GitHub buttons); else `contribute` on `/contributing/` and `/submit/` or for issue forms, discussions, pull requests, forks and `CONTRIBUTING.md`; else `content` |
 | `site_search` | `search_term` (lower-case, max. 60 characters) | the explorer search box, after 1.5 s without typing, on Enter or when it loses focus; an identical consecutive query is sent once |
 
 In the GA4 stream, enhanced measurement keeps page views on real loads, scrolls, outbound clicks and file downloads. Its "page changes based on browser history events" and "site search" options are **off**: the explorer rewrites its URL with `history.replaceState` on every keystroke, so they would send one page view or search per key. `site_search` replaces that. The custom events add the provider-specific detail under their own names; they do not replace GA's automatic outbound-click and file-download events.
 
-**Mark as key events in GA4:** `outbound_provider_click` (a visitor leaves for a provider, the site's main outcome), `copy_snippet` (a visitor takes code to use a provider) and `api_download` (dataset or API reuse). The others are for understanding behaviour, not outcomes.
+**Mark as key events in GA4:** `outbound_provider_click` (a visitor leaves for a provider, the site's main outcome), `copy_snippet` (a visitor takes code to use a provider) and `api_download` (dataset or API reuse). `repo_click` measures the path to stars and contributions; mark it too if repository growth is a goal. The others are for understanding behaviour, not outcomes.
 
 ## 5. Design system (`site/styles.css`)
 - Terminal-green identity: `--accent:#3fce8f`, self-hosted JetBrains Mono, CSS vars + `[data-theme]` dark/light (persisted), SVG icon sprite (`ic-*`), `>_`-style prompts, AA contrast.
