@@ -64,3 +64,29 @@ for f in rf-inst.ttf:roboto-flex DMMono-Regular.ttf:dm-mono-400 DMMono-Medium.tt
     --flavor=woff2 --no-hinting --desubroutinize --output-file="${f##*:}.woff2"
 done
 ```
+
+## Aura, stamp and mark
+
+- **Aura** (`scripts/lib/aura.mjs`): one per provider, from its record. How to read it is on the
+  [methodology page](methodology.md#how-to-read-an-aura). `auraHtml()` draws it with CSS, `auraSvg()` with SVG arcs.
+- **Receipt stamp** (`scripts/lib/stamp.mjs`): "✓ 24 Nov · source", linked to the checked page, the quoted sentence
+  in its title.
+- **Mark**: the hub's own aura (six modalities, full disc). `npm run icons` writes the sprite symbol, `favicon.svg`,
+  the PNG/ICO icons and `assets/logo-{light,dark,full}.svg`; the wordmark is outlined (`scripts/lib/wordmark.mjs`).
+
+## Tagline
+
+One constant, `TAGLINE` in [`scripts/lib/brand.mjs`](../scripts/lib/brand.mjs), is **a placeholder until the
+owner picks one** (candidates in the brand drafts). The home title, the README, the home social image, the README
+banner and the GitHub social preview read it. After changing it, run `npm run build`, `npm run og` and
+`npm run brand-assets`.
+
+## Images outside the site
+
+- **Social images** (`npm run og`): dark cards drawn by `scripts/lib/og-art.mjs` and rasterised with the static fonts in
+  [`tools/og-fonts/`](../tools/og-fonts/) (system fonts are not loaded). `scripts/check-og.mjs` fails when one no longer
+  matches the data; the regeneration workflow re-renders them.
+- **README banner and GitHub social preview** (`npm run brand-assets`): `assets/banner-{light,dark}.png` and
+  `assets/social-preview.png` (1280×640). They are a snapshot of the dataset, not checked in CI; refresh them at a
+  release. GitHub does not read the social preview from the repository: upload it in *Settings → General → Social
+  preview*.

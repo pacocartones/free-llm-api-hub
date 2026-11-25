@@ -45,6 +45,7 @@ import { requirementsHtml, limitsHtml, glanceHtml, modelsHtml, dataPolicyHtml, s
 import { aboutHtml } from './lib/provider-summaries.mjs';
 import { fontHead, fingerprintSite } from './lib/assets.mjs';
 import { auraHtml, auraSpec } from './lib/aura.mjs';
+import { TAGLINE, taglineParts } from './lib/brand.mjs';
 import { logoSymbol } from './icons.mjs';
 import { stampHtml, stampSource } from './lib/stamp.mjs';
 import { securityTxt } from './lib/security-txt.mjs';
@@ -821,6 +822,7 @@ const QUOTES = QUOTE_REGISTRY.entries;
 }
 
 let readme = readFileSync(join(ROOT, 'README.md'), 'utf8');
+readme = inject(readme, 'tagline', `**${TAGLINE}**`);
 readme = inject(readme, 'not-free', notFreeReadmeMd(NOT_FREE, { site: SITE }));
 readme = inject(readme, 'coverage', coverageTable);
 readme = inject(readme, 'collections', collectionsIndexMd);
@@ -973,6 +975,9 @@ indexHtml = indexHtml.replace(/<title>[^<]*<\/title>/, `<title>${htmlEsc(HOME_TI
 indexHtml = inject(indexHtml, 'csp', CSP);
 indexHtml = inject(indexHtml, 'themeguard', THEME_GUARD);
 indexHtml = inject(indexHtml, 'fonts', fontHead(''));
+// The tagline (lib/brand.mjs, a placeholder until the owner picks one): the home H1, its closing phrase in the accent.
+const [TAG_LEAD, TAG_KEY] = taglineParts();
+indexHtml = inject(indexHtml, 'tagline', `    <h1>${htmlEsc(TAG_LEAD)}${TAG_KEY ? `<br> <span class="h1-key">${htmlEsc(TAG_KEY)}</span>` : ''}</h1>`);
 indexHtml = inject(indexHtml, 'rows', homeRows);
 // The hero's field of auras (brand H1): every provider in the explorer's order, then the key to read them. Dated by ASOF
 // like the rows, so the field is deterministic. Each aura links its provider page for the mouse; the whole field is
