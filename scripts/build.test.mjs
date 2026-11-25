@@ -1599,10 +1599,11 @@ describe('read-only generated output', () => {
       for (const d of html.match(/\d{4}-\d{2}-\d{2}/g) || []) {
         assert.ok(dataDates.has(d), `${rel}: date ${d} is not from the dataset (pages must not depend on the build day)`);
       }
-      // provider pages suggest the comparisons they appear in, when both sides share a category
+      // provider pages never suggest a comparison across main modalities (lib/compare.mjs comparePeers picks the closest
+      // peers of the same modality, linking this page when it is one of them; provider-page.test.mjs checks the picks)
       for (const s of [a.slug, b.slug]) {
         const linked = readFileSync(join(ROOT, `site/p/${s}.html`), 'utf8').includes(`href="../compare/${path}/"`);
-        assert.equal(linked, sameComparisonCategory(a, b), `p/${s} ${sameComparisonCategory(a, b) ? 'links' : 'does not suggest'} ${path}`);
+        if (!sameComparisonCategory(a, b)) assert.equal(linked, false, `p/${s} does not suggest ${path}`);
       }
     }
   });
@@ -2361,7 +2362,7 @@ test('provider page: the score is visible, no «All providers» link or «Report
   // Mutant: show the old button or link again, drop data-pager, or lose the score line; this test turns red.
   const html = readFileSync(join(ROOT, 'site/p/groq.html'), 'utf8');
   const main = html.slice(html.indexOf('<main id="main">'));
-  assert.match(main, /<div class="prov-score"><span class="best-score" title="Out of 100">\d+\.\d \/ 100<\/span>/, 'the score of the provider');
+  assert.match(main, /<div class="prov-score"><p class="score-rank"><strong>#\d+ of \d+<\/strong> by score <span class="muted">\(\d+(\.\d)? \/ 100\)<\/span>/, 'the score of the provider, as a place (Q13)');
   assert.match(main, /<a href="\.\.\/best\/methodology\/">how it is computed<\/a>/, 'a link to the method');
   // Mutant: drop the underline and the links in the score line rely on colour alone, which Lighthouse fails (link-in-text-block).
   assert.match(readFileSync(join(ROOT, 'site/styles.css'), 'utf8'), /\.prov-score a \{[^}]*text-decoration: underline/, 'the links of the score line are underlined');

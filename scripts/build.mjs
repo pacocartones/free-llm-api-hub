@@ -20,7 +20,7 @@ import * as rows from './lib/rows.mjs';
 import * as sortLib from './lib/sort.mjs';
 import { esc, stripTags } from './lib/escape.mjs';
 import { mineHistoryAndSnapshots, HISTORY_FIELDS } from './lib/history.mjs';
-import { flattenFieldChanges, groupChangesByWeek, changesRss, weekTitle, formatValue } from './lib/changes.mjs';
+import { flattenFieldChanges, groupChangesByWeek, changesRss, weekTitle, formatValue, beforeAfter } from './lib/changes.mjs';
 import { monthlyReport, reportMonths, monthEndDate, monthName, monthLabel, pct, monthSummary, monthBrief } from './lib/state.mjs';
 import { resolveBestEntries, topEntries, PODIUM_SIZE } from './lib/best.mjs';
 import { agreementsTableHtml, sponsoredBlockHtml, disclosureHtml, inForce, NOT_IN_DATA_SENTENCE, MACHINE_SENTENCE } from './lib/agreements.mjs';
@@ -36,7 +36,8 @@ import { markNewTabLinks } from './lib/links.mjs';
 import { codingToolsMainHtml, codingToolMainHtml, codingToolTitle, codingToolDescription } from './lib/free-coding-tools.mjs';
 import { dataPolicyRows, dataPolicyMainHtml } from './lib/data-policy-page.mjs';
 import { quotesReportHtml } from './lib/quotes-report.mjs';
-import { SCORE_WEIGHTS, EDITORIAL_WEIGHT, EDITORIAL_DEFAULT, MATH_INPUTS, MIN_CONFIRMED, TOP_SIZE, EDITORIAL_NOTE_THRESHOLD, STABILITY_MIN_DAYS, STABILITY_MIN_SAMPLES, rankProviders, editorialRating } from './lib/score.mjs';
+import { SCORE_WEIGHTS, EDITORIAL_WEIGHT, EDITORIAL_DEFAULT, MATH_INPUTS, MIN_CONFIRMED, TOP_SIZE, EDITORIAL_NOTE_THRESHOLD, STABILITY_MIN_DAYS, STABILITY_MIN_SAMPLES, rankProviders, editorialRating, inputFractions, stabilityFromProbe } from './lib/score.mjs';
+import { scoreBlockHtml } from './lib/score-bar.mjs';
 import { publishableClientConfigs } from './lib/client-config.mjs';
 import { COLLECTIONS as SHARED_COLLECTIONS } from './lib/collections.mjs';
 import * as compareLib from './lib/compare.mjs';
@@ -58,6 +59,7 @@ import { websiteRef, datasetRef } from './lib/site-entity.mjs';
 import { SITEMAP_INDEX, sitemapIndexXml } from './lib/state-sitemap.mjs';
 import { SITEMAPS as INDEXNOW_SITEMAPS } from './lib/indexnow.mjs';
 import { groupModels, modelKey } from './lib/model-keys.mjs';
+import { providerMetaDescription } from './lib/provider-meta.mjs';
 import { isIndexable, modelPageMainHtml, modelPageTitle, modelPageDescription, modelPageJsonLd } from './lib/model-pages.mjs';
 import { collectionPageJsonLd as pageJsonLd, comparePageJsonLd } from './lib/page-jsonld.mjs';
 
@@ -825,12 +827,16 @@ const topList = topEntries(providers, { editorial: EDITORIAL, probeReport: PROBE
 const rankedAll = rankProviders(providers, { editorial: EDITORIAL, probeReport: PROBE_REPORT, now: new Date(ASOF + 'T12:00:00Z'), minConfirmed: 0 });
 const scoreMap = Object.fromEntries(rankedAll
   .map((r) => [r.slug, { total: Math.round(r.total * 10) / 10, confirmed: r.confirmed, of: r.of, rank: topList.find((e) => e.p.slug === r.slug)?.rank ?? null }]));
+// A provider page's place among every scored provider ("#1 of 69") and its editorial points (Q13). Kept apart from
+// scoreMap, which is published as site/scores.json with its own shape.
+const scorePlace = new Map(rankedAll.map((r, i) => [r.slug, { position: i + 1, editorial: r.editorial }]));
 // Static /compare/<a>-vs-<b>/ pages (#175): the picks of data/best.json compared pairwise
 // where they share a modality, capped (see lib/compare.mjs). Computed up front
 // so the provider pages can link to the comparisons they appear in.
 const comparePairs = compareLib.selectComparePairs(bestEntries.map((e) => e.p));
 // Only same-category pairs are suggested (links); every pair keeps its page and sitemap entry.
 const suggestedPairs = comparePairs.filter((cp) => compareLib.sameComparisonCategory(cp.a, cp.b));
+const COMPARE_PATHS = new Set(comparePairs.map((cp) => cp.path));
 
 let readme = readFileSync(join(ROOT, 'README.md'), 'utf8');
 readme = inject(readme, 'coverage', coverageTable);
@@ -1179,7 +1185,12 @@ mkdirSync(join(ROOT, 'site/badges'), { recursive: true });
 const historyHtml = (slug) => {
   const all = historyBySlug[slug] || [];
   if (!all.length) return '';
-  const items = all.slice().reverse().map((e) => `<li class="upd"><span class="upd-date">${e.date}</span> <span>${htmlEsc(e.text)}</span></li>`).join('');
+  // One entry per day (lib/history.mjs collapseSameDay); a change to the limits or a flag shows its before → after.
+  const diff = (e) => {
+    const rows = beforeAfter(e);
+    return rows.length ? `<ul class="upd-diff">${rows.map((r) => `<li><span class="upd-field">${htmlEsc(r.label)}:</span> <del>${htmlEsc(r.from)}</del> → <ins>${htmlEsc(r.to)}</ins></li>`).join('')}</ul>` : '';
+  };
+  const items = all.slice().reverse().map((e) => `<li class="upd"><span class="upd-date">${e.date}</span> <span>${htmlEsc(e.text)}</span>${diff(e)}</li>`).join('');
   return `<h2>Change history</h2>` +
     `<p class="muted">How this free tier has changed since we started tracking it (${all[0].date}) — generated from the git history of <a href="${REPO}/commits/main/data/providers.json">providers.json</a>.</p>` +
     `<ul class="upd-list" data-pager="5">${items}</ul>`;
@@ -1229,8 +1240,12 @@ for (const p of providers) {
   // The score of the provider (lib/score.mjs, the same numbers as /best/ and the API) with its method one click away. Providers that are
   // not scored (not verified, or outside the freshness window) say so instead of showing a number.
   const sc = scoreMap[p.slug];
+  // Q13: its place among the scored providers and a bar of the six inputs (lib/score-bar.mjs); the formula is lib/score.mjs.
   const scoreHtml = sc
-    ? `<div class="prov-score"><span class="best-score" title="Out of 100">${sc.total.toFixed(1)} / 100</span><span>Score${sc.rank ? ` · #${sc.rank} on <a href="../best/">The Best</a>` : ''} · ${sc.confirmed} of ${sc.of} inputs confirmed · <a href="../best/methodology/">how it is computed</a></span></div>`
+    ? scoreBlockHtml({
+      position: scorePlace.get(p.slug).position, of: rankedAll.length, total: sc.total, editorial: scorePlace.get(p.slug).editorial, editorialWeight: EDITORIAL_WEIGHT,
+      fractions: inputFractions(p, stabilityFromProbe(PROBE_REPORT, p.slug, new Date(ASOF + 'T12:00:00Z'))), weights: SCORE_WEIGHTS, topRank: sc.rank,
+    })
     : `<div class="prov-score"><span class="muted">No score: only verified providers inside the freshness window are scored · <a href="../best/methodology/">how it is computed</a></span></div>`;
   const summary = `<div class="prov-summary"><h2 id="whats-free">What's free</h2><p>${htmlEsc(p.free_tier)}</p></div>` + scoreHtml + requirementsHtml(p);
   // Freshness relative to the current day (provider pages are regenerated on deploy, not diff-gated).
@@ -1261,12 +1276,12 @@ for (const p of providers) {
   } catch (_) { /* no/invalid docs URL — skip the website button */ }
   // "Compare with …": the static comparisons this provider appears in, plus the
   // interactive view pre-filled with it.
-  const comparePeers = suggestedPairs
-    .filter((cp) => cp.a.slug === p.slug || cp.b.slug === p.slug)
-    .map((cp) => ({ path: cp.path, other: cp.a.slug === p.slug ? cp.b : cp.a }));
+  // Peers of the same main modality (lib/compare.mjs comparePeers, Q9): the published page of the pair when there is one,
+  // else the interactive view with both providers in it.
+  const comparePeers = compareLib.comparePeers(p, providers, { staticPaths: COMPARE_PATHS, score: (o) => scoreMap[o.slug]?.total ?? null });
   const compareHtml =
     `<h2>Compare</h2><div class="colls">` +
-    comparePeers.map((c) => `<a href="../compare/${c.path}/">Compare with ${htmlEsc(c.other.name)}</a>`).join('') +
+    comparePeers.map((c) => `<a href="../compare/${c.path ? `${c.path}/` : `?compare=${p.slug},${c.other.slug}`}">Compare with ${htmlEsc(c.other.name)}</a>`).join('') +
     `<a href="../compare/?compare=${p.slug}">Compare with another provider →</a></div>`;
   const crossChips = [
     ...inColls.map((c) => `<a href="../collections/${c.slug}">${htmlEsc(c.title)}</a>`),
@@ -1284,13 +1299,15 @@ for (const p of providers) {
     `<main id="main"><div class="wrap prose prov-prose">` +
     summary +
     limitsHtml(p) +
+    // Q3: the snippet right after the limits (it sat ~4,500px down /p/groq on a phone); speed, data policy and the
+    // provider's own description follow it.
+    quick +
     glanceHtml(p, typeLabel(p)) +
     modelsHtml(p, { modelHref: modelPageHref('../') }) +
     speedHtml(p) +
     dataPolicyHtml(p) +
     aboutHtml(summaryBySlug.get(p.slug), p.name) +
     disclosureHtml(AGREEMENTS_FILE, p.slug) +
-    quick +
     (crossChips ? `<h2>Appears in</h2><div class="colls">${crossChips}</div>` : '') +
     compareHtml +
     historyHtml(p.slug) +
@@ -1315,7 +1332,7 @@ for (const p of providers) {
   });
   writeFileSync(
     join(ROOT, `site/p/${p.slug}.html`),
-    htmlPage({ title: `${p.name} — free tier & limits · Free LLM API Hub`, desc: `${p.name}: ${p.free_tier}`.slice(0, 180), canonical: `${SITE}/p/${p.slug}`, main: tagProviderLinks(main, providerLinkTargets(p, { website: websiteHref })), jsonld, ogImage: `${SITE}/og/p/${p.slug}.png`, scripts: ['pager.js'] })
+    htmlPage({ title: `${p.name} — free tier & limits · Free LLM API Hub`, desc: providerMetaDescription(p), canonical: `${SITE}/p/${p.slug}`, main: tagProviderLinks(main, providerLinkTargets(p, { website: websiteHref })), jsonld, ogImage: `${SITE}/og/p/${p.slug}.png`, scripts: ['pager.js'] })
   );
 
   // Embeddable per-provider badge. Same rule as the repo badge: the colour tracks
@@ -1352,6 +1369,9 @@ const legalPage = (slug, title, bodyHtml) => {
 // GitHub Pages serves this one file for ANY missing path (/contributing/, /a/b/c), so a relative prefix would resolve against the
 // missing URL and lose the styles, the menu and the footer. It is built with the same header and footer as every page and the
 // root-absolute prefix '/'. The path read-out below is pinned by hash in the CSP: change its text and recompute the hash.
+// Q16: a search box that lands on the explorer (/?q=, which explorer.js reads on load) and six popular providers: the
+// first six of The Best, the score top (lib/score.mjs), so the list follows the data. Root-absolute links like the rest.
+const NOT_FOUND_POPULAR = topList.slice(0, 6).map((e) => `<a href="/p/${e.p.slug}">${htmlEsc(e.p.name)}</a>`).join('');
 const NOT_FOUND_PATH_SCRIPT = `<script>try{document.getElementById('path').textContent=location.pathname.replace('/free-llm-api-hub','')||'/';}catch(e){}</script>`;
 writeFileSync(
   join(ROOT, 'site/404.html'),
@@ -1367,7 +1387,9 @@ writeFileSync(
 <div class="code" aria-hidden="true">404</div>
 <p class="msg">&gt; command not found: <span class="path" id="path">/…</span><span class="caret" aria-hidden="true"></span></p>
 <p>That page isn't part of the dataset. It may have moved, or never existed. The data, though, is very much alive.</p>
-<div class="cta"><a class="btn primary" href="/">← Back home</a><a class="btn ghost" href="/#explorer">Browse providers</a><a class="btn ghost" href="/guides-and-collections/">Guides &amp; collections</a></div>
+<form class="nf-search" action="/" method="get" role="search"><label for="nf-q">Search the providers</label><input type="search" id="nf-q" name="q" class="sel search-input" placeholder="e.g. groq, embeddings, llama" autocomplete="off" spellcheck="false"><button type="submit" class="btn primary">Search</button></form>
+${NOT_FOUND_POPULAR ? `<h2 class="nf-h">Popular providers</h2><nav class="colls" aria-label="Popular providers">${NOT_FOUND_POPULAR}</nav>` : ''}
+<div class="cta"><a class="btn ghost" href="/">← Back home</a><a class="btn ghost" href="/#explorer">Browse providers</a><a class="btn ghost" href="/guides-and-collections/">Guides &amp; collections</a></div>
 ${NOT_FOUND_PATH_SCRIPT}
 </main>`,
   })
