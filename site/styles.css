@@ -517,6 +517,20 @@ pre code { color: var(--text); }
 .prov-summary h2 { margin: 0 0 8px; font-size: 1.45rem; color: var(--accent); font-weight: 700; }
 .prov-score { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 14px 0; font-size: .92rem; }
 .prov-score .best-score { margin-left: 0; }
+/* Q13: the score as a place ("#1 of 69") and a bar of the six inputs of lib/score.mjs, each segment as wide as its
+   weight; an input nobody has confirmed is a grey segment. Existing tokens only. */
+.prov-score { flex-direction: column; align-items: stretch; }
+.score-rank { margin: 0; }
+.score-bar { display: flex; gap: 3px; height: 12px; max-width: 520px; }
+.sb-seg { position: relative; overflow: hidden; border-radius: 3px; background: var(--panel-2); border: 1px solid var(--border-strong); }
+.sb-fill { display: block; height: 100%; background: var(--accent); }
+.sb-seg.sb-unknown { background: repeating-linear-gradient(135deg, var(--panel-2) 0 4px, var(--border) 4px 8px); }
+.score-legend { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: .82rem; color: var(--muted); }
+.score-legend li { display: inline-flex; align-items: center; gap: 6px; }
+.score-legend .sb-key { width: 10px; height: 10px; border-radius: 2px; background: var(--accent); }
+.score-legend .sb-u .sb-key { background: repeating-linear-gradient(135deg, var(--panel-2) 0 2px, var(--border-strong) 2px 4px); }
+.score-legend .sb-pts { font-family: var(--font-mono); color: var(--text); }
+.score-note { margin: 0; font-size: .84rem; }
 .prov-score a { text-decoration: underline; text-underline-offset: 2px; } /* a link inside running text must not rely on colour alone (Lighthouse: link-in-text-block) */
 .prov-summary p { margin: 0; font-size: 1.04rem; line-height: 1.55; }
 .prov-actions { margin-top: 18px; display: flex; flex-wrap: wrap; gap: 10px; }
@@ -584,13 +598,20 @@ pre code { color: var(--text); }
 .upd-list { list-style: none; padding: 0; margin: 10px 0; }
 .upd { display: flex; gap: 14px; padding: 11px 4px; border-bottom: 1px solid var(--border); align-items: baseline; }
 .upd-date { font-family: var(--font-mono); font-size: .78rem; color: var(--accent); flex: 0 0 92px; }
+/* Provider history: a limits or flag change spells out before → after on its own line under the entry (Q4). */
+.upd:has(.upd-diff) { flex-wrap: wrap; }
+.upd-list .upd-diff { flex-basis: 100%; list-style: none; margin: 4px 0 0 106px; padding: 0; color: var(--muted); font-size: .86rem; overflow-wrap: anywhere; }
+.upd-list .upd-diff li { margin: 0; }
+.upd-list .upd-diff li + li { margin-top: 3px; }
+.upd-diff .upd-field { color: var(--text); }
+.upd-diff ins { text-decoration: none; color: var(--text); }
 .upd a { color: var(--text); }
 .upd a:hover { color: var(--accent); }
 .pagination { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 16px; margin: 28px 0 8px; font-family: var(--font-mono); font-size: .82rem; color: var(--muted); }
 .pagination a:last-child { text-align: right; }
 .pagination span { text-align: center; }
 .pagination a { color: var(--accent); font-weight: 700; }
-@media (max-width: 560px) { .upd { flex-direction: column; gap: 2px; } .upd-date { flex-basis: auto; } }
+@media (max-width: 560px) { .upd { flex-direction: column; gap: 2px; } .upd-date { flex-basis: auto; } .upd-list .upd-diff { margin-left: 0; } }
 
 /* ---------- footer ---------- */
 .site-footer { border-top: 1px solid var(--border); background: var(--bg-elev); color: var(--muted); font-size: .87rem; }
@@ -807,6 +828,11 @@ p.muted a, .prose p a, .prov-summary p a { text-decoration: underline; text-unde
 .nf .msg .path { color: var(--text); }
 .nf p { color: var(--muted); max-width: 46ch; margin: 8px auto 26px; }
 .nf .cta { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }
+.nf-search { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; align-items: center; margin: 0 0 18px; width: 100%; max-width: 520px; }
+.nf-search label { flex-basis: 100%; font-family: var(--font-mono); font-size: .85rem; color: var(--muted); }
+.nf-search input { flex: 1 1 240px; }
+.nf-h { font-family: var(--font-mono); font-size: .9rem; margin: 6px 0 8px; }
+.nf .colls { justify-content: center; margin-bottom: 22px; }
 
 /* The state report of a month (build.mjs): three tiles sized by their content, no room reserved below them. */
 .stats.stats-month { grid-template-columns: repeat(3, 1fr); align-items: start; min-height: 0; margin-bottom: 18px; }
