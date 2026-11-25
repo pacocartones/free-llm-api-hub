@@ -330,7 +330,7 @@
       "env_key": "FIREWORKS_API_KEY",
       "is_text_llm": true,
       "model_tier": null,
-      "field_checks": {"phone_required":{"status":"source_silent","checked":"2026-11-24","sources":["https://docs.fireworks.ai/faq-new/billing-pricing/how-much-does-fireworks-cost","https://fireworks.ai/pricing","https://fireworks.ai/terms-of-service"],"note":"Pricing, the billing FAQ, the full docs and the terms (July 10, 2026) have no phone or SMS step"}},
+      "field_checks": {"phone_required":{"status":"source_silent","checked":"2026-11-24","sources":["https://docs.fireworks.ai/faq-new/billing-pricing/how-much-does-fireworks-cost","https://fireworks.ai/pricing","https://fireworks.ai/terms-of-service"],"note":"Pricing, the billing FAQ, the full docs and the terms (July 10, 2026) have no phone or SMS step"},"commercial_ok":{"status":"source_silent","checked":"2026-11-25","sources":["https://fireworks.ai/terms-of-service","https://fireworks.ai/pricing"],"note":"Terms 2.1 grant use solely for personal use or internal business purposes and bar commercial solicitation; no clause covers the free credit or offering the Service to third parties"}},
       "verified": true,
       "last_verified": "2026-11-19",
       "data_policy": {"trains_on_prompts":false,"retention":"Prompt and generation data for open models not logged or stored without opt-in","source":"https://fireworks.ai/privacy-policy","checked":"2026-10-15","quote":"No AI Training on Your Data: We do not use your prompts, training data, or API inputs to train or improve our AI models without your explicit opt-in.","note":"Last modified 2026-08-11. The page names no plan.","plan_named":false}
@@ -975,6 +975,7 @@
       "env_key": "SPEECHMATICS_API_KEY",
       "is_text_llm": false,
       "model_tier": null,
+      "field_checks": {"phone_required":{"status":"source_silent","checked":"2026-11-25","sources":["https://www.speechmatics.com/terms-and-conditions","https://www.speechmatics.com/pricing","https://docs.speechmatics.com/get-started/quickstart"],"note":"The terms, the pricing FAQ and the quickstart describe sign-up and the free credits but name no phone or SMS step"}},
       "verified": true,
       "last_verified": "2026-11-20",
       "data_policy": {"trains_on_prompts":false,"retention":null,"source":"https://www.speechmatics.com/legal/terms-of-service","checked":"2026-10-15","quote":"Speechmatics will not use Your inputs, outputs or any other data for machine learning or model training purposes unless You opt in by enabling model training within Your portal workspace.","note":"Section 5.1 gives «free Hours of use» per month; the clause on inputs, outputs and other data does not mention Free Usage.","plan_named":false}
@@ -1024,6 +1025,7 @@
       "env_key": "UNREALSPEECH_API_KEY",
       "is_text_llm": false,
       "model_tier": null,
+      "field_checks": {"phone_required":{"status":"source_silent","checked":"2026-11-25","sources":["https://unrealspeech.com/terms","https://unrealspeech.com/pricing"],"note":"The terms mention a telephone number only for copyright notices; the pricing page says nothing about sign-up details"}},
       "verified": true,
       "last_verified": "2026-11-20"
     },
@@ -1102,7 +1104,7 @@
       "env_key": "GLADIA_API_KEY",
       "is_text_llm": false,
       "model_tier": null,
-      "field_checks": {"commercial_ok":{"status":"source_silent","checked":"2026-11-24","sources":["https://www.gladia.io/general-terms-of-use-gladia-inc","https://www.gladia.io/terms-conditions-gladia-inc","https://www.gladia.io/pricing"],"note":"The Output licence for commercial purposes (7) depends on payment of all applicable fees; the terms name the free offer only in a data-deletion clause"}},
+      "field_checks": {"commercial_ok":{"status":"source_silent","checked":"2026-11-24","sources":["https://www.gladia.io/general-terms-of-use-gladia-inc","https://www.gladia.io/terms-conditions-gladia-inc","https://www.gladia.io/pricing"],"note":"The Output licence for commercial purposes (7) depends on payment of all applicable fees; the terms name the free offer only in a data-deletion clause"},"phone_required":{"status":"source_silent","checked":"2026-11-25","sources":["https://www.gladia.io/general-terms-of-use-gladia-inc","https://www.gladia.io/pricing","https://docs.gladia.io/chapters/introduction/getting-started"],"note":"The terms, the pricing FAQ (free credits for new accounts) and the getting-started guide name no phone or SMS step"}},
       "verified": true,
       "last_verified": "2026-11-19"
     },
@@ -1127,7 +1129,7 @@
       "env_key": "RIME_API_KEY",
       "is_text_llm": false,
       "model_tier": null,
-      "field_checks": {"commercial_ok":{"status":"source_silent","checked":"2026-11-24","sources":["https://www.rime.ai/terms","https://rime.ai/pricing"],"note":"Terms 6.3 say the Free Plan is intended for evaluation and development and bar Caller audio, PHI and third-party personal data on it; 7.2 sets no use restriction, and no clause allows or forbids commercial use"}},
+      "field_checks": {"commercial_ok":{"status":"source_silent","checked":"2026-11-24","sources":["https://www.rime.ai/terms","https://rime.ai/pricing"],"note":"Terms 6.3 say the Free Plan is intended for evaluation and development and bar Caller audio, PHI and third-party personal data on it; 7.2 sets no use restriction, and no clause allows or forbids commercial use"},"phone_required":{"status":"source_silent","checked":"2026-11-25","sources":["https://www.rime.ai/terms","https://rime.ai/pricing"],"note":"The terms mention telephones only in the calling-law rules (TCPA); the pricing page covers phone audio, not sign-up"}},
       "verified": true,
       "last_verified": "2026-11-19",
       "data_policy": null
@@ -1230,6 +1232,7 @@
       "env_key": "CARTESIA_API_KEY",
       "is_text_llm": false,
       "model_tier": null,
+      "field_checks": {"phone_required":{"status":"source_silent","checked":"2026-11-25","sources":["https://cartesia.ai/legal/terms.html","https://cartesia.ai/pricing","https://docs.cartesia.ai/get-started/overview"],"note":"Terms 2.1 say to create an account or link a GitHub or Google account and give accurate information, without naming a phone; pricing lists phone numbers only for voice agents"}},
       "verified": true,
       "last_verified": "2026-11-19",
       "added": "2026-07-31",
@@ -1255,6 +1258,7 @@
       "env_key": "FISH_AUDIO_API_KEY",
       "is_text_llm": false,
       "model_tier": null,
+      "field_checks": {"phone_required":{"status":"source_silent","checked":"2026-11-25","sources":["https://fish.audio/terms/","https://fish.audio/plan/"],"note":"The terms cover SMS messages sent to a wireless number you provide when signing up, but do not say a number is required; the plan page is silent"}},
       "verified": true,
       "last_verified": "2026-11-20",
       "added": "2026-07-31"
@@ -1279,6 +1283,7 @@
       "env_key": "CAMB_API_KEY",
       "is_text_llm": false,
       "model_tier": null,
+      "field_checks": {"phone_required":{"status":"source_silent","checked":"2026-11-25","sources":["https://www.camb.ai/terms","https://www.camb.ai/pricing"],"note":"Terms 5.1 reserve the right to gather a mobile number and 5.3 ask for an e-mail address and/or mobile number; a billing clause for paid plans asks for a telephone number. No page says the free sign-up needs one"},"commercial_ok":{"status":"source_silent","checked":"2026-11-25","sources":["https://www.camb.ai/terms","https://www.camb.ai/pricing"],"note":"The terms bar selling or licensing the Services and limit content from paid Enterprise Trials to non-commercial use; nothing covers output made with the free credits"}},
       "verified": true,
       "last_verified": "2026-11-19",
       "added": "2026-07-31"
@@ -1303,7 +1308,7 @@
       "env_key": "REV_AI_API_KEY",
       "is_text_llm": false,
       "model_tier": null,
-      "field_checks": {"commercial_ok":{"status":"source_silent","checked":"2026-11-24","sources":["https://www.rev.com/legal/terms","https://www.rev.ai/pricing"],"note":"Terms allow internal business use under an Order (2.1) and ban service-bureau use (2.2(f)), but never say whether signup free credits are an Order or may be used commercially"}},
+      "field_checks": {"commercial_ok":{"status":"source_silent","checked":"2026-11-24","sources":["https://www.rev.com/legal/terms","https://www.rev.ai/pricing"],"note":"Terms allow internal business use under an Order (2.1) and ban service-bureau use (2.2(f)), but never say whether signup free credits are an Order or may be used commercially"},"phone_required":{"status":"source_silent","checked":"2026-11-25","sources":["https://www.rev.com/legal/terms","https://www.rev.ai/pricing"],"note":"The terms cover telephone numbers the customer provides for its users (account, onboarding, support) but do not require one at sign-up; the pricing page is silent"}},
       "verified": true,
       "last_verified": "2026-11-19",
       "added": "2026-07-31"
@@ -1354,6 +1359,7 @@
       "env_key": "NUTRIENT_API_KEY",
       "is_text_llm": false,
       "model_tier": null,
+      "field_checks": {"phone_required":{"status":"source_silent","checked":"2026-11-25","sources":["https://www.nutrient.io/legal/terms/","https://www.nutrient.io/api/pricing/data-extraction-api/"],"note":"The only phone fields on these pages belong to the contact-sales forms (one marked optional); neither page names a phone or SMS step for the free API account"}},
       "verified": true,
       "last_verified": "2026-11-19",
       "added": "2026-07-31"
@@ -1457,6 +1463,7 @@
       "env_key": "VERYFI_API_KEY",
       "is_text_llm": false,
       "model_tier": null,
+      "field_checks": {"phone_required":{"status":"source_silent","checked":"2026-11-25","sources":["https://www.veryfi.com/terms-api-starter/","https://www.veryfi.com/pricing/"],"note":"The Starter terms describe self-serve sign-up and mention phone support only for Enterprise; the pricing page names no phone or SMS step"}},
       "verified": true,
       "last_verified": "2026-11-19",
       "added": "2026-07-31",
@@ -1482,6 +1489,7 @@
       "env_key": "VOICEGAIN_API_KEY",
       "is_text_llm": false,
       "model_tier": null,
+      "field_checks": {"phone_required":{"status":"source_silent","checked":"2026-11-25","sources":["https://github.com/voicegain/platform/blob/master/TERMS-OF-SERVICE.md","https://www.voicegain.ai/developers"],"note":"The terms (published from the official repository the site links) and the developers page name no phone or SMS step; phone numbers appear only as a billed service"},"commercial_ok":{"status":"source_silent","checked":"2026-11-25","sources":["https://github.com/voicegain/platform/blob/master/TERMS-OF-SERVICE.md","https://www.voicegain.ai/developers"],"note":"Terms 4.a let Resolvity offer or end the Free Tier and use Free Tier data for tuning, but set no rule on commercial use of it; the developers page is silent"}},
       "verified": true,
       "last_verified": "2026-11-20",
       "added": "2026-07-31",
@@ -1507,6 +1515,7 @@
       "env_key": "SMALLEST_API_KEY",
       "is_text_llm": false,
       "model_tier": null,
+      "field_checks": {"phone_required":{"status":"source_silent","checked":"2026-11-25","sources":["https://smallest.ai/terms-of-service","https://smallest.ai/pricing"],"note":"The terms and the pricing page mention phones only as rented numbers and telephony for voice agents, not as a sign-up step"}},
       "verified": true,
       "last_verified": "2026-11-19",
       "added": "2026-07-31",
@@ -1666,6 +1675,7 @@
       "is_text_llm": true,
       "model_tier": null,
       "free_limits": null,
+      "field_checks": {"phone_required":{"status":"source_silent","checked":"2026-11-25","sources":["https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/start/express-mode/overview","https://cloud.google.com/resources/cloud-express-faqs"],"note":"Sign-up needs a @gmail.com Google Account and no billing information; no page names a phone or SMS step. The FAQ link redirects to the overview"},"commercial_ok":{"status":"source_silent","checked":"2026-11-25","sources":["https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/start/express-mode/overview","https://cloud.google.com/terms/service-terms"],"note":"Express mode is a Preview under the Pre-GA Offerings Terms (as is, no SLA, may change or stop); neither page allows or bars commercial use of the free tier"}},
       "verified": true,
       "last_verified": "2026-11-24",
       "added": "2026-11-24",
