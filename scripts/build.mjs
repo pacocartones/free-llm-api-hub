@@ -62,6 +62,9 @@ import { groupModels, modelKey } from './lib/model-keys.mjs';
 import { providerMetaDescription } from './lib/provider-meta.mjs';
 import { isIndexable, modelPageMainHtml, modelPageTitle, modelPageDescription, modelPageJsonLd } from './lib/model-pages.mjs';
 import { collectionPageJsonLd as pageJsonLd, comparePageJsonLd } from './lib/page-jsonld.mjs';
+import { notFreeErrors, notFreeReadmeMd, notFreeModel, notFreeMainHtml, notFreeJsonLd, notFreeTitle, notFreeDescription, NOT_FREE_PATH } from './lib/not-free.mjs';
+import { embedMainHtml, embedTitle, embedDescription, EMBED_PATH } from './lib/embed-page.mjs';
+import { citationRecord } from './lib/citation.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const FRESH_DAYS = SLA_DAYS; // the freshness SLA, defined once in lib/rules.mjs
@@ -673,8 +676,8 @@ ${contributeBtn(p)}
 
 const siteFooter = (p) => `<footer class="site-footer"><div class="wrap footer-top">
 <div class="footer-brand"><a class="foot-brand-link" href="${p}" aria-label="Free LLM API Hub — home"><svg class="logo-mark"><use href="#logo"/></svg><span class="brand-name">Free LLM API <span class="grad">Hub</span></span></a><p>The <strong>continuously-verified</strong>, <strong>machine-readable</strong> dataset of <strong>free LLM &amp; AI-model APIs</strong> and <strong>trial credits</strong> — every entry <strong>dated</strong>, <strong>sourced</strong>, and <strong>free of dead links</strong>.</p><img class="trust-badge" src="${p}badge-verified.svg" alt="Verified providers" width="${BADGE_W}" height="20" loading="lazy"><a class="star-btn" href="${REPO}" target="_blank" rel="noopener"><span class="sb-label">${GH_ICON} Star on GitHub</span><span class="sb-count" data-stars>★</span></a></div>
-<div class="footer-col"><h2 class="footer-h">Explore</h2><a href="${p}models/">Free model index</a><a href="${p}guides-and-collections/">Guides &amp; collections</a><a href="${p}programs/startups">Startup credits</a><a href="${p}programs/research">Student &amp; research credits</a><a href="${p}free-gpu/">Free GPU compute</a><a href="${p}coding-tools/">Free AI coding tools</a></div>
-<div class="footer-col"><h2 class="footer-h">Data</h2><a href="${p}providers.json">providers.json</a><a href="${p}api/">JSON API</a><a href="${p}llms.txt">llms.txt</a><a href="${p}data-policy/">Who trains on your data</a><a href="${p}coverage/">Data coverage</a><a href="${p}quality/">Data quality</a></div>
+<div class="footer-col"><h2 class="footer-h">Explore</h2><a href="${p}models/">Free model index</a><a href="${p}guides-and-collections/">Guides &amp; collections</a><a href="${p}programs/startups">Startup credits</a><a href="${p}programs/research">Student &amp; research credits</a><a href="${p}free-gpu/">Free GPU compute</a><a href="${p}coding-tools/">Free AI coding tools</a><a href="${p}not-free/">Not free (and why)</a></div>
+<div class="footer-col"><h2 class="footer-h">Data</h2><a href="${p}providers.json">providers.json</a><a href="${p}api/">JSON API</a><a href="${p}llms.txt">llms.txt</a><a href="${p}data-policy/">Who trains on your data</a><a href="${p}coverage/">Data coverage</a><a href="${p}quality/">Data quality</a><a href="${p}embed/">Use the data</a></div>
 <div class="footer-col"><h2 class="footer-h">Project</h2><a href="${p}updates">Updates</a><a href="${p}changes/">What changed</a><a href="${p}submit/">Submit</a><a href="${p}methodology/">Methodology</a><a href="${p}contributing/">Contributing</a><a href="${p}agreements/">Agreements</a></div>
 </div><div class="wrap footer-bottom"><p>Terms change without notice; always confirm against each provider's own docs. MIT licensed.</p><p class="foot-legal"><a href="${p}legal/privacy">Privacy</a> · <a href="${p}legal/terms">Terms</a></p><p class="foot-email"><a href="mailto:admin@freellmapihub.com">admin@freellmapihub.com</a></p></div></footer>`;
 
@@ -859,7 +862,16 @@ const comparePairs = compareLib.selectComparePairs(bestEntries.map((e) => e.p));
 const suggestedPairs = comparePairs.filter((cp) => compareLib.sameComparisonCategory(cp.a, cp.b));
 const COMPARE_PATHS = new Set(comparePairs.map((cp) => cp.path));
 
+// "Notably NOT free": one source (data/not-free.json) for the README section and the /not-free/ page.
+const NOT_FREE = JSON.parse(readFileSync(join(ROOT, 'data/not-free.json'), 'utf8'));
+const QUOTES = JSON.parse(readFileSync(join(ROOT, 'data/quotes.json'), 'utf8')).entries;
+{
+  const errs = notFreeErrors(NOT_FREE, { providers, quotes: QUOTES });
+  if (errs.length) throw new Error('data/not-free.json:\n' + errs.join('\n'));
+}
+
 let readme = readFileSync(join(ROOT, 'README.md'), 'utf8');
+readme = inject(readme, 'not-free', notFreeReadmeMd(NOT_FREE, { site: SITE }));
 readme = inject(readme, 'coverage', coverageTable);
 readme = inject(readme, 'collections', collectionsIndexMd);
 readme = inject(readme, 'best', bestTable(topList));
@@ -1243,6 +1255,15 @@ const MODEL_GROUPS = groupModels(providers);
 const MODEL_PAGE_KEYS = new Set(MODEL_GROUPS.map((g) => g.key));
 const modelPageHref = (prefix) => (id) => { const k = modelKey(id); return k && MODEL_PAGE_KEYS.has(k) ? `${prefix}models/${k}/` : ''; };
 
+// The last block of every provider page: its badge on /embed/ and, for a provider on /not-free/, why. One function,
+// appended after the change history, so a change to the section order elsewhere does not touch it.
+const notFreeBySlug = new Map(NOT_FREE.entries.filter((e) => e.slug).map((e) => [e.slug, e]));
+const useDataHtml = (p) => {
+  const nf = notFreeBySlug.get(p.slug);
+  return `<p class="muted" id="use-the-data"><a href="../embed/?p=${p.slug}#provider-badge">Embed this provider's badge</a>` +
+    (nf ? ` · <a href="../not-free/#${nf.id}">Why ${htmlEsc(nf.name)} is on the Not free list</a>` : '') + `</p>`;
+};
+
 for (const p of providers) {
   const inColls = COLLECTIONS.filter((c) => collRows(c).some((x) => x.slug === p.slug));
   const inGuides = GUIDES.filter((g) => g.filter(p));
@@ -1341,6 +1362,7 @@ for (const p of providers) {
     (crossChips ? `<h2>Appears in</h2><div class="colls">${crossChips}</div>` : '') +
     compareHtml +
     historyHtml(p.slug) +
+    useDataHtml(p) +
     `</div></main>`;
   const jsonld = JSON.stringify({
     '@context': 'https://schema.org',
@@ -1819,6 +1841,7 @@ for (const g of GUIDES) {
     faqHtml +
     (twins.length ? `<h2>Related collections</h2><nav class="colls">${twins.map((c) => `<a href="../collections/${c.slug}">${htmlEsc(c.title)}</a>`).join('')}</nav>` : '') +
     `<h2>More guides</h2><nav class="colls">${related}</nav>` +
+    `<p class="muted">Looking for OpenAI, Anthropic, Mistral or GitHub Models? <a href="../not-free/">Why they are not on this list</a>.</p>` +
     `<p class="prov-back"><a href="../guides-and-collections/">← All guides</a></p>` +
     `</div></main>`;
   const jsonld = JSON.stringify({
@@ -2061,6 +2084,7 @@ const apiDocMain =
   clientConfigDocs +
   `<h2>Stability</h2><p>Paths under <code>/api/v1/</code> stay put and fields are only ever added within v1; a breaking change ships as <code>/api/v2/</code>. The full policy, and how the dataset <code>version</code> relates to the path, is in <a href="${REPO}/blob/main/docs/api.md">docs/api.md</a>. The JSON Schema is published at <a href="v1/schema.json"><code>/api/v1/schema.json</code></a>.</p>` +
   `<p class="muted">Every object carries the dataset <code>version</code> and <code>generated</code> date. Prefer a stable snapshot? Pin a Git tag of <a href="${REPO}">the repo</a>. For AI agents, see <a href="../llms.txt">llms.txt</a>.</p>` +
+  `<p>Want the widget, a badge or a citation instead? See <a href="../embed/">Use the data</a>.</p>` +
   `</div></main>`;
 mkdirSync(join(ROOT, 'site/api'), { recursive: true });
 writeFileSync(join(ROOT, 'site/api/index.html'), htmlPage({
@@ -2422,6 +2446,34 @@ writeFileSync(
   })
 );
 
+// ---------- /not-free/ — the APIs people expect to be free, from data/not-free.json (same source as the README) ----------
+{
+  const model = notFreeModel(NOT_FREE, { providers, quotes: QUOTES, scoreOf: (slug) => scoreMap[slug]?.total ?? null });
+  mkdirSync(join(ROOT, 'site/not-free'), { recursive: true });
+  writeFileSync(join(ROOT, 'site/not-free/index.html'), htmlPage({
+    title: notFreeTitle(), desc: notFreeDescription(model), canonical: `${SITE}${NOT_FREE_PATH}`, prefix: '../',
+    main: notFreeMainHtml(model, { pageHero, site: SITE, prefix: '../' }),
+    jsonld: notFreeJsonLd(model, { site: SITE, dateModified: ASOF }),
+    ogImage: `${SITE}/og/not-free.png`,
+  }));
+}
+
+// ---------- /embed/ — "Use the data": widget generator, badges, data files and the citation from CITATION.cff ----------
+mkdirSync(join(ROOT, 'site/embed'), { recursive: true });
+writeFileSync(join(ROOT, 'site/embed/index.html'), htmlPage({
+  title: embedTitle(), desc: embedDescription(publicProviders.length), canonical: `${SITE}${EMBED_PATH}`, prefix: '../',
+  main: embedMainHtml({ pageHero, site: SITE, prefix: '../', providers, badgeWidth: BADGE_W, citation: citationRecord(citation), slaDays: FRESH_DAYS }),
+  jsonld: collectionPageJsonLd({
+    type: 'WebPage', name: 'Use the data', url: `${SITE}${EMBED_PATH}`,
+    description: 'Embed the widget or a badge, download the dataset and cite it.',
+    about: datasetRef(SITE),
+    crumbs: [['Use the data', `${SITE}${EMBED_PATH}`]],
+  }),
+  // shared-rules.js and shared-sort.js first, so the preview widget finds them on this page and loads nothing else.
+  scripts: ['shared-rules.js', 'shared-sort.js', 'widget.js', 'embed.js'],
+  ogImage: `${SITE}/og/embed.png`,
+}));
+
 // ---------- /compare — provider compare view (#175) ----------
 // The interactive view (/compare/?compare=a,b — 2 to 4 slugs) and a small,
 // deterministic set of static pages (/compare/<a>-vs-<b>/). Both render the
@@ -2446,6 +2498,7 @@ for (const cp of comparePairs) {
     tagProviderLinks(compareLib.compareTableHtml([a, b], { prefix: '../../', scores: scoreMap }), [...providerLinkTargets(a), ...providerLinkTargets(b)]) +
     `<div class="prov-actions" style="margin-top:22px"><a class="btn primary" href="../?compare=${a.slug},${b.slug}">Add a provider to this comparison →</a></div>` +
     `<h2>Other comparisons</h2><nav class="colls">${compareLinksHtml('../../', cp.path)}</nav>` +
+    `<p class="muted">Expected OpenAI, Anthropic or Mistral here? <a href="../../not-free/">APIs that are not free, and why</a>.</p>` +
     `<p class="prov-back"><a href="../../#explorer">← All providers</a></p>` +
     `</div></main>`;
   const jsonld = comparePageJsonLd({ site: SITE, path: cp.path, a, b });
@@ -2514,6 +2567,8 @@ const sitemapEntries = [
   [`${SITE}/coding-tools/`, codingTools.generated],
   ...CODING_TOOL_PAGES.map(({ e, generated }) => [`${SITE}/coding-tools/${e.slug}/`, generated]),
   [`${SITE}/api/`, ASOF],
+  [`${SITE}${EMBED_PATH}`, ASOF],
+  [`${SITE}${NOT_FREE_PATH}`, ASOF],
   [`${SITE}/changes/`, ASOF],
   [`${SITE}/programs/`, programs.generated],
   [`${SITE}/programs/startups`, programs.generated],

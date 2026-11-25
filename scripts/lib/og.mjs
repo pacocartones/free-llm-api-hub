@@ -40,13 +40,15 @@ export const GUIDES = [
   { slug: 'free-ocr-document-ai-apis', title: 'Free OCR & document AI APIs', filter: (p) => p.verified === true && (p.modalities || []).includes('ocr') },
 ];
 
-// Section images for pages that used the site-wide og.png: the comparisons, the coding tools and the API. Their
+// Section images for pages that used the site-wide og.png: the comparisons, the coding tools, the API, /not-free/ and /embed/. Their
 // text is fixed (no count), so a comparison set or tool list that changes with the data never stales them; the
 // fingerprint is the text itself, which lets check-og.mjs report a missing or outdated one.
 export const SECTION_OGS = [
   { file: 'compare.png', label: 'COMPARE', title: 'Free LLM APIs side by side', subtitle: 'limits · card · phone · commercial use' },
   { file: 'coding-tools.png', label: 'CODING TOOLS', title: 'Free AI coding tools', subtitle: "each value with the tool's own sentence" },
   { file: 'api.png', label: 'API', title: 'Static JSON API', subtitle: 'versioned · CORS-open · no key' },
+  { file: 'not-free.png', label: 'NOT FREE', title: 'LLM APIs that are not free', subtitle: "the provider's own words · dated · free alternatives" },
+  { file: 'embed.png', label: 'USE THE DATA', title: 'Widget, badges, API, citation', subtitle: 'MIT · no key · no tracking' },
 ];
 
 // The manifest every data-dependent OG must match: file name -> fingerprint of

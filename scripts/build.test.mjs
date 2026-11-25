@@ -1731,8 +1731,8 @@ test('header menu: Providers (with The Best inside), Models, Compare, Changes, A
 test('footer columns: where each link lives, and no GitHub star entry in Project', () => {
   run(['scripts/build.mjs']);
   const expected = {
-    Explore: ['models/', 'guides-and-collections/', 'programs/startups', 'programs/research', 'free-gpu/', 'coding-tools/'],
-    Data: ['providers.json', 'api/', 'llms.txt', 'data-policy/', 'coverage/', 'quality/'],
+    Explore: ['models/', 'guides-and-collections/', 'programs/startups', 'programs/research', 'free-gpu/', 'coding-tools/', 'not-free/'],
+    Data: ['providers.json', 'api/', 'llms.txt', 'data-policy/', 'coverage/', 'quality/', 'embed/'],
     Project: ['updates', 'changes/', 'submit/', 'methodology/', 'contributing/', 'agreements/'],
   };
   for (const rel of ['site/index.html', 'site/compare/index.html', 'site/p/groq.html', 'site/legal/privacy.html']) {

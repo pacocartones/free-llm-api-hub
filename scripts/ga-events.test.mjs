@@ -108,6 +108,23 @@ describe('event payloads (analytics granted)', () => {
     assert.ok(p.events().every(([n, prm]) => n === 'copy_snippet' && Object.keys(prm).join() === 'snippet'));
   });
 
+  test('copy_snippet: a block of /embed/ names its kind from the fixed list; anything else falls back to the text', () => {
+    const p = on({ path: '/embed/' });
+    const block = (kind, text) => {
+      const pre = el({ sels: ['pre'], attrs: kind ? { 'data-snippet': kind } : {} });
+      pre.querySelector = () => ({ textContent: text });
+      return el({ sels: ['.pre-copy'], parent: pre });
+    };
+    p.fire('click', block('citation', '@misc{freellmapihub2026,'));
+    p.fire('click', block('citation', 'pacocartones. (2026). Free LLM API Hub'));
+    p.fire('click', block('badge', '[![Groq on Free LLM API Hub](https://img.shields.io/endpoint?url=x)](y)'));
+    p.fire('click', block('embed', '<div id="flh-widget" data-count="6"></div>'));
+    p.fire('click', block(null, '<div id="flh-widget" data-count="6"></div>'));
+    p.fire('click', block('someone@example.com', 'curl https://x'));
+    assert.deepEqual(p.events().map((e) => e[1].snippet), ['citation', 'citation', 'badge', 'embed', 'embed', 'curl']);
+    assert.ok(p.events().every(([n, prm]) => n === 'copy_snippet' && Object.keys(prm).join() === 'snippet'));
+  });
+
   test('explorer_filter: category, modality and each chip, values from fixed lists', () => {
     const p = on();
     p.fire('click', el({ sels: ['#cat button[data-cat]'], attrs: { 'data-cat': 'trial' } }));
