@@ -28,7 +28,7 @@ before(() => { execFileSync(process.execPath, [join(ROOT, 'scripts/build.mjs')],
 
 test('every guide opens with a direct answer of 40 to 55 words that states its own count', () => {
   const slugs = guides();
-  assert.equal(slugs.length, 9);
+  assert.equal(slugs.length, 5);
   for (const slug of slugs) {
     const html = read(slug);
     const a = html.match(/<p class="answer"><strong>([^<]*)<\/strong><\/p>/);
@@ -168,10 +168,11 @@ test('the hub has a direct answer, a title and a description from its live count
   for (const q of graph.find((g) => g['@type'] === 'FAQPage').mainEntity) assert.ok(visible.includes(q.acceptedAnswer.text), q.name);
 });
 
-test('image guide describes editing as well as generation, matching the broad image modality', () => {
+test('image guide lists the image APIs that don’t generate images in their own table, matching the broad image modality', () => {
   const html = read('free-image-generation-apis');
-  assert.match(html, /<h1>Free image APIs — generation and editing<\/h1>/);
-  assert.match(html, /Not every image API generates images/);
+  assert.match(html, /<h1>Free image generation APIs<\/h1>/);
+  assert.match(html, /aria-label="Other free image APIs"/);
+  assert.match(html, /their entries don’t name image generation/);
 });
 
 test('discovery pages have unique metadata, self canonicals and exactly one sitemap entry', () => {
