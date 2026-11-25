@@ -267,7 +267,19 @@
    "kind": "sentence",
    "text": "不会将您的业务数据用于任何大模型的预训练、微调或其他商业用途",
    "source_url": "https://docs.siliconflow.cn/docs/legals/privacy-policy",
-   "read_on": "2026-11-14",
+   "read_on": "2026-11-25",
+   "lang": "cn",
+   "method": "html-text-v1: page requested with Accept-Language cn, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "2b1f6094bc6b9be389829567109f290c41ed0f0504bbc3a385e4ff9e908486e1"
+  },
+  {
+   "id": "siliconflow.phone_required.sentence",
+   "slug": "siliconflow",
+   "kind": "field_sentence",
+   "field": "phone_required",
+   "text": "您需要向我们提供的必要信息包括：您的手机号码、验证码。",
+   "source_url": "https://docs.siliconflow.cn/docs/legals/privacy-policy",
+   "read_on": "2026-11-25",
    "lang": "cn",
    "method": "html-text-v1: page requested with Accept-Language cn, tags removed, character references decoded, white space collapsed",
    "page_sha256": "2b1f6094bc6b9be389829567109f290c41ed0f0504bbc3a385e4ff9e908486e1"
@@ -300,10 +312,10 @@
    "kind": "sentence",
    "text": "Your data is never used to train our models, and we only keep what is strictly necessary for billing.",
    "source_url": "https://www.ovhcloud.com/en/public-cloud/ai-endpoints/",
-   "read_on": "2026-11-24",
+   "read_on": "2026-11-25",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
-   "page_sha256": "8af77e3bbb08fc31dbddc393fd03daff46547e4fd941bc175c0065f618b5c076"
+   "page_sha256": "49999e4300e58dfb54cb27525609e53154c5cba77fe3c03cdbcdfe74ec087e50"
   },
   {
    "id": "fireworks-ai.sentence",
@@ -344,10 +356,10 @@
    "kind": "sentence",
    "text": "Baseten does not use customer content to train or fine-tune models.",
    "source_url": "https://www.baseten.co/security/",
-   "read_on": "2026-11-19",
+   "read_on": "2026-11-25",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
-   "page_sha256": "846bd82b1e5911e170e3dda6695730635e6800dfe9b69b64e722ef373977b5b9"
+   "page_sha256": "73dac62814320997cebc0cf22e65d868e8050142b07d7398a1aa0172962df95b"
   },
   {
    "id": "novita.sentence",
@@ -961,12 +973,12 @@
    "id": "upstage.sentence",
    "slug": "upstage",
    "kind": "sentence",
-   "text": "may be used for service provision and improvement, as well as for research and development of artificial intelligence technologies (including training).",
+   "text": "may be used for service provision and improvement, as well as for research and development of artificial intelligence technologies (including training)",
    "source_url": "https://www.upstage.ai/terms-of-service",
-   "read_on": "2026-11-19",
+   "read_on": "2026-11-25",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
-   "page_sha256": "44b85514e26fda3834a5030d2763ea37e107fa328fe2261b2e0e7255fe5b8d1f"
+   "page_sha256": "c65d5a4023f4655c2bde4e5274c6d92f39f9c016871dd032ba27dc9e9f641f3d"
   },
   {
    "id": "veryfi.sentence",

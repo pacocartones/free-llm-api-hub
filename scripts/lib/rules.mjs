@@ -41,6 +41,35 @@ export function recScore(p) {
 export const FREE_TYPE_RANK = { perpetual: 0, 'renewing-quota': 1, 'recurring-credit': 2, 'trial-credit': 3 };
 export const freeTypeRank = (p) => (FREE_TYPE_RANK[p.free_type] ?? 4);
 
+// The visitor's most common intent: a text LLM they can keep calling, with no card on file. Rows that match all three
+// (is_text_llm, an ongoing free tier, a confirmed "no card") open the "Recommended" order; everything else follows.
+// Ordering by recScore alone put a Thai-language research API, OCR and speech services above Gemini (9th) and Groq
+// (21st), because a specialised API with every flag confirmed outscores a general LLM with one flag still unknown.
+// 0 = the intent group, 1 = the rest. Only confirmed values count: an unknown card requirement is not "no card".
+export function intentRank(p) {
+  return p.is_text_llm === true && p.category === 'ongoing' && p.card_required === false ? 0 : 1;
+}
+
+// The full "Recommended" order, shared by the server render, the explorer, the widget and the guides' "Top pick":
+//   1. the intent group first (intentRank),
+//   2. then the flag score (recScore),
+//   3. then text LLMs before other modalities (the modality tie-break),
+//   4. then the rated quality of the best free model (model_tier, 0-4; a provider still to be rated sorts after
+//      a rated one, never above it),
+//   5. then the free_type taxonomy, then the name, so the order is total and deterministic.
+// It references recScore, intentRank and freeTypeRank by name: the serialised copy in site/shared-rules.js declares
+// them in the same closure.
+export function recommendedCmp(a, b) {
+  const tier = (p) => (Number.isInteger(p.model_tier) ? p.model_tier : -1);
+  const text = (p) => (p.is_text_llm === true ? 1 : 0);
+  return (intentRank(a) - intentRank(b)) ||
+    (recScore(b) - recScore(a)) ||
+    (text(b) - text(a)) ||
+    (tier(b) - tier(a)) ||
+    (freeTypeRank(a) - freeTypeRank(b)) ||
+    (a.name < b.name ? -1 : a.name > b.name ? 1 : 0);
+}
+
 // [field, value, icon-id, label] — the access-flag pills in the Type column.
 export const FLAG_PAIRS = [
   ['card_required', false, 'ic-nocard', 'no card'], ['card_required', true, 'ic-card', 'card'],
