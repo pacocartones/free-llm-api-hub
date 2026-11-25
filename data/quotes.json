@@ -1122,6 +1122,30 @@
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "1947fa93108fe60af1381216110156c93d996ac6516ec21c7e70deedbbe736a0"
+  },
+  {
+   "id": "meganova.card_required.sentence",
+   "slug": "meganova",
+   "kind": "field_sentence",
+   "field": "card_required",
+   "text": "Free registration — no credit card required",
+   "source_url": "https://docs.meganova.ai/tiers/tier-1",
+   "read_on": "2026-11-25",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "c7245a89e713743024aec41a3538d844d49d57667aa422dcb4d72d7607efd588"
+  },
+  {
+   "id": "sea-lion.commercial_ok.sentence",
+   "slug": "sea-lion",
+   "kind": "field_sentence",
+   "field": "commercial_ok",
+   "text": "Our free APIs are intended for proof-of-concept (POC) development and are rate-limited (10 requests per minute). They are not designed for production workloads.",
+   "source_url": "https://docs.sea-lion.ai/overview/readme/faq",
+   "read_on": "2026-11-25",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "993d45e41dd1e3e07feff0c6db63c5acbe99fdc80e8e93650e90daba68999ae7"
   }
  ]
 }
