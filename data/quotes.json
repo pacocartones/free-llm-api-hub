@@ -48,6 +48,18 @@
    "page_sha256": "645fa99e301839336160d9b0387edad3a965dc30e8bed95efb9e54116c2f2f1e"
   },
   {
+   "id": "groq.openai_compatible.sentence",
+   "slug": "groq",
+   "kind": "field_sentence",
+   "field": "openai_compatible",
+   "text": "We designed Groq API to be mostly compatible with OpenAI's client libraries, making it easy to configure your existing applications to run on Groq and try our inference speed.",
+   "source_url": "https://console.groq.com/docs/openai",
+   "read_on": "2026-11-25",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "eadb5c138a45b332d56e854038b2b551efb75b87310772cc467ccddcd7f7cc59"
+  },
+  {
    "id": "groq.speed.openai/gpt-oss-20b.output_tokens_per_second",
    "slug": "groq",
    "kind": "speed_quote",
