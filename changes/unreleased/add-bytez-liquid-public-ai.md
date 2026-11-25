@@ -12,7 +12,8 @@
   on Liquid Console, for its own LFM and d1 models, through an
   OpenAI-compatible API. The console calls it a limited-time offer. The terms
   allow use for internal business purposes and to operate applications, and
-  let Liquid train on prompts and outputs. Checked 2026-11-25, agent-assisted (#790).
+  let Liquid train on prompts and outputs. Checked 2026-11-25, agent-assisted
+  (#790).
 - Public AI Inference Utility (`public-ai`): a one-time $2 starter credit for
   every new account on a nonprofit, OpenAI-compatible gateway to public and
   sovereign open models (Apertus, SEA-LION, Olmo, Bielik), at 100 requests per
