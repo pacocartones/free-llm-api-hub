@@ -8,7 +8,7 @@ LLM and AI APIs whose free allowance resets (daily, monthly or per minute) inste
 
 Providers whose free access **renews**: a quota (`free_type: renewing-quota`) or a credit (`free_type: recurring-credit`) that resets on a schedule. One-time signup credits and permanently free models are listed in other collections. A renewing allowance can still be evaluation-only (for example Cohere) — read the catch.
 
-**25 of 64 tracked providers** match.
+**26 of 66 tracked providers** match.
 
 | Provider | Type | What's free | The catch | Verified |
 |---|---|---|---|---|
@@ -37,6 +37,7 @@ Providers whose free access **renews**: a quota (`free_type: renewing-quota`) or
 | **[Nutrient (Data Extraction API)](https://www.nutrient.io/api/pricing/data-extraction-api/)**<br><sub>💳 no card · 🏢 commercial OK (conditional)</sub> | Ongoing | $5 of usage every month, shared across all APIs; unused monthly usage expires without rollover. Existing legacy credits plans continue unchanged | No credit card required. Without a pay-as-you-go wallet, requests pause when monthly usage runs out and resume after it resets. Legacy credits plans keep working unchanged; the new dollar-denominated plan is not a stated increase to their quota. Formerly PSPDFKit. Extraction/OCR supports tables, key-value data and handwriting. Commercial-use eligibility remains unconfirmed. | ✅ 2026-11-19 |
 | **[Photoroom](https://www.photoroom.com/api/pricing)**<br><sub>💳 no card · 🔬 eval only</sub> | Ongoing | 10 free production calls on the Remove Background API (one-time) plus 1,000 sandbox calls/month on the Image Editing API (watermarked) | No credit card required. Sandbox output is watermarked (for testing); the 10 production calls return clean output. Image editing/generation (AI backgrounds, relighting, shadows). The terms license Free Accounts for personal, non-commercial purposes only. | ✅ 2026-11-19 |
 | **[Veryfi](https://www.veryfi.com/pricing/)**<br><sub>💳 no card · 🏢 commercial OK</sub> | Ongoing | Free Forever plan: up to 100 documents/month with API access to 100+ document types; the Document to JSON structured extraction is not included on Free | No credit card required. The 'Free Forever' 100 docs/mo tier is the standing free tier (a separate 14-day trial unlocks paid features). Proprietary OCR / document-intelligence REST API. | ✅ 2026-11-19 |
+| **[Aion Labs](https://www.aionlabs.ai/docs/rate-limits/)**<br><sub>💳 card required · 🏢 commercial OK · 🔌 OpenAI-compat</sub> | Ongoing | Free tier with a daily allowance usable on the API: 20,000 tokens a day; API keys activate after verifying a payment card that is never charged | EU provider (Deep Forge sp. z o.o., Warsaw). Free-tier API keys return 403 until a payment card is verified through Stripe on the Billing page; the card is never charged and one card can activate one free account. Models are Aion Labs' own multi-model systems built on DeepSeek and GLM, tuned for roleplay and storytelling, including mature themes; the service is for adults only. The docs do not say which models the free allowance covers. Pricing, rate-limit, quickstart and model pages, terms (version 2026-10-17) and privacy policy (effective 2026-11-16) read 2026-11-25. | ✅ 2026-11-25 |
 
 ---
 
