@@ -1,6 +1,6 @@
 ### Changed and fixed
 
-- Weekly re-verification (agent-assisted; quotes in the pull request), Refs #4:
+- Weekly re-verification (agent-assisted; quotes in the pull request) (#734, issue #4):
   - Moondream Cloud (`moondream`) and Modal (`modal`) re-confirmed against
     their own pages: `last_verified` and `data_policy.checked` moved to
     2026-11-24. `card_required` now has a stated source for both: Moondream's
