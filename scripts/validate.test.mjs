@@ -1,10 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { cpSync, readdirSync, readFileSync, symlinkSync, writeFileSync } from 'node:fs';
+import { cpSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { makeTmpDir } from './lib/tmp.mjs';
+import { linkDir } from './lib/private-tree.mjs';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 const DATA = JSON.parse(readFileSync(join(ROOT, 'data/providers.json'), 'utf8'));
@@ -442,8 +443,8 @@ function repositoryCopy() {
   cpSync(join(ROOT, 'data'), join(root, 'data'), { recursive: true });
   for (const file of readdirSync(join(ROOT, 'docs')).filter((f) => f.endsWith('.md'))) cpSync(join(ROOT, 'docs', file), join(root, 'docs', file));
   for (const file of ['README.md', 'CONTRIBUTING.md', 'GOVERNANCE.md', 'site/index.html']) cpSync(join(ROOT, file), join(root, file));
-  // ajv resolves from the copy's own node_modules; a junction needs no privileges on Windows and is a plain symlink elsewhere.
-  symlinkSync(join(ROOT, 'node_modules'), join(root, 'node_modules'), 'junction');
+  // ajv resolves from the copy's own node_modules: a junction (no privileges needed on Windows), a copy if even that fails.
+  linkDir(join(ROOT, 'node_modules'), join(root, 'node_modules'));
   return root;
 }
 

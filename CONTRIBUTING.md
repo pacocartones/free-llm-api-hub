@@ -84,6 +84,16 @@ OG files are left for you to check: run `node scripts/check-og.mjs`; if it repor
 >
 > If you cloned shallow, fix it with `git fetch --unshallow`; otherwise just clone normally: `git clone https://github.com/pacocartones/free-llm-api-hub`. The root integrity and site-build CI jobs check out the full history (`fetch-depth: 0`); workflows that do not mine history may use shallow checkouts.
 
+### Windows and WSL
+
+`npm test` should pass on Windows and in WSL as it does on Linux and macOS. CI runs it on a Windows runner with CRLF settings and without symlink privileges.
+
+- **WSL:** clone inside the Linux file system (for example `~/src/free-llm-api-hub`), not under `/mnt/c/`: the Windows drive is slow from WSL, and Windows Git and Linux Git sharing one clone disagree about file modes and the index. Install `git` and `jq` (`sudo apt install git jq`) and the Node version in `.nvmrc`. Without `jq`, the tests that run workflow shell scripts are skipped with a message that says so.
+- **Windows:** Developer Mode is not needed. The test copies link `node_modules` with a junction, which needs no privileges, and copy it where a junction is impossible. Tests of Bash scripts are skipped on Windows, and the Linux job runs them.
+- **Line endings:** `.gitattributes` checks text files out with LF whatever `core.autocrlf` says. If `npm test` stops with "tracked text file(s) have CRLF line endings", an editor saved those files with CRLF: save them with LF (or `git checkout -- <file>` for a file you have not edited).
+- **Commit signing:** if your git config signs commits (`commit.gpgsign`), `npm test` turns signing off for the throwaway repositories the tests create. Your own commits are not affected.
+- **A data-only change:** `npm run validate` checks `data/` in seconds while you edit; before the pull request, run `npm run build && npm test`, commit, then `npm run check`, as in [Which checks to run](#which-checks-to-run).
+
 If you want to preview how your entry renders on the site before opening the PR:
 
 ```bash
