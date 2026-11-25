@@ -112,7 +112,7 @@ describe('the editorial file can only quote the data', () => {
 
   test('raw HTML in the file is text, not markup', () => {
     const out = renderReport(FILE.replace('## Headlines', '## <script>alert(1)</script>'), model(), { site: SITE });
-    assert.doesNotMatch(out.html, /<script>/);
+    assert.ok(!out.html.toLowerCase().includes('<script'), 'no script element in the output');
   });
 
   test('every month with a month before it gets the generated sections without a file', () => {
@@ -191,7 +191,7 @@ describe('the built /state/ pages', () => {
       const html = read(`site/state/${month}/index.html`);
       for (const [, raw] of html.matchAll(/<a [^>]*href="([^"]+)"/g)) {
         let href = raw.replace(/&amp;/g, '&');
-        if (href.startsWith(SITE)) href = href.slice(SITE.length) || '/';
+        if (href === SITE || href.startsWith(SITE + '/')) href = href.slice(SITE.length) || '/';
         else if (/^(https?:|mailto:|#)/.test(href)) continue;
         const path = href.split(/[?#]/)[0];
         const target = path.startsWith('/') ? join(ROOT, 'site', path) : resolve(join(ROOT, `site/state/${month}`), path);
