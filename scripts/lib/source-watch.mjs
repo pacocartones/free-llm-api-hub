@@ -21,6 +21,12 @@ export const FLAG_AFTER_RUNS = 2;
 export const GONE_STATUSES = new Set([404, 410]);
 export const DEFAULT_CONCURRENCY = 4;
 export const DEFAULT_DELAY_MS = 700;
+/** Pages whose text differs on every request (a per-request token in the markup), so their hash says nothing: a present quote on one of
+ * them is "present", never "changed". The quote itself is still checked. Digits and dates are deliberately NOT normalised away for every
+ * page, because that would hide exactly the limit changes the watch is for. Add a page here only after two reads a minute apart differ. */
+export const VOLATILE_PAGES = new Set([
+  'https://azure.microsoft.com/en-us/pricing/purchase-options/azure-account', // a 32-hex token changes on every request (2026-11-25)
+]);
 const STATE_RE = /<!-- source-watch-state: (\{.*?\}) -->/s;
 const MAX_ROWS = 300; // an issue body is capped at 65,536 characters; far more rows than the register has today
 
@@ -72,7 +78,7 @@ export async function judge(entries, pages) {
   return results.map((r) => {
     const e = byId.get(r.id);
     const row = { id: e.id, slug: e.slug, kind: e.kind, source_url: e.source_url, read_on: e.read_on };
-    if (r.result === 'ok') return { ...row, status: r.page_changed ? 'changed' : 'present' };
+    if (r.result === 'ok') return { ...row, status: r.page_changed && !VOLATILE_PAGES.has(e.source_url) ? 'changed' : 'present' };
     if (r.result === 'expired') return { ...row, status: 'missing' };
     const reading = pages.get(`${e.lang}\0${e.source_url}`);
     return { ...row, status: 'fetch_error', ...(Number.isInteger(reading?.status) ? { http: reading.status } : {}), reason: fetchReason(reading, r.result) };
@@ -113,7 +119,8 @@ export function buildReport(rows, previousState, { ranAt, runUrl = '' } = {}) {
   return { version: 1, ran_at: ranAt, run_url: runUrl, clean, summary, state: { version: 1, fetch_errors }, results: out };
 }
 
-const cell = (s) => String(s).replace(/\|/g, '\\|').replace(/[\r\n]+/g, ' ');
+// A Markdown table cell: backslashes first, then pipes, so a value can neither end the cell nor un-escape our escape; line breaks become spaces.
+const cell = (s) => String(s).replace(/\\/g, '\\\\').replace(/\|/g, '\\|').replace(/[\r\n]+/g, ' ');
 const bySlug = (rows) => {
   const m = new Map();
   for (const r of rows) { if (!m.has(r.slug)) m.set(r.slug, []); m.get(r.slug).push(r); }

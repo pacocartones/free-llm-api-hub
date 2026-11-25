@@ -119,6 +119,8 @@ The script writes nothing to the repository and is not part of `npm test` or CI,
 | missing | the page came, in the recorded language, and the quoted text is no longer in it | re-check the claim and the quote (below) |
 | fetch error | HTTP error, timeout, a page that needs scripts, or another language | only flagged after **2 runs in a row** (404/410 at once), because CDNs often block GitHub runners |
 
+A few pages put a per-request token in their markup, so their hash differs on every read. They are listed in `VOLATILE_PAGES` in `scripts/lib/source-watch.mjs` and never report "changed"; the quote itself is still checked. Add a page there only after two reads a minute apart differ. Digits and dates are deliberately not normalised away, because that would hide the limit changes the watch exists to catch.
+
 It publishes **one** issue, "Source watch: quotes to re-check": missing quotes grouped by provider, then flagged fetch errors. The body is replaced on every run (keep discussion in comments); the issue is reopened when something needs a person and closed when a run is clean. The two-run memory is a hidden `source-watch-state` comment at the end of that body (URLs and counts only); the full report is kept as the `source-watch-report` run artifact for 90 days. Nothing is written to the repository, no pull request is opened, no secret is used, and the issue lists our own ids and URLs, never page text. The job has `contents: read` and `issues: write` only.
 
 Requests are polite: at most 4 hosts at a time, one request at a time per host, a 0.7 s pause before each, 30 s timeout, through the repository's public-URL transport.

@@ -6,7 +6,7 @@ import { readFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { htmlToText, sha256 } from './lib/page-text.mjs';
-import { ISSUE_TITLE, FLAG_AFTER_RUNS, readAll, judge, parseState, buildReport, renderIssue, plan, fetchReason } from './lib/source-watch.mjs';
+import { ISSUE_TITLE, FLAG_AFTER_RUNS, VOLATILE_PAGES, readAll, judge, parseState, buildReport, renderIssue, plan, fetchReason } from './lib/source-watch.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const FILLER = ' This paragraph is padding so that the page has enough text to count as a real page that was read.'.repeat(4);
@@ -130,6 +130,20 @@ test('a clean run says so', async () => {
   const body = renderIssue(buildReport((await run(entries)).rows, null, { ranAt: '2026-11-30T06:00:00Z' }));
   assert.match(body, /\*\*Everything is clean/);
   assert.doesNotMatch(body, /## Missing|## Fetch errors/);
+});
+
+test('a volatile page never reports "changed", but a missing quote on it is still missing', async () => {
+  const url = [...VOLATILE_PAGES][0];
+  const html = page('All you need is a phone number. token 0123abcd');
+  const entries = [entry('v.sentence', url, 'All you need is a phone number.', page('All you need is a phone number. token ffff0000')), entry('v.other', url, 'Not on the page.', html)];
+  const { rows } = await run(entries, { [url]: { status: 200, html } });
+  assert.deepEqual(rows.map((r) => r.status), ['present', 'missing']);
+});
+
+test('table cells escape backslashes before pipes, so a value cannot break out of its cell', () => {
+  const rows = [{ id: 'q.sentence', slug: 'q', kind: 'sentence', source_url: 'https://q.example/', read_on: '2026-11-01', status: 'fetch_error', http: 404, reason: 'error: a\\|b\nc' }];
+  const body = renderIssue(buildReport(rows, null, { ranAt: '2026-11-30T06:00:00Z' }));
+  assert.ok(body.includes('| error: a\\\\\\|b c | 1 |'), body);
 });
 
 test('a broken or hostile state comment is ignored rather than trusted', () => {
