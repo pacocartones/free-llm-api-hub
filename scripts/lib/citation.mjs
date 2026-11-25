@@ -25,7 +25,8 @@ export function citationRecord(cffText) {
 }
 
 // BibTeX special characters in a field value: braces stay balanced, and the TeX specials are escaped.
-const bib = (s) => String(s).replace(/[\\{}]/g, '').replace(/([&%$#_])/g, '\\$1');
+// One pass: backslashes and braces are dropped, every other special gets a leading backslash.
+const bib = (s) => String(s).replace(/[\\{}&%$#_]/g, (ch) => ('\\{}'.includes(ch) ? '' : `\\${ch}`));
 
 export function bibtex(r) {
   const key = `freellmapihub${r.year || ''}`;

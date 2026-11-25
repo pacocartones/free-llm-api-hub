@@ -182,7 +182,7 @@ describe('/embed/: Use the data', () => {
     assert.equal(r.title, cff.match(/^title: "(.+)"$/m)[1]);
     assert.ok(html.includes(`<pre data-snippet="citation"><code id="cite-bibtex">${codeHtmlEsc(bibtex(r))}</code></pre>`), 'BibTeX');
     assert.ok(html.includes(`<pre data-snippet="citation"><code id="cite-apa">${codeHtmlEsc(apa(r))}</code></pre>`), 'APA');
-    assert.match(bibtex(r), new RegExp(`version = \\{${r.version.replace(/\./g, '\\.')}\\}`));
+    assert.match(bibtex(r), new RegExp(`version = \\{${r.version.replace(/[\\^$.*+?()[\]{}|]/g, '\\$&')}\\}`));
     assert.equal(apa(r), `pacocartones. (${r.year}). ${r.title} (Version ${r.version}) [Data set]. ${r.url}`);
   });
 
