@@ -1,0 +1,74 @@
+name: Regeneration preview
+
+# Shadow evaluation, on pull requests, of the drift gate planned for the regeneration bot's switch to direct push
+# (docs/regeneration-bot.md, step C). It needs no GitHub App and no secret, and it never blocks: it is not a
+# required check and it exits green whatever it finds (a failing build still fails, as it does in Verify).
+#
+# For each pull request it rebuilds the derived files on the pull request's merge commit and reports:
+#   - which derived files a fresh build changes, as a list in the run summary and as the `regen-preview-patch`
+#     artifact (a contributor without Node can download it and `git apply --binary` it);
+#   - what the planned gate would decide: `in-sync`, `bot-would-regenerate` (informative after the switch),
+#     `would-block-hand-edit` or `would-block-release` (logic in scripts/lib/regenerate.mjs, tested).
+# The blocking gate in verify.yml ("Generated files must be in sync with the data") is unchanged.
+#
+# Safe for pull requests from forks: the `pull_request` event (never `pull_request_target`) gives a read-only
+# GITHUB_TOKEN and no secrets, credentials are not persisted, npm lifecycle scripts are off, and nothing is pushed,
+# commented or labelled. It runs the same pull-request code Verify already runs, with the same permissions.
+on:
+  pull_request:
+    paths:
+      - 'data/**'
+      - 'scripts/**'
+      - 'CONTRIBUTING.md'
+      - 'docs/**'
+      - 'README.md'
+      - 'collections/**'
+      - 'site/**'
+      - 'CITATION.cff'
+      - 'badge-verified.json'
+      - 'derived-fingerprints.json'
+      - '.github/workflows/regenerate-preview.yml'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions: {}
+
+jobs:
+  preview:
+    name: Regeneration preview (shadow)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0 # build.mjs mines per-provider history from git log
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+      - name: Install the locked development tools (no lifecycle scripts)
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Build
+        run: node scripts/build.mjs
+      - name: Render social images only if they no longer match the data
+        run: node scripts/check-og.mjs || node scripts/og.mjs
+      - id: preview
+        name: What the planned drift gate would decide
+        # HEAD is the pull request's merge commit; its first parent is the base branch.
+        run: BASE="$(git rev-parse HEAD^1)" node scripts/regenerate-guard.mjs preview
+      - name: Write the patch
+        if: ${{ steps.preview.outputs.changed == 'true' }}
+        run: |
+          git add -A
+          git diff --cached --binary > "$RUNNER_TEMP/regen-preview.patch"
+      - if: ${{ steps.preview.outputs.changed == 'true' }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: regen-preview-patch
+          path: ${{ runner.temp }}/regen-preview.patch
+          retention-days: 7
+          if-no-files-found: error

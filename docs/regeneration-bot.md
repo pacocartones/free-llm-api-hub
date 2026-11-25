@@ -21,6 +21,15 @@ It rolls out in three steps, controlled by the repository variable `REGEN_MODE`:
 - **Why a GitHub App and not `GITHUB_TOKEN`.** This repository does not allow Actions to create pull requests (`can_approve_pull_request_reviews: false`), a pull request opened with `GITHUB_TOKEN` does not run the required checks, and `GITHUB_TOKEN` can never be a ruleset bypass actor for step 2. The App's pull requests run every check, its commits are signed by `<slug>[bot]` (not a maintainer identity, so `commit policy` applies only the branch rule, and `chore/regenerate-derived` passes it), and its key only exists inside the `publish` job.
 - **Not recommended:** turning on *Settings → Actions → General → Allow GitHub Actions to create and approve pull requests*. It would also let any workflow approve pull requests, its pull requests would still run no checks, and it does not help step 2. The workflow does not use it.
 
+## Pull-request preview (no App needed)
+
+`.github/workflows/regenerate-preview.yml` is the pull-request side of shadow mode. On every pull request that touches data, scripts, docs or derived files it rebuilds on the pull request's merge commit and, without ever failing on drift:
+
+- lists the derived files a fresh build changes in the run summary and uploads them as the `regen-preview-patch` artifact (7 days), so a contributor without Node, or the maintainer, can `git apply --binary regen-preview.patch` on the pull request branch (it is cut against the merge commit, so it applies cleanly while the branch is up to date with `main`);
+- says what the drift gate planned for step C would decide: `in-sync`, `bot-would-regenerate` (only derived files the pull request did not touch are stale: informative after the switch), `would-block-hand-edit` (the pull request edits derived files that do not match the build) or `would-block-release` (a release pull request must ship fully regenerated). The logic is `previewVerdict()` in [scripts/lib/regenerate.mjs](../scripts/lib/regenerate.mjs); paths outside the allowlist raise a warning.
+
+It is not a required check and changes nothing about the blocking gate in `verify.yml`. It uses only the `pull_request` event with a read-only token: no secret, no App, nothing pushed or commented, so it is safe for pull requests from forks. Counting its verdicts over the shadow week is the audit §6 of the ADR asks for before the gate is relaxed.
+
 ## What the maintainer clicks
 
 ### A. Shadow mode, report only (no App)
