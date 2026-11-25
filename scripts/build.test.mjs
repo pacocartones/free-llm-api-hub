@@ -481,7 +481,7 @@ test('sitemap.xml lists no paginated updates pages (their count follows the comm
   assert.doesNotMatch(sitemap, /\/updates\/page\//, 'a page count tied to git history would make the drift-gated sitemap change on every merge');
 });
 
-test('derived-fingerprints.json pins gitignored outputs, skips site/p/, site/badges/, tracked and git-log files', () => {
+test('derived-fingerprints.json pins gitignored outputs, skips site/p/, site/badges/, the freshness badge, tracked and git-log files', () => {
   const fp = join(ROOT, 'derived-fingerprints.json');
   if (!existsSync(fp)) run(['scripts/build.mjs']);
   const pins = JSON.parse(readFileSync(fp, 'utf8'));
@@ -496,6 +496,8 @@ test('derived-fingerprints.json pins gitignored outputs, skips site/p/, site/bad
     'site/p/ must not be pinned (date-relative)');
   assert.equal(Object.keys(pins).some((k) => k.startsWith('site/badges/')), false,
     'site/badges/ must not be pinned (colour tracks verification age)');
+  assert.equal(pins['site/badge-freshness.json'], undefined,
+    'site/badge-freshness.json must not be pinned (its oldest age moves every day)');
   assert.equal(Object.keys(pins).some((k) => k.startsWith('site/og/')), false,
     'site/og/ is tracked and diff-gated directly');
   assert.equal(pins['site/index.html'], undefined,
