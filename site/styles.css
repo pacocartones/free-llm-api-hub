@@ -138,8 +138,6 @@ code, pre, kbd { font-family: var(--font-mono); }
 svg.i { width: 15px; height: 15px; flex: none; vertical-align: -2px; }
 ::placeholder { color: var(--muted); opacity: 1; }
 ::selection { background: color-mix(in srgb, var(--accent) 32%, transparent); }
-.caret { display: inline-block; width: .52em; height: 1.02em; margin-left: .08em; background: var(--accent); vertical-align: -.13em; border-radius: 1px; animation: blink 1.15s steps(1) 6; }
-@keyframes blink { 50% { opacity: 0; } }
 
 /* ---------- logo ---------- */
 .logo-mark { display: block; width: 28px; height: 28px; flex: none; transition: transform .15s ease; }
@@ -250,28 +248,56 @@ svg.i { width: 15px; height: 15px; flex: none; vertical-align: -2px; }
 .btn.ghost:hover { border-color: var(--accent); color: var(--accent); }
 
 /* ---------- hero ---------- */
-.hero { position: relative; overflow: hidden; border-bottom: 1px solid var(--border); background-image: radial-gradient(var(--border) 1px, transparent 1px); background-size: 22px 22px; background-position: -1px -1px; }
-.hero::before {
-  content: ""; position: absolute; inset: -180px 0 auto 0; height: 460px; z-index: 0;
-  background: radial-gradient(620px 300px at 50% 0, color-mix(in srgb, var(--accent) 16%, transparent), transparent 70%);
-  pointer-events: none;
-}
-.hero-inner { position: relative; z-index: 1; padding: 36px 0 28px; text-align: center; }
+/* Brand H1: the copy on the left, aligned left; the field of every provider's aura on the right (lib/aura.mjs), with
+   the key to read it. Plain ground, no glow. On a phone the field goes, so the explorer stays in the first viewport. */
+.hero { position: relative; border-bottom: 1px solid var(--border); }
+.hero-inner { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr); gap: 24px 44px; align-items: center; padding: 28px 24px 22px; }
+.hero-copy { min-width: 0; }
 .hero-logo { display: inline-flex; margin-bottom: 16px; }
-.hero-star { margin-top: 18px; display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
-.eyebrow { color: var(--accent); font-weight: 700; font-size: .74rem; letter-spacing: .18em; text-transform: uppercase; margin: 0 0 14px; font-family: var(--font-mono); }
-.eyebrow::before { content: "> "; opacity: .8; }
+.hero-star { margin-top: 16px; display: flex; flex-wrap: wrap; gap: 10px; }
+.eyebrow { color: var(--muted); font-weight: 500; font-size: .74rem; letter-spacing: .14em; text-transform: uppercase; margin: 0 0 12px; font-family: var(--font-mono); }
 h1 { font-size: clamp(1.9rem, 4.4vw, 3rem); line-height: 1.1; margin: 0 auto 18px; max-width: 20ch; }
 .lede { color: var(--muted); font-size: 1.1rem; max-width: 64ch; margin: 0 auto 30px; }
-.hero .lede { max-width: 86ch; }
-.hero .lede { margin-bottom: 14px; }
-/* The home title is two lines at every width (Q2): the break is in the markup, so the lines may be wider than 20ch. */
-.hero h1 { max-width: none; }
-@media (max-width: 480px) {
-  .hero h1 { font-size: 1.7rem; }
+.hero h1 { max-width: none; margin: 0 0 14px; font-size: clamp(2.1rem, 4.2vw, 3.5rem); line-height: .95; }
+/* The key phrase in the accent, set in the variable font's narrow heavy cut. It "breathes" (width and weight) once on
+   load, only when motion is welcome, and never loops (WCAG 2.2.2). */
+.h1-key { display: inline-block; color: var(--accent); font-variation-settings: "wdth" 80, "wght" 800; }
+@media (prefers-reduced-motion: no-preference) {
+  .h1-key { animation: breathe 5s ease-in-out 1; }
+  @keyframes breathe { 50% { font-variation-settings: "wdth" 125, "wght" 350; } }
+}
+.hero .lede { margin: 0 0 14px; max-width: 60ch; font-size: 1.05rem; }
+.hero .stats-line { margin: 0; }
+.hero .hero-links { justify-content: flex-start; }
+.hero-field { min-width: 0; }
+.aura-field { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 8px; }
+.aura-field a { display: block; border-radius: 50%; line-height: 0; }
+.aura-field .aura { width: 100%; }
+.aura-key { margin-top: 14px; font-size: .8rem; color: var(--muted); }
+.aura-key-h { margin: 0 0 8px; }
+.aura-key-h a { text-decoration: underline; text-underline-offset: 2px; }
+.aura-key ul { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 8px 16px; }
+.aura-key-shapes li { display: inline-flex; align-items: center; gap: 8px; }
+.aura-key-shapes .aura { width: 20px; }
+.aura-key-shapes b { color: var(--text); font-weight: 600; }
+.aura-key-hues { margin-top: 8px !important; font-family: var(--font-mono); font-size: .74rem; }
+.aura-key-hues li { display: inline-flex; align-items: center; gap: 6px; }
+.hue-dot { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+@media (width <= 900px) {
+  .hero-inner { grid-template-columns: minmax(0, 1fr); }
+  .aura-field { grid-template-columns: repeat(18, minmax(0, 1fr)); gap: 6px; }
+}
+@media (width <= 720px) {
+  .hero-inner { padding: 24px 16px 18px; }
+  /* Phones: the field and its key go, so the explorer stays in the first viewport; every row still leads with its
+     aura, and each provider page reads its aura in words. */
+  .hero-field { display: none; }
+}
+@media (width <= 480px) {
+  .hero h1 { font-size: 2rem; }
   /* Phones: the Popular row repeats the menu (Models, Compare, Guides) and the star button repeats the header's star
      count; both go, so the search box and the first rows come up (Q2). The Get started row stays. */
-  .hero-links.hl-popular, .hero-star { display: none; }
+  .hero-links.hl-popular, .hero-star, .aura-key-hues { display: none; }
 }
 .cta { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-bottom: 40px; }
 
@@ -566,16 +592,18 @@ pre code { color: var(--text); }
 .prov-card h3 { margin: 0 0 6px; font-size: .72rem; text-transform: uppercase; letter-spacing: .06em; color: var(--faint); font-weight: 700; }
 .prov-card p { margin: 0; font-size: .92rem; }
 .prov-card code { word-break: break-all; }
-.prov-summary { background: color-mix(in srgb, var(--accent) 9%, var(--panel)); border: 1px solid color-mix(in srgb, var(--accent) 30%, var(--border)); border-radius: var(--radius); padding: 20px 22px; margin: 22px 0; }
-.prov-summary h2 { margin: 0 0 8px; font-size: 1.45rem; color: var(--accent); font-weight: 700; }
+.prov-summary { background: var(--panel); border: 1px solid var(--border); border-radius: 20px; padding: 22px 24px; margin: 22px 0; }
+.prov-summary h2 { margin: 0 0 8px; font-size: 1.6rem; color: var(--text); }
 .prov-score { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 14px 0; font-size: .92rem; }
 .prov-score .best-score { margin-left: 0; }
 /* Q13: the score as a place ("#1 of 69") and a bar of the six inputs of lib/score.mjs, each segment as wide as its
    weight; an input nobody has confirmed is a grey segment. Existing tokens only. */
 .prov-score { flex-direction: column; align-items: stretch; }
 .score-rank { margin: 0; }
-.score-bar { display: flex; gap: 3px; height: 12px; max-width: 520px; }
-.sb-seg { position: relative; overflow: hidden; border-radius: 3px; background: var(--panel-2); border: 1px solid var(--border-strong); }
+.score-bar { display: flex; gap: 4px; height: 14px; max-width: 560px; }
+/* Brand H1 score: the place in the ranking as a big display figure ("#1 of 69"), the bar of the six inputs below it. */
+.score-rank strong { font-family: var(--font-display); font-weight: 800; font-stretch: 75%; font-size: 1.9rem; letter-spacing: -.02em; margin-right: 4px; vertical-align: -3px; }
+.sb-seg { position: relative; overflow: hidden; border-radius: 999px; background: var(--panel-2); border: 1px solid var(--border-strong); }
 .sb-fill { display: block; height: 100%; background: var(--accent); }
 .sb-seg.sb-unknown { background: repeating-linear-gradient(135deg, var(--panel-2) 0 4px, var(--border) 4px 8px); }
 .score-legend { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: .82rem; color: var(--muted); }
@@ -588,11 +616,40 @@ pre code { color: var(--text); }
 .prov-summary p { margin: 0; font-size: 1.04rem; line-height: 1.55; }
 .prov-actions { margin-top: 18px; display: flex; flex-wrap: wrap; gap: 10px; }
 /* Provider card hero — centered header, breadcrumbs, badges and actions. */
-.prov-hero { text-align: center; }
-.prov-hero .crumbs, .prov-hero h1 { text-align: center; }
-.prov-hero h1 { max-width: none; }
-.prov-hero .prov-badges, .prov-hero .prov-actions { justify-content: center; }
-.prov-hero .lede { text-align: center; margin: 10px auto 0; max-width: 62ch; }
+/* Brand H1 provider hero: the aura and its reading on the left, everything else on the right, aligned left. One column
+   on a phone, the aura first. The grid places the direct children of the hero's .wrap that pageHero() emits. */
+.prov-hero .wrap { display: grid; grid-template-columns: minmax(0, .7fr) minmax(0, 1.3fr); column-gap: 40px; align-items: start; padding-top: 26px; padding-bottom: 30px; }
+.prov-hero .wrap > * { grid-column: 2; }
+.prov-hero .crumbs { grid-column: 1 / -1; text-align: left; margin-bottom: 14px; }
+.prov-hero .prov-aura { grid-column: 1; grid-row: 2 / span 7; margin: 8px 0 0; }
+.prov-hero .aura-lg { width: min(260px, 100%); }
+.prov-hero h1 { text-align: left; max-width: none; margin: 0 0 6px; font-size: clamp(2.4rem, 5.5vw, 4rem); line-height: .95; font-stretch: 75%; }
+.prov-hero .lede { text-align: left; margin: 4px 0 10px; max-width: 62ch; }
+.prov-hero .prov-badges, .prov-hero .prov-actions { justify-content: flex-start; }
+.prov-hero .prov-badges { margin-top: 4px; }
+/* Reading order on screen: name, one-line description, stamp and flags, numbers, receipt, buttons (the markup keeps
+   pageHero's order; grid order only moves the boxes, not the reading order of each box). */
+.prov-hero .crumbs { order: 0; } .prov-hero h1 { order: 1; } .prov-hero .lede { order: 2; } .prov-hero .prov-badges { order: 3; }
+.prov-hero .prov-nums { order: 4; } .prov-hero .prov-nums-scope { order: 5; } .prov-hero .prov-receipt { order: 6; } .prov-hero .prov-actions { order: 7; }
+.prov-nums { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 18px 0 4px; max-width: 520px; }
+.prov-nums div { display: flex; flex-direction: column-reverse; }
+.prov-nums dd { margin: 0; font-family: var(--font-display); font-weight: 800; font-stretch: 70%; font-size: 2.3rem; line-height: 1; font-variant-numeric: tabular-nums; }
+.prov-nums dt { font-family: var(--font-mono); font-size: .74rem; color: var(--muted); margin-top: 4px; }
+.prov-nums-scope { margin: 6px 0 0; font-size: .8rem; color: var(--muted); max-width: 62ch; }
+.prov-nums-scope a { text-decoration: underline; text-underline-offset: 2px; }
+.prov-receipt { margin: 16px 0 0; padding-left: 14px; border-left: 3px solid var(--h-text); max-width: 62ch; }
+.prov-receipt p { margin: 0; font-size: 1.05rem; line-height: 1.45; }
+.prov-receipt cite { display: block; margin-top: 6px; font-style: normal; font-family: var(--font-mono); font-size: .74rem; color: var(--muted); overflow-wrap: anywhere; }
+.prov-hero .aura-read { text-align: left; }
+.prov-hero .prov-aura { align-items: flex-start; }
+@media (width <= 760px) {
+  .prov-hero .wrap { grid-template-columns: minmax(0, 1fr); padding-left: 16px; padding-right: 16px; }
+  .prov-hero .wrap > *, .prov-hero .prov-aura { grid-column: 1; grid-row: auto; }
+  .prov-hero .aura-lg { width: 96px; }
+  .prov-hero .aura-read { font-size: .74rem; }
+  .prov-hero .prov-aura { flex-direction: row; align-items: center; gap: 14px; }
+  .prov-nums dd { font-size: 1.8rem; }
+}
 .btn.website { background: transparent; color: var(--ok); border-color: color-mix(in srgb, var(--ok) 50%, var(--border)); }
 .btn.website:hover { color: var(--ok); border-color: var(--ok); background: color-mix(in srgb, var(--ok) 12%, transparent); }
 .prov-meta { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin: 20px 0; }

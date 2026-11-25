@@ -922,7 +922,7 @@ test('a confirmed card requirement is never hidden in the README top-20 or the e
 
   // Explorer: the full-list surface must show the card flag for every gated provider.
   for (const p of walled) {
-    const row = explorer.split('\n').find((l) => l.includes(`href="p/${p.slug}"`));
+    const row = explorer.split('\n').find((l) => l.includes(`class="name-link" href="p/${p.slug}"`));
     assert.ok(row, `${p.slug}: no explorer row found`);
     assert.match(row, /<span class="pflag pflag-bad pflag-mini" data-flag="card" title="Card required: yes">/, `${p.slug}: explorer row hides the card requirement`);
   }
@@ -2427,7 +2427,7 @@ test('home: no good-first-issues button in the hero, a fixed table layout, a lin
   assert.match(css, /#table thead th \{ position: sticky; top: var\(--header-h\);/, 'the header row is pinned under the header');
   assert.match(css, /#table thead th \{ top: calc\(var\(--header-h\) \+ var\(--controls-h, 120px\)\); \}/, 'and under the filter bar where that is pinned');
   assert.match(css, /main#explorer > \.wrap, \.controls \.controls-inner \{ max-width: 1480px; \}/, 'a wider table');
-  assert.match(css, /\.hero \.lede \{ max-width: 86ch; \}/, 'a wider lede');
+  assert.match(css, /\.hero \.lede \{ margin: 0 0 14px; max-width: 60ch;/, 'the lede fills the left column of the brand H1 hero');
   const row = explorerRowHtml({ slug: 'acme', name: 'Acme', category: 'ongoing', free_tier: 'Free', notes: 'n', best_for: 'b' });
   assert.match(row, /<a class="name-link" href="p\/acme">Acme<span class="name-go" aria-hidden="true"> ↗<\/span><\/a>/, 'the name is a link-button');
   assert.match(row, /<div class="clamp2" title="Free">Free<\/div>/, 'the free text is clamped and complete in the title');
@@ -2455,7 +2455,7 @@ test('provider page: the score is visible, no «All providers» link or «Report
   assert.match(dp, /<dt><svg class="i" aria-hidden="true"><use href="#ic-clock"\/><\/svg>Retention<\/dt>/);
   const css = readFileSync(join(ROOT, 'site/styles.css'), 'utf8');
   assert.match(css, /\.prov-reqs \.req \{[^}]*text-align: center/, 'the cards are centred');
-  assert.match(css, /\.prov-summary h2 \{[^}]*font-size: 1\.45rem/, '«What\'s free» is larger');
+  assert.match(css, /\.prov-summary h2 \{[^}]*font-size: 1\.6rem/, '«What\'s free» is larger');
 });
 
 test('pager.js: pages of 5 rows, the window is clamped, and the script never touches the URL', async () => {
@@ -2893,10 +2893,12 @@ test('a11y: the filter chips stay reachable by keyboard and screen reader, with 
   for (const chip of chips) assert.match(chip, /<input type="checkbox" id="f-[a-z]+">/, 'each chip label contains its checkbox, so the label stays the click target');
 });
 
-test('a11y: small fixes stay in place (finite caret, placeholder colour, no 320px minimum, focus kept after Clear and Escape)', () => {
+test('a11y: small fixes stay in place (no endless animation, placeholder colour, no 320px minimum, focus kept after Clear and Escape)', () => {
   const css = readFileSync(join(ROOT, 'site/styles.css'), 'utf8');
-  const caret = css.split('\n').find((l) => l.startsWith('.caret {'));
-  assert.ok(caret && !/infinite/.test(caret), 'the caret blink stops by itself (WCAG 2.2.2)');
+  // Brand H1 dropped the blinking caret; the title's "breathing" runs once, and nothing on the site loops forever (WCAG 2.2.2).
+  assert.doesNotMatch(css, /animation:[^;}]*infinite/, 'no animation loops forever');
+  assert.match(css, /\.h1-key \{ animation: breathe 5s ease-in-out 1; \}/, 'the title breathes once');
+  assert.match(css, /@media \(prefers-reduced-motion: no-preference\) \{\n  \.h1-key \{ animation/, 'and only when motion is welcome');
   assert.match(css, /::placeholder\s*\{[^}]*color:\s*var\(--muted\)/, 'placeholder text uses the muted colour');
   assert.doesNotMatch(css, /\.limits-table\s*\{[^}]*min-width:\s*320px/, 'the limits table has no 320px minimum (reflow at 320px)');
   assert.match(css, /minmax\(min\(280px, 100%\), 1fr\)/, 'collection tracks never exceed the container');

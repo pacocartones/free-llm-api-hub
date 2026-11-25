@@ -573,6 +573,29 @@ ${LOGO_SYMBOL}
 </defs></svg>`;
 const IC = (id) => `<svg class="i" aria-hidden="true"><use href="#${id}"/></svg>`;
 
+// Brand H1 provider hero: up to three published limits as big numbers (free_limits, in this order), and the receipt,
+// the sentence quoted from the provider's page with where and when it was read. Nothing shows when the record has none.
+const LIMIT_NUMS = [['requests_per_minute', 'requests/min'], ['requests_per_second', 'requests/sec'], ['requests_per_day', 'requests/day'],
+  ['tokens_per_day', 'tokens/day'], ['requests_per_month', 'requests/month'], ['tokens_per_month', 'tokens/month']];
+const bigNum = (n) => (n >= 1e6 && n % 1e5 === 0 ? `${n / 1e6}M` : n >= 1e4 && n % 1e3 === 0 ? `${n / 1e3}K` : n.toLocaleString('en-US'));
+function provNumsHtml(p) {
+  const fl = p.free_limits || {};
+  const nums = LIMIT_NUMS.filter(([k]) => Number.isInteger(fl[k])).slice(0, 3);
+  if (!nums.length) return '';
+  return `<dl class="prov-nums">${nums.map(([k, label]) => `<div><dt>${label}</dt><dd>${bigNum(fl[k])}</dd></div>`).join('')}</dl>` +
+    (fl.scope ? `<p class="prov-nums-scope">${htmlEsc(fl.scope)} · <a href="#limits">all limits</a></p>` : '');
+}
+function provReceiptHtml(p) {
+  const r = stampSource(p, QUOTE_REGISTRY);
+  if (!r.q) return '';
+  let host = '';
+  try { host = new URL(r.u).host + new URL(r.u).pathname.replace(/\/$/, ''); } catch { /* no URL: no cite link */ }
+  const cite = host ? `<a href="${htmlEsc(r.u)}" rel="noopener">${htmlEsc(host)}</a>` : 'the provider\'s docs';
+  const entry = QUOTE_REGISTRY.entries.find((e) => e.slug === p.slug && e.kind === 'sentence');
+  const readOn = entry ? entry.read_on : (p.data_policy && p.data_policy.checked) || '';
+  return `<blockquote class="prov-receipt"><p>“${htmlEsc(r.q)}”</p><cite>${cite}${readOn ? ` · read ${htmlEsc(readOn)}` : ''}</cite></blockquote>`;
+}
+
 // The page header that every generated page shares: breadcrumbs, title, an optional subtitle (the lede) and optional
 // extra markup, centred by the model-hero class. The provider page passes cls 'prov-hero' and puts its badges after
 // the title and its buttons in extra. The home page (hand-written) has its own hero.
@@ -951,6 +974,24 @@ indexHtml = inject(indexHtml, 'csp', CSP);
 indexHtml = inject(indexHtml, 'themeguard', THEME_GUARD);
 indexHtml = inject(indexHtml, 'fonts', fontHead(''));
 indexHtml = inject(indexHtml, 'rows', homeRows);
+// The hero's field of auras (brand H1): every provider in the explorer's order, then the key to read them. Dated by ASOF
+// like the rows, so the field is deterministic. Each aura links its provider page for the mouse; the whole field is
+// aria-hidden with no tab stop, because the explorer right below lists the same providers with the same links.
+const AURA_KEY = [
+  ['Ongoing', 'full disc', { category: 'ongoing', modalities: ['text', 'audio'], verified: true, last_verified: ASOF, card_required: false, phone_required: false, commercial_ok: true, data_policy: { trains_on_prompts: false } }],
+  ['Trial', 'ring', { category: 'trial', modalities: ['text', 'audio'], verified: true, last_verified: ASOF, card_required: false, phone_required: false, commercial_ok: true, data_policy: { trains_on_prompts: false } }],
+  ['Not stated', 'dashed edge', { category: 'ongoing', modalities: ['text', 'audio'], verified: true, last_verified: ASOF }],
+  ['Checked 30+ days ago', 'faded', { category: 'ongoing', modalities: ['text', 'audio'], verified: false, card_required: false, phone_required: false, commercial_ok: true, data_policy: { trains_on_prompts: false } }],
+];
+const AURA_HUE_NAMES = [['text', 'text'], ['vision', 'vision'], ['image', 'image'], ['audio', 'speech'], ['embeddings', 'embeddings'], ['rerank', 'rerank'], ['ocr', 'OCR']];
+const auraFieldHtml = `<div class="aura-field" aria-hidden="true">` +
+  [...providers].sort((a, b) => sortLib.comparator('recommended', 1, a, b))
+    .map((p) => `<a href="p/${p.slug}" tabindex="-1">${auraHtml(p, { now: ASOF })}</a>`).join('') +
+  `</div>\n<div class="aura-key"><p class="aura-key-h">Each circle is one provider, drawn from its own data. <a href="methodology/#how-to-read-an-aura">How to read it</a></p>` +
+  `<ul class="aura-key-shapes">${AURA_KEY.map(([t, s, p]) => `<li>${auraHtml(p, { now: ASOF })}<span><b>${t}</b> ${s}</span></li>`).join('')}</ul>` +
+  `<ul class="aura-key-hues">${AURA_HUE_NAMES.map(([m, n]) => `<li><span class="hue-dot" style="background:var(--h-${m})" aria-hidden="true"></span>${n}</li>`).join('')}</ul></div>`;
+indexHtml = inject(indexHtml, 'aurafield', auraFieldHtml);
+
 indexHtml = inject(indexHtml, 'stats', homeStatsHtml);
 // The "New here?" strip above the explorer: what the list is, what verified means, how to use it (lib/home-first-use.mjs).
 indexHtml = inject(indexHtml, 'firstuse', firstUseHtml(providers, { slaDays: SLA_DAYS }));
@@ -1295,7 +1336,8 @@ for (const p of providers) {
       h1: htmlEsc(p.name),
       // The provider's aura (lib/aura.mjs) with its reading in words, so the picture never has to be decoded alone.
       afterTitle: `<div class="prov-aura">${auraHtml(p, { now: ASOF, cls: 'aura-lg' })}<p class="aura-read"><span class="aura-read-h">Aura:</span> ${htmlEsc(auraSpec(p, { now: ASOF }).label)} · <a href="../methodology/#how-to-read-an-aura">how to read it</a></p></div>` +
-        `<div class="prov-badges"><span class="type">${typeLabel(p)}</span> ${verifiedLine}${probedLine} ${provFlagsHtml(p)}</div>`,
+        `<div class="prov-badges"><span class="type">${typeLabel(p)}</span> ${verifiedLine}${probedLine} ${provFlagsHtml(p)}</div>` +
+        provNumsHtml(p) + provReceiptHtml(p),
       lede: p.best_for ? htmlEsc(p.best_for) : '',
       extra: `<div class="prov-actions">${docsBtn}${websiteBtn}${playgroundBtn}</div>`,
     }) +
