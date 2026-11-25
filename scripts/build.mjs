@@ -8,7 +8,7 @@
 // Zero dependencies. Run with: node scripts/build.mjs   (or `npm run build`)
 
 import { shortenProse } from './lib/short-text.mjs';
-import { measurementId, analyticsCspSources, consentScript, withAnalytics } from './lib/analytics.mjs';
+import { measurementId, analyticsCspSources, consentScript, withAnalytics, CLOUDFLARE_WEB_ANALYTICS_CSP as CF_WA_CSP } from './lib/analytics.mjs';
 import { providerLinkTargets, tagProviderLinks } from './lib/provider-links.mjs';
 import { readFileSync, writeFileSync, mkdirSync, readdirSync, rmSync, existsSync } from 'node:fs';
 import { execSync } from 'node:child_process';
@@ -36,7 +36,7 @@ import { freeGpuMainHtml } from './lib/free-gpu.mjs';
 import { labelTables } from './lib/tables.mjs';
 import { markNewTabLinks } from './lib/links.mjs';
 import { codingToolsMainHtml, codingToolMainHtml, codingToolTitle, codingToolDescription } from './lib/free-coding-tools.mjs';
-import { dataPolicyRows, dataPolicyMainHtml } from './lib/data-policy-page.mjs';
+import { dataPolicyRows, dataPolicyMainHtml, trainState } from './lib/data-policy-page.mjs';
 import { quotesReportHtml } from './lib/quotes-report.mjs';
 import { SCORE_WEIGHTS, EDITORIAL_WEIGHT, EDITORIAL_DEFAULT, MATH_INPUTS, MIN_CONFIRMED, TOP_SIZE, EDITORIAL_NOTE_THRESHOLD, STABILITY_MIN_DAYS, STABILITY_MIN_SAMPLES, rankProviders, editorialRating, inputFractions, stabilityFromProbe } from './lib/score.mjs';
 import { scoreBlockHtml } from './lib/score-bar.mjs';
@@ -699,7 +699,7 @@ const THEME_GUARD = `<script>(function(){try{var t=localStorage.getItem('theme')
 // the first-party file consent.js ('self'), so no inline hash changes.
 const GA_ID = measurementId();
 const GA_CSP = analyticsCspSources(GA_ID);
-const CSP = `<meta http-equiv="Content-Security-Policy" content="script-src 'self' 'sha256-r3FnVnP9W/uaNhK9XkZqH3GIfK4TudOQGYTwoNIjGR4=' 'sha256-YzEhxvq2BwovGsg/RCjKkQdwf+LZmTjIkiQcjXCZMHc='${GA_CSP.script}; connect-src 'self' https://raw.githubusercontent.com${GA_CSP.connect}; object-src 'none'; base-uri 'self'">`;
+const CSP = `<meta http-equiv="Content-Security-Policy" content="script-src 'self' 'sha256-r3FnVnP9W/uaNhK9XkZqH3GIfK4TudOQGYTwoNIjGR4=' 'sha256-YzEhxvq2BwovGsg/RCjKkQdwf+LZmTjIkiQcjXCZMHc='${CF_WA_CSP.script}${GA_CSP.script}; connect-src 'self' https://raw.githubusercontent.com${CF_WA_CSP.connect}${GA_CSP.connect}; object-src 'none'; base-uri 'self'">`;
 
 // Search engines cut a snippet around 155 characters. Every page's description goes through
 // here, so no page can ship a longer one: cut at a word boundary and end with an ellipsis.
@@ -1449,11 +1449,12 @@ ${NOT_FOUND_PATH_SCRIPT}
   })
 );
 
-// The privacy page says exactly what the build ships: no cookies and no analytics by default; with GA_MEASUREMENT_ID set
-// (lib/analytics.mjs), Google Analytics and Google signals behind an opt-in banner with two categories, described below.
+// The privacy page says exactly what the site runs: by default no cookies and only the cookieless Cloudflare Web Analytics
+// that Cloudflare injects at the edge (lib/analytics.mjs); with GA_MEASUREMENT_ID set, also Google Analytics and Google
+// signals behind an opt-in banner with two categories, described below.
 const privacyIntro = GA_ID
   ? `<p>This site is a static, open-source reference operated by ${ORG} It has no user accounts and shows no ads. It uses Google cookies <strong>only for the categories you allow</strong> in the cookie banner; until you allow one, nothing is loaded from Google and no cookie is set.</p>`
-  : `<p>This site is a static, open-source reference operated by ${ORG} It has no user accounts, no ads, and no third-party analytics or tracking.</p>`;
+  : `<p>This site is a static, open-source reference operated by ${ORG} It has no user accounts, no ads, no cookies and no tracking; its only analytics is the cookieless Cloudflare Web Analytics described under Hosting.</p>`;
 const privacyServerItem = GA_ID
   ? `<li><strong>Nothing on a server of ours.</strong> The site is served as static files by GitHub Pages; there is no backend. No cookies are set unless you allow a category below.</li>`
   : `<li><strong>Nothing on a server.</strong> The site is served as static files by GitHub Pages; there is no backend and no cookies are set.</li>`;
@@ -1486,9 +1487,10 @@ const privacyAnalytics = GA_ID
 <p>You can ask us for access to, correction or deletion of personal data about you, object to its processing, or complain to your data-protection authority.</p>
 `
   : '';
+const privacyCloudflareAnalytics = `Cloudflare also runs Cloudflare Web Analytics for this site: a small script from Cloudflare (static.cloudflareinsights.com) reports, in aggregate, page views, the referring site, page-load timings (Core Web Vitals) and the country, browser and device type. It sets no cookies, stores nothing on your device and does not fingerprint you or follow you across sites; we see only aggregated counts.`;
 const privacyHostingTail = GA_ID
-  ? `We do not use Cloudflare's analytics; the only analytics is the opt-in Google Analytics described above.`
-  : `We do not use Cloudflare's analytics or any other analytics, and this site sets no cookies.`;
+  ? `${privacyCloudflareAnalytics} Apart from it, the only analytics is the opt-in Google Analytics described above.`
+  : `${privacyCloudflareAnalytics} This site sets no cookies.`;
 legalPage('privacy', 'Privacy', `
 ${privacyIntro}
 <h2>What we store</h2>
@@ -2166,6 +2168,15 @@ writeFileSync(join(ROOT, 'site/llms.txt'), llmsTxt);
 // A null flag with a recorded reason (field_checks) says the reason instead of "unknown".
 const yn = (v, yes, no, check) => v === true ? yes : v === false ? no : v === 'conditional' ? 'conditional'
   : check && check.status !== 'stated' && REASON_LABEL[check.status] ? `unknown, ${REASON_LABEL[check.status]} (checked ${check.checked})` : 'unknown';
+// yes / no only where /data-policy/ says so (trainState); a value without the provider's sentence, or none, is not confirmed.
+const TRAINS_ON_PROMPTS = { yes: 'yes', no: 'no' };
+const dataPolicyLine = (p) => {
+  const dp = p.data_policy && typeof p.data_policy === 'object' ? p.data_policy : null;
+  if (!dp) return '';
+  const trains = TRAINS_ON_PROMPTS[trainState(p)] || 'not confirmed';
+  const retention = dp.retention ? String(dp.retention).replace(/\s+/g, ' ').trim() : 'not confirmed';
+  return `- Prompt data policy: trains on prompts: ${trains}; retention: ${retention} (source ${dp.source}, checked ${dp.checked})\n`;
+};
 const provBlock = (p) => {
   const gates = [
     `card required: ${yn(p.card_required, 'yes', 'no', fieldCheck(p, 'card_required'))}`,
@@ -2184,6 +2195,7 @@ const provBlock = (p) => {
     `- Gates: ${gates}\n` +
     conditionLine +
     (publishedSpeed(p).length ? `- Published speed (the provider's own figures, not measured by us; not stated for the free tier unless the page says so): ${publishedSpeed(p).map((e) => `${e.model} ${speedFigure(e)} (${e.source}, checked ${e.checked})`).join('; ')}\n` : '') +
+    dataPolicyLine(p) +
     `- Docs: ${p.docs_url}\n` +
     `- Page: ${SITE}/p/${p.slug}\n`;
 };

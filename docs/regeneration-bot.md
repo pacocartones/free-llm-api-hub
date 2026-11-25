@@ -1,4 +1,4 @@
-# Regeneration bot (shadow mode)
+# Regeneration bot
 
 `.github/workflows/regenerate.yml` rebuilds the derived files (README tables, `collections/`, the committed site pages, `site/providers.csv`, `site/sitemap.xml`, `derived-fingerprints.json`, OG images) after every push to `main` that changes a canonical input, using the code already on `main`. The goal is that a data pull request only has to change `data/` plus a changelog fragment, so open data pull requests stop conflicting on generated files.
 
@@ -8,9 +8,9 @@ It rolls out in three steps, controlled by the repository variable `REGEN_MODE`:
 |---|---|---|---|
 | 0 | unset (default) or anything else | The workflow starts and skips everything after the gate. | None |
 | 1. Shadow | `shadow` | Rebuilds after each merge (and nightly). With the GitHub App configured it opens or updates a **draft** pull request from `chore/regenerate-derived`; without it, it only reports the diff in the run summary and as the `regen-patch` artifact. The pull-request drift gate in `verify.yml` stays blocking. | None: nothing is pushed to `main` |
-| 2. Push | `push` | Commits the regenerated files straight to `main` as the App. | Needs the ruleset bypass below |
+| 2. Push | `push` | Commits the regenerated files straight to `main` as the App. The drift gate in `verify.yml` blocks only hand-edited derived files, release pull requests that are not regenerated and drift outside the allowlist; `pages.yml` deploys after the bot; Lighthouse skips the bot's pushes (see [What push mode changes](#what-push-mode-changes)). | Needs the ruleset bypass below |
 
-**Until step 2 is live, contributors keep regenerating locally** exactly as [CONTRIBUTING.md](../CONTRIBUTING.md) says. During shadow mode `main` is already in sync when a pull request merges, so every shadow pull request is a determinism bug in the bot's environment (fonts, Node, git history). Close it, note the cause, and fix it before moving on. Exit criterion for shadow: at least 7 days and 10 merges with no shadow pull request.
+**Until step 2 is live, contributors keep regenerating locally** exactly as [CONTRIBUTING.md](../CONTRIBUTING.md) says. **In push mode, data pull requests no longer regenerate or commit derived files:** they change `data/` plus a changelog fragment, and the bot commits the derived files to `main` after the merge. During shadow mode `main` is already in sync when a pull request merges, so every shadow pull request is a determinism bug in the bot's environment (fonts, Node, git history). Close it, note the cause, and fix it before moving on. Exit criterion for shadow: at least 7 days and 10 merges with no shadow pull request.
 
 ## How it is built
 
@@ -28,7 +28,7 @@ It rolls out in three steps, controlled by the repository variable `REGEN_MODE`:
 - lists the derived files a fresh build changes in the run summary and uploads them as the `regen-preview-patch` artifact (7 days), so a contributor without Node, or the maintainer, can `git apply --binary regen-preview.patch` on the pull request branch (it is cut against the merge commit, so it applies cleanly while the branch is up to date with `main`);
 - says what the drift gate planned for step C would decide: `in-sync`, `bot-would-regenerate` (only derived files the pull request did not touch are stale: informative after the switch), `would-block-hand-edit` (the pull request edits derived files that do not match the build) or `would-block-release` (a release pull request must ship fully regenerated). The logic is `previewVerdict()` in [scripts/lib/regenerate.mjs](../scripts/lib/regenerate.mjs); paths outside the allowlist raise a warning.
 
-It is not a required check and changes nothing about the blocking gate in `verify.yml`. It uses only the `pull_request` event with a read-only token: no secret, no App, nothing pushed or commented, so it is safe for pull requests from forks. Counting its verdicts over the shadow week is the audit §6 of the ADR asks for before the gate is relaxed.
+It is not a required check and changes nothing about the blocking gate in `verify.yml`; in push mode that gate makes the same decision with the same function (`driftGate()`), so the preview's verdict tells a contributor in advance what *Dataset integrity* will say. It uses only the `pull_request` event with a read-only token: no secret, no App, nothing pushed or commented, so it is safe for pull requests from forks. Counting its verdicts over the shadow week is the audit §6 of the ADR asks for before the gate is relaxed.
 
 ## What the maintainer clicks
 
@@ -66,9 +66,25 @@ The switch itself is one variable, but it needs the protection of `main` to move
    - *Bypass list → Add bypass → Apps* → `free-llm-api-hub-regen`, mode **Always allow**. If the App is not offered, stop here: the fallback is a deploy key and needs a workflow change.
    - *Create*.
 3. Open a throwaway pull request and check the five checks still show as *Required*. Then *Settings → Branches* → delete the classic rule for `main`, and confirm `gh api repos/pacocartones/free-llm-api-hub/rules/branches/main` lists the rules of both rulesets.
-4. Merge the cut-over pull request (prepared separately: the drift gate in `verify.yml` becomes blocking only for derived files a pull request edits and for release pull requests; `pages.yml` deploys after this workflow via `workflow_run`; `lighthouse.yml` skips the bot's pushes; CONTRIBUTING and this page say data pull requests no longer regenerate).
-5. Set `REGEN_MODE` = `push`.
+4. Merge the cut-over pull request. It changes nothing while `REGEN_MODE` is not `push`: every relaxation below is behind that value.
+5. Set `REGEN_MODE` = `push`. The next data pull request should show *Dataset integrity* green without derived files, and after its merge one `chore(generated):` commit by `free-llm-api-hub-regen[bot]` followed by one *Deploy site* run.
 
-**Rollback** at any step: set `REGEN_MODE` to `off` (or delete it). In push mode, also revert the cut-over pull request; contributors then regenerate locally as before.
+## What push mode changes
+
+Everything here is keyed on `REGEN_MODE` = `push`; with `shadow`, `off` or no value the workflows behave as before the cut-over.
+
+- **Contributors.** A data pull request changes `data/` (and a changelog fragment) and nothing generated. It does not run `npm run build` or `npm run og` to commit their output. A release pull request (`npm run release:prepare`) still ships every derived file regenerated, because `tag-release.yml` tags its merge.
+- **`verify.yml`** (required checks *Dataset integrity* and *Windows tests*, names unchanged). Both jobs regenerate the derived files before running the checks, so the suite sees what `main` will hold after the bot. The last step of *Dataset integrity* rebuilds and calls `regenerate-guard.mjs drift-gate` (`driftGate()` in [scripts/lib/regenerate.mjs](../scripts/lib/regenerate.mjs), tested in `scripts/regenerate-cutover.test.mjs`). It blocks only:
+  - `would-block-hand-edit`: the pull request changes a derived file and that file does not match the build. The bot would overwrite the edit silently. Fix: `git checkout origin/main -- <file>` (and let the bot regenerate it), or regenerate on a branch that is up to date with `main`;
+  - `would-block-release`: a release pull request with stale derived files;
+  - drift outside the bot's allowlist (the bot would refuse to write it: a bug in the generator or the allowlist).
+
+  Stale derived files the pull request did not touch (`bot-would-regenerate`) pass. The same rule applies to the push run on `main`, so a merge followed by the bot's commit does not open a "Verify failed on main" issue. In any other mode the old step, "Generated files must be in sync with the data", runs unchanged and every drift blocks.
+- **`pages.yml`.** It also runs on `workflow_run` when "Regenerate derived files" completes on `main`. A `gate` job (`pagesDeploy()`) decides: in push mode a push that changes an input of the bot (its `paths` filter, `REGENERATE_INPUTS`) or that the bot made is not deployed by itself; the finished bot run deploys instead, so the live sitemap check compares against a regenerated `main`. Other pushes, the daily schedule and *Run workflow* deploy as before. In other modes the `workflow_run` runs skip and every push deploys, as before. The upstream workflow never runs pull-request code and the deploy always checks out `main`, which is why this `workflow_run` is allowed to build (the rule is in `scripts/workflow-policy.test.mjs`).
+- **`lighthouse.yml`.** The performance job skips pushes by `free-llm-api-hub-regen[bot]`: they only rewrite derived files right after a merge that was measured, and the nightly run measures the result. The required check, which runs on pull requests, is untouched.
+
+## Rollback
+
+At any step: set `REGEN_MODE` to `off` (or delete it). Nothing needs reverting: outside push mode the cut-over's workflows behave as before, so the strict drift gate is back on the next run and contributors regenerate locally again. Pull requests opened during push mode without derived files then need `npm run build` (or the `regen-preview-patch` artifact) before they can merge.
 
 **If the App key leaks:** App page → *Private keys* → delete it, generate a new one, update `REGEN_APP_PRIVATE_KEY`, and review the `[bot]` commits. The App is never in the "main integrity" bypass list, so it cannot force-push or delete `main`.
