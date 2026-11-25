@@ -54,6 +54,9 @@ const byScore = (a, b) => recScore(b) - recScore(a) || (a.name < b.name ? -1 : a
 const byName = (a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0);
 const httpsOnly = (u) => (typeof u === 'string' && /^https:\/\/[^\s"<>]+$/i.test(u) ? u : '');
 const ext = (url, text) => (httpsOnly(url) ? `<a href="${esc(url)}" target="_blank" rel="noopener">${text}</a>` : text);
+// Data text in running prose (not in a table, which wraps anywhere): a long unbroken token such as a URL gets break
+// points after its slashes, so it never widens a phone screen.
+export const escProse = (s) => esc(s).replace(/\S{30,}/g, (t) => t.replace(/\//g, '/<wbr>'));
 const provLink = (p, prefix) => `<a href="${prefix}p/${esc(p.slug)}">${esc(p.name)}</a>`;
 const time = (d) => (d ? `<time datetime="${esc(d)}">${esc(d)}</time>` : 'date not recorded');
 const code = (s) => `<code>${esc(s)}</code>`;
@@ -61,7 +64,7 @@ const pre = (lang, src) => `<pre><code class="language-${lang}">${codeHtmlEsc(sr
 const p = (html) => `<p>${html}</p>`;
 const h2 = (text, id) => `<h2${id ? ` id="${id}"` : ''}>${text}</h2>`;
 const tableHtml = (label, head, rows) =>
-  `<div class="table-scroll" role="region" aria-label="${esc(label)}" tabindex="0"><table class="model-table"><thead><tr>${head.map((h) => `<th>${h}</th>`).join('')}</tr></thead><tbody>\n` +
+  `<div class="table-scroll" role="region" aria-label="${esc(label)}" tabindex="0"><table><thead><tr>${head.map((h) => `<th>${h}</th>`).join('')}</tr></thead><tbody>\n` +
   rows.map((r) => `<tr>${r.map((v, i) => `<td${i === 0 ? ' class="name"' : ''}>${v}</td>`).join('')}</tr>`).join('\n') +
   `\n</tbody></table></div>`;
 const related = (links) => `<p class="muted">Related: ${links.join(' · ')}</p>`;
@@ -195,16 +198,21 @@ console.log(resp.choices[0].message.content);`;
       `<h3>curl</h3>` + pre('bash', curl);
   }
 
-  const baseCell = (x) => (httpsOnly(x.openai_base_url) ? code(x.openai_base_url) : '<span class="notes">see the provider page</span>');
+  // The provider cell carries what to paste: the base URL (with break points after its slashes, so a narrow column
+  // wraps it) and, for chat, a free model ID.
+  const wrapCode = (t) => `<code>${esc(t).replace(/\//g, '/<wbr>')}</code>`;
+  const providerCell = (x, withModel) =>
+    `${L(x)}<br><small>base_url</small> ${httpsOnly(x.openai_base_url) ? wrapCode(x.openai_base_url) : '<span class="notes">see the provider page</span>'}` +
+    (withModel ? `<br><small>model</small> ${exampleChatModel(x) ? wrapCode(exampleChatModel(x)) : '<span class="notes">see the provider page</span>'}` : '');
   const evalMark = (x) => (x.commercial_ok === false ? ' <strong>Evaluation only: its terms do not allow production or commercial use.</strong>' : '');
   const chatRows = (list) => list.map((x) => [
-    L(x), baseCell(x), exampleChatModel(x) ? code(exampleChatModel(x)) : '—',
+    providerCell(x, true),
     `${esc(x.free_tier)}<br><span class="notes">${esc(x.rate_limits)}</span>${evalMark(x)}`,
     esc(cardWords(x)), checkedCell(x),
   ]);
-  const freeRows = (list) => list.map((x) => [L(x), baseCell(x), `${esc(x.free_tier)}${evalMark(x)}`, esc(cardWords(x)), checkedCell(x)]);
-  const HEAD_CHAT = ['Provider', '<code>base_url</code>', 'Example free model', 'What’s free and the published limits', 'Card', 'Checked'];
-  const HEAD_FREE = ['Provider', '<code>base_url</code>', 'What’s free', 'Card', 'Checked'];
+  const freeRows = (list) => list.map((x) => [providerCell(x, false), `${esc(x.free_tier)}${evalMark(x)}`, esc(cardWords(x)), checkedCell(x)]);
+  const HEAD_CHAT = ['Provider, base_url and a free model', 'What’s free and the published limits', 'Card', 'Checked'];
+  const HEAD_FREE = ['Provider and base_url', 'What’s free', 'Card', 'Checked'];
   const nativeLine = (list, what, guideHref) => {
     if (!list.length) return '';
     const shown = list.slice(0, NATIVE_MAX).map((x) => `${L(x)} (${x.category === 'ongoing' ? 'ongoing' : 'one-time credit'})`);
@@ -232,7 +240,7 @@ console.log(resp.choices[0].message.content);`;
     h2('Chat and text generation', 'chat') +
     `<h3>Ongoing free tiers (renewing, no end date)</h3>` + tableHtml('Ongoing free chat APIs that are OpenAI-compatible', HEAD_CHAT, chatRows(s.chatOngoing)) +
     `<h3>One-time trial credits</h3>` + tableHtml('OpenAI-compatible chat APIs with one-time trial credits', HEAD_CHAT, chatRows(s.chatTrial)) +
-    (s.noCalls.length ? p(`${s.noCalls.length === 1 ? 'One OpenAI-compatible entry does' : `${s.noCalls.length} OpenAI-compatible entries do`} <strong>not give free model calls</strong> despite the compatible endpoint. Per ${s.noCalls.length === 1 ? 'its entry' : 'their entries'}: ${s.noCalls.map((x) => `${L(x)}: “${esc(x.free_tier)}”`).join('; ')}. Don’t switch to ${s.noCalls.length === 1 ? 'it' : 'them'} expecting free chat.`) : '') +
+    (s.noCalls.length ? p(`${s.noCalls.length === 1 ? 'One OpenAI-compatible entry does' : `${s.noCalls.length} OpenAI-compatible entries do`} <strong>not give free model calls</strong> despite the compatible endpoint. Per ${s.noCalls.length === 1 ? 'its entry' : 'their entries'}: ${s.noCalls.map((x) => `${L(x)}: “${escProse(x.free_tier)}”`).join('; ')}. Don’t switch to ${s.noCalls.length === 1 ? 'it' : 'them'} expecting free chat.`) : '') +
     related([`<a href="${prefix}collections/openai-compatible">OpenAI-compatible collection</a>`, `<a href="${prefix}guides/openai-compatible-free-apis">the full OpenAI-compatible list</a>`, a && b && a !== b ? `<a href="${prefix}compare/?compare=${esc(a.slug)},${esc(b.slug)}">${esc(a.name)} and ${esc(b.name)} side by side</a>` : '']) +
     h2('Embeddings', 'embeddings') +
     p('These providers list embeddings and have an OpenAI-compatible API for their free offering. The dataset records compatibility per provider, not per endpoint, so check the provider page to confirm its <code>/embeddings</code> route and model IDs.') +
@@ -253,7 +261,7 @@ console.log(resp.choices[0].message.content);`;
     related([`<a href="${prefix}guides/free-vision-apis">Free vision APIs</a>`]) +
     h2('OCR and documents', 'ocr') +
     (s.ocr.length
-      ? p(`Few OCR APIs speak the OpenAI format. In the dataset: ${andList(s.ocr.map((x) => `${L(x)} (${httpsOnly(x.openai_base_url) ? code(x.openai_base_url) : 'see its page'}): ${esc(x.free_tier)}`))}.`)
+      ? p(`Few OCR APIs speak the OpenAI format. In the dataset: ${andList(s.ocr.map((x) => `${L(x)} (${httpsOnly(x.openai_base_url) ? code(x.openai_base_url) : 'see its page'}): ${escProse(x.free_tier)}`))}.`)
       : p('No OCR provider in the dataset has an OpenAI-compatible API for its free offering.')) +
     nativeLine(s.nativeOcr, 'OCR and document parsing', 'guides/free-ocr-document-ai-apis') +
     related([`<a href="${prefix}guides/free-ocr-document-ai-apis">Free OCR and document AI APIs</a>`]) +
@@ -350,7 +358,7 @@ function productionGuide({ providers, prefix }) {
     }
     return out.slice(0, max);
   };
-  const exampleHtml = ({ x, field, c }) => `${L(x)}’s ${FIELD_WORDS[field]}: “${esc(c.note)}” (read ${time(c.checked)}).`;
+  const exampleHtml = ({ x, field, c }) => `${L(x)}’s ${FIELD_WORDS[field]}: “${escProse(c.note)}” (read ${time(c.checked)}).`;
   const silent = reasonExamples('source_silent', 1);
   const account = reasonExamples('needs_account', 1);
   const disagree = reasonExamples('sources_disagree', 2);
@@ -413,7 +421,7 @@ function productionGuide({ providers, prefix }) {
       ['<code>"conditional"</code>', c.conditional, `Allowed under a stated condition${conditional.length ? ` (${andList(conditional.map(L))})` : ''}.`],
       ['<code>null</code>', c.null, 'Not confirmed: the provider’s pages don’t settle it (see below).'],
     ]) +
-    (falseQuoted.length ? p('Real examples of <code>false</code>, with the provider’s words:') + `<ul>${falseQuoted.map((x) => { const k = fieldCheck(x, 'commercial_ok'); return `<li><strong>${L(x)}:</strong> “${esc(k.quote)}” (${ext((k.sources || [])[0], 'source')}, read ${time(k.checked)}).</li>`; }).join('')}</ul>` : '') +
+    (falseQuoted.length ? p('Real examples of <code>false</code>, with the provider’s words:') + `<ul>${falseQuoted.map((x) => { const k = fieldCheck(x, 'commercial_ok'); return `<li><strong>${L(x)}:</strong> “${escProse(k.quote)}” (${ext((k.sources || [])[0], 'source')}, read ${time(k.checked)}).</li>`; }).join('')}</ul>` : '') +
     (conditional.length ? p(`Conditional means read the condition: ${conditional.map((x) => `${L(x)}: ${esc(String(x.commercial_ok_condition || 'see its page').replace(/\.$/, ''))}`).join('; ')}.`) : '') +
     p(`Also check <strong>where your users are</strong>: terms can differ by region. The provider page has the notes.`) +
     related([`<a href="${prefix}collections/commercial-use">Commercial use collection</a>`]) +
@@ -430,7 +438,7 @@ function productionGuide({ providers, prefix }) {
     ((limitExample(groq) || limitExample(orr)) ? `<li><strong>Look at the tightest limit, not the headline.</strong> ${[limitExample(groq), limitExample(orr)].filter(Boolean).join(' ')}</li>` : '') +
     (unpublished.length ? `<li><strong>Unpublished means unknown.</strong> ${andList(unpublished.map(L))} publish no numeric free limit. Plan for throttling you can’t predict.</li>` : '') +
     `<li><strong>Know what happens at the limit.</strong> With no card on file, crossing a limit normally means HTTP 429, not a bill.${cardOnFile.length ? ` With a card on file (${andList(cardOnFile.map(L))}), read the billing page for what follows the free amount.` : ''}</li>` +
-    (hordeSla ? `<li><strong>Volunteer and shared capacity has no SLA.</strong> ${L(horde)}’s notes: “${esc(hordeSla.replace(/[.;]$/, ''))}”.</li>` : '') +
+    (hordeSla ? `<li><strong>Volunteer and shared capacity has no SLA.</strong> ${L(horde)}’s notes: “${escProse(hordeSla.replace(/[.;]$/, ''))}”.</li>` : '') +
     `</ul>` +
     p(`Structured limits (<code>free_limits</code>, with source and date) exist for ${F.freeLimits} providers; the rest are in each provider’s rate-limits text.`) +
     h2('3. Does it train on your prompts, and how long does it keep them?', 'data-policy') +
@@ -439,7 +447,7 @@ function productionGuide({ providers, prefix }) {
     `<li><strong>${F.trainsTrue.length} say they do</strong>${F.trainsTrue.length ? `, among them ${andList([...F.trainsTrue].sort(byScore).slice(0, 3).map(L))}` : ''}.</li>` +
     `<li><strong>${F.trainsNull.length} are unsettled</strong>: the provider’s own pages conflict or are silent${F.trainsNull.length ? ` (${andList([...F.trainsNull].sort(byName).slice(0, 3).map(L))} among them)` : ''}.</li></ul>` +
     p(`Read <code>plan_named</code> too: whether the provider’s sentence names the free plan. ${namedFalse === 0 ? `For every one of the ${F.trainsFalse.length} “doesn’t train” rows the answer is no: the sentence doesn’t name the free plan. That doesn’t mean the free plan is excluded; it means the sentence is general.` : `Of the ${F.trainsFalse.length} “doesn’t train” rows, ${namedFalse} name the free plan; for the rest the sentence is general.`}`) +
-    (retention.length ? p(`Retention is a separate question. ${retention.map((x) => `${L(x)}: ${esc(x.data_policy.retention)}`).join('. ')}.`) : '') +
+    (retention.length ? p(`Retention is a separate question. ${retention.map((x) => `${L(x)}: ${escProse(x.data_policy.retention)}`).join('. ')}.`) : '') +
     related([`<a href="${prefix}collections/no-training">No-training collection</a>`, `<a href="${prefix}data-policy/">Data policy, provider by provider</a>`]) +
     h2('4. Will signup work for you?', 'signup') +
     `<ul><li><strong>Card:</strong> ${F.noCard} of ${F.verified} verified providers need no card for the free access. A card on file changes what happens at the limit (check 2).</li>` +
@@ -458,8 +466,8 @@ function productionGuide({ providers, prefix }) {
     h2('A worked example', 'worked-example') +
     p('You need chat for a commercial side project, no card, and you’d rather your prompts weren’t used for training.') +
     `<ol><li>Filter: commercial use <code>true</code>, card <code>false</code> → ${plural(step1.length, 'provider')}. Keep text LLMs.</li>` +
-    `<li>Data policy <code>trains_on_prompts: false</code> → ${step2.length ? andList(step2.map((x) => `${L(x)} (${esc(x.free_tier)})`)) : 'none today'}.</li>` +
-    (step2.length ? `<li>Limits: ${step2.map((x) => `${L(x)}: ${esc(x.rate_limits)}`).join('; ')}. Anything unpublished is an unknown to test before launch.</li>` +
+    `<li>Data policy <code>trains_on_prompts: false</code> → ${step2.length ? andList(step2.map((x) => `${L(x)} (${escProse(x.free_tier)})`)) : 'none today'}.</li>` +
+    (step2.length ? `<li>Limits: ${step2.map((x) => `${L(x)}: ${escProse(x.rate_limits)}`).join('; ')}. Anything unpublished is an unknown to test before launch.</li>` +
       `<li>Freshness: ${step2.map((x) => `${esc(x.name)} checked ${time(x.last_verified)}`).join(', ')}.</li>` : '') +
     `</ol>` +
     p(`Result: a short list of ${step2.length}, with its unknowns named, instead of a guess.`) +
@@ -523,14 +531,14 @@ function noCardNoPhoneGuide({ providers, prefix }) {
     related([`<a href="${prefix}collections/no-credit-card">No credit card collection</a>`, `<a href="${prefix}collections/no-phone">No phone collection</a>`, `<a href="${prefix}guides/free-llm-api-without-credit-card">Free LLM APIs with no credit card</a>`]) +
     h2('The catch, provider by provider', 'the-catch') +
     p('Everything below is from each provider’s entry, which quotes its own pages.') +
-    groups.map(([g, l]) => `<h3>${esc(g)}</h3><ul>${l.map((x) => `<li><strong>${L(x)}.</strong> ${esc(x.notes)} ${sourceOf(x)}</li>`).join('')}</ul>`).join('') +
+    groups.map(([g, l]) => `<h3>${esc(g)}</h3><ul>${l.map((x) => `<li><strong>${L(x)}.</strong> ${escProse(x.notes)} ${sourceOf(x)}</li>`).join('')}</ul>`).join('') +
     h2(`No card, phone not confirmed: ${phoneUnknown.length} more`, 'phone-not-confirmed') +
     p(`Another ${phoneUnknown.length} of the verified providers need no card, but their pages don’t say whether signup asks for a phone number. Among them are some of the most used free tiers: ${andList(phoneUnknown.slice(0, 7).map(L))}.`) +
     p(`“Not confirmed” means we read their official pages and none answers the question.${gemini && fieldCheck(gemini, 'phone_required') && gemini.phone_required == null ? ` For ${esc(gemini.name)}: “${esc(fieldCheck(gemini, 'phone_required').note)}” (read ${time(fieldCheck(gemini, 'phone_required').checked)}).` : ''} It doesn’t mean they ask for a phone; it means their docs don’t say.`) +
     (phoneRequired.length ? p(`<strong>No card, but a phone is required:</strong> ${andList(phoneRequired.map((x) => { const c = fieldCheck(x, 'phone_required'); return c && c.status === 'stated' && c.quote ? `${L(x)} (“${esc(c.quote)}”)` : L(x); }))}.`) : '') +
     related([`<a href="${prefix}coverage/">Open questions per flag</a>`, `<a href="${prefix}guides/choose-free-llm-api-for-production">what “unknown” means</a>`]) +
     h2('No account at all', 'no-account') +
-    (anon.length ? p(`${anon.length === 1 ? 'One provider' : `${anon.length} providers`} can be called with <strong>no account</strong>, each with the provider’s own sentence: ${anon.map((x) => `${L(x)} (“${esc(x.anonymous_access.quote)}”${x.anonymous_access.note ? `; ${esc(x.anonymous_access.note)}` : ''})`).join('; ')}.`) : p('No provider in the dataset records anonymous access today.')) +
+    (anon.length ? p(`${anon.length === 1 ? 'One provider' : `${anon.length} providers`} can be called with <strong>no account</strong>, each with the provider’s own sentence: ${anon.map((x) => `${L(x)} (“${escProse(x.anonymous_access.quote)}”${x.anonymous_access.note ? `; ${escProse(x.anonymous_access.note)}` : ''})`).join('; ')}.`) : p('No provider in the dataset records anonymous access today.')) +
     related([`<a href="${prefix}collections/anonymous-access">No-account collection</a>`, `<a href="${prefix}guides/free-llm-api-no-signup">Free LLM APIs with no phone and no card</a>`]) +
     h2('How sure is “no phone”?', 'how-sure') +
     p(`For these ${list.length} providers, the dataset records “no card” and “no phone”. ${withPhoneCheck.length === 0 ? 'None of them has a provider sentence registered for the phone answer in <code>field_checks</code> yet: the answer comes from the entry’s verification.' : `${withPhoneCheck.length} of them have a recorded phone check in <code>field_checks</code> (${andList(withPhoneCheck.map(L))}); for the others the answer comes from the entry’s verification, with no provider sentence registered yet.`} When a re-check finds no current page that states an unsourced flag, the flag moves to “not confirmed”, and the provider drops off this list. Each provider page shows the current state and the date.`);

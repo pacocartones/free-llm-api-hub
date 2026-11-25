@@ -125,7 +125,7 @@ describe('the lists are the data', () => {
     const answer = stripTags(html.match(/<p class="answer"><strong>([\s\S]*?)<\/strong><\/p>/)[1]);
     assert.ok(answer.includes(`${compat.length} of the ${providers.filter((p) => p.verified).length} verified providers`), answer);
     // Each base URL shown is the provider's own.
-    for (const p of usable.filter((x) => x.is_text_llm && x.openai_base_url)) assert.ok(html.includes(`<code>${p.openai_base_url.replace(/&/g, '&amp;')}</code>`), p.slug);
+    for (const p of usable.filter((x) => x.is_text_llm && x.openai_base_url)) assert.ok(html.includes(`<code>${p.openai_base_url.replace(/&/g, "&amp;").replace(/\//g, "/<wbr>")}</code>`), p.slug);
     // The not-free names come from data/not-free.json.
     for (const e of notFree.entries.filter((x) => x.group !== 'removed')) assert.ok(html.includes(e.name.replace(/&/g, '&amp;').replace(/'/g, "'")), e.name);
   });
