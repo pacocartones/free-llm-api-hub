@@ -213,6 +213,18 @@
    "page_sha256": "2aba6287e39902eab9da378b3dbe62debf9c3b99c2d728b141f6d54f87ee7ee7"
   },
   {
+   "id": "cerebras.openai_compatible.sentence",
+   "slug": "cerebras",
+   "kind": "field_sentence",
+   "field": "openai_compatible",
+   "text": "The Cerebras API is compatible with OpenAI client libraries for many common workflows.",
+   "source_url": "https://inference-docs.cerebras.ai/resources/openai",
+   "read_on": "2026-11-25",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "ed338420bd3ed2b5f9306615eea78b26c0806a5d461a689173439c61b9d7e3c1"
+  },
+  {
    "id": "cerebras.speed.gpt-oss-120b.output_tokens_per_second",
    "slug": "cerebras",
    "kind": "speed_quote",

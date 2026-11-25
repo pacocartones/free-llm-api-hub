@@ -22,6 +22,8 @@ Descriptions are copied from each property itself. “No description in schema.�
 | `expires` | string | Yes | No | — | Validity window for time-limited offers, e.g. '30 days'. null for perpetual/renewing tiers. |
 | `docs_url` | string | No | Yes | — | Primary source: the provider's own pricing/rate-limit docs. Empty string only for flagged-unverified entries. |
 | `playground_url` | string | No | No | Format: <code>uri</code>; Pattern: <code>^https://</code> | Provider-owned no-code playground, linked from the provider's own docs or console. Omit when unrecorded; requires a non-empty docs_url. |
+| `keys_url` | string | No | No | Format: <code>uri</code>; Pattern: <code>^https://</code> | The provider's own page where a signed-up user creates an API key, exactly as the provider's docs link it. Omit when unrecorded (never guessed); requires keys_url_source and a non-empty docs_url. Adds a "Get a free key" button on the provider page. |
+| `keys_url_source` | string | No | No | Format: <code>uri</code>; Pattern: <code>^https://</code> | The provider's own docs page that names or links keys_url. Present if and only if keys_url is. |
 | `phone_required` | boolean | Yes | No | — | No description in schema. |
 | `card_required` | boolean | Yes | No | — | No description in schema. |
 | `commercial_ok` | boolean or string | Yes | No | One of: (Type: boolean or null) OR (Value: <code>"conditional"</code>) | No description in schema. |

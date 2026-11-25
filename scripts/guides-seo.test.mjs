@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { privateTree } from './lib/private-tree.mjs';
 import { stripTags } from './lib/escape.mjs';
+import { LONG_GUIDES } from './lib/long-guides.mjs';
 
 // The guides under /guides/: what a search result and an assistant quote must say, and that it is true of the page.
 const REPO = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -15,7 +16,11 @@ const list = Array.isArray(providers) ? providers : providers.providers;
 const generated = Array.isArray(providers) ? null : providers.generated;
 
 const read = (slug) => readFileSync(join(ROOT, 'site/guides', `${slug}.html`), 'utf8');
-const guides = () => readdirSync(join(ROOT, 'site/guides')).filter((f) => f.endsWith('.html') && f !== 'index.html').map((f) => f.replace(/\.html$/, ''));
+// The list guides (a direct answer and one table). The long-form guides share /guides/ and have their own tests
+// (long-guides.test.mjs); the hub and the metadata checks below cover both.
+const LONG = new Set(LONG_GUIDES.map((g) => g.slug));
+const allGuides = () => readdirSync(join(ROOT, 'site/guides')).filter((f) => f.endsWith('.html') && f !== 'index.html').map((f) => f.replace(/\.html$/, ''));
+const guides = () => allGuides().filter((s) => !LONG.has(s));
 const jsonld = (html) => JSON.parse(html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1]);
 const words = (t) => t.trim().split(/\s+/).length;
 
@@ -140,18 +145,19 @@ test('a provider named in a collection text is a row of that collection table', 
   }
 });
 
-test('the hub has a direct answer, a title and a description from its live counts, and CollectionPage, BreadcrumbList and FAQPage that list all nineteen pages', () => {
+test('the hub has a direct answer, a title and a description from its live counts, and CollectionPage, BreadcrumbList and FAQPage that list every guide and collection page', () => {
   const html = readFileSync(join(ROOT, 'site/guides-and-collections/index.html'), 'utf8');
   const a = stripTags(html.match(/<p class="answer"><strong>([^<]*)<\/strong><\/p>/)[1]);
   assert.ok(words(a) >= 40 && words(a) <= 55, `${words(a)} words`);
   assert.ok(a.includes(`${guides().length} guides`) && a.includes(`${colls().length} collections`));
   const meta = html.match(/<meta name="description" content="([^"]*)"/)[1];
-  assert.ok(meta.length <= 155 && meta.startsWith(`${guides().length} guides and ${colls().length} collections`));
+  assert.ok(meta.length <= 155 && meta.startsWith(`${allGuides().length} guides and ${colls().length} collections`));
   const title = html.match(/<title>([^<]*)<\/title>/)[1];
   assert.ok(title.length <= 60, `title ${title.length} characters`);
   const graph = jsonld(html)['@graph'];
   const page = graph.find((g) => g['@type'] === 'CollectionPage');
-  assert.equal(page.mainEntity.itemListElement.length, 19);
+  assert.equal(page.mainEntity.itemListElement.length, allGuides().length + colls().length);
+  assert.equal(allGuides().length, guides().length + LONG_GUIDES.length);
   for (const e of page.mainEntity.itemListElement) {
     const path = e.url.replace('https://freellmapihub.com/', '');
     const file = path.startsWith('guides/') ? `site/${path}.html` : `site/${path}.html`;
@@ -171,7 +177,7 @@ test('image guide describes editing as well as generation, matching the broad im
 test('discovery pages have unique metadata, self canonicals and exactly one sitemap entry', () => {
   const sitemap = readFileSync(join(ROOT, 'site/sitemap.xml'), 'utf8');
   const titles = new Set(), descriptions = new Set();
-  for (const [section, slugs] of [['guides', guides()], ['collections', colls()]]) {
+  for (const [section, slugs] of [['guides', allGuides()], ['collections', colls()]]) {
     for (const slug of slugs) {
       const html = section === 'guides' ? read(slug) : readColl(slug);
       const url = `https://freellmapihub.com/${section}/${slug}`;

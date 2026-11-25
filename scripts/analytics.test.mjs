@@ -289,9 +289,9 @@ describe('build with GA_MEASUREMENT_ID set', () => {
       const connect = new Set(sources('connect-src'));
       assert.ok(script.has('https://www.googletagmanager.com'), `${rel}: script-src allows gtag.js`);
       for (const h of GA_HOSTS) assert.ok(connect.has(h), `${rel}: connect-src allows ${h}`);
-      // nothing beyond the site's own sources and the GA4 / Google signals hosts
-      assert.deepEqual([...connect].sort(), ["'self'", 'https://raw.githubusercontent.com', ...GA_HOSTS].sort(), `${rel}: connect-src scope`);
-      assert.deepEqual([...script].filter((s) => !s.startsWith("'sha256-")).sort(), ["'self'", 'https://www.googletagmanager.com'].sort(), `${rel}: script-src scope`);
+      // nothing beyond the site's own sources, Cloudflare Web Analytics (edge-injected) and the GA4 / Google signals hosts
+      assert.deepEqual([...connect].sort(), ["'self'", 'https://raw.githubusercontent.com', 'https://cloudflareinsights.com', ...GA_HOSTS].sort(), `${rel}: connect-src scope`);
+      assert.deepEqual([...script].filter((s) => !s.startsWith("'sha256-")).sort(), ["'self'", 'https://static.cloudflareinsights.com', 'https://www.googletagmanager.com'].sort(), `${rel}: script-src scope`);
       assert.equal([...script].filter((s) => s.startsWith("'sha256-")).length, 2, `${rel}: the two inline hashes stay`);
       const consentTag = html.match(/<script src="([^"]*)consent\.js\?v=[0-9a-f]{8}" defer><\/script>/);
       assert.ok(consentTag && consentTag[1] === prefix, `${rel}: consent.js (fingerprinted) with prefix ${prefix}`);
@@ -304,11 +304,14 @@ describe('build with GA_MEASUREMENT_ID set', () => {
   test('site/consent.js is built with the ID', () => {
     assert.ok(existsSync(join(ROOT, 'site/consent.js')));
     assert.ok(read('site/consent.js').includes(`'${ID}'`));
+    // the built banner carries the repo_click event and the keys link type (payloads: ga-events.test.mjs)
+    assert.ok(read('site/consent.js').includes("track('repo_click'"));
+    assert.ok(read('site/consent.js').includes("'keys'"));
   });
 
   test('the privacy page describes both categories instead of "no cookies"', () => {
     const privacy = read('site/legal/privacy.html');
-    assert.doesNotMatch(privacy, /sets no cookies/);
+    assert.doesNotMatch(privacy, /This site sets no cookies/); // Cloudflare Web Analytics itself is described as cookieless
     assert.match(privacy, /<strong>only for the categories you allow<\/strong>/);
     assert.match(privacy, /<h3>1\. Analytics<\/h3>/);
     assert.match(privacy, /<h3>2\. Advertising &amp; personalised measurement \(Google signals\)<\/h3>/);
@@ -320,6 +323,7 @@ describe('build with GA_MEASUREMENT_ID set', () => {
     assert.match(privacy, /EU–US Data Privacy Framework/);
     assert.match(privacy, /kept in Google Analytics for 14 months/);
     assert.match(privacy, /what you type in its search box \(cut to 60 characters/);
+    assert.match(privacy, /where on the site you follow a link to this project&#39;s GitHub repository|where on the site you follow a link to this project's GitHub repository/);
     assert.match(privacy, /Cookie settings/);
     assert.match(privacy, /GDPR Art\. 6\(1\)\(a\)/);
     assert.match(privacy, /no request is ever sent to Google/);
