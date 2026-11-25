@@ -1,6 +1,6 @@
 # Update playbook
 
-How this list stays current — the routine that keeps the freshness badge green. Provider verification and dataset regeneration run locally, on demand, on a machine you control. The one maintenance exception is [weekly issue publication](../.github/workflows/weekly-worklist.yml): Actions replaces issue #4's generated worklist from repository metadata without visiting provider sources or verifying any provider claim.
+How this list stays current — the routine that keeps the freshness badge green. Provider verification and dataset regeneration run locally, on demand, on a machine you control. Two maintenance jobs run in Actions: [weekly issue publication](../.github/workflows/weekly-worklist.yml) replaces issue #4's generated worklist from repository metadata without visiting provider sources, and the report-only [source watch](#source-watch) re-reads the pages cited in `data/quotes.json` and lists quotes to re-check. Neither verifies a provider claim or edits data.
 
 Before the first pass in a clone, install the locked local development tools without running package lifecycle scripts:
 
@@ -12,6 +12,7 @@ npm ci --ignore-scripts
 
 - **Weekly human verification:** aim for one pass a week (Mondays ~10:00 Madrid works well); `npm run reverify` proposes at least 6 entries a week (the approved pace) and more only when the 90-day SLA needs it. Publishing a current worklist does not complete this pass or clear the backlog.
 - **Weekly issue publication:** Mondays at 09:17 UTC (10:17 Madrid in winter / 11:17 in summer), best effort. The main-only workflow refreshes issue #4 from current main and the actual UTC date; age arithmetic changes even when the dataset does not. Schedules can be delayed or disabled; use the recovery procedure below.
+- **Weekly source watch:** Mondays at 06:41 UTC, best effort, report-only. See [Source watch](#source-watch).
 - **Freshness SLA:** every verified entry is re-confirmed against the provider's own docs within **90 days**. The badge is graded on the *oldest* entry against that SLA, so it turns amber the moment one row goes past 60 days and red the moment one goes past 90 — it slips before the list does.
 
 ## Layer 1 — the re-verification batch (local script)
@@ -32,7 +33,7 @@ Start each weekly pass with `npm run worklist`. It prints this week's oldest ver
 
 **Staggering a cohort.** When many entries share a verification date (45 were verified on 2026-11-19 and 2026-11-20), they would all become due in the same week. The worklist's **📊 Freshness histogram** shows how many entries reach day 61 and day 91 in each of the next 16 weeks and marks with ⛰️ any week with more than 8 becoming due. While such a week exists, the batch pulls its entries forward, oldest first, even before they are 28 days old (never younger than 7 days), so the cohort is re-checked a few at a time. Do the whole batch each week, as one pull request, and the ⛰️ weeks disappear; skip a week and the following batches stay at 6, so the gap shows up as amber or overdue entries in the histogram. The rules are in [freshness-sla.md](freshness-sla.md#4-the-worklist-npm-run-worklist).
 
-A cheap weekly check that every quote in `data/quotes.json` is still on its page ("quote drift") is not part of this: `npm run verify-quotes` reads provider pages, which GitHub runners often cannot reach and which the issue publisher deliberately never visits. It stays a local run until the source-watch work gives it a home.
+The weekly check that every quote in `data/quotes.json` is still on its page ("quote drift") is not part of the worklist publisher, which deliberately never visits provider pages: it is the separate [source watch](#source-watch).
 
 [Issue #4](https://github.com/pacocartones/free-llm-api-hub/issues/4) publishes the same renderer with a UTC refresh date and an immutable link to the checked-out dataset commit. Its **entire body is generated and replaced on refresh**, including resetting checkboxes. Keep discussion in comments. Checked boxes are not evidence of completed verification; only human-reviewed, supported dataset edits establish it.
 
@@ -106,6 +107,30 @@ The output starts with `Checked N source URLs.`. If every URL answers, it prints
 | HTTP status, `timeout`, or the fetch error | the data file and slug, or `docs/sources.md` | the URL checked | the closest available Wayback snapshot, or `-` |
 
 The script writes nothing to the repository and is not part of `npm test` or CI, so a provider or Archive.org outage never fails a build.
+
+### Source watch
+
+[`source-watch.yml`](../.github/workflows/source-watch.yml) runs `scripts/source-watch.mjs` every Monday at 06:41 UTC (and on manual dispatch from `main`). It reads every distinct page cited in `data/quotes.json` once, the way `npm run quotes:add` reads it (same headers and User-Agent naming this repository, same `html-text-v1` / `pdf-text-v1` normalisation), and gives each quote one status:
+
+| Status | Meaning | What to do |
+| --- | --- | --- |
+| present | the quoted text is on the page and the page text still matches `page_sha256` | nothing |
+| changed | the quoted text is still on the page, but the page text changed (hash differs) | nothing; low priority, listed folded in the issue |
+| missing | the page came, in the recorded language, and the quoted text is no longer in it | re-check the claim and the quote (below) |
+| fetch error | HTTP error, timeout, a page that needs scripts, or another language | only flagged after **2 runs in a row** (404/410 at once), because CDNs often block GitHub runners |
+
+A few pages put a per-request token in their markup, so their hash differs on every read. They are listed in `VOLATILE_PAGES` in `scripts/lib/source-watch.mjs` and never report "changed"; the quote itself is still checked. Add a page there only after two reads a minute apart differ. Digits and dates are deliberately not normalised away, because that would hide the limit changes the watch exists to catch.
+
+It publishes **one** issue, "Source watch: quotes to re-check": missing quotes grouped by provider, then flagged fetch errors. The body is replaced on every run (keep discussion in comments); the issue is reopened when something needs a person and closed when a run is clean. The two-run memory is a hidden `source-watch-state` comment at the end of that body (URLs and counts only); the full report is kept as the `source-watch-report` run artifact for 90 days. Nothing is written to the repository, no pull request is opened, no secret is used, and the issue lists our own ids and URLs, never page text. The job has `contents: read` and `issues: write` only.
+
+Requests are polite: at most 4 hosts at a time, one request at a time per host, a 0.7 s pause before each, 30 s timeout, through the repository's public-URL transport.
+
+When a quote is **missing**: open the source page from a normal connection. If the provider changed the policy, follow the weekly pass for that row (update `data/providers.json` with a supported edit), then run `npm run quotes:add -- <slug>` to record the new quote, hash and date. If the text only moved to another page, record that page as the source. A **flagged fetch error** is a lead, not a verdict: re-check from a normal connection before changing anything. A dry run prints the issue body without publishing:
+
+```sh
+node scripts/source-watch.mjs                  # whole register; add --only <slug> for one provider
+node scripts/source-watch.mjs --json report.json
+```
 
 ### Optional: live probe
 
