@@ -18,3 +18,5 @@
 - The `copy_snippet` GA4 event (sent only with analytics consent) recognises the widget snippet, which starts
   with `<div`, as `embed` instead of `other`, and takes two new values, `badge` and `citation`, from the code
   blocks of `/embed/`.
+- The widget's "Could not load" fallback line takes the host page's text colour instead of a fixed grey that
+  failed contrast on dark pages.
