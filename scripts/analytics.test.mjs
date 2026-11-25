@@ -289,9 +289,9 @@ describe('build with GA_MEASUREMENT_ID set', () => {
       const connect = new Set(sources('connect-src'));
       assert.ok(script.has('https://www.googletagmanager.com'), `${rel}: script-src allows gtag.js`);
       for (const h of GA_HOSTS) assert.ok(connect.has(h), `${rel}: connect-src allows ${h}`);
-      // nothing beyond the site's own sources and the GA4 / Google signals hosts
-      assert.deepEqual([...connect].sort(), ["'self'", 'https://raw.githubusercontent.com', ...GA_HOSTS].sort(), `${rel}: connect-src scope`);
-      assert.deepEqual([...script].filter((s) => !s.startsWith("'sha256-")).sort(), ["'self'", 'https://www.googletagmanager.com'].sort(), `${rel}: script-src scope`);
+      // nothing beyond the site's own sources, Cloudflare Web Analytics (edge-injected) and the GA4 / Google signals hosts
+      assert.deepEqual([...connect].sort(), ["'self'", 'https://raw.githubusercontent.com', 'https://cloudflareinsights.com', ...GA_HOSTS].sort(), `${rel}: connect-src scope`);
+      assert.deepEqual([...script].filter((s) => !s.startsWith("'sha256-")).sort(), ["'self'", 'https://static.cloudflareinsights.com', 'https://www.googletagmanager.com'].sort(), `${rel}: script-src scope`);
       assert.equal([...script].filter((s) => s.startsWith("'sha256-")).length, 2, `${rel}: the two inline hashes stay`);
       const consentTag = html.match(/<script src="([^"]*)consent\.js\?v=[0-9a-f]{8}" defer><\/script>/);
       assert.ok(consentTag && consentTag[1] === prefix, `${rel}: consent.js (fingerprinted) with prefix ${prefix}`);
@@ -308,7 +308,7 @@ describe('build with GA_MEASUREMENT_ID set', () => {
 
   test('the privacy page describes both categories instead of "no cookies"', () => {
     const privacy = read('site/legal/privacy.html');
-    assert.doesNotMatch(privacy, /sets no cookies/);
+    assert.doesNotMatch(privacy, /This site sets no cookies/); // Cloudflare Web Analytics itself is described as cookieless
     assert.match(privacy, /<strong>only for the categories you allow<\/strong>/);
     assert.match(privacy, /<h3>1\. Analytics<\/h3>/);
     assert.match(privacy, /<h3>2\. Advertising &amp; personalised measurement \(Google signals\)<\/h3>/);
