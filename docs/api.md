@@ -27,6 +27,7 @@ What is *not* guaranteed: the order of providers in a list, the exact contents o
 
 ### Fields added within v1
 
+- **`free_limits.per_model`** (unreleased, planned for dataset 2.16.0): an optional array inside the existing `free_limits` object, for providers whose official page publishes limits per model. Each entry is `{ model, requests_per_second?, requests_per_minute?, requests_per_day?, requests_per_month?, tokens_per_day?, tokens_per_month?, scope? }`: `model` is an ID of the same provider's `models_free`, exactly as listed, appears once, and the entry carries at least one number (`scripts/validate.mjs` rejects anything else). The entries share the object's `source` and `checked`: one page, read on one day. A model with no entry falls back to the provider-wide numbers of the object, which keep their meaning; nothing is copied from another model. `free_limits` stays one object (its v1 type), so this is a new key, not a new shape. No provider carries it yet: it is filled only when an official page gives the numbers per model. The CSV does not carry it.
 - **`published_speed`** (unreleased, planned for dataset 2.15.0): an optional array on a provider. Each entry is a speed figure the provider publishes on its own site for a model of its `models_free`: `{ model, metric, unit, value, qualifier, conditions, plan_named, source, checked, quote }`. `metric` is `output_tokens_per_second` (`unit` `tokens/s`) or `time_to_first_token_ms` (`unit` `ms`); `qualifier` is `exact`, `approx`, `at_least` or `up_to`, as the quote words it; `plan_named: false` means the page ties the figure to no plan, so it is not stated for the free tier. These are provider claims, not measurements: figures from different providers are not a like-for-like comparison. Absent means nothing published or recorded, never "slow". No existing field changes. The CSV does not carry it. As with `field_checks`, a client validating with a copy of the published schema from before dataset 2.15.0 (which set `additionalProperties: false`) would reject the new key; fetch the current schema, which allows additional properties, or parse leniently.
 - **`field_checks`** (unreleased, planned for dataset 2.15.0): an optional object on a provider, keyed by tri-state flag (`phone_required`, `card_required`, `commercial_ok`, `openai_compatible`). Each entry is `{ status, checked, sources, quote?, note? }`: `status` is `stated` (an official page says it; the flag is known), `source_silent` (the provider's pages that should say it were read and do not), `needs_account` (only an account would tell) or `sources_disagree` (two official pages contradict each other; at least two `sources` and a `note`); `checked` is the date the pages were read; `sources` lists 1 to 4 HTTPS pages of the provider; `quote` is the provider's sentence (only with `stated`); `note` is plain text. A flag with no entry has no recorded check (`not_checked`), which never means "no". No existing field changes type or meaning: a flag with a reason is still `null`, and `null` still means "not confirmed". Because v1 projects `commercial_ok: "conditional"` to `null`, a v1 object can carry `commercial_ok: null` with `field_checks.commercial_ok.status: "stated"`; with `commercial_ok_condition` that marks a documented condition. The CSV does not carry it. As with `data_policy`, a client validating with a copy of the published schema from before dataset 2.15.0 (which set `additionalProperties: false`) would reject the new key; fetch the current schema, which allows additional properties, or parse leniently. [`/coverage/`](https://freellmapihub.com/coverage/) shows the counts by status.
 - **`playground_url`** (dataset 2.13.0): an optional HTTPS string pointing to a provider-owned no-code playground. Omitted means unrecorded; no new property is required. A recorded value requires a non-empty `docs_url` and adds a "Try it" action on the provider page. This additive v1 field does not extend the CSV projection; its columns remain the explicit list above.
@@ -89,6 +90,87 @@ A provider with few confirmed inputs still appears, with a low `confirmed`: miss
 ```
 
 (abridged: the real file carries every field of the tables above.)
+
+### The free-model matrix: `/api/v1/models.json`
+
+[`/api/v1/models.json`](https://freellmapihub.com/api/v1/models.json) (unreleased, planned for dataset 2.16.0) answers "which free APIs list this model?" for every model at once: one record per model, with one row per provider that lists it in its free-model sample (`models_free`). The models are the same groups, under the same keys, as the [model pages](https://freellmapihub.com/models/) `/models/<key>/`: an ID loses its deployment prefix (`@cf/`), its organisation prefix and OpenRouter's `:free` suffix and is lower-cased; a different size, version, date or suffix stays a different model, and any other merge needs a reviewed alias. An ID that gives no valid key is not in the file (it has no page either). When one provider lists two IDs with the same key, the row carries the first one.
+
+Every value is a field of `data/providers.json` that is already recorded, projected to the v1 types (`commercial_ok` is `boolean | null`, as in every v1 provider object). `null` means not recorded or not confirmed, never "no", and nothing is estimated. Model lists are a sample and change often; they are not part of the dataset's verified core claim, and the file says so in `caveat`. The file depends only on the dataset, so it is byte-stable for a given dataset and pinned by the drift gate.
+
+Its contract is **v1** and is described by a JSON Schema at a stable URL, [`/api/v1/models.schema.json`](https://freellmapihub.com/api/v1/models.schema.json) (the source is [`data/models.schema.json`](../data/models.schema.json)). The rules above apply: a field named below is never renamed, removed or retyped within v1, new fields may be added, so read only the fields you need and ignore the rest.
+
+Top level, after the shared envelope:
+
+| Field | Type | Meaning |
+|---|---|---|
+| `schema` | URL | the schema of this file |
+| `page` | URL | the free model index |
+| `caveat` | string | model lists are a sample and change often |
+| `count` | integer | the number of models |
+| `pairs` | integer | the number of (model, provider) rows |
+| `models` | array | one record per model, sorted by `key` |
+
+Each model has `key`, `name` (the most frequent bare ID), `page` (its model page), `indexable` (whether that page may be indexed: two or more verified providers list it), `provider_count` and `providers`, one row per provider in the order of the model page. Each row has:
+
+| Field | Type | Meaning |
+|---|---|---|
+| `slug`, `name` | string | the provider |
+| `model_id` | string | the exact ID the provider lists: the one to pass as `model` |
+| `verified`, `last_verified` | boolean, date or null | whether the provider entry is verified, and the day it last was |
+| `category`, `free_type`, `expires` | string or null | as in `providers.json` |
+| `card_required`, `phone_required`, `commercial_ok`, `openai_compatible` | boolean or null | the provider's flags; `null` = not confirmed |
+| `commercial_ok_condition` | string or null | the documented condition on commercial use |
+| `openai_base_url` | URL or null | the OpenAI-compatible base URL |
+| `data_policy` | object or null | `trains_on_prompts`, `retention`, `source`, `checked`; `null` when nothing is recorded |
+| `limits_scope` | string | `model` (numbers the provider publishes for this exact ID, from `free_limits.per_model`), `provider` (the provider-wide numbers, not specific to this model), `none_published` (the provider publishes no numeric free limits) or `not_recorded` |
+| `free_limits` | object or null | the numbers `limits_scope` names, with `scope`, `source` and `checked`; `null` for `none_published` and `not_recorded` |
+| `provenance` | object | where the row can be checked: `source` (the provider's model catalogue, else its docs), `source_kind` (`models_url` or `docs_url`) and `checked` (the day the provider entry was last verified; `null` for an unverified entry) |
+
+```json
+{
+  "key": "gpt-oss-120b",
+  "name": "gpt-oss-120b",
+  "page": "https://freellmapihub.com/models/gpt-oss-120b/",
+  "indexable": true,
+  "provider_count": 2,
+  "providers": [
+    { "slug": "example", "name": "Example", "model_id": "openai/gpt-oss-120b", "verified": true, "last_verified": "2026-11-24",
+      "card_required": false, "commercial_ok": true, "openai_base_url": "https://api.example.com/v1",
+      "limits_scope": "provider",
+      "free_limits": { "requests_per_minute": 30, "scope": "free plan", "source": "https://example.com/limits", "checked": "2026-11-24" },
+      "provenance": { "source": "https://example.com/models", "source_kind": "models_url", "checked": "2026-11-24" } }
+  ]
+}
+```
+
+(abridged: the real rows carry every field of the table above.)
+
+### The change feed: `/api/v1/changes.json`
+
+[`/api/v1/changes.json`](https://freellmapihub.com/api/v1/changes.json) is the field-level change feed as data: every change to a tracked provider field, with its value before and after, grouped by ISO week, newest week first. It covers the last 12 weeks that end at the week of the newest change (never anchored on the current date); weeks with no change are left out. It is mined from the git history of `data/providers.json` at build time, by the same code as the [What changed](https://freellmapihub.com/changes/) page and the RSS feed [`/changes.xml`](https://freellmapihub.com/changes.xml): each week of the JSON is the feed item with the same `guid`, and its `title` and `summary` are that item's title and description. One difference is deliberate: the JSON projects `commercial_ok` to `boolean | null` like every v1 file, so a change that only turns an unknown answer into a conditional one (`null` to `"conditional"`) is in the feed but not in the JSON, where both values are `null`; that week's counts then differ by those changes. Because it depends on the git history (a squash merge moves commit dates and hashes), the file is regenerated on every deploy and is not pinned by the drift gate.
+
+Its contract is **v1** and is described by a JSON Schema at a stable URL, [`/api/v1/changes.schema.json`](https://freellmapihub.com/api/v1/changes.schema.json) (the source is [`data/changes.schema.json`](../data/changes.schema.json)). The fields `weeks` (`week`, `start`, `end`, `count`, `changes`) and, on each change, `date`, `slug`, `name`, `field`, `from` and `to` are the file's original shape and keep it. The fields marked 2.16.0 below were added in dataset 2.16.0 (unreleased).
+
+| Field | Type | Meaning |
+|---|---|---|
+| `schema`, `page`, `feed` | URL | this file's schema, the What changed page, the RSS feed (2.16.0) |
+| `fields` | array | the tracked fields in order, each `{ field, label }` (2.16.0): `free_tier`, `rate_limits`, `notes`, `free_type`, `commercial_ok`, `commercial_ok_condition`, `card_required`, `phone_required`, `openai_compatible` |
+| `window_weeks` | integer | the window in weeks, 12 (2.16.0) |
+| `count` | integer | the number of changes in the file (2.16.0) |
+| `weeks` | array | one entry per week with a change, newest first |
+
+Each week has `week` (ISO week, such as `2026-W48`), `start` (Monday), `end` (Sunday), `count`, `changes`, and since 2.16.0 `title`, `summary` and `guid` (the matching `changes.xml` item) and `providers` (the slugs with a change that week). Each change has:
+
+| Field | Type | Meaning |
+|---|---|---|
+| `date` | date | the commit date of the change |
+| `slug`, `name` | string | the provider; a provider that has left the dataset has its slug as `name` |
+| `field` | string | one of the tracked fields of `fields` |
+| `from`, `to` | string, boolean or null | the value before and after |
+| `label` | string | the human label of `field` (2.16.0) |
+| `commit` | string or null | the 40-character hash of the commit that made the change (2.16.0); a squash or rebase merge can give the same change a new hash, so it is a link, not an identifier |
+
+Fields outside `fields` (limits, models, data policy) are not tracked yet: a change to them is not in this file.
 
 ### Free GPU compute: `/api/v1/free-gpu.json`
 

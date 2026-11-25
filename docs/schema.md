@@ -73,6 +73,20 @@ Descriptions are copied from each property itself. â€œNo description in schema.â
 | `free_limits.scope` | string | No | No | Min length: 1 | No description in schema. |
 | `free_limits.source` | string | No | Yes | Format: <code>uri</code> | The provider's own page that states the numbers. |
 | `free_limits.checked` | string | No | Yes | Format: <code>date</code> | The day the numbers were read on that page. |
+| `free_limits.per_model` | array | No | No | Min items: 1; Items: object (Min properties: 2; No additional properties) | Optional. Numbers the provider publishes for one model of its models_free, from the same source page and reading day. A model with no entry falls back to the provider-wide numbers above. Only when the official page gives the numbers per model; never copied from another model. |
+
+## <code>free_limits.per_model[]</code>
+
+| Field | Type (excluding null) | Nullable | Required | Allowed values / constraints | Description |
+| --- | --- | --- | --- | --- | --- |
+| `free_limits.per_model[].model` | string | No | Yes | Min length: 1; max length: 120 | The model ID as the provider writes it; it must be in the provider's models_free. |
+| `free_limits.per_model[].requests_per_second` | integer | No | No | Minimum: 1 | No description in schema. |
+| `free_limits.per_model[].requests_per_minute` | integer | No | No | Minimum: 1 | No description in schema. |
+| `free_limits.per_model[].requests_per_day` | integer | No | No | Minimum: 1 | No description in schema. |
+| `free_limits.per_model[].requests_per_month` | integer | No | No | Minimum: 1 | No description in schema. |
+| `free_limits.per_model[].tokens_per_day` | integer | No | No | Minimum: 1 | No description in schema. |
+| `free_limits.per_model[].tokens_per_month` | integer | No | No | Minimum: 1 | No description in schema. |
+| `free_limits.per_model[].scope` | string | No | No | Min length: 1 | The plan or condition these numbers apply to, when the page narrows them further. |
 
 ## <code>no_expiry</code>
 

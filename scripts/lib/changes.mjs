@@ -25,7 +25,8 @@ export const isoWeek = (iso) => {
   return { key: `${year}-W${pad2(week)}`, year, week, start: ymd(start), end: ymd(new Date(+start + 6 * DAY)) };
 };
 
-// One row per changed field: { date, slug, name, field, label, from, to },
+// One row per changed field: { date, slug, name, field, label, from, to, commit },
+// where commit is the 40-character hash of the providers.json commit, or null.
 // newest first, then by provider name, then by the HISTORY_FIELDS order.
 // nameBySlug resolves display names; a provider that has since left the
 // dataset falls back to its slug.
@@ -37,7 +38,7 @@ export const flattenFieldChanges = (historyBySlug, nameBySlug = {}) => {
       if (e.kind !== 'changed') continue;
       const changes = e.changes || (e.fields || []).map((field) => ({ field, from: null, to: null }));
       for (const c of changes) {
-        out.push({ date: e.date, slug, name: nameBySlug[slug] || slug, field: c.field, label: HISTORY_FIELDS[c.field] || c.field, from: c.from ?? null, to: c.to ?? null });
+        out.push({ date: e.date, slug, name: nameBySlug[slug] || slug, field: c.field, label: HISTORY_FIELDS[c.field] || c.field, from: c.from ?? null, to: c.to ?? null, commit: e.commit ?? null });
       }
     }
   }
@@ -99,13 +100,16 @@ const plural = (n, one, many) => `${n} ${n === 1 ? one : many}`;
 export const weekTitle = (g) =>
   `${g.week} (${g.start} to ${g.end}): ${plural(g.count, 'field change', 'field changes')} across ${plural(g.providers.length, 'provider', 'providers')}`;
 
+// The <guid> of a week's item in changes.xml, also published in changes.json.
+export const weekGuid = (g) => `free-llm-api-hub-changes-${g.week}`;
+
 // RSS 2.0, one <item> per ISO week. Deterministic: pubDate is the date of the
 // newest change in that week, the guid is the week key.
 export const changesRss = (groups, { site }) => {
   const items = groups.map((g) =>
     `    <item><title>${xmlEsc(weekTitle(g))}</title>` +
     `<link>${xmlEsc(`${site}/changes/#${g.week}`)}</link>` +
-    `<guid isPermaLink="false">${xmlEsc(`free-llm-api-hub-changes-${g.week}`)}</guid>` +
+    `<guid isPermaLink="false">${xmlEsc(weekGuid(g))}</guid>` +
     `<pubDate>${new Date(g.lastDate + 'T00:00:00Z').toUTCString()}</pubDate>` +
     `<description>${xmlEsc(weekSummary(g))}</description></item>`).join('\n');
   return `<?xml version="1.0" encoding="UTF-8"?>\n<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel>\n` +
@@ -122,3 +126,32 @@ export const changesRss = (groups, { site }) => {
 // Returns a raw URL; HTML-escape it when writing it into an attribute.
 export const reportChangeUrl = (p, repo) =>
   `${repo}/issues/new?template=inaccuracy.yml&provider=${encodeURIComponent(p.slug)}&title=${encodeURIComponent(`[outdated] ${p.name}`)}`;
+
+// The body of /api/v1/changes.json (everything after the shared API envelope).
+// `weeks` comes from groupChangesByWeek over the v1-projected changes. Fields
+// published before dataset 2.16.0 keep their names, order and meaning (week,
+// start, end, count, changes; date, slug, name, field, from, to); the rest is
+// additive. `title` and `summary` are the same strings as the <title> and
+// <description> of that week's item in changes.xml (weekTitle, weekSummary), and
+// `guid` is that item's <guid>, so a client can match the JSON to the feed.
+export const CHANGES_WINDOW_WEEKS = 12;
+export const changesApiBody = (weeks, { site, windowWeeks = CHANGES_WINDOW_WEEKS } = {}) => ({
+  schema: `${site}/api/v1/changes.schema.json`,
+  page: `${site}/changes/`,
+  feed: `${site}/changes.xml`,
+  fields: Object.entries(HISTORY_FIELDS).map(([field, label]) => ({ field, label })),
+  window_weeks: windowWeeks,
+  count: weeks.reduce((n, g) => n + g.changes.length, 0),
+  weeks: weeks.map((g) => ({
+    week: g.week, start: g.start, end: g.end, count: g.count,
+    changes: g.changes.map(({ date, slug, name, field, from, to, label, commit }) => ({
+      date, slug, name, field, from, to,
+      label: label || HISTORY_FIELDS[field] || field,
+      commit: commit ?? null,
+    })),
+    title: weekTitle(g),
+    summary: weekSummary(g),
+    guid: weekGuid(g),
+    providers: [...new Set(g.changes.map((c) => c.slug))],
+  })),
+});

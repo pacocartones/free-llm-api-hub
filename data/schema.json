@@ -206,7 +206,28 @@
             "tokens_per_month": { "type": "integer", "minimum": 1 },
             "scope": { "type": "string", "minLength": 1 },
             "source": { "type": "string", "format": "uri", "description": "The provider's own page that states the numbers." },
-            "checked": { "type": "string", "format": "date", "description": "The day the numbers were read on that page." }
+            "checked": { "type": "string", "format": "date", "description": "The day the numbers were read on that page." },
+            "per_model": {
+              "type": "array",
+              "minItems": 1,
+              "description": "Optional. Numbers the provider publishes for one model of its models_free, from the same source page and reading day. A model with no entry falls back to the provider-wide numbers above. Only when the official page gives the numbers per model; never copied from another model.",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["model"],
+                "minProperties": 2,
+                "properties": {
+                  "model": { "type": "string", "minLength": 1, "maxLength": 120, "description": "The model ID as the provider writes it; it must be in the provider's models_free." },
+                  "requests_per_second": { "type": "integer", "minimum": 1 },
+                  "requests_per_minute": { "type": "integer", "minimum": 1 },
+                  "requests_per_day": { "type": "integer", "minimum": 1 },
+                  "requests_per_month": { "type": "integer", "minimum": 1 },
+                  "tokens_per_day": { "type": "integer", "minimum": 1 },
+                  "tokens_per_month": { "type": "integer", "minimum": 1 },
+                  "scope": { "type": "string", "minLength": 1, "description": "The plan or condition these numbers apply to, when the page narrows them further." }
+                }
+              }
+            }
           }
         },
         "no_expiry": {

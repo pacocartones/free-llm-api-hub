@@ -57,7 +57,7 @@ export const readProviderRevisions = (cwd) => {
 };
 
 // Pure: turns an ordered list of parsed revisions ([{ date, parsed }], oldest
-// first) into the per-provider history plus one snapshot per calendar month
+// first; `hash` optional) into the per-provider history plus one snapshot per calendar month
 // (the last revision committed in that month). A 'changed' event carries the
 // field-level before/after values in `changes`, which feed the weekly change
 // feed; api/v1/history.json strips them to keep its published shape.
@@ -65,7 +65,7 @@ export const historyFromRevisions = (revisions) => {
   const historyBySlug = {};
   const monthEnd = {};
   const prevSnap = {};
-  for (const { date, parsed } of revisions) {
+  for (const { hash, date, parsed } of revisions) {
     for (const pp of parsed.providers || []) {
       const prior = prevSnap[pp.slug];
       if (!prior) {
@@ -75,6 +75,9 @@ export const historyFromRevisions = (revisions) => {
         if (changed.length) {
           (historyBySlug[pp.slug] ||= []).push({
             date, kind: 'changed', fields: changed,
+            // The commit that changed data/providers.json, when the revision carries one (api/v1/changes.json
+            // publishes it; history.json strips it to keep its published shape).
+            ...(typeof hash === 'string' && /^[0-9a-f]{40}$/.test(hash) ? { commit: hash } : {}),
             text: `Updated ${changed.map((k) => HISTORY_FIELDS[k]).join(', ')}`,
             changes: changed.map((k) => ({ field: k, from: prior[k] ?? null, to: pp[k] ?? null })),
           });
