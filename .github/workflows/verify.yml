@@ -5,8 +5,9 @@ name: Verify
 # What blocks: the dataset must satisfy the integrity rules, internal doc links
 # must resolve, and the generated artifacts must be in sync with the data. The
 # author regenerates them locally (`npm run build`, `npm run og`) and commits
-# them in the same PR. There is no regeneration bot for changes you author —
-# the author regenerates locally. The weekly-worklist workflow publishes issue
+# them in the same PR. The regeneration bot (regenerate.yml) runs in shadow
+# mode and does not commit yet, so the author still regenerates locally; see
+# docs/regeneration-bot.md. The weekly-worklist workflow publishes issue
 # metadata only; provider re-verification, badge regeneration, probe and the
 # `models_free` backfill stay local and on-demand, see docs/update-playbook.md.
 on:
@@ -93,8 +94,8 @@ jobs:
       - name: Run the pipeline test suite
         run: node scripts/run-tests.mjs
 
-      # The PR must ship its own regenerated files — there is no regeneration
-      # bot anymore, so an out-of-sync main would otherwise stay broken.
+      # The PR must ship its own regenerated files — the regeneration bot does
+      # not commit to main yet, so an out-of-sync main would otherwise stay broken.
       # The freshness badge is date-relative (the oldest age in days moves
       # daily), so it is not committed at all: the build writes
       # site/badge-freshness.json and every deploy publishes it.
@@ -146,3 +147,52 @@ jobs:
 
       - name: Run the full test suite
         run: npm test
+
+  # A push to main is checked again after the merge (two pull requests that pass
+  # alone can fail together, e.g. a duplicate slug). A failure there used to be
+  # visible only on the commit's status; this job turns it into one open issue,
+  # comments on it while main stays broken, and closes it on the next clean run.
+  # It checks nothing out and runs no repository code; its token can only write
+  # issues. Pull requests never reach it.
+  report:
+    name: Report Verify on main
+    needs: [validate, windows-tests]
+    if: ${{ always() && github.repository == 'pacocartones/free-llm-api-hub' && github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && !contains(needs.*.result, 'cancelled') && !contains(needs.*.result, 'skipped') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      issues: write
+    steps:
+      - name: Open, update or close the Verify issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          FAILED: ${{ contains(needs.*.result, 'failure') }}
+          LINUX: ${{ needs.validate.result }}
+          WINDOWS: ${{ needs.windows-tests.result }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          COMMIT: ${{ github.sha }}
+        run: |
+          title='Verify failed on main'
+          number=$(gh issue list --state open --search "in:title \"$title\"" --json number,title \
+            --jq "map(select(.title == \"$title\")) | .[0].number // empty")
+          body=$(mktemp)
+          if [ "$FAILED" = true ]; then
+            {
+              echo "Verify failed on \`$COMMIT\` after it reached main."
+              echo
+              echo "- Dataset integrity (Linux): $LINUX"
+              echo "- Windows tests: $WINDOWS"
+              echo
+              echo "Open the run, read the failed step, and fix main in a pull request. Run: $RUN_URL"
+            } > "$body"
+            if [ -n "$number" ]; then
+              gh issue comment "$number" --body-file "$body"
+            else
+              gh issue create --title "$title" --label chore --body-file "$body"
+            fi
+          elif [ -n "$number" ]; then
+            printf 'Verify passes again on `%s`.\n\nRun: %s\n' "$COMMIT" "$RUN_URL" > "$body"
+            gh issue comment "$number" --body-file "$body"
+            gh issue close "$number" --reason completed
+          fi
