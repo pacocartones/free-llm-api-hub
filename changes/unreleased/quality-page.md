@@ -6,4 +6,4 @@
   `models_free`, and the non-text ratio under both definitions (no `text` in `modalities`, and `is_text_llm: false`).
   Every number is computed from `data/providers.json` at build time and dated by the dataset's as-of day; tables
   only, no script. Linked from the footer and the methodology, in the sitemap and in the Lighthouse gate.
-  Agent-assisted.
+  Agent-assisted (#765).
