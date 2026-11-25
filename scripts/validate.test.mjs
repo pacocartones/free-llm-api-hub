@@ -24,8 +24,8 @@ const VALIDATE = join(ROOT, 'scripts/validate.mjs');
 //   SCHEMA_GATED_CASES row proves the schema gate names the field; that is not
 //   evidence for the hand-written line itself.
 // - "redundant": the same input always also fails another line, so it cannot be isolated.
-// 97 sites total: 73 direct cases; 22 schema-gated; 1 redundant;
-// 1 without a dedicated direct case (203, reserved for good first issue #703).
+// 97 sites total: 74 direct cases; 22 schema-gated; 1 redundant;
+// 0 without a dedicated direct case.
 // | validate.mjs line | Diagnostic or delegated protection | Evidence |
 // | --- | --- | --- |
 // | 83 | top-level: version must be semver | schema-gated |
@@ -74,7 +74,7 @@ const VALIDATE = join(ROOT, 'scripts/validate.mjs');
 // | 198 | ${id}: model_tier_source.snapshot must be a date not after today in UTC | direct case |
 // | 201 | ${id}: a one-time trial credit is not continuous free access, so it carries no free_limits | direct case |
 // | 202 | ${id}: free_limits.checked must be a date not after today in UTC | direct case |
-// | 203 | ${id}: free_limits.source must be the provider's page (http/https) | no dedicated direct case (good first issue #703) |
+// | 203 | ${id}: free_limits.source must be the provider's page (http/https) | new isolated case |
 // | 209 | ${id}: data_policy must state trains_on_prompts or retention | direct case |
 // | 210 | ${id}: data_policy.checked must be a date not after today in UTC | direct case |
 // | 211 | ${id}: data_policy.source must be the provider's public HTTPS page | direct case |
@@ -182,6 +182,7 @@ const INTEGRITY_CASES = [
   ['data_policy.note text', 'a recorded policy condition that says something', (p) => { p.data_policy.note = '   '; }, 'data_policy.note must be text of 1 to 300 characters'],
   ['field_checks via fieldCheckErrors', 'a stated check on a flag that holds no value', (p) => { p.phone_required = null; p.field_checks = { phone_required: { status: 'stated', checked: '2026-11-24', sources: ['https://example.com/terms'], quote: null, note: 'The terms say nothing either way.' } }; }, 'field_checks.phone_required: phone_required is null, so its check cannot be stated (use source_silent, needs_account or sources_disagree)'],
   ['published_speed via publishedSpeedErrors', 'a speed figure the cited passage does not contain', (p) => { p.published_speed[0].value = 123456; }, 'published_speed[0].quote must contain the figure 123456 as the page writes it (no rounding, no conversion)', (d) => d.providers.find((row) => row.published_speed?.length)],
+  ['free_limits.source http(s)', "numbers traceable to the provider's page", (p) => { p.free_limits.source = 'ftp://example.com/limits'; }, "free_limits.source must be the provider's page (http/https)", (d) => d.providers.find((row) => row.free_limits)],
   ['no_expiry.source http(s)', "a no-expiry statement traceable to the provider's page", (p) => { p.expires = null; p.no_expiry = { source: 'ftp://example.com/terms', checked: '2026-10-01', quote: 'Credits do not expire.' }; }, "no_expiry.source must be the provider's page (http/https)", trialProvider],
   // The schema's minLength accepts whitespace; only the trimmed-length rule rejects it.
   ['no_expiry.quote text', 'a no-expiry statement that quotes the passage', (p) => { p.expires = null; p.no_expiry = { source: 'https://example.com/terms', checked: '2026-10-01', quote: '   ' }; }, 'no_expiry.quote must be the passage, 1 to 300 characters', trialProvider],
