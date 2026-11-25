@@ -265,6 +265,12 @@
       "of": 6,
       "rank": null
     },
+    "infomaniak": {
+      "total": 30.6,
+      "confirmed": 3,
+      "of": 6,
+      "rank": null
+    },
     "baseten": {
       "total": 30,
       "confirmed": 1,
@@ -278,6 +284,12 @@
       "rank": null
     },
     "lemonfox": {
+      "total": 30,
+      "confirmed": 1,
+      "of": 6,
+      "rank": null
+    },
+    "plamo": {
       "total": 30,
       "confirmed": 1,
       "of": 6,
@@ -375,6 +387,12 @@
     },
     "tencent-hunyuan": {
       "total": 27.4,
+      "confirmed": 2,
+      "of": 6,
+      "rank": null
+    },
+    "entrim": {
+      "total": 26.1,
       "confirmed": 2,
       "of": 6,
       "rank": null
