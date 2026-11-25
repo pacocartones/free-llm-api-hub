@@ -7,10 +7,13 @@ import { writeFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { makeTmpDir } from './lib/tmp.mjs';
+import { shellSkip } from './lib/test-tools.mjs';
 
 const SCRIPT = join(dirname(fileURLToPath(import.meta.url)), 'check-commit-policy.sh');
 const NOREPLY = '253313177+pacocartones@users.noreply.github.com';
-const skip = process.platform === 'win32' ? 'bash script, checked on Linux' : false;
+const skip = shellSkip('bash script');
+// A pull request context (a branch and an event file) makes the script read the event with jq.
+const skipPr = shellSkip('bash script', ['jq']);
 
 function run({ name, email, committerName = name, committerEmail = email, message = 'change', branch, headRepo, prAuthor = 'someone', actor = 'someone' }) {
   const dir = makeTmpDir('commit-policy-');
@@ -54,12 +57,12 @@ const securityPr = {
 };
 
 for (const branch of securityBranches) {
-  test(`Codex Security branch format passes: ${branch}`, { skip }, () => {
+  test(`Codex Security branch format passes: ${branch}`, { skip: skipPr }, () => {
     assert.equal(run({ ...securityPr, branch }), 0);
   });
 }
 
-test('Codex Security compatibility is a branch format rule, not an author or actor bypass', { skip }, () => {
+test('Codex Security compatibility is a branch format rule, not an author or actor bypass', { skip: skipPr }, () => {
   assert.equal(run({ ...securityPr, prAuthor: 'pacocartones' }), 0);
   for (const branch of [
     'codex-security', 'codex-security/', 'codex-security/fix-network',
@@ -75,13 +78,13 @@ test('Codex Security compatibility is a branch format rule, not an author or act
   }
 });
 
-test('fork branches remain unrestricted, including malformed automation names', { skip }, () => {
+test('fork branches remain unrestricted, including malformed automation names', { skip: skipPr }, () => {
   for (const branch of [securityBranches[0], 'codex-security/anything', 'dependabot/anything']) {
     assert.equal(run({ ...securityPr, branch, headRepo: 'someone/free-llm-api-hub' }), 0);
   }
 });
 
-test('automation branch names never exempt maintainer authors or committers', { skip }, () => {
+test('automation branch names never exempt maintainer authors or committers', { skip: skipPr }, () => {
   for (const headRepo of [securityPr.headRepo, 'someone/free-llm-api-hub']) {
     const pr = { ...securityPr, headRepo };
     assert.equal(run({ ...pr, name: 'agent:security', email: NOREPLY }), 1);
@@ -92,7 +95,7 @@ test('automation branch names never exempt maintainer authors or committers', { 
   }
 });
 
-test('existing branch formats remain accepted and unrelated namespaces stay rejected', { skip }, () => {
+test('existing branch formats remain accepted and unrelated namespaces stay rejected', { skip: skipPr }, () => {
   for (const branch of ['fix/network', 'ci/policy', 'changeset-release/main', 'bot/update/data']) {
     assert.equal(run({ ...securityPr, branch }), 0, branch);
   }
@@ -116,7 +119,7 @@ test('a contributor is never checked, even one called Paco with their own addres
   assert.equal(run({ name: 'Someone Else', email: 'someone@example.com' }), 0);
 });
 
-test('a branch of this repository must follow the naming rule; a fork branch is never checked', { skip }, () => {
+test('a branch of this repository must follow the naming rule; a fork branch is never checked', { skip: skipPr }, () => {
   const own = 'pacocartones/free-llm-api-hub';
   assert.equal(run({ name: 'Paco Cartones', email: NOREPLY, branch: 'web/hero', headRepo: own }), 1);
   assert.equal(run({ name: 'Paco Cartones', email: NOREPLY, branch: 'feat/hero', headRepo: own }), 0);
@@ -142,30 +145,30 @@ const dependabot = {
 };
 
 for (const branch of dependabotBranches) {
-  test(`Dependabot's own branch passes: ${branch}`, { skip }, () => {
+  test(`Dependabot's own branch passes: ${branch}`, { skip: skipPr }, () => {
     assert.equal(run({ ...dependabot, branch }), 0);
   });
 }
 
-test('the dependabot prefix alone does not exempt a human, another bot or a missing PR author', { skip }, () => {
+test('the dependabot prefix alone does not exempt a human, another bot or a missing PR author', { skip: skipPr }, () => {
   for (const prAuthor of ['someone', 'renovate[bot]', null]) {
     assert.equal(run({ ...dependabot, prAuthor, branch: dependabotBranches[0], actor: 'dependabot[bot]' }), 1);
   }
 });
 
-test('Dependabot is not exempt outside its branch namespace', { skip }, () => {
+test('Dependabot is not exempt outside its branch namespace', { skip: skipPr }, () => {
   for (const branch of ['web/hero', 'dependabot-lookalike/update', 'dependabot']) {
     assert.equal(run({ ...dependabot, branch }), 1);
   }
 });
 
-test('a Dependabot PR still enforces maintainer identity and attribution rules', { skip }, () => {
+test('a Dependabot PR still enforces maintainer identity and attribution rules', { skip: skipPr }, () => {
   const pr = { ...dependabot, branch: dependabotBranches[0] };
   assert.equal(run({ ...pr, name: 'agent:free-llm-api-hub', email: NOREPLY }), 1);
   assert.equal(run({ ...pr, name: 'Paco Cartones', email: NOREPLY, message: 'change\n\nCo-Authored-By: Claude <noreply@anthropic.com>' }), 1);
 });
 
-test('Dependabot author gating and Codex Security naming compose without cross-exemptions', { skip }, () => {
+test('Dependabot author gating and Codex Security naming compose without cross-exemptions', { skip: skipPr }, () => {
   const cases = [
     { branch: dependabotBranches[0], prAuthor: 'dependabot[bot]', want: 0 },
     { branch: dependabotBranches[0], prAuthor: 'pacocartones', want: 1 },
@@ -207,7 +210,7 @@ test('Leon identity rejects unverified addresses, aliases and cross-maintainer p
   }
 });
 
-test('Leon authors and committers receive attribution checks even in fork or automation PRs', { skip }, () => {
+test('Leon authors and committers receive attribution checks even in fork or automation PRs', { skip: skipPr }, () => {
   for (const email of leonEmails) {
     for (const headRepo of [securityPr.headRepo, 'someone/free-llm-api-hub']) {
       const pr = { ...securityPr, headRepo, name: 'Leon Marcos', email };
