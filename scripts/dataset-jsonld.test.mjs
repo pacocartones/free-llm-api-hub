@@ -5,7 +5,8 @@ import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { privateTree } from './lib/private-tree.mjs';
-import { parseCitation, datasetJsonLd, datasetJsonLdErrors, datasetJsonLdScript } from './lib/dataset-jsonld.mjs';
+import { parseCitation, datasetJsonLd, homeJsonLd, datasetNode, datasetJsonLdErrors, datasetJsonLdScript } from './lib/dataset-jsonld.mjs';
+import { CREATOR, PUBLISHER_NAME } from './lib/site-entity.mjs';
 import { datasetAsOf } from './lib/release-stamp.mjs';
 
 // The home page's schema.org Dataset block (Google Dataset Search) and the ways in to the change history.
@@ -40,10 +41,17 @@ test('datasetJsonLd: deterministic, from the data; the validator catches what Go
   assert.equal(a.dateModified, '2026-01-05');
   assert.equal(a.temporalCoverage, '2025-12-30/2026-01-05');
   assert.equal(a.citation, undefined, 'Google: citation is for related articles, not the dataset itself');
-  assert.deepEqual(datasetJsonLdErrors(a, { site: SITE, siteFile: () => true }), []);
-  assert.ok(datasetJsonLdErrors({ ...a, description: 'short' }, { site: SITE, siteFile: () => true }).some((e) => /description/.test(e)));
-  assert.ok(datasetJsonLdErrors({ ...a, name: '' }, { site: SITE, siteFile: () => true }).some((e) => /name/.test(e)));
-  assert.ok(datasetJsonLdErrors(a, { site: SITE, siteFile: () => false }).some((e) => /not in the build/.test(e)));
+  const home = homeJsonLd({ data, citation, site: SITE, asOf: datasetAsOf(data) });
+  const { '@context': _context, ...bare } = a;
+  assert.deepEqual(datasetNode(home), bare, 'the home block carries the same Dataset');
+  const ok = { site: SITE, siteFile: () => true };
+  assert.deepEqual(datasetJsonLdErrors(home, ok), []);
+  const withDataset = (patch) => ({ ...home, '@graph': home['@graph'].map((n) => (n['@type'] === 'Dataset' ? { ...n, ...patch } : n)) });
+  assert.ok(datasetJsonLdErrors(withDataset({ description: 'short' }), ok).some((e) => /description/.test(e)));
+  assert.ok(datasetJsonLdErrors(withDataset({ name: '' }), ok).some((e) => /name/.test(e)));
+  assert.ok(datasetJsonLdErrors(withDataset({ publisher: undefined }), ok).some((e) => /publisher is missing/.test(e)));
+  assert.ok(datasetJsonLdErrors(home, { site: SITE, siteFile: () => false }).some((e) => /not in the build/.test(e)));
+  assert.ok(datasetJsonLdErrors(a, ok).some((e) => /creator .* is not a named node/.test(e)), 'a bare reference outside its @graph is caught');
   assert.ok(!datasetJsonLdScript({ x: '</script>' }).includes('</script>"'), 'a "<" in the data cannot close the block');
 });
 
@@ -57,8 +65,9 @@ test('the home page carries one Dataset block that parses, is valid and points a
   const html = readFileSync(join(ROOT, 'site/index.html'), 'utf8');
   const blocks = [...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)];
   assert.equal(blocks.length, 1, 'one JSON-LD block on the home page');
-  const ld = JSON.parse(blocks[0][1]);
-  assert.deepEqual(datasetJsonLdErrors(ld, { site: SITE, siteFile: siteFile(ROOT) }), []);
+  const block = JSON.parse(blocks[0][1]);
+  assert.deepEqual(datasetJsonLdErrors(block, { site: SITE, siteFile: siteFile(ROOT) }), []);
+  const ld = datasetNode(block);
   const data = JSON.parse(readFileSync(join(ROOT, 'data/providers.json'), 'utf8'));
   assert.equal(ld.version, data.version);
   assert.equal(ld.dateModified, datasetAsOf(data));
@@ -83,4 +92,30 @@ test('home and /changes/ advertise the change feed; both link to the change hist
   const hero = changes.match(/<section class="page-hero[^"]*">([\s\S]*?)<\/section>/)?.[1];
   assert.match(hero, /<a class="btn primary" href="\.\.\/changes\.xml" type="application\/rss\+xml">Subscribe via RSS<\/a>/, '/changes/: a Subscribe button');
   assert.ok(existsSync(join(ROOT, 'site/changes.xml')) && existsSync(join(ROOT, 'site/api/v1/changes.json')), 'the feed and the JSON exist');
+});
+
+test('authorship: Tweakeo, Inc. publishes, Paco Cartones creates; consistent with LICENSE and CITATION.cff, no email', () => {
+  const license = readFileSync(join(REPO, 'LICENSE'), 'utf8');
+  assert.ok(license.includes(`Copyright (c) 2026 ${PUBLISHER_NAME} and contributors`), 'the publisher is the LICENSE holder');
+  const citation = parseCitation(readFileSync(join(REPO, 'CITATION.cff'), 'utf8'));
+  assert.equal(CREATOR.url, citation.author.website, 'the creator is the account CITATION.cff lists');
+  assert.equal(CREATOR.alternateName, citation.author.alias);
+
+  const html = readFileSync(join(ROOT, 'site/index.html'), 'utf8');
+  const block = JSON.parse(html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1]);
+  const byId = Object.fromEntries(block['@graph'].map((n) => [n['@id'], n]));
+  const dataset = datasetNode(block);
+  const website = block['@graph'].find((n) => n['@type'] === 'WebSite');
+  for (const node of [dataset, website]) {
+    assert.equal(byId[node.publisher['@id']]['@type'], 'Organization');
+    assert.equal(byId[node.publisher['@id']].name, 'Tweakeo, Inc.');
+    assert.equal(byId[node.creator['@id']]['@type'], 'Person');
+    assert.equal(byId[node.creator['@id']].name, 'Paco Cartones');
+    assert.equal(byId[node.creator['@id']].url, 'https://github.com/pacocartones');
+  }
+  assert.equal(website['@id'], `${SITE}/#website`);
+  assert.equal(website.url, `${SITE}/`);
+  assert.equal(website.name, 'Free LLM API Hub');
+  assert.equal(dataset.isPartOf['@id'], website['@id']);
+  assert.doesNotMatch(JSON.stringify(block), /[\w.+-]+@[\w-]+\.[a-z]{2,}|mailto:|"email"/i, 'no email address in the structured data');
 });

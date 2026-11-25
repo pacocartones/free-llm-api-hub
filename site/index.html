@@ -42,118 +42,159 @@
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
-  "@type": "Dataset",
-  "name": "Free LLM API Hub",
-  "alternateName": "Free LLM API Hub — a continuously-verified dataset of free-tier and trial-credit LLM APIs",
-  "description": "A curated, continuously-verified dataset of LLM API providers offering a free tier, permanently-free models, or trial credits for developers. Every entry is dated, sourced to the provider's own documentation, and machine-readable via a JSON dataset validated against a published schema.",
-  "url": "https://freellmapihub.com/",
-  "sameAs": "https://github.com/pacocartones/free-llm-api-hub",
-  "identifier": "https://github.com/pacocartones/free-llm-api-hub",
-  "version": "2.14.2",
-  "dateModified": "2026-11-25",
-  "keywords": [
-    "free llm api",
-    "llm api",
-    "free tier",
-    "trial credits",
-    "ai api",
-    "developer tools",
-    "openai-compatible",
-    "dataset",
-    "free image api",
-    "free speech api",
-    "free embeddings api",
-    "free ocr api"
-  ],
-  "license": "https://opensource.org/licenses/MIT",
-  "isAccessibleForFree": true,
-  "creator": {
-    "@type": "Person",
-    "name": "pacocartones",
-    "url": "https://github.com/pacocartones"
-  },
-  "temporalCoverage": "2026-11-14/2026-11-25",
-  "variableMeasured": [
+  "@graph": [
     {
-      "@type": "PropertyValue",
-      "name": "category",
-      "description": "Primary bucket: an ongoing free tier or a one-off trial credit."
+      "@type": "Dataset",
+      "@id": "https://freellmapihub.com/#dataset",
+      "name": "Free LLM API Hub",
+      "alternateName": "Free LLM API Hub — a continuously-verified dataset of free-tier and trial-credit LLM APIs",
+      "description": "A curated, continuously-verified dataset of LLM API providers offering a free tier, permanently-free models, or trial credits for developers. Every entry is dated, sourced to the provider's own documentation, and machine-readable via a JSON dataset validated against a published schema.",
+      "url": "https://freellmapihub.com/",
+      "sameAs": "https://github.com/pacocartones/free-llm-api-hub",
+      "identifier": "https://github.com/pacocartones/free-llm-api-hub",
+      "version": "2.14.2",
+      "dateModified": "2026-11-25",
+      "keywords": [
+        "free llm api",
+        "llm api",
+        "free tier",
+        "trial credits",
+        "ai api",
+        "developer tools",
+        "openai-compatible",
+        "dataset",
+        "free image api",
+        "free speech api",
+        "free embeddings api",
+        "free ocr api"
+      ],
+      "license": "https://opensource.org/licenses/MIT",
+      "isAccessibleForFree": true,
+      "publisher": {
+        "@id": "https://freellmapihub.com/#publisher"
+      },
+      "creator": {
+        "@id": "https://freellmapihub.com/#creator"
+      },
+      "isPartOf": {
+        "@id": "https://freellmapihub.com/#website"
+      },
+      "temporalCoverage": "2026-11-14/2026-11-25",
+      "variableMeasured": [
+        {
+          "@type": "PropertyValue",
+          "name": "category",
+          "description": "Primary bucket: an ongoing free tier or a one-off trial credit."
+        },
+        {
+          "@type": "PropertyValue",
+          "name": "free_type",
+          "description": "Finer-grained shape of the free access: perpetual, renewing quota, recurring credit or trial credit."
+        },
+        {
+          "@type": "PropertyValue",
+          "name": "free_tier",
+          "description": "What you get for free, in concrete terms, as the provider states it."
+        },
+        {
+          "@type": "PropertyValue",
+          "name": "rate_limits",
+          "description": "Free-tier rate limits as the provider states them."
+        },
+        {
+          "@type": "PropertyValue",
+          "name": "card_required",
+          "description": "Whether a payment card is required to use the free access (true, false, or null when not stated)."
+        },
+        {
+          "@type": "PropertyValue",
+          "name": "phone_required",
+          "description": "Whether a phone number is required to sign up (true, false, or null when not stated)."
+        },
+        {
+          "@type": "PropertyValue",
+          "name": "commercial_ok",
+          "description": "Whether the free access may be used commercially (true, false, or null when not stated)."
+        },
+        {
+          "@type": "PropertyValue",
+          "name": "openai_compatible",
+          "description": "Whether the free offering exposes an OpenAI-compatible endpoint (null when unconfirmed)."
+        },
+        {
+          "@type": "PropertyValue",
+          "name": "modalities",
+          "description": "Modalities reachable on the free tier (text, image, audio, embeddings, rerank, OCR, vision)."
+        },
+        {
+          "@type": "PropertyValue",
+          "name": "data_policy.trains_on_prompts",
+          "description": "Whether the provider says it trains on prompts sent through the free access (null when not recorded)."
+        },
+        {
+          "@type": "PropertyValue",
+          "name": "last_verified",
+          "description": "Date the core facts were last confirmed against the provider's own documentation."
+        }
+      ],
+      "distribution": [
+        {
+          "@type": "DataDownload",
+          "name": "Full dataset, API v1 (JSON)",
+          "encodingFormat": "application/json",
+          "contentUrl": "https://freellmapihub.com/api/v1/providers.json"
+        },
+        {
+          "@type": "DataDownload",
+          "name": "Full dataset (JSON)",
+          "encodingFormat": "application/json",
+          "contentUrl": "https://freellmapihub.com/providers.json"
+        },
+        {
+          "@type": "DataDownload",
+          "name": "Scalar fields (CSV)",
+          "encodingFormat": "text/csv",
+          "contentUrl": "https://freellmapihub.com/providers.csv"
+        },
+        {
+          "@type": "DataDownload",
+          "name": "Full dataset as Markdown text, for language models (llms-full.txt)",
+          "encodingFormat": "text/plain",
+          "contentUrl": "https://freellmapihub.com/llms-full.txt"
+        }
+      ]
     },
     {
-      "@type": "PropertyValue",
-      "name": "free_type",
-      "description": "Finer-grained shape of the free access: perpetual, renewing quota, recurring credit or trial credit."
+      "@type": "WebSite",
+      "@id": "https://freellmapihub.com/#website",
+      "name": "Free LLM API Hub",
+      "alternateName": "freellmapihub.com",
+      "url": "https://freellmapihub.com/",
+      "inLanguage": "en",
+      "publisher": {
+        "@id": "https://freellmapihub.com/#publisher"
+      },
+      "creator": {
+        "@id": "https://freellmapihub.com/#creator"
+      },
+      "sameAs": [
+        "https://github.com/pacocartones/free-llm-api-hub"
+      ]
     },
     {
-      "@type": "PropertyValue",
-      "name": "free_tier",
-      "description": "What you get for free, in concrete terms, as the provider states it."
+      "@type": "Organization",
+      "@id": "https://freellmapihub.com/#publisher",
+      "name": "Tweakeo, Inc."
     },
     {
-      "@type": "PropertyValue",
-      "name": "rate_limits",
-      "description": "Free-tier rate limits as the provider states them."
-    },
-    {
-      "@type": "PropertyValue",
-      "name": "card_required",
-      "description": "Whether a payment card is required to use the free access (true, false, or null when not stated)."
-    },
-    {
-      "@type": "PropertyValue",
-      "name": "phone_required",
-      "description": "Whether a phone number is required to sign up (true, false, or null when not stated)."
-    },
-    {
-      "@type": "PropertyValue",
-      "name": "commercial_ok",
-      "description": "Whether the free access may be used commercially (true, false, or null when not stated)."
-    },
-    {
-      "@type": "PropertyValue",
-      "name": "openai_compatible",
-      "description": "Whether the free offering exposes an OpenAI-compatible endpoint (null when unconfirmed)."
-    },
-    {
-      "@type": "PropertyValue",
-      "name": "modalities",
-      "description": "Modalities reachable on the free tier (text, image, audio, embeddings, rerank, OCR, vision)."
-    },
-    {
-      "@type": "PropertyValue",
-      "name": "data_policy.trains_on_prompts",
-      "description": "Whether the provider says it trains on prompts sent through the free access (null when not recorded)."
-    },
-    {
-      "@type": "PropertyValue",
-      "name": "last_verified",
-      "description": "Date the core facts were last confirmed against the provider's own documentation."
-    }
-  ],
-  "distribution": [
-    {
-      "@type": "DataDownload",
-      "name": "Full dataset, API v1 (JSON)",
-      "encodingFormat": "application/json",
-      "contentUrl": "https://freellmapihub.com/api/v1/providers.json"
-    },
-    {
-      "@type": "DataDownload",
-      "name": "Full dataset (JSON)",
-      "encodingFormat": "application/json",
-      "contentUrl": "https://freellmapihub.com/providers.json"
-    },
-    {
-      "@type": "DataDownload",
-      "name": "Scalar fields (CSV)",
-      "encodingFormat": "text/csv",
-      "contentUrl": "https://freellmapihub.com/providers.csv"
-    },
-    {
-      "@type": "DataDownload",
-      "name": "Full dataset as Markdown text, for language models (llms-full.txt)",
-      "encodingFormat": "text/plain",
-      "contentUrl": "https://freellmapihub.com/llms-full.txt"
+      "@type": "Person",
+      "@id": "https://freellmapihub.com/#creator",
+      "name": "Paco Cartones",
+      "alternateName": "pacocartones",
+      "url": "https://github.com/pacocartones",
+      "sameAs": [
+        "https://github.com/pacocartones"
+      ]
     }
   ]
 }

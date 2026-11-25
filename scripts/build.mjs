@@ -51,7 +51,10 @@ import { codeHtmlEsc, curlChatQuickstart, pythonChatQuickstart, pythonEmbeddings
 import { providersCsv } from './lib/provider-csv.mjs';
 import { writeSchemaDocs } from './schema-docs.mjs';
 import { datasetAsOf } from './lib/release-stamp.mjs';
-import { parseCitation, datasetJsonLd, datasetJsonLdScript } from './lib/dataset-jsonld.mjs';
+import { parseCitation, homeJsonLd, datasetJsonLdScript } from './lib/dataset-jsonld.mjs';
+import { websiteRef, datasetRef } from './lib/site-entity.mjs';
+import { SITEMAP_INDEX, sitemapIndexXml } from './lib/state-sitemap.mjs';
+import { SITEMAPS as INDEXNOW_SITEMAPS } from './lib/indexnow.mjs';
 import { groupModels, modelKey } from './lib/model-keys.mjs';
 import { isIndexable, modelPageMainHtml, modelPageTitle, modelPageDescription, modelPageJsonLd } from './lib/model-pages.mjs';
 import { collectionPageJsonLd as pageJsonLd, comparePageJsonLd } from './lib/page-jsonld.mjs';
@@ -964,7 +967,7 @@ indexHtml = inject(indexHtml, 'stats', homeStatsHtml);
 indexHtml = inject(indexHtml, 'firstuse', firstUseHtml(providers, { slaDays: SLA_DAYS }));
 indexHtml = inject(indexHtml, 'data', inlineData);
 // The schema.org Dataset block (Google Dataset Search), from CITATION.cff and the data: lib/dataset-jsonld.mjs.
-indexHtml = inject(indexHtml, 'dataset', datasetJsonLdScript(datasetJsonLd({ data, citation: parseCitation(readFileSync(join(ROOT, 'CITATION.cff'), 'utf8')), site: SITE, asOf: ASOF })));
+indexHtml = inject(indexHtml, 'dataset', datasetJsonLdScript(homeJsonLd({ data, citation: parseCitation(readFileSync(join(ROOT, 'CITATION.cff'), 'utf8')), site: SITE, asOf: ASOF })));
 indexHtml = withStars(indexHtml).replace(/(<img class="trust-badge"[^>]*? width=")\d+(")/, `$1${BADGE_W}$2`);
 writeFileSync(join(ROOT, 'site/index.html'), withAnalytics(indexHtml, GA_ID, ''));
 // The consent banner exists only when analytics is configured; without an ID a stale copy is removed.
@@ -1126,7 +1129,7 @@ const hubJsonLd = JSON.stringify({
     {
       '@type': 'CollectionPage', name: 'Free LLM API guides and collections', description: HUB_META,
       url: `${SITE}/guides-and-collections/`, dateModified: ASOF,
-      isPartOf: { '@type': 'WebSite', name: 'Free LLM API Hub', url: `${SITE}/` },
+      isPartOf: websiteRef(SITE),
       mainEntity: {
         '@type': 'ItemList', numberOfItems: GUIDES.length + COLLECTIONS.length,
         itemListElement: [
@@ -1295,7 +1298,8 @@ for (const p of providers) {
     '@graph': [
       {
         '@type': 'WebPage', name: `${p.name} — free LLM API`, description: p.free_tier, url: `${SITE}/p/${p.slug}`,
-        isPartOf: { '@type': 'Dataset', name: 'Free LLM API Hub', url: `${SITE}/` },
+        ...(p.last_verified ? { dateModified: p.last_verified } : {}),
+        isPartOf: datasetRef(SITE),
       },
       {
         '@type': 'BreadcrumbList',
@@ -1765,7 +1769,7 @@ for (const g of GUIDES) {
     '@graph': [
       {
         '@type': 'Article', headline: g.h1, description: metaDesc, dateModified: ASOF,
-        url: `${SITE}/guides/${g.slug}`, isPartOf: { '@type': 'WebSite', name: 'Free LLM API Hub', url: `${SITE}/` },
+        url: `${SITE}/guides/${g.slug}`, isPartOf: websiteRef(SITE),
       },
       {
         '@type': 'BreadcrumbList',
@@ -2010,7 +2014,7 @@ writeFileSync(join(ROOT, 'site/api/index.html'), htmlPage({
   jsonld: collectionPageJsonLd({
     type: 'WebPage', name: 'Static JSON API', url: `${SITE}/api/`,
     description: 'The free-llm-api-hub dataset as versioned JSON at stable URLs.',
-    about: { '@type': 'Dataset', name: 'Free LLM API Hub', url: `${SITE}/` },
+    about: datasetRef(SITE),
     crumbs: [['API', `${SITE}/api/`]],
   }),
 }));
@@ -2461,6 +2465,9 @@ writeFileSync(join(ROOT, 'site/sitemap-state.xml'),
   `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +
   stateReports.map((r, i, all) => `  <url><loc>${SITE}/state/${r.month}/</loc><lastmod>${stateLastmod(r.month, i, all)}</lastmod></url>`).join('\n') +
   `\n</urlset>\n`);
+// Both sitemaps behind one index (lib/state-sitemap.mjs): the URL to submit in Search Console. robots.txt keeps
+// naming the two sitemaps directly.
+writeFileSync(join(ROOT, `site/${SITEMAP_INDEX}`), sitemapIndexXml(SITE, INDEXNOW_SITEMAPS));
 
 // ---------- fingerprint of the gitignored derived files (drift gate) ----------
 // derived-fingerprints.json pins every build output under site/ that is
