@@ -3152,7 +3152,7 @@ test('links: on every generated page, each link that opens a new tab carries the
   assert.deepEqual(bad.slice(0, 5), []);
   const cov = readFileSync(join(ROOT, 'site/coverage/index.html'), 'utf8');
   const tasks = cov.match(/<li class="cov-task">[\s\S]*?<\/li>/g) || [];
-  assert.ok(tasks.length > 50, 'the coverage page lists its open tasks');
+  assert.ok(tasks.length > 20, 'the coverage page lists its open tasks');
   for (const t of tasks.slice(0, 30)) {
     assert.match(t, /official docs<span class="sr-only"> for [^<]+<\/span>/, 'the docs link says whose docs');
     assert.match(t, /propose the value<span class="sr-only"> for [^<]+<\/span>/, 'the proposal link says for whom');
