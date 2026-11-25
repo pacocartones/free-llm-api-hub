@@ -168,14 +168,15 @@ function statsHtml(now) {
   const oldest = ages.length ? Math.max(...ages) : 0;
   const slaDays = SLA_DAYS || 90;
   const status = freshnessStatus(oldest);
-  const tiles = [
-    ['ic-database', total, 'providers tracked', ''],
-    ['ic-refresh', ongoing, 'ongoing free tiers', ''],
-    ['ic-clock', trial, 'trial credits', ''],
-    ['ic-shield', `${oldest}d`, `oldest verification · ${slaDays}-day SLA`, status],
-  ];
-  return tiles.map(([ic, n, l, c]) =>
-    `<div class="stat ${c}"><svg class="si" aria-hidden="true"><use href="#${ic}"/></svg><div class="num">${n}</div><div class="lbl">${l}${c ? `<span class="sr-only"> (${STATUS_WORD[c] || c})</span>` : ''}</div></div>`).join('');
+  // One text row, the same markup as homeStatsHtml in scripts/build.mjs. "Re-checked within the last N days" is the
+  // age of the oldest verification: every verified entry was read on its source in that window.
+  const recheck = oldest <= 0 ? 'Re-checked today' : oldest === 1 ? 'Re-checked within the last day' : `Re-checked within the last ${oldest} days`;
+  return [
+    `<strong>${total}</strong> providers tracked`,
+    `<strong>${ongoing}</strong> ongoing free tiers`,
+    `<strong>${trial}</strong> trial credits`,
+    `<span class="st-fresh ${status}" title="Every verified entry is due for a re-check ${slaDays} days after its date">${recheck}<span class="sr-only"> (${STATUS_WORD[status] || status})</span></span>`,
+  ].join('<span class="st-sep" aria-hidden="true"> · </span>');
 }
 
 // On small screens the column headers are hidden, so a select offers the same sorts.

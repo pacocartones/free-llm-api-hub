@@ -20,6 +20,16 @@ After a first contribution, browse [unassigned help wanted issues](https://githu
 
 Use the same claim, source and validation rules. Keep one task in progress while learning the repository; if you get stuck, share what you tried and the error or unanswered question. If you stop, `/release` makes an assigned task available again. If neither list has a suitable task, use [Questions & ideas](https://github.com/pacocartones/free-llm-api-hub/discussions) to ask where your skills would help.
 
+### Recurring issues: where to find work each month
+
+Some work comes back on a schedule, so there is always something open:
+
+- **Free tier changes — *Month YYYY*** (labels `data`, `help wanted`), opened on the 1st by [`monthly-issues.yml`](.github/workflows/monthly-issues.yml). It lists what changed in the dataset the month before (providers added and removed, limit and flag changes, from the same history as the [What changed](https://freellmapihub.com/changes/) page). Comment with a change we missed: the provider, what changed, a link to the provider's own page and the UTC day you read it. A comment is enough.
+- **New provider candidates — *Month YYYY*** (label `help wanted`), opened the same day. Propose one provider per comment under [docs/inclusion-criteria.md](docs/inclusion-criteria.md); the issue states the current non-text share against the 35% guardrail. It is not a `good first issue`: adding a provider touches more than two files.
+- **[#4](https://github.com/pacocartones/free-llm-api-hub/issues/4) weekly re-verification worklist**, refreshed every Monday: the entries whose verification is oldest.
+- **Monthly source check** and **Source watch** issues, opened only when a cited link or quote stops matching its page: each line is a lead to re-check from a normal connection.
+- **"Pick one provider" good first issues**: each lists several providers; one provider is a complete pull request, and the list is refreshed as entries are done.
+
 ## For provider data, edit the source
 
 For a **provider data correction**, edit [`data/providers.json`](data/providers.json), not a generated page. The README tables, the freshness badge, the `collections/` markdown, and the whole interactive site (explorer, per-provider pages, collection pages, badges, sitemap) are generated from it. A docs or code issue names its own source files.
@@ -83,6 +93,16 @@ OG files are left for you to check: run `node scripts/check-og.mjs`; if it repor
 > ```
 >
 > If you cloned shallow, fix it with `git fetch --unshallow`; otherwise just clone normally: `git clone https://github.com/pacocartones/free-llm-api-hub`. The root integrity and site-build CI jobs check out the full history (`fetch-depth: 0`); workflows that do not mine history may use shallow checkouts.
+
+### Windows and WSL
+
+`npm test` should pass on Windows and in WSL as it does on Linux and macOS. CI runs it on a Windows runner with CRLF settings and without symlink privileges.
+
+- **WSL:** clone inside the Linux file system (for example `~/src/free-llm-api-hub`), not under `/mnt/c/`: the Windows drive is slow from WSL, and Windows Git and Linux Git sharing one clone disagree about file modes and the index. Install `git` and `jq` (`sudo apt install git jq`) and the Node version in `.nvmrc`. Without `jq`, the tests that run workflow shell scripts are skipped with a message that says so.
+- **Windows:** Developer Mode is not needed. The test copies link `node_modules` with a junction, which needs no privileges, and copy it where a junction is impossible. Tests of Bash scripts are skipped on Windows, and the Linux job runs them.
+- **Line endings:** `.gitattributes` checks text files out with LF whatever `core.autocrlf` says. If `npm test` stops with "tracked text file(s) have CRLF line endings", an editor saved those files with CRLF: save them with LF (or `git checkout -- <file>` for a file you have not edited).
+- **Commit signing:** if your git config signs commits (`commit.gpgsign`), `npm test` turns signing off for the throwaway repositories the tests create. Your own commits are not affected.
+- **A data-only change:** `npm run validate` checks `data/` in seconds while you edit; before the pull request, run `npm run build && npm test`, commit, then `npm run check`, as in [Which checks to run](#which-checks-to-run).
 
 If you want to preview how your entry renders on the site before opening the PR:
 
@@ -300,7 +320,7 @@ GitHub holds workflow runs from a **first-time contributor** until a maintainer 
 
 - **Release-only lines.** `version` and `generated` in `data/providers.json`, the version in `package.json`/`package-lock.json`, `date-released` in `CITATION.cff` (built from `generated`) and the move of `changes/unreleased/*.md` into `CHANGELOG.md` change only in a release pull request, prepared with `npm run release:prepare -- X.Y.Z`. The freshness badge is not committed: every deploy builds `site/badge-freshness.json`. Public dates (API `generated`, CSV `dataset_generated`, sitemap) still mean the last dataset change and are derived from the data, so a pull request that records a newer date also rewrites those date lines in the aggregate outputs; they are generated files, so `npm run sync-main` rebuilds them, and two pull requests from the same day write identical lines. What still collides in practice is `derived-fingerprints.json` and, between pull requests from different days, those date lines.
 - **The author ships the derived files.** The regeneration bot (`regenerate.yml`) is off by default and, until its switch to direct push, writes nothing to `main` (see [docs/regeneration-bot.md](docs/regeneration-bot.md)): `main` requires the "Dataset integrity" check, and a change is complete when its regenerated files are committed in the same PR. After editing `data/providers.json` (or `data/programs.json`), run `npm run build` (and `npm run og` if the OG check flags drift), commit the regenerated files together with the data change, and push. The "Dataset integrity" check fails until they are in sync.
-- **Provider maintenance is not scheduled.** Re-verification, model samples and the live probe are local on-demand tasks — see [docs/update-playbook.md](docs/update-playbook.md). GitHub Actions does run the site deployment daily to refresh its build-time star count, plus CodeQL on pull requests and weekly, weekly OpenSSF Scorecard scans, the weekly worklist refresh of issue #4, the monthly source checks (which report in an issue) and the regeneration bot, which does nothing unless it is enabled; none of those jobs changes provider claims.
+- **Provider maintenance is not scheduled.** Re-verification, model samples and the live probe are local on-demand tasks — see [docs/update-playbook.md](docs/update-playbook.md). GitHub Actions does run the site deployment daily to refresh its build-time star count, plus CodeQL on pull requests and weekly, weekly OpenSSF Scorecard scans, the weekly worklist refresh of issue #4, the monthly source checks (which report in an issue), the monthly contributor issues (`monthly-issues.yml`) and the regeneration bot, which does nothing unless it is enabled; none of those jobs changes provider claims.
 
 ### Branch names and commit identity
 

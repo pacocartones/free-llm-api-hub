@@ -225,6 +225,7 @@
   var CATEGORIES = ['all', 'ongoing', 'trial'];
   var SORT_KEYS = ['recommended', 'name', 'category', 'free_tier', 'notes', 'verified'];
   var DOWNLOAD = /^\/((providers\.(json|csv))|(api\/v1\/[a-z0-9._-]+\.(json|yaml))|(llms(-full)?\.txt)|(badge-[a-z]+\.json))$/;
+  var SNIPPET_KINDS = ['embed', 'badge', 'citation'];
   var SEARCH_IDLE_MS = 1500;
   var pageSent = false;
   var lastSearch = '';
@@ -287,12 +288,15 @@
       var kind = 'api_url';
       if (copy.classList.contains('pre-copy')) {
         var pre = copy.closest('pre');
+        // A block can name its kind (data-snippet, from a fixed list): the citations and badges of /embed/.
+        var declared = pre ? pre.getAttribute('data-snippet') : null;
         var code = pre ? (pre.querySelector('code') || pre).textContent : '';
         var head = String(code || '').replace(/^\s+/, '');
-        kind = /^curl\b/.test(head) ? 'curl'
+        kind = SNIPPET_KINDS.indexOf(declared) !== -1 ? declared
+          : /^curl\b/.test(head) ? 'curl'
           : /^(from|import)\s/.test(head) ? 'python'
           : /^(export|set)\s+[A-Z][A-Z0-9_]*=/.test(head) ? 'env_key'
-          : /^<(script|iframe|a|img)\b/i.test(head) ? 'embed'
+          : /^<(script|iframe|a|img|div)\b/i.test(head) ? 'embed'
           : 'other';
       }
       track('copy_snippet', { snippet: kind });
