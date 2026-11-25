@@ -34,7 +34,7 @@ import { freeGpuMainHtml } from './lib/free-gpu.mjs';
 import { labelTables } from './lib/tables.mjs';
 import { markNewTabLinks } from './lib/links.mjs';
 import { codingToolsMainHtml, codingToolMainHtml, codingToolTitle, codingToolDescription } from './lib/free-coding-tools.mjs';
-import { dataPolicyRows, dataPolicyMainHtml } from './lib/data-policy-page.mjs';
+import { dataPolicyRows, dataPolicyMainHtml, trainState } from './lib/data-policy-page.mjs';
 import { quotesReportHtml } from './lib/quotes-report.mjs';
 import { SCORE_WEIGHTS, EDITORIAL_WEIGHT, EDITORIAL_DEFAULT, MATH_INPUTS, MIN_CONFIRMED, TOP_SIZE, EDITORIAL_NOTE_THRESHOLD, STABILITY_MIN_DAYS, STABILITY_MIN_SAMPLES, rankProviders, editorialRating, inputFractions, stabilityFromProbe } from './lib/score.mjs';
 import { scoreBlockHtml } from './lib/score-bar.mjs';
@@ -2122,6 +2122,15 @@ writeFileSync(join(ROOT, 'site/llms.txt'), llmsTxt);
 // A null flag with a recorded reason (field_checks) says the reason instead of "unknown".
 const yn = (v, yes, no, check) => v === true ? yes : v === false ? no : v === 'conditional' ? 'conditional'
   : check && check.status !== 'stated' && REASON_LABEL[check.status] ? `unknown, ${REASON_LABEL[check.status]} (checked ${check.checked})` : 'unknown';
+// yes / no only where /data-policy/ says so (trainState); a value without the provider's sentence, or none, is not confirmed.
+const TRAINS_ON_PROMPTS = { yes: 'yes', no: 'no' };
+const dataPolicyLine = (p) => {
+  const dp = p.data_policy && typeof p.data_policy === 'object' ? p.data_policy : null;
+  if (!dp) return '';
+  const trains = TRAINS_ON_PROMPTS[trainState(p)] || 'not confirmed';
+  const retention = dp.retention ? String(dp.retention).replace(/\s+/g, ' ').trim() : 'not confirmed';
+  return `- Prompt data policy: trains on prompts: ${trains}; retention: ${retention} (source ${dp.source}, checked ${dp.checked})\n`;
+};
 const provBlock = (p) => {
   const gates = [
     `card required: ${yn(p.card_required, 'yes', 'no', fieldCheck(p, 'card_required'))}`,
@@ -2140,6 +2149,7 @@ const provBlock = (p) => {
     `- Gates: ${gates}\n` +
     conditionLine +
     (publishedSpeed(p).length ? `- Published speed (the provider's own figures, not measured by us; not stated for the free tier unless the page says so): ${publishedSpeed(p).map((e) => `${e.model} ${speedFigure(e)} (${e.source}, checked ${e.checked})`).join('; ')}\n` : '') +
+    dataPolicyLine(p) +
     `- Docs: ${p.docs_url}\n` +
     `- Page: ${SITE}/p/${p.slug}\n`;
 };
