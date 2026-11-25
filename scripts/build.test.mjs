@@ -2032,7 +2032,8 @@ test('active providers retain models_url from their official catalogues', () => 
 test('validate: the dates of the dataset are UTC days and none is in the future', () => {
   const data = JSON.parse(readFileSync(DATA, 'utf8'));
   const withToday = (today, file = DATA) => { try { execFileSync(process.execPath, ['scripts/validate.mjs', file], { cwd: ROOT, stdio: 'pipe', env: { ...process.env, VALIDATE_TODAY: today } }); return ''; } catch (e) { return `${e.stdout}${e.stderr}`; } };
-  assert.equal(withToday(data.generated), '', 'generated is today: valid');
+  // `generated` is the release stamp, so data read after the last release carries later days: check against the real UTC day.
+  assert.equal(withToday(new Date().toISOString().slice(0, 10)), '', 'the dataset is valid on the UTC day of the run');
   assert.equal(withToday('2999-01-01'), '', 'generated in the past: valid');
   const day = new Date(Date.parse(`${data.generated}T00:00:00Z`) - 86400000).toISOString().slice(0, 10);
   assert.match(withToday(day), new RegExp(`generated \\(${data.generated}\\) is after today in UTC \\(${day}\\); write the dates of the dataset in UTC`), 'generated the day after "today" fails and says how to write it');

@@ -619,6 +619,7 @@
       "env_key": "JINA_API_KEY",
       "is_text_llm": false,
       "model_tier": null,
+      "anonymous_access": {"source":"https://github.com/jina-ai/reader","checked":"2026-11-25","quote":"Anonymous traffic is the most aggressively rate-limited and lands in the lowest-trust pool.","note":"Applies to the Reader API (r.jina.ai) only: jina.ai/embeddings lists 20 RPM for Reader without an API key, while the Embeddings, Reranker and s.jina.ai search APIs are blocked without one."},
       "verified": true,
       "last_verified": "2026-11-20",
       "data_policy": {"trains_on_prompts":false,"retention":null,"source":"https://jina.ai/embeddings/","checked":"2026-10-15","quote":"We never use your API requests, inputs, or outputs to train our embedding, reranker, or any other models.","note":"The answer sits in the embeddings FAQ; the next FAQ lists Free, Paid and Premium rate limits, but the answer does not name a plan.","plan_named":false}
@@ -874,6 +875,7 @@
       "is_text_llm": false,
       "model_tier": null,
       "free_limits": {"requests_per_day":500,"scope":"free OCR API key, per IP address","source":"https://ocr.space/OCRAPI","checked":"2026-10-09"},
+      "anonymous_access": {"source":"https://ocr.space/OCRAPI","checked":"2026-11-25","quote":"The samples use the \"helloworld\" api key and are ready to run without any further edits.","note":"A shared key published in the page’s code samples; the page states no limits for it, and its own free plan says to register for a personal free API key."},
       "verified": true,
       "last_verified": "2026-11-19",
       "playground_url": "https://ocr.space/"
