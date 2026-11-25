@@ -669,7 +669,7 @@ test('/best shows the podium of three and the methodology page states the rules'
 
 test('the explorer does not claim a column sort before the user chooses one', () => {
   const explorer = readFileSync(join(ROOT, 'site/index.html'), 'utf8');
-  assert.match(explorer, /<th data-key="name" scope="col" aria-sort="none"><button type="button" class="th-sort">API<\/button><\/th>/);
+  assert.match(explorer, /<th data-key="name" scope="col" aria-sort="none" role="columnheader"><button type="button" class="th-sort">API<\/button><\/th>/);
 });
 
 test('the homepage hero gives first-time visitors working explorer and JSON API entry points', () => {
@@ -1630,7 +1630,7 @@ describe('read-only generated output', () => {
     const p = { slug: 'demo', name: 'Demo', category: 'ongoing', verified: true, last_verified: '2026-07-20' };
     assert.doesNotMatch(explorerRowHtml(p, { now: '2026-08-13' }), /tabindex/);
     const index = readFileSync(join(ROOT, 'site/index.html'), 'utf8');
-    const tbody = index.slice(index.indexOf('<tbody id="tbody">'), index.indexOf('</tbody>'));
+    const tbody = index.slice(index.indexOf('<tbody id="tbody"'), index.indexOf('</tbody>'));
     assert.doesNotMatch(tbody, /tabindex/);
     assert.match(index, /<caption class="sr-only">[^<]*arrow keys move between providers and Enter opens one\.<\/caption>/);
   });

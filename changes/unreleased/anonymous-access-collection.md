@@ -7,4 +7,4 @@
   `checked`, `quote`, optional `note`), validated like `no_expiry`. First
   entries: AI Horde (shared anonymous key `0000000000`) and OVHcloud AI
   Endpoints, whose note records that the same page also says a key is needed
-  in each request (#182).
+  in each request (#731, issue #182).

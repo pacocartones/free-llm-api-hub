@@ -92,7 +92,7 @@ test('the client bundle exposes rowHtml', () => {
   const rowHtml = clientRowHtml();
   assert.equal(typeof rowHtml, 'function');
   const out = rowHtml(base, { now: '2026-08-13' });
-  assert.match(out, /<tr>/);
+  assert.match(out, /<tr role="row">/);
   assert.match(out, /href="p\/groq"/);
   assert.ok(!out.includes('.html'), 'client link must match the clean-URL standard (#132)');
 });
@@ -402,6 +402,37 @@ test('keyboard: the explorer wires a roving tabindex without trapping focus', ()
   // the sortable headers hold a real button: its click reaches the header cell, so no keydown handler is needed
   assert.match(src, /th\.addEventListener\('click', \(\) => applySort\(th\)\);/);
   assert.doesNotMatch(src, /th\.addEventListener\('keydown'/, 'a button needs no key handler on the header cell');
+});
+
+test('the card layout keeps table semantics: explicit roles, and card labels are not read twice', () => {
+  // On a phone styles.css sets display: block on the table to draw cards, which makes VoiceOver on iOS (and some
+  // Chromium versions) drop the implicit table roles. The markup states them explicitly instead.
+  const html = readFileSync(new URL('../site/index.html', import.meta.url), 'utf8');
+  const css = readFileSync(new URL('../site/styles.css', import.meta.url), 'utf8');
+  assert.match(html, /<table id="table" class="sortable" role="table">/);
+  assert.match(html, /<thead role="rowgroup">\s*<tr role="row">/);
+  assert.match(html, /<tbody id="tbody" role="rowgroup">/);
+  const heads = html.match(/<th data-key="[a-z_]+"[^>]*>/g) || [];
+  assert.equal(heads.length, 5);
+  for (const h of heads) assert.match(h, /role="columnheader"/);
+
+  const rowHtml = clientRowHtml();
+  const row = rowHtml({ ...base, notes: 'n' }, { now: Date.parse('2026-08-02T00:00:00Z') });
+  assert.match(row, /^<tr role="row">/);
+  const cells = row.match(/<td\b[^>]*>/g) || [];
+  assert.equal(cells.length, heads.length, 'one cell per column header');
+  for (const td of cells) {
+    assert.match(td, /role="cell"/);
+    assert.match(td, /data-label="[^"]+"/);
+  }
+  // The server render is the same function, so every SSR row carries the roles too.
+  const ssrRows = html.slice(html.indexOf('<!-- AUTOGEN:rows:start -->'), html.indexOf('<!-- AUTOGEN:rows:end -->')).match(/<tr\b[^>]*>/g) || [];
+  assert.ok(ssrRows.length > 0);
+  for (const tr of ssrRows) assert.equal(tr, '<tr role="row">');
+
+  // The CSS label is decoration: the column header already names the cell, so the generated text has an empty
+  // alternative (with the plain declaration first as the fallback for browsers without that syntax).
+  assert.match(css, /#table td::before \{ content: attr\(data-label\); content: attr\(data-label\) \/ "";/);
 });
 
 test('keyboard: the focused row has a visible focus ring in styles.css', () => {

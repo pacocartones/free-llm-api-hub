@@ -6,6 +6,6 @@
   Fish Audio, Rev AI, Nutrient, Veryfi, Voicegain, Smallest.ai, CAMB.AI and
   Google Agent Platform express mode, and `commercial_ok` for Fireworks AI,
   Voicegain, CAMB.AI and Google Agent Platform express mode. The flags stay
-  unknown; the site shows why and when they were checked. Refs #7, Refs #8.
+  unknown; the site shows why and when they were checked (#738, issues #7 and #8).
   Agent-assisted: an AI agent read the pages and drafted the entries for
   maintainer review.
