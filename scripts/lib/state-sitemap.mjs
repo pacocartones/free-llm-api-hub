@@ -20,3 +20,14 @@ export function stateSitemapProblems(xml, robots, site) {
   }
   return { problems, locs };
 }
+
+// The sitemap index: the one URL to submit in Search Console, so the monthly reports' sitemap is found with the main
+// one (sitemaps.org protocol: a <sitemapindex> may list sitemaps of the same host). No <lastmod>: the child sitemaps
+// carry their own per-URL dates, and leaving it out keeps the index byte-stable, so it is committed and drift-gated.
+export const SITEMAP_INDEX = 'sitemap-index.xml';
+
+export const sitemapIndexXml = (site, files) =>
+  `<?xml version="1.0" encoding="UTF-8"?>\n` +
+  `<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +
+  files.map((f) => `  <sitemap><loc>${site}/${f}</loc></sitemap>`).join('\n') +
+  `\n</sitemapindex>\n`;

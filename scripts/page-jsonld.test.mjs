@@ -126,3 +126,44 @@ test('no internal link points to the .html variant of a collection', () => {
     assert.doesNotMatch(read(`coding-tools/${d.name}/index.html`), /href="[^"]*collections\/[a-z-]+\.html"/, d.name);
   }
 });
+
+test('pages that name the site or the dataset refer to the home nodes and carry the same authorship', () => {
+  const htmlIn = (dir, n) => readdirSync(join(ROOT, 'site', dir)).filter((f) => f.endsWith('.html')).slice(0, n).map((f) => `${dir}/${f}`);
+  const rels = ['models/index.html', 'changes/index.html', 'guides-and-collections/index.html', 'api/index.html', ...htmlIn('guides', 3), ...htmlIn('p', 5)];
+  for (const rel of rels) {
+    const refs = [];
+    const walk = (v) => {
+      if (Array.isArray(v)) return v.forEach(walk);
+      if (v && typeof v === 'object') {
+        if (v['@type'] === 'WebSite' || v['@type'] === 'Dataset') refs.push(v);
+        Object.values(v).forEach(walk);
+      }
+    };
+    walk(jsonld(read(rel)));
+    assert.ok(refs.length, `${rel}: names neither the site nor the dataset`);
+    for (const r of refs) {
+      assert.equal(r['@id'], `${SITE}/#${r['@type'] === 'WebSite' ? 'website' : 'dataset'}`, `${rel}: stable @id`);
+      assert.deepEqual([r.publisher['@id'], r.publisher.name], [`${SITE}/#publisher`, 'Tweakeo, Inc.'], `${rel}: publisher`);
+      assert.deepEqual([r.creator['@id'], r.creator.name], [`${SITE}/#creator`, 'Paco Cartones'], `${rel}: creator`);
+    }
+  }
+});
+
+test('provider pages: dateModified is the last_verified date the page shows', () => {
+  const data = JSON.parse(readFileSync(join(ROOT, 'data/providers.json'), 'utf8'));
+  for (const p of data.providers.filter((x) => x.last_verified).slice(0, 10)) {
+    const html = read(`p/${p.slug}.html`);
+    const page = jsonld(html)['@graph'].find((n) => n['@type'] === 'WebPage');
+    assert.equal(page.dateModified, p.last_verified, p.slug);
+    assert.ok(html.includes(p.last_verified), `${p.slug}: the date is visible on the page`);
+  }
+});
+
+test('the sitemap index lists both sitemaps, and both exist', () => {
+  const xml = read('sitemap-index.xml');
+  assert.ok(xml.startsWith('<?xml version="1.0" encoding="UTF-8"?>\n<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'));
+  const locs = [...xml.matchAll(/<loc>([^<]*)<\/loc>/g)].map((m) => m[1]);
+  assert.deepEqual(locs, [`${SITE}/sitemap.xml`, `${SITE}/sitemap-state.xml`]);
+  for (const u of locs) assert.ok(existsSync(join(ROOT, 'site', u.slice(SITE.length + 1))), `${u} was built`);
+  assert.doesNotMatch(xml, /<lastmod>/, 'no lastmod: the index stays byte-stable');
+});

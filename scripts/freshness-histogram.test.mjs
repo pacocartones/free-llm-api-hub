@@ -138,4 +138,21 @@ test('coverage page section: one row per week, clusters marked, nothing without 
   assert.equal((html.match(/class="cov-cluster"/g) || []).length, 1);
   assert.match(html, /<th scope="row">2027-01-18<\/th><td class="num">9 <span class="muted">\(cluster\)<\/span>/);
   assert.match(html, /href="https:\/\/example\.test\/r\/issues\/4"/);
+  assert.match(html, /href="\.\.\/quality\/#freshness-weeks"/, 'links the backward-looking view on /quality/');
+  assert.match(html, /href="\.\.\/quality\/#freshness-weeks"/);
+});
+
+test('/coverage/ and /quality/ agree: every verified entry is counted once in each freshness view', async () => {
+  const { quality } = await import('./lib/quality.mjs');
+  const { providers, generated } = JSON.parse(readFileSync(join(ROOT, 'data/providers.json'), 'utf8'));
+  const asOf = providers.map((p) => p.last_verified).filter(Boolean).concat(generated).sort().at(-1);
+  const q = quality(providers, asOf);
+  // Wide enough that every due date lands inside the window or before it.
+  const h = freshnessHistogram(providers, new Date(q.freshness.firstWeek + 'T00:00:00Z'), { weeks: 40 });
+  const verifiedCount = q.freshness.weeks.reduce((n, w) => n + w.count, 0) + q.freshness.earlier;
+  assert.equal(h.rows.reduce((n, r) => n + r.due, 0) + h.dueBefore, verifiedCount);
+  // Each /quality/ week's due date range falls in the /coverage/ weeks that count those entries.
+  for (const w of q.freshness.weeks.filter((x) => x.count)) {
+    assert.ok(h.rows.some((r) => r.week === iso(weekStart(new Date(w.dueFrom + 'T00:00:00Z'))) && r.due > 0), `due week of ${w.start}`);
+  }
 });
