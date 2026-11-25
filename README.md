@@ -91,7 +91,7 @@ Focused, always-current collections — each is generated from the dataset and h
 <!-- AUTOGEN:collections:start -->
 - **[Free LLM APIs with no credit card](collections/no-credit-card.md)** (50) — start without a payment method · [live page ↗](https://freellmapihub.com/collections/no-credit-card)
 - **[Free LLM APIs with no phone verification](collections/no-phone.md)** (16) — no SMS/phone verification · [live page ↗](https://freellmapihub.com/collections/no-phone)
-- **[Free AI APIs with no account needed](collections/anonymous-access.md)** (2) — call the API with no account at all · [live page ↗](https://freellmapihub.com/collections/anonymous-access)
+- **[Free AI APIs with no account needed](collections/anonymous-access.md)** (4) — call the API with no account at all · [live page ↗](https://freellmapihub.com/collections/anonymous-access)
 - **[Free LLM APIs for commercial use](collections/commercial-use.md)** (21) — safe to ship, not eval-only · [live page ↗](https://freellmapihub.com/collections/commercial-use)
 - **[OpenAI-compatible free LLM APIs](collections/openai-compatible.md)** (30) — drop-in OpenAI SDK swap · [live page ↗](https://freellmapihub.com/collections/openai-compatible)
 - **[Permanently free LLM APIs](collections/always-free.md)** (5) — $0 models, no trial clock · [live page ↗](https://freellmapihub.com/collections/always-free)
