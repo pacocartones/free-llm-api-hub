@@ -1,8 +1,8 @@
 ### Changed and fixed
 
 - Provider pages put the quickstart snippet right after the free limits, before the speed figures, the data policy
-  and the provider's own description: on `/p/groq` on a phone it moves from ~4,500px down the page to the second
-  screen. Agent-assisted.
+  and the provider's own description: on `/p/groq` it moves from 4,540px to 2,349px down the page on a phone and
+  from 2,769px to 1,431px on a desktop. Agent-assisted.
 - The change history shows one entry per day and field: the commits of one day merge into one entry with the value
   before the day's first commit and after its last, and a field that ended the day where it started is left out.
   `/p/groq` listed "Updated the catch" ten times on 2026-11-24; it now lists it once. Limits and flag changes show

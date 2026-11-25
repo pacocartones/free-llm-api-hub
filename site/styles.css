@@ -555,8 +555,9 @@ pre code { color: var(--text); }
 .upd-date { font-family: var(--font-mono); font-size: .78rem; color: var(--accent); flex: 0 0 92px; }
 /* Provider history: a limits or flag change spells out before → after on its own line under the entry (Q4). */
 .upd:has(.upd-diff) { flex-wrap: wrap; }
-.upd-diff { flex-basis: 100%; list-style: none; margin: 4px 0 0 106px; padding: 0; color: var(--muted); font-size: .86rem; overflow-wrap: anywhere; }
-.upd-diff li + li { margin-top: 3px; }
+.upd-list .upd-diff { flex-basis: 100%; list-style: none; margin: 4px 0 0 106px; padding: 0; color: var(--muted); font-size: .86rem; overflow-wrap: anywhere; }
+.upd-list .upd-diff li { margin: 0; }
+.upd-list .upd-diff li + li { margin-top: 3px; }
 .upd-diff .upd-field { color: var(--text); }
 .upd-diff ins { text-decoration: none; color: var(--text); }
 .upd a { color: var(--text); }
@@ -565,7 +566,7 @@ pre code { color: var(--text); }
 .pagination a:last-child { text-align: right; }
 .pagination span { text-align: center; }
 .pagination a { color: var(--accent); font-weight: 700; }
-@media (max-width: 560px) { .upd { flex-direction: column; gap: 2px; } .upd-date { flex-basis: auto; } .upd-diff { margin-left: 0; } }
+@media (max-width: 560px) { .upd { flex-direction: column; gap: 2px; } .upd-date { flex-basis: auto; } .upd-list .upd-diff { margin-left: 0; } }
 
 /* ---------- footer ---------- */
 .site-footer { border-top: 1px solid var(--border); background: var(--bg-elev); color: var(--muted); font-size: .87rem; }
