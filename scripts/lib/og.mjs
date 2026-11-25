@@ -11,6 +11,7 @@ import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { COLLECTIONS } from './collections.mjs';
 import { injectInlineFigures, providerFigures } from './figures.mjs';
+import { LONG_GUIDES } from './long-guides.mjs';
 
 const sha256 = (s) => createHash('sha256').update(s, 'utf8').digest('hex');
 
@@ -49,6 +50,8 @@ export const SECTION_OGS = [
   { file: 'api.png', label: 'API', title: 'Static JSON API', subtitle: 'versioned · CORS-open · no key' },
   { file: 'not-free.png', label: 'NOT FREE', title: 'LLM APIs that are not free', subtitle: "the provider's own words · dated · free alternatives" },
   { file: 'embed.png', label: 'USE THE DATA', title: 'Widget, badges, API, citation', subtitle: 'MIT · no key · no tracking' },
+  // The long-form guides carry fixed text too (no count), so a dataset change never stales their image.
+  ...LONG_GUIDES.map((g) => ({ file: `guides/${g.slug}.png`, label: 'GUIDE', title: g.ogTitle, subtitle: g.ogSubtitle })),
 ];
 
 // The manifest every data-dependent OG must match: file name -> fingerprint of
