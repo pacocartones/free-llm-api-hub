@@ -2681,6 +2681,33 @@ test('llms-full.txt shows the commercial-use condition of every conditional prov
   assert.equal(lines.length, conditional.length, 'no other provider carries a condition line');
 });
 
+test('llms-full.txt gives each provider with a data_policy one prompt data policy line, from trainState', () => {
+  run(['scripts/build.mjs']);
+  const { providers } = JSON.parse(readFileSync(DATA, 'utf8'));
+  const full = readFileSync(join(ROOT, 'site/llms-full.txt'), 'utf8');
+  const blocks = full.split('\n### ').slice(1).map((text) => `### ${text}`);
+  const blockOf = (p) => blocks.find((b) => b.startsWith(`### ${p.name} — `));
+  const policyLines = (p) => blockOf(p).split('\n').filter((l) => l.startsWith('- Prompt data policy: '));
+
+  const said = providers.find((p) => trainState(p) === 'no');
+  assert.ok(said, 'the dataset has a provider whose own sentence says it does not train on prompts');
+  const [saidLine] = policyLines(said);
+  assert.match(saidLine, /trains on prompts: no;/, `${said.slug}: no, from trainState`);
+  assert.ok(saidLine.includes(`(source ${said.data_policy.source}, checked ${said.data_policy.checked})`), `${said.slug}: its source and day`);
+
+  const valueOnly = providers.find((p) => trainState(p) === 'recorded');
+  assert.ok(valueOnly, 'the dataset has a provider with a recorded value but no quote');
+  assert.match(policyLines(valueOnly)[0], /trains on prompts: not confirmed;/, `${valueOnly.slug}: a value alone is not confirmed`);
+
+  const without = providers.find((p) => !p.data_policy);
+  assert.ok(without, 'the dataset has a provider without a data_policy');
+  assert.deepEqual(policyLines(without), [], `${without.slug}: no line, absent is never "no"`);
+
+  const withPolicy = providers.filter((p) => p.data_policy && typeof p.data_policy === 'object');
+  const lines = full.split('\n').filter((l) => l.startsWith('- Prompt data policy: '));
+  assert.equal(lines.length, withPolicy.length, 'exactly one line per provider with a data_policy');
+});
+
 test('/coverage/ treats conditional commercial use as open, not confirmed', () => {
   const provider = { slug: 'conditional', name: 'Conditional', docs_url: 'https://example.com/terms', verified: true, commercial_ok: 'conditional' };
   const row = coverageOf([provider]).find((entry) => entry.key === 'commercial_ok');
