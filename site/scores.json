@@ -25,17 +25,17 @@
       "of": 6,
       "rank": 3
     },
-    "modelscope": {
-      "total": 51.4,
-      "confirmed": 4,
-      "of": 6,
-      "rank": 4
-    },
     "cloudflare-workers-ai": {
       "total": 50.4,
       "confirmed": 3,
       "of": 6,
       "rank": null
+    },
+    "modelscope": {
+      "total": 48.8,
+      "confirmed": 4,
+      "of": 6,
+      "rank": 4
     },
     "ocr-space": {
       "total": 47.2,
@@ -175,12 +175,6 @@
       "of": 6,
       "rank": null
     },
-    "alibaba-model-studio": {
-      "total": 33.9,
-      "confirmed": 2,
-      "of": 6,
-      "rank": null
-    },
     "fireworks-ai": {
       "total": 33.9,
       "confirmed": 2,
@@ -240,6 +234,12 @@
       "confirmed": 4,
       "of": 6,
       "rank": 8
+    },
+    "alibaba-model-studio": {
+      "total": 31.3,
+      "confirmed": 2,
+      "of": 6,
+      "rank": null
     },
     "siliconflow": {
       "total": 31.3,
