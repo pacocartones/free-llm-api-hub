@@ -8,7 +8,8 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { SLA_DAYS, DUE_SOON_DAYS, ageInDays, freshnessStatus } from './lib/rules.mjs';
-import { weeklyPacing, weeklyBatch, WEEKLY_CAP, MIN_AGE_DAYS } from './lib/pacing.mjs';
+import { weeklyPlan, WEEKLY_CAP, MIN_AGE_DAYS, PACE_FLOOR } from './lib/pacing.mjs';
+import { freshnessHistogram, histogramMarkdown, CLUSTER_LIMIT, HISTOGRAM_WEEKS } from './lib/freshness-histogram.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 // Same bucketing the freshness badge is graded on — imported from rules.mjs, not
@@ -51,15 +52,15 @@ export function stalenessWorklist(providers, now = new Date()) {
     if (!cliff || n > cliff.n) cliff = { d, n, crossIn, crossOn };
   }
 
-  // Weekly batch: the smallest size that keeps every entry inside the SLA if
-  // each week's batch is done, oldest first, when that is possible within the
-  // weekly cap (see lib/pacing.mjs). Taking the oldest each week re-verifies
-  // part of any same-day cohort early, which is what spreads it out.
-  const verifiedList = providers
-    .filter((p) => p.verified && p.last_verified)
-    .sort((a, b) => (a.last_verified < b.last_verified ? -1 : 1) || (a.slug < b.slug ? -1 : 1));
-  const pacing = weeklyPacing(verifiedList.map((p) => ageDays(p.last_verified)), OVERDUE);
-  const batch = weeklyBatch(verifiedList, (p) => ageDays(p.last_verified), OVERDUE, pacing.size);
+  // Weekly batch (lib/pacing.mjs): at least PACE_FLOOR a week, more when
+  // keeping every entry inside the SLA needs it (up to the cap), oldest first.
+  // While a coming week has more than CLUSTER_LIMIT entries reaching day 61,
+  // entries due by then are pulled forward early, so a same-day cohort is
+  // spread over the weeks before its due date instead of expiring together.
+  const verifiedList = providers.filter((p) => p.verified && p.last_verified && ageDays(p.last_verified) !== null);
+  const pacing = weeklyPlan(verifiedList, (p) => ageDays(p.last_verified), OVERDUE);
+  const batch = pacing.batch;
+  const histogram = freshnessHistogram(providers, now);
 
   const line = ({ p, age }) =>
     `- [ ] **${p.name}** (\`${p.slug}\`) — last verified ${p.last_verified} (${age} days ago)` +
@@ -83,8 +84,12 @@ export function stalenessWorklist(providers, now = new Date()) {
   }
 
   out.push(`### 📅 This week's batch — ${batch.length}`);
-  out.push(`_The ${batch.length} oldest verifications that are at least ${MIN_AGE_DAYS} days old (sized at ${pacing.size}, at most ${WEEKLY_CAP} a week). ${pacing.capped ? `At this cap, one batch a week cannot keep every entry inside the ${OVERDUE}-day SLA; extra re-verifications are needed.` : `Doing one batch every week keeps every entry inside the ${OVERDUE}-day SLA and spreads same-day cohorts out, so no week inherits a cliff.`}_`);
+  out.push(`_The ${batch.length} oldest verifications that are at least ${pacing.minAge} days old (sized at ${pacing.size}: at least ${PACE_FLOOR}, at most ${WEEKLY_CAP} a week).${pacing.pulling ? ` Entries younger than ${MIN_AGE_DAYS} days are included because a coming week has more than ${CLUSTER_LIMIT} entries becoming due; pulling them forward now spreads that cohort out.` : ''} ${pacing.capped ? `At this cap, one batch a week cannot keep every entry inside the ${OVERDUE}-day SLA; extra re-verifications are needed.` : `Doing one batch every week keeps every entry inside the ${OVERDUE}-day SLA and spreads same-day cohorts out, so no week inherits a cliff.`}_`);
   out.push(batch.map((p) => `- [ ] **${p.name}** (\`${p.slug}\`) — last verified ${p.last_verified} (${ageDays(p.last_verified)} days ago)` + (p.docs_url ? ` · [docs](${p.docs_url})` : '')).join('\n') || '_None._');
+  out.push('');
+
+  out.push(`### 📊 Freshness histogram — next ${HISTOGRAM_WEEKS} weeks`);
+  out.push(histogramMarkdown(histogram));
   out.push('');
 
   out.push(`### 🔴 Overdue (>${OVERDUE} days) — ${overdue.length}`);

@@ -56,7 +56,7 @@ const safeHttp = (u) => (/^https?:\/\//i.test(String(u || '')) ? String(u) : '')
  * The main content of /coverage/. `prefix` is the path from the page to the site root. Everything that
  * comes from the data is escaped; a slug becomes a link only after SLUG_RE and a docs URL only if http(s).
  */
-export function coverageMainHtml(rows, { repo, generated, prefix = '../' }) {
+export function coverageMainHtml(rows, { repo, generated, prefix = '../', histogram = null }) {
   const summary = rows.map((r) =>
     `<tr><th scope="row"><span class="cov-label">${htmlEsc(r.label)}</span><span class="cov-pop">counted over ${htmlEsc(r.population)}</span></th><td class="cov-popcol">${htmlEsc(r.population)}</td>` +
     `<td class="num">${r.confirmed} of ${r.total}</td><td class="num">${percent(r.confirmed, r.total)}%</td><td class="num">${r.open.length}</td>` +
@@ -98,5 +98,23 @@ export function coverageMainHtml(rows, { repo, generated, prefix = '../' }) {
     sections +
     reasonsTable +
     resolvedSections +
+    freshnessHistogramHtml(histogram, { repo }) +
     '</div></main>';
+}
+
+/**
+ * The freshness histogram section of /coverage/ (see lib/freshness-histogram.mjs): how many verified
+ * entries reach day 61 (due for re-verification) and day 91 (past the SLA) in each coming week. Empty
+ * string without a histogram. Every value is a number or a date the build computed.
+ */
+export function freshnessHistogramHtml(h, { repo }) {
+  if (!h || !Array.isArray(h.rows) || !h.rows.length) return '';
+  const limit = Number(h.limit) || 8;
+  const body = h.rows.map((r) =>
+    `<tr${r.clustered ? ' class="cov-cluster"' : ''}><th scope="row">${htmlEsc(r.week)}</th><td class="num">${Number(r.due)}${r.clustered ? ' <span class="muted">(cluster)</span>' : ''}</td><td class="num">${Number(r.stale)}</td></tr>`).join('');
+  const before = h.dueBefore ? `<p class="muted">${Number(h.dueBefore)} entries were already due when this window opens (${Number(h.staleBefore)} past the SLA).</p>` : '';
+  return '<h2 id="freshness">When entries come due</h2>' +
+    `<p>Every verified entry is re-checked against the provider’s own docs within 90 days. It counts as <strong>due</strong> from day 61 and <strong>past the SLA</strong> from day 91. The table counts, per week, the entries that cross each line if nobody re-checks them first. A week with more than ${limit} entries becoming due is a cluster: the <a href="${htmlEsc(repo)}/issues/4">weekly worklist</a> pulls those entries forward, a few each week, so they do not all expire together. Weeks start on Monday (UTC), from the week of the data date.</p>` +
+    '<table class="cov-table cov-fresh"><thead><tr><th>Week of</th><th class="num">Become due (day 61)</th><th class="num">Past the SLA (day 91)</th></tr></thead><tbody>' + body + '</tbody></table>' +
+    before;
 }

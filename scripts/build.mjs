@@ -25,6 +25,7 @@ import { monthlyReport, reportMonths, monthEndDate, monthName, monthLabel, pct, 
 import { resolveBestEntries, topEntries, PODIUM_SIZE } from './lib/best.mjs';
 import { agreementsTableHtml, sponsoredBlockHtml, disclosureHtml, inForce, NOT_IN_DATA_SENTENCE, MACHINE_SENTENCE } from './lib/agreements.mjs';
 import { coverage, coverageMainHtml } from './lib/coverage.mjs';
+import { freshnessHistogram, CLUSTER_LIMIT } from './lib/freshness-histogram.mjs';
 import { fieldCheck, REASON_LABEL } from './lib/field-checks.mjs';
 import { publishedSpeed, speedFigure } from './lib/published-speed.mjs';
 import { apiV1ProviderSchema, projectApiV1Changes, toApiV1Provider } from './lib/api-v1.mjs';
@@ -2215,7 +2216,7 @@ writeFileSync(
     canonical: SITE + '/coverage/',
     main:
       pageHero({ crumbs: `<a href="../">Home</a> / Data coverage`, h1: `Data coverage`, lede: `Where the data is thin, and how to add one value. Every gap links the provider's own docs.` }) +
-      coverageMainHtml(fieldCoverage, { repo: REPO, generated: ASOF, prefix: '../' }),
+      coverageMainHtml(fieldCoverage, { repo: REPO, generated: ASOF, prefix: '../', histogram: { ...freshnessHistogram(providers, new Date(ASOF + 'T00:00:00Z')), limit: CLUSTER_LIMIT } }),
     prefix: '../',
   })
 );
