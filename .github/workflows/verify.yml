@@ -134,6 +134,16 @@ jobs:
     name: Windows tests
     runs-on: windows-latest
     steps:
+      # Set up git as a contributor's Windows machine often is: CRLF conversion on, and every commit and tag signed by
+      # a program that fails (a key behind a passphrase, or no gpg). The checkout must still be LF (.gitattributes) and
+      # the suite must not depend on the signing config.
+      - name: Configure git like a contributor machine
+        run: |
+          git config --global core.autocrlf true
+          git config --global commit.gpgsign true
+          git config --global tag.gpgsign true
+          git config --global gpg.format openpgp
+          git config --global gpg.program false
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
@@ -145,8 +155,15 @@ jobs:
       - name: Install locked development dependencies
         run: npm ci --ignore-scripts
 
-      - name: Run the full test suite
-        run: npm test
+      # The runner may create symlinks; a contributor without Developer Mode may not (#783). The preload refuses them
+      # as Windows does there, junctions still work. A file URL, so the test processes in other folders find it too.
+      - name: Run the full test suite without symlink privileges
+        shell: pwsh
+        run: |
+          $preload = ([System.Uri](Join-Path $PWD 'scripts/lib/deny-symlinks.mjs')).AbsoluteUri
+          $env:NODE_OPTIONS = "--import=$preload"
+          npm test
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
   # A push to main is checked again after the merge (two pull requests that pass
   # alone can fail together, e.g. a duplicate slug). A failure there used to be
