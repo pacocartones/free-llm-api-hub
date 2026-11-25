@@ -308,7 +308,7 @@ describe('build with GA_MEASUREMENT_ID set', () => {
 
   test('the privacy page describes both categories instead of "no cookies"', () => {
     const privacy = read('site/legal/privacy.html');
-    assert.doesNotMatch(privacy, /sets no cookies/);
+    assert.doesNotMatch(privacy, /This site sets no cookies/); // Cloudflare Web Analytics itself is described as cookieless
     assert.match(privacy, /<strong>only for the categories you allow<\/strong>/);
     assert.match(privacy, /<h3>1\. Analytics<\/h3>/);
     assert.match(privacy, /<h3>2\. Advertising &amp; personalised measurement \(Google signals\)<\/h3>/);
