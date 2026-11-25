@@ -8,7 +8,7 @@ Free LLM API tiers that permit production/commercial use — not restricted to e
 
 Free tiers that **allow commercial/production use** (`commercial_ok: true`). Evaluation-only tiers (`commercial_ok: false`) and tiers whose terms do not say are deliberately left out — read their rows in the main list for the restriction.
 
-**22 of 68 tracked providers** match.
+**22 of 70 tracked providers** match.
 
 | Provider | Type | What's free | The catch | Verified |
 |---|---|---|---|---|
