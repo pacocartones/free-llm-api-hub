@@ -213,27 +213,28 @@ export function reportBlocks(r, { prefix = '../../', current = new Set(), siteCh
   ].map((row) => row.map(String)));
 
   const newProviders = r.added.length
-    ? table(`New providers in ${r.figures.month_label}`, ['Provider', 'What’s free', 'Card?', 'Commercial use', 'Source (checked)'], r.added.map((p) => {
+    ? table(`New providers in ${r.figures.month_label}`, ['Provider', 'What’s free', 'Card?', 'Commercial use', 'Checked', 'Source'], r.added.map((p) => {
       const cq = fieldCheck(p, 'card_required');
       return [
         provLink(p, prefix, current),
         esc(p.free_tier),
         `${cardCell(p)}${cq && cq.status === 'stated' && cq.quote ? `: “${esc(cq.quote)}”` : ''}`,
         commercialCell(p),
-        `${ext(p.docs_url, esc(httpsOnly(p.docs_url) ? new URL(p.docs_url).hostname : 'source'))} (${time(p.last_verified)})`,
+        time(p.last_verified),
+        ext(p.docs_url, esc(httpsOnly(p.docs_url) ? new URL(p.docs_url).hostname : 'source')),
       ];
     }))
     : `<p class="muted">No provider joined the dataset in ${esc(r.figures.month_label)}.</p>`;
 
+  // Each link is alone in its cell (a link inside running text in a table cell is not told apart from the text).
   const removedRows = r.removed.map((p) => {
     const e = removalReason(p, r.notFree);
     const why = e ? esc(e.short.charAt(0).toUpperCase() + e.short.slice(1)) : 'See the changelog.';
-    const src = e && e.sources && e.sources[0] ? ext(e.sources[0].url, 'source') : ext(p.docs_url, 'last source');
-    return [esc(p.name), `${why}${e ? ` (<a href="${prefix}not-free/#${esc(e.id)}">details</a>)` : ''}`, `${e ? time(e.checked) : '—'} (${src})`];
+    const src = e && e.sources && e.sources[0] ? e.sources[0].url : p.docs_url;
+    return [e ? `<a href="${prefix}not-free/#${esc(e.id)}">${esc(p.name)}</a>` : esc(p.name), why, e ? time(e.checked) : '—', ext(src, e ? 'source' : 'last source')];
   });
   const removed = r.removed.length
-    ? table(`Providers removed in ${r.figures.month_label}`, ['Provider', 'Why it left', 'Checked']
-      , removedRows)
+    ? table(`Providers removed in ${r.figures.month_label}`, ['Provider', 'Why it left', 'Checked', 'Source'], removedRows)
     : `<p class="muted">No provider left the dataset in ${esc(r.figures.month_label)}.</p>`;
   const underReview = r.underReview.length
     ? `<p><strong>Under review:</strong> ${andList(r.underReview.map((p) => provLink(p, prefix, current)))} ${r.underReview.length === 1 ? 'is' : 'are'} now unverified and out of the ranking until a re-check settles ${r.underReview.length === 1 ? 'its' : 'their'} free access; the provider page says why.</p>`
