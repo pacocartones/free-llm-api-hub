@@ -589,6 +589,19 @@ pre code { color: var(--text); }
 .tri-no { color: var(--text); }
 .tri-cond { color: var(--text); }
 .tri-unk { color: var(--muted); font-style: italic; }
+/* The production flag (lib/flags.mjs): the state is a shape as well as a colour. ✓ ok, ✕ bad, ~ conditional,
+   ? unknown with a dashed border (null is "not confirmed", never "no"). The words keep their own colours. */
+.flag { display: inline-flex; align-items: center; gap: 6px; }
+.flag-mark { display: inline-grid; place-items: center; flex: none; width: 1.3em; height: 1.3em; border: 1px solid currentColor; border-radius: 4px; font-family: var(--font-mono); font-size: .78em; font-weight: 700; font-style: normal; line-height: 1; }
+.flag-ok .flag-mark { color: var(--ok); }
+.flag-bad .flag-mark { color: var(--bad); }
+.flag-cond .flag-mark { color: var(--unk); }
+.flag-unk .flag-mark { color: var(--unk); border-style: dashed; }
+.flags { display: contents; }
+/* Explorer form: the flag's icon with the mark as a small badge on its lower right corner, so the four take the width of the four icons they replace. */
+.flag-mini { position: relative; color: var(--muted); }
+.flag-mini svg.i { width: 15px; height: 15px; }
+.flag-mini .flag-mark { position: absolute; right: -6px; bottom: -5px; width: 12px; height: 12px; border-radius: 3px; font-family: var(--font-sans); font-size: 9px; background: var(--panel); }
 .muted { color: var(--muted); }
 .model-chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0 6px; }
 .model-chips code { background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 4px 9px; font-size: .82rem; color: var(--accent); word-break: break-all; }

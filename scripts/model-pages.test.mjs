@@ -37,7 +37,7 @@ test('the page shows the literal ID each provider lists and links each provider 
 });
 
 test('a null flag reads "not confirmed", an unverified provider is marked', () => {
-  assert.match(page(groupOf([alpha], 'shared-7b')), /Phone verification<\/dt><dd><span class="tri tri-unk">not confirmed<\/span>/);
+  assert.match(page(groupOf([alpha], 'shared-7b')), /Phone verification<\/dt><dd><span class="flag flag-unk" data-flag="phone"[^>]*><span class="flag-mark" aria-hidden="true">\?<\/span><span class="flag-vis" aria-hidden="true"><span class="tri tri-unk">not confirmed<\/span>/);
   assert.match(page(groupOf([ghost], 'solo-1b')), /tri-unk">unverified</);
 });
 
