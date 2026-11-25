@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync, spawnSync } from 'node:child_process';
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join, relative } from 'node:path';
 import { makeTmpDir } from './lib/tmp.mjs';
 
@@ -95,4 +95,18 @@ test('parent links inside ROOT and Windows separators remain valid', () => {
   const { run } = fixture('docs/nested/runbook.md', '[parent](../../README.md)\n[windows](..\\..\\README.md)');
   const result = run();
   assert.equal(result.status, 0, result.stdout + result.stderr);
+});
+
+test('a committed Markdown file deleted but not staged is skipped, and links to it are still reported', () => {
+  const { root, write, run } = fixture('README.md', '[fragment](changes/unreleased/gone.md)');
+  write('changes/unreleased/gone.md', '### Added\n\n- An entry.\n');
+  execFileSync('git', ['add', '-A'], { cwd: root });
+  rmSync(join(root, 'changes/unreleased/gone.md'));
+  const result = run();
+  assert.equal(result.status, 1, result.stdout + result.stderr);
+  assert.doesNotMatch(result.stderr, /ENOENT/);
+  assert.match(result.stderr, /README\.md → changes\/unreleased\/gone\.md/);
+  write('README.md', '');
+  const clean = run();
+  assert.equal(clean.status, 0, clean.stdout + clean.stderr);
 });

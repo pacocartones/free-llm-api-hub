@@ -40,6 +40,7 @@ const VALIDATE = join(ROOT, 'scripts/validate.mjs');
 // | 103 | ${id}: duplicate name | direct case |
 // | 106 | ${id}: name required | schema-gated |
 // | 108 | ${id}: playground_url requires a non-empty docs_url | direct case |
+// | 110 (added after 1ec1562; later rows shift by one) | ${id}: keys_url and keys_url_source go together and require a non-empty docs_url | direct case |
 // | 112 | ${id}: ${field} must not contain control, bidirectional or zero-width characters | direct case |
 // | 114 | ${id}: category must be one of ${CATEGORIES.join('/')} | schema-gated |
 // | 115 | ${id}: free_type must be one of ${FREE_TYPES.join('/')} | schema-gated |
@@ -310,6 +311,9 @@ test('playground_url requires non-empty docs_url on unverified rows', () => {
   const p = data.providers.find((row) => row.slug === 'groq');
   p.verified = false;
   p.last_verified = null;
+  // keys_url has its own docs_url rule (tested below); keep this case about playground_url alone
+  delete p.keys_url;
+  delete p.keys_url_source;
   p.playground_url = 'https://example.com/playground';
   const accepted = runValidate(data);
   assert.equal(accepted.status, 0, accepted.output);
@@ -332,6 +336,58 @@ test('playground_url requires non-empty docs_url on unverified rows', () => {
   p.docs_url = '';
   const noPlayground = runValidate(data);
   assert.equal(noPlayground.status, 0, noPlayground.output);
+});
+
+test('keys_url accepts HTTPS with its source and remains optional', () => {
+  const data = structuredClone(DATA);
+  const p = provider(data);
+  p.keys_url = 'https://example.com/keys?tab=api&new=1';
+  p.keys_url_source = 'https://example.com/docs/quickstart';
+  const present = runValidate(data);
+  assert.equal(present.status, 0, present.output);
+  delete p.keys_url;
+  delete p.keys_url_source;
+  const absent = runValidate(data);
+  assert.equal(absent.status, 0, absent.output);
+});
+
+test('keys_url and keys_url_source reject invalid present values', () => {
+  for (const field of ['keys_url', 'keys_url_source']) {
+    for (const value of ['http://example.com/keys', 'javascript:alert(1)', '/keys', '', null, 7]) {
+      const data = structuredClone(DATA);
+      const p = provider(data);
+      p.keys_url = 'https://example.com/keys';
+      p.keys_url_source = 'https://example.com/docs';
+      p[field] = value;
+      const result = runValidate(data);
+      assert.notEqual(result.status, 0, `${field}=${JSON.stringify(value)}: ${result.output}`);
+      assert.ok(result.output.includes(`/providers/${data.providers.indexOf(p)}/${field}`), result.output);
+    }
+  }
+});
+
+test('keys_url needs its source, the source needs keys_url, and both need a non-empty docs_url', () => {
+  const message = (p) => `${p.slug}: keys_url and keys_url_source go together and require a non-empty docs_url`;
+  for (const only of ['keys_url', 'keys_url_source']) {
+    const data = structuredClone(DATA);
+    const p = provider(data);
+    delete p.keys_url;
+    delete p.keys_url_source;
+    p[only] = 'https://example.com/keys';
+    const rejected = runValidate(data);
+    assert.notEqual(rejected.status, 0, rejected.output);
+    assert.ok(rejected.output.includes(message(p)), rejected.output);
+  }
+  const data = structuredClone(DATA);
+  const p = data.providers.find((row) => row.slug === 'groq');
+  p.verified = false;
+  p.last_verified = null;
+  p.keys_url = 'https://example.com/keys';
+  p.keys_url_source = 'https://example.com/docs';
+  p.docs_url = '  ';
+  const rejected = runValidate(data);
+  assert.notEqual(rejected.status, 0, rejected.output);
+  assert.ok(rejected.output.includes(message(p)), rejected.output);
 });
 
 test('the fixture harness leaves a valid fixture valid', () => {

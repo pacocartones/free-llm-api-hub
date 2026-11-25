@@ -14,6 +14,7 @@ export const ORDER = [
   'card_required', 'commercial_ok', 'commercial_ok_condition', 'openai_compatible', 'openai_base_url', 'env_key',
   'is_text_llm', 'model_tier', 'model_tier_source', 'free_limits', 'no_expiry', 'anonymous_access',
   'published_speed', 'field_checks', 'verified', 'last_verified', 'added', 'last_probed', 'probe_status', 'data_policy', 'playground_url',
+  'keys_url', 'keys_url_source',
 ];
 export const TOP = ['$schema', 'version', 'generated', 'source', 'note'];
 

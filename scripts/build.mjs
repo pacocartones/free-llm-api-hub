@@ -1246,6 +1246,11 @@ for (const p of providers) {
         ? ` <span class="v warn" title="The key authenticated but the free tier appears gone">${IC('ic-warn')} free tier unconfirmed live</span>`
         : ''));
   const docsBtn = docsHref(p.docs_url) ? `<a class="btn primary" href="${htmlEsc(docsHref(p.docs_url))}" target="_blank" rel="noopener">Official docs ↗</a>` : '';
+  // "Get a free key": the provider's own key page, exactly as its docs link it (keys_url), next to the limits and the
+  // quickstart. Tagged data-link="keys" by tagProviderLinks, so a click is an outbound_provider_click (consent-gated).
+  const keysHtml = p.keys_url
+    ? `<div class="prov-actions prov-key" style="align-items:center"><a class="btn primary" href="${htmlEsc(p.keys_url)}" target="_blank" rel="noopener">Get a free key ↗</a><span class="muted">Sign up or sign in on ${htmlEsc(p.name)}'s own site, then create an API key there.</span></div>`
+    : '';
   const playgroundBtn = p.playground_url ? `<a class="btn" href="${htmlEsc(p.playground_url)}" target="_blank" rel="noopener">Try it ↗</a>` : '';
   // "Visit website": the provider's main site, derived from the docs URL by stripping
   // common docs/console/api subdomains so it points at the marketing homepage.
@@ -1282,6 +1287,7 @@ for (const p of providers) {
     `<main id="main"><div class="wrap prose prov-prose">` +
     summary +
     limitsHtml(p) +
+    keysHtml +
     // Q3: the snippet right after the limits (it sat ~4,500px down /p/groq on a phone); speed, data policy and the
     // provider's own description follow it.
     quick +
@@ -1397,7 +1403,7 @@ const privacyAnalytics = GA_ID
 <h3>1. Analytics</h3>
 <ul>
 <li><strong>Purpose:</strong> count visits and see which pages are useful.</li>
-<li><strong>What is collected:</strong> pages viewed, the page you came from, approximate location (country/city, derived from your IP address, which Google Analytics 4 does not log or store), device, browser, screen size and timing of your visit, and how you use the site: filters and sort order in the provider explorer, what you type in its search box (cut to 60 characters, never sent if it looks like an email address or a phone number), which kind of code snippet you copy, which data files you download, which comparisons and collections you open, and which provider pages you follow. Cookies: <code>_ga</code> and <code>_ga_&lt;id&gt;</code>, to tell visits apart.</li>
+<li><strong>What is collected:</strong> pages viewed, the page you came from, approximate location (country/city, derived from your IP address, which Google Analytics 4 does not log or store), device, browser, screen size and timing of your visit, and how you use the site: filters and sort order in the provider explorer, what you type in its search box (cut to 60 characters, never sent if it looks like an email address or a phone number), which kind of code snippet you copy, which data files you download, which comparisons and collections you open, which provider pages you follow, and where on the site you follow a link to this project's GitHub repository. Cookies: <code>_ga</code> and <code>_ga_&lt;id&gt;</code>, to tell visits apart.</li>
 <li><strong>Role of Google:</strong> processor, acting on our instructions under Google's data processing terms.</li>
 </ul>
 <h3>2. Advertising &amp; personalised measurement (Google signals)</h3>
@@ -2605,7 +2611,7 @@ writeFileSync(join(ROOT, `site/${SITEMAP_INDEX}`), sitemapIndexXml(SITE, INDEXNO
 // on every deploy; pinning them caused the post-merge refresh-pin churn this
 // removes. It lives at the repo root (not under data/) so a fingerprint-only
 // commit never touches a path the updates feed watches.
-const isDateRelative = (rel) => rel.startsWith('site/p/') || rel.startsWith('site/badges/');
+const isDateRelative = (rel) => rel === 'site/badge-freshness.json' || rel.startsWith('site/p/') || rel.startsWith('site/badges/');
 // The weekly change feed (changes/, changes.xml, api/v1/changes.json) and the
 // monthly state reports (state/) are mined from the same git history, so they
 // are excluded for the same reason.
