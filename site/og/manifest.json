@@ -2,6 +2,7 @@
   "../og.png": "1d9958e4c80ca1da101455546099bfe2b144d22da705a8c603ccc8ea4e55578b",
   "collections/no-credit-card.png": "1a6562590ef19d1045d06c4055742d38288e9e6dcd71ccde5cee80f1d5a774eb",
   "collections/no-phone.png": "b17ef6d19c7a5b1ee83b907c595526dcb1eb06db8227d650d5dda0a9f4ce8cd9",
+  "collections/anonymous-access.png": "d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35",
   "collections/commercial-use.png": "6f4b6612125fb3a0daecd2799dfd6c9c299424fd920f9b308110a2c1fbd8f443",
   "collections/openai-compatible.png": "624b60c58c9d8bfb6ff1886c2fd605d2adeb6ea4da576068201b6c6958ce93f4",
   "collections/always-free.png": "ef2d127de37b942baad06145e54b0c619a1f22327b2ebbcfbec78f5564afe39d",
@@ -71,7 +72,7 @@
   "p/rev-ai.png": "8d79f3d2678df2429f0830d2ef99e65086be00b9cc09bdf5bb0fe4177ebae158",
   "p/unstructured.png": "d9ec0e7f5df719409ddea6d877b32a969c5e83023f230e0c02340856411a63e3",
   "p/nutrient.png": "81aa1df43f8b34bf9b33febd3b58d7e878236e74b9110ba79d93e8ce9d3ed4d9",
-  "p/photoroom.png": "3443d04a42e872a4cd63ae3bbae5cd38e88e2e6490efeb825126d3d8e67ec788",
+  "p/photoroom.png": "302061005ec0835b573f16696c4f021a89eea8e53d9be44421a868c790bca13b",
   "p/poolside.png": "574e46b726639c12a0a7ae44c12312da31e810f45fd4ce40f7fe7d9270da3cd7",
   "p/upstage.png": "d932a1ddfc178321e9a282d87c7831acd8534dd7113dfc01ecd5a0d328b42bc5",
   "p/veryfi.png": "3fdae6ecb0c483dee677633f3943a325ab117ceb0453abcf935377c706905030",
@@ -82,5 +83,8 @@
   "p/wandb-inference.png": "847158f3ec01ac41d6cce7ef7e02acece511dc9e8e6dab1c03de226ff53a03f1",
   "p/typhoon.png": "ab3a8c55cbe716fe820fb3f9d21cd2a8fa1fb875a517c0cf59e16a5a5b9db9f9",
   "p/regolo.png": "facefb15f66307a5fff00b4158b0c780b0d648d1df3e8acd5da8a55667949672",
-  "p/google-agent-platform-express.png": "ee0298203ec31558226ef4d2aba3f5b6ec8848b39546352611a720bf20fd237f"
+  "p/google-agent-platform-express.png": "ee0298203ec31558226ef4d2aba3f5b6ec8848b39546352611a720bf20fd237f",
+  "compare.png": "3cc84c49fc277341f5e2cfa8a9161277d9cd5c2acb41e17aee61f007d28bbcec",
+  "coding-tools.png": "7121b6a0dd6b8db3dad2b6d26dccc6f8784c7ebd68c50bd98a60e929485435b5",
+  "api.png": "049c5934d20a11bd72face09dda5260cea1e52b62e5bdf105b70bef671ecd34c"
 }

@@ -17,7 +17,7 @@ export const utcToday = (override) => override || new Date().toISOString().slice
 /** Every date a data change writes on a provider: verification, addition, the checked days of its sourced facts, probes. */
 const providerDates = (p) => [
   p.last_verified, p.added, p.last_probed,
-  p.data_policy?.checked, p.free_limits?.checked, p.no_expiry?.checked,
+  p.data_policy?.checked, p.free_limits?.checked, p.no_expiry?.checked, p.anonymous_access?.checked,
 ];
 
 /** The newest date recorded on the providers, or null when none is dated. */

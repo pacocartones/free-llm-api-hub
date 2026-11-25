@@ -62,6 +62,19 @@
    "page_sha256": "8e227f1b41815703fde5e08abac333233fb0564e0c7ada3299be7c515712a6cc"
   },
   {
+   "id": "groq.speed.qwen/qwen3.8-27b.output_tokens_per_second",
+   "slug": "groq",
+   "kind": "speed_quote",
+   "model": "qwen/qwen3.8-27b",
+   "metric": "output_tokens_per_second",
+   "text": "TOKEN SPEED ~450+ tps",
+   "source_url": "https://console.groq.com/docs/model/qwen/qwen3.8-27b",
+   "read_on": "2026-11-24",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "5f829877de34d861b1453cbd561ef3f0911fcf91d371d6df21e84c8f65002443"
+  },
+  {
    "id": "openrouter.sentence",
    "slug": "openrouter",
    "kind": "sentence",
@@ -405,10 +418,10 @@
    "kind": "sentence",
    "text": "Modal will not, except with Customer's prior written consent: (i) train any AI model using Customer Data, or (ii) export Customer Data into, or cause Customer Data to be ingested by, large language models.",
    "source_url": "https://modal.com/legal/terms",
-   "read_on": "2026-10-16",
+   "read_on": "2026-11-24",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
-   "page_sha256": "246080092abebcd77646fc52b62b9e966cda34106c6eacc52ed0ea0532d86b83"
+   "page_sha256": "9516d0ad565591caf3561402c3cf613c5361b4eec7c2067c1489b5dd52842912"
   },
   {
    "id": "modal.note_passage.1",
@@ -416,10 +429,10 @@
    "kind": "note_passage",
    "text": "solely for Customer's internal business",
    "source_url": "https://modal.com/legal/terms",
-   "read_on": "2026-10-16",
+   "read_on": "2026-11-24",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
-   "page_sha256": "246080092abebcd77646fc52b62b9e966cda34106c6eacc52ed0ea0532d86b83"
+   "page_sha256": "9516d0ad565591caf3561402c3cf613c5361b4eec7c2067c1489b5dd52842912"
   },
   {
    "id": "modal.note_passage.2",
@@ -427,10 +440,10 @@
    "kind": "note_passage",
    "text": "No-Fee Use",
    "source_url": "https://modal.com/legal/terms",
-   "read_on": "2026-10-16",
+   "read_on": "2026-11-24",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
-   "page_sha256": "246080092abebcd77646fc52b62b9e966cda34106c6eacc52ed0ea0532d86b83"
+   "page_sha256": "9516d0ad565591caf3561402c3cf613c5361b4eec7c2067c1489b5dd52842912"
   },
   {
    "id": "modal.note_passage.3",
@@ -438,10 +451,22 @@
    "kind": "note_passage",
    "text": "may be subject to certain additional restrictions, limitations and differing terms",
    "source_url": "https://modal.com/legal/terms",
-   "read_on": "2026-10-16",
+   "read_on": "2026-11-24",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
-   "page_sha256": "246080092abebcd77646fc52b62b9e966cda34106c6eacc52ed0ea0532d86b83"
+   "page_sha256": "9516d0ad565591caf3561402c3cf613c5361b4eec7c2067c1489b5dd52842912"
+  },
+  {
+   "id": "modal.card_required.sentence",
+   "slug": "modal",
+   "kind": "field_sentence",
+   "field": "card_required",
+   "text": "Note that you must have a payment method on file in order to use Modal.",
+   "source_url": "https://modal.com/docs/guide/billing",
+   "read_on": "2026-11-24",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "34707fa98d577e107391753a9200238859eeb0aed1aa7c16150ae2fc8b662fc1"
   },
   {
    "id": "sambanova.commercial_ok.sentence",
@@ -456,6 +481,19 @@
    "page_sha256": "474add61f6efb00213cc7b4cc044bad7214e624cc0665f1a39b2fabc9e48a5a5"
   },
   {
+   "id": "sambanova.speed.gpt-oss-120b.output_tokens_per_second",
+   "slug": "sambanova",
+   "kind": "speed_quote",
+   "model": "gpt-oss-120b",
+   "metric": "output_tokens_per_second",
+   "text": "SambaCloud is running the model at the full 131K context length and at speeds over 700 tokens/seconds/user powered by the SambaNova RDU.",
+   "source_url": "https://sambanova.ai/blog/start-building-with-lightning-fast-gpt-oss-120b-on-sambacloud",
+   "read_on": "2026-11-24",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "7c937debf47c0be8766266fba294564792ebcb44bb7b8f1926ac00d3f49d8ec2"
+  },
+  {
    "id": "scaleway.sentence",
    "slug": "scaleway",
    "kind": "sentence",
@@ -465,6 +503,32 @@
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "8da85e4dccfaaaea63f791b192f28d209cfb6d5704522d6f4ebe19ffc12aad27"
+  },
+  {
+   "id": "scaleway.speed.gpt-oss-120b.output_tokens_per_second",
+   "slug": "scaleway",
+   "kind": "speed_quote",
+   "model": "gpt-oss-120b",
+   "metric": "output_tokens_per_second",
+   "text": "Output token generation speed should be above 100 tokens per second for recent small to medium-sized models (such as gpt-oss-120b or mistral-small-3.2-24b-instruct-2506 )",
+   "source_url": "https://www.scaleway.com/en/docs/generative-apis/faq/",
+   "read_on": "2026-11-24",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "6ec4c179faa295b87aff9d731b08da3d06584b10db637af89e55140390d547e5"
+  },
+  {
+   "id": "scaleway.speed.mistral-small-3.2-24b-instruct-2506.output_tokens_per_second",
+   "slug": "scaleway",
+   "kind": "speed_quote",
+   "model": "mistral-small-3.2-24b-instruct-2506",
+   "metric": "output_tokens_per_second",
+   "text": "Output token generation speed should be above 100 tokens per second for recent small to medium-sized models (such as gpt-oss-120b or mistral-small-3.2-24b-instruct-2506 )",
+   "source_url": "https://www.scaleway.com/en/docs/generative-apis/faq/",
+   "read_on": "2026-11-24",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "6ec4c179faa295b87aff9d731b08da3d06584b10db637af89e55140390d547e5"
   },
   {
    "id": "nvidia-nim.sentence",
@@ -626,7 +690,7 @@
    "kind": "sentence",
    "text": "M87 Labs will not use Customer Content or Outputs to Train any model or adapter that is made generally available by M87 Labs (including the base Moondream models), or to Train any model or adapter for the benefit of any third party, except where you explicitly opt in under a separate written agreement.",
    "source_url": "https://moondream.ai/terms",
-   "read_on": "2026-10-16",
+   "read_on": "2026-11-24",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "a7c151d622c571676ef6225174ff69e6e77e071a79c55c9c88dfec0f76f1976a"
@@ -637,7 +701,7 @@
    "kind": "note_passage",
    "text": "your internal business or personal purposes",
    "source_url": "https://moondream.ai/terms",
-   "read_on": "2026-10-16",
+   "read_on": "2026-11-24",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "a7c151d622c571676ef6225174ff69e6e77e071a79c55c9c88dfec0f76f1976a"
@@ -648,10 +712,22 @@
    "kind": "note_passage",
    "text": "commercially exploit the Service or any portion of the Service",
    "source_url": "https://moondream.ai/terms",
-   "read_on": "2026-10-16",
+   "read_on": "2026-11-24",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "a7c151d622c571676ef6225174ff69e6e77e071a79c55c9c88dfec0f76f1976a"
+  },
+  {
+   "id": "moondream.card_required.sentence",
+   "slug": "moondream",
+   "kind": "field_sentence",
+   "field": "card_required",
+   "text": "No credit card required.",
+   "source_url": "https://moondream.ai/",
+   "read_on": "2026-11-24",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "f881da5f601fdbf94595fcb3b37cdb89ebe5c96f5abe24d8b8029dcd90ee40b8"
   },
   {
    "id": "speechmatics.sentence",
@@ -786,6 +862,18 @@
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "76a536b858ef4430c67415493f49d2280f1e902c009bdb176d5356cfb0bd0984"
+  },
+  {
+   "id": "photoroom.commercial_ok.sentence",
+   "slug": "photoroom",
+   "kind": "field_sentence",
+   "field": "commercial_ok",
+   "text": "We grant Free Accounts a non-exclusive, non-transferable license to access and use the Services, in accordance with the Terms, for your own personal, non commercial purposes.",
+   "source_url": "https://www.photoroom.com/legal/terms-and-conditions",
+   "read_on": "2026-11-24",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "435f0c9bc0bae695f6f54a36cf6b2006210267288d3e8bc0c9e16e1db929201a"
   },
   {
    "id": "poolside.sentence",

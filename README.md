@@ -33,7 +33,7 @@ Each pick links to its full verified profile on the live site.
 | I want… | Start with | Why |
 |---|---|---|
 | **The smartest model, free** | [Google Gemini](https://freellmapihub.com/p/google-gemini) | The only genuinely frontier-class model with a real free tier here — not just open weights |
-| **Published speed figures** | [Cerebras](https://freellmapihub.com/p/cerebras) or [Groq](https://freellmapihub.com/p/groq) | Each provider's own figure for gpt-oss-120b: ~3,000 tok/s (Cerebras), ~500 tok/s (Groq). Provider claims, not our measurement; neither says it applies to the free tier |
+| **Published speed figures** | [Cerebras](https://freellmapihub.com/p/cerebras) or [SambaNova Cloud](https://freellmapihub.com/p/sambanova) | Each provider's own figure for gpt-oss-120b: ~3,000 tok/s (Cerebras), ≥700 tok/s (SambaNova Cloud). Provider claims, not our measurement; neither says it applies to the free tier |
 | **The most free volume/day** | [Cloudflare Workers AI](https://freellmapihub.com/p/cloudflare-workers-ai) (10k Neurons) or [OpenRouter](https://freellmapihub.com/p/openrouter) (50 req/day, 1,000 once you have bought $10 of credit) | Highest ceilings for a side project with real traffic |
 | **No card *and* no phone** | [Z.ai (GLM)](https://freellmapihub.com/p/zai-glm) | SiliconFlow and Tencent Hunyuan gate signup behind phone verification |
 | **No card; phone not confirmed** | [Google Gemini](https://freellmapihub.com/p/google-gemini) | Google does not say whether signup needs a phone; its API key page mentions only project verification |
@@ -91,6 +91,7 @@ Focused, always-current collections — each is generated from the dataset and h
 <!-- AUTOGEN:collections:start -->
 - **[Free LLM APIs with no credit card](collections/no-credit-card.md)** (50) — start without a payment method · [live page ↗](https://freellmapihub.com/collections/no-credit-card)
 - **[Free LLM APIs with no phone verification](collections/no-phone.md)** (16) — no SMS/phone verification · [live page ↗](https://freellmapihub.com/collections/no-phone)
+- **[Free AI APIs with no account needed](collections/anonymous-access.md)** (2) — call the API with no account at all · [live page ↗](https://freellmapihub.com/collections/anonymous-access)
 - **[Free LLM APIs for commercial use](collections/commercial-use.md)** (21) — safe to ship, not eval-only · [live page ↗](https://freellmapihub.com/collections/commercial-use)
 - **[OpenAI-compatible free LLM APIs](collections/openai-compatible.md)** (30) — drop-in OpenAI SDK swap · [live page ↗](https://freellmapihub.com/collections/openai-compatible)
 - **[Permanently free LLM APIs](collections/always-free.md)** (5) — $0 models, no trial clock · [live page ↗](https://freellmapihub.com/collections/always-free)

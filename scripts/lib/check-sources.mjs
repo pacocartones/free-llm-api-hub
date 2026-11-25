@@ -29,6 +29,7 @@ export function collectSources(providers, sourcesMarkdown) {
       ['free_limits.source', p.free_limits?.source],
       ['data_policy.source', p.data_policy?.source],
       ['no_expiry.source', p.no_expiry?.source],
+      ['anonymous_access.source', p.anonymous_access?.source],
       ['model_tier_source.url', p.model_tier_source?.url],
     ]) add(url, `${source}.${field}`);
   }

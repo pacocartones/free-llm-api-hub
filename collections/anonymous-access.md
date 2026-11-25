@@ -1,0 +1,24 @@
+<!-- Generated from data/providers.json by scripts/build.mjs — do not edit by hand. -->
+
+# Free AI APIs you can call with no account
+
+APIs whose own pages say they work with no account at all: an anonymous endpoint or a shared public key. Each row quotes the provider. A live slice of a verified dataset.
+
+[← All collections](README.md) · [Interactive explorer ↗](https://freellmapihub.com/) · [Main list](../README.md)
+
+Providers whose **own page says the API can be called with no account** (`anonymous_access`: the page, the day it was read and the sentence). Expect the lowest limits and queue priority. A provider whose pages do not say it is not listed, which never means it needs an account.
+
+**2 of 64 tracked providers** match.
+
+Each row ends with the provider’s own sentence about anonymous access and any condition its pages attach to it.
+
+| Provider | Type | What's free | The catch | Verified |
+|---|---|---|---|---|
+| **[OVHcloud AI Endpoints](https://www.ovhcloud.com/en/public-cloud/ai-endpoints/catalog/)**<br><sub>💳 no card · 📵 no phone · 🔌 OpenAI-compat</sub><br>_“Anonymous: 2 requests per minute, per IP and per model.” (read 2026-11-24) — The page gives it as a rate limit; the same page also says users “need to provide an API access key in each request”._ | Ongoing | Seven models are currently listed as Free: two Qwen3Guard moderation models, Stable Diffusion XL and four NVIDIA Riva TTS voices; access is available anonymously or with an API key tied to a Public Cloud project | Anonymous access uses no account, API key or signup phone; the 2 requests/min limit is per IP and model. Authenticated API keys require a Public Cloud project with a valid payment method. Commercial permission for the hosted free-model tier is not confirmed; individual model licences are separate. Sources: https://docs.ovhcloud.com/en/guides/public-cloud/ai-machine-learning/ai-endpoints-capabilities and https://docs.ovhcloud.com/en/guides/public-cloud/ai-machine-learning/ai-endpoints-getting-started (read 2026-11-14). | ✅ 2026-11-14 |
+| **[AI Horde](https://aihorde.net/)**<br><sub>💳 no card · 📵 no phone · 🏢 commercial OK (conditional)</sub><br>_“Anyone can use the AI Horde for free, even anonymously.” (read 2026-11-24) — The README’s Anonymous Usage section: use the API key 0000000000, no registration needed, lowest priority in the generation queues, and anonymous use may be restricted when the Horde is under high load._ | Ongoing | Free crowdsourced text & image generation; anonymous API key '0000000000' (no registration), or register to earn kudos for priority | Community-powered volunteer network — model availability and speed vary with worker supply, so it is not a fixed-SLA service. No card, no phone. Kudos never expire and cannot be sold. Commercial use is conditional: each model carries its own licence (aihorde.net UI displays 'Commercial use: allowed' or 'Pick something else if you plan to sell what you make or use it in a business'), and the official AI Horde FAQ (https://aihorde.net/faq/) says paid services built on the API must give back to the Horde at least as much as they take. | ✅ 2026-11-14 |
+
+---
+
+Other collections: [Free LLM APIs with no credit card](no-credit-card.md) · [Free LLM APIs with no phone verification](no-phone.md) · [Free AI APIs with no account needed](anonymous-access.md) · [Free LLM APIs for commercial use](commercial-use.md) · [OpenAI-compatible free LLM APIs](openai-compatible.md) · [Permanently free LLM APIs](always-free.md) · [Free multimodal LLM APIs](multimodal.md) · [Free LLM APIs that say they do not train on your prompts](no-training.md) · [Free LLM APIs whose free tier renews](renewing-free-tier.md) · [Free LLM APIs with a free signup credit](free-signup-credit.md)
+
+_Generated from [providers.json](../data/providers.json). Terms change without notice — always confirm against each provider's own docs._

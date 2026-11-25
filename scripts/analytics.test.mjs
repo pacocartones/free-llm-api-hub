@@ -50,7 +50,7 @@ const ALL_COOKIES = [['_ga', '1'], ['_ga_ABC', '2'], ['_gcl_au', '3'], ['_gac_x'
 function fakeDom({ stored = null, storageThrows = false } = {}) {
   const head = [], cookies = new Map(ALL_COOKIES);
   const store = new Map(stored ? [[KEY, stored]] : []);
-  let bannerClick = null, focused = null, inserted = null;
+  let bannerClick = null, bannerKey = null, focused = null, inserted = null;
   const node = (attrs) => ({
     attrs: { ...attrs }, hidden: false,
     setAttribute(k, v) { this.attrs[k] = String(v); }, getAttribute(k) { return this.attrs[k] ?? null; },
@@ -78,7 +78,7 @@ function fakeDom({ stored = null, storageThrows = false } = {}) {
       el.querySelector = (sel) => (sel === '[data-view="main"] [data-action]' ? main.reject : null);
       const inside = new Set([sw.analytics, sw.ads, ...Object.values(main), ...Object.values(custom)]);
       el.contains = (n) => inside.has(n);
-      el.addEventListener = (_t, fn) => { bannerClick = fn; };
+      el.addEventListener = (t, fn) => { if (t === 'keydown') bannerKey = fn; else bannerClick = fn; };
     }
     return el;
   };
@@ -115,6 +115,7 @@ function fakeDom({ stored = null, storageThrows = false } = {}) {
     press: (view, a) => bannerClick({ target: b()[view][a] }),
     toggle: (k) => bannerClick({ target: b().sw[k] }),
     openSettings: () => openerClick({ currentTarget: opener }),
+    key: (key) => bannerKey({ key, preventDefault() {} }),
     focused: () => focused,
   };
 }
@@ -220,6 +221,21 @@ describe('consent banner behaviour', () => {
     assert.equal(d.focused(), d.banner().sw.analytics);
     d.press('custom', 'save');
     assert.equal(d.focused(), d.opener);
+  });
+
+  test('Escape closes the reopened settings without saving and returns focus; a first-visit banner stays', () => {
+    const d = fakeDom({ stored: saved(true, true) });
+    const before = d.store.get(KEY);
+    d.openSettings();
+    d.toggle('ads');
+    d.key('Escape');
+    assert.equal(d.banner().hidden, true);
+    assert.equal(d.focused(), d.opener);
+    assert.equal(d.store.get(KEY), before, 'nothing saved');
+    const first = fakeDom();
+    first.key('Escape');
+    assert.equal(first.banner().hidden, false, 'no choice yet: the banner stays');
+    assert.ok(!first.store.has(KEY));
   });
 
   test('withdrawing advertising only: consent and signals updated to denied, ads cookies deleted, analytics kept', () => {

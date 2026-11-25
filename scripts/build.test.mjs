@@ -1674,7 +1674,9 @@ describe('read-only generated output', () => {
     let links = 0;
     const pages = [join(ROOT, 'site/compare/index.html'), ...readdirSync(join(ROOT, 'site/p')).filter((f) => f.endsWith('.html')).map((f) => join(ROOT, 'site/p', f))];
     for (const file of pages) {
-      for (const path of suggested(readFileSync(file, 'utf8'))) {
+      // /compare/ also lists every other published pair under "More comparisons", so each page has a link; only what
+      // comes before that heading is a suggestion.
+      for (const path of suggested(readFileSync(file, 'utf8').split('<h2>More comparisons</h2>')[0])) {
         const ok = [...path.matchAll(/-vs-/g)].some((m) => {
           const pa = bySlug.get(path.slice(0, m.index)), pb = bySlug.get(path.slice(m.index + 4));
           return pa && pb && sameComparisonCategory(pa, pb);
@@ -1685,8 +1687,10 @@ describe('read-only generated output', () => {
     }
     assert.ok(links > 0, 'some same-category comparisons are still suggested');
     // the pages of the pairs that are no longer suggested are still published
+    const more = readFileSync(join(ROOT, 'site/compare/index.html'), 'utf8').split('<h2>More comparisons</h2>')[1] || '';
     for (const mixed of ['ocr-space-vs-groq', 'speechify-vs-groq']) {
       assert.ok(existsSync(join(ROOT, `site/compare/${mixed}/index.html`)), `${mixed} page stays`);
+      assert.ok(suggested(more).includes(mixed), `${mixed} is listed under More comparisons`);
     }
   });
 

@@ -9,7 +9,7 @@ import { dirname, join } from 'node:path';
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 // Collection/guide filter lists and the data fingerprints live in lib/og.mjs,
 // shared with the CI check (scripts/check-og.mjs) so both always agree.
-import { COLLS, GUIDES, buildOgManifest, renderHomeOg } from './lib/og.mjs';
+import { COLLS, GUIDES, SECTION_OGS, buildOgManifest, renderHomeOg } from './lib/og.mjs';
 const { Resvg } = await import('@resvg/resvg-js');
 const render = (svg, out) => {
   const png = new Resvg(Buffer.isBuffer(svg) ? svg : Buffer.from(svg), { fitTo: { mode: 'width', value: 1200 } }).render().asPng();
@@ -77,6 +77,9 @@ const modelCount = providers.reduce((n, p) => n + ((p.models_free || []).length)
 const modelProviders = providers.filter((p) => p.models_free && p.models_free.length).length;
 render(tagSvg('INDEX', 'Free model index', `${modelCount} free models across ${modelProviders} providers`), join(ROOT, 'site/og/models.png'));
 console.log('model-index OG: 1 rendered.');
+
+for (const o of SECTION_OGS) render(tagSvg(o.label, o.title, o.subtitle), join(ROOT, `site/og/${o.file}`));
+console.log(`section OG: ${SECTION_OGS.length} rendered.`);
 
 // per-provider OG
 mkdirSync(join(ROOT, 'site/og/p'), { recursive: true });
