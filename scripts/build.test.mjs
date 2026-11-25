@@ -2032,7 +2032,8 @@ test('active providers retain models_url from their official catalogues', () => 
 test('validate: the dates of the dataset are UTC days and none is in the future', () => {
   const data = JSON.parse(readFileSync(DATA, 'utf8'));
   const withToday = (today, file = DATA) => { try { execFileSync(process.execPath, ['scripts/validate.mjs', file], { cwd: ROOT, stdio: 'pipe', env: { ...process.env, VALIDATE_TODAY: today } }); return ''; } catch (e) { return `${e.stdout}${e.stderr}`; } };
-  assert.equal(withToday(data.generated), '', 'generated is today: valid');
+  // `generated` is the release stamp, so data read after the last release carries later days: check against the real UTC day.
+  assert.equal(withToday(new Date().toISOString().slice(0, 10)), '', 'the dataset is valid on the UTC day of the run');
   assert.equal(withToday('2999-01-01'), '', 'generated in the past: valid');
   const day = new Date(Date.parse(`${data.generated}T00:00:00Z`) - 86400000).toISOString().slice(0, 10);
   assert.match(withToday(day), new RegExp(`generated \\(${data.generated}\\) is after today in UTC \\(${day}\\); write the dates of the dataset in UTC`), 'generated the day after "today" fails and says how to write it');
@@ -2990,7 +2991,7 @@ test('data_policy lot 4: the 13 providers that say they do not train were read f
   for (const p of data.providers.filter((q) => q.data_policy && q.data_policy.trains_on_prompts !== false)) {
     // rows that say it may train were read for the plan later (lots 2, 3, 5 and the correction of the absence claims): true where the
     // clause names the free users or free usage (AssemblyAI, Voyage AI, Cohere), false where it does not
-    const READ = { assemblyai: true, 'voyage-ai': true, elevenlabs: false, cartesia: false, 'retell-ai': false, deepgram: false, 'arli-ai': false, 'sarvam-ai': false, poolside: false, typhoon: false, openrouter: false, nlpcloud: false, 'nvidia-nim': false, veryfi: false, voicegain: false, cohere: true };
+    const READ = { assemblyai: true, 'voyage-ai': true, elevenlabs: false, cartesia: false, 'retell-ai': false, deepgram: false, 'arli-ai': false, 'sarvam-ai': false, poolside: false, typhoon: false, openrouter: false, nlpcloud: false, 'nvidia-nim': false, veryfi: false, voicegain: false, cohere: true, inception: false };
     if (p.slug in READ) assert.equal(p.data_policy.plan_named, READ[p.slug], `${p.slug}: plan_named as read`);
     else assert.equal(p.data_policy.plan_named, undefined, `${p.slug}: not read for the plan yet, so no value is written`);
   }

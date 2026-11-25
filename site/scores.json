@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-24",
+  "generated": "2026-11-25",
   "scores": {
     "groq": {
       "total": 62.4,
@@ -193,6 +193,12 @@
       "of": 6,
       "rank": null
     },
+    "inception": {
+      "total": 33.9,
+      "confirmed": 2,
+      "of": 6,
+      "rank": null
+    },
     "moondream": {
       "total": 33.9,
       "confirmed": 2,
@@ -228,6 +234,12 @@
       "confirmed": 2,
       "of": 6,
       "rank": null
+    },
+    "aion-labs": {
+      "total": 32.4,
+      "confirmed": 4,
+      "of": 6,
+      "rank": 8
     },
     "siliconflow": {
       "total": 31.3,
