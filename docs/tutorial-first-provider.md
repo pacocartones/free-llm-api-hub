@@ -204,6 +204,8 @@ On merge, the entry goes live: the explorer and provider page appear, the badge 
 | Committed only `data/providers.json` | "Dataset integrity" check fails | Regenerate with `npm run build` and commit the derived files |
 | Marketing language in `free_tier`/`rate_limits` | Reviewer sends it back | Use the exact published numbers, or say "not published" |
 | Renaming or reusing a `slug` | Breaks external references | Slugs are permanent |
+| PR falls behind `main` | Generated files conflict with newer commits | Run `npm run sync-main` or apply `regen-preview-patch` — see [Updating your branch from main](../CONTRIBUTING.md#updating-your-branch-from-main) |
+| Checks show "Waiting for approval" | First-time fork PRs pause before workflows run | Nothing is wrong; wait for a maintainer to approve the run — see [Your first PR from a fork](../CONTRIBUTING.md#your-first-pr-from-a-fork-the-checks-may-wait) |
 
 ## Recap
 
