@@ -1726,7 +1726,7 @@ test('header menu: only Guides & Collections, The Best (highlighted) and Submit;
 test('footer columns: where each link lives, and no GitHub star entry in Project', () => {
   run(['scripts/build.mjs']);
   const expected = {
-    Explore: ['models/', 'guides-and-collections/', 'programs/startups', 'programs/research', 'free-gpu/', 'coding-tools/'],
+    Explore: ['models/', 'limits/', 'alternatives/', 'guides-and-collections/', 'programs/startups', 'programs/research', 'free-gpu/', 'coding-tools/'],
     Data: ['providers.json', 'api/', 'llms.txt', 'data-policy/', 'coverage/', 'quality/'],
     Project: ['updates', 'changes/', 'submit/', 'methodology/', 'contributing/', 'agreements/'],
   };

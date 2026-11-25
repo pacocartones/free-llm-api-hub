@@ -119,6 +119,13 @@ const modelSample = groupModels(providers).filter((g) => isIndexable(g) && exist
   .sort((a, b) => b.entries.length - a.entries.length || (a.key < b.key ? -1 : 1))[0];
 if (!modelSample) { console.error('No generated model page under site/models/: run `node scripts/build.mjs` first.'); process.exit(1); }
 pages.push(`/models/${modelSample.key}/`);
+// One limits page and one alternatives page (lib/longtail-pages.mjs), the first of each the build wrote, so a dataset change that
+// removes one cannot turn the gate into a 404.
+for (const dir of ['limits', 'alternatives']) {
+  const first = existsSync(join(SITE, dir)) && readdirSync(join(SITE, dir), { withFileTypes: true }).filter((d) => d.isDirectory()).map((d) => d.name).sort()[0];
+  if (!first) { console.error(`No generated page under site/${dir}/: run \`node scripts/build.mjs\` first.`); process.exit(1); }
+  pages.push(`/${dir}/${first}/`);
+}
 const lighthouse = join(ROOT, 'tools/lighthouse/node_modules/.bin/lighthouse');
 const RUNS = mode.runs;
 const failures = [];

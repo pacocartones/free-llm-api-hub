@@ -47,6 +47,8 @@ export const SECTION_OGS = [
   { file: 'compare.png', label: 'COMPARE', title: 'Free LLM APIs side by side', subtitle: 'limits · card · phone · commercial use' },
   { file: 'coding-tools.png', label: 'CODING TOOLS', title: 'Free AI coding tools', subtitle: "each value with the tool's own sentence" },
   { file: 'api.png', label: 'API', title: 'Static JSON API', subtitle: 'versioned · CORS-open · no key' },
+  { file: 'limits.png', label: 'FREE TIER LIMITS', title: 'Free tier limits, with sources', subtitle: 'requests · tokens · card · phone · data policy' },
+  { file: 'alternatives.png', label: 'ALTERNATIVES', title: 'Free alternatives, from the data', subtitle: 'same modality · card · phone · limits' },
 ];
 
 // The manifest every data-dependent OG must match: file name -> fingerprint of
