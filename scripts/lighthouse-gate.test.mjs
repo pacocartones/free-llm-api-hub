@@ -167,7 +167,10 @@ test('the workflow keeps the required check on pull requests and moves performan
   assert.match(pr, /lighthouse-gate\.mjs --mode=accessibility-seo/);
   // Performance never runs on a pull request.
   const perf = job('performance');
-  assert.match(perf, /if: \$\{\{ github\.event_name != 'pull_request' \}\}/);
+  assert.match(perf, /if: \$\{\{ github\.event_name != 'pull_request' && /);
+  // Nor on the regeneration bot's pushes (docs/regeneration-bot.md).
+  assert.match(perf, /!\(github\.event_name == 'push' && github\.actor == 'free-llm-api-hub-regen\[bot\]'\)/);
+  assert.doesNotMatch(pr, /regen\[bot\]/, 'the required check is never skipped');
   assert.match(perf, /lighthouse-gate\.mjs --mode=performance/);
   // Only the report job may write, only issues, only on main, and it runs no repository code.
   assert.match(wf, /^permissions:\n {2}contents: read$/m);
