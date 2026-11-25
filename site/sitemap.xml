@@ -5,16 +5,16 @@
   <url><loc>https://freellmapihub.com/models/bge-reranker-v2-m3/</loc><lastmod>2026-11-25</lastmod></url>
   <url><loc>https://freellmapihub.com/models/deepseek-v4-flash/</loc><lastmod>2026-11-25</lastmod></url>
   <url><loc>https://freellmapihub.com/models/deepseek-v4-flash-0731/</loc><lastmod>2026-11-20</lastmod></url>
-  <url><loc>https://freellmapihub.com/models/deepseek-v4.1-flash/</loc><lastmod>2026-11-24</lastmod></url>
+  <url><loc>https://freellmapihub.com/models/deepseek-v4.1-flash/</loc><lastmod>2026-11-25</lastmod></url>
   <url><loc>https://freellmapihub.com/models/gemini-2.5-flash/</loc><lastmod>2026-11-24</lastmod></url>
   <url><loc>https://freellmapihub.com/models/gemini-2.5-flash-lite/</loc><lastmod>2026-11-24</lastmod></url>
   <url><loc>https://freellmapihub.com/models/gemini-2.5-pro/</loc><lastmod>2026-11-24</lastmod></url>
   <url><loc>https://freellmapihub.com/models/gemma-4-26b-a4b-it/</loc><lastmod>2026-11-24</lastmod></url>
   <url><loc>https://freellmapihub.com/models/gemma-4-31b-it/</loc><lastmod>2026-11-24</lastmod></url>
   <url><loc>https://freellmapihub.com/models/glm-5.2/</loc><lastmod>2026-11-20</lastmod></url>
-  <url><loc>https://freellmapihub.com/models/gpt-oss-120b/</loc><lastmod>2026-11-24</lastmod></url>
+  <url><loc>https://freellmapihub.com/models/gpt-oss-120b/</loc><lastmod>2026-11-25</lastmod></url>
   <url><loc>https://freellmapihub.com/models/gpt-oss-20b/</loc><lastmod>2026-11-24</lastmod></url>
-  <url><loc>https://freellmapihub.com/models/kimi-k3/</loc><lastmod>2026-11-19</lastmod></url>
+  <url><loc>https://freellmapihub.com/models/kimi-k3/</loc><lastmod>2026-11-25</lastmod></url>
   <url><loc>https://freellmapihub.com/models/l3-8b-stheno-v3.2/</loc><lastmod>2026-11-25</lastmod></url>
   <url><loc>https://freellmapihub.com/models/llama-3.3-70b-instruct/</loc><lastmod>2026-11-20</lastmod></url>
   <url><loc>https://freellmapihub.com/models/minimax-m3/</loc><lastmod>2026-11-20</lastmod></url>
@@ -62,11 +62,11 @@
   <url><loc>https://freellmapihub.com/guides/free-vision-apis</loc><lastmod>2026-11-25</lastmod></url>
   <url><loc>https://freellmapihub.com/updates</loc><lastmod>2026-11-25</lastmod></url>
   <url><loc>https://freellmapihub.com/collections/no-credit-card</loc><lastmod>2026-11-25</lastmod></url>
-  <url><loc>https://freellmapihub.com/collections/no-phone</loc><lastmod>2026-11-20</lastmod></url>
-  <url><loc>https://freellmapihub.com/collections/anonymous-access</loc><lastmod>2026-11-20</lastmod></url>
+  <url><loc>https://freellmapihub.com/collections/no-phone</loc><lastmod>2026-11-25</lastmod></url>
+  <url><loc>https://freellmapihub.com/collections/anonymous-access</loc><lastmod>2026-11-25</lastmod></url>
   <url><loc>https://freellmapihub.com/collections/commercial-use</loc><lastmod>2026-11-25</lastmod></url>
   <url><loc>https://freellmapihub.com/collections/openai-compatible</loc><lastmod>2026-11-25</lastmod></url>
-  <url><loc>https://freellmapihub.com/collections/always-free</loc><lastmod>2026-11-19</lastmod></url>
+  <url><loc>https://freellmapihub.com/collections/always-free</loc><lastmod>2026-11-25</lastmod></url>
   <url><loc>https://freellmapihub.com/collections/multimodal</loc><lastmod>2026-11-25</lastmod></url>
   <url><loc>https://freellmapihub.com/collections/no-training</loc><lastmod>2026-11-25</lastmod></url>
   <url><loc>https://freellmapihub.com/collections/renewing-free-tier</loc><lastmod>2026-11-25</lastmod></url>
@@ -78,12 +78,12 @@
   <url><loc>https://freellmapihub.com/p/cohere</loc><lastmod>2026-11-24</lastmod></url>
   <url><loc>https://freellmapihub.com/p/cerebras</loc><lastmod>2026-11-24</lastmod></url>
   <url><loc>https://freellmapihub.com/p/huggingface</loc><lastmod>2026-11-19</lastmod></url>
-  <url><loc>https://freellmapihub.com/p/siliconflow</loc><lastmod>2026-11-14</lastmod></url>
+  <url><loc>https://freellmapihub.com/p/siliconflow</loc><lastmod>2026-11-25</lastmod></url>
   <url><loc>https://freellmapihub.com/p/zai-glm</loc><lastmod>2026-11-19</lastmod></url>
   <url><loc>https://freellmapihub.com/p/ibm-watsonx</loc><lastmod>2026-11-19</lastmod></url>
   <url><loc>https://freellmapihub.com/p/ovhcloud-ai-endpoints</loc><lastmod>2026-11-14</lastmod></url>
   <url><loc>https://freellmapihub.com/p/fireworks-ai</loc><lastmod>2026-11-19</lastmod></url>
-  <url><loc>https://freellmapihub.com/p/baseten</loc><lastmod>2026-11-19</lastmod></url>
+  <url><loc>https://freellmapihub.com/p/baseten</loc><lastmod>2026-11-25</lastmod></url>
   <url><loc>https://freellmapihub.com/p/novita</loc><lastmod>2026-11-20</lastmod></url>
   <url><loc>https://freellmapihub.com/p/ai21</loc><lastmod>2026-11-20</lastmod></url>
   <url><loc>https://freellmapihub.com/p/nlpcloud</loc><lastmod>2026-11-20</lastmod></url>
@@ -97,7 +97,7 @@
   <url><loc>https://freellmapihub.com/p/deepgram</loc><lastmod>2026-11-20</lastmod></url>
   <url><loc>https://freellmapihub.com/p/assemblyai</loc><lastmod>2026-11-20</lastmod></url>
   <url><loc>https://freellmapihub.com/p/mixedbread</loc><lastmod>2026-11-19</lastmod></url>
-  <url><loc>https://freellmapihub.com/p/ai-horde</loc><lastmod>2026-11-14</lastmod></url>
+  <url><loc>https://freellmapihub.com/p/ai-horde</loc><lastmod>2026-11-25</lastmod></url>
   <url><loc>https://freellmapihub.com/p/modelscope</loc><lastmod>2026-11-20</lastmod></url>
   <url><loc>https://freellmapihub.com/p/pollinations</loc><lastmod>2026-11-20</lastmod></url>
   <url><loc>https://freellmapihub.com/p/runware</loc><lastmod>2026-11-20</lastmod></url>
@@ -119,7 +119,7 @@
   <url><loc>https://freellmapihub.com/p/contextual-ai</loc><lastmod>2026-11-20</lastmod></url>
   <url><loc>https://freellmapihub.com/p/cartesia</loc><lastmod>2026-11-19</lastmod></url>
   <url><loc>https://freellmapihub.com/p/fish-audio</loc><lastmod>2026-11-20</lastmod></url>
-  <url><loc>https://freellmapihub.com/p/camb-ai</loc><lastmod>2026-11-19</lastmod></url>
+  <url><loc>https://freellmapihub.com/p/camb-ai</loc><lastmod>2026-11-25</lastmod></url>
   <url><loc>https://freellmapihub.com/p/rev-ai</loc><lastmod>2026-11-19</lastmod></url>
   <url><loc>https://freellmapihub.com/p/unstructured</loc><lastmod>2026-11-20</lastmod></url>
   <url><loc>https://freellmapihub.com/p/nutrient</loc><lastmod>2026-11-19</lastmod></url>
@@ -146,12 +146,12 @@
   <url><loc>https://freellmapihub.com/compare/typhoon-vs-google-gemini/</loc><lastmod>2026-11-19</lastmod></url>
   <url><loc>https://freellmapihub.com/compare/typhoon-vs-openrouter/</loc><lastmod>2026-11-24</lastmod></url>
   <url><loc>https://freellmapihub.com/compare/cloudflare-workers-ai-vs-google-gemini/</loc><lastmod>2026-11-24</lastmod></url>
-  <url><loc>https://freellmapihub.com/compare/typhoon-vs-ai-horde/</loc><lastmod>2026-11-19</lastmod></url>
+  <url><loc>https://freellmapihub.com/compare/typhoon-vs-ai-horde/</loc><lastmod>2026-11-25</lastmod></url>
   <url><loc>https://freellmapihub.com/compare/cloudflare-workers-ai-vs-openrouter/</loc><lastmod>2026-11-24</lastmod></url>
-  <url><loc>https://freellmapihub.com/compare/cloudflare-workers-ai-vs-ai-horde/</loc><lastmod>2026-11-24</lastmod></url>
+  <url><loc>https://freellmapihub.com/compare/cloudflare-workers-ai-vs-ai-horde/</loc><lastmod>2026-11-25</lastmod></url>
   <url><loc>https://freellmapihub.com/compare/google-gemini-vs-openrouter/</loc><lastmod>2026-11-24</lastmod></url>
-  <url><loc>https://freellmapihub.com/compare/google-gemini-vs-ai-horde/</loc><lastmod>2026-11-14</lastmod></url>
-  <url><loc>https://freellmapihub.com/compare/openrouter-vs-ai-horde/</loc><lastmod>2026-11-24</lastmod></url>
+  <url><loc>https://freellmapihub.com/compare/google-gemini-vs-ai-horde/</loc><lastmod>2026-11-25</lastmod></url>
+  <url><loc>https://freellmapihub.com/compare/openrouter-vs-ai-horde/</loc><lastmod>2026-11-25</lastmod></url>
   <url><loc>https://freellmapihub.com/compare/llamaparse-vs-ocr-space/</loc><lastmod>2026-11-19</lastmod></url>
   <url><loc>https://freellmapihub.com/compare/llamaparse-vs-jina-ai/</loc><lastmod>2026-11-20</lastmod></url>
   <url><loc>https://freellmapihub.com/compare/ocr-space-vs-jina-ai/</loc><lastmod>2026-11-20</lastmod></url>

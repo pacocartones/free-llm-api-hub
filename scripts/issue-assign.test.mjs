@@ -4,8 +4,9 @@ import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { makeTmpDir } from './lib/tmp.mjs';
+import { shellSkip } from './lib/test-tools.mjs';
 
-const skip = process.platform === 'win32' ? 'workflow shell, checked on Linux' : false;
+const skip = shellSkip('workflow shell', ['jq']);
 const workflow = readFileSync(new URL('../.github/workflows/issue-assign.yml', import.meta.url), 'utf8');
 const contributing = readFileSync(new URL('../CONTRIBUTING.md', import.meta.url), 'utf8');
 const script = workflow.split('        run: |\n')[1].split('\n').map((line) => line.replace(/^          /, '')).join('\n');
