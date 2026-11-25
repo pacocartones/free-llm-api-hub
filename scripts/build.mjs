@@ -8,7 +8,7 @@
 // Zero dependencies. Run with: node scripts/build.mjs   (or `npm run build`)
 
 import { shortenProse } from './lib/short-text.mjs';
-import { measurementId, analyticsCspSources, consentScript, withAnalytics } from './lib/analytics.mjs';
+import { measurementId, analyticsCspSources, consentScript, withAnalytics, CLOUDFLARE_WEB_ANALYTICS_CSP as CF_WA_CSP } from './lib/analytics.mjs';
 import { providerLinkTargets, tagProviderLinks } from './lib/provider-links.mjs';
 import { readFileSync, writeFileSync, mkdirSync, readdirSync, rmSync, existsSync } from 'node:fs';
 import { execSync } from 'node:child_process';
@@ -65,6 +65,7 @@ import { collectionPageJsonLd as pageJsonLd, comparePageJsonLd } from './lib/pag
 import { notFreeErrors, notFreeReadmeMd, notFreeModel, notFreeMainHtml, notFreeJsonLd, notFreeTitle, notFreeDescription, NOT_FREE_PATH } from './lib/not-free.mjs';
 import { embedMainHtml, embedTitle, embedDescription, EMBED_PATH } from './lib/embed-page.mjs';
 import { citationRecord } from './lib/citation.mjs';
+import { LONG_GUIDES, longGuidePage } from './lib/long-guides.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const FRESH_DAYS = SLA_DAYS; // the freshness SLA, defined once in lib/rules.mjs
@@ -163,7 +164,7 @@ const COLLECTION_COPY = [
     h1: 'Free LLM APIs with no credit card required',
     desc: 'LLM APIs you can start calling without entering a payment method — filtered live from a continuously-verified dataset.',
     intro: 'Every provider below offers free API access with **no card required** to get started (`card_required: false`, confirmed against their own docs). Rows where the requirement is unknown are excluded rather than assumed.',
-    guides: ['free-llm-api-without-credit-card', 'free-llm-api-no-signup'],
+    guides: ['free-llm-api-without-credit-card', 'free-llm-api-no-signup', 'free-llm-api-no-credit-card-no-phone'],
     faq: [
       { q: 'Can I use an LLM API for free without a credit card?', a: 'Yes — every provider on this page offers a free tier with no card required, confirmed against its own docs. You are limited by rate, not billing.' },
       { q: 'Will I be charged if I go over the free limit?', a: 'Usually not. Without a payment method on file there is nothing to charge, so reaching a limit means being rate-limited (HTTP 429). Read the catch on each row, because terms change.' },
@@ -179,7 +180,7 @@ const COLLECTION_COPY = [
     h1: 'Free LLM APIs with no phone number required',
     desc: 'LLM APIs whose signup needs no SMS/phone verification — a live slice of a continuously-verified dataset.',
     intro: 'Providers you can sign up for **without phone verification** (`phone_required: false`). Providers that gate signup behind a phone number, or whose rule is not known, are left out.',
-    guides: ['free-llm-api-no-signup'],
+    guides: ['free-llm-api-no-signup', 'free-llm-api-no-credit-card-no-phone'],
     faq: [
       { q: 'Is there a free LLM API with no phone verification?', a: 'Yes — every provider on this page asks for no phone number at signup, according to its own docs. A provider whose rule is not known is not listed.' },
       { q: 'Do these APIs need any account at all?', a: 'Almost always: they ask for an email or a sign-in with an existing account, only not for a phone number.' },
@@ -197,7 +198,7 @@ const COLLECTION_COPY = [
     intro: 'Providers whose **own page says the API can be called with no account** (`anonymous_access`: the page, the day it was read and the sentence). Expect the lowest limits and queue priority. A provider whose pages do not say it is not listed, which never means it needs an account.',
     header: 'Each row ends with the provider’s own sentence about anonymous access and any condition its pages attach to it.',
     rowMark: (p) => anonMark(p.anonymous_access),
-    guides: ['free-llm-api-no-signup'],
+    guides: ['free-llm-api-no-signup', 'free-llm-api-no-credit-card-no-phone'],
     faq: [
       { q: 'Can I call an AI API with no account at all?', a: 'Yes, a few providers allow it, according to their own pages: each row on this page quotes the sentence and the day it was read. Anonymous use has the tightest limits and the lowest priority.' },
       { q: 'Is anonymous access the same as no signup form?', a: 'No. Most providers with no card and no phone still ask for an email or a sign-in; those are in the no-card and no-phone collections. This page lists only APIs that work with no account.' },
@@ -213,7 +214,7 @@ const COLLECTION_COPY = [
     h1: 'Free LLM APIs you can use commercially',
     desc: 'Free LLM API tiers that permit production/commercial use — not restricted to evaluation. Verified against each provider’s terms.',
     intro: 'Free tiers that **allow commercial/production use** (`commercial_ok: true`). Evaluation-only tiers (`commercial_ok: false`) and tiers whose terms do not say are deliberately left out — read their rows in the main list for the restriction.',
-    guides: ['openai-compatible-free-apis', 'free-llm-api-without-credit-card'],
+    guides: ['openai-compatible-free-apis', 'free-llm-api-without-credit-card', 'choose-free-llm-api-for-production'],
     faq: [
       { q: 'Can I use this list in a commercial product?', a: 'Yes. Free LLM API Hub and its dataset are MIT licensed, so you can reuse, fork and adapt them, including commercially. A link back is appreciated but not required. Each provider’s page has a Commercial use line that reads allowed, evaluation only or not confirmed, and the explorer on the home page marks the first two with an icon. Not confirmed means no reading of the provider’s terms has confirmed that commercial use is allowed: some terms do not clearly say so, and for other providers the question is still open. It is not a permission. The data describes other companies’ free tiers, whose terms change without notice, so confirm against the provider’s own docs before you ship. This list is independent: it is not affiliated with, endorsed by or sponsored by any provider on it, and it is not legal advice.' },
       { q: 'Which free LLM APIs allow commercial use?', a: 'Every provider on this page permits commercial/production use on its free tier (`commercial_ok: true`), confirmed against its own terms. Evaluation-only tiers are excluded.' },
@@ -231,7 +232,7 @@ const COLLECTION_COPY = [
     desc: 'Free LLM APIs that expose an OpenAI-compatible endpoint — point the OpenAI SDK at a new base_url and you are done.',
     intro: 'These providers expose an **OpenAI-compatible endpoint** (`openai_compatible: true`), so migrating is usually a one-line change: keep the OpenAI SDK, swap `base_url` and `api_key`. Grab each provider’s exact base URL from its linked docs.',
     quickstart: true,
-    guides: ['openai-compatible-free-apis'],
+    guides: ['openai-compatible-free-apis', 'openai-api-alternatives'],
     faq: [
       { q: 'What does OpenAI-compatible mean?', a: 'The API accepts the same request format as OpenAI’s <code>/chat/completions</code>, so the OpenAI SDK works by changing only <code>base_url</code> and the API key.' },
       { q: 'Is every feature supported?', a: 'Not necessarily: compatibility can be partial, and a feature a provider lacks fails at the provider. Read the catch on each row.' },
@@ -281,6 +282,7 @@ const COLLECTION_COPY = [
     // A row is the provider's own sentence; whether it covers the free plan is a separate fact, shown per row (see planMark).
     header: 'Each row is the provider’s own sentence. Many sources do not say whether it covers the free plan; read the row’s note.',
     rowMark: (p) => planMark(p.data_policy),
+    guides: ['choose-free-llm-api-for-production'],
     faq: [
       { q: 'Which free LLM APIs say they do not train on my prompts?', a: 'The providers on this page, each according to its own terms or privacy page, cited with the day it was read on the provider’s page on this site. The wording differs: for some it holds only while you have not opted in to training, and a privacy notice is not a contract.' },
       { q: 'Does a provider missing from this list train on my data?', a: 'Not necessarily. A provider is missing when its own page says it may train on prompts, says nothing we could cite, or could not be read. Check the provider before you send sensitive data.' },
@@ -386,88 +388,6 @@ const GUIDES = [
     faq: [
       { q: 'Is there a free LLM API with no phone verification?', a: 'Yes — every provider here requires neither a credit card nor a phone number to obtain a key.' },
       { q: 'Can I call an LLM API with no account at all?', a: 'A few can, with tighter limits: AI Horde works with a shared anonymous key and the lowest queue priority. Most providers here still want an email or a sign-in with an existing account.' },
-    ],
-  },
-  {
-    slug: 'free-embeddings-apis',
-    answer: '{n} providers in the verified dataset include embedding models on a free tier. They suit prototypes of semantic search and retrieval-augmented generation (RAG); the table lists each free tier and its limits. Choose the model before you index, because vectors from different models are not comparable and changing models means re-embedding your data.',
-    metaDesc: '{n} free vector embedding APIs for semantic search and RAG, with free tiers and limits compared. Dataset of {date}.',
-    card: 'Embeddings / RAG',
-    blurb: 'Free vector embeddings for search and RAG.',
-    h1: 'Free embeddings APIs for search and RAG',
-    title: 'Free embeddings APIs for RAG · Free LLM API Hub',
-    desc: 'Verified APIs that expose embedding models on a free tier — for semantic search, RAG and clustering. Token allowances compared.',
-    lede: 'Free vector embeddings for semantic search, RAG and clustering.',
-    intro: `<p>Embeddings power semantic search, RAG and clustering — and you rarely need to pay for them at prototype scale. The providers below expose <strong>embedding models on a free tier</strong>, several with generous monthly token allowances.</p><p>Building RAG? Pair one of these with a free chat model (see the <a href="../models/">model index</a>), ideally behind the same OpenAI-compatible base URL.</p>`,
-    filter: (p) => (p.modalities || []).includes('embeddings'),
-    query: '#explorer',
-    modality: 'embeddings',
-    pick: 'jina-ai',
-    faq: [
-      { q: 'Is there a free embeddings API?', a: 'Yes — providers such as Jina AI, Cohere, Google Gemini and Cloudflare offer embedding models on a free tier, several with large monthly token allowances.' },
-      { q: 'Can I build RAG for free?', a: 'For prototypes, yes: pair a free embeddings API with a free chat model, ideally behind the same OpenAI-compatible base URL.' },
-    ],
-  },
-  {
-    slug: 'free-speech-to-text-apis',
-    answer: '{n} providers in the verified dataset offer free speech APIs, for transcription (speech-to-text) or voice output (text-to-speech). Free allowances are given in audio time, characters or credits, so convert them to the same unit before comparing. Voice terms often differ from text terms, so read the commercial-use flag in the Gotchas column for each row.',
-    metaDesc: '{n} free transcription and text-to-speech APIs, with limits in audio time, characters or credits compared. Dataset of {date}.',
-    card: 'Speech (STT/TTS)',
-    blurb: 'Free transcription and text-to-speech tiers.',
-    h1: 'Free speech APIs — transcription and text-to-speech',
-    title: 'Free speech-to-text & TTS APIs · Free LLM API Hub',
-    desc: 'Verified speech APIs with a free tier or sizeable starting credit — transcription (STT) and synthesis (TTS). Limits and catches compared.',
-    lede: 'Free speech-to-text and text-to-speech APIs, from free monthly minutes to hundreds in credit.',
-    intro: `<p>Audio APIs — transcription (STT) and synthesis (TTS) — often ship a real free tier or a sizeable one-time credit. The providers below offer <strong>free audio/speech access</strong>, from a few free hours a month to hundreds of dollars in starting balance.</p><p>Check the "catch" on each provider's page: some free speech tiers forbid commercial use or watermark the output.</p>`,
-    filter: (p) => (p.modalities || []).includes('audio'),
-    query: '#explorer',
-    modality: 'audio',
-    pick: 'groq',
-    faq: [
-      { q: 'Is there a free speech-to-text API?', a: 'Yes — Groq (Whisper), Cloudflare Workers AI and others offer free STT; several dedicated speech providers also grant a sizeable one-time credit.' },
-      { q: 'Which free speech API is best for production?', a: 'Check each provider’s rate limits and whether commercial use is allowed — some free speech tiers are evaluation-only or watermark their output.' },
-    ],
-  },
-  {
-    slug: 'free-image-generation-apis',
-    answer: '{n} providers in the verified dataset offer free access or starting credit for image generation or editing. Allowances are usually images or credits, and the catches that matter are watermarks and commercial-use terms. The Gotchas column flags commercial use; watermark rules are in the notes on each provider page.',
-    metaDesc: '{n} free image APIs for generation or editing, with limits and commercial-use terms compared. Dataset of {date}.',
-    card: 'Image APIs',
-    blurb: 'Free image generation and editing APIs.',
-    h1: 'Free image APIs — generation and editing',
-    title: 'Free image APIs — generation & editing · Free LLM API Hub',
-    desc: 'Free image generation and editing APIs, with starting credits, limits and commercial-use terms compared.',
-    lede: 'Free image APIs for generation, editing and background removal.',
-    intro: `<p>Text-to-image is one of the easiest modalities to try for free: several providers host <strong>Flux, Stable Diffusion and SDXL</strong> behind a simple API — some with no signup at all, others with a small starting credit. Not every image API generates images: this table also includes editing and background-removal services. Read each free-tier description to choose the operation you need.</p><p>Watch two catches on each provider's page: whether the free output is <em>watermarked</em>, and whether <em>commercial use</em> is allowed — both vary a lot across free image tiers.</p>`,
-    filter: (p) => (p.modalities || []).includes('image'),
-    query: '#explorer',
-    modality: 'image',
-    pick: 'ai-horde',
-    faq: [
-      { q: 'Is there a free image generation API?', a: 'Yes — AI Horde (anonymous, queue-based) and OVHcloud AI Endpoints (Stable Diffusion XL, anonymous at a low rate limit) need no signup, while Pollinations (credits earned through Quests), Runware and others give credits for hosted Flux and SDXL models, and Photoroom gives free background-removal and editing calls.' },
-      { q: 'Can I use free AI-generated images commercially?', a: 'Sometimes — it depends on the provider and whether the output is watermarked. Each row flags commercial use, confirmed against the provider’s terms.' },
-      { q: 'Which free image API has no watermark?', a: 'Watermark terms vary and change: Photoroom, for example, does not watermark its free production calls but does watermark its sandbox calls. Check the catch on each provider page.' },
-    ],
-  },
-  {
-    slug: 'free-ocr-document-ai-apis',
-    answer: '{n} providers in the verified dataset offer free OCR or document parsing. Allowances are given in pages or credits, and some are one-time rather than monthly, so check each row. Layout-aware parsers keep tables and headings, which matters for RAG; plain OCR returns only the text.',
-    metaDesc: '{n} free OCR and document-parsing APIs to turn PDFs and scans into text for RAG. Page limits and terms compared. Dataset of {date}.',
-    card: 'OCR / document AI',
-    blurb: 'Free OCR and document-parsing APIs for RAG.',
-    h1: 'Free OCR and document-parsing APIs',
-    title: 'Free OCR & document AI APIs · Free LLM API Hub',
-    desc: 'Verified APIs that do OCR and document parsing on a free tier — extract text, tables and key-values from PDFs and images for RAG. Page limits compared.',
-    lede: 'Free OCR and document-AI APIs to turn PDFs and images into structured, LLM-ready text.',
-    intro: `<p>Before a document can go into a RAG pipeline it has to be parsed — OCR, layout, tables and key-values. The providers below offer <strong>document AI on a free tier</strong>, several with thousands of free pages a month that renew.</p><p>Pair one of these with a <a href="free-embeddings-apis">free embeddings API</a> and a free chat model to build a full document-QA stack at zero cost for prototypes.</p>`,
-    filter: (p) => (p.modalities || []).includes('ocr'),
-    query: '#explorer',
-    modality: 'ocr',
-    pick: 'unstructured',
-    faq: [
-      { q: 'Is there a free OCR API?', a: 'Yes — OCR.space, Unstructured, Nutrient and LlamaParse all offer free OCR / document parsing, several with thousands of pages a month.' },
-      { q: 'What’s the best free API to parse PDFs for RAG?', a: 'Unstructured (10,000 free pages to start) and LlamaParse (10,000 credits a month) are built specifically to turn documents into clean, chunked text for RAG.' },
-      { q: 'Can free OCR handle tables and handwriting?', a: 'Some do — providers such as Nutrient extract tables, key-values and handwriting. Check each provider page for the exact free-tier capabilities.' },
     ],
   },
   {
@@ -697,7 +617,7 @@ const THEME_GUARD = `<script>(function(){try{var t=localStorage.getItem('theme')
 // the first-party file consent.js ('self'), so no inline hash changes.
 const GA_ID = measurementId();
 const GA_CSP = analyticsCspSources(GA_ID);
-const CSP = `<meta http-equiv="Content-Security-Policy" content="script-src 'self' 'sha256-r3FnVnP9W/uaNhK9XkZqH3GIfK4TudOQGYTwoNIjGR4=' 'sha256-YzEhxvq2BwovGsg/RCjKkQdwf+LZmTjIkiQcjXCZMHc='${GA_CSP.script}; connect-src 'self' https://raw.githubusercontent.com${GA_CSP.connect}; object-src 'none'; base-uri 'self'">`;
+const CSP = `<meta http-equiv="Content-Security-Policy" content="script-src 'self' 'sha256-r3FnVnP9W/uaNhK9XkZqH3GIfK4TudOQGYTwoNIjGR4=' 'sha256-YzEhxvq2BwovGsg/RCjKkQdwf+LZmTjIkiQcjXCZMHc='${CF_WA_CSP.script}${GA_CSP.script}; connect-src 'self' https://raw.githubusercontent.com${CF_WA_CSP.connect}${GA_CSP.connect}; object-src 'none'; base-uri 'self'">`;
 
 // Search engines cut a snippet around 155 characters. Every page's description goes through
 // here, so no page can ship a longer one: cut at a word boundary and end with an ellipsis.
@@ -909,6 +829,13 @@ const citation = readFileSync(citationPath, 'utf8')
   .replace(/^date-released: .*$/m, `date-released: "${data.generated}"`);
 writeFileSync(citationPath, citation);
 
+// Long-form guides (lib/long-guides.mjs): editorial copy whose every number, limit, flag and provider list is computed
+// from data/providers.json and data/not-free.json here, at build time. They share /guides/, the hub, the sitemap and
+// llms.txt with the guides above; `featured` is the set of providers a guide lists (provider pages link back to it).
+const LONG_GUIDE_PAGES = LONG_GUIDES.map((g) => ({ ...g, ...longGuidePage(g, { providers, notFree: NOT_FREE }) }));
+// Every guide by slug, for the cross-links of collections and the "More guides" lists.
+const ALL_GUIDE_LINKS = [...GUIDES, ...LONG_GUIDE_PAGES].map((g) => ({ slug: g.slug, card: g.card }));
+
 // ---------- git-mined change history (computed once) ----------
 // Feeds the per-provider pages and api/v1/history.json (both git-mined and
 // regenerated on deploy). Graceful if git is unavailable (tarball build).
@@ -1077,7 +1004,7 @@ for (const c of COLLECTIONS) {
     (o) => `<a href="${o.slug}"${o.slug === c.slug ? ' class="active" aria-current="page"' : ''}>${htmlEsc(o.title)}</a>`
   ).join('');
   const guideLinks = (c.guides || [])
-    .map((s) => { const gx = GUIDES.find((x) => x.slug === s); return gx ? `<a href="../guides/${gx.slug}">${htmlEsc(gx.card)}</a>` : ''; })
+    .map((s) => { const gx = ALL_GUIDE_LINKS.find((x) => x.slug === s); return gx ? `<a href="../guides/${gx.slug}">${htmlEsc(gx.card)}</a>` : ''; })
     .filter(Boolean).join('');
   const collFaqHtml = (c.faq && c.faq.length)
     ? `<h2>FAQ</h2>` + c.faq.map((f) => `<div class="faq-item"><h3>${htmlEsc(f.q)}</h3><p>${f.a}</p></div>`).join('')
@@ -1158,8 +1085,11 @@ const hubCards = COLLECTIONS.map((c) =>
 const guidesCards = GUIDES.map((g) =>
   `<a class="coll-card" href="../guides/${g.slug}"><div class="coll-card-head"><strong>${htmlEsc(g.card)}</strong><span class="count">${providers.filter(g.filter).length}</span></div><p>${htmlEsc(g.blurb)}</p></a>`
 ).join('');
-const HUB_ANSWER = `Which free LLM API fits your constraint? Each of the ${GUIDES.length} guides answers one “is there a free API for…?” question; each of the ${COLLECTIONS.length} collections is a live filter of our dataset by one condition, such as no card, no phone or commercial use. Every entry is dated and sourced.`;
-const HUB_META = `${GUIDES.length} guides and ${COLLECTIONS.length} collections of free LLM APIs, filtered from a dated dataset: no card, no phone, commercial use, OpenAI-compatible.`;
+const longGuideCards = LONG_GUIDE_PAGES.map((g) =>
+  `<a class="coll-card" href="../guides/${g.slug}"><div class="coll-card-head"><strong>${htmlEsc(g.card)}</strong><span class="count">${g.count}</span></div><p>${htmlEsc(g.blurb)}</p></a>`
+).join('');
+const HUB_ANSWER = `Which free LLM API fits your constraint? Each of the ${GUIDES.length} guides answers one “is there a free API for…?” question, and ${LONG_GUIDE_PAGES.length} longer ones walk through a choice; each of the ${COLLECTIONS.length} collections is a live filter of our dated, sourced dataset by one condition: no card, no phone or commercial use.`;
+const HUB_META = `${GUIDES.length + LONG_GUIDE_PAGES.length} guides and ${COLLECTIONS.length} collections of free LLM APIs, filtered from a dated dataset: no card, no phone, commercial use, OpenAI-compatible.`;
 const HUB_FAQ = [
   { q: 'What is the difference between a guide and a collection?', a: 'A guide answers one question with a short explanation and a table; a collection is a live filter of the dataset by one condition, with no commentary.' },
   { q: 'How current is the data?', a: 'Every row shows the day its source was read. The dataset is re-verified on a schedule, and each provider page cites its source.' },
@@ -1170,6 +1100,7 @@ const hubMain =
   `<main id="main"><div class="wrap">` +
   `<p class="answer"><strong>${htmlEsc(HUB_ANSWER)}</strong></p>` +
   `<h2 class="eyebrow">Guides: answers to one question</h2><div class="coll-grid">${guidesCards}</div>` +
+  `<h2 class="eyebrow" style="margin-top:26px">Guides: how to choose</h2><div class="coll-grid">${longGuideCards}</div>` +
   `<h2 class="eyebrow" style="margin-top:26px">Collections: one filter, live</h2><div class="coll-grid">${hubCards}</div>` +
   `<h2 class="eyebrow" style="margin-top:26px">FAQ</h2>` + HUB_FAQ.map((f) => `<div class="faq-item"><h3>${htmlEsc(f.q)}</h3><p>${htmlEsc(f.a)}</p></div>`).join('') +
   `</div></main>`;
@@ -1184,6 +1115,7 @@ const hubJsonLd = JSON.stringify({
         '@type': 'ItemList', numberOfItems: GUIDES.length + COLLECTIONS.length,
         itemListElement: [
           ...GUIDES.map((g) => ({ name: g.card, url: `${SITE}/guides/${g.slug}` })),
+          ...LONG_GUIDE_PAGES.map((g) => ({ name: g.card, url: `${SITE}/guides/${g.slug}` })),
           ...COLLECTIONS.map((c) => ({ name: c.title, url: `${SITE}/collections/${c.slug}` })),
         ].map((e, i) => ({ '@type': 'ListItem', position: i + 1, name: e.name, url: e.url })),
       },
@@ -1266,7 +1198,7 @@ const useDataHtml = (p) => {
 
 for (const p of providers) {
   const inColls = COLLECTIONS.filter((c) => collRows(c).some((x) => x.slug === p.slug));
-  const inGuides = GUIDES.filter((g) => g.filter(p));
+  const inGuides = [...GUIDES.filter((g) => g.filter(p)), ...LONG_GUIDE_PAGES.filter((g) => g.slug !== 'choose-free-llm-api-for-production' && g.featured.some((x) => x.slug === p.slug))];
   // Concrete free model for snippets: prefer a real sampled ID, else a sensible default.
   const DEFAULT_MODEL = { groq: 'llama-3.1-8b-instant' };
   const model = (p.models_free && p.models_free[0]) || DEFAULT_MODEL[p.slug] || '<a-free-model>';
@@ -1314,6 +1246,11 @@ for (const p of providers) {
         ? ` <span class="v warn" title="The key authenticated but the free tier appears gone">${IC('ic-warn')} free tier unconfirmed live</span>`
         : ''));
   const docsBtn = docsHref(p.docs_url) ? `<a class="btn primary" href="${htmlEsc(docsHref(p.docs_url))}" target="_blank" rel="noopener">Official docs ↗</a>` : '';
+  // "Get a free key": the provider's own key page, exactly as its docs link it (keys_url), next to the limits and the
+  // quickstart. Tagged data-link="keys" by tagProviderLinks, so a click is an outbound_provider_click (consent-gated).
+  const keysHtml = p.keys_url
+    ? `<div class="prov-actions prov-key" style="align-items:center"><a class="btn primary" href="${htmlEsc(p.keys_url)}" target="_blank" rel="noopener">Get a free key ↗</a><span class="muted">Sign up or sign in on ${htmlEsc(p.name)}'s own site, then create an API key there.</span></div>`
+    : '';
   const playgroundBtn = p.playground_url ? `<a class="btn" href="${htmlEsc(p.playground_url)}" target="_blank" rel="noopener">Try it ↗</a>` : '';
   // "Visit website": the provider's main site, derived from the docs URL by stripping
   // common docs/console/api subdomains so it points at the marketing homepage.
@@ -1350,6 +1287,7 @@ for (const p of providers) {
     `<main id="main"><div class="wrap prose prov-prose">` +
     summary +
     limitsHtml(p) +
+    keysHtml +
     // Q3: the snippet right after the limits (it sat ~4,500px down /p/groq on a phone); speed, data policy and the
     // provider's own description follow it.
     quick +
@@ -1447,11 +1385,12 @@ ${NOT_FOUND_PATH_SCRIPT}
   })
 );
 
-// The privacy page says exactly what the build ships: no cookies and no analytics by default; with GA_MEASUREMENT_ID set
-// (lib/analytics.mjs), Google Analytics and Google signals behind an opt-in banner with two categories, described below.
+// The privacy page says exactly what the site runs: by default no cookies and only the cookieless Cloudflare Web Analytics
+// that Cloudflare injects at the edge (lib/analytics.mjs); with GA_MEASUREMENT_ID set, also Google Analytics and Google
+// signals behind an opt-in banner with two categories, described below.
 const privacyIntro = GA_ID
   ? `<p>This site is a static, open-source reference operated by ${ORG} It has no user accounts and shows no ads. It uses Google cookies <strong>only for the categories you allow</strong> in the cookie banner; until you allow one, nothing is loaded from Google and no cookie is set.</p>`
-  : `<p>This site is a static, open-source reference operated by ${ORG} It has no user accounts, no ads, and no third-party analytics or tracking.</p>`;
+  : `<p>This site is a static, open-source reference operated by ${ORG} It has no user accounts, no ads, no cookies and no tracking; its only analytics is the cookieless Cloudflare Web Analytics described under Hosting.</p>`;
 const privacyServerItem = GA_ID
   ? `<li><strong>Nothing on a server of ours.</strong> The site is served as static files by GitHub Pages; there is no backend. No cookies are set unless you allow a category below.</li>`
   : `<li><strong>Nothing on a server.</strong> The site is served as static files by GitHub Pages; there is no backend and no cookies are set.</li>`;
@@ -1464,7 +1403,7 @@ const privacyAnalytics = GA_ID
 <h3>1. Analytics</h3>
 <ul>
 <li><strong>Purpose:</strong> count visits and see which pages are useful.</li>
-<li><strong>What is collected:</strong> pages viewed, the page you came from, approximate location (country/city, derived from your IP address, which Google Analytics 4 does not log or store), device, browser, screen size and timing of your visit, and how you use the site: filters and sort order in the provider explorer, what you type in its search box (cut to 60 characters, never sent if it looks like an email address or a phone number), which kind of code snippet you copy, which data files you download, which comparisons and collections you open, and which provider pages you follow. Cookies: <code>_ga</code> and <code>_ga_&lt;id&gt;</code>, to tell visits apart.</li>
+<li><strong>What is collected:</strong> pages viewed, the page you came from, approximate location (country/city, derived from your IP address, which Google Analytics 4 does not log or store), device, browser, screen size and timing of your visit, and how you use the site: filters and sort order in the provider explorer, what you type in its search box (cut to 60 characters, never sent if it looks like an email address or a phone number), which kind of code snippet you copy, which data files you download, which comparisons and collections you open, which provider pages you follow, and where on the site you follow a link to this project's GitHub repository. Cookies: <code>_ga</code> and <code>_ga_&lt;id&gt;</code>, to tell visits apart.</li>
 <li><strong>Role of Google:</strong> processor, acting on our instructions under Google's data processing terms.</li>
 </ul>
 <h3>2. Advertising &amp; personalised measurement (Google signals)</h3>
@@ -1484,9 +1423,10 @@ const privacyAnalytics = GA_ID
 <p>You can ask us for access to, correction or deletion of personal data about you, object to its processing, or complain to your data-protection authority.</p>
 `
   : '';
+const privacyCloudflareAnalytics = `Cloudflare also runs Cloudflare Web Analytics for this site: a small script from Cloudflare (static.cloudflareinsights.com) reports, in aggregate, page views, the referring site, page-load timings (Core Web Vitals) and the country, browser and device type. It sets no cookies, stores nothing on your device and does not fingerprint you or follow you across sites; we see only aggregated counts.`;
 const privacyHostingTail = GA_ID
-  ? `We do not use Cloudflare's analytics; the only analytics is the opt-in Google Analytics described above.`
-  : `We do not use Cloudflare's analytics or any other analytics, and this site sets no cookies.`;
+  ? `${privacyCloudflareAnalytics} Apart from it, the only analytics is the opt-in Google Analytics described above.`
+  : `${privacyCloudflareAnalytics} This site sets no cookies.`;
 legalPage('privacy', 'Privacy', `
 ${privacyIntro}
 <h2>What we store</h2>
@@ -1822,7 +1762,7 @@ for (const g of GUIDES) {
   // The pick is the guide's own (g.pick) or the first row of the shared "Recommended" order. It is shown only when it
   // belongs to the guide's modality (guideFits): a text-LLM guide never headlines an OCR or speech API as its top pick.
   const top = [(g.pick && list.find((x) => x.slug === g.pick)) || [...list].sort(recommendedCmp)[0]].find((x) => x && guideFits(g, x));
-  const related = GUIDES.filter((x) => x.slug !== g.slug)
+  const related = ALL_GUIDE_LINKS.filter((x) => x.slug !== g.slug)
     .map((x) => `<a href="${x.slug}">${htmlEsc(x.card)}</a>`).join('');
   const faqHtml = (g.faq && g.faq.length)
     ? `<h2>FAQ</h2>` + g.faq.map((f) => `<div class="faq-item"><h3>${htmlEsc(f.q)}</h3><p>${f.a}</p></div>`).join('')
@@ -1870,6 +1810,48 @@ for (const g of GUIDES) {
   });
   writeFileSync(join(ROOT, `site/guides/${g.slug}.html`), htmlPage({
     title: datedTitle(g.title), desc: metaDesc, canonical: `${SITE}/guides/${g.slug}`, main, jsonld,
+    ogImage: `${SITE}/og/guides/${g.slug}.png`,
+  }));
+}
+
+// ---------- long-form guides: editorial copy, every figure from the data (lib/long-guides.mjs) ----------
+for (const g of LONG_GUIDE_PAGES) {
+  const faqHtml = `<h2 id="faq">FAQ</h2>` + g.faq.map((f) => `<div class="faq-item"><h3>${htmlEsc(f.q)}</h3><p>${f.a}</p></div>`).join('');
+  const related = ALL_GUIDE_LINKS.filter((x) => x.slug !== g.slug).map((x) => `<a href="${x.slug}">${htmlEsc(x.card)}</a>`).join('');
+  const main =
+    pageHero({ crumbs: `<a href="../">Home</a> / <a href="../guides-and-collections/">Guides &amp; Collections</a> / ${htmlEsc(g.h1)}`, h1: htmlEsc(g.h1), lede: `Data as of <time datetime="${ASOF}">${ASOF}</time>. Every limit is quoted from the provider’s own page and dated.` }) +
+    `<main id="main"><div class="wrap prose">` +
+    `<p class="answer"><strong>${g.answer}</strong></p>` +
+    g.body +
+    faqHtml +
+    (g.slug === 'openai-api-alternatives' ? '' : `<p class="muted">Looking for OpenAI, Anthropic, Mistral or GitHub Models? <a href="../not-free/">Why they are not on this list</a>.</p>`) +
+    `<h2>More guides</h2><nav class="colls">${related}</nav>` +
+    `<p class="muted">Data from the Free LLM API Hub dataset, as of ${ASOF}. Every limit is quoted from the provider’s own page; follow the source link before relying on it.</p>` +
+    `<p class="prov-back"><a href="../guides-and-collections/">← All guides</a></p>` +
+    `</div></main>`;
+  const jsonld = JSON.stringify({
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'Article', headline: g.h1, description: g.metaDesc, dateModified: ASOF,
+        url: `${SITE}/guides/${g.slug}`, isPartOf: websiteRef(SITE), about: datasetRef(SITE),
+      },
+      {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Free LLM API Hub', item: `${SITE}/` },
+          { '@type': 'ListItem', position: 2, name: 'Guides & Collections', item: `${SITE}/guides-and-collections/` },
+          { '@type': 'ListItem', position: 3, name: g.h1, item: `${SITE}/guides/${g.slug}` },
+        ],
+      },
+      {
+        '@type': 'FAQPage',
+        mainEntity: g.faq.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: stripTags(f.a) } })),
+      },
+    ],
+  });
+  writeFileSync(join(ROOT, `site/guides/${g.slug}.html`), htmlPage({
+    title: g.title, desc: g.metaDesc, canonical: `${SITE}/guides/${g.slug}`, main, jsonld,
     ogImage: `${SITE}/og/guides/${g.slug}.png`,
   }));
 }
@@ -2112,7 +2094,7 @@ const llmsTxt =
   `- [Static JSON API](${SITE}/api/): versioned endpoints + pre-filtered slices (category, modality, no-card, commercial, OpenAI-compatible, …)\n` +
   `- [Full provider list expanded, markdown](${SITE}/llms-full.txt)\n\n` +
   `## Guides\n` +
-  GUIDES.map((g) => `- [${g.h1}](${SITE}/guides/${g.slug}): ${g.blurb}`).join('\n') + `\n\n` +
+  [...GUIDES, ...LONG_GUIDE_PAGES].map((g) => `- [${g.h1}](${SITE}/guides/${g.slug}): ${g.blurb}`).join('\n') + `\n\n` +
   `## Collections\n` +
   COLLECTIONS.map((c) => `- [${c.title}](${SITE}/collections/${c.slug})`).join('\n') + `\n\n` +
   `## Credit programs\n` +
@@ -2584,6 +2566,7 @@ const sitemapEntries = [
   [`${SITE}/programs/startups`, programs.generated],
   [`${SITE}/programs/research`, programs.generated],
   ...GUIDES.map((g) => [`${SITE}/guides/${g.slug}`, ASOF]),
+  ...LONG_GUIDE_PAGES.map((g) => [`${SITE}/guides/${g.slug}`, ASOF]),
   // Only the first updates page: the number of /updates/page/N/ pages follows
   // the commit count, so listing them made the drift-gated sitemap change with
   // every merge, whatever the PR touched. Crawlers reach them via pagination.
@@ -2628,7 +2611,7 @@ writeFileSync(join(ROOT, `site/${SITEMAP_INDEX}`), sitemapIndexXml(SITE, INDEXNO
 // on every deploy; pinning them caused the post-merge refresh-pin churn this
 // removes. It lives at the repo root (not under data/) so a fingerprint-only
 // commit never touches a path the updates feed watches.
-const isDateRelative = (rel) => rel.startsWith('site/p/') || rel.startsWith('site/badges/');
+const isDateRelative = (rel) => rel === 'site/badge-freshness.json' || rel.startsWith('site/p/') || rel.startsWith('site/badges/');
 // The weekly change feed (changes/, changes.xml, api/v1/changes.json) and the
 // monthly state reports (state/) are mined from the same git history, so they
 // are excluded for the same reason.

@@ -8,7 +8,7 @@ Free LLM APIs that expose an OpenAI-compatible endpoint — point the OpenAI SDK
 
 These providers expose an **OpenAI-compatible endpoint** (`openai_compatible: true`), so migrating is usually a one-line change: keep the OpenAI SDK, swap `base_url` and `api_key`. Grab each provider’s exact base URL from its linked docs.
 
-**41 of 76 tracked providers** match.
+**41 of 77 tracked providers** match.
 
 | Provider | OpenAI base URL | What's free | The catch | Verified |
 |---|---|---|---|---|

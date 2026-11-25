@@ -84,10 +84,8 @@ test('the server-rendered home rows follow the shared order', () => {
 test('guides: a "Top pick" is always of the guide\'s modality, and the text-LLM guides pick a text LLM', () => {
   const bySlug = new Map(providers.map((p) => [p.slug, p]));
   const byName = new Map(providers.map((p) => [p.name, p]));
-  const modalityOf = {
-    'free-embeddings-apis': 'embeddings', 'free-speech-to-text-apis': 'audio', 'free-image-generation-apis': 'image',
-    'free-ocr-document-ai-apis': 'ocr', 'free-reranking-apis': 'rerank', 'free-vision-apis': 'vision',
-  };
+  // The embeddings, speech, OCR and image guides are long-form guides with no top pick (long-guides.test.mjs).
+  const modalityOf = { 'free-reranking-apis': 'rerank', 'free-vision-apis': 'vision' };
   const dir = join(ROOT, 'site/guides');
   let checked = 0;
   for (const f of readdirSync(dir).filter((n) => n.endsWith('.html'))) {
