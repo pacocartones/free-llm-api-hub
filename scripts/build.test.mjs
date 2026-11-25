@@ -67,6 +67,58 @@ test('playground_url survives canonical serialization', () => {
   assert.equal(Object.hasOwn(saved.providers[1], 'playground_url'), false);
 });
 
+test('keys_url and keys_url_source survive canonical serialization', () => {
+  const data = JSON.parse(readFileSync(DATA, 'utf8'));
+  data.providers[0].keys_url = 'https://example.com/keys?tab=api&new=1';
+  data.providers[0].keys_url_source = 'https://example.com/docs';
+  delete data.providers[1].keys_url;
+  delete data.providers[1].keys_url_source;
+  const saved = JSON.parse(serialize(data));
+  assert.equal(saved.providers[0].keys_url, 'https://example.com/keys?tab=api&new=1');
+  assert.equal(saved.providers[0].keys_url_source, 'https://example.com/docs');
+  assert.equal(Object.hasOwn(saved.providers[1], 'keys_url'), false);
+});
+
+test('provider "Get a free key" button is conditional, tracked as data-link="keys", and kept in public JSON', () => {
+  const raw = readFileSync(DATA, 'utf8');
+  const data = JSON.parse(raw);
+  const [first, second] = data.providers;
+  first.keys_url = 'https://example.com/keys?tab=api&new=1';
+  first.keys_url_source = 'https://example.com/docs';
+  delete second.keys_url;
+  delete second.keys_url_source;
+  try {
+    writeFileSync(DATA, serialize(data));
+    run(['scripts/build.mjs']);
+    const present = readFileSync(join(ROOT, 'site/p', `${first.slug}.html`), 'utf8');
+    assert.equal((present.match(/>Get a free key ↗/g) || []).length, 1);
+    assert.ok(present.includes(`<a class="btn primary" href="https://example.com/keys?tab=api&amp;new=1" target="_blank" rel="noopener" data-provider="${first.slug}" data-link="keys">Get a free key ↗<span class="sr-only"> (opens in a new tab)</span></a>`));
+    // between the free limits and the quickstart
+    const at = (s) => present.indexOf(s);
+    assert.ok(at('id="limits"') < at('>Get a free key ↗') && at('>Get a free key ↗') < at('id="quickstart"'));
+    const absent = readFileSync(join(ROOT, 'site/p', `${second.slug}.html`), 'utf8');
+    assert.doesNotMatch(absent, /Get a free key/);
+    for (const file of ['site/providers.json', 'site/api/v1/providers.json']) {
+      const published = JSON.parse(readFileSync(join(ROOT, file), 'utf8'));
+      const row = published.providers.find((p) => p.slug === first.slug);
+      assert.equal(row.keys_url, 'https://example.com/keys?tab=api&new=1');
+      assert.equal(row.keys_url_source, 'https://example.com/docs');
+      assert.equal(Object.hasOwn(published.providers.find((p) => p.slug === second.slug), 'keys_url'), false);
+    }
+    const schema = JSON.parse(readFileSync(join(ROOT, 'site/api/v1/schema.json'), 'utf8'));
+    for (const name of ['keys_url', 'keys_url_source']) {
+      const field = schema.$defs.provider.properties[name];
+      assert.deepEqual([field.type, field.format, field.pattern], ['string', 'uri', '^https://']);
+    }
+    assert.notEqual(schema.$defs.provider.additionalProperties, false, 'v1 stays open to additive fields');
+    const csvHeader = readFileSync(join(ROOT, 'site/providers.csv'), 'utf8').split('\n')[0];
+    assert.doesNotMatch(csvHeader, /keys_url/, 'the CSV column list is unchanged');
+  } finally {
+    writeFileSync(DATA, raw);
+    run(['scripts/build.mjs']);
+  }
+});
+
 test('serializer ORDER matches the JSON Schema provider properties', () => {
   const schema = JSON.parse(readFileSync(join(ROOT, 'data/schema.json'), 'utf8'));
   const providerKeys = Object.keys(schema.$defs.provider.properties);
@@ -481,7 +533,7 @@ test('sitemap.xml lists no paginated updates pages (their count follows the comm
   assert.doesNotMatch(sitemap, /\/updates\/page\//, 'a page count tied to git history would make the drift-gated sitemap change on every merge');
 });
 
-test('derived-fingerprints.json pins gitignored outputs, skips site/p/, site/badges/, tracked and git-log files', () => {
+test('derived-fingerprints.json pins gitignored outputs, skips site/p/, site/badges/, the freshness badge, tracked and git-log files', () => {
   const fp = join(ROOT, 'derived-fingerprints.json');
   if (!existsSync(fp)) run(['scripts/build.mjs']);
   const pins = JSON.parse(readFileSync(fp, 'utf8'));
@@ -496,6 +548,8 @@ test('derived-fingerprints.json pins gitignored outputs, skips site/p/, site/bad
     'site/p/ must not be pinned (date-relative)');
   assert.equal(Object.keys(pins).some((k) => k.startsWith('site/badges/')), false,
     'site/badges/ must not be pinned (colour tracks verification age)');
+  assert.equal(pins['site/badge-freshness.json'], undefined,
+    'site/badge-freshness.json must not be pinned (its oldest age moves every day)');
   assert.equal(Object.keys(pins).some((k) => k.startsWith('site/og/')), false,
     'site/og/ is tracked and diff-gated directly');
   assert.equal(pins['site/index.html'], undefined,
@@ -1756,13 +1810,13 @@ test('provider links carry data-provider and data-link for the opt-in outbound_p
   assert.match(groq, /<a class="btn primary" href="[^"]+"[^>]* data-provider="groq" data-link="docs">Official docs/);
   assert.match(groq, /<a class="btn website" href="[^"]+"[^>]* data-provider="groq" data-link="website">/);
   const tagged = [...groq.matchAll(/data-provider="([^"]*)" data-link="([^"]*)"/g)];
-  assert.ok(tagged.every((m) => m[1] === 'groq' && ['docs', 'website', 'playground', 'models', 'limits_source', 'data_policy'].includes(m[2])), 'only the page provider and known link types');
+  assert.ok(tagged.every((m) => m[1] === 'groq' && ['docs', 'keys', 'website', 'playground', 'models', 'limits_source', 'data_policy'].includes(m[2])), 'only the page provider and known link types');
   const compareDir = readdirSync(join(ROOT, 'site/compare')).find((n) => n.includes('-vs-'));
   const cmp = readFileSync(join(ROOT, `site/compare/${compareDir}/index.html`), 'utf8');
   assert.equal([...cmp.matchAll(/data-link="docs"/g)].length, 2, "both providers' docs links are tagged on a static comparison");
 });
 
-test('no GA_MEASUREMENT_ID (the default): the build emits no analytics code, CSP host, banner or cookie notice change', () => {
+test('no GA_MEASUREMENT_ID (the default): no Google analytics code, Google CSP host, banner or cookie notice change; Cloudflare Web Analytics allowed and described', () => {
   const env = { ...process.env };
   delete env.GA_MEASUREMENT_ID;
   execFileSync(process.execPath, ['scripts/build.mjs'], { cwd: ROOT, stdio: 'pipe', env });
@@ -1775,7 +1829,14 @@ test('no GA_MEASUREMENT_ID (the default): the build emits no analytics code, CSP
     const html = readFileSync(join(ROOT, rel), 'utf8');
     assert.doesNotMatch(html, /googletagmanager|google-analytics|analytics\.google|gtag|consent\.js|data-consent-open|Cookie settings/, `${rel} carries analytics code without an ID`);
   }
-  assert.match(readFileSync(join(ROOT, 'site/legal/privacy.html'), 'utf8'), /no third-party analytics or tracking/);
+  const privacy = readFileSync(join(ROOT, 'site/legal/privacy.html'), 'utf8');
+  assert.match(privacy, /no cookies and no tracking/);
+  assert.match(privacy, /cookieless Cloudflare Web Analytics/);
+  assert.doesNotMatch(privacy, /We do not use Cloudflare's analytics/);
+  // Cloudflare injects the Web Analytics beacon at the edge, so every build must let it through the CSP
+  const csp = readFileSync(join(ROOT, 'site/index.html'), 'utf8').match(/http-equiv="Content-Security-Policy" content="([^"]+)"/)[1];
+  assert.match(csp, /script-src [^;]*https:\/\/static\.cloudflareinsights\.com/);
+  assert.match(csp, /connect-src [^;]*https:\/\/cloudflareinsights\.com/);
 });
 
 test('the privacy page and SECURITY.md say what the star count really does: no GitHub call from the browser', () => {
@@ -2681,6 +2742,33 @@ test('llms-full.txt shows the commercial-use condition of every conditional prov
   assert.equal(lines.length, conditional.length, 'no other provider carries a condition line');
 });
 
+test('llms-full.txt gives each provider with a data_policy one prompt data policy line, from trainState', () => {
+  run(['scripts/build.mjs']);
+  const { providers } = JSON.parse(readFileSync(DATA, 'utf8'));
+  const full = readFileSync(join(ROOT, 'site/llms-full.txt'), 'utf8');
+  const blocks = full.split('\n### ').slice(1).map((text) => `### ${text}`);
+  const blockOf = (p) => blocks.find((b) => b.startsWith(`### ${p.name} — `));
+  const policyLines = (p) => blockOf(p).split('\n').filter((l) => l.startsWith('- Prompt data policy: '));
+
+  const said = providers.find((p) => trainState(p) === 'no');
+  assert.ok(said, 'the dataset has a provider whose own sentence says it does not train on prompts');
+  const [saidLine] = policyLines(said);
+  assert.match(saidLine, /trains on prompts: no;/, `${said.slug}: no, from trainState`);
+  assert.ok(saidLine.includes(`(source ${said.data_policy.source}, checked ${said.data_policy.checked})`), `${said.slug}: its source and day`);
+
+  const valueOnly = providers.find((p) => trainState(p) === 'recorded');
+  assert.ok(valueOnly, 'the dataset has a provider with a recorded value but no quote');
+  assert.match(policyLines(valueOnly)[0], /trains on prompts: not confirmed;/, `${valueOnly.slug}: a value alone is not confirmed`);
+
+  const without = providers.find((p) => !p.data_policy);
+  assert.ok(without, 'the dataset has a provider without a data_policy');
+  assert.deepEqual(policyLines(without), [], `${without.slug}: no line, absent is never "no"`);
+
+  const withPolicy = providers.filter((p) => p.data_policy && typeof p.data_policy === 'object');
+  const lines = full.split('\n').filter((l) => l.startsWith('- Prompt data policy: '));
+  assert.equal(lines.length, withPolicy.length, 'exactly one line per provider with a data_policy');
+});
+
 test('/coverage/ treats conditional commercial use as open, not confirmed', () => {
   const provider = { slug: 'conditional', name: 'Conditional', docs_url: 'https://example.com/terms', verified: true, commercial_ok: 'conditional' };
   const row = coverageOf([provider]).find((entry) => entry.key === 'commercial_ok');
@@ -3002,7 +3090,7 @@ test('data_policy lot 4: the 13 providers that say they do not train were read f
   for (const p of data.providers.filter((q) => q.data_policy && q.data_policy.trains_on_prompts !== false)) {
     // rows that say it may train were read for the plan later (lots 2, 3, 5 and the correction of the absence claims): true where the
     // clause names the free users or free usage (AssemblyAI, Voyage AI, Cohere), false where it does not
-    const READ = { assemblyai: true, 'voyage-ai': true, elevenlabs: false, cartesia: false, 'retell-ai': false, deepgram: false, 'arli-ai': false, 'sarvam-ai': false, poolside: false, typhoon: false, openrouter: false, nlpcloud: false, 'nvidia-nim': false, veryfi: false, voicegain: false, cohere: true, inception: false, 'azure-speech': false, lemonfox: false, gladia: true };
+    const READ = { assemblyai: true, 'voyage-ai': true, elevenlabs: false, cartesia: false, 'retell-ai': false, deepgram: false, 'arli-ai': false, 'sarvam-ai': false, poolside: false, typhoon: false, openrouter: false, nlpcloud: false, 'nvidia-nim': false, veryfi: false, voicegain: false, cohere: true, inception: false, 'azure-speech': false, lemonfox: false, gladia: true, 'liquid-ai': false };
     if (p.slug in READ) assert.equal(p.data_policy.plan_named, READ[p.slug], `${p.slug}: plan_named as read`);
     else assert.equal(p.data_policy.plan_named, undefined, `${p.slug}: not read for the plan yet, so no value is written`);
   }

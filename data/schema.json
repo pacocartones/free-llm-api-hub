@@ -137,6 +137,18 @@
           "pattern": "^https://",
           "description": "Provider-owned no-code playground, linked from the provider's own docs or console. Omit when unrecorded; requires a non-empty docs_url."
         },
+        "keys_url": {
+          "type": "string",
+          "format": "uri",
+          "pattern": "^https://",
+          "description": "The provider's own page where a signed-up user creates an API key, exactly as the provider's docs link it. Omit when unrecorded (never guessed); requires keys_url_source and a non-empty docs_url. Adds a \"Get a free key\" button on the provider page."
+        },
+        "keys_url_source": {
+          "type": "string",
+          "format": "uri",
+          "pattern": "^https://",
+          "description": "The provider's own docs page that names or links keys_url. Present if and only if keys_url is."
+        },
         "phone_required": { "$ref": "#/$defs/tristate" },
         "card_required": { "$ref": "#/$defs/tristate" },
         "commercial_ok": { "$ref": "#/$defs/commercial_ok_value" },
