@@ -2628,7 +2628,7 @@ writeFileSync(join(ROOT, `site/${SITEMAP_INDEX}`), sitemapIndexXml(SITE, INDEXNO
 // on every deploy; pinning them caused the post-merge refresh-pin churn this
 // removes. It lives at the repo root (not under data/) so a fingerprint-only
 // commit never touches a path the updates feed watches.
-const isDateRelative = (rel) => rel.startsWith('site/p/') || rel.startsWith('site/badges/');
+const isDateRelative = (rel) => rel === 'site/badge-freshness.json' || rel.startsWith('site/p/') || rel.startsWith('site/badges/');
 // The weekly change feed (changes/, changes.xml, api/v1/changes.json) and the
 // monthly state reports (state/) are mined from the same git history, so they
 // are excluded for the same reason.
