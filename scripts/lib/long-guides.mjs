@@ -1,5 +1,5 @@
-// long-guides.mjs — the three long-form guides under /guides/ (OpenAI alternatives, production checklist, no card and
-// no phone). The copy is editorial; every number, limit, flag, date and provider list in it is computed here from
+// long-guides.mjs — the long-form guides under /guides/: OpenAI alternatives, production checklist, no card and no
+// phone, and one per modality (embeddings, speech, OCR, image generation). The copy is editorial; every number, limit, flag, date and provider list in it is computed here from
 // data/providers.json and data/not-free.json at build time, so the pages cannot drift from the data. A provider the
 // copy names by hand (an example, a quote) is looked up in the data and dropped when it no longer qualifies.
 //
@@ -8,7 +8,7 @@
 
 import { recScore, SLA_DAYS, DUE_SOON_DAYS } from './rules.mjs';
 import { fieldCheck, REASON_LABEL } from './field-checks.mjs';
-import { codeHtmlEsc, pythonStringLiteral } from './quickstart.mjs';
+import { codeHtmlEsc, pythonEmbeddingsQuickstart, pythonStringLiteral } from './quickstart.mjs';
 
 export const NOT_FREE_HREF = 'not-free/';
 
@@ -44,6 +44,47 @@ export const LONG_GUIDES = [
     blurb: 'Every no-card, no-phone API, with the catch for each.',
     ogTitle: 'No card, no phone: free AI APIs',
     ogSubtitle: 'every one with its catch · dated · sourced',
+  },
+  // The modality guides replace the short list guides that had these slugs, so their URLs and links stay.
+  {
+    slug: 'free-embeddings-apis',
+    title: 'Free Embedding APIs ({n}, Checked): Limits and Terms',
+    metaDesc: 'The {n} free embedding APIs in our dataset, for search and RAG: free limits, card and phone, commercial use and data policy, each checked at source.',
+    h1: 'Free embedding APIs for search and RAG',
+    card: 'Embeddings / RAG',
+    blurb: 'Free embedding APIs compared: limits, terms, data use.',
+    ogTitle: 'Free embedding APIs',
+    ogSubtitle: 'limits · commercial use · data policy',
+  },
+  {
+    slug: 'free-speech-to-text-apis',
+    title: 'Free Speech-to-Text and Text-to-Speech APIs ({n}, Checked)',
+    metaDesc: '{n} free speech-to-text and text-to-speech APIs: free minutes, characters or credits, card and phone, commercial use and data policy. Checked at source.',
+    h1: 'Free speech-to-text and text-to-speech APIs',
+    card: 'Speech (STT/TTS)',
+    blurb: 'Free transcription and voice APIs, with the catch for each.',
+    ogTitle: 'Free speech-to-text and TTS APIs',
+    ogSubtitle: 'limits · commercial use · data policy',
+  },
+  {
+    slug: 'free-ocr-document-ai-apis',
+    title: 'Free OCR and Document-Parsing APIs ({n}, Checked)',
+    metaDesc: '{n} free OCR and document-parsing APIs for PDFs and scans: free pages or credits, card and phone, commercial use and data policy. Checked at source.',
+    h1: 'Free OCR and document-parsing APIs',
+    card: 'OCR / document AI',
+    blurb: 'Free OCR and document parsing, compared for PDFs and scans.',
+    ogTitle: 'Free OCR and document-parsing APIs',
+    ogSubtitle: 'limits · commercial use · data policy',
+  },
+  {
+    slug: 'free-image-generation-apis',
+    title: 'Free Image Generation APIs ({n}, Checked): Limits and Terms',
+    metaDesc: '{n} free image generation APIs, plus editing: free credits and limits, card and phone, commercial use, watermarks and data policy. Checked at source.',
+    h1: 'Free image generation APIs',
+    card: 'Image generation',
+    blurb: 'Free image generation, with licences and watermarks.',
+    ogTitle: 'Free image generation APIs',
+    ogSubtitle: 'licences · watermarks · data policy',
   },
 ];
 
@@ -200,7 +241,6 @@ console.log(resp.choices[0].message.content);`;
 
   // The provider cell carries what to paste: the base URL (with break points after its slashes, so a narrow column
   // wraps it) and, for chat, a free model ID.
-  const wrapCode = (t) => `<code>${esc(t).replace(/\//g, '/<wbr>')}</code>`;
   const providerCell = (x, withModel) =>
     `${L(x)}<br><small>base_url</small> ${httpsOnly(x.openai_base_url) ? wrapCode(x.openai_base_url) : '<span class="notes">see the provider page</span>'}` +
     (withModel ? `<br><small>model</small> ${exampleChatModel(x) ? wrapCode(exampleChatModel(x)) : '<span class="notes">see the provider page</span>'}` : '');
@@ -555,10 +595,367 @@ function noCardNoPhoneGuide({ providers, prefix }) {
   return { count: list.length, answer, body, faq, featured: list };
 }
 
+// ---------- guides 4 to 7: one per modality (embeddings, speech, OCR, image generation) ----------
+// Each guide lists every verified provider with that modality, except the NO_FREE_MODEL_CALLS entries, which a
+// sentence names instead. The dataset has no field for some splits (speech-to-text or text-to-speech, image
+// generation or editing), so those are read from the words of each entry, and the page says so.
+const hasModality = (m) => (x) => (x.modalities || []).includes(m);
+const entryText = (x) => [x.free_tier, x.rate_limits, x.notes, x.best_for, ...(x.models_free || [])].filter(Boolean).join(' ');
+export const MENTIONS_STT = /speech[- ]to[- ]text|\bSTT\b|transcri|whisper|\bASR\b|-asr\b|speech recognition/i;
+export const MENTIONS_TTS = /text[- ]to[- ]speech|\bTTS\b|-tts\b/i;
+export const MENTIONS_IMAGE_GENERATION = /flux|sdxl|stable[- ]diffusion|text[- ]to[- ]image|image generation|generat\w* images?|image models?|-image\b/i;
+const EMBEDDING_MODEL = /embed|\bbge\b|bge-|\be5\b|e5-|gte-|minilm/i;
+export const embeddingModel = (x) => (x.models_free || []).find((m) => EMBEDDING_MODEL.test(m)) || null;
+// The sentences of an entry (free tier and notes) that mention a watermark, quoted as they stand: an entry can
+// mention one to say it is gone, so the page quotes the sentence instead of calling it a watermark.
+export const watermarkSentences = (x) => [x.free_tier, x.notes].filter(Boolean).flatMap((t) => t.split(/(?<=[.;])\s+/)).filter((t) => /watermark/i.test(t));
+
+export function modalitySets(providers) {
+  const v = providers.filter((x) => x.verified === true);
+  const of = (m) => v.filter((x) => hasModality(m)(x) && !NO_FREE_MODEL_CALLS.includes(x.slug)).sort(byScore);
+  const noCalls = (m) => v.filter((x) => hasModality(m)(x) && NO_FREE_MODEL_CALLS.includes(x.slug)).sort(byName);
+  const image = of('image');
+  return {
+    verified: v.length,
+    embeddings: of('embeddings'),
+    speech: of('audio'),
+    ocr: of('ocr'),
+    image,
+    imageGeneration: image.filter((x) => MENTIONS_IMAGE_GENERATION.test(entryText(x))),
+    imageOther: image.filter((x) => !MENTIONS_IMAGE_GENERATION.test(entryText(x))),
+    noCalls: { embeddings: noCalls('embeddings'), speech: noCalls('audio'), ocr: noCalls('ocr'), image: noCalls('image') },
+  };
+}
+export const speechMentions = (x) => ({ stt: MENTIONS_STT.test(entryText(x)), tts: MENTIONS_TTS.test(entryText(x)) });
+
+const wrapCode = (t) => `<code>${esc(t).replace(/\//g, '/<wbr>')}</code>`;
+const reasonOf = (x, field) => { const c = fieldCheck(x, field); return REASON_LABEL[c && c.status] || REASON_LABEL.not_checked; };
+const flagWords = (x, field) => (x[field] === false ? 'No' : x[field] === true ? 'Yes' : `Not confirmed (${reasonOf(x, field)})`);
+const typeLine = (x) => (x.category === 'ongoing' ? 'Ongoing free tier' : 'One-time credit');
+const names = (list) => andList(list.map((x) => esc(x.name)));
+// The verb that agrees with a list of providers: "Groq allows", "Groq and Gemini allow".
+const agree = (list, one, many) => (list.length === 1 ? one : many);
+const isOngoing = (x) => x.category === 'ongoing';
+const commercialSplit = (list) => ({
+  yes: list.filter((x) => x.commercial_ok === true),
+  no: list.filter((x) => x.commercial_ok === false),
+  cond: list.filter((x) => x.commercial_ok === 'conditional'),
+  unk: list.filter((x) => x.commercial_ok == null),
+});
+const trainsSplit = (list) => ({
+  no: list.filter((x) => x.data_policy && x.data_policy.trains_on_prompts === false),
+  yes: list.filter((x) => x.data_policy && x.data_policy.trains_on_prompts === true),
+  open: list.filter((x) => !x.data_policy || x.data_policy.trains_on_prompts == null),
+});
+
+export function dataUseWords(x) {
+  const dp = x.data_policy;
+  if (!dp) return 'Not recorded';
+  if (dp.trains_on_prompts === true) return 'Says it can use your inputs for training';
+  if (dp.trains_on_prompts === false) return 'Says it doesn’t train on your inputs';
+  return 'Unsettled: its pages conflict or are silent';
+}
+
+/** The comparison table of a modality guide; `extra` adds a column after the provider ({ head, cell }). */
+function modalityTable(label, list, L, { baseUrl = false, extra = null } = {}) {
+  const providerCell = (x) => `${L(x)}<br><small>${typeLine(x)}</small>` +
+    (baseUrl && x.openai_compatible === true && httpsOnly(x.openai_base_url) ? `<br><small>base_url</small> ${wrapCode(x.openai_base_url)}` : '');
+  const commercialCell = (x) => commercialWords(x) +
+    (x.commercial_ok === 'conditional' && x.commercial_ok_condition ? `<br><span class="notes">${esc(x.commercial_ok_condition)}</span>` : '') +
+    (x.commercial_ok == null ? `<br><span class="notes">${esc(reasonOf(x, 'commercial_ok'))}</span>` : '');
+  const dataCell = (x) => `${esc(dataUseWords(x))}${x.data_policy && httpsOnly(x.data_policy.source) ? ` (${ext(x.data_policy.source, 'source')})` : ''}`;
+  const head = ['Provider', ...(extra ? [extra.head] : []), 'What’s free and the published limits', 'Card and phone', 'Commercial use', 'Data use', 'Checked'];
+  return tableHtml(label, head, list.map((x) => [
+    providerCell(x), ...(extra ? [extra.cell(x)] : []),
+    `${esc(x.free_tier)}<br><span class="notes">${esc(x.rate_limits)}</span>`,
+    `Card: ${esc(flagWords(x, 'card_required'))}<br>Phone: ${esc(flagWords(x, 'phone_required'))}`,
+    commercialCell(x), dataCell(x), checkedCell(x),
+  ]));
+}
+
+const FLAG_LABEL = { commercial_ok: 'Commercial use', card_required: 'The card requirement', phone_required: 'The phone requirement' };
+/** The gotchas of a modality guide: each entry's notes, then what the data can't confirm, with the recorded reasons. */
+function modalityGotchas(list, L, { noCalls = [], what }) {
+  const unknowns = Object.keys(FLAG_LABEL).map((field) => {
+    const nulls = list.filter((x) => x[field] == null);
+    if (!nulls.length) return '';
+    const ex = nulls.map((x) => ({ x, c: fieldCheck(x, field) })).find(({ c }) => c && c.note);
+    return `<li><strong>${FLAG_LABEL[field]}</strong> isn’t confirmed for ${nulls.length} of ${list.length}: ${andList(nulls.map((x) => `${L(x)} (${esc(reasonOf(x, field))})`))}.` +
+      (ex ? ` For example, ${L(ex.x)}: “${escProse(ex.c.note)}” (read ${time(ex.c.checked)}).` : '') + `</li>`;
+  }).join('');
+  const noPolicy = list.filter((x) => !x.data_policy);
+  const windows = list.filter((x) => typeof x.expires === 'string' && x.expires);
+  const noExpiry = list.filter((x) => x.no_expiry && x.no_expiry.quote);
+  const anon = list.filter((x) => x.anonymous_access && x.anonymous_access.quote);
+  const watermarks = list.filter((x) => watermarkSentences(x).length);
+  return h2('Gotchas', 'gotchas') +
+    p('Everything below comes from each provider’s entry, which quotes the provider’s own pages. A flag the pages don’t settle stays “not confirmed”, with the reason; it is never a hidden yes or no.') +
+    `<h3>What the data can’t confirm</h3><ul>${unknowns}` +
+    (noPolicy.length ? `<li><strong>No quoted data policy</strong> is recorded for ${noPolicy.length} of ${list.length}: ${andList(noPolicy.map(L))}.</li>` : '') +
+    `</ul>` +
+    ((windows.length || noExpiry.length || anon.length || watermarks.length) ? `<h3>Expiry, account and output</h3><ul>` +
+      (windows.length ? `<li><strong>Free access with an end date:</strong> ${andList(windows.map((x) => `${L(x)} (${esc(x.expires)})`))}.</li>` : '') +
+      (noExpiry.length ? `<li><strong>Credit that doesn’t expire</strong>, in the provider’s words: ${noExpiry.map((x) => `${L(x)}: “${escProse(x.no_expiry.quote)}”`).join('; ')}.</li>` : '') +
+      (anon.length ? `<li><strong>No account needed</strong> for some use: ${anon.map((x) => `${L(x)} (“${escProse(x.anonymous_access.quote)}”${x.anonymous_access.note ? `; ${escProse(x.anonymous_access.note)}` : ''})`).join('; ')}.</li>` : '') +
+      (watermarks.length ? `<li><strong>Watermarks:</strong> ${watermarks.map((x) => `${L(x)}: “${escProse(watermarkSentences(x).join(' '))}”`).join('; ')}.</li>` : '') +
+      `</ul>` : '') +
+    (noCalls.length ? p(`${andList(noCalls.map(L))} also ${noCalls.length === 1 ? 'lists' : 'list'} ${what} but ${noCalls.length === 1 ? 'is' : 'are'} left out of the table: per ${noCalls.length === 1 ? 'its entry' : 'their entries'}, ${noCalls.map((x) => `“${escProse(x.free_tier)}”`).join('; ')}.`) : '') +
+    `<h3>The catch, provider by provider</h3><ul>${list.filter((x) => x.notes).map((x) => `<li><strong>${L(x)}.</strong> ${escProse(x.notes)}</li>`).join('')}</ul>`;
+}
+
+const compareLink = (list, prefix) => (list.length >= 2
+  ? `<a href="${prefix}compare/?compare=${list.slice(0, 2).map((x) => esc(x.slug)).join(',')}">${andList(list.slice(0, 2).map((x) => esc(x.name)))} side by side</a>`
+  : '');
+const listOrNone = (list, L, none) => (list.length ? andList(list.map(L)) : none);
+
+// ---------- guide 4: free embedding APIs ----------
+// The quickstart provider: OpenAI-compatible, with a base URL and a free embedding model ID in its entry; no card and
+// no phone first, then no card, then the rest, each by score.
+const qsRank = (x) => (x.card_required === false && x.phone_required !== true ? 0 : x.card_required === false ? 1 : 2);
+export const embeddingsQuickstartProvider = (list) =>
+  list.filter((x) => x.openai_compatible === true && httpsOnly(x.openai_base_url) && embeddingModel(x)).sort((a, b) => qsRank(a) - qsRank(b) || byScore(a, b))[0] || null;
+
+function embeddingsGuide({ providers, prefix }) {
+  const S = modalitySets(providers);
+  const list = S.embeddings;
+  const L = (x) => provLink(x, prefix);
+  const ongoing = list.filter(isOngoing);
+  const trial = list.filter((x) => !isOngoing(x));
+  const compat = list.filter((x) => x.openai_compatible === true);
+  const native = list.filter((x) => x.openai_compatible !== true);
+  const rerank = list.filter(hasModality('rerank'));
+  const c = commercialSplit(list);
+  const t = trainsSplit(list);
+  const qs = embeddingsQuickstartProvider(list);
+
+  const answer = `${list.length} of the ${S.verified} verified providers in our dataset include embedding models in their free access: ${ongoing.length} with an ongoing free tier and ${trial.length} with a one-time credit. ${compat.length} of them list an OpenAI-compatible API, so the OpenAI SDK’s embeddings call works with a different <code>base_url</code>. The table compares free limits, card and phone, commercial use and data policy.`;
+  const body =
+    h2('Who this guide is for', 'who-its-for') +
+    p(`Developers building semantic search, retrieval-augmented generation (RAG), clustering or deduplication who want to prototype without paying for embeddings. For the chat model of a RAG stack, see <a href="${prefix}guides/openai-api-alternatives">free OpenAI API alternatives</a>; to reorder search results, see <a href="${prefix}guides/free-reranking-apis">free reranking APIs</a>; to get text out of PDFs first, see <a href="${prefix}guides/free-ocr-document-ai-apis">free OCR APIs</a>.`) +
+    h2('Free embedding APIs compared', 'compared') +
+    p('Sorted by our recommendation score. The base URL is shown where the provider lists an OpenAI-compatible API.') +
+    modalityTable('Free embedding APIs compared', list, L, { baseUrl: true }) +
+    related([`<a href="${prefix}collections/multimodal">Multimodal collection</a>`, compareLink(list, prefix)].filter(Boolean)) +
+    h2('How to choose', 'how-to-choose') +
+    `<ol>` +
+    `<li><strong>Pick the model before you index.</strong> Vectors from different models can’t be compared, so changing the model later means embedding every document again. Choose for the language and length of your documents, then stay with it.</li>` +
+    `<li><strong>Renewing or one-time.</strong> Ongoing free tiers: ${listOrNone(ongoing, L, 'none')}. One-time credits: ${listOrNone(trial, L, 'none')}. A one-time credit can cover a first index, but queries keep costing after it runs out.</li>` +
+    `<li><strong>Same SDK as your chat model.</strong> ${compat.length ? `${andList(compat.map(L))} ${agree(compat, 'lists', 'list')} an OpenAI-compatible API.` : 'None lists an OpenAI-compatible API.'}${native.length ? ` ${andList(native.map(L))} ${agree(native, 'uses its', 'use their')} own API.` : ''} Compatibility is recorded per provider, not per endpoint, so confirm the <code>/embeddings</code> route on the provider page. See the <a href="${prefix}collections/openai-compatible">OpenAI-compatible collection</a>.</li>` +
+    `<li><strong>Commercial use.</strong> ${c.yes.length ? `${andList(c.yes.map(L))} ${agree(c.yes, 'allows', 'allow')} it on the free tier.` : 'None confirms it on the free tier.'}${c.no.length ? ` ${andList(c.no.map(L))} ${agree(c.no, 'doesn’t', 'don’t')}.` : ''}${c.cond.length ? ` ${andList(c.cond.map(L))} ${agree(c.cond, 'allows', 'allow')} it under a condition.` : ''}${c.unk.length ? ` For the other ${c.unk.length} the provider’s pages don’t settle it.` : ''} See the <a href="${prefix}collections/commercial-use">commercial-use collection</a>.</li>` +
+    `<li><strong>Your documents.</strong> Everything you index is sent to the provider. ${t.no.length ? `${andList(t.no.map(L))} ${agree(t.no, 'says it doesn’t', 'say they don’t')} train on your inputs.` : ''}${t.yes.length ? ` ${andList(t.yes.map(L))} ${agree(t.yes, 'says it can', 'say they can')}.` : ''}${t.open.length ? ` For ${t.open.length} more, no quoted policy settles it.` : ''} See <a href="${prefix}data-policy/">data policy, provider by provider</a> and the <a href="${prefix}collections/no-training">no-training collection</a>.</li>` +
+    (rerank.length ? `<li><strong>Reranking with the same key.</strong> ${andList(rerank.map(L))} also ${agree(rerank, 'lists a reranker in its', 'list a reranker in their')} free access. See <a href="${prefix}guides/free-reranking-apis">free reranking APIs</a>.</li>` : '') +
+    `</ol>` +
+    h2('Quickstart', 'quickstart') +
+    (qs
+      ? p(`This is the repository’s embeddings quickstart, filled with ${L(qs)}’s base URL and a free embedding model from its entry (${code(embeddingModel(qs))}). Card: ${esc(flagWords(qs, 'card_required'))}. Phone: ${esc(flagWords(qs, 'phone_required'))}.`) +
+        pre('python', pythonEmbeddingsQuickstart(qs.openai_base_url, embeddingModel(qs))) +
+        p('For another OpenAI-compatible provider, change <code>base_url</code>, the key and <code>model</code>. Every provider page has its own quickstart, and the <a href="' + prefix + 'models/">free model index</a> lists the model IDs in each entry.')
+      : p(`No provider in the dataset lists both an OpenAI-compatible base URL and a free embedding model ID, so there is no ready-made snippet. Each provider page links its docs.`)) +
+    modalityGotchas(list, L, { noCalls: S.noCalls.embeddings, what: 'embeddings' }) +
+    related([`<a href="${prefix}collections/no-credit-card">No credit card collection</a>`, `<a href="${prefix}guides/choose-free-llm-api-for-production">Can you use a free API in production?</a>`, `<a href="${prefix}coverage/">What the dataset doesn’t know yet</a>`]);
+
+  const noCardOngoing = ongoing.filter((x) => x.card_required === false);
+  const faq = [
+    {
+      q: 'Is there a free embedding API?',
+      a: `Yes. ${list.length} of the ${S.verified} verified providers in our dataset include embedding models in their free access.${noCardOngoing.length ? ` ${names(noCardOngoing)} ${noCardOngoing.length === 1 ? 'has' : 'have'} an ongoing free tier with no card required.` : ''}${trial.length ? ` ${trial.length} more give a one-time credit.` : ''}`,
+    },
+    {
+      q: 'Can I use a free embedding API commercially?',
+      a: `${c.yes.length} of the ${list.length} allow it on the free tier, per their terms.${c.no.length ? ` ${names(c.no)} ${c.no.length === 1 ? 'doesn’t' : 'don’t'}.` : ''}${c.cond.length ? ` ${names(c.cond)} ${c.cond.length === 1 ? 'allows' : 'allow'} it under a condition.` : ''}${c.unk.length ? ` For ${c.unk.length} it isn’t confirmed.` : ''}`,
+    },
+    {
+      q: 'Do free embedding APIs train on my documents?',
+      a: `${t.no.length ? `${names(t.no)} ${agree(t.no, 'says it doesn’t', 'say they don’t')}.` : 'None says it doesn’t.'}${t.yes.length ? ` ${names(t.yes)} ${agree(t.yes, 'says it can', 'say they can')}.` : ''}${t.open.length ? ` For the other ${t.open.length}, no quoted policy settles it.` : ''}`,
+    },
+    { q: 'Can I switch embedding providers later?', a: 'Only by embedding your documents again: vectors from different models can’t be compared. Pick the model before you build the index.' },
+  ];
+  return { count: list.length, answer, body, faq, featured: list };
+}
+
+// ---------- guide 5: free speech-to-text and text-to-speech APIs ----------
+function speechGuide({ providers, prefix }) {
+  const S = modalitySets(providers);
+  const list = S.speech;
+  const L = (x) => provLink(x, prefix);
+  const stt = list.filter((x) => speechMentions(x).stt);
+  const tts = list.filter((x) => speechMentions(x).tts);
+  const both = list.filter((x) => speechMentions(x).stt && speechMentions(x).tts);
+  const ongoing = list.filter(isOngoing);
+  const trial = list.filter((x) => !isOngoing(x));
+  const whisper = list.filter((x) => x.openai_compatible === true && httpsOnly(x.openai_base_url) && (x.models_free || []).some((m) => /whisper/i.test(m)));
+  const c = commercialSplit(list);
+  const cTts = commercialSplit(tts);
+  const t = trainsSplit(list);
+  const mentions = (x) => { const m = speechMentions(x); return m.stt || m.tts ? andList([m.stt && 'speech-to-text', m.tts && 'text-to-speech'].filter(Boolean)) : '<span class="notes">Not stated in its entry</span>'; };
+
+  const answer = `${list.length} of the ${S.verified} verified providers in our dataset offer free speech APIs. By the words of their entries, ${stt.length} mention speech-to-text (transcription) and ${tts.length} text-to-speech; ${both.length} mention both. ${ongoing.length} have an ongoing free tier and ${trial.length} a one-time credit. Free amounts come in minutes, characters, credits or money, so convert them to your own usage before you compare.`;
+  const body =
+    h2('Who this guide is for', 'who-its-for') +
+    p('Developers adding transcription, captions, meeting notes, voice commands, read-aloud or a voice agent to an app, who want to prototype on a free tier and know the catch before they ship.') +
+    h2('Free speech APIs compared', 'compared') +
+    p('The “Covers” column is read from the words of each entry (its free tier, notes and model IDs); the dataset has no separate field for it. Check the provider page for the exact models.') +
+    modalityTable('Free speech-to-text and text-to-speech APIs compared', list, L, { extra: { head: 'Covers', cell: mentions } }) +
+    related([`<a href="${prefix}collections/multimodal">Multimodal collection</a>`, compareLink(stt, prefix)].filter(Boolean)) +
+    h2('How to choose', 'how-to-choose') +
+    `<ol>` +
+    `<li><strong>Transcription or voice output.</strong> Speech-to-text with an ongoing free tier: ${listOrNone(stt.filter(isOngoing), L, 'none')}; with a one-time credit: ${listOrNone(stt.filter((x) => !isOngoing(x)), L, 'none')}. Text-to-speech with an ongoing free tier: ${listOrNone(tts.filter(isOngoing), L, 'none')}; with a one-time credit: ${listOrNone(tts.filter((x) => !isOngoing(x)), L, 'none')}.</li>` +
+    `<li><strong>Convert the units.</strong> Transcription is usually counted in audio minutes or hours, voice output in characters, and many providers count credits or money. Work out what one minute of your audio, or one page of your text, costs in each unit before you compare.</li>` +
+    (whisper.length ? `<li><strong>Keep the OpenAI SDK.</strong> ${andList(whisper.map((x) => `${L(x)} (${code((x.models_free || []).find((m) => /whisper/i.test(m)))})`))} ${agree(whisper, 'lists an OpenAI-compatible API and a Whisper model in its entry', 'list an OpenAI-compatible API and a Whisper model in their entries')}. Compatibility is recorded per provider, not per endpoint: confirm the audio route on the provider page.</li>` : '') +
+    `<li><strong>Commercial use.</strong> Voice terms often differ from text terms. ${c.yes.length ? `${andList(c.yes.map(L))} ${agree(c.yes, 'allows', 'allow')} commercial use on the free tier.` : 'None confirms commercial use on the free tier.'}${c.no.length ? ` ${andList(c.no.map(L))} ${agree(c.no, 'doesn’t', 'don’t')}.` : ''}${c.cond.length ? ` ${andList(c.cond.map(L))} ${agree(c.cond, 'allows', 'allow')} it under a condition.` : ''}${c.unk.length ? ` For the other ${c.unk.length} the provider’s pages don’t settle it.` : ''} See the <a href="${prefix}collections/commercial-use">commercial-use collection</a>.</li>` +
+    `<li><strong>Your audio.</strong> Recordings often hold personal data. ${t.yes.length ? `${andList(t.yes.map(L))} ${agree(t.yes, 'says it', 'say they')} can use your inputs for training; the Data use column links the sentence, which may include an opt-out.` : ''}${t.no.length ? ` ${andList(t.no.map(L))} ${agree(t.no, 'says it doesn’t', 'say they don’t')} train on them.` : ''}${t.open.length ? ` For ${t.open.length} more, no quoted policy settles it.` : ''} See <a href="${prefix}data-policy/">data policy, provider by provider</a>.</li>` +
+    `<li><strong>Concurrency and streaming.</strong> The limits column gives each provider’s published concurrency or request limits; real-time transcription and voice agents hit those first.</li>` +
+    `</ol>` +
+    h2('Quickstart', 'quickstart') +
+    p(`This repository has no speech quickstart: most speech APIs use their own REST or WebSocket endpoints. Each provider page links its docs${whisper.length ? `; for the OpenAI-compatible ones above, the OpenAI SDK’s audio transcription call with that provider’s <code>base_url</code> is the place to start` : ''}.`) +
+    modalityGotchas(list, L, { noCalls: S.noCalls.speech, what: 'audio' }) +
+    related([`<a href="${prefix}collections/no-credit-card">No credit card collection</a>`, `<a href="${prefix}guides/openai-api-alternatives">Free OpenAI API alternatives</a>`, `<a href="${prefix}guides/choose-free-llm-api-for-production">Can you use a free API in production?</a>`]);
+
+  const sttOngoing = stt.filter(isOngoing);
+  const ttsOngoing = tts.filter(isOngoing);
+  const faq = [
+    {
+      q: 'Is there a free speech-to-text API?',
+      a: `Yes. ${sttOngoing.length ? `${names(sttOngoing)} ${sttOngoing.length === 1 ? 'has an ongoing free tier whose entry mentions' : 'have ongoing free tiers whose entries mention'} speech-to-text.` : 'No ongoing free tier in the dataset mentions speech-to-text.'}${stt.length - sttOngoing.length ? ` ${stt.length - sttOngoing.length} more give a one-time credit.` : ''}`,
+    },
+    {
+      q: 'Is there a free text-to-speech API?',
+      a: `Yes. ${ttsOngoing.length ? `${names(ttsOngoing)} ${ttsOngoing.length === 1 ? 'has an ongoing free tier whose entry mentions' : 'have ongoing free tiers whose entries mention'} text-to-speech.` : 'No ongoing free tier in the dataset mentions text-to-speech.'}${tts.length - ttsOngoing.length ? ` ${tts.length - ttsOngoing.length} more give a one-time credit.` : ''}`,
+    },
+    {
+      q: 'Can I use free text-to-speech voices commercially?',
+      a: `Of the ${tts.length} entries that mention text-to-speech, ${cTts.yes.length} allow commercial use on the free tier.${cTts.no.length ? ` ${names(cTts.no)} ${cTts.no.length === 1 ? 'doesn’t' : 'don’t'}.` : ''}${cTts.cond.length ? ` ${names(cTts.cond)} ${cTts.cond.length === 1 ? 'allows' : 'allow'} it under a condition.` : ''}${cTts.unk.length ? ` For ${cTts.unk.length} it isn’t confirmed.` : ''}`,
+    },
+    {
+      q: 'Do free speech APIs train on my audio?',
+      a: `${t.yes.length ? `${names(t.yes)} ${agree(t.yes, 'says it', 'say they')} can use your inputs for training.` : 'None says it trains on your inputs.'}${t.no.length ? ` ${names(t.no)} ${agree(t.no, 'says it doesn’t', 'say they don’t')}.` : ''}${t.open.length ? ` For the other ${t.open.length}, no quoted policy settles it.` : ''}`,
+    },
+  ];
+  return { count: list.length, answer, body, faq, featured: list };
+}
+
+// ---------- guide 6: free OCR and document-parsing APIs ----------
+function ocrGuide({ providers, prefix }) {
+  const S = modalitySets(providers);
+  const list = S.ocr;
+  const L = (x) => provLink(x, prefix);
+  const ongoing = list.filter(isOngoing);
+  const trial = list.filter((x) => !isOngoing(x));
+  const compat = list.filter((x) => x.openai_compatible === true);
+  const native = list.filter((x) => x.openai_compatible !== true);
+  const watermarks = list.filter((x) => watermarkSentences(x).length);
+  const c = commercialSplit(list);
+  const t = trainsSplit(list);
+  const noCard = list.filter((x) => x.card_required === false);
+  const noCardNoPhoneList = noCard.filter((x) => x.phone_required === false);
+
+  const answer = `${list.length} of the ${S.verified} verified providers in our dataset offer free OCR or document parsing: ${ongoing.length} with an ongoing free tier and ${trial.length} with a one-time allowance. Free amounts are counted in pages, conversions or credits, so read the limits column against your volume. The table also shows card and phone, commercial use and data policy.`;
+  const body =
+    h2('Who this guide is for', 'who-its-for') +
+    p(`Developers turning PDFs, scans, receipts or forms into text: for search, for a RAG pipeline, or for data entry. Once the text is out, see <a href="${prefix}guides/free-embeddings-apis">free embedding APIs</a> to index it.`) +
+    h2('Free OCR and document-parsing APIs compared', 'compared') +
+    modalityTable('Free OCR and document-parsing APIs compared', list, L) +
+    related([`<a href="${prefix}collections/multimodal">Multimodal collection</a>`, compareLink(list, prefix)].filter(Boolean)) +
+    h2('How to choose', 'how-to-choose') +
+    `<ol>` +
+    `<li><strong>Renewing or one-time.</strong> Ongoing free tiers: ${listOrNone(ongoing, L, 'none')}. One-time allowances: ${listOrNone(trial, L, 'none')}.</li>` +
+    `<li><strong>Plain text or layout.</strong> Plain OCR returns the text. Document parsers also return layout (tables, headings, reading order), which matters when you split documents into chunks for RAG. Each entry’s free-tier text says what it covers; the provider page has the details.</li>` +
+    `<li><strong>Commercial use.</strong> ${c.yes.length ? `${andList(c.yes.map(L))} ${agree(c.yes, 'allows', 'allow')} it on the free tier.` : 'None confirms it on the free tier.'}${c.cond.length ? ` ${c.cond.map((x) => `${L(x)}: ${esc(String(x.commercial_ok_condition || 'allowed under a condition').replace(/\.$/, ''))}`).join('; ')}.` : ''}${c.no.length ? ` ${andList(c.no.map(L))} ${agree(c.no, 'doesn’t', 'don’t')}.` : ''}${c.unk.length ? ` For ${andList(c.unk.map(L))} the provider’s pages don’t settle it.` : ''}</li>` +
+    (watermarks.length ? `<li><strong>Watermarks.</strong> ${watermarks.map((x) => `${L(x)}: “${escProse(watermarkSentences(x).join(' '))}”`).join('; ')}.</li>` : '') +
+    `<li><strong>Your documents.</strong> Scans often hold personal or financial data. ${t.no.length ? `${andList(t.no.map(L))} ${agree(t.no, 'says it doesn’t', 'say they don’t')} train on your inputs.` : ''}${t.yes.length ? ` ${andList(t.yes.map(L))} ${agree(t.yes, 'says it can', 'say they can')}.` : ''}${t.open.length ? ` For ${andList(t.open.map(L))}, no quoted policy settles it.` : ''} See <a href="${prefix}data-policy/">data policy, provider by provider</a>.</li>` +
+    `<li><strong>OpenAI SDK.</strong> ${compat.length ? `${andList(compat.map(L))} ${agree(compat, 'lists', 'list')} an OpenAI-compatible API, recorded per provider rather than per endpoint; the others use their own REST APIs.` : 'None of them lists an OpenAI-compatible API; each uses its own REST API.'}</li>` +
+    `</ol>` +
+    h2('Quickstart', 'quickstart') +
+    p(`This repository has no OCR quickstart: ${native.length} of the ${list.length} use their own REST API, not the OpenAI format. Each provider page links its docs.`) +
+    modalityGotchas(list, L, { noCalls: S.noCalls.ocr, what: 'OCR' }) +
+    related([`<a href="${prefix}collections/no-credit-card">No credit card collection</a>`, `<a href="${prefix}collections/commercial-use">Commercial use collection</a>`, `<a href="${prefix}guides/openai-api-alternatives">Free OpenAI API alternatives</a>`]);
+
+  const faq = [
+    {
+      q: 'Is there a free OCR API?',
+      a: `Yes. ${ongoing.length ? `${names(ongoing)} ${ongoing.length === 1 ? 'has' : 'have'} an ongoing free tier for OCR or document parsing.` : 'No provider in the dataset has an ongoing free OCR tier.'}${trial.length ? ` ${names(trial)} ${agree(trial, 'gives', 'give')} a one-time allowance.` : ''}`,
+    },
+    {
+      q: 'Can I use a free OCR API commercially?',
+      a: `${c.yes.length} of the ${list.length} allow it on the free tier, per their terms.${c.cond.length ? ` ${names(c.cond)} ${c.cond.length === 1 ? 'allows' : 'allow'} it under a condition.` : ''}${c.no.length ? ` ${names(c.no)} ${c.no.length === 1 ? 'doesn’t' : 'don’t'}.` : ''}${c.unk.length ? ` For ${names(c.unk)} it isn’t confirmed.` : ''}`,
+    },
+    {
+      q: 'Does free OCR add a watermark?',
+      a: watermarks.length ? `Of the ${list.length} entries, ${agree(watermarks, 'one mentions', `${watermarks.length} mention`)} a watermark: ${names(watermarks)}. The Gotchas section quotes the sentence.` : 'None of the entries mentions a watermark. Check the provider page for the output of the free tier.',
+    },
+    {
+      q: 'Which free OCR API needs no credit card?',
+      a: noCard.length ? `${names(noCard)} ${agree(noCard, 'needs', 'need')} no card for the free access.${noCardNoPhoneList.length ? ` Of those, ${names(noCardNoPhoneList)} also ${agree(noCardNoPhoneList, 'needs', 'need')} no phone number.` : ''}` : 'None is confirmed to need no card.',
+    },
+  ];
+  return { count: list.length, answer, body, faq, featured: list };
+}
+
+// ---------- guide 7: free image generation APIs ----------
+function imageGuide({ providers, prefix }) {
+  const S = modalitySets(providers);
+  const gen = S.imageGeneration;
+  const other = S.imageOther;
+  const all = S.image;
+  const L = (x) => provLink(x, prefix);
+  const ongoing = gen.filter(isOngoing);
+  const trial = gen.filter((x) => !isOngoing(x));
+  const c = commercialSplit(gen);
+  const t = trainsSplit(all);
+  const anon = gen.filter((x) => x.anonymous_access);
+  const watermarks = all.filter((x) => watermarkSentences(x).length);
+  const compat = gen.filter((x) => x.openai_compatible === true);
+
+  const answer = `${gen.length} of the ${S.verified} verified providers in our dataset give free access or starting credit that their entries tie to image generation. ${other.length} more list the image modality, but their entries don’t name image generation: they cover editing, background removal or images as input, or don’t say. They are in a second table. Check commercial use, model licences and watermarks first.`;
+  const body =
+    h2('Who this guide is for', 'who-its-for') +
+    p(`Developers generating illustrations, product shots, thumbnails or test images from a prompt, in an app or a script. To <em>read</em> images (captions, visual questions), see <a href="${prefix}guides/free-vision-apis">free vision APIs</a> instead.`) +
+    h2('Free image generation APIs compared', 'compared') +
+    p('An entry is in this table when its free tier, notes, model IDs or summary name image generation or an image model; the dataset has no separate field for it.') +
+    modalityTable('Free image generation APIs compared', gen, L) +
+    (other.length ? `<h3>Other image APIs: editing, image input or not stated</h3>` + modalityTable('Other free image APIs', other, L) : '') +
+    related([`<a href="${prefix}collections/multimodal">Multimodal collection</a>`, compareLink(gen, prefix)].filter(Boolean)) +
+    h2('How to choose', 'how-to-choose') +
+    `<ol>` +
+    `<li><strong>Commercial use and model licences.</strong> ${c.yes.length ? `${andList(c.yes.map(L))} ${agree(c.yes, 'allows', 'allow')} commercial use on the free access.` : 'None confirms commercial use on the free access.'}${c.cond.length ? ` Conditional: ${c.cond.map((x) => `${L(x)}: ${esc(String(x.commercial_ok_condition || 'see its page').replace(/\.$/, ''))}`).join('; ')}.` : ''}${c.no.length ? ` ${andList(c.no.map(L))} ${agree(c.no, 'doesn’t', 'don’t')} allow it.` : ''}${c.unk.length ? ` For ${andList(c.unk.map(L))} the provider’s pages don’t settle it.` : ''} A hosted model can carry its own licence on top of the provider’s terms.</li>` +
+    `<li><strong>Renewing or one-time.</strong> Ongoing free access: ${listOrNone(ongoing, L, 'none')}. One-time credit: ${listOrNone(trial, L, 'none')}.</li>` +
+    (anon.length ? `<li><strong>No account.</strong> ${andList(anon.map(L))} can be called without an account, with tighter limits; the Gotchas section quotes the provider’s sentence. See the <a href="${prefix}collections/anonymous-access">no-account collection</a>.</li>` : '') +
+    (watermarks.length ? `<li><strong>Watermarks.</strong> ${watermarks.map((x) => `${L(x)}: “${escProse(watermarkSentences(x).join(' '))}”`).join('; ')}.</li>` : '') +
+    `<li><strong>Your prompts and uploads.</strong> ${t.no.length ? `${andList(t.no.map(L))} ${agree(t.no, 'says it doesn’t', 'say they don’t')} train on your inputs.` : ''}${t.yes.length ? ` ${andList(t.yes.map(L))} ${agree(t.yes, 'says it can', 'say they can')}.` : ''}${t.open.length ? ` For ${t.open.length} more, no quoted policy settles it.` : ''} See <a href="${prefix}data-policy/">data policy, provider by provider</a>.</li>` +
+    (compat.length ? `<li><strong>OpenAI SDK.</strong> ${andList(compat.map(L))} ${agree(compat, 'lists', 'list')} an OpenAI-compatible API, but compatibility is recorded per provider, not per endpoint: confirm that the image endpoint follows the OpenAI shape before you rely on it.</li>` : '') +
+    `</ol>` +
+    h2('Quickstart', 'quickstart') +
+    p('This repository has no image-generation quickstart: image endpoints, parameters and model names differ from provider to provider. Each provider page links its docs.') +
+    modalityGotchas(all, L, { noCalls: S.noCalls.image, what: 'image' }) +
+    related([`<a href="${prefix}collections/commercial-use">Commercial use collection</a>`, `<a href="${prefix}collections/no-credit-card">No credit card collection</a>`, `<a href="${prefix}guides/free-llm-api-no-credit-card-no-phone">No card, no phone: every API</a>`]);
+
+  const noCardOngoing = ongoing.filter((x) => x.card_required === false);
+  const faq = [
+    {
+      q: 'Is there a free image generation API?',
+      a: `Yes. ${gen.length} of the ${S.verified} verified providers in our dataset tie free access or starting credit to image generation.${anon.length ? ` ${names(anon)} can be called with no account.` : ''}${noCardOngoing.length ? ` ${names(noCardOngoing)} ${noCardOngoing.length === 1 ? 'has' : 'have'} ongoing free access with no card required.` : ''}`,
+    },
+    {
+      q: 'Can I use free AI-generated images commercially?',
+      a: `It depends on the provider and the model. ${c.yes.length} of the ${gen.length} allow commercial use on the free access.${c.cond.length ? ` ${names(c.cond)} ${c.cond.length === 1 ? 'allows' : 'allow'} it subject to each model’s licence or another condition.` : ''}${c.no.length ? ` ${names(c.no)} ${c.no.length === 1 ? 'doesn’t' : 'don’t'}.` : ''}${c.unk.length ? ` For ${c.unk.length} it isn’t confirmed.` : ''}`,
+    },
+    {
+      q: 'Which free image APIs add a watermark?',
+      a: watermarks.length ? `${names(watermarks)} ${watermarks.length === 1 ? 'mentions' : 'mention'} a watermark in ${watermarks.length === 1 ? 'its entry' : 'their entries'}; the sentence is quoted under How to choose. An entry can mention a watermark to say it applies only to some calls, or that it is gone.` : 'None of the entries mentions a watermark. Check the provider page for the output of the free tier.',
+    },
+    { q: 'Is a vision API the same as an image generation API?', a: 'No. A vision model reads an image and returns text; an image generation model makes a new image from a prompt. For reading images, see the free vision APIs guide.' },
+  ];
+  return { count: gen.length, answer, body, faq, featured: all };
+}
+
 const RENDER = {
   'openai-api-alternatives': alternativesGuide,
   'choose-free-llm-api-for-production': productionGuide,
   'free-llm-api-no-credit-card-no-phone': noCardNoPhoneGuide,
+  'free-embeddings-apis': embeddingsGuide,
+  'free-speech-to-text-apis': speechGuide,
+  'free-ocr-document-ai-apis': ocrGuide,
+  'free-image-generation-apis': imageGuide,
 };
 
 /** The page parts of one long guide: { count, answer, body, faq, featured, title, metaDesc }. */
