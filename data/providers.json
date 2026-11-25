@@ -624,7 +624,8 @@
       "anonymous_access": {"source":"https://github.com/jina-ai/reader","checked":"2026-11-25","quote":"Anonymous traffic is the most aggressively rate-limited and lands in the lowest-trust pool.","note":"Applies to the Reader API (r.jina.ai) only: jina.ai/embeddings lists 20 RPM for Reader without an API key, while the Embeddings, Reranker and s.jina.ai search APIs are blocked without one."},
       "verified": true,
       "last_verified": "2026-11-20",
-      "data_policy": {"trains_on_prompts":false,"retention":null,"source":"https://jina.ai/embeddings/","checked":"2026-10-15","quote":"We never use your API requests, inputs, or outputs to train our embedding, reranker, or any other models.","note":"The answer sits in the embeddings FAQ; the next FAQ lists Free, Paid and Premium rate limits, but the answer does not name a plan.","plan_named":false}
+      "data_policy": {"trains_on_prompts":false,"retention":null,"source":"https://jina.ai/embeddings/","checked":"2026-10-15","quote":"We never use your API requests, inputs, or outputs to train our embedding, reranker, or any other models.","note":"The answer sits in the embeddings FAQ; the next FAQ lists Free, Paid and Premium rate limits, but the answer does not name a plan.","plan_named":false},
+      "playground_url": "https://jina.ai/reader/"
     },
     {
       "slug": "deepgram",
