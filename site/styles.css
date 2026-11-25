@@ -142,8 +142,7 @@ svg.i { width: 15px; height: 15px; flex: none; vertical-align: -2px; }
 @keyframes blink { 50% { opacity: 0; } }
 
 /* ---------- logo ---------- */
-.logo-mark { display: block; width: 30px; height: 30px; flex: none; color: var(--accent); --logo-ink: var(--bg); transition: transform .15s ease; }
-.site-header .logo-mark { color: var(--on-header-accent); --logo-ink: var(--header-bar); }
+.logo-mark { display: block; width: 28px; height: 28px; flex: none; transition: transform .15s ease; }
 .logo-mark.lg { width: 58px; height: 58px; }
 .brand:hover .logo-mark, .hero-logo:hover .logo-mark, .foot-logo:hover .logo-mark { transform: translateY(-2px); }
 
@@ -954,3 +953,47 @@ p.muted a, .prose p a, .prov-summary p a { text-decoration: underline; text-unde
 /* "Clear all filters" under an empty result (explorer.js creates it on first need). */
 .empty-clear { display: block; margin: -32px auto 40px; }
 .empty-clear[hidden] { display: none; }
+
+/* ---------- brand H1: aura and receipt stamp ---------- */
+/* The aura (lib/aura.mjs): conic sectors in the modality hues (--aura, set inline from the --h-* tokens) under a soft
+   highlight. A trial is a ring; a dashed edge in --unk means
+   a production flag is not stated; a faded aura was last checked over 30 days ago. Shape and words carry the meaning,
+   the hues only decorate it (WCAG 1.4.1). */
+.aura { display: inline-block; flex: none; width: 24px; aspect-ratio: 1; border-radius: 50%; vertical-align: middle;
+  background: radial-gradient(circle at 35% 30%, rgba(255,255,255,.55), transparent 45%), var(--aura, var(--h-text)); }
+/* The ring's hole is painted in the surface colour behind it (--aura-ground), so the dashed outline is never clipped. */
+.aura-ring { background: radial-gradient(circle closest-side, var(--aura-ground, var(--bg)) 52%, transparent calc(52% + 1px)),
+  radial-gradient(circle at 35% 30%, rgba(255,255,255,.55), transparent 45%), var(--aura, var(--h-text)); }
+.aura-dash { outline: 2px dashed var(--unk); outline-offset: 2px; }
+tbody tr:hover .aura { --aura-ground: var(--panel); }
+.aura-old { filter: saturate(.25); }
+.aura-sm { width: 22px; }
+.aura-lg { width: 112px; }
+.name-row { display: inline-flex; align-items: flex-start; gap: 10px; }
+.name-row > .aura { margin-top: 3px; }
+.prov-aura { display: flex; flex-direction: column; align-items: center; gap: 10px; margin: 6px auto 14px; }
+.aura-read { margin: 0; max-width: 60ch; color: var(--muted); font-size: .82rem; font-family: var(--font-mono); text-align: center; }
+.aura-read-h { color: var(--text); font-weight: 500; }
+@media (prefers-reduced-motion: no-preference) {
+  .aura { transition: transform var(--t-base) var(--ease); }
+  a:hover > .aura, tr:hover .aura-sm { transform: scale(1.15); }
+}
+
+/* The receipt stamp (lib/stamp.mjs): "✓ 24 Nov · source", slightly turned like a rubber stamp. Freshness is the mark
+   (✓ / !), the border (dashed when a re-check is due) and sr-only words; the colour follows --ok / --unk / --bad. */
+.stamp { display: inline-flex; align-items: center; gap: 5px; padding: 2px 8px; border-radius: 5px; border: 1.5px solid currentColor;
+  background: transparent; font-family: var(--font-mono); font-weight: 500; font-size: .72rem; white-space: nowrap;
+  font-variant-numeric: tabular-nums; transform: rotate(-2deg); text-decoration: none; }
+a.stamp:hover { text-decoration: none; }
+.stamp.b-ok { color: var(--ok); border-color: var(--ok); background: transparent; }
+.stamp.b-warn { color: var(--unk); border: 1.5px dashed var(--unk); background: transparent; }
+.stamp.b-stale { color: var(--bad); border-color: var(--bad); background: transparent; }
+.stamp-mark { font-family: system-ui, -apple-system, "Segoe UI Symbol", sans-serif; font-size: 1.05em; line-height: 1; }
+.stamp-sep { opacity: .7; }
+.stamp-lg { font-size: .82rem; padding: 4px 11px; }
+#table td.pver .ver-cell { display: inline-flex; justify-content: center; }
+@media (prefers-reduced-motion: no-preference) {
+  .stamp { animation: stamp-in 180ms var(--ease) both; transition: transform var(--t-base) var(--ease); }
+  .stamp:hover, .stamp:focus-visible { transform: rotate(0) scale(1.05); }
+  @keyframes stamp-in { from { opacity: 0; transform: rotate(-2deg) scale(1.08); } to { opacity: 1; transform: rotate(-2deg) scale(1); } }
+}

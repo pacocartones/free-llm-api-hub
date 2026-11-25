@@ -127,22 +127,20 @@ test('a slug that is not kebab-case renders the name without a link', () => {
   assert.ok(!out.includes('onmouseover='), 'no event handler may survive');
 });
 
-test('freshness is said in words and by icon shape, not only by colour and a title (WCAG 1.4.1)', () => {
+test('freshness is said in words and by the stamp\'s shape, not only by colour and a title (WCAG 1.4.1)', () => {
   const d = (daysAgo) => {
     const t = new Date('2026-08-13T00:00:00Z'); t.setUTCDate(t.getUTCDate() - daysAgo);
     return t.toISOString().slice(0, 10);
   };
   const rowHtml = clientRowHtml();
-  const cell = (days) => rowHtml({ ...base, last_verified: d(days) }, { now: '2026-08-13' }).match(/<span class="ver-cell">[\s\S]*?<\/span><span class="ver-date">/)[0];
+  const cell = (days) => rowHtml({ ...base, last_verified: d(days) }, { now: '2026-08-13' }).match(/<span class="ver-cell">[\s\S]*?<\/span><\/td>/)[0];
   const fresh = cell(10), due = cell(75), stale = cell(95);
-  assert.match(fresh, /<span class="sr-only">Verified, fresh<\/span>/);
-  assert.match(due, /<span class="sr-only">Verified, due for re-check<\/span>/);
-  assert.match(stale, /<span class="sr-only">Verified, stale: re-check overdue<\/span>/);
-  assert.match(fresh, /ic-check/);
-  assert.doesNotMatch(due, /ic-check/, 'due uses a different icon from fresh');
-  assert.doesNotMatch(stale, /ic-check/, 'stale uses a different icon from fresh');
-  assert.match(due, /ic-warn/);
-  assert.match(stale, /ic-warn/);
+  assert.match(fresh, /<span class="sr-only">Verified, fresh: <\/span>/);
+  assert.match(due, /<span class="sr-only">Verified, due for re-check: <\/span>/);
+  assert.match(stale, /<span class="sr-only">Verified, stale: re-check overdue: <\/span>/);
+  assert.match(fresh, /<span class="stamp-mark" aria-hidden="true">✓<\/span>/);
+  assert.match(due, /class="stamp badge b-warn"/, 'due: the dashed stamp (styles.css draws .stamp.b-warn dashed)');
+  assert.match(stale, /<span class="stamp-mark" aria-hidden="true">!<\/span>/, 'stale uses another mark than fresh');
 });
 
 test('the explorer announces how many providers are shown, in a permanent live region', () => {

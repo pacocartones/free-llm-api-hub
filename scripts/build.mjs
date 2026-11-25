@@ -44,6 +44,9 @@ import * as compareLib from './lib/compare.mjs';
 import { requirementsHtml, limitsHtml, glanceHtml, modelsHtml, dataPolicyHtml, speedHtml } from './lib/provider-sections.mjs';
 import { aboutHtml } from './lib/provider-summaries.mjs';
 import { fontHead, fingerprintSite } from './lib/assets.mjs';
+import { auraHtml, auraSpec } from './lib/aura.mjs';
+import { logoSymbol } from './icons.mjs';
+import { stampHtml, stampSource } from './lib/stamp.mjs';
 import { securityTxt } from './lib/security-txt.mjs';
 import { markdownToHtml } from './lib/markdown.mjs';
 import { bestFactsHtml } from './lib/best-facts.mjs';
@@ -536,8 +539,10 @@ function collectionTableHtml(rows, opts = {}) {
 // Shared chrome for generated pages (collection pages live one level below site root → '../').
 const GH_ICON = '<svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.6 7.6 0 014 0c1.53-1.03 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>';
 const REPO = 'https://github.com/pacocartones/free-llm-api-hub';
+// The brand mark (the hub's aura, scripts/icons.mjs) is the #logo symbol; index.html and 404.html carry the same markup.
+const LOGO_SYMBOL = logoSymbol();
 const SPRITE = `<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
-<symbol id="logo" viewBox="0 0 32 32" fill="none"><rect x="2" y="2" width="28" height="28" rx="8" fill="currentColor"/><path d="M9 11 L14 16 L9 21" style="stroke: var(--logo-ink, #0a0d0b)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><rect x="16.5" y="19.4" width="7" height="2.6" rx="1.3" style="fill: var(--logo-ink, #0a0d0b)"/></symbol>
+${LOGO_SYMBOL}
 <symbol id="ic-card" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="1.5" y="3.5" width="13" height="9" rx="2"/><path d="M1.5 6.5H14.5"/></symbol>
 <symbol id="ic-nocard" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="1.5" y="3.5" width="13" height="9" rx="2"/><path d="M1.5 6.5H14.5"/><path d="M2.6 2 L13.4 14"/></symbol>
 <symbol id="ic-phone" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="4.5" y="1.5" width="7" height="13" rx="1.6"/><path d="M7 12.3H9"/></symbol>
@@ -785,7 +790,8 @@ const COMPARE_PATHS = new Set(comparePairs.map((cp) => cp.path));
 
 // "Notably NOT free": one source (data/not-free.json) for the README section and the /not-free/ page.
 const NOT_FREE = JSON.parse(readFileSync(join(ROOT, 'data/not-free.json'), 'utf8'));
-const QUOTES = JSON.parse(readFileSync(join(ROOT, 'data/quotes.json'), 'utf8')).entries;
+const QUOTE_REGISTRY = JSON.parse(readFileSync(join(ROOT, 'data/quotes.json'), 'utf8'));
+const QUOTES = QUOTE_REGISTRY.entries;
 {
   const errs = notFreeErrors(NOT_FREE, { providers, quotes: QUOTES });
   if (errs.length) throw new Error('data/not-free.json:\n' + errs.join('\n'));
@@ -852,6 +858,8 @@ const { historyBySlug, monthEnd: monthEndSnapshots } = mineHistoryAndSnapshots({
 // render is deterministic and the drift gate never trips on a calendar boundary.
 const homeRows = [...providers]
   .sort((a, b) => sortLib.comparator('recommended', 1, a, b))
+  // Each record carries the receipt of its stamp (lib/stamp.mjs), as the inline data below does for the repaint.
+  .map((rec) => ({ ...rec, stamp: stampSource(rec, QUOTE_REGISTRY) }))
   .map((p) => rows.explorerRowHtml(p, { now: ASOF }))
   .join('\n');
 
@@ -905,6 +913,9 @@ const homeProvider = (p) => {
   if (Number.isInteger(fl.tokens_per_day)) caps.tokens_per_day = fl.tokens_per_day;
   if (Object.keys(caps).length) out.free_limits = caps;
   if (p.data_policy && p.data_policy.trains_on_prompts !== undefined) out.data_policy = { trains_on_prompts: p.data_policy.trains_on_prompts };
+  // The receipt of the stamp (lib/stamp.mjs): the quoted sentence and its page, so the repaint prints the same stamp.
+  const stamp = stampSource(p, QUOTE_REGISTRY);
+  if (stamp.q || stamp.u) out.stamp = stamp;
   return out;
 };
 // One provider per line: a data change rewrites only its own provider's line, so two pull requests that edit different
@@ -1234,8 +1245,9 @@ for (const p of providers) {
   const summary = `<div class="prov-summary"><h2 id="whats-free">What's free</h2><p>${htmlEsc(p.free_tier)}</p></div>` + scoreHtml + requirementsHtml(p);
   // Freshness relative to the current day (provider pages are regenerated on deploy, not diff-gated).
   const daysAgo = p.verified && p.last_verified ? ageInDays(p.last_verified, today) : null;
+  // The receipt stamp (lib/stamp.mjs): "✓ Verified 24 Nov 2026 · source", the quoted sentence in its title.
   const verifiedLine = p.verified
-    ? `<span class="v ok">${IC('ic-check')} verified ${htmlEsc(p.last_verified)}${daysAgo != null ? ` · ${daysAgo}d ago` : ''}</span>` +
+    ? stampHtml({ ...p, stamp: stampSource(p, QUOTE_REGISTRY) }, { now: today, long: true }) +
       (daysAgo != null && daysAgo > FRESH_DAYS ? ` <span class="v warn">${IC('ic-warn')} re-verification due</span>` : '')
     : `<span class="v warn">${IC('ic-warn')} unverified</span>`;
   // Live-test badge: an actual successful API call, separate from the docs-based `verified`.
@@ -1281,7 +1293,9 @@ for (const p of providers) {
       cls: 'prov-hero',
       crumbs: `<a href="../">Home</a> / <a href="../#explorer">Providers</a> / ${htmlEsc(p.name)}`,
       h1: htmlEsc(p.name),
-      afterTitle: `<div class="prov-badges"><span class="type">${typeLabel(p)}</span> ${verifiedLine}${probedLine} ${provFlagsHtml(p)}</div>`,
+      // The provider's aura (lib/aura.mjs) with its reading in words, so the picture never has to be decoded alone.
+      afterTitle: `<div class="prov-aura">${auraHtml(p, { now: ASOF, cls: 'aura-lg' })}<p class="aura-read"><span class="aura-read-h">Aura:</span> ${htmlEsc(auraSpec(p, { now: ASOF }).label)} · <a href="../methodology/#how-to-read-an-aura">how to read it</a></p></div>` +
+        `<div class="prov-badges"><span class="type">${typeLabel(p)}</span> ${verifiedLine}${probedLine} ${provFlagsHtml(p)}</div>`,
       lede: p.best_for ? htmlEsc(p.best_for) : '',
       extra: `<div class="prov-actions">${docsBtn}${websiteBtn}${playgroundBtn}</div>`,
     }) +

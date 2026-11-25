@@ -89,24 +89,16 @@ export function explorerRowHtml(p, opts = {}) {
       .map(([, , ic, t]) => `<span class="fmini-i" role="img" title="${t}" aria-label="${t}">${ICON(ic)}</span>`)
       .join('')}</div>`;
 
-  let v;
-  if (p.verified) {
-    const date = htmlEsc(p.last_verified || '');
-    const age = p.last_verified ? Math.floor((nowMs - Date.parse(p.last_verified + 'T00:00:00Z')) / 86400000) : null;
-    const st = freshnessStatus(age);
-    const cls = st === 'stale' ? 'b-stale' : st === 'due' ? 'b-warn' : 'b-ok';
-    const tip = age != null ? ` title="Verified ${age}d ago · ${date}"` : '';
-    // The state is said in words (and by the icon shape), not only by colour and a title.
-    const word = st === 'stale' ? 'Verified, stale: re-check overdue' : st === 'due' ? 'Verified, due for re-check' : 'Verified, fresh';
-    v = `<span class="ver-cell"><span class="badge ${cls}"${tip}>${ICON(st === 'fresh' ? 'ic-check' : 'ic-warn')}<span class="sr-only">${word}</span></span><span class="ver-date">${date}</span></span>`;
-  } else {
-    v = `<span class="badge b-warn">${ICON('ic-warn')} unverified</span>`;
-  }
+  // Verified: the receipt stamp (lib/stamp.mjs), dated, linked to the page the entry was checked on, the quote in its title.
+  const v = p.verified && p.last_verified
+    ? `<span class="ver-cell">${stampHtml(p, { now: nowMs })}</span>`
+    : `<span class="badge b-warn">${ICON('ic-warn')} unverified</span>`;
 
   // Explicit row/cell roles: on a phone the stylesheet turns the table into cards (display: block), which makes some
   // screen readers (VoiceOver on iOS, some Chromium versions) drop the implicit table semantics. See styles.css.
+  // The provider's aura (lib/aura.mjs) leads the name: decorative here (its meaning is in the title and on the provider page).
   return `<tr role="row">` +
-    `<td class="name" role="cell" data-label="API">${name}</td>` +
+    `<td class="name" role="cell" data-label="API"><span class="name-row">${auraHtml(p, { now: nowMs, cls: 'aura-sm' })}<span class="name-main">${name}</span></span></td>` +
     `<td role="cell" data-label="Type">${typeCell}</td>` +
     `<td role="cell" data-label="What's free"><div class="clamp2" title="${htmlEsc(p.free_tier)}">${htmlEsc(p.free_tier)}</div></td>` +
     catchCellHtml(p) +
@@ -136,6 +128,8 @@ export function rowKeyTarget(key, index, count) {
 // importing them here keeps the same names in scope for the server render.
 import { FLAG_PAIRS, freshnessStatus } from './rules.mjs';
 import { FLAG_DEFS, FLAG_MARKS, FLAG_UNKNOWN_WHY, flagValue, flagState, flagText, flagHtml, flagsHtml } from './flags.mjs';
+import { AURA_ORDER, AURA_START, AURA_OLD_DAYS, AURA_NAMES, auraSpec, auraGradient, auraHtml } from './aura.mjs';
+import { STAMP_MONTHS, STAMP_WORDS, stampDate, stampHtml } from './stamp.mjs';
 
 /**
  * The exact client bundle the browser runs (written to site/shared-rows.js by
@@ -159,11 +153,22 @@ window.FLLM_ROWS = (function () {
   const flagText = ${flagText.toString()};
   const flagHtml = ${flagHtml.toString()};
   const flagsHtml = ${flagsHtml.toString()};
+  const AURA_ORDER = ${JSON.stringify(AURA_ORDER)};
+  const AURA_START = ${AURA_START};
+  const AURA_OLD_DAYS = ${AURA_OLD_DAYS};
+  const AURA_NAMES = ${JSON.stringify(AURA_NAMES)};
+  const auraSpec = ${auraSpec.toString()};
+  const auraGradient = ${auraGradient.toString()};
+  const auraHtml = ${auraHtml.toString()};
+  const STAMP_MONTHS = ${JSON.stringify(STAMP_MONTHS)};
+  const STAMP_WORDS = ${JSON.stringify(STAMP_WORDS)};
+  const stampDate = ${stampDate.toString()};
+  const stampHtml = ${stampHtml.toString()};
   const rowHtml = ${explorerRowHtml.toString()};
   const catchTags = ${catchTags.toString()};
   const catchCellHtml = ${catchCellHtml.toString()};
   const rowKeyTarget = ${rowKeyTarget.toString()};
-  return { rowHtml, rowKeyTarget, flagHtml, flagsHtml };
+  return { rowHtml, rowKeyTarget, flagHtml, flagsHtml, auraHtml, stampHtml };
 })();
 `;
 }

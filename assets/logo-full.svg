@@ -1,11 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 252 40" width="252" height="40" role="img" aria-label="Free LLM API Hub">
-  <g transform="translate(4 4)">
-    <rect width="32" height="32" rx="8" fill="#0a0d0b"/>
-    <rect x="2.5" y="2.5" width="27" height="27" rx="6.5" fill="none" stroke="#3fce8f" stroke-width="1.6" stroke-opacity=".6"/>
-    <path d="M9 11 L14 16 L9 21" fill="none" stroke="#3fce8f" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
-    <rect x="16.5" y="19.4" width="7" height="2.4" rx="1.2" fill="#3fce8f"/>
-  </g>
-  <text x="48" y="26.5" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace" font-size="18" font-weight="700" letter-spacing="-0.3">
-    <tspan fill="#161b18">Free LLM API </tspan><tspan fill="#0b7040">Hub</tspan>
-  </text>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240" role="img" aria-label="Free LLM API Hub"><defs><radialGradient id="x-sh" cx="35%" cy="30%" r="45%"><stop offset="0" stop-color="#fff" stop-opacity=".55"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient></defs><g><path d="M120 120L64 216.99A112 112 0 0 1 8 120Z" fill="#7c5cff"/><path d="M120 120L8 120A112 112 0 0 1 64 23.01Z" fill="#00c2e0"/><path d="M120 120L64 23.01A112 112 0 0 1 176 23.01Z" fill="#ff4f8b"/><path d="M120 120L176 23.01A112 112 0 0 1 232 120Z" fill="#ffa31a"/><path d="M120 120L232 120A112 112 0 0 1 176 216.99Z" fill="#2bc48a"/><path d="M120 120L176 216.99A112 112 0 0 1 64 216.99Z" fill="#ff7a3d"/><circle cx="120" cy="120" r="112" fill="url(#x-sh)"/></g></svg>

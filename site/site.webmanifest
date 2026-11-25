@@ -4,8 +4,8 @@
   "description": "A continuously-verified dataset of free LLM & AI-model APIs.",
   "start_url": "/",
   "display": "browser",
-  "background_color": "#0a0d0b",
-  "theme_color": "#0a0d0b",
+  "background_color": "#fafafa",
+  "theme_color": "#fafafa",
   "icons": [
     {
       "src": "/icon-192.png",
