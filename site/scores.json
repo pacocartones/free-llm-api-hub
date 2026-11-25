@@ -151,6 +151,12 @@
       "of": 6,
       "rank": null
     },
+    "liquid-ai": {
+      "total": 34.5,
+      "confirmed": 2,
+      "of": 6,
+      "rank": null
+    },
     "sarvam-ai": {
       "total": 34.5,
       "confirmed": 2,
@@ -265,7 +271,19 @@
       "of": 6,
       "rank": null
     },
+    "bytez": {
+      "total": 30,
+      "confirmed": 1,
+      "of": 6,
+      "rank": null
+    },
     "lemonfox": {
+      "total": 30,
+      "confirmed": 1,
+      "of": 6,
+      "rank": null
+    },
+    "public-ai": {
       "total": 30,
       "confirmed": 1,
       "of": 6,
