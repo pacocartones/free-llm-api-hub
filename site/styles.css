@@ -136,6 +136,21 @@ svg.i { width: 15px; height: 15px; flex: none; vertical-align: -2px; }
   @keyframes best-shine { to { transform: translateX(120%); } }
 }
 .header-actions { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+/* Providers: a disclosure in the menu that holds the explorer and The Best. The summary reads like a menu link; the
+   panel drops below it on desktop and stays in the flow of the mobile menu. Colours are the menu's own tokens. */
+.nav-group { position: relative; }
+.nav-group > summary {
+  display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; cursor: pointer; list-style: none;
+  color: var(--muted); font-size: .88rem; font-family: var(--font-mono); font-weight: 500; padding: 6px 10px; border-radius: 7px;
+}
+.nav-group > summary::-webkit-details-marker { display: none; }
+.nav-group > summary::after { content: "▾"; font-size: .75em; opacity: .8; }
+.nav-group[open] > summary::after { content: "▴"; }
+.nav-group > summary:hover { color: var(--text); background: var(--panel); }
+.nav-sub { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
+.nav-contribute { white-space: nowrap; font-family: var(--font-mono); font-size: .82rem; font-weight: 600; }
+.nav-contribute svg.i { width: 14px; height: 14px; }
+@media (max-width: 480px) { .nav-contribute .nc-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; } }
 /* Desktop: logo on the left, the menu centred on the page, the star counter and the theme toggle on the right. */
 @media (min-width: 901px) {
   .nav a { color: var(--on-header-muted); }
@@ -144,6 +159,12 @@ svg.i { width: 15px; height: 15px; flex: none; vertical-align: -2px; }
   .header-inner { display: grid; grid-template-columns: 1fr auto 1fr; }
   .nav { margin-left: 0; justify-self: center; }
   .header-actions { margin-left: 0; justify-self: end; }
+  .nav-group > summary { color: var(--on-header-muted); }
+  .nav-group > summary:hover, .nav-group[open] > summary { color: var(--on-header); background: var(--on-header-hover); }
+  .nav-sub {
+    position: absolute; top: calc(100% + 8px); left: 0; z-index: 60; min-width: 190px; padding: 8px;
+    background: var(--header-bar); border: 1px solid var(--on-header-line); border-radius: 10px; box-shadow: var(--shadow-sm);
+  }
 }
 .icon-btn {
   display: inline-flex; align-items: center; gap: 7px; height: 34px; padding: 0 11px;
@@ -182,14 +203,23 @@ svg.i { width: 15px; height: 15px; flex: none; vertical-align: -2px; }
   background: radial-gradient(620px 300px at 50% 0, color-mix(in srgb, var(--accent) 16%, transparent), transparent 70%);
   pointer-events: none;
 }
-.hero-inner { position: relative; z-index: 1; padding: 58px 0 46px; text-align: center; }
+.hero-inner { position: relative; z-index: 1; padding: 36px 0 28px; text-align: center; }
 .hero-logo { display: inline-flex; margin-bottom: 16px; }
-.hero-star { margin-bottom: 22px; display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+.hero-star { margin-top: 18px; display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
 .eyebrow { color: var(--accent); font-weight: 700; font-size: .74rem; letter-spacing: .18em; text-transform: uppercase; margin: 0 0 14px; font-family: var(--font-mono); }
 .eyebrow::before { content: "> "; opacity: .8; }
 h1 { font-size: clamp(1.9rem, 4.4vw, 3rem); line-height: 1.1; margin: 0 auto 18px; max-width: 20ch; }
 .lede { color: var(--muted); font-size: 1.1rem; max-width: 64ch; margin: 0 auto 30px; }
 .hero .lede { max-width: 86ch; }
+.hero .lede { margin-bottom: 14px; }
+/* The home title is two lines at every width (Q2): the break is in the markup, so the lines may be wider than 20ch. */
+.hero h1 { max-width: none; }
+@media (max-width: 480px) {
+  .hero h1 { font-size: 1.7rem; }
+  /* Phones: the Popular row repeats the menu (Models, Compare, Guides) and the star button repeats the header's star
+     count; both go, so the search box and the first rows come up (Q2). The Get started row stays. */
+  .hero-links.hl-popular, .hero-star { display: none; }
+}
 .cta { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-bottom: 40px; }
 
 /* star button */
@@ -199,6 +229,15 @@ h1 { font-size: clamp(1.9rem, 4.4vw, 3rem); line-height: 1.1; margin: 0 auto 18p
 .star-btn .sb-label svg { width: 16px; height: 16px; }
 .star-btn .sb-count { display: inline-flex; align-items: center; padding: 9px 14px; background: var(--panel-2); color: var(--accent); border-left: 1px solid var(--border-strong); font-variant-numeric: tabular-nums; min-width: 42px; justify-content: center; }
 .star-btn:hover .sb-label { color: var(--accent); }
+
+/* ---------- home counters: one text row under the lede (Q2/Q14) ---------- */
+.stats-line { margin: 0 auto; max-width: 110ch; color: var(--muted); font-family: var(--font-mono); font-size: .86rem; line-height: 1.6; }
+.stats-line strong { color: var(--accent); font-weight: 700; }
+.stats-line .st-fresh.fresh { color: var(--green); }
+.stats-line .st-fresh.due { color: var(--warn); }
+.stats-line .st-fresh.stale { color: var(--red); }
+.stats-line .st-sep { opacity: .6; }
+.stats-line .st-fresh { white-space: nowrap; }
 
 /* ---------- stat tiles ---------- */
 .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; max-width: 860px; margin: 0 auto; }
@@ -212,7 +251,13 @@ h1 { font-size: clamp(1.9rem, 4.4vw, 3rem); line-height: 1.1; margin: 0 auto 18p
 
 /* "New here?" strip (lib/home-first-use.mjs): three short cards between the hero and the explorer controls. */
 .first-use { border-bottom: 1px solid var(--border); background: var(--bg-elev); }
-.first-use .wrap { padding-top: 18px; padding-bottom: 18px; }
+.first-use .wrap { padding-top: 10px; padding-bottom: 10px; }
+.fu-details > summary { cursor: pointer; list-style: none; display: flex; align-items: center; gap: 8px; }
+.fu-details > summary::-webkit-details-marker { display: none; }
+.fu-details > summary::before { content: "▸"; color: var(--accent); font-size: .8rem; }
+.fu-details[open] > summary::before { content: "▾"; }
+.fu-details > summary .fu-h { margin: 0; }
+.fu-details[open] > summary { margin-bottom: 12px; }
 .fu-h { margin: 0 0 12px; font-family: var(--font-mono); font-size: .9rem; font-weight: 700; color: var(--text); letter-spacing: -.01em; }
 .fu-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
 .fu-card { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 15px; }
@@ -633,6 +678,8 @@ pre code { color: var(--text); }
   .site-header.nav-open .nav { display: flex; }
   .nav a { padding: 11px 12px; font-size: .95rem; border-radius: 8px; }
   .nav a.nav-best { padding: 11px 14px; border-radius: 999px; }
+  .nav-group > summary { padding: 11px 12px; font-size: .95rem; border-radius: 8px; }
+  .nav-sub { padding-left: 14px; }
 }
 /* Without scripts there is no toggle: the links stay in the page flow, under the brand. With scripts the menu is
    collapsed behind its button from the first paint. It used to stay open until site.js (the last script of the body)
@@ -730,21 +777,9 @@ p.muted a, .prose p a, .prov-summary p a { text-decoration: underline; text-unde
   .model-table thead th { white-space: normal; letter-spacing: 0; font-size: .75rem; }
 }
 
-/* The stat tiles are written by explorer.js, so the block is empty until the script runs. Without a reserved
-   height it grew from 0 to its full size and pushed the "Popular guides" row down (layout shift 0.068 on a phone).
-   The height is reserved only where scripts run: with scripting off the block stays empty and takes no room.
-   The heights are measured (2026-10-09, JetBrains Mono, four tiles): 157px in one row, 288px in two rows, 308px
-   when two labels wrap (<= 479px). Re-measure them if a tile is added or removed, a label changes length or
-   the font changes (scripts/build.test.mjs pins the numbers; Lighthouse CLS on the home should stay at 0). */
-@media (scripting: enabled) {
-  .stats { min-height: 157px; }
-}
-@media (scripting: enabled) and (max-width: 640px) {
-  .stats { min-height: 288px; }
-}
-@media (scripting: enabled) and (max-width: 479px) {
-  .stats { min-height: 308px; }
-}
+/* The home counters are one line of text rendered by the build (explorer.js only repaints it when the visitor's day
+   differs from the build's), so no height is reserved for them: the old four tiles needed 157-308px reserved to keep
+   Lighthouse CLS at 0 on the home. */
 
 /* Provider pages on a phone (360 to 390 px): a note with a long unbroken string (a documentation URL, a model id)
    was wider than the card and widened the whole page (7 of the 68 pages, up to 614px at 360px). The string now

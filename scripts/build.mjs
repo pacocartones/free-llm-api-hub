@@ -15,7 +15,7 @@ import { execSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, relative } from 'node:path';
-import { recScore, FREE_TYPE_RANK, freeTypeRank, FLAG_PAIRS, SLA_DAYS, DUE_SOON_DAYS, ageInDays, freshnessColor, freshnessBadge, freshnessStatus } from './lib/rules.mjs';
+import { recScore, intentRank, recommendedCmp, FREE_TYPE_RANK, freeTypeRank, FLAG_PAIRS, SLA_DAYS, DUE_SOON_DAYS, ageInDays, freshnessColor, freshnessBadge, freshnessStatus } from './lib/rules.mjs';
 import * as rows from './lib/rows.mjs';
 import * as sortLib from './lib/sort.mjs';
 import { esc, stripTags } from './lib/escape.mjs';
@@ -73,6 +73,10 @@ const data = JSON.parse(readFileSync(join(ROOT, 'data/providers.json'), 'utf8'))
 // documented meaning, "the date of the last dataset change": ASOF, the newest date recorded in the data (datasetAsOf). It is
 // derived from the committed data only (no clock), so the build stays byte-stable for a given dataset.
 const ASOF = datasetAsOf(data);
+// The dataset month in page titles ("Free LLM APIs (Nov 2026): ..."), Q10: from ASOF, the date of the last dataset
+// change, never the clock, so a title moves only when the data does and the build stays deterministic.
+const TITLE_MONTH = `${monthName(ASOF.slice(0, 7)).slice(0, 3)} ${ASOF.slice(0, 4)}`;
+const datedTitle = (t) => (t.includes(' · Free LLM API Hub') ? t.replace(' · Free LLM API Hub', ` (${TITLE_MONTH}) · Free LLM API Hub`) : `${t} (${TITLE_MONTH})`);
 const providers = data.providers;
 const summaryBySlug = new Map(JSON.parse(readFileSync(join(ROOT, 'data/provider-summaries.json'), 'utf8')).summaries.map((x) => [x.id, x]));
 // Counts quoted in prose come from the data, never from a typed number (lib/figures.mjs).
@@ -394,6 +398,7 @@ const GUIDES = [
     intro: `<p>Embeddings power semantic search, RAG and clustering — and you rarely need to pay for them at prototype scale. The providers below expose <strong>embedding models on a free tier</strong>, several with generous monthly token allowances.</p><p>Building RAG? Pair one of these with a free chat model (see the <a href="../models/">model index</a>), ideally behind the same OpenAI-compatible base URL.</p>`,
     filter: (p) => (p.modalities || []).includes('embeddings'),
     query: '#explorer',
+    modality: 'embeddings',
     pick: 'jina-ai',
     faq: [
       { q: 'Is there a free embeddings API?', a: 'Yes — providers such as Jina AI, Cohere, Google Gemini and Cloudflare offer embedding models on a free tier, several with large monthly token allowances.' },
@@ -413,6 +418,7 @@ const GUIDES = [
     intro: `<p>Audio APIs — transcription (STT) and synthesis (TTS) — often ship a real free tier or a sizeable one-time credit. The providers below offer <strong>free audio/speech access</strong>, from a few free hours a month to hundreds of dollars in starting balance.</p><p>Check the "catch" on each provider's page: some free speech tiers forbid commercial use or watermark the output.</p>`,
     filter: (p) => (p.modalities || []).includes('audio'),
     query: '#explorer',
+    modality: 'audio',
     pick: 'groq',
     faq: [
       { q: 'Is there a free speech-to-text API?', a: 'Yes — Groq (Whisper), Cloudflare Workers AI and others offer free STT; several dedicated speech providers also grant a sizeable one-time credit.' },
@@ -432,6 +438,7 @@ const GUIDES = [
     intro: `<p>Text-to-image is one of the easiest modalities to try for free: several providers host <strong>Flux, Stable Diffusion and SDXL</strong> behind a simple API — some with no signup at all, others with a small starting credit. Not every image API generates images: this table also includes editing and background-removal services. Read each free-tier description to choose the operation you need.</p><p>Watch two catches on each provider's page: whether the free output is <em>watermarked</em>, and whether <em>commercial use</em> is allowed — both vary a lot across free image tiers.</p>`,
     filter: (p) => (p.modalities || []).includes('image'),
     query: '#explorer',
+    modality: 'image',
     pick: 'ai-horde',
     faq: [
       { q: 'Is there a free image generation API?', a: 'Yes — AI Horde (anonymous, queue-based) and OVHcloud AI Endpoints (Stable Diffusion XL, anonymous at a low rate limit) need no signup, while Pollinations (credits earned through Quests), Runware and others give credits for hosted Flux and SDXL models, and Photoroom gives free background-removal and editing calls.' },
@@ -452,6 +459,7 @@ const GUIDES = [
     intro: `<p>Before a document can go into a RAG pipeline it has to be parsed — OCR, layout, tables and key-values. The providers below offer <strong>document AI on a free tier</strong>, several with thousands of free pages a month that renew.</p><p>Pair one of these with a <a href="free-embeddings-apis">free embeddings API</a> and a free chat model to build a full document-QA stack at zero cost for prototypes.</p>`,
     filter: (p) => (p.modalities || []).includes('ocr'),
     query: '#explorer',
+    modality: 'ocr',
     pick: 'unstructured',
     faq: [
       { q: 'Is there a free OCR API?', a: 'Yes — OCR.space, Unstructured, Nutrient and LlamaParse all offer free OCR / document parsing, several with thousands of pages a month.' },
@@ -466,12 +474,13 @@ const GUIDES = [
     card: 'Reranking',
     blurb: 'Free rerank tiers for search and RAG.',
     h1: 'Free reranking APIs for search and RAG',
-    title: 'Free reranking APIs (rerank) · Free LLM API Hub',
+    title: 'Free reranking & rerank APIs · Free LLM API Hub',
     desc: 'Verified reranking APIs with a free tier or starting credit, with limits, commercial-use flags and catches side by side.',
     lede: 'Yes — several providers in the dataset include a reranker in a free tier or a starting credit, most of them as a one-time balance.',
     intro: `<p>A reranker reorders the passages a search or embedding step returns, and it is the cheapest quality gain in most RAG systems. The providers below list a reranker inside their <strong>free tier or starting credit</strong>.</p><p>Read two things per row: whether the allowance <em>renews</em> or is a one-time balance, and whether <em>commercial use</em> is allowed — Cohere’s free key explicitly is not. The pricing pages of Voyage AI and Pinecone disagree with themselves about which rerankers the free plan covers, and the catch of their rows says so.</p>`,
     filter: (p) => (p.modalities || []).includes('rerank') && p.verified,
     query: '#explorer',
+    modality: 'rerank',
     pick: 'jina-ai',
     faq: [
       { q: 'Is there a free reranking API?', a: 'Yes. Jina AI, Mixedbread, Voyage AI and Contextual AI give a one-time free balance that covers their rerankers with no card, and Pinecone offers 500 rerank requests a month on its Starter plan. Cohere’s free key also includes rerank but is for evaluation only.' },
@@ -492,6 +501,7 @@ const GUIDES = [
     intro: `<p>Vision models take an image and answer about it: caption it, answer a question, find an object. The providers below list a <strong>vision-capable model</strong> in a free tier or starting credit.</p><p>Check whether the allowance <em>renews</em>, whether <em>commercial use</em> is allowed (ModelScope says no) and what the catch is — for example, Twelve Labs analyses video rather than chatting about stills, and Tencent has moved its Hunyuan models to a new platform.</p>`,
     filter: (p) => (p.modalities || []).includes('vision') && p.verified,
     query: '#explorer',
+    modality: 'vision',
     pick: 'google-gemini',
     faq: [
       { q: 'Is there a free API to analyse images?', a: 'Yes. Google Gemini has a free tier with no card, Z.ai lists its GLM-4.6V-Flash vision model at $0 permanently, and Moondream gives $5 of credit each month.' },
@@ -641,10 +651,21 @@ const IC = (id) => `<svg class="i" aria-hidden="true"><use href="#${id}"/></svg>
 const pageHero = ({ crumbs, h1, lede = '', afterTitle = '', extra = '', cls = 'model-hero' }) =>
   `<section class="page-hero ${cls}"><div class="wrap"><nav class="crumbs" aria-label="Breadcrumb">${crumbs}</nav><h1>${h1}</h1>${afterTitle}${lede ? `<p class="lede">${lede}</p>` : ''}${extra}</div></section>`;
 
+// The primary menu, shared by every generated page; site/index.html carries the same markup by hand (the test
+// "header menu" in build.test.mjs keeps the two equal). Providers is a disclosure (<details>) holding the explorer and
+// The Best, so the six entries fit one desktop row; Submit is the secondary Contribute button next to the menu.
+const primaryNav = (p) => `<nav class="nav" id="primary-nav" aria-label="Primary">` +
+  `<details class="nav-group"><summary>Providers</summary><div class="nav-sub"><a href="${p}#explorer">All providers</a>` +
+  `<a class="nav-best" href="${p}best/" title="The top 10 by score, recomputed from the data at every build">${IC('ic-spark')}The Best</a></div></details>` +
+  `<a href="${p}models/">Models</a><a href="${p}compare/">Compare</a><a href="${p}changes/">Changes</a><a href="${p}api/">API</a>` +
+  `<a href="${p}guides-and-collections/">Guides</a></nav>`;
+const contributeBtn = (p) => `<a class="icon-btn nav-contribute" href="${p}submit/">${IC('ic-rocket')}<span class="nc-label">Contribute</span></a>`;
+
 const siteHeader = (p) => `<header class="site-header"><div class="wrap header-inner">
 <a class="brand" href="${p}" aria-label="Free LLM API Hub — home"><svg class="logo-mark"><use href="#logo"/></svg><span class="brand-name">Free LLM API <span class="grad">Hub</span></span></a>
-<nav class="nav" id="primary-nav" aria-label="Primary"><a href="${p}guides-and-collections/">${IC('ic-book')}Guides &amp; Collections</a><a class="nav-best" href="${p}best/" title="The top 10 by score, recomputed from the data at every build">${IC('ic-spark')}The Best</a><a href="${p}submit/">${IC('ic-rocket')}Submit</a></nav>
+${primaryNav(p)}
 <div class="header-actions">
+${contributeBtn(p)}
 <button class="icon-btn nav-toggle" id="navToggle" aria-label="Open menu" aria-expanded="false" aria-controls="primary-nav"><svg class="i menu" aria-hidden="true"><use href="#ic-menu"/></svg><svg class="i close" aria-hidden="true"><use href="#ic-close"/></svg></button>
 <a class="icon-btn" href="${REPO}" target="_blank" rel="noopener"><span class="sr-only">Star on GitHub</span>${GH_ICON}<span class="star-count" data-stars>★</span></a>
 <button class="icon-btn theme-toggle" id="themeToggle" aria-label="Toggle light and dark theme" title="Toggle theme"><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><svg class="moon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/></svg></button>
@@ -910,8 +931,10 @@ window.FLLM_RULES = (function () {
   const DUE_SOON_DAYS = ${DUE_SOON_DAYS};
   const recScore = ${recScore.toString()};
   const freeTypeRank = ${freeTypeRank.toString()};
+  const intentRank = ${intentRank.toString()};
+  const recommendedCmp = ${recommendedCmp.toString()};
   const freshnessStatus = ${freshnessStatus.toString()};
-  return { recScore, FREE_TYPE_RANK, freeTypeRank, FLAG_PAIRS, SLA_DAYS, DUE_SOON_DAYS, freshnessStatus };
+  return { recScore, intentRank, recommendedCmp, FREE_TYPE_RANK, freeTypeRank, FLAG_PAIRS, SLA_DAYS, DUE_SOON_DAYS, freshnessStatus };
 })();
 `;
 writeFileSync(join(ROOT, 'site/shared-rules.js'), sharedRulesJs);
@@ -932,7 +955,7 @@ const publicProviders = providers.map(({ env_key, ...rest }) => rest);
 // falls back to if the inline data is missing. data_policy is reduced to trains_on_prompts, the one part the filter reads.
 const HOME_FIELDS = ['slug', 'name', 'category', 'free_type', 'free_tier', 'notes', 'best_for', 'verified', 'last_verified', 'added',
   'card_required', 'phone_required', 'commercial_ok', 'commercial_ok_condition', 'openai_compatible', 'is_text_llm', 'modalities',
-  'models_free', 'expires'];
+  'models_free', 'expires', 'model_tier'];
 const homeProvider = (p) => {
   const out = {};
   for (const k of HOME_FIELDS) if (p[k] !== undefined) out[k] = p[k];
@@ -948,24 +971,31 @@ const homeProvider = (p) => {
 // providers do not both rewrite one long line of this page. "asof" is the date the server rows and stat tiles are rendered
 // for (ASOF), so explorer.js keeps them on first paint and only replaces what the visitor's clock changes.
 const inlineData = `<script type="application/json" id="providers-data">{"asof":"${ASOF}",\n"providers":[\n${publicProviders.map((p) => JSON.stringify(homeProvider(p))).join(',\n').replace(/</g, '\\u003c')}\n]}</script>`;
-// The four stat tiles are rendered here too, dated by ASOF (deterministic), so they show without JavaScript and
-// without a layout shift; explorer.js repaints them with the visitor's clock. Same markup as renderStats() in explorer.js.
+// The counters row is rendered here too, dated by ASOF (deterministic), so it shows without JavaScript and without a
+// layout shift; explorer.js repaints it with the visitor's clock. Same markup as statsHtml() in explorer.js.
 const STAT_STATUS_WORD = { fresh: 'fresh', due: 'due for re-check', stale: 'stale' };
 const homeStatsHtml = (() => {
   const genMs = Date.parse(ASOF + 'T00:00:00Z');
   const ages = providers.filter((p) => p.verified && p.last_verified).map((p) => Math.floor((genMs - Date.parse(p.last_verified + 'T00:00:00Z')) / 86400000));
   const oldest = ages.length ? Math.max(...ages) : 0;
   const status = freshnessStatus(oldest);
-  const tiles = [
-    ['ic-database', providers.length, 'providers tracked', ''],
-    ['ic-refresh', providers.filter((p) => p.category === 'ongoing').length, 'ongoing free tiers', ''],
-    ['ic-clock', providers.filter((p) => p.category === 'trial').length, 'trial credits', ''],
-    ['ic-shield', `${oldest}d`, `oldest verification · ${SLA_DAYS}-day SLA`, status],
-  ];
-  return tiles.map(([ic, n, l, c]) =>
-    `<div class="stat ${c}"><svg class="si" aria-hidden="true"><use href="#${ic}"/></svg><div class="num">${n}</div><div class="lbl">${l}${c ? `<span class="sr-only"> (${STAT_STATUS_WORD[c] || c})</span>` : ''}</div></div>`).join('');
+  const recheck = oldest <= 0 ? 'Re-checked today' : oldest === 1 ? 'Re-checked within the last day' : `Re-checked within the last ${oldest} days`;
+  return [
+    `<strong>${providers.length}</strong> providers tracked`,
+    `<strong>${providers.filter((p) => p.category === 'ongoing').length}</strong> ongoing free tiers`,
+    `<strong>${providers.filter((p) => p.category === 'trial').length}</strong> trial credits`,
+    `<span class="st-fresh ${status}" title="Every verified entry is due for a re-check ${SLA_DAYS} days after its date">${recheck}<span class="sr-only"> (${STAT_STATUS_WORD[status] || status})</span></span>`,
+  ].join('<span class="st-sep" aria-hidden="true"> · </span>');
 })();
 let indexHtml = readFileSync(join(ROOT, 'site/index.html'), 'utf8');
+// The home title carries the dataset month and the verified count (Q10); og:title and twitter:title repeat it. The
+// build rewrites it on every run, so the number follows the data. It is worded "free tiers & credits" (ongoing tiers
+// and trial credits are both counted), which is also not the "N verified providers" phrasing that lib/figures.mjs
+// guards in hand-written sources: validate.mjs reads site/index.html before the build has rewritten it.
+const HOME_TITLE = `Free LLM APIs (${TITLE_MONTH}): ${providers.filter((p) => p.verified === true).length} verified free tiers & credits, sourced & dated`;
+indexHtml = indexHtml.replace(/<title>[^<]*<\/title>/, `<title>${htmlEsc(HOME_TITLE)}</title>`)
+  .replace(/<meta property="og:title" content="[^"]*">/, `<meta property="og:title" content="${htmlEsc(HOME_TITLE)}">`)
+  .replace(/<meta name="twitter:title" content="[^"]*">/, `<meta name="twitter:title" content="${htmlEsc(HOME_TITLE)}">`);
 indexHtml = inject(indexHtml, 'csp', CSP);
 indexHtml = inject(indexHtml, 'themeguard', THEME_GUARD);
 indexHtml = inject(indexHtml, 'fonts', fontHead(''));
@@ -1717,7 +1747,7 @@ const modelsMain =
   modelIndex.map(modelRowHtml).join('\n') +
   `\n</tbody></table><p class="muted" style="margin-top:18px">Model lists are a live sample and change often — always confirm against the provider. A provider missing here usually needs an API key to list its models; <a href="${REPO}/blob/main/docs/update-playbook.md">see how the list is refreshed</a>.</p></div></main>`;
 writeFileSync(join(ROOT, 'site/models/index.html'), htmlPage({
-  title: 'Free model index — which free API serves which model · Free LLM API Hub',
+  title: datedTitle('Free model index — which free API serves which model · Free LLM API Hub'),
   desc: `Index of ${modelIndex.length} models available on free LLM & AI-model API tiers, and which provider serves each.`,
   canonical: `${SITE}/models/`,
   main: modelsMain,
@@ -1754,6 +1784,8 @@ for (const g of MODEL_GROUPS) {
 
 // ---------- SEO guides: intent-matched landing pages, generated from the data ----------
 mkdirSync(join(ROOT, 'site/guides'), { recursive: true });
+// A guide's modality is its `modality` field; a guide without one is about text LLMs (no card, OpenAI-compatible, no signup).
+const guideFits = (g, p) => (g.modality ? (p.modalities || []).includes(g.modality) : p.is_text_llm === true);
 const guideRow = (p) =>
   `<tr><td class="name"><a href="../p/${p.slug}">${htmlEsc(p.name)}</a><br><small>Verified <time datetime="${htmlEsc(p.last_verified)}">${htmlEsc(p.last_verified)}</time></small></td>` +
   `<td>${htmlEsc(p.free_tier)}</td>` +
@@ -1765,8 +1797,9 @@ for (const g of GUIDES) {
   const fill = (t) => t.replaceAll('{n}', String(list.length)).replaceAll('{date}', ASOF);
   const metaDesc = fill(g.metaDesc);
   const twins = COLLECTIONS.filter((c) => (c.guides || []).includes(g.slug));
-  const top = (g.pick && list.find((x) => x.slug === g.pick)) ||
-    [...list].sort((a, b) => recScore(b) - recScore(a) || (a.name < b.name ? -1 : 1))[0];
+  // The pick is the guide's own (g.pick) or the first row of the shared "Recommended" order. It is shown only when it
+  // belongs to the guide's modality (guideFits): a text-LLM guide never headlines an OCR or speech API as its top pick.
+  const top = [(g.pick && list.find((x) => x.slug === g.pick)) || [...list].sort(recommendedCmp)[0]].find((x) => x && guideFits(g, x));
   const related = GUIDES.filter((x) => x.slug !== g.slug)
     .map((x) => `<a href="${x.slug}">${htmlEsc(x.card)}</a>`).join('');
   const faqHtml = (g.faq && g.faq.length)
@@ -1813,7 +1846,7 @@ for (const g of GUIDES) {
     ],
   });
   writeFileSync(join(ROOT, `site/guides/${g.slug}.html`), htmlPage({
-    title: g.title, desc: metaDesc, canonical: `${SITE}/guides/${g.slug}`, main, jsonld,
+    title: datedTitle(g.title), desc: metaDesc, canonical: `${SITE}/guides/${g.slug}`, main, jsonld,
     ogImage: `${SITE}/og/guides/${g.slug}.png`,
   }));
 }
@@ -2145,7 +2178,7 @@ const bestMain =
 mkdirSync(join(ROOT, 'site/best'), { recursive: true });
 writeFileSync(
   join(ROOT, 'site/best/index.html'),
-  htmlPage({ title: 'The best free LLM APIs · Free LLM API Hub', desc: BEST.desc, canonical: SITE + '/best/', main: bestMain, jsonld: bestJsonld, prefix: '../' })
+  htmlPage({ title: datedTitle('The best free LLM APIs · Free LLM API Hub'), desc: BEST.desc, canonical: SITE + '/best/', main: bestMain, jsonld: bestJsonld, prefix: '../' })
 );
 
 // ---------- /best/methodology/ — the public method of the score ----------
