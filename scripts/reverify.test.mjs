@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { Script, createContext } from 'node:vm';
 import { SLA_DAYS, ageInDays } from './lib/rules.mjs';
-import { weeklyPacing, weeklyBatch } from './lib/pacing.mjs';
+import { weeklyPlan } from './lib/pacing.mjs';
 import { fetchDocs } from './lib/reverify-fetch.mjs';
 
 const transportProvider = { docs_url: 'https://provider.example/docs' };
@@ -142,7 +142,7 @@ async function run({ providers = fixture(), args = [], response = {}, fetchError
   };
   const context = createContext({
     Date: FixedDate, SLA_DAYS, ageInDays: (date, now = NOW) => ageInDays(date, now),
-    weeklyPacing, weeklyBatch,
+    weeklyPlan,
     fetchDocs: (p) => fetchDocs(p, { fetchImpl, timeoutMs: timeout ? 10 : 20000 }),
     tmpdir: () => '/fixture-human-review',
     dirname: () => '/fixture/scripts', join: (...parts) => parts.join('/'), fileURLToPath: () => '/fixture/scripts/reverify.mjs',
@@ -164,9 +164,11 @@ async function run({ providers = fixture(), args = [], response = {}, fetchError
 
 test('fixed-date automatic batch selects the oldest eligible providers in order', async () => {
   const result = await run({ args: ['--fetch-for-human-review'] });
-  assert.deepEqual(result.selected, ['oldest', 'due']);
-  assert.deepEqual(result.requests.map((r) => r.url), ['https://oldest.invalid/docs', 'https://due.invalid/docs']);
-  assert.equal(result.writes.length, 2);
+  // At least the approved pace (6) is proposed, but only entries at least 28 days old
+  // qualify when no week is clustered: 'fresh' (1 day) stays out, 'middle' (57 days) is in.
+  assert.deepEqual(result.selected, ['oldest', 'due', 'middle']);
+  assert.deepEqual(result.requests.map((r) => r.url), ['https://oldest.invalid/docs', 'https://due.invalid/docs', 'https://middle.invalid/docs']);
+  assert.equal(result.writes.length, 3);
 });
 
 test('never-verified and undated entries do not enter a re-verification batch', async () => {

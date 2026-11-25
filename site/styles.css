@@ -448,6 +448,9 @@ pre code { color: var(--text); }
 .cov-list { list-style: none; margin: 10px 0 2px; padding: 0; display: flex; flex-direction: column; gap: 6px; }
 .cov-task { line-height: 1.5; overflow-wrap: anywhere; }
 .cov-pop { display: none; }
+/* /quality/ — the week histogram: a bar beside each number (decoration; the number is the data) */
+.q-barcell { width: 40%; min-width: 60px; padding-left: 12px !important; }
+.q-bar { display: block; height: .7em; min-width: 0; margin-top: .35em; border-radius: 3px; background: var(--accent, #3fce8f); }
 @media (max-width: 640px) {
   .cov-popcol { display: none; }
   .cov-pop { display: block; font-weight: 400; font-size: .82rem; color: var(--muted); margin-top: 2px; }

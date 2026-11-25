@@ -10,13 +10,13 @@ npm ci --ignore-scripts
 
 ## Cadence
 
-- **Weekly human verification:** aim for one pass a week (Mondays ~10:00 Madrid works well); `npm run reverify` sizes its batch to clear the 90-day SLA without a cliff. Publishing a current worklist does not complete this pass or clear the backlog.
+- **Weekly human verification:** aim for one pass a week (Mondays ~10:00 Madrid works well); `npm run reverify` proposes at least 6 entries a week (the approved pace) and more only when the 90-day SLA needs it. Publishing a current worklist does not complete this pass or clear the backlog.
 - **Weekly issue publication:** Mondays at 09:17 UTC (10:17 Madrid in winter / 11:17 in summer), best effort. The main-only workflow refreshes issue #4 from current main and the actual UTC date; age arithmetic changes even when the dataset does not. Schedules can be delayed or disabled; use the recovery procedure below.
 - **Freshness SLA:** every verified entry is re-confirmed against the provider's own docs within **90 days**. The badge is graded on the *oldest* entry against that SLA, so it turns amber the moment one row goes past 60 days and red the moment one goes past 90 — it slips before the list does.
 
 ## Layer 1 — the re-verification batch (local script)
 
-[`scripts/reverify.mjs`](../scripts/reverify.mjs) (`npm run reverify`) picks the oldest verifications (sized to clear the SLA). Its default mode prints the worklist without fetching remote content. A human can explicitly fetch each provider's `docs_url` into the operating system's temporary `free-llm-api-hub/reverify-human-only/` directory, outside the repository worktree:
+[`scripts/reverify.mjs`](../scripts/reverify.mjs) (`npm run reverify`) picks the same batch as the worklist: the oldest verifications, at least 6 a week. Its default mode prints the worklist without fetching remote content. A human can explicitly fetch each provider's `docs_url` into the operating system's temporary `free-llm-api-hub/reverify-human-only/` directory, outside the repository worktree:
 
 ```bash
 npm run reverify                                  # safe worklist; no remote fetch
@@ -28,7 +28,11 @@ The script never edits the data. Dossiers contain provider-controlled prose and 
 
 ### Paced re-verification batches
 
-Start each weekly pass with `npm run worklist`. It prints this week's oldest verified providers — a batch sized by `scripts/lib/pacing.mjs` (at most 11 a week), so the 90-day freshness SLA is spread across small, regular batches instead of becoming a large end-of-quarter cleanup. If the worklist flags a cliff of entries that share a verification date, take the larger batch it recommends.
+Start each weekly pass with `npm run worklist`. It prints this week's oldest verified providers — a batch picked by `weeklyPlan` in `scripts/lib/pacing.mjs`: at least 6 a week (the approved pace), at most 11, more than 6 only when the 90-day SLA needs it. The freshness SLA is spread across small, regular batches instead of becoming a large end-of-quarter cleanup.
+
+**Staggering a cohort.** When many entries share a verification date (45 were verified on 2026-11-19 and 2026-11-20), they would all become due in the same week. The worklist's **📊 Freshness histogram** shows how many entries reach day 61 and day 91 in each of the next 16 weeks and marks with ⛰️ any week with more than 8 becoming due. While such a week exists, the batch pulls its entries forward, oldest first, even before they are 28 days old (never younger than 7 days), so the cohort is re-checked a few at a time. Do the whole batch each week, as one pull request, and the ⛰️ weeks disappear; skip a week and the following batches stay at 6, so the gap shows up as amber or overdue entries in the histogram. The rules are in [freshness-sla.md](freshness-sla.md#4-the-worklist-npm-run-worklist).
+
+A cheap weekly check that every quote in `data/quotes.json` is still on its page ("quote drift") is not part of this: `npm run verify-quotes` reads provider pages, which GitHub runners often cannot reach and which the issue publisher deliberately never visits. It stays a local run until the source-watch work gives it a home.
 
 [Issue #4](https://github.com/pacocartones/free-llm-api-hub/issues/4) publishes the same renderer with a UTC refresh date and an immutable link to the checked-out dataset commit. Its **entire body is generated and replaced on refresh**, including resetting checkboxes. Keep discussion in comments. Checked boxes are not evidence of completed verification; only human-reviewed, supported dataset edits establish it.
 

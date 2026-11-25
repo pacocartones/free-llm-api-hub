@@ -6,6 +6,7 @@
   "type": "module",
   "scripts": {
     "changelog-draft": "node scripts/changelog-draft.mjs",
+    "contributors": "node scripts/contributors.mjs --write",
     "release-snapshot": "node scripts/release-snapshot.mjs",
     "release:prepare": "node scripts/release-prepare.mjs",
     "changelog:collect": "node scripts/release-prepare.mjs --collect",
