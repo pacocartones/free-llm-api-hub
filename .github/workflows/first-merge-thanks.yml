@@ -1,10 +1,14 @@
 name: First merge thanks
 
-# One short comment when a person's first pull request is merged, pointing at the
-# good first issues. Like welcome.yml, it does not check out or run any code from
-# the pull request: it reads the event, asks the API how many merged pull requests
-# the author has, and posts a comment. The author and number reach the shell only
-# through environment variables, never interpolated into the script.
+# One short comment when a person's first pull request is merged, suggesting two
+# open, unassigned good first issues as a next step: of the other kind when it can
+# (a data pull request gets code or docs issues, and the other way round), with the
+# filtered list as the fallback. Like welcome.yml, it does not check out or run any
+# code from the pull request: it reads the event, asks the API how many merged pull
+# requests the author has and which good first issues are open, and posts a comment.
+# The author, number and labels reach the shell only through environment variables,
+# never interpolated into the script. Issues are cited as bare #numbers, so no issue
+# title is pasted into the comment.
 on:
   pull_request_target: # zizmor: ignore[dangerous-triggers] no checkout, no PR code is run; only posts a comment
     types: [closed]
@@ -18,6 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 3
     permissions:
+      issues: read
       pull-requests: write
     env:
       GH_TOKEN: ${{ github.token }}
@@ -25,6 +30,7 @@ jobs:
       AUTHOR: ${{ github.event.pull_request.user.login }}
       AUTHOR_TYPE: ${{ github.event.pull_request.user.type }}
       NUMBER: ${{ github.event.pull_request.number }}
+      PR_LABELS: ${{ toJSON(github.event.pull_request.labels.*.name) }}
     steps:
       - name: Comment on the first merged pull request of an outside contributor
         run: |
@@ -40,6 +46,21 @@ jobs:
           if [ "$merged" != "1" ]; then
             echo "skipped: $AUTHOR has $merged merged pull requests"; exit 0
           fi
-          body='Merged, thank you. If you would like to do another, the [good first issues](https://github.com/pacocartones/free-llm-api-hub/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) list is open.'
+          list="https://github.com/$REPO/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22+no%3Aassignee"
+          # A data pull request is labelled `data`; suggest issues of the other kind first.
+          if printf '%s' "${PR_LABELS:-[]}" | jq -e 'index("data")' >/dev/null 2>&1; then want=other; else want=data; fi
+          # Open, unassigned, not blocked good first issues (the API also lists pull requests; drop them).
+          # A failed lookup only loses the suggestions: the comment then links the filtered list.
+          picks="$(gh api "repos/$REPO/issues?state=open&labels=good%20first%20issue&per_page=100" 2>/dev/null \
+            | jq -r --arg want "$want" '[.[] | select(.pull_request == null and (.assignees | length) == 0)
+                | ([.labels[].name]) as $l | select($l | index("blocked") | not)
+                | {number, rank: (if (($l | index("data")) != null) == ($want == "data") then 0 else 1 end)}]
+                | sort_by(.rank) | .[:2] | .[] | "- #\(.number)"' 2>/dev/null)" || picks=""
+          thanks='Merged, thank you! You will be listed in CONTRIBUTORS.md and thanked in the next release notes.'
+          if [ -n "$picks" ]; then
+            body="$(printf '%s\n\nIf you would like to do another, these good first issues are open and unassigned (comment `/take` on one to claim it):\n\n%s\n\nOr pick any from the [full list](%s).' "$thanks" "$picks" "$list")"
+          else
+            body="$(printf '%s\n\nIf you would like to do another, the [open good first issues](%s) are a good place to start (comment `/take` on one to claim it).' "$thanks" "$list")"
+          fi
           gh api -X POST "repos/$REPO/issues/$NUMBER/comments" -f body="$body" >/dev/null
           echo "thanked $AUTHOR on #$NUMBER"

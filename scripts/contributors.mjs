@@ -2,31 +2,43 @@
 // Builds CONTRIBUTORS.md from the merged pull requests of this repository.
 // No services, no dependencies: it reads the JSON that `gh` prints.
 //
+//   npm run contributors        # release step: asks `gh` (read only) and rewrites CONTRIBUTORS.md
+//
+// or, from a saved list (this is what the tests use):
+//
 //   gh pr list --state merged --limit 1000 --json number,title,author,mergedAt > /tmp/merged.json
 //   node scripts/contributors.mjs /tmp/merged.json > CONTRIBUTORS.md
 //
 // Maintainers, bots and apps are left out (see EXCLUDE). Only public GitHub handles
 // are listed, never emails or real names. Counts are merged pull requests.
-import { readFileSync } from 'node:fs';
+import { readFileSync, writeFileSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
 
 const EXCLUDE = new Set(['pacocartones', 'LeonMAG']);
-const isBot = (login) => login.startsWith('app/') || login.endsWith('[bot]');
+const isBot = (author) => Boolean(author.is_bot) || author.login.startsWith('app/') || author.login.endsWith('[bot]');
+const DEFAULT_REPO = 'pacocartones/free-llm-api-hub';
 
+const write = process.argv[2] === '--write';
 const file = process.argv[2];
-if (!file) { console.error('usage: node scripts/contributors.mjs merged.json'); process.exit(2); }
-const prs = JSON.parse(readFileSync(file, 'utf8'));
+if (!file) { console.error('usage: node scripts/contributors.mjs merged.json [owner/repo] | --write'); process.exit(2); }
+const repo = process.env.GITHUB_REPOSITORY || (write ? DEFAULT_REPO : process.argv[3] || '');
+const LIMIT = 5000;
+const prs = write
+  ? JSON.parse(execFileSync('gh', ['pr', 'list', '-R', repo, '--state', 'merged', '--limit', String(LIMIT),
+    '--json', 'number,title,author,mergedAt'], { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 }))
+  : JSON.parse(readFileSync(file, 'utf8'));
+if (write && prs.length >= LIMIT) { console.error(`contributors: ${prs.length} merged pull requests reached the limit; raise LIMIT`); process.exit(1); }
 
 const people = new Map();
 for (const pr of prs) {
   const login = pr.author?.login;
-  if (!login || isBot(login) || EXCLUDE.has(login)) continue;
+  if (!login || isBot(pr.author) || EXCLUDE.has(login)) continue;
   const p = people.get(login) ?? { login, prs: [], first: pr.mergedAt };
   p.prs.push(pr.number);
   if (pr.mergedAt < p.first) p.first = pr.mergedAt;
   people.set(login, p);
 }
 
-const repo = process.env.GITHUB_REPOSITORY || process.argv[3] || '';
 const link = (n) => (repo ? `[#${n}](https://github.com/${repo}/pull/${n})` : `#${n}`);
 const rows = [...people.values()].sort((a, b) => (a.first < b.first ? -1 : a.first > b.first ? 1 : a.login.localeCompare(b.login)));
 
@@ -40,4 +52,9 @@ for (const p of rows) {
   out.push(`| [@${p.login}](https://github.com/${p.login}) | ${nums.length}: ${shown} | ${p.first.slice(0, 10)} |`);
 }
 out.push('', 'Issues, reviews, ideas and bug reports count too; they are not in this table because they are not in the git history. If you contributed that way and want to be named, open an issue.', '');
-process.stdout.write(out.join('\n'));
+if (write) {
+  writeFileSync(new URL('../CONTRIBUTORS.md', import.meta.url), out.join('\n'));
+  console.error(`contributors: wrote CONTRIBUTORS.md with ${rows.length} people from ${prs.length} merged pull requests`);
+} else {
+  process.stdout.write(out.join('\n'));
+}

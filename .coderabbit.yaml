@@ -43,8 +43,18 @@ reviews:
         doctrine). Flag any hand-maintained value that duplicates something derivable
         from the data, and any change to generated output that should instead change
         the generator or the source data.
+    # Many first pull requests here are tests. Keep their review to the change itself:
+    # an outside contributor cannot merge until every bot thread is resolved.
+    - path: "scripts/*.test.mjs"
+      instructions: >
+        Prefer fixture-based tests that run the real script or workflow shell over mocks.
+        Do not request refactors of code the pull request does not touch, and do not ask
+        for extra cases beyond the issue it closes; mention them as optional at most.
 chat:
-  auto_reply: true
+  # Do not answer every reply in a thread: a first-time contributor replying to the
+  # bot should not start a longer thread that also has to be resolved before merging.
+  # `@coderabbitai` mentions still get an answer.
+  auto_reply: false
 
 # No issue-enrichment comments ("Related PRs", "Similar issues", auto-plans)
 # on new issues: this tracker is organized as umbrellas + per-provider
