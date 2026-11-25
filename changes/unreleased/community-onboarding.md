@@ -5,4 +5,4 @@
   maintainers and bots and listing no email, and it is now a step of every release (`RELEASING.md`).
   The first-merge thanks comment now suggests two open, unassigned good first issues, of the other
   kind when it can (data or code and docs), and CodeRabbit asks less of first-time contributors:
-  scoped test reviews and no automatic replies in its threads. Agent-assisted.
+  scoped test reviews and no automatic replies in its threads. Agent-assisted (#763).
