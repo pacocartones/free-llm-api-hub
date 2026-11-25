@@ -166,7 +166,7 @@ if grep -l -- "$profile" /proc/[0-9]*/cmdline 2>/dev/null | grep -qv "/proc/$$/"
 There are two kinds of issue:
 
 - **Labelled both `good first issue` and `data`** (a data question answered from the provider's own page): don't claim it, open a pull request when it's ready. The first correct, sourced PR is merged. If you found something useful but won't open a PR, post it in the issue with the link and the date; the PR that uses it credits you.
-- **Everything else:** comment `/take` on its own as the first line of an issue comment. A bot assigns it to you if nobody has it and you have fewer than two open issues assigned. Check the assignee and bot reply; if there is no reply, ask in the issue before starting duplicate work. If you can't continue, comment `/release` on its own as the first line; that's completely fine. Check that your assignment was removed so someone else can take it. Share any useful findings or draft PR link when handing it back. An assigned issue with no activity for two weeks may be offered to another contributor, after a ping. A pull request for an issue assigned to someone else waits for them.
+- **Everything else:** comment `/take` on its own as the first line of an issue comment. A bot assigns it to you if nobody has it and you have fewer than two open issues assigned. Check the assignee and bot reply; if there is no reply, ask in the issue before starting duplicate work. If you can't continue, comment `/release` on its own as the first line; that's completely fine. Check that your assignment was removed so someone else can take it. Share any useful findings or draft PR link when handing it back. An assigned issue with no activity for two weeks may be offered to another contributor, after a ping (7 days during a program, see [Programs](#programs-social-winter-of-code-and-similar)). A pull request for an issue assigned to someone else waits for them.
 
 We read every pull request and reply as soon as we can. A reply is a real answer (a review, a question or an assignment), not an acknowledgement.
 
@@ -219,9 +219,72 @@ Live GitHub settings remain authoritative. Preserve existing controls when recon
 names; a required PR check must not use path filters that leave it permanently
 pending. Security policy and token permissions are in [SECURITY.md](SECURITY.md).
 
-## Hacktoberfest
+## Programs (Social Winter of Code and similar)
 
-October is Hacktoberfest month, but Hacktoberfest 2026 no longer rewards pull requests (it is about learning and building with open-source AI), so a pull request here does not earn Hacktoberfest swag or points, and we do not promise any. Contributions are welcome all year. The [good first issues](https://github.com/pacocartones/free-llm-api-hub/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) are the best place to start (see [Good first issues](#good-first-issues) for what qualifies). Your name goes in [CONTRIBUTORS.md](CONTRIBUTORS.md) when a pull request is merged.
+This repository takes part in contribution programs that score merged pull requests, such as [Social Winter of Code](https://www.swoc.in/) (SWoC). This section is for program participants; everything else in this guide applies to you too. Contributions are welcome all year, inside or outside a program.
+
+**Social Winter of Code Season 7 runs from 1 January to 30 March 2027.** The program and level labels it uses are listed here, and only here, so this table is the one place to check (SWoC publishes the exact names before the season starts, and we update the table then):
+
+| Purpose | Label |
+|---|---|
+| Program label: the issue counts for Social Winter of Code Season 7 | `SWoC27` |
+| Level label for an Easy issue | `Easy` |
+| Level label for a Medium issue | `Medium` |
+| Level label for a Hard issue | `Hard` |
+
+Below, "the program label" and "a level label" mean the labels in this table, and Easy, Medium and Hard mean the levels described in [Difficulty levels](#difficulty-levels).
+
+### Picking and taking an issue
+
+- **Pick an open issue with the program label and a level label.** Read the whole issue, its latest comments and its linked pull requests first.
+- **Data issues labelled `good first issue` and `data` are not assigned**, as for everyone else: open a pull request when it is ready, and the first correct, sourced PR is merged. If a second correct PR arrives later, we thank you and point you to another open issue.
+- **For every other issue, comment `/take`** on its own as the first line of a comment, and wait for the bot to assign you before starting (see [Claiming an issue](#claiming-an-issue)). You can hold **at most two open assigned issues** at a time; the bot refuses a third. Comment `/release` when you stop, so someone else can take it.
+- **No hoarding.** Take an issue only when you are about to work on it, not to reserve it. Asking for several issues at once, or taking issues you don't work on, means we stop assigning to you for that day. During the program, an assigned issue with no activity for **7 days** is released after a ping on day 5 (outside programs it is two weeks).
+- **At most two Easy merges per person.** Two merged pull requests are enough for the SWoC certificate. After that, please pick Medium or Hard issues so the next newcomer has an easy one.
+- Don't ask to be assigned in a pull request or by direct message: everything happens in the issue, in public.
+
+### Difficulty levels
+
+| Level | What it means here | Typical size |
+|---|---|---|
+| Easy | One or two files named in the issue, one named check, no third-party account. Good for a first contribution. | Under about 2 hours |
+| Medium | Reading existing code or tests, or comparing several official pages. The issue names the files and the check. | About 2 to 6 hours |
+| Hard | A design decision, several files, or a careful data re-verification with quotes. Agree the approach in the issue before you write code. | More than a day, in steps |
+
+The level is set in the issue by a maintainer. If you think it is wrong, say so in the issue **before** you start; we don't change it after the work is done. SWoC scores each level differently: see [swoc.in](https://www.swoc.in/) for the current points.
+
+### How points are given
+
+- Points come from labels on the **merged pull request**, and only a maintainer adds them. When we merge, we copy the level label from the issue to the pull request and add the program label.
+- **Only pull requests that close an issue carrying the program label get these labels.** Link it with `Closes #123` in the pull request description. A pull request without such an issue is reviewed on its merits as usual, but it gets no level label and does not score.
+- Only merged pull requests count. A pull request that is closed, or that only rewords text, reformats files or adds unsourced claims, gets no label (see [Hacktoberfest](#hacktoberfest) below for what gets merged).
+- If a merged contribution turns out to rest on an invented source, we revert it and ask the program to withdraw its points.
+
+### Reviews and response times
+
+During the program we aim to approve waiting checks within 1 day, reply to a new pull request within 2 days, give a first review within 3 days and reach a decision within 7 days. These are goals, not promises: maintainers are volunteers. If more than 10 program pull requests are waiting for review, we pause new assignments until the queue is shorter, and we say so in the issues.
+
+If a pull request is nearly ready and only needs regenerated files, an update from `main` or a formatting fix, a maintainer may finish it on your branch ("Allow edits by maintainers") and say so in a comment. You stay the author, and the changelog credits you.
+
+### Your first pull request waits for approval
+
+Until your first pull request here is merged, GitHub holds its checks until a maintainer approves them (see [Your first PR from a fork](#your-first-pr-from-a-fork-the-checks-may-wait)). During the program we approve them in batches, usually twice a day in January and once a day afterwards. So:
+
+- **Push when your change is complete.** Every push before your first merge waits for approval again.
+- **Don't close and reopen your pull request** to restart the checks; push to the same branch instead.
+- After your first merge, your later pull requests run their checks straight away.
+
+### AI and quotes
+
+The quality bar is the same as always. Read [AI_POLICY.md](AI_POLICY.md): AI-assisted work is welcome, but understand and test what you send, and be ready to answer review questions in your own words.
+
+- **Every fact and every quote must come from a page you opened yourself,** on the provider's own site. Third-party summaries, blog posts and other lists don't count as sources.
+- **Quotes are copied word for word.** Don't translate, shorten or reword a quoted sentence, and don't quote from memory or from an AI tool's answer. Reviewers open the source and look for the exact sentence before merging; [docs/quotes.md](docs/quotes.md) explains how quotes are recorded and checked.
+- **Pull requests with invented or unchecked sources are closed,** and so are pull requests that ignore the issue they claim to fix. If the official page does not answer the question, that is a useful result: say so in the issue with the link and the date.
+
+### Hacktoberfest
+
+October is Hacktoberfest month, but Hacktoberfest 2026 no longer rewards pull requests (it is about learning and building with open-source AI), so a pull request here does not earn Hacktoberfest swag or points, and we do not promise any. The [good first issues](https://github.com/pacocartones/free-llm-api-hub/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) are the best place to start (see [Good first issues](#good-first-issues) for what qualifies). Your name goes in [CONTRIBUTORS.md](CONTRIBUTORS.md) when a pull request is merged.
 
 What gets merged is what makes the data more accurate: a field confirmed from the provider's own docs, a stale number corrected, a dead link fixed with its replacement. Pull requests that only reword text, reformat files or add unsourced claims will be closed, and so will pull requests opened without reading the issue they claim to fix.
 

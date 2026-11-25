@@ -1,6 +1,8 @@
 name: Issue assignment
 
 # "/take" in an issue comment assigns the commenter, "/release" unassigns them.
+# Nobody holds more than MAX_OPEN open assigned issues at a time (the limit
+# CONTRIBUTING.md states, also during programs such as Social Winter of Code).
 # Issues labelled both "good first issue" and "data" are not assigned: the first
 # correct pull request wins. Runs on comments only; no code from the repository
 # is checked out.
@@ -31,6 +33,8 @@ jobs:
           BODY: ${{ github.event.comment.body }}
           LABELS: ${{ toJSON(github.event.issue.labels.*.name) }}
           ASSIGNEES: ${{ toJSON(github.event.issue.assignees.*.login) }}
+          MAX_OPEN: '2'
+          RULES: https://github.com/pacocartones/free-llm-api-hub/blob/main/CONTRIBUTING.md#claiming-an-issue
         run: |
           set -u
           cmd=$(printf '%s\n' "$BODY" | head -n 1 | tr -d '\r' | awk '{print tolower($1)}')
@@ -45,11 +49,11 @@ jobs:
                 say "@$AUTHOR this issue is already assigned to @$(jq -r '.[0]' <<<"$ASSIGNEES"). Any other issue labelled \`good first issue\` without an assignee is free."
               else
                 open=$(gh issue list --repo "$REPO" --assignee "$AUTHOR" --state open --json number --jq length)
-                if [ "$open" -ge 2 ]; then
-                  say "@$AUTHOR you already have $open open issues assigned. Finish or /release one of them first."
+                if [ "$open" -ge "$MAX_OPEN" ]; then
+                  say "@$AUTHOR you already have $open open issues assigned, and the limit is $MAX_OPEN per person. Finish or /release one of them first."
                 else
                   gh issue edit "$ISSUE" --repo "$REPO" --add-assignee "$AUTHOR" >/dev/null
-                  say "@$AUTHOR assigned to you. If you can't continue, comment \`/release\`; an assigned issue with no activity for two weeks may be offered to someone else after a ping."
+                  say "@$AUTHOR assigned to you. If you can't continue, comment \`/release\`. An assigned issue with no activity may be offered to someone else after a ping: two weeks, or 7 days during a program such as Social Winter of Code ($RULES)."
                 fi
               fi ;;
             /release)

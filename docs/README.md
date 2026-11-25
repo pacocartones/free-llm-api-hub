@@ -26,6 +26,9 @@ How **Free LLM API Hub** works — how entries are verified, what earns a spot, 
 | [Live testing](live-testing.md) | Probing each free tier with a real key — `last_probed`, and the Infisical setup |
 | [Roadmap](roadmap.md) | Where the project is going next |
 | [Backlog](backlog.md) | The living, actionable to-do checklist |
+| [Preparing dataset releases](release-preparation.md) | Stable local preparation procedure for dataset tags, GitHub Releases and snapshot assets |
+| [MCP product boundaries and release checklist](mcp-productization.md) | Product limits and pre-release checks for public distribution of the MCP server |
+| [MCP release setup](mcp-release.md) | Maintainer procedure for external setup and release of the MCP package |
 
 ## Adjacent references
 
