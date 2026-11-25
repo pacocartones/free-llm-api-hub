@@ -67,6 +67,58 @@ test('playground_url survives canonical serialization', () => {
   assert.equal(Object.hasOwn(saved.providers[1], 'playground_url'), false);
 });
 
+test('keys_url and keys_url_source survive canonical serialization', () => {
+  const data = JSON.parse(readFileSync(DATA, 'utf8'));
+  data.providers[0].keys_url = 'https://example.com/keys?tab=api&new=1';
+  data.providers[0].keys_url_source = 'https://example.com/docs';
+  delete data.providers[1].keys_url;
+  delete data.providers[1].keys_url_source;
+  const saved = JSON.parse(serialize(data));
+  assert.equal(saved.providers[0].keys_url, 'https://example.com/keys?tab=api&new=1');
+  assert.equal(saved.providers[0].keys_url_source, 'https://example.com/docs');
+  assert.equal(Object.hasOwn(saved.providers[1], 'keys_url'), false);
+});
+
+test('provider "Get a free key" button is conditional, tracked as data-link="keys", and kept in public JSON', () => {
+  const raw = readFileSync(DATA, 'utf8');
+  const data = JSON.parse(raw);
+  const [first, second] = data.providers;
+  first.keys_url = 'https://example.com/keys?tab=api&new=1';
+  first.keys_url_source = 'https://example.com/docs';
+  delete second.keys_url;
+  delete second.keys_url_source;
+  try {
+    writeFileSync(DATA, serialize(data));
+    run(['scripts/build.mjs']);
+    const present = readFileSync(join(ROOT, 'site/p', `${first.slug}.html`), 'utf8');
+    assert.equal((present.match(/>Get a free key ↗/g) || []).length, 1);
+    assert.ok(present.includes(`<a class="btn primary" href="https://example.com/keys?tab=api&amp;new=1" target="_blank" rel="noopener" data-provider="${first.slug}" data-link="keys">Get a free key ↗<span class="sr-only"> (opens in a new tab)</span></a>`));
+    // between the free limits and the quickstart
+    const at = (s) => present.indexOf(s);
+    assert.ok(at('id="limits"') < at('>Get a free key ↗') && at('>Get a free key ↗') < at('id="quickstart"'));
+    const absent = readFileSync(join(ROOT, 'site/p', `${second.slug}.html`), 'utf8');
+    assert.doesNotMatch(absent, /Get a free key/);
+    for (const file of ['site/providers.json', 'site/api/v1/providers.json']) {
+      const published = JSON.parse(readFileSync(join(ROOT, file), 'utf8'));
+      const row = published.providers.find((p) => p.slug === first.slug);
+      assert.equal(row.keys_url, 'https://example.com/keys?tab=api&new=1');
+      assert.equal(row.keys_url_source, 'https://example.com/docs');
+      assert.equal(Object.hasOwn(published.providers.find((p) => p.slug === second.slug), 'keys_url'), false);
+    }
+    const schema = JSON.parse(readFileSync(join(ROOT, 'site/api/v1/schema.json'), 'utf8'));
+    for (const name of ['keys_url', 'keys_url_source']) {
+      const field = schema.$defs.provider.properties[name];
+      assert.deepEqual([field.type, field.format, field.pattern], ['string', 'uri', '^https://']);
+    }
+    assert.notEqual(schema.$defs.provider.additionalProperties, false, 'v1 stays open to additive fields');
+    const csvHeader = readFileSync(join(ROOT, 'site/providers.csv'), 'utf8').split('\n')[0];
+    assert.doesNotMatch(csvHeader, /keys_url/, 'the CSV column list is unchanged');
+  } finally {
+    writeFileSync(DATA, raw);
+    run(['scripts/build.mjs']);
+  }
+});
+
 test('serializer ORDER matches the JSON Schema provider properties', () => {
   const schema = JSON.parse(readFileSync(join(ROOT, 'data/schema.json'), 'utf8'));
   const providerKeys = Object.keys(schema.$defs.provider.properties);
@@ -481,7 +533,7 @@ test('sitemap.xml lists no paginated updates pages (their count follows the comm
   assert.doesNotMatch(sitemap, /\/updates\/page\//, 'a page count tied to git history would make the drift-gated sitemap change on every merge');
 });
 
-test('derived-fingerprints.json pins gitignored outputs, skips site/p/, site/badges/, tracked and git-log files', () => {
+test('derived-fingerprints.json pins gitignored outputs, skips site/p/, site/badges/, the freshness badge, tracked and git-log files', () => {
   const fp = join(ROOT, 'derived-fingerprints.json');
   if (!existsSync(fp)) run(['scripts/build.mjs']);
   const pins = JSON.parse(readFileSync(fp, 'utf8'));
@@ -496,6 +548,8 @@ test('derived-fingerprints.json pins gitignored outputs, skips site/p/, site/bad
     'site/p/ must not be pinned (date-relative)');
   assert.equal(Object.keys(pins).some((k) => k.startsWith('site/badges/')), false,
     'site/badges/ must not be pinned (colour tracks verification age)');
+  assert.equal(pins['site/badge-freshness.json'], undefined,
+    'site/badge-freshness.json must not be pinned (its oldest age moves every day)');
   assert.equal(Object.keys(pins).some((k) => k.startsWith('site/og/')), false,
     'site/og/ is tracked and diff-gated directly');
   assert.equal(pins['site/index.html'], undefined,
@@ -1756,7 +1810,7 @@ test('provider links carry data-provider and data-link for the opt-in outbound_p
   assert.match(groq, /<a class="btn primary" href="[^"]+"[^>]* data-provider="groq" data-link="docs">Official docs/);
   assert.match(groq, /<a class="btn website" href="[^"]+"[^>]* data-provider="groq" data-link="website">/);
   const tagged = [...groq.matchAll(/data-provider="([^"]*)" data-link="([^"]*)"/g)];
-  assert.ok(tagged.every((m) => m[1] === 'groq' && ['docs', 'website', 'playground', 'models', 'limits_source', 'data_policy'].includes(m[2])), 'only the page provider and known link types');
+  assert.ok(tagged.every((m) => m[1] === 'groq' && ['docs', 'keys', 'website', 'playground', 'models', 'limits_source', 'data_policy'].includes(m[2])), 'only the page provider and known link types');
   const compareDir = readdirSync(join(ROOT, 'site/compare')).find((n) => n.includes('-vs-'));
   const cmp = readFileSync(join(ROOT, `site/compare/${compareDir}/index.html`), 'utf8');
   assert.equal([...cmp.matchAll(/data-link="docs"/g)].length, 2, "both providers' docs links are tagged on a static comparison");
@@ -2037,6 +2091,7 @@ test('active providers retain models_url from their official catalogues', () => 
     ['alibaba-model-studio', 'https://www.alibabacloud.com/help/en/model-studio/model-pricing'],
     ['sarvam-ai', 'https://docs.sarvam.ai/api/token-factory/models'],
     ['tencent-hunyuan', 'https://cloud.tencent.com/document/product/1823/130051'],
+    ['stability-ai', 'https://docs.stability.ai/api-reference'],
   ]);
 });
 
@@ -2819,7 +2874,7 @@ test('a11y: the filter chips stay reachable by keyboard and screen reader, with 
   const css = readFileSync(join(ROOT, 'site/styles.css'), 'utf8');
   assert.doesNotMatch(css, /\.chip input\s*\{[^}]*display\s*:\s*none/, 'a display:none checkbox leaves the chip out of the tab order and the accessibility tree');
   assert.match(css, /\.chip:has\(input:focus-visible\)/, 'the focused chip shows an outline');
-  assert.match(css, /--control-border:\s*#[0-9a-f]{6}/i, 'a control border token exists for the 3:1 non-text contrast');
+  assert.match(css, /--control:\s*#[0-9a-f]{6}/i, 'a control border token exists for the 3:1 non-text contrast');
 
   const index = readFileSync(join(ROOT, 'site/index.html'), 'utf8');
   const chips = index.match(/<label class="chip">[\s\S]*?<\/label>/g) || [];
@@ -3036,7 +3091,7 @@ test('data_policy lot 4: the 13 providers that say they do not train were read f
   for (const p of data.providers.filter((q) => q.data_policy && q.data_policy.trains_on_prompts !== false)) {
     // rows that say it may train were read for the plan later (lots 2, 3, 5 and the correction of the absence claims): true where the
     // clause names the free users or free usage (AssemblyAI, Voyage AI, Cohere), false where it does not
-    const READ = { assemblyai: true, 'voyage-ai': true, elevenlabs: false, cartesia: false, 'retell-ai': false, deepgram: false, 'arli-ai': false, 'sarvam-ai': false, poolside: false, typhoon: false, openrouter: false, nlpcloud: false, 'nvidia-nim': false, veryfi: false, voicegain: false, cohere: true, inception: false, 'azure-speech': false, lemonfox: false, gladia: true, 'liquid-ai': false };
+    const READ = { assemblyai: true, 'voyage-ai': true, elevenlabs: false, cartesia: false, 'retell-ai': false, deepgram: false, 'arli-ai': false, 'sarvam-ai': false, poolside: false, typhoon: false, openrouter: false, nlpcloud: false, 'nvidia-nim': false, veryfi: false, voicegain: false, cohere: true, inception: false, 'azure-speech': false, lemonfox: false, gladia: true, 'liquid-ai': false, 'stability-ai': false };
     if (p.slug in READ) assert.equal(p.data_policy.plan_named, READ[p.slug], `${p.slug}: plan_named as read`);
     else assert.equal(p.data_policy.plan_named, undefined, `${p.slug}: not read for the plan yet, so no value is written`);
   }
@@ -3224,6 +3279,48 @@ test('a11y: the global focus ring is at least 2px, uses the accent and reaches 3
   // The ring must not be removed from a control that takes the keyboard: the only outline:none rules are the ones that draw their own focus.
   const removed = [...css.matchAll(/([^{}]+)\{[^}]*outline:\s*none[^}]*\}/g)].map((m) => m[1].trim());
   assert.deepEqual(removed.filter((s) => /th-sort|chip|\.sel\b|button|a:focus/.test(s)), [], 'no outline:none on the sort buttons, chips, selects, buttons or links');
+});
+
+// ---- semantic colour tokens: every text-bearing token stays AA (4.5:1) and the control border 3:1, on every surface, in both themes ----
+// A token may alias another with var(--x); the light theme inherits what it does not redefine, as the cascade does on <html>.
+const SEMANTIC_TEXT_TOKENS = ['ok', 'unk', 'bad', 'chg', 'trial', 'm-text', 'm-vision', 'm-image', 'm-audio', 'm-embeddings', 'm-rerank', 'm-ocr'];
+test('a11y: the semantic colour tokens (ok, unk, bad, chg, trial, m-*, control) keep their contrast on bg, panel and panel-2 in both themes', () => {
+  const css = readFileSync(join(ROOT, 'site/styles.css'), 'utf8');
+  const block = (selector) => css.slice(css.indexOf(selector + ' {'), css.indexOf('\n}', css.indexOf(selector + ' {')));
+  const dark = block(':root'), light = block('[data-theme="light"]');
+  const raw = (b, name) => { const m = b.match(new RegExp('^\\s*--' + name + ':\\s*([^;]+);', 'm')); return m ? m[1].trim() : null; };
+  const resolve = (theme, name, seen = new Set()) => {
+    assert.ok(!seen.has(name), `--${name} aliases itself`); seen.add(name);
+    const v = (theme === 'light' && raw(light, name)) || raw(dark, name);
+    assert.ok(v, `token --${name} is missing`);
+    const alias = /^var\(--([a-z0-9-]+)\)$/.exec(v);
+    if (alias) return resolve(theme, alias[1], seen);
+    assert.match(v, /^#[0-9a-fA-F]{6}$/, `--${name} resolves to a 6-digit hex (${v})`);
+    return v;
+  };
+  // Every modality the schema allows has its token, so a new modality cannot ship without a colour.
+  const schema = JSON.parse(readFileSync(join(ROOT, 'data/schema.json'), 'utf8'));
+  const findEnum = (o) => { if (!o || typeof o !== 'object') return null; if (o.modalities?.items?.enum) return o.modalities.items.enum; for (const v of Object.values(o)) { const r = findEnum(v); if (r) return r; } return null; };
+  const modalities = findEnum(schema);
+  assert.ok(modalities && modalities.length >= 7, 'the schema lists the modalities');
+  for (const m of modalities) assert.ok(SEMANTIC_TEXT_TOKENS.includes('m-' + m), `--m-${m} is checked`);
+  for (const theme of ['dark', 'light']) {
+    for (const surface of ['bg', 'panel', 'panel-2']) {
+      const bg = resolve(theme, surface);
+      for (const t of SEMANTIC_TEXT_TOKENS) {
+        const r = contrast(resolve(theme, t), bg);
+        assert.ok(r >= 4.5, `${theme}: --${t} on --${surface} is ${r.toFixed(2)}:1, below 4.5:1`);
+      }
+      const c = contrast(resolve(theme, 'control'), bg);
+      assert.ok(c >= 3, `${theme}: --control on --${surface} is ${c.toFixed(2)}:1, below 3:1 (WCAG 1.4.11)`);
+    }
+  }
+  // The legacy names stay as aliases (lib/consent.client.js reads --control-border), and component rules use the semantic names.
+  for (const [legacy, semantic] of [['green', 'ok'], ['warn', 'unk'], ['red', 'bad'], ['control-border', 'control']]) {
+    assert.equal(raw(dark, legacy), `var(--${semantic})`, `--${legacy} aliases --${semantic}`);
+    const outsideTokens = css.slice(css.indexOf('\n}', css.indexOf('[data-theme="light"] {')));
+    assert.ok(!outsideTokens.includes(`var(--${legacy})`), `no component rule reads var(--${legacy}); use var(--${semantic})`);
+  }
 });
 
 // ---- Dated banner mechanism (site/site.js) ---------------------------------
