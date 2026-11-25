@@ -221,10 +221,14 @@ For a provider fact, cite the provider's own page and the day you read it (UTC);
 
 | Doc | What it covers |
 |---|---|
+| [Tutorial: add your first provider](docs/tutorial-first-provider.md) | Follow along end to end — check, add, validate, regenerate, merge a real entry |
 | [Methodology](docs/methodology.md) | How each entry is verified; what "verified" does and doesn't mean |
 | [Update playbook](docs/update-playbook.md) | The weekly routine that keeps the badge green |
+| [Freshness SLA](docs/freshness-sla.md) | The 90-day re-verification promise behind the badge |
 | [Inclusion criteria](docs/inclusion-criteria.md) | What earns a spot — and what gets rejected |
 | [Comparison dimensions](docs/comparison-dimensions.md) | Every field and flag in the dataset, defined |
+| [Provider schema reference](docs/schema.md) | Every field, generated from the JSON Schema |
+| [Static JSON API](docs/api.md) | Stability and versioning guarantees for `/api/v1/` |
 | [Self-hosting on free compute](docs/self-hosting-on-free-compute.md) | Adjacent: free GPU/compute when no hosted API fits |
 | [Credit programs (apply to get)](docs/credit-programs.md) | Adjacent: startup & student/research credit programs |
 | [Roadmap](docs/roadmap.md) | Where this is going next |
