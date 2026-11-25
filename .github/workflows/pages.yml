@@ -1,6 +1,20 @@
 name: Deploy site
 
+# When it deploys depends on the repository variable REGEN_MODE (docs/regeneration-bot.md):
+#   - push: the regeneration bot commits the derived files to main after a merge. A push that changes an input of
+#     "Regenerate derived files" (or that the bot made) is not deployed by itself; the deploy runs when that
+#     workflow finishes on main (workflow_run), so the committed sitemap the live check compares is current.
+#     Other pushes (a script or style under site/, say) deploy at once, as before.
+#   - anything else: every push in the paths below deploys, and workflow_run runs are skipped.
+# The daily schedule and the manual "Run workflow" button deploy in every mode.
+# The `gate` job decides (pagesDeploy() in scripts/lib/regenerate.mjs, tested). workflow_run is safe here: the
+# upstream workflow runs on main only (push, schedule, manual) and never on pull-request code, and this workflow
+# always checks out main.
 on:
+  workflow_run:
+    workflows: ['Regenerate derived files']
+    types: [completed]
+    branches: [main]
   push:
     branches: [main]
     paths:
@@ -31,7 +45,37 @@ permissions:
   contents: read
 
 jobs:
+  gate:
+    name: Decide whether to deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    permissions:
+      contents: read
+    outputs:
+      deploy: ${{ steps.gate.outputs.deploy }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0 # the push's range (before..after) must be in the clone
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+      - id: gate
+        name: Mode, event and pushed paths
+        env:
+          REGEN_MODE: ${{ vars.REGEN_MODE }}
+          EVENT: ${{ github.event_name }}
+          ACTOR: ${{ github.actor }}
+          BOT_LOGIN: ${{ vars.REGEN_APP_SLUG && format('{0}[bot]', vars.REGEN_APP_SLUG) || '' }}
+          BEFORE: ${{ github.event.before }}
+          CONCLUSION: ${{ github.event.workflow_run.conclusion }}
+          HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+        run: node scripts/regenerate-guard.mjs pages-gate
+
   build:
+    needs: gate
+    if: ${{ needs.gate.outputs.deploy == 'true' }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
