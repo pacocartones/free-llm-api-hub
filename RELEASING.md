@@ -88,7 +88,10 @@ before the previous release date or before the newest `last_verified`/`added`. T
   order, and deletes the fragments it moved.
 
 Write the summary paragraph under the new heading and check the entries against the merged pull
-requests (rule 5, `npm run changelog-draft`), then `npm run build` (`npm run og` if the OG check asks),
+requests (rule 5, `npm run changelog-draft`). Refresh the contributor list with `npm run contributors`
+(it reads the merged pull requests through `gh`, read only, and rewrites `CONTRIBUTORS.md`; maintainers
+and bots are left out and no email is listed), so nobody waits more than one release to be credited.
+Then `npm run build` (`npm run og` if the OG check asks),
 `npm test`, commit and open the pull request. When it merges, `Tag release` tags that commit
 (rule 2). `npm run changelog:collect` moves the fragments under `## [Unreleased]` without a
 release, for a preview.
