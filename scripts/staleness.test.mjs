@@ -162,12 +162,14 @@ test('combined dataset: providers appear in the correct sections and in the expe
   // Never verified section preserves input order
   assert.deepEqual(slugsInSection(md, '### ⚠️ Never independently verified'), ['unverified-first', 'unverified-second']);
 
-  // Weekly batch prioritizes oldest verifications (forced: > 90d or age + 7 > 90d)
-  // With 6 verified providers, pacing size is 3, so only the 3 forced entries are included
+  // Weekly batch prioritizes oldest verifications (forced: > 90d or age + 7 > 90d).
+  // The size is at least the approved pace (6), but only entries at least 28 days
+  // old qualify when no coming week is clustered, so the two fresh ones stay out.
   assert.deepEqual(slugsInSection(md, "### 📅 This week's batch"), [
     'overdue-older-120d',
     'overdue-newer-91d',
     'due-soon-older-90d',
+    'due-soon-younger-70d',
   ]);
 });
 
@@ -240,4 +242,40 @@ test('top-level CLI execution matches stalenessWorklist on data/providers.json a
   assert.ok(cliOutput.includes('### 🔴 Overdue'));
   assert.ok(cliOutput.includes('### 🟡 Due soon'));
   assert.ok(cliOutput.includes('### ⚠️ Never independently verified'));
+});
+
+// ---------- staggered re-verification (pace floor, cluster pull-forward, histogram) ----------
+
+const daysBefore = (now, days) => new Date(+now - days * 86400000).toISOString().slice(0, 10);
+
+test('a same-day cohort is pulled forward at the approved pace, oldest first, before it is 28 days old', () => {
+  const providers = [
+    ...['d', 'b', 'a', 'c'].map((s) => ({ slug: `old-${s}`, name: `Old ${s}`, verified: true, last_verified: daysBefore(NOW, 16) })),
+    ...Array.from({ length: 30 }, (_, i) => ({ slug: `cohort-${String(i).padStart(2, '0')}`, name: `Cohort ${i}`, verified: true, last_verified: daysBefore(NOW, 11) })),
+    { slug: 'last-week', name: 'Last week', verified: true, last_verified: daysBefore(NOW, 5) },
+  ];
+  const md = stalenessWorklist(providers, NOW);
+  // 4 oldest by date, then ties broken by slug; the 5-day-old entry is never pulled.
+  assert.deepEqual(slugsInSection(md, "### 📅 This week's batch"), ['old-a', 'old-b', 'old-c', 'old-d', 'cohort-00', 'cohort-01']);
+  assert.match(md, /Entries younger than 28 days are included because a coming week has more than 8 entries becoming due/);
+  // Same answer whatever the input order.
+  assert.equal(stalenessWorklist([...providers].reverse(), NOW), md);
+});
+
+test('without a cluster, young entries wait for the 28-day minimum', () => {
+  const providers = Array.from({ length: 8 }, (_, i) => ({ slug: `spread-${i}`, name: `Spread ${i}`, verified: true, last_verified: daysBefore(NOW, 10 + i * 2) }));
+  const md = stalenessWorklist(providers, NOW);
+  assert.deepEqual(slugsInSection(md, "### 📅 This week's batch"), []);
+  assert.doesNotMatch(md, /Entries younger than 28 days are included/);
+});
+
+test('the worklist shows a 16-week freshness histogram and marks clustered weeks', () => {
+  const providers = Array.from({ length: 9 }, (_, i) => ({ slug: `c-${i}`, name: `C ${i}`, verified: true, last_verified: daysBefore(NOW, 20) }));
+  const md = stalenessWorklist(providers, NOW);
+  const section = md.split('### 📊 Freshness histogram — next 16 weeks\n')[1].split('\n### ')[0];
+  const rows = section.split('\n').filter((l) => /^\| \d{4}-/.test(l));
+  assert.equal(rows.length, 16);
+  assert.equal(rows.filter((l) => l.includes('⛰️')).length, 1);
+  assert.match(section, /\| 9 ⛰️ \| 0 \|/);
+  assert.match(section, /more than 8 entries become due/);
 });

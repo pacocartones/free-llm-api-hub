@@ -14,7 +14,7 @@ import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { SLA_DAYS, ageInDays } from './lib/rules.mjs';
-import { weeklyPacing, weeklyBatch } from './lib/pacing.mjs';
+import { weeklyPlan } from './lib/pacing.mjs';
 import { fetchDocs } from './lib/reverify-fetch.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -40,8 +40,7 @@ const verified = providers
 // --batch overrides the size.
 const today = new Date();
 const ageOf = (p) => ageInDays(p.last_verified, today);
-const n = batchSize ?? weeklyPacing(verified.map(ageOf), SLA_DAYS).size;
-const batch = batchSize ? verified.slice(0, n) : weeklyBatch(verified, ageOf, SLA_DAYS, n);
+const batch = batchSize ? verified.slice(0, batchSize) : weeklyPlan(verified, ageOf, SLA_DAYS).batch;
 
 console.log(`Re-verification batch — ${batch.length} of ${verified.length} verified (oldest first):\n`);
 for (const p of batch) {
