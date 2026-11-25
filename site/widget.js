@@ -67,7 +67,7 @@
     });
 
   var fail = function () {
-    el.innerHTML = '<div style="font:13px sans-serif;color:#888">Could not load the Free LLM API Hub widget.</div>';
+    el.innerHTML = '<div style="font:13px sans-serif;color:inherit">Could not load the Free LLM API Hub widget.</div>';
   };
 
   rulesReady
