@@ -7,4 +7,5 @@
   training on API User Content unless agreed; API texts not stored), Veryfi
   (submitted documents may train its proprietary, non-generative models;
   business opt-out) and Voicegain (retention 0 seconds to 7 days; training not
-  stated, so `trains_on_prompts` stays unknown) (#708).
+  stated, so `trains_on_prompts` stays unknown); agent-assisted reading
+  (#708).
