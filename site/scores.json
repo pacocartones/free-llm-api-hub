@@ -85,6 +85,12 @@
       "of": 6,
       "rank": null
     },
+    "meganova": {
+      "total": 38.1,
+      "confirmed": 3,
+      "of": 6,
+      "rank": null
+    },
     "ibm-watsonx": {
       "total": 37.1,
       "confirmed": 4,
@@ -356,6 +362,12 @@
       "rank": null
     },
     "nvidia-nim": {
+      "total": 25.5,
+      "confirmed": 2,
+      "of": 6,
+      "rank": null
+    },
+    "sea-lion": {
       "total": 25.5,
       "confirmed": 2,
       "of": 6,
