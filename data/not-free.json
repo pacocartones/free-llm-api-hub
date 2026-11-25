@@ -1,0 +1,311 @@
+{
+  "note": "The one source for \"Notably NOT free\": scripts/build.mjs renders the README section (AUTOGEN:not-free) and the /not-free/ page from this file. Every quote is copied verbatim from docs/sources.md or data/quotes.json (quote_ids), with the same source URL and date; scripts/not-free.test.mjs checks that. `checked` is the UTC day the provider's page was read, or null when no date is recorded.",
+  "groups": [
+    {
+      "id": "no-free-tier",
+      "title": "No ongoing free API tier",
+      "intro": "API use is paid in advance with credits and stops when they run out. Their \"Free\" or \"Tier 0\" rows are rate-limit tiers, not free usage, and any recurring API credits are promotional or come with paid plans."
+    },
+    {
+      "id": "card-or-prepay",
+      "title": "A card or prepayment before any API use",
+      "intro": "Providers people *assume* are free, but which currently require a card or prepayment before any API use, per their own docs. Some have handed out small one-time trial credits at various points, but that has changed repeatedly; check each provider's billing page before assuming anything."
+    },
+    {
+      "id": "removed",
+      "title": "Retired or removed after re-verification",
+      "intro": "Listed here before, removed (or moved) when a re-check of the provider's own pages no longer supported free access."
+    }
+  ],
+  "alternatives_note": "For genuinely free access to strong models, your best bets here are **Gemini** (frontier-class) and the free open-weight models on **Groq, OpenRouter, Cloudflare and Z.ai** (SiliconFlow's free models are on its China platform and need real-name verification).",
+  "entries": [
+    {
+      "id": "openai",
+      "name": "OpenAI",
+      "group": "no-free-tier",
+      "slug": null,
+      "modalities": ["text"],
+      "expectation": "The rate-limits guide has a \"Free\" row, so the API looks free to start.",
+      "summary": "No ongoing free API tier is established. New API accounts pay in advance; requests fail once credits run out. The rate-limits guide's \"Free\" row is a usage tier (allowed geography, $100/month limit), not a statement that usage is free. Promotional credits exist, including for eligible ChatGPT subscriptions, but no recurring free allowance is published.",
+      "short": "prepaid billing; the \"Free\" row is a rate-limit tier",
+      "quotes": [
+        "New API accounts use prepaid billing.",
+        "Prepaid billing lets you purchase credits before using the API.",
+        "When a prepaid account runs out of credits, API requests begin returning a billing error."
+      ],
+      "sources": [
+        { "label": "Prepaid API billing", "url": "https://help.openai.com/en/articles/8264644-what-is-prepaid-billing" },
+        { "label": "Rate limits", "url": "https://developers.openai.com/api/docs/guides/rate-limits" }
+      ],
+      "checked": "2026-11-20",
+      "faq": "Is the OpenAI API free?"
+    },
+    {
+      "id": "anthropic",
+      "name": "Anthropic",
+      "group": "no-free-tier",
+      "slug": null,
+      "modalities": ["text"],
+      "expectation": "Claude has a consumer Free plan, so the API is assumed to have one too.",
+      "summary": "No ongoing free API tier. Credits are bought before use; recurring monthly API credits come only with the paid Max, Ultra and Team plans. The consumer Free plan is chat, not API.",
+      "short": "credits are bought before use; the Free plan is chat, not API",
+      "quotes": [
+        "Buy credits before you use the API, and they're applied to your usage according to our current pricing.",
+        "If you run out of credits, you can no longer call the API or use the playground until you add more."
+      ],
+      "sources": [
+        { "label": "How to pay for Claude API usage", "url": "https://support.claude.com/en/articles/8977456-how-do-i-pay-for-my-claude-api-usage" }
+      ],
+      "checked": "2026-11-20",
+      "faq": "Is the Anthropic (Claude) API free?"
+    },
+    {
+      "id": "xai",
+      "name": "xAI",
+      "group": "no-free-tier",
+      "slug": null,
+      "modalities": ["text"],
+      "expectation": "The rate-limit table starts at \"Tier 0 / $0\", which reads like a free tier.",
+      "summary": "No ongoing free API tier. \"Tier 0 / $0\" is a rate-limit tier based on cumulative spend, not a usage allowance; by default only prepaid credits are used.",
+      "short": "\"Tier 0 / $0\" is a rate-limit tier; prepaid credits only",
+      "quotes": [
+        "Your API requests will be automatically rejected once your prepaid credits are depleted."
+      ],
+      "sources": [
+        { "label": "Billing", "url": "https://docs.x.ai/console/billing" },
+        { "label": "Consumption and rate limits", "url": "https://docs.x.ai/docs/key-information/consumption-and-rate-limits" }
+      ],
+      "checked": "2026-11-20",
+      "faq": "Is the xAI (Grok) API free?"
+    },
+    {
+      "id": "together-ai",
+      "name": "Together AI",
+      "group": "card-or-prepay",
+      "slug": null,
+      "modalities": ["text"],
+      "expectation": "It publishes free-tier rate limits, which look like free access.",
+      "summary": "The official billing article says there are no free trials and platform access requires a minimum $5 credit purchase. Rate limits do not establish whether access is free.",
+      "short": "no free trials; a minimum $5 credit purchase",
+      "quotes": [
+        "Together AI does not currently offer free trials.",
+        "Access to the Together platform requires a minimum $5 credit purchase."
+      ],
+      "sources": [
+        { "label": "Official free-trial and billing article", "url": "https://support.together.ai/articles/1862638756-changes-to-free-tier-and-billing-july-2025" }
+      ],
+      "checked": "2026-11-14",
+      "faq": null
+    },
+    {
+      "id": "deepinfra",
+      "name": "DeepInfra",
+      "group": "card-or-prepay",
+      "slug": null,
+      "modalities": ["text"],
+      "expectation": "Often listed as free on other lists.",
+      "summary": "A card or prepayment is required before service use. A separate free tier or trial credit is not established by this page.",
+      "short": "a card or prepayment before use",
+      "quotes": [
+        "You have to add a card or pre-pay or you won't be able to use our services."
+      ],
+      "sources": [
+        { "label": "Official pricing page", "url": "https://deepinfra.com/pricing" }
+      ],
+      "checked": "2026-11-14",
+      "faq": null
+    },
+    {
+      "id": "perplexity",
+      "name": "Perplexity's API",
+      "group": "card-or-prepay",
+      "slug": null,
+      "modalities": ["text"],
+      "expectation": "Often assumed to be free.",
+      "summary": "Currently requires a card or prepayment before any API use, per its own docs. No quote has been recorded in this repository yet.",
+      "short": "a card or prepayment before any API use",
+      "quotes": [],
+      "sources": [],
+      "checked": null,
+      "faq": null
+    },
+    {
+      "id": "replicate",
+      "name": "Replicate",
+      "group": "card-or-prepay",
+      "slug": null,
+      "modalities": ["image", "text"],
+      "expectation": "Often listed as free on other lists.",
+      "summary": "Currently requires a card or prepayment before any API use, per its own docs. It was held back from the dataset for lack of a citable, quantifiable free tier. No quote has been recorded in this repository yet.",
+      "short": "a card or prepayment before any API use",
+      "quotes": [],
+      "sources": [],
+      "checked": null,
+      "faq": null
+    },
+    {
+      "id": "featherless-ai",
+      "name": "Featherless AI",
+      "group": "card-or-prepay",
+      "slug": null,
+      "modalities": ["text"],
+      "expectation": "Often listed as free on other lists.",
+      "summary": "Currently requires a card or prepayment before any API use, per its own docs. No quote has been recorded in this repository yet.",
+      "short": "a card or prepayment before any API use",
+      "quotes": [],
+      "sources": [],
+      "checked": null,
+      "faq": null
+    },
+    {
+      "id": "mistral",
+      "name": "Mistral",
+      "group": "removed",
+      "slug": null,
+      "modalities": ["text"],
+      "expectation": "Mistral has a Free mode, and its API used to be listed here as free.",
+      "summary": "Free mode no longer includes API access; API keys require billing activation and pay-as-you-go. Free Studio/Vibe budgets are not a free developer API. Removed from the dataset in 2.14.0.",
+      "short": "Free mode no longer includes API access; API keys require billing activation and pay-as-you-go",
+      "quotes": [],
+      "sources": [
+        { "label": "Usage limits", "url": "https://docs.mistral.ai/admin/billing-usage/usage-limits" }
+      ],
+      "checked": "2026-11-14",
+      "faq": "Is there a free Mistral API?"
+    },
+    {
+      "id": "github-models",
+      "name": "GitHub Models",
+      "group": "removed",
+      "slug": null,
+      "modalities": ["text"],
+      "expectation": "It was listed here as a free tier until GitHub retired it.",
+      "summary": "Fully retired by GitHub on 2026-07-30: playground, catalog, inference API and BYOK shut down for all customers. Removed from the dataset in 2.7.0.",
+      "short": "fully retired by GitHub on 2026-07-30 — playground, catalog and inference API shut down for all customers",
+      "quotes": [],
+      "sources": [],
+      "checked": null,
+      "faq": "Does GitHub Models still have a free tier?"
+    },
+    {
+      "id": "cerebras",
+      "name": "Cerebras",
+      "group": "removed",
+      "slug": "cerebras",
+      "modalities": ["text"],
+      "expectation": "It used to have an ongoing free tier.",
+      "summary": "Now listed as a trial credit, not a free tier: a one-time $5 credit that requires a verified payment method and expires 30 days after grant.",
+      "short": "now listed as a trial credit: the ongoing free tier became a payment-method-gated $5/30-day trial",
+      "quotes": [],
+      "quote_ids": ["cerebras.card_required.sentence"],
+      "sources": [
+        { "label": "Rate limits", "url": "https://inference-docs.cerebras.ai/support/rate-limits" }
+      ],
+      "checked": "2026-11-24",
+      "faq": "Is the Cerebras API still free?"
+    },
+    {
+      "id": "arli-ai",
+      "name": "Arli AI",
+      "group": "removed",
+      "slug": null,
+      "modalities": ["text"],
+      "expectation": "It was listed here with free access.",
+      "summary": "Paid plans only.",
+      "short": "paid plans only",
+      "quotes": [],
+      "sources": [],
+      "checked": "2026-11-19/20",
+      "faq": null
+    },
+    {
+      "id": "nebius",
+      "name": "Nebius",
+      "group": "removed",
+      "slug": null,
+      "modalities": ["text"],
+      "expectation": "It was listed here with a trial credit.",
+      "summary": "No published trial credit.",
+      "short": "no published trial credit",
+      "quotes": [],
+      "sources": [],
+      "checked": "2026-11-19/20",
+      "faq": null
+    },
+    {
+      "id": "hume",
+      "name": "Hume",
+      "group": "removed",
+      "slug": null,
+      "modalities": ["audio"],
+      "expectation": "It was listed here with free access.",
+      "summary": "No published pricing.",
+      "short": "no published pricing",
+      "quotes": [],
+      "sources": [],
+      "checked": "2026-11-19/20",
+      "faq": null
+    },
+    {
+      "id": "clarifai",
+      "name": "Clarifai",
+      "group": "removed",
+      "slug": null,
+      "modalities": ["text", "vision"],
+      "expectation": "It was listed here with free access.",
+      "summary": "Its documentation domain no longer resolves. Removed on 2026-11-20 after being unverified.",
+      "short": "its documentation domain no longer resolves; removed 2026-11-20 after being unverified",
+      "quotes": [],
+      "sources": [],
+      "checked": "2026-11-20",
+      "faq": null
+    },
+    {
+      "id": "ollama-cloud",
+      "name": "Ollama Cloud",
+      "group": "removed",
+      "slug": null,
+      "modalities": ["text"],
+      "expectation": "It was listed here with a free plan.",
+      "summary": "No official page states the free terms, and its public model catalogue does not mark a free subset. Removed on 2026-11-20 after being unverified.",
+      "short": "no official page states the free terms; its public model catalogue does not mark a free subset; removed 2026-11-20 after being unverified",
+      "quotes": [],
+      "sources": [],
+      "checked": "2026-11-20",
+      "faq": null
+    },
+    {
+      "id": "inference-net",
+      "name": "Inference.net",
+      "group": "removed",
+      "slug": null,
+      "modalities": ["text"],
+      "expectation": "It advertises a free tier.",
+      "summary": "The free tier is gateway/observability only, not free model tokens.",
+      "short": "the free tier is gateway/observability only, not free model tokens",
+      "quotes": [],
+      "sources": [],
+      "checked": null,
+      "faq": null
+    },
+    {
+      "id": "hyperbolic",
+      "name": "Hyperbolic",
+      "group": "removed",
+      "slug": null,
+      "modalities": ["text"],
+      "expectation": "Its docs describe a Free Tier.",
+      "summary": "Not included pending a complete inclusion review. Personal Free Tier accounts can use inference after phone verification, which adds $1 credit; requests require a balance above zero. The page does not state a recurring allowance. This check supersedes the earlier deposit finding.",
+      "short": "not included pending a complete inclusion review; the current public-access check supersedes the earlier deposit finding",
+      "quotes": [
+        "Personal accounts on the Free Tier can use inference after you verify a phone number. Verifying also adds a $1 credit.",
+        "Your balance must be above zero."
+      ],
+      "sources": [
+        { "label": "Inference overview — Who can use inference", "url": "https://hyperbolic.ai/docs/inference/overview" }
+      ],
+      "checked": "2026-11-14",
+      "faq": null
+    }
+  ]
+}

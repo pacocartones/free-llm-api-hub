@@ -126,11 +126,38 @@ Filter any category live in the [interactive explorer](https://freellmapihub.com
 
 ## Notably NOT free
 
-Worth saying plainly. As checked on 2026-11-20 against their own billing docs, **OpenAI, Anthropic and xAI do not offer an ongoing free API tier**: API use is paid in advance with credits and stops when they run out. Their "Free" or "Tier 0" rows are rate-limit tiers, not free usage, and any recurring API credits are promotional or come with paid plans ([quotes](docs/sources.md#checked-with-what-each-page-says)). Several providers people *assume* are free — **Together AI, DeepInfra, Perplexity's API, Replicate, Featherless AI** — currently require a card or prepayment before any API use, per their own docs. Some have handed out small one-time trial credits at various points, but that's changed repeatedly; check each provider's billing page before assuming anything.
+<!-- AUTOGEN:not-free:start -->
+Worth saying plainly: these are the APIs people most often expect to be free. Each line says what the provider's own page says and the day it was read (UTC). The [Not free page](https://freellmapihub.com/not-free/) adds the provider's own words and the closest free alternatives in the dataset; the quotes are also in [docs/sources.md](docs/sources.md#checked-with-what-each-page-says).
+
+**No ongoing free API tier.** API use is paid in advance with credits and stops when they run out. Their "Free" or "Tier 0" rows are rate-limit tiers, not free usage, and any recurring API credits are promotional or come with paid plans.
+
+- **OpenAI** — prepaid billing; the "Free" row is a rate-limit tier (checked 2026-11-20 · [Prepaid API billing](https://help.openai.com/en/articles/8264644-what-is-prepaid-billing) · [Rate limits](https://developers.openai.com/api/docs/guides/rate-limits))
+- **Anthropic** — credits are bought before use; the Free plan is chat, not API (checked 2026-11-20 · [How to pay for Claude API usage](https://support.claude.com/en/articles/8977456-how-do-i-pay-for-my-claude-api-usage))
+- **xAI** — "Tier 0 / $0" is a rate-limit tier; prepaid credits only (checked 2026-11-20 · [Billing](https://docs.x.ai/console/billing) · [Consumption and rate limits](https://docs.x.ai/docs/key-information/consumption-and-rate-limits))
+
+**A card or prepayment before any API use.** Providers people *assume* are free, but which currently require a card or prepayment before any API use, per their own docs. Some have handed out small one-time trial credits at various points, but that has changed repeatedly; check each provider's billing page before assuming anything.
+
+- **Together AI** — no free trials; a minimum $5 credit purchase (checked 2026-11-14 · [Official free-trial and billing article](https://support.together.ai/articles/1862638756-changes-to-free-tier-and-billing-july-2025))
+- **DeepInfra** — a card or prepayment before use (checked 2026-11-14 · [Official pricing page](https://deepinfra.com/pricing))
+- **Perplexity's API** — a card or prepayment before any API use (date not recorded)
+- **Replicate** — a card or prepayment before any API use (date not recorded)
+- **Featherless AI** — a card or prepayment before any API use (date not recorded)
+
+**Retired or removed after re-verification.** Listed here before, removed (or moved) when a re-check of the provider's own pages no longer supported free access.
+
+- **Mistral** — Free mode no longer includes API access; API keys require billing activation and pay-as-you-go (checked 2026-11-14 · [Usage limits](https://docs.mistral.ai/admin/billing-usage/usage-limits))
+- **GitHub Models** — fully retired by GitHub on 2026-07-30 — playground, catalog and inference API shut down for all customers (date not recorded)
+- **Cerebras** — now listed as a trial credit: the ongoing free tier became a payment-method-gated $5/30-day trial (checked 2026-11-24 · [Rate limits](https://inference-docs.cerebras.ai/support/rate-limits))
+- **Arli AI** — paid plans only (checked 2026-11-19/20)
+- **Nebius** — no published trial credit (checked 2026-11-19/20)
+- **Hume** — no published pricing (checked 2026-11-19/20)
+- **Clarifai** — its documentation domain no longer resolves; removed 2026-11-20 after being unverified (checked 2026-11-20)
+- **Ollama Cloud** — no official page states the free terms; its public model catalogue does not mark a free subset; removed 2026-11-20 after being unverified (checked 2026-11-20)
+- **Inference.net** — the free tier is gateway/observability only, not free model tokens (date not recorded)
+- **Hyperbolic** — not included pending a complete inclusion review; the current public-access check supersedes the earlier deposit finding (checked 2026-11-14 · [Inference overview — Who can use inference](https://hyperbolic.ai/docs/inference/overview))
 
 For genuinely free access to strong models, your best bets here are **Gemini** (frontier-class) and the free open-weight models on **Groq, OpenRouter, Cloudflare and Z.ai** (SiliconFlow's free models are on its China platform and need real-name verification).
-
-Retired or removed after re-verification: **Arli AI** (paid plans only), **Nebius** (no published trial credit) and **Hume** (no published pricing), all checked 2026-11-19/20; **Clarifai** (its documentation domain no longer resolves) and **Ollama Cloud** (no official page states the free terms; its public model catalogue does not mark a free subset), removed 2026-11-20 after being unverified; **Mistral** ([Free mode no longer includes API access](https://docs.mistral.ai/admin/billing-usage/usage-limits); API keys require billing activation and pay-as-you-go, checked 2026-11-14), **GitHub Models** (fully retired by GitHub on 2026-07-30 — playground, catalog and inference API shut down for all customers), **Cerebras** (now listed as a trial credit: the ongoing free tier became a payment-method-gated $5/30-day trial), **Inference.net** (the free tier is gateway/observability only, not free model tokens), and **Hyperbolic** (not included pending a complete inclusion review; the [current public-access check](docs/sources.md#checked-with-what-each-page-says) supersedes the earlier deposit finding).
+<!-- AUTOGEN:not-free:end -->
 
 ## How verification works
 
