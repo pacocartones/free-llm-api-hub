@@ -42,7 +42,7 @@ node --input-type=module -e 'import { readFileSync } from "node:fs"; const { pro
 
 ## Removal
 
-An entry is removed (not silently left to rot) when the provider ends the free access entirely. Notable removals are recorded in [CHANGELOG.md](../CHANGELOG.md) so the history stays honest. Providers that people *assume* are free but aren't live in the README's "Notably NOT free" section, on purpose — saying what isn't free saves builders time too.
+An entry is removed (not silently left to rot) when the provider ends the free access entirely. Notable removals are recorded in a changelog fragment (`changes/unreleased/`), which the release moves into [CHANGELOG.md](../CHANGELOG.md), so the history stays honest. Providers that people *assume* are free but aren't live in the README's "Notably NOT free" section, on purpose — saying what isn't free saves builders time too.
 
 ---
 

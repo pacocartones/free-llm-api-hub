@@ -8,4 +8,4 @@
   for the switch to direct push would decide. It needs no GitHub App or
   secret, has a read-only token, never fails on drift, and is not a
   required check; the blocking gate in `verify.yml` is unchanged. See
-  `docs/regeneration-bot.md`.
+  `docs/regeneration-bot.md` (#742).

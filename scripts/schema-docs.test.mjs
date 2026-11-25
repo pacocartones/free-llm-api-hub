@@ -28,6 +28,9 @@ const fixture = () => ({
         limits: { type: ['object', 'null'], required: ['count'], properties: {
           count: { type: 'integer', minimum: 1, description: 'Published allowance.' },
         } },
+        speeds: { type: 'array', items: { type: 'object', required: ['value'], properties: {
+          value: { type: 'number', description: 'Figure as written.' },
+        } } },
       },
     },
   },
@@ -43,6 +46,8 @@ test('field rows distinguish omission from null and expose referenced unions and
   assert.match(row(doc, 'tier'), /integer \| Yes \| No \| Minimum: 0; maximum: 4/);
   assert.match(row(doc, 'models'), /array \| Yes \| No \|.*Unique items.*Items: string.*"a".*"b"/);
   assert.match(row(doc, 'limits.count'), /integer \| No \| Yes \| Minimum: 1 \| Published allowance/);
+  assert.match(row(doc, 'speeds[].value'), /number \| No \| Yes \| — \| Figure as written/);
+  assert.match(doc, /## <code>speeds\[\]<\/code>/);
 });
 
 test('every current provider and nested property gets exactly one row, in schema order', () => {
@@ -55,6 +60,11 @@ test('every current provider and nested property gets exactly one row, in schema
       // a nested property that is a $ref to a shared object (field_checks entries) is expanded like an inline object
       const target = value.$ref ? SCHEMA.$defs[value.$ref.split('/').pop()] : value;
       if (target && target.properties) collect(target.properties, `${prefix}${name}.`);
+      // an array of objects (published_speed entries) is expanded as `<name>[].<key>`
+      else if (target && target.items) {
+        const item = target.items.$ref ? SCHEMA.$defs[target.items.$ref.split('/').pop()] : target.items;
+        if (item && item.properties) collect(item.properties, `${prefix}${name}[].`);
+      }
     }
   }
   // Top-level table first; nested sections follow, each in schema order.
