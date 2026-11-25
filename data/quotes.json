@@ -413,6 +413,18 @@
    "page_sha256": "3ac8f2d9f84dd737d3cf1ea173d485c52be9519c9ea88b2105ee5fd2322be8f0"
   },
   {
+   "id": "alibaba-model-studio.phone_required.sentence",
+   "slug": "alibaba-model-studio",
+   "kind": "field_sentence",
+   "field": "phone_required",
+   "text": "If you registered your Alibaba Cloud account with an email address, you must complete secure phone number verification.",
+   "source_url": "https://www.alibabacloud.com/help/en/account/step-1-register-an-alibaba-cloud-account",
+   "read_on": "2026-11-25",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "572a96d30bb7ce092abac0eae47a08fbf5fdc8ccc48dffa8eb87362b2a14f301"
+  },
+  {
    "id": "modal.sentence",
    "slug": "modal",
    "kind": "sentence",
@@ -639,6 +651,18 @@
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "f3208efd912fef615ceee1886d289d9c82dcbd1078cf55814ec7fa4104438dac"
+  },
+  {
+   "id": "modelscope.phone_required.sentence",
+   "slug": "modelscope",
+   "kind": "field_sentence",
+   "field": "phone_required",
+   "text": "手机号码：输入您的手机号码，确保号码准确无误，以便接收验证码。",
+   "source_url": "https://www.modelscope.cn/docs/accounts/registration.md",
+   "read_on": "2026-11-25",
+   "lang": "zh",
+   "method": "html-text-v1: page requested with Accept-Language zh, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "5b10efa2a31d278d8f8722551330f5ff8b74e4d8d95b3f210960bf8ffcb9ece6"
   },
   {
    "id": "runware.sentence",
