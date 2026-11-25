@@ -74,6 +74,7 @@
       "best_for": "Widest model selection behind one no-card key",
       "modalities": ["text", "vision"],
       "models_free": ["baidu/ernie-5.5-flash-preview:free", "google/gemma-4-26b-a4b-it:free", "inclusionai/ling-3.2-flash:free", "liquid/lfm-3-1.7b:free", "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free", "particle-ai/particle-1:free"],
+      "models_url": "https://openrouter.ai/models",
       "expires": null,
       "docs_url": "https://openrouter.ai/docs/api-reference/limits",
       "phone_required": null,
