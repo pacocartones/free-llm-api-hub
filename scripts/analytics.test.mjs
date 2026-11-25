@@ -304,6 +304,9 @@ describe('build with GA_MEASUREMENT_ID set', () => {
   test('site/consent.js is built with the ID', () => {
     assert.ok(existsSync(join(ROOT, 'site/consent.js')));
     assert.ok(read('site/consent.js').includes(`'${ID}'`));
+    // the built banner carries the repo_click event and the keys link type (payloads: ga-events.test.mjs)
+    assert.ok(read('site/consent.js').includes("track('repo_click'"));
+    assert.ok(read('site/consent.js').includes("'keys'"));
   });
 
   test('the privacy page describes both categories instead of "no cookies"', () => {
@@ -320,6 +323,7 @@ describe('build with GA_MEASUREMENT_ID set', () => {
     assert.match(privacy, /EU–US Data Privacy Framework/);
     assert.match(privacy, /kept in Google Analytics for 14 months/);
     assert.match(privacy, /what you type in its search box \(cut to 60 characters/);
+    assert.match(privacy, /where on the site you follow a link to this project&#39;s GitHub repository|where on the site you follow a link to this project's GitHub repository/);
     assert.match(privacy, /Cookie settings/);
     assert.match(privacy, /GDPR Art\. 6\(1\)\(a\)/);
     assert.match(privacy, /no request is ever sent to Google/);

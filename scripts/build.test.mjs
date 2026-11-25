@@ -67,6 +67,58 @@ test('playground_url survives canonical serialization', () => {
   assert.equal(Object.hasOwn(saved.providers[1], 'playground_url'), false);
 });
 
+test('keys_url and keys_url_source survive canonical serialization', () => {
+  const data = JSON.parse(readFileSync(DATA, 'utf8'));
+  data.providers[0].keys_url = 'https://example.com/keys?tab=api&new=1';
+  data.providers[0].keys_url_source = 'https://example.com/docs';
+  delete data.providers[1].keys_url;
+  delete data.providers[1].keys_url_source;
+  const saved = JSON.parse(serialize(data));
+  assert.equal(saved.providers[0].keys_url, 'https://example.com/keys?tab=api&new=1');
+  assert.equal(saved.providers[0].keys_url_source, 'https://example.com/docs');
+  assert.equal(Object.hasOwn(saved.providers[1], 'keys_url'), false);
+});
+
+test('provider "Get a free key" button is conditional, tracked as data-link="keys", and kept in public JSON', () => {
+  const raw = readFileSync(DATA, 'utf8');
+  const data = JSON.parse(raw);
+  const [first, second] = data.providers;
+  first.keys_url = 'https://example.com/keys?tab=api&new=1';
+  first.keys_url_source = 'https://example.com/docs';
+  delete second.keys_url;
+  delete second.keys_url_source;
+  try {
+    writeFileSync(DATA, serialize(data));
+    run(['scripts/build.mjs']);
+    const present = readFileSync(join(ROOT, 'site/p', `${first.slug}.html`), 'utf8');
+    assert.equal((present.match(/>Get a free key ↗/g) || []).length, 1);
+    assert.ok(present.includes(`<a class="btn primary" href="https://example.com/keys?tab=api&amp;new=1" target="_blank" rel="noopener" data-provider="${first.slug}" data-link="keys">Get a free key ↗<span class="sr-only"> (opens in a new tab)</span></a>`));
+    // between the free limits and the quickstart
+    const at = (s) => present.indexOf(s);
+    assert.ok(at('id="limits"') < at('>Get a free key ↗') && at('>Get a free key ↗') < at('id="quickstart"'));
+    const absent = readFileSync(join(ROOT, 'site/p', `${second.slug}.html`), 'utf8');
+    assert.doesNotMatch(absent, /Get a free key/);
+    for (const file of ['site/providers.json', 'site/api/v1/providers.json']) {
+      const published = JSON.parse(readFileSync(join(ROOT, file), 'utf8'));
+      const row = published.providers.find((p) => p.slug === first.slug);
+      assert.equal(row.keys_url, 'https://example.com/keys?tab=api&new=1');
+      assert.equal(row.keys_url_source, 'https://example.com/docs');
+      assert.equal(Object.hasOwn(published.providers.find((p) => p.slug === second.slug), 'keys_url'), false);
+    }
+    const schema = JSON.parse(readFileSync(join(ROOT, 'site/api/v1/schema.json'), 'utf8'));
+    for (const name of ['keys_url', 'keys_url_source']) {
+      const field = schema.$defs.provider.properties[name];
+      assert.deepEqual([field.type, field.format, field.pattern], ['string', 'uri', '^https://']);
+    }
+    assert.notEqual(schema.$defs.provider.additionalProperties, false, 'v1 stays open to additive fields');
+    const csvHeader = readFileSync(join(ROOT, 'site/providers.csv'), 'utf8').split('\n')[0];
+    assert.doesNotMatch(csvHeader, /keys_url/, 'the CSV column list is unchanged');
+  } finally {
+    writeFileSync(DATA, raw);
+    run(['scripts/build.mjs']);
+  }
+});
+
 test('serializer ORDER matches the JSON Schema provider properties', () => {
   const schema = JSON.parse(readFileSync(join(ROOT, 'data/schema.json'), 'utf8'));
   const providerKeys = Object.keys(schema.$defs.provider.properties);
@@ -1756,7 +1808,7 @@ test('provider links carry data-provider and data-link for the opt-in outbound_p
   assert.match(groq, /<a class="btn primary" href="[^"]+"[^>]* data-provider="groq" data-link="docs">Official docs/);
   assert.match(groq, /<a class="btn website" href="[^"]+"[^>]* data-provider="groq" data-link="website">/);
   const tagged = [...groq.matchAll(/data-provider="([^"]*)" data-link="([^"]*)"/g)];
-  assert.ok(tagged.every((m) => m[1] === 'groq' && ['docs', 'website', 'playground', 'models', 'limits_source', 'data_policy'].includes(m[2])), 'only the page provider and known link types');
+  assert.ok(tagged.every((m) => m[1] === 'groq' && ['docs', 'keys', 'website', 'playground', 'models', 'limits_source', 'data_policy'].includes(m[2])), 'only the page provider and known link types');
   const compareDir = readdirSync(join(ROOT, 'site/compare')).find((n) => n.includes('-vs-'));
   const cmp = readFileSync(join(ROOT, `site/compare/${compareDir}/index.html`), 'utf8');
   assert.equal([...cmp.matchAll(/data-link="docs"/g)].length, 2, "both providers' docs links are tagged on a static comparison");
