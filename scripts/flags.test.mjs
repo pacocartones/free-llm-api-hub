@@ -21,7 +21,7 @@ function client() {
 }
 
 const def = (id) => FLAG_DEFS.find((d) => d.id === id);
-const flagOf = (html, id) => (html.match(new RegExp(`<span class="flag [^"]*" data-flag="${id}"[\\s\\S]*?<span class="sr-only">[^<]*</span></span>`)) || [''])[0];
+const flagOf = (html, id) => (html.match(new RegExp(`<span class="pflag [^"]*" data-flag="${id}"[\\s\\S]*?<span class="sr-only">[^<]*</span></span>`)) || [''])[0];
 
 test('flags: four, in the fixed order Card · Phone · Commercial · Training on prompts', () => {
   assert.deepEqual(FLAG_DEFS.map((d) => d.id), ['card', 'phone', 'commercial', 'training']);
@@ -52,8 +52,8 @@ test('flags: each state has its own shape — ✓ ok, ✕ bad, ~ conditional, ? 
   for (const [id, p, state, sentence] of cases) {
     for (const opts of [{}, { mini: true }]) {
       const html = flagHtml(def(id), p, opts);
-      assert.match(html, new RegExp(`^<span class="flag flag-${state}${opts.mini ? ' flag-mini' : ''}" data-flag="${id}"`), `${id} ${JSON.stringify(p)}: class flag-${state}`);
-      assert.ok(html.includes(`<span class="flag-mark" aria-hidden="true">${FLAG_MARKS[state]}</span>`), `${id} ${JSON.stringify(p)}: the ${state} shape, hidden from screen readers`);
+      assert.match(html, new RegExp(`^<span class="pflag pflag-${state}${opts.mini ? ' pflag-mini' : ''}" data-flag="${id}"`), `${id} ${JSON.stringify(p)}: class pflag-${state}`);
+      assert.ok(html.includes(`<span class="pflag-mark" aria-hidden="true">${FLAG_MARKS[state]}</span>`), `${id} ${JSON.stringify(p)}: the ${state} shape, hidden from screen readers`);
       assert.ok(html.includes(`<span class="sr-only">${sentence.replace(/'/g, '&#39;')}</span>`), `${id} ${JSON.stringify(p)}: the accessible sentence «${sentence}»`);
       assert.ok(html.includes(`title="${sentence.replace(/'/g, '&#39;')}"`), `${id}: the same sentence as tooltip`);
     }
@@ -72,9 +72,9 @@ test('flags: an unknown names its reason from field_checks, as the spec example 
 
 test('flags: the visible part and the mark are aria-hidden, so the sentence is read once', () => {
   const html = flagHtml(def('phone'), { phone_required: null }, { visible: '<span class="tri tri-unk">not confirmed</span>' });
-  assert.match(html, /<span class="flag-vis" aria-hidden="true"><span class="tri tri-unk">not confirmed<\/span><\/span>/);
+  assert.match(html, /<span class="pflag-vis" aria-hidden="true"><span class="tri tri-unk">not confirmed<\/span><\/span>/);
   const mini = flagHtml(def('phone'), { phone_required: null }, { mini: true });
-  assert.match(mini, /^<span class="flag flag-unk flag-mini" data-flag="phone" title="[^"]+"><svg class="i" aria-hidden="true"><use href="#ic-phone"\/><\/svg><span class="flag-mark" aria-hidden="true">\?<\/span><span class="sr-only">/);
+  assert.match(mini, /^<span class="pflag pflag-unk pflag-mini" data-flag="phone" title="[^"]+"><svg class="i" aria-hidden="true"><use href="#ic-phone"\/><\/svg><span class="pflag-mark" aria-hidden="true">\?<\/span><span class="sr-only">/);
   assert.doesNotMatch(html + mini, /role="img"/, 'no role=img: the sr-only sentence is the name');
 });
 
@@ -104,9 +104,9 @@ test('flags: the explorer row shows the four flags first, then the other icons (
   const fmini = html.match(/<div class="fmini">([\s\S]*?)<\/div>/)[1];
   assert.deepEqual([...fmini.matchAll(/data-flag="([a-z]+)"|aria-label="([^"]+)"/g)].map((m) => m[1] || m[2]), ['card', 'phone', 'commercial', 'training', 'OpenAI-compat']);
   assert.ok(!/ic-nocard|ic-nophone|ic-flask/.test(fmini), 'the four flags replace their old icons, nothing is said twice');
-  assert.match(flagOf(html, 'card'), /flag-ok/);
-  assert.match(flagOf(html, 'phone'), /flag-unk[\s\S]*>\?</);
-  assert.match(flagOf(html, 'training'), /flag-bad[\s\S]*>✕</);
+  assert.match(flagOf(html, 'card'), /pflag-ok/);
+  assert.match(flagOf(html, 'phone'), /pflag-unk[\s\S]*>\?</);
+  assert.match(flagOf(html, 'training'), /pflag-bad[\s\S]*>✕</);
 });
 
 test('flags: the provider page uses the same component around its own words, with the field_checks reason', () => {
@@ -116,12 +116,12 @@ test('flags: the provider page uses the same component around its own words, wit
     data_policy: { trains_on_prompts: false, source: 'https://acme.example/privacy', checked: '2026-11-20' },
   };
   const req = requirementsHtml(p);
-  assert.match(flagOf(req, 'card'), /^<span class="flag flag-unk" data-flag="card" title="Card required: unknown — not stated in the provider&#39;s docs">/);
-  assert.match(flagOf(req, 'card'), /<span class="flag-vis" aria-hidden="true"><span class="tri tri-unk tri-why"/, 'the words the page already used stay');
-  assert.match(flagOf(req, 'phone'), /flag-ok[\s\S]*>✓<[\s\S]*not required/);
-  assert.match(flagOf(req, 'commercial'), /flag-cond[\s\S]*>~</);
+  assert.match(flagOf(req, 'card'), /^<span class="pflag pflag-unk" data-flag="card" title="Card required: unknown — not stated in the provider&#39;s docs">/);
+  assert.match(flagOf(req, 'card'), /<span class="pflag-vis" aria-hidden="true"><span class="tri tri-unk tri-why"/, 'the words the page already used stay');
+  assert.match(flagOf(req, 'phone'), /pflag-ok[\s\S]*>✓<[\s\S]*not required/);
+  assert.match(flagOf(req, 'commercial'), /pflag-cond[\s\S]*>~</);
   assert.ok(req.indexOf('data-flag="card"') < req.indexOf('data-flag="phone"') && req.indexOf('data-flag="phone"') < req.indexOf('data-flag="commercial"'), 'in order');
-  assert.match(flagOf(dataPolicyHtml(p), 'training'), /flag-ok[\s\S]*Trains on prompts: no/);
+  assert.match(flagOf(dataPolicyHtml(p), 'training'), /pflag-ok[\s\S]*Trains on prompts: no/);
 });
 
 test('flags: the built pages carry the component (explorer and a provider page) and the styles draw each shape', () => {
@@ -132,10 +132,14 @@ test('flags: the built pages carry the component (explorer and a provider page) 
     assert.ok(groq.includes(`data-flag="${id}"`), `the Groq page shows the ${id} flag`);
   }
   const css = read('site/styles.css');
-  assert.match(css, /\.flag-ok \.flag-mark \{ color: var\(--ok\); \}/);
-  assert.match(css, /\.flag-bad \.flag-mark \{ color: var\(--bad\); \}/);
-  assert.match(css, /\.flag-unk \.flag-mark \{ color: var\(--unk\); border-style: dashed; \}/, 'unknown is dashed, not only another colour');
-  assert.match(css, /\.flag-cond \.flag-mark \{ color: var\(--unk\); \}/);
+  assert.match(css, /\.pflag-ok \.pflag-mark \{ color: var\(--ok\); \}/);
+  assert.match(css, /\.pflag-bad \.pflag-mark \{ color: var\(--bad\); \}/);
+  assert.match(css, /\.pflag-unk \.pflag-mark \{ color: var\(--unk\); border-style: dashed; \}/, 'unknown is dashed, not only another colour');
+  assert.match(css, /\.pflag-cond \.pflag-mark \{ color: var\(--unk\); \}/);
+  // The collection tables already own .flags / .flag (build.mjs): the component keeps its own prefix so neither restyles the other.
+  const all = flagsHtml({}, { mini: true }) + flagsHtml({});
+  assert.deepEqual([...new Set([...all.matchAll(/class="([^"]+)"/g)].flatMap((m) => m[1].split(' ')))].filter((c) => !/^(pflags?(-[a-z]+)?|sr-only|i)$/.test(c)), [], 'only pflag-prefixed classes');
+  assert.doesNotMatch(css.slice(css.indexOf('/* The production flag (lib/flags.mjs)')), /^\.flags? [{,]/m, 'the component adds no rule for the collection-table classes');
 });
 
 test('modality filter: plain-text options with unchanged values, and a decorative dot coloured by the --m-* tokens', () => {

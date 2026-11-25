@@ -27,7 +27,7 @@ export const FLAG_DEFS = [
   { id: 'training', field: 'data_policy.trains_on_prompts', name: 'Trains on prompts', short: 'No training', icon: 'ic-shield', good: false },
 ];
 
-/** The shape of each state; the CSS colours it (.flag-ok, .flag-bad, .flag-cond, .flag-unk). */
+/** The shape of each state; the CSS colours it (.pflag-ok, .pflag-bad, .pflag-cond, .pflag-unk). */
 export const FLAG_MARKS = { ok: '✓', bad: '✕', cond: '~', unk: '?' };
 
 /** The words for an unknown value, by field_checks status (REASON_LABEL in field-checks.mjs says the same). */
@@ -73,13 +73,13 @@ export function flagHtml(def, p, opts) {
   const v = flagValue(def, p);
   const st = flagState(def, v);
   const text = htmlEsc(flagText(def, v, o.check));
-  const mark = `<span class="flag-mark" aria-hidden="true">${FLAG_MARKS[st]}</span>`;
-  const vis = o.mini ? ICON(def.icon) : `<span class="flag-vis" aria-hidden="true">${o.visible != null ? o.visible : htmlEsc(def.short)}</span>`;
-  return `<span class="flag flag-${st}${o.mini ? ' flag-mini' : ''}" data-flag="${def.id}" title="${text}">` +
+  const mark = `<span class="pflag-mark" aria-hidden="true">${FLAG_MARKS[st]}</span>`;
+  const vis = o.mini ? ICON(def.icon) : `<span class="pflag-vis" aria-hidden="true">${o.visible != null ? o.visible : htmlEsc(def.short)}</span>`;
+  return `<span class="pflag pflag-${st}${o.mini ? ' pflag-mini' : ''}" data-flag="${def.id}" title="${text}">` +
     (o.mini ? vis + mark : mark + vis) + `<span class="sr-only">${text}</span></span>`;
 }
 
 /** The four flags, in their fixed order. */
 export function flagsHtml(p, opts) {
-  return `<span class="flags">${FLAG_DEFS.map((d) => flagHtml(d, p, opts)).join('')}</span>`;
+  return `<span class="pflags">${FLAG_DEFS.map((d) => flagHtml(d, p, opts)).join('')}</span>`;
 }
