@@ -35,10 +35,12 @@ If a relevant check could not run, include the error and why it is blocked. -->
 - [ ] **Data changes:** for a verified change, I set `verified: true` **with** a `last_verified` date (the day I checked) **and** a real `docs_url`.
 - [ ] **Data changes:** anything I couldn't confirm against the provider's own docs stays `null` or `verified: false`, with a note saying what's unconfirmed.
 - [ ] **`data_policy` changes:** I ran `npm run quotes:add -- <slug>` when required by `docs/quotes.md`.
+- [ ] **`field_checks` or `published_speed` changes:** I ran `npm run quotes:add -- <slug> --field <flag>` for each `stated` entry with a `quote`, or `npm run quotes:add -- <slug> --speed`.
 - [ ] (Optional) I used AI tools for part of this change, and I have read and tested it myself.
 
 <!--
-There is no regeneration bot: the required "Dataset integrity" check fails until the
-derived files are in sync with the data. If it says files are out of sync, run
-`npm run build`, commit, and push again.
+No bot regenerates the derived files for you yet: the required "Dataset integrity" check
+fails until they are in sync with the data. If it says files are out of sync, run
+`npm run build`, commit, and push again. The non-blocking "Regeneration preview" run
+lists the stale files and offers them as a patch artifact (`regen-preview-patch`).
 -->

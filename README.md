@@ -10,7 +10,7 @@
 Free LLM APIs plus adjacent model APIs — image, speech, embeddings, rerank and OCR: free tiers, trial credits and no-cost quotas.
 Every entry is dated and sourced to the provider's own docs, and what we could not confirm is marked. Just what's actually free, and the fine print that bites.
 
-<img src="assets/demo.svg" alt="Terminal demo: curl freellmapihub.com/api/v1/no-card.json returns Google Gemini, Groq, Cloudflare Workers AI, OpenRouter and Cohere" width="740">
+<img src="assets/demo.svg" alt="Terminal demo: curl freellmapihub.com/api/v1/no-card.json returns Google Gemini, Groq, Cloudflare Workers AI, Cohere and HuggingFace" width="740">
 
 [![Verify](https://github.com/pacocartones/free-llm-api-hub/actions/workflows/verify.yml/badge.svg)](https://github.com/pacocartones/free-llm-api-hub/actions/workflows/verify.yml)
 [![Freshness](https://img.shields.io/endpoint?url=https://freellmapihub.com/badge-freshness.json)](#how-verification-works)
@@ -169,7 +169,7 @@ curl -s https://raw.githubusercontent.com/pacocartones/free-llm-api-hub/main/dat
 **Pin a snapshot for reproducible builds.** `main` moves; depend on an immutable tag instead:
 
 ```bash
-curl -s https://raw.githubusercontent.com/pacocartones/free-llm-api-hub/v2.14.0/data/providers.json   # v2.14.0 was the latest on 2026-11-20; see Releases
+curl -s https://raw.githubusercontent.com/pacocartones/free-llm-api-hub/v2.14.2/data/providers.json   # v2.14.2 was the latest on 2026-11-25; see Releases
 ```
 
 Tags track the dataset `version` in [`data/providers.json`](data/providers.json) (see [CHANGELOG.md](CHANGELOG.md)) — pin `vX.Y.Z` and bump deliberately. The [live JSON API](https://freellmapihub.com/api/v1/providers.json) always serves the latest `main`.
@@ -180,7 +180,7 @@ Tags track the dataset `version` in [`data/providers.json`](data/providers.json)
 [![Free LLM API Hub](https://img.shields.io/endpoint?url=https://freellmapihub.com/badge-freshness.json)](https://github.com/pacocartones/free-llm-api-hub)
 ```
 
-It renders the age of the oldest verified entry at the last committed badge refresh. It does not recompute with each view; use the live explorer for freshness calculated in the browser.
+It renders the age of the oldest verified entry as of the site's last deploy (every deploy rebuilds `badge-freshness.json`, at least daily; it is not committed). It does not recompute with each view; use the live explorer for freshness calculated in the browser.
 
 **Embed a live widget** on any site — a compact, always-current list of the top verified free APIs:
 

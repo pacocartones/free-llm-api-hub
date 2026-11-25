@@ -99,6 +99,10 @@ export function schemaDocs(schema) {
     for (const [name, property] of Object.entries(object.properties)) {
       const nested = dereference(property, schema);
       if (nested.properties) table(nested, `${prefix}${name}.`);
+      else if (nested.items) {
+        const item = dereference(nested.items, schema);
+        if (item.properties) table(item, `${prefix}${name}[].`);
+      }
     }
   }
   table(provider);

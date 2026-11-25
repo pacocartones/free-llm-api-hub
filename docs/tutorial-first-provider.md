@@ -166,7 +166,7 @@ npm run og
 
 ## Step 6 — Commit and open the PR
 
-Commit the data change **and** the regenerated files in the same commit — a data PR without its derived files fails CI by design, because there is no regeneration bot:
+Commit the data change **and** the regenerated files in the same commit — a data PR without its derived files fails CI by design, because no bot regenerates them for you yet (the [regeneration bot](regeneration-bot.md) is not live):
 
 ```bash
 git status --short
@@ -200,7 +200,7 @@ On merge, the entry goes live: the explorer and provider page appear, the badge 
 | `verified: true` with no `last_verified` or no real `docs_url` | Validator rejects | Confirm against the provider's own docs and date it, or set `verified: false` |
 | `verified: false` with a date | Validator rejects (`unverified entry must have last_verified: null`) | Set `last_verified: null`, explain in `notes` |
 | Shallow clone | Test suite fails on history integrity | `git fetch --unshallow` |
-| Bumped `generated` | "Release stamp" check fails | Put it back as it is on `main`: it changes only in a release |
+| Bumped `generated` | "Dataset integrity" check fails at its "Release stamp moves only with the version" step | Put it back as it is on `main`: it changes only in a release |
 | Committed only `data/providers.json` | "Dataset integrity" check fails | Regenerate with `npm run build` and commit the derived files |
 | Marketing language in `free_tier`/`rate_limits` | Reviewer sends it back | Use the exact published numbers, or say "not published" |
 | Renaming or reusing a `slug` | Breaks external references | Slugs are permanent |
