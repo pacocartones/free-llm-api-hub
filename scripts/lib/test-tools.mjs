@@ -13,7 +13,7 @@ import { spawnSync } from 'node:child_process';
 const seen = new Map();
 
 export function hasTool(name) {
-  if (!seen.has(name)) seen.set(name, !spawnSync(name, ['--version'], { stdio: 'ignore' }).error);
+  if (!seen.has(name)) seen.set(name, spawnSync(name, ['--version'], { stdio: 'ignore' }).status === 0);
   return seen.get(name);
 }
 
