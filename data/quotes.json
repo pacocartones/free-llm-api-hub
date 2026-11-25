@@ -1310,6 +1310,29 @@
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "808293cf00a3a9775ddb61f88e6a79ca454a44147ea6529c372431c194d63829"
+  },
+  {
+   "id": "stability-ai.sentence",
+   "slug": "stability-ai",
+   "kind": "sentence",
+   "text": "As described in our Privacy Policy , we may use Content to improve and develop our Services (but you can opt-out to prevent us from using your Inputs and Outputs to train our models, learn more ), comply with applicable law, enforce our terms and policies, and to keep our Services safe.",
+   "source_url": "https://stability.ai/terms-of-service",
+   "read_on": "2026-11-25",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "a41f4b6a2cb03d0bbc1d950b712cc6624329460356ede6b07ef40e87af372564"
+  },
+  {
+   "id": "stability-ai.commercial_ok.sentence",
+   "slug": "stability-ai",
+   "kind": "field_sentence",
+   "field": "commercial_ok",
+   "text": "Can I use the API outputs for commercial purposes? Yes, as long as the output doesn’t violate anyone’s copyright.",
+   "source_url": "https://docs.stability.ai/faq",
+   "read_on": "2026-11-25",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "27111e3b30e1b741e61defa6ae5d1d3c6c2ef63324b09603e76548d505b7c67a"
   }
  ]
 }

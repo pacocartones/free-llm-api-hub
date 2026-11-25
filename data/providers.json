@@ -1968,6 +1968,38 @@
       "last_probed": null,
       "probe_status": null,
       "data_policy": null
+    },
+    {
+      "slug": "stability-ai",
+      "name": "Stability AI",
+      "category": "trial",
+      "free_type": "trial-credit",
+      "free_tier": "25 free credits for a new Developer Platform account created with Google sign-in (1 credit = $0.01, so about $0.25): for example 8 Stable Image Core images at 3 credits each, or 3 Stable Image Ultra images at 8 credits",
+      "rate_limits": "150 requests every 10 seconds; past that the API answers 429 and blocks for 60 seconds",
+      "notes": "The getting-started page ties the 25 credits to signing up with Google; it does not say whether a username-and-password account gets them. Credits are spent per call (e.g. SD 3.5 Large 6.5, Flash 2.5, Creative Upscaler 60) on image generation, editing, upscaling, 3D and Stable Audio; after that, credits cost $1 per 100. The terms say unused service credits, including promotional ones, expire one year after issuance unless otherwise specified. Commercial use of API outputs is allowed and you own the outputs; the terms forbid using outputs to train a model that competes with Stability. The Community License page (free below $1M annual revenue) is about self-hosting the models; it does not say the threshold applies to API outputs.",
+      "best_for": "Trying Stable Image and Stable Diffusion 3.5 over an API with a small no-cost credit",
+      "modalities": ["image", "audio"],
+      "models_free": null,
+      "models_url": "https://docs.stability.ai/api-reference",
+      "expires": "1 year",
+      "docs_url": "https://docs.stability.ai/pricing",
+      "phone_required": null,
+      "card_required": null,
+      "commercial_ok": true,
+      "openai_compatible": null,
+      "openai_base_url": null,
+      "is_text_llm": false,
+      "model_tier": null,
+      "model_tier_source": null,
+      "free_limits": null,
+      "no_expiry": null,
+      "field_checks": {"phone_required":{"status":"source_silent","checked":"2026-11-25","sources":["https://docs.stability.ai/getting-started","https://docs.stability.ai/faq","https://stability.ai/terms-of-service"],"note":"The getting-started page says an account can be created with a username and password or a Google account; none of these pages mentions phone verification"},"card_required":{"status":"source_silent","checked":"2026-11-25","sources":["https://docs.stability.ai/getting-started","https://docs.stability.ai/pricing","https://docs.stability.ai/faq","https://stability.ai/terms-of-service"],"note":"The pages say more credits can be bought on the Billing dashboard after the free ones run out, and the terms ask for billing information only if you purchase; none says whether a card is needed for the free credits"},"commercial_ok":{"status":"stated","checked":"2026-11-25","sources":["https://docs.stability.ai/faq","https://stability.ai/terms-of-service"],"quote":"Can I use the API outputs for commercial purposes? Yes, as long as the output doesn’t violate anyone’s copyright.","note":"The terms (effective 2026-09-30) assign the outputs to the user and forbid using the Services or Outputs to train a model that competes with Stability"},"openai_compatible":{"status":"source_silent","checked":"2026-11-25","sources":["https://docs.stability.ai/","https://docs.stability.ai/api-reference","https://docs.stability.ai/getting-started"],"note":"The docs describe Stability's own REST API for images, 3D and audio; no page mentions an OpenAI-compatible endpoint"}},
+      "verified": true,
+      "last_verified": "2026-11-25",
+      "added": "2026-11-25",
+      "last_probed": null,
+      "probe_status": null,
+      "data_policy": {"trains_on_prompts":true,"retention":null,"source":"https://stability.ai/terms-of-service","checked":"2026-11-25","quote":"As described in our Privacy Policy , we may use Content to improve and develop our Services (but you can opt-out to prevent us from using your Inputs and Outputs to train our models, learn more ), comply with applicable law, enforce our terms and policies, and to keep our Services safe.","note":"Terms effective 2026-09-30; they define the Services to include the API. Stability's opt-out help page explains how Platform API users turn the training toggle off in their account settings. No retention period for prompts is stated.","plan_named":false}
     }
   ]
 }
