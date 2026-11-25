@@ -625,7 +625,10 @@ pre code { color: var(--text); }
   #table, #table tbody, #table tr, #table td { display: block; width: 100%; }
   #table tr { border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 12px; padding: 6px 2px 10px; background: var(--panel); }
   #table td { border: 0; padding: 7px 14px; display: flex; gap: 12px; align-items: baseline; }
-  #table td::before { content: attr(data-label); flex: 0 0 40%; color: var(--faint); font-weight: 600; font-size: .7rem; text-transform: uppercase; letter-spacing: .04em; font-family: var(--font-mono); }
+  /* The card label is visual only: assistive tech already gets the column header from the explicit table roles (see
+     lib/rows.mjs), so the generated text gets an empty alternative and is not read twice. Browsers without the
+     alternative-text syntax keep the first declaration. */
+  #table td::before { content: attr(data-label); content: attr(data-label) / ""; flex: 0 0 40%; color: var(--faint); font-weight: 600; font-size: .7rem; text-transform: uppercase; letter-spacing: .04em; font-family: var(--font-mono); }
   #table td.name { display: block; padding: 12px 14px 8px; border-bottom: 1px solid var(--border); margin-bottom: 4px; }
   #table td.name::before { content: none; }
   #table td.notes { max-width: none; }
