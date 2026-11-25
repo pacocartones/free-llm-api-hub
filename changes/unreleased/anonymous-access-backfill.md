@@ -8,4 +8,4 @@
   API page publishes the shared `helloworld` key in samples that are "ready to
   run without any further edits". Pollinations was checked and does not
   qualify: its docs require a secret key for generation requests and leave
-  only model listing open.
+  only model listing open (#737).

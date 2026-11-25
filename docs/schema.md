@@ -152,6 +152,21 @@ Descriptions are copied from each property itself. “No description in schema.�
 | `field_checks.openai_compatible.quote` | string | Yes | No | Min length: 1; max length: 400 | For stated: the provider's own sentence, copied as the page words it, from the first source. It has an entry in data/quotes.json. |
 | `field_checks.openai_compatible.note` | string | Yes | No | Min length: 1; max length: 300 | What was read and what it says, in plain words; for sources_disagree, what each page says. |
 
+## <code>published_speed[]</code>
+
+| Field | Type (excluding null) | Nullable | Required | Allowed values / constraints | Description |
+| --- | --- | --- | --- | --- | --- |
+| `published_speed[].model` | string | No | Yes | Min length: 1; max length: 120 | The model ID as the provider writes it; it must be in the provider's models_free. |
+| `published_speed[].metric` | string | No | Yes | Allowed: <code>"output_tokens_per_second"</code>, <code>"time_to_first_token_ms"</code> | What the figure measures, as the provider states it. |
+| `published_speed[].unit` | string | No | Yes | Allowed: <code>"tokens/s"</code>, <code>"ms"</code> | tokens/s for output_tokens_per_second, ms for time_to_first_token_ms. |
+| `published_speed[].value` | number | No | Yes | Exclusive minimum: 0 | The figure exactly as the quote writes it (no rounding, no conversion). |
+| `published_speed[].qualifier` | string | No | Yes | Allowed: <code>"exact"</code>, <code>"approx"</code>, <code>"at_least"</code>, <code>"up_to"</code> | How the quote words the figure: exact (a bare number), approx ('~', 'about'), at_least ('&gt;', 'more than', '+'), up_to ('up to', a peak). |
+| `published_speed[].conditions` | string | Yes | No | Min length: 1; max length: 200 | Conditions the provider's page gives for the figure (off-peak, preview, input size), in plain words. |
+| `published_speed[].plan_named` | boolean | Yes | Yes | — | true = the page ties the figure to a plan; false = the page was read and ties it to none (the figure is not stated for the free tier); null = not checked. |
+| `published_speed[].source` | string | No | Yes | Format: <code>uri</code>; Pattern: <code>^https://</code> | The provider's own page carrying the figure (same site as its docs, models list or API); never a third party, aggregator or benchmark. |
+| `published_speed[].checked` | string | No | Yes | Format: <code>date</code> | The day the page was read (UTC). |
+| `published_speed[].quote` | string | No | Yes | Min length: 1; max length: 300 | The provider's words carrying the figure, as the page text has them. It has a speed_quote entry in data/quotes.json. |
+
 ## Conditional rules
 
 These schema branches apply in addition to the base field definitions. A required key can still be nullable unless its branch narrows the type.
