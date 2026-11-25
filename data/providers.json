@@ -1111,7 +1111,8 @@
       "model_tier": null,
       "field_checks": {"commercial_ok":{"status":"source_silent","checked":"2026-11-24","sources":["https://www.gladia.io/general-terms-of-use-gladia-inc","https://www.gladia.io/terms-conditions-gladia-inc","https://www.gladia.io/pricing"],"note":"The Output licence for commercial purposes (7) depends on payment of all applicable fees; the terms name the free offer only in a data-deletion clause"},"phone_required":{"status":"source_silent","checked":"2026-11-25","sources":["https://www.gladia.io/general-terms-of-use-gladia-inc","https://www.gladia.io/pricing","https://docs.gladia.io/chapters/introduction/getting-started"],"note":"The terms, the pricing FAQ (free credits for new accounts) and the getting-started guide name no phone or SMS step"}},
       "verified": true,
-      "last_verified": "2026-11-19"
+      "last_verified": "2026-11-19",
+      "data_policy": {"trains_on_prompts":null,"retention":"Free accounts: 1 year by default (audio input, transcription output, API metadata, logs)","source":"https://docs.gladia.io/chapters/limits-and-specifications/data-retention","checked":"2026-11-25","quote":"By default, Free accounts retain all data types for 1 year","note":"Paid accounts keep audio and transcripts 3 weeks by default; only Enterprise offers custom or zero retention. Training conflicts across Gladia pages: Pricing (Self-serve) and Security say Free/default data may train models (opt-out on Pricing), while Compliance Hub says never by default.","plan_named":true}
     },
     {
       "slug": "rime",
