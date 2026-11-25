@@ -130,3 +130,13 @@ test('providersCsv on the real dataset: every public provider appears once, incl
   assert.equal(new Set(slugs).size, publicProviders.length, 'one row per slug');
   assert.equal(PROVIDER_CSV_COLUMNS.includes('env_key'), false);
 });
+
+test('providers.csv: every provider field of data/schema.json is either a column or listed as omitted, never both', () => {
+  const schema = JSON.parse(readFileSync(join(ROOT, 'data/schema.json'), 'utf8'));
+  for (const field of Object.keys(schema.$defs.provider.properties)) {
+    const inColumns = PROVIDER_CSV_COLUMNS.includes(field);
+    const inOmitted = PROVIDER_CSV_OMITTED.includes(field);
+    assert.ok(inColumns || inOmitted, `providers.csv: schema field "${field}" is neither a column nor listed as omitted`);
+    assert.ok(!(inColumns && inOmitted), `providers.csv: schema field "${field}" is both a column and listed as omitted`);
+  }
+});

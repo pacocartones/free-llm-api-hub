@@ -39,6 +39,9 @@ export const PROVIDER_CSV_OMITTED = [
   'anonymous_access',
   'data_policy',
   'env_key',
+  'playground_url',
+  'field_checks',
+  'published_speed',
 ];
 
 const cell = (value) => {
