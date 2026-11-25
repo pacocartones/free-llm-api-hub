@@ -57,7 +57,7 @@ export function catchTags(p) {
 export function catchCellHtml(p) {
   const chips = catchTags(p).map((t) => `<span class="catch-tag" title="${htmlEsc(t.title)}">${htmlEsc(t.label)}</span>`).join('');
   const more = SLUG_RE.test(String(p.slug || '')) ? `<a class="catch-more" href="p/${p.slug}#limits">Details<span class="sr-only"> of ${htmlEsc(p.name)}</span></a>` : '';
-  return `<td class="notes" data-label="The catch"${p.notes ? ` title="${htmlEsc(p.notes)}"` : ''}>${chips}${more}</td>`;
+  return `<td class="notes" role="cell" data-label="The catch"${p.notes ? ` title="${htmlEsc(p.notes)}"` : ''}>${chips}${more}</td>`;
 }
 
 /**
@@ -101,12 +101,14 @@ export function explorerRowHtml(p, opts = {}) {
     v = `<span class="badge b-warn">${ICON('ic-warn')} unverified</span>`;
   }
 
-  return `<tr>` +
-    `<td class="name" data-label="API">${name}</td>` +
-    `<td data-label="Type">${typeCell}</td>` +
-    `<td data-label="What's free"><div class="clamp2" title="${htmlEsc(p.free_tier)}">${htmlEsc(p.free_tier)}</div></td>` +
+  // Explicit row/cell roles: on a phone the stylesheet turns the table into cards (display: block), which makes some
+  // screen readers (VoiceOver on iOS, some Chromium versions) drop the implicit table semantics. See styles.css.
+  return `<tr role="row">` +
+    `<td class="name" role="cell" data-label="API">${name}</td>` +
+    `<td role="cell" data-label="Type">${typeCell}</td>` +
+    `<td role="cell" data-label="What's free"><div class="clamp2" title="${htmlEsc(p.free_tier)}">${htmlEsc(p.free_tier)}</div></td>` +
     catchCellHtml(p) +
-    `<td class="pver" data-label="Verified">${v}</td></tr>`;
+    `<td class="pver" role="cell" data-label="Verified">${v}</td></tr>`;
 }
 
 /**
