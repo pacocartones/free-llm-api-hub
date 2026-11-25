@@ -165,7 +165,7 @@ export function qualityMainHtml(q, { prefix = '../', repo }) {
     `<tr><th scope="row">Stale (over ${SLA_DAYS} days)</th>${share(f.stale, q.verified)}</tr>` +
     '</tbody></table>' +
     `<h3 id="freshness-weeks">Last verification, by week</h3>` +
-    `<p>Verified entries by the week (Monday, UTC) of their last verification, from the week of the oldest one (at most ${QUALITY_WEEKS} weeks back), empty weeks included. The last column is when they turn due for a re-check, unless they are re-verified first: a tall bar is a week of re-checks coming due together.</p>` +
+    `<p>Verified entries by the week (Monday, UTC) of their last verification, from the week of the oldest one (at most ${QUALITY_WEEKS} weeks back), empty weeks included. The last column is when they turn due for a re-check, unless they are re-verified first: a tall bar is a week of re-checks coming due together. The same entries counted by the week they turn due, with clustered weeks marked, are on <a href="${prefix}coverage/#freshness">Data coverage</a>.</p>` +
     '<div class="table-scroll" role="region" aria-label="Last verification by week" tabindex="0"><table class="cov-table q-weeks"><caption class="sr-only">Verified entries by week of last verification</caption><thead><tr><th>Week of</th><th class="num">Entries</th><th class="q-barcell"><span class="sr-only">Bar</span></th><th>Due for a re-check</th></tr></thead><tbody>' +
     weekRows + '</tbody></table></div>' +
     (f.earlier ? `<p class="muted">${f.earlier} verified ${f.earlier === 1 ? 'entry was' : 'entries were'} last verified before ${htmlEsc(f.firstWeek)}.</p>` : '') +
