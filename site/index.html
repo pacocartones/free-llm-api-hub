@@ -200,7 +200,7 @@
 }
 </script>
 <!-- AUTOGEN:dataset:end -->
-<link rel="stylesheet" href="styles.css?v=ea58afad">
+<link rel="stylesheet" href="styles.css?v=ac89d9cf">
 </head>
 <body>
 <a class="skip-link" href="#explorer">Skip to the explorer</a>
@@ -343,16 +343,16 @@
     <label class="sr-only" for="q">Search providers</label>
     <input type="search" id="q" class="sel search-input" placeholder="Search providers" autocomplete="off" spellcheck="false">
     <label class="sr-only" for="modality">Filter by modality</label>
-    <select id="modality" class="sel" aria-label="Filter by modality">
+    <span class="mod-pick"><span class="mod-dot" id="modality-dot" data-mod="all" aria-hidden="true"></span><select id="modality" class="sel" aria-label="Filter by modality">
       <option value="all">All modalities</option>
-      <option value="text">💬 Text / LLM</option>
-      <option value="image">🎨 Image generation</option>
-      <option value="audio">🔊 Speech (STT/TTS)</option>
-      <option value="embeddings">🧬 Embeddings</option>
-      <option value="rerank">📊 Rerank</option>
-      <option value="ocr">📄 OCR / documents</option>
-      <option value="vision">👁 Vision</option>
-    </select>
+      <option value="text">Text / LLM</option>
+      <option value="image">Image generation</option>
+      <option value="audio">Speech (STT/TTS)</option>
+      <option value="embeddings">Embeddings</option>
+      <option value="rerank">Rerank</option>
+      <option value="ocr">OCR / documents</option>
+      <option value="vision">Vision</option>
+    </select></span>
     <div class="seg" id="cat" role="group" aria-label="Filter by type">
       <button data-cat="all" class="active" aria-pressed="true">All</button>
       <button data-cat="ongoing" aria-pressed="false">Ongoing</button>
@@ -601,6 +601,6 @@
 <script src="shared-rules.js?v=5b8bda45" defer></script>
 <script src="shared-rows.js?v=ad7c434c" defer></script>
 <script src="shared-sort.js?v=55ae5c2d" defer></script>
-<script src="explorer.js?v=0249edb9" defer></script>
+<script src="explorer.js?v=e47d8e26" defer></script>
 </body>
 </html>

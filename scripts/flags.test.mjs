@@ -137,3 +137,18 @@ test('flags: the built pages carry the component (explorer and a provider page) 
   assert.match(css, /\.flag-unk \.flag-mark \{ color: var\(--unk\); border-style: dashed; \}/, 'unknown is dashed, not only another colour');
   assert.match(css, /\.flag-cond \.flag-mark \{ color: var\(--unk\); \}/);
 });
+
+test('modality filter: plain-text options with unchanged values, and a decorative dot coloured by the --m-* tokens', () => {
+  const home = read('site/index.html');
+  const select = home.match(/<select id="modality"[\s\S]*?<\/select>/)[0];
+  const options = [...select.matchAll(/<option value="([^"]+)">([^<]*)<\/option>/g)].map((m) => [m[1], m[2]]);
+  assert.deepEqual(options, [
+    ['all', 'All modalities'], ['text', 'Text / LLM'], ['image', 'Image generation'], ['audio', 'Speech (STT/TTS)'],
+    ['embeddings', 'Embeddings'], ['rerank', 'Rerank'], ['ocr', 'OCR / documents'], ['vision', 'Vision'],
+  ], 'the values explorer.js and the GA4 hook read are unchanged');
+  for (const [, label] of options) assert.doesNotMatch(label, /\p{Extended_Pictographic}/u, `no emoji in «${label}»: a screen reader would announce it`);
+  assert.match(home, /<span class="mod-dot" id="modality-dot" data-mod="all" aria-hidden="true"><\/span><select id="modality"/, 'the dot is decorative');
+  const css = read('site/styles.css');
+  for (const [value] of options.slice(1)) assert.ok(css.includes(`.mod-dot[data-mod="${value}"] { background: var(--m-${value}); }`), `the ${value} dot reads --m-${value}`);
+  assert.match(read('site/explorer.js'), /getElementById\('modality-dot'\)[\s\S]{0,40}if \(modDot\) modDot\.setAttribute\('data-mod', modality\)/, 'explorer.js keeps the dot in step with the filter');
+});

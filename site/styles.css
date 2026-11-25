@@ -749,6 +749,19 @@ p.muted a, .prose p a, .prov-summary p a { text-decoration: underline; text-unde
 /* Sorting on small screens: the column headers are hidden there, so a select takes their place. */
 .sort-mobile { display: none; align-items: center; gap: 8px; font-size: .85rem; color: var(--muted); font-family: var(--font-mono); }
 @media (max-width: 720px) { .sort-mobile { display: inline-flex; } }
+/* The modality filter: a native select (its value drives explorer.js and the GA4 hook) with a small decorative dot in
+   the colour of the selected modality (--m-*, set by explorer.js through data-mod). No dot for "All modalities". */
+.mod-pick { position: relative; display: inline-flex; }
+.mod-dot { position: absolute; left: 12px; top: 50%; width: 8px; height: 8px; margin-top: -4px; border-radius: 50%; pointer-events: none; display: none; }
+.mod-dot:not([data-mod="all"]) { display: block; }
+.mod-pick:has(.mod-dot:not([data-mod="all"])) .sel { padding-left: 27px; }
+.mod-dot[data-mod="text"] { background: var(--m-text); }
+.mod-dot[data-mod="vision"] { background: var(--m-vision); }
+.mod-dot[data-mod="image"] { background: var(--m-image); }
+.mod-dot[data-mod="audio"] { background: var(--m-audio); }
+.mod-dot[data-mod="embeddings"] { background: var(--m-embeddings); }
+.mod-dot[data-mod="rerank"] { background: var(--m-rerank); }
+.mod-dot[data-mod="ocr"] { background: var(--m-ocr); }
 .search-input { cursor: text; flex: 1 1 180px; max-width: 260px; min-width: 150px; }
 
 /* Narrow phones: the brand and the three header buttons must fit without the theme toggle leaving the viewport. */
