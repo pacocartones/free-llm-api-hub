@@ -265,6 +265,12 @@
       "of": 6,
       "rank": null
     },
+    "lemonfox": {
+      "total": 30,
+      "confirmed": 1,
+      "of": 6,
+      "rank": null
+    },
     "datalab": {
       "total": 29.9,
       "confirmed": 2,
@@ -399,6 +405,12 @@
     },
     "smallest-ai": {
       "total": 21.5,
+      "confirmed": 2,
+      "of": 6,
+      "rank": null
+    },
+    "azure-speech": {
+      "total": 19.5,
       "confirmed": 2,
       "of": 6,
       "rank": null
