@@ -25,6 +25,7 @@ import { monthlyReport, reportMonths, monthEndDate, monthName, monthLabel, pct, 
 import { resolveBestEntries, topEntries, PODIUM_SIZE } from './lib/best.mjs';
 import { agreementsTableHtml, sponsoredBlockHtml, disclosureHtml, inForce, NOT_IN_DATA_SENTENCE, MACHINE_SENTENCE } from './lib/agreements.mjs';
 import { coverage, coverageMainHtml } from './lib/coverage.mjs';
+import { quality, qualityMainHtml } from './lib/quality.mjs';
 import { fieldCheck, REASON_LABEL } from './lib/field-checks.mjs';
 import { publishedSpeed, speedFigure } from './lib/published-speed.mjs';
 import { apiV1ProviderSchema, projectApiV1Changes, toApiV1Provider } from './lib/api-v1.mjs';
@@ -649,7 +650,7 @@ const siteHeader = (p) => `<header class="site-header"><div class="wrap header-i
 const siteFooter = (p) => `<footer class="site-footer"><div class="wrap footer-top">
 <div class="footer-brand"><a class="foot-brand-link" href="${p}" aria-label="Free LLM API Hub — home"><svg class="logo-mark"><use href="#logo"/></svg><span class="brand-name">Free LLM API <span class="grad">Hub</span></span></a><p>The <strong>continuously-verified</strong>, <strong>machine-readable</strong> dataset of <strong>free LLM &amp; AI-model APIs</strong> and <strong>trial credits</strong> — every entry <strong>dated</strong>, <strong>sourced</strong>, and <strong>free of dead links</strong>.</p><img class="trust-badge" src="${p}badge-verified.svg" alt="Verified providers" width="${BADGE_W}" height="20" loading="lazy"><a class="star-btn" href="${REPO}" target="_blank" rel="noopener"><span class="sb-label">${GH_ICON} Star on GitHub</span><span class="sb-count" data-stars>★</span></a></div>
 <div class="footer-col"><h2 class="footer-h">Explore</h2><a href="${p}models/">Free model index</a><a href="${p}guides-and-collections/">Guides &amp; collections</a><a href="${p}programs/startups">Startup credits</a><a href="${p}programs/research">Student &amp; research credits</a><a href="${p}free-gpu/">Free GPU compute</a><a href="${p}coding-tools/">Free AI coding tools</a></div>
-<div class="footer-col"><h2 class="footer-h">Data</h2><a href="${p}providers.json">providers.json</a><a href="${p}api/">JSON API</a><a href="${p}llms.txt">llms.txt</a><a href="${p}data-policy/">Who trains on your data</a><a href="${p}coverage/">Data coverage</a></div>
+<div class="footer-col"><h2 class="footer-h">Data</h2><a href="${p}providers.json">providers.json</a><a href="${p}api/">JSON API</a><a href="${p}llms.txt">llms.txt</a><a href="${p}data-policy/">Who trains on your data</a><a href="${p}coverage/">Data coverage</a><a href="${p}quality/">Data quality</a></div>
 <div class="footer-col"><h2 class="footer-h">Project</h2><a href="${p}updates">Updates</a><a href="${p}changes/">What changed</a><a href="${p}submit/">Submit</a><a href="${p}methodology/">Methodology</a><a href="${p}contributing/">Contributing</a><a href="${p}agreements/">Agreements</a></div>
 </div><div class="wrap footer-bottom"><p>Terms change without notice; always confirm against each provider's own docs. MIT licensed.</p><p class="foot-legal"><a href="${p}legal/privacy">Privacy</a> · <a href="${p}legal/terms">Terms</a></p><p class="foot-email"><a href="mailto:admin@freellmapihub.com">admin@freellmapihub.com</a></p></div></footer>`;
 
@@ -2224,6 +2225,24 @@ writeFileSync(
   })
 );
 
+// ---------- /quality/ — verified share, freshness and how many answers are known, from the data ----------
+const qualityTitle = 'Data quality';
+const qualityDesc = 'How much of the free LLM API dataset is verified, how fresh it is, and how many answers are known, unknown with a recorded reason, or not checked yet. Computed from the data.';
+mkdirSync(join(ROOT, 'site/quality'), { recursive: true });
+writeFileSync(
+  join(ROOT, 'site/quality/index.html'),
+  htmlPage({
+    title: `${qualityTitle} · Free LLM API Hub`,
+    desc: qualityDesc,
+    canonical: SITE + '/quality/',
+    main:
+      pageHero({ crumbs: `<a href="../">Home</a> / ${qualityTitle}`, h1: qualityTitle, lede: `Verified share, freshness and unknowns, counted from the data. Nothing on this page is typed by hand.` }) +
+      qualityMainHtml(quality(providers, ASOF), { prefix: '../', repo: REPO }),
+    prefix: '../',
+    jsonld: collectionPageJsonLd({ type: 'WebPage', name: qualityTitle, url: `${SITE}/quality/`, description: qualityDesc, about: datasetRef(SITE), crumbs: [[qualityTitle, `${SITE}/quality/`]] }),
+  })
+);
+
 // ---------- /coding-tools/ — free AI coding tools, apart from the ranking ----------
 // Reads data/coding-tools.json only; nothing here enters a provider count, score or collection.
 rmSync(join(ROOT, 'site/coding-tools'), { recursive: true, force: true });
@@ -2430,6 +2449,7 @@ const sitemapEntries = [
   [`${SITE}/best/`, ASOF],
   [`${SITE}/best/methodology/`, ASOF],
   [`${SITE}/coverage/`, ASOF],
+  [`${SITE}/quality/`, ASOF],
   [`${SITE}/submit/`, ASOF],
   ...DOC_PAGES.map((d) => [`${SITE}/${d.slug}/`, ASOF]),
   [`${SITE}/data-policy/`, ASOF],
