@@ -1,0 +1,49 @@
+name: Weekly source watch
+
+# Re-reads every page cited in data/quotes.json, the way `npm run quotes:add` reads it, and reports quote drift in ONE issue
+# ("Source watch: quotes to re-check"): missing quotes per provider, and fetch errors that have lasted two runs in a row.
+# Reports only: it never edits data, opens no pull request, uses no secret, and lists our own ids and URLs, never page text.
+# The run-to-run memory (fetch errors in a row) lives in a hidden comment of that issue; the full report is a run artifact.
+on:
+  schedule:
+    - cron: '41 6 * * 1' # Monday UTC, before the weekly worklist; delivery is best effort.
+  workflow_dispatch: {}
+
+permissions: {}
+
+concurrency:
+  group: source-watch
+  cancel-in-progress: false
+
+jobs:
+  watch:
+    if: ${{ github.repository == 'pacocartones/free-llm-api-hub' && github.ref == 'refs/heads/main' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+      - name: Install the locked development tools (PDF sources are read with unpdf)
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Test the source watch
+        run: node --test scripts/source-watch.test.mjs
+      - name: Re-read the cited pages and publish the issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node scripts/source-watch.mjs --publish --json "$RUNNER_TEMP/source-watch.json"
+      - name: Keep the full report
+        if: ${{ always() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: source-watch-report
+          path: ${{ runner.temp }}/source-watch.json
+          if-no-files-found: ignore
+          retention-days: 90
