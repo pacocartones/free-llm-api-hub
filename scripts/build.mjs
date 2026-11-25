@@ -2044,7 +2044,8 @@ const provBlock = (p) => {
     `OpenAI-compatible: ${yn(p.openai_compatible, 'yes', 'no', fieldCheck(p, 'openai_compatible'))}${p.openai_base_url ? ` (base ${p.openai_base_url})` : ''}`,
   ].join('; ');
   // The condition is its own line: Gates uses "; " as its separator and a condition may contain ";" itself.
-  const conditionLine = p.commercial_ok === 'conditional' && p.commercial_ok_condition ? `- Commercial-use condition: ${p.commercial_ok_condition}\n` : '';
+  // Collapse white space so a condition that holds a line break still reads as one line.
+  const conditionLine = p.commercial_ok === 'conditional' && p.commercial_ok_condition ? `- Commercial-use condition: ${String(p.commercial_ok_condition).replace(/\s+/g, ' ').trim()}\n` : '';
   return `### ${p.name} — ${p.category === 'ongoing' ? 'ongoing free tier' : 'trial credit'}\n` +
     `- Free: ${p.free_tier}\n` +
     `- Rate limits: ${p.rate_limits || 'not specified'}\n` +

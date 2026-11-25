@@ -2661,7 +2661,7 @@ test('llms-full.txt shows the commercial-use condition of every conditional prov
     const block = blocks.find((b) => b.startsWith(`### ${p.name} — `));
     assert.ok(block, `${p.slug}: its block is in llms-full.txt`);
     const lines = block.split('\n');
-    const i = lines.findIndex((l) => l === `- Commercial-use condition: ${p.commercial_ok_condition}`);
+    const i = lines.findIndex((l) => l === `- Commercial-use condition: ${p.commercial_ok_condition.replace(/\s+/g, ' ').trim()}`);
     assert.ok(i > 0, `${p.slug}: the condition is its own line with the recorded text`);
     assert.match(lines[i - 1], /^- Gates: /, `${p.slug}: the line sits directly after Gates:`);
   }
