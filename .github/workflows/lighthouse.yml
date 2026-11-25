@@ -20,6 +20,7 @@ name: Lighthouse
 #   - Push to main, nightly and manual runs: performance, median of three runs
 #     per page (one run moves too much: 0.78 and 0.91 on the same commit). A
 #     failure on main opens or updates one issue; a later clean run closes it.
+#     Pushes by the regeneration bot (free-llm-api-hub-regen[bot]) are skipped.
 #
 # No secret is used. The measuring jobs can only read the repository; only the
 # report job, which checks nothing out and runs on main only, can write issues.
@@ -76,7 +77,9 @@ jobs:
 
   performance:
     name: Lighthouse performance (median of 3)
-    if: ${{ github.event_name != 'pull_request' }}
+    # Not on the regeneration bot's pushes (docs/regeneration-bot.md): they only rewrite derived files right after
+    # a merge that was measured already, and the nightly run measures the result.
+    if: ${{ github.event_name != 'pull_request' && !(github.event_name == 'push' && github.actor == 'free-llm-api-hub-regen[bot]') }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
     outputs:

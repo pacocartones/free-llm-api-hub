@@ -107,7 +107,8 @@ for (const p of data.providers ?? []) {
   if ('playground_url' in p) {
     check(typeof p.docs_url === 'string' && p.docs_url.trim().length > 0, `${id}: playground_url requires a non-empty docs_url`);
   }
-  for (const field of ['name', 'docs_url', 'models_url', 'openai_base_url']) {
+  check(('keys_url' in p) === ('keys_url_source' in p) && (!('keys_url' in p) || (typeof p.docs_url === 'string' && p.docs_url.trim().length > 0)), `${id}: keys_url and keys_url_source go together and require a non-empty docs_url`);
+  for (const field of ['name', 'docs_url', 'models_url', 'openai_base_url', 'keys_url', 'keys_url_source']) {
     const value = p[field];
     check(value == null || typeof value !== 'string' || !hasHiddenChars(value), `${id}: ${field} must not contain control, bidirectional or zero-width characters`);
   }

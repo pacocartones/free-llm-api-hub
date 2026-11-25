@@ -5,8 +5,11 @@
 //      in its settings; this fails in the pull request instead of at run time, with the file and line);
 //   2. every workflow sets `permissions:` at the top, so no job inherits the default token scope;
 //   3. every actions/checkout step sets `persist-credentials: false`, so no later step finds a token in .git/config;
-//   4. a `pull_request_target` or `workflow_run` workflow (it runs with the base repository's token on behalf of a pull
-//      request) grants nothing at the top, checks nothing out and runs no npm or repository script;
+//   4. a `pull_request_target` workflow, or a `workflow_run` workflow whose upstream can run on a pull request (both run
+//      with the base repository's token on behalf of a pull request), grants nothing at the top, checks nothing out and
+//      runs no npm or repository script. A `workflow_run` is exempt only when it is limited to `branches: [main]` and
+//      every upstream it names is a workflow of this repository with no pull-request trigger (pages.yml after
+//      "Regenerate derived files");
 //   5. text an outsider controls (pull request or issue title and body, comment body, branch name) never appears inside a
 //      `run:` script, where `${{ }}` is pasted into the shell before it runs; pass it through `env:` instead.
 // Plain line parsing, no YAML dependency: the workflows here are written in one consistent block style.
@@ -99,8 +102,32 @@ test('every checkout sets persist-credentials: false', () => {
   assert.deepEqual(bad, [], 'set `with: persist-credentials: false` on actions/checkout');
 });
 
+/** The lines of one trigger block under `on:` (its key line excluded). */
+function triggerBlock(lines, name) {
+  const at = lines.findIndex((l) => l === `  ${name}:` || l.startsWith(`  ${name}: `) || l.startsWith(`  ${name}:#`));
+  if (at < 0) return [];
+  let end = at + 1;
+  while (end < lines.length && (lines[end].trim() === '' || indent(lines[end]) > 2)) end++;
+  return lines.slice(at + 1, end);
+}
+
+const PR_TRIGGERS = new Set(['pull_request', 'pull_request_target']);
+const workflowName = (lines) => lines.find((l) => /^name:/.test(l))?.replace(/^name:\s*/, '').replace(/^['"]|['"]$/g, '').trim();
+
+/** Whether a workflow_run trigger can act on behalf of a pull request: true unless it is limited to main and every
+ * upstream it names is a workflow here with no pull-request trigger. */
+function workflowRunPrivileged(lines) {
+  const block = triggerBlock(lines, 'workflow_run').map(code).join('\n');
+  const upstream = block.match(/workflows:\s*\[([^\]]*)\]/)?.[1]?.split(',').map((w) => w.trim().replace(/^['"]|['"]$/g, '')).filter(Boolean) ?? [];
+  if (!upstream.length || !/branches:\s*\[\s*main\s*\]/.test(block)) return true;
+  return upstream.some((n) => {
+    const wf = WORKFLOWS.find((w) => workflowName(w.lines) === n);
+    return !wf || triggers(wf.lines).some((t) => PR_TRIGGERS.has(t));
+  });
+}
+
 test('privileged pull-request triggers grant nothing at the top and run no pull request code', () => {
-  const privileged = WORKFLOWS.filter(({ lines }) => triggers(lines).some((t) => t === 'pull_request_target' || t === 'workflow_run'));
+  const privileged = WORKFLOWS.filter(({ lines }) => triggers(lines).some((t) => t === 'pull_request_target' || (t === 'workflow_run' && workflowRunPrivileged(lines))));
   for (const { name, lines } of privileged) {
     assert.ok(lines.some((l) => /^permissions:\s*\{\}\s*(#.*)?$/.test(l)), `${name}: top-level permissions must be {}`);
     const text = lines.map(code).join('\n');
@@ -150,4 +177,15 @@ test('a failing Verify run on main opens or updates one issue, and a clean run c
   assert.match(job, /gh issue close "\$number" --reason completed/);
   const top = verify.split(/\njobs:\n/)[0];
   assert.match(top, /\npermissions:\n {2}contents: read\n/, 'the rest of the workflow stays read-only');
+});
+
+test('a workflow_run is exempt only when its upstream never runs on a pull request and it is limited to main', () => {
+  const sample = (on) => ['name: X', 'on:', ...on, 'permissions:', '  contents: read'];
+  assert.equal(workflowRunPrivileged(sample(['  workflow_run:', "    workflows: ['Regenerate derived files']", '    types: [completed]', '    branches: [main]'])), false);
+  assert.equal(workflowRunPrivileged(sample(['  workflow_run:', "    workflows: ['Regenerate derived files']", '    types: [completed]'])), true, 'no branch filter');
+  assert.equal(workflowRunPrivileged(sample(['  workflow_run:', "    workflows: ['Verify']", '    branches: [main]'])), true, 'Verify runs on pull requests');
+  assert.equal(workflowRunPrivileged(sample(['  workflow_run:', "    workflows: ['No such workflow']", '    branches: [main]'])), true, 'an unknown upstream');
+  // Every workflow_run in the repository today: only pages.yml, after the regeneration bot.
+  const exempt = WORKFLOWS.filter(({ lines }) => triggers(lines).includes('workflow_run') && !workflowRunPrivileged(lines)).map((w) => w.name);
+  assert.deepEqual(exempt, ['pages.yml']);
 });
