@@ -1216,6 +1216,65 @@
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "40478f541d44f4d95c552d87750c0a781736f7e0b92ee9ba600ae0a75fb16512"
+  },
+  {
+   "id": "bytez.openai_compatible.sentence",
+   "slug": "bytez",
+   "kind": "field_sentence",
+   "field": "openai_compatible",
+   "text": "Use OpenAI-compatible endpoints for chat and text completions via OpenAI clients, supporting streaming and custom parameters.",
+   "source_url": "https://docs.bytez.com/http-reference/examples/openai-compliant/chatCompletionsExample",
+   "read_on": "2026-11-25",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "cfaabcdc6e87325be011decd0b0803780f2ab0abccaf81eb729ca23deb734eb0"
+  },
+  {
+   "id": "liquid-ai.sentence",
+   "slug": "liquid-ai",
+   "kind": "sentence",
+   "text": "You also grant Liquid AI and its affiliates a worldwide, non-exclusive, royalty-free license to use Your Content to develop and improve Liquid AI’s models, products, and services, including through training, fine-tuning, evaluation, and testing.",
+   "source_url": "https://www.liquid.ai/terms-conditions",
+   "read_on": "2026-11-25",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "014c19a7a35d979e41a99390e8d0d0939f434742fd1396fcedfb7295e229aa14"
+  },
+  {
+   "id": "liquid-ai.commercial_ok.sentence",
+   "slug": "liquid-ai",
+   "kind": "field_sentence",
+   "field": "commercial_ok",
+   "text": "Subject to your compliance with these Terms, you may access and use the Services for your internal business purposes and to develop, evaluate, and operate applications that use the Services.",
+   "source_url": "https://www.liquid.ai/terms-conditions",
+   "read_on": "2026-11-25",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "014c19a7a35d979e41a99390e8d0d0939f434742fd1396fcedfb7295e229aa14"
+  },
+  {
+   "id": "liquid-ai.openai_compatible.sentence",
+   "slug": "liquid-ai",
+   "kind": "field_sentence",
+   "field": "openai_compatible",
+   "text": "The API speaks OpenAI’s protocol, so the official OpenAI SDKs work with a new base URL.",
+   "source_url": "https://docs.liquid.ai/api/overview",
+   "read_on": "2026-11-25",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "567e264be4616a1ebc34cb01b6f2ef414f2b3daad41119b523c56a5a3d79552f"
+  },
+  {
+   "id": "public-ai.openai_compatible.sentence",
+   "slug": "public-ai",
+   "kind": "field_sentence",
+   "field": "openai_compatible",
+   "text": "The Public AI Gateway provides a unified, OpenAI-compatible API for open-source models from multiple inference partners.",
+   "source_url": "https://platform.publicai.co/models",
+   "read_on": "2026-11-25",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "808293cf00a3a9775ddb61f88e6a79ca454a44147ea6529c372431c194d63829"
   }
  ]
 }
