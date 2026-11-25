@@ -874,3 +874,68 @@ p.muted a, .prose p a, .prov-summary p a { text-decoration: underline; text-unde
 /* "Clear all filters" under an empty result (explorer.js creates it on first need). */
 .empty-clear { display: block; margin: -32px auto 40px; }
 .empty-clear[hidden] { display: none; }
+
+/* /find/ ("Find my free API", site/find.js): one question at a time, then the shortlist. Layout only: the colours and
+   type are the site's own tokens. A flag says its state three ways: words, icon shape (a warning sign when it is not
+   confirmed) and colour. */
+.find-wrap { max-width: 860px; }
+.find-form { margin: 8px 0 0; }
+.find-form[hidden], .find-results[hidden], .find-q[hidden] { display: none; }
+.find-q { border: 1px solid var(--border); border-radius: var(--radius); background: var(--panel); padding: 18px 18px 14px; margin: 0; min-width: 0; }
+.find-q:focus { outline: none; }
+.find-q legend { float: left; width: 100%; font-size: 1.08rem; font-weight: 700; color: var(--text); padding: 0; }
+.find-q legend + * { clear: both; }
+.find-step { display: block; font-family: var(--font-mono); font-size: .74rem; font-weight: 400; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 4px; }
+.find-help { margin: 4px 0 12px; font-size: .86rem; }
+.find-opts { display: grid; gap: 8px; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+.find-opt { position: relative; display: flex; flex-direction: column; gap: 2px; padding: 11px 12px 11px 38px; border: 1px solid var(--border); border-radius: 9px; background: var(--panel-2); cursor: pointer; min-height: 44px; justify-content: center; }
+.find-opt input { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; margin: 0; accent-color: var(--accent); }
+.find-opt:hover { border-color: var(--accent); }
+.find-opt:has(input:checked) { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.find-opt:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
+.find-opt-label { color: var(--text); font-weight: 600; font-size: .92rem; }
+.find-opt-hint { color: var(--muted); font-size: .8rem; }
+.find-error { min-height: 1.2em; margin: 8px 0 0; color: var(--warn); font-size: .88rem; }
+.find-nav, .find-tools, .find-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.find-nav { margin-top: 10px; }
+.find-nav [hidden], .find-tools [hidden], .find-more [hidden], .find-empty[hidden], .find-maybe[hidden], .find-list[hidden] { display: none; }
+.find-count { margin: 16px 0 0; font-family: var(--font-mono); font-size: .86rem; color: var(--muted); min-height: 1.3em; }
+.find-results h2 { margin: 18px 0 4px; }
+.find-results h2:focus { outline: none; }
+.find-summary { margin: 0 0 12px; color: var(--muted); }
+.find-list { list-style: none; margin: 18px 0 0; padding: 0; display: grid; gap: 12px; }
+.find-item { border: 1px solid var(--border); border-radius: var(--radius); background: var(--panel); padding: 16px 16px 12px; min-width: 0; }
+.find-item-head { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
+.find-item-head h3 { margin: 0; font-size: 1.05rem; }
+.find-item-head h3 a { text-decoration: underline; text-underline-offset: 3px; }
+.find-rank { font-family: var(--font-mono); color: var(--accent); font-weight: 700; }
+.find-ver { font-family: var(--font-mono); font-size: .74rem; color: var(--muted); display: inline-flex; align-items: center; gap: 4px; }
+.find-best { margin: 6px 0 0; color: var(--muted); font-size: .88rem; }
+.find-free { margin: 8px 0 0; overflow-wrap: anywhere; }
+.find-limits { list-style: none; display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 0; padding: 0; }
+.find-limits li { font-family: var(--font-mono); font-size: .74rem; color: var(--text); border: 1px solid var(--border); border-radius: 6px; padding: 2px 8px; }
+.find-flags { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 0; }
+.find-flag.is-yes { color: var(--green); border-color: color-mix(in srgb, var(--green) 38%, var(--border)); }
+.find-flag.is-no { color: var(--red); border-color: color-mix(in srgb, var(--red) 38%, var(--border)); }
+.find-flag.is-unknown { color: var(--warn); border-color: color-mix(in srgb, var(--warn) 45%, var(--border)); border-style: dashed; }
+.find-actions { margin: 12px 0 0; }
+.find-quick { margin: 10px 0 0; }
+.find-quick summary { cursor: pointer; font-size: .86rem; color: var(--muted); padding: 4px 0; }
+.find-quick pre { margin: 8px 0 0; }
+.find-quick-none { margin: 10px 0 0; font-size: .84rem; }
+.find-more { margin: 12px 0 0; }
+.find-empty { margin: 16px 0 0; }
+.find-maybe { margin: 22px 0 0; border-top: 1px solid var(--border); padding-top: 12px; }
+.find-maybe > summary { cursor: pointer; font-weight: 700; color: var(--text); }
+.find-maybe > p { font-size: .86rem; }
+.find-how { margin-top: 40px; border-top: 1px solid var(--border); padding-top: 8px; }
+.find-how h2 { font-size: 1.1rem; }
+.find-how ul { padding-left: 1.2em; }
+.find-how li { margin: 6px 0; color: var(--muted); }
+.find-how li strong { color: var(--text); }
+.find-how a, .find-noscript a, .hub-find a { text-decoration: underline; text-underline-offset: 2px; }
+.find-noscript { border: 1px solid var(--border); border-radius: var(--radius); background: var(--panel); padding: 14px 16px; }
+@media (max-width: 640px) {
+  .find-opts { grid-template-columns: 1fr; }
+  .find-nav .btn, .find-tools .btn { flex: 1 1 auto; justify-content: center; }
+}

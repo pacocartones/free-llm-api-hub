@@ -227,6 +227,9 @@
   var DOWNLOAD = /^\/((providers\.(json|csv))|(api\/v1\/[a-z0-9._-]+\.(json|yaml))|(llms(-full)?\.txt)|(badge-[a-z]+\.json))$/;
   var SNIPPET_KINDS = ['embed', 'badge', 'citation'];
   var SEARCH_IDLE_MS = 1500;
+  // /find/ (site/find.js) reports a finished wizard as a DOM event; only these values pass (lib/find.mjs USES, CONSTRAINTS).
+  var WIZARD_USES = ['any', 'chat', 'code', 'embeddings', 'speech', 'image', 'ocr'];
+  var WIZARD_FILTERS = ['card', 'phone', 'commercial', 'train', 'openai'];
   var pageSent = false;
   var lastSearch = '';
   var searchTimer = null;
@@ -331,7 +334,23 @@
     }
   }
 
+  // wizard_complete: what the visitor builds, which constraints they set (a sorted list from a fixed set, or "none")
+  // and how many providers matched. Nothing typed by the visitor; anything outside the lists drops the event.
+  function onWizardComplete(e) {
+    var d = e && e.detail;
+    if (!d || WIZARD_USES.indexOf(d.use) === -1) return;
+    var filters = String(d.filters || 'none');
+    if (filters !== 'none') {
+      var parts = filters.split(',');
+      for (var i = 0; i < parts.length; i++) if (WIZARD_FILTERS.indexOf(parts[i]) === -1 || parts.indexOf(parts[i]) !== i) return;
+    }
+    var n = d.results;
+    if (typeof n !== 'number' || n !== Math.floor(n) || n < 0 || n > 999) return;
+    track('wizard_complete', { use: d.use, filters: filters, result_count: n });
+  }
+
   function listen() {
+    document.addEventListener('fllm:wizard-complete', onWizardComplete);
     document.addEventListener('click', onClick);
     // Middle-click opens a provider link in a new tab without a click event.
     document.addEventListener('auxclick', function (e) { if (e.button === 1) onClick(e); });

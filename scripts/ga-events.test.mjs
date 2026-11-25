@@ -210,7 +210,7 @@ describe('event payloads (analytics granted)', () => {
   test('no event carries more than the documented parameters', () => {
     const src = consentScript(ID);
     const names = [...src.matchAll(/track\('([a-z_]+)'/g)].map((m) => m[1]);
-    assert.deepEqual([...new Set(names)].sort(), ['api_download', 'collection_view', 'compare_view', 'copy_snippet', 'explorer_filter', 'explorer_sort', 'outbound_provider_click', 'site_search']);
+    assert.deepEqual([...new Set(names)].sort(), ['api_download', 'collection_view', 'compare_view', 'copy_snippet', 'explorer_filter', 'explorer_sort', 'outbound_provider_click', 'site_search', 'wizard_complete']);
   });
 });
 
@@ -236,5 +236,40 @@ describe('provider link attributes', () => {
   test('rejects a bad slug or link type', () => {
     assert.throws(() => tagProviderLinks('', [{ href: 'https://x', provider: 'Bad Slug', link: 'docs' }]));
     assert.throws(() => tagProviderLinks('', [{ href: 'https://x', provider: 'ok', link: 'pricing' }]));
+  });
+});
+
+// /find/ reports a finished wizard as a DOM event (site/find.js); consent.js sends it as wizard_complete, only with
+// analytics consent, and only when every parameter is from its fixed list (lib/find.mjs completeEvent).
+describe('wizard_complete', () => {
+  const done = (detail) => ({ detail });
+  test('sent with analytics consent, with exactly the validated parameters', () => {
+    const p = page({ consent: saved(true, false), path: '/find/' });
+    p.fire('fllm:wizard-complete', null, done({ use: 'chat', filters: 'card,commercial', results: 6 }));
+    p.fire('fllm:wizard-complete', null, done({ use: 'any', filters: 'none', results: 0 }));
+    assert.deepEqual(p.events(), [
+      ['wizard_complete', { use: 'chat', filters: 'card,commercial', result_count: 6 }],
+      ['wizard_complete', { use: 'any', filters: 'none', result_count: 0 }],
+    ]);
+  });
+  for (const [label, consent] of [['no choice', null], ['everything rejected', saved(false, false)], ['advertising only', saved(false, true)]]) {
+    test(`${label}: nothing is sent`, () => {
+      const p = page({ consent, path: '/find/' });
+      p.fire('fllm:wizard-complete', null, done({ use: 'chat', filters: 'none', results: 3 }));
+      assert.deepEqual(p.events(), []);
+    });
+  }
+  test('anything outside the fixed lists drops the event', () => {
+    const p = page({ consent: saved(true, false), path: '/find/' });
+    for (const d of [
+      { use: 'me@example.com', filters: 'none', results: 1 },
+      { use: 'chat', filters: 'card,evil', results: 1 },
+      { use: 'chat', filters: 'card,card', results: 1 },
+      { use: 'chat', filters: 'none', results: 1.5 },
+      { use: 'chat', filters: 'none', results: 1000 },
+      { use: 'chat', filters: 'none', results: '3' },
+      null,
+    ]) p.fire('fllm:wizard-complete', null, done(d));
+    assert.deepEqual(p.events(), []);
   });
 });
