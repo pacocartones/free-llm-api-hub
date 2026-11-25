@@ -28,8 +28,8 @@ If a relevant check could not run, include the error and why it is blocked. -->
 - [ ] I ran the checks for my change in CONTRIBUTING.md and the issue, and recorded commands and results above.
 - [ ] **Code, data or build-input changes:** I ran `npm test` and it passed.
 - [ ] **Docs or template text:** I previewed the changed text and opened its links.
-- [ ] **Data or build-input changes:** I ran `npm run build` (and `npm run og` if the OG check asked for it) and committed the regenerated files.
-- [ ] **Build-input changes:** I ran `npm run check` and it found no drift.
+- [ ] **Data or build-input changes:** I ran `npm run build` (and `npm run og` if the OG check asked for it). Outside push mode I committed the regenerated files; in push mode I committed none of them (the bot does it after the merge).
+- [ ] **Build-input changes, outside push mode:** I ran `npm run check` and it found no drift.
 - [ ] **Data changes:** I edited the canonical data by hand, not the generated files, and left `generated` and `version` as they are (they move only in a release).
 - [ ] **User-visible changes:** I added a changelog fragment `changes/unreleased/<short-name>.md` instead of editing `CHANGELOG.md`.
 - [ ] **Data changes:** for a verified change, I set `verified: true` **with** a `last_verified` date (the day I checked) **and** a real `docs_url`.
@@ -39,8 +39,12 @@ If a relevant check could not run, include the error and why it is blocked. -->
 - [ ] (Optional) I used AI tools for part of this change, and I have read and tested it myself.
 
 <!--
-No bot regenerates the derived files for you yet: the required "Dataset integrity" check
-fails until they are in sync with the data. If it says files are out of sync, run
-`npm run build`, commit, and push again. The non-blocking "Regeneration preview" run
-lists the stale files and offers them as a patch artifact (`regen-preview-patch`).
+Derived files (README tables, collections/, site pages, CSV, sitemap, OG images) depend on the
+regeneration bot's mode, printed by the "Regeneration mode" step of the "Dataset integrity" check
+(docs/regeneration-bot.md):
+- mode=push: do not regenerate or commit derived files. The bot commits them to main after the
+  merge. The check fails only if you edited a derived file by hand or this is a release PR.
+- any other mode: the check fails until they are in sync. Run `npm run build`, commit, push again.
+The non-blocking "Regeneration preview" run lists the stale files and offers them as a patch
+artifact (`regen-preview-patch`).
 -->

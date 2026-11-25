@@ -1762,7 +1762,7 @@ test('provider links carry data-provider and data-link for the opt-in outbound_p
   assert.equal([...cmp.matchAll(/data-link="docs"/g)].length, 2, "both providers' docs links are tagged on a static comparison");
 });
 
-test('no GA_MEASUREMENT_ID (the default): the build emits no analytics code, CSP host, banner or cookie notice change', () => {
+test('no GA_MEASUREMENT_ID (the default): no Google analytics code, Google CSP host, banner or cookie notice change; Cloudflare Web Analytics allowed and described', () => {
   const env = { ...process.env };
   delete env.GA_MEASUREMENT_ID;
   execFileSync(process.execPath, ['scripts/build.mjs'], { cwd: ROOT, stdio: 'pipe', env });
@@ -1775,7 +1775,14 @@ test('no GA_MEASUREMENT_ID (the default): the build emits no analytics code, CSP
     const html = readFileSync(join(ROOT, rel), 'utf8');
     assert.doesNotMatch(html, /googletagmanager|google-analytics|analytics\.google|gtag|consent\.js|data-consent-open|Cookie settings/, `${rel} carries analytics code without an ID`);
   }
-  assert.match(readFileSync(join(ROOT, 'site/legal/privacy.html'), 'utf8'), /no third-party analytics or tracking/);
+  const privacy = readFileSync(join(ROOT, 'site/legal/privacy.html'), 'utf8');
+  assert.match(privacy, /no cookies and no tracking/);
+  assert.match(privacy, /cookieless Cloudflare Web Analytics/);
+  assert.doesNotMatch(privacy, /We do not use Cloudflare's analytics/);
+  // Cloudflare injects the Web Analytics beacon at the edge, so every build must let it through the CSP
+  const csp = readFileSync(join(ROOT, 'site/index.html'), 'utf8').match(/http-equiv="Content-Security-Policy" content="([^"]+)"/)[1];
+  assert.match(csp, /script-src [^;]*https:\/\/static\.cloudflareinsights\.com/);
+  assert.match(csp, /connect-src [^;]*https:\/\/cloudflareinsights\.com/);
 });
 
 test('the privacy page and SECURITY.md say what the star count really does: no GitHub call from the browser', () => {
