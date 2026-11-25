@@ -3,7 +3,7 @@
 // The measurement ID comes from ONE place: the GA_MEASUREMENT_ID environment variable, which the deploy workflow
 // (.github/workflows/pages.yml) fills from the repository variable of the same name. Empty or unset (every local build,
 // every CI check, and the deploy until the owner sets the variable) means the build emits NO analytics code at all: no
-// banner, no script, no extra CSP host, and the privacy page keeps saying the site sets no cookies.
+// banner, no script, no Google CSP host, and the privacy page keeps saying the site sets no cookies.
 //
 // With an ID: every page gets site/consent.js (from lib/consent.client.js) and a "Cookie settings" control in the footer,
 // the CSP allows exactly the Google hosts GA4 and Google signals need, and the privacy page describes what happens. Nothing
@@ -40,6 +40,17 @@ export function analyticsCspSources(id) {
     connect: ' https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com https://*.g.doubleclick.net https://*.google.com',
   };
 }
+
+/**
+ * Cloudflare Web Analytics is on for freellmapihub.com in the Cloudflare dashboard (automatic setup). Cloudflare injects
+ * its beacon into each page at the edge, outside this build: a script from static.cloudflareinsights.com that reports to
+ * /cdn-cgi/rum on this origin or to cloudflareinsights.com. It is cookieless and stores nothing in the browser, so it needs
+ * no banner, but the CSP must allow it on every build or the browser blocks it.
+ */
+export const CLOUDFLARE_WEB_ANALYTICS_CSP = {
+  script: ' https://static.cloudflareinsights.com',
+  connect: ' https://cloudflareinsights.com',
+};
 
 /** The first-party consent script with the ID written in, or null without an ID. */
 export function consentScript(id) {

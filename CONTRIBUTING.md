@@ -20,13 +20,28 @@ After a first contribution, browse [unassigned help wanted issues](https://githu
 
 Use the same claim, source and validation rules. Keep one task in progress while learning the repository; if you get stuck, share what you tried and the error or unanswered question. If you stop, `/release` makes an assigned task available again. If neither list has a suitable task, use [Questions & ideas](https://github.com/pacocartones/free-llm-api-hub/discussions) to ask where your skills would help.
 
+### Recurring issues: where to find work each month
+
+Some work comes back on a schedule, so there is always something open:
+
+- **Free tier changes — *Month YYYY*** (labels `data`, `help wanted`), opened on the 1st by [`monthly-issues.yml`](.github/workflows/monthly-issues.yml). It lists what changed in the dataset the month before (providers added and removed, limit and flag changes, from the same history as the [What changed](https://freellmapihub.com/changes/) page). Comment with a change we missed: the provider, what changed, a link to the provider's own page and the UTC day you read it. A comment is enough.
+- **New provider candidates — *Month YYYY*** (label `help wanted`), opened the same day. Propose one provider per comment under [docs/inclusion-criteria.md](docs/inclusion-criteria.md); the issue states the current non-text share against the 35% guardrail. It is not a `good first issue`: adding a provider touches more than two files.
+- **[#4](https://github.com/pacocartones/free-llm-api-hub/issues/4) weekly re-verification worklist**, refreshed every Monday: the entries whose verification is oldest.
+- **Monthly source check** and **Source watch** issues, opened only when a cited link or quote stops matching its page: each line is a lead to re-check from a normal connection.
+- **"Pick one provider" good first issues**: each lists several providers; one provider is a complete pull request, and the list is refreshed as entries are done.
+
 ## For provider data, edit the source
 
 For a **provider data correction**, edit [`data/providers.json`](data/providers.json), not a generated page. The README tables, the freshness badge, the `collections/` markdown, and the whole interactive site (explorer, per-provider pages, collection pages, badges, sitemap) are generated from it. A docs or code issue names its own source files.
 
-**Your pull request ships its own regenerated files.** After editing `data/providers.json`, run `npm run build` (and `npm run og` if the OG check flags drift) and commit the regenerated files together with the data change. The regeneration bot does not write to `main` (it is off by default and rolls out through a shadow mode first, see [docs/regeneration-bot.md](docs/regeneration-bot.md)): the required "Dataset integrity" check fails until the derived files are in sync. The non-blocking *Regeneration preview* run on your pull request lists the stale derived files and offers them as a patch (`regen-preview-patch`) if you cannot build locally.
+**Who regenerates the derived files depends on the regeneration bot's mode** ([docs/regeneration-bot.md](docs/regeneration-bot.md)); the *Regeneration mode* step of the "Dataset integrity" check prints it.
 
-Fixing a rate limit means editing one field plus the files regenerated from it — still a small, reviewable diff.
+- **Push mode (`mode=push`): do not regenerate.** Your data pull request changes `data/` plus a changelog fragment, and nothing generated: no `npm run build` or `npm run og` output in the commit. After the merge the bot commits the derived files to `main`. "Dataset integrity" fails only if your pull request edits a derived file that does not match the build (undo it with `git checkout origin/main -- <file>`) or is a release pull request that is not fully regenerated.
+- **Any other mode: your pull request ships its own regenerated files.** After editing `data/providers.json`, run `npm run build` (and `npm run og` if the OG check flags drift) and commit the regenerated files together with the data change. The required "Dataset integrity" check fails until the derived files are in sync.
+
+In both cases the non-blocking *Regeneration preview* run on your pull request lists the stale derived files, says what the push-mode gate decides, and offers the files as a patch (`regen-preview-patch`) if you cannot build locally.
+
+Fixing a rate limit means editing one field (plus, outside push mode, the files regenerated from it) — a small, reviewable diff.
 
 **Leave `version` and `generated` alone.** The two lines at the top of `data/providers.json` are the release: `generated` is the day of the dataset release and changes only together with `version`, in a release pull request (see [RELEASING.md](RELEASING.md)). Your dates go in the fields you checked (`last_verified`, `added`, `checked`). The *Dataset integrity* check fails if a data pull request moves `generated`: every pull request used to bump that one line, so any two open data pull requests conflicted on it.
 
@@ -63,7 +78,7 @@ Run these commands from the repository root after installing dependencies. Follo
 | Change | Local validation before opening a PR |
 | --- | --- |
 | Hand-written docs or issue/PR template text | `npm run links`, then preview the changed Markdown or form and open its links. The link checker checks local paths in tracked and non-ignored new Markdown files, including nested docs and package READMEs. Absolute paths and paths escaping the repository are rejected; it does not validate GitHub forms, external issue searches or heading anchors. |
-| Provider data or build inputs (including `CONTRIBUTING.md`, which generates the site's contributing page) | `npm run build && npm test`; commit your changes and regenerated files, then run `npm run check` (it compares generated output with the committed version). Run `npm run og` too if the OG check flags drift. |
+| Provider data or build inputs (including `CONTRIBUTING.md`, which generates the site's contributing page) | `npm run build && npm test`; commit your changes and regenerated files, then run `npm run check` (it compares generated output with the committed version). Run `npm run og` too if the OG check flags drift. In push mode, run the same checks but commit only your source changes, not the regenerated files (see [For provider data, edit the source](#for-provider-data-edit-the-source)). |
 | Code | `npm test`, plus the focused check named in the issue. If the change affects generated output, also follow the build-input row above. |
 
 CI runs the full integrity suite on every PR, including docs-only changes. Paste your local commands and their results in the PR; a focused check is useful evidence, and a check you could not run needs an explanation. See [the first-fork checks note](#your-first-pr-from-a-fork-the-checks-may-wait) if CI is waiting for approval.
@@ -83,6 +98,16 @@ OG files are left for you to check: run `node scripts/check-og.mjs`; if it repor
 > ```
 >
 > If you cloned shallow, fix it with `git fetch --unshallow`; otherwise just clone normally: `git clone https://github.com/pacocartones/free-llm-api-hub`. The root integrity and site-build CI jobs check out the full history (`fetch-depth: 0`); workflows that do not mine history may use shallow checkouts.
+
+### Windows and WSL
+
+`npm test` should pass on Windows and in WSL as it does on Linux and macOS. CI runs it on a Windows runner with CRLF settings and without symlink privileges.
+
+- **WSL:** clone inside the Linux file system (for example `~/src/free-llm-api-hub`), not under `/mnt/c/`: the Windows drive is slow from WSL, and Windows Git and Linux Git sharing one clone disagree about file modes and the index. Install `git` and `jq` (`sudo apt install git jq`) and the Node version in `.nvmrc`. Without `jq`, the tests that run workflow shell scripts are skipped with a message that says so.
+- **Windows:** Developer Mode is not needed. The test copies link `node_modules` with a junction, which needs no privileges, and copy it where a junction is impossible. Tests of Bash scripts are skipped on Windows, and the Linux job runs them.
+- **Line endings:** `.gitattributes` checks text files out with LF whatever `core.autocrlf` says. If `npm test` stops with "tracked text file(s) have CRLF line endings", an editor saved those files with CRLF: save them with LF (or `git checkout -- <file>` for a file you have not edited).
+- **Commit signing:** if your git config signs commits (`commit.gpgsign`), `npm test` turns signing off for the throwaway repositories the tests create. Your own commits are not affected.
+- **A data-only change:** `npm run validate` checks `data/` in seconds while you edit; before the pull request, run `npm run build && npm test`, commit, then `npm run check`, as in [Which checks to run](#which-checks-to-run).
 
 If you want to preview how your entry renders on the site before opening the PR:
 
@@ -166,7 +191,7 @@ if grep -l -- "$profile" /proc/[0-9]*/cmdline 2>/dev/null | grep -qv "/proc/$$/"
 There are two kinds of issue:
 
 - **Labelled both `good first issue` and `data`** (a data question answered from the provider's own page): don't claim it, open a pull request when it's ready. The first correct, sourced PR is merged. If you found something useful but won't open a PR, post it in the issue with the link and the date; the PR that uses it credits you.
-- **Everything else:** comment `/take` on its own as the first line of an issue comment. A bot assigns it to you if nobody has it and you have fewer than two open issues assigned. Check the assignee and bot reply; if there is no reply, ask in the issue before starting duplicate work. If you can't continue, comment `/release` on its own as the first line; that's completely fine. Check that your assignment was removed so someone else can take it. Share any useful findings or draft PR link when handing it back. An assigned issue with no activity for two weeks may be offered to another contributor, after a ping. A pull request for an issue assigned to someone else waits for them.
+- **Everything else:** comment `/take` on its own as the first line of an issue comment. A bot assigns it to you if nobody has it and you have fewer than two open issues assigned. Check the assignee and bot reply; if there is no reply, ask in the issue before starting duplicate work. If you can't continue, comment `/release` on its own as the first line; that's completely fine. Check that your assignment was removed so someone else can take it. Share any useful findings or draft PR link when handing it back. An assigned issue with no activity for two weeks may be offered to another contributor, after a ping (7 days during a program, see [Programs](#programs-social-winter-of-code-and-similar)). A pull request for an issue assigned to someone else waits for them.
 
 We read every pull request and reply as soon as we can. A reply is a real answer (a review, a question or an assignment), not an acknowledgement.
 
@@ -219,9 +244,72 @@ Live GitHub settings remain authoritative. Preserve existing controls when recon
 names; a required PR check must not use path filters that leave it permanently
 pending. Security policy and token permissions are in [SECURITY.md](SECURITY.md).
 
-## Hacktoberfest
+## Programs (Social Winter of Code and similar)
 
-October is Hacktoberfest month, but Hacktoberfest 2026 no longer rewards pull requests (it is about learning and building with open-source AI), so a pull request here does not earn Hacktoberfest swag or points, and we do not promise any. Contributions are welcome all year. The [good first issues](https://github.com/pacocartones/free-llm-api-hub/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) are the best place to start (see [Good first issues](#good-first-issues) for what qualifies). Your name goes in [CONTRIBUTORS.md](CONTRIBUTORS.md) when a pull request is merged.
+This repository takes part in contribution programs that score merged pull requests, such as [Social Winter of Code](https://www.swoc.in/) (SWoC). This section is for program participants; everything else in this guide applies to you too. Contributions are welcome all year, inside or outside a program.
+
+**Social Winter of Code Season 7 runs from 1 January to 30 March 2027.** The program and level labels it uses are listed here, and only here, so this table is the one place to check (SWoC publishes the exact names before the season starts, and we update the table then):
+
+| Purpose | Label |
+|---|---|
+| Program label: the issue counts for Social Winter of Code Season 7 | `SWoC27` |
+| Level label for an Easy issue | `Easy` |
+| Level label for a Medium issue | `Medium` |
+| Level label for a Hard issue | `Hard` |
+
+Below, "the program label" and "a level label" mean the labels in this table, and Easy, Medium and Hard mean the levels described in [Difficulty levels](#difficulty-levels).
+
+### Picking and taking an issue
+
+- **Pick an open issue with the program label and a level label.** Read the whole issue, its latest comments and its linked pull requests first.
+- **Data issues labelled `good first issue` and `data` are not assigned**, as for everyone else: open a pull request when it is ready, and the first correct, sourced PR is merged. If a second correct PR arrives later, we thank you and point you to another open issue.
+- **For every other issue, comment `/take`** on its own as the first line of a comment, and wait for the bot to assign you before starting (see [Claiming an issue](#claiming-an-issue)). You can hold **at most two open assigned issues** at a time; the bot refuses a third. Comment `/release` when you stop, so someone else can take it.
+- **No hoarding.** Take an issue only when you are about to work on it, not to reserve it. Asking for several issues at once, or taking issues you don't work on, means we stop assigning to you for that day. During the program, an assigned issue with no activity for **7 days** is released after a ping on day 5 (outside programs it is two weeks).
+- **At most two Easy merges per person.** Two merged pull requests are enough for the SWoC certificate. After that, please pick Medium or Hard issues so the next newcomer has an easy one.
+- Don't ask to be assigned in a pull request or by direct message: everything happens in the issue, in public.
+
+### Difficulty levels
+
+| Level | What it means here | Typical size |
+|---|---|---|
+| Easy | One or two files named in the issue, one named check, no third-party account. Good for a first contribution. | Under about 2 hours |
+| Medium | Reading existing code or tests, or comparing several official pages. The issue names the files and the check. | About 2 to 6 hours |
+| Hard | A design decision, several files, or a careful data re-verification with quotes. Agree the approach in the issue before you write code. | More than a day, in steps |
+
+The level is set in the issue by a maintainer. If you think it is wrong, say so in the issue **before** you start; we don't change it after the work is done. SWoC scores each level differently: see [swoc.in](https://www.swoc.in/) for the current points.
+
+### How points are given
+
+- Points come from labels on the **merged pull request**, and only a maintainer adds them. When we merge, we copy the level label from the issue to the pull request and add the program label.
+- **Only pull requests that close an issue carrying the program label get these labels.** Link it with `Closes #123` in the pull request description. A pull request without such an issue is reviewed on its merits as usual, but it gets no level label and does not score.
+- Only merged pull requests count. A pull request that is closed, or that only rewords text, reformats files or adds unsourced claims, gets no label (see [Hacktoberfest](#hacktoberfest) below for what gets merged).
+- If a merged contribution turns out to rest on an invented source, we revert it and ask the program to withdraw its points.
+
+### Reviews and response times
+
+During the program we aim to approve waiting checks within 1 day, reply to a new pull request within 2 days, give a first review within 3 days and reach a decision within 7 days. These are goals, not promises: maintainers are volunteers. If more than 10 program pull requests are waiting for review, we pause new assignments until the queue is shorter, and we say so in the issues.
+
+If a pull request is nearly ready and only needs regenerated files, an update from `main` or a formatting fix, a maintainer may finish it on your branch ("Allow edits by maintainers") and say so in a comment. You stay the author, and the changelog credits you.
+
+### Your first pull request waits for approval
+
+Until your first pull request here is merged, GitHub holds its checks until a maintainer approves them (see [Your first PR from a fork](#your-first-pr-from-a-fork-the-checks-may-wait)). During the program we approve them in batches, usually twice a day in January and once a day afterwards. So:
+
+- **Push when your change is complete.** Every push before your first merge waits for approval again.
+- **Don't close and reopen your pull request** to restart the checks; push to the same branch instead.
+- After your first merge, your later pull requests run their checks straight away.
+
+### AI and quotes
+
+The quality bar is the same as always. Read [AI_POLICY.md](AI_POLICY.md): AI-assisted work is welcome, but understand and test what you send, and be ready to answer review questions in your own words.
+
+- **Every fact and every quote must come from a page you opened yourself,** on the provider's own site. Third-party summaries, blog posts and other lists don't count as sources.
+- **Quotes are copied word for word.** Don't translate, shorten or reword a quoted sentence, and don't quote from memory or from an AI tool's answer. Reviewers open the source and look for the exact sentence before merging; [docs/quotes.md](docs/quotes.md) explains how quotes are recorded and checked.
+- **Pull requests with invented or unchecked sources are closed,** and so are pull requests that ignore the issue they claim to fix. If the official page does not answer the question, that is a useful result: say so in the issue with the link and the date.
+
+### Hacktoberfest
+
+October is Hacktoberfest month, but Hacktoberfest 2026 no longer rewards pull requests (it is about learning and building with open-source AI), so a pull request here does not earn Hacktoberfest swag or points, and we do not promise any. The [good first issues](https://github.com/pacocartones/free-llm-api-hub/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) are the best place to start (see [Good first issues](#good-first-issues) for what qualifies). Your name goes in [CONTRIBUTORS.md](CONTRIBUTORS.md) when a pull request is merged.
 
 What gets merged is what makes the data more accurate: a field confirmed from the provider's own docs, a stale number corrected, a dead link fixed with its replacement. Pull requests that only reword text, reformat files or add unsourced claims will be closed, and so will pull requests opened without reading the issue they claim to fix.
 
@@ -236,8 +324,8 @@ GitHub holds workflow runs from a **first-time contributor** until a maintainer 
 ## Maintainer notes
 
 - **Release-only lines.** `version` and `generated` in `data/providers.json`, the version in `package.json`/`package-lock.json`, `date-released` in `CITATION.cff` (built from `generated`) and the move of `changes/unreleased/*.md` into `CHANGELOG.md` change only in a release pull request, prepared with `npm run release:prepare -- X.Y.Z`. The freshness badge is not committed: every deploy builds `site/badge-freshness.json`. Public dates (API `generated`, CSV `dataset_generated`, sitemap) still mean the last dataset change and are derived from the data, so a pull request that records a newer date also rewrites those date lines in the aggregate outputs; they are generated files, so `npm run sync-main` rebuilds them, and two pull requests from the same day write identical lines. What still collides in practice is `derived-fingerprints.json` and, between pull requests from different days, those date lines.
-- **The author ships the derived files.** The regeneration bot (`regenerate.yml`) is off by default and, until its switch to direct push, writes nothing to `main` (see [docs/regeneration-bot.md](docs/regeneration-bot.md)): `main` requires the "Dataset integrity" check, and a change is complete when its regenerated files are committed in the same PR. After editing `data/providers.json` (or `data/programs.json`), run `npm run build` (and `npm run og` if the OG check flags drift), commit the regenerated files together with the data change, and push. The "Dataset integrity" check fails until they are in sync.
-- **Provider maintenance is not scheduled.** Re-verification, model samples and the live probe are local on-demand tasks — see [docs/update-playbook.md](docs/update-playbook.md). GitHub Actions does run the site deployment daily to refresh its build-time star count, plus CodeQL on pull requests and weekly, weekly OpenSSF Scorecard scans, the weekly worklist refresh of issue #4, the monthly source checks (which report in an issue) and the regeneration bot, which does nothing unless it is enabled; none of those jobs changes provider claims.
+- **Who ships the derived files.** In push mode (`REGEN_MODE=push`, see [docs/regeneration-bot.md](docs/regeneration-bot.md)) the regeneration bot (`regenerate.yml`) commits them to `main` after each merge, so a data pull request ships only its source change and the "Dataset integrity" check blocks only hand-edited derived files and release pull requests that are not regenerated. In any other mode the bot writes nothing to `main` and the author ships them: after editing `data/providers.json` (or `data/programs.json`), run `npm run build` (and `npm run og` if the OG check flags drift), commit the regenerated files together with the data change, and push; the "Dataset integrity" check fails until they are in sync.
+- **Provider maintenance is not scheduled.** Re-verification, model samples and the live probe are local on-demand tasks — see [docs/update-playbook.md](docs/update-playbook.md). GitHub Actions does run the site deployment daily to refresh its build-time star count, plus CodeQL on pull requests and weekly, weekly OpenSSF Scorecard scans, the weekly worklist refresh of issue #4, the monthly source checks (which report in an issue), the monthly contributor issues (`monthly-issues.yml`) and the regeneration bot, which does nothing unless it is enabled; none of those jobs changes provider claims.
 
 ### Branch names and commit identity
 

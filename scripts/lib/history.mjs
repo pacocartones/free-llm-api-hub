@@ -17,10 +17,19 @@ export const HISTORY_FIELDS = {
   openai_compatible: 'OpenAI compatibility',
 };
 
-// Reads every committed revision of data/providers.json, oldest first, as
-// [{ hash, date, parsed }]. Throws if git is unavailable; callers degrade.
+// Reads every revision of data/providers.json on the checked-out branch's
+// first-parent line, oldest first, as [{ hash, date, parsed }]. Throws if git
+// is unavailable; callers degrade.
+//
+// --first-parent matters: without it `git log` lists the commits of every
+// merged pull request branch by date, so two branches open at the same time
+// interleave (A1, B1, A2, merge) and each one's revision "reverts" the other's
+// edits. Every such flip counted as a field change (November 2026: 362 instead
+// of 171) and a month-end snapshot could be a branch's state, not main's. On
+// the first-parent line each merge is one revision with the merged result,
+// dated on the day it landed; direct and squash-merged commits are unchanged.
 export const readProviderRevisions = (cwd) => {
-  const log = execSync('git log --reverse --date=short --format=%H%x1f%ad -- data/providers.json', { cwd, encoding: 'utf8', maxBuffer: 1024 * 1024 * 40 }).trim();
+  const log = execSync('git log --first-parent --reverse --date=short --format=%H%x1f%ad -- data/providers.json', { cwd, encoding: 'utf8', maxBuffer: 1024 * 1024 * 40 }).trim();
   const revs = log ? log.split('\n').map((l) => { const [hash, date] = l.split('\x1f'); return { hash, date }; }) : [];
   // Read every revision's file in ONE process instead of one `git show` spawn
   // per commit (which made the build take minutes on slow checkouts).
@@ -87,7 +96,51 @@ export const historyFromRevisions = (revisions) => {
     }
     monthEnd[date.slice(0, 7)] = { date, providers: parsed.providers || [] };
   }
+  for (const slug of Object.keys(historyBySlug)) historyBySlug[slug] = collapseSameDay(historyBySlug[slug]);
   return { historyBySlug, monthEnd };
+};
+
+const sameValue = (a, b) => JSON.stringify(a ?? null) === JSON.stringify(b ?? null);
+
+// One day + one field = one entry. A provider's commits of one day (several pull requests merged the same day, or a
+// branch that flips a value and flips it back) used to give one 'changed' event per commit: /p/groq listed the same
+// "Updated the catch" ten times on 2026-11-24 and November counted 362 field changes for 172 distinct ones. The
+// 'changed' events of one date merge into one event, at the place of the first, holding for each field its value
+// before the first commit of the day and after the last. A field that ends the day where it started (true → null →
+// true) changed nothing that day and is left out; a day whose every field did so has no event. 'added' events stay.
+export const collapseSameDay = (events) => {
+  const fieldOrder = Object.keys(HISTORY_FIELDS);
+  const out = [];
+  const byDate = new Map();
+  for (const e of events || []) {
+    if (e.kind !== 'changed') { out.push(e); continue; }
+    const changes = e.changes || (e.fields || []).map((field) => ({ field, from: null, to: null }));
+    let day = byDate.get(e.date);
+    if (!day) {
+      day = { date: e.date, kind: 'changed', changes: [], order: [] };
+      byDate.set(e.date, day);
+      out.push(day);
+    }
+    // The commit that set a field's final value of the day travels with that field (api/v1/changes.json).
+    const commit = typeof e.commit === 'string' ? { commit: e.commit } : {};
+    if (commit.commit) day.order.push(commit.commit);
+    for (const c of changes) {
+      const seen = day.changes.find((x) => x.field === c.field);
+      if (seen) Object.assign(seen, { to: c.to ?? null }, commit);
+      else day.changes.push({ field: c.field, from: c.from ?? null, to: c.to ?? null, ...commit });
+    }
+  }
+  return out.flatMap((e) => {
+    if (e.kind !== 'changed') return [e];
+    const changes = e.changes.filter((c) => !sameValue(c.from, c.to))
+      .sort((a, b) => fieldOrder.indexOf(a.field) - fieldOrder.indexOf(b.field));
+    if (!changes.length) return [];
+    const fields = changes.map((c) => c.field);
+    // The day's event carries the last commit among its kept changes (in commit order), when any is known.
+    const commits = changes.map((c) => c.commit).filter(Boolean);
+    const last = commits.length ? e.order.filter((h) => commits.includes(h)).pop() : undefined;
+    return [{ date: e.date, kind: 'changed', fields, ...(last ? { commit: last } : {}), text: `Updated ${fields.map((k) => HISTORY_FIELDS[k] || k).join(', ')}`, changes }];
+  });
 };
 
 // History plus month-end snapshots in one git pass. Both are {} without git.

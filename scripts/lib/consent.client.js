@@ -220,11 +220,19 @@
   // their own names. History changes (the explorer rewrites its URL on every keystroke) never send a page_view: that
   // enhanced-measurement option is off in the GA4 stream.
   var SLUG = /^[a-z0-9][a-z0-9-]{0,63}$/;
-  var LINK_TYPES = ['docs', 'website', 'playground', 'models', 'limits_source', 'data_policy'];
+  var LINK_TYPES = ['docs', 'keys', 'website', 'playground', 'models', 'limits_source', 'data_policy'];
   var CHIPS = { 'f-nocard': 'no_card', 'f-nophone': 'no_phone', 'f-commercial': 'commercial', 'f-text': 'text_only', 'f-notrain': 'no_training', 'f-openai': 'openai_compatible', 'f-verified': 'verified' };
   var CATEGORIES = ['all', 'ongoing', 'trial'];
   var SORT_KEYS = ['recommended', 'name', 'category', 'free_tier', 'notes', 'verified'];
   var DOWNLOAD = /^\/((providers\.(json|csv))|(api\/v1\/[a-z0-9._-]+\.(json|yaml))|(llms(-full)?\.txt)|(badge-[a-z]+\.json))$/;
+  var SNIPPET_KINDS = ['embed', 'badge', 'citation'];
+  // Links to this project's GitHub repository (stars, issues, contributing): repo_click with where the link sits. A link can
+  // name its place (data-repo-location, from the fixed list); otherwise the site header or footer it sits in, or a
+  // contribution link (the /contributing/ and /submit/ pages, issue forms, discussions, pull requests, forks), else content.
+  var REPO_PATH = /^\/pacocartones\/free-llm-api-hub(\/|$)/i;
+  var REPO_LOCATIONS = ['header', 'footer', 'contribute', 'content'];
+  var CONTRIBUTE_PAGE = /^\/(contributing|submit)(\/|\.html|$)/;
+  var CONTRIBUTE_TARGET = /^\/[^/]+\/[^/]+\/((issues\/new|discussions|pulls?|fork|compare)(\/|$)|blob\/[^/]+\/CONTRIBUTING\.md$)/i;
   var SEARCH_IDLE_MS = 1500;
   var pageSent = false;
   var lastSearch = '';
@@ -265,6 +273,15 @@
     if (track('site_search', { search_term: term })) lastSearch = term;
   }
 
+  function repoLocation(a, url) {
+    var declared = a.getAttribute('data-repo-location');
+    if (declared && REPO_LOCATIONS.indexOf(declared) !== -1) return declared;
+    if (a.closest('.site-header')) return 'header';
+    if (a.closest('.site-footer')) return 'footer';
+    if (CONTRIBUTE_PAGE.test(String(location.pathname || '/')) || CONTRIBUTE_TARGET.test(url.pathname)) return 'contribute';
+    return 'content';
+  }
+
   function onClick(e) {
     var t = e.target;
     if (!t || !t.closest) return;
@@ -280,6 +297,9 @@
       if (url && url.hostname === location.hostname && DOWNLOAD.test(url.pathname)) {
         track('api_download', { file: url.pathname.slice(1) });
       }
+      if (url && (url.hostname === 'github.com' || url.hostname === 'www.github.com') && REPO_PATH.test(url.pathname)) {
+        track('repo_click', { location: repoLocation(a, url) });
+      }
       return;
     }
     var copy = t.closest('.pre-copy, .api-copy');
@@ -287,12 +307,15 @@
       var kind = 'api_url';
       if (copy.classList.contains('pre-copy')) {
         var pre = copy.closest('pre');
+        // A block can name its kind (data-snippet, from a fixed list): the citations and badges of /embed/.
+        var declared = pre ? pre.getAttribute('data-snippet') : null;
         var code = pre ? (pre.querySelector('code') || pre).textContent : '';
         var head = String(code || '').replace(/^\s+/, '');
-        kind = /^curl\b/.test(head) ? 'curl'
+        kind = SNIPPET_KINDS.indexOf(declared) !== -1 ? declared
+          : /^curl\b/.test(head) ? 'curl'
           : /^(from|import)\s/.test(head) ? 'python'
           : /^(export|set)\s+[A-Z][A-Z0-9_]*=/.test(head) ? 'env_key'
-          : /^<(script|iframe|a|img)\b/i.test(head) ? 'embed'
+          : /^<(script|iframe|a|img|div)\b/i.test(head) ? 'embed'
           : 'other';
       }
       track('copy_snippet', { snippet: kind });

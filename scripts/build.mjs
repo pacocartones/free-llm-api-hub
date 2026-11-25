@@ -8,19 +8,19 @@
 // Zero dependencies. Run with: node scripts/build.mjs   (or `npm run build`)
 
 import { shortenProse } from './lib/short-text.mjs';
-import { measurementId, analyticsCspSources, consentScript, withAnalytics } from './lib/analytics.mjs';
+import { measurementId, analyticsCspSources, consentScript, withAnalytics, CLOUDFLARE_WEB_ANALYTICS_CSP as CF_WA_CSP } from './lib/analytics.mjs';
 import { providerLinkTargets, tagProviderLinks } from './lib/provider-links.mjs';
 import { readFileSync, writeFileSync, mkdirSync, readdirSync, rmSync, existsSync } from 'node:fs';
 import { execSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, relative } from 'node:path';
-import { recScore, FREE_TYPE_RANK, freeTypeRank, FLAG_PAIRS, SLA_DAYS, DUE_SOON_DAYS, ageInDays, freshnessColor, freshnessBadge, freshnessStatus } from './lib/rules.mjs';
+import { recScore, intentRank, recommendedCmp, FREE_TYPE_RANK, freeTypeRank, FLAG_PAIRS, SLA_DAYS, DUE_SOON_DAYS, ageInDays, freshnessColor, freshnessBadge, freshnessStatus } from './lib/rules.mjs';
 import * as rows from './lib/rows.mjs';
 import * as sortLib from './lib/sort.mjs';
 import { esc, stripTags } from './lib/escape.mjs';
 import { mineHistoryAndSnapshots, HISTORY_FIELDS } from './lib/history.mjs';
-import { flattenFieldChanges, groupChangesByWeek, changesRss, weekTitle, formatValue, changesApiBody, CHANGES_WINDOW_WEEKS } from './lib/changes.mjs';
+import { flattenFieldChanges, groupChangesByWeek, changesRss, weekTitle, formatValue, beforeAfter, changesApiBody, CHANGES_WINDOW_WEEKS } from './lib/changes.mjs';
 import { monthlyReport, reportMonths, monthEndDate, monthName, monthLabel, pct, monthSummary, monthBrief } from './lib/state.mjs';
 import { resolveBestEntries, topEntries, PODIUM_SIZE } from './lib/best.mjs';
 import { agreementsTableHtml, sponsoredBlockHtml, disclosureHtml, inForce, NOT_IN_DATA_SENTENCE, MACHINE_SENTENCE } from './lib/agreements.mjs';
@@ -34,9 +34,10 @@ import { freeGpuMainHtml } from './lib/free-gpu.mjs';
 import { labelTables } from './lib/tables.mjs';
 import { markNewTabLinks } from './lib/links.mjs';
 import { codingToolsMainHtml, codingToolMainHtml, codingToolTitle, codingToolDescription } from './lib/free-coding-tools.mjs';
-import { dataPolicyRows, dataPolicyMainHtml } from './lib/data-policy-page.mjs';
+import { dataPolicyRows, dataPolicyMainHtml, trainState } from './lib/data-policy-page.mjs';
 import { quotesReportHtml } from './lib/quotes-report.mjs';
-import { SCORE_WEIGHTS, EDITORIAL_WEIGHT, EDITORIAL_DEFAULT, MATH_INPUTS, MIN_CONFIRMED, TOP_SIZE, EDITORIAL_NOTE_THRESHOLD, STABILITY_MIN_DAYS, STABILITY_MIN_SAMPLES, rankProviders, editorialRating } from './lib/score.mjs';
+import { SCORE_WEIGHTS, EDITORIAL_WEIGHT, EDITORIAL_DEFAULT, MATH_INPUTS, MIN_CONFIRMED, TOP_SIZE, EDITORIAL_NOTE_THRESHOLD, STABILITY_MIN_DAYS, STABILITY_MIN_SAMPLES, rankProviders, editorialRating, inputFractions, stabilityFromProbe } from './lib/score.mjs';
+import { scoreBlockHtml } from './lib/score-bar.mjs';
 import { publishableClientConfigs } from './lib/client-config.mjs';
 import { COLLECTIONS as SHARED_COLLECTIONS } from './lib/collections.mjs';
 import * as compareLib from './lib/compare.mjs';
@@ -59,8 +60,13 @@ import { SITEMAP_INDEX, sitemapIndexXml } from './lib/state-sitemap.mjs';
 import { SITEMAPS as INDEXNOW_SITEMAPS } from './lib/indexnow.mjs';
 import { groupModels, modelKey } from './lib/model-keys.mjs';
 import { modelsApiBody } from './lib/models-api.mjs';
+import { providerMetaDescription } from './lib/provider-meta.mjs';
 import { isIndexable, modelPageMainHtml, modelPageTitle, modelPageDescription, modelPageJsonLd } from './lib/model-pages.mjs';
 import { collectionPageJsonLd as pageJsonLd, comparePageJsonLd } from './lib/page-jsonld.mjs';
+import { notFreeErrors, notFreeReadmeMd, notFreeModel, notFreeMainHtml, notFreeJsonLd, notFreeTitle, notFreeDescription, NOT_FREE_PATH } from './lib/not-free.mjs';
+import { embedMainHtml, embedTitle, embedDescription, EMBED_PATH } from './lib/embed-page.mjs';
+import { citationRecord } from './lib/citation.mjs';
+import { LONG_GUIDES, longGuidePage } from './lib/long-guides.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const FRESH_DAYS = SLA_DAYS; // the freshness SLA, defined once in lib/rules.mjs
@@ -72,6 +78,10 @@ const data = JSON.parse(readFileSync(join(ROOT, 'data/providers.json'), 'utf8'))
 // documented meaning, "the date of the last dataset change": ASOF, the newest date recorded in the data (datasetAsOf). It is
 // derived from the committed data only (no clock), so the build stays byte-stable for a given dataset.
 const ASOF = datasetAsOf(data);
+// The dataset month in page titles ("Free LLM APIs (Nov 2026): ..."), Q10: from ASOF, the date of the last dataset
+// change, never the clock, so a title moves only when the data does and the build stays deterministic.
+const TITLE_MONTH = `${monthName(ASOF.slice(0, 7)).slice(0, 3)} ${ASOF.slice(0, 4)}`;
+const datedTitle = (t) => (t.includes(' · Free LLM API Hub') ? t.replace(' · Free LLM API Hub', ` (${TITLE_MONTH}) · Free LLM API Hub`) : `${t} (${TITLE_MONTH})`);
 const providers = data.providers;
 const summaryBySlug = new Map(JSON.parse(readFileSync(join(ROOT, 'data/provider-summaries.json'), 'utf8')).summaries.map((x) => [x.id, x]));
 // Counts quoted in prose come from the data, never from a typed number (lib/figures.mjs).
@@ -155,7 +165,7 @@ const COLLECTION_COPY = [
     h1: 'Free LLM APIs with no credit card required',
     desc: 'LLM APIs you can start calling without entering a payment method — filtered live from a continuously-verified dataset.',
     intro: 'Every provider below offers free API access with **no card required** to get started (`card_required: false`, confirmed against their own docs). Rows where the requirement is unknown are excluded rather than assumed.',
-    guides: ['free-llm-api-without-credit-card', 'free-llm-api-no-signup'],
+    guides: ['free-llm-api-without-credit-card', 'free-llm-api-no-signup', 'free-llm-api-no-credit-card-no-phone'],
     faq: [
       { q: 'Can I use an LLM API for free without a credit card?', a: 'Yes — every provider on this page offers a free tier with no card required, confirmed against its own docs. You are limited by rate, not billing.' },
       { q: 'Will I be charged if I go over the free limit?', a: 'Usually not. Without a payment method on file there is nothing to charge, so reaching a limit means being rate-limited (HTTP 429). Read the catch on each row, because terms change.' },
@@ -171,7 +181,7 @@ const COLLECTION_COPY = [
     h1: 'Free LLM APIs with no phone number required',
     desc: 'LLM APIs whose signup needs no SMS/phone verification — a live slice of a continuously-verified dataset.',
     intro: 'Providers you can sign up for **without phone verification** (`phone_required: false`). Providers that gate signup behind a phone number, or whose rule is not known, are left out.',
-    guides: ['free-llm-api-no-signup'],
+    guides: ['free-llm-api-no-signup', 'free-llm-api-no-credit-card-no-phone'],
     faq: [
       { q: 'Is there a free LLM API with no phone verification?', a: 'Yes — every provider on this page asks for no phone number at signup, according to its own docs. A provider whose rule is not known is not listed.' },
       { q: 'Do these APIs need any account at all?', a: 'Almost always: they ask for an email or a sign-in with an existing account, only not for a phone number.' },
@@ -189,7 +199,7 @@ const COLLECTION_COPY = [
     intro: 'Providers whose **own page says the API can be called with no account** (`anonymous_access`: the page, the day it was read and the sentence). Expect the lowest limits and queue priority. A provider whose pages do not say it is not listed, which never means it needs an account.',
     header: 'Each row ends with the provider’s own sentence about anonymous access and any condition its pages attach to it.',
     rowMark: (p) => anonMark(p.anonymous_access),
-    guides: ['free-llm-api-no-signup'],
+    guides: ['free-llm-api-no-signup', 'free-llm-api-no-credit-card-no-phone'],
     faq: [
       { q: 'Can I call an AI API with no account at all?', a: 'Yes, a few providers allow it, according to their own pages: each row on this page quotes the sentence and the day it was read. Anonymous use has the tightest limits and the lowest priority.' },
       { q: 'Is anonymous access the same as no signup form?', a: 'No. Most providers with no card and no phone still ask for an email or a sign-in; those are in the no-card and no-phone collections. This page lists only APIs that work with no account.' },
@@ -205,7 +215,7 @@ const COLLECTION_COPY = [
     h1: 'Free LLM APIs you can use commercially',
     desc: 'Free LLM API tiers that permit production/commercial use — not restricted to evaluation. Verified against each provider’s terms.',
     intro: 'Free tiers that **allow commercial/production use** (`commercial_ok: true`). Evaluation-only tiers (`commercial_ok: false`) and tiers whose terms do not say are deliberately left out — read their rows in the main list for the restriction.',
-    guides: ['openai-compatible-free-apis', 'free-llm-api-without-credit-card'],
+    guides: ['openai-compatible-free-apis', 'free-llm-api-without-credit-card', 'choose-free-llm-api-for-production'],
     faq: [
       { q: 'Can I use this list in a commercial product?', a: 'Yes. Free LLM API Hub and its dataset are MIT licensed, so you can reuse, fork and adapt them, including commercially. A link back is appreciated but not required. Each provider’s page has a Commercial use line that reads allowed, evaluation only or not confirmed, and the explorer on the home page marks the first two with an icon. Not confirmed means no reading of the provider’s terms has confirmed that commercial use is allowed: some terms do not clearly say so, and for other providers the question is still open. It is not a permission. The data describes other companies’ free tiers, whose terms change without notice, so confirm against the provider’s own docs before you ship. This list is independent: it is not affiliated with, endorsed by or sponsored by any provider on it, and it is not legal advice.' },
       { q: 'Which free LLM APIs allow commercial use?', a: 'Every provider on this page permits commercial/production use on its free tier (`commercial_ok: true`), confirmed against its own terms. Evaluation-only tiers are excluded.' },
@@ -223,7 +233,7 @@ const COLLECTION_COPY = [
     desc: 'Free LLM APIs that expose an OpenAI-compatible endpoint — point the OpenAI SDK at a new base_url and you are done.',
     intro: 'These providers expose an **OpenAI-compatible endpoint** (`openai_compatible: true`), so migrating is usually a one-line change: keep the OpenAI SDK, swap `base_url` and `api_key`. Grab each provider’s exact base URL from its linked docs.',
     quickstart: true,
-    guides: ['openai-compatible-free-apis'],
+    guides: ['openai-compatible-free-apis', 'openai-api-alternatives'],
     faq: [
       { q: 'What does OpenAI-compatible mean?', a: 'The API accepts the same request format as OpenAI’s <code>/chat/completions</code>, so the OpenAI SDK works by changing only <code>base_url</code> and the API key.' },
       { q: 'Is every feature supported?', a: 'Not necessarily: compatibility can be partial, and a feature a provider lacks fails at the provider. Read the catch on each row.' },
@@ -273,6 +283,7 @@ const COLLECTION_COPY = [
     // A row is the provider's own sentence; whether it covers the free plan is a separate fact, shown per row (see planMark).
     header: 'Each row is the provider’s own sentence. Many sources do not say whether it covers the free plan; read the row’s note.',
     rowMark: (p) => planMark(p.data_policy),
+    guides: ['choose-free-llm-api-for-production'],
     faq: [
       { q: 'Which free LLM APIs say they do not train on my prompts?', a: 'The providers on this page, each according to its own terms or privacy page, cited with the day it was read on the provider’s page on this site. The wording differs: for some it holds only while you have not opted in to training, and a privacy notice is not a contract.' },
       { q: 'Does a provider missing from this list train on my data?', a: 'Not necessarily. A provider is missing when its own page says it may train on prompts, says nothing we could cite, or could not be read. Check the provider before you send sensitive data.' },
@@ -393,6 +404,7 @@ const GUIDES = [
     intro: `<p>Embeddings power semantic search, RAG and clustering — and you rarely need to pay for them at prototype scale. The providers below expose <strong>embedding models on a free tier</strong>, several with generous monthly token allowances.</p><p>Building RAG? Pair one of these with a free chat model (see the <a href="../models/">model index</a>), ideally behind the same OpenAI-compatible base URL.</p>`,
     filter: (p) => (p.modalities || []).includes('embeddings'),
     query: '#explorer',
+    modality: 'embeddings',
     pick: 'jina-ai',
     faq: [
       { q: 'Is there a free embeddings API?', a: 'Yes — providers such as Jina AI, Cohere, Google Gemini and Cloudflare offer embedding models on a free tier, several with large monthly token allowances.' },
@@ -412,6 +424,7 @@ const GUIDES = [
     intro: `<p>Audio APIs — transcription (STT) and synthesis (TTS) — often ship a real free tier or a sizeable one-time credit. The providers below offer <strong>free audio/speech access</strong>, from a few free hours a month to hundreds of dollars in starting balance.</p><p>Check the "catch" on each provider's page: some free speech tiers forbid commercial use or watermark the output.</p>`,
     filter: (p) => (p.modalities || []).includes('audio'),
     query: '#explorer',
+    modality: 'audio',
     pick: 'groq',
     faq: [
       { q: 'Is there a free speech-to-text API?', a: 'Yes — Groq (Whisper), Cloudflare Workers AI and others offer free STT; several dedicated speech providers also grant a sizeable one-time credit.' },
@@ -431,6 +444,7 @@ const GUIDES = [
     intro: `<p>Text-to-image is one of the easiest modalities to try for free: several providers host <strong>Flux, Stable Diffusion and SDXL</strong> behind a simple API — some with no signup at all, others with a small starting credit. Not every image API generates images: this table also includes editing and background-removal services. Read each free-tier description to choose the operation you need.</p><p>Watch two catches on each provider's page: whether the free output is <em>watermarked</em>, and whether <em>commercial use</em> is allowed — both vary a lot across free image tiers.</p>`,
     filter: (p) => (p.modalities || []).includes('image'),
     query: '#explorer',
+    modality: 'image',
     pick: 'ai-horde',
     faq: [
       { q: 'Is there a free image generation API?', a: 'Yes — AI Horde (anonymous, queue-based) and OVHcloud AI Endpoints (Stable Diffusion XL, anonymous at a low rate limit) need no signup, while Pollinations (credits earned through Quests), Runware and others give credits for hosted Flux and SDXL models, and Photoroom gives free background-removal and editing calls.' },
@@ -451,6 +465,7 @@ const GUIDES = [
     intro: `<p>Before a document can go into a RAG pipeline it has to be parsed — OCR, layout, tables and key-values. The providers below offer <strong>document AI on a free tier</strong>, several with thousands of free pages a month that renew.</p><p>Pair one of these with a <a href="free-embeddings-apis">free embeddings API</a> and a free chat model to build a full document-QA stack at zero cost for prototypes.</p>`,
     filter: (p) => (p.modalities || []).includes('ocr'),
     query: '#explorer',
+    modality: 'ocr',
     pick: 'unstructured',
     faq: [
       { q: 'Is there a free OCR API?', a: 'Yes — OCR.space, Unstructured, Nutrient and LlamaParse all offer free OCR / document parsing, several with thousands of pages a month.' },
@@ -465,12 +480,13 @@ const GUIDES = [
     card: 'Reranking',
     blurb: 'Free rerank tiers for search and RAG.',
     h1: 'Free reranking APIs for search and RAG',
-    title: 'Free reranking APIs (rerank) · Free LLM API Hub',
+    title: 'Free reranking & rerank APIs · Free LLM API Hub',
     desc: 'Verified reranking APIs with a free tier or starting credit, with limits, commercial-use flags and catches side by side.',
     lede: 'Yes — several providers in the dataset include a reranker in a free tier or a starting credit, most of them as a one-time balance.',
     intro: `<p>A reranker reorders the passages a search or embedding step returns, and it is the cheapest quality gain in most RAG systems. The providers below list a reranker inside their <strong>free tier or starting credit</strong>.</p><p>Read two things per row: whether the allowance <em>renews</em> or is a one-time balance, and whether <em>commercial use</em> is allowed — Cohere’s free key explicitly is not. The pricing pages of Voyage AI and Pinecone disagree with themselves about which rerankers the free plan covers, and the catch of their rows says so.</p>`,
     filter: (p) => (p.modalities || []).includes('rerank') && p.verified,
     query: '#explorer',
+    modality: 'rerank',
     pick: 'jina-ai',
     faq: [
       { q: 'Is there a free reranking API?', a: 'Yes. Jina AI, Mixedbread, Voyage AI and Contextual AI give a one-time free balance that covers their rerankers with no card, and Pinecone offers 500 rerank requests a month on its Starter plan. Cohere’s free key also includes rerank but is for evaluation only.' },
@@ -491,6 +507,7 @@ const GUIDES = [
     intro: `<p>Vision models take an image and answer about it: caption it, answer a question, find an object. The providers below list a <strong>vision-capable model</strong> in a free tier or starting credit.</p><p>Check whether the allowance <em>renews</em>, whether <em>commercial use</em> is allowed (ModelScope says no) and what the catch is — for example, Twelve Labs analyses video rather than chatting about stills, and Tencent has moved its Hunyuan models to a new platform.</p>`,
     filter: (p) => (p.modalities || []).includes('vision') && p.verified,
     query: '#explorer',
+    modality: 'vision',
     pick: 'google-gemini',
     faq: [
       { q: 'Is there a free API to analyse images?', a: 'Yes. Google Gemini has a free tier with no card, Z.ai lists its GLM-4.6V-Flash vision model at $0 permanently, and Moondream gives $5 of credit each month.' },
@@ -640,10 +657,21 @@ const IC = (id) => `<svg class="i" aria-hidden="true"><use href="#${id}"/></svg>
 const pageHero = ({ crumbs, h1, lede = '', afterTitle = '', extra = '', cls = 'model-hero' }) =>
   `<section class="page-hero ${cls}"><div class="wrap"><nav class="crumbs" aria-label="Breadcrumb">${crumbs}</nav><h1>${h1}</h1>${afterTitle}${lede ? `<p class="lede">${lede}</p>` : ''}${extra}</div></section>`;
 
+// The primary menu, shared by every generated page; site/index.html carries the same markup by hand (the test
+// "header menu" in build.test.mjs keeps the two equal). Providers is a disclosure (<details>) holding the explorer and
+// The Best, so the six entries fit one desktop row; Submit is the secondary Contribute button next to the menu.
+const primaryNav = (p) => `<nav class="nav" id="primary-nav" aria-label="Primary">` +
+  `<details class="nav-group"><summary>Providers</summary><div class="nav-sub"><a href="${p}#explorer">All providers</a>` +
+  `<a class="nav-best" href="${p}best/" title="The top 10 by score, recomputed from the data at every build">${IC('ic-spark')}The Best</a></div></details>` +
+  `<a href="${p}models/">Models</a><a href="${p}compare/">Compare</a><a href="${p}changes/">Changes</a><a href="${p}api/">API</a>` +
+  `<a href="${p}guides-and-collections/">Guides</a></nav>`;
+const contributeBtn = (p) => `<a class="icon-btn nav-contribute" href="${p}submit/">${IC('ic-rocket')}<span class="nc-label">Contribute</span></a>`;
+
 const siteHeader = (p) => `<header class="site-header"><div class="wrap header-inner">
 <a class="brand" href="${p}" aria-label="Free LLM API Hub — home"><svg class="logo-mark"><use href="#logo"/></svg><span class="brand-name">Free LLM API <span class="grad">Hub</span></span></a>
-<nav class="nav" id="primary-nav" aria-label="Primary"><a href="${p}guides-and-collections/">${IC('ic-book')}Guides &amp; Collections</a><a class="nav-best" href="${p}best/" title="The top 10 by score, recomputed from the data at every build">${IC('ic-spark')}The Best</a><a href="${p}submit/">${IC('ic-rocket')}Submit</a></nav>
+${primaryNav(p)}
 <div class="header-actions">
+${contributeBtn(p)}
 <button class="icon-btn nav-toggle" id="navToggle" aria-label="Open menu" aria-expanded="false" aria-controls="primary-nav"><svg class="i menu" aria-hidden="true"><use href="#ic-menu"/></svg><svg class="i close" aria-hidden="true"><use href="#ic-close"/></svg></button>
 <a class="icon-btn" href="${REPO}" target="_blank" rel="noopener"><span class="sr-only">Star on GitHub</span>${GH_ICON}<span class="star-count" data-stars>★</span></a>
 <button class="icon-btn theme-toggle" id="themeToggle" aria-label="Toggle light and dark theme" title="Toggle theme"><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><svg class="moon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/></svg></button>
@@ -651,8 +679,8 @@ const siteHeader = (p) => `<header class="site-header"><div class="wrap header-i
 
 const siteFooter = (p) => `<footer class="site-footer"><div class="wrap footer-top">
 <div class="footer-brand"><a class="foot-brand-link" href="${p}" aria-label="Free LLM API Hub — home"><svg class="logo-mark"><use href="#logo"/></svg><span class="brand-name">Free LLM API <span class="grad">Hub</span></span></a><p>The <strong>continuously-verified</strong>, <strong>machine-readable</strong> dataset of <strong>free LLM &amp; AI-model APIs</strong> and <strong>trial credits</strong> — every entry <strong>dated</strong>, <strong>sourced</strong>, and <strong>free of dead links</strong>.</p><img class="trust-badge" src="${p}badge-verified.svg" alt="Verified providers" width="${BADGE_W}" height="20" loading="lazy"><a class="star-btn" href="${REPO}" target="_blank" rel="noopener"><span class="sb-label">${GH_ICON} Star on GitHub</span><span class="sb-count" data-stars>★</span></a></div>
-<div class="footer-col"><h2 class="footer-h">Explore</h2><a href="${p}models/">Free model index</a><a href="${p}guides-and-collections/">Guides &amp; collections</a><a href="${p}programs/startups">Startup credits</a><a href="${p}programs/research">Student &amp; research credits</a><a href="${p}free-gpu/">Free GPU compute</a><a href="${p}coding-tools/">Free AI coding tools</a></div>
-<div class="footer-col"><h2 class="footer-h">Data</h2><a href="${p}providers.json">providers.json</a><a href="${p}api/">JSON API</a><a href="${p}llms.txt">llms.txt</a><a href="${p}data-policy/">Who trains on your data</a><a href="${p}coverage/">Data coverage</a><a href="${p}quality/">Data quality</a></div>
+<div class="footer-col"><h2 class="footer-h">Explore</h2><a href="${p}models/">Free model index</a><a href="${p}guides-and-collections/">Guides &amp; collections</a><a href="${p}programs/startups">Startup credits</a><a href="${p}programs/research">Student &amp; research credits</a><a href="${p}free-gpu/">Free GPU compute</a><a href="${p}coding-tools/">Free AI coding tools</a><a href="${p}not-free/">Not free (and why)</a></div>
+<div class="footer-col"><h2 class="footer-h">Data</h2><a href="${p}providers.json">providers.json</a><a href="${p}api/">JSON API</a><a href="${p}llms.txt">llms.txt</a><a href="${p}data-policy/">Who trains on your data</a><a href="${p}coverage/">Data coverage</a><a href="${p}quality/">Data quality</a><a href="${p}embed/">Use the data</a></div>
 <div class="footer-col"><h2 class="footer-h">Project</h2><a href="${p}updates">Updates</a><a href="${p}changes/">What changed</a><a href="${p}submit/">Submit</a><a href="${p}methodology/">Methodology</a><a href="${p}contributing/">Contributing</a><a href="${p}agreements/">Agreements</a></div>
 </div><div class="wrap footer-bottom"><p>Terms change without notice; always confirm against each provider's own docs. MIT licensed.</p><p class="foot-legal"><a href="${p}legal/privacy">Privacy</a> · <a href="${p}legal/terms">Terms</a></p><p class="foot-email"><a href="mailto:admin@freellmapihub.com">admin@freellmapihub.com</a></p></div></footer>`;
 
@@ -672,7 +700,7 @@ const THEME_GUARD = `<script>(function(){try{var t=localStorage.getItem('theme')
 // the first-party file consent.js ('self'), so no inline hash changes.
 const GA_ID = measurementId();
 const GA_CSP = analyticsCspSources(GA_ID);
-const CSP = `<meta http-equiv="Content-Security-Policy" content="script-src 'self' 'sha256-r3FnVnP9W/uaNhK9XkZqH3GIfK4TudOQGYTwoNIjGR4=' 'sha256-YzEhxvq2BwovGsg/RCjKkQdwf+LZmTjIkiQcjXCZMHc='${GA_CSP.script}; connect-src 'self' https://raw.githubusercontent.com${GA_CSP.connect}; object-src 'none'; base-uri 'self'">`;
+const CSP = `<meta http-equiv="Content-Security-Policy" content="script-src 'self' 'sha256-r3FnVnP9W/uaNhK9XkZqH3GIfK4TudOQGYTwoNIjGR4=' 'sha256-YzEhxvq2BwovGsg/RCjKkQdwf+LZmTjIkiQcjXCZMHc='${CF_WA_CSP.script}${GA_CSP.script}; connect-src 'self' https://raw.githubusercontent.com${CF_WA_CSP.connect}${GA_CSP.connect}; object-src 'none'; base-uri 'self'">`;
 
 // Search engines cut a snippet around 155 characters. Every page's description goes through
 // here, so no page can ship a longer one: cut at a word boundary and end with an ellipsis.
@@ -826,14 +854,27 @@ const topList = topEntries(providers, { editorial: EDITORIAL, probeReport: PROBE
 const rankedAll = rankProviders(providers, { editorial: EDITORIAL, probeReport: PROBE_REPORT, now: new Date(ASOF + 'T12:00:00Z'), minConfirmed: 0 });
 const scoreMap = Object.fromEntries(rankedAll
   .map((r) => [r.slug, { total: Math.round(r.total * 10) / 10, confirmed: r.confirmed, of: r.of, rank: topList.find((e) => e.p.slug === r.slug)?.rank ?? null }]));
+// A provider page's place among every scored provider ("#1 of 69") and its editorial points (Q13). Kept apart from
+// scoreMap, which is published as site/scores.json with its own shape.
+const scorePlace = new Map(rankedAll.map((r, i) => [r.slug, { position: i + 1, editorial: r.editorial }]));
 // Static /compare/<a>-vs-<b>/ pages (#175): the picks of data/best.json compared pairwise
 // where they share a modality, capped (see lib/compare.mjs). Computed up front
 // so the provider pages can link to the comparisons they appear in.
 const comparePairs = compareLib.selectComparePairs(bestEntries.map((e) => e.p));
 // Only same-category pairs are suggested (links); every pair keeps its page and sitemap entry.
 const suggestedPairs = comparePairs.filter((cp) => compareLib.sameComparisonCategory(cp.a, cp.b));
+const COMPARE_PATHS = new Set(comparePairs.map((cp) => cp.path));
+
+// "Notably NOT free": one source (data/not-free.json) for the README section and the /not-free/ page.
+const NOT_FREE = JSON.parse(readFileSync(join(ROOT, 'data/not-free.json'), 'utf8'));
+const QUOTES = JSON.parse(readFileSync(join(ROOT, 'data/quotes.json'), 'utf8')).entries;
+{
+  const errs = notFreeErrors(NOT_FREE, { providers, quotes: QUOTES });
+  if (errs.length) throw new Error('data/not-free.json:\n' + errs.join('\n'));
+}
 
 let readme = readFileSync(join(ROOT, 'README.md'), 'utf8');
+readme = inject(readme, 'not-free', notFreeReadmeMd(NOT_FREE, { site: SITE }));
 readme = inject(readme, 'coverage', coverageTable);
 readme = inject(readme, 'collections', collectionsIndexMd);
 readme = inject(readme, 'best', bestTable(topList));
@@ -871,6 +912,13 @@ const citation = readFileSync(citationPath, 'utf8')
   .replace(/^date-released: .*$/m, `date-released: "${data.generated}"`);
 writeFileSync(citationPath, citation);
 
+// Long-form guides (lib/long-guides.mjs): editorial copy whose every number, limit, flag and provider list is computed
+// from data/providers.json and data/not-free.json here, at build time. They share /guides/, the hub, the sitemap and
+// llms.txt with the guides above; `featured` is the set of providers a guide lists (provider pages link back to it).
+const LONG_GUIDE_PAGES = LONG_GUIDES.map((g) => ({ ...g, ...longGuidePage(g, { providers, notFree: NOT_FREE }) }));
+// Every guide by slug, for the cross-links of collections and the "More guides" lists.
+const ALL_GUIDE_LINKS = [...GUIDES, ...LONG_GUIDE_PAGES].map((g) => ({ slug: g.slug, card: g.card }));
+
 // ---------- git-mined change history (computed once) ----------
 // Feeds the per-provider pages and api/v1/history.json (both git-mined and
 // regenerated on deploy). Graceful if git is unavailable (tarball build).
@@ -905,8 +953,10 @@ window.FLLM_RULES = (function () {
   const DUE_SOON_DAYS = ${DUE_SOON_DAYS};
   const recScore = ${recScore.toString()};
   const freeTypeRank = ${freeTypeRank.toString()};
+  const intentRank = ${intentRank.toString()};
+  const recommendedCmp = ${recommendedCmp.toString()};
   const freshnessStatus = ${freshnessStatus.toString()};
-  return { recScore, FREE_TYPE_RANK, freeTypeRank, FLAG_PAIRS, SLA_DAYS, DUE_SOON_DAYS, freshnessStatus };
+  return { recScore, intentRank, recommendedCmp, FREE_TYPE_RANK, freeTypeRank, FLAG_PAIRS, SLA_DAYS, DUE_SOON_DAYS, freshnessStatus };
 })();
 `;
 writeFileSync(join(ROOT, 'site/shared-rules.js'), sharedRulesJs);
@@ -927,7 +977,7 @@ const publicProviders = providers.map(({ env_key, ...rest }) => rest);
 // falls back to if the inline data is missing. data_policy is reduced to trains_on_prompts, the one part the filter reads.
 const HOME_FIELDS = ['slug', 'name', 'category', 'free_type', 'free_tier', 'notes', 'best_for', 'verified', 'last_verified', 'added',
   'card_required', 'phone_required', 'commercial_ok', 'commercial_ok_condition', 'openai_compatible', 'is_text_llm', 'modalities',
-  'models_free', 'expires'];
+  'models_free', 'expires', 'model_tier'];
 const homeProvider = (p) => {
   const out = {};
   for (const k of HOME_FIELDS) if (p[k] !== undefined) out[k] = p[k];
@@ -943,24 +993,31 @@ const homeProvider = (p) => {
 // providers do not both rewrite one long line of this page. "asof" is the date the server rows and stat tiles are rendered
 // for (ASOF), so explorer.js keeps them on first paint and only replaces what the visitor's clock changes.
 const inlineData = `<script type="application/json" id="providers-data">{"asof":"${ASOF}",\n"providers":[\n${publicProviders.map((p) => JSON.stringify(homeProvider(p))).join(',\n').replace(/</g, '\\u003c')}\n]}</script>`;
-// The four stat tiles are rendered here too, dated by ASOF (deterministic), so they show without JavaScript and
-// without a layout shift; explorer.js repaints them with the visitor's clock. Same markup as renderStats() in explorer.js.
+// The counters row is rendered here too, dated by ASOF (deterministic), so it shows without JavaScript and without a
+// layout shift; explorer.js repaints it with the visitor's clock. Same markup as statsHtml() in explorer.js.
 const STAT_STATUS_WORD = { fresh: 'fresh', due: 'due for re-check', stale: 'stale' };
 const homeStatsHtml = (() => {
   const genMs = Date.parse(ASOF + 'T00:00:00Z');
   const ages = providers.filter((p) => p.verified && p.last_verified).map((p) => Math.floor((genMs - Date.parse(p.last_verified + 'T00:00:00Z')) / 86400000));
   const oldest = ages.length ? Math.max(...ages) : 0;
   const status = freshnessStatus(oldest);
-  const tiles = [
-    ['ic-database', providers.length, 'providers tracked', ''],
-    ['ic-refresh', providers.filter((p) => p.category === 'ongoing').length, 'ongoing free tiers', ''],
-    ['ic-clock', providers.filter((p) => p.category === 'trial').length, 'trial credits', ''],
-    ['ic-shield', `${oldest}d`, `oldest verification · ${SLA_DAYS}-day SLA`, status],
-  ];
-  return tiles.map(([ic, n, l, c]) =>
-    `<div class="stat ${c}"><svg class="si" aria-hidden="true"><use href="#${ic}"/></svg><div class="num">${n}</div><div class="lbl">${l}${c ? `<span class="sr-only"> (${STAT_STATUS_WORD[c] || c})</span>` : ''}</div></div>`).join('');
+  const recheck = oldest <= 0 ? 'Re-checked today' : oldest === 1 ? 'Re-checked within the last day' : `Re-checked within the last ${oldest} days`;
+  return [
+    `<strong>${providers.length}</strong> providers tracked`,
+    `<strong>${providers.filter((p) => p.category === 'ongoing').length}</strong> ongoing free tiers`,
+    `<strong>${providers.filter((p) => p.category === 'trial').length}</strong> trial credits`,
+    `<span class="st-fresh ${status}" title="Every verified entry is due for a re-check ${SLA_DAYS} days after its date">${recheck}<span class="sr-only"> (${STAT_STATUS_WORD[status] || status})</span></span>`,
+  ].join('<span class="st-sep" aria-hidden="true"> · </span>');
 })();
 let indexHtml = readFileSync(join(ROOT, 'site/index.html'), 'utf8');
+// The home title carries the dataset month and the verified count (Q10); og:title and twitter:title repeat it. The
+// build rewrites it on every run, so the number follows the data. It is worded "free tiers & credits" (ongoing tiers
+// and trial credits are both counted), which is also not the "N verified providers" phrasing that lib/figures.mjs
+// guards in hand-written sources: validate.mjs reads site/index.html before the build has rewritten it.
+const HOME_TITLE = `Free LLM APIs (${TITLE_MONTH}): ${providers.filter((p) => p.verified === true).length} verified free tiers & credits, sourced & dated`;
+indexHtml = indexHtml.replace(/<title>[^<]*<\/title>/, `<title>${htmlEsc(HOME_TITLE)}</title>`)
+  .replace(/<meta property="og:title" content="[^"]*">/, `<meta property="og:title" content="${htmlEsc(HOME_TITLE)}">`)
+  .replace(/<meta name="twitter:title" content="[^"]*">/, `<meta name="twitter:title" content="${htmlEsc(HOME_TITLE)}">`);
 indexHtml = inject(indexHtml, 'csp', CSP);
 indexHtml = inject(indexHtml, 'themeguard', THEME_GUARD);
 indexHtml = inject(indexHtml, 'fonts', fontHead(''));
@@ -1030,7 +1087,7 @@ for (const c of COLLECTIONS) {
     (o) => `<a href="${o.slug}"${o.slug === c.slug ? ' class="active" aria-current="page"' : ''}>${htmlEsc(o.title)}</a>`
   ).join('');
   const guideLinks = (c.guides || [])
-    .map((s) => { const gx = GUIDES.find((x) => x.slug === s); return gx ? `<a href="../guides/${gx.slug}">${htmlEsc(gx.card)}</a>` : ''; })
+    .map((s) => { const gx = ALL_GUIDE_LINKS.find((x) => x.slug === s); return gx ? `<a href="../guides/${gx.slug}">${htmlEsc(gx.card)}</a>` : ''; })
     .filter(Boolean).join('');
   const collFaqHtml = (c.faq && c.faq.length)
     ? `<h2>FAQ</h2>` + c.faq.map((f) => `<div class="faq-item"><h3>${htmlEsc(f.q)}</h3><p>${f.a}</p></div>`).join('')
@@ -1111,8 +1168,11 @@ const hubCards = COLLECTIONS.map((c) =>
 const guidesCards = GUIDES.map((g) =>
   `<a class="coll-card" href="../guides/${g.slug}"><div class="coll-card-head"><strong>${htmlEsc(g.card)}</strong><span class="count">${providers.filter(g.filter).length}</span></div><p>${htmlEsc(g.blurb)}</p></a>`
 ).join('');
-const HUB_ANSWER = `Which free LLM API fits your constraint? Each of the ${GUIDES.length} guides answers one “is there a free API for…?” question; each of the ${COLLECTIONS.length} collections is a live filter of our dataset by one condition, such as no card, no phone or commercial use. Every entry is dated and sourced.`;
-const HUB_META = `${GUIDES.length} guides and ${COLLECTIONS.length} collections of free LLM APIs, filtered from a dated dataset: no card, no phone, commercial use, OpenAI-compatible.`;
+const longGuideCards = LONG_GUIDE_PAGES.map((g) =>
+  `<a class="coll-card" href="../guides/${g.slug}"><div class="coll-card-head"><strong>${htmlEsc(g.card)}</strong><span class="count">${g.count}</span></div><p>${htmlEsc(g.blurb)}</p></a>`
+).join('');
+const HUB_ANSWER = `Which free LLM API fits your constraint? Each of the ${GUIDES.length} guides answers one “is there a free API for…?” question, and ${LONG_GUIDE_PAGES.length} longer ones walk through a choice; each of the ${COLLECTIONS.length} collections is a live filter of our dated, sourced dataset by one condition: no card, no phone or commercial use.`;
+const HUB_META = `${GUIDES.length + LONG_GUIDE_PAGES.length} guides and ${COLLECTIONS.length} collections of free LLM APIs, filtered from a dated dataset: no card, no phone, commercial use, OpenAI-compatible.`;
 const HUB_FAQ = [
   { q: 'What is the difference between a guide and a collection?', a: 'A guide answers one question with a short explanation and a table; a collection is a live filter of the dataset by one condition, with no commentary.' },
   { q: 'How current is the data?', a: 'Every row shows the day its source was read. The dataset is re-verified on a schedule, and each provider page cites its source.' },
@@ -1123,6 +1183,7 @@ const hubMain =
   `<main id="main"><div class="wrap">` +
   `<p class="answer"><strong>${htmlEsc(HUB_ANSWER)}</strong></p>` +
   `<h2 class="eyebrow">Guides: answers to one question</h2><div class="coll-grid">${guidesCards}</div>` +
+  `<h2 class="eyebrow" style="margin-top:26px">Guides: how to choose</h2><div class="coll-grid">${longGuideCards}</div>` +
   `<h2 class="eyebrow" style="margin-top:26px">Collections: one filter, live</h2><div class="coll-grid">${hubCards}</div>` +
   `<h2 class="eyebrow" style="margin-top:26px">FAQ</h2>` + HUB_FAQ.map((f) => `<div class="faq-item"><h3>${htmlEsc(f.q)}</h3><p>${htmlEsc(f.a)}</p></div>`).join('') +
   `</div></main>`;
@@ -1137,6 +1198,7 @@ const hubJsonLd = JSON.stringify({
         '@type': 'ItemList', numberOfItems: GUIDES.length + COLLECTIONS.length,
         itemListElement: [
           ...GUIDES.map((g) => ({ name: g.card, url: `${SITE}/guides/${g.slug}` })),
+          ...LONG_GUIDE_PAGES.map((g) => ({ name: g.card, url: `${SITE}/guides/${g.slug}` })),
           ...COLLECTIONS.map((c) => ({ name: c.title, url: `${SITE}/collections/${c.slug}` })),
         ].map((e, i) => ({ '@type': 'ListItem', position: i + 1, name: e.name, url: e.url })),
       },
@@ -1180,7 +1242,12 @@ mkdirSync(join(ROOT, 'site/badges'), { recursive: true });
 const historyHtml = (slug) => {
   const all = historyBySlug[slug] || [];
   if (!all.length) return '';
-  const items = all.slice().reverse().map((e) => `<li class="upd"><span class="upd-date">${e.date}</span> <span>${htmlEsc(e.text)}</span></li>`).join('');
+  // One entry per day (lib/history.mjs collapseSameDay); a change to the limits or a flag shows its before → after.
+  const diff = (e) => {
+    const rows = beforeAfter(e);
+    return rows.length ? `<ul class="upd-diff">${rows.map((r) => `<li><span class="upd-field">${htmlEsc(r.label)}:</span> <del>${htmlEsc(r.from)}</del> → <ins>${htmlEsc(r.to)}</ins></li>`).join('')}</ul>` : '';
+  };
+  const items = all.slice().reverse().map((e) => `<li class="upd"><span class="upd-date">${e.date}</span> <span>${htmlEsc(e.text)}</span>${diff(e)}</li>`).join('');
   return `<h2>Change history</h2>` +
     `<p class="muted">How this free tier has changed since we started tracking it (${all[0].date}) — generated from the git history of <a href="${REPO}/commits/main/data/providers.json">providers.json</a>.</p>` +
     `<ul class="upd-list" data-pager="5">${items}</ul>`;
@@ -1203,9 +1270,18 @@ const MODEL_GROUPS = groupModels(providers);
 const MODEL_PAGE_KEYS = new Set(MODEL_GROUPS.map((g) => g.key));
 const modelPageHref = (prefix) => (id) => { const k = modelKey(id); return k && MODEL_PAGE_KEYS.has(k) ? `${prefix}models/${k}/` : ''; };
 
+// The last block of every provider page: its badge on /embed/ and, for a provider on /not-free/, why. One function,
+// appended after the change history, so a change to the section order elsewhere does not touch it.
+const notFreeBySlug = new Map(NOT_FREE.entries.filter((e) => e.slug).map((e) => [e.slug, e]));
+const useDataHtml = (p) => {
+  const nf = notFreeBySlug.get(p.slug);
+  return `<p class="muted" id="use-the-data"><a href="../embed/?p=${p.slug}#provider-badge">Embed this provider's badge</a>` +
+    (nf ? ` · <a href="../not-free/#${nf.id}">Why ${htmlEsc(nf.name)} is on the Not free list</a>` : '') + `</p>`;
+};
+
 for (const p of providers) {
   const inColls = COLLECTIONS.filter((c) => collRows(c).some((x) => x.slug === p.slug));
-  const inGuides = GUIDES.filter((g) => g.filter(p));
+  const inGuides = [...GUIDES.filter((g) => g.filter(p)), ...LONG_GUIDE_PAGES.filter((g) => g.slug !== 'choose-free-llm-api-for-production' && g.featured.some((x) => x.slug === p.slug))];
   // Concrete free model for snippets: prefer a real sampled ID, else a sensible default.
   const DEFAULT_MODEL = { groq: 'llama-3.1-8b-instant' };
   const model = (p.models_free && p.models_free[0]) || DEFAULT_MODEL[p.slug] || '<a-free-model>';
@@ -1230,8 +1306,12 @@ for (const p of providers) {
   // The score of the provider (lib/score.mjs, the same numbers as /best/ and the API) with its method one click away. Providers that are
   // not scored (not verified, or outside the freshness window) say so instead of showing a number.
   const sc = scoreMap[p.slug];
+  // Q13: its place among the scored providers and a bar of the six inputs (lib/score-bar.mjs); the formula is lib/score.mjs.
   const scoreHtml = sc
-    ? `<div class="prov-score"><span class="best-score" title="Out of 100">${sc.total.toFixed(1)} / 100</span><span>Score${sc.rank ? ` · #${sc.rank} on <a href="../best/">The Best</a>` : ''} · ${sc.confirmed} of ${sc.of} inputs confirmed · <a href="../best/methodology/">how it is computed</a></span></div>`
+    ? scoreBlockHtml({
+      position: scorePlace.get(p.slug).position, of: rankedAll.length, total: sc.total, editorial: scorePlace.get(p.slug).editorial, editorialWeight: EDITORIAL_WEIGHT,
+      fractions: inputFractions(p, stabilityFromProbe(PROBE_REPORT, p.slug, new Date(ASOF + 'T12:00:00Z'))), weights: SCORE_WEIGHTS, topRank: sc.rank,
+    })
     : `<div class="prov-score"><span class="muted">No score: only verified providers inside the freshness window are scored · <a href="../best/methodology/">how it is computed</a></span></div>`;
   const summary = `<div class="prov-summary"><h2 id="whats-free">What's free</h2><p>${htmlEsc(p.free_tier)}</p></div>` + scoreHtml + requirementsHtml(p);
   // Freshness relative to the current day (provider pages are regenerated on deploy, not diff-gated).
@@ -1249,6 +1329,11 @@ for (const p of providers) {
         ? ` <span class="v warn" title="The key authenticated but the free tier appears gone">${IC('ic-warn')} free tier unconfirmed live</span>`
         : ''));
   const docsBtn = docsHref(p.docs_url) ? `<a class="btn primary" href="${htmlEsc(docsHref(p.docs_url))}" target="_blank" rel="noopener">Official docs ↗</a>` : '';
+  // "Get a free key": the provider's own key page, exactly as its docs link it (keys_url), next to the limits and the
+  // quickstart. Tagged data-link="keys" by tagProviderLinks, so a click is an outbound_provider_click (consent-gated).
+  const keysHtml = p.keys_url
+    ? `<div class="prov-actions prov-key" style="align-items:center"><a class="btn primary" href="${htmlEsc(p.keys_url)}" target="_blank" rel="noopener">Get a free key ↗</a><span class="muted">Sign up or sign in on ${htmlEsc(p.name)}'s own site, then create an API key there.</span></div>`
+    : '';
   const playgroundBtn = p.playground_url ? `<a class="btn" href="${htmlEsc(p.playground_url)}" target="_blank" rel="noopener">Try it ↗</a>` : '';
   // "Visit website": the provider's main site, derived from the docs URL by stripping
   // common docs/console/api subdomains so it points at the marketing homepage.
@@ -1262,12 +1347,12 @@ for (const p of providers) {
   } catch (_) { /* no/invalid docs URL — skip the website button */ }
   // "Compare with …": the static comparisons this provider appears in, plus the
   // interactive view pre-filled with it.
-  const comparePeers = suggestedPairs
-    .filter((cp) => cp.a.slug === p.slug || cp.b.slug === p.slug)
-    .map((cp) => ({ path: cp.path, other: cp.a.slug === p.slug ? cp.b : cp.a }));
+  // Peers of the same main modality (lib/compare.mjs comparePeers, Q9): the published page of the pair when there is one,
+  // else the interactive view with both providers in it.
+  const comparePeers = compareLib.comparePeers(p, providers, { staticPaths: COMPARE_PATHS, score: (o) => scoreMap[o.slug]?.total ?? null });
   const compareHtml =
     `<h2>Compare</h2><div class="colls">` +
-    comparePeers.map((c) => `<a href="../compare/${c.path}/">Compare with ${htmlEsc(c.other.name)}</a>`).join('') +
+    comparePeers.map((c) => `<a href="../compare/${c.path ? `${c.path}/` : `?compare=${p.slug},${c.other.slug}`}">Compare with ${htmlEsc(c.other.name)}</a>`).join('') +
     `<a href="../compare/?compare=${p.slug}">Compare with another provider →</a></div>`;
   const crossChips = [
     ...inColls.map((c) => `<a href="../collections/${c.slug}">${htmlEsc(c.title)}</a>`),
@@ -1285,16 +1370,20 @@ for (const p of providers) {
     `<main id="main"><div class="wrap prose prov-prose">` +
     summary +
     limitsHtml(p) +
+    keysHtml +
+    // Q3: the snippet right after the limits (it sat ~4,500px down /p/groq on a phone); speed, data policy and the
+    // provider's own description follow it.
+    quick +
     glanceHtml(p, typeLabel(p)) +
     modelsHtml(p, { modelHref: modelPageHref('../') }) +
     speedHtml(p) +
     dataPolicyHtml(p) +
     aboutHtml(summaryBySlug.get(p.slug), p.name) +
     disclosureHtml(AGREEMENTS_FILE, p.slug) +
-    quick +
     (crossChips ? `<h2>Appears in</h2><div class="colls">${crossChips}</div>` : '') +
     compareHtml +
     historyHtml(p.slug) +
+    useDataHtml(p) +
     `</div></main>`;
   const jsonld = JSON.stringify({
     '@context': 'https://schema.org',
@@ -1316,7 +1405,7 @@ for (const p of providers) {
   });
   writeFileSync(
     join(ROOT, `site/p/${p.slug}.html`),
-    htmlPage({ title: `${p.name} — free tier & limits · Free LLM API Hub`, desc: `${p.name}: ${p.free_tier}`.slice(0, 180), canonical: `${SITE}/p/${p.slug}`, main: tagProviderLinks(main, providerLinkTargets(p, { website: websiteHref })), jsonld, ogImage: `${SITE}/og/p/${p.slug}.png`, scripts: ['pager.js'] })
+    htmlPage({ title: `${p.name} — free tier & limits · Free LLM API Hub`, desc: providerMetaDescription(p), canonical: `${SITE}/p/${p.slug}`, main: tagProviderLinks(main, providerLinkTargets(p, { website: websiteHref })), jsonld, ogImage: `${SITE}/og/p/${p.slug}.png`, scripts: ['pager.js'] })
   );
 
   // Embeddable per-provider badge. Same rule as the repo badge: the colour tracks
@@ -1353,6 +1442,9 @@ const legalPage = (slug, title, bodyHtml) => {
 // GitHub Pages serves this one file for ANY missing path (/contributing/, /a/b/c), so a relative prefix would resolve against the
 // missing URL and lose the styles, the menu and the footer. It is built with the same header and footer as every page and the
 // root-absolute prefix '/'. The path read-out below is pinned by hash in the CSP: change its text and recompute the hash.
+// Q16: a search box that lands on the explorer (/?q=, which explorer.js reads on load) and six popular providers: the
+// first six of The Best, the score top (lib/score.mjs), so the list follows the data. Root-absolute links like the rest.
+const NOT_FOUND_POPULAR = topList.slice(0, 6).map((e) => `<a href="/p/${e.p.slug}">${htmlEsc(e.p.name)}</a>`).join('');
 const NOT_FOUND_PATH_SCRIPT = `<script>try{document.getElementById('path').textContent=location.pathname.replace('/free-llm-api-hub','')||'/';}catch(e){}</script>`;
 writeFileSync(
   join(ROOT, 'site/404.html'),
@@ -1368,17 +1460,20 @@ writeFileSync(
 <div class="code" aria-hidden="true">404</div>
 <p class="msg">&gt; command not found: <span class="path" id="path">/…</span><span class="caret" aria-hidden="true"></span></p>
 <p>That page isn't part of the dataset. It may have moved, or never existed. The data, though, is very much alive.</p>
-<div class="cta"><a class="btn primary" href="/">← Back home</a><a class="btn ghost" href="/#explorer">Browse providers</a><a class="btn ghost" href="/guides-and-collections/">Guides &amp; collections</a></div>
+<form class="nf-search" action="/" method="get" role="search"><label for="nf-q">Search the providers</label><input type="search" id="nf-q" name="q" class="sel search-input" placeholder="e.g. groq, embeddings, llama" autocomplete="off" spellcheck="false"><button type="submit" class="btn primary">Search</button></form>
+${NOT_FOUND_POPULAR ? `<h2 class="nf-h">Popular providers</h2><nav class="colls" aria-label="Popular providers">${NOT_FOUND_POPULAR}</nav>` : ''}
+<div class="cta"><a class="btn ghost" href="/">← Back home</a><a class="btn ghost" href="/#explorer">Browse providers</a><a class="btn ghost" href="/guides-and-collections/">Guides &amp; collections</a></div>
 ${NOT_FOUND_PATH_SCRIPT}
 </main>`,
   })
 );
 
-// The privacy page says exactly what the build ships: no cookies and no analytics by default; with GA_MEASUREMENT_ID set
-// (lib/analytics.mjs), Google Analytics and Google signals behind an opt-in banner with two categories, described below.
+// The privacy page says exactly what the site runs: by default no cookies and only the cookieless Cloudflare Web Analytics
+// that Cloudflare injects at the edge (lib/analytics.mjs); with GA_MEASUREMENT_ID set, also Google Analytics and Google
+// signals behind an opt-in banner with two categories, described below.
 const privacyIntro = GA_ID
   ? `<p>This site is a static, open-source reference operated by ${ORG} It has no user accounts and shows no ads. It uses Google cookies <strong>only for the categories you allow</strong> in the cookie banner; until you allow one, nothing is loaded from Google and no cookie is set.</p>`
-  : `<p>This site is a static, open-source reference operated by ${ORG} It has no user accounts, no ads, and no third-party analytics or tracking.</p>`;
+  : `<p>This site is a static, open-source reference operated by ${ORG} It has no user accounts, no ads, no cookies and no tracking; its only analytics is the cookieless Cloudflare Web Analytics described under Hosting.</p>`;
 const privacyServerItem = GA_ID
   ? `<li><strong>Nothing on a server of ours.</strong> The site is served as static files by GitHub Pages; there is no backend. No cookies are set unless you allow a category below.</li>`
   : `<li><strong>Nothing on a server.</strong> The site is served as static files by GitHub Pages; there is no backend and no cookies are set.</li>`;
@@ -1391,7 +1486,7 @@ const privacyAnalytics = GA_ID
 <h3>1. Analytics</h3>
 <ul>
 <li><strong>Purpose:</strong> count visits and see which pages are useful.</li>
-<li><strong>What is collected:</strong> pages viewed, the page you came from, approximate location (country/city, derived from your IP address, which Google Analytics 4 does not log or store), device, browser, screen size and timing of your visit, and how you use the site: filters and sort order in the provider explorer, what you type in its search box (cut to 60 characters, never sent if it looks like an email address or a phone number), which kind of code snippet you copy, which data files you download, which comparisons and collections you open, and which provider pages you follow. Cookies: <code>_ga</code> and <code>_ga_&lt;id&gt;</code>, to tell visits apart.</li>
+<li><strong>What is collected:</strong> pages viewed, the page you came from, approximate location (country/city, derived from your IP address, which Google Analytics 4 does not log or store), device, browser, screen size and timing of your visit, and how you use the site: filters and sort order in the provider explorer, what you type in its search box (cut to 60 characters, never sent if it looks like an email address or a phone number), which kind of code snippet you copy, which data files you download, which comparisons and collections you open, which provider pages you follow, and where on the site you follow a link to this project's GitHub repository. Cookies: <code>_ga</code> and <code>_ga_&lt;id&gt;</code>, to tell visits apart.</li>
 <li><strong>Role of Google:</strong> processor, acting on our instructions under Google's data processing terms.</li>
 </ul>
 <h3>2. Advertising &amp; personalised measurement (Google signals)</h3>
@@ -1411,9 +1506,10 @@ const privacyAnalytics = GA_ID
 <p>You can ask us for access to, correction or deletion of personal data about you, object to its processing, or complain to your data-protection authority.</p>
 `
   : '';
+const privacyCloudflareAnalytics = `Cloudflare also runs Cloudflare Web Analytics for this site: a small script from Cloudflare (static.cloudflareinsights.com) reports, in aggregate, page views, the referring site, page-load timings (Core Web Vitals) and the country, browser and device type. It sets no cookies, stores nothing on your device and does not fingerprint you or follow you across sites; we see only aggregated counts.`;
 const privacyHostingTail = GA_ID
-  ? `We do not use Cloudflare's analytics; the only analytics is the opt-in Google Analytics described above.`
-  : `We do not use Cloudflare's analytics or any other analytics, and this site sets no cookies.`;
+  ? `${privacyCloudflareAnalytics} Apart from it, the only analytics is the opt-in Google Analytics described above.`
+  : `${privacyCloudflareAnalytics} This site sets no cookies.`;
 legalPage('privacy', 'Privacy', `
 ${privacyIntro}
 <h2>What we store</h2>
@@ -1696,7 +1792,7 @@ const modelsMain =
   modelIndex.map(modelRowHtml).join('\n') +
   `\n</tbody></table><p class="muted" style="margin-top:18px">Model lists are a live sample and change often — always confirm against the provider. The same models as data, one record per model with the limits that apply to it: <a href="../api/v1/models.json"><code>/api/v1/models.json</code></a>. A provider missing here usually needs an API key to list its models; <a href="${REPO}/blob/main/docs/update-playbook.md">see how the list is refreshed</a>.</p></div></main>`;
 writeFileSync(join(ROOT, 'site/models/index.html'), htmlPage({
-  title: 'Free model index — which free API serves which model · Free LLM API Hub',
+  title: datedTitle('Free model index — which free API serves which model · Free LLM API Hub'),
   desc: `Index of ${modelIndex.length} models available on free LLM & AI-model API tiers, and which provider serves each.`,
   canonical: `${SITE}/models/`,
   main: modelsMain,
@@ -1733,6 +1829,8 @@ for (const g of MODEL_GROUPS) {
 
 // ---------- SEO guides: intent-matched landing pages, generated from the data ----------
 mkdirSync(join(ROOT, 'site/guides'), { recursive: true });
+// A guide's modality is its `modality` field; a guide without one is about text LLMs (no card, OpenAI-compatible, no signup).
+const guideFits = (g, p) => (g.modality ? (p.modalities || []).includes(g.modality) : p.is_text_llm === true);
 const guideRow = (p) =>
   `<tr><td class="name"><a href="../p/${p.slug}">${htmlEsc(p.name)}</a><br><small>Verified <time datetime="${htmlEsc(p.last_verified)}">${htmlEsc(p.last_verified)}</time></small></td>` +
   `<td>${htmlEsc(p.free_tier)}</td>` +
@@ -1744,9 +1842,10 @@ for (const g of GUIDES) {
   const fill = (t) => t.replaceAll('{n}', String(list.length)).replaceAll('{date}', ASOF);
   const metaDesc = fill(g.metaDesc);
   const twins = COLLECTIONS.filter((c) => (c.guides || []).includes(g.slug));
-  const top = (g.pick && list.find((x) => x.slug === g.pick)) ||
-    [...list].sort((a, b) => recScore(b) - recScore(a) || (a.name < b.name ? -1 : 1))[0];
-  const related = GUIDES.filter((x) => x.slug !== g.slug)
+  // The pick is the guide's own (g.pick) or the first row of the shared "Recommended" order. It is shown only when it
+  // belongs to the guide's modality (guideFits): a text-LLM guide never headlines an OCR or speech API as its top pick.
+  const top = [(g.pick && list.find((x) => x.slug === g.pick)) || [...list].sort(recommendedCmp)[0]].find((x) => x && guideFits(g, x));
+  const related = ALL_GUIDE_LINKS.filter((x) => x.slug !== g.slug)
     .map((x) => `<a href="${x.slug}">${htmlEsc(x.card)}</a>`).join('');
   const faqHtml = (g.faq && g.faq.length)
     ? `<h2>FAQ</h2>` + g.faq.map((f) => `<div class="faq-item"><h3>${htmlEsc(f.q)}</h3><p>${f.a}</p></div>`).join('')
@@ -1765,6 +1864,7 @@ for (const g of GUIDES) {
     faqHtml +
     (twins.length ? `<h2>Related collections</h2><nav class="colls">${twins.map((c) => `<a href="../collections/${c.slug}">${htmlEsc(c.title)}</a>`).join('')}</nav>` : '') +
     `<h2>More guides</h2><nav class="colls">${related}</nav>` +
+    `<p class="muted">Looking for OpenAI, Anthropic, Mistral or GitHub Models? <a href="../not-free/">Why they are not on this list</a>.</p>` +
     `<p class="prov-back"><a href="../guides-and-collections/">← All guides</a></p>` +
     `</div></main>`;
   const jsonld = JSON.stringify({
@@ -1792,7 +1892,49 @@ for (const g of GUIDES) {
     ],
   });
   writeFileSync(join(ROOT, `site/guides/${g.slug}.html`), htmlPage({
-    title: g.title, desc: metaDesc, canonical: `${SITE}/guides/${g.slug}`, main, jsonld,
+    title: datedTitle(g.title), desc: metaDesc, canonical: `${SITE}/guides/${g.slug}`, main, jsonld,
+    ogImage: `${SITE}/og/guides/${g.slug}.png`,
+  }));
+}
+
+// ---------- long-form guides: editorial copy, every figure from the data (lib/long-guides.mjs) ----------
+for (const g of LONG_GUIDE_PAGES) {
+  const faqHtml = `<h2 id="faq">FAQ</h2>` + g.faq.map((f) => `<div class="faq-item"><h3>${htmlEsc(f.q)}</h3><p>${f.a}</p></div>`).join('');
+  const related = ALL_GUIDE_LINKS.filter((x) => x.slug !== g.slug).map((x) => `<a href="${x.slug}">${htmlEsc(x.card)}</a>`).join('');
+  const main =
+    pageHero({ crumbs: `<a href="../">Home</a> / <a href="../guides-and-collections/">Guides &amp; Collections</a> / ${htmlEsc(g.h1)}`, h1: htmlEsc(g.h1), lede: `Data as of <time datetime="${ASOF}">${ASOF}</time>. Every limit is quoted from the provider’s own page and dated.` }) +
+    `<main id="main"><div class="wrap prose">` +
+    `<p class="answer"><strong>${g.answer}</strong></p>` +
+    g.body +
+    faqHtml +
+    (g.slug === 'openai-api-alternatives' ? '' : `<p class="muted">Looking for OpenAI, Anthropic, Mistral or GitHub Models? <a href="../not-free/">Why they are not on this list</a>.</p>`) +
+    `<h2>More guides</h2><nav class="colls">${related}</nav>` +
+    `<p class="muted">Data from the Free LLM API Hub dataset, as of ${ASOF}. Every limit is quoted from the provider’s own page; follow the source link before relying on it.</p>` +
+    `<p class="prov-back"><a href="../guides-and-collections/">← All guides</a></p>` +
+    `</div></main>`;
+  const jsonld = JSON.stringify({
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'Article', headline: g.h1, description: g.metaDesc, dateModified: ASOF,
+        url: `${SITE}/guides/${g.slug}`, isPartOf: websiteRef(SITE), about: datasetRef(SITE),
+      },
+      {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Free LLM API Hub', item: `${SITE}/` },
+          { '@type': 'ListItem', position: 2, name: 'Guides & Collections', item: `${SITE}/guides-and-collections/` },
+          { '@type': 'ListItem', position: 3, name: g.h1, item: `${SITE}/guides/${g.slug}` },
+        ],
+      },
+      {
+        '@type': 'FAQPage',
+        mainEntity: g.faq.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: stripTags(f.a) } })),
+      },
+    ],
+  });
+  writeFileSync(join(ROOT, `site/guides/${g.slug}.html`), htmlPage({
+    title: g.title, desc: g.metaDesc, canonical: `${SITE}/guides/${g.slug}`, main, jsonld,
     ogImage: `${SITE}/og/guides/${g.slug}.png`,
   }));
 }
@@ -2021,6 +2163,7 @@ const apiDocMain =
   clientConfigDocs +
   `<h2>Stability</h2><p>Paths under <code>/api/v1/</code> stay put and fields are only ever added within v1; a breaking change ships as <code>/api/v2/</code>. The full policy, and how the dataset <code>version</code> relates to the path, is in <a href="${REPO}/blob/main/docs/api.md">docs/api.md</a>. The JSON Schema is published at <a href="v1/schema.json"><code>/api/v1/schema.json</code></a>.</p>` +
   `<p class="muted">Every object carries the dataset <code>version</code> and <code>generated</code> date. Prefer a stable snapshot? Pin a Git tag of <a href="${REPO}">the repo</a>. For AI agents, see <a href="../llms.txt">llms.txt</a>.</p>` +
+  `<p>Want the widget, a badge or a citation instead? See <a href="../embed/">Use the data</a>.</p>` +
   `</div></main>`;
 mkdirSync(join(ROOT, 'site/api'), { recursive: true });
 writeFileSync(join(ROOT, 'site/api/index.html'), htmlPage({
@@ -2048,7 +2191,7 @@ const llmsTxt =
   `- [Static JSON API](${SITE}/api/): versioned endpoints + pre-filtered slices (category, modality, no-card, commercial, OpenAI-compatible, …)\n` +
   `- [Full provider list expanded, markdown](${SITE}/llms-full.txt)\n\n` +
   `## Guides\n` +
-  GUIDES.map((g) => `- [${g.h1}](${SITE}/guides/${g.slug}): ${g.blurb}`).join('\n') + `\n\n` +
+  [...GUIDES, ...LONG_GUIDE_PAGES].map((g) => `- [${g.h1}](${SITE}/guides/${g.slug}): ${g.blurb}`).join('\n') + `\n\n` +
   `## Collections\n` +
   COLLECTIONS.map((c) => `- [${c.title}](${SITE}/collections/${c.slug})`).join('\n') + `\n\n` +
   `## Credit programs\n` +
@@ -2058,6 +2201,15 @@ writeFileSync(join(ROOT, 'site/llms.txt'), llmsTxt);
 // A null flag with a recorded reason (field_checks) says the reason instead of "unknown".
 const yn = (v, yes, no, check) => v === true ? yes : v === false ? no : v === 'conditional' ? 'conditional'
   : check && check.status !== 'stated' && REASON_LABEL[check.status] ? `unknown, ${REASON_LABEL[check.status]} (checked ${check.checked})` : 'unknown';
+// yes / no only where /data-policy/ says so (trainState); a value without the provider's sentence, or none, is not confirmed.
+const TRAINS_ON_PROMPTS = { yes: 'yes', no: 'no' };
+const dataPolicyLine = (p) => {
+  const dp = p.data_policy && typeof p.data_policy === 'object' ? p.data_policy : null;
+  if (!dp) return '';
+  const trains = TRAINS_ON_PROMPTS[trainState(p)] || 'not confirmed';
+  const retention = dp.retention ? String(dp.retention).replace(/\s+/g, ' ').trim() : 'not confirmed';
+  return `- Prompt data policy: trains on prompts: ${trains}; retention: ${retention} (source ${dp.source}, checked ${dp.checked})\n`;
+};
 const provBlock = (p) => {
   const gates = [
     `card required: ${yn(p.card_required, 'yes', 'no', fieldCheck(p, 'card_required'))}`,
@@ -2076,6 +2228,7 @@ const provBlock = (p) => {
     `- Gates: ${gates}\n` +
     conditionLine +
     (publishedSpeed(p).length ? `- Published speed (the provider's own figures, not measured by us; not stated for the free tier unless the page says so): ${publishedSpeed(p).map((e) => `${e.model} ${speedFigure(e)} (${e.source}, checked ${e.checked})`).join('; ')}\n` : '') +
+    dataPolicyLine(p) +
     `- Docs: ${p.docs_url}\n` +
     `- Page: ${SITE}/p/${p.slug}\n`;
 };
@@ -2138,7 +2291,7 @@ const bestMain =
 mkdirSync(join(ROOT, 'site/best'), { recursive: true });
 writeFileSync(
   join(ROOT, 'site/best/index.html'),
-  htmlPage({ title: 'The best free LLM APIs · Free LLM API Hub', desc: BEST.desc, canonical: SITE + '/best/', main: bestMain, jsonld: bestJsonld, prefix: '../' })
+  htmlPage({ title: datedTitle('The best free LLM APIs · Free LLM API Hub'), desc: BEST.desc, canonical: SITE + '/best/', main: bestMain, jsonld: bestJsonld, prefix: '../' })
 );
 
 // ---------- /best/methodology/ — the public method of the score ----------
@@ -2382,6 +2535,34 @@ writeFileSync(
   })
 );
 
+// ---------- /not-free/ — the APIs people expect to be free, from data/not-free.json (same source as the README) ----------
+{
+  const model = notFreeModel(NOT_FREE, { providers, quotes: QUOTES, scoreOf: (slug) => scoreMap[slug]?.total ?? null });
+  mkdirSync(join(ROOT, 'site/not-free'), { recursive: true });
+  writeFileSync(join(ROOT, 'site/not-free/index.html'), htmlPage({
+    title: notFreeTitle(), desc: notFreeDescription(model), canonical: `${SITE}${NOT_FREE_PATH}`, prefix: '../',
+    main: notFreeMainHtml(model, { pageHero, site: SITE, prefix: '../' }),
+    jsonld: notFreeJsonLd(model, { site: SITE, dateModified: ASOF }),
+    ogImage: `${SITE}/og/not-free.png`,
+  }));
+}
+
+// ---------- /embed/ — "Use the data": widget generator, badges, data files and the citation from CITATION.cff ----------
+mkdirSync(join(ROOT, 'site/embed'), { recursive: true });
+writeFileSync(join(ROOT, 'site/embed/index.html'), htmlPage({
+  title: embedTitle(), desc: embedDescription(publicProviders.length), canonical: `${SITE}${EMBED_PATH}`, prefix: '../',
+  main: embedMainHtml({ pageHero, site: SITE, prefix: '../', providers, badgeWidth: BADGE_W, citation: citationRecord(citation), slaDays: FRESH_DAYS }),
+  jsonld: collectionPageJsonLd({
+    type: 'WebPage', name: 'Use the data', url: `${SITE}${EMBED_PATH}`,
+    description: 'Embed the widget or a badge, download the dataset and cite it.',
+    about: datasetRef(SITE),
+    crumbs: [['Use the data', `${SITE}${EMBED_PATH}`]],
+  }),
+  // shared-rules.js and shared-sort.js first, so the preview widget finds them on this page and loads nothing else.
+  scripts: ['shared-rules.js', 'shared-sort.js', 'widget.js', 'embed.js'],
+  ogImage: `${SITE}/og/embed.png`,
+}));
+
 // ---------- /compare — provider compare view (#175) ----------
 // The interactive view (/compare/?compare=a,b — 2 to 4 slugs) and a small,
 // deterministic set of static pages (/compare/<a>-vs-<b>/). Both render the
@@ -2406,6 +2587,7 @@ for (const cp of comparePairs) {
     tagProviderLinks(compareLib.compareTableHtml([a, b], { prefix: '../../', scores: scoreMap }), [...providerLinkTargets(a), ...providerLinkTargets(b)]) +
     `<div class="prov-actions" style="margin-top:22px"><a class="btn primary" href="../?compare=${a.slug},${b.slug}">Add a provider to this comparison →</a></div>` +
     `<h2>Other comparisons</h2><nav class="colls">${compareLinksHtml('../../', cp.path)}</nav>` +
+    `<p class="muted">Expected OpenAI, Anthropic or Mistral here? <a href="../../not-free/">APIs that are not free, and why</a>.</p>` +
     `<p class="prov-back"><a href="../../#explorer">← All providers</a></p>` +
     `</div></main>`;
   const jsonld = comparePageJsonLd({ site: SITE, path: cp.path, a, b });
@@ -2474,11 +2656,14 @@ const sitemapEntries = [
   [`${SITE}/coding-tools/`, codingTools.generated],
   ...CODING_TOOL_PAGES.map(({ e, generated }) => [`${SITE}/coding-tools/${e.slug}/`, generated]),
   [`${SITE}/api/`, ASOF],
+  [`${SITE}${EMBED_PATH}`, ASOF],
+  [`${SITE}${NOT_FREE_PATH}`, ASOF],
   [`${SITE}/changes/`, ASOF],
   [`${SITE}/programs/`, programs.generated],
   [`${SITE}/programs/startups`, programs.generated],
   [`${SITE}/programs/research`, programs.generated],
   ...GUIDES.map((g) => [`${SITE}/guides/${g.slug}`, ASOF]),
+  ...LONG_GUIDE_PAGES.map((g) => [`${SITE}/guides/${g.slug}`, ASOF]),
   // Only the first updates page: the number of /updates/page/N/ pages follows
   // the commit count, so listing them made the drift-gated sitemap change with
   // every merge, whatever the PR touched. Crawlers reach them via pagination.
@@ -2523,7 +2708,7 @@ writeFileSync(join(ROOT, `site/${SITEMAP_INDEX}`), sitemapIndexXml(SITE, INDEXNO
 // on every deploy; pinning them caused the post-merge refresh-pin churn this
 // removes. It lives at the repo root (not under data/) so a fingerprint-only
 // commit never touches a path the updates feed watches.
-const isDateRelative = (rel) => rel.startsWith('site/p/') || rel.startsWith('site/badges/');
+const isDateRelative = (rel) => rel === 'site/badge-freshness.json' || rel.startsWith('site/p/') || rel.startsWith('site/badges/');
 // The weekly change feed (changes/, changes.xml, api/v1/changes.json) and the
 // monthly state reports (state/) are mined from the same git history, so they
 // are excluded for the same reason.

@@ -206,6 +206,19 @@ test('history events carry the commit of the change; history.json does not need 
   assert.deepEqual(flat.map((c) => c.commit), [null, H2]);
 });
 
+test('two commits on one day: the day is one event and each field keeps the commit that set its final value', () => {
+  const { historyBySlug } = historyFromRevisions([
+    crev('2026-11-02', H1, [prov('a')]),
+    crev('2026-11-10', H2, [prov('a', { rate_limits: '20 rpm' })]),
+    crev('2026-11-10', H3, [prov('a', { rate_limits: '20 rpm', notes: 'phone' })]),
+  ]);
+  const changed = historyBySlug.a.filter((e) => e.kind === 'changed');
+  assert.equal(changed.length, 1, 'one event for the day');
+  assert.equal(changed[0].commit, H3, 'the event carries the last commit of the day');
+  const flat = flattenFieldChanges(historyBySlug, { a: 'Alpha' });
+  assert.deepEqual(flat.map((c) => [c.field, c.commit]), [['rate_limits', H2], ['notes', H3]]);
+});
+
 test('changes.json keeps its original shape first and adds labels, commits and the matching feed item', () => {
   const { historyBySlug } = historyFromRevisions([
     crev('2026-10-01', H1, [prov('a'), prov('b')]),

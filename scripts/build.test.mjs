@@ -67,6 +67,58 @@ test('playground_url survives canonical serialization', () => {
   assert.equal(Object.hasOwn(saved.providers[1], 'playground_url'), false);
 });
 
+test('keys_url and keys_url_source survive canonical serialization', () => {
+  const data = JSON.parse(readFileSync(DATA, 'utf8'));
+  data.providers[0].keys_url = 'https://example.com/keys?tab=api&new=1';
+  data.providers[0].keys_url_source = 'https://example.com/docs';
+  delete data.providers[1].keys_url;
+  delete data.providers[1].keys_url_source;
+  const saved = JSON.parse(serialize(data));
+  assert.equal(saved.providers[0].keys_url, 'https://example.com/keys?tab=api&new=1');
+  assert.equal(saved.providers[0].keys_url_source, 'https://example.com/docs');
+  assert.equal(Object.hasOwn(saved.providers[1], 'keys_url'), false);
+});
+
+test('provider "Get a free key" button is conditional, tracked as data-link="keys", and kept in public JSON', () => {
+  const raw = readFileSync(DATA, 'utf8');
+  const data = JSON.parse(raw);
+  const [first, second] = data.providers;
+  first.keys_url = 'https://example.com/keys?tab=api&new=1';
+  first.keys_url_source = 'https://example.com/docs';
+  delete second.keys_url;
+  delete second.keys_url_source;
+  try {
+    writeFileSync(DATA, serialize(data));
+    run(['scripts/build.mjs']);
+    const present = readFileSync(join(ROOT, 'site/p', `${first.slug}.html`), 'utf8');
+    assert.equal((present.match(/>Get a free key ↗/g) || []).length, 1);
+    assert.ok(present.includes(`<a class="btn primary" href="https://example.com/keys?tab=api&amp;new=1" target="_blank" rel="noopener" data-provider="${first.slug}" data-link="keys">Get a free key ↗<span class="sr-only"> (opens in a new tab)</span></a>`));
+    // between the free limits and the quickstart
+    const at = (s) => present.indexOf(s);
+    assert.ok(at('id="limits"') < at('>Get a free key ↗') && at('>Get a free key ↗') < at('id="quickstart"'));
+    const absent = readFileSync(join(ROOT, 'site/p', `${second.slug}.html`), 'utf8');
+    assert.doesNotMatch(absent, /Get a free key/);
+    for (const file of ['site/providers.json', 'site/api/v1/providers.json']) {
+      const published = JSON.parse(readFileSync(join(ROOT, file), 'utf8'));
+      const row = published.providers.find((p) => p.slug === first.slug);
+      assert.equal(row.keys_url, 'https://example.com/keys?tab=api&new=1');
+      assert.equal(row.keys_url_source, 'https://example.com/docs');
+      assert.equal(Object.hasOwn(published.providers.find((p) => p.slug === second.slug), 'keys_url'), false);
+    }
+    const schema = JSON.parse(readFileSync(join(ROOT, 'site/api/v1/schema.json'), 'utf8'));
+    for (const name of ['keys_url', 'keys_url_source']) {
+      const field = schema.$defs.provider.properties[name];
+      assert.deepEqual([field.type, field.format, field.pattern], ['string', 'uri', '^https://']);
+    }
+    assert.notEqual(schema.$defs.provider.additionalProperties, false, 'v1 stays open to additive fields');
+    const csvHeader = readFileSync(join(ROOT, 'site/providers.csv'), 'utf8').split('\n')[0];
+    assert.doesNotMatch(csvHeader, /keys_url/, 'the CSV column list is unchanged');
+  } finally {
+    writeFileSync(DATA, raw);
+    run(['scripts/build.mjs']);
+  }
+});
+
 test('serializer ORDER matches the JSON Schema provider properties', () => {
   const schema = JSON.parse(readFileSync(join(ROOT, 'data/schema.json'), 'utf8'));
   const providerKeys = Object.keys(schema.$defs.provider.properties);
@@ -481,7 +533,7 @@ test('sitemap.xml lists no paginated updates pages (their count follows the comm
   assert.doesNotMatch(sitemap, /\/updates\/page\//, 'a page count tied to git history would make the drift-gated sitemap change on every merge');
 });
 
-test('derived-fingerprints.json pins gitignored outputs, skips site/p/, site/badges/, tracked and git-log files', () => {
+test('derived-fingerprints.json pins gitignored outputs, skips site/p/, site/badges/, the freshness badge, tracked and git-log files', () => {
   const fp = join(ROOT, 'derived-fingerprints.json');
   if (!existsSync(fp)) run(['scripts/build.mjs']);
   const pins = JSON.parse(readFileSync(fp, 'utf8'));
@@ -496,6 +548,8 @@ test('derived-fingerprints.json pins gitignored outputs, skips site/p/, site/bad
     'site/p/ must not be pinned (date-relative)');
   assert.equal(Object.keys(pins).some((k) => k.startsWith('site/badges/')), false,
     'site/badges/ must not be pinned (colour tracks verification age)');
+  assert.equal(pins['site/badge-freshness.json'], undefined,
+    'site/badge-freshness.json must not be pinned (its oldest age moves every day)');
   assert.equal(Object.keys(pins).some((k) => k.startsWith('site/og/')), false,
     'site/og/ is tracked and diff-gated directly');
   assert.equal(pins['site/index.html'], undefined,
@@ -1599,10 +1653,11 @@ describe('read-only generated output', () => {
       for (const d of html.match(/\d{4}-\d{2}-\d{2}/g) || []) {
         assert.ok(dataDates.has(d), `${rel}: date ${d} is not from the dataset (pages must not depend on the build day)`);
       }
-      // provider pages suggest the comparisons they appear in, when both sides share a category
+      // provider pages never suggest a comparison across main modalities (lib/compare.mjs comparePeers picks the closest
+      // peers of the same modality, linking this page when it is one of them; provider-page.test.mjs checks the picks)
       for (const s of [a.slug, b.slug]) {
         const linked = readFileSync(join(ROOT, `site/p/${s}.html`), 'utf8').includes(`href="../compare/${path}/"`);
-        assert.equal(linked, sameComparisonCategory(a, b), `p/${s} ${sameComparisonCategory(a, b) ? 'links' : 'does not suggest'} ${path}`);
+        if (!sameComparisonCategory(a, b)) assert.equal(linked, false, `p/${s} does not suggest ${path}`);
       }
     }
   });
@@ -1647,13 +1702,13 @@ describe('read-only generated output', () => {
     run('name', -1); assert.equal(sel.value, 'custom');
   });
 
-  test('home: search box, Submit in the menu, and the star count rendered at build', () => {
+  test('home: search box, Submit as the header\'s Contribute button, and the star count rendered at build', () => {
     const index = readFileSync(join(ROOT, 'site/index.html'), 'utf8');
     assert.match(index, /<input type="search" id="q"[^>]*>/);
     assert.match(index, /<label class="sr-only" for="q">/);
     for (const page of [index, readFileSync(join(ROOT, 'site/compare/index.html'), 'utf8'), readFileSync(join(ROOT, 'site/p/groq.html'), 'utf8')]) {
-      const nav = page.slice(page.indexOf('id="primary-nav"'), page.indexOf('</nav>', page.indexOf('id="primary-nav"')));
-      assert.match(nav, /href="(\.\.\/)?submit\/"/);
+      const actions = page.slice(page.indexOf('<div class="header-actions">'), page.indexOf('</header>'));
+      assert.match(actions, /<a class="icon-btn nav-contribute" href="(\.\.\/)?submit\/">[\s\S]*?<span class="nc-label">Contribute<\/span><\/a>/);
     }
     const { stars } = JSON.parse(readFileSync(join(ROOT, 'data/repo-stats.json'), 'utf8'));
     assert.ok(Number.isInteger(stars));
@@ -1708,16 +1763,20 @@ test('the client makes no GitHub API call and the home search covers model names
   assert.ok(searchText(groq).includes(groq.models_free[0].toLowerCase()), 'a real provider is found by one of its models');
 });
 
-test('header menu: only Guides & Collections, The Best (highlighted) and Submit; Models and API live in the footer', () => {
+test('header menu: Providers (with The Best inside), Models, Compare, Changes, API, Guides; the same on the home and the generated pages', () => {
+  // Q8: the menu names the site's main sections. Providers is a <details> holding the explorer and The Best (still the
+  // one highlighted entry); Submit moved out of the menu to the secondary Contribute button. The home's header is
+  // hand-written, so this also keeps it equal to siteHeader() in build.mjs.
   run(['scripts/build.mjs']);
   const pages = ['site/index.html', 'site/compare/index.html', 'site/p/groq.html', 'site/models/index.html', 'site/guides-and-collections/index.html'];
   for (const rel of pages) {
     const html = readFileSync(join(ROOT, rel), 'utf8');
     const nav = html.slice(html.indexOf('id="primary-nav"'), html.indexOf('</nav>', html.indexOf('id="primary-nav"')));
     const hrefs = [...nav.matchAll(/<a [^>]*href="([^"]+)"/g)].map((m) => m[1].replace(/^(\.\.\/)+|^\.\//, ''));
-    assert.deepEqual(hrefs, ['guides-and-collections/', 'best/', 'submit/'], `${rel}: the header menu is exactly Guides & Collections, The Best, Submit`);
-    assert.match(nav, /<a class="nav-best" href="[^"]*best\/"[^>]*>.*The Best<\/a>/s, `${rel}: The Best carries the highlight class`);
+    assert.deepEqual(hrefs, ['#explorer', 'best/', 'models/', 'compare/', 'changes/', 'api/', 'guides-and-collections/'], `${rel}: the header menu entries, in order`);
+    assert.match(nav, /<details class="nav-group"><summary>Providers<\/summary><div class="nav-sub"><a href="[^"]*#explorer">All providers<\/a><a class="nav-best" href="[^"]*best\/"[^>]*>.*The Best<\/a><\/div><\/details>/s, `${rel}: The Best sits inside Providers`);
     assert.equal((nav.match(/class="nav-best"/g) || []).length, 1, `${rel}: only one highlighted entry`);
+    assert.doesNotMatch(nav, /submit\//, `${rel}: Submit is not a menu entry`);
     const footer = html.slice(html.indexOf('<footer'));
     for (const dest of ['models/', 'api/', 'programs/startups', 'programs/research']) assert.ok(footer.includes(dest), `${rel}: footer lacks ${dest}`);
   }
@@ -1726,8 +1785,8 @@ test('header menu: only Guides & Collections, The Best (highlighted) and Submit;
 test('footer columns: where each link lives, and no GitHub star entry in Project', () => {
   run(['scripts/build.mjs']);
   const expected = {
-    Explore: ['models/', 'guides-and-collections/', 'programs/startups', 'programs/research', 'free-gpu/', 'coding-tools/'],
-    Data: ['providers.json', 'api/', 'llms.txt', 'data-policy/', 'coverage/', 'quality/'],
+    Explore: ['models/', 'guides-and-collections/', 'programs/startups', 'programs/research', 'free-gpu/', 'coding-tools/', 'not-free/'],
+    Data: ['providers.json', 'api/', 'llms.txt', 'data-policy/', 'coverage/', 'quality/', 'embed/'],
     Project: ['updates', 'changes/', 'submit/', 'methodology/', 'contributing/', 'agreements/'],
   };
   for (const rel of ['site/index.html', 'site/compare/index.html', 'site/p/groq.html', 'site/legal/privacy.html']) {
@@ -1751,13 +1810,13 @@ test('provider links carry data-provider and data-link for the opt-in outbound_p
   assert.match(groq, /<a class="btn primary" href="[^"]+"[^>]* data-provider="groq" data-link="docs">Official docs/);
   assert.match(groq, /<a class="btn website" href="[^"]+"[^>]* data-provider="groq" data-link="website">/);
   const tagged = [...groq.matchAll(/data-provider="([^"]*)" data-link="([^"]*)"/g)];
-  assert.ok(tagged.every((m) => m[1] === 'groq' && ['docs', 'website', 'playground', 'models', 'limits_source', 'data_policy'].includes(m[2])), 'only the page provider and known link types');
+  assert.ok(tagged.every((m) => m[1] === 'groq' && ['docs', 'keys', 'website', 'playground', 'models', 'limits_source', 'data_policy'].includes(m[2])), 'only the page provider and known link types');
   const compareDir = readdirSync(join(ROOT, 'site/compare')).find((n) => n.includes('-vs-'));
   const cmp = readFileSync(join(ROOT, `site/compare/${compareDir}/index.html`), 'utf8');
   assert.equal([...cmp.matchAll(/data-link="docs"/g)].length, 2, "both providers' docs links are tagged on a static comparison");
 });
 
-test('no GA_MEASUREMENT_ID (the default): the build emits no analytics code, CSP host, banner or cookie notice change', () => {
+test('no GA_MEASUREMENT_ID (the default): no Google analytics code, Google CSP host, banner or cookie notice change; Cloudflare Web Analytics allowed and described', () => {
   const env = { ...process.env };
   delete env.GA_MEASUREMENT_ID;
   execFileSync(process.execPath, ['scripts/build.mjs'], { cwd: ROOT, stdio: 'pipe', env });
@@ -1770,7 +1829,14 @@ test('no GA_MEASUREMENT_ID (the default): the build emits no analytics code, CSP
     const html = readFileSync(join(ROOT, rel), 'utf8');
     assert.doesNotMatch(html, /googletagmanager|google-analytics|analytics\.google|gtag|consent\.js|data-consent-open|Cookie settings/, `${rel} carries analytics code without an ID`);
   }
-  assert.match(readFileSync(join(ROOT, 'site/legal/privacy.html'), 'utf8'), /no third-party analytics or tracking/);
+  const privacy = readFileSync(join(ROOT, 'site/legal/privacy.html'), 'utf8');
+  assert.match(privacy, /no cookies and no tracking/);
+  assert.match(privacy, /cookieless Cloudflare Web Analytics/);
+  assert.doesNotMatch(privacy, /We do not use Cloudflare's analytics/);
+  // Cloudflare injects the Web Analytics beacon at the edge, so every build must let it through the CSP
+  const csp = readFileSync(join(ROOT, 'site/index.html'), 'utf8').match(/http-equiv="Content-Security-Policy" content="([^"]+)"/)[1];
+  assert.match(csp, /script-src [^;]*https:\/\/static\.cloudflareinsights\.com/);
+  assert.match(csp, /connect-src [^;]*https:\/\/cloudflareinsights\.com/);
 });
 
 test('the privacy page and SECURITY.md say what the star count really does: no GitHub call from the browser', () => {
@@ -2018,12 +2084,14 @@ test('active providers retain models_url from their official catalogues', () => 
   assert.deepEqual(seeded, [
     ['google-gemini', 'https://ai.google.dev/gemini-api/docs/models'],
     ['groq', 'https://console.groq.com/docs/models'],
+    ['openrouter', 'https://openrouter.ai/models'],
     ['ibm-watsonx', 'https://www.ibm.com/docs/en/watsonx/saas?topic=solutions-supported-foundation-models'],
     ['fireworks-ai', 'https://fireworks.ai/models'],
     ['baseten', 'https://docs.baseten.co/inference/model-apis/overview'],
     ['alibaba-model-studio', 'https://www.alibabacloud.com/help/en/model-studio/model-pricing'],
     ['sarvam-ai', 'https://docs.sarvam.ai/api/token-factory/models'],
     ['tencent-hunyuan', 'https://cloud.tencent.com/document/product/1823/130051'],
+    ['stability-ai', 'https://docs.stability.ai/api-reference'],
   ]);
 });
 
@@ -2208,16 +2276,16 @@ test('the 404 page is built with the shared header, menu and footer and root-abs
   assert.ok(html.includes(hash), 'the path read-out is pinned by hash in the CSP: ' + hash);
 });
 
-test('the menu has Guides & Collections, The Best and Submit, and the footer no longer carries the removed entries', () => {
-  // Mutant: put Compare back in the menu, or the «Interactive explorer» link or the «Independent, community-maintained» line back in
+test('the menu has Providers (All providers, The Best), Models, Compare, Changes, API and Guides, and the footer no longer carries the removed entries', () => {
+  // Mutant: put Submit back in the menu, or the «Interactive explorer» link or the «Independent, community-maintained» line back in
   // the footer; this test turns red.
   const home = readFileSync(join(ROOT, 'site/index.html'), 'utf8');
   const best = readFileSync(join(ROOT, 'site/best/index.html'), 'utf8');
   for (const [name, html] of [['home', home], ['best', best]]) {
     const nav = html.match(/<nav class="nav" id="primary-nav"[\s\S]*?<\/nav>/);
     assert.ok(nav, name + ': the menu');
-    const labels = [...nav[0].matchAll(/<a [^>]*>(?:<svg[\s\S]*?<\/svg>)?([^<]+)<\/a>/g)].map((m) => m[1].replace(/&amp;/g, '&').trim());
-    assert.deepEqual(labels, ['Guides & Collections', 'The Best', 'Submit'], name + ': the menu entries');
+    const labels = [...nav[0].matchAll(/<(?:a [^>]*|summary)>(?:<svg[\s\S]*?<\/svg>)?([^<]+)<\/(?:a|summary)>/g)].map((m) => m[1].replace(/&amp;/g, '&').trim());
+    assert.deepEqual(labels, ['Providers', 'All providers', 'The Best', 'Models', 'Compare', 'Changes', 'API', 'Guides'], name + ': the menu entries');
     assert.ok(!/Interactive explorer/.test(html), name + ': no «Interactive explorer» link');
     assert.ok(!/Independent, community-maintained/.test(html), name + ': no «Independent, community-maintained» line');
     assert.ok(/<a href="[^"]*submit\/">Submit<\/a>/.test(html), name + ': Submit in the footer');
@@ -2360,7 +2428,7 @@ test('provider page: the score is visible, no «All providers» link or «Report
   // Mutant: show the old button or link again, drop data-pager, or lose the score line; this test turns red.
   const html = readFileSync(join(ROOT, 'site/p/groq.html'), 'utf8');
   const main = html.slice(html.indexOf('<main id="main">'));
-  assert.match(main, /<div class="prov-score"><span class="best-score" title="Out of 100">\d+\.\d \/ 100<\/span>/, 'the score of the provider');
+  assert.match(main, /<div class="prov-score"><p class="score-rank"><strong>#\d+ of \d+<\/strong> by score <span class="muted">\(\d+(\.\d)? \/ 100\)<\/span>/, 'the score of the provider, as a place (Q13)');
   assert.match(main, /<a href="\.\.\/best\/methodology\/">how it is computed<\/a>/, 'a link to the method');
   // Mutant: drop the underline and the links in the score line rely on colour alone, which Lighthouse fails (link-in-text-block).
   assert.match(readFileSync(join(ROOT, 'site/styles.css'), 'utf8'), /\.prov-score a \{[^}]*text-decoration: underline/, 'the links of the score line are underlined');
@@ -2493,21 +2561,24 @@ test('the narrow-screen rules that keep the pages from scrolling sideways stay i
   assert.match(css, /@media \(max-width: 480px\) \{ \.model-table th, \.model-table td \{ padding-left: 6px;/);
 });
 
-test('the stat tiles keep a reserved height, so filling them in does not push the page down', () => {
-  // Lighthouse on a phone measured a 0.068 shift when explorer.js filled an empty block (0 with the reserved height).
-  // The build now renders the four tiles into the HTML (dated by the public data date, datasetAsOf) and explorer.js only repaints them;
-  // the reserved height stays as a guard for the repaint.
+test('the home counters are one server-rendered line, in the same words as the client repaint', () => {
+  // The four tiles (157-308px, with a reserved height so explorer.js could fill them without a layout shift) became one
+  // line of text under the lede (Q2), and "Nd oldest verification · 90-day SLA" became "Re-checked within the last N
+  // days" (Q14). The build writes the line, dated by datasetAsOf, so nothing is reserved and nothing moves on load.
   const html = readFileSync(join(ROOT, 'site/index.html'), 'utf8');
-  const block = html.match(/<div class="stats" id="stats"[^>]*>([\s\S]*?)<!-- AUTOGEN:stats:end --><\/div>/);
-  assert.ok(block, 'the stats block carries its AUTOGEN markers');
-  assert.equal((block[1].match(/<div class="stat /g) || []).length, 4, 'four tiles are in the HTML before any script runs');
-  assert.match(block[1], /providers tracked/);
+  const block = html.match(/<p class="stats-line" id="stats"[^>]*>([\s\S]*?)<!-- AUTOGEN:stats:end --><\/p>/);
+  assert.ok(block, 'the counters line carries its AUTOGEN markers');
+  assert.match(block[1], /<strong>\d+<\/strong> providers tracked/);
+  assert.match(block[1], /<strong>\d+<\/strong> ongoing free tiers/);
+  assert.match(block[1], /<strong>\d+<\/strong> trial credits/);
+  assert.match(block[1], /<span class="st-fresh (fresh|due|stale)"[^>]*>Re-checked (today|within the last day|within the last \d+ days)<span class="sr-only"> \((fresh|due for re-check|stale)\)<\/span><\/span>/);
+  assert.doesNotMatch(block[1], /oldest verification|-day SLA|class="stat /, 'the old tile copy is gone');
+  // the client builds the same words, so its repaint (only when the visitor's day differs from the build's) matches
+  const explorer = readFileSync(join(ROOT, 'site/explorer.js'), 'utf8');
+  assert.ok(explorer.includes('`Re-checked within the last ${oldest} days`'), 'explorer.js repaints with the same copy');
+  assert.ok(explorer.includes("'<span class=\"st-sep\" aria-hidden=\"true\"> · </span>'"), 'and the same separator');
   const css = readFileSync(join(ROOT, 'site/styles.css'), 'utf8').replace(/\s+/g, ' ');
-  assert.match(css, /@media \(scripting: enabled\) \{ \.stats \{ min-height: 157px; \} \}/);
-  assert.match(css, /@media \(scripting: enabled\) and \(max-width: 640px\) \{ \.stats \{ min-height: 288px; \} \}/);
-  assert.match(css, /@media \(scripting: enabled\) and \(max-width: 479px\) \{ \.stats \{ min-height: 308px; \} \}/);
-  // Not reserved without scripts: the block would be an empty gap when explorer.js never runs.
-  assert.doesNotMatch(css, /\.stats \{ display: grid;[^}]*min-height/);
+  assert.doesNotMatch(css, /\.stats \{ min-height/, 'no height is reserved for a line that is already in the HTML');
 });
 
 test('long strings in provider notes wrap instead of widening the page on a phone', () => {
@@ -2605,7 +2676,8 @@ test('/coverage/ has one task row per open gap, each with the official docs and 
     assert.ok(url && row.includes(`href="${url.replace(/&/g, '&amp;')}"`), `${name}: the row links the provider's own docs_url`);
   }
   // an unknown value reads "not confirmed", never "no": every open group says so, and no task row states a value
-  const summaries = html.match(/<summary>[\s\S]*?<\/summary>/g) || [];
+  // the page's own groups: the header menu has a <summary> too (Providers)
+  const summaries = html.slice(html.indexOf('<main')).match(/<summary>[\s\S]*?<\/summary>/g) || [];
   assert.ok(summaries.length >= 1, 'there are open groups');
   assert.ok(summaries.every((x) => /not confirmed/.test(x)), 'every open group says not confirmed');
   assert.ok(rows.every((r) => !/\b(yes|no)\b/i.test(r.replace(/<a href="\.\.\/p\/[^"]*">[^<]*<\/a>/, '').replace(/<[^>]+>/g, ' ').replace(/official docs|propose the value/g, ''))), 'a task row never states a value, only that it is open');
@@ -2669,6 +2741,33 @@ test('llms-full.txt shows the commercial-use condition of every conditional prov
   }
   const lines = full.split('\n').filter((l) => l.startsWith('- Commercial-use condition: '));
   assert.equal(lines.length, conditional.length, 'no other provider carries a condition line');
+});
+
+test('llms-full.txt gives each provider with a data_policy one prompt data policy line, from trainState', () => {
+  run(['scripts/build.mjs']);
+  const { providers } = JSON.parse(readFileSync(DATA, 'utf8'));
+  const full = readFileSync(join(ROOT, 'site/llms-full.txt'), 'utf8');
+  const blocks = full.split('\n### ').slice(1).map((text) => `### ${text}`);
+  const blockOf = (p) => blocks.find((b) => b.startsWith(`### ${p.name} — `));
+  const policyLines = (p) => blockOf(p).split('\n').filter((l) => l.startsWith('- Prompt data policy: '));
+
+  const said = providers.find((p) => trainState(p) === 'no');
+  assert.ok(said, 'the dataset has a provider whose own sentence says it does not train on prompts');
+  const [saidLine] = policyLines(said);
+  assert.match(saidLine, /trains on prompts: no;/, `${said.slug}: no, from trainState`);
+  assert.ok(saidLine.includes(`(source ${said.data_policy.source}, checked ${said.data_policy.checked})`), `${said.slug}: its source and day`);
+
+  const valueOnly = providers.find((p) => trainState(p) === 'recorded');
+  assert.ok(valueOnly, 'the dataset has a provider with a recorded value but no quote');
+  assert.match(policyLines(valueOnly)[0], /trains on prompts: not confirmed;/, `${valueOnly.slug}: a value alone is not confirmed`);
+
+  const without = providers.find((p) => !p.data_policy);
+  assert.ok(without, 'the dataset has a provider without a data_policy');
+  assert.deepEqual(policyLines(without), [], `${without.slug}: no line, absent is never "no"`);
+
+  const withPolicy = providers.filter((p) => p.data_policy && typeof p.data_policy === 'object');
+  const lines = full.split('\n').filter((l) => l.startsWith('- Prompt data policy: '));
+  assert.equal(lines.length, withPolicy.length, 'exactly one line per provider with a data_policy');
 });
 
 test('/coverage/ treats conditional commercial use as open, not confirmed', () => {
@@ -2775,7 +2874,7 @@ test('a11y: the filter chips stay reachable by keyboard and screen reader, with 
   const css = readFileSync(join(ROOT, 'site/styles.css'), 'utf8');
   assert.doesNotMatch(css, /\.chip input\s*\{[^}]*display\s*:\s*none/, 'a display:none checkbox leaves the chip out of the tab order and the accessibility tree');
   assert.match(css, /\.chip:has\(input:focus-visible\)/, 'the focused chip shows an outline');
-  assert.match(css, /--control-border:\s*#[0-9a-f]{6}/i, 'a control border token exists for the 3:1 non-text contrast');
+  assert.match(css, /--control:\s*#[0-9a-f]{6}/i, 'a control border token exists for the 3:1 non-text contrast');
 
   const index = readFileSync(join(ROOT, 'site/index.html'), 'utf8');
   const chips = index.match(/<label class="chip">[\s\S]*?<\/label>/g) || [];
@@ -2992,7 +3091,7 @@ test('data_policy lot 4: the 13 providers that say they do not train were read f
   for (const p of data.providers.filter((q) => q.data_policy && q.data_policy.trains_on_prompts !== false)) {
     // rows that say it may train were read for the plan later (lots 2, 3, 5 and the correction of the absence claims): true where the
     // clause names the free users or free usage (AssemblyAI, Voyage AI, Cohere), false where it does not
-    const READ = { assemblyai: true, 'voyage-ai': true, elevenlabs: false, cartesia: false, 'retell-ai': false, deepgram: false, 'arli-ai': false, 'sarvam-ai': false, poolside: false, typhoon: false, openrouter: false, nlpcloud: false, 'nvidia-nim': false, veryfi: false, voicegain: false, cohere: true, inception: false, 'azure-speech': false, lemonfox: false };
+    const READ = { assemblyai: true, 'voyage-ai': true, elevenlabs: false, cartesia: false, 'retell-ai': false, deepgram: false, 'arli-ai': false, 'sarvam-ai': false, poolside: false, typhoon: false, openrouter: false, nlpcloud: false, 'nvidia-nim': false, veryfi: false, voicegain: false, cohere: true, inception: false, 'azure-speech': false, lemonfox: false, gladia: true, 'liquid-ai': false, 'stability-ai': false };
     if (p.slug in READ) assert.equal(p.data_policy.plan_named, READ[p.slug], `${p.slug}: plan_named as read`);
     else assert.equal(p.data_policy.plan_named, undefined, `${p.slug}: not read for the plan yet, so no value is written`);
   }
@@ -3180,6 +3279,48 @@ test('a11y: the global focus ring is at least 2px, uses the accent and reaches 3
   // The ring must not be removed from a control that takes the keyboard: the only outline:none rules are the ones that draw their own focus.
   const removed = [...css.matchAll(/([^{}]+)\{[^}]*outline:\s*none[^}]*\}/g)].map((m) => m[1].trim());
   assert.deepEqual(removed.filter((s) => /th-sort|chip|\.sel\b|button|a:focus/.test(s)), [], 'no outline:none on the sort buttons, chips, selects, buttons or links');
+});
+
+// ---- semantic colour tokens: every text-bearing token stays AA (4.5:1) and the control border 3:1, on every surface, in both themes ----
+// A token may alias another with var(--x); the light theme inherits what it does not redefine, as the cascade does on <html>.
+const SEMANTIC_TEXT_TOKENS = ['ok', 'unk', 'bad', 'chg', 'trial', 'm-text', 'm-vision', 'm-image', 'm-audio', 'm-embeddings', 'm-rerank', 'm-ocr'];
+test('a11y: the semantic colour tokens (ok, unk, bad, chg, trial, m-*, control) keep their contrast on bg, panel and panel-2 in both themes', () => {
+  const css = readFileSync(join(ROOT, 'site/styles.css'), 'utf8');
+  const block = (selector) => css.slice(css.indexOf(selector + ' {'), css.indexOf('\n}', css.indexOf(selector + ' {')));
+  const dark = block(':root'), light = block('[data-theme="light"]');
+  const raw = (b, name) => { const m = b.match(new RegExp('^\\s*--' + name + ':\\s*([^;]+);', 'm')); return m ? m[1].trim() : null; };
+  const resolve = (theme, name, seen = new Set()) => {
+    assert.ok(!seen.has(name), `--${name} aliases itself`); seen.add(name);
+    const v = (theme === 'light' && raw(light, name)) || raw(dark, name);
+    assert.ok(v, `token --${name} is missing`);
+    const alias = /^var\(--([a-z0-9-]+)\)$/.exec(v);
+    if (alias) return resolve(theme, alias[1], seen);
+    assert.match(v, /^#[0-9a-fA-F]{6}$/, `--${name} resolves to a 6-digit hex (${v})`);
+    return v;
+  };
+  // Every modality the schema allows has its token, so a new modality cannot ship without a colour.
+  const schema = JSON.parse(readFileSync(join(ROOT, 'data/schema.json'), 'utf8'));
+  const findEnum = (o) => { if (!o || typeof o !== 'object') return null; if (o.modalities?.items?.enum) return o.modalities.items.enum; for (const v of Object.values(o)) { const r = findEnum(v); if (r) return r; } return null; };
+  const modalities = findEnum(schema);
+  assert.ok(modalities && modalities.length >= 7, 'the schema lists the modalities');
+  for (const m of modalities) assert.ok(SEMANTIC_TEXT_TOKENS.includes('m-' + m), `--m-${m} is checked`);
+  for (const theme of ['dark', 'light']) {
+    for (const surface of ['bg', 'panel', 'panel-2']) {
+      const bg = resolve(theme, surface);
+      for (const t of SEMANTIC_TEXT_TOKENS) {
+        const r = contrast(resolve(theme, t), bg);
+        assert.ok(r >= 4.5, `${theme}: --${t} on --${surface} is ${r.toFixed(2)}:1, below 4.5:1`);
+      }
+      const c = contrast(resolve(theme, 'control'), bg);
+      assert.ok(c >= 3, `${theme}: --control on --${surface} is ${c.toFixed(2)}:1, below 3:1 (WCAG 1.4.11)`);
+    }
+  }
+  // The legacy names stay as aliases (lib/consent.client.js reads --control-border), and component rules use the semantic names.
+  for (const [legacy, semantic] of [['green', 'ok'], ['warn', 'unk'], ['red', 'bad'], ['control-border', 'control']]) {
+    assert.equal(raw(dark, legacy), `var(--${semantic})`, `--${legacy} aliases --${semantic}`);
+    const outsideTokens = css.slice(css.indexOf('\n}', css.indexOf('[data-theme="light"] {')));
+    assert.ok(!outsideTokens.includes(`var(--${legacy})`), `no component rule reads var(--${legacy}); use var(--${semantic})`);
+  }
 });
 
 // ---- Dated banner mechanism (site/site.js) ---------------------------------

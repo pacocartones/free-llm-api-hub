@@ -38,7 +38,7 @@ export const flattenFieldChanges = (historyBySlug, nameBySlug = {}) => {
       if (e.kind !== 'changed') continue;
       const changes = e.changes || (e.fields || []).map((field) => ({ field, from: null, to: null }));
       for (const c of changes) {
-        out.push({ date: e.date, slug, name: nameBySlug[slug] || slug, field: c.field, label: HISTORY_FIELDS[c.field] || c.field, from: c.from ?? null, to: c.to ?? null, commit: e.commit ?? null });
+        out.push({ date: e.date, slug, name: nameBySlug[slug] || slug, field: c.field, label: HISTORY_FIELDS[c.field] || c.field, from: c.from ?? null, to: c.to ?? null, commit: c.commit ?? e.commit ?? null });
       }
     }
   }
@@ -78,6 +78,16 @@ export const formatValue = (v) => {
   if (Array.isArray(v)) return v.join(', ');
   return String(v);
 };
+
+// The fields whose change a provider page spells out as "before → after": the limits text and the short values (the
+// free type and the tri-state flags). free_tier, the catch and the commercial-use condition are paragraphs; for them
+// the page keeps the label and links the history.
+export const BEFORE_AFTER_FIELDS = ['rate_limits', 'free_type', 'card_required', 'phone_required', 'commercial_ok', 'openai_compatible'];
+
+/** [{ label, from, to }] for the before → after lines of one history event, in the event's field order. */
+export const beforeAfter = (e) => (e && e.kind === 'changed' ? e.changes || [] : [])
+  .filter((c) => BEFORE_AFTER_FIELDS.includes(c.field))
+  .map((c) => ({ label: HISTORY_FIELDS[c.field] || c.field, from: formatValue(c.from), to: formatValue(c.to) }));
 
 // XML 1.0 text escaping: the five predefined entities, plus removal of the
 // control characters XML 1.0 forbids outright (they cannot be escaped).

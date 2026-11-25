@@ -1,10 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { cpSync, readdirSync, readFileSync, symlinkSync, writeFileSync } from 'node:fs';
+import { cpSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { makeTmpDir } from './lib/tmp.mjs';
+import { linkDir } from './lib/private-tree.mjs';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 const DATA = JSON.parse(readFileSync(join(ROOT, 'data/providers.json'), 'utf8'));
@@ -24,8 +25,8 @@ const VALIDATE = join(ROOT, 'scripts/validate.mjs');
 //   SCHEMA_GATED_CASES row proves the schema gate names the field; that is not
 //   evidence for the hand-written line itself.
 // - "redundant": the same input always also fails another line, so it cannot be isolated.
-// 97 sites total: 73 direct cases; 22 schema-gated; 1 redundant;
-// 1 without a dedicated direct case (203, reserved for good first issue #703).
+// 97 sites total: 74 direct cases; 22 schema-gated; 1 redundant;
+// 0 without a dedicated direct case.
 // | validate.mjs line | Diagnostic or delegated protection | Evidence |
 // | --- | --- | --- |
 // | 83 | top-level: version must be semver | schema-gated |
@@ -39,6 +40,7 @@ const VALIDATE = join(ROOT, 'scripts/validate.mjs');
 // | 103 | ${id}: duplicate name | direct case |
 // | 106 | ${id}: name required | schema-gated |
 // | 108 | ${id}: playground_url requires a non-empty docs_url | direct case |
+// | 110 (added after 1ec1562; later rows shift by one) | ${id}: keys_url and keys_url_source go together and require a non-empty docs_url | direct case |
 // | 112 | ${id}: ${field} must not contain control, bidirectional or zero-width characters | direct case |
 // | 114 | ${id}: category must be one of ${CATEGORIES.join('/')} | schema-gated |
 // | 115 | ${id}: free_type must be one of ${FREE_TYPES.join('/')} | schema-gated |
@@ -74,7 +76,7 @@ const VALIDATE = join(ROOT, 'scripts/validate.mjs');
 // | 198 | ${id}: model_tier_source.snapshot must be a date not after today in UTC | direct case |
 // | 201 | ${id}: a one-time trial credit is not continuous free access, so it carries no free_limits | direct case |
 // | 202 | ${id}: free_limits.checked must be a date not after today in UTC | direct case |
-// | 203 | ${id}: free_limits.source must be the provider's page (http/https) | no dedicated direct case (good first issue #703) |
+// | 203 | ${id}: free_limits.source must be the provider's page (http/https) | new isolated case |
 // | 209 | ${id}: data_policy must state trains_on_prompts or retention | direct case |
 // | 210 | ${id}: data_policy.checked must be a date not after today in UTC | direct case |
 // | 211 | ${id}: data_policy.source must be the provider's public HTTPS page | direct case |
@@ -182,6 +184,7 @@ const INTEGRITY_CASES = [
   ['data_policy.note text', 'a recorded policy condition that says something', (p) => { p.data_policy.note = '   '; }, 'data_policy.note must be text of 1 to 300 characters'],
   ['field_checks via fieldCheckErrors', 'a stated check on a flag that holds no value', (p) => { p.phone_required = null; p.field_checks = { phone_required: { status: 'stated', checked: '2026-11-24', sources: ['https://example.com/terms'], quote: null, note: 'The terms say nothing either way.' } }; }, 'field_checks.phone_required: phone_required is null, so its check cannot be stated (use source_silent, needs_account or sources_disagree)'],
   ['published_speed via publishedSpeedErrors', 'a speed figure the cited passage does not contain', (p) => { p.published_speed[0].value = 123456; }, 'published_speed[0].quote must contain the figure 123456 as the page writes it (no rounding, no conversion)', (d) => d.providers.find((row) => row.published_speed?.length)],
+  ['free_limits.source http(s)', "numbers traceable to the provider's page", (p) => { p.free_limits.source = 'ftp://example.com/limits'; }, "free_limits.source must be the provider's page (http/https)", (d) => d.providers.find((row) => row.free_limits)],
   ['no_expiry.source http(s)', "a no-expiry statement traceable to the provider's page", (p) => { p.expires = null; p.no_expiry = { source: 'ftp://example.com/terms', checked: '2026-10-01', quote: 'Credits do not expire.' }; }, "no_expiry.source must be the provider's page (http/https)", trialProvider],
   // The schema's minLength accepts whitespace; only the trimmed-length rule rejects it.
   ['no_expiry.quote text', 'a no-expiry statement that quotes the passage', (p) => { p.expires = null; p.no_expiry = { source: 'https://example.com/terms', checked: '2026-10-01', quote: '   ' }; }, 'no_expiry.quote must be the passage, 1 to 300 characters', trialProvider],
@@ -308,6 +311,9 @@ test('playground_url requires non-empty docs_url on unverified rows', () => {
   const p = data.providers.find((row) => row.slug === 'groq');
   p.verified = false;
   p.last_verified = null;
+  // keys_url has its own docs_url rule (tested below); keep this case about playground_url alone
+  delete p.keys_url;
+  delete p.keys_url_source;
   p.playground_url = 'https://example.com/playground';
   const accepted = runValidate(data);
   assert.equal(accepted.status, 0, accepted.output);
@@ -330,6 +336,58 @@ test('playground_url requires non-empty docs_url on unverified rows', () => {
   p.docs_url = '';
   const noPlayground = runValidate(data);
   assert.equal(noPlayground.status, 0, noPlayground.output);
+});
+
+test('keys_url accepts HTTPS with its source and remains optional', () => {
+  const data = structuredClone(DATA);
+  const p = provider(data);
+  p.keys_url = 'https://example.com/keys?tab=api&new=1';
+  p.keys_url_source = 'https://example.com/docs/quickstart';
+  const present = runValidate(data);
+  assert.equal(present.status, 0, present.output);
+  delete p.keys_url;
+  delete p.keys_url_source;
+  const absent = runValidate(data);
+  assert.equal(absent.status, 0, absent.output);
+});
+
+test('keys_url and keys_url_source reject invalid present values', () => {
+  for (const field of ['keys_url', 'keys_url_source']) {
+    for (const value of ['http://example.com/keys', 'javascript:alert(1)', '/keys', '', null, 7]) {
+      const data = structuredClone(DATA);
+      const p = provider(data);
+      p.keys_url = 'https://example.com/keys';
+      p.keys_url_source = 'https://example.com/docs';
+      p[field] = value;
+      const result = runValidate(data);
+      assert.notEqual(result.status, 0, `${field}=${JSON.stringify(value)}: ${result.output}`);
+      assert.ok(result.output.includes(`/providers/${data.providers.indexOf(p)}/${field}`), result.output);
+    }
+  }
+});
+
+test('keys_url needs its source, the source needs keys_url, and both need a non-empty docs_url', () => {
+  const message = (p) => `${p.slug}: keys_url and keys_url_source go together and require a non-empty docs_url`;
+  for (const only of ['keys_url', 'keys_url_source']) {
+    const data = structuredClone(DATA);
+    const p = provider(data);
+    delete p.keys_url;
+    delete p.keys_url_source;
+    p[only] = 'https://example.com/keys';
+    const rejected = runValidate(data);
+    assert.notEqual(rejected.status, 0, rejected.output);
+    assert.ok(rejected.output.includes(message(p)), rejected.output);
+  }
+  const data = structuredClone(DATA);
+  const p = data.providers.find((row) => row.slug === 'groq');
+  p.verified = false;
+  p.last_verified = null;
+  p.keys_url = 'https://example.com/keys';
+  p.keys_url_source = 'https://example.com/docs';
+  p.docs_url = '  ';
+  const rejected = runValidate(data);
+  assert.notEqual(rejected.status, 0, rejected.output);
+  assert.ok(rejected.output.includes(message(p)), rejected.output);
 });
 
 test('the fixture harness leaves a valid fixture valid', () => {
@@ -441,8 +499,8 @@ function repositoryCopy() {
   cpSync(join(ROOT, 'data'), join(root, 'data'), { recursive: true });
   for (const file of readdirSync(join(ROOT, 'docs')).filter((f) => f.endsWith('.md'))) cpSync(join(ROOT, 'docs', file), join(root, 'docs', file));
   for (const file of ['README.md', 'CONTRIBUTING.md', 'GOVERNANCE.md', 'site/index.html']) cpSync(join(ROOT, file), join(root, file));
-  // ajv resolves from the copy's own node_modules; a junction needs no privileges on Windows and is a plain symlink elsewhere.
-  symlinkSync(join(ROOT, 'node_modules'), join(root, 'node_modules'), 'junction');
+  // ajv resolves from the copy's own node_modules: a junction (no privileges needed on Windows), a copy if even that fails.
+  linkDir(join(ROOT, 'node_modules'), join(root, 'node_modules'));
   return root;
 }
 
