@@ -934,8 +934,9 @@ const homeProvider = (p) => {
   return out;
 };
 // One provider per line: a data change rewrites only its own provider's line, so two pull requests that edit different
-// providers do not both rewrite one long line of this page.
-const inlineData = `<script type="application/json" id="providers-data">{"providers":[\n${publicProviders.map((p) => JSON.stringify(homeProvider(p))).join(',\n').replace(/</g, '\\u003c')}\n]}</script>`;
+// providers do not both rewrite one long line of this page. "asof" is the date the server rows and stat tiles are rendered
+// for (ASOF), so explorer.js keeps them on first paint and only replaces what the visitor's clock changes.
+const inlineData = `<script type="application/json" id="providers-data">{"asof":"${ASOF}",\n"providers":[\n${publicProviders.map((p) => JSON.stringify(homeProvider(p))).join(',\n').replace(/</g, '\\u003c')}\n]}</script>`;
 // The four stat tiles are rendered here too, dated by ASOF (deterministic), so they show without JavaScript and
 // without a layout shift; explorer.js repaints them with the visitor's clock. Same markup as renderStats() in explorer.js.
 const STAT_STATUS_WORD = { fresh: 'fresh', due: 'due for re-check', stale: 'stale' };

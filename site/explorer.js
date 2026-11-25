@@ -22,7 +22,34 @@ function searchText(p) {
   return [p.name, p.slug, p.category, p.free_tier, p.best_for, ...models, ...(p.modalities || [])].filter(Boolean).join(' ').toLowerCase();
 }
 
-function render() {
+// The day the server render is dated by (ASOF in scripts/build.mjs, inlined as "asof" next to the data), in ms; 0 if unknown.
+let SSR_NOW = 0;
+
+// The cells of one rowHtml() string: rowHtml writes `<tr role="row">`, five `<td …>…</td>` without nested cells, then `</tr>`.
+const rowCells = (html) => html.replace(/^<tr[^>]*>/, '').replace(/<\/tr>$/, '').split('</td>').slice(0, -1).map((c) => c + '</td>');
+
+// First paint, default view: the server already rendered these rows, in this order, dated by SSR_NOW. Rebuilding all of them
+// (about 160 KB of markup on the home page) only to move the freshness to the visitor's clock doubled the page's style and
+// layout work and was most of its blocking time. Instead only the cells whose markup differs at the visitor's clock (the
+// "Verified Nd ago" cell, a "NEW" badge that expired) are replaced, from the same rowHtml(). Returns false, so that the caller
+// rebuilds the table as before, whenever the server rows cannot be matched one for one.
+function patchServerRows(rows, now) {
+  const tbody = document.getElementById('tbody');
+  const trs = tbody && tbody.rows ? Array.from(tbody.rows) : [];
+  if (!SSR_NOW || !trs.length || trs.length !== rows.length) return false;
+  if (rows.some((p, i) => rowSlug(trs[i]) !== p.slug)) return false;
+  rows.forEach((p, i) => {
+    const live = window.FLLM_ROWS.rowHtml(p, { now });
+    const served = window.FLLM_ROWS.rowHtml(p, { now: SSR_NOW });
+    if (live === served) return;
+    const a = rowCells(live), b = rowCells(served), tr = trs[i];
+    if (a.length !== b.length || a.length !== tr.cells.length) { tr.outerHTML = live; return; }
+    a.forEach((cell, k) => { if (cell !== b[k]) tr.cells[k].outerHTML = cell; });
+  });
+  return true;
+}
+
+function render(first) {
   const nocard = document.getElementById('f-nocard').checked;
   const nophone = document.getElementById('f-nophone').checked;
   const commercial = document.getElementById('f-commercial').checked;
@@ -65,8 +92,11 @@ function render() {
 
   // Rows come from shared-rows.js — the same function the server used to SSR
   // this table (see lib/rows.mjs). Date.now() gives visitors live freshness;
-  // the server render uses data.generated for a deterministic initial paint.
-  tbody.innerHTML = rows.map((p) => window.FLLM_ROWS.rowHtml(p, { now: Date.now() })).join('\n');
+  // the server render uses ASOF for a deterministic initial paint. The first paint of the default view keeps the server rows.
+  const now = Date.now();
+  if (!(first && activeCount === 0 && patchServerRows(rows, now))) {
+    tbody.innerHTML = rows.map((p) => window.FLLM_ROWS.rowHtml(p, { now })).join('\n');
+  }
   syncSortSel();
   syncRoving();
   syncURL();
@@ -124,11 +154,16 @@ syncRoving();
 
 // The status of the oldest verification in words, so it never rests on colour alone.
 const STATUS_WORD = { fresh: 'fresh', due: 'due for re-check', stale: 'stale' };
-function renderStats() {
+function renderStats(first) {
+  const html = statsHtml(Date.now());
+  // The server wrote the same tiles dated by SSR_NOW: leave them alone unless the visitor's clock changes them.
+  if (first && SSR_NOW && html === statsHtml(SSR_NOW)) return;
+  document.getElementById('stats').innerHTML = html;
+}
+function statsHtml(now) {
   const total = DATA.length;
   const ongoing = DATA.filter(p => p.category === 'ongoing').length;
   const trial = DATA.filter(p => p.category === 'trial').length;
-  const now = Date.now();
   const ages = DATA.filter(p => p.verified && p.last_verified).map(p => Math.floor((now - Date.parse(p.last_verified + 'T00:00:00Z')) / 86400000));
   const oldest = ages.length ? Math.max(...ages) : 0;
   const slaDays = SLA_DAYS || 90;
@@ -139,7 +174,7 @@ function renderStats() {
     ['ic-clock', trial, 'trial credits', ''],
     ['ic-shield', `${oldest}d`, `oldest verification · ${slaDays}-day SLA`, status],
   ];
-  document.getElementById('stats').innerHTML = tiles.map(([ic, n, l, c]) =>
+  return tiles.map(([ic, n, l, c]) =>
     `<div class="stat ${c}"><svg class="si" aria-hidden="true"><use href="#${ic}"/></svg><div class="num">${n}</div><div class="lbl">${l}${c ? `<span class="sr-only"> (${STATUS_WORD[c] || c})</span>` : ''}</div></div>`).join('');
 }
 
@@ -288,7 +323,13 @@ const SOURCES = ['providers.json', 'https://raw.githubusercontent.com/pacocarton
   const inlineEl = document.getElementById('providers-data');
   try {
     const raw = inlineEl && inlineEl.textContent.trim();
-    if (raw) { DATA = JSON.parse(raw).providers; renderStats(); render(); return; }
+    if (raw) {
+      const inline = JSON.parse(raw);
+      DATA = inline.providers;
+      const asof = typeof inline.asof === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(inline.asof) ? Date.parse(inline.asof + 'T00:00:00Z') : NaN;
+      SSR_NOW = asof > 0 ? asof : 0;
+      renderStats(true); render(true); return;
+    }
   } catch (_) { /* fall through to fetch */ }
   for (const url of SOURCES) {
     try {
