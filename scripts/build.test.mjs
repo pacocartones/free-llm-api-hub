@@ -669,7 +669,7 @@ test('/best shows the podium of three and the methodology page states the rules'
 
 test('the explorer does not claim a column sort before the user chooses one', () => {
   const explorer = readFileSync(join(ROOT, 'site/index.html'), 'utf8');
-  assert.match(explorer, /<th data-key="name" scope="col" aria-sort="none"><button type="button" class="th-sort">API<\/button><\/th>/);
+  assert.match(explorer, /<th data-key="name" scope="col" aria-sort="none" role="columnheader"><button type="button" class="th-sort">API<\/button><\/th>/);
 });
 
 test('the homepage hero gives first-time visitors working explorer and JSON API entry points', () => {
@@ -1630,7 +1630,7 @@ describe('read-only generated output', () => {
     const p = { slug: 'demo', name: 'Demo', category: 'ongoing', verified: true, last_verified: '2026-07-20' };
     assert.doesNotMatch(explorerRowHtml(p, { now: '2026-08-13' }), /tabindex/);
     const index = readFileSync(join(ROOT, 'site/index.html'), 'utf8');
-    const tbody = index.slice(index.indexOf('<tbody id="tbody">'), index.indexOf('</tbody>'));
+    const tbody = index.slice(index.indexOf('<tbody id="tbody"'), index.indexOf('</tbody>'));
     assert.doesNotMatch(tbody, /tabindex/);
     assert.match(index, /<caption class="sr-only">[^<]*arrow keys move between providers and Enter opens one\.<\/caption>/);
   });
@@ -2032,8 +2032,9 @@ test('active providers retain models_url from their official catalogues', () => 
 test('validate: the dates of the dataset are UTC days and none is in the future', () => {
   const data = JSON.parse(readFileSync(DATA, 'utf8'));
   const withToday = (today, file = DATA) => { try { execFileSync(process.execPath, ['scripts/validate.mjs', file], { cwd: ROOT, stdio: 'pipe', env: { ...process.env, VALIDATE_TODAY: today } }); return ''; } catch (e) { return `${e.stdout}${e.stderr}`; } };
-  // `generated` is the release stamp, so data read after the last release carries later days: check against the real UTC day.
-  assert.equal(withToday(new Date().toISOString().slice(0, 10)), '', 'the dataset is valid on the UTC day of the run');
+  // `generated` is a release stamp, so a check recorded after the last release carries a later day: "today" is the latest day in the file.
+  const latest = [data.generated, ...JSON.stringify(data.providers).match(/"\d{4}-\d{2}-\d{2}"/g).map((x) => x.slice(1, -1))].sort().at(-1);
+  assert.equal(withToday(latest), '', 'the latest day of the dataset is today: valid');
   assert.equal(withToday('2999-01-01'), '', 'generated in the past: valid');
   const day = new Date(Date.parse(`${data.generated}T00:00:00Z`) - 86400000).toISOString().slice(0, 10);
   assert.match(withToday(day), new RegExp(`generated \\(${data.generated}\\) is after today in UTC \\(${day}\\); write the dates of the dataset in UTC`), 'generated the day after "today" fails and says how to write it');

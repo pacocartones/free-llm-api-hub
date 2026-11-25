@@ -6,5 +6,5 @@
   safety of its AI models, after steps to de-identify them, so
   `trains_on_prompts` is `true` and the clause names the trial plan. Retention
   is stated only for Enterprise Users, so it stays unknown for the free trial.
-  With this row every provider listed in #442 and #445 has a recorded
-  `data_policy`.
+  With this row every provider listed in issues #442 and #445 has a recorded
+  `data_policy` (#729).

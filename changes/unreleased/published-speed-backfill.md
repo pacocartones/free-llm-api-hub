@@ -8,4 +8,4 @@
   `mistral-small-3.2-24b-instruct-2506` above 100 tok/s (Serverless FAQ,
   given as an order of magnitude). Other providers surveyed publish no
   per-model figure for a free model, only relative claims, or attribute
-  the figure to a third party, so they get no entry (Refs #606).
+  the figure to a third party, so they get no entry (#733, issue #606).
