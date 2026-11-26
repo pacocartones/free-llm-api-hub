@@ -122,7 +122,7 @@ export function changesIssue({ month, added, removed, fieldChanges }, { current 
     '_Opened automatically on the 1st of each month by `monthly-issues.yml`; it lists our own data and URLs only. A maintainer closes it when the reports have been handled._',
     '',
   );
-  return { title: changesTitle(month), labels: ['data', 'help wanted'], body: out.join('\n') };
+  return { title: changesTitle(month), labels: ['data', 'help wanted', 'tracker'], body: out.join('\n') };
 }
 
 /** Non-text providers (no `text` modality), the share, and how many more fit under the cap. */
@@ -180,7 +180,7 @@ export function candidatesIssue(month, providers) {
     '_Opened automatically on the 1st of each month by `monthly-issues.yml`. A maintainer closes it at the end of the month; proposals that were not handled can be repeated in the next one._',
     '',
   ].join('\n');
-  return { title: candidatesTitle(month), labels: ['help wanted'], body };
+  return { title: candidatesTitle(month), labels: ['data', 'help wanted', 'tracker'], body };
 }
 
 /** Opens the issue unless one with the same title exists in any state. Returns the existing or new issue number. */

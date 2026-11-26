@@ -38,6 +38,8 @@ If a relevant check could not run, include the error and why it is blocked. -->
 - [ ] **`field_checks` or `published_speed` changes:** I ran `npm run quotes:add -- <slug> --field <flag>` for each `stated` entry with a `quote`, or `npm run quotes:add -- <slug> --speed`.
 - [ ] (Optional) I used AI tools for part of this change, and I have read and tested it myself.
 
+<!-- Taking part in a program such as Social Winter of Code? Link the program issue with `Closes #123`. A maintainer adds the level label when merging. -->
+
 <!--
 Derived files (README tables, collections/, site pages, CSV, sitemap, OG images) depend on the
 regeneration bot's mode, printed by the "Regeneration mode" step of the "Dataset integrity" check
