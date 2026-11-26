@@ -53,12 +53,22 @@
 
   var pick = document.getElementById('badge-provider');
   var badge = document.getElementById('badge-snippet');
+  var badgeHtml = document.getElementById('badge-snippet-html');
+  // The same escaping as htmlEsc in scripts/lib/rows.mjs, so the snippet matches the built page ("W&B" → "W&amp;B").
+  var attrEsc = function (s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  };
   if (pick && badge) {
     var show = function () {
       var opt = pick.options[pick.selectedIndex];
       if (!opt || !SLUG.test(opt.value)) return;
       var slug = opt.value;
-      badge.textContent = '[![' + opt.textContent + ' on Free LLM API Hub](https://img.shields.io/endpoint?url=' + SITE + '/badges/' + slug + '.json)](' + SITE + '/p/' + slug + ')';
+      var name = opt.textContent;
+      var img = 'https://img.shields.io/endpoint?url=' + SITE + '/badges/' + slug + '.json';
+      badge.textContent = '[![' + name + ' on Free LLM API Hub](' + img + ')](' + SITE + '/p/' + slug + ')';
+      if (badgeHtml) {
+        badgeHtml.textContent = '<a href="' + SITE + '/p/' + slug + '"><img src="' + img + '" alt="' + attrEsc(name) + ' on Free LLM API Hub" height="20"></a>';
+      }
     };
     var q = /[?&]p=([a-z0-9-]+)/.exec(location.search || '');
     if (q && SLUG.test(q[1])) {

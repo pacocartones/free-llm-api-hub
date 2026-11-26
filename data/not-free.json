@@ -136,11 +136,18 @@
       "slug": null,
       "modalities": ["image", "text"],
       "expectation": "Often listed as free on other lists.",
-      "summary": "Currently requires a card or prepayment before any API use, per its own docs. It was held back from the dataset for lack of a citable, quantifiable free tier. No quote has been recorded in this repository yet.",
+      "summary": "Currently requires a card or prepayment before any API use, per its own docs. It was held back from the dataset for lack of a citable, quantifiable free tier.",
       "short": "a card or prepayment before any API use",
-      "quotes": [],
-      "sources": [],
-      "checked": null,
+      "quotes": [
+        "To use Replicate, you must first purchase credit upfront."
+      ],
+      "sources": [
+        {
+          "label": "Prepaid credit",
+          "url": "https://replicate.com/docs/topics/billing/prepaid-credit"
+        }
+      ],
+      "checked": "2026-11-25",
       "faq": null
     },
     {
@@ -150,11 +157,20 @@
       "slug": null,
       "modalities": ["text"],
       "expectation": "Often listed as free on other lists.",
-      "summary": "Currently requires a card or prepayment before any API use, per its own docs. No quote has been recorded in this repository yet.",
+      "summary": "Currently requires a card or prepayment before any API use, per its own docs.",
       "short": "a card or prepayment before any API use",
-      "quotes": [],
-      "sources": [],
-      "checked": null,
+      "quotes": [
+        "Chat is a flat $25/month subscription.",
+        "Pay-As-You-Go Plan is a prepaid credit balance: the plan itself is $0 per month, and you top up from $5 whenever you need more credits.",
+        "At zero or below, API calls are blocked until more credits are available."
+      ],
+      "sources": [
+        {
+          "label": "Billing & Payment Methods",
+          "url": "https://featherless.ai/docs/billing"
+        }
+      ],
+      "checked": "2026-11-26",
       "faq": null
     },
     {
@@ -182,9 +198,17 @@
       "expectation": "It was listed here as a free tier until GitHub retired it.",
       "summary": "Fully retired by GitHub on 2026-07-30: playground, catalog, inference API and BYOK shut down for all customers. Removed from the dataset in 2.7.0.",
       "short": "fully retired by GitHub on 2026-07-30 — playground, catalog and inference API shut down for all customers",
-      "quotes": [],
-      "sources": [],
-      "checked": null,
+      "quotes": [
+        "As of July 30, 2026, GitHub Models is now retired.",
+        "The playground, model catalog, inference API, and bring your own key (BYOK) are no longer available to any customer, including existing customers with active usage."
+      ],
+      "sources": [
+        {
+          "label": "GitHub Models is now retired",
+          "url": "https://github.blog/changelog/2026-07-30-github-models-is-now-retired/"
+        }
+      ],
+      "checked": "2026-11-26",
       "faq": "Does GitHub Models still have a free tier?"
     },
     {
