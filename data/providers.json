@@ -524,6 +524,7 @@
       "best_for": "Fast open models on a rate-limited free tier",
       "modalities": ["text"],
       "models_free": ["gpt-oss-120b", "gemma-4-31B-it"],
+      "models_url": "https://docs.sambanova.ai/docs/en/models/sambacloud-models",
       "expires": null,
       "docs_url": "https://cloud.sambanova.ai/plans",
       "phone_required": null,
