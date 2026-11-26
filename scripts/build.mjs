@@ -1870,7 +1870,7 @@ for (const g of FAMILY_GROUPS) {
     main: familyPageMainHtml(g, { asOf: ASOF, prefix: '../../', modelHref: modelPageHref('../../'), others: FAMILY_GROUPS }),
     jsonld: pageJsonLd({
       site: SITE, type: 'WebPage', name: familyH1(g), url, description: familyPageDescription(g),
-      about: datasetRef(SITE),
+      about: datasetRef(SITE, DATASET_FACTS),
       crumbs: [['Free model index', `${SITE}/models/`], [g.name, url]],
       items: g.entries.map((e) => ({ name: e.p.name, url: `${SITE}/p/${e.p.slug}` })),
     }),
