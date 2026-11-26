@@ -1295,7 +1295,9 @@
       "field_checks": {"phone_required":{"status":"source_silent","checked":"2026-11-25","sources":["https://fish.audio/terms/","https://fish.audio/plan/"],"note":"The terms cover SMS messages sent to a wireless number you provide when signing up, but do not say a number is required; the plan page is silent"}},
       "verified": true,
       "last_verified": "2026-11-20",
-      "added": "2026-07-31"
+      "added": "2026-07-31",
+      "keys_url": "https://fish.audio/app/api-keys",
+      "keys_url_source": "https://docs.fish.audio/developer-guide/getting-started/quickstart"
     },
     {
       "slug": "camb-ai",
