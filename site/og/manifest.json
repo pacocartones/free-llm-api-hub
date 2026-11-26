@@ -105,5 +105,10 @@
   "guides/free-embeddings-apis.png": "c2683588c0843307421e12cad78527fddda91959883a2bb80aa595317ccfc225",
   "guides/free-speech-to-text-apis.png": "593db41f3e310be2c0344512085466193befe77d18d6811a495c8794e3c70f6c",
   "guides/free-ocr-document-ai-apis.png": "ef7479750cfcca501fa5e748ca9094dcc477cd7603b9b2daae5dba488df7ca9d",
-  "guides/free-image-generation-apis.png": "b34abf7ddb80a399205c284c4b51e717fff5c52ea0a743938703f1bc3d86fa7a"
+  "guides/free-image-generation-apis.png": "b34abf7ddb80a399205c284c4b51e717fff5c52ea0a743938703f1bc3d86fa7a",
+  "guides/free-llm-api-for-coding.png": "8805a30bb5a432c16d5faa3be0ae524d0c33d49bb9925975c34b81cc0f2329e4",
+  "guides/free-api-for-rag.png": "542761d870e3b76c5239dd37d51a684ea7d9ab96597f1ea0175d9f185d347262",
+  "guides/free-llm-api-for-ai-agents.png": "c844011f445a29c0428193667011d55a6608db23cb3c320a6e35697e27e6ea40",
+  "guides/free-chatbot-api.png": "2bfa35fce962381b751d4e6b6f4806c4c9dc4b70a8c0be0857d8bea4f7b3b078",
+  "guides/free-ai-api-for-students.png": "47997e94352e00121e281c9ca1e2b6d7766157645d56c2e088524b66ea097abf"
 }

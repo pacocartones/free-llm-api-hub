@@ -844,7 +844,12 @@ writeFileSync(citationPath, citation);
 // Long-form guides (lib/long-guides.mjs): editorial copy whose every number, limit, flag and provider list is computed
 // from data/providers.json and data/not-free.json here, at build time. They share /guides/, the hub, the sitemap and
 // llms.txt with the guides above; `featured` is the set of providers a guide lists (provider pages link back to it).
-const LONG_GUIDE_PAGES = LONG_GUIDES.map((g) => ({ ...g, ...longGuidePage(g, { providers, notFree: NOT_FREE }) }));
+// The use-case guides also read the student programs (data/programs.json) and the own-key coding tools.
+const LONG_GUIDE_EXTRAS = {
+  programs: JSON.parse(readFileSync(join(ROOT, 'data/programs.json'), 'utf8')),
+  codingToolsOwnKey: JSON.parse(readFileSync(join(ROOT, 'data/coding-tools-own-key.json'), 'utf8')),
+};
+const LONG_GUIDE_PAGES = LONG_GUIDES.map((g) => ({ ...g, ...longGuidePage(g, { providers, notFree: NOT_FREE, ...LONG_GUIDE_EXTRAS }) }));
 // Every guide by slug, for the cross-links of collections and the "More guides" lists.
 const ALL_GUIDE_LINKS = [...GUIDES, ...LONG_GUIDE_PAGES].map((g) => ({ slug: g.slug, card: g.card }));
 
@@ -1097,9 +1102,10 @@ const hubCards = COLLECTIONS.map((c) =>
 const guidesCards = GUIDES.map((g) =>
   `<a class="coll-card" href="../guides/${g.slug}"><div class="coll-card-head"><strong>${htmlEsc(g.card)}</strong><span class="count">${providers.filter(g.filter).length}</span></div><p>${htmlEsc(g.blurb)}</p></a>`
 ).join('');
-const longGuideCards = LONG_GUIDE_PAGES.map((g) =>
-  `<a class="coll-card" href="../guides/${g.slug}"><div class="coll-card-head"><strong>${htmlEsc(g.card)}</strong><span class="count">${g.count}</span></div><p>${htmlEsc(g.blurb)}</p></a>`
-).join('');
+const longGuideCard = (g) =>
+  `<a class="coll-card" href="../guides/${g.slug}"><div class="coll-card-head"><strong>${htmlEsc(g.card)}</strong><span class="count">${g.count}</span></div><p>${htmlEsc(g.blurb)}</p></a>`;
+const longGuideCards = LONG_GUIDE_PAGES.filter((g) => g.group !== 'use-case').map(longGuideCard).join('');
+const useCaseGuideCards = LONG_GUIDE_PAGES.filter((g) => g.group === 'use-case').map(longGuideCard).join('');
 const HUB_ANSWER = `Which free LLM API fits your constraint? Each of the ${GUIDES.length} guides answers one “is there a free API for…?” question, and ${LONG_GUIDE_PAGES.length} longer ones walk through a choice; each of the ${COLLECTIONS.length} collections is a live filter of our dated, sourced dataset by one condition: no card, no phone or commercial use.`;
 const HUB_META = `${GUIDES.length + LONG_GUIDE_PAGES.length} guides and ${COLLECTIONS.length} collections of free LLM APIs, filtered from a dated dataset: no card, no phone, commercial use, OpenAI-compatible.`;
 const HUB_FAQ = [
@@ -1113,6 +1119,7 @@ const hubMain =
   `<p class="answer"><strong>${htmlEsc(HUB_ANSWER)}</strong></p>` +
   `<p class="hub-find">Several constraints at once? <a href="../find/">Find my free API</a>: answer six quick questions and get a ranked shortlist.</p>` +
   `<h2 class="eyebrow">Guides: answers to one question</h2><div class="coll-grid">${guidesCards}</div>` +
+  `<h2 class="eyebrow" style="margin-top:26px">Guides: by what you’re building</h2><div class="coll-grid">${useCaseGuideCards}</div>` +
   `<h2 class="eyebrow" style="margin-top:26px">Guides: how to choose</h2><div class="coll-grid">${longGuideCards}</div>` +
   `<h2 class="eyebrow" style="margin-top:26px">Collections: one filter, live</h2><div class="coll-grid">${hubCards}</div>` +
   `<h2 class="eyebrow" style="margin-top:26px">FAQ</h2>` + HUB_FAQ.map((f) => `<div class="faq-item"><h3>${htmlEsc(f.q)}</h3><p>${htmlEsc(f.a)}</p></div>`).join('') +
