@@ -98,9 +98,9 @@ test('provider "Get a free key" button is conditional, tracked as data-link="key
     const present = readFileSync(join(ROOT, 'site/p', `${first.slug}.html`), 'utf8');
     assert.equal((present.match(/>Get a free key ↗/g) || []).length, 1);
     assert.ok(present.includes(`<a class="btn primary" href="https://example.com/keys?tab=api&amp;new=1" target="_blank" rel="noopener" data-provider="${first.slug}" data-link="keys">Get a free key ↗<span class="sr-only"> (opens in a new tab)</span></a>`));
-    // between the free limits and the quickstart
+    // right after What's free, before the quickstart and the limits (the owner's order)
     const at = (s) => present.indexOf(s);
-    assert.ok(at('id="limits"') < at('>Get a free key ↗') && at('>Get a free key ↗') < at('id="quickstart"'));
+    assert.ok(at('id="whats-free"') < at('>Get a free key ↗') && at('>Get a free key ↗') < at('id="quickstart"') && at('id="quickstart"') < at('id="limits"'));
     const absent = readFileSync(join(ROOT, 'site/p', `${second.slug}.html`), 'utf8');
     assert.doesNotMatch(absent, /Get a free key/);
     for (const file of ['site/providers.json', 'site/api/v1/providers.json']) {
@@ -930,7 +930,7 @@ test('a confirmed card requirement is never hidden in the README top-20 or the e
 
   // Explorer: the full-list surface must show the card flag for every gated provider.
   for (const p of walled) {
-    const row = explorer.split('\n').find((l) => l.includes(`href="p/${p.slug}"`));
+    const row = explorer.split('\n').find((l) => l.includes(`class="name-link" href="p/${p.slug}"`));
     assert.ok(row, `${p.slug}: no explorer row found`);
     assert.match(row, /<span class="need-req">Card required[,<]/, `${p.slug}: explorer row hides the card requirement`);
   }
@@ -985,9 +985,9 @@ test('the verified badge colours by freshness — fresh / due / stale', () => {
     return { slug: 'demo', name: 'Demo', category: 'ongoing', verified: true, last_verified: d.toISOString().slice(0, 10) };
   };
   const row = (p) => explorerRowHtml(p, { now: '2026-08-13' });
-  assert.match(row(mk(10)), /badge b-ok/, 'fresh entry must stay green');
-  assert.match(row(mk(75)), /badge b-warn/, 'due entry must turn yellow');
-  assert.match(row(mk(95)), /badge b-stale/, 'stale entry must turn red');
+  assert.match(row(mk(10)), /stamp-pill b-ok/, 'fresh entry must stay green');
+  assert.match(row(mk(75)), /stamp-pill b-warn/, 'due entry must turn yellow');
+  assert.match(row(mk(95)), /stamp-pill b-stale/, 'stale entry must turn red');
   assert.match(row(mk(75)), /title="Verified 75d ago/, 'due badge explains its age');
 });
 
@@ -2364,16 +2364,23 @@ test('/submit/ links to the GitHub issue forms, has no form, and publishes one a
   assert.ok(readFileSync(join(ROOT, 'site/sitemap.xml'), 'utf8').includes('/submit/'), 'in the sitemap');
 });
 
-test('the green header keeps AA contrast: white 7:1 and the muted text 4.5:1 on the bar', () => {
+test('the header keeps AA contrast in both themes: ink 7:1, the muted menu text and the brand accent 4.5:1 on its ground', () => {
+  // Brand H1: the header is the page ground (white or near-black) with a hairline, not a coloured bar. Mutant: a header token
+  // that drops below its ratio in either theme, or a hover that paints a fixed white over the light ground; this test turns red.
   const css = readFileSync(join(ROOT, 'site/styles.css'), 'utf8');
-  const token = (n) => { const m = css.match(new RegExp('--' + n + ':\\s*(#[0-9a-fA-F]{6})')); assert.ok(m, 'the token --' + n); return m[1]; };
   const lum = (hex) => { const c = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255).map((v) => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4)); return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]; };
   const ratio = (a, b) => { const [x, y] = [lum(a), lum(b)].sort((p, q) => q - p); return (x + 0.05) / (y + 0.05); };
-  const bar = token('header-bar');
-  assert.ok(ratio(token('on-header'), bar) >= 7, 'white on the bar');
-  assert.ok(ratio(token('on-header-muted'), bar) >= 4.5, 'muted text on the bar');
-  assert.ok(ratio(token('on-header-accent'), bar) >= 4.5, 'the accent word of the brand on the bar');
+  const block = (selector) => css.slice(css.indexOf(selector + ' {'), css.indexOf('\n}', css.indexOf(selector + ' {')));
+  for (const [theme, b] of [['dark', block(':root')], ['light', block('[data-theme="light"]')]]) {
+    const token = (n) => { const m = b.match(new RegExp('--' + n + ':\\s*(#[0-9a-fA-F]{6})')); assert.ok(m, theme + ': the token --' + n); return m[1]; };
+    const bar = token('header-bar');
+    assert.equal(bar.toLowerCase(), token('bg').toLowerCase(), theme + ': the header sits on the page ground');
+    assert.ok(ratio(token('on-header'), bar) >= 7, theme + ': ink on the header');
+    assert.ok(ratio(token('on-header-muted'), bar) >= 4.5, theme + ': muted menu text on the header');
+    assert.ok(ratio(token('on-header-accent'), bar) >= 4.5, theme + ': the accent word of the brand on the header');
+  }
   assert.match(css, /\.site-header \.icon-btn \.star-count, \.site-header \.icon-btn:hover \.star-count \{ color: var\(--on-header\); \}/, 'the small star count stays AA over the translucent button backgrounds');
+  assert.doesNotMatch(css, /\.site-header \.icon-btn:hover \{[^}]*rgba\(255, 255, 255/, 'no fixed white hover over the light header');
 });
 
 test('best-facts: the three cards show fields of the record as they are, and a missing field reads «not stated»', () => {
@@ -2471,7 +2478,7 @@ test('home: no good-first-issues button in the hero, a fixed table layout, a lin
   assert.match(css, /#table thead th \{ position: sticky; top: var\(--header-h\);/, 'the header row is pinned under the header');
   assert.match(css, /#table thead th \{ top: calc\(var\(--header-h\) \+ var\(--controls-h, 120px\)\); \}/, 'and under the filter bar where that is pinned');
   assert.match(css, /main#explorer > \.wrap, \.controls \.controls-inner \{ max-width: 1480px; \}/, 'a wider table');
-  assert.match(css, /\.hero \.lede \{ max-width: 86ch; \}/, 'a wider lede');
+  assert.match(css, /\.hero \.lede \{ margin: 0 0 14px; max-width: 54ch;/, 'the lede fills the left column of the brand H1 hero');
   const row = explorerRowHtml({ slug: 'acme', name: 'Acme', category: 'ongoing', free_tier: 'Free', notes: 'n', best_for: 'b' });
   assert.match(row, /<div class="name-line"><a class="name-link" href="p\/acme" title="Acme">Acme<\/a> <span class="badge b-ongoing"[^>]*>Ongoing<\/span><\/div>/, 'the name is a link, with its type right after it');
   assert.match(row, /<div class="clamp2" title="Free">Free<\/div>/, 'the free text is clamped and complete in the title');
@@ -2483,7 +2490,7 @@ test('provider page: the score is visible, no «All providers» link or «Report
   // Mutant: show the old button or link again, drop data-pager, or lose the score line; this test turns red.
   const html = readFileSync(join(ROOT, 'site/p/groq.html'), 'utf8');
   const main = html.slice(html.indexOf('<main id="main">'));
-  assert.match(main, /<div class="prov-score"><p class="score-rank"><strong>#\d+ of \d+<\/strong> scored <span class="muted">\(\d+(\.\d)? \/ 100\)<\/span>/, 'the score of the provider, as a place (Q13)');
+  assert.match(main, /<div class="prov-score prov-score-line"><p class="score-rank"><strong>#\d+ of \d+<\/strong> scored <span class="muted">\(\d+(\.\d)? \/ 100\)<\/span>/, 'the score of the provider, as a place (Q13)');
   assert.match(main, /<a href="\.\.\/best\/methodology\/">how it is computed<\/a>/, 'a link to the method');
   // Mutant: drop the underline and the links in the score line rely on colour alone, which Lighthouse fails (link-in-text-block).
   assert.match(readFileSync(join(ROOT, 'site/styles.css'), 'utf8'), /\.prov-score a \{[^}]*text-decoration: underline/, 'the links of the score line are underlined');
@@ -2499,7 +2506,7 @@ test('provider page: the score is visible, no «All providers» link or «Report
   assert.match(dp, /<dt><svg class="i" aria-hidden="true"><use href="#ic-clock"\/><\/svg>Retention<\/dt>/);
   const css = readFileSync(join(ROOT, 'site/styles.css'), 'utf8');
   assert.match(css, /\.prov-reqs \.req \{[^}]*text-align: center/, 'the cards are centred');
-  assert.match(css, /\.prov-summary h2 \{[^}]*font-size: 1\.45rem/, '«What\'s free» is larger');
+  assert.match(css, /\.prov-summary h2 \{[^}]*font-size: 1\.6rem/, '«What\'s free» is larger');
 });
 
 test('pager.js: pages of 5 rows, the window is clamped, and the script never touches the URL', async () => {
@@ -2939,10 +2946,12 @@ test('a11y: the requirement filters stay reachable by keyboard and screen reader
   assert.match(index, /<legend>Must have<\/legend>/);
 });
 
-test('a11y: small fixes stay in place (finite caret, placeholder colour, no 320px minimum, focus kept after Clear and Escape)', () => {
+test('a11y: small fixes stay in place (no endless animation, placeholder colour, no 320px minimum, focus kept after Clear and Escape)', () => {
   const css = readFileSync(join(ROOT, 'site/styles.css'), 'utf8');
-  const caret = css.split('\n').find((l) => l.startsWith('.caret {'));
-  assert.ok(caret && !/infinite/.test(caret), 'the caret blink stops by itself (WCAG 2.2.2)');
+  // Brand H1 dropped the blinking caret; the title's "breathing" runs once, and nothing on the site loops forever (WCAG 2.2.2).
+  assert.doesNotMatch(css, /animation:[^;}]*infinite/, 'no animation loops forever');
+  assert.match(css, /\.h1-key \{ display: inline-block; animation: breathe 5s ease-in-out 1; \}/, 'the title breathes once');
+  assert.match(css, /@media \(prefers-reduced-motion: no-preference\) \{\n  \.h1-key \{ display: inline-block; animation/, 'and only when motion is welcome');
   assert.match(css, /::placeholder\s*\{[^}]*color:\s*var\(--muted\)/, 'placeholder text uses the muted colour');
   assert.doesNotMatch(css, /\.limits-table\s*\{[^}]*min-width:\s*320px/, 'the limits table has no 320px minimum (reflow at 320px)');
   assert.match(css, /minmax\(min\(280px, 100%\), 1fr\)/, 'collection tracks never exceed the container');
@@ -3406,6 +3415,88 @@ test('a11y: the semantic colour tokens (ok, unk, bad, chg, trial, m-*, control) 
     assert.equal(raw(dark, legacy), `var(--${semantic})`, `--${legacy} aliases --${semantic}`);
     const outsideTokens = css.slice(css.indexOf('\n}', css.indexOf('[data-theme="light"] {')));
     assert.ok(!outsideTokens.includes(`var(--${legacy})`), `no component rule reads var(--${legacy}); use var(--${semantic})`);
+  }
+});
+
+// ---- brand H1: one graphic hue per modality, light by default ----
+test('brand: every schema modality has a graphic hue (--h-*), and no rule paints text with one', () => {
+  // The hues are fills for the auras and dots; text uses the darkened --m-* tokens checked above. Mutant: drop a hue, or set
+  // color: var(--h-text) on a label; this test turns red.
+  const css = readFileSync(join(ROOT, 'site/styles.css'), 'utf8');
+  const schema = JSON.parse(readFileSync(join(ROOT, 'data/schema.json'), 'utf8'));
+  const findEnum = (o) => { if (!o || typeof o !== 'object') return null; if (o.modalities?.items?.enum) return o.modalities.items.enum; for (const v of Object.values(o)) { const r = findEnum(v); if (r) return r; } return null; };
+  for (const m of findEnum(schema)) assert.match(css, new RegExp('--h-' + m + ':\\s*#[0-9a-f]{6};', 'i'), '--h-' + m);
+  assert.doesNotMatch(css, /(?:^|[;{\s])color:\s*var\(--h-/m, 'no text colour from a graphic hue');
+});
+
+test('brand: accent text on an accent tint (chips, badges, the active filter) uses --accent-dim and stays AA in both themes', () => {
+  // The accent itself reaches only 4.34:1 on its own 12 % tint in the light theme (Lighthouse color-contrast on .type).
+  // Mutant: a tinted chip back on color: var(--accent); this test turns red.
+  const css = readFileSync(join(ROOT, 'site/styles.css'), 'utf8');
+  for (const rule of css.match(/[^{}]+\{[^}]*background: color-mix\(in srgb, var\(--accent\) \d+%, transparent\)[^}]*\}/g) || []) {
+    assert.doesNotMatch(rule, /(?<![-\w])color: var\(--accent\);/, 'tinted rule with accent text: ' + rule.trim().slice(0, 80));
+  }
+  const block = (selector) => css.slice(css.indexOf(selector + ' {'), css.indexOf('\n}', css.indexOf(selector + ' {')));
+  const hex = (b, n) => b.match(new RegExp('--' + n + ':\\s*(#[0-9a-fA-F]{6})'))[1];
+  const mix = (a, b, t) => '#' + [1, 3, 5].map((i) => Math.round(parseInt(a.slice(i, i + 2), 16) * t + parseInt(b.slice(i, i + 2), 16) * (1 - t)).toString(16).padStart(2, '0')).join('');
+  for (const b of [block(':root'), block('[data-theme="light"]')]) {
+    for (const surface of ['bg', 'panel', 'panel-2']) {
+      const tint = mix(hex(b, 'accent'), hex(b, surface), 0.16);
+      assert.ok(contrast(hex(b, 'accent-dim'), tint) >= 4.5, `--accent-dim on a 16 % accent tint over --${surface}: ${contrast(hex(b, 'accent-dim'), tint).toFixed(2)}`);
+    }
+  }
+});
+
+test('brand: light is the default theme; dark comes from the system preference or the toggle', () => {
+  // Mutant: default back to dark when the system states no preference; this test turns red.
+  for (const rel of ['site/index.html', 'site/404.html', 'site/best/index.html']) {
+    const html = readFileSync(join(ROOT, rel), 'utf8');
+    assert.match(html, /<html lang="en" data-theme="light">/, rel + ': light before the guard runs');
+    assert.ok(html.includes("matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'"), rel + ': the guard picks dark only on request');
+    const guard = html.match(/<script>(\(function\(\)\{try\{var t=localStorage[^<]*)<\/script>/);
+    assert.ok(guard, rel + ': the theme guard');
+    assert.ok(html.includes("'sha256-" + createHash('sha256').update(guard[1]).digest('base64') + "'"), rel + ': the guard is pinned by hash in the CSP');
+  }
+});
+
+test('brand Cálida: the palette is the owner\'s final variant, value for value, in both themes', () => {
+  // The values of brand-drafts/08-variantes-h1.md, section "H1-e · Cálida" (docs/brand.md has the same table). Mutant:
+  // retune one token (say the accent back to the provisional magenta); this test turns red and names it.
+  const css = readFileSync(join(ROOT, 'site/styles.css'), 'utf8');
+  const block = (selector) => css.slice(css.indexOf(selector + ' {'), css.indexOf('\n}', css.indexOf(selector + ' {')));
+  const hex = (b, n) => { const m = b.match(new RegExp('^\\s*--' + n + ':\\s*(#[0-9a-fA-F]{6})', 'm')); assert.ok(m, '--' + n); return m[1].toLowerCase(); };
+  const SPEC = {
+    light: { bg: '#fff9f6', panel: '#ffffff', text: '#22140f', muted: '#6a5048', border: '#f0e2db', control: '#9a8179', accent: '#9c4a00',
+      'accent-ink': '#ffffff', ok: '#2f6b1f', unk: '#7f5a00', bad: '#b3261e', chg: '#7a2e8c', 'seal-bg': '#ffebd9',
+      'h-text': '#d9502a', 'h-vision': '#c48200', 'h-audio': '#c2185b', 'h-embeddings': '#8e7a00', 'h-image': '#d85a85', 'h-ocr': '#8b3a2e', 'h-rerank': '#7b2d6b' },
+    dark: { bg: '#17110f', panel: '#211915', text: '#fbf1ec', muted: '#c2a89e', border: '#352822', control: '#7a645b', accent: '#ffb25c',
+      'accent-ink': '#17110f', ok: '#9ad27f', unk: '#f2c14e', bad: '#ff8a7a', chg: '#e0a3f0', 'seal-bg': '#2e2119',
+      'h-text': '#ff7a4d', 'h-vision': '#f5b21f', 'h-audio': '#ff5c93', 'h-embeddings': '#c9b02e', 'h-image': '#ff9cbc', 'h-ocr': '#d97a62', 'h-rerank': '#c77ab8' },
+  };
+  for (const [theme, b] of [['dark', block(':root')], ['light', block('[data-theme="light"]')]]) {
+    for (const [name, value] of Object.entries(SPEC[theme])) assert.equal(hex(b, name), value, `${theme}: --${name}`);
+  }
+  assert.match(block(':root'), /--radius: 18px;/, 'the Cálida radius');
+});
+
+test('brand Cálida: graphic hues reach 3:1, the accent reads on the stamp, and buttons keep their text', () => {
+  // WCAG 1.4.11 for the aura bars and dots; 1.4.3 for the accent on --seal-bg (the ticket and the pill) and the button
+  // text on the accent. Mutant: a paler --h-vision in light, or a --seal-bg too close to the accent; this test turns red.
+  const css = readFileSync(join(ROOT, 'site/styles.css'), 'utf8');
+  const block = (selector) => css.slice(css.indexOf(selector + ' {'), css.indexOf('\n}', css.indexOf(selector + ' {')));
+  const hex = (b, n) => b.match(new RegExp('^\\s*--' + n + ':\\s*(#[0-9a-fA-F]{6})', 'm'))[1];
+  const schema = JSON.parse(readFileSync(join(ROOT, 'data/schema.json'), 'utf8'));
+  const findEnum = (o) => { if (!o || typeof o !== 'object') return null; if (o.modalities?.items?.enum) return o.modalities.items.enum; for (const v of Object.values(o)) { const r = findEnum(v); if (r) return r; } return null; };
+  for (const [theme, b] of [['dark', block(':root')], ['light', block('[data-theme="light"]')]]) {
+    for (const m of findEnum(schema)) {
+      for (const surface of ['bg', 'panel']) {
+        const r = contrast(hex(b, 'h-' + m), hex(b, surface));
+        assert.ok(r >= 3, `${theme}: --h-${m} on --${surface} is ${r.toFixed(2)}:1, below 3:1`);
+      }
+    }
+    assert.ok(contrast(hex(b, 'accent'), hex(b, 'seal-bg')) >= 4.5, `${theme}: the accent on --seal-bg`);
+    assert.ok(contrast(hex(b, 'text'), hex(b, 'seal-bg')) >= 4.5, `${theme}: ink on --seal-bg`);
+    assert.ok(contrast(hex(b, 'accent-ink'), hex(b, 'accent')) >= 4.5, `${theme}: button text on the accent`);
   }
 });
 

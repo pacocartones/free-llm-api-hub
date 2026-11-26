@@ -1,9 +1,9 @@
 // Fonts in the head, asset fingerprints, security.txt and favicon.ico (scripts/lib/assets.mjs, security-txt.mjs, ico.mjs).
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync, existsSync } from 'node:fs';
+import { readFileSync, existsSync, statSync, readdirSync } from 'node:fs';
 import { createHash } from 'node:crypto';
-import { FONTS, fontHead, fingerprintHtml, hash8 } from './lib/assets.mjs';
+import { FONTS, FONT_BUDGET_BYTES, fontHead, fingerprintHtml, hash8 } from './lib/assets.mjs';
 import { securityTxt, securityTxtExpires, SECURITY_TXT_ISSUED } from './lib/security-txt.mjs';
 import { pngToIco } from './lib/ico.mjs';
 
@@ -11,15 +11,31 @@ const file = (rel) => new URL(`../${rel}`, import.meta.url);
 const read = (rel) => readFileSync(file(rel), 'utf8');
 const sha8 = (rel) => createHash('sha256').update(readFileSync(file(rel))).digest('hex').slice(0, 8);
 
-test('fontHead preloads every weight it declares, with the same URL, and never swaps fonts in late', () => {
+test('fontHead preloads every face it declares, with the same URL, and never swaps fonts in late', () => {
   const head = fontHead('../');
   for (const f of FONTS) {
-    assert.ok(head.includes(`<link rel="preload" href="../${f.file}" as="font" type="font/woff2" crossorigin>`), `preload ${f.weight}`);
-    assert.ok(head.includes(`font-weight:${f.weight};font-display:optional;src:url('../${f.file}')`), `@font-face ${f.weight}`);
+    assert.ok(head.includes(`<link rel="preload" href="../${f.file}" as="font" type="font/woff2" crossorigin>`), `preload ${f.file}`);
+    assert.ok(head.includes(`@font-face{font-family:'${f.family}';font-style:normal;font-weight:${f.weight};font-stretch:${f.stretch};font-display:optional;src:url('../${f.file}')`), `@font-face ${f.file}`);
   }
   // A late swap re-flows the hero on a slow network; `optional` keeps the first paint's font for the whole view.
   assert.doesNotMatch(head, /font-display:swap/);
   assert.doesNotMatch(read('site/styles.css'), /@font-face/, 'the faces live in the head only, so the preload and the face never disagree');
+});
+
+test('brand fonts: Roboto Flex and DM Mono only, within the font budget, each family with its OFL licence next to it', () => {
+  // Mutant: add a weight that takes the fonts over 90 KB, or ship a family without its licence; this test turns red.
+  assert.deepEqual([...new Set(FONTS.map((f) => f.family))], ['Roboto Flex', 'DM Mono']);
+  const total = FONTS.reduce((n, f) => n + statSync(file('site/' + f.file)).size, 0);
+  assert.ok(total <= FONT_BUDGET_BYTES, `fonts weigh ${total} bytes, over the ${FONT_BUDGET_BYTES}-byte budget`);
+  assert.equal(FONT_BUDGET_BYTES, 90 * 1024, 'the brand plan budget');
+  for (const [lic, author] of [['site/fonts/OFL-RobotoFlex.txt', 'Roboto Flex Project Authors'], ['site/fonts/OFL-DMMono.txt', 'DM Mono Project Authors']]) {
+    const text = read(lic);
+    assert.ok(text.includes(author), `${lic}: copyright line`);
+    assert.ok(text.includes('SIL OPEN FONT LICENSE Version 1.1'), `${lic}: the OFL text`);
+  }
+  // Every woff2 in site/fonts is one FONTS declares: no orphan file ships without a face and a licence.
+  const shipped = readdirSync(file('site/fonts')).filter((n) => n.endsWith('.woff2')).sort();
+  assert.deepEqual(shipped, FONTS.map((f) => f.file.replace('fonts/', '')).sort());
 });
 
 test('fingerprintHtml stamps local styles, scripts and fonts by their hash, resolved from the page, and is idempotent', () => {

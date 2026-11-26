@@ -22,10 +22,10 @@ Use the same claim, source and validation rules. Keep one task in progress while
 
 ### Recurring issues: where to find work each month
 
-Some work comes back on a schedule, so there is always something open:
+Some work comes back on a schedule, so there is always something open. These lists carry the `tracker` label: you don't `/take` a tracker, you comment on it or take the task it links to.
 
-- **Free tier changes — *Month YYYY*** (labels `data`, `help wanted`), opened on the 1st by [`monthly-issues.yml`](.github/workflows/monthly-issues.yml). It lists what changed in the dataset the month before (providers added and removed, limit and flag changes, from the same history as the [What changed](https://freellmapihub.com/changes/) page). Comment with a change we missed: the provider, what changed, a link to the provider's own page and the UTC day you read it. A comment is enough.
-- **New provider candidates — *Month YYYY*** (label `help wanted`), opened the same day. Propose one provider per comment under [docs/inclusion-criteria.md](docs/inclusion-criteria.md); the issue states the current non-text share against the 35% guardrail. It is not a `good first issue`: adding a provider touches more than two files.
+- **Free tier changes — *Month YYYY*** (labels `data`, `help wanted`, `tracker`), opened on the 1st by [`monthly-issues.yml`](.github/workflows/monthly-issues.yml). It lists what changed in the dataset the month before (providers added and removed, limit and flag changes, from the same history as the [What changed](https://freellmapihub.com/changes/) page). Comment with a change we missed: the provider, what changed, a link to the provider's own page and the UTC day you read it. A comment is enough.
+- **New provider candidates — *Month YYYY*** (labels `data`, `help wanted`, `tracker`), opened the same day. Propose one provider per comment under [docs/inclusion-criteria.md](docs/inclusion-criteria.md); the issue states the current non-text share against the 35% guardrail. It is not a `good first issue`: adding a provider touches more than two files.
 - **[#4](https://github.com/pacocartones/free-llm-api-hub/issues/4) weekly re-verification worklist**, refreshed every Monday: the entries whose verification is oldest.
 - **Monthly source check** and **Source watch** issues, opened only when a cited link or quote stops matching its page: each line is a lead to re-check from a normal connection.
 - **"Pick one provider" good first issues**: each lists several providers; one provider is a complete pull request, and the list is refreshed as entries are done.
@@ -193,7 +193,7 @@ There are two kinds of issue:
 - **Labelled both `good first issue` and `data`** (a data question answered from the provider's own page): don't claim it, open a pull request when it's ready. The first correct, sourced PR is merged. If you found something useful but won't open a PR, post it in the issue with the link and the date; the PR that uses it credits you.
 - **Everything else:** comment `/take` on its own as the first line of an issue comment. A bot assigns it to you if nobody has it and you have fewer than two open issues assigned. Check the assignee and bot reply; if there is no reply, ask in the issue before starting duplicate work. If you can't continue, comment `/release` on its own as the first line; that's completely fine. Check that your assignment was removed so someone else can take it. Share any useful findings or draft PR link when handing it back. An assigned issue with no activity for two weeks may be offered to another contributor, after a ping (7 days during a program, see [Programs](#programs-social-winter-of-code-and-similar)). A pull request for an issue assigned to someone else waits for them.
 
-We read every pull request and reply as soon as we can. A reply is a real answer (a review, a question or an assignment), not an acknowledgement.
+We aim to give issues, pull requests and `/take` requests a real reply within **3 business days**. This is a best-effort goal, not a guarantee (security reports follow [SECURITY.md](SECURITY.md)). A reply is a real answer (a review, a question or an assignment), not an acknowledgement. During a program, the faster times in [Reviews and response times](#reviews-and-response-times) apply.
 
 ## Good first issues
 
@@ -201,10 +201,12 @@ An issue carries the `good first issue` label only if all of these hold:
 
 1. **No third-party account or payment.** Provider facts can be checked on public official pages; docs and code tasks can be done from the public repository and site. (This is why `phone_required` questions are not good first issues: most providers don't document it, and answering needs a sign-up. They live in the [#7](https://github.com/pacocartones/free-llm-api-hub/issues/7) checklist instead.)
 2. **One or two files**, named in the issue.
-3. **A named check** that must pass, for example `npm run build && npm test`, or `npm run check` for `data/` changes.
+3. **A named check** that must pass, for example `npm run validate` for `data/` changes, or `npm run build && npm test`.
 4. **Under about two hours** for someone new to the repository.
 5. **Unclaimed:** no assignee and no open pull request linked to it.
 6. **Reviewed by a maintainer in the last 30 days.**
+
+We keep at most about 30 good first issues open, so each one stays current and gets a quick review. Trackers (label `tracker`) are never good first issues.
 
 Maintainers can draw new tasks from the [#7](https://github.com/pacocartones/free-llm-api-hub/issues/7) and [#8](https://github.com/pacocartones/free-llm-api-hub/issues/8) checklists or from the weekly re-verification batch. If the provider's docs don't answer the question, that is a useful result too: say so in the issue with the link and the date, and the field stays `null`.
 
