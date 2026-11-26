@@ -323,10 +323,10 @@
    "kind": "sentence",
    "text": "No AI Training on Your Data: We do not use your prompts, training data, or API inputs to train or improve our AI models without your explicit opt-in.",
    "source_url": "https://fireworks.ai/privacy-policy",
-   "read_on": "2026-10-15",
+   "read_on": "2026-11-25",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
-   "page_sha256": "c47bfd258ed2f573a44c557ae68a1b679c3e0b5f8267f52957e27c4c7cabae40"
+   "page_sha256": "abe7586d38f3e1474f906d6ba8b3e833f0c8816bb776800f8009747a7d52174a"
   },
   {
    "id": "fireworks-ai.absence_check",
@@ -345,10 +345,10 @@
     "plan": 0
    },
    "source_url": "https://fireworks.ai/privacy-policy",
-   "read_on": "2026-10-15",
+   "read_on": "2026-11-25",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
-   "page_sha256": "c47bfd258ed2f573a44c557ae68a1b679c3e0b5f8267f52957e27c4c7cabae40"
+   "page_sha256": "abe7586d38f3e1474f906d6ba8b3e833f0c8816bb776800f8009747a7d52174a"
   },
   {
    "id": "baseten.sentence",
@@ -378,10 +378,10 @@
    "kind": "sentence",
    "text": "Consistent with our Terms of Service, and unless otherwise agreed in writing or required to provide the Services, we do not use your inputs or outputs to train AI21’s foundational or generally available AI models.",
    "source_url": "https://www.ai21.com/terms-policies/privacy-policy/",
-   "read_on": "2026-10-15",
+   "read_on": "2026-11-25",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
-   "page_sha256": "3a2697b1e08e9928e6d77198a5c875b6abba4812f9d4c38020a03afe8086bb03"
+   "page_sha256": "9ef422aee409e1aa63a2d4ae16a3e265bd4a572aa864ba909b9f7aea3988bf3f"
   },
   {
    "id": "ai21.note_passage.1",
@@ -389,10 +389,10 @@
    "kind": "note_passage",
    "text": "Privacy Policy",
    "source_url": "https://www.ai21.com/terms-policies/privacy-policy/",
-   "read_on": "2026-10-15",
+   "read_on": "2026-11-25",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
-   "page_sha256": "3a2697b1e08e9928e6d77198a5c875b6abba4812f9d4c38020a03afe8086bb03"
+   "page_sha256": "9ef422aee409e1aa63a2d4ae16a3e265bd4a572aa864ba909b9f7aea3988bf3f"
   },
   {
    "id": "ai21.note_passage.2",
@@ -400,10 +400,10 @@
    "kind": "note_passage",
    "text": "for example, for individual-developer accounts",
    "source_url": "https://www.ai21.com/terms-policies/privacy-policy/",
-   "read_on": "2026-10-15",
+   "read_on": "2026-11-25",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
-   "page_sha256": "3a2697b1e08e9928e6d77198a5c875b6abba4812f9d4c38020a03afe8086bb03"
+   "page_sha256": "9ef422aee409e1aa63a2d4ae16a3e265bd4a572aa864ba909b9f7aea3988bf3f"
   },
   {
    "id": "ai21.note_passage.3",
@@ -411,10 +411,10 @@
    "kind": "note_passage",
    "text": "that processing is governed by our agreement with the customer",
    "source_url": "https://www.ai21.com/terms-policies/privacy-policy/",
-   "read_on": "2026-10-15",
+   "read_on": "2026-11-25",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
-   "page_sha256": "3a2697b1e08e9928e6d77198a5c875b6abba4812f9d4c38020a03afe8086bb03"
+   "page_sha256": "9ef422aee409e1aa63a2d4ae16a3e265bd4a572aa864ba909b9f7aea3988bf3f"
   },
   {
    "id": "ai21.absence_check",
@@ -433,10 +433,10 @@
     "plan": 0
    },
    "source_url": "https://www.ai21.com/terms-policies/privacy-policy/",
-   "read_on": "2026-10-15",
+   "read_on": "2026-11-25",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
-   "page_sha256": "3a2697b1e08e9928e6d77198a5c875b6abba4812f9d4c38020a03afe8086bb03"
+   "page_sha256": "9ef422aee409e1aa63a2d4ae16a3e265bd4a572aa864ba909b9f7aea3988bf3f"
   },
   {
    "id": "nlpcloud.sentence",
@@ -640,10 +640,10 @@
    "kind": "sentence",
    "text": "We never use your API requests, inputs, or outputs to train our embedding, reranker, or any other models.",
    "source_url": "https://jina.ai/embeddings/",
-   "read_on": "2026-10-15",
+   "read_on": "2026-11-25",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
-   "page_sha256": "8248d3aa3cb0d451fa61856ac51541b25728e09eebcfdc0bd480f278136edaae"
+   "page_sha256": "67212db1af451ce105cce2a95d7c3fc3b1562ad96c21b9debcee6d53e085ff22"
   },
   {
    "id": "deepgram.sentence",
@@ -651,10 +651,10 @@
    "kind": "sentence",
    "text": "We may also use Your Content to improve our Services, to develop other products and services, and for other business purposes, including training and testing our Models.",
    "source_url": "https://deepgram.com/terms",
-   "read_on": "2026-10-15",
+   "read_on": "2026-11-25",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
-   "page_sha256": "42fc8c93a7d1893ee3a402ac817f846f477ded0bfc6b16c0932a7c5bc84b7372"
+   "page_sha256": "588fe455baa6086eba219bbca3077ae5e9f03409452a424dc5e0f5fcd0b39aff"
   },
   {
    "id": "deepgram.note_passage.1",
@@ -662,10 +662,10 @@
    "kind": "note_passage",
    "text": "you may opt out of model training on a per-request basis by setting the applicable parameter in your request",
    "source_url": "https://deepgram.com/terms",
-   "read_on": "2026-10-15",
+   "read_on": "2026-11-25",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
-   "page_sha256": "42fc8c93a7d1893ee3a402ac817f846f477ded0bfc6b16c0932a7c5bc84b7372"
+   "page_sha256": "588fe455baa6086eba219bbca3077ae5e9f03409452a424dc5e0f5fcd0b39aff"
   },
   {
    "id": "assemblyai.sentence",
@@ -673,10 +673,10 @@
    "kind": "sentence",
    "text": "(iii) to train AssemblyAI’s artificial intelligence and machine learning models.",
    "source_url": "https://www.assemblyai.com/legal/terms-of-service",
-   "read_on": "2026-10-15",
+   "read_on": "2026-11-25",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
-   "page_sha256": "2e1b18c2cc443d7ca82740ce26bb5c0befb536f0ec8f4768c105f4ba6d0c4c75"
+   "page_sha256": "eab8ec47640829ac8d707658a51e5b88f13413ce21003350d61aae7507296a94"
   },
   {
    "id": "assemblyai.note_passage.1",
@@ -684,10 +684,10 @@
    "kind": "note_passage",
    "text": "Free users do not have the ability to opt out of the model improvement program.",
    "source_url": "https://www.assemblyai.com/docs/faq/how-to-opt-out-of-data-sharing-for-our-model-improvement-program",
-   "read_on": "2026-10-15",
+   "read_on": "2026-11-25",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
-   "page_sha256": "d3e92df175183957a1d4ca502bd3461354f35b21ce0a29275f394b8698ea40ee"
+   "page_sha256": "3b92cf904bf2e93a25f5ec0b16023f3d88cd1a4edfb7696e49cfc4855e2f238e"
   },
   {
    "id": "mixedbread.sentence",
@@ -744,6 +744,17 @@
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "7e94345821523a4c8a1a0b0a474fc7b9dafea62db0e11b7a36a9aba968f2eaca"
+  },
+  {
+   "id": "twelve-labs.sentence",
+   "slug": "twelve-labs",
+   "kind": "sentence",
+   "text": "in order to: (i) provide, maintain, enhance, train, and improve the Twelve Labs Services (including the training, re-training, fine-tuning, and improving the Twelve Labs Services)",
+   "source_url": "https://www.twelvelabs.io/legal/terms-of-use-2026.15.05",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "9475d45a093aa5672aad753cb419141790404454f78d04c9a7b7d7da75cddc8a"
   },
   {
    "id": "llamaparse.sentence",
@@ -829,10 +840,10 @@
    "kind": "sentence",
    "text": "you may opt out of our use of your Content for training at any time by navigating to the 'Data use' menu in the 'Terms and Privacy' section of your ElevenLabs account.",
    "source_url": "https://elevenlabs.io/terms-of-use",
-   "read_on": "2026-10-15",
+   "read_on": "2026-11-25",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
-   "page_sha256": "e1aace949855493f0c20860532894ea9eb0c8c84b98c55e85d132c6abe98062e"
+   "page_sha256": "634017d1f25f9a00f354ead32a5432051ca135086d6e9d61b88b52e3b0549d3f"
   },
   {
    "id": "sarvam-ai.sentence",
@@ -918,22 +929,22 @@
    "slug": "cartesia",
    "kind": "sentence",
    "text": "You may request that we not use certain categories of Your Content to train our Models by completing this online form",
-   "source_url": "https://cartesia.ai/legal/terms.html",
-   "read_on": "2026-10-15",
+   "source_url": "https://www.cartesia.ai/legal/terms.html",
+   "read_on": "2026-11-25",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
-   "page_sha256": "9399f9854cd2d68dce07f6bcfbdc9f8a785c7d06a3e8930b6cf81789fd32f5ff"
+   "page_sha256": "0c51c8696a9f516079d1332bcee43aa520d8df7160ceef16b61254b01b82f258"
   },
   {
    "id": "cartesia.note_passage.1",
    "slug": "cartesia",
    "kind": "note_passage",
    "text": "Training Opt-Out",
-   "source_url": "https://cartesia.ai/legal/terms.html",
-   "read_on": "2026-10-15",
+   "source_url": "https://www.cartesia.ai/legal/terms.html",
+   "read_on": "2026-11-25",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
-   "page_sha256": "9399f9854cd2d68dce07f6bcfbdc9f8a785c7d06a3e8930b6cf81789fd32f5ff"
+   "page_sha256": "0c51c8696a9f516079d1332bcee43aa520d8df7160ceef16b61254b01b82f258"
   },
   {
    "id": "photoroom.sentence",

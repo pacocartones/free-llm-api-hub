@@ -83,7 +83,9 @@ export function explorerRowHtml(p, opts = {}) {
 
   const typeCell =
     `<span class="badge ${p.category === 'ongoing' ? 'b-ongoing' : 'b-trial'}">${p.category === 'ongoing' ? 'Ongoing' : 'Trial'}</span>` +
-    `<div class="fmini">${FLAG_PAIRS.filter(([k, v]) => p[k] === v)
+    // The four production flags (lib/flags.mjs) in their fixed order, each with its shape; then the other
+    // icons of FLAG_PAIRS that are not one of those four (today: OpenAI-compatible).
+    `<div class="fmini">${flagsHtml(p, { mini: true })}${FLAG_PAIRS.filter(([k, v]) => p[k] === v && !FLAG_DEFS.some((d) => d.field === k))
       .map(([, , ic, t]) => `<span class="fmini-i" role="img" title="${t}" aria-label="${t}">${ICON(ic)}</span>`)
       .join('')}</div>`;
 
@@ -133,6 +135,7 @@ export function rowKeyTarget(key, index, count) {
 // the serialised copy (shared-rows.js) can pick them up from window.FLLM_RULES;
 // importing them here keeps the same names in scope for the server render.
 import { FLAG_PAIRS, freshnessStatus } from './rules.mjs';
+import { FLAG_DEFS, FLAG_MARKS, FLAG_UNKNOWN_WHY, flagValue, flagState, flagText, flagHtml, flagsHtml } from './flags.mjs';
 
 /**
  * The exact client bundle the browser runs (written to site/shared-rows.js by
@@ -148,11 +151,19 @@ window.FLLM_ROWS = (function () {
   const htmlEsc = ${htmlEsc.toString()};
   const ICON = ${ICON.toString()};
   const SLUG_RE = ${SLUG_RE.toString()};
+  const FLAG_DEFS = ${JSON.stringify(FLAG_DEFS)};
+  const FLAG_MARKS = ${JSON.stringify(FLAG_MARKS)};
+  const FLAG_UNKNOWN_WHY = ${JSON.stringify(FLAG_UNKNOWN_WHY)};
+  const flagValue = ${flagValue.toString()};
+  const flagState = ${flagState.toString()};
+  const flagText = ${flagText.toString()};
+  const flagHtml = ${flagHtml.toString()};
+  const flagsHtml = ${flagsHtml.toString()};
   const rowHtml = ${explorerRowHtml.toString()};
   const catchTags = ${catchTags.toString()};
   const catchCellHtml = ${catchCellHtml.toString()};
   const rowKeyTarget = ${rowKeyTarget.toString()};
-  return { rowHtml, rowKeyTarget };
+  return { rowHtml, rowKeyTarget, flagHtml, flagsHtml };
 })();
 `;
 }

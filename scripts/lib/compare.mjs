@@ -188,9 +188,10 @@ export function compareTableHtml(list, opts = {}) {
         `<div class="cmp-sub">The provider's own ${list.length > 1 ? 'figures' : 'figure'}, checked ${cell([...new Set(list.map((e) => e.checked))].join(', '))}; not our measurement and not a like-for-like benchmark</div>`;
     }],
     ['Modalities', (p) => cell((p.modalities || []).join(', ') || '—')],
-    ['Free models (sample)', (p) => (p.models_free && p.models_free.length)
+    ['Free models (sample)', (p) => ((p.models_free && p.models_free.length)
       ? p.models_free.map((m) => `<code>${cell(m)}</code>`).join(' ')
-      : '<span class="tri tri-unk">no sample</span>'],
+      : '<span class="tri tri-unk">no sample</span>') +
+      (safeUrl(p.models_url) ? `<div class="cmp-sub"><a href="${cell(safeUrl(p.models_url))}" target="_blank" rel="noopener">official catalogue ↗</a></div>` : '')],
     ['Official docs', (p) => safeUrl(p.docs_url)
       ? `<a href="${cell(safeUrl(p.docs_url))}" target="_blank" rel="noopener">${cell(safeUrl(p.docs_url).replace(/^https?:\/\//i, ''))}</a>`
       : '—'],
