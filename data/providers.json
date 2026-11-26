@@ -881,7 +881,8 @@
       "free_limits": {"requests_per_day":3000,"requests_per_minute":25,"scope":"Free plan, Embed API (Marengo 3.5): 3,000 requests per day for video, audio, image and text; 25 requests per minute for video and audio, 600 for image and text. Other APIs have their own limits","source":"https://docs.twelvelabs.io/docs/get-started/rate-limits","checked":"2026-10-09"},
       "field_checks": {"phone_required":{"status":"source_silent","checked":"2026-11-24","sources":["https://docs.twelvelabs.io/docs/get-started/quickstart","https://www.twelvelabs.io/legal/terms-of-use","https://www.twelvelabs.io/pricing"],"note":"Quickstart and pricing do not mention phone verification; the terms list phone numbers only as account information a user may provide"},"commercial_ok":{"status":"source_silent","checked":"2026-11-24","sources":["https://www.twelvelabs.io/legal/terms-of-use","https://www.twelvelabs.io/pricing"],"note":"Neither the terms nor the pricing page say whether the Free plan may be used commercially"}},
       "verified": true,
-      "last_verified": "2026-11-20"
+      "last_verified": "2026-11-20",
+      "data_policy": {"trains_on_prompts":true,"retention":null,"source":"https://www.twelvelabs.io/legal/terms-of-use-2026.15.05","checked":"2026-11-26","quote":"in order to: (i) provide, maintain, enhance, train, and improve the Twelve Labs Services (including the training, re-training, fine-tuning, and improving the Twelve Labs Services)","note":"The license covers Customer Data a user submits, prompts included. Enterprise customers can instead sign the Enterprise Terms with the AI Terms Addendum, which bars training on Inputs/Outputs except for the customer's benefit."}
     },
     {
       "slug": "ocr-space",

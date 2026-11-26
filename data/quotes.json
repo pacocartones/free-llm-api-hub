@@ -746,6 +746,17 @@
    "page_sha256": "7e94345821523a4c8a1a0b0a474fc7b9dafea62db0e11b7a36a9aba968f2eaca"
   },
   {
+   "id": "twelve-labs.sentence",
+   "slug": "twelve-labs",
+   "kind": "sentence",
+   "text": "in order to: (i) provide, maintain, enhance, train, and improve the Twelve Labs Services (including the training, re-training, fine-tuning, and improving the Twelve Labs Services)",
+   "source_url": "https://www.twelvelabs.io/legal/terms-of-use-2026.15.05",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "9475d45a093aa5672aad753cb419141790404454f78d04c9a7b7d7da75cddc8a"
+  },
+  {
    "id": "llamaparse.sentence",
    "slug": "llamaparse",
    "kind": "sentence",
