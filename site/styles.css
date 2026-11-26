@@ -484,7 +484,7 @@ table.sortable thead th:not(.sorted)::after { content: " ⇅"; opacity: .28; fon
    lede never touch the screen edge. */
 .page-hero .wrap { position: relative; z-index: 1; padding-top: 34px; padding-bottom: 26px; }
 .crumbs { font-size: .84rem; margin-bottom: 12px; font-family: var(--font-mono); }
-.crumbs a { color: var(--muted); }
+.crumbs a { color: var(--muted); text-decoration: underline; text-decoration-color: var(--border-strong); text-underline-offset: 3px; }
 /* One standard header for every generated page (pageHero() in scripts/build.mjs): breadcrumbs, title and subtitle are centred. */
 .page-hero .crumbs, .page-hero h1 { text-align: center; }
 .page-hero h1 { margin: 0 0 10px; font-size: clamp(1.6rem, 3.4vw, 2.2rem); max-width: none; }

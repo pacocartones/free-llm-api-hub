@@ -2428,7 +2428,7 @@ test('home: no good-first-issues button in the hero, a fixed table layout, a lin
   assert.match(css, /#table thead th \{ position: sticky; top: var\(--header-h\);/, 'the header row is pinned under the header');
   assert.match(css, /#table thead th \{ top: calc\(var\(--header-h\) \+ var\(--controls-h, 120px\)\); \}/, 'and under the filter bar where that is pinned');
   assert.match(css, /main#explorer > \.wrap, \.controls \.controls-inner \{ max-width: 1480px; \}/, 'a wider table');
-  assert.match(css, /\.hero \.lede \{ margin: 0 0 14px; max-width: 60ch;/, 'the lede fills the left column of the brand H1 hero');
+  assert.match(css, /\.hero \.lede \{ margin: 0 0 14px; max-width: 54ch;/, 'the lede fills the left column of the brand H1 hero');
   const row = explorerRowHtml({ slug: 'acme', name: 'Acme', category: 'ongoing', free_tier: 'Free', notes: 'n', best_for: 'b' });
   assert.match(row, /<a class="name-link" href="p\/acme">Acme<span class="name-go" aria-hidden="true"> ↗<\/span><\/a>/, 'the name is a link-button');
   assert.match(row, /<div class="clamp2" title="Free">Free<\/div>/, 'the free text is clamped and complete in the title');
@@ -2898,7 +2898,7 @@ test('a11y: small fixes stay in place (no endless animation, placeholder colour,
   const css = readFileSync(join(ROOT, 'site/styles.css'), 'utf8');
   // Brand H1 dropped the blinking caret; the title's "breathing" runs once, and nothing on the site loops forever (WCAG 2.2.2).
   assert.doesNotMatch(css, /animation:[^;}]*infinite/, 'no animation loops forever');
-  assert.match(css, /\.h1-key \{ animation: breathe 5s ease-in-out 1; \}/, 'the title breathes once');
+  assert.match(css, /\.h1-key \{ display: inline-block; animation: breathe 5s ease-in-out 1; \}/, 'the title breathes once');
   assert.match(css, /@media \(prefers-reduced-motion: no-preference\) \{\n  \.h1-key \{ animation/, 'and only when motion is welcome');
   assert.match(css, /::placeholder\s*\{[^}]*color:\s*var\(--muted\)/, 'placeholder text uses the muted colour');
   assert.doesNotMatch(css, /\.limits-table\s*\{[^}]*min-width:\s*320px/, 'the limits table has no 320px minimum (reflow at 320px)');
