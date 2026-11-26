@@ -138,9 +138,9 @@ test('freshness is said in words and by the stamp\'s shape, not only by colour a
   assert.match(fresh, /<span class="sr-only">Verified, fresh: <\/span>/);
   assert.match(due, /<span class="sr-only">Verified, due for re-check: <\/span>/);
   assert.match(stale, /<span class="sr-only">Verified, stale: re-check overdue: <\/span>/);
-  assert.match(fresh, /<span class="stamp-mark" aria-hidden="true">✓<\/span>/);
-  assert.match(due, /class="stamp badge b-warn"/, 'due: the dashed stamp (styles.css draws .stamp.b-warn dashed)');
-  assert.match(stale, /<span class="stamp-mark" aria-hidden="true">!<\/span>/, 'stale uses another mark than fresh');
+  assert.match(fresh, /<span class="stamp-dot" aria-hidden="true"><\/span>/);
+  assert.match(due, /class="stamp stamp-pill b-warn"/, 'due: the dashed pill (styles.css draws .stamp-pill.b-warn dashed)');
+  assert.match(stale, /<span class="stamp-dot" aria-hidden="true">!<\/span>/, 'stale marks its dot, not only its colour');
 });
 
 test('the explorer announces how many providers are shown, in a permanent live region', () => {
@@ -186,9 +186,9 @@ test('freshness status drives the badge class and title', () => {
     return t.toISOString().slice(0, 10);
   };
   const rowHtml = clientRowHtml();
-  assert.match(rowHtml({ ...base, last_verified: d(10) }, { now: '2026-08-13' }), /badge b-ok/);
-  assert.match(rowHtml({ ...base, last_verified: d(75) }, { now: '2026-08-13' }), /badge b-warn/);
-  assert.match(rowHtml({ ...base, last_verified: d(95) }, { now: '2026-08-13' }), /badge b-stale/);
+  assert.match(rowHtml({ ...base, last_verified: d(10) }, { now: '2026-08-13' }), /stamp-pill b-ok/);
+  assert.match(rowHtml({ ...base, last_verified: d(75) }, { now: '2026-08-13' }), /stamp-pill b-warn/);
+  assert.match(rowHtml({ ...base, last_verified: d(95) }, { now: '2026-08-13' }), /stamp-pill b-stale/);
   assert.match(rowHtml({ ...base, last_verified: d(75) }, { now: '2026-08-13' }), /title="Verified 75d ago/);
 });
 

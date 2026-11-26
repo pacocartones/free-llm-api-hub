@@ -977,9 +977,9 @@ test('the verified badge colours by freshness — fresh / due / stale', () => {
     return { slug: 'demo', name: 'Demo', category: 'ongoing', verified: true, last_verified: d.toISOString().slice(0, 10) };
   };
   const row = (p) => explorerRowHtml(p, { now: '2026-08-13' });
-  assert.match(row(mk(10)), /badge b-ok/, 'fresh entry must stay green');
-  assert.match(row(mk(75)), /badge b-warn/, 'due entry must turn yellow');
-  assert.match(row(mk(95)), /badge b-stale/, 'stale entry must turn red');
+  assert.match(row(mk(10)), /stamp-pill b-ok/, 'fresh entry must stay green');
+  assert.match(row(mk(75)), /stamp-pill b-warn/, 'due entry must turn yellow');
+  assert.match(row(mk(95)), /stamp-pill b-stale/, 'stale entry must turn red');
   assert.match(row(mk(75)), /title="Verified 75d ago/, 'due badge explains its age');
 });
 
