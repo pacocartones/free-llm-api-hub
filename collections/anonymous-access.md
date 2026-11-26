@@ -8,7 +8,7 @@ APIs whose own pages say they work with no account at all: an anonymous endpoint
 
 Providers whose **own page says the API can be called with no account** (`anonymous_access`: the page, the day it was read and the sentence). Expect the lowest limits and queue priority. A provider whose pages do not say it is not listed, which never means it needs an account.
 
-**4 of 74 tracked providers** match.
+**4 of 77 tracked providers** match.
 
 Each row ends with the provider’s own sentence about anonymous access and any condition its pages attach to it.
 
