@@ -61,6 +61,18 @@
       "of": 6,
       "rank": 5
     },
+    "experiential-labs": {
+      "total": 42.6,
+      "confirmed": 4,
+      "of": 6,
+      "rank": 6
+    },
+    "requesty": {
+      "total": 41.7,
+      "confirmed": 3,
+      "of": 6,
+      "rank": null
+    },
     "jina-ai": {
       "total": 41,
       "confirmed": 3,
@@ -89,7 +101,7 @@
       "total": 37.1,
       "confirmed": 4,
       "of": 6,
-      "rank": 6
+      "rank": 7
     },
     "assemblyai": {
       "total": 37,
@@ -199,6 +211,12 @@
       "of": 6,
       "rank": null
     },
+    "kilo-gateway": {
+      "total": 33.9,
+      "confirmed": 2,
+      "of": 6,
+      "rank": null
+    },
     "moondream": {
       "total": 33.9,
       "confirmed": 2,
@@ -233,7 +251,7 @@
       "total": 32.4,
       "confirmed": 4,
       "of": 6,
-      "rank": 7
+      "rank": 8
     },
     "alibaba-model-studio": {
       "total": 31.3,

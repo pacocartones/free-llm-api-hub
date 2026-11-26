@@ -8,7 +8,7 @@ Free API tiers that go beyond text: vision, image, audio/speech, embeddings and 
 
 Free tiers that reach **beyond plain text** — vision, image, audio/speech, embeddings or rerank on the free plan.
 
-**60 of 79 tracked providers** match.
+**60 of 82 tracked providers** match.
 
 | Provider | Type | What's free | The catch | Verified |
 |---|---|---|---|---|
