@@ -157,11 +157,20 @@
       "slug": null,
       "modalities": ["text"],
       "expectation": "Often listed as free on other lists.",
-      "summary": "Currently requires a card or prepayment before any API use, per its own docs. No quote has been recorded in this repository yet.",
+      "summary": "Currently requires a card or prepayment before any API use, per its own docs.",
       "short": "a card or prepayment before any API use",
-      "quotes": [],
-      "sources": [],
-      "checked": null,
+      "quotes": [
+        "Chat is a flat $25/month subscription.",
+        "Pay-As-You-Go Plan is a prepaid credit balance: the plan itself is $0 per month, and you top up from $5 whenever you need more credits.",
+        "At zero or below, API calls are blocked until more credits are available."
+      ],
+      "sources": [
+        {
+          "label": "Billing & Payment Methods",
+          "url": "https://featherless.ai/docs/billing"
+        }
+      ],
+      "checked": "2026-11-26",
       "faq": null
     },
     {
