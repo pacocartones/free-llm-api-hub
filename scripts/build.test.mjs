@@ -2104,7 +2104,9 @@ test('models_url is an optional public HTTPS URL', () => {
 
 test('active providers retain models_url from their official catalogues', () => {
   const { providers } = JSON.parse(readFileSync(DATA, 'utf8'));
-  const seeded = providers.filter((p) => Object.hasOwn(p, 'models_url')).map((p) => [p.slug, p.models_url]);
+  // Compared by slug, not by file order: each contributor PR appends one row, and merged rows land in any order.
+  const bySlug = (x, y) => x[0].localeCompare(y[0]);
+  const seeded = providers.filter((p) => Object.hasOwn(p, 'models_url')).map((p) => [p.slug, p.models_url]).sort(bySlug);
   assert.deepEqual(seeded, [
     ['google-gemini', 'https://ai.google.dev/gemini-api/docs/models'],
     ['groq', 'https://console.groq.com/docs/models'],
@@ -2122,7 +2124,7 @@ test('active providers retain models_url from their official catalogues', () => 
     ['plamo', 'https://docs.plamo.preferredai.jp/en/api'],
     ['entrim', 'https://entrim.ai/ai-models/'],
     ['infomaniak', 'https://www.infomaniak.com/en/hosting/ai-services/open-source-models'],
-  ]);
+  ].sort(bySlug));
 });
 
 // A `generated` after today in UTC is what a contributor in a time zone ahead of UTC writes at the end of their day (2026-10-16 when it is still
