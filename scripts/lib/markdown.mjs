@@ -6,6 +6,7 @@
 // raw-HTML and no image syntax, and a link is only written when its target is http(s), a page of this site, or a path of
 // the repository (which becomes a GitHub URL); anything else (javascript:, data:, ...) is left as plain text.
 
+import { stripTags } from './escape.mjs';
 import { escapeHtml } from './html.mjs';
 
 /** GitHub's heading id: lowercase, drop what is not a letter, digit, space, hyphen or underscore, spaces become hyphens. */
@@ -147,7 +148,7 @@ export const markdownToHtml = (md, ctx) => {
         if (n) id += `-${n}`;
         const heading = inlineHtml(text, ctx);
         // The heading text is already escaped. Strip the generated tags for the label.
-        tableLabel = heading.replace(/<[^>]+>/g, '').trim() || 'Table';
+        tableLabel = stripTags(heading).trim() || 'Table';
         out.push(`<h${hashes.length} id="${escapeHtml(id)}">${heading}</h${hashes.length}>`); i++; continue;
       }
       if (isRule(l)) { out.push('<hr>'); i++; continue; }
