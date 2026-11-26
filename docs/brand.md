@@ -107,3 +107,28 @@ bars and four modalities so it reads at 16 px.
 "N sources" is the number of distinct https pages behind the entry (`docs_url`, the published limits' source, the
 data-policy source and every source of `field_checks`). Freshness never rests on colour: stale turns the ✓ into `!`, and
 a due or overdue check dashes the pill's border and underlines the ticket's text.
+
+## Mark
+
+The hub's own aura (six modalities, rays from the centre). `npm run icons` writes the sprite symbol, `favicon.svg`, the
+PNG/ICO icons and `assets/logo-{light,dark,full}.svg`; the wordmark is outlined (`scripts/lib/wordmark.mjs`).
+
+## Tagline
+
+One constant, `TAGLINE` in [`scripts/lib/brand.mjs`](../scripts/lib/brand.mjs): **"We read the docs. You ship the
+code."**, the owner's choice. The home title, the README, the home social image, the README banner and the GitHub
+social preview read it. After changing it, run `npm run build`, `npm run og` and `npm run brand-assets`.
+
+## Images outside the site
+
+- **Social images** (`npm run og`): Cálida light cards drawn by `scripts/lib/og-art.mjs` (warm off-white ground, the
+  auras in the light hues, the perforated ticket "✓ | Verified · N sources") and rasterised with the static fonts in
+  [`tools/og-fonts/`](../tools/og-fonts/) (system fonts are not loaded). `scripts/check-og.mjs` fails when one no longer
+  matches the data or the artwork version (`OG_ART` in `scripts/lib/og.mjs`); the regeneration workflow re-renders them.
+- **Footer badge** (`site/badge-verified.svg`): the perforated ticket "✓ | N/M verified providers", drawn by
+  `ticketBadgeSvg()` in `scripts/lib/badge-svg.mjs`.
+- **README banner and GitHub social preview** (`npm run brand-assets`): `assets/banner-{light,dark}.png` (Cálida light
+  and dark) and `assets/social-preview.png` (1280×640). They are a snapshot of the dataset, not checked in CI; refresh
+  them at a release. GitHub does not read the social preview from the repository: upload it in *Settings → General →
+  Social preview*. The README's static shields use the Cálida accent `9C4A00`, plum `7A2E8C`, ok `2F6B1F` and muted
+  `6A5048`.

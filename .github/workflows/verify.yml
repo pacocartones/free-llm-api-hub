@@ -233,10 +233,14 @@ jobs:
           fi
           node scripts/regenerate-guard.mjs mode
 
-      # As in Dataset integrity: in push mode the suite runs on the tree main will hold after the bot's run.
+      # As in Dataset integrity: in push mode the suite runs on the tree main will hold after the bot's run, social
+      # images included (a pull request that changes how they are drawn does not ship them either).
       - name: Regenerate the derived files first (REGEN_MODE=push)
         if: ${{ steps.regen.outputs.mode == 'push' }}
-        run: node scripts/build.mjs
+        shell: bash
+        run: |
+          node scripts/build.mjs
+          node scripts/check-og.mjs || node scripts/og.mjs
 
       # The runner may create symlinks; a contributor without Developer Mode may not (#783). The preload refuses them
       # as Windows does there, junctions still work. A file URL, so the test processes in other folders find it too.

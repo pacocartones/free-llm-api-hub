@@ -54,3 +54,24 @@ export function badgeSvg({ label, message, color }) {
     `<text x="${mx}" y="15" fill="#010101" fill-opacity=".3"${fit(message)}>${esc(message)}</text><text x="${mx}" y="14"${fit(message)}>${esc(message)}</text></g></svg>\n`;
   return { svg, width, height };
 }
+
+// The Cálida receipt as a 20 px badge: the perforated ticket (lib/stamp.mjs STAMP_SHAPES.ticket, scaled down), the
+// apricot fill with a semicircular notch cut on each side, a drawn check, a dashed cut line and the text in the accent.
+// Not turned, so it sits on a text line like any badge. The site's own footer badge (site/badge-verified.svg) uses it.
+export const TICKET = Object.freeze({ fill: '#ffebd9', ink: '#9c4a00', notch: 4, stub: 19 });
+
+/** { svg, width, height } for a ticket badge reading "<label> <message>", e.g. "verified 76/77". */
+export function ticketBadgeSvg({ label, message }) {
+  const text = `${label} ${message}`;
+  const tw = textWidth(text);
+  const width = TICKET.stub + 6 + tw + 9;
+  const height = 20;
+  const title = `${label}: ${message}`;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" role="img" aria-label="${esc(title)}"><title>${esc(title)}</title>` +
+    `<mask id="n"><rect width="${width}" height="${height}" fill="#fff"/><circle cy="10" r="${TICKET.notch}" fill="#000"/><circle cx="${width}" cy="10" r="${TICKET.notch}" fill="#000"/></mask>` +
+    `<rect width="${width}" height="${height}" rx="3" fill="${TICKET.fill}" mask="url(#n)"/>` +
+    `<path d="M${TICKET.stub} 3.5V16.5" stroke="${TICKET.ink}" stroke-width="1.2" stroke-dasharray="2 1.6"/>` +
+    `<path d="M7 10.3l2.3 2.3 4.3-4.7" fill="none" stroke="${TICKET.ink}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>` +
+    `<text x="${TICKET.stub + 6 + tw / 2}" y="14" fill="${TICKET.ink}" text-anchor="middle" font-family="DM Mono,ui-monospace,Menlo,Consolas,monospace" font-weight="500" font-size="${FONT_PX}" textLength="${tw}" lengthAdjust="spacing">${esc(text)}</text></svg>\n`;
+  return { svg, width, height };
+}
