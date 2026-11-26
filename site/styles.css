@@ -682,7 +682,7 @@ pre code { color: var(--text); }
 .prov-hero .wrap { display: grid; grid-template-columns: minmax(0, .7fr) minmax(0, 1.3fr); column-gap: 40px; align-items: start; padding-top: 26px; padding-bottom: 30px; }
 .prov-hero .wrap > * { grid-column: 2; }
 .prov-hero .crumbs { grid-column: 1 / -1; text-align: left; margin-bottom: 14px; }
-.prov-hero .prov-aura { grid-column: 1; grid-row: 2 / span 7; margin: 8px 0 0; }
+.prov-hero .prov-aura { grid-column: 1; grid-row: 2 / span 8; margin: 8px 0 0; }
 .prov-hero .aura-lg { width: min(300px, 100%); }
 .prov-hero h1 { text-align: left; max-width: none; margin: 10px 0 6px; font-size: clamp(2.6rem, 5.5vw, 4rem); line-height: .9; }
 .prov-hero .lede { text-align: left; margin: 4px 0 10px; max-width: 62ch; }
@@ -690,8 +690,10 @@ pre code { color: var(--text); }
 .prov-hero .prov-badges { margin-top: 4px; }
 /* Reading order on screen: name, one-line description, stamp and flags, numbers, receipt, buttons (the markup keeps
    pageHero's order; grid order only moves the boxes, not the reading order of each box). */
-.prov-hero .crumbs { order: 0; } .prov-hero .prov-badges { order: 1; } .prov-hero h1 { order: 2; } .prov-hero .lede { order: 3; }
-.prov-hero .prov-nums { order: 4; } .prov-hero .prov-nums-scope { order: 5; } .prov-hero .prov-receipt { order: 6; } .prov-hero .prov-actions { order: 7; }
+.prov-hero .crumbs { order: 0; } .prov-hero .prov-badges { order: 1; } .prov-hero h1 { order: 2; } .prov-hero .answer-first { order: 3; } .prov-hero .lede { order: 4; }
+.prov-hero .prov-nums { order: 5; } .prov-hero .prov-nums-scope { order: 6; } .prov-hero .prov-receipt { order: 7; } .prov-hero .prov-actions { order: 8; }
+/* The answer-first paragraph (lib/provider-faq.mjs): right under the name, in body text, so it reads as the answer. */
+.prov-hero .answer-first { text-align: left; margin: 6px 0 4px; max-width: 62ch; font-size: 1.04rem; line-height: 1.55; color: var(--text); }
 .prov-nums { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 18px 0 4px; max-width: 520px; }
 .prov-nums div { display: flex; flex-direction: column-reverse; }
 .prov-nums dd { margin: 0; font-family: var(--font-display); font-weight: 800; font-stretch: 72%; font-size: 2.25rem; line-height: 1; font-variant-numeric: tabular-nums; }
