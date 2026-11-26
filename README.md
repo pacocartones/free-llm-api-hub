@@ -140,7 +140,7 @@ Worth saying plainly: these are the APIs people most often expect to be free. Ea
 - **Together AI** — no free trials; a minimum $5 credit purchase (checked 2026-11-14 · [Official free-trial and billing article](https://support.together.ai/articles/1862638756-changes-to-free-tier-and-billing-july-2025))
 - **DeepInfra** — a card or prepayment before use (checked 2026-11-14 · [Official pricing page](https://deepinfra.com/pricing))
 - **Perplexity's API** — a card or prepayment before any API use (date not recorded)
-- **Replicate** — a card or prepayment before any API use (date not recorded)
+- **Replicate** — a card or prepayment before any API use (checked 2026-11-25 · [Prepaid credit](https://replicate.com/docs/topics/billing/prepaid-credit))
 - **Featherless AI** — a card or prepayment before any API use (date not recorded)
 
 **Retired or removed after re-verification.** Listed here before, removed (or moved) when a re-check of the provider's own pages no longer supported free access.
