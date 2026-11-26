@@ -98,9 +98,9 @@ test('provider "Get a free key" button is conditional, tracked as data-link="key
     const present = readFileSync(join(ROOT, 'site/p', `${first.slug}.html`), 'utf8');
     assert.equal((present.match(/>Get a free key ↗/g) || []).length, 1);
     assert.ok(present.includes(`<a class="btn primary" href="https://example.com/keys?tab=api&amp;new=1" target="_blank" rel="noopener" data-provider="${first.slug}" data-link="keys">Get a free key ↗<span class="sr-only"> (opens in a new tab)</span></a>`));
-    // between the free limits and the quickstart
+    // right after What's free, before the quickstart and the limits (the owner's order)
     const at = (s) => present.indexOf(s);
-    assert.ok(at('id="limits"') < at('>Get a free key ↗') && at('>Get a free key ↗') < at('id="quickstart"'));
+    assert.ok(at('id="whats-free"') < at('>Get a free key ↗') && at('>Get a free key ↗') < at('id="quickstart"') && at('id="quickstart"') < at('id="limits"'));
     const absent = readFileSync(join(ROOT, 'site/p', `${second.slug}.html`), 'utf8');
     assert.doesNotMatch(absent, /Get a free key/);
     for (const file of ['site/providers.json', 'site/api/v1/providers.json']) {
@@ -930,7 +930,7 @@ test('a confirmed card requirement is never hidden in the README top-20 or the e
 
   // Explorer: the full-list surface must show the card flag for every gated provider.
   for (const p of walled) {
-    const row = explorer.split('\n').find((l) => l.includes(`href="p/${p.slug}"`));
+    const row = explorer.split('\n').find((l) => l.includes(`class="name-link" href="p/${p.slug}"`));
     assert.ok(row, `${p.slug}: no explorer row found`);
     assert.match(row, /<span class="need-req">Card required[,<]/, `${p.slug}: explorer row hides the card requirement`);
   }
@@ -2478,7 +2478,7 @@ test('home: no good-first-issues button in the hero, a fixed table layout, a lin
   assert.match(css, /#table thead th \{ position: sticky; top: var\(--header-h\);/, 'the header row is pinned under the header');
   assert.match(css, /#table thead th \{ top: calc\(var\(--header-h\) \+ var\(--controls-h, 120px\)\); \}/, 'and under the filter bar where that is pinned');
   assert.match(css, /main#explorer > \.wrap, \.controls \.controls-inner \{ max-width: 1480px; \}/, 'a wider table');
-  assert.match(css, /\.hero \.lede \{ max-width: 86ch; \}/, 'a wider lede');
+  assert.match(css, /\.hero \.lede \{ margin: 0 0 14px; max-width: 54ch;/, 'the lede fills the left column of the brand H1 hero');
   const row = explorerRowHtml({ slug: 'acme', name: 'Acme', category: 'ongoing', free_tier: 'Free', notes: 'n', best_for: 'b' });
   assert.match(row, /<div class="name-line"><a class="name-link" href="p\/acme" title="Acme">Acme<\/a> <span class="badge b-ongoing"[^>]*>Ongoing<\/span><\/div>/, 'the name is a link, with its type right after it');
   assert.match(row, /<div class="clamp2" title="Free">Free<\/div>/, 'the free text is clamped and complete in the title');
@@ -2490,7 +2490,7 @@ test('provider page: the score is visible, no «All providers» link or «Report
   // Mutant: show the old button or link again, drop data-pager, or lose the score line; this test turns red.
   const html = readFileSync(join(ROOT, 'site/p/groq.html'), 'utf8');
   const main = html.slice(html.indexOf('<main id="main">'));
-  assert.match(main, /<div class="prov-score"><p class="score-rank"><strong>#\d+ of \d+<\/strong> scored <span class="muted">\(\d+(\.\d)? \/ 100\)<\/span>/, 'the score of the provider, as a place (Q13)');
+  assert.match(main, /<div class="prov-score prov-score-line"><p class="score-rank"><strong>#\d+ of \d+<\/strong> scored <span class="muted">\(\d+(\.\d)? \/ 100\)<\/span>/, 'the score of the provider, as a place (Q13)');
   assert.match(main, /<a href="\.\.\/best\/methodology\/">how it is computed<\/a>/, 'a link to the method');
   // Mutant: drop the underline and the links in the score line rely on colour alone, which Lighthouse fails (link-in-text-block).
   assert.match(readFileSync(join(ROOT, 'site/styles.css'), 'utf8'), /\.prov-score a \{[^}]*text-decoration: underline/, 'the links of the score line are underlined');
@@ -2506,7 +2506,7 @@ test('provider page: the score is visible, no «All providers» link or «Report
   assert.match(dp, /<dt><svg class="i" aria-hidden="true"><use href="#ic-clock"\/><\/svg>Retention<\/dt>/);
   const css = readFileSync(join(ROOT, 'site/styles.css'), 'utf8');
   assert.match(css, /\.prov-reqs \.req \{[^}]*text-align: center/, 'the cards are centred');
-  assert.match(css, /\.prov-summary h2 \{[^}]*font-size: 1\.45rem/, '«What\'s free» is larger');
+  assert.match(css, /\.prov-summary h2 \{[^}]*font-size: 1\.6rem/, '«What\'s free» is larger');
 });
 
 test('pager.js: pages of 5 rows, the window is clamped, and the script never touches the URL', async () => {
@@ -2946,10 +2946,12 @@ test('a11y: the requirement filters stay reachable by keyboard and screen reader
   assert.match(index, /<legend>Must have<\/legend>/);
 });
 
-test('a11y: small fixes stay in place (finite caret, placeholder colour, no 320px minimum, focus kept after Clear and Escape)', () => {
+test('a11y: small fixes stay in place (no endless animation, placeholder colour, no 320px minimum, focus kept after Clear and Escape)', () => {
   const css = readFileSync(join(ROOT, 'site/styles.css'), 'utf8');
-  const caret = css.split('\n').find((l) => l.startsWith('.caret {'));
-  assert.ok(caret && !/infinite/.test(caret), 'the caret blink stops by itself (WCAG 2.2.2)');
+  // Brand H1 dropped the blinking caret; the title's "breathing" runs once, and nothing on the site loops forever (WCAG 2.2.2).
+  assert.doesNotMatch(css, /animation:[^;}]*infinite/, 'no animation loops forever');
+  assert.match(css, /\.h1-key \{ display: inline-block; animation: breathe 5s ease-in-out 1; \}/, 'the title breathes once');
+  assert.match(css, /@media \(prefers-reduced-motion: no-preference\) \{\n  \.h1-key \{ display: inline-block; animation/, 'and only when motion is welcome');
   assert.match(css, /::placeholder\s*\{[^}]*color:\s*var\(--muted\)/, 'placeholder text uses the muted colour');
   assert.doesNotMatch(css, /\.limits-table\s*\{[^}]*min-width:\s*320px/, 'the limits table has no 320px minimum (reflow at 320px)');
   assert.match(css, /minmax\(min\(280px, 100%\), 1fr\)/, 'collection tracks never exceed the container');

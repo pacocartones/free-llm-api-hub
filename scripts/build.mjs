@@ -577,6 +577,29 @@ ${LOGO_SYMBOL}
 </defs></svg>`;
 const IC = (id) => `<svg class="i" aria-hidden="true"><use href="#${id}"/></svg>`;
 
+// Brand H1 provider hero: up to three published limits as big numbers (free_limits, in this order), and the receipt,
+// the sentence quoted from the provider's page with where and when it was read. Nothing shows when the record has none.
+const LIMIT_NUMS = [['requests_per_minute', 'requests/min'], ['requests_per_second', 'requests/sec'], ['requests_per_day', 'requests/day'],
+  ['tokens_per_day', 'tokens/day'], ['requests_per_month', 'requests/month'], ['tokens_per_month', 'tokens/month']];
+const bigNum = (n) => (n >= 1e6 && n % 1e5 === 0 ? `${n / 1e6}M` : n >= 1e4 && n % 1e3 === 0 ? `${n / 1e3}K` : n.toLocaleString('en-US'));
+function provNumsHtml(p) {
+  const fl = p.free_limits || {};
+  const nums = LIMIT_NUMS.filter(([k]) => Number.isInteger(fl[k])).slice(0, 3);
+  if (!nums.length) return '';
+  return `<dl class="prov-nums">${nums.map(([k, label]) => `<div><dt>${label}</dt><dd>${bigNum(fl[k])}</dd></div>`).join('')}</dl>` +
+    (fl.scope ? `<p class="prov-nums-scope">${htmlEsc(fl.scope)} · <a href="#limits">all limits</a></p>` : '');
+}
+function provReceiptHtml(p) {
+  const r = stampSource(p, QUOTE_REGISTRY);
+  if (!r.q) return '';
+  let host = '';
+  try { host = new URL(r.u).host + new URL(r.u).pathname.replace(/\/$/, ''); } catch { /* no URL: no cite link */ }
+  const cite = host ? `<a href="${htmlEsc(r.u)}" rel="noopener">${htmlEsc(host)}</a>` : 'the provider\'s docs';
+  const entry = QUOTE_REGISTRY.entries.find((e) => e.slug === p.slug && e.kind === 'sentence');
+  const readOn = entry ? entry.read_on : (p.data_policy && p.data_policy.checked) || '';
+  return `<blockquote class="prov-receipt"><p>“${htmlEsc(r.q)}”</p><cite>${cite}${readOn ? ` · read ${htmlEsc(readOn)}` : ''}</cite></blockquote>`;
+}
+
 // The page header that every generated page shares: breadcrumbs, title, an optional subtitle (the lede) and optional
 // extra markup, centred by the model-hero class. The provider page passes cls 'prov-hero' and puts its badges after
 // the title and its buttons in extra. The home page (hand-written) has its own hero.
@@ -969,6 +992,25 @@ indexHtml = inject(indexHtml, 'csp', CSP);
 indexHtml = inject(indexHtml, 'themeguard', THEME_GUARD);
 indexHtml = inject(indexHtml, 'fonts', fontHead(''));
 indexHtml = inject(indexHtml, 'rows', homeRows);
+// The hero's field of auras (brand H1): every provider in the explorer's order, then the key to read them. Dated by ASOF
+// like the rows, so the field is deterministic. The field is a picture, not a menu: aria-hidden and with no links, so the
+// hero keeps exactly its two controls (home density); the explorer right below links the same providers.
+// The key's four auras share one seed (slug 'key-a'), so only the state differs between them.
+const AURA_KEY = [
+  ['Ongoing', 'rays from the centre', { slug: 'key-a', category: 'ongoing', modalities: ['text', 'audio'], verified: true, last_verified: ASOF, card_required: false, phone_required: false, commercial_ok: true, data_policy: { trains_on_prompts: false } }],
+  ['Trial', 'outer crown only', { slug: 'key-a', category: 'trial', modalities: ['text', 'audio'], verified: true, last_verified: ASOF, card_required: false, phone_required: false, commercial_ok: true, data_policy: { trains_on_prompts: false } }],
+  ['Not stated', 'dashed circle', { slug: 'key-a', category: 'ongoing', modalities: ['text', 'audio'], verified: true, last_verified: ASOF }],
+  ['Checked 30+ days ago', 'faded', { slug: 'key-a', category: 'ongoing', modalities: ['text', 'audio'], verified: false, card_required: false, phone_required: false, commercial_ok: true, data_policy: { trains_on_prompts: false } }],
+];
+const AURA_HUE_NAMES = [['text', 'text'], ['vision', 'vision'], ['image', 'image'], ['audio', 'speech'], ['embeddings', 'embeddings'], ['rerank', 'rerank'], ['ocr', 'OCR']];
+const auraFieldHtml = `<div class="aura-field" aria-hidden="true">` +
+  [...providers].sort((a, b) => sortLib.comparator('recommended', 1, a, b))
+    .map((p) => `<span class="aura-cell">${auraHtml(p, { now: ASOF })}</span>`).join('') +
+  `</div>\n<div class="aura-key"><p class="aura-key-h">Each aura is one provider, drawn from its own data: a colour sector per modality; each provider page reads its own in words.</p>` +
+  `<ul class="aura-key-shapes">${AURA_KEY.map(([t, s, p]) => `<li>${auraHtml(p, { now: ASOF })}<span><b>${t}</b>${s}</span></li>`).join('')}</ul>` +
+  `<ul class="aura-key-hues">${AURA_HUE_NAMES.map(([m, n]) => `<li><span class="hue-dot hue-${m}" aria-hidden="true"></span>${n}</li>`).join('')}</ul></div>`;
+indexHtml = inject(indexHtml, 'aurafield', auraFieldHtml);
+
 indexHtml = inject(indexHtml, 'stats', homeStatsHtml);
 // The "New here?" strip above the explorer: what the list is, what verified means, how to use it (lib/home-first-use.mjs).
 indexHtml = inject(indexHtml, 'firstuse', firstUseHtml(providers, { slaDays: SLA_DAYS }));
@@ -1261,9 +1303,13 @@ for (const p of providers) {
     ? scoreBlockHtml({
       position: scorePlace.get(p.slug).position, of: rankedAll.length, total: sc.total, editorial: scorePlace.get(p.slug).editorial, editorialWeight: EDITORIAL_WEIGHT,
       fractions: inputFractions(p, stabilityFromProbe(PROBE_REPORT, p.slug, new Date(ASOF + 'T12:00:00Z'))), weights: SCORE_WEIGHTS, topRank: sc.rank,
+      compact: true,
     })
     : `<div class="prov-score"><span class="muted">No score: only verified providers inside the freshness window are scored · <a href="../best/methodology/">how it is computed</a></span></div>`;
-  const summary = `<div class="prov-summary"><h2 id="whats-free">What's free</h2><p>${htmlEsc(p.free_tier)}</p></div>` + scoreHtml + requirementsHtml(p);
+  // What's free (only when the record says it: no empty box), then, further down, the requirement cards behind one
+  // summary line and the score on one line.
+  const summary = p.free_tier ? `<div class="prov-summary"><h2 id="whats-free">What's free</h2><p>${htmlEsc(p.free_tier)}</p></div>` : '';
+  const reqsHtml = `<details class="prov-reqs-box"><summary>What you need to start: card, phone, commercial use</summary>${requirementsHtml(p)}</details>`;
   // Freshness relative to the current day (provider pages are regenerated on deploy, not diff-gated).
   const daysAgo = p.verified && p.last_verified ? ageInDays(p.last_verified, today) : null;
   // The receipt stamp (lib/stamp.mjs), the perforated ticket: "✓ | Verified 24 Nov 2026 · 7 sources", the quoted sentence in its title.
@@ -1282,8 +1328,18 @@ for (const p of providers) {
   const docsBtn = docsHref(p.docs_url) ? `<a class="btn primary" href="${htmlEsc(docsHref(p.docs_url))}" target="_blank" rel="noopener">Official docs ↗</a>` : '';
   // "Get a free key": the provider's own key page, exactly as its docs link it (keys_url), next to the limits and the
   // quickstart. Tagged data-link="keys" by tagProviderLinks, so a click is an outbound_provider_click (consent-gated).
-  const keysHtml = p.keys_url
-    ? `<div class="prov-actions prov-key" style="align-items:center"><a class="btn primary" href="${htmlEsc(p.keys_url)}" target="_blank" rel="noopener">Get a free key ↗</a><span class="muted">Sign up or sign in on ${htmlEsc(p.name)}'s own site, then create an API key there.</span></div>`
+  // "Copy base URL": the OpenAI-compatible base URL to the clipboard (site.js, the .api-copy handler: the result is
+  // announced in the status line next to it). Both sit right under What's free, before the quickstart.
+  const baseCopy = p.openai_base_url
+    ? `<button type="button" class="btn api-copy base-copy" data-api-url="${htmlEsc(p.openai_base_url)}" data-label="Copy base URL" data-copy-fail="Copy failed. Select the base URL in the quickstart and copy it by hand.">Copy base URL</button>`
+    : '';
+  const keysHtml = p.keys_url || baseCopy
+    ? `<div class="prov-actions prov-key">` +
+      (p.keys_url ? `<a class="btn primary" href="${htmlEsc(p.keys_url)}" target="_blank" rel="noopener">Get a free key ↗</a>` : '') +
+      baseCopy + `<a class="prov-compare" href="#compare">Compare with…</a>` +
+      (baseCopy ? `<span class="api-copy-status" role="status"></span>` : '') +
+      (p.keys_url ? `<p class="muted prov-key-hint">Sign up or sign in on ${htmlEsc(p.name)}'s own site, then create an API key there.</p>` : '') +
+      `</div>`
     : '';
   const playgroundBtn = p.playground_url ? `<a class="btn" href="${htmlEsc(p.playground_url)}" target="_blank" rel="noopener">Try it ↗</a>` : '';
   // "Visit website": the provider's main site, derived from the docs URL by stripping
@@ -1302,7 +1358,7 @@ for (const p of providers) {
   // else the interactive view with both providers in it.
   const comparePeers = compareLib.comparePeers(p, providers, { staticPaths: COMPARE_PATHS, score: (o) => scoreMap[o.slug]?.total ?? null });
   const compareHtml =
-    `<h2>Compare</h2><div class="colls">` +
+    `<h2 id="compare">Compare</h2><div class="colls">` +
     comparePeers.map((c) => `<a href="../compare/${c.path ? `${c.path}/` : `?compare=${p.slug},${c.other.slug}`}">Compare with ${htmlEsc(c.other.name)}</a>`).join('') +
     `<a href="../compare/?compare=${p.slug}">Compare with another provider →</a></div>`;
   const crossChips = [
@@ -1316,17 +1372,20 @@ for (const p of providers) {
       h1: htmlEsc(p.name),
       // The provider's aura (lib/aura.mjs) with its reading in words, so the picture never has to be decoded alone.
       afterTitle: `<div class="prov-aura">${auraHtml(p, { now: ASOF, cls: 'aura-lg', digits: 1 })}<p class="aura-read"><span class="aura-read-h">Aura:</span> ${htmlEsc(auraSpec(p, { now: ASOF }).label)} · <a href="../methodology/#how-to-read-an-aura">how to read it</a></p></div>` +
-        `<div class="prov-badges"><span class="type">${typeLabel(p)}</span> ${verifiedLine}${probedLine} ${provFlagsHtml(p)}</div>`,
+        `<div class="prov-badges"><span class="type">${typeLabel(p)}</span> ${verifiedLine}${probedLine} ${provFlagsHtml(p)}</div>` +
+        provNumsHtml(p) + provReceiptHtml(p),
       lede: p.best_for ? htmlEsc(p.best_for) : '',
       extra: `<div class="prov-actions">${docsBtn}${websiteBtn}${playgroundBtn}</div>`,
     }) +
     `<main id="main"><div class="wrap prose prov-prose">` +
+    // The owner's order: What's free, then the two actions (a free key, the base URL), then the quickstart; the limits,
+    // the requirement cards and the score (one line) follow. Speed, data policy and the provider's description come after.
     summary +
-    limitsHtml(p) +
     keysHtml +
-    // Q3: the snippet right after the limits (it sat ~4,500px down /p/groq on a phone); speed, data policy and the
-    // provider's own description follow it.
     quick +
+    limitsHtml(p) +
+    reqsHtml +
+    scoreHtml +
     glanceHtml(p, typeLabel(p)) +
     modelsHtml(p, { modelHref: modelPageHref('../') }) +
     speedHtml(p) +

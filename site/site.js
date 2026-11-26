@@ -21,10 +21,13 @@
   // --- API endpoint rows: clipboard success is announced only after completion ---
   document.querySelectorAll('.api-copy').forEach(function (btn) {
     var status = btn.parentElement.querySelector('.api-copy-status');
+    // The provider page's "Copy base URL" keeps its own label and failure hint (data-label, data-copy-fail).
+    var label = btn.getAttribute('data-label') || 'Copy';
+    var failText = btn.getAttribute('data-copy-fail') || 'Copy failed. Copy the endpoint link address manually.';
     btn.addEventListener('click', async function () {
       if (btn.getAttribute('aria-disabled') === 'true') return;
       btn.setAttribute('aria-disabled', 'true');
-      btn.textContent = 'Copy';
+      btn.textContent = label;
       btn.classList.remove('copied');
       status.textContent = '';
       try {
@@ -34,9 +37,9 @@
         btn.classList.add('copied');
         status.textContent = 'URL copied.';
       } catch (e) {
-        btn.textContent = 'Copy';
+        btn.textContent = label;
         btn.classList.remove('copied');
-        status.textContent = 'Copy failed. Copy the endpoint link address manually.';
+        status.textContent = failText;
       } finally {
         btn.setAttribute('aria-disabled', 'false');
       }
