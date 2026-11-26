@@ -33,7 +33,7 @@ export function scoreBlockHtml({ position, of, total, editorial, editorialWeight
   const said = rows.map((r) => `${r.label} ${r.known ? `${pts(r.points)} of ${r.weight}` : `not confirmed, ${pts(r.points)} of ${r.weight}`}`).join('; ');
   const legend = rows.map((r) => `<li${r.known ? '' : ' class="sb-u"'}><span class="sb-key" aria-hidden="true"></span>${esc(r.label)} <span class="sb-pts">${r.known ? `${pts(r.points)}/${r.weight}` : `? · ${pts(r.points)}/${r.weight}`}</span></li>`).join('');
   return `<div class="prov-score">` +
-    `<p class="score-rank"><strong>#${position} of ${of}</strong> by score <span class="muted">(${pts(total)} / 100)</span>` +
+    `<p class="score-rank"><strong>#${position} of ${of}</strong> scored <span class="muted">(${pts(total)} / 100)</span>` +
     (topRank ? ` · #${topRank} on <a href="${prefix}best/">The Best</a>` : '') +
     ` · <a href="${prefix}best/methodology/">how it is computed</a></p>` +
     `<div class="score-bar" role="img" aria-label="${esc(`Score inputs: ${said}`)}">${segs}</div>` +

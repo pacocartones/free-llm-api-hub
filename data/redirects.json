@@ -1,0 +1,22 @@
+{
+  "note": "Retired site URLs that search engines still know, mapped to where their content lives now. build.mjs writes a noindex meta-refresh stub for each source (never listed in the sitemap); scripts/lib/redirects.mjs checks that no source is also built as a real page and that every target exists. A retired provider goes to its /not-free/#<id> section when data/not-free.json has one, otherwise to /not-free/#removed. A retired compare pair goes to /compare/?compare=a,b while both providers are listed, otherwise to /compare/.",
+  "redirects": {
+    "/p/mistral": "/not-free/#mistral",
+    "/p/arli-ai": "/not-free/#arli-ai",
+    "/p/clarifai": "/not-free/#clarifai",
+    "/p/hume-ai": "/not-free/#hume",
+    "/p/nebius": "/not-free/#nebius",
+    "/p/ollama-cloud": "/not-free/#ollama-cloud",
+    "/p/lmnt": "/not-free/#removed",
+    "/compare/ai-horde-vs-groq/": "/compare/?compare=ai-horde,groq",
+    "/compare/ai-horde-vs-jina-ai/": "/compare/?compare=ai-horde,jina-ai",
+    "/compare/ai-horde-vs-llamaparse/": "/compare/?compare=ai-horde,llamaparse",
+    "/compare/ai-horde-vs-ocr-space/": "/compare/?compare=ai-horde,ocr-space",
+    "/compare/sambanova-vs-pollinations/": "/compare/?compare=sambanova,pollinations",
+    "/compare/sambanova-vs-voyage-ai/": "/compare/?compare=sambanova,voyage-ai",
+    "/compare/cloudflare-workers-ai-vs-ollama-cloud/": "/compare/",
+    "/compare/google-gemini-vs-ollama-cloud/": "/compare/",
+    "/compare/ollama-cloud-vs-openrouter/": "/compare/",
+    "/compare/typhoon-vs-ollama-cloud/": "/compare/"
+  }
+}

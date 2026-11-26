@@ -143,7 +143,7 @@ test('stamp: the compact pill is flat, a status dot then "Verified · 24 Nov 202
   // Mutant: rotate the pill, drop the dot or say freshness by colour alone.
   const p = { ...base, last_verified: '2026-11-24', stamp: { u: 'https://acme.example/limits', n: 3 } };
   const html = stampHtml(p, { now: '2026-11-25', shape: 'pill' });
-  assert.match(html, /^<a class="stamp stamp-pill b-ok" title="Verified 1d ago · 2026-11-24 on the provider’s own docs" href="https:\/\/acme\.example\/limits" rel="noopener"><span class="stamp-dot" aria-hidden="true"><\/span><span class="sr-only">Verified, fresh: <\/span><b>Verified<\/b><span aria-hidden="true"> · <\/span><time datetime="2026-11-24">24 Nov 2026<\/time> · 3 sources/);
+  assert.match(html, /^<a class="stamp stamp-pill b-ok" title="Verified 1d ago · 2026-11-24 on the provider’s own docs" href="https:\/\/acme\.example\/limits" rel="noopener"><span class="stamp-dot" aria-hidden="true"><\/span><span class="sr-only">Verified, fresh: <\/span><b>Verified<\/b><span aria-hidden="true"> · <\/span><time datetime="2026-11-24">24 Nov 2026<\/time><span class="stamp-n"> · 3 sources<\/span>/);
   assert.match(stampHtml(p, { now: '2027-02-01', shape: 'pill' }), /class="stamp stamp-pill b-warn"[^>]*>.*Verified, due for re-check/);
   const css = read('site/styles.css');
   const rule = css.match(/\.stamp-pill \{[^}]*\}/)[0];

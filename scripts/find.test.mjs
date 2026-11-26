@@ -266,7 +266,7 @@ describe('the page in the build', () => {
     assert.doesNotMatch(JSON.stringify(ld), /Offer|AggregateRating|Review|Product/);
     assert.match(html, /<link rel="canonical" href="https:\/\/freellmapihub\.com\/find\/">/);
     assert.match(read('site/sitemap.xml'), /<loc>https:\/\/freellmapihub\.com\/find\/<\/loc>/);
-    assert.match(read('site/index.html'), /<nav class="hero-links" aria-label="Get started">\s*<span class="hl-label">Get started:<\/span>\s*<a href="find\/">Find my free API<\/a>/, 'home hero');
+    assert.match(read('site/index.html'), /<div class="hero-cta">\s*<a class="btn primary hero-find" href="find\/">Find my free API<\/a>/, 'home hero: the one primary action');
     for (const rel of ['site/index.html', 'site/find/index.html', 'site/compare/index.html']) {
       assert.match(read(rel), /<div class="nav-sub"><a href="[^"]*#explorer">All providers<\/a><a href="(\.\.\/)?find\/">Find my free API<\/a>/, `${rel}: Providers menu`);
     }
