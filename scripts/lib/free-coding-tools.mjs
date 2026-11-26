@@ -102,7 +102,7 @@ export function codingToolMainHtml(entry, { prefix = '../../', group = 'free', o
     (unstated.length ? claims(unstated) : '<p class="muted">Everything is stated.</p>') +
     '<h2 id="sources">Sources</h2>' +
     (sources.length
-      ? `<ul class="plain">${sources.map((x) => `<li><a href="${htmlEsc(x.src)}" target="_blank" rel="noopener">${htmlEsc(x.src)}</a> · read ${x.days.map(htmlEsc).join(', ')}</li>`).join('')}</ul>`
+      ? `<ul class="plain tool-sources">${sources.map((x) => `<li><a href="${htmlEsc(x.src)}" target="_blank" rel="noopener">${htmlEsc(x.src)}</a> · read ${x.days.map(htmlEsc).join(', ')}</li>`).join('')}</ul>`
       : '<p class="muted">No source page is quoted.</p>') +
     (others.length
       ? `<h2 id="others">Other free AI coding tools</h2><div class="colls">${others.filter((o) => SLUG_RE.test(o.slug)).map((o) => `<a href="${prefix}coding-tools/${o.slug}/">${htmlEsc(o.name)}</a>`).join('')}</div>`

@@ -4,7 +4,7 @@
   pass the 90-day SLA (day 91) in each of the next 16 weeks, with clustered
   weeks marked. It is in the weekly worklist (issue #4) and on the
   [data coverage](https://freellmapihub.com/coverage/#freshness)
-  page. Agent-assisted.
+  page. Agent-assisted (#766).
 
 ### Changed and fixed
 
@@ -15,4 +15,4 @@
   instead of waiting until they are 28 days old. Ties are broken by slug, so
   the batch does not depend on file order. This staggers the 45 entries
   verified on 2026-11-19 and 2026-11-20, which would otherwise all become due
-  in the week of 2027-01-18 and overdue in mid-February. Agent-assisted.
+  in the week of 2027-01-18 and overdue in mid-February. Agent-assisted (#766).

@@ -7,4 +7,4 @@
   requests that are not regenerated and drift outside the bot's allowlist; the
   site deploys after "Regenerate derived files" finishes on `main`; Lighthouse
   performance skips the bot's pushes. With any other mode every workflow
-  behaves as before. See `docs/regeneration-bot.md` (#809).
+  behaves as before. See `docs/regeneration-bot.md` (#809). Agent-assisted.

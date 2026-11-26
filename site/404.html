@@ -1,25 +1,23 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>404 — Free LLM API Hub</title>
 <meta name="description" content="That page isn't part of the dataset. It may have moved, or never existed. The data, though, is very much alive.">
 <meta name="robots" content="noindex">
-<meta http-equiv="Content-Security-Policy" content="script-src 'self' 'sha256-ByZJaawcxAiK85qnD6nIc7iBFGzp/nf/DTzzA7Dl5Qs=' 'sha256-YzEhxvq2BwovGsg/RCjKkQdwf+LZmTjIkiQcjXCZMHc=' https://static.cloudflareinsights.com; connect-src 'self' https://raw.githubusercontent.com https://cloudflareinsights.com; object-src 'none'; base-uri 'self'">
-<script>(function(){try{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<meta http-equiv="Content-Security-Policy" content="script-src 'self' 'sha256-r3FnVnP9W/uaNhK9XkZqH3GIfK4TudOQGYTwoNIjGR4=' 'sha256-YzEhxvq2BwovGsg/RCjKkQdwf+LZmTjIkiQcjXCZMHc=' https://static.cloudflareinsights.com; connect-src 'self' https://raw.githubusercontent.com https://cloudflareinsights.com; object-src 'none'; base-uri 'self'">
+<script>(function(){try{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: light)').matches?'light':'dark');document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
 <link rel="icon" href="/favicon.ico" sizes="32x32">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="manifest" href="/site.webmanifest">
-<link rel="preload" href="/fonts/roboto-flex.woff2?v=9d338035" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="/fonts/dm-mono-400.woff2?v=1be3d580" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="/fonts/dm-mono-500.woff2?v=d41479fe" as="font" type="font/woff2" crossorigin>
-<style>@font-face{font-family:'Roboto Flex';font-style:normal;font-weight:300 900;font-stretch:75% 130%;font-display:optional;src:url('/fonts/roboto-flex.woff2?v=9d338035') format('woff2')}@font-face{font-family:'DM Mono';font-style:normal;font-weight:400;font-stretch:100%;font-display:optional;src:url('/fonts/dm-mono-400.woff2?v=1be3d580') format('woff2')}@font-face{font-family:'DM Mono';font-style:normal;font-weight:500;font-stretch:100%;font-display:optional;src:url('/fonts/dm-mono-500.woff2?v=d41479fe') format('woff2')}</style>
-<meta name="theme-color" content="#fff9f6" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#17110f" media="(prefers-color-scheme: dark)">
-<meta name="color-scheme" content="light dark">
+<link rel="preload" href="/fonts/jetbrains-mono-500.woff2?v=cb182fee" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/jetbrains-mono-700.woff2?v=d0d4e818" as="font" type="font/woff2" crossorigin>
+<style>@font-face{font-family:'JetBrains Mono';font-style:normal;font-weight:500;font-display:optional;src:url('/fonts/jetbrains-mono-500.woff2?v=cb182fee') format('woff2')}@font-face{font-family:'JetBrains Mono';font-style:normal;font-weight:700;font-display:optional;src:url('/fonts/jetbrains-mono-700.woff2?v=d0d4e818') format('woff2')}</style>
+<meta name="theme-color" content="#0a0d0b">
+<meta name="color-scheme" content="dark light">
 <meta property="og:title" content="404 — Free LLM API Hub">
 <meta property="og:description" content="That page isn't part of the dataset. It may have moved, or never existed. The data, though, is very much alive.">
 <meta property="og:type" content="website">
@@ -33,7 +31,7 @@
 <meta name="twitter:image" content="https://freellmapihub.com/og.png">
 <link rel="alternate" type="application/rss+xml" title="Free LLM API Hub — updates" href="/feed.xml">
 <link rel="alternate" type="application/rss+xml" title="Free LLM API Hub — what changed, week by week" href="/changes.xml">
-<link rel="stylesheet" href="/styles.css?v=70813f91">
+<link rel="stylesheet" href="/styles.css?v=775df1d2">
 
 </head>
 <body>
@@ -70,7 +68,7 @@
 </defs></svg>
 <header class="site-header"><div class="wrap header-inner">
 <a class="brand" href="/" aria-label="Free LLM API Hub — home"><svg class="logo-mark"><use href="#logo"/></svg><span class="brand-name">Free LLM API <span class="grad">Hub</span></span></a>
-<nav class="nav" id="primary-nav" aria-label="Primary"><details class="nav-group"><summary>Providers</summary><div class="nav-sub"><a href="/#explorer">All providers</a><a href="/find/">Find my free API</a><a class="nav-best" href="/best/" title="The top 10 by score, recomputed from the data at every build"><svg class="i" aria-hidden="true"><use href="#ic-spark"/></svg>The Best</a></div></details><a href="/models/">Models</a><a href="/compare/">Compare</a><a href="/changes/">Changes</a><a href="/api/">API</a><a href="/guides-and-collections/">Guides</a></nav>
+<nav class="nav" id="primary-nav" aria-label="Primary"><a class="nav-find" href="/find/">Find my free API</a><details class="nav-group"><summary>Providers</summary><div class="nav-sub"><a href="/#explorer">All providers</a><a href="/find/">Find my free API</a><a class="nav-best" href="/best/" title="The top 10 by score, recomputed from the data at every build"><svg class="i" aria-hidden="true"><use href="#ic-spark"/></svg>The Best</a></div></details><a href="/models/">Models</a><a href="/compare/">Compare</a><a href="/changes/">Changes</a><a href="/api/">API</a><a href="/guides-and-collections/">Guides</a></nav>
 <div class="header-actions">
 <a class="icon-btn nav-contribute" href="/submit/"><svg class="i" aria-hidden="true"><use href="#ic-rocket"/></svg><span class="nc-label">Contribute</span></a>
 <button class="icon-btn nav-toggle" id="navToggle" aria-label="Open menu" aria-expanded="false" aria-controls="primary-nav"><svg class="i menu" aria-hidden="true"><use href="#ic-menu"/></svg><svg class="i close" aria-hidden="true"><use href="#ic-close"/></svg></button>

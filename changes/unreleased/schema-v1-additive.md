@@ -8,4 +8,4 @@
   The canonical `data/schema.json` stays closed, so `scripts/validate.mjs`
   still rejects a misspelt or undeclared field in the dataset. Clients holding
   an older copy of the schema should refresh it (`docs/api.md`).
-  Agent-assisted.
+  Agent-assisted (#760).

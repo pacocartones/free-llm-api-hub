@@ -1,4 +1,4 @@
-// The long-form guides under /guides/ (lib/long-guides.mjs), including the four modality guides: they are built and
+// The long-form guides under /guides/ (lib/long-guides.mjs), including the modality and use-case guides: they are built and
 // listed everywhere a guide is (hub,
 // sitemap, llms.txt, OG image), every internal link resolves, the FAQ structured data is the visible text, and every
 // list and number on the page is the one the data gives, so the copy cannot outlive the data.
@@ -14,7 +14,9 @@ import { figureErrors, providerFigures } from './lib/figures.mjs';
 import {
   LONG_GUIDES, longGuidePage, alternativesSets, noCardNoPhone, productionFigures, NO_FREE_MODEL_CALLS,
   modalitySets, speechMentions, dataUseWords, embeddingModel, embeddingsQuickstartProvider, watermarkSentences, MENTIONS_IMAGE_GENERATION,
+  textLlms, codingSets, topSpeed, ragSets, ragStack, agentSets, AGENT_WORDS, chatbotSets, chatbotPasses, CHATBOT_CHECKS, studentSets,
 } from './lib/long-guides.mjs';
+import { parseHash, constraintState } from './lib/find.mjs';
 
 const REPO = join(dirname(fileURLToPath(import.meta.url)), '..');
 const ROOT = privateTree(REPO);
@@ -185,11 +187,11 @@ describe('the lists are the data', () => {
     assert.equal(F.commercial.true + F.commercial.false + F.commercial.conditional + F.commercial.null, F.verified);
     assert.ok(text.includes(`Only ${F.shortlist.length} of ${F.verified} verified providers`));
     for (const p of F.shortlist) assert.ok(html.includes(`<a href="../p/${p.slug}">`), p.slug);
-    assert.ok(text.includes(`${F.phoneUnknown} of ${F.total} providers don’t state it`));
-    assert.ok(text.includes(`${F.dataPolicy} providers have a quoted data_policy`));
+    assert.ok(text.includes(`${F.phoneUnknown} of ${F.verified} verified providers don’t state it`));
+    assert.ok(text.includes(`${F.dataPolicy} of the ${F.verified} verified providers have a quoted data_policy`));
     assert.ok(text.includes(`${F.trainsFalse.length} say they don’t train`) && text.includes(`${F.trainsTrue.length} say they do`) && text.includes(`${F.trainsNull.length} are unsettled`));
     assert.ok(text.includes(`Ongoing tiers renew (daily or monthly): ${F.ongoing} providers. Trials are one-time: ${F.trial}.`));
-    assert.ok(text.includes(`exist for ${F.freeLimits} providers`));
+    assert.ok(text.includes(`exist for ${F.freeLimits} of the ${F.verified} verified providers`));
   });
 });
 
@@ -382,5 +384,189 @@ describe('the modality guides', () => {
     assert.match(faq, /OCR\.space doesn’t\./);
     assert.ok(ocr.faq.find((f) => f.q === 'Does free OCR add a watermark?').a.includes('OCR.space'));
     assert.notEqual(ocr.body, base['free-ocr-document-ai-apis'].body);
+  });
+});
+
+// ---------- the use-case guides: coding, RAG, agents, a chatbot, students ----------
+const USE_CASE = ['free-llm-api-for-coding', 'free-api-for-rag', 'free-llm-api-for-ai-agents', 'free-chatbot-api', 'free-ai-api-for-students'];
+const extras = () => ({ programs: JSON.parse(read('data/programs.json')), codingToolsOwnKey: JSON.parse(read('data/coding-tools-own-key.json')) });
+const partsOf = (slug, list = providers) => longGuidePage(LONG_GUIDES.find((g) => g.slug === slug), { providers: list, notFree, ...extras() });
+const codeBlocks = (html) => [...html.matchAll(/<pre><code class="language-(\w+)">([\s\S]*?)<\/code><\/pre>/g)]
+  .map((m) => ({ lang: m[1], src: m[2].replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&') }));
+const slugsOf = (list) => sorted(list.map((p) => p.slug));
+
+describe('the use-case guides', () => {
+  test('are in the use-case group and in their own section of the hub', () => {
+    assert.deepEqual(LONG_GUIDES.filter((g) => g.group === 'use-case').map((g) => g.slug), USE_CASE);
+    const hub = read('site/guides-and-collections/index.html');
+    const at = hub.indexOf('Guides: by what you’re building');
+    assert.ok(at >= 0, 'the hub has the section');
+    const section = hub.slice(at, hub.indexOf('<h2', at + 1));
+    assert.deepEqual([...section.matchAll(/href="\.\.\/guides\/([a-z0-9-]+)"/g)].map((m) => m[1]), USE_CASE);
+    for (const g of LONG_GUIDES.filter((x) => x.group !== 'use-case')) assert.ok(!section.includes(`../guides/${g.slug}"`), `${g.slug} stays in its own section`);
+  });
+
+  test('each links to /find/ with a preset the wizard reads, and to provider pages, a collection, /compare/ and /not-free/', () => {
+    const want = {
+      'free-llm-api-for-coding': { use: 'code', openai: 'yes' },
+      'free-api-for-rag': { use: 'embeddings' },
+      'free-llm-api-for-ai-agents': { use: 'chat', commercial: 'yes', openai: 'yes' },
+      'free-chatbot-api': { use: 'chat', card: 'no', phone: 'no', commercial: 'yes', train: 'yes' },
+      'free-ai-api-for-students': { use: 'chat', card: 'no', phone: 'no' },
+    };
+    for (const slug of USE_CASE) {
+      const html = page(slug);
+      const hash = html.match(/href="\.\.\/find\/#([^"]+)"/);
+      assert.ok(hash, `${slug}: links to /find/ with a hash`);
+      assert.deepEqual(parseHash(hash[1].replace(/&amp;/g, '&')), want[slug], `${slug}: the preset`);
+      assert.match(html, /href="\.\.\/p\/[a-z0-9-]+"/, `${slug}: provider pages`);
+      assert.match(html, /href="\.\.\/collections\/[a-z-]+"/, `${slug}: a collection`);
+      assert.match(html, /href="\.\.\/compare\/\?compare=[a-z0-9-]+(,[a-z0-9-]+)+"/, `${slug}: a comparison`);
+      assert.ok(html.includes('href="../not-free/"'), `${slug}: /not-free/`);
+      assert.ok(html.includes('aria-label="Pick a '), `${slug}: a pick-a-stack table`);
+    }
+  });
+
+  test('every table row shows the entry’s own card, phone, commercial, data-use and date, with unknowns as not confirmed', () => {
+    const tables = {
+      'free-llm-api-for-coding': ['Renewing free LLM APIs for coding', 'Free LLM APIs for coding with one-time credits'],
+      'free-api-for-rag': ['Free embedding APIs for RAG', 'Free reranking APIs for RAG', 'Renewing free text LLMs for RAG'],
+      'free-llm-api-for-ai-agents': ['Renewing free LLM APIs for AI agents', 'Free LLM APIs for AI agents with one-time credits'],
+      'free-ai-api-for-students': ['Renewing free AI APIs with no credit card'],
+    };
+    const bySlug = new Map(providers.map((p) => [p.slug, p]));
+    const flag = (v) => (v === false ? 'No' : v === true ? 'Yes' : 'Not confirmed');
+    for (const [slug, labels] of Object.entries(tables)) {
+      for (const label of labels) {
+        for (const [ps, cells] of tableRows(page(slug), label)) {
+          const p = bySlug.get(ps);
+          const [card, commercial, data, checked] = cells.slice(-4);
+          assert.ok(stripTags(card).startsWith(`Card: ${flag(p.card_required)}`) && stripTags(card).includes(`Phone: ${flag(p.phone_required)}`), `${slug} ${ps}: card and phone`);
+          assert.ok(stripTags(commercial).startsWith({ true: 'Yes', false: 'No', conditional: 'Conditional' }[String(p.commercial_ok)] || 'Not confirmed'), `${slug} ${ps}: commercial use`);
+          assert.ok(stripTags(data).startsWith(dataUseWords(p)), `${slug} ${ps}: data use`);
+          assert.ok(checked.includes(`<time datetime="${p.last_verified}">`), `${slug} ${ps}: date`);
+        }
+      }
+    }
+  });
+
+  test('coding: the tables are the OpenAI-compatible text LLMs, the speeds are the published ones, the quickstart a listed provider’s', () => {
+    const html = page('free-llm-api-for-coding');
+    const S = codingSets(providers);
+    const compat = textLlms(providers).filter((p) => p.openai_compatible === true && /^https:\/\//.test(p.openai_base_url || ''));
+    assert.deepEqual(slugsOf(S.compat), slugsOf(compat));
+    assert.deepEqual(sorted(tableSlugs(html, 'Renewing free LLM APIs for coding')), slugsOf(compat.filter((p) => p.category === 'ongoing')));
+    assert.deepEqual(sorted(tableSlugs(html, 'Free LLM APIs for coding with one-time credits')), slugsOf(compat.filter((p) => p.category !== 'ongoing')));
+    const speeds = providers.filter((p) => S.text.includes(p)).flatMap((p) => (p.published_speed || []).map((s) => `${p.slug}:${s.model}`));
+    const at = html.indexOf('aria-label="Published output speeds of free text LLMs"');
+    const rows = [...html.slice(at, html.indexOf('</tbody>', at)).matchAll(/<tr><td class="name"><a href="\.\.\/p\/([a-z0-9-]+)">[^<]*<\/a><\/td><td><code>([\s\S]*?)<\/code>/g)].map((m) => `${m[1]}:${m[2].replace(/<wbr>/g, '')}`);
+    assert.deepEqual(sorted(rows), sorted(speeds), 'one row per published speed');
+    assert.ok(answerOf(html).startsWith(`${compat.length} of the ${providers.filter((p) => p.verified).length} verified providers`));
+    assert.ok(partsOf('free-llm-api-for-coding').title.includes(`${compat.length} OpenAI-Compatible`));
+    const py = codeBlocks(html).find((c) => c.lang === 'python').src;
+    const qs = compat.find((p) => py.includes(`base_url="${p.openai_base_url}"`));
+    assert.ok(qs && qs.category === 'ongoing' && qs.card_required === false, 'a renewing, no-card provider');
+    assert.ok((qs.models_free || []).some((m) => py.includes(`model="${m}"`)), 'one of its free models');
+    // The own-key coding tools are named from data/coding-tools-own-key.json, and the page renders without that file.
+    for (const t of extras().codingToolsOwnKey.entries) assert.ok(html.includes(`href="../coding-tools/${t.slug}/"`), t.slug);
+    const bare = longGuidePage(LONG_GUIDES.find((g) => g.slug === 'free-llm-api-for-coding'), { providers, notFree });
+    assert.ok(!bare.body.includes('coding-tools/zed'), 'no own-key list without the data');
+  });
+
+  test('RAG: the three tables are the data and the worked example calls the picked providers’ own base URLs and models', () => {
+    const html = page('free-api-for-rag');
+    const S = ragSets(providers);
+    const verified = providers.filter((p) => p.verified === true && !NO_FREE_MODEL_CALLS.includes(p.slug));
+    assert.deepEqual(sorted(tableSlugs(html, 'Free embedding APIs for RAG')), slugsOf(verified.filter((p) => p.modalities.includes('embeddings'))));
+    assert.deepEqual(sorted(tableSlugs(html, 'Free reranking APIs for RAG')), slugsOf(verified.filter((p) => p.modalities.includes('rerank'))));
+    assert.deepEqual(sorted(tableSlugs(html, 'Renewing free text LLMs for RAG')), slugsOf(verified.filter((p) => p.is_text_llm === true && p.category === 'ongoing')));
+    assert.equal(partsOf('free-api-for-rag').count, new Set([...S.embeddings, ...S.rerank, ...S.llm]).size);
+    const { easy } = ragStack(providers);
+    assert.ok(easy.embeddings && easy.llm, 'a stack exists today');
+    const py = codeBlocks(html).find((c) => c.lang === 'python').src;
+    assert.ok(py.includes(`"${easy.embeddings.openai_base_url}"`) && py.includes(`model="${embeddingModel(easy.embeddings)}"`), 'the embeddings pick');
+    assert.ok((easy.embeddings.models_free || []).includes(embeddingModel(easy.embeddings)));
+    assert.ok(py.includes(`"${easy.llm.openai_base_url}"`) && (easy.llm.models_free || []).some((m) => py.includes(`model="${m}"`)), 'the LLM pick');
+    assert.ok(easy.embeddings.card_required === false && easy.llm.card_required === false, 'the example needs no card, as the answer says');
+    assert.ok(py.includes('embed.embeddings.create(') && py.includes('llm.chat.completions.create('));
+    const both = S.embeddings.filter((p) => S.rerank.includes(p));
+    const faq = faqOf(html).find((q) => q.name === 'Which free API has both embeddings and reranking?').acceptedAnswer.text;
+    for (const p of both) assert.ok(faq.includes(p.name), p.slug);
+  });
+
+  test('agents: the tables are every free text LLM, and tool calling is never claimed', () => {
+    const html = page('free-llm-api-for-ai-agents');
+    const S = agentSets(providers);
+    const text = textLlms(providers);
+    assert.deepEqual(sorted([...tableSlugs(html, 'Renewing free LLM APIs for AI agents'), ...tableSlugs(html, 'Free LLM APIs for AI agents with one-time credits')]), slugsOf(text));
+    const faq = faqOf(html).find((q) => q.name === 'Which free LLM APIs support tool calling?').acceptedAnswer.text;
+    assert.ok(faq.startsWith('Our dataset doesn’t record tool or function calling.') && faq.includes(`${S.compat.length} of the ${text.length} free text LLMs`));
+    // The page asks which providers support tool calling; it never answers that one does.
+    assert.doesNotMatch(textOf(html), /\b(supports|does support) (tool|function) calling\b|(tool|function) calling is supported/i);
+    assert.ok(!AGENT_WORDS.test('Every request needs a User-Agent header'), 'a User-Agent header is not an agent');
+    for (const p of S.mentions) assert.ok(html.includes(`<a href="../p/${p.slug}">`), `${p.slug}: its mention is quoted`);
+    const rows = tableRows(html, 'Renewing free LLM APIs for AI agents');
+    for (const [slug, cells] of rows) {
+      const p = providers.find((x) => x.slug === slug);
+      const want = p.openai_compatible === true ? 'Yes' : p.openai_compatible === false ? 'No' : 'Not confirmed';
+      assert.ok(stripTags(cells[1]).startsWith(want), `${slug}: OpenAI-compatible`);
+    }
+  });
+
+  test('chatbot: every check cell is the wizard’s own state, and "all four" is exactly the providers that pass them', () => {
+    const html = page('free-chatbot-api');
+    const S = chatbotSets(providers);
+    const text = textLlms(providers);
+    const rows = tableRows(html, 'Free chatbot APIs checked for card, phone, commercial use and training');
+    assert.deepEqual(sorted([...rows.keys()]), slugsOf(text));
+    for (const p of text) {
+      const cells = rows.get(p.slug);
+      CHATBOT_CHECKS.forEach((c, i) => {
+        const cell = stripTags(cells[2 + i]);
+        const s = constraintState(p, c);
+        if (s === 'yes') assert.equal(cell, 'Yes', `${p.slug} ${c.key}`);
+        else assert.ok(!cell.startsWith('Yes'), `${p.slug} ${c.key}: an unconfirmed check is never yes`);
+      });
+      assert.equal(stripTags(cells[6]), `${chatbotPasses(p)} of 4`, `${p.slug}: confirmed count`);
+    }
+    const all = text.filter((p) => CHATBOT_CHECKS.every((c) => constraintState(p, c) === 'yes'));
+    assert.deepEqual(slugsOf(S.all), slugsOf(all));
+    for (const p of all) assert.ok(answerOf(html).includes(p.name), p.slug);
+    assert.ok(answerOf(html).startsWith(`We checked all ${text.length} free text LLMs`));
+    const phone = faqOf(html).find((q) => q.name === 'Does a free chatbot API need a phone number?').acceptedAnswer.text;
+    assert.equal(phone, `Of the ${text.length} free text LLMs, ${text.filter((p) => p.phone_required === false).length} confirm no phone, ${text.filter((p) => p.phone_required === true).length} require one, and ${text.filter((p) => p.phone_required == null).length} don’t state it.`);
+  });
+
+  test('students: the table is every renewing no-card entry, the no-account and programs sections are the data', () => {
+    const html = page('free-ai-api-for-students');
+    const S = studentSets(providers, extras().programs);
+    const want = providers.filter((p) => p.verified === true && p.category === 'ongoing' && p.card_required === false && !NO_FREE_MODEL_CALLS.includes(p.slug));
+    assert.deepEqual(sorted(tableSlugs(html, 'Renewing free AI APIs with no credit card')), slugsOf(want));
+    assert.ok(partsOf('free-ai-api-for-students').title.includes(`(${want.length}, Checked)`));
+    for (const p of providers.filter((x) => x.verified && x.anonymous_access)) assert.ok(html.includes(`<a href="../p/${p.slug}">`), `${p.slug}: no-account section`);
+    const programs = extras().programs.research.filter((r) => /student|both/i.test(r.audience));
+    assert.equal(S.programs.length, programs.length);
+    for (const r of programs) assert.ok(html.includes(r.name.replace(/&/g, '&amp;')), r.name);
+    const at = html.indexOf('aria-label="Pick a free AI API for learning"');
+    const row = html.slice(at, html.indexOf('</tbody>', at)).match(/<tr><td class="name">Try a model with no account<\/td><td><a href="\.\.\/p\/([a-z0-9-]+)">/);
+    assert.ok(row && providers.find((p) => p.slug === row[1]).anonymous_access, 'the no-account pick has anonymous access');
+  });
+
+  test('the copy follows the data: removing a provider and flipping flags changes counts, picks and lists', () => {
+    const base = Object.fromEntries(USE_CASE.map((slug) => [slug, partsOf(slug)]));
+    const all4 = chatbotSets(providers).all[0];
+    assert.ok(all4, 'a provider passes all four chatbot checks today');
+    const changed = providers
+      .filter((p) => p.slug !== 'groq')
+      .map((p) => (p.slug === all4.slug ? { ...p, phone_required: null } : p.slug === 'typhoon' ? { ...p, card_required: null } : p));
+    const next = Object.fromEntries(USE_CASE.map((slug) => [slug, partsOf(slug, changed)]));
+    assert.equal(next['free-llm-api-for-coding'].count, base['free-llm-api-for-coding'].count - 1);
+    assert.ok(!next['free-llm-api-for-coding'].body.includes('../p/groq"'));
+    assert.equal(next['free-llm-api-for-ai-agents'].count, base['free-llm-api-for-ai-agents'].count - 1);
+    assert.ok(!chatbotSets(changed).all.some((p) => p.slug === all4.slug), 'an unconfirmed phone drops it from "all four"');
+    assert.notEqual(next['free-chatbot-api'].answer, base['free-chatbot-api'].answer);
+    assert.equal(next['free-ai-api-for-students'].count, base['free-ai-api-for-students'].count - 2, 'Groq removed, Typhoon’s card unconfirmed');
+    assert.notEqual(next['free-api-for-rag'].body, base['free-api-for-rag'].body);
+    assert.ok(topSpeed(providers.find((p) => p.slug === 'groq')), 'Groq publishes a speed, so removing it changes the speed table');
   });
 });
