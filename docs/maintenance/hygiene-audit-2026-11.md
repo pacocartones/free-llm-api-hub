@@ -295,10 +295,10 @@ These findings sat in files or areas that open pull requests owned. Since then t
 
 | Finding | Status | Pull request or reason |
 |---|---|---|
-| D1 `safeHttp`, `safeUrl`, `plural` | Fixed (10 of 14 copies) | #905. Deferred: the copies in `changes.mjs` and `provider-sections.mjs` (#774, #775, #815 and #927 edit those files). `compare.mjs` keeps its copy because its source ships to the browser. |
+| D1 `safeHttp`, `safeUrl`, `plural` | Fixed (10 of 14 copies) | #905. Deferred: the copies in `changes.mjs` and `provider-sections.mjs` (#774, #775 and #815 edit those files). `compare.mjs` keeps its copy because its source ships to the browser. |
 | D2 inaccuracy-issue URL builder | Deferred | `reportChangeUrl` should be deleted, not wrapped (X2), and #774 edits the lines after it. The other two copies alone are not worth a helper. |
 | D3 seven HTML escapers | Fixed | #920 (`scripts/lib/html.mjs`). #930 fixes a page module from #922 that still imported the old name and stopped the build on `main`. |
-| D4 repeated fragments in `build.mjs` | Deferred | `build.mjs` is edited by #774, #775, #815, #896 and #927. It is a refactor, not a fix. |
+| D4 repeated fragments in `build.mjs` | Deferred | `build.mjs` is edited by #774, #775, #815 and #896. It is a refactor, not a fix. |
 | D5 site and repository constants | Deferred | Same files as D4 (`build.mjs`), plus `monthly-issues.mjs` and `contributors.mjs`. Low payoff. |
 | D6 dates | Deferred | Low payoff, and it overlaps the date-format work of finding 10 (I3). |
 | D7 near-identical page generators | Deferred | The bytes of the site change, so it needs its own reviewed `site/` diff. |
