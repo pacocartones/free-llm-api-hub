@@ -5,7 +5,10 @@
 //   already uses to say how the dataset is cited — nothing typed twice;
 // - publisher (Tweakeo, Inc., the LICENSE copyright holder) and creator (Paco Cartones, the GitHub account CITATION.cff
 //   lists) from lib/site-entity.mjs, shared with the WebSite node and every page that names the site or the dataset;
-// - version, dateModified and temporalCoverage from data/providers.json (no clock).
+// - version, dateModified and temporalCoverage from data/providers.json (no clock). dateModified is a datetime with a
+//   timezone (midnight UTC of the data date), as Google's validator wants it.
+// - no `isPartOf`: for a Dataset, Google reads it as "part of a larger dataset" and rejects a WebSite there. The
+//   WebSite node in the same @graph already names the publisher and the creator.
 //
 // Google's Dataset guide (developers.google.com/search/docs/appearance/structured-data/dataset) requires `name` and
 // `description` (50–5000 characters) and, for each `distribution`, a `contentUrl`. It says `citation` is for related
@@ -14,6 +17,7 @@
 // tagged (RELEASING.md), so its download URL can 404 for a while after the site deploys with the new version.
 
 import { entityIds, websiteNode, publisherNode, creatorNode } from './site-entity.mjs';
+import { isoDateTime, licenseUrl } from './structured-data.mjs';
 
 const unquote = (s) => s.trim().replace(/^"(.*)"$/, '$1').replace(/^'(.*)'$/, '$1');
 
@@ -86,13 +90,12 @@ export function datasetJsonLd({ data, citation, site, asOf }) {
     sameAs: repo,
     identifier: repo,
     version: data.version,
-    dateModified: asOf,
+    dateModified: isoDateTime(asOf),
     keywords: [...new Set([...c.keywords, ...MODALITY_KEYWORDS])],
-    license: c.license === 'MIT' ? 'https://opensource.org/licenses/MIT' : undefined,
+    license: licenseUrl(c.license),
     isAccessibleForFree: true,
     publisher: { '@id': ids.publisher },
     creator: { '@id': ids.creator },
-    isPartOf: { '@id': ids.website },
     temporalCoverage: dates.length ? `${dates[0]}/${dates[dates.length - 1]}` : undefined,
     variableMeasured: VARIABLES.map(([name, description]) => ({ '@type': 'PropertyValue', name, description })),
     distribution: [

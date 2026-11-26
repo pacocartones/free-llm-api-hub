@@ -65,6 +65,7 @@ import { writeSchemaDocs } from './schema-docs.mjs';
 import { datasetAsOf } from './lib/release-stamp.mjs';
 import { parseCitation, homeJsonLd, datasetJsonLdScript } from './lib/dataset-jsonld.mjs';
 import { websiteRef, datasetRef } from './lib/site-entity.mjs';
+import { isoDateTime, datasetFacts, licenseUrl, guideArticle } from './lib/structured-data.mjs';
 import { SITEMAP_INDEX, sitemapIndexXml } from './lib/state-sitemap.mjs';
 import { SITEMAPS as INDEXNOW_SITEMAPS } from './lib/indexnow.mjs';
 import { groupModels, modelKey } from './lib/model-keys.mjs';
@@ -94,6 +95,8 @@ const providers = data.providers;
 const summaryBySlug = new Map(JSON.parse(readFileSync(join(ROOT, 'data/provider-summaries.json'), 'utf8')).summaries.map((x) => [x.id, x]));
 // Counts quoted in prose come from the data, never from a typed number (lib/figures.mjs).
 const FIGS = providerFigures(providers);
+// What every nested Dataset node in the JSON-LD says (description and licence, lib/structured-data.mjs).
+const DATASET_FACTS = datasetFacts({ verified: FIGS.verified, asOf: ASOF, license: licenseUrl(parseCitation(readFileSync(join(ROOT, 'CITATION.cff'), 'utf8')).license) });
 
 // ---------- freshness ----------
 const today = new Date();
@@ -1191,7 +1194,7 @@ const hubJsonLd = JSON.stringify({
   '@graph': [
     {
       '@type': 'CollectionPage', name: 'Free LLM API guides and collections', description: HUB_META,
-      url: `${SITE}/guides-and-collections/`, dateModified: ASOF,
+      url: `${SITE}/guides-and-collections/`, dateModified: isoDateTime(ASOF),
       isPartOf: websiteRef(SITE),
       mainEntity: {
         '@type': 'ItemList', numberOfItems: GUIDES.length + COLLECTIONS.length,
@@ -1409,8 +1412,8 @@ for (const p of providers) {
     '@graph': [
       {
         '@type': 'WebPage', name: `${p.name} — free LLM API`, description: p.free_tier, url: `${SITE}/p/${p.slug}`,
-        ...(p.last_verified ? { dateModified: p.last_verified } : {}),
-        isPartOf: datasetRef(SITE),
+        ...(p.last_verified ? { dateModified: isoDateTime(p.last_verified) } : {}),
+        isPartOf: websiteRef(SITE), about: datasetRef(SITE, DATASET_FACTS),
       },
       {
         '@type': 'BreadcrumbList',
@@ -1892,10 +1895,7 @@ for (const g of GUIDES) {
   const jsonld = JSON.stringify({
     '@context': 'https://schema.org',
     '@graph': [
-      {
-        '@type': 'Article', headline: g.h1, description: metaDesc, dateModified: ASOF,
-        url: `${SITE}/guides/${g.slug}`, isPartOf: websiteRef(SITE),
-      },
+      guideArticle({ site: SITE, slug: g.slug, headline: g.h1, description: metaDesc, asOf: ASOF, extra: { isPartOf: websiteRef(SITE) } }),
       {
         '@type': 'BreadcrumbList',
         itemListElement: [
@@ -1937,10 +1937,7 @@ for (const g of LONG_GUIDE_PAGES) {
   const jsonld = JSON.stringify({
     '@context': 'https://schema.org',
     '@graph': [
-      {
-        '@type': 'Article', headline: g.h1, description: g.metaDesc, dateModified: ASOF,
-        url: `${SITE}/guides/${g.slug}`, isPartOf: websiteRef(SITE), about: datasetRef(SITE),
-      },
+      guideArticle({ site: SITE, slug: g.slug, headline: g.h1, description: g.metaDesc, asOf: ASOF, extra: { isPartOf: websiteRef(SITE), about: datasetRef(SITE, DATASET_FACTS) } }),
       {
         '@type': 'BreadcrumbList',
         itemListElement: [
@@ -2192,7 +2189,7 @@ writeFileSync(join(ROOT, 'site/api/index.html'), htmlPage({
   jsonld: collectionPageJsonLd({
     type: 'WebPage', name: 'Static JSON API', url: `${SITE}/api/`,
     description: 'The free-llm-api-hub dataset as versioned JSON at stable URLs.',
-    about: datasetRef(SITE),
+    about: datasetRef(SITE, DATASET_FACTS),
     crumbs: [['API', `${SITE}/api/`]],
   }),
 }));
@@ -2443,7 +2440,7 @@ writeFileSync(
         `${citeBlockHtml(citationRecord(citation))}</div></main>`,
       ),
     prefix: '../',
-    jsonld: collectionPageJsonLd({ type: 'WebPage', name: qualityTitle, url: `${SITE}/quality/`, description: qualityDesc, about: datasetRef(SITE), crumbs: [[qualityTitle, `${SITE}/quality/`]] }),
+    jsonld: collectionPageJsonLd({ type: 'WebPage', name: qualityTitle, url: `${SITE}/quality/`, description: qualityDesc, about: datasetRef(SITE, DATASET_FACTS), crumbs: [[qualityTitle, `${SITE}/quality/`]] }),
   })
 );
 
@@ -2463,7 +2460,7 @@ const codingToolsJsonLd = JSON.stringify({
   '@graph': [
     {
       '@type': 'CollectionPage', name: 'Free AI coding tools', description: CODING_TOOLS_DESC,
-      url: `${SITE}/coding-tools/`, dateModified: ASOF,
+      url: `${SITE}/coding-tools/`, dateModified: isoDateTime(ASOF),
       isPartOf: websiteRef(SITE),
       mainEntity: {
         '@type': 'ItemList', numberOfItems: CODING_TOOL_PAGES.length,
@@ -2602,7 +2599,7 @@ writeFileSync(
   writeFileSync(join(ROOT, 'site/not-free/index.html'), htmlPage({
     title: notFreeTitle(), desc: notFreeDescription(model), canonical: `${SITE}${NOT_FREE_PATH}`, prefix: '../',
     main: notFreeMainHtml(model, { pageHero, site: SITE, prefix: '../' }),
-    jsonld: notFreeJsonLd(model, { site: SITE, dateModified: ASOF }),
+    jsonld: notFreeJsonLd(model, { site: SITE, dateModified: ASOF, dataset: DATASET_FACTS }),
     ogImage: `${SITE}/og/not-free.png`,
   }));
 }
@@ -2615,7 +2612,7 @@ writeFileSync(join(ROOT, 'site/embed/index.html'), htmlPage({
   jsonld: collectionPageJsonLd({
     type: 'WebPage', name: 'Use the data', url: `${SITE}${EMBED_PATH}`,
     description: 'Embed the widget or a badge, download the dataset and cite it.',
-    about: datasetRef(SITE),
+    about: datasetRef(SITE, DATASET_FACTS),
     crumbs: [['Use the data', `${SITE}${EMBED_PATH}`]],
   }),
   // shared-rules.js and shared-sort.js first, so the preview widget finds them on this page and loads nothing else.

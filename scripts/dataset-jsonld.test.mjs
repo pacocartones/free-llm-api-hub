@@ -38,7 +38,7 @@ test('datasetJsonLd: deterministic, from the data; the validator catches what Go
   const a = datasetJsonLd({ data, citation, site: SITE, asOf: datasetAsOf(data) });
   assert.deepEqual(a, datasetJsonLd({ data, citation, site: SITE, asOf: datasetAsOf(data) }));
   assert.equal(a.version, '9.8.7');
-  assert.equal(a.dateModified, '2026-01-05');
+  assert.equal(a.dateModified, '2026-01-05T00:00:00Z', 'a datetime with a timezone, as Google wants it');
   assert.equal(a.temporalCoverage, '2025-12-30/2026-01-05');
   assert.equal(a.citation, undefined, 'Google: citation is for related articles, not the dataset itself');
   const home = homeJsonLd({ data, citation, site: SITE, asOf: datasetAsOf(data) });
@@ -70,7 +70,7 @@ test('the home page carries one Dataset block that parses, is valid and points a
   const ld = datasetNode(block);
   const data = JSON.parse(readFileSync(join(ROOT, 'data/providers.json'), 'utf8'));
   assert.equal(ld.version, data.version);
-  assert.equal(ld.dateModified, datasetAsOf(data));
+  assert.equal(ld.dateModified, `${datasetAsOf(data)}T00:00:00Z`);
   const formats = Object.fromEntries(ld.distribution.map((d) => [d.contentUrl.slice(SITE.length), d.encodingFormat]));
   assert.equal(formats['/api/v1/providers.json'], 'application/json');
   assert.equal(formats['/providers.csv'], 'text/csv');
@@ -116,6 +116,6 @@ test('authorship: Tweakeo, Inc. publishes, Paco Cartones creates; consistent wit
   assert.equal(website['@id'], `${SITE}/#website`);
   assert.equal(website.url, `${SITE}/`);
   assert.equal(website.name, 'Free LLM API Hub');
-  assert.equal(dataset.isPartOf['@id'], website['@id']);
+  assert.equal(dataset.isPartOf, undefined, 'a Dataset is only part of a larger Dataset; Google rejects a WebSite there');
   assert.doesNotMatch(JSON.stringify(block), /[\w.+-]+@[\w-]+\.[a-z]{2,}|mailto:|"email"/i, 'no email address in the structured data');
 });
