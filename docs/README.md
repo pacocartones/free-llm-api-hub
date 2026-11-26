@@ -43,4 +43,6 @@ How **Free LLM API Hub** works — how entries are verified, what earns a spot, 
 
 ---
 
+Not sure where to start? [Find my free API](https://freellmapihub.com/find/) asks six questions and gives you a shortlist.
+
 ← [Back to the main README](../README.md) &nbsp;·&nbsp; [Interactive explorer ↗](https://freellmapihub.com/)
