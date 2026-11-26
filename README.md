@@ -1,7 +1,7 @@
 # Brand H1 · Cálida: screenshots for visual review
 
 Review screenshots of the brand stack, never to be merged. They are taken from the top of the stack
-(#847, `feat/brand-h1-og-readme` at `7fda7ec`), which carries #844, #845 and #846 and is up to date with main
+(#847, `feat/brand-h1-og-readme` at `be2e81e`), which carries #844, #845 and #846 and is up to date with main
 (home density #892, mobile overflow #902 and the rest).
 
 `final/` holds the home page, the Groq provider page, the explorer table and `/find/` at 1440 px (desktop) and
