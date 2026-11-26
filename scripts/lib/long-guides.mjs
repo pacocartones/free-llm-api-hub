@@ -334,7 +334,7 @@ console.log(resp.choices[0].message.content);`;
 export function productionFigures(providers) {
   const v = providers.filter((x) => x.verified === true);
   const count = (list, f) => list.filter(f).length;
-  const dp = providers.filter((x) => x.data_policy);
+  const dp = v.filter((x) => x.data_policy);
   return {
     verified: v.length,
     total: providers.length,
@@ -345,8 +345,8 @@ export function productionFigures(providers) {
       null: count(v, (x) => x.commercial_ok == null),
     },
     shortlist: v.filter((x) => x.commercial_ok === true && x.card_required === false && x.data_policy && x.data_policy.trains_on_prompts === false).sort(byName),
-    phoneUnknown: count(providers, (x) => x.phone_required == null),
-    freeLimits: count(providers, (x) => x.free_limits && typeof x.free_limits === 'object'),
+    phoneUnknown: count(v, (x) => x.phone_required == null),
+    freeLimits: count(v, (x) => x.free_limits && typeof x.free_limits === 'object'),
     dataPolicy: dp.length,
     trainsFalse: dp.filter((x) => x.data_policy.trains_on_prompts === false),
     trainsTrue: dp.filter((x) => x.data_policy.trains_on_prompts === true),
@@ -471,7 +471,7 @@ function productionGuide({ providers, prefix }) {
     (account.length ? p(`<strong>Only an account would tell (<code>needs_account</code>).</strong> The public pages are silent and the answer appears only during signup. <em>Example:</em> ${account.map(exampleHtml).join(' ')}`) : '') +
     (disagree.length ? p(`<strong>Two official pages disagree (<code>sources_disagree</code>).</strong> We quote both and don’t pick one. <em>${disagree.length > 1 ? 'Examples' : 'Example'}:</em> ${disagree.map(exampleHtml).join(' ')}`) : '') +
     p('<strong>What to do with a null:</strong> treat it as a question to put to the provider, in writing, before you depend on it. For commercial use in production, don’t ship on a null.') +
-    p(`Across the dataset the phone requirement is the least documented fact: ${F.phoneUnknown} of ${F.total} providers don’t state it.`) +
+    p(`Across the dataset the phone requirement is the least documented fact: ${F.phoneUnknown} of ${F.verified} verified providers don’t state it.`) +
     related([`<a href="${prefix}coverage/">What the dataset doesn’t know yet</a>`, `<a href="${prefix}quality/">Data quality</a>`]) +
     h2('2. Will the limits hold under load?', 'limits') +
     `<ul>` +
@@ -480,9 +480,9 @@ function productionGuide({ providers, prefix }) {
     `<li><strong>Know what happens at the limit.</strong> With no card on file, crossing a limit normally means HTTP 429, not a bill.${cardOnFile.length ? ` With a card on file (${andList(cardOnFile.map(L))}), read the billing page for what follows the free amount.` : ''}</li>` +
     (hordeSla ? `<li><strong>Volunteer and shared capacity has no SLA.</strong> ${L(horde)}’s notes: “${escProse(hordeSla.replace(/[.;]$/, ''))}”.</li>` : '') +
     `</ul>` +
-    p(`Structured limits (<code>free_limits</code>, with source and date) exist for ${F.freeLimits} providers; the rest are in each provider’s rate-limits text.`) +
+    p(`Structured limits (<code>free_limits</code>, with source and date) exist for ${F.freeLimits} of the ${F.verified} verified providers; the rest are in each provider’s rate-limits text.`) +
     h2('3. Does it train on your prompts, and how long does it keep them?', 'data-policy') +
-    p(`${F.dataPolicy} providers have a quoted <code>data_policy</code>:`) +
+    p(`${F.dataPolicy} of the ${F.verified} verified providers have a quoted <code>data_policy</code>:`) +
     `<ul><li><strong>${F.trainsFalse.length} say they don’t train</strong> on your prompts${noTrainExample ? `, for example ${L(noTrainExample)}: “${esc(noTrainExample.data_policy.quote)}” (${ext(noTrainExample.data_policy.source, 'source')})` : ''}.</li>` +
     `<li><strong>${F.trainsTrue.length} say they do</strong>${F.trainsTrue.length ? `, among them ${andList([...F.trainsTrue].sort(byScore).slice(0, 3).map(L))}` : ''}.</li>` +
     `<li><strong>${F.trainsNull.length} are unsettled</strong>: the provider’s own pages conflict or are silent${F.trainsNull.length ? ` (${andList([...F.trainsNull].sort(byName).slice(0, 3).map(L))} among them)` : ''}.</li></ul>` +
