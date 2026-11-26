@@ -1993,6 +1993,29 @@ test('expiry reads the same on the provider page, the comparison and the API', (
   assert.match(pageCell('groq'), /^no expiry<\/span>$/);
 });
 
+test('compare links the official model catalogue under the free-model sample (#705)', () => {
+  const row = (p) => compareTableHtml([p, p]).match(/Free models \(sample\)[\s\S]*?<\/tr>/)[0];
+  const base = { name: 'Fixture', category: 'ongoing' };
+  // a provider with a sample and one with "no sample" both get the link
+  assert.match(row({ ...base, slug: 'fx-sample', models_free: ['a/b'], models_url: 'https://example.com/models' }),
+    /<code>a\/b<\/code><div class="cmp-sub"><a href="https:\/\/example\.com\/models" target="_blank" rel="noopener">official catalogue ↗<\/a><\/div>/);
+  assert.match(row({ ...base, slug: 'fx-nosample', models_url: 'https://example.com/models' }),
+    /no sample<\/span><div class="cmp-sub"><a href="https:\/\/example\.com\/models" target="_blank" rel="noopener">official catalogue ↗<\/a><\/div>/);
+  // without models_url the cell renders exactly as before: no link, no cmp-sub line
+  assert.doesNotMatch(row({ ...base, slug: 'fx-plain', models_free: ['a/b'] }), /cmp-sub|official catalogue/);
+  // an unsafe models_url never becomes a link
+  assert.doesNotMatch(row({ ...base, slug: 'fx-unsafe', models_free: ['a/b'], models_url: 'javascript:alert(1)' }),
+    /javascript:|official catalogue/);
+  // the browser bundle ships the same function
+  run(['scripts/build.mjs']);
+  const bundle = readFileSync(join(ROOT, 'site/shared-compare.js'), 'utf8');
+  assert.match(bundle, /official catalogue/, 'the browser bundle carries the catalogue link');
+  const { compareTableHtml: bundledCompare } = (new Function('window', bundle + '; return window.FLLM_COMPARE;'))({});
+  assert.match(bundledCompare([{ ...base, slug: 'fx-bundle', models_url: 'https://example.com/models' }, base2()]),
+    /official catalogue ↗/, 'the bundled function renders the link');
+  function base2() { return { name: 'Other', category: 'ongoing', slug: 'fx-other' }; }
+});
+
 // ---------- weekly re-verification pacing (lib/pacing.mjs) ----------
 // Simulate doing exactly the proposed batch every week and check the two
 // promises the worklist makes: nothing goes overdue, and a same-day cohort
