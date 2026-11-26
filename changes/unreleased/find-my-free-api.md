@@ -10,4 +10,4 @@
   (`/find/#use=chat&card=no`), so results are shareable. Linked from the home
   hero, the Providers menu and the guides hub, listed in the sitemap, measured
   by the Lighthouse gate, and reported as `wizard_complete` only with analytics
-  consent. Agent-assisted.
+  consent. Agent-assisted (#817).

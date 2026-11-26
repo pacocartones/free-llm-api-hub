@@ -20,7 +20,12 @@ const ROOT = privateTree(REPO);
 const SITE = 'https://freellmapihub.com';
 const read = (rel) => readFileSync(join(ROOT, rel), 'utf8');
 const json = (rel) => JSON.parse(read(rel));
-const PAGES = { notFree: 'site/not-free/index.html', embed: 'site/embed/index.html' };
+const PAGES = {
+  notFree: 'site/not-free/index.html',
+  embed: 'site/embed/index.html',
+  api: 'site/api/index.html',
+  quality: 'site/quality/index.html',
+};
 
 let NF, providers, quotes, cff;
 before(() => {
@@ -254,6 +259,23 @@ describe('/embed/: Use the data', () => {
     page.change();
     assert.equal(page.ids['badge-snippet'].textContent, providerBadgeMarkdown(groq, SITE));
     assert.equal(page.ids['badge-snippet-html'].textContent, providerBadgeHtml(groq, SITE));
+  });
+
+  test('the Cite block is identical on /api/, /quality/ and /embed/ and matches CITATION.cff', () => {
+    const r = citationRecord(cff);
+    const bib = `<pre data-snippet="citation"><code id="cite-bibtex">${codeHtmlEsc(bibtex(r))}</code></pre>`;
+    const apaHtml = `<pre data-snippet="citation"><code id="cite-apa">${codeHtmlEsc(apa(r))}</code></pre>`;
+
+    for (const [page, heading] of [
+      [PAGES.api, 'Cite this dataset'],
+      [PAGES.quality, 'Cite this dataset'],
+      [PAGES.embed, 'Cite'],
+    ]) {
+      const html = read(page);
+      assert.ok(html.includes(`<h2 id="cite">${heading}</h2>`), `${page}: Cite heading`);
+      assert.ok(html.includes(bib), `${page}: BibTeX`);
+      assert.ok(html.includes(apaHtml), `${page}: APA`);
+    }
   });
 
   test('links the data files and the API', () => {

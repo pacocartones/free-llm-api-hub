@@ -13,4 +13,4 @@
     the HTML pages.
   - The `Content-Signal:` line that Search Console flagged is gone, and so is
     the duplicate `User-agent: *` group.
-  - `scripts/robots.test.mjs` parses the file and checks these rules.
+  - `scripts/robots.test.mjs` parses the file and checks these rules (#767).

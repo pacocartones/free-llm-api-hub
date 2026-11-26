@@ -174,7 +174,7 @@ test('the explorer count reflects unfiltered and filtered render output', () => 
 test('every sortable header holds a real button and the header cell has no tab stop of its own', () => {
   const html = readFileSync(new URL('../site/index.html', import.meta.url), 'utf8');
   const heads = html.match(/<th data-key="[a-z_]+"[^>]*>[\s\S]*?<\/th>/g) || [];
-  assert.equal(heads.length, 5, 'five sortable headers');
+  assert.equal(heads.length, 4, 'four sortable headers');
   for (const h of heads) {
     assert.doesNotMatch(h, /tabindex/, 'no tab stop on the cell');
     assert.match(h, /<button type="button" class="th-sort">[^<]+<\/button>/, 'a real button inside');
@@ -413,7 +413,7 @@ test('the card layout keeps table semantics: explicit roles, and card labels are
   assert.match(html, /<thead role="rowgroup">\s*<tr role="row">/);
   assert.match(html, /<tbody id="tbody" role="rowgroup">/);
   const heads = html.match(/<th data-key="[a-z_]+"[^>]*>/g) || [];
-  assert.equal(heads.length, 5);
+  assert.equal(heads.length, 4);
   for (const h of heads) assert.match(h, /role="columnheader"/);
 
   const rowHtml = clientRowHtml();
