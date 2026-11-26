@@ -19,6 +19,7 @@ How **Free LLM API Hub** works — how entries are verified, what earns a spot, 
 | [Freshness SLA](freshness-sla.md) | The 90-day re-verification system: buckets, badge, worklist, reverify batch, verified column |
 | [Quoted passages](quotes.md) | Evidence register, quote updates and offline versus live checks |
 | [Architecture](architecture.md) | The data-first pipeline: what each script does, the data model, the two-places rule |
+| [Quarterly report](state-quarterly.md) | The "State of Free LLM APIs" page per quarter: where its figures come from, the editorial file, and how to publish one |
 | [Regeneration bot](regeneration-bot.md) | The post-merge rebuild of derived files (off, then shadow mode, then direct push) and its pull-request preview |
 | [Provider schema reference](schema.md) | Generated field types, nullability and required keys of `data/schema.json` |
 | [Static JSON API: stability and versioning](api.md) | What `/api/v1/` guarantees, how `version` relates to the path, and pinning a snapshot by tag |

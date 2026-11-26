@@ -60,6 +60,9 @@ import { datasetAsOf } from './lib/release-stamp.mjs';
 import { parseCitation, homeJsonLd, datasetJsonLdScript } from './lib/dataset-jsonld.mjs';
 import { websiteRef, datasetRef } from './lib/site-entity.mjs';
 import { SITEMAP_INDEX, sitemapIndexXml } from './lib/state-sitemap.mjs';
+import { reportQuarters, quarterlyReport, quarterFigures, quarterLabel } from './lib/state-quarterly.mjs';
+import { quarterBlocks, quarterDataJson, quarterJsonLd } from './lib/state-quarterly-page.mjs';
+import { readEditorial, renderEditorial } from './lib/state-editorial.mjs';
 import { SITEMAPS as INDEXNOW_SITEMAPS } from './lib/indexnow.mjs';
 import { groupModels, modelKey } from './lib/model-keys.mjs';
 import { providerMetaDescription } from './lib/provider-meta.mjs';
@@ -1534,6 +1537,8 @@ const changeRowHtml = (c, prefix = '../') =>
 const addedBySlug = Object.fromEntries(providers.filter((p) => p.added).map((p) => [p.slug, p.added]));
 const stateMonths = reportMonths(monthEndSnapshots);
 const stateReports = stateMonths.map((m) => ({ ...monthlyReport({ ...m, historyBySlug, addedBySlug }), snapshotDate: m.snapshotDate }));
+// The quarterly reports (/state/YYYY-qN/): every quarter with a snapshot before it, from the same months.
+const quarterlyReports = reportQuarters(stateMonths).map((q) => quarterlyReport(q, { historyBySlug, notFree: NOT_FREE.entries }));
 const kvTable = (head, rowsArr) =>
   `<table class="model-table"><thead><tr>${head.map((h) => `<th>${htmlEsc(h)}</th>`).join('')}</tr></thead><tbody>` +
   rowsArr.map((r) => `<tr>${r.map((v, i) => `<td${i === 0 ? ' class="name"' : ''}>${v}</td>`).join('')}</tr>`).join('') + `</tbody></table>`;
@@ -1621,6 +1626,11 @@ const changesMain =
   `<section id="months"><h2>Month by month</h2>` +
   `<p>One report per month, from the first to the latest: provider counts by category and modality, verified share, verification age, and every field change and provider added, in the order they happened. A month with no committed revision of providers.json says so. Every figure is computed from the data and its git history.</p>` +
   monthsTable + `</section>` +
+  (quarterlyReports.length
+    ? `<section id="quarters"><h2>Quarter by quarter</h2><p>The quarterly report, <em>State of Free LLM APIs</em>: headline figures, the changes of the quarter, the breakdown by modality and what the data do not say, with charts.</p><ul>` +
+      [...quarterlyReports].reverse().map((q) => `<li><a href="../state/${q.quarter}/">State of Free LLM APIs — ${quarterLabel(q.quarter)}</a>${q.closed ? '' : ` <span class="muted">(in progress, data to ${q.end.date})</span>`}</li>`).join('') +
+      `</ul></section>`
+    : '') +
   `<p class="prov-back"><a href="../updates">← All updates</a></p>` +
   `</div></main>`;
 rmSync(join(ROOT, 'site/changes'), { recursive: true, force: true });
@@ -1636,6 +1646,37 @@ writeFileSync(join(ROOT, 'site/changes/index.html'), htmlPage({
 }));
 // The old index of the monthly reports now lives in /changes/#months; the reports keep their URLs.
 writeFileSync(join(ROOT, 'site/state/index.html'), redirectPage('../changes/#months'));
+
+// ---------- quarterly state reports: /state/YYYY-qN/ (lib/state-quarterly*.mjs; wording in content/state/) ----------
+// Every figure, chart and table comes from the two snapshots and the mined history; the editorial file only quotes
+// them. A quarter in progress is built (to review it) but not indexed and not in the sitemap until it closes.
+for (const r of quarterlyReports) {
+  const dir = `site/state/${r.quarter}`;
+  const figures = quarterFigures(r);
+  const editorial = readEditorial(ROOT, r.quarter);
+  const blocks = quarterBlocks(r, {
+    provLink: (slug, name) => provLink(slug, name, '../../'),
+    links: {
+      notFree: '../../not-free/', methodology: '../../methodology/', data: 'data.json',
+      changesJson: '../../api/v1/changes.json', history: '../../api/v1/history.json', month: (m) => `../${m}/`,
+    },
+  });
+  const { title, description, html } = renderEditorial(editorial.text, { figures, blocks, file: editorial.file, ctx: { repo: REPO, site: SITE, from: editorial.file } });
+  const label = quarterLabel(r.quarter);
+  const main =
+    pageHero({ crumbs: `<a href="../../">Home</a> / <a href="../../changes/#quarters">What changed</a> / ${label}`, h1: htmlEsc(title),
+      lede: `${r.closed ? 'Quarterly report' : 'Quarterly report, in progress'}: ${quarterLabel(r.quarter)}, computed from the dataset and its git history (snapshots of ${r.start.date} and ${r.end.date}).` }) +
+    `<main id="main"><div class="wrap prose quarter-report">${html}` +
+    `<nav class="pagination" aria-label="Quarterly reports"><span aria-hidden="true"></span><span><a href="../../changes/#quarters">All reports</a></span><span aria-hidden="true"></span></nav>` +
+    `</div></main>`;
+  mkdirSync(join(ROOT, dir), { recursive: true });
+  writeFileSync(join(ROOT, dir, 'data.json'), JSON.stringify(quarterDataJson(r, { site: SITE }), null, 2) + '\n');
+  writeFileSync(join(ROOT, dir, 'index.html'), htmlPage({
+    title: `${title} · Free LLM API Hub`, desc: description, canonical: `${SITE}/state/${r.quarter}/`, main, prefix: '../../',
+    noindex: r.closed ? false : 'noindex,follow', styles: ['charts.css'], ogImage: `${SITE}/og/state-quarterly.png`,
+    jsonld: quarterJsonLd(r, { site: SITE, title, description: fitDescription(description) }),
+  }));
+}
 
 // ---------- credit programs: site pages + doc, from data/programs.json ----------
 const programs = JSON.parse(readFileSync(join(ROOT, 'data/programs.json'), 'utf8'));
@@ -2653,7 +2694,8 @@ writeFileSync(join(ROOT, 'site/sitemap.xml'), sitemap);
 writeFileSync(join(ROOT, 'site/sitemap-state.xml'),
   `<?xml version="1.0" encoding="UTF-8"?>\n` +
   `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +
-  stateReports.map((r, i, all) => `  <url><loc>${SITE}/state/${r.month}/</loc><lastmod>${stateLastmod(r.month, i, all)}</lastmod></url>`).join('\n') +
+  [...stateReports.map((r, i, all) => `  <url><loc>${SITE}/state/${r.month}/</loc><lastmod>${stateLastmod(r.month, i, all)}</lastmod></url>`),
+    ...quarterlyReports.filter((q) => q.closed).map((q) => `  <url><loc>${SITE}/state/${q.quarter}/</loc><lastmod>${q.end.date}</lastmod></url>`)].join('\n') +
   `\n</urlset>\n`);
 // Both sitemaps behind one index (lib/state-sitemap.mjs): the URL to submit in Search Console. robots.txt keeps
 // naming the two sitemaps directly.
