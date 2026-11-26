@@ -76,3 +76,34 @@ for f in rf-inst.ttf:roboto-flex DMMono-Regular.ttf:dm-mono-400 DMMono-Medium.tt
     --flavor=woff2 --no-hinting --desubroutinize --output-file="${f##*:}.woff2"
 done
 ```
+
+## Aura and receipt
+
+Both shapes are parameters in code, so a later variant changes numbers, not renderers.
+
+**Aura: radial bars** (`AURA_GEOMETRY` in [`scripts/lib/aura.mjs`](../scripts/lib/aura.mjs), a 100-unit box):
+
+| Parameter | Value |
+|---|---|
+| Bars | 40, round caps; one contiguous sector per modality (40 / n bars each), in `AURA_ORDER` |
+| Seed | the slug: the fan's rotation and each bar's length (0.45–1 of the sector's full length) |
+| Ongoing | bars from r = 9, up to 37 long, stroke 3.3 (rays from the centre) |
+| Trial | bars from r = 27, up to 18 long, stroke 3.0 (outer crown only) |
+| Flags not stated | dashed circle r = 48.4, stroke 2.2, dash `4 3`, in `--unk` |
+| Last check over 30 days | `saturate(.2)` |
+
+`auraHtml()` is the web form (inline SVG; the bars take `--h-*` by class, so one markup serves both themes), `auraSvg()`
+the image form (hex colours of one theme, or `theme: 'css'` for the `#logo` sprite symbol). The favicon uses 12 thicker
+bars and four modalities so it reads at 16 px.
+
+**Receipt** (`STAMP_SHAPES` in [`scripts/lib/stamp.mjs`](../scripts/lib/stamp.mjs), CSS in `site/styles.css`):
+
+- **Perforated ticket**, the main stamp (provider pages, social images, badges): semicircular notches of 5 px on both
+  sides, a 1.5 px dashed cut line between the ✓ and the text, `--seal-bg` fill with `--accent` text, turned −1.5°,
+  DM Mono 500 at 12 px (14 px and a 16 px ✓ on the provider page). Text: "Verified 24 Nov 2026 · 7 sources".
+- **Pill**, the compact stamp in tables and lists: flat, `border-radius: 999px`, 1 px `--control` border, an 8 px status
+  dot in `--ok`, "Verified" in `--accent` and "· 24 Nov 2026 · 7 sources" in ink, DM Mono 500 at 12 px.
+
+"N sources" is the number of distinct https pages behind the entry (`docs_url`, the published limits' source, the
+data-policy source and every source of `field_checks`). Freshness never rests on colour: stale turns the ✓ into `!`, and
+a due or overdue check dashes the pill's border and underlines the ticket's text.
