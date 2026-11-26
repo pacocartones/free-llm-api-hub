@@ -14,6 +14,7 @@ import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
 import { ORDER, roundTripError, serialize } from './_serialize.mjs';
 import { redirectStubFiles } from './lib/redirects.mjs';
+import { trackedFilesOnDisk } from './lib/tracked-files.mjs';
 import { freshnessBadge, freshnessColor, freshnessStatus, recScore, SLA_DAYS, DUE_SOON_DAYS } from './lib/rules.mjs';
 import { esc, stripTags } from './lib/escape.mjs';
 import { mineProviderHistory, assertHistoryPlausible, historyFromRevisions } from './lib/history.mjs';
@@ -630,7 +631,8 @@ test('tracked files reject personal mailboxes except the verified maintainer pol
   assert.equal(unexpected('CONTRIBUTORS.md', historicalEmail), true, 'no contributor-list exception');
   assert.equal(unexpected('CONTRIBUTING.md', historicalEmail.replace('leonaniagomez', 'someone')), true, 'other addresses still fail inside policy files');
   assert.equal(unexpected('CONTRIBUTING.md', 'prefix' + historicalEmail), true, 'partial address matches are not exempt');
-  const files = execFileSync('git', ['ls-files', '-z'], { cwd: ROOT, encoding: 'utf8' }).split('\0').filter(Boolean);
+  // Skips tracked files deleted but not yet staged, such as the fragments right after release:prepare.
+  const files = trackedFilesOnDisk(ROOT);
   const hits = [];
   for (const rel of files) {
     if (/\.(png|jpe?g|webp|gif|woff2?|ico)$/i.test(rel)) continue;
