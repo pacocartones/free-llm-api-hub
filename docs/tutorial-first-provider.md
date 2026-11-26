@@ -180,7 +180,7 @@ git push -u fork add-your-provider
 
 If you chose a different branch name, use that name in the push command too.
 
-Do not run `npm run check` in push mode: it compares the build with the committed derived files, which your pull request leaves stale on purpose, so it reports drift that the bot fixes after the merge. If the *Regeneration mode* step of the "Dataset integrity" check ever prints a mode other than `push` (a rollback), commit the regenerated files with the data instead and run `npm run check` until it finds no drift, as [CONTRIBUTING.md](../CONTRIBUTING.md#for-provider-data-edit-the-source) describes.
+`npm run check` follows the mode too. In push mode it runs CI's push-mode gate against the merge base with `origin/main`: the derived files your pull request leaves stale on purpose pass, because the bot regenerates them after the merge. If the *Regeneration mode* step of the "Dataset integrity" check ever prints a mode other than `push` (a rollback), commit the regenerated files with the data instead and run `npm run check` until it finds no drift, as [CONTRIBUTING.md](../CONTRIBUTING.md#for-provider-data-edit-the-source) describes.
 
 Open the pull request. Give it a title that says what changed and a body with the source link and what you confirmed.
 

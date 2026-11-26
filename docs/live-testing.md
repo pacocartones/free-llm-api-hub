@@ -40,7 +40,7 @@ The probe reads keys from `process.env[env_key]` (each provider declares its `en
 
 ## Worked walkthrough (local, first run)
 
-Step by step from an empty checkout — no VPS, no Infisical needed for the basic path. The `--env-file` flag needs Node.js 20.6 or later:
+Step by step from an empty checkout — no VPS, no Infisical needed for the basic path. It needs Node.js 24, like the rest of the repository (`.nvmrc`):
 
 ```bash
 # 1. Start from the repo root and install dependencies once
