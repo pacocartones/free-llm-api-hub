@@ -173,7 +173,7 @@ const collectionPageJsonLd = (args) => pageJsonLd({ site: SITE, ...args });
 const COLLECTION_COPY = [
   {
     slug: 'no-credit-card',
-    answer: '{n} of {total} tracked providers need no payment method to start. That includes trial credits as well as permanent free tiers, so read the Type column. Each row says what is free and the catch. The list is a live filter and changes when a provider changes its terms.',
+    answer: '{n} of {total} tracked providers need no payment method to start. That includes trial credits as well as permanent free tiers, so read the Type column. Each row says what is free and the catch. This collection is a live filter and changes when a provider changes its terms.',
     metaDesc: '{n} LLM APIs you can start calling without a payment method, filtered live from a dated dataset. Dataset of {date}.',
     title: 'Free LLM APIs with no credit card',
     h1: 'Free LLM APIs with no credit card required',
@@ -183,13 +183,13 @@ const COLLECTION_COPY = [
     faq: [
       { q: 'Can I use an LLM API for free without a credit card?', a: 'Yes — every provider on this page offers a free tier with no card required, confirmed against its own docs. You are limited by rate, not billing.' },
       { q: 'Will I be charged if I go over the free limit?', a: 'Usually not. Without a payment method on file there is nothing to charge, so reaching a limit means being rate-limited (HTTP 429). Read the catch on each row, because terms change.' },
-      { q: 'How often does this list change?', a: 'It is a live filter of the dataset: it is regenerated whenever the dataset changes, and every row shows the day its source was read.' },
+      { q: 'How often does this collection change?', a: 'It is a live filter of the dataset: it is regenerated whenever the dataset changes, and every row shows the day its source was read.' },
       { q: 'How do I report a mistake?', a: 'Open an issue on GitHub with the row and the evidence; the maintainers re-read the provider’s own page.' },
     ],
   },
   {
     slug: 'no-phone',
-    answer: '{n} of {total} tracked providers do not ask for a phone number at signup. Some still require an email or a sign-in with another account. A provider whose phone rule is not known is left out rather than assumed, and the list updates when a provider changes its signup.',
+    answer: '{n} of {total} tracked providers do not ask for a phone number at signup. Some still require an email or a sign-in with another account. A provider whose phone rule is not known is left out rather than assumed, and this collection updates when a provider changes its signup.',
     metaDesc: '{n} LLM APIs whose signup needs no SMS or phone verification, filtered live from a dated dataset. Dataset of {date}.',
     title: 'Free LLM APIs with no phone verification',
     h1: 'Free LLM APIs with no phone number required',
@@ -199,7 +199,7 @@ const COLLECTION_COPY = [
     faq: [
       { q: 'Is there a free LLM API with no phone verification?', a: 'Yes — every provider on this page asks for no phone number at signup, according to its own docs. A provider whose rule is not known is not listed.' },
       { q: 'Do these APIs need any account at all?', a: 'Almost always: they ask for an email or a sign-in with an existing account, only not for a phone number.' },
-      { q: 'How often does this list change?', a: 'It is a live filter of the dataset: it is regenerated whenever the dataset changes, and every row shows the day its source was read.' },
+      { q: 'How often does this collection change?', a: 'It is a live filter of the dataset: it is regenerated whenever the dataset changes, and every row shows the day its source was read.' },
       { q: 'How do I report a mistake?', a: 'Open an issue on GitHub with the row and the evidence; the maintainers re-read the provider’s own page.' },
     ],
   },
@@ -217,7 +217,7 @@ const COLLECTION_COPY = [
     faq: [
       { q: 'Can I call an AI API with no account at all?', a: 'Yes, a few providers allow it, according to their own pages: each row on this page quotes the sentence and the day it was read. Anonymous use has the tightest limits and the lowest priority.' },
       { q: 'Is anonymous access the same as no signup form?', a: 'No. Most providers with no card and no phone still ask for an email or a sign-in; those are in the no-card and no-phone collections. This page lists only APIs that work with no account.' },
-      { q: 'How often does this list change?', a: 'It is a live filter of the dataset: it is regenerated whenever the dataset changes, and every row shows the day its source was read.' },
+      { q: 'How often does this collection change?', a: 'It is a live filter of the dataset: it is regenerated whenever the dataset changes, and every row shows the day its source was read.' },
       { q: 'How do I report a mistake?', a: 'Open an issue on GitHub with the row and the evidence; the maintainers re-read the provider’s own page.' },
     ],
   },
@@ -231,10 +231,10 @@ const COLLECTION_COPY = [
     intro: 'Free tiers that **allow commercial/production use** (`commercial_ok: true`). Evaluation-only tiers (`commercial_ok: false`) and tiers whose terms do not say are deliberately left out — read their rows in the main list for the restriction.',
     guides: ['openai-compatible-free-apis', 'free-llm-api-without-credit-card', 'choose-free-llm-api-for-production'],
     faq: [
-      { q: 'Can I use this list in a commercial product?', a: 'Yes. Free LLM API Hub and its dataset are MIT licensed, so you can reuse, fork and adapt them, including commercially. A link back is appreciated but not required. Each provider’s page has a Commercial use line that reads allowed, evaluation only or not confirmed, and the explorer on the home page marks the first two with an icon. Not confirmed means no reading of the provider’s terms has confirmed that commercial use is allowed: some terms do not clearly say so, and for other providers the question is still open. It is not a permission. The data describes other companies’ free tiers, whose terms change without notice, so confirm against the provider’s own docs before you ship. This list is independent: it is not affiliated with, endorsed by or sponsored by any provider on it, and it is not legal advice.' },
+      { q: 'Can I use this collection in a commercial product?', a: 'Yes. Free LLM API Hub and its dataset are MIT licensed, so you can reuse, fork and adapt them, including commercially. A link back is appreciated but not required. Each provider’s page has a Commercial use line that reads allowed, evaluation only or not confirmed, and the explorer on the home page marks the first two with an icon. Not confirmed means no reading of the provider’s terms has confirmed that commercial use is allowed: some terms do not clearly say so, and for other providers the question is still open. It is not a permission. The data describes other companies’ free tiers, whose terms change without notice, so confirm against the provider’s own docs before you ship. This dataset is independent: it is not affiliated with, endorsed by or sponsored by any provider on it, and it is not legal advice.' },
       { q: 'Which free LLM APIs allow commercial use?', a: 'Every provider on this page permits commercial/production use on its free tier (`commercial_ok: true`), confirmed against its own terms. Evaluation-only tiers are excluded.' },
       { q: 'Is a free tier safe to ship to production?', a: 'Check the rate limits and whether the free tier is renewing or a one-time credit — both are on each provider’s row. For steady load, a renewing free tier or a paid plan is safer than a trial credit.' },
-      { q: 'How often does this list change?', a: 'It is a live filter of the dataset: it is regenerated whenever the dataset changes, and every row shows the day its source was read.' },
+      { q: 'How often does this collection change?', a: 'It is a live filter of the dataset: it is regenerated whenever the dataset changes, and every row shows the day its source was read.' },
       { q: 'How do I report a mistake?', a: 'Open an issue on GitHub with the row and the evidence; the maintainers re-read the provider’s own page.' },
     ],
   },
@@ -251,7 +251,7 @@ const COLLECTION_COPY = [
     faq: [
       { q: 'What does OpenAI-compatible mean?', a: 'The API accepts the same request format as OpenAI’s <code>/chat/completions</code>, so the OpenAI SDK works by changing only <code>base_url</code> and the API key.' },
       { q: 'Is every feature supported?', a: 'Not necessarily: compatibility can be partial, and a feature a provider lacks fails at the provider. Read the catch on each row.' },
-      { q: 'How often does this list change?', a: 'It is a live filter of the dataset: it is regenerated whenever the dataset changes, and every row shows the day its source was read.' },
+      { q: 'How often does this collection change?', a: 'It is a live filter of the dataset: it is regenerated whenever the dataset changes, and every row shows the day its source was read.' },
       { q: 'How do I report a mistake?', a: 'Open an issue on GitHub with the row and the evidence; the maintainers re-read the provider’s own page.' },
     ],
   },
@@ -266,7 +266,7 @@ const COLLECTION_COPY = [
     faq: [
       { q: 'Are there LLM APIs that are free with no trial clock?', a: 'Yes — the providers on this page list models at $0 on a perpetual basis, according to their own pages. Rate limits still apply.' },
       { q: 'Does permanently free mean free forever?', a: 'No. It describes what the provider says today; prices and limits can change, so every row shows the day it was read.' },
-      { q: 'How often does this list change?', a: 'It is a live filter of the dataset: it is regenerated whenever the dataset changes, and every row shows the day its source was read.' },
+      { q: 'How often does this collection change?', a: 'It is a live filter of the dataset: it is regenerated whenever the dataset changes, and every row shows the day its source was read.' },
       { q: 'How do I report a mistake?', a: 'Open an issue on GitHub with the row and the evidence; the maintainers re-read the provider’s own page.' },
     ],
   },
@@ -282,7 +282,7 @@ const COLLECTION_COPY = [
     faq: [
       { q: 'Are there free APIs for images, speech and embeddings — not just text?', a: 'Yes — the providers here reach beyond text on their free tier: vision, image generation, speech (STT/TTS), embeddings or rerank. See the modality-specific guides linked above.' },
       { q: 'Can one free API cover several modalities?', a: 'Some do: a provider can span text, vision, audio and embeddings on a single free key. The What’s free column of each row says which modalities that provider offers free.' },
-      { q: 'How often does this list change?', a: 'It is a live filter of the dataset: it is regenerated whenever the dataset changes, and every row shows the day its source was read.' },
+      { q: 'How often does this collection change?', a: 'It is a live filter of the dataset: it is regenerated whenever the dataset changes, and every row shows the day its source was read.' },
       { q: 'How do I report a mistake?', a: 'Open an issue on GitHub with the row and the evidence; the maintainers re-read the provider’s own page.' },
     ],
   },
@@ -300,14 +300,14 @@ const COLLECTION_COPY = [
     guides: ['choose-free-llm-api-for-production'],
     faq: [
       { q: 'Which free LLM APIs say they do not train on my prompts?', a: 'The providers on this page, each according to its own terms or privacy page, cited with the day it was read on the provider’s page on this site. The wording differs: for some it holds only while you have not opted in to training, and a privacy notice is not a contract.' },
-      { q: 'Does a provider missing from this list train on my data?', a: 'Not necessarily. A provider is missing when its own page says it may train on prompts, says nothing we could cite, or could not be read. Check the provider before you send sensitive data.' },
-      { q: 'How often does this list change?', a: 'It is a live filter of the dataset: it is regenerated whenever the dataset changes, and every row shows the day its source was read.' },
+      { q: 'Does a provider missing from this collection train on my data?', a: 'Not necessarily. A provider is missing when its own page says it may train on prompts, says nothing we could cite, or could not be read. Check the provider before you send sensitive data.' },
+      { q: 'How often does this collection change?', a: 'It is a live filter of the dataset: it is regenerated whenever the dataset changes, and every row shows the day its source was read.' },
       { q: 'How do I report a mistake?', a: 'Open an issue on GitHub with the row and the evidence; the maintainers re-read the provider’s own page.' },
     ],
   },
   {
     slug: 'renewing-free-tier',
-    answer: '{n} of {total} tracked providers give a free allowance that renews: a daily or monthly quota or credit that resets, not a one-time balance. Renewing does not mean unlimited — limits are hard and some tiers are evaluation-only, so read the Type and catch columns. The list is a live filter.',
+    answer: '{n} of {total} tracked providers give a free allowance that renews: a daily or monthly quota or credit that resets, not a one-time balance. Renewing does not mean unlimited — limits are hard and some tiers are evaluation-only, so read the Type and catch columns. This collection is a live filter.',
     metaDesc: '{n} AI APIs whose free allowance renews instead of running out once, filtered live from a dated dataset. Dataset of {date}.',
     title: 'Free LLM APIs whose free tier renews',
     h1: 'Free LLM APIs with a renewing free allowance',
@@ -317,7 +317,7 @@ const COLLECTION_COPY = [
     faq: [
       { q: 'Which free LLM APIs reset their limits?', a: 'The providers on this page: their free allowance renews on a schedule rather than being a one-time credit.' },
       { q: 'Is a renewing allowance the same as permanently free?', a: 'No. Permanently free (see that collection) means models priced at $0 with no trial window; a renewing allowance resets and may change or carry commercial restrictions.' },
-      { q: 'How often does this list change?', a: 'It is a live filter of the dataset: it is regenerated whenever the dataset changes, and every row shows the day its source was read.' },
+      { q: 'How often does this collection change?', a: 'It is a live filter of the dataset: it is regenerated whenever the dataset changes, and every row shows the day its source was read.' },
       { q: 'How do I report a mistake?', a: 'Open an issue on GitHub with the row and the evidence; the maintainers re-read the provider’s own page.' },
     ],
   },
@@ -333,7 +333,7 @@ const COLLECTION_COPY = [
     faq: [
       { q: 'Do free signup credits expire?', a: 'Some do, with windows from 30 days to a year in the dataset; others say the credit does not expire. Each row shows the catch.' },
       { q: 'Is a signup credit the same as a free tier?', a: 'No. A credit is a balance that runs out; a free tier renews or is permanent. See the renewing and permanently free collections.' },
-      { q: 'How often does this list change?', a: 'It is a live filter of the dataset: it is regenerated whenever the dataset changes, and every row shows the day its source was read.' },
+      { q: 'How often does this collection change?', a: 'It is a live filter of the dataset: it is regenerated whenever the dataset changes, and every row shows the day its source was read.' },
       { q: 'How do I report a mistake?', a: 'Open an issue on GitHub with the row and the evidence; the maintainers re-read the provider’s own page.' },
     ],
   },
@@ -384,7 +384,7 @@ const GUIDES = [
     faq: [
       { q: 'What does OpenAI-compatible mean?', a: 'The API accepts the same request and response format as OpenAI’s <code>/chat/completions</code>, so the official OpenAI SDKs work by changing only <code>base_url</code> and the API key.' },
       { q: 'How do I switch my code to a free OpenAI-compatible API?', a: 'Set <code>base_url</code> to the provider’s endpoint (listed on each provider page), use its free API key, and pass one of its free model IDs as <code>model</code>.' },
-      { q: 'Do all free LLM APIs support the OpenAI format?', a: 'No — this list is only the providers confirmed to expose an OpenAI-compatible endpoint against their own documentation.' },
+      { q: 'Do all free LLM APIs support the OpenAI format?', a: 'No — this collection is only the providers confirmed to expose an OpenAI-compatible endpoint against their own documentation.' },
     ],
   },
   {
@@ -1922,7 +1922,7 @@ for (const g of GUIDES) {
     faqHtml +
     (twins.length ? `<h2>Related collections</h2><nav class="colls">${twins.map((c) => `<a href="../collections/${c.slug}">${escapeAttr(c.title)}</a>`).join('')}</nav>` : '') +
     `<h2>More guides</h2><nav class="colls">${related}</nav>` +
-    `<p class="muted">Looking for OpenAI, Anthropic, Mistral or GitHub Models? <a href="../not-free/">Why they are not on this list</a>.</p>` +
+    `<p class="muted">Looking for OpenAI, Anthropic, Mistral or GitHub Models? <a href="../not-free/">Why they are not in this dataset</a>.</p>` +
     `<p class="prov-back"><a href="../guides-and-collections/">← All guides</a></p>` +
     `</div></main>`;
   const jsonld = JSON.stringify({
@@ -1962,7 +1962,7 @@ for (const g of LONG_GUIDE_PAGES) {
     `<p class="answer"><strong>${g.answer}</strong></p>` +
     g.body +
     faqHtml +
-    (g.slug === 'openai-api-alternatives' ? '' : `<p class="muted">Looking for OpenAI, Anthropic, Mistral or GitHub Models? <a href="../not-free/">Why they are not on this list</a>.</p>`) +
+    (g.slug === 'openai-api-alternatives' ? '' : `<p class="muted">Looking for OpenAI, Anthropic, Mistral or GitHub Models? <a href="../not-free/">Why they are not in this dataset</a>.</p>`) +
     `<h2>More guides</h2><nav class="colls">${related}</nav>` +
     `<p class="muted">Data from the Free LLM API Hub dataset, as of ${ASOF}. Every limit is quoted from the provider’s own page; follow the source link before relying on it.</p>` +
     `<p class="prov-back"><a href="../guides-and-collections/">← All guides</a></p>` +
@@ -2229,7 +2229,7 @@ writeFileSync(join(ROOT, 'site/api/index.html'), htmlPage({
 
 // llms.txt (concise index) + llms-full.txt (every provider expanded) — llmstxt.org
 const programCount = programs.startups.length + programs.research.length;
-const llmsSummary = `A continuously-verified, machine-readable dataset of free-tier and trial-credit LLM (and adjacent AI-model) APIs for developers. Every entry is dated and sourced to the provider's own docs.`;
+const llmsSummary = `A continuously-verified, machine-readable dataset of free-tier and trial-credit LLM (and adjacent AI-model) APIs for developers. Every entry is checked against the provider's own docs and dated; quoted where the docs say it; "not stated" where they don't.`;
 // llmstxt.org layout: H1, a blockquote summary, the dataset date and counts first, then H2 sections of links.
 // Each provider has one line (name, free type, one-line limits, its page and the Markdown twin at /p/<slug>.md).
 const llmsTxt =
@@ -2245,12 +2245,12 @@ const llmsTxt =
   `- [Static JSON API](${SITE}/api/): versioned endpoints + pre-filtered slices (category, modality, no-card, commercial, OpenAI-compatible, …)\n` +
   `- [Provider status, JSON](${SITE}/api/v1/status.json): per provider, last verified, freshness against the ${DUE_SOON_DAYS}/${SLA_DAYS}-day SLA, free now, and the day of its last change\n` +
   `- [JSON Schema](${REPO}/blob/main/data/schema.json)\n` +
-  `- [Full provider list expanded, markdown](${SITE}/llms-full.txt)\n` +
+  `- [Full dataset expanded, markdown](${SITE}/llms-full.txt)\n` +
   `- [Data quality](${SITE}/quality/): how much of the dataset is verified, how fresh it is, and which answers are still unknown\n` +
   `- [Use the data](${SITE}/embed/): the widget, verified badges, JSON and CSV downloads, and how to cite the dataset\n` +
   `- [Methodology](${SITE}/methodology/): how entries are verified, sourced and dated\n\n` +
   `## Guides\n` +
-  `- [All guides and collections](${SITE}/guides-and-collections/): every guide and filtered list on one page\n` +
+  `- [All guides and collections](${SITE}/guides-and-collections/): every guide and filtered collection on one page\n` +
   [...GUIDES, ...LONG_GUIDE_PAGES].map((g) => `- [${g.h1}](${SITE}/guides/${g.slug}): ${g.blurb}`).join('\n') + `\n\n` +
   `## Free API by model family\n` +
   FAMILY_GROUPS.filter(isFamilyIndexable).map((g) => `- [${familyH1(g)}](${familyUrl(SITE, g)}): ${familyBlurb(g)}`).join('\n') + `\n\n` +
@@ -2392,9 +2392,9 @@ writeFileSync(
 // Written from docs/methodology.md and CONTRIBUTING.md with lib/markdown.mjs (no dependency; nothing of the source is passed through as HTML), so the page and
 // the file on GitHub cannot say different things. A relative link of the document becomes a link to the file on GitHub, or to the page when the file has one.
 const DOC_PAGES = [
-  { slug: 'methodology', file: 'docs/methodology.md', title: 'Methodology: how a provider gets on the list · Free LLM API Hub',
-    desc: 'How an entry gets on the list, what verified means and does not mean, and how freshness, sourcing, corrections, model tier and the score work.',
-    h1: 'Methodology', lede: 'How an entry gets on the list, what “verified” means, and what it does not.' },
+  { slug: 'methodology', file: 'docs/methodology.md', title: 'Methodology: how a provider gets into the dataset · Free LLM API Hub',
+    desc: 'How an entry gets into the dataset, what verified means and does not mean, and how freshness, sourcing, corrections, model tier and the score work.',
+    h1: 'Methodology', lede: 'How an entry gets into the dataset, what “verified” means, and what it does not.' },
   { slug: 'contributing', file: 'CONTRIBUTING.md', title: 'Contributing: add or fix a provider · Free LLM API Hub',
     desc: 'How to add or fix a provider, report a mistake without a pull request, claim an issue, and what happens to your first pull request.',
     h1: 'Contributing', lede: 'How to add or fix a provider, step by step.' },
