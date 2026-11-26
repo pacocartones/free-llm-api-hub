@@ -120,7 +120,7 @@ test('CLI accepts an alternate schema/output and repeated generation is byte-ide
 test('both drift entry points catch an untracked reference, a regenerated stale reference and deletion', () => {
   const dir = makeTmpDir('flah-schema-drift-');
   const git = (...args) => execFileSync('git', args, { cwd: dir, encoding: 'utf8' });
-  const check = () => spawnSync(process.execPath, [CHECK], { cwd: dir, encoding: 'utf8' });
+  const check = () => spawnSync(process.execPath, [CHECK, '--strict'], { cwd: dir, encoding: 'utf8' });
   const targets = (...args) => execFileSync(process.execPath, [TARGETS, ...args], { cwd: dir, encoding: 'utf8' }).trim().split(/\s+/);
   git('init', '-q');
   git('config', 'user.email', 'test@example.invalid');
