@@ -2111,6 +2111,7 @@ test('active providers retain models_url from their official catalogues', () => 
     ['google-gemini', 'https://ai.google.dev/gemini-api/docs/models'],
     ['groq', 'https://console.groq.com/docs/models'],
     ['openrouter', 'https://openrouter.ai/models'],
+    ['cerebras', 'https://inference-docs.cerebras.ai/models/overview'],
     ['cloudflare-workers-ai', 'https://developers.cloudflare.com/workers-ai/models/'],
     ['ibm-watsonx', 'https://www.ibm.com/docs/en/watsonx/saas?topic=solutions-supported-foundation-models'],
     ['fireworks-ai', 'https://fireworks.ai/models'],
