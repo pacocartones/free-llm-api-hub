@@ -58,6 +58,7 @@ import { markdownToHtml } from './lib/markdown.mjs';
 import { bestFactsHtml } from './lib/best-facts.mjs';
 import { providerFigures, expandFigures, injectInlineFigures, figureErrors } from './lib/figures.mjs';
 import { firstUseHtml } from './lib/home-first-use.mjs';
+import { homeFaq, homeFaqHtml, homeFaqJsonLd, homeMeta } from './lib/home-faq.mjs';
 import { ticketBadgeSvg } from './lib/badge-svg.mjs';
 import { providerMarkdown, llmsProviderLine } from './lib/provider-markdown.mjs';
 import { curlChatQuickstart, pythonChatQuickstart, pythonEmbeddingsQuickstart, pythonStringLiteral } from './lib/quickstart.mjs';
@@ -987,14 +988,18 @@ const homeStatsHtml = (() => {
   ].join('<span class="st-sep" aria-hidden="true"> · </span>');
 })();
 let indexHtml = readFileSync(join(ROOT, 'site/index.html'), 'utf8');
-// The home title carries the dataset month and the verified count (Q10); og:title and twitter:title repeat it. The
-// build rewrites it on every run, so the number follows the data. It is worded "free tiers & credits" (ongoing tiers
-// and trial credits are both counted), which is also not the "N verified providers" phrasing that lib/figures.mjs
-// guards in hand-written sources: validate.mjs reads site/index.html before the build has rewritten it.
-const HOME_TITLE = `Free LLM APIs (${TITLE_MONTH}): ${providers.filter((p) => p.verified === true).length} verified free tiers & credits`;
+// The home title and description answer the top search, "free llm api" (Search Console, Nov 2026): both lead with the
+// query and carry the live provider count and the verified count, plus the dataset month (Q10). og: and twitter: repeat
+// them. The build rewrites them on every run, so the numbers follow the data (lib/home-faq.mjs homeMeta). The wording
+// "N providers, M verified" is not the "N verified providers" phrasing that lib/figures.mjs guards in hand-written
+// sources: validate.mjs reads site/index.html before the build has rewritten it.
+const { title: HOME_TITLE, description: HOME_DESC } = homeMeta(providers, { month: TITLE_MONTH });
 indexHtml = indexHtml.replace(/<title>[^<]*<\/title>/, `<title>${escapeAttr(HOME_TITLE)}</title>`)
+  .replace(/<meta name="description" content="[^"]*">/, `<meta name="description" content="${escapeAttr(HOME_DESC)}">`)
   .replace(/<meta property="og:title" content="[^"]*">/, `<meta property="og:title" content="${escapeAttr(HOME_TITLE)}">`)
-  .replace(/<meta name="twitter:title" content="[^"]*">/, `<meta name="twitter:title" content="${escapeAttr(HOME_TITLE)}">`);
+  .replace(/<meta property="og:description" content="[^"]*">/, `<meta property="og:description" content="${escapeAttr(HOME_DESC)}">`)
+  .replace(/<meta name="twitter:title" content="[^"]*">/, `<meta name="twitter:title" content="${escapeAttr(HOME_TITLE)}">`)
+  .replace(/<meta name="twitter:description" content="[^"]*">/, `<meta name="twitter:description" content="${escapeAttr(HOME_DESC)}">`);
 indexHtml = inject(indexHtml, 'csp', CSP);
 indexHtml = inject(indexHtml, 'themeguard', THEME_GUARD);
 indexHtml = inject(indexHtml, 'fonts', fontHead(''));
@@ -1026,7 +1031,15 @@ indexHtml = inject(indexHtml, 'stats', homeStatsHtml);
 indexHtml = inject(indexHtml, 'firstuse', firstUseHtml(providers, { slaDays: SLA_DAYS }));
 indexHtml = inject(indexHtml, 'data', inlineData);
 // The schema.org Dataset block (Google Dataset Search), from CITATION.cff and the data: lib/dataset-jsonld.mjs.
-indexHtml = inject(indexHtml, 'dataset', datasetJsonLdScript(homeJsonLd({ data, citation: parseCitation(readFileSync(join(ROOT, 'CITATION.cff'), 'utf8')), site: SITE, asOf: ASOF })));
+// The FAQ below the table (lib/home-faq.mjs): every answer built from the data. The same items give the visible
+// section and the FAQPage node, which joins the home page's one JSON-LD block (its @graph), so the two cannot differ.
+const HOME_FAQ = homeFaq(providers);
+indexHtml = inject(indexHtml, 'homefaq', homeFaqHtml(HOME_FAQ));
+{
+  const homeLd = homeJsonLd({ data, citation: parseCitation(readFileSync(join(ROOT, 'CITATION.cff'), 'utf8')), site: SITE, asOf: ASOF });
+  homeLd['@graph'].push(homeFaqJsonLd(HOME_FAQ));
+  indexHtml = inject(indexHtml, 'dataset', datasetJsonLdScript(homeLd));
+}
 indexHtml = withStars(indexHtml).replace(/(<img class="trust-badge"[^>]*? width=")\d+(")/, `$1${BADGE_W}$2`);
 writeFileSync(join(ROOT, 'site/index.html'), withAnalytics(indexHtml, GA_ID, ''));
 // The consent banner exists only when analytics is configured; without an ID a stale copy is removed.

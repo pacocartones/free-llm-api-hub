@@ -767,6 +767,12 @@ pre code { color: var(--text); }
 .faq-item { margin: 14px 0; }
 .faq-item h3 { margin: 0 0 4px; font-size: 1rem; }
 .faq-item p { margin: 0; color: var(--muted); }
+/* The home FAQ (lib/home-faq.mjs), below the provider table: a readable measure, set apart from the table by a rule. */
+.home-faq { margin-top: 48px; border-top: 1px solid var(--border); }
+.home-faq .wrap { max-width: 860px; padding-top: 32px; }
+.home-faq h2 { margin: 0 0 8px; font-size: 1.3rem; }
+.home-faq .faq-item { margin: 18px 0; }
+.home-faq .faq-item p { line-height: 1.6; }
 
 /* ---------- credit programs ---------- */
 .funds { display: inline-block; font-size: .74rem; font-family: var(--font-mono); white-space: nowrap; }
