@@ -7,8 +7,7 @@
 // are computed from the rows; nothing is written by hand, nothing is interpreted and nothing is ranked.
 
 import { htmlEsc, SLUG_RE } from './rows.mjs';
-
-const safeHttp = (u) => (/^https?:\/\//i.test(String(u || '')) ? String(u) : '');
+import { safeHttp } from './text.mjs';
 
 /**
  * 'yes' | 'no' | 'recorded' | 'unknown'. A row reads yes or no only when the data holds a literal true or false AND the
