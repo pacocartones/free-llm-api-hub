@@ -688,6 +688,7 @@
       "best_for": "Free speech-to-text and speech understanding",
       "modalities": ["audio"],
       "models_free": null,
+      "models_url": "https://www.assemblyai.com/docs/getting-started/models",
       "expires": null,
       "docs_url": "https://www.assemblyai.com/pricing",
       "phone_required": false,
