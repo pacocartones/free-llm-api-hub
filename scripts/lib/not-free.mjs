@@ -3,7 +3,7 @@
 // One source, data/not-free.json, two outputs: the README section between <!-- AUTOGEN:not-free:start/end --> and the
 // /not-free/ page. Both are rendered here from the same entries, so they cannot drift. The quotes are not new evidence:
 // each is copied verbatim from docs/sources.md (with its source URL and date) or referenced by id from data/quotes.json,
-// and scripts/not-free.test.mjs checks that.
+// and scripts/use-data-pages.test.mjs checks that.
 //
 // Pure functions of their arguments (the data, the providers and the scores): the page is drift-gated and deterministic.
 
