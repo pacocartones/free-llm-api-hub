@@ -1918,6 +1918,7 @@
       "best_for": "Trying many small open models and the big closed APIs behind one key, with a small credit that renews every 4 weeks",
       "modalities": ["text", "vision", "audio", "image", "embeddings"],
       "models_free": ["Qwen/Qwen3-4B", "google/gemma-3-4b-it", "Qwen/Qwen2-Audio-7B-Instruct"],
+      "models_url": "https://bytez.com/models",
       "expires": null,
       "docs_url": "https://docs.bytez.com/model-api/docs/billing",
       "phone_required": null,
