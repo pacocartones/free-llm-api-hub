@@ -2092,6 +2092,7 @@ test('active providers retain models_url from their official catalogues', () => 
     ['alibaba-model-studio', 'https://www.alibabacloud.com/help/en/model-studio/model-pricing'],
     ['sarvam-ai', 'https://docs.sarvam.ai/api/token-factory/models'],
     ['tencent-hunyuan', 'https://cloud.tencent.com/document/product/1823/130051'],
+    ['voyage-ai', 'https://docs.voyageai.com/docs/embeddings'],
     ['stability-ai', 'https://docs.stability.ai/api-reference'],
     ['plamo', 'https://docs.plamo.preferredai.jp/en/api'],
     ['entrim', 'https://entrim.ai/ai-models/'],
