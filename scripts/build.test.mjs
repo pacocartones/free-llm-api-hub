@@ -2120,6 +2120,7 @@ test('active providers retain models_url from their official catalogues', () => 
     ['sambanova', 'https://docs.sambanova.ai/docs/en/models/sambacloud-models'],
     ['sarvam-ai', 'https://docs.sarvam.ai/api/token-factory/models'],
     ['tencent-hunyuan', 'https://cloud.tencent.com/document/product/1823/130051'],
+    ['liquid-ai', 'https://docs.liquid.ai/api/models'],
     ['voyage-ai', 'https://docs.voyageai.com/docs/embeddings'],
     ['stability-ai', 'https://docs.stability.ai/api-reference'],
     ['plamo', 'https://docs.plamo.preferredai.jp/en/api'],

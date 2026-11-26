@@ -1980,6 +1980,7 @@
       "best_for": "Cheap, very small models for agents, classification and on-device-sized workloads, tried with a one-time credit",
       "modalities": ["text", "vision", "audio"],
       "models_free": ["lfm3-1.7b", "d1.1"],
+      "models_url": "https://docs.liquid.ai/api/models",
       "expires": null,
       "docs_url": "https://www.liquid.ai/pricing",
       "phone_required": null,
