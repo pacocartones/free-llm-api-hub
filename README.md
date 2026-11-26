@@ -141,12 +141,12 @@ Worth saying plainly: these are the APIs people most often expect to be free. Ea
 - **DeepInfra** — a card or prepayment before use (checked 2026-11-14 · [Official pricing page](https://deepinfra.com/pricing))
 - **Perplexity's API** — a card or prepayment before any API use (date not recorded)
 - **Replicate** — a card or prepayment before any API use (checked 2026-11-25 · [Prepaid credit](https://replicate.com/docs/topics/billing/prepaid-credit))
-- **Featherless AI** — a card or prepayment before any API use (date not recorded)
+- **Featherless AI** — a card or prepayment before any API use (checked 2026-11-26 · [Billing & Payment Methods](https://featherless.ai/docs/billing))
 
 **Retired or removed after re-verification.** Listed here before, removed (or moved) when a re-check of the provider's own pages no longer supported free access.
 
 - **Mistral** — Free mode no longer includes API access; API keys require billing activation and pay-as-you-go (checked 2026-11-14 · [Usage limits](https://docs.mistral.ai/admin/billing-usage/usage-limits))
-- **GitHub Models** — fully retired by GitHub on 2026-07-30 — playground, catalog and inference API shut down for all customers (date not recorded)
+- **GitHub Models** — fully retired by GitHub on 2026-07-30 — playground, catalog and inference API shut down for all customers (checked 2026-11-26 · [GitHub Models is now retired](https://github.blog/changelog/2026-07-30-github-models-is-now-retired/))
 - **Cerebras** — now listed as a trial credit: the ongoing free tier became a payment-method-gated $5/30-day trial (checked 2026-11-24 · [Rate limits](https://inference-docs.cerebras.ai/support/rate-limits))
 - **Arli AI** — paid plans only (checked 2026-11-19/20)
 - **Nebius** — no published trial credit (checked 2026-11-19/20)
