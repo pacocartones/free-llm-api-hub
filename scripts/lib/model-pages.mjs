@@ -13,6 +13,7 @@ import { comparator } from './sort.mjs';
 import { expiryHtml } from './expiry.mjs';
 import { requirementsHtml, freeLimitsTableHtml } from './provider-sections.mjs';
 import { codeHtmlEsc, curlChatQuickstart } from './quickstart.mjs';
+import { safeUrl, plural } from './text.mjs';
 
 /** The fixed sample caveat. Every model page carries it, word for word (the tests look for it). */
 export const MODEL_SAMPLE_CAVEAT = "Model lists are a sample and change often; confirm on the provider's catalogue before you build.";
@@ -34,7 +35,6 @@ const FREE_TYPE_LABEL = {
   'trial-credit': 'One-time trial credit',
 };
 
-const safeUrl = (u) => (/^https?:\/\//i.test(String(u || '')) ? htmlEsc(u) : '');
 const ENV_NAME = /^[A-Z][A-Z0-9_]*$/;
 
 export const hasQuickstart = (p) => p.openai_compatible === true && typeof p.openai_base_url === 'string' && /^https:\/\//i.test(p.openai_base_url);
@@ -49,8 +49,6 @@ export function isIndexable(group, rule = MODEL_PAGE_INDEX_RULE) {
 
 /** Entries in the explorer's "recommended" order (the same comparator the explorer runs). */
 export const sortedEntries = (group) => [...group.entries].sort((a, b) => comparator('recommended', 1, a.p, b.p));
-
-const plural = (n, one, many = one + 's') => `${n} ${n === 1 ? one : many}`;
 
 export function modelPageTitle(group) {
   return `Free API for ${group.name} — ${plural(group.entries.length, 'provider')} with a free tier · Free LLM API Hub`;

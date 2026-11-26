@@ -11,6 +11,7 @@ import { recScore, SLA_DAYS, DUE_SOON_DAYS } from './rules.mjs';
 import { fieldCheck, REASON_LABEL } from './field-checks.mjs';
 import { codeHtmlEsc, pythonEmbeddingsQuickstart, pythonStringLiteral, pythonChatQuickstart, curlChatQuickstart } from './quickstart.mjs';
 import { CONSTRAINTS, constraintState, toHash, explorerHref } from './find.mjs';
+import { plural } from './text.mjs';
 
 export const NOT_FREE_HREF = 'not-free/';
 
@@ -171,7 +172,6 @@ const related = (links) => `<p class="muted">Related: ${links.join(' · ')}</p>`
 
 /** "A, B and C" (already-escaped HTML parts). */
 export const andList = (parts) => (parts.length <= 1 ? parts.join('') : `${parts.slice(0, -1).join(', ')} and ${parts[parts.length - 1]}`);
-const plural = (n, one, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
 
 /** Card requirement in words, with the recorded reason when it is unknown and a phone note when one is required. */
 export function cardWords(x) {

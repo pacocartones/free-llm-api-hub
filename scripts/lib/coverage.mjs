@@ -13,6 +13,7 @@
 
 import { htmlEsc, SLUG_RE } from './rows.mjs';
 import { FIELD_CHECK_FIELDS, NULL_REASONS, REASON_LABEL, fieldCheck, fieldCheckStatus, fieldCheckCounts } from './field-checks.mjs';
+import { safeHttp } from './text.mjs';
 
 const verifiedTextLlm = (p) => p.verified === true && p.is_text_llm === true;
 
@@ -49,8 +50,6 @@ export const percent = (n, total) => (total > 0 ? Math.round((100 * n) / total) 
 /** The prefilled issue that opens the existing inaccuracy form for one provider and one field. */
 export const coverageIssueUrl = (p, field, repo) =>
   `${repo}/issues/new?template=inaccuracy.yml&provider=${encodeURIComponent(p.slug)}&title=${encodeURIComponent(`[coverage] ${field.label} — ${p.name}`)}`;
-
-const safeHttp = (u) => (/^https?:\/\//i.test(String(u || '')) ? String(u) : '');
 
 /**
  * The main content of /coverage/. `prefix` is the path from the page to the site root. Everything that
