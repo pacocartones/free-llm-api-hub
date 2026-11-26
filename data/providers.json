@@ -10,9 +10,9 @@
       "name": "Google Gemini API (AI Studio)",
       "category": "ongoing",
       "free_type": "renewing-quota",
-      "free_tier": "Gemini 2.5 Flash, 2.5 Flash-Lite, 2.5 Pro (limited), embeddings, 2.5 Flash TTS; API access to the 2.5 models is limited to existing users",
-      "rate_limits": "Sampled Gemini 2.5 model limits are shown only in AI Studio; quotas vary by model and project. Public docs separately publish selected model quotas: Gemini Decision 1 on the Decisions API, Free tier 200 RPM, 50,000 TPM, 10,000 RPD (https://ai.google.dev/gemini-api/docs/rate-limits, read 2026-11-23)",
-      "notes": "Free-tier prompts/outputs may be used by Google to improve its products outside the UK/CH/EEA/EU. Since the 2026-03-23 terms, only Paid Services may serve API clients to end users in the EEA/CH/UK. Gemini 2.5 Pro and 2.5 Flash are deprecated; the pricing page announces automatic routing to Gemini 3.8 Flash and 3.5 Flash-Lite respectively, billed at their rates, from 2026-12-01. The models page says API access to the 2.5 models is limited to users who actively used them before (no start date given); Gemini 2.5 Flash-Lite is not deprecated. Gemini 2.5 Pro TTS has no free tier (https://ai.google.dev/gemini-api/docs/models and https://ai.google.dev/gemini-api/docs/pricing, read 2026-11-24)",
+      "free_tier": "Free of charge on the Free Tier: Gemini 4 Hydrogen, 3.8 Flash, 3.6 Flash, 3.5 Flash-Lite, 3.1 Flash-Lite, 3 Flash Preview, 2.5 Flash-Lite, embeddings, Flash TTS models and Gemma 4; 2.5 Pro and 2.5 Flash are deprecated and API access to the 2.5 models is limited to existing users",
+      "rate_limits": "Sampled Gemini 2.5 model limits are shown only in AI Studio; quotas vary by model and project. Public docs separately publish selected model quotas: Gemini Decision 1 on the Decisions API, Free tier 200 RPM, 50,000 TPM, 10,000 RPD (https://ai.google.dev/gemini-api/docs/rate-limits, read 2026-11-25)",
+      "notes": "Free-tier prompts/outputs may be used by Google to improve its products outside the UK/CH/EEA/EU. Since the 2026-03-23 terms, only Paid Services may serve API clients to end users in the EEA/CH/UK. Gemini 2.5 Pro and 2.5 Flash are deprecated; the pricing page announces automatic routing to Gemini 3.8 Flash and 3.5 Flash-Lite respectively, billed at their rates, from 2026-12-01. The models page says API access to the 2.5 models is limited to users who actively used them before (no start date given); Gemini 2.5 Flash-Lite is not deprecated. Gemini 2.5 Pro TTS has no free tier (https://ai.google.dev/gemini-api/docs/models and https://ai.google.dev/gemini-api/docs/pricing, read 2026-11-25)",
       "best_for": "The only frontier-class model with a genuine free tier",
       "modalities": ["text", "vision", "embeddings", "audio"],
       "models_free": ["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-2.5-pro"],
@@ -30,7 +30,7 @@
       "model_tier_source": {"model":"gemini-2.5-pro","arena_model":"gemini-2.5-pro","match":"exact","rating":1445.6,"ci":[1443.1,1448],"boundary":true,"votes":124834,"snapshot":"2026-10-02","url":"https://huggingface.co/datasets/lmarena-ai/leaderboard-dataset"},
       "field_checks": {"phone_required":{"status":"source_silent","checked":"2026-11-24","sources":["https://aistudio.google.com/docs/api-key","https://aistudio.google.com/docs/pricing","https://aistudio.google.com/docs/terms"],"note":"The API key page mentions only project verification for projects created outside AI Studio; pricing and terms do not mention phone verification"},"card_required":{"status":"stated","checked":"2026-11-25","sources":["https://ai.google.dev/gemini-api/docs/billing"],"quote":"To access higher tiers, you must set up billing on your project.","note":"New accounts begin on the Free Tier; a billing account — and the payment method setting one up requires — is only linked to reach the Paid Tiers."}},
       "verified": true,
-      "last_verified": "2026-11-14",
+      "last_verified": "2026-11-25",
       "data_policy": {"trains_on_prompts":true,"retention":null,"source":"https://ai.google.dev/gemini-api/terms","checked":"2026-11-14","quote":"Google uses the content you submit to the Services and any generated responses to provide, improve, and develop Google products and services and machine learning technologies","note":"Applies to the Unpaid Services; in the EEA, Switzerland and the UK the paid terms also apply to free access. Terms effective 2026-03-23."},
       "keys_url": "https://aistudio.google.com/apikey",
       "keys_url_source": "https://ai.google.dev/gemini-api/docs/api-key"
@@ -303,12 +303,12 @@
       "name": "OVHcloud AI Endpoints",
       "category": "ongoing",
       "free_type": "perpetual",
-      "free_tier": "Seven models are currently listed as Free: two Qwen3Guard moderation models, Stable Diffusion XL and four NVIDIA Riva TTS voices; access is available anonymously or with an API key tied to a Public Cloud project",
+      "free_tier": "Ten models are currently listed as Free: three Olala-v1.0 text models (mini-7A1B, summarise, translate), two Qwen3Guard moderation models, Stable Diffusion XL (being retired, end of life 2027-02-10) and four NVIDIA Riva TTS voices; access is available anonymously or with an API key tied to a Public Cloud project",
       "rate_limits": "Anonymous access: 2 requests/min per IP per model. Authenticated (API key): 400 requests/min per project per model. Exceeding either returns HTTP 429",
-      "notes": "Anonymous access uses no account, API key or signup phone; the 2 requests/min limit is per IP and model. Authenticated API keys require a Public Cloud project with a valid payment method. Commercial permission for the hosted free-model tier is not confirmed; individual model licences are separate. Sources: https://docs.ovhcloud.com/en/guides/public-cloud/ai-machine-learning/ai-endpoints-capabilities and https://docs.ovhcloud.com/en/guides/public-cloud/ai-machine-learning/ai-endpoints-getting-started (read 2026-11-14).",
+      "notes": "Anonymous access uses no account, API key or signup phone; the 2 requests/min limit is per IP and model. Authenticated API keys require a Public Cloud project with a valid payment method. Commercial permission for the hosted free-model tier is not confirmed; individual model licences are separate. Sources: https://docs.ovhcloud.com/en/guides/public-cloud/ai-machine-learning/ai-endpoints-capabilities and https://docs.ovhcloud.com/en/guides/public-cloud/ai-machine-learning/ai-endpoints-getting-started (read 2026-11-25).",
       "best_for": "EU-hosted, no-account access to open models",
       "modalities": ["text", "image", "audio"],
-      "models_free": ["Qwen3Guard-Gen-8B", "Qwen3Guard-Gen-0.6B", "stable-diffusion-xl-base-v10", "nvr-tts-de-de", "nvr-tts-es-es", "nvr-tts-it-it", "nvr-tts-en-us"],
+      "models_free": ["Olala-v1.0-mini-7A1B", "Olala-v1.0-summarise", "Olala-v1.0-translate", "Qwen3Guard-Gen-8B", "Qwen3Guard-Gen-0.6B", "stable-diffusion-xl-base-v10", "nvr-tts-de-de", "nvr-tts-es-es", "nvr-tts-it-it", "nvr-tts-en-us"],
       "expires": null,
       "docs_url": "https://www.ovhcloud.com/en/public-cloud/ai-endpoints/catalog/",
       "phone_required": false,
@@ -317,13 +317,13 @@
       "openai_compatible": true,
       "openai_base_url": "https://oai.endpoints.kepler.ai.cloud.ovh.net/v1",
       "env_key": "OVHCLOUD_API_KEY",
-      "is_text_llm": false,
+      "is_text_llm": true,
       "model_tier": null,
       "free_limits": {"requests_per_minute":2,"scope":"anonymous access, per IP and per model. With an API access key the page gives 400 requests per minute per Public Cloud project and per model, but the getting-started guide says keys from projects without a payment method (Discovery mode) cannot use the service, so that figure needs a project with a payment method","source":"https://docs.ovhcloud.com/en/guides/public-cloud/ai-machine-learning/ai-endpoints-capabilities","checked":"2026-11-25"},
       "anonymous_access": {"source":"https://docs.ovhcloud.com/en/guides/public-cloud/ai-machine-learning/ai-endpoints-capabilities","checked":"2026-11-25","quote":"Anonymous: 2 requests per minute, per IP and per model.","note":"The page gives it as a rate limit; the same page also says users “need to provide an API access key in each request”."},
       "field_checks": {"commercial_ok":{"checked":"2026-11-24","status":"source_silent","sources":["https://www.ovhcloud.com/en/public-cloud/ai-endpoints/","https://www.ovhcloud.com/en/public-cloud/ai-endpoints/catalog/","https://docs.ovhcloud.com/en/guides/public-cloud/ai-machine-learning/ai-endpoints-capabilities","https://docs.ovhcloud.com/en/guides/public-cloud/ai-machine-learning/ai-endpoints-getting-started"],"note":"Product page, catalog and guides do not say whether the free models may be used commercially; model licences are separate"}},
       "verified": true,
-      "last_verified": "2026-11-14",
+      "last_verified": "2026-11-25",
       "data_policy": {"trains_on_prompts":false,"retention":"Zero data retention; only data strictly necessary for billing is kept","source":"https://www.ovhcloud.com/en/public-cloud/ai-endpoints/","checked":"2026-11-25","quote":"Your data is never used to train our models, and we only keep what is strictly necessary for billing.","note":"Product-level statement for AI Endpoints. The page separately states zero data retention; billing data is kept. The quoted sentence does not name the free tier.","plan_named":false}
     },
     {
@@ -351,7 +351,7 @@
       "field_checks": {"phone_required":{"status":"source_silent","checked":"2026-11-24","sources":["https://docs.fireworks.ai/faq-new/billing-pricing/how-much-does-fireworks-cost","https://fireworks.ai/pricing","https://fireworks.ai/terms-of-service"],"note":"Pricing, the billing FAQ, the full docs and the terms (July 10, 2026) have no phone or SMS step"},"commercial_ok":{"status":"source_silent","checked":"2026-11-25","sources":["https://fireworks.ai/terms-of-service","https://fireworks.ai/pricing"],"note":"Terms 2.1 grant use solely for personal use or internal business purposes and bar commercial solicitation; no clause covers the free credit or offering the Service to third parties"}},
       "verified": true,
       "last_verified": "2026-11-19",
-      "data_policy": {"trains_on_prompts":false,"retention":"Prompt and generation data for open models not logged or stored without opt-in","source":"https://fireworks.ai/privacy-policy","checked":"2026-10-15","quote":"No AI Training on Your Data: We do not use your prompts, training data, or API inputs to train or improve our AI models without your explicit opt-in.","note":"Last modified 2026-08-11. The page names no plan.","plan_named":false},
+      "data_policy": {"trains_on_prompts":false,"retention":"Prompt and generation data for open models not logged or stored without opt-in","source":"https://fireworks.ai/privacy-policy","checked":"2026-11-25","quote":"No AI Training on Your Data: We do not use your prompts, training data, or API inputs to train or improve our AI models without your explicit opt-in.","note":"Last modified 2026-09-16. The page names no plan.","plan_named":false},
       "keys_url": "https://app.fireworks.ai/settings/users/api-keys",
       "keys_url_source": "https://docs.fireworks.ai/getting-started/quickstart"
     },
@@ -406,7 +406,9 @@
       "field_checks": {"phone_required":{"status":"source_silent","checked":"2026-11-24","sources":["https://docs.novita.ai/guides/quickstart","https://novita.ai/pricing","https://novita.ai/legal/terms-of-service"],"note":"Sign-up is by Google, GitHub or email; docs mention identity verification for some models without naming a phone"}},
       "verified": true,
       "last_verified": "2026-11-20",
-      "data_policy": {"trains_on_prompts":false,"retention":null,"source":"https://novita.ai/legal/terms-of-service","checked":"2026-10-15","quote":"By Default, Novita AI will not use your Content to train our own models or to improve the Services.","note":"Updated 2026-08-05. The terms mention free quotas (account section) but do not say this sentence covers them.","plan_named":false}
+      "data_policy": {"trains_on_prompts":false,"retention":null,"source":"https://novita.ai/legal/terms-of-service","checked":"2026-10-15","quote":"By Default, Novita AI will not use your Content to train our own models or to improve the Services.","note":"Updated 2026-08-05. The terms mention free quotas (account section) but do not say this sentence covers them.","plan_named":false},
+      "keys_url": "https://novita.ai/settings/key-management",
+      "keys_url_source": "https://docs.novita.ai/guides/introduction"
     },
     {
       "slug": "ai21",
@@ -432,7 +434,7 @@
       "field_checks": {"phone_required":{"status":"source_silent","checked":"2026-11-24","sources":["https://docs.ai21.com/docs/managing-your-account","https://docs.ai21.com/docs/usage-cost","https://www.ai21.com/terms-of-service/"],"note":"Sign-up is by email or an authentication provider; pricing docs and terms do not mention a phone"}},
       "verified": true,
       "last_verified": "2026-11-20",
-      "data_policy": {"trains_on_prompts":false,"retention":null,"source":"https://www.ai21.com/terms-policies/privacy-policy/","checked":"2026-10-15","quote":"Consistent with our Terms of Service, and unless otherwise agreed in writing or required to provide the Services, we do not use your inputs or outputs to train AI21’s foundational or generally available AI models.","note":"«Privacy Policy», last updated August 2, 2026. It applies where AI21 acts as controller, «for example, for individual-developer accounts»; for a business customer «that processing is governed by our agreement with the customer». The policy has no mention of a free, trial, paid or other plan.","plan_named":false}
+      "data_policy": {"trains_on_prompts":false,"retention":null,"source":"https://www.ai21.com/terms-policies/privacy-policy/","checked":"2026-11-25","quote":"Consistent with our Terms of Service, and unless otherwise agreed in writing or required to provide the Services, we do not use your inputs or outputs to train AI21’s foundational or generally available AI models.","note":"«Privacy Policy», last updated August 2, 2026. It applies where AI21 acts as controller, «for example, for individual-developer accounts»; for a business customer «that processing is governed by our agreement with the customer». The policy has no mention of a free, trial, paid or other plan.","plan_named":false}
     },
     {
       "slug": "nlpcloud",
@@ -648,7 +650,7 @@
       "anonymous_access": {"source":"https://github.com/jina-ai/reader","checked":"2026-11-25","quote":"Anonymous traffic is the most aggressively rate-limited and lands in the lowest-trust pool.","note":"Applies to the Reader API (r.jina.ai) only: jina.ai/embeddings lists 20 RPM for Reader without an API key, while the Embeddings, Reranker and s.jina.ai search APIs are blocked without one."},
       "verified": true,
       "last_verified": "2026-11-20",
-      "data_policy": {"trains_on_prompts":false,"retention":null,"source":"https://jina.ai/embeddings/","checked":"2026-10-15","quote":"We never use your API requests, inputs, or outputs to train our embedding, reranker, or any other models.","note":"The answer sits in the embeddings FAQ; the next FAQ lists Free, Paid and Premium rate limits, but the answer does not name a plan.","plan_named":false},
+      "data_policy": {"trains_on_prompts":false,"retention":null,"source":"https://jina.ai/embeddings/","checked":"2026-11-25","quote":"We never use your API requests, inputs, or outputs to train our embedding, reranker, or any other models.","note":"The answer sits in the embeddings FAQ; the next FAQ lists Free, Paid and Premium rate limits, but the answer does not name a plan.","plan_named":false},
       "playground_url": "https://jina.ai/reader/"
     },
     {
@@ -675,7 +677,7 @@
       "no_expiry": {"source":"https://deepgram.com/pricing","checked":"2026-10-09","quote":"Unlike \"free tiers\" that expire after 12 months, this credit is available until you use it up, allowing you to prototype without time pressure."},
       "verified": true,
       "last_verified": "2026-11-20",
-      "data_policy": {"trains_on_prompts":true,"retention":null,"source":"https://deepgram.com/terms","checked":"2026-10-15","quote":"We may also use Your Content to improve our Services, to develop other products and services, and for other business purposes, including training and testing our Models.","note":"Terms of Service §3.2, last updated August 6, 2026. §3.3 offers an opt-out: «you may opt out of model training on a per-request basis by setting the applicable parameter in your request». The terms name Promotional Offers (§5.6); they are not tied to this sentence.","plan_named":false}
+      "data_policy": {"trains_on_prompts":true,"retention":null,"source":"https://deepgram.com/terms","checked":"2026-11-25","quote":"We may also use Your Content to improve our Services, to develop other products and services, and for other business purposes, including training and testing our Models.","note":"Terms of Service §3.2, last updated August 6, 2026. §3.3 offers an opt-out: «you may opt out of model training on a per-request basis by setting the applicable parameter in your request». The terms name Promotional Offers (§5.6); they are not tied to this sentence.","plan_named":false}
     },
     {
       "slug": "assemblyai",
@@ -700,7 +702,7 @@
       "model_tier": null,
       "verified": true,
       "last_verified": "2026-11-20",
-      "data_policy": {"trains_on_prompts":true,"retention":null,"source":"https://www.assemblyai.com/legal/terms-of-service","checked":"2026-10-15","quote":"(iii) to train AssemblyAI’s artificial intelligence and machine learning models.","note":"Terms §4.3(b)(iii), about Customer Data. Its FAQ (assemblyai.com/docs/faq/how-to-opt-out-of-data-sharing-for-our-model-improvement-program, read 2026-10-15) says: «Free users do not have the ability to opt out of the model improvement program.» Paid customers can opt out, forward only.","plan_named":true}
+      "data_policy": {"trains_on_prompts":true,"retention":null,"source":"https://www.assemblyai.com/legal/terms-of-service","checked":"2026-11-25","quote":"(iii) to train AssemblyAI’s artificial intelligence and machine learning models.","note":"Terms §4.3(b)(iii), about Customer Data. Its FAQ (assemblyai.com/docs/faq/how-to-opt-out-of-data-sharing-for-our-model-improvement-program, read 2026-11-25) says: «Free users do not have the ability to opt out of the model improvement program.» Paid customers can opt out, forward only.","plan_named":true}
     },
     {
       "slug": "mixedbread",
@@ -1067,7 +1069,7 @@
       "category": "ongoing",
       "free_type": "renewing-quota",
       "free_tier": "10,000 credits/month shared across Text-to-Speech, Speech-to-Text and more (~10 min TTS/month)",
-      "rate_limits": "2 concurrent requests on the Free plan",
+      "rate_limits": "Free plan concurrency: 2 requests (Multilingual v2), 4 (Flash), 8 (Speech to Text), 6 (Realtime Speech to Text)",
       "notes": "The free tier is NON-COMMERCIAL only per the Terms of Use (commercial license starts on paid Starter, $6/mo); non-commercial use requires a personal email address. Free-plan credits do not roll over. API access is available on the free plan. No credit card to sign up.",
       "best_for": "Best-known TTS voices (free tier is non-commercial)",
       "modalities": ["audio"],
@@ -1083,8 +1085,8 @@
       "is_text_llm": false,
       "model_tier": null,
       "verified": true,
-      "last_verified": "2026-11-19",
-      "data_policy": {"trains_on_prompts":true,"retention":null,"source":"https://elevenlabs.io/terms-of-use","checked":"2026-10-15","quote":"you may opt out of our use of your Content for training at any time by navigating to the 'Data use' menu in the 'Terms and Privacy' section of your ElevenLabs account.","note":"Terms of Service (non-EEA), last updated 09 Oct 2026. The sentence is addressed to every user and does not name a plan; the same terms define Free Users separately. Whether the Data use menu exists on the free plan is not stated.","plan_named":false}
+      "last_verified": "2026-11-25",
+      "data_policy": {"trains_on_prompts":true,"retention":null,"source":"https://elevenlabs.io/terms-of-use","checked":"2026-11-25","quote":"you may opt out of our use of your Content for training at any time by navigating to the 'Data use' menu in the 'Terms and Privacy' section of your ElevenLabs account.","note":"Terms of Service (non-EEA), last updated 09 Oct 2026. The sentence is addressed to every user and does not name a plan; the same terms define Free Users separately. Whether the Data use menu exists on the free plan is not stated.","plan_named":false}
     },
     {
       "slug": "sarvam-ai",
@@ -1138,7 +1140,7 @@
       "model_tier": null,
       "field_checks": {"commercial_ok":{"status":"source_silent","checked":"2026-11-24","sources":["https://www.gladia.io/general-terms-of-use-gladia-inc","https://www.gladia.io/terms-conditions-gladia-inc","https://www.gladia.io/pricing"],"note":"The Output licence for commercial purposes (7) depends on payment of all applicable fees; the terms name the free offer only in a data-deletion clause"},"phone_required":{"status":"source_silent","checked":"2026-11-25","sources":["https://www.gladia.io/general-terms-of-use-gladia-inc","https://www.gladia.io/pricing","https://docs.gladia.io/chapters/introduction/getting-started"],"note":"The terms, the pricing FAQ (free credits for new accounts) and the getting-started guide name no phone or SMS step"}},
       "verified": true,
-      "last_verified": "2026-11-19",
+      "last_verified": "2026-11-25",
       "data_policy": {"trains_on_prompts":null,"retention":"Free accounts: 1 year by default (audio input, transcription output, API metadata, logs)","source":"https://docs.gladia.io/chapters/limits-and-specifications/data-retention","checked":"2026-11-25","quote":"By default, Free accounts retain all data types for 1 year","note":"Paid accounts keep audio and transcripts 3 weeks by default; only Enterprise offers custom or zero retention. Training conflicts across Gladia pages: Pricing (Self-serve) and Security say Free/default data may train models (opt-out on Pricing), while Compliance Hub says never by default.","plan_named":true}
     },
     {
@@ -1205,6 +1207,7 @@
       "best_for": "Best-in-class embeddings and reranking with a large free allotment",
       "modalities": ["text", "image", "embeddings", "rerank"],
       "models_free": null,
+      "models_url": "https://docs.voyageai.com/docs/embeddings",
       "expires": null,
       "docs_url": "https://docs.voyageai.com/docs/pricing",
       "phone_required": null,
@@ -1267,9 +1270,9 @@
       "model_tier": null,
       "field_checks": {"phone_required":{"status":"source_silent","checked":"2026-11-25","sources":["https://cartesia.ai/legal/terms.html","https://cartesia.ai/pricing","https://docs.cartesia.ai/get-started/overview"],"note":"Terms 2.1 say to create an account or link a GitHub or Google account and give accurate information, without naming a phone; pricing lists phone numbers only for voice agents"}},
       "verified": true,
-      "last_verified": "2026-11-19",
+      "last_verified": "2026-11-25",
       "added": "2026-07-31",
-      "data_policy": {"trains_on_prompts":true,"retention":null,"source":"https://cartesia.ai/legal/terms.html","checked":"2026-10-15","quote":"You may request that we not use certain categories of Your Content to train our Models by completing this online form","note":"Section «Training Opt-Out». The request covers selected categories and applies only to later use; earlier uses are not affected. The clause is not tied to a plan; the terms treat free trials in a separate section (2.6).","plan_named":false}
+      "data_policy": {"trains_on_prompts":true,"retention":null,"source":"https://www.cartesia.ai/legal/terms.html","checked":"2026-11-25","quote":"You may request that we not use certain categories of Your Content to train our Models by completing this online form","note":"Section «Training Opt-Out». The request covers selected categories and applies only to later use; earlier uses are not affected. The clause is not tied to a plan; the terms treat free trials in a separate section (2.6).","plan_named":false}
     },
     {
       "slug": "fish-audio",
@@ -1609,7 +1612,9 @@
       "verified": true,
       "last_verified": "2026-11-24",
       "added": "2026-07-31",
-      "data_policy": {"trains_on_prompts":null,"retention":"Conversion results: deleted about one day after processing; uploaded source-file retention unconfirmed","source":"https://documentation.datalab.to/platform/security","checked":"2026-11-24","quote":"Conversion results are automatically deleted from Datalab servers about one day after processing completes.","note":"Use of documents to improve models is opt-in in team settings; opting in receives discounted rates. Retention statement covers conversion results only. The quoted sentence does not name a plan."}
+      "data_policy": {"trains_on_prompts":null,"retention":"Conversion results: deleted about one day after processing; uploaded source-file retention unconfirmed","source":"https://documentation.datalab.to/platform/security","checked":"2026-11-24","quote":"Conversion results are automatically deleted from Datalab servers about one day after processing completes.","note":"Use of documents to improve models is opt-in in team settings; opting in receives discounted rates. Retention statement covers conversion results only. The quoted sentence does not name a plan."},
+      "keys_url": "https://www.datalab.to/app/keys",
+      "keys_url_source": "https://documentation.datalab.to/docs/recipes/conversion/conversion-api-overview"
     },
     {
       "slug": "wandb-inference",
@@ -1781,7 +1786,9 @@
       "added": "2026-11-25",
       "last_probed": null,
       "probe_status": null,
-      "data_policy": {"trains_on_prompts":false,"retention":"prompts and responses not stored; request metadata (time, model, token counts, cost, status, IP) recorded","source":"https://www.aionlabs.ai/privacy/","checked":"2026-11-25","quote":"the prompts you send through the API or browser chat and the responses you receive are processed to generate the response and returned to you. We do not store them.","note":"The terms (version 2026-10-17) add: \"We do not use your Input or Output to train models and we do not sell them.\" Neither sentence names a plan.","plan_named":false}
+      "data_policy": {"trains_on_prompts":false,"retention":"prompts and responses not stored; request metadata (time, model, token counts, cost, status, IP) recorded","source":"https://www.aionlabs.ai/privacy/","checked":"2026-11-25","quote":"the prompts you send through the API or browser chat and the responses you receive are processed to generate the response and returned to you. We do not store them.","note":"The terms (version 2026-10-17) add: \"We do not use your Input or Output to train models and we do not sell them.\" Neither sentence names a plan.","plan_named":false},
+      "keys_url": "https://www.aionlabs.ai/app/api-keys/",
+      "keys_url_source": "https://www.aionlabs.ai/docs/"
     },
     {
       "slug": "meganova",
@@ -1936,7 +1943,9 @@
       "added": "2026-11-25",
       "last_probed": null,
       "probe_status": null,
-      "data_policy": null
+      "data_policy": null,
+      "keys_url": "https://bytez.com/api/key",
+      "keys_url_source": "https://docs.bytez.com/model-api/docs/containers"
     },
     {
       "slug": "liquid-ai",
@@ -2031,7 +2040,9 @@
       "added": "2026-11-25",
       "last_probed": null,
       "probe_status": null,
-      "data_policy": {"trains_on_prompts":true,"retention":null,"source":"https://stability.ai/terms-of-service","checked":"2026-11-25","quote":"As described in our Privacy Policy , we may use Content to improve and develop our Services (but you can opt-out to prevent us from using your Inputs and Outputs to train our models, learn more ), comply with applicable law, enforce our terms and policies, and to keep our Services safe.","note":"Terms effective 2026-09-30; they define the Services to include the API. Stability's opt-out help page explains how Platform API users turn the training toggle off in their account settings. No retention period for prompts is stated.","plan_named":false}
+      "data_policy": {"trains_on_prompts":true,"retention":null,"source":"https://stability.ai/terms-of-service","checked":"2026-11-25","quote":"As described in our Privacy Policy , we may use Content to improve and develop our Services (but you can opt-out to prevent us from using your Inputs and Outputs to train our models, learn more ), comply with applicable law, enforce our terms and policies, and to keep our Services safe.","note":"Terms effective 2026-09-30; they define the Services to include the API. Stability's opt-out help page explains how Platform API users turn the training toggle off in their account settings. No retention period for prompts is stated.","plan_named":false},
+      "keys_url": "https://platform.stability.ai/dashboard/api-keys",
+      "keys_url_source": "https://docs.stability.ai/api-reference"
     },
     {
       "slug": "plamo",
