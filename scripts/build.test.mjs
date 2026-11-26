@@ -19,7 +19,7 @@ import { mineProviderHistory, assertHistoryPlausible, historyFromRevisions } fro
 import { isoWeek, flattenFieldChanges, groupChangesByWeek, changesRss, xmlEsc, reportChangeUrl } from './lib/changes.mjs';
 import { monthlyReport, reportMonths, monthEndDate, fillMonths, monthSummary, monthBrief } from './lib/state.mjs';
 import { buildOgManifest } from './lib/og.mjs';
-import { explorerRowHtml, catchTags, catchCellHtml, CATCH_LABELS } from './lib/rows.mjs';
+import { explorerRowHtml, needsOf, needsCellHtml, NEED_LABELS, UNKNOWN_LABELS } from './lib/rows.mjs';
 import { labelTables } from './lib/tables.mjs';
 import { markNewTabLinks } from './lib/links.mjs';
 import { bestFactsHtml } from './lib/best-facts.mjs';
@@ -726,16 +726,18 @@ test('the explorer does not claim a column sort before the user chooses one', ()
   assert.match(explorer, /<th data-key="name" scope="col" aria-sort="none" role="columnheader"><button type="button" class="th-sort">API<\/button><\/th>/);
 });
 
-test('the homepage hero gives first-time visitors working explorer and JSON API entry points', () => {
+test('the homepage hero has one primary action (the finder), a quiet link down to the table, and the JSON API stays one click away', () => {
   run(['scripts/build.mjs']);
   const index = readFileSync(join(ROOT, 'site/index.html'), 'utf8');
   const hero = index.match(/<section class="hero">([\s\S]*?)<\/section>/)?.[1];
   assert.ok(hero, 'the homepage has a hero');
-  const start = hero.match(/<nav\b[^>]*aria-label="Get started"[^>]*>([\s\S]*?)<\/nav>/)?.[1];
-  assert.ok(start, 'first-use navigation is available in the hero without JavaScript');
-  assert.match(start, /<a href="#explorer">Browse providers<\/a>/);
-  assert.match(index, /<main id="explorer">/, 'the browse link reaches the existing explorer');
-  assert.match(start, /<a href="api\/">Use the JSON API<\/a>/);
+  const cta = hero.match(/<div class="hero-cta">([\s\S]*?)<\/div>/)?.[1];
+  assert.ok(cta, 'the hero actions are in the page without JavaScript');
+  assert.match(cta, /<a class="btn primary hero-find" href="find\/">Find my free API<\/a>/);
+  assert.match(cta, /<a class="hero-browse" href="#all-providers">Browse all/);
+  assert.match(index, /<h2 id="all-providers" class="explorer-h">All providers<\/h2>/, 'the browse link reaches the heading above the table');
+  assert.match(index, /<main id="explorer">/);
+  assert.match(index.slice(index.indexOf('<footer')), /<a href="api\/">JSON API<\/a>/, 'the JSON API is linked from the footer');
   const docs = readFileSync(join(ROOT, 'site/api/index.html'), 'utf8');
   assert.match(docs, /href="v1\/no-card\.json"/, 'API docs link to a ready-to-use dataset slice');
   const slice = JSON.parse(readFileSync(join(ROOT, 'site/api/v1/no-card.json'), 'utf8'));
@@ -924,7 +926,7 @@ test('a confirmed card requirement is never hidden in the README top-20 or the e
   for (const p of walled) {
     const row = explorer.split('\n').find((l) => l.includes(`href="p/${p.slug}"`));
     assert.ok(row, `${p.slug}: no explorer row found`);
-    assert.match(row, /<span class="pflag pflag-bad pflag-mini" data-flag="card" title="Card required: yes">/, `${p.slug}: explorer row hides the card requirement`);
+    assert.match(row, /<span class="need-req">Card required[,<]/, `${p.slug}: explorer row hides the card requirement`);
   }
 });
 
@@ -1773,7 +1775,8 @@ test('header menu: Providers (with Find my free API and The Best inside), Models
     const html = readFileSync(join(ROOT, rel), 'utf8');
     const nav = html.slice(html.indexOf('id="primary-nav"'), html.indexOf('</nav>', html.indexOf('id="primary-nav"')));
     const hrefs = [...nav.matchAll(/<a [^>]*href="([^"]+)"/g)].map((m) => m[1].replace(/^(\.\.\/)+|^\.\//, ''));
-    assert.deepEqual(hrefs, ['#explorer', 'find/', 'best/', 'models/', 'compare/', 'changes/', 'api/', 'guides-and-collections/'], `${rel}: the header menu entries, in order`);
+    assert.deepEqual(hrefs, ['find/', '#explorer', 'find/', 'best/', 'models/', 'compare/', 'changes/', 'api/', 'guides-and-collections/'], `${rel}: the header menu entries, in order (the first one shows on phones only)`);
+    assert.match(nav, /^id="primary-nav" aria-label="Primary">\s*<a class="nav-find" href="[^"]*find\/">Find my free API<\/a>/, `${rel}: Find my free API heads the phone menu`);
     assert.match(nav, /<details class="nav-group"><summary>Providers<\/summary><div class="nav-sub"><a href="[^"]*#explorer">All providers<\/a><a href="[^"]*find\/">Find my free API<\/a><a class="nav-best" href="[^"]*best\/"[^>]*>.*The Best<\/a><\/div><\/details>/s, `${rel}: The Best sits inside Providers`);
     assert.equal((nav.match(/class="nav-best"/g) || []).length, 1, `${rel}: only one highlighted entry`);
     assert.doesNotMatch(nav, /submit\//, `${rel}: Submit is not a menu entry`);
@@ -2317,7 +2320,7 @@ test('the menu has Providers (All providers, Find my free API, The Best), Models
     const nav = html.match(/<nav class="nav" id="primary-nav"[\s\S]*?<\/nav>/);
     assert.ok(nav, name + ': the menu');
     const labels = [...nav[0].matchAll(/<(?:a [^>]*|summary)>(?:<svg[\s\S]*?<\/svg>)?([^<]+)<\/(?:a|summary)>/g)].map((m) => m[1].replace(/&amp;/g, '&').trim());
-    assert.deepEqual(labels, ['Providers', 'All providers', 'Find my free API', 'The Best', 'Models', 'Compare', 'Changes', 'API', 'Guides'], name + ': the menu entries');
+    assert.deepEqual(labels, ['Find my free API', 'Providers', 'All providers', 'Find my free API', 'The Best', 'Models', 'Compare', 'Changes', 'API', 'Guides'], name + ': the menu entries (the first one shows on phones only)');
     assert.ok(!/Interactive explorer/.test(html), name + ': no «Interactive explorer» link');
     assert.ok(!/Independent, community-maintained/.test(html), name + ': no «Independent, community-maintained» line');
     assert.ok(/<a href="[^"]*submit\/">Submit<\/a>/.test(html), name + ': Submit in the footer');
@@ -2382,7 +2385,7 @@ test('explorer rows and best facts show conditional commercial use with its esca
     verified: true, last_verified: '2026-10-08', docs_url: 'https://example.com/terms',
   };
   const row = explorerRowHtml(p, { now: '2026-10-08' });
-  assert.match(row, /<span class="pflag pflag-cond pflag-mini" data-flag="commercial" title="Commercial use allowed: conditional">/);
+  assert.match(row, /<span class="need-req">Commercial use conditional<\/span>/);
   assert.match(row, /Conditional/);
   assert.ok(row.includes('Per-model &lt;licence&gt; applies.'));
   assert.doesNotMatch(row, /Not stated/);
@@ -2412,29 +2415,30 @@ test('/best/ layout: three cards per entry, a separator instead of the «Ranks 4
   assert.match(css, /\.best-intro \{[^}]*text-align: center/, 'the introduction is centred');
 });
 
-test('home table: «The catch» is a closed vocabulary of short tags, the free text is only in the title and on the provider page', () => {
-  // Mutant: put the free text of the record (notes) back in the cell, or add a tag outside the list; this test turns red.
+test('home table: «Needs / unknown» says in words only what is required or unknown, from a closed vocabulary; the free text stays in the title', () => {
+  // Mutant: put the free text of the record (notes) back in the cell, add a phrase outside the lists, or bring back
+  // "Not stated"; this test turns red.
   const providers = JSON.parse(readFileSync(join(ROOT, 'data/providers.json'), 'utf8')).providers;
   const seen = new Set();
   for (const p of providers) {
-    const tags = catchTags(p);
-    for (const t of tags) { assert.ok(CATCH_LABELS.includes(t.label), p.slug + ': tag outside the vocabulary: ' + t.label); seen.add(t.label); }
-    // Two lines at the reference desktop width (a 26% column of a 1480px table is about 380px, 40 characters of the monospace face a
-    // line): the tags and the link must fit in about 80 characters.
-    assert.ok(tags.length <= 4, p.slug + ': at most four tags');
-    assert.ok(tags.reduce((n, t) => n + t.label.length + 2, 0) + 'Details'.length <= 60, p.slug + ': the cell fits in two lines');
-    const cell = catchCellHtml(p);
-    const inner = cell.replace(/^<td[^>]*>/, '').replace(/<\/td>$/, '').replace(/<span class="sr-only">[^<]*<\/span>/g, '');
-    const visible = inner.replace(/<[^>]+>/g, '');
+    const { needs, unknown } = needsOf(p);
+    for (const n of needs) { assert.ok(NEED_LABELS.includes(n), p.slug + ': phrase outside the vocabulary: ' + n); seen.add(n); }
+    for (const u of unknown) assert.ok(UNKNOWN_LABELS.includes(u), p.slug + ': unknown outside the vocabulary: ' + u);
+    const cell = needsCellHtml(p);
+    const visible = cell.replace(/<[^>]+>/g, '');
+    assert.doesNotMatch(visible, /Not stated|✓/, p.slug + ': no "Not stated" and no tick marks');
+    // Two lines at the reference desktop width (a 22% column of a 1480px table, about 45 characters of the body face a line).
+    assert.ok(needs.join(', ').length <= 90 && ('Unknown: ' + unknown.join(', ')).length <= 90, p.slug + ': each part fits in two lines');
     if (p.notes) {
       assert.ok(!visible.includes(p.notes.slice(0, 25)), p.slug + ': the free text is not in the cell');
-      assert.ok(cell.includes(' title="' + htmlEsc(p.notes) + '"'), p.slug + ': the free text is in the title');
+      assert.ok(cell.includes(htmlEsc(p.notes) + '"'), p.slug + ': the free text is in the title');
     }
-    assert.match(cell, new RegExp('<a class="catch-more" href="p/' + p.slug + '#limits">Details'), p.slug + ': the link to the provider page');
+    if (!needs.length && !unknown.length) assert.match(visible, /^Nothing required$/, p.slug + ': says there is nothing to worry about');
   }
-  assert.ok(seen.size >= 3, 'the dataset exercises at least three of the tags');
-  assert.deepEqual(catchTags({ card_required: false, phone_required: false, commercial_ok: true }), [], 'a provider with nothing to warn about has no tag');
-  assert.deepEqual(catchTags({ card_required: true, phone_required: null, commercial_ok: false, expires: '30 days' }).map((t) => t.label), ['Card required', 'Evaluation only', 'Expires', 'Not stated']);
+  assert.ok(seen.size >= 2, 'the dataset exercises at least two of the phrases');
+  assert.deepEqual(needsOf({ card_required: false, phone_required: false, commercial_ok: true, data_policy: { trains_on_prompts: false } }), { needs: [], unknown: [] });
+  assert.deepEqual(needsOf({ card_required: true, phone_required: null, commercial_ok: false }), { needs: ['Card required', 'Non-commercial only'], unknown: ['phone', 'training'] });
+  assert.match(needsCellHtml({ card_required: true, phone_required: null, commercial_ok: false }), /<span class="need-req">Card required, Non-commercial only<\/span><span class="need-unk">Unknown: phone, training<\/span>/);
 });
 
 test('home: no good-first-issues button in the hero, a fixed table layout, a link-button name and a pinned header row', () => {
@@ -2443,14 +2447,14 @@ test('home: no good-first-issues button in the hero, a fixed table layout, a lin
   assert.ok(!/Contribute: good first issues|contrib-btn/.test(index + css), 'the hero button is gone');
   assert.match(css, /#table \{ table-layout: fixed; \}/, 'a fixed layout');
   const widths = [...css.matchAll(/#table th:nth-child\((\d)\) \{ width: (\d+)%; \}/g)];
-  assert.equal(widths.length, 5, 'a width for each of the five columns');
+  assert.equal(widths.length, 4, 'a width for each of the four columns');
   assert.equal(widths.reduce((n, m) => n + Number(m[2]), 0), 100, 'the widths add up to 100%');
   assert.match(css, /#table thead th \{ position: sticky; top: var\(--header-h\);/, 'the header row is pinned under the header');
   assert.match(css, /#table thead th \{ top: calc\(var\(--header-h\) \+ var\(--controls-h, 120px\)\); \}/, 'and under the filter bar where that is pinned');
   assert.match(css, /main#explorer > \.wrap, \.controls \.controls-inner \{ max-width: 1480px; \}/, 'a wider table');
   assert.match(css, /\.hero \.lede \{ max-width: 86ch; \}/, 'a wider lede');
   const row = explorerRowHtml({ slug: 'acme', name: 'Acme', category: 'ongoing', free_tier: 'Free', notes: 'n', best_for: 'b' });
-  assert.match(row, /<a class="name-link" href="p\/acme">Acme<span class="name-go" aria-hidden="true"> ↗<\/span><\/a>/, 'the name is a link-button');
+  assert.match(row, /<div class="name-line"><a class="name-link" href="p\/acme" title="Acme">Acme<\/a> <span class="badge b-ongoing"[^>]*>Ongoing<\/span><\/div>/, 'the name is a link, with its type right after it');
   assert.match(row, /<div class="clamp2" title="Free">Free<\/div>/, 'the free text is clamped and complete in the title');
   assert.ok(!/<img|logo/i.test(row), 'no logo in a row');
   assert.match(css, /#table tbody tr:focus-within \{ background: var\(--panel\); \}/, 'the row is highlighted on keyboard focus');
@@ -2902,16 +2906,18 @@ test('/coverage/ says how to propose one value, is in the sitemap with an absolu
   assert.match(readFileSync(join(ROOT, 'site/p/groq.html'), 'utf8'), /<a href="\.\.\/coverage\/">Data coverage<\/a>/, 'the shared footer of a generated page');
 });
 
-test('a11y: the filter chips stay reachable by keyboard and screen reader, with a visible focus', () => {
+test('a11y: the requirement filters stay reachable by keyboard and screen reader, inside one labelled dropdown', () => {
   const css = readFileSync(join(ROOT, 'site/styles.css'), 'utf8');
-  assert.doesNotMatch(css, /\.chip input\s*\{[^}]*display\s*:\s*none/, 'a display:none checkbox leaves the chip out of the tab order and the accessibility tree');
-  assert.match(css, /\.chip:has\(input:focus-visible\)/, 'the focused chip shows an outline');
+  assert.doesNotMatch(css, /\.req-opt input\s*\{[^}]*display\s*:\s*none/, 'a display:none checkbox leaves the option out of the tab order and the accessibility tree');
+  assert.match(css, /\.req-btn:focus-visible \{ outline: 2px solid var\(--accent\)/, 'the dropdown button shows an outline');
   assert.match(css, /--control:\s*#[0-9a-f]{6}/i, 'a control border token exists for the 3:1 non-text contrast');
 
   const index = readFileSync(join(ROOT, 'site/index.html'), 'utf8');
-  const chips = index.match(/<label class="chip">[\s\S]*?<\/label>/g) || [];
-  assert.ok(chips.length >= 6, 'the six filter chips are in the template');
-  for (const chip of chips) assert.match(chip, /<input type="checkbox" id="f-[a-z]+">/, 'each chip label contains its checkbox, so the label stays the click target');
+  assert.match(index, /<details class="req" id="req">\s*<summary class="sel req-btn">Requirements<span class="req-n" id="reqCount"><\/span><\/summary>/);
+  const opts = index.match(/<label class="req-opt">[\s\S]*?<\/label>/g) || [];
+  assert.equal(opts.length, 7, 'the seven boolean filters are in the dropdown');
+  for (const o of opts) assert.match(o, /<input type="checkbox" id="f-[a-z]+">/, 'each label contains its checkbox, so the label stays the click target');
+  assert.match(index, /<legend>Must have<\/legend>/);
 });
 
 test('a11y: small fixes stay in place (finite caret, placeholder colour, no 320px minimum, focus kept after Clear and Escape)', () => {
@@ -3200,10 +3206,10 @@ test('correction of the absence claims: no note says the page names no plan unle
   assert.match(readFileSync(join(ROOT, 'CHANGELOG.md'), 'utf8'), /^- \*\*Corrección:\*\*/m, 'the correction is visible in the changelog');
 });
 
-test('mobile: the two long text cells stack their label above the text at 720px', () => {
+test('mobile: the long «What\'s free» cell stacks its label above the text at 720px', () => {
   const css = readFileSync(join(ROOT, 'site/styles.css'), 'utf8').replace(/\s+/g, ' ');
-  assert.match(css, /#table td\.notes, #table td:nth-child\(3\) \{ display: block; \}/, 'the notes and the catch cells are blocks, not a 40% label beside a narrow column');
-  assert.match(css, /#table td\.notes::before, #table td:nth-child\(3\)::before \{ display: block;/, 'the label sits above the text');
+  assert.match(css, /#table td\.free \{ display: block; \}/, 'the free-tier cell is a block, not a 40% label beside a narrow column');
+  assert.match(css, /#table td\.free::before \{ display: block;/, 'the label sits above the text');
 });
 
 test('data-policy page: five columns, the help link inside the source cell, and the header labels may wrap', () => {
