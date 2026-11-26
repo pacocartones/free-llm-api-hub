@@ -4,7 +4,7 @@
 // that every mode other than `push` keeps the gate as it was.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
@@ -152,7 +152,7 @@ test('drift-gate and pages-gate read the pull request and the push from git', ()
     write('scratch.tmp', 'x');
     const push = gate({ REGEN_MODE: 'push' });
     assert.equal(push.status, 0, push.stdout + push.stderr);
-    assert.match(push.stdout, /^verdict=bot-would-regenerate\nblock=false\n/);
+    assert.match(push.stdout, /^verdict=bot-would-regenerate\nblock=false\nchanged=true\n/);
     assert.match(push.stdout, /site\/new\.html/);
     assert.doesNotMatch(push.stdout, /scratch\.tmp/, 'an untracked file that is not a derived target is ignored');
     // The same tree is blocked in shadow mode.
@@ -214,8 +214,7 @@ test('verify.yml: outside push mode the drift gate is exactly the old one', () =
   const strict = stepOf(validate, 'name: Generated files must be in sync with the data');
   assert.match(strict, /if: \$\{\{ steps\.regen\.outputs\.mode != 'push' \}\}/);
   assert.match(strict, /node scripts\/build\.mjs/);
-  assert.match(strict, /git diff --quiet -- \$targets && \[ -z "\$untracked" \]/);
-  assert.match(strict, /exit 1/);
+  assert.match(strict, /node scripts\/check-generated\.mjs --strict/, 'the strict gate, whatever .github/regen-mode says');
   // The OG check stays unconditional and blocking (in push mode it runs after the images were rendered).
   const og = stepOf(validate, 'name: Check OG images are committed and match the dataset');
   assert.doesNotMatch(og, /\n {8}if:/);
@@ -257,6 +256,17 @@ test('verify.yml: push mode regenerates before the checks and blocks through dri
   // It compares the tree the regeneration step wrote: no second build (the suite leaves the working tree as it found it).
   assert.doesNotMatch(noComments(gate), /node scripts\/build\.mjs/, 'the job builds once');
   assert.ok(validate.indexOf('Regenerate the derived files first') < validate.indexOf('regenerate-guard.mjs drift-gate'), 'regenerated before it compares');
+  // The regen-preview-patch artifact (the former regenerate-preview.yml): pull requests only, after either gate, even a failed one.
+  const patch = stepOf(validate, 'name: Write the derived files a fresh build changed as a patch');
+  const when = "if: ${{ !cancelled() && github.event_name == 'pull_request' && (steps.drift.outputs.changed == 'true' || steps.strict.outcome == 'failure') }}";
+  assert.ok(patch.includes(when), patch);
+  assert.match(patch, /git diff --cached --binary > "\$RUNNER_TEMP\/regen-preview\.patch"/);
+  const upload = validate.slice(validate.indexOf('uses: actions/upload-artifact@'));
+  assert.ok(validate.slice(0, validate.indexOf('uses: actions/upload-artifact@')).endsWith(`- ${when}\n        `), 'the upload has the same condition');
+  assert.match(upload, /name: regen-preview-patch\n/);
+  assert.match(validate, /- id: drift\n {8}name: Derived files must not be hand-edited/);
+  assert.match(validate, /- id: strict\n {8}name: Generated files must be in sync with the data/);
+  assert.ok(!existsSync(join(ROOT, '.github/workflows/regenerate-preview.yml')), 'no second build per pull request');
 });
 
 test('verify.yml: read-only, no secret, no credentials, pinned actions, no expression inside run:', () => {
