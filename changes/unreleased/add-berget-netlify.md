@@ -11,6 +11,3 @@
   limit. Keys and base URLs are injected into Netlify Functions, and a
   production deploy is needed first. The gateway does not store prompts or
   outputs. Checked 2026-11-26, agent-assisted (#903).
-
-With these additions, 25 of 79 providers (31.6%) list no `text` modality, under
-the 35% non-text guardrail.
