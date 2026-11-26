@@ -1763,7 +1763,7 @@ test('the client makes no GitHub API call and the home search covers model names
   assert.ok(searchText(groq).includes(groq.models_free[0].toLowerCase()), 'a real provider is found by one of its models');
 });
 
-test('header menu: Providers (with The Best inside), Models, Compare, Changes, API, Guides; the same on the home and the generated pages', () => {
+test('header menu: Providers (with Find my free API and The Best inside), Models, Compare, Changes, API, Guides; the same on the home and the generated pages', () => {
   // Q8: the menu names the site's main sections. Providers is a <details> holding the explorer and The Best (still the
   // one highlighted entry); Submit moved out of the menu to the secondary Contribute button. The home's header is
   // hand-written, so this also keeps it equal to siteHeader() in build.mjs.
@@ -1773,8 +1773,8 @@ test('header menu: Providers (with The Best inside), Models, Compare, Changes, A
     const html = readFileSync(join(ROOT, rel), 'utf8');
     const nav = html.slice(html.indexOf('id="primary-nav"'), html.indexOf('</nav>', html.indexOf('id="primary-nav"')));
     const hrefs = [...nav.matchAll(/<a [^>]*href="([^"]+)"/g)].map((m) => m[1].replace(/^(\.\.\/)+|^\.\//, ''));
-    assert.deepEqual(hrefs, ['#explorer', 'best/', 'models/', 'compare/', 'changes/', 'api/', 'guides-and-collections/'], `${rel}: the header menu entries, in order`);
-    assert.match(nav, /<details class="nav-group"><summary>Providers<\/summary><div class="nav-sub"><a href="[^"]*#explorer">All providers<\/a><a class="nav-best" href="[^"]*best\/"[^>]*>.*The Best<\/a><\/div><\/details>/s, `${rel}: The Best sits inside Providers`);
+    assert.deepEqual(hrefs, ['#explorer', 'find/', 'best/', 'models/', 'compare/', 'changes/', 'api/', 'guides-and-collections/'], `${rel}: the header menu entries, in order`);
+    assert.match(nav, /<details class="nav-group"><summary>Providers<\/summary><div class="nav-sub"><a href="[^"]*#explorer">All providers<\/a><a href="[^"]*find\/">Find my free API<\/a><a class="nav-best" href="[^"]*best\/"[^>]*>.*The Best<\/a><\/div><\/details>/s, `${rel}: The Best sits inside Providers`);
     assert.equal((nav.match(/class="nav-best"/g) || []).length, 1, `${rel}: only one highlighted entry`);
     assert.doesNotMatch(nav, /submit\//, `${rel}: Submit is not a menu entry`);
     const footer = html.slice(html.indexOf('<footer'));
@@ -2281,7 +2281,7 @@ test('the 404 page is built with the shared header, menu and footer and root-abs
   assert.ok(html.includes(hash), 'the path read-out is pinned by hash in the CSP: ' + hash);
 });
 
-test('the menu has Providers (All providers, The Best), Models, Compare, Changes, API and Guides, and the footer no longer carries the removed entries', () => {
+test('the menu has Providers (All providers, Find my free API, The Best), Models, Compare, Changes, API and Guides, and the footer no longer carries the removed entries', () => {
   // Mutant: put Submit back in the menu, or the «Interactive explorer» link or the «Independent, community-maintained» line back in
   // the footer; this test turns red.
   const home = readFileSync(join(ROOT, 'site/index.html'), 'utf8');
@@ -2290,7 +2290,7 @@ test('the menu has Providers (All providers, The Best), Models, Compare, Changes
     const nav = html.match(/<nav class="nav" id="primary-nav"[\s\S]*?<\/nav>/);
     assert.ok(nav, name + ': the menu');
     const labels = [...nav[0].matchAll(/<(?:a [^>]*|summary)>(?:<svg[\s\S]*?<\/svg>)?([^<]+)<\/(?:a|summary)>/g)].map((m) => m[1].replace(/&amp;/g, '&').trim());
-    assert.deepEqual(labels, ['Providers', 'All providers', 'The Best', 'Models', 'Compare', 'Changes', 'API', 'Guides'], name + ': the menu entries');
+    assert.deepEqual(labels, ['Providers', 'All providers', 'Find my free API', 'The Best', 'Models', 'Compare', 'Changes', 'API', 'Guides'], name + ': the menu entries');
     assert.ok(!/Interactive explorer/.test(html), name + ': no «Interactive explorer» link');
     assert.ok(!/Independent, community-maintained/.test(html), name + ': no «Independent, community-maintained» line');
     assert.ok(/<a href="[^"]*submit\/">Submit<\/a>/.test(html), name + ': Submit in the footer');

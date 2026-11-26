@@ -41,6 +41,8 @@ import { scoreBlockHtml } from './lib/score-bar.mjs';
 import { publishableClientConfigs } from './lib/client-config.mjs';
 import { COLLECTIONS as SHARED_COLLECTIONS } from './lib/collections.mjs';
 import * as compareLib from './lib/compare.mjs';
+import * as findLib from './lib/find.mjs';
+import { FIND_PATH, FIND_TITLE, FIND_DESC, findMainHtml, findJsonLd } from './lib/find-page.mjs';
 import { requirementsHtml, limitsHtml, glanceHtml, modelsHtml, dataPolicyHtml, speedHtml } from './lib/provider-sections.mjs';
 import { aboutHtml } from './lib/provider-summaries.mjs';
 import { fontHead, fingerprintSite } from './lib/assets.mjs';
@@ -579,6 +581,7 @@ const pageHero = ({ crumbs, h1, lede = '', afterTitle = '', extra = '', cls = 'm
 // The Best, so the six entries fit one desktop row; Submit is the secondary Contribute button next to the menu.
 const primaryNav = (p) => `<nav class="nav" id="primary-nav" aria-label="Primary">` +
   `<details class="nav-group"><summary>Providers</summary><div class="nav-sub"><a href="${p}#explorer">All providers</a>` +
+  `<a href="${p}find/">Find my free API</a>` +
   `<a class="nav-best" href="${p}best/" title="The top 10 by score, recomputed from the data at every build">${IC('ic-spark')}The Best</a></div></details>` +
   `<a href="${p}models/">Models</a><a href="${p}compare/">Compare</a><a href="${p}changes/">Changes</a><a href="${p}api/">API</a>` +
   `<a href="${p}guides-and-collections/">Guides</a></nav>`;
@@ -1099,6 +1102,7 @@ const hubMain =
   pageHero({ crumbs: `<a href="../">Home</a> / Guides &amp; Collections`, h1: `Guides &amp; Collections`, lede: `Short, data-backed answers to the most common “is there a free API for…” questions, plus curated slices of the dataset by a single constraint — every card generated from the verified dataset so it stays current.` }) +
   `<main id="main"><div class="wrap">` +
   `<p class="answer"><strong>${htmlEsc(HUB_ANSWER)}</strong></p>` +
+  `<p class="hub-find">Several constraints at once? <a href="../find/">Find my free API</a>: answer six quick questions and get a ranked shortlist.</p>` +
   `<h2 class="eyebrow">Guides: answers to one question</h2><div class="coll-grid">${guidesCards}</div>` +
   `<h2 class="eyebrow" style="margin-top:26px">Guides: how to choose</h2><div class="coll-grid">${longGuideCards}</div>` +
   `<h2 class="eyebrow" style="margin-top:26px">Collections: one filter, live</h2><div class="coll-grid">${hubCards}</div>` +
@@ -2528,6 +2532,22 @@ writeFileSync(join(ROOT, 'site/compare/index.html'), htmlPage({
   }),
 }));
 
+// ---------- /find/: the "Find my free API" wizard ----------
+// Questions, filters, hash and result markup live in lib/find.mjs (serialised to site/shared-find.js, the code
+// find.test.mjs executes); the page body in lib/find-page.mjs; the interaction in site/find.js. The order is the
+// explorer's (recommendedCmp, from shared-rules.js) and every filter is an explorer chip: no ranking of its own.
+// The page inlines only the fields the wizard reads, dated by ASOF, so the drift-gated page stays deterministic.
+writeFileSync(join(ROOT, 'site/shared-find.js'), findLib.clientBundle());
+rmSync(join(ROOT, 'site/find'), { recursive: true, force: true });
+mkdirSync(join(ROOT, 'site/find'), { recursive: true });
+const findData = `<script type="application/json" id="find-data">${JSON.stringify(findLib.findPayload(publicProviders, ASOF)).replace(/</g, '\\u003c')}</script>`;
+writeFileSync(join(ROOT, 'site/find/index.html'), htmlPage({
+  title: FIND_TITLE, desc: FIND_DESC, canonical: `${SITE}${FIND_PATH}`, prefix: '../',
+  main: findMainHtml({ pageHero, total: providers.length, verified: verifiedCount }) + findData,
+  scripts: ['shared-rules.js', 'shared-find.js', 'find.js'], ogImage: `${SITE}/og/find.png`,
+  jsonld: findJsonLd({ site: SITE, asof: ASOF }),
+}));
+
 // ---------- sitemap.xml (site SEO) ----------
 // lastmod is the date the page's content last changed in the DATA, not the build
 // date: a provider page moves with its last_verified, a collection or compare page with
@@ -2574,6 +2594,7 @@ const sitemapEntries = [
   ...COLLECTIONS.map((c) => [`${SITE}/collections/${c.slug}`, lastVerified(providers.filter(c.filter))]),
   ...providers.map((p) => [`${SITE}/p/${p.slug}`, p.last_verified || ASOF]),
   [`${SITE}/compare/`, ASOF],
+  [`${SITE}${FIND_PATH}`, ASOF],
   ...comparePairs.map((cp) => [`${SITE}/compare/${cp.path}/`, lastVerified([cp.a, cp.b])]),
 ];
 const sitemap =
