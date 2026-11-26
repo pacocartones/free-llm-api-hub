@@ -3088,6 +3088,35 @@ test('a11y: wide data tables sit in a keyboard-reachable scroll region and the h
   assert.match(readFileSync(join(ROOT, 'site/programs/startups.html'), 'utf8'), region, 'the programs table too');
 });
 
+// ---- no page scrolls sideways on a 390px phone (measured with Playwright on the Nov 2026 build: 30 compare pages up to
+// 868px wide, /coverage/ 986px, /coding-tools/goose-own-key/ 546px). The compare table sat in a scroll box that was not
+// positioned, so its screen-reader-only text escaped the box; the coverage tables had no scroll box; a source URL had no
+// break point. ----
+test('reflow: compare and coverage tables scroll inside a positioned region, and a source URL wraps', () => {
+  const region = /<div class="table-scroll(?: [\w-]+)*" role="region" aria-label="[^"]+" tabindex="0"><table/g;
+  const tablesInRegions = (html) => [(html.match(/<table/g) || []).length, (html.match(region) || []).length];
+  // The table function itself, which the static compare pages and the interactive /compare/ view both use.
+  const one = compareTableHtml([{ slug: 'a', name: 'A' }, { slug: 'b', name: 'B' }]);
+  assert.match(one, /^<div class="table-scroll compare-scroll" role="region" aria-label="Comparison of A, B" tabindex="0"><table class="compare-table">/);
+  // Every generated compare page, and /coverage/.
+  const comparePages = readdirSync(join(ROOT, 'site/compare'), { withFileTypes: true }).filter((d) => d.isDirectory())
+    .map((d) => `site/compare/${d.name}/index.html`)
+    .filter((f) => !/<meta http-equiv="refresh"/.test(readFileSync(join(ROOT, f), 'utf8'))); // retired pairs are redirect stubs
+  assert.ok(comparePages.length > 10, `expected the static compare pages, found ${comparePages.length}`);
+  for (const f of [...comparePages, 'site/coverage/index.html']) {
+    const [tables, inRegion] = tablesInRegions(readFileSync(join(ROOT, f), 'utf8'));
+    assert.ok(tables > 0, `${f}: has a table`);
+    assert.equal(inRegion, tables, `${f}: every table is in a labelled, focusable scroll region`);
+  }
+  // .table-scroll is what clips the sr-only text (pinned in the test above); .compare-scroll must not undo it.
+  const css = readFileSync(join(ROOT, 'site/styles.css'), 'utf8');
+  assert.doesNotMatch(css.match(/^\.compare-scroll \{[^}]*\}/m)[0], /position:|overflow-x: visible|max-width: none/);
+  // A source listed by its full URL breaks anywhere instead of widening the page.
+  assert.match(css, /^\.tool-sources a \{ overflow-wrap: anywhere; \}/m);
+  const goose = readFileSync(join(ROOT, 'site/coding-tools/goose-own-key/index.html'), 'utf8');
+  assert.match(goose, /<h2 id="sources">Sources<\/h2><ul class="plain tool-sources"><li><a href="https:\/\//);
+});
+
 // ---- the data-policy table fits a laptop screen (measured: 1114px at 1100px before, 1052px after) ----
 test('data_policy lot 2: at least 21 of 68, the four new rows carry a quote and a source', () => {
   const data = JSON.parse(readFileSync(join(ROOT, 'data/providers.json'), 'utf8'));
