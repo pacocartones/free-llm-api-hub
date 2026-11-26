@@ -8,10 +8,10 @@
   (`https://freellmapihub.com/#website`, `#dataset`, `#publisher`,
   `#creator`). Every other page that names the site or the dataset refers to
   the same `@id` with the same publisher and creator. No email address is
-  published.
+  published (#764).
 - Provider pages' `WebPage` structured data carries `dateModified`, the
-  `last_verified` date shown on the page.
+  `last_verified` date shown on the page (#764).
 - `sitemap-index.xml` lists `sitemap.xml` and `sitemap-state.xml`, so the
   monthly `/state/YYYY-MM/` reports can be found from one submitted sitemap.
   The post-deploy smoke test checks that it is published. `robots.txt` is
-  unchanged.
+  unchanged (#764).

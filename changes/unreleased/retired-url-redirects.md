@@ -5,4 +5,4 @@
   the interactive `/compare/?compare=a,b` view while both providers are listed, otherwise to
   `/compare/`. The map lives in `data/redirects.json`; each stub is `noindex`, carries a canonical
   link and stays out of the sitemap, and the build fails if a source is built as a real page again
-  or a target does not exist.
+  or a target does not exist (#890). Agent-assisted.
