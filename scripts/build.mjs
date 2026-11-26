@@ -41,6 +41,8 @@ import { scoreBlockHtml } from './lib/score-bar.mjs';
 import { publishableClientConfigs } from './lib/client-config.mjs';
 import { COLLECTIONS as SHARED_COLLECTIONS } from './lib/collections.mjs';
 import * as compareLib from './lib/compare.mjs';
+import * as findLib from './lib/find.mjs';
+import { FIND_PATH, FIND_TITLE, FIND_DESC, findMainHtml, findJsonLd } from './lib/find-page.mjs';
 import { requirementsHtml, limitsHtml, glanceHtml, modelsHtml, dataPolicyHtml, speedHtml } from './lib/provider-sections.mjs';
 import { aboutHtml } from './lib/provider-summaries.mjs';
 import { fontHead, fingerprintSite } from './lib/assets.mjs';
@@ -607,6 +609,7 @@ const pageHero = ({ crumbs, h1, lede = '', afterTitle = '', extra = '', cls = 'm
 // The Best, so the six entries fit one desktop row; Submit is the secondary Contribute button next to the menu.
 const primaryNav = (p) => `<nav class="nav" id="primary-nav" aria-label="Primary">` +
   `<details class="nav-group"><summary>Providers</summary><div class="nav-sub"><a href="${p}#explorer">All providers</a>` +
+  `<a href="${p}find/">Find my free API</a>` +
   `<a class="nav-best" href="${p}best/" title="The top 10 by score, recomputed from the data at every build">${IC('ic-spark')}The Best</a></div></details>` +
   `<a href="${p}models/">Models</a><a href="${p}compare/">Compare</a><a href="${p}changes/">Changes</a><a href="${p}api/">API</a>` +
   `<a href="${p}guides-and-collections/">Guides</a></nav>`;
@@ -702,8 +705,8 @@ ${canonical ? `<link rel="canonical" href="${htmlEsc(canonical)}">
 <link rel="apple-touch-icon" href="${prefix}apple-touch-icon.png">
 <link rel="manifest" href="${prefix}site.webmanifest">
 ${fontHead(prefix)}
-<meta name="theme-color" content="#fafafa" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#0e0e11" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#fff9f6" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#17110f" media="(prefers-color-scheme: dark)">
 <meta name="color-scheme" content="light dark">
 <meta property="og:title" content="${htmlEsc(title)}">
 <meta property="og:description" content="${htmlEsc(fitDescription(desc))}">
@@ -1152,6 +1155,7 @@ const hubMain =
   pageHero({ crumbs: `<a href="../">Home</a> / Guides &amp; Collections`, h1: `Guides &amp; Collections`, lede: `Short, data-backed answers to the most common “is there a free API for…” questions, plus curated slices of the dataset by a single constraint — every card generated from the verified dataset so it stays current.` }) +
   `<main id="main"><div class="wrap">` +
   `<p class="answer"><strong>${htmlEsc(HUB_ANSWER)}</strong></p>` +
+  `<p class="hub-find">Several constraints at once? <a href="../find/">Find my free API</a>: answer six quick questions and get a ranked shortlist.</p>` +
   `<h2 class="eyebrow">Guides: answers to one question</h2><div class="coll-grid">${guidesCards}</div>` +
   `<h2 class="eyebrow" style="margin-top:26px">Guides: how to choose</h2><div class="coll-grid">${longGuideCards}</div>` +
   `<h2 class="eyebrow" style="margin-top:26px">Collections: one filter, live</h2><div class="coll-grid">${hubCards}</div>` +
@@ -1286,7 +1290,7 @@ for (const p of providers) {
   const summary = `<div class="prov-summary"><h2 id="whats-free">What's free</h2><p>${htmlEsc(p.free_tier)}</p></div>` + scoreHtml + requirementsHtml(p);
   // Freshness relative to the current day (provider pages are regenerated on deploy, not diff-gated).
   const daysAgo = p.verified && p.last_verified ? ageInDays(p.last_verified, today) : null;
-  // The receipt stamp (lib/stamp.mjs): "✓ Verified 24 Nov 2026 · source", the quoted sentence in its title.
+  // The receipt stamp (lib/stamp.mjs), the perforated ticket: "✓ | Verified 24 Nov 2026 · 7 sources", the quoted sentence in its title.
   const verifiedLine = p.verified
     ? stampHtml({ ...p, stamp: stampSource(p, QUOTE_REGISTRY) }, { now: today, long: true }) +
       (daysAgo != null && daysAgo > FRESH_DAYS ? ` <span class="v warn">${IC('ic-warn')} re-verification due</span>` : '')
@@ -1335,7 +1339,7 @@ for (const p of providers) {
       crumbs: `<a href="../">Home</a> / <a href="../#explorer">Providers</a> / ${htmlEsc(p.name)}`,
       h1: htmlEsc(p.name),
       // The provider's aura (lib/aura.mjs) with its reading in words, so the picture never has to be decoded alone.
-      afterTitle: `<div class="prov-aura">${auraHtml(p, { now: ASOF, cls: 'aura-lg' })}<p class="aura-read"><span class="aura-read-h">Aura:</span> ${htmlEsc(auraSpec(p, { now: ASOF }).label)} · <a href="../methodology/#how-to-read-an-aura">how to read it</a></p></div>` +
+      afterTitle: `<div class="prov-aura">${auraHtml(p, { now: ASOF, cls: 'aura-lg', digits: 1 })}<p class="aura-read"><span class="aura-read-h">Aura:</span> ${htmlEsc(auraSpec(p, { now: ASOF }).label)} · <a href="../methodology/#how-to-read-an-aura">how to read it</a></p></div>` +
         `<div class="prov-badges"><span class="type">${typeLabel(p)}</span> ${verifiedLine}${probedLine} ${provFlagsHtml(p)}</div>` +
         provNumsHtml(p) + provReceiptHtml(p),
       lede: p.best_for ? htmlEsc(p.best_for) : '',
@@ -2585,6 +2589,22 @@ writeFileSync(join(ROOT, 'site/compare/index.html'), htmlPage({
   }),
 }));
 
+// ---------- /find/: the "Find my free API" wizard ----------
+// Questions, filters, hash and result markup live in lib/find.mjs (serialised to site/shared-find.js, the code
+// find.test.mjs executes); the page body in lib/find-page.mjs; the interaction in site/find.js. The order is the
+// explorer's (recommendedCmp, from shared-rules.js) and every filter is an explorer chip: no ranking of its own.
+// The page inlines only the fields the wizard reads, dated by ASOF, so the drift-gated page stays deterministic.
+writeFileSync(join(ROOT, 'site/shared-find.js'), findLib.clientBundle());
+rmSync(join(ROOT, 'site/find'), { recursive: true, force: true });
+mkdirSync(join(ROOT, 'site/find'), { recursive: true });
+const findData = `<script type="application/json" id="find-data">${JSON.stringify(findLib.findPayload(publicProviders, ASOF)).replace(/</g, '\\u003c')}</script>`;
+writeFileSync(join(ROOT, 'site/find/index.html'), htmlPage({
+  title: FIND_TITLE, desc: FIND_DESC, canonical: `${SITE}${FIND_PATH}`, prefix: '../',
+  main: findMainHtml({ pageHero, total: providers.length, verified: verifiedCount }) + findData,
+  scripts: ['shared-rules.js', 'shared-find.js', 'find.js'], ogImage: `${SITE}/og/find.png`,
+  jsonld: findJsonLd({ site: SITE, asof: ASOF }),
+}));
+
 // ---------- sitemap.xml (site SEO) ----------
 // lastmod is the date the page's content last changed in the DATA, not the build
 // date: a provider page moves with its last_verified, a collection or compare page with
@@ -2631,6 +2651,7 @@ const sitemapEntries = [
   ...COLLECTIONS.map((c) => [`${SITE}/collections/${c.slug}`, lastVerified(providers.filter(c.filter))]),
   ...providers.map((p) => [`${SITE}/p/${p.slug}`, p.last_verified || ASOF]),
   [`${SITE}/compare/`, ASOF],
+  [`${SITE}${FIND_PATH}`, ASOF],
   ...comparePairs.map((cp) => [`${SITE}/compare/${cp.path}/`, lastVerified([cp.a, cp.b])]),
 ];
 const sitemap =

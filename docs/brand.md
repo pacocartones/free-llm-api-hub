@@ -6,41 +6,53 @@ parts that live in code, so a contributor can extend them without guessing.
 
 ## Colour
 
-All colours are CSS custom properties in [`site/styles.css`](../site/styles.css): `:root` holds the dark values and
-`[data-theme="light"]` the light ones. Light is the default; the theme guard in each page's `<head>` picks dark when the
-visitor's system prefers it or they chose it with the toggle. Components read semantic names, never a raw colour.
+The palette is the final variant **H1-e · Cálida**: a toasted-saffron brand accent, warm off-white or warm near-black
+grounds, and one warm hue per modality. All colours are CSS custom properties in [`site/styles.css`](../site/styles.css):
+`:root` holds the dark values and `[data-theme="light"]` the light ones. Light is the default; the theme guard in each
+page's `<head>` picks dark when the visitor's system prefers it or they chose it with the toggle. Components read
+semantic names, never a raw colour. Contrast is on `--bg` / `--panel` (WCAG 2.x relative luminance).
 
-| Token | Light | Dark | Use |
+| Token | Light | Contrast | Dark | Contrast | Use |
+|---|---|---|---|---|---|
+| `--bg` / `--panel` / `--panel-2` | `#fff9f6` / `#ffffff` / `#fcf1ec` | | `#17110f` / `#211915` / `#251c18` | | Grounds |
+| `--border` (line) | `#f0e2db` | | `#352822` | | Hairlines |
+| `--text` (ink) | `#22140f` | 17.13 / 17.87 | `#fbf1ec` | 16.82 / 15.56 | Body text |
+| `--muted` | `#6a5048` | 7.05 / 7.36 | `#c2a89e` | 8.36 / 7.73 | Secondary text |
+| `--control` | `#9a8179` | 3.48 / 3.63 | `#7a645b` | 3.38 / 3.13 | Control borders (3:1, WCAG 1.4.11) |
+| `--accent` | `#9c4a00` | 5.93 / 6.19 | `#ffb25c` | 10.48 / 9.69 | Brand: links, focus ring, primary button |
+| `--accent-ink` (on-accent) | `#ffffff` | 6.19 on the accent | `#17110f` | 10.48 on the accent | Text on the accent |
+| `--ok` | `#2f6b1f` | 6.21 / 6.47 | `#9ad27f` | 10.59 / 9.80 | Confirmed good |
+| `--unk` | `#7f5a00` | 5.98 / 6.24 | `#f2c14e` | 11.14 / 10.30 | Not stated |
+| `--bad` | `#b3261e` | 6.27 / 6.54 | `#ff8a7a` | 8.16 / 7.55 | Confirmed bad |
+| `--chg` | `#7a2e8c` | 7.75 / 8.09 | `#e0a3f0` | 9.49 / 8.78 | A change in the record |
+| `--seal-bg` | `#ffebd9` | accent on it 5.35 | `#2e2119` | accent on it 8.74 | The receipt stamp's fill |
+
+`--panel-2`, `--accent-dim` (accent text on an accent tint), `--faint` and `--trial` are derived so every text token
+still reaches 4.5:1 on all three grounds.
+
+**Modalities** have two tokens each. `--h-*` is the graphic hue (aura bars, dots), one set per theme; `--m-*` is the text
+variant, darkened in light until it reaches 4.5:1 (in dark every hue already does, so `--m-*` equals `--h-*`).
+
+| Modality | `--h-*` light (on `--bg`) | `--m-*` light | `--h-*` = `--m-*` dark (on `--bg`) |
 |---|---|---|---|
-| `--bg` / `--panel` / `--panel-2` | `#fafafa` / `#ffffff` / `#f1f1f4` | `#0e0e11` / `#18181d` / `#1f1f25` | Grounds |
-| `--text` | `#0f0f12` | `#f3f3f5` | Body text |
-| `--muted` | `#55565e` | `#a6a7b0` | Secondary text |
-| `--accent` | `#c2255c` | `#ff6b9a` | Brand magenta: links, focus ring, primary button |
-| `--ok` / `--unk` / `--bad` | `#1b7a44` / `#8a5700` / `#c0262d` | `#4fd08a` / `#f0ba4e` / `#ff7a7a` | Confirmed good · not stated · confirmed bad |
-| `--chg` / `--trial` | `#3550e8` / `#0a6a75` | `#8c9eff` / `#55c8d4` | A change in the record · the trial category |
-| `--control` | `#85868f` | `#71727c` | Control borders (3:1, WCAG 1.4.11) |
+| text | `#d9502a` (3.92) | `#bd4625` | `#ff7a4d` (7.25) |
+| vision | `#c48200` (3.08) | `#956300` | `#f5b21f` (10.03) |
+| audio | `#c2185b` (5.63) | `#c2185b` | `#ff5c93` (6.41) |
+| embeddings | `#8e7a00` (4.08) | `#7e6d00` | `#c9b02e` (8.66) |
+| image | `#d85a85` (3.52) | `#b14a6d` | `#ff9cbc` (9.55) |
+| ocr | `#8b3a2e` (7.34) | `#8b3a2e` | `#d97a62` (6.15) |
+| rerank | `#7b2d6b` (8.29) | `#7b2d6b` | `#c77ab8` (6.15) |
 
-**Modalities** have two tokens each:
-
-| Modality | `--h-*` graphic hue (both themes) | `--m-*` text, light | `--m-*` text, dark |
-|---|---|---|---|
-| text | `#7c5cff` | `#5b3fe0` | `#a594ff` |
-| vision | `#00c2e0` | `#006f88` | `#3fd0ee` |
-| image | `#ff4f8b` | `#b01d63` | `#ff7fb4` |
-| audio | `#ffa31a` | `#8a5200` | `#ffb547` |
-| embeddings | `#2bc48a` | `#0f7445` | `#4fd08a` |
-| rerank | `#4c8dff` | `#1f5fc4` | `#8cb4ff` |
-| ocr | `#ff7a3d` | `#a3420c` | `#ff9a5c` |
-
-The `--h-*` hues are fills only (aura sectors, dots) and always sit next to the modality's name, so colour never carries
-meaning alone (WCAG 1.4.1). Text uses `--m-*`, which reaches 4.5:1. `scripts/build.test.mjs` checks every text token on
-`--bg`, `--panel` and `--panel-2` in both themes, `--control` at 3:1, that every schema modality has both tokens, and that
-no rule sets a text colour from an `--h-*` hue.
+The `--h-*` hues are fills only and always sit next to the modality's name, so colour never carries meaning alone
+(WCAG 1.4.1); each reaches 3:1 on `--bg` and `--panel` (WCAG 1.4.11). `scripts/build.test.mjs` checks every text token
+on `--bg`, `--panel` and `--panel-2` in both themes, `--control` at 3:1, the hues at 3:1, the accent on `--seal-bg`,
+that the Cálida values are the ones in this table, that every schema modality has both tokens, and that no rule sets a
+text colour from an `--h-*` hue.
 
 ## Type
 
-- **Roboto Flex** (variable; `wght` 300–900 and `wdth` 75–130 kept) for display and text. Headings narrow as they grow
-  (`font-stretch` 80–88 %).
+- **Roboto Flex** (variable; `wght` 300–900 and `wdth` 75–130 kept) for display and text. Headings use the Cálida
+  axes: weight 760, `font-stretch` 92 %, tracking −0.03 em (`--h1-weight`, `--h1-stretch`, `--h1-tracking`).
 - **DM Mono** 400 and 500 for data, code and badges.
 
 Both are SIL OFL 1.1 (licences in [`site/fonts/`](../site/fonts/)), self-hosted, preloaded and declared in each page's
@@ -64,3 +76,34 @@ for f in rf-inst.ttf:roboto-flex DMMono-Regular.ttf:dm-mono-400 DMMono-Medium.tt
     --flavor=woff2 --no-hinting --desubroutinize --output-file="${f##*:}.woff2"
 done
 ```
+
+## Aura and receipt
+
+Both shapes are parameters in code, so a later variant changes numbers, not renderers.
+
+**Aura: radial bars** (`AURA_GEOMETRY` in [`scripts/lib/aura.mjs`](../scripts/lib/aura.mjs), a 100-unit box):
+
+| Parameter | Value |
+|---|---|
+| Bars | 40, round caps; one contiguous sector per modality (40 / n bars each), in `AURA_ORDER` |
+| Seed | the slug: the fan's rotation and each bar's length (0.45–1 of the sector's full length) |
+| Ongoing | bars from r = 9, up to 37 long, stroke 3.3 (rays from the centre) |
+| Trial | bars from r = 27, up to 18 long, stroke 3.0 (outer crown only) |
+| Flags not stated | dashed circle r = 48.4, stroke 2.2, dash `4 3`, in `--unk` |
+| Last check over 30 days | `saturate(.2)` |
+
+`auraHtml()` is the web form (inline SVG; the bars take `--h-*` by class, so one markup serves both themes), `auraSvg()`
+the image form (hex colours of one theme, or `theme: 'css'` for the `#logo` sprite symbol). The favicon uses 12 thicker
+bars and four modalities so it reads at 16 px.
+
+**Receipt** (`STAMP_SHAPES` in [`scripts/lib/stamp.mjs`](../scripts/lib/stamp.mjs), CSS in `site/styles.css`):
+
+- **Perforated ticket**, the main stamp (provider pages, social images, badges): semicircular notches of 5 px on both
+  sides, a 1.5 px dashed cut line between the ✓ and the text, `--seal-bg` fill with `--accent` text, turned −1.5°,
+  DM Mono 500 at 12 px (14 px and a 16 px ✓ on the provider page). Text: "Verified 24 Nov 2026 · 7 sources".
+- **Pill**, the compact stamp in tables and lists: flat, `border-radius: 999px`, 1 px `--control` border, an 8 px status
+  dot in `--ok`, "Verified" in `--accent` and "· 24 Nov 2026 · 7 sources" in ink, DM Mono 500 at 12 px.
+
+"N sources" is the number of distinct https pages behind the entry (`docs_url`, the published limits' source, the
+data-policy source and every source of `field_checks`). Freshness never rests on colour: stale turns the ✓ into `!`, and
+a due or overdue check dashes the pill's border and underlines the ticket's text.

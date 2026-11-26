@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// lighthouse-gate.mjs — serve site/ locally, run Lighthouse on twenty pages and
+// lighthouse-gate.mjs — serve site/ locally, run Lighthouse on twenty-one pages and
 // fail when a category drops below the thresholds in lib/lighthouse-gate.mjs.
 // Needs the runner from tools/lighthouse (npm ci there) and a Chrome binary in
 // CHROME_PATH. Nothing is published and nothing leaves the machine.
@@ -113,7 +113,7 @@ const base = `http://127.0.0.1:${server.address().port}`;
 const providers = JSON.parse(readFileSync(join(ROOT, 'data/providers.json'), 'utf8')).providers;
 const sample = providers.find((p) => existsSync(join(SITE, 'p', `${p.slug}.html`)));
 if (!sample) { console.error('No generated provider page under site/p/: run `node scripts/build.mjs` first.'); process.exit(1); }
-const pages = ['/', '/best/', '/coverage/', '/quality/', '/free-gpu/', '/coding-tools/', '/compare/', '/data-policy/', '/guides-and-collections/', `/p/${sample.slug}.html`,
+const pages = ['/', '/best/', '/coverage/', '/quality/', '/free-gpu/', '/coding-tools/', '/compare/', '/find/', '/data-policy/', '/guides-and-collections/', `/p/${sample.slug}.html`,
   '/collections/no-credit-card.html', '/collections/openai-compatible.html',
   '/guides/free-llm-api-no-signup.html', '/guides/free-embeddings-apis.html',
   '/guides/free-ocr-document-ai-apis.html', '/guides/free-speech-to-text-apis.html',

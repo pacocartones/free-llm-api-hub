@@ -1,113 +1,126 @@
-/* Free LLM API Hub — design system. Brand direction H1 "Fingerprint + Receipts": white or near-black grounds, one hue
-   per modality (graphic fill only, never text), a magenta brand accent, Roboto Flex (variable) for display and text and
+/* Free LLM API Hub — design system. Brand direction H1 "Fingerprint + Receipts", variant Cálida: warm off-white or warm
+   near-black grounds, one hue per modality (graphic fill only, never text), a toasted-saffron brand accent, Roboto Flex (variable) for display and text and
    DM Mono for data. Every colour a component reads is a semantic token below; the contrast tests in
    scripts/build.test.mjs walk them in both themes. */
 
 /* The font faces (Roboto Flex, DM Mono) are declared in each page's <head> (scripts/lib/assets.mjs: preloaded, font-display: optional). */
 
 /* ---------- tokens ---------- */
-/* :root holds the dark values and [data-theme="light"] the light ones. Light is the default: the theme guard in the
-   <head> picks dark only when the visitor's system asks for it (prefers-color-scheme) or they chose it with the toggle. */
+/* Palette: brand H1, final variant "H1-e · Cálida" (docs/brand.md). :root holds the dark values and [data-theme="light"]
+   the light ones. Light is the default: the theme guard in the <head> picks dark only when the visitor's system asks for
+   it (prefers-color-scheme) or they chose it with the toggle. */
 :root {
   --t-fast: 120ms; --t-base: 200ms; --t-slow: 320ms; --ease: cubic-bezier(.2, .8, .2, 1);
-  --bg: #0e0e11;
-  --bg-elev: #121216;
-  --panel: #18181d;
-  --panel-2: #1f1f25;
-  --border: #2a2a31;
-  --border-strong: #3a3a43;
-  --control: #71727c; /* control borders: >= 3:1 against panel-2 (WCAG 1.4.11) */
+  --bg: #17110f;
+  --bg-elev: #1b1411;
+  --panel: #211915;
+  --panel-2: #251c18;
+  --border: #352822;
+  --border-strong: #4a3830;
+  --control: #7a645b; /* control borders: >= 3:1 against panel-2 (WCAG 1.4.11) */
   --control-border: var(--control); /* legacy name: lib/consent.client.js reads it */
-  --text: #f3f3f5;
-  --muted: #a6a7b0;
-  --faint: #9a9ba4; /* >= 5:1 on bg, panel and panel-2 */
-  --accent: #ff6b9a; /* brand magenta */
-  --accent-dim: #ff8db2; /* also the accent as TEXT on an accent tint (chips, badges): >= 4.5:1 there */
-  --accent-ink: #0e0e11;
+  --text: #fbf1ec;
+  --muted: #c2a89e;
+  --faint: #c2a89e; /* >= 5:1 on bg, panel and panel-2 */
+  --accent: #ffb25c; /* brand: toasted saffron */
+  --accent-dim: #ffc078; /* also the accent as TEXT on an accent tint (chips, badges): >= 4.5:1 there */
+  --accent-ink: #17110f;
   /* Semantic tokens: components read these, never a raw colour, so a new brand only changes values here.
      ok = confirmed good / fresh, unk = not confirmed / due, bad = confirmed bad / stale, chg = a change in the record,
      trial = the trial-credit category, m-* = one per modality in data/schema.json. Text-bearing ones are checked
      for contrast on bg, panel and panel-2 in both themes by scripts/build.test.mjs. */
-  --ok: #4fd08a;
-  --unk: #f0ba4e;
-  --bad: #ff7a7a;
-  --chg: #8c9eff;
-  --trial: #55c8d4;
-  /* m-*: the modality as TEXT (a label, a chip). Lightened or darkened from the hue so it reaches 4.5:1. */
-  --m-text: #a594ff;
-  --m-vision: #3fd0ee;
-  --m-image: #ff7fb4;
-  --m-audio: #ffb547;
-  --m-embeddings: #4fd08a;
-  --m-rerank: #8cb4ff;
-  --m-ocr: #ff9a5c;
-  /* h-*: the modality as a graphic FILL (aura sectors, dots). The same in both themes and never used for text: it
-     always sits next to the modality's name, so it never carries meaning on its own (WCAG 1.4.1). */
-  --h-text: #7c5cff;
-  --h-vision: #00c2e0;
-  --h-image: #ff4f8b;
-  --h-audio: #ffa31a;
-  --h-embeddings: #2bc48a;
-  --h-rerank: #4c8dff;
-  --h-ocr: #ff7a3d;
+  --ok: #9ad27f;
+  --unk: #f2c14e;
+  --bad: #ff8a7a;
+  --chg: #e0a3f0;
+  --trial: var(--muted);
+  /* The receipt stamp's fill (the perforated ticket and the compact pill); the accent on it is 8.74:1 here. */
+  --seal-bg: #2e2119;
+  /* m-*: the modality as TEXT (a label, a chip). In dark every hue already reaches 4.5:1, so m-* equals h-*. */
+  --m-text: #ff7a4d;
+  --m-vision: #f5b21f;
+  --m-image: #ff9cbc;
+  --m-audio: #ff5c93;
+  --m-embeddings: #c9b02e;
+  --m-rerank: #c77ab8;
+  --m-ocr: #d97a62;
+  /* h-*: the modality as a graphic FILL (aura bars, dots), one set per theme. Never used for text: it always sits next
+     to the modality's name, so it never carries meaning on its own (WCAG 1.4.1). */
+  --h-text: #ff7a4d;
+  --h-vision: #f5b21f;
+  --h-image: #ff9cbc;
+  --h-audio: #ff5c93;
+  --h-embeddings: #c9b02e;
+  --h-rerank: #c77ab8;
+  --h-ocr: #d97a62;
   /* Legacy names, kept as aliases. */
   --green: var(--ok);
   --warn: var(--unk);
   --red: var(--bad);
   --shadow-sm: 0 1px 2px rgba(0,0,0,.4);
   --shadow-md: 0 10px 34px rgba(0,0,0,.45);
-  --glow: 0 0 0 1px rgba(255,107,154,.18);
-  --header-bg: rgba(14,14,17,.97);
+  --glow: 0 0 0 1px rgba(255,178,92,.2);
+  --header-bg: rgba(23,17,15,.97);
   --font-display: 'Roboto Flex', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   --font-sans: 'Roboto Flex', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   --font-mono: 'DM Mono', ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
   --header-h: 60px;
   /* The header sits on the page ground with a hairline under it (no coloured bar); scripts/build.test.mjs checks its text in both themes. */
-  --header-bar: #0e0e11;
-  --on-header: #f3f3f5;
-  --on-header-muted: #a6a7b0;
-  --on-header-accent: #ff6b9a;
-  --on-header-line: #2a2a31;
-  --on-header-hover: rgba(255, 255, 255, .07);
-  --radius: 10px;
+  --header-bar: #17110f;
+  --on-header: #fbf1ec;
+  --on-header-muted: #c2a89e;
+  --on-header-accent: #ffb25c;
+  --on-header-line: #352822;
+  --on-header-hover: rgba(255, 241, 236, .07);
+  --radius: 18px;
+  /* Display type axes for this variant (Roboto Flex). */
+  --h1-weight: 760; --h1-stretch: 92%; --h1-tracking: -.03em;
 }
 [data-theme="light"] {
-  --bg: #fafafa;
-  --bg-elev: #f4f4f6;
+  --bg: #fff9f6;
+  --bg-elev: #fcf3ef;
   --panel: #ffffff;
-  --panel-2: #f1f1f4;
-  --border: #e6e6ea;
-  --border-strong: #d0d0d6;
-  --control: #85868f; /* control borders: >= 3:1 against panel-2 (WCAG 1.4.11) */
+  --panel-2: #fcf1ec;
+  --border: #f0e2db;
+  --border-strong: #e3cfc6;
+  --control: #9a8179; /* control borders: >= 3:1 against panel-2 (WCAG 1.4.11) */
   --control-border: var(--control); /* legacy name: lib/consent.client.js reads it */
-  --text: #0f0f12;
-  --muted: #55565e;
-  --faint: #5c5d66;
-  --accent: #c2255c;
-  --accent-dim: #a11e4c;
+  --text: #22140f;
+  --muted: #6a5048;
+  --faint: #6a5048;
+  --accent: #9c4a00;
+  --accent-dim: #874000;
   --accent-ink: #ffffff;
-  --ok: #1b7a44;
-  --unk: #8a5700;
-  --bad: #c0262d;
-  --chg: #3550e8;
-  --trial: #0a6a75;
-  --m-text: #5b3fe0;
-  --m-vision: #006f88;
-  --m-image: #b01d63;
-  --m-audio: #8a5200;
-  --m-embeddings: #0f7445;
-  --m-rerank: #1f5fc4;
-  --m-ocr: #a3420c;
-  --shadow-sm: 0 1px 2px rgba(15,15,18,.06);
-  --shadow-md: 0 12px 34px rgba(15,15,18,.10);
-  --glow: 0 0 0 1px rgba(194,37,92,.16);
-  --header-bg: rgba(250,250,250,.97);
-  --header-bar: #fafafa;
-  --on-header: #0f0f12;
-  --on-header-muted: #55565e;
-  --on-header-accent: #c2255c;
-  --on-header-line: #e6e6ea;
-  --on-header-hover: rgba(15, 15, 18, .06);
+  --ok: #2f6b1f;
+  --unk: #7f5a00;
+  --bad: #b3261e;
+  --chg: #7a2e8c;
+  --seal-bg: #ffebd9; /* apricot; the accent on it is 5.35:1 */
+  /* m-*: darkened from the hue until it reaches 4.5:1 on bg, panel and panel-2. */
+  --m-text: #bd4625;
+  --m-vision: #956300;
+  --m-image: #b14a6d;
+  --m-audio: #c2185b;
+  --m-embeddings: #7e6d00;
+  --m-rerank: #7b2d6b;
+  --m-ocr: #8b3a2e;
+  --h-text: #d9502a;
+  --h-vision: #c48200;
+  --h-image: #d85a85;
+  --h-audio: #c2185b;
+  --h-embeddings: #8e7a00;
+  --h-rerank: #7b2d6b;
+  --h-ocr: #8b3a2e;
+  --shadow-sm: 0 1px 2px rgba(34,20,15,.06);
+  --shadow-md: 0 12px 34px rgba(34,20,15,.10);
+  --glow: 0 0 0 1px rgba(156,74,0,.18);
+  --header-bg: rgba(255,249,246,.97);
+  --header-bar: #fff9f6;
+  --on-header: #22140f;
+  --on-header-muted: #6a5048;
+  --on-header-accent: #9c4a00;
+  --on-header-line: #f0e2db;
+  --on-header-hover: rgba(34, 20, 15, .06);
 }
 
 /* ---------- base ---------- */
@@ -121,8 +134,8 @@ body {
   font-synthesis: style;
 }
 /* Display: Roboto Flex, narrowed and tightened as it grows (the variable wdth axis). */
-h1, h2, h3 { font-family: var(--font-display); font-weight: 750; font-stretch: 88%; letter-spacing: -.02em; }
-h1 { font-weight: 800; font-stretch: 80%; letter-spacing: -.03em; }
+h1, h2, h3 { font-family: var(--font-display); font-weight: var(--h1-weight); font-stretch: var(--h1-stretch); letter-spacing: -.02em; }
+h1 { letter-spacing: var(--h1-tracking); }
 .mono { font-family: var(--font-mono); font-weight: 500; }
 a { color: var(--accent); text-decoration: none; }
 a:hover { text-decoration: underline; }
@@ -416,11 +429,11 @@ tbody tr:hover { background: var(--panel); }
    title and on the provider page). The header row stays pinned under the header and, where the controls are pinned, under them. */
 @media (min-width: 721px) {
   #table { table-layout: fixed; }
-  #table th:nth-child(1) { width: 24%; }
-  #table th:nth-child(2) { width: 9%; }
-  #table th:nth-child(3) { width: 30%; }
-  #table th:nth-child(4) { width: 26%; }
-  #table th:nth-child(5) { width: 11%; }
+  #table th:nth-child(1) { width: 22%; }
+  #table th:nth-child(2) { width: 8%; }
+  #table th:nth-child(3) { width: 26%; }
+  #table th:nth-child(4) { width: 20%; }
+  #table th:nth-child(5) { width: 24%; }
   #table td { vertical-align: middle; }
   #table tbody tr:focus-within { background: var(--panel); }
   #table thead th { position: sticky; top: var(--header-h); z-index: 5; background: var(--bg); }
@@ -1012,22 +1025,25 @@ p.muted a, .prose p a, .prov-summary p a { text-decoration: underline; text-unde
 .empty-clear[hidden] { display: none; }
 
 /* ---------- brand H1: aura and receipt stamp ---------- */
-/* The aura (lib/aura.mjs): conic sectors in the modality hues (--aura, set inline from the --h-* tokens) under a soft
-   highlight. A trial is a ring; a dashed edge in --unk means
-   a production flag is not stated; a faded aura was last checked over 30 days ago. Shape and words carry the meaning,
-   the hues only decorate it (WCAG 1.4.1). */
-.aura { display: inline-block; flex: none; width: 24px; aspect-ratio: 1; border-radius: 50%; vertical-align: middle;
-  background: radial-gradient(circle at 35% 30%, rgba(255,255,255,.55), transparent 45%), var(--aura, var(--h-text)); }
-/* The ring's hole is painted in the surface colour behind it (--aura-ground), so the dashed outline is never clipped. */
-.aura-ring { background: radial-gradient(circle closest-side, var(--aura-ground, var(--bg)) 52%, transparent calc(52% + 1px)),
-  radial-gradient(circle at 35% 30%, rgba(255,255,255,.55), transparent 45%), var(--aura, var(--h-text)); }
-.aura-dash { outline: 2px dashed var(--unk); outline-offset: 2px; }
-tbody tr:hover .aura { --aura-ground: var(--panel); }
-.aura-old { filter: saturate(.25); }
-.aura-sm { width: 22px; }
-.aura-lg { width: 112px; }
-.name-row { display: inline-flex; align-items: flex-start; gap: 10px; }
-.name-row > .aura { margin-top: 3px; }
+/* The aura (lib/aura.mjs): the Cálida radial bars, an inline SVG whose bars take the modality hues (--h-*). Rays from
+   the centre = ongoing, an outer crown only = trial, a dashed circle in --unk = a production flag is not stated, faded =
+   last checked over 30 days ago. Shape and words carry the meaning, the hues only decorate it (WCAG 1.4.1). */
+.aura { display: inline-block; flex: none; width: 24px; aspect-ratio: 1; vertical-align: middle; }
+.aura svg { display: block; width: 100%; height: 100%; overflow: visible; fill: none; stroke-linecap: round; }
+.aura .h-text { stroke: var(--h-text); }
+.aura .h-vision { stroke: var(--h-vision); }
+.aura .h-image { stroke: var(--h-image); }
+.aura .h-audio { stroke: var(--h-audio); }
+.aura .h-embeddings { stroke: var(--h-embeddings); }
+.aura .h-rerank { stroke: var(--h-rerank); }
+.aura .h-ocr { stroke: var(--h-ocr); }
+.aura .aura-edge { stroke: var(--unk); }
+.aura-old { filter: saturate(.2); }
+.aura-sm { width: 26px; }
+.aura-lg { width: 132px; }
+.name-row { display: flex; align-items: flex-start; gap: 10px; max-width: 100%; }
+.name-row > .name-main { min-width: 0; }
+.name-row > .aura { margin-top: 1px; }
 .prov-aura { display: flex; flex-direction: column; align-items: center; gap: 10px; margin: 6px auto 14px; }
 .aura-read { margin: 0; max-width: 60ch; color: var(--muted); font-size: .82rem; font-family: var(--font-mono); text-align: center; }
 .aura-read-h { color: var(--text); font-weight: 500; }
@@ -1036,21 +1052,105 @@ tbody tr:hover .aura { --aura-ground: var(--panel); }
   a:hover > .aura, tr:hover .aura-sm { transform: scale(1.15); }
 }
 
-/* The receipt stamp (lib/stamp.mjs): "✓ 24 Nov · source", slightly turned like a rubber stamp. Freshness is the mark
-   (✓ / !), the border (dashed when a re-check is due) and sr-only words; the colour follows --ok / --unk / --bad. */
-.stamp { display: inline-flex; align-items: center; gap: 5px; padding: 2px 8px; border-radius: 5px; border: 1.5px solid currentColor;
-  background: transparent; font-family: var(--font-mono); font-weight: 500; font-size: .72rem; white-space: nowrap;
-  font-variant-numeric: tabular-nums; transform: rotate(-2deg); text-decoration: none; }
+/* The receipt (lib/stamp.mjs), two shapes. Freshness is the mark or dot (✓ / !), the border (dashed when a re-check is
+   due or overdue) and sr-only words; the colour follows --ok / --unk / --bad. */
+.stamp { font-family: var(--font-mono); font-weight: 500; font-size: 12px; white-space: nowrap; font-variant-numeric: tabular-nums; text-decoration: none; }
 a.stamp:hover { text-decoration: none; }
-.stamp.b-ok { color: var(--ok); border-color: var(--ok); background: transparent; }
-.stamp.b-warn { color: var(--unk); border: 1.5px dashed var(--unk); background: transparent; }
-.stamp.b-stale { color: var(--bad); border-color: var(--bad); background: transparent; }
-.stamp-mark { font-family: system-ui, -apple-system, "Segoe UI Symbol", sans-serif; font-size: 1.05em; line-height: 1; }
-.stamp-sep { opacity: .7; }
-.stamp-lg { font-size: .82rem; padding: 4px 11px; }
-#table td.pver .ver-cell { display: inline-flex; justify-content: center; }
+.stamp b { font-weight: 500; }
+/* The main stamp, a perforated ticket: semicircular notches (radius 5px, STAMP_SHAPES.ticket) cut by a mask on both
+   sides, a dashed cut line between the ✓ and the text, the apricot fill, turned -1.5deg. */
+.stamp-ticket { display: inline-flex; align-items: stretch; color: var(--accent); background: var(--seal-bg); border-radius: 4px; transform: rotate(-1.5deg);
+  -webkit-mask: radial-gradient(circle at 0 50%, transparent 5px, #000 5.5px) left / 51% 100% no-repeat, radial-gradient(circle at 100% 50%, transparent 5px, #000 5.5px) right / 51% 100% no-repeat;
+  mask: radial-gradient(circle at 0 50%, transparent 5px, #000 5.5px) left / 51% 100% no-repeat, radial-gradient(circle at 100% 50%, transparent 5px, #000 5.5px) right / 51% 100% no-repeat; }
+.stamp-ticket .stamp-mark { padding: 4px 7px 4px 11px; border-right: 1.5px dashed currentColor; font-family: var(--font-mono); line-height: 1.5; }
+.stamp-ticket .stamp-text { padding: 4px 12px 4px 8px; line-height: 1.5; }
+.stamp-ticket.b-warn { color: var(--unk); }
+.stamp-ticket.b-stale { color: var(--bad); }
+.stamp-ticket.b-warn .stamp-text, .stamp-ticket.b-stale .stamp-text { text-decoration: underline dashed; text-underline-offset: 3px; }
+.stamp-ticket.stamp-lg { font-size: 14px; }
+.stamp-ticket.stamp-lg .stamp-mark { padding: 8px 10px 8px 16px; font-size: 16px; line-height: 1.2; }
+.stamp-ticket.stamp-lg .stamp-text { padding: 8px 18px 8px 11px; line-height: 1.5; }
+/* The compact stamp in tables and lists, a flat pill: the status dot (8px), "Verified" in the accent, the date and count in ink. */
+.stamp-pill { display: inline-flex; align-items: center; gap: 7px; color: var(--text); background: var(--seal-bg); border: 1px solid var(--control);
+  border-radius: 999px; padding: 4px 11px 4px 9px; }
+.stamp-pill b { color: var(--accent); }
+.stamp-pill .stamp-dot { display: inline-grid; place-items: center; flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--ok);
+  color: var(--seal-bg); font-size: 7px; line-height: 1; font-weight: 700; }
+.stamp-pill.b-warn { border-style: dashed; }
+.stamp-pill.b-warn .stamp-dot { background: var(--unk); }
+.stamp-pill.b-stale { border-style: dashed; }
+.stamp-pill.b-stale .stamp-dot { background: var(--bad); width: 12px; height: 12px; }
+#table td.pver { text-align: left; }
+#table td.pver .ver-cell { display: inline-flex; justify-content: flex-start; max-width: 100%; }
+/* In the explorer the pill is a little smaller, and on a narrow column its text may wrap instead of overflowing. */
+#table .stamp-pill { font-size: 11px; white-space: normal; row-gap: 0; flex-wrap: wrap; border-radius: 14px; }
 @media (prefers-reduced-motion: no-preference) {
-  .stamp { animation: stamp-in 180ms var(--ease) both; transition: transform var(--t-base) var(--ease); }
-  .stamp:hover, .stamp:focus-visible { transform: rotate(0) scale(1.05); }
-  @keyframes stamp-in { from { opacity: 0; transform: rotate(-2deg) scale(1.08); } to { opacity: 1; transform: rotate(-2deg) scale(1); } }
+  .stamp-ticket { animation: stamp-in 180ms var(--ease) both; transition: transform var(--t-base) var(--ease); }
+  .stamp-ticket:hover, .stamp-ticket:focus-visible { transform: rotate(0) scale(1.04); }
+  @keyframes stamp-in { from { opacity: 0; transform: rotate(-1.5deg) scale(1.08); } to { opacity: 1; transform: rotate(-1.5deg) scale(1); } }
+}
+
+/* /find/ ("Find my free API", site/find.js): one question at a time, then the shortlist. Layout only: the colours and
+   type are the site's own tokens. A flag says its state three ways: words, icon shape (a warning sign when it is not
+   confirmed) and colour. */
+.find-wrap { max-width: 860px; }
+.find-form { margin: 8px 0 0; }
+.find-form[hidden], .find-results[hidden], .find-q[hidden] { display: none; }
+.find-q { border: 1px solid var(--border); border-radius: var(--radius); background: var(--panel); padding: 18px 18px 14px; margin: 0; min-width: 0; }
+.find-q:focus { outline: none; }
+.find-q legend { float: left; width: 100%; font-size: 1.08rem; font-weight: 700; color: var(--text); padding: 0; }
+.find-q legend + * { clear: both; }
+.find-step { display: block; font-family: var(--font-mono); font-size: .74rem; font-weight: 400; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 4px; }
+.find-help { margin: 4px 0 12px; font-size: .86rem; }
+.find-opts { display: grid; gap: 8px; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+.find-opt { position: relative; display: flex; flex-direction: column; gap: 2px; padding: 11px 12px 11px 38px; border: 1px solid var(--border); border-radius: 9px; background: var(--panel-2); cursor: pointer; min-height: 44px; justify-content: center; }
+.find-opt input { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; margin: 0; accent-color: var(--accent); }
+.find-opt:hover { border-color: var(--accent); }
+.find-opt:has(input:checked) { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.find-opt:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
+.find-opt-label { color: var(--text); font-weight: 600; font-size: .92rem; }
+.find-opt-hint { color: var(--muted); font-size: .8rem; }
+.find-error { min-height: 1.2em; margin: 8px 0 0; color: var(--unk); font-size: .88rem; }
+.find-nav, .find-tools, .find-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.find-nav { margin-top: 10px; }
+.find-nav [hidden], .find-tools [hidden], .find-more [hidden], .find-empty[hidden], .find-maybe[hidden], .find-list[hidden] { display: none; }
+.find-count { margin: 16px 0 0; font-family: var(--font-mono); font-size: .86rem; color: var(--muted); min-height: 1.3em; }
+.find-results h2 { margin: 18px 0 4px; }
+.find-results h2:focus { outline: none; }
+.find-summary { margin: 0 0 12px; color: var(--muted); }
+.find-list { list-style: none; margin: 18px 0 0; padding: 0; display: grid; gap: 12px; }
+.find-item { border: 1px solid var(--border); border-radius: var(--radius); background: var(--panel); padding: 16px 16px 12px; min-width: 0; }
+.find-item-head { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
+.find-item-head h3 { margin: 0; font-size: 1.05rem; }
+.find-item-head h3 a { text-decoration: underline; text-underline-offset: 3px; }
+.find-rank { font-family: var(--font-mono); color: var(--accent); font-weight: 700; }
+.find-ver { font-family: var(--font-mono); font-size: .74rem; color: var(--muted); display: inline-flex; align-items: center; gap: 4px; }
+.find-best { margin: 6px 0 0; color: var(--muted); font-size: .88rem; }
+.find-free { margin: 8px 0 0; overflow-wrap: anywhere; }
+.find-limits { list-style: none; display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 0; padding: 0; }
+.find-limits li { font-family: var(--font-mono); font-size: .74rem; color: var(--text); border: 1px solid var(--border); border-radius: 6px; padding: 2px 8px; }
+.find-flags { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 0; }
+.find-flag.is-yes { color: var(--ok); border-color: color-mix(in srgb, var(--ok) 38%, var(--border)); }
+.find-flag.is-no { color: var(--bad); border-color: color-mix(in srgb, var(--bad) 38%, var(--border)); }
+.find-flag.is-unknown { color: var(--unk); border-color: color-mix(in srgb, var(--unk) 45%, var(--border)); border-style: dashed; }
+.find-actions { margin: 12px 0 0; }
+.find-quick { margin: 10px 0 0; }
+.find-quick summary { cursor: pointer; font-size: .86rem; color: var(--muted); padding: 4px 0; }
+.find-quick pre { margin: 8px 0 0; }
+.find-quick-none { margin: 10px 0 0; font-size: .84rem; }
+.find-more { margin: 12px 0 0; }
+.find-empty { margin: 16px 0 0; }
+.find-maybe { margin: 22px 0 0; border-top: 1px solid var(--border); padding-top: 12px; }
+.find-maybe > summary { cursor: pointer; font-weight: 700; color: var(--text); }
+.find-maybe > p { font-size: .86rem; }
+.find-how { margin-top: 40px; border-top: 1px solid var(--border); padding-top: 8px; }
+.find-how h2 { font-size: 1.1rem; }
+.find-how ul { padding-left: 1.2em; }
+.find-how li { margin: 6px 0; color: var(--muted); }
+.find-how li strong { color: var(--text); }
+.find-how a, .find-noscript a, .hub-find a { text-decoration: underline; text-underline-offset: 2px; }
+.find-noscript { border: 1px solid var(--border); border-radius: var(--radius); background: var(--panel); padding: 14px 16px; }
+@media (max-width: 640px) {
+  .find-opts { grid-template-columns: 1fr; }
+  .find-nav .btn, .find-tools .btn { flex: 1 1 auto; justify-content: center; }
 }
