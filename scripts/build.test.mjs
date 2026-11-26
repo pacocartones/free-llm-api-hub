@@ -14,6 +14,7 @@ import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
 import { ORDER, roundTripError, serialize } from './_serialize.mjs';
 import { redirectStubFiles } from './lib/redirects.mjs';
+import { trackedFilesOnDisk } from './lib/tracked-files.mjs';
 import { freshnessBadge, freshnessColor, freshnessStatus, recScore, SLA_DAYS, DUE_SOON_DAYS } from './lib/rules.mjs';
 import { esc, stripTags } from './lib/escape.mjs';
 import { mineProviderHistory, assertHistoryPlausible, historyFromRevisions } from './lib/history.mjs';
@@ -630,7 +631,8 @@ test('tracked files reject personal mailboxes except the verified maintainer pol
   assert.equal(unexpected('CONTRIBUTORS.md', historicalEmail), true, 'no contributor-list exception');
   assert.equal(unexpected('CONTRIBUTING.md', historicalEmail.replace('leonaniagomez', 'someone')), true, 'other addresses still fail inside policy files');
   assert.equal(unexpected('CONTRIBUTING.md', 'prefix' + historicalEmail), true, 'partial address matches are not exempt');
-  const files = execFileSync('git', ['ls-files', '-z'], { cwd: ROOT, encoding: 'utf8' }).split('\0').filter(Boolean);
+  // Skips tracked files deleted but not yet staged, such as the fragments right after release:prepare.
+  const files = trackedFilesOnDisk(ROOT);
   const hits = [];
   for (const rel of files) {
     if (/\.(png|jpe?g|webp|gif|woff2?|ico)$/i.test(rel)) continue;
@@ -2125,6 +2127,7 @@ test('active providers retain models_url from their official catalogues', () => 
     ['fireworks-ai', 'https://fireworks.ai/models'],
     ['baseten', 'https://docs.baseten.co/inference/model-apis/overview'],
     ['alibaba-model-studio', 'https://www.alibabacloud.com/help/en/model-studio/model-pricing'],
+    ['elevenlabs', 'https://elevenlabs.io/docs/overview/models'],
     ['assemblyai', 'https://www.assemblyai.com/docs/getting-started/models'],
     ['deepgram', 'https://developers.deepgram.com/docs/models-languages-overview'],
     ['nvidia-nim', 'https://build.nvidia.com/models'],
@@ -3086,6 +3089,35 @@ test('a11y: wide data tables sit in a keyboard-reachable scroll region and the h
     assert.equal((html.match(/<table/g) || []).length, (html.match(/class="table-scroll"/g) || []).length, `${f}: every table of the page is in one`);
   }
   assert.match(readFileSync(join(ROOT, 'site/programs/startups.html'), 'utf8'), region, 'the programs table too');
+});
+
+// ---- no page scrolls sideways on a 390px phone (measured with Playwright on the Nov 2026 build: 30 compare pages up to
+// 868px wide, /coverage/ 986px, /coding-tools/goose-own-key/ 546px). The compare table sat in a scroll box that was not
+// positioned, so its screen-reader-only text escaped the box; the coverage tables had no scroll box; a source URL had no
+// break point. ----
+test('reflow: compare and coverage tables scroll inside a positioned region, and a source URL wraps', () => {
+  const region = /<div class="table-scroll(?: [\w-]+)*" role="region" aria-label="[^"]+" tabindex="0"><table/g;
+  const tablesInRegions = (html) => [(html.match(/<table/g) || []).length, (html.match(region) || []).length];
+  // The table function itself, which the static compare pages and the interactive /compare/ view both use.
+  const one = compareTableHtml([{ slug: 'a', name: 'A' }, { slug: 'b', name: 'B' }]);
+  assert.match(one, /^<div class="table-scroll compare-scroll" role="region" aria-label="Comparison of A, B" tabindex="0"><table class="compare-table">/);
+  // Every generated compare page, and /coverage/.
+  const comparePages = readdirSync(join(ROOT, 'site/compare'), { withFileTypes: true }).filter((d) => d.isDirectory())
+    .map((d) => `site/compare/${d.name}/index.html`)
+    .filter((f) => !/<meta http-equiv="refresh"/.test(readFileSync(join(ROOT, f), 'utf8'))); // retired pairs are redirect stubs
+  assert.ok(comparePages.length > 10, `expected the static compare pages, found ${comparePages.length}`);
+  for (const f of [...comparePages, 'site/coverage/index.html']) {
+    const [tables, inRegion] = tablesInRegions(readFileSync(join(ROOT, f), 'utf8'));
+    assert.ok(tables > 0, `${f}: has a table`);
+    assert.equal(inRegion, tables, `${f}: every table is in a labelled, focusable scroll region`);
+  }
+  // .table-scroll is what clips the sr-only text (pinned in the test above); .compare-scroll must not undo it.
+  const css = readFileSync(join(ROOT, 'site/styles.css'), 'utf8');
+  assert.doesNotMatch(css.match(/^\.compare-scroll \{[^}]*\}/m)[0], /position:|overflow-x: visible|max-width: none/);
+  // A source listed by its full URL breaks anywhere instead of widening the page.
+  assert.match(css, /^\.tool-sources a \{ overflow-wrap: anywhere; \}/m);
+  const goose = readFileSync(join(ROOT, 'site/coding-tools/goose-own-key/index.html'), 'utf8');
+  assert.match(goose, /<h2 id="sources">Sources<\/h2><ul class="plain tool-sources"><li><a href="https:\/\//);
 });
 
 // ---- the data-policy table fits a laptop screen (measured: 1114px at 1100px before, 1052px after) ----
