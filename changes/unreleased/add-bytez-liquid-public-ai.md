@@ -18,5 +18,3 @@
   every new account on a nonprofit, OpenAI-compatible gateway to public and
   sovereign open models (Apertus, SEA-LION, Olmo, Bielik), at 100 requests per
   minute per key on the Free tier. Checked 2026-11-25, agent-assisted (#790).
-
-The dataset stays under the non-text cap: 24 of 73 providers (32.9%).

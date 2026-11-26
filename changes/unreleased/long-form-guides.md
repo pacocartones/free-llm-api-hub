@@ -10,4 +10,4 @@
   it is computed from `data/providers.json` and `data/not-free.json` at build time (`scripts/lib/long-guides.mjs`),
   so the pages follow the data. Each has a FAQ (`FAQPage` JSON-LD), its own social image, and is on the Guides &
   Collections hub, in the sitemap and in `llms.txt`; related collections and provider pages link to them.
-  Agent-assisted.
+  Agent-assisted (#808).
