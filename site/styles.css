@@ -1,113 +1,126 @@
-/* Free LLM API Hub — design system. Brand direction H1 "Fingerprint + Receipts": white or near-black grounds, one hue
-   per modality (graphic fill only, never text), a magenta brand accent, Roboto Flex (variable) for display and text and
+/* Free LLM API Hub — design system. Brand direction H1 "Fingerprint + Receipts", variant Cálida: warm off-white or warm
+   near-black grounds, one hue per modality (graphic fill only, never text), a toasted-saffron brand accent, Roboto Flex (variable) for display and text and
    DM Mono for data. Every colour a component reads is a semantic token below; the contrast tests in
    scripts/build.test.mjs walk them in both themes. */
 
 /* The font faces (Roboto Flex, DM Mono) are declared in each page's <head> (scripts/lib/assets.mjs: preloaded, font-display: optional). */
 
 /* ---------- tokens ---------- */
-/* :root holds the dark values and [data-theme="light"] the light ones. Light is the default: the theme guard in the
-   <head> picks dark only when the visitor's system asks for it (prefers-color-scheme) or they chose it with the toggle. */
+/* Palette: brand H1, final variant "H1-e · Cálida" (docs/brand.md). :root holds the dark values and [data-theme="light"]
+   the light ones. Light is the default: the theme guard in the <head> picks dark only when the visitor's system asks for
+   it (prefers-color-scheme) or they chose it with the toggle. */
 :root {
   --t-fast: 120ms; --t-base: 200ms; --t-slow: 320ms; --ease: cubic-bezier(.2, .8, .2, 1);
-  --bg: #0e0e11;
-  --bg-elev: #121216;
-  --panel: #18181d;
-  --panel-2: #1f1f25;
-  --border: #2a2a31;
-  --border-strong: #3a3a43;
-  --control: #71727c; /* control borders: >= 3:1 against panel-2 (WCAG 1.4.11) */
+  --bg: #17110f;
+  --bg-elev: #1b1411;
+  --panel: #211915;
+  --panel-2: #251c18;
+  --border: #352822;
+  --border-strong: #4a3830;
+  --control: #7a645b; /* control borders: >= 3:1 against panel-2 (WCAG 1.4.11) */
   --control-border: var(--control); /* legacy name: lib/consent.client.js reads it */
-  --text: #f3f3f5;
-  --muted: #a6a7b0;
-  --faint: #9a9ba4; /* >= 5:1 on bg, panel and panel-2 */
-  --accent: #ff6b9a; /* brand magenta */
-  --accent-dim: #ff8db2; /* also the accent as TEXT on an accent tint (chips, badges): >= 4.5:1 there */
-  --accent-ink: #0e0e11;
+  --text: #fbf1ec;
+  --muted: #c2a89e;
+  --faint: #c2a89e; /* >= 5:1 on bg, panel and panel-2 */
+  --accent: #ffb25c; /* brand: toasted saffron */
+  --accent-dim: #ffc078; /* also the accent as TEXT on an accent tint (chips, badges): >= 4.5:1 there */
+  --accent-ink: #17110f;
   /* Semantic tokens: components read these, never a raw colour, so a new brand only changes values here.
      ok = confirmed good / fresh, unk = not confirmed / due, bad = confirmed bad / stale, chg = a change in the record,
      trial = the trial-credit category, m-* = one per modality in data/schema.json. Text-bearing ones are checked
      for contrast on bg, panel and panel-2 in both themes by scripts/build.test.mjs. */
-  --ok: #4fd08a;
-  --unk: #f0ba4e;
-  --bad: #ff7a7a;
-  --chg: #8c9eff;
-  --trial: #55c8d4;
-  /* m-*: the modality as TEXT (a label, a chip). Lightened or darkened from the hue so it reaches 4.5:1. */
-  --m-text: #a594ff;
-  --m-vision: #3fd0ee;
-  --m-image: #ff7fb4;
-  --m-audio: #ffb547;
-  --m-embeddings: #4fd08a;
-  --m-rerank: #8cb4ff;
-  --m-ocr: #ff9a5c;
-  /* h-*: the modality as a graphic FILL (aura sectors, dots). The same in both themes and never used for text: it
-     always sits next to the modality's name, so it never carries meaning on its own (WCAG 1.4.1). */
-  --h-text: #7c5cff;
-  --h-vision: #00c2e0;
-  --h-image: #ff4f8b;
-  --h-audio: #ffa31a;
-  --h-embeddings: #2bc48a;
-  --h-rerank: #4c8dff;
-  --h-ocr: #ff7a3d;
+  --ok: #9ad27f;
+  --unk: #f2c14e;
+  --bad: #ff8a7a;
+  --chg: #e0a3f0;
+  --trial: var(--muted);
+  /* The receipt stamp's fill (the perforated ticket and the compact pill); the accent on it is 8.74:1 here. */
+  --seal-bg: #2e2119;
+  /* m-*: the modality as TEXT (a label, a chip). In dark every hue already reaches 4.5:1, so m-* equals h-*. */
+  --m-text: #ff7a4d;
+  --m-vision: #f5b21f;
+  --m-image: #ff9cbc;
+  --m-audio: #ff5c93;
+  --m-embeddings: #c9b02e;
+  --m-rerank: #c77ab8;
+  --m-ocr: #d97a62;
+  /* h-*: the modality as a graphic FILL (aura bars, dots), one set per theme. Never used for text: it always sits next
+     to the modality's name, so it never carries meaning on its own (WCAG 1.4.1). */
+  --h-text: #ff7a4d;
+  --h-vision: #f5b21f;
+  --h-image: #ff9cbc;
+  --h-audio: #ff5c93;
+  --h-embeddings: #c9b02e;
+  --h-rerank: #c77ab8;
+  --h-ocr: #d97a62;
   /* Legacy names, kept as aliases. */
   --green: var(--ok);
   --warn: var(--unk);
   --red: var(--bad);
   --shadow-sm: 0 1px 2px rgba(0,0,0,.4);
   --shadow-md: 0 10px 34px rgba(0,0,0,.45);
-  --glow: 0 0 0 1px rgba(255,107,154,.18);
-  --header-bg: rgba(14,14,17,.97);
+  --glow: 0 0 0 1px rgba(255,178,92,.2);
+  --header-bg: rgba(23,17,15,.97);
   --font-display: 'Roboto Flex', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   --font-sans: 'Roboto Flex', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   --font-mono: 'DM Mono', ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
   --header-h: 60px;
   /* The header sits on the page ground with a hairline under it (no coloured bar); scripts/build.test.mjs checks its text in both themes. */
-  --header-bar: #0e0e11;
-  --on-header: #f3f3f5;
-  --on-header-muted: #a6a7b0;
-  --on-header-accent: #ff6b9a;
-  --on-header-line: #2a2a31;
-  --on-header-hover: rgba(255, 255, 255, .07);
-  --radius: 10px;
+  --header-bar: #17110f;
+  --on-header: #fbf1ec;
+  --on-header-muted: #c2a89e;
+  --on-header-accent: #ffb25c;
+  --on-header-line: #352822;
+  --on-header-hover: rgba(255, 241, 236, .07);
+  --radius: 18px;
+  /* Display type axes for this variant (Roboto Flex). */
+  --h1-weight: 760; --h1-stretch: 92%; --h1-tracking: -.03em;
 }
 [data-theme="light"] {
-  --bg: #fafafa;
-  --bg-elev: #f4f4f6;
+  --bg: #fff9f6;
+  --bg-elev: #fcf3ef;
   --panel: #ffffff;
-  --panel-2: #f1f1f4;
-  --border: #e6e6ea;
-  --border-strong: #d0d0d6;
-  --control: #85868f; /* control borders: >= 3:1 against panel-2 (WCAG 1.4.11) */
+  --panel-2: #fcf1ec;
+  --border: #f0e2db;
+  --border-strong: #e3cfc6;
+  --control: #9a8179; /* control borders: >= 3:1 against panel-2 (WCAG 1.4.11) */
   --control-border: var(--control); /* legacy name: lib/consent.client.js reads it */
-  --text: #0f0f12;
-  --muted: #55565e;
-  --faint: #5c5d66;
-  --accent: #c2255c;
-  --accent-dim: #a11e4c;
+  --text: #22140f;
+  --muted: #6a5048;
+  --faint: #6a5048;
+  --accent: #9c4a00;
+  --accent-dim: #874000;
   --accent-ink: #ffffff;
-  --ok: #1b7a44;
-  --unk: #8a5700;
-  --bad: #c0262d;
-  --chg: #3550e8;
-  --trial: #0a6a75;
-  --m-text: #5b3fe0;
-  --m-vision: #006f88;
-  --m-image: #b01d63;
-  --m-audio: #8a5200;
-  --m-embeddings: #0f7445;
-  --m-rerank: #1f5fc4;
-  --m-ocr: #a3420c;
-  --shadow-sm: 0 1px 2px rgba(15,15,18,.06);
-  --shadow-md: 0 12px 34px rgba(15,15,18,.10);
-  --glow: 0 0 0 1px rgba(194,37,92,.16);
-  --header-bg: rgba(250,250,250,.97);
-  --header-bar: #fafafa;
-  --on-header: #0f0f12;
-  --on-header-muted: #55565e;
-  --on-header-accent: #c2255c;
-  --on-header-line: #e6e6ea;
-  --on-header-hover: rgba(15, 15, 18, .06);
+  --ok: #2f6b1f;
+  --unk: #7f5a00;
+  --bad: #b3261e;
+  --chg: #7a2e8c;
+  --seal-bg: #ffebd9; /* apricot; the accent on it is 5.35:1 */
+  /* m-*: darkened from the hue until it reaches 4.5:1 on bg, panel and panel-2. */
+  --m-text: #bd4625;
+  --m-vision: #956300;
+  --m-image: #b14a6d;
+  --m-audio: #c2185b;
+  --m-embeddings: #7e6d00;
+  --m-rerank: #7b2d6b;
+  --m-ocr: #8b3a2e;
+  --h-text: #d9502a;
+  --h-vision: #c48200;
+  --h-image: #d85a85;
+  --h-audio: #c2185b;
+  --h-embeddings: #8e7a00;
+  --h-rerank: #7b2d6b;
+  --h-ocr: #8b3a2e;
+  --shadow-sm: 0 1px 2px rgba(34,20,15,.06);
+  --shadow-md: 0 12px 34px rgba(34,20,15,.10);
+  --glow: 0 0 0 1px rgba(156,74,0,.18);
+  --header-bg: rgba(255,249,246,.97);
+  --header-bar: #fff9f6;
+  --on-header: #22140f;
+  --on-header-muted: #6a5048;
+  --on-header-accent: #9c4a00;
+  --on-header-line: #f0e2db;
+  --on-header-hover: rgba(34, 20, 15, .06);
 }
 
 /* ---------- base ---------- */
@@ -121,8 +134,8 @@ body {
   font-synthesis: style;
 }
 /* Display: Roboto Flex, narrowed and tightened as it grows (the variable wdth axis). */
-h1, h2, h3 { font-family: var(--font-display); font-weight: 750; font-stretch: 88%; letter-spacing: -.02em; }
-h1 { font-weight: 800; font-stretch: 80%; letter-spacing: -.03em; }
+h1, h2, h3 { font-family: var(--font-display); font-weight: var(--h1-weight); font-stretch: var(--h1-stretch); letter-spacing: -.02em; }
+h1 { letter-spacing: var(--h1-tracking); }
 .mono { font-family: var(--font-mono); font-weight: 500; }
 a { color: var(--accent); text-decoration: none; }
 a:hover { text-decoration: underline; }

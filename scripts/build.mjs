@@ -677,8 +677,8 @@ ${canonical ? `<link rel="canonical" href="${htmlEsc(canonical)}">
 <link rel="apple-touch-icon" href="${prefix}apple-touch-icon.png">
 <link rel="manifest" href="${prefix}site.webmanifest">
 ${fontHead(prefix)}
-<meta name="theme-color" content="#fafafa" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#0e0e11" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#fff9f6" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#17110f" media="(prefers-color-scheme: dark)">
 <meta name="color-scheme" content="light dark">
 <meta property="og:title" content="${htmlEsc(title)}">
 <meta property="og:description" content="${htmlEsc(fitDescription(desc))}">

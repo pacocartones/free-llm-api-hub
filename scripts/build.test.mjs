@@ -3376,6 +3376,47 @@ test('brand: light is the default theme; dark comes from the system preference o
   }
 });
 
+test('brand Cálida: the palette is the owner\'s final variant, value for value, in both themes', () => {
+  // The values of brand-drafts/08-variantes-h1.md, section "H1-e · Cálida" (docs/brand.md has the same table). Mutant:
+  // retune one token (say the accent back to the provisional magenta); this test turns red and names it.
+  const css = readFileSync(join(ROOT, 'site/styles.css'), 'utf8');
+  const block = (selector) => css.slice(css.indexOf(selector + ' {'), css.indexOf('\n}', css.indexOf(selector + ' {')));
+  const hex = (b, n) => { const m = b.match(new RegExp('^\\s*--' + n + ':\\s*(#[0-9a-fA-F]{6})', 'm')); assert.ok(m, '--' + n); return m[1].toLowerCase(); };
+  const SPEC = {
+    light: { bg: '#fff9f6', panel: '#ffffff', text: '#22140f', muted: '#6a5048', border: '#f0e2db', control: '#9a8179', accent: '#9c4a00',
+      'accent-ink': '#ffffff', ok: '#2f6b1f', unk: '#7f5a00', bad: '#b3261e', chg: '#7a2e8c', 'seal-bg': '#ffebd9',
+      'h-text': '#d9502a', 'h-vision': '#c48200', 'h-audio': '#c2185b', 'h-embeddings': '#8e7a00', 'h-image': '#d85a85', 'h-ocr': '#8b3a2e', 'h-rerank': '#7b2d6b' },
+    dark: { bg: '#17110f', panel: '#211915', text: '#fbf1ec', muted: '#c2a89e', border: '#352822', control: '#7a645b', accent: '#ffb25c',
+      'accent-ink': '#17110f', ok: '#9ad27f', unk: '#f2c14e', bad: '#ff8a7a', chg: '#e0a3f0', 'seal-bg': '#2e2119',
+      'h-text': '#ff7a4d', 'h-vision': '#f5b21f', 'h-audio': '#ff5c93', 'h-embeddings': '#c9b02e', 'h-image': '#ff9cbc', 'h-ocr': '#d97a62', 'h-rerank': '#c77ab8' },
+  };
+  for (const [theme, b] of [['dark', block(':root')], ['light', block('[data-theme="light"]')]]) {
+    for (const [name, value] of Object.entries(SPEC[theme])) assert.equal(hex(b, name), value, `${theme}: --${name}`);
+  }
+  assert.match(block(':root'), /--radius: 18px;/, 'the Cálida radius');
+});
+
+test('brand Cálida: graphic hues reach 3:1, the accent reads on the stamp, and buttons keep their text', () => {
+  // WCAG 1.4.11 for the aura bars and dots; 1.4.3 for the accent on --seal-bg (the ticket and the pill) and the button
+  // text on the accent. Mutant: a paler --h-vision in light, or a --seal-bg too close to the accent; this test turns red.
+  const css = readFileSync(join(ROOT, 'site/styles.css'), 'utf8');
+  const block = (selector) => css.slice(css.indexOf(selector + ' {'), css.indexOf('\n}', css.indexOf(selector + ' {')));
+  const hex = (b, n) => b.match(new RegExp('^\\s*--' + n + ':\\s*(#[0-9a-fA-F]{6})', 'm'))[1];
+  const schema = JSON.parse(readFileSync(join(ROOT, 'data/schema.json'), 'utf8'));
+  const findEnum = (o) => { if (!o || typeof o !== 'object') return null; if (o.modalities?.items?.enum) return o.modalities.items.enum; for (const v of Object.values(o)) { const r = findEnum(v); if (r) return r; } return null; };
+  for (const [theme, b] of [['dark', block(':root')], ['light', block('[data-theme="light"]')]]) {
+    for (const m of findEnum(schema)) {
+      for (const surface of ['bg', 'panel']) {
+        const r = contrast(hex(b, 'h-' + m), hex(b, surface));
+        assert.ok(r >= 3, `${theme}: --h-${m} on --${surface} is ${r.toFixed(2)}:1, below 3:1`);
+      }
+    }
+    assert.ok(contrast(hex(b, 'accent'), hex(b, 'seal-bg')) >= 4.5, `${theme}: the accent on --seal-bg`);
+    assert.ok(contrast(hex(b, 'text'), hex(b, 'seal-bg')) >= 4.5, `${theme}: ink on --seal-bg`);
+    assert.ok(contrast(hex(b, 'accent-ink'), hex(b, 'accent')) >= 4.5, `${theme}: button text on the accent`);
+  }
+});
+
 // ---- Dated banner mechanism (site/site.js) ---------------------------------
 // A banner hand-written in site/index.html is removed by site/site.js once its
 // data-until day (UTC, inclusive) has passed; none is on the page today. The build stays
