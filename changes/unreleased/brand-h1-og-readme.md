@@ -1,4 +1,4 @@
-### Changed
+### Changed and fixed
 
 - The tagline is the owner's choice, "We read the docs. You ship the code.", kept in one constant
   (`scripts/lib/brand.mjs`) that the home title, the README, the home social image, the README banner and the GitHub
