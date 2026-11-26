@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
-import { evaluate, medianReport, parseMode, MODES, THRESHOLDS } from './lib/lighthouse-gate.mjs';
+import { evaluate, fontBudgetFailures, medianReport, pageFontUrls, parseMode, MODES, THRESHOLDS } from './lib/lighthouse-gate.mjs';
 
 const report = (accessibility, performance) => ({ categories: { accessibility: { score: accessibility }, performance: { score: performance } } });
 
@@ -197,4 +197,27 @@ test('the gate server compresses what the production edge compresses, with the e
   assert.equal(negotiateEncoding('image/png', chrome), null, 'PNG is already compressed');
   const server = readFileSync(join(dirname(fileURLToPath(import.meta.url)), 'lighthouse-gate.mjs'), 'utf8');
   assert.match(server, /negotiateEncoding\(type, req\.headers\['accept-encoding'\]\)/, 'the local server uses it');
+});
+
+test('font budget: the local woff2 files a page preloads or declares are summed against the budget', () => {
+  // Mutant: count a font twice (preload + @font-face), skip url() references or let an external font through; this test turns red.
+  const html = '<link rel="preload" href="../fonts/a.woff2?v=12345678" as="font"><style>@font-face{src:url(\'../fonts/a.woff2?v=12345678\')}'
+    + "@font-face{src:url('../fonts/b.woff2')}</style><link rel=\"preload\" href=\"https://cdn.example/x.woff2\" as=\"font\">";
+  assert.deepEqual(pageFontUrls(html), ['../fonts/a.woff2', '../fonts/b.woff2'], 'each local file once, without the fingerprint; off-site URLs are not ours');
+  const sizes = { '../fonts/a.woff2': 50 * 1024, '../fonts/b.woff2': 30 * 1024 };
+  assert.deepEqual(fontBudgetFailures('/p/x.html', html, (f) => sizes[f], 90 * 1024), [], '80 KB fits 90 KB');
+  const over = fontBudgetFailures('/p/x.html', html, (f) => sizes[f], 70 * 1024);
+  assert.equal(over.length, 1);
+  assert.match(over[0], /^\/p\/x\.html: fonts weigh 80\.0 KB, over the 70 KB budget/);
+  assert.match(fontBudgetFailures('/', html, (f) => (f.endsWith('a.woff2') ? 1 : null), 90 * 1024)[0], /font \.\.\/fonts\/b\.woff2 is declared but not found/);
+});
+
+test('font budget: the committed home page fits the budget with the brand fonts', async () => {
+  const { FONT_BUDGET_BYTES } = await import('./lib/assets.mjs');
+  const { statSync, existsSync } = await import('node:fs');
+  const root = join(dirname(fileURLToPath(import.meta.url)), '..');
+  const html = readFileSync(join(root, 'site/index.html'), 'utf8');
+  const sizeOf = (f) => (existsSync(join(root, 'site', f)) ? statSync(join(root, 'site', f)).size : null);
+  assert.ok(pageFontUrls(html).length >= 3, 'the home declares the brand fonts');
+  assert.deepEqual(fontBudgetFailures('/', html, sizeOf, FONT_BUDGET_BYTES), []);
 });

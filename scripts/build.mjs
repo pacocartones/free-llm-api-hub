@@ -30,6 +30,7 @@ import { quality, qualityMainHtml } from './lib/quality.mjs';
 import { fieldCheck, REASON_LABEL } from './lib/field-checks.mjs';
 import { publishedSpeed, speedFigure } from './lib/published-speed.mjs';
 import { apiV1ProviderSchema, projectApiV1Changes, toApiV1Provider } from './lib/api-v1.mjs';
+import { statusPayload } from './lib/status.mjs';
 import { freeGpuMainHtml } from './lib/free-gpu.mjs';
 import { labelTables } from './lib/tables.mjs';
 import { markNewTabLinks } from './lib/links.mjs';
@@ -47,12 +48,16 @@ import { FIND_PATH, FIND_TITLE, FIND_DESC, findMainHtml, findJsonLd } from './li
 import { requirementsHtml, limitsHtml, glanceHtml, modelsHtml, dataPolicyHtml, speedHtml } from './lib/provider-sections.mjs';
 import { aboutHtml } from './lib/provider-summaries.mjs';
 import { fontHead, fingerprintSite } from './lib/assets.mjs';
+import { auraHtml, auraSpec } from './lib/aura.mjs';
+import { TAGLINE, taglineParts } from './lib/brand.mjs';
+import { logoSymbol } from './icons.mjs';
+import { stampHtml, stampSource } from './lib/stamp.mjs';
 import { securityTxt } from './lib/security-txt.mjs';
 import { markdownToHtml } from './lib/markdown.mjs';
 import { bestFactsHtml } from './lib/best-facts.mjs';
 import { providerFigures, expandFigures, injectInlineFigures, figureErrors } from './lib/figures.mjs';
 import { firstUseHtml } from './lib/home-first-use.mjs';
-import { badgeSvg } from './lib/badge-svg.mjs';
+import { ticketBadgeSvg } from './lib/badge-svg.mjs';
 import { providerMarkdown, llmsProviderLine } from './lib/provider-markdown.mjs';
 import { codeHtmlEsc, curlChatQuickstart, pythonChatQuickstart, pythonEmbeddingsQuickstart, pythonStringLiteral } from './lib/quickstart.mjs';
 import { providersCsv } from './lib/provider-csv.mjs';
@@ -60,6 +65,7 @@ import { writeSchemaDocs } from './schema-docs.mjs';
 import { datasetAsOf } from './lib/release-stamp.mjs';
 import { parseCitation, homeJsonLd, datasetJsonLdScript } from './lib/dataset-jsonld.mjs';
 import { websiteRef, datasetRef } from './lib/site-entity.mjs';
+import { isoDateTime, datasetFacts, licenseUrl, guideArticle } from './lib/structured-data.mjs';
 import { SITEMAP_INDEX, sitemapIndexXml } from './lib/state-sitemap.mjs';
 import { SITEMAPS as INDEXNOW_SITEMAPS } from './lib/indexnow.mjs';
 import { groupModels, modelKey } from './lib/model-keys.mjs';
@@ -90,6 +96,8 @@ const providers = data.providers;
 const summaryBySlug = new Map(JSON.parse(readFileSync(join(ROOT, 'data/provider-summaries.json'), 'utf8')).summaries.map((x) => [x.id, x]));
 // Counts quoted in prose come from the data, never from a typed number (lib/figures.mjs).
 const FIGS = providerFigures(providers);
+// What every nested Dataset node in the JSON-LD says (description and licence, lib/structured-data.mjs).
+const DATASET_FACTS = datasetFacts({ verified: FIGS.verified, asOf: ASOF, license: licenseUrl(parseCitation(readFileSync(join(ROOT, 'CITATION.cff'), 'utf8')).license) });
 
 // ---------- freshness ----------
 const today = new Date();
@@ -106,7 +114,7 @@ const verifiedCount = providers.filter((p) => p.verified).length;
 // The footer badge: its data is one object (written as badge-verified.json and drawn as badge-verified.svg), and its width
 // goes into every <img> so the footer does not move when the image arrives.
 const badgeVerified = { schemaVersion: 1, label: 'verified', message: `${verifiedCount}/${total}`, color: 'brightgreen' };
-const BADGE_W = badgeSvg(badgeVerified).width;
+const BADGE_W = ticketBadgeSvg(badgeVerified).width;
 
 // ---------- markdown helpers ----------
 function flags(p) {
@@ -541,8 +549,10 @@ function collectionTableHtml(rows, opts = {}) {
 // Shared chrome for generated pages (collection pages live one level below site root → '../').
 const GH_ICON = '<svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.6 7.6 0 014 0c1.53-1.03 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>';
 const REPO = 'https://github.com/pacocartones/free-llm-api-hub';
+// The brand mark (the hub's aura, scripts/icons.mjs) is the #logo symbol; index.html and 404.html carry the same markup.
+const LOGO_SYMBOL = logoSymbol();
 const SPRITE = `<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
-<symbol id="logo" viewBox="0 0 32 32" fill="none"><rect x="2" y="2" width="28" height="28" rx="8" fill="currentColor"/><path d="M9 11 L14 16 L9 21" style="stroke: var(--logo-ink, #0a0d0b)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><rect x="16.5" y="19.4" width="7" height="2.6" rx="1.3" style="fill: var(--logo-ink, #0a0d0b)"/></symbol>
+${LOGO_SYMBOL}
 <symbol id="ic-card" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="1.5" y="3.5" width="13" height="9" rx="2"/><path d="M1.5 6.5H14.5"/></symbol>
 <symbol id="ic-nocard" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="1.5" y="3.5" width="13" height="9" rx="2"/><path d="M1.5 6.5H14.5"/><path d="M2.6 2 L13.4 14"/></symbol>
 <symbol id="ic-phone" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="4.5" y="1.5" width="7" height="13" rx="1.6"/><path d="M7 12.3H9"/></symbol>
@@ -572,6 +582,29 @@ const SPRITE = `<svg width="0" height="0" style="position:absolute" aria-hidden=
 <symbol id="ic-spark" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M8 1.6l1.5 4.9 4.9 1.5-4.9 1.5L8 14.4l-1.5-4.9L1.6 8l4.9-1.5z"/></symbol>
 </defs></svg>`;
 const IC = (id) => `<svg class="i" aria-hidden="true"><use href="#${id}"/></svg>`;
+
+// Brand H1 provider hero: up to three published limits as big numbers (free_limits, in this order), and the receipt,
+// the sentence quoted from the provider's page with where and when it was read. Nothing shows when the record has none.
+const LIMIT_NUMS = [['requests_per_minute', 'requests/min'], ['requests_per_second', 'requests/sec'], ['requests_per_day', 'requests/day'],
+  ['tokens_per_day', 'tokens/day'], ['requests_per_month', 'requests/month'], ['tokens_per_month', 'tokens/month']];
+const bigNum = (n) => (n >= 1e6 && n % 1e5 === 0 ? `${n / 1e6}M` : n >= 1e4 && n % 1e3 === 0 ? `${n / 1e3}K` : n.toLocaleString('en-US'));
+function provNumsHtml(p) {
+  const fl = p.free_limits || {};
+  const nums = LIMIT_NUMS.filter(([k]) => Number.isInteger(fl[k])).slice(0, 3);
+  if (!nums.length) return '';
+  return `<dl class="prov-nums">${nums.map(([k, label]) => `<div><dt>${label}</dt><dd>${bigNum(fl[k])}</dd></div>`).join('')}</dl>` +
+    (fl.scope ? `<p class="prov-nums-scope">${htmlEsc(fl.scope)} · <a href="#limits">all limits</a></p>` : '');
+}
+function provReceiptHtml(p) {
+  const r = stampSource(p, QUOTE_REGISTRY);
+  if (!r.q) return '';
+  let host = '';
+  try { host = new URL(r.u).host + new URL(r.u).pathname.replace(/\/$/, ''); } catch { /* no URL: no cite link */ }
+  const cite = host ? `<a href="${htmlEsc(r.u)}" rel="noopener">${htmlEsc(host)}</a>` : 'the provider\'s docs';
+  const entry = QUOTE_REGISTRY.entries.find((e) => e.slug === p.slug && e.kind === 'sentence');
+  const readOn = entry ? entry.read_on : (p.data_policy && p.data_policy.checked) || '';
+  return `<blockquote class="prov-receipt"><p>“${htmlEsc(r.q)}”</p><cite>${cite}${readOn ? ` · read ${htmlEsc(readOn)}` : ''}</cite></blockquote>`;
+}
 
 // The page header that every generated page shares: breadcrumbs, title, an optional subtitle (the lede) and optional
 // extra markup, centred by the model-hero class. The provider page passes cls 'prov-hero' and puts its badges after
@@ -612,7 +645,7 @@ const siteFooter = (p) => `<footer class="site-footer"><div class="wrap footer-t
 // Full page wrapper for generated (collection) pages. `p` is the path prefix to the site root.
 // Theme guard — runs before first paint to avoid the white flash. ONE source, shared by
 // htmlPage() (every generated page) and site/index.html (injected via AUTOGEN:themeguard).
-const THEME_GUARD = `<script>(function(){try{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: light)').matches?'light':'dark');document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>`;
+const THEME_GUARD = `<script>(function(){try{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>`;
 
 // Content-Security-Policy (all pages, injected into index.html via AUTOGEN:csp and hard-copied
 // in 404.html). script-src pins our two inline scripts by hash — the theme guard (every page)
@@ -625,7 +658,7 @@ const THEME_GUARD = `<script>(function(){try{var t=localStorage.getItem('theme')
 // the first-party file consent.js ('self'), so no inline hash changes.
 const GA_ID = measurementId();
 const GA_CSP = analyticsCspSources(GA_ID);
-const CSP = `<meta http-equiv="Content-Security-Policy" content="script-src 'self' 'sha256-r3FnVnP9W/uaNhK9XkZqH3GIfK4TudOQGYTwoNIjGR4=' 'sha256-YzEhxvq2BwovGsg/RCjKkQdwf+LZmTjIkiQcjXCZMHc='${CF_WA_CSP.script}${GA_CSP.script}; connect-src 'self' https://raw.githubusercontent.com${CF_WA_CSP.connect}${GA_CSP.connect}; object-src 'none'; base-uri 'self'">`;
+const CSP = `<meta http-equiv="Content-Security-Policy" content="script-src 'self' 'sha256-ByZJaawcxAiK85qnD6nIc7iBFGzp/nf/DTzzA7Dl5Qs=' 'sha256-YzEhxvq2BwovGsg/RCjKkQdwf+LZmTjIkiQcjXCZMHc='${CF_WA_CSP.script}${GA_CSP.script}; connect-src 'self' https://raw.githubusercontent.com${CF_WA_CSP.connect}${GA_CSP.connect}; object-src 'none'; base-uri 'self'">`;
 
 // Search engines cut a snippet around 155 characters. Every page's description goes through
 // here, so no page can ship a longer one: cut at a word boundary and end with an ellipsis.
@@ -667,7 +700,7 @@ function htmlPageRaw({ title, desc, canonical, main, jsonld, prefix = '../', noi
   // the JSON unicode escape (backslash-u-003c) keeps a "</script>" in the
   // data from ever closing the block.
   return `<!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -682,8 +715,9 @@ ${canonical ? `<link rel="canonical" href="${htmlEsc(canonical)}">
 <link rel="apple-touch-icon" href="${prefix}apple-touch-icon.png">
 <link rel="manifest" href="${prefix}site.webmanifest">
 ${fontHead(prefix)}
-<meta name="theme-color" content="#0a0d0b">
-<meta name="color-scheme" content="dark light">
+<meta name="theme-color" content="#fff9f6" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#17110f" media="(prefers-color-scheme: dark)">
+<meta name="color-scheme" content="light dark">
 <meta property="og:title" content="${htmlEsc(title)}">
 <meta property="og:description" content="${htmlEsc(fitDescription(desc))}">
 <meta property="og:type" content="website">
@@ -792,7 +826,8 @@ const COMPARE_PATHS = new Set(comparePairs.map((cp) => cp.path));
 
 // "Notably NOT free": one source (data/not-free.json) for the README section and the /not-free/ page.
 const NOT_FREE = JSON.parse(readFileSync(join(ROOT, 'data/not-free.json'), 'utf8'));
-const QUOTES = JSON.parse(readFileSync(join(ROOT, 'data/quotes.json'), 'utf8')).entries;
+const QUOTE_REGISTRY = JSON.parse(readFileSync(join(ROOT, 'data/quotes.json'), 'utf8'));
+const QUOTES = QUOTE_REGISTRY.entries;
 {
   const errs = notFreeErrors(NOT_FREE, { providers, quotes: QUOTES });
   if (errs.length) throw new Error('data/not-free.json:\n' + errs.join('\n'));
@@ -805,6 +840,7 @@ const REDIRECTS = JSON.parse(readFileSync(join(ROOT, 'data/redirects.json'), 'ut
 }
 
 let readme = readFileSync(join(ROOT, 'README.md'), 'utf8');
+readme = inject(readme, 'tagline', `**${TAGLINE}**`);
 readme = inject(readme, 'not-free', notFreeReadmeMd(NOT_FREE, { site: SITE }));
 readme = inject(readme, 'coverage', coverageTable);
 readme = inject(readme, 'collections', collectionsIndexMd);
@@ -870,6 +906,8 @@ const { historyBySlug, monthEnd: monthEndSnapshots } = mineHistoryAndSnapshots({
 // render is deterministic and the drift gate never trips on a calendar boundary.
 const homeRows = [...providers]
   .sort((a, b) => sortLib.comparator('recommended', 1, a, b))
+  // Each record carries the receipt of its stamp (lib/stamp.mjs), as the inline data below does for the repaint.
+  .map((rec) => ({ ...rec, stamp: stampSource(rec, QUOTE_REGISTRY) }))
   .map((p) => rows.explorerRowHtml(p, { now: ASOF }))
   .join('\n');
 
@@ -923,6 +961,9 @@ const homeProvider = (p) => {
   if (Number.isInteger(fl.tokens_per_day)) caps.tokens_per_day = fl.tokens_per_day;
   if (Object.keys(caps).length) out.free_limits = caps;
   if (p.data_policy && p.data_policy.trains_on_prompts !== undefined) out.data_policy = { trains_on_prompts: p.data_policy.trains_on_prompts };
+  // The receipt of the stamp (lib/stamp.mjs): the quoted sentence and its page, so the repaint prints the same stamp.
+  const stamp = stampSource(p, QUOTE_REGISTRY);
+  if (stamp.q || stamp.u) out.stamp = stamp;
   return out;
 };
 // One provider per line: a data change rewrites only its own provider's line, so two pull requests that edit different
@@ -957,7 +998,29 @@ indexHtml = indexHtml.replace(/<title>[^<]*<\/title>/, `<title>${htmlEsc(HOME_TI
 indexHtml = inject(indexHtml, 'csp', CSP);
 indexHtml = inject(indexHtml, 'themeguard', THEME_GUARD);
 indexHtml = inject(indexHtml, 'fonts', fontHead(''));
+// The tagline (lib/brand.mjs, the owner's choice): the home H1, its closing sentence in the accent.
+const [TAG_LEAD, TAG_KEY] = taglineParts();
+indexHtml = inject(indexHtml, 'tagline', `    <h1>${htmlEsc(TAG_LEAD)}${TAG_KEY ? ` <span class="h1-key">${htmlEsc(TAG_KEY)}</span>` : ''}</h1>`);
 indexHtml = inject(indexHtml, 'rows', homeRows);
+// The hero's field of auras (brand H1): every provider in the explorer's order, then the key to read them. Dated by ASOF
+// like the rows, so the field is deterministic. The field is a picture, not a menu: aria-hidden and with no links, so the
+// hero keeps exactly its two controls (home density); the explorer right below links the same providers.
+// The key's four auras share one seed (slug 'key-a'), so only the state differs between them.
+const AURA_KEY = [
+  ['Ongoing', 'rays from the centre', { slug: 'key-a', category: 'ongoing', modalities: ['text', 'audio'], verified: true, last_verified: ASOF, card_required: false, phone_required: false, commercial_ok: true, data_policy: { trains_on_prompts: false } }],
+  ['Trial', 'outer crown only', { slug: 'key-a', category: 'trial', modalities: ['text', 'audio'], verified: true, last_verified: ASOF, card_required: false, phone_required: false, commercial_ok: true, data_policy: { trains_on_prompts: false } }],
+  ['Not stated', 'dashed circle', { slug: 'key-a', category: 'ongoing', modalities: ['text', 'audio'], verified: true, last_verified: ASOF }],
+  ['Checked 30+ days ago', 'faded', { slug: 'key-a', category: 'ongoing', modalities: ['text', 'audio'], verified: false, card_required: false, phone_required: false, commercial_ok: true, data_policy: { trains_on_prompts: false } }],
+];
+const AURA_HUE_NAMES = [['text', 'text'], ['vision', 'vision'], ['image', 'image'], ['audio', 'speech'], ['embeddings', 'embeddings'], ['rerank', 'rerank'], ['ocr', 'OCR']];
+const auraFieldHtml = `<div class="aura-field" aria-hidden="true">` +
+  [...providers].sort((a, b) => sortLib.comparator('recommended', 1, a, b))
+    .map((p) => `<span class="aura-cell">${auraHtml(p, { now: ASOF })}</span>`).join('') +
+  `</div>\n<div class="aura-key"><p class="aura-key-h">Each aura is one provider, drawn from its own data: a colour sector per modality; each provider page reads its own in words.</p>` +
+  `<ul class="aura-key-shapes">${AURA_KEY.map(([t, s, p]) => `<li>${auraHtml(p, { now: ASOF })}<span><b>${t}</b>${s}</span></li>`).join('')}</ul>` +
+  `<ul class="aura-key-hues">${AURA_HUE_NAMES.map(([m, n]) => `<li><span class="hue-dot hue-${m}" aria-hidden="true"></span>${n}</li>`).join('')}</ul></div>`;
+indexHtml = inject(indexHtml, 'aurafield', auraFieldHtml);
+
 indexHtml = inject(indexHtml, 'stats', homeStatsHtml);
 // The "New here?" strip above the explorer: what the list is, what verified means, how to use it (lib/home-first-use.mjs).
 indexHtml = inject(indexHtml, 'firstuse', firstUseHtml(providers, { slaDays: SLA_DAYS }));
@@ -994,7 +1057,8 @@ writeFileSync(join(ROOT, 'site/badge-freshness.json'), JSON.stringify(badge, nul
 writeFileSync(join(ROOT, 'badge-verified.json'), JSON.stringify(badgeVerified, null, 2) + '\n');
 writeFileSync(join(ROOT, 'site/badge-verified.json'), JSON.stringify(badgeVerified, null, 2) + '\n');
 // The footer badge is this SVG, served by the site itself: no page asks a third party for it (see the privacy page).
-const verifiedBadge = badgeSvg(badgeVerified);
+// Brand H1: it is the perforated ticket, the main receipt (lib/badge-svg.mjs ticketBadgeSvg).
+const verifiedBadge = ticketBadgeSvg(badgeVerified);
 writeFileSync(join(ROOT, 'site/badge-verified.svg'), verifiedBadge.svg);
 
 // ---------- ship data with the site ----------
@@ -1131,7 +1195,7 @@ const hubJsonLd = JSON.stringify({
   '@graph': [
     {
       '@type': 'CollectionPage', name: 'Free LLM API guides and collections', description: HUB_META,
-      url: `${SITE}/guides-and-collections/`, dateModified: ASOF,
+      url: `${SITE}/guides-and-collections/`, dateModified: isoDateTime(ASOF),
       isPartOf: websiteRef(SITE),
       mainEntity: {
         '@type': 'ItemList', numberOfItems: GUIDES.length + COLLECTIONS.length,
@@ -1252,13 +1316,18 @@ for (const p of providers) {
     ? scoreBlockHtml({
       position: scorePlace.get(p.slug).position, of: rankedAll.length, total: sc.total, editorial: scorePlace.get(p.slug).editorial, editorialWeight: EDITORIAL_WEIGHT,
       fractions: inputFractions(p, stabilityFromProbe(PROBE_REPORT, p.slug, new Date(ASOF + 'T12:00:00Z'))), weights: SCORE_WEIGHTS, topRank: sc.rank,
+      compact: true,
     })
     : `<div class="prov-score"><span class="muted">No score: only verified providers inside the freshness window are scored · <a href="../best/methodology/">how it is computed</a></span></div>`;
-  const summary = `<div class="prov-summary"><h2 id="whats-free">What's free</h2><p>${htmlEsc(p.free_tier)}</p></div>` + scoreHtml + requirementsHtml(p);
+  // What's free (only when the record says it: no empty box), then, further down, the requirement cards behind one
+  // summary line and the score on one line.
+  const summary = p.free_tier ? `<div class="prov-summary"><h2 id="whats-free">What's free</h2><p>${htmlEsc(p.free_tier)}</p></div>` : '';
+  const reqsHtml = `<details class="prov-reqs-box"><summary>What you need to start: card, phone, commercial use</summary>${requirementsHtml(p)}</details>`;
   // Freshness relative to the current day (provider pages are regenerated on deploy, not diff-gated).
   const daysAgo = p.verified && p.last_verified ? ageInDays(p.last_verified, today) : null;
+  // The receipt stamp (lib/stamp.mjs), the perforated ticket: "✓ | Verified 24 Nov 2026 · 7 sources", the quoted sentence in its title.
   const verifiedLine = p.verified
-    ? `<span class="v ok">${IC('ic-check')} verified ${htmlEsc(p.last_verified)}${daysAgo != null ? ` · ${daysAgo}d ago` : ''}</span>` +
+    ? stampHtml({ ...p, stamp: stampSource(p, QUOTE_REGISTRY) }, { now: today, long: true }) +
       (daysAgo != null && daysAgo > FRESH_DAYS ? ` <span class="v warn">${IC('ic-warn')} re-verification due</span>` : '')
     : `<span class="v warn">${IC('ic-warn')} unverified</span>`;
   // Live-test badge: an actual successful API call, separate from the docs-based `verified`.
@@ -1272,8 +1341,18 @@ for (const p of providers) {
   const docsBtn = docsHref(p.docs_url) ? `<a class="btn primary" href="${htmlEsc(docsHref(p.docs_url))}" target="_blank" rel="noopener">Official docs ↗</a>` : '';
   // "Get a free key": the provider's own key page, exactly as its docs link it (keys_url), next to the limits and the
   // quickstart. Tagged data-link="keys" by tagProviderLinks, so a click is an outbound_provider_click (consent-gated).
-  const keysHtml = p.keys_url
-    ? `<div class="prov-actions prov-key" style="align-items:center"><a class="btn primary" href="${htmlEsc(p.keys_url)}" target="_blank" rel="noopener">Get a free key ↗</a><span class="muted">Sign up or sign in on ${htmlEsc(p.name)}'s own site, then create an API key there.</span></div>`
+  // "Copy base URL": the OpenAI-compatible base URL to the clipboard (site.js, the .api-copy handler: the result is
+  // announced in the status line next to it). Both sit right under What's free, before the quickstart.
+  const baseCopy = p.openai_base_url
+    ? `<button type="button" class="btn api-copy base-copy" data-api-url="${htmlEsc(p.openai_base_url)}" data-label="Copy base URL" data-copy-fail="Copy failed. Select the base URL in the quickstart and copy it by hand.">Copy base URL</button>`
+    : '';
+  const keysHtml = p.keys_url || baseCopy
+    ? `<div class="prov-actions prov-key">` +
+      (p.keys_url ? `<a class="btn primary" href="${htmlEsc(p.keys_url)}" target="_blank" rel="noopener">Get a free key ↗</a>` : '') +
+      baseCopy + `<a class="prov-compare" href="#compare">Compare with…</a>` +
+      (baseCopy ? `<span class="api-copy-status" role="status"></span>` : '') +
+      (p.keys_url ? `<p class="muted prov-key-hint">Sign up or sign in on ${htmlEsc(p.name)}'s own site, then create an API key there.</p>` : '') +
+      `</div>`
     : '';
   const playgroundBtn = p.playground_url ? `<a class="btn" href="${htmlEsc(p.playground_url)}" target="_blank" rel="noopener">Try it ↗</a>` : '';
   // "Visit website": the provider's main site, derived from the docs URL by stripping
@@ -1292,7 +1371,7 @@ for (const p of providers) {
   // else the interactive view with both providers in it.
   const comparePeers = compareLib.comparePeers(p, providers, { staticPaths: COMPARE_PATHS, score: (o) => scoreMap[o.slug]?.total ?? null });
   const compareHtml =
-    `<h2>Compare</h2><div class="colls">` +
+    `<h2 id="compare">Compare</h2><div class="colls">` +
     comparePeers.map((c) => `<a href="../compare/${c.path ? `${c.path}/` : `?compare=${p.slug},${c.other.slug}`}">Compare with ${htmlEsc(c.other.name)}</a>`).join('') +
     `<a href="../compare/?compare=${p.slug}">Compare with another provider →</a></div>`;
   const crossChips = [
@@ -1304,17 +1383,22 @@ for (const p of providers) {
       cls: 'prov-hero',
       crumbs: `<a href="../">Home</a> / <a href="../#explorer">Providers</a> / ${htmlEsc(p.name)}`,
       h1: htmlEsc(p.name),
-      afterTitle: `<div class="prov-badges"><span class="type">${typeLabel(p)}</span> ${verifiedLine}${probedLine} ${provFlagsHtml(p)}</div>`,
+      // The provider's aura (lib/aura.mjs) with its reading in words, so the picture never has to be decoded alone.
+      afterTitle: `<div class="prov-aura">${auraHtml(p, { now: ASOF, cls: 'aura-lg', digits: 1 })}<p class="aura-read"><span class="aura-read-h">Aura:</span> ${htmlEsc(auraSpec(p, { now: ASOF }).label)} · <a href="../methodology/#how-to-read-an-aura">how to read it</a></p></div>` +
+        `<div class="prov-badges"><span class="type">${typeLabel(p)}</span> ${verifiedLine}${probedLine} ${provFlagsHtml(p)}</div>` +
+        provNumsHtml(p) + provReceiptHtml(p),
       lede: p.best_for ? htmlEsc(p.best_for) : '',
       extra: `<div class="prov-actions">${docsBtn}${websiteBtn}${playgroundBtn}</div>`,
     }) +
     `<main id="main"><div class="wrap prose prov-prose">` +
+    // The owner's order: What's free, then the two actions (a free key, the base URL), then the quickstart; the limits,
+    // the requirement cards and the score (one line) follow. Speed, data policy and the provider's description come after.
     summary +
-    limitsHtml(p) +
     keysHtml +
-    // Q3: the snippet right after the limits (it sat ~4,500px down /p/groq on a phone); speed, data policy and the
-    // provider's own description follow it.
     quick +
+    limitsHtml(p) +
+    reqsHtml +
+    scoreHtml +
     glanceHtml(p, typeLabel(p)) +
     modelsHtml(p, { modelHref: modelPageHref('../') }) +
     speedHtml(p) +
@@ -1331,8 +1415,8 @@ for (const p of providers) {
     '@graph': [
       {
         '@type': 'WebPage', name: `${p.name} — free LLM API`, description: p.free_tier, url: `${SITE}/p/${p.slug}`,
-        ...(p.last_verified ? { dateModified: p.last_verified } : {}),
-        isPartOf: datasetRef(SITE),
+        ...(p.last_verified ? { dateModified: isoDateTime(p.last_verified) } : {}),
+        isPartOf: websiteRef(SITE), about: datasetRef(SITE, DATASET_FACTS),
       },
       {
         '@type': 'BreadcrumbList',
@@ -1839,10 +1923,7 @@ for (const g of GUIDES) {
   const jsonld = JSON.stringify({
     '@context': 'https://schema.org',
     '@graph': [
-      {
-        '@type': 'Article', headline: g.h1, description: metaDesc, dateModified: ASOF,
-        url: `${SITE}/guides/${g.slug}`, isPartOf: websiteRef(SITE),
-      },
+      guideArticle({ site: SITE, slug: g.slug, headline: g.h1, description: metaDesc, asOf: ASOF, extra: { isPartOf: websiteRef(SITE) } }),
       {
         '@type': 'BreadcrumbList',
         itemListElement: [
@@ -1884,10 +1965,7 @@ for (const g of LONG_GUIDE_PAGES) {
   const jsonld = JSON.stringify({
     '@context': 'https://schema.org',
     '@graph': [
-      {
-        '@type': 'Article', headline: g.h1, description: g.metaDesc, dateModified: ASOF,
-        url: `${SITE}/guides/${g.slug}`, isPartOf: websiteRef(SITE), about: datasetRef(SITE),
-      },
+      guideArticle({ site: SITE, slug: g.slug, headline: g.h1, description: g.metaDesc, asOf: ASOF, extra: { isPartOf: websiteRef(SITE), about: datasetRef(SITE, DATASET_FACTS) } }),
       {
         '@type': 'BreadcrumbList',
         itemListElement: [
@@ -1995,6 +2073,11 @@ writeApi('coding-tools-own-key.json', {
   notes: codingToolsOwnKey.notes || [],
 });
 writeFileSync(join(ROOT, 'site/api/v1/coding-tools-own-key.schema.json'), readFileSync(join(ROOT, 'data/coding-tools-own-key-api.schema.json')));
+// /api/v1/status.json: one small freshness record per provider, keyed by slug, for routers that poll (lib/status.mjs).
+// Graded at ASOF, never the clock; its last_change comes from the git-mined change list, so it is git-log derived.
+const STATUS_SCHEMA_URL = SITE + '/api/v1/status.schema.json';
+writeApi('status.json', statusPayload({ base: apiBase, asOf: ASOF, providers: publicProviders, changes: projectApiV1Changes(allFieldChanges), schemaUrl: STATUS_SCHEMA_URL }));
+writeFileSync(join(ROOT, 'site/api/v1/status.schema.json'), readFileSync(join(ROOT, 'data/status.schema.json')));
 const API_SLICES = {
   ongoing: (p) => p.category === 'ongoing',
   trial: (p) => p.category === 'trial',
@@ -2036,6 +2119,8 @@ const apiEndpoints = {
   programs: 'v1/programs.json',
   history: 'v1/history.json',
   changes: 'v1/changes.json',
+  status: 'v1/status.json',
+  'status-schema': 'v1/status.schema.json',
   best: 'v1/best.json',
   score: 'v1/score.json',
   'score-schema': 'v1/score.schema.json',
@@ -2103,6 +2188,8 @@ const apiDocMain =
   apiRow('Free AI coding tools you connect your own key to, apart from the ranking (not a count of providers)', 'coding-tools-own-key.json', codingToolsOwnKey.entries.length) +
   apiRow('JSON Schema of coding-tools-own-key.json (contract v1)', 'coding-tools-own-key.schema.json', null) +
   apiRow('Field-level provider changes by ISO week (last 12 weeks)', 'changes.json', null) +
+  apiRow('Freshness per provider, keyed by slug: last verified, SLA state, free now, last change', 'status.json', publicProviders.length) +
+  apiRow('JSON Schema of status.json (contract v1)', 'status.schema.json', null) +
   apiRow('Endpoint manifest', 'index.json', null) +
   apiRow('JSON Schema of API v1 provider-list payloads', 'schema.json', null) +
   apiRow('OpenAI SDK settings per verified OpenAI-compatible provider', 'openai-clients.json', clientList.length) +
@@ -2130,7 +2217,7 @@ writeFileSync(join(ROOT, 'site/api/index.html'), htmlPage({
   jsonld: collectionPageJsonLd({
     type: 'WebPage', name: 'Static JSON API', url: `${SITE}/api/`,
     description: 'The free-llm-api-hub dataset as versioned JSON at stable URLs.',
-    about: datasetRef(SITE),
+    about: datasetRef(SITE, DATASET_FACTS),
     crumbs: [['API', `${SITE}/api/`]],
   }),
 }));
@@ -2151,6 +2238,7 @@ const llmsTxt =
   `## Dataset\n` +
   `- [Full dataset, JSON](${SITE}/api/v1/providers.json): every provider, all fields\n` +
   `- [Static JSON API](${SITE}/api/): versioned endpoints + pre-filtered slices (category, modality, no-card, commercial, OpenAI-compatible, …)\n` +
+  `- [Provider status, JSON](${SITE}/api/v1/status.json): per provider, last verified, freshness against the ${DUE_SOON_DAYS}/${SLA_DAYS}-day SLA, free now, and the day of its last change\n` +
   `- [JSON Schema](${REPO}/blob/main/data/schema.json)\n` +
   `- [Full provider list expanded, markdown](${SITE}/llms-full.txt)\n` +
   `- [Data quality](${SITE}/quality/): how much of the dataset is verified, how fresh it is, and which answers are still unknown\n` +
@@ -2382,7 +2470,7 @@ writeFileSync(
         `${citeBlockHtml(citationRecord(citation))}</div></main>`,
       ),
     prefix: '../',
-    jsonld: collectionPageJsonLd({ type: 'WebPage', name: qualityTitle, url: `${SITE}/quality/`, description: qualityDesc, about: datasetRef(SITE), crumbs: [[qualityTitle, `${SITE}/quality/`]] }),
+    jsonld: collectionPageJsonLd({ type: 'WebPage', name: qualityTitle, url: `${SITE}/quality/`, description: qualityDesc, about: datasetRef(SITE, DATASET_FACTS), crumbs: [[qualityTitle, `${SITE}/quality/`]] }),
   })
 );
 
@@ -2402,7 +2490,7 @@ const codingToolsJsonLd = JSON.stringify({
   '@graph': [
     {
       '@type': 'CollectionPage', name: 'Free AI coding tools', description: CODING_TOOLS_DESC,
-      url: `${SITE}/coding-tools/`, dateModified: ASOF,
+      url: `${SITE}/coding-tools/`, dateModified: isoDateTime(ASOF),
       isPartOf: websiteRef(SITE),
       mainEntity: {
         '@type': 'ItemList', numberOfItems: CODING_TOOL_PAGES.length,
@@ -2541,7 +2629,7 @@ writeFileSync(
   writeFileSync(join(ROOT, 'site/not-free/index.html'), htmlPage({
     title: notFreeTitle(), desc: notFreeDescription(model), canonical: `${SITE}${NOT_FREE_PATH}`, prefix: '../',
     main: notFreeMainHtml(model, { pageHero, site: SITE, prefix: '../' }),
-    jsonld: notFreeJsonLd(model, { site: SITE, dateModified: ASOF }),
+    jsonld: notFreeJsonLd(model, { site: SITE, dateModified: ASOF, dataset: DATASET_FACTS }),
     ogImage: `${SITE}/og/not-free.png`,
   }));
 }
@@ -2554,7 +2642,7 @@ writeFileSync(join(ROOT, 'site/embed/index.html'), htmlPage({
   jsonld: collectionPageJsonLd({
     type: 'WebPage', name: 'Use the data', url: `${SITE}${EMBED_PATH}`,
     description: 'Embed the widget or a badge, download the dataset and cite it.',
-    about: datasetRef(SITE),
+    about: datasetRef(SITE, DATASET_FACTS),
     crumbs: [['Use the data', `${SITE}${EMBED_PATH}`]],
   }),
   // shared-rules.js and shared-sort.js first, so the preview widget finds them on this page and loads nothing else.
@@ -2735,11 +2823,11 @@ writeFileSync(join(ROOT, `site/${SITEMAP_INDEX}`), sitemapIndexXml(SITE, INDEXNO
 // removes. It lives at the repo root (not under data/) so a fingerprint-only
 // commit never touches a path the updates feed watches.
 const isDateRelative = (rel) => rel === 'site/badge-freshness.json' || rel.startsWith('site/p/') || rel.startsWith('site/badges/');
-// The weekly change feed (changes/, changes.xml, api/v1/changes.json) and the
+// The weekly change feed (changes/, changes.xml, api/v1/changes.json), api/v1/status.json (its last_change) and the
 // monthly state reports (state/) are mined from the same git history, so they
 // are excluded for the same reason.
 const isGitLogDerived = (rel) => rel === 'site/feed.xml' || rel === 'site/api/v1/history.json' || rel === 'site/updates.html' || rel.startsWith('site/updates/') ||
-  rel === 'site/changes.xml' || rel === 'site/api/v1/changes.json' || rel.startsWith('site/changes/') || rel.startsWith('site/state/') || rel === 'site/sitemap-state.xml';
+  rel === 'site/changes.xml' || rel === 'site/api/v1/changes.json' || rel === 'site/api/v1/status.json' || rel.startsWith('site/changes/') || rel.startsWith('site/state/') || rel === 'site/sitemap-state.xml';
 // ---------- /.well-known/security.txt ----------
 // RFC 9116 contact file from SECURITY.md's two channels; its Expires date comes from lib/security-txt.mjs, not the clock.
 mkdirSync(join(ROOT, 'site/.well-known'), { recursive: true });

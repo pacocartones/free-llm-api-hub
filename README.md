@@ -1,11 +1,15 @@
 <div align="center">
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="assets/logo-dark.svg">
-  <img src="assets/logo-light.svg" alt="Free LLM API Hub" width="320">
+  <source media="(prefers-color-scheme: dark)" srcset="assets/banner-dark.png">
+  <img src="assets/banner-light.png" alt="Free LLM API Hub: a field of coloured circles, one per provider, drawn from its own data" width="840">
 </picture>
 
-**A continuously-verified dataset of free LLM & AI-model APIs you can build on.**
+<!-- AUTOGEN:tagline:start -->
+**We read the docs. You ship the code.**
+<!-- AUTOGEN:tagline:end -->
+
+A continuously-verified dataset of free LLM & AI-model APIs.
 
 Free LLM APIs plus adjacent model APIs — image, speech, embeddings, rerank and OCR: free tiers, trial credits and no-cost quotas.
 Every entry is dated and sourced to the provider's own docs, and what we could not confirm is marked. Just what's actually free, and the fine print that bites.
@@ -15,8 +19,8 @@ Every entry is dated and sourced to the provider's own docs, and what we could n
 [![Verify](https://github.com/pacocartones/free-llm-api-hub/actions/workflows/verify.yml/badge.svg)](https://github.com/pacocartones/free-llm-api-hub/actions/workflows/verify.yml)
 [![Freshness](https://img.shields.io/endpoint?url=https://freellmapihub.com/badge-freshness.json)](#how-verification-works)
 [![Verified providers](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/pacocartones/free-llm-api-hub/main/badge-verified.json)](docs/methodology.md)
-[![Website](https://img.shields.io/badge/explorer-freellmapihub.com-0b7285.svg)](https://freellmapihub.com/)
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Website](https://img.shields.io/badge/explorer-freellmapihub.com-9C4A00.svg)](https://freellmapihub.com/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-6A5048.svg)](LICENSE)
 
 **[🔎 Interactive explorer](https://freellmapihub.com/)** &nbsp;·&nbsp; **[📊 Dataset](data/providers.json)** &nbsp;·&nbsp; **[🧪 How we verify](docs/methodology.md)** &nbsp;·&nbsp; **[➕ Add a provider](CONTRIBUTING.md)**
 
@@ -176,7 +180,7 @@ What "verified" covers and where its limits are: [docs/methodology.md](docs/meth
 ## How this project is maintained
 
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/pacocartones/free-llm-api-hub/badge)](https://scorecard.dev/viewer/?uri=github.com/pacocartones/free-llm-api-hub)
-[![Dataset: JSON](https://img.shields.io/badge/dataset-JSON%20%2B%20schema-blue.svg)](data/providers.json)
+[![Dataset: JSON](https://img.shields.io/badge/dataset-JSON%20%2B%20schema-7A2E8C.svg)](data/providers.json)
 
 The maintainers are [@pacocartones](https://github.com/pacocartones) and [@LeonMAG](https://github.com/LeonMAG). AI agents assist under human oversight with repository checks, human-authored data updates and code. Re-verification is done by a maintainer or, at the owner's request, with AI assistance: official pages are read by isolated read-only fetchers that return verbatim quotes, and the pull request says which method was used ([playbook](docs/update-playbook.md)). Every change still goes through a pull request, a human maintainer reviews it and is responsible for every merge, and every data change carries a link to the provider's own page and the date it was checked. Commit messages carry no AI signature or trailer; this section is where we say it.
 
@@ -228,8 +232,8 @@ Prefer a generator? [Use the data](https://freellmapihub.com/embed/) builds this
 
 ## Contributing
 
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
-[![Good first issues](https://img.shields.io/badge/contribute-good%20first%20issues-9c4668.svg)](https://github.com/pacocartones/free-llm-api-hub/contribute)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-2F6B1F.svg)](CONTRIBUTING.md)
+[![Good first issues](https://img.shields.io/badge/contribute-good%20first%20issues-9C4A00.svg)](https://github.com/pacocartones/free-llm-api-hub/contribute)
 
 Found an outdated limit, a dead link, or a provider that belongs here? You'll keep this useful for everyone.
 

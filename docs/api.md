@@ -38,6 +38,52 @@ What is *not* guaranteed: the order of providers in a list, the exact contents o
 - **`free_limits`** (dataset 2.10.0): an optional object with optional positive-integer `requests_per_second/minute/day/month` and `tokens_per_day/month` limits as published by the provider, an optional `scope`, and required `source` (an HTTP(S) URL) and `checked` (a date). An omitted limit field means no value is recorded for that unit; `null` or absent for the object means the provider publishes no numeric free limits. Numbers are never converted between units. It appears in the provider objects the API serves; consumers that ignore unknown fields are unaffected.
 - **`commercial_ok_condition`** (dataset 2.12.0): an optional string explaining provider conditions on commercial use. The canonical dataset uses `commercial_ok: "conditional"` with this field, but every `/api/v1/` provider object and every `commercial_ok` value in `changes.json` projects that value to `null`, preserving v1's `boolean | null` type. The condition string remains present, so consumers can distinguish a documented condition from a wholly unconfirmed answer without retyping the existing field.
 
+### Provider status: `/api/v1/status.json`
+
+[`/api/v1/status.json`](https://freellmapihub.com/api/v1/status.json) is a small freshness record per provider, keyed by `slug`, for clients that poll the dataset (API routers, key pools, dashboards) and only need to know how recent each entry is and whether its free access is in effect, without downloading and re-deriving the full provider objects. It lists every provider of `providers.json`, including unverified ones.
+
+Its contract is **v1** and is described by a JSON Schema at a stable URL, [`/api/v1/status.schema.json`](https://freellmapihub.com/api/v1/status.schema.json) (the source is [`data/status.schema.json`](../data/status.schema.json)). The file names it in `schema`. The rules above apply: a field named below is never renamed, removed or retyped within v1, new fields may be added, so read only the fields you need and ignore the rest.
+
+Every state is graded at `generated_at`, the date of the last dataset change, never the build clock, so the file is byte-stable for a given dataset and history. A client that wants the state for its own today regrades `last_verified` with the thresholds in `sla`. `last_change` is mined from the git history, like `changes.json` and `history.json`.
+
+Top level:
+
+| Field | Type | Meaning |
+|---|---|---|
+| `dataset`, `version`, `generated`, `license`, `homepage`, `docs`, `description` | | the same envelope as every other file of the API |
+| `schema` | URL | the URL of the JSON Schema of this file |
+| `schema_version` | integer | the contract version of this file, `1` for as long as `/api/v1/` is served |
+| `generated_at` | date | the day every state is graded at (equal to `generated`) |
+| `sla` | object | `due_after_days` (60) and `stale_after_days` (90): the freshness SLA, as in [methodology](methodology.md) and on [`/quality/`](https://freellmapihub.com/quality/) |
+| `count` | integer | the number of providers, equal to the number of keys of `providers` |
+| `providers` | object | one entry per provider, keyed by its `slug`, in slug order |
+
+Each entry of `providers`:
+
+| Field | Type | Meaning |
+|---|---|---|
+| `last_verified` | date or null | the day the entry was last verified against the provider's own docs; `null` if never |
+| `oldest_field_check` | date or null | the oldest `checked` day among the entry's `field_checks`; `null` when it has none |
+| `freshness` | string | `fresh` (verified at most `due_after_days` before `generated_at`), `due` (up to `stale_after_days`), `stale` (older: the SLA is breached) or `unverified` (never verified) |
+| `free_now` | boolean or null | `true`: verified, and the last probe did not report the free tier gone; `false`: the last probe reported `tier-ended`; `null`: not verified, so not confirmed. It is not a live check |
+| `last_change` | date or null | the day of the entry's newest field-level change, the changes of `changes.json` over the whole history rather than its last 12 weeks; `null` when none is recorded |
+
+```json
+{
+  "dataset": "free-llm-api-hub",
+  "schema": "https://freellmapihub.com/api/v1/status.schema.json",
+  "schema_version": 1,
+  "generated_at": "2026-11-26",
+  "sla": { "due_after_days": 60, "stale_after_days": 90 },
+  "count": 79,
+  "providers": {
+    "example": { "last_verified": "2026-11-20", "oldest_field_check": "2026-11-24", "freshness": "fresh", "free_now": true, "last_change": "2026-11-21" }
+  }
+}
+```
+
+(abridged: the real file carries the full envelope and every provider.)
+
 ### The score: `/api/v1/score.json`
 
 [`/api/v1/score.json`](https://freellmapihub.com/api/v1/score.json) is the whole [FLLMAPIHUB score](methodology.md#the-score), not only the top 10 that [`best.json`](https://freellmapihub.com/api/v1/best.json) carries. It lists every eligible provider (verified and inside the freshness window), best score first, with the parts of the score and how many of its inputs the data confirms. The numbers are the same as in `best.json` (one rounding rule, one source), and the file is byte-stable for a given dataset: the scores are computed at `generated`.
