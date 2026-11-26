@@ -72,6 +72,7 @@ import { SITEMAPS as INDEXNOW_SITEMAPS } from './lib/indexnow.mjs';
 import { groupModels, modelKey } from './lib/model-keys.mjs';
 import { providerMetaDescription } from './lib/provider-meta.mjs';
 import { isIndexable, modelPageMainHtml, modelPageTitle, modelPageDescription, modelPageJsonLd } from './lib/model-pages.mjs';
+import { FAMILY_PATH, familyGroups, isFamilyIndexable, familyUrl, familyH1, familyPageTitle, familyPageDescription, familyBlurb, familyPageMainHtml, familyNavHtml } from './lib/model-families.mjs';
 import { collectionPageJsonLd as pageJsonLd, comparePageJsonLd } from './lib/page-jsonld.mjs';
 import { notFreeErrors, notFreeReadmeMd, notFreeModel, notFreeMainHtml, notFreeJsonLd, notFreeTitle, notFreeDescription, NOT_FREE_PATH } from './lib/not-free.mjs';
 import { embedMainHtml, embedTitle, embedDescription, EMBED_PATH } from './lib/embed-page.mjs';
@@ -1270,6 +1271,8 @@ const provFlagsHtml = (p) => {
 const MODEL_GROUPS = groupModels(providers);
 const MODEL_PAGE_KEYS = new Set(MODEL_GROUPS.map((g) => g.key));
 const modelPageHref = (prefix) => (id) => { const k = modelKey(id); return k && MODEL_PAGE_KEYS.has(k) ? `${prefix}models/${k}/` : ''; };
+// The model-family pages behind /free-api/<family>/ (lib/model-families.mjs), built after the model pages.
+const FAMILY_GROUPS = familyGroups(providers);
 
 // The last block of every provider page: its badge on /embed/ and, for a provider on /not-free/, why. One function,
 // appended after the change history, so a change to the section order elsewhere does not touch it.
@@ -1812,7 +1815,8 @@ const modelRowHtml = ({ m, p }) =>
   `<td class="notes">${(p.modalities || []).join(', ') || '—'}</td></tr>`;
 const modelsMain =
   pageHero({ crumbs: `<a href="../">Home</a> / Free model index`, h1: `Free model index`, lede: `Every model our verified providers expose on a free tier — <strong>${modelIndex.length}</strong> entries across <strong>${modelProviderCount}</strong> providers, pulled from each provider's own <code>/models</code> endpoint where possible. The same model can appear under more than one provider.` }) +
-  `<main id="main"><div class="wrap"><table class="model-table"><thead><tr><th>Model</th><th>Provider</th><th>Free type</th><th>Modalities</th></tr></thead><tbody>\n` +
+  `<main id="main"><div class="wrap"><h2 class="eyebrow">Free API by model family</h2>${familyNavHtml(FAMILY_GROUPS, '../')}` +
+  `<table class="model-table"><thead><tr><th>Model</th><th>Provider</th><th>Free type</th><th>Modalities</th></tr></thead><tbody>\n` +
   modelIndex.map(modelRowHtml).join('\n') +
   `\n</tbody></table><p class="muted" style="margin-top:18px">Model lists are a live sample and change often — always confirm against the provider. A provider missing here usually needs an API key to list its models; <a href="${REPO}/blob/main/docs/update-playbook.md">see how the list is refreshed</a>.</p></div></main>`;
 writeFileSync(join(ROOT, 'site/models/index.html'), htmlPage({
@@ -1847,6 +1851,30 @@ for (const g of MODEL_GROUPS) {
     jsonld: modelPageJsonLd(g, { site: SITE }),
     prefix: '../../',
     noindex: !isIndexable(g),
+    ogImage: `${SITE}/og/models.png`,
+  }));
+}
+
+// One page per open model family: /free-api/<family>/ ("Where can I use Llama for free via API?"). The verified
+// providers whose free-model sample lists a model of the family, with limits, flags and dates from the data
+// (lib/model-families.mjs). The folder is removed and written again, so a family dropped from the list leaves no page.
+rmSync(join(ROOT, `site/${FAMILY_PATH}`), { recursive: true, force: true });
+for (const g of FAMILY_GROUPS) {
+  const url = familyUrl(SITE, g);
+  mkdirSync(join(ROOT, `site/${FAMILY_PATH}${g.slug}`), { recursive: true });
+  writeFileSync(join(ROOT, `site/${FAMILY_PATH}${g.slug}/index.html`), htmlPage({
+    title: datedTitle(familyPageTitle(g)),
+    desc: familyPageDescription(g),
+    canonical: url,
+    main: familyPageMainHtml(g, { asOf: ASOF, prefix: '../../', modelHref: modelPageHref('../../'), others: FAMILY_GROUPS }),
+    jsonld: pageJsonLd({
+      site: SITE, type: 'WebPage', name: familyH1(g), url, description: familyPageDescription(g),
+      about: datasetRef(SITE, DATASET_FACTS),
+      crumbs: [['Free model index', `${SITE}/models/`], [g.name, url]],
+      items: g.entries.map((e) => ({ name: e.p.name, url: `${SITE}/p/${e.p.slug}` })),
+    }),
+    prefix: '../../',
+    noindex: !isFamilyIndexable(g),
     ogImage: `${SITE}/og/models.png`,
   }));
 }
@@ -2218,6 +2246,8 @@ const llmsTxt =
   `## Guides\n` +
   `- [All guides and collections](${SITE}/guides-and-collections/): every guide and filtered list on one page\n` +
   [...GUIDES, ...LONG_GUIDE_PAGES].map((g) => `- [${g.h1}](${SITE}/guides/${g.slug}): ${g.blurb}`).join('\n') + `\n\n` +
+  `## Free API by model family\n` +
+  FAMILY_GROUPS.filter(isFamilyIndexable).map((g) => `- [${familyH1(g)}](${familyUrl(SITE, g)}): ${familyBlurb(g)}`).join('\n') + `\n\n` +
   `## Collections\n` +
   COLLECTIONS.map((c) => `- [${c.title}](${SITE}/collections/${c.slug})`).join('\n') + `\n\n` +
   `## Credit programs\n` +
@@ -2724,6 +2754,7 @@ const sitemapEntries = [
   [`${SITE}/`, ASOF],
   [`${SITE}/models/`, ASOF],
   ...MODEL_GROUPS.filter((g) => isIndexable(g)).map((g) => [`${SITE}/models/${g.key}/`, lastVerified(g.entries.map((e) => e.p))]),
+  ...FAMILY_GROUPS.filter(isFamilyIndexable).map((g) => [familyUrl(SITE, g), lastVerified(g.entries.map((e) => e.p))]),
   [`${SITE}/guides-and-collections/`, ASOF],
   [`${SITE}/best/`, ASOF],
   [`${SITE}/best/methodology/`, ASOF],
