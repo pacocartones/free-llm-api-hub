@@ -124,7 +124,8 @@ test('provider page: the answer is the first thing after the H1, and the visible
 test('the FAQ escapes what comes from the data', () => {
   const evil = { ...nulls, name: 'Acme <b>', commercial_ok: 'conditional', commercial_ok_condition: '<script>x</script>' };
   const html = providerFaqHtml(evil);
-  assert.doesNotMatch(html, /<script>|Acme <b>/);
+  const lower = html.toLowerCase();
+  assert.ok(!lower.includes('<script') && !lower.includes('<b>'), 'no markup from the data survives, in any letter case');
   assert.match(html, /Acme &lt;b&gt; FAQ/);
 });
 
