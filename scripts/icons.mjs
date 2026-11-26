@@ -1,5 +1,6 @@
-// icons.mjs — every rendering of the brand mark, from one source: the hub's own aura (lib/aura.mjs, brand H1), the
-// six modalities in a full disc with nothing unsaid. The favicon uses a four-sector version that stays legible at 16 px.
+// icons.mjs — every rendering of the brand mark, from one source: the hub's own aura (lib/aura.mjs, brand H1, Cálida
+// radial bars), six modalities with rays from the centre and nothing unsaid. The favicon uses a four-sector version
+// with fewer, thicker bars that stays legible at 16 px, on the warm near-black tile so it reads on light and dark tabs.
 //   site/favicon.svg, favicon-32.png, favicon.ico, apple-touch-icon.png, icon-192.png, icon-512.png, site.webmanifest
 //   assets/logo-light.svg, assets/logo-dark.svg (mark + outlined wordmark) and assets/logo-full.svg (mark only, large)
 // Run by hand when the mark changes: `npm run icons`. Uses @resvg/resvg-js, a devDependency only; the outputs are
@@ -12,36 +13,37 @@ import { auraSvg, HUB_AURA, FAVICON_AURA } from './lib/aura.mjs';
 import { wordmarkSvg, wordmarkWidth } from './lib/wordmark.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
-const INK = '#0e0e11';
-const PAPER = '#fafafa';
+const INK = '#17110f';
+const PAPER = '#fff9f6';
 
-// The mark at `size` px. Small sizes use the four-sector favicon aura on a transparent ground; `bleed` fills the square
-// with the near-black ground (iOS and Android round it themselves) and keeps the aura inside their safe zone.
+// The mark at `size` px, in the dark theme's hues on the warm near-black ground. Small sizes use the favicon aura on a
+// rounded tile; `bleed` fills the square (iOS and Android round it themselves) and keeps the aura inside their safe zone.
 export const markSvg = (size, { bleed = false } = {}) => {
   const body = bleed
-    ? `<rect width="32" height="32" fill="${INK}"/>${auraSvg(HUB_AURA, { cx: 16, cy: 16, r: 10.5, id: 'm' })}`
-    : auraSvg(size <= 32 ? FAVICON_AURA : HUB_AURA, { cx: 16, cy: 16, r: 15, id: 'm', shine: size > 32 });
+    ? `<rect width="32" height="32" fill="${INK}"/>${auraSvg(HUB_AURA, { cx: 16, cy: 16, r: 11, id: 'm', theme: 'dark' })}`
+    : `<rect width="32" height="32" rx="7" fill="${INK}"/>${auraSvg(size <= 32 ? FAVICON_AURA : HUB_AURA, { cx: 16, cy: 16, r: 15, id: 'm', theme: 'dark' })}`;
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 32 32">${body}</svg>`;
 };
 
-// The SVG favicon: the same four sectors, with no animation (a tab icon should not move).
+// The SVG favicon: the same tile and four sectors, with no animation (a tab icon should not move).
 export const faviconSvg = () =>
-  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">${auraSvg(FAVICON_AURA, { cx: 16, cy: 16, r: 15, id: 'f', shine: false })}</svg>\n`;
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32"><rect width="32" height="32" rx="7" fill="${INK}"/>${auraSvg(FAVICON_AURA, { cx: 16, cy: 16, r: 15, id: 'f', theme: 'dark' })}</svg>\n`;
 
 // The sprite symbol every page uses (#logo in the SVG sprite of build.mjs, index.html and 404.html).
-export const logoSymbol = () => `<symbol id="logo" viewBox="0 0 32 32">${auraSvg(HUB_AURA, { cx: 16, cy: 16, r: 15, id: 'logo' })}</symbol>`;
+// Its colours are the --h-* tokens, so the mark follows the page's theme.
+export const logoSymbol = () => `<symbol id="logo" viewBox="0 0 32 32">${auraSvg(HUB_AURA, { cx: 16, cy: 16, r: 16, id: 'logo', theme: 'css' })}</symbol>`;
 
 // Mark + wordmark, for the README and anyone who links the logo. Text is outlined (lib/wordmark.mjs): no font needed.
 export const logoSvg = (theme) => {
   const size = 22, h = 40, gap = 12, mark = 32;
   const w = Math.ceil(4 + mark + gap + wordmarkWidth(size) + 4);
-  const ink = theme === 'dark' ? '#f3f3f5' : '#0f0f12';
+  const ink = theme === 'dark' ? '#fbf1ec' : '#22140f';
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" role="img" aria-label="Free LLM API Hub">` +
-    `${auraSvg(HUB_AURA, { cx: 4 + mark / 2, cy: h / 2, r: mark / 2, id: 'l' })}` +
+    `${auraSvg(HUB_AURA, { cx: 4 + mark / 2, cy: h / 2, r: mark / 2, id: 'l', theme: theme === 'dark' ? 'dark' : 'light' })}` +
     `${wordmarkSvg({ x: 4 + mark + gap, y: 28, size, fill: ink })}</svg>\n`;
 };
 
-// The mark alone, large, for avatars and press kits (works on light and dark grounds).
+// The mark alone, large, for avatars and press kits: the light theme's hues, which keep 3:1 on white.
 export const logoFullSvg = () =>
   `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240" role="img" aria-label="Free LLM API Hub">${auraSvg(HUB_AURA, { cx: 120, cy: 120, r: 112, id: 'x' })}</svg>\n`;
 

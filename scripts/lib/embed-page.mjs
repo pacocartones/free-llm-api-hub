@@ -23,6 +23,9 @@ export function widgetSnippet({ count = WIDGET_DEFAULT.count, modality = '', cat
 export const providerBadgeMarkdown = (p, site) =>
   `[![${p.name} on Free LLM API Hub](https://img.shields.io/endpoint?url=${site}/badges/${p.slug}.json)](${site}/p/${p.slug})`;
 
+export const providerBadgeHtml = (p, site) =>
+  `<a href="${site}/p/${p.slug}"><img src="https://img.shields.io/endpoint?url=${site}/badges/${p.slug}.json" alt="${htmlEsc(p.name)} on Free LLM API Hub" height="20"></a>`;
+
 export const verifiedBadgeHtml = (site, width) =>
   `<a href="${site}/"><img src="${site}/badge-verified.svg" alt="Verified providers on Free LLM API Hub" width="${width}" height="20"></a>`;
 
@@ -69,7 +72,10 @@ export function embedMainHtml({ pageHero, site, prefix = '../', providers, badge
     `<h3 id="provider-badge">One provider</h3>` +
     `<p>Every provider has its own badge with the date of its last verification. Its colour follows the age of that check: green while fresh, yellow past 60 days, red past the ${slaDays}-day freshness window, so a badge someone forgot never claims more than the data does. It renders through <a href="https://shields.io/badges/endpoint-badge" target="_blank" rel="noopener">shields.io</a> from <a href="${prefix}badges/${htmlEsc(first.slug)}.json">this site’s JSON</a>; this page loads nothing from shields.io.</p>` +
     `<form class="cmp-form" action="#provider-badge"><label class="cmp-slot"><span>Provider</span><select class="sel" id="badge-provider" name="p">${providerOptions}</select></label></form>` +
+    `<p>Markdown:</p>` +
     pre('badge', providerBadgeMarkdown(first, site), 'badge-snippet') +
+    `<p>HTML:</p>` +
+    pre('badge', providerBadgeHtml(first, site), 'badge-snippet-html') +
     `<p class="muted">Each provider page links here with its badge selected.</p>` +
     `<h2 id="data">Data files</h2>` +
     `<ul>` +

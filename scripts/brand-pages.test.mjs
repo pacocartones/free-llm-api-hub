@@ -14,10 +14,12 @@ test('home hero: one aura per provider, decorative, with no tab stop, and the ke
   const links = field[1].match(/<a href="p\/[a-z0-9-]+" tabindex="-1"><span class="aura[ "]/g) || [];
   assert.equal(links.length, providers.length, 'one aura per provider');
   assert.doesNotMatch(field[1], /<a (?![^>]*tabindex="-1")/, 'no link in the field takes a tab stop');
-  assert.match(html, /<div class="aura-key"><p class="aura-key-h">Each circle is one provider, drawn from its own data\. <a href="methodology\/#how-to-read-an-aura">How to read it<\/a>/);
+  assert.match(html, /<div class="aura-key"><p class="aura-key-h">Each aura is one provider, drawn from its own data: a colour sector per modality\. <a href="methodology\/#how-to-read-an-aura">How to read it<\/a>/);
+  for (const w of ['rays from the centre', 'outer crown only', 'dashed circle', 'faded']) assert.ok(html.includes(`</b>${w}</span>`), 'key reading: ' + w);
   for (const w of ['Ongoing', 'Trial', 'Not stated', 'Checked 30+ days ago']) assert.ok(html.includes(`<b>${w}</b>`), 'key: ' + w);
   for (const w of ['text', 'vision', 'image', 'speech', 'embeddings', 'rerank', 'OCR']) assert.match(html, new RegExp(`aria-hidden="true"></span>${w}</li>`), 'hue named: ' + w);
-  assert.match(html, /<h1>Free LLM APIs you can<br> <span class="h1-key">actually build on\.<\/span><\/h1>/, 'the H1 text is unchanged (SEO)');
+  assert.match(html, /<h1>We read the docs\. <span class="h1-key">You ship the code\.<\/span><\/h1>/, 'the owner\'s tagline is the H1');
+  assert.match(html, /<p class="eyebrow">Free LLM &amp; AI APIs · /, 'the search phrase stays above the fold');
 });
 
 test('provider hero: up to three published limits as numbers, the quoted receipt with its page and date', () => {
@@ -28,4 +30,14 @@ test('provider hero: up to three published limits as numbers, the quoted receipt
   const without = providers.find((p) => !p.free_limits && existsSync(new URL(`../site/p/${p.slug}.html`, import.meta.url)));
   assert.ok(without, 'a provider without structured limits');
   assert.doesNotMatch(read(`site/p/${without.slug}.html`), /class="prov-nums"/, without.slug + ': no numbers without free_limits');
+});
+
+test('generated pages keep a side gutter on phones: the hero wrap overrides only its vertical padding', () => {
+  // Mutant: `.page-hero .wrap { padding: 34px 0 26px }` again; on a 390 px phone the breadcrumb, title and lede touch the edge.
+  const css = read('site/styles.css');
+  const rule = css.match(/\.page-hero \.wrap \{[^}]*\}/)[0];
+  assert.doesNotMatch(rule, /padding:\s*\S+\s+0[\s;]/, 'no zero side padding');
+  assert.match(rule, /padding-top: \d+px; padding-bottom: \d+px;/);
+  assert.match(css, /\.wrap \{ max-width: 1180px; margin: 0 auto; padding: 0 24px; \}/);
+  assert.match(css, /@media \(width <= 480px\) \{ \.wrap \{ padding-left: max\(16px, env\(safe-area-inset-left, 0px\)\); padding-right: max\(16px, env\(safe-area-inset-right, 0px\)\); \} \}/, 'at least 16px on phones');
 });
