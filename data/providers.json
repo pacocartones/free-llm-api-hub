@@ -406,7 +406,9 @@
       "field_checks": {"phone_required":{"status":"source_silent","checked":"2026-11-24","sources":["https://docs.novita.ai/guides/quickstart","https://novita.ai/pricing","https://novita.ai/legal/terms-of-service"],"note":"Sign-up is by Google, GitHub or email; docs mention identity verification for some models without naming a phone"}},
       "verified": true,
       "last_verified": "2026-11-20",
-      "data_policy": {"trains_on_prompts":false,"retention":null,"source":"https://novita.ai/legal/terms-of-service","checked":"2026-10-15","quote":"By Default, Novita AI will not use your Content to train our own models or to improve the Services.","note":"Updated 2026-08-05. The terms mention free quotas (account section) but do not say this sentence covers them.","plan_named":false}
+      "data_policy": {"trains_on_prompts":false,"retention":null,"source":"https://novita.ai/legal/terms-of-service","checked":"2026-10-15","quote":"By Default, Novita AI will not use your Content to train our own models or to improve the Services.","note":"Updated 2026-08-05. The terms mention free quotas (account section) but do not say this sentence covers them.","plan_named":false},
+      "keys_url": "https://novita.ai/settings/key-management",
+      "keys_url_source": "https://docs.novita.ai/guides/introduction"
     },
     {
       "slug": "ai21",
