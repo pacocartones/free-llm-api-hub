@@ -79,18 +79,6 @@
       "of": 6,
       "rank": null
     },
-    "upstage": {
-      "total": 38.4,
-      "confirmed": 3,
-      "of": 6,
-      "rank": null
-    },
-    "wandb-inference": {
-      "total": 38.4,
-      "confirmed": 3,
-      "of": 6,
-      "rank": null
-    },
     "meganova": {
       "total": 38.1,
       "confirmed": 3,
@@ -189,7 +177,7 @@
     },
     "veryfi": {
       "total": 34.4,
-      "confirmed": 3,
+      "confirmed": 4,
       "of": 6,
       "rank": null
     },
@@ -230,6 +218,12 @@
       "rank": null
     },
     "scaleway": {
+      "total": 33.9,
+      "confirmed": 2,
+      "of": 6,
+      "rank": null
+    },
+    "upstage": {
       "total": 33.9,
       "confirmed": 2,
       "of": 6,
@@ -325,6 +319,12 @@
       "of": 6,
       "rank": null
     },
+    "wandb-inference": {
+      "total": 30,
+      "confirmed": 1,
+      "of": 6,
+      "rank": null
+    },
     "datalab": {
       "total": 29.9,
       "confirmed": 2,
@@ -368,12 +368,6 @@
       "rank": null
     },
     "voicegain": {
-      "total": 29.9,
-      "confirmed": 2,
-      "of": 6,
-      "rank": null
-    },
-    "voyage-ai": {
       "total": 29.9,
       "confirmed": 2,
       "of": 6,
@@ -434,6 +428,12 @@
       "rank": null
     },
     "rev-ai": {
+      "total": 26,
+      "confirmed": 1,
+      "of": 6,
+      "rank": null
+    },
+    "voyage-ai": {
       "total": 26,
       "confirmed": 1,
       "of": 6,
