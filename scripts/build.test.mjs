@@ -8,7 +8,7 @@ import { execFileSync } from 'node:child_process';
 import { readFileSync, writeFileSync, existsSync, readdirSync, statSync, rmSync } from 'node:fs';
 import { tmpFile } from './lib/tmp.mjs';
 import { privateTree } from './lib/private-tree.mjs';
-import { htmlEsc } from './lib/rows.mjs';
+import { escapeHtml, escapeText } from './lib/html.mjs';
 import { join, dirname, isAbsolute, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
@@ -30,7 +30,7 @@ import { clientConfigProviders, openaiClients, litellmYaml, MODEL_PLACEHOLDER } 
 import { hasHiddenChars } from './lib/hidden-chars.mjs';
 import { requirementsHtml, limitsHtml, glanceHtml, modelsHtml, dataPolicyHtml } from './lib/provider-sections.mjs';
 import { compareTableHtml, comparisonCategory, sameComparisonCategory, selectComparePairs, COMPARE_PAGE_CAP, COMPARE_PER_PROVIDER_CAP, COMPARE_MAX as COMPARE_MAX_SLOTS } from './lib/compare.mjs';
-import { codeHtmlEsc, curlChatQuickstart, posixShellQuote, pythonChatQuickstart, pythonEmbeddingsQuickstart, pythonStringLiteral } from './lib/quickstart.mjs';
+import { curlChatQuickstart, posixShellQuote, pythonChatQuickstart, pythonEmbeddingsQuickstart, pythonStringLiteral } from './lib/quickstart.mjs';
 import { providersCsv } from './lib/provider-csv.mjs';
 import { projectApiV1Changes, toApiV1ChangeValue, toApiV1Provider } from './lib/api-v1.mjs';
 import Ajv2020 from 'ajv/dist/2020.js';
@@ -148,7 +148,7 @@ test('provider playground action is conditional and preserved in public JSON', (
     assert.equal((present.match(/>Try it ↗/g) || []).length, 1);
     // the provider links carry data-provider / data-link for the opt-in outbound_provider_click event
     assert.ok(present.includes(`<a class="btn" href="https://example.com/playground?model=a&amp;mode=b" target="_blank" rel="noopener" data-provider="${first.slug}" data-link="playground">Try it ↗<span class="sr-only"> (opens in a new tab)</span></a>`));
-    assert.ok(present.includes(`href="${htmlEsc(first.docs_url)}" target="_blank" rel="noopener" data-provider="${first.slug}" data-link="docs">Official docs ↗`));
+    assert.ok(present.includes(`href="${escapeHtml(first.docs_url)}" target="_blank" rel="noopener" data-provider="${first.slug}" data-link="docs">Official docs ↗`));
     assert.match(present, /class="btn website"[^>]*>Visit website ↗/);
     const absent = readFileSync(join(ROOT, 'site/p', `${second.slug}.html`), 'utf8');
     assert.doesNotMatch(absent, />Try it ↗/);
@@ -816,7 +816,7 @@ test('stripTags removes nested fragments with fixed-point iteration', () => {
 test('stripTags passes clean text through unchanged', () => {
   // stripTags is aggressive on purpose: bare < and > ARE treated as tag
   // boundaries. In the build pipeline text reaches stripTags already escaped
-  // by htmlEsc/esc, so this is only reached with clean payloads or
+  // by escapeHtml/esc, so this is only reached with clean payloads or
   // pre-stripped fragments.
   assert.equal(stripTags('no tags here'), 'no tags here');
   assert.equal(stripTags('&lt; &amp; &gt;'), '&lt; &amp; &gt;');
@@ -1186,8 +1186,8 @@ test('quickstarts preserve ordinary chat, embeddings and copied HTML output', ()
   const curl = curlChatQuickstart(base, model, { apiKeyVariable: 'YOUR_FREE_API_KEY', spacedJson: true });
   assert.match(curl, /^curl https:\/\/api\.example\/v1\/chat\/completions \\/);
   assert.match(curl, /Bearer \$YOUR_FREE_API_KEY/);
-  assert.equal(codeHtmlEsc('<tag>&'), '&lt;tag&gt;&amp;', 'HTML encoding preserves decoded clipboard text without creating markup');
-  assert.equal(decodeCodeHtml(codeHtmlEsc(curl)), curl, 'browser-decoded code remains the safely quoted shell program');
+  assert.equal(escapeText('<tag>&'), '&lt;tag&gt;&amp;', 'HTML encoding preserves decoded clipboard text without creating markup');
+  assert.equal(decodeCodeHtml(escapeText(curl)), curl, 'browser-decoded code remains the safely quoted shell program');
 });
 
 test('the built client configs match the dataset, are registered, and publish the v1 schema', () => {
@@ -1513,7 +1513,7 @@ describe('read-only generated output', () => {
     const index = readFileSync(join(ROOT, 'site/models/index.html'), 'utf8');
     const listed = [...sitemap.matchAll(/<loc>https:\/\/freellmapihub\.com\/models\/([^<]+)\/<\/loc>/g)].map((m) => m[1]);
     assert.deepEqual(listed.sort(), groups.filter((g) => isIndexable(g)).map((g) => g.key).sort(), 'sitemap parity: only the indexable model pages');
-    const caveat = htmlEsc(MODEL_SAMPLE_CAVEAT);
+    const caveat = escapeHtml(MODEL_SAMPLE_CAVEAT);
     for (const g of groups) {
       const rel = `site/models/${g.key}/index.html`;
       const html = readFileSync(join(ROOT, rel), 'utf8');
@@ -1522,7 +1522,7 @@ describe('read-only generated output', () => {
       assert.equal(/<meta name="robots" content="noindex">/.test(html), !isIndexable(g), `${rel}: noindex follows the index rule`);
       assert.match(pins[rel] || '', /^[0-9a-f]{64}$/, `${rel}: pinned`);
       assert.equal(createHash('sha256').update(readFileSync(join(ROOT, rel))).digest('hex'), pins[rel], `${rel}: pin matches the bytes`);
-      for (const { id, p } of g.entries) assert.ok(html.includes(`<code>${htmlEsc(id)}</code>`) && html.includes(`href="../../p/${p.slug}"`), `${rel}: ${p.slug} row`);
+      for (const { id, p } of g.entries) assert.ok(html.includes(`<code>${escapeHtml(id)}</code>`) && html.includes(`href="../../p/${p.slug}"`), `${rel}: ${p.slug} row`);
       assert.ok(index.includes(`href="${g.key}/"`), `/models/ links ${g.key}`);
       const p = g.entries[0].p;
       if (existsSync(join(ROOT, `site/p/${p.slug}.html`))) assert.ok(readFileSync(join(ROOT, `site/p/${p.slug}.html`), 'utf8').includes(`href="../models/${g.key}/"`), `/p/${p.slug} links ${g.key}`);
@@ -2450,7 +2450,7 @@ test('home table: «Needs / unknown» says in words only what is required or unk
     assert.ok(needs.join(', ').length <= 90 && ('Unknown: ' + unknown.join(', ')).length <= 90, p.slug + ': each part fits in two lines');
     if (p.notes) {
       assert.ok(!visible.includes(p.notes.slice(0, 25)), p.slug + ': the free text is not in the cell');
-      assert.ok(cell.includes(htmlEsc(p.notes) + '"'), p.slug + ': the free text is in the title');
+      assert.ok(cell.includes(escapeHtml(p.notes) + '"'), p.slug + ': the free text is in the title');
     }
     if (!needs.length && !unknown.length) assert.match(visible, /^Nothing required$/, p.slug + ': says there is nothing to worry about');
   }
@@ -2842,10 +2842,10 @@ test('conditional commercial use is visible in UI, excluded from commercial coll
 
   const providerPage = readFileSync(join(ROOT, 'site/p', `${conditional.slug}.html`), 'utf8');
   assert.match(providerPage, /conditional/);
-  assert.ok(providerPage.includes(htmlEsc(conditional.commercial_ok_condition)), 'provider page shows the escaped condition');
+  assert.ok(providerPage.includes(escapeHtml(conditional.commercial_ok_condition)), 'provider page shows the escaped condition');
   const compare = compareTableHtml([conditional, raw.providers.find((p) => p.slug !== conditional.slug)]);
   assert.match(compare, /tri-cond">conditional/);
-  assert.ok(compare.includes(htmlEsc(conditional.commercial_ok_condition)), 'compare view shows the escaped condition');
+  assert.ok(compare.includes(escapeHtml(conditional.commercial_ok_condition)), 'compare view shows the escaped condition');
 
   const commercialMd = readFileSync(join(ROOT, 'collections/commercial-use.md'), 'utf8');
   const commercialHtml = readFileSync(join(ROOT, 'site/collections/commercial-use.html'), 'utf8');
@@ -3242,7 +3242,7 @@ test('data_policy coverage: a floor that only rises, and every recorded row is o
   assert.ok(covered.length >= 29, `${covered.length} providers have a data_policy; it must not fall below the 29 of lot 7`);
   const page = readFileSync(join(ROOT, 'site/data-policy/index.html'), 'utf8');
   // The page lists verified providers only (dataPolicyRows), so that is the set the page must show.
-  for (const p of covered.filter((x) => x.verified === true)) assert.ok(page.includes(htmlEsc(p.name)), `${p.slug}: its data_policy row is on the data-policy page`);
+  for (const p of covered.filter((x) => x.verified === true)) assert.ok(page.includes(escapeHtml(p.name)), `${p.slug}: its data_policy row is on the data-policy page`);
 });
 
 test('correction of the absence claims: no note says the page names no plan unless the page has none of the four words, and Voyage AI names free usage', () => {

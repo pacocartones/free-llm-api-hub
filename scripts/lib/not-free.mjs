@@ -7,7 +7,8 @@
 //
 // Pure functions of their arguments (the data, the providers and the scores): the page is drift-gated and deterministic.
 
-import { htmlEsc, SLUG_RE } from './rows.mjs';
+import { escapeHtml } from './html.mjs';
+import { SLUG_RE } from './rows.mjs';
 import { inlineHtml } from './markdown.mjs';
 import { breadcrumbList } from './page-jsonld.mjs';
 import { websiteRef, datasetRef } from './site-entity.mjs';
@@ -99,9 +100,9 @@ export function notFreeReadmeMd(doc, { site }) {
 }
 
 const mdInline = (s, site) => inlineHtml(s, { repo: '', site });
-const sourcesHtml = (sources) => sources.map((s) => `<a href="${htmlEsc(s.url)}" target="_blank" rel="noopener">${htmlEsc(s.label)}</a>`).join(' · ');
-const checkedHtml = (c) => (c ? (/^\d{4}-\d{2}-\d{2}$/.test(c) ? `<time datetime="${c}">${c}</time>` : htmlEsc(c)) : '<span class="gpu-unstated">not recorded</span>');
-const altLinks = (alts, prefix) => alts.map((p) => `<a href="${prefix}p/${htmlEsc(p.slug)}">${htmlEsc(p.name)}</a>`).join(', ');
+const sourcesHtml = (sources) => sources.map((s) => `<a href="${escapeHtml(s.url)}" target="_blank" rel="noopener">${escapeHtml(s.label)}</a>`).join(' · ');
+const checkedHtml = (c) => (c ? (/^\d{4}-\d{2}-\d{2}$/.test(c) ? `<time datetime="${c}">${c}</time>` : escapeHtml(c)) : '<span class="gpu-unstated">not recorded</span>');
+const altLinks = (alts, prefix) => alts.map((p) => `<a href="${prefix}p/${escapeHtml(p.slug)}">${escapeHtml(p.name)}</a>`).join(', ');
 
 // Quotes read from the same pages on the same day share one block and one source line.
 function quotesHtml(quotes) {
@@ -113,7 +114,7 @@ function quotesHtml(quotes) {
   }
   return groups.map((g) => {
     const src = sourcesHtml(g.sources);
-    return `<blockquote class="gpu-quote">${g.texts.map((t) => `<p>“${htmlEsc(t)}”</p>`).join('')}<footer class="muted">${src}${src && g.read ? ' · ' : ''}${g.read ? `read ${htmlEsc(g.read)}` : ''}</footer></blockquote>`;
+    return `<blockquote class="gpu-quote">${g.texts.map((t) => `<p>“${escapeHtml(t)}”</p>`).join('')}<footer class="muted">${src}${src && g.read ? ' · ' : ''}${g.read ? `read ${escapeHtml(g.read)}` : ''}</footer></blockquote>`;
   }).join('');
 }
 
@@ -124,9 +125,9 @@ function faqAnswerText(e, alts) {
   return `${e.summary}${when}${alt}`;
 }
 function faqAnswerHtml(e, alts, prefix) {
-  const when = e.checked ? ` Checked ${htmlEsc(e.checked)} against the provider's own page.` : '';
+  const when = e.checked ? ` Checked ${escapeHtml(e.checked)} against the provider's own page.` : '';
   const alt = alts.length ? ` Closest free alternatives in the dataset: ${altLinks(alts, prefix)}.` : '';
-  return `${htmlEsc(e.summary)}${when}${alt}`;
+  return `${escapeHtml(e.summary)}${when}${alt}`;
 }
 
 /** Everything the page needs, computed once: entries with their quotes and alternatives, and the FAQ. */
@@ -152,19 +153,19 @@ export function notFreeMainHtml(model, { pageHero, site, prefix = '../' }) {
   const groupHtml = doc.groups.map((g) => {
     const items = entries.filter((x) => x.e.group === g.id).map(({ e, quotes, alts, listed }) => {
       const claims = [
-        ['What people expect', htmlEsc(e.expectation)],
-        ['What the provider’s page says', `${htmlEsc(e.summary)}${quotesHtml(quotes)}${!quotes.length && e.sources.length ? `<p class="muted">${sourcesHtml(e.sources)}</p>` : ''}${!quotes.length && !e.sources.length ? '<p class="gpu-unstated">No quote or source link is recorded in this repository yet.</p>' : ''}`],
+        ['What people expect', escapeHtml(e.expectation)],
+        ['What the provider’s page says', `${escapeHtml(e.summary)}${quotesHtml(quotes)}${!quotes.length && e.sources.length ? `<p class="muted">${sourcesHtml(e.sources)}</p>` : ''}${!quotes.length && !e.sources.length ? '<p class="gpu-unstated">No quote or source link is recorded in this repository yet.</p>' : ''}`],
         ['Checked (UTC)', checkedHtml(e.checked)],
         ['Closest free alternatives', alts.length ? altLinks(alts, prefix) : '<span class="gpu-unstated">none in the dataset for this modality</span>'],
-        ...(listed ? [['In the dataset', `<a href="${prefix}p/${htmlEsc(listed.slug)}">${htmlEsc(listed.name)}: current entry</a>`]] : []),
+        ...(listed ? [['In the dataset', `<a href="${prefix}p/${escapeHtml(listed.slug)}">${escapeHtml(listed.name)}: current entry</a>`]] : []),
       ].map(([k, v]) => `<div class="gpu-claim"><dt>${k}</dt><dd>${v}</dd></div>`).join('');
-      return `<section class="gpu-entry" id="${e.id}"><h3>${htmlEsc(e.name)}</h3><dl class="gpu-claims">${claims}</dl></section>`;
+      return `<section class="gpu-entry" id="${e.id}"><h3>${escapeHtml(e.name)}</h3><dl class="gpu-claims">${claims}</dl></section>`;
     }).join('');
-    return `<h2 id="${g.id}">${htmlEsc(g.title)}</h2><p>${mdInline(g.intro, site)}</p>${items}`;
+    return `<h2 id="${g.id}">${escapeHtml(g.title)}</h2><p>${mdInline(g.intro, site)}</p>${items}`;
   }).join('');
-  const jump = `<nav class="colls" aria-label="Jump to a provider">${entries.map(({ e }) => `<a href="#${e.id}">${htmlEsc(e.name)}</a>`).join('')}</nav>`;
+  const jump = `<nav class="colls" aria-label="Jump to a provider">${entries.map(({ e }) => `<a href="#${e.id}">${escapeHtml(e.name)}</a>`).join('')}</nav>`;
   const faqHtml = faq.length
-    ? `<h2 id="faq">FAQ</h2>` + faq.map(({ e, alts }) => `<div class="faq-item"><h3>${htmlEsc(e.faq)}</h3><p>${faqAnswerHtml(e, alts, prefix)}</p></div>`).join('')
+    ? `<h2 id="faq">FAQ</h2>` + faq.map(({ e, alts }) => `<div class="faq-item"><h3>${escapeHtml(e.faq)}</h3><p>${faqAnswerHtml(e, alts, prefix)}</p></div>`).join('')
     : '';
   return pageHero({
     crumbs: `<a href="${prefix}">Home</a> / Not free`,
@@ -172,7 +173,7 @@ export function notFreeMainHtml(model, { pageHero, site, prefix = '../' }) {
     lede: `The APIs people most often expect to be free, and are not, or stopped being free. Each says what the provider’s own page says, the day it was read, and the closest free alternatives in the dataset.`,
   }) +
     `<main id="main"><div class="wrap prose">` +
-    `<p class="answer"><strong>${htmlEsc(answer)}</strong></p>` +
+    `<p class="answer"><strong>${escapeHtml(answer)}</strong></p>` +
     jump +
     `<div class="prov-summary"><h2>Free instead</h2><p>${mdInline(doc.alternatives_note, site)} Every free tier in the <a href="${prefix}#explorer">explorer</a> is dated and sourced.</p></div>` +
     groupHtml +

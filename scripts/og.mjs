@@ -10,6 +10,7 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 // Collection/guide filter lists and the data fingerprints live in lib/og.mjs,
 // shared with the CI check (scripts/check-og.mjs) so both always agree.
 import { COLLS, GUIDES, SECTION_OGS, buildOgManifest, renderHomeOg } from './lib/og.mjs';
+import { escapeText } from './lib/html.mjs';
 const { Resvg } = await import('@resvg/resvg-js');
 const render = (svg, out) => {
   const png = new Resvg(Buffer.isBuffer(svg) ? svg : Buffer.from(svg), { fitTo: { mode: 'width', value: 1200 } }).render().asPng();
@@ -26,7 +27,6 @@ console.log(`og.png: ${(n / 1024).toFixed(0)} KB`);
 
 // per-collection OG
 
-const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 // Wrap a title onto up to two lines at ~26 chars.
 const wrap = (t) => {
   const words = t.split(' '); const lines = ['']; const max = 26;
@@ -37,7 +37,7 @@ const wrap = (t) => {
 // Guides and the model index share the same OG template.
 function tagSvg(label, title, subtitle) {
   const lines = wrap(title);
-  const titleSvg = lines.map((l, i) => `<text x="80" y="${262 + i * 84}" fill="#d8e2dc" font-size="70" font-weight="700" letter-spacing="-2">${esc(l)}</text>`).join('');
+  const titleSvg = lines.map((l, i) => `<text x="80" y="${262 + i * 84}" fill="#d8e2dc" font-size="70" font-weight="700" letter-spacing="-2">${escapeText(l)}</text>`).join('');
   return `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" font-family="'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace">
   <defs>
     <radialGradient id="glow" cx="50%" cy="0%" r="70%"><stop offset="0" stop-color="#3fce8f" stop-opacity="0.16"/><stop offset="1" stop-color="#3fce8f" stop-opacity="0"/></radialGradient>
@@ -51,9 +51,9 @@ function tagSvg(label, title, subtitle) {
     <rect x="29" y="33" width="12" height="4.2" rx="2.1" fill="#0a0d0b"/>
   </g>
   <text x="152" y="107" fill="#d8e2dc" font-size="29" font-weight="700">free-llm-api-hub</text>
-  <text x="80" y="180" fill="#3fce8f" font-size="24" font-weight="700" letter-spacing="6">&gt; ${esc(label)}</text>
+  <text x="80" y="180" fill="#3fce8f" font-size="24" font-weight="700" letter-spacing="6">&gt; ${escapeText(label)}</text>
   ${titleSvg}
-  <text x="82" y="470" fill="#808f87" font-size="27">${esc(subtitle)}</text>
+  <text x="82" y="470" fill="#808f87" font-size="27">${escapeText(subtitle)}</text>
   <text x="80" y="588" fill="#56655c" font-size="21">freellmapihub.com</text>
 </svg>`;
 }

@@ -5,7 +5,8 @@
 // state reads "Not stated" and is never filled in, and never reads as "no"; a quoted sentence is shown with the
 // page it comes from and the day it was read. Nothing is ranked or called best, and nothing is interpreted.
 
-import { htmlEsc, SLUG_RE } from './rows.mjs';
+import { escapeHtml } from './html.mjs';
+import { SLUG_RE } from './rows.mjs';
 import { claimsTableHtml } from './claims-table.mjs';
 import { safeHttp } from './text.mjs';
 
@@ -23,8 +24,8 @@ const KIND_LABEL = Object.freeze({ 'ide-extension': 'IDE extension', editor: 'ed
 // The quote and entry blocks share their markup (and styles) with the Free GPU page.
 const quoteHtml = (q) => {
   const src = safeHttp(q.source);
-  const link = src ? `<a href="${htmlEsc(src)}" target="_blank" rel="noopener">${htmlEsc(new URL(src).hostname)}</a>` : '';
-  return `<blockquote class="gpu-quote"><p>&ldquo;${htmlEsc(q.text)}&rdquo;</p><footer class="muted">${link}${link ? ' · ' : ''}read ${htmlEsc(q.read)}</footer></blockquote>`;
+  const link = src ? `<a href="${escapeHtml(src)}" target="_blank" rel="noopener">${escapeHtml(new URL(src).hostname)}</a>` : '';
+  return `<blockquote class="gpu-quote"><p>&ldquo;${escapeHtml(q.text)}&rdquo;</p><footer class="muted">${link}${link ? ' · ' : ''}read ${escapeHtml(q.read)}</footer></blockquote>`;
 };
 
 function claimHtml(slug, field, claim) {
@@ -33,7 +34,7 @@ function claimHtml(slug, field, claim) {
   if (claim.state === 'stated') state = '<span class="gpu-stated">Stated by the tool\'s page</span>';
   else if (claim.quotes.length) state = '<span class="gpu-unstated">Not stated</span> <span class="muted">Context quoted from the page:</span>';
   else state = '<span class="gpu-unstated">Not stated</span>';
-  return `<div class="gpu-claim"${SLUG_RE.test(slug) ? ` id="${slug}-${field}"` : ''}><dt>${htmlEsc(LABELS[field] || field)}</dt><dd>${state}${quotes}</dd></div>`;
+  return `<div class="gpu-claim"${SLUG_RE.test(slug) ? ` id="${slug}-${field}"` : ''}><dt>${escapeHtml(LABELS[field] || field)}</dt><dd>${state}${quotes}</dd></div>`;
 }
 
 /** { tools, stated } computed from the entries: how many tools, and how many of their values rest on a sentence. */
@@ -46,9 +47,9 @@ export function codingToolsCounts(section) {
 function entriesHtml(section, prefix = '../') {
   return section.entries.map((e) => {
     const url = safeHttp(e.url);
-    const name = url ? `<a href="${htmlEsc(url)}" target="_blank" rel="noopener">${htmlEsc(e.name)}</a>` : htmlEsc(e.name);
+    const name = url ? `<a href="${escapeHtml(url)}" target="_blank" rel="noopener">${escapeHtml(e.name)}</a>` : escapeHtml(e.name);
     const claims = Object.keys(LABELS).map((f) => claimHtml(e.slug, f, e.claims[f])).join('');
-    return `<section class="gpu-entry" id="${SLUG_RE.test(e.slug) ? e.slug : ''}"><h3>${name} <span class="muted">· ${htmlEsc(KIND_LABEL[e.kind] || e.kind)}</span></h3><dl class="gpu-claims">${claims}</dl>${SLUG_RE.test(e.slug) ? `<p class="muted"><a href="${prefix}coding-tools/${e.slug}/">The page of ${htmlEsc(e.name)} →</a></p>` : ''}</section>`;
+    return `<section class="gpu-entry" id="${SLUG_RE.test(e.slug) ? e.slug : ''}"><h3>${name} <span class="muted">· ${escapeHtml(KIND_LABEL[e.kind] || e.kind)}</span></h3><dl class="gpu-claims">${claims}</dl>${SLUG_RE.test(e.slug) ? `<p class="muted"><a href="${prefix}coding-tools/${e.slug}/">The page of ${escapeHtml(e.name)} →</a></p>` : ''}</section>`;
   }).join('');
 }
 
@@ -92,7 +93,7 @@ export function codingToolMainHtml(entry, { prefix = '../../', group = 'free', o
     ? 'This tool is free itself while the model behind it is paid for with your own key or a free API.'
     : 'This tool says it has a free plan.';
   return '<main id="main"><div class="wrap prose">' +
-    `<p>${htmlEsc(KIND_LABEL[entry.kind] || entry.kind)}. ${where}${url ? ` <a href="${htmlEsc(url)}" target="_blank" rel="noopener">The tool's own page ↗</a>.` : ''} ` +
+    `<p>${escapeHtml(KIND_LABEL[entry.kind] || entry.kind)}. ${where}${url ? ` <a href="${escapeHtml(url)}" target="_blank" rel="noopener">The tool's own page ↗</a>.` : ''} ` +
     'It is <strong>not part of the ranking</strong> of free LLM APIs, and each value below is written only where the tool\'s own page says it.</p>' +
     '<h2 id="stated">What its page states</h2>' +
     (stated.length ? claims(stated) : '<p class="muted">Nothing is stated yet.</p>') +
@@ -101,23 +102,23 @@ export function codingToolMainHtml(entry, { prefix = '../../', group = 'free', o
     (unstated.length ? claims(unstated) : '<p class="muted">Everything is stated.</p>') +
     '<h2 id="sources">Sources</h2>' +
     (sources.length
-      ? `<ul class="plain tool-sources">${sources.map((x) => `<li><a href="${htmlEsc(x.src)}" target="_blank" rel="noopener">${htmlEsc(x.src)}</a> · read ${x.days.map(htmlEsc).join(', ')}</li>`).join('')}</ul>`
+      ? `<ul class="plain tool-sources">${sources.map((x) => `<li><a href="${escapeHtml(x.src)}" target="_blank" rel="noopener">${escapeHtml(x.src)}</a> · read ${x.days.map(escapeHtml).join(', ')}</li>`).join('')}</ul>`
       : '<p class="muted">No source page is quoted.</p>') +
     (others.length
-      ? `<h2 id="others">Other free AI coding tools</h2><div class="colls">${others.filter((o) => SLUG_RE.test(o.slug)).map((o) => `<a href="${prefix}coding-tools/${o.slug}/">${htmlEsc(o.name)}</a>`).join('')}</div>`
+      ? `<h2 id="others">Other free AI coding tools</h2><div class="colls">${others.filter((o) => SLUG_RE.test(o.slug)).map((o) => `<a href="${prefix}coding-tools/${o.slug}/">${escapeHtml(o.name)}</a>`).join('')}</div>`
       : '') +
     '</div></main>';
 }
 
 const notesHtml = (section) => (section.notes || []).map((n) =>
-  `<section class="gpu-note"><h3>${htmlEsc(n.subject)}</h3><p>${htmlEsc(n.text)}</p>${n.quotes.map(quoteHtml).join('')}</section>`).join('');
+  `<section class="gpu-note"><h3>${escapeHtml(n.subject)}</h3><p>${escapeHtml(n.text)}</p>${n.quotes.map(quoteHtml).join('')}</section>`).join('');
 
 /** The second part of the page: tools that are free themselves while inference is paid with your own key or a free API. */
 function ownKeyHtml(ownKey, prefix) {
   if (!ownKey || !Array.isArray(ownKey.entries) || !ownKey.entries.length) return '';
   const c = codingToolsCounts(ownKey);
   return '<h2 id="own-key">Tools you connect your own key to</h2>' +
-    `<p>${htmlEsc(ownKey.note || 'The tool is free; inference is paid with your own key or a free API.')} ` +
+    `<p>${escapeHtml(ownKey.note || 'The tool is free; inference is paid with your own key or a free API.')} ` +
     `See also: <a href="${prefix}collections/openai-compatible">OpenAI-compatible free APIs</a>; <a href="${prefix}#explorer">the interactive explorer</a>. ` +
     'The same rule holds: a value is written only where the tool\'s own page says it, and <strong>Not stated</strong> is never <em>no</em>.</p>' +
     `<p class="muted">${c.tools} tools listed; ${c.stated} of ${c.total} values rest on a sentence from the tool's own page.</p>` +
@@ -139,6 +140,6 @@ export function codingToolsMainHtml(section, { prefix = '../', repo = '', ownKey
     (entries || '<p class="muted">No tool is recorded yet.</p>') +
     (notes ? '<h2>Worth knowing</h2>' + notes : '') +
     ownKeyHtml(ownKey, prefix) +
-    `<p class="muted">Looking for hosted LLM APIs instead? <a href="${prefix}">See the main list</a>. To add or correct a value, ${repo ? `<a href="${htmlEsc(repo)}/issues/new?template=inaccuracy.yml" target="_blank" rel="noopener">open an issue</a>` : 'open an issue'} with the tool\'s own page.</p>` +
+    `<p class="muted">Looking for hosted LLM APIs instead? <a href="${prefix}">See the main list</a>. To add or correct a value, ${repo ? `<a href="${escapeHtml(repo)}/issues/new?template=inaccuracy.yml" target="_blank" rel="noopener">open an issue</a>` : 'open an issue'} with the tool\'s own page.</p>` +
     '</div></main>';
 }
