@@ -7,6 +7,7 @@ import { dirname, join, extname } from 'node:path';
 import { privateTree } from './lib/private-tree.mjs';
 import { breadcrumbList, collectionPageJsonLd, comparePageJsonLd } from './lib/page-jsonld.mjs';
 import { SECTION_OGS } from './lib/og.mjs';
+import { redirectStubFiles } from './lib/redirects.mjs';
 
 // Structured data on the index pages, sitemap pages reachable by a link, noindex on the updates pagination, the
 // change feed advertised everywhere and the section social images (web plan of 24-11, SEO-2/3/5/6/8, UX-3, UX-7).
@@ -15,6 +16,9 @@ const ROOT = privateTree(REPO);
 const SITE = 'https://freellmapihub.com';
 const read = (rel) => readFileSync(join(ROOT, 'site', rel), 'utf8');
 const jsonld = (html) => JSON.parse(html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1]);
+// Retired URLs (data/redirects.json) are meta-refresh stubs under site/p/ and site/compare/, not pages.
+const STUBS = redirectStubFiles(JSON.parse(readFileSync(join(ROOT, 'data/redirects.json'), 'utf8')));
+const pairDirs = () => readdirSync(join(ROOT, 'site/compare'), { withFileTypes: true }).filter((e) => e.isDirectory() && !STUBS.has(`compare/${e.name}/index.html`));
 const graphTypes = (data) => (data['@graph'] || [data]).map((n) => n['@type']);
 
 before(() => { execFileSync(process.execPath, [join(ROOT, 'scripts/build.mjs')], { cwd: ROOT, stdio: 'pipe' }); });
@@ -47,7 +51,7 @@ test('the index pages that had no structured data now carry a page type and a br
     const types = graphTypes(jsonld(read(rel)));
     assert.ok(types.includes(type) && types.includes('BreadcrumbList'), `${rel}: ${types}`);
   }
-  for (const d of readdirSync(join(ROOT, 'site/compare'), { withFileTypes: true }).filter((e) => e.isDirectory())) {
+  for (const d of pairDirs()) {
     assert.deepEqual(graphTypes(jsonld(read(`compare/${d.name}/index.html`))), ['ItemList', 'BreadcrumbList'], d.name);
   }
 });
@@ -115,7 +119,7 @@ test('both feeds carry their own URL, and every generated page advertises the ch
 test('comparisons, coding tools and the API use their own social image, and each image exists', () => {
   for (const o of SECTION_OGS) assert.ok(existsSync(join(ROOT, 'site/og', o.file)), o.file);
   assert.match(read('compare/index.html'), /og:image" content="https:\/\/freellmapihub\.com\/og\/compare\.png"/);
-  const pair = readdirSync(join(ROOT, 'site/compare'), { withFileTypes: true }).find((e) => e.isDirectory()).name;
+  const pair = pairDirs()[0].name;
   assert.match(read(`compare/${pair}/index.html`), /og:image" content="https:\/\/freellmapihub\.com\/og\/compare\.png"/);
   assert.match(read('coding-tools/index.html'), /og\/coding-tools\.png"/);
   assert.match(read('api/index.html'), /og\/api\.png"/);
@@ -128,7 +132,7 @@ test('no internal link points to the .html variant of a collection', () => {
 });
 
 test('pages that name the site or the dataset refer to the home nodes and carry the same authorship', () => {
-  const htmlIn = (dir, n) => readdirSync(join(ROOT, 'site', dir)).filter((f) => f.endsWith('.html')).slice(0, n).map((f) => `${dir}/${f}`);
+  const htmlIn = (dir, n) => readdirSync(join(ROOT, 'site', dir)).filter((f) => f.endsWith('.html') && !STUBS.has(`${dir}/${f}`)).slice(0, n).map((f) => `${dir}/${f}`);
   const rels = ['models/index.html', 'changes/index.html', 'guides-and-collections/index.html', 'api/index.html', ...htmlIn('guides', 3), ...htmlIn('p', 5)];
   for (const rel of rels) {
     const refs = [];
