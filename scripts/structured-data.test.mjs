@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync, readdirSync, statSync, existsSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { dirname, join, relative } from 'node:path';
+import { dirname, join, relative, sep } from 'node:path';
 import { privateTree } from './lib/private-tree.mjs';
 import { isoDateTime, datasetFacts, guideDates, guideArticle, jsonLdErrors, pageJsonLd, GUIDE_PUBLISHED, ISO_DATETIME_TZ } from './lib/structured-data.mjs';
 import { datasetRef } from './lib/site-entity.mjs';
@@ -32,7 +32,7 @@ const all = (type) => pages.flatMap(({ rel, blocks }) => blocks.flatMap((b) => [
 before(() => {
   ROOT = privateTree(REPO);
   execFileSync(process.execPath, [join(ROOT, 'scripts/build.mjs')], { cwd: ROOT, stdio: 'pipe' });
-  pages = walk(join(ROOT, 'site')).map((f) => ({ rel: relative(join(ROOT, 'site'), f), blocks: pageJsonLd(readFileSync(f, 'utf8')) }));
+  pages = walk(join(ROOT, 'site')).map((f) => ({ rel: relative(join(ROOT, 'site'), f).split(sep).join('/'), blocks: pageJsonLd(readFileSync(f, 'utf8')) }));
 });
 
 test('isoDateTime: a recorded day becomes midnight UTC; a datetime with a timezone passes; anything else throws', () => {
