@@ -2548,7 +2548,7 @@ test('sitemap lists every indexable page except the deliberately omitted ones, w
   const missing = [];
   for (const f of pages) {
     const rel = slash(f.slice(join(ROOT, 'site').length + 1));
-    if (rel === '404.html' || rel.startsWith('updates/page/') || /^state\/\d{4}-\d{2}\//.test(rel)) continue; // 404 is not a page; pagination follows the commit count (test above)
+    if (rel === '404.html' || rel.startsWith('updates/page/') || /^state\/\d{4}-(?:\d{2}|q[1-4])\//.test(rel)) continue; // 404 is not a page; pagination follows the commit count (test above); monthly and quarterly reports are in sitemap-state.xml
     if (/^google[0-9a-f]+\.html$/.test(rel)) continue; // Search Console ownership file, not a page
     const html = readFileSync(f, 'utf8');
     if (/<meta name="robots" content="noindex">/.test(html)) continue; // redirect stubs and legal pages
@@ -2565,6 +2565,11 @@ test('sitemap lists every indexable page except the deliberately omitted ones, w
   const stateMap = readFileSync(join(ROOT, 'site/sitemap-state.xml'), 'utf8');
   for (const m of readdirSync(join(ROOT, 'site/state')).filter((f) => /^\d{4}-\d{2}$/.test(f))) {
     assert.match(stateMap, new RegExp(`<loc>https://freellmapihub\\.com/state/${m}/</loc>`), `state/${m} missing from sitemap-state.xml`);
+  }
+  // A closed quarterly report is listed there; one in progress is noindex and is not.
+  for (const q of readdirSync(join(ROOT, 'site/state')).filter((f) => /^\d{4}-q[1-4]$/.test(f))) {
+    const closed = JSON.parse(readFileSync(join(ROOT, `site/state/${q}/data.json`), 'utf8')).status === 'closed';
+    assert.equal(stateMap.includes(`<loc>https://freellmapihub.com/state/${q}/</loc>`), closed, `state/${q}: in sitemap-state.xml exactly when closed`);
   }
   assert.match(readFileSync(join(ROOT, 'site/robots.txt'), 'utf8'), /^Sitemap: https:\/\/freellmapihub\.com\/sitemap-state\.xml$/m);
 });
