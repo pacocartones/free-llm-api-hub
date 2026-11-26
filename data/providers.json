@@ -406,7 +406,9 @@
       "field_checks": {"phone_required":{"status":"source_silent","checked":"2026-11-24","sources":["https://docs.novita.ai/guides/quickstart","https://novita.ai/pricing","https://novita.ai/legal/terms-of-service"],"note":"Sign-up is by Google, GitHub or email; docs mention identity verification for some models without naming a phone"}},
       "verified": true,
       "last_verified": "2026-11-20",
-      "data_policy": {"trains_on_prompts":false,"retention":null,"source":"https://novita.ai/legal/terms-of-service","checked":"2026-10-15","quote":"By Default, Novita AI will not use your Content to train our own models or to improve the Services.","note":"Updated 2026-08-05. The terms mention free quotas (account section) but do not say this sentence covers them.","plan_named":false}
+      "data_policy": {"trains_on_prompts":false,"retention":null,"source":"https://novita.ai/legal/terms-of-service","checked":"2026-10-15","quote":"By Default, Novita AI will not use your Content to train our own models or to improve the Services.","note":"Updated 2026-08-05. The terms mention free quotas (account section) but do not say this sentence covers them.","plan_named":false},
+      "keys_url": "https://novita.ai/settings/key-management",
+      "keys_url_source": "https://docs.novita.ai/guides/introduction"
     },
     {
       "slug": "ai21",
@@ -1610,7 +1612,9 @@
       "verified": true,
       "last_verified": "2026-11-24",
       "added": "2026-07-31",
-      "data_policy": {"trains_on_prompts":null,"retention":"Conversion results: deleted about one day after processing; uploaded source-file retention unconfirmed","source":"https://documentation.datalab.to/platform/security","checked":"2026-11-24","quote":"Conversion results are automatically deleted from Datalab servers about one day after processing completes.","note":"Use of documents to improve models is opt-in in team settings; opting in receives discounted rates. Retention statement covers conversion results only. The quoted sentence does not name a plan."}
+      "data_policy": {"trains_on_prompts":null,"retention":"Conversion results: deleted about one day after processing; uploaded source-file retention unconfirmed","source":"https://documentation.datalab.to/platform/security","checked":"2026-11-24","quote":"Conversion results are automatically deleted from Datalab servers about one day after processing completes.","note":"Use of documents to improve models is opt-in in team settings; opting in receives discounted rates. Retention statement covers conversion results only. The quoted sentence does not name a plan."},
+      "keys_url": "https://www.datalab.to/app/keys",
+      "keys_url_source": "https://documentation.datalab.to/docs/recipes/conversion/conversion-api-overview"
     },
     {
       "slug": "wandb-inference",
@@ -2036,7 +2040,9 @@
       "added": "2026-11-25",
       "last_probed": null,
       "probe_status": null,
-      "data_policy": {"trains_on_prompts":true,"retention":null,"source":"https://stability.ai/terms-of-service","checked":"2026-11-25","quote":"As described in our Privacy Policy , we may use Content to improve and develop our Services (but you can opt-out to prevent us from using your Inputs and Outputs to train our models, learn more ), comply with applicable law, enforce our terms and policies, and to keep our Services safe.","note":"Terms effective 2026-09-30; they define the Services to include the API. Stability's opt-out help page explains how Platform API users turn the training toggle off in their account settings. No retention period for prompts is stated.","plan_named":false}
+      "data_policy": {"trains_on_prompts":true,"retention":null,"source":"https://stability.ai/terms-of-service","checked":"2026-11-25","quote":"As described in our Privacy Policy , we may use Content to improve and develop our Services (but you can opt-out to prevent us from using your Inputs and Outputs to train our models, learn more ), comply with applicable law, enforce our terms and policies, and to keep our Services safe.","note":"Terms effective 2026-09-30; they define the Services to include the API. Stability's opt-out help page explains how Platform API users turn the training toggle off in their account settings. No retention period for prompts is stated.","plan_named":false},
+      "keys_url": "https://platform.stability.ai/dashboard/api-keys",
+      "keys_url_source": "https://docs.stability.ai/api-reference"
     },
     {
       "slug": "plamo",
