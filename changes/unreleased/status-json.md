@@ -9,4 +9,4 @@
   dataset day, and the thresholds are in the file, so a client can regrade.
   Contract v1 with a JSON Schema at `/api/v1/status.schema.json`, listed in
   `index.json`, on `/api/` and in `llms.txt`, and documented in
-  `docs/api.md`. Purely additive: no existing file changes shape.
+  `docs/api.md`. Purely additive: no existing file changes shape (#918).

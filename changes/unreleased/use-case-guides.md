@@ -16,4 +16,4 @@
   LLM against the `/find/` wizard's own card, phone, commercial-use and training rules, with unconfirmed checks
   shown as not confirmed; the students guide adds the no-account providers and the student programs from
   `data/programs.json`. Every number, list and pick is computed from the data at build time
-  (`scripts/lib/long-guides.mjs`). Agent-assisted.
+  (`scripts/lib/long-guides.mjs`). Agent-assisted (#898).
