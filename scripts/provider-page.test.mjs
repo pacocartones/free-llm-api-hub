@@ -64,19 +64,26 @@ test('the built Groq page: one history entry per day, and its limits change show
   assert.match(list, /<ul class="upd-diff"><li><span class="upd-field">rate limits:<\/span> <del>[^<]+<\/del> → <ins>[^<]+<\/ins><\/li>/);
 });
 
-test('Q3: the quickstart follows the free limits, before speed, data policy and the about text', () => {
+test('the owner\'s order: What\'s free, a free key and the base URL, the quickstart, then limits, cards and a one-line score', () => {
+  // Mutant: move the actions under the score or the cards again, or put the quickstart back under the limits.
   for (const slug of ['groq', 'google-gemini', 'jina-ai']) {
     const html = readFileSync(join(ROOT, `site/p/${slug}.html`), 'utf8');
-    const at = (re) => { const m = html.match(re); return m ? m.index : -1; };
+    const main = html.slice(html.indexOf('<main id="main">'));
+    const at = (re) => { const m = main.match(re); return m ? m.index : -1; };
     const quick = at(/<h2 id="quickstart">/);
-    assert.ok(quick > 0, `${slug}: a quickstart`);
-    assert.ok(at(/<h2 id="whats-free">/) < quick, `${slug}: after what's free`);
-    const limits = at(/<h2[^>]*>Free limits/);
-    if (limits > 0) assert.ok(limits < quick, `${slug}: after the free limits`);
-    for (const later of [/<h2[^>]*>Published speed/, /<h2[^>]*>Data policy/, /<h2[^>]*>About /]) {
+    const actions = at(/<div class="prov-actions prov-key">/);
+    assert.ok(quick > 0 && actions > 0, `${slug}: a quickstart and the actions`);
+    assert.ok(at(/<h2 id="whats-free">/) < actions && actions < quick, `${slug}: What's free, then the actions, then the quickstart`);
+    for (const later of [/<h2 id="limits">/, /<details class="prov-reqs-box">/, /<div class="prov-score/, /<h2[^>]*>Published speed/, /<h2[^>]*>Data policy/, /<h2[^>]*>About /]) {
       const i = at(later);
       if (i > 0) assert.ok(quick < i, `${slug}: the quickstart comes before ${later}`);
     }
+    assert.ok(at(/<details class="prov-reqs-box">/) < at(/<div class="prov-score/), `${slug}: the cards, then the score`);
+    if (JSON.parse(readFileSync(join(ROOT, 'data/providers.json'), 'utf8')).providers.find((p) => p.slug === slug).openai_base_url) {
+      assert.match(main, /<button type="button" class="btn api-copy base-copy" data-api-url="https:\/\/[^"]+" data-label="Copy base URL"/, `${slug}: Copy base URL`);
+    }
+    assert.match(main, /<a class="prov-compare" href="#compare">Compare with…<\/a>/);
+    assert.doesNotMatch(main, /class="score-legend"|class="muted score-note"/, `${slug}: the score is one line, no legend block`);
   }
 });
 
@@ -98,12 +105,12 @@ test('Q9: the main modality respects is_text_llm, and suggested comparisons shar
   const bySlug = new Map(providers.map((p) => [p.slug, p]));
   for (const slug of ['groq', 'jina-ai', 'google-gemini', 'deepgram']) {
     const html = readFileSync(join(ROOT, `site/p/${slug}.html`), 'utf8');
-    const block = html.slice(html.indexOf('<h2>Compare</h2>'), html.indexOf('</div>', html.indexOf('<h2>Compare</h2>')));
+    const block = html.slice(html.indexOf('<h2 id="compare">Compare</h2>'), html.indexOf('</div>', html.indexOf('<h2 id="compare">Compare</h2>')));
     const others = [...block.matchAll(/href="\.\.\/compare\/(?:\?compare=[a-z0-9-]+,([a-z0-9-]+)|([a-z0-9-]+)-vs-([a-z0-9-]+)\/)"/g)]
       .map((m) => m[1] || (m[2] === slug ? m[3] : m[2]));
     for (const o of others) assert.equal(comparisonCategory(bySlug.get(o)), comparisonCategory(bySlug.get(slug)), `${slug} suggests ${o} of the same main modality`);
   }
-  assert.doesNotMatch(readFileSync(join(ROOT, 'site/p/groq.html'), 'utf8').split('<h2>Compare</h2>')[1].split('</div>')[0], /jina-ai/, 'Groq no longer suggests Jina AI');
+  assert.doesNotMatch(readFileSync(join(ROOT, 'site/p/groq.html'), 'utf8').split('<h2 id="compare">Compare</h2>')[1].split('</div>')[0], /jina-ai/, 'Groq no longer suggests Jina AI');
 });
 
 test('Q11: the meta description leads with the published limits, else trims the free tier at a word', () => {
@@ -126,14 +133,14 @@ test('Q11: the meta description leads with the published limits, else trims the 
 test('Q13: the score reads as a place with a bar of its six inputs, unknowns in grey', () => {
   const fractions = { quality: { frac: 0.75, known: true }, limits: { frac: 0, known: false }, friction: { frac: 0.5, known: true }, commercial: { frac: 0.5, known: false }, openai: { frac: 1, known: true }, stability: { frac: 0, known: false } };
   const out = scoreBlockHtml({ position: 1, of: 69, total: 62.4, editorial: 15, fractions, weights: SCORE_WEIGHTS, topRank: 1 });
-  assert.match(out, /<strong>#1 of 69<\/strong> by score <span class="muted">\(62\.4 \/ 100\)<\/span>/);
+  assert.match(out, /<strong>#1 of 69<\/strong> scored <span class="muted">\(62\.4 \/ 100\)<\/span>/);
   assert.equal((out.match(/class="sb-seg/g) || []).length, 6, 'six segments');
   assert.equal((out.match(/class="sb-seg sb-unknown"/g) || []).length, 3, 'the three unknown inputs are grey');
   assert.match(out, /style="flex-grow:22"><span class="sb-fill" style="width:75%">/, 'a segment is as wide as its weight and filled as far as earned');
   assert.match(out, /Unknowns lower the score on purpose/);
   assert.match(out, /role="img" aria-label="Score inputs: Model quality 16\.5 of 22; Free limits not confirmed, 0 of 18;/);
   const html = readFileSync(join(ROOT, 'site/p/groq.html'), 'utf8');
-  assert.match(html, /<p class="score-rank"><strong>#\d+ of \d+<\/strong> by score/);
+  assert.match(html, /<p class="score-rank"><strong>#\d+ of \d+<\/strong> scored/);
   assert.doesNotMatch(html, /<span class="best-score" title="Out of 100">/, 'no bare "N / 100" badge');
 });
 

@@ -71,7 +71,7 @@ export function stampHtml(p, opts) {
   if (o.shape === 'pill') {
     cls = 'stamp stamp-pill ' + fr.cls;
     inner = '<span class="stamp-dot" aria-hidden="true">' + (fr.st === 'stale' ? '!' : '') + '</span>' + sr +
-      '<b>Verified</b><span aria-hidden="true"> · </span>' + when + sources + of;
+      '<b>Verified</b><span aria-hidden="true"> · </span>' + when + (sources ? '<span class="stamp-n">' + sources + '</span>' : '') + of;
   } else {
     cls = 'stamp stamp-ticket ' + fr.cls + (o.long ? ' stamp-lg' : '');
     inner = '<b class="stamp-mark" aria-hidden="true">' + (fr.st === 'stale' ? '!' : '✓') + '</b>' +

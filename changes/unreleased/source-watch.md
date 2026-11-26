@@ -9,4 +9,4 @@
   listed as low priority. It never edits data, uses no secret, has only
   `contents: read` and `issues: write`, and lists our own ids and URLs, never
   page text; the run-to-run memory lives in the issue body, not the repository.
-  See `docs/update-playbook.md#source-watch`.
+  See `docs/update-playbook.md#source-watch` (#771).

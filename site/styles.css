@@ -176,6 +176,8 @@ svg.i { width: 15px; height: 15px; flex: none; vertical-align: -2px; }
 .nav { display: flex; gap: 4px; margin-left: 6px; }
 .nav a { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; color: var(--muted); font-size: .88rem; font-family: var(--font-sans); font-weight: 500; padding: 6px 10px; border-radius: 7px; }
 .nav a svg.i { width: 14px; height: 14px; opacity: .8; }
+/* The guided finder heads the phone menu; on a desktop it stays in the Providers group. */
+.nav a.nav-find { display: none; }
 .nav a:hover svg.i { opacity: 1; }
 .nav a:hover { color: var(--text); background: var(--panel); text-decoration: none; }
 /* The Best — the editorial top 10 is the one highlighted entry: a thin pill with a gradient border
@@ -265,14 +267,14 @@ svg.i { width: 15px; height: 15px; flex: none; vertical-align: -2px; }
 /* Brand H1: the copy on the left, aligned left; the field of every provider's aura on the right (lib/aura.mjs), with
    the key to read it. Plain ground, no glow. On a phone the field goes, so the explorer stays in the first viewport. */
 .hero { position: relative; border-bottom: 1px solid var(--border); }
-.hero-inner { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px 40px; align-items: center; padding-top: 40px; padding-bottom: 22px; }
+.hero-inner { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 20px 48px; align-items: center; padding-top: 36px; padding-bottom: 24px; }
 .hero-copy { min-width: 0; }
 .hero-logo { display: inline-flex; margin-bottom: 16px; }
-.hero-star { margin-top: 16px; display: flex; flex-wrap: wrap; gap: 10px; }
 .eyebrow { color: var(--muted); font-weight: 500; font-size: .74rem; letter-spacing: .14em; text-transform: uppercase; margin: 0 0 12px; font-family: var(--font-mono); }
 h1 { font-size: clamp(1.9rem, 4.4vw, 3rem); line-height: 1.1; margin: 0 auto 18px; max-width: 20ch; }
 .lede { color: var(--muted); font-size: 1.1rem; max-width: 64ch; margin: 0 auto 30px; }
-.hero h1 { max-width: none; margin: 0 0 16px; font-size: clamp(2.5rem, 5.4vw, 4.6rem); line-height: .95; text-wrap: balance; }
+/* Two lines on a desktop (one per sentence), so the hero stays short enough for the explorer to show under it. */
+.hero h1 { max-width: none; margin: 0 0 16px; font-size: clamp(2.3rem, 3.9vw, 3.5rem); line-height: 1; text-wrap: balance; }
 /* The key phrase in the accent, set in the variable font's narrow heavy cut. It "breathes" (width and weight) once on
    load, only when motion is welcome, and never loops (WCAG 2.2.2). */
 .h1-key { color: var(--accent); }
@@ -282,12 +284,13 @@ h1 { font-size: clamp(1.9rem, 4.4vw, 3rem); line-height: 1.1; margin: 0 auto 18p
 }
 .hero .lede { margin: 0 0 14px; max-width: 54ch; font-size: 1.125rem; }
 .hero .stats-line { margin: 0; }
-.hero .hero-links { justify-content: flex-start; }
+.hero .hero-cta { justify-content: flex-start; margin: 0 0 16px; }
 .hero-field { min-width: 0; }
-.aura-field { display: grid; grid-template-columns: repeat(9, minmax(0, 1fr)); gap: 9px; }
-.aura-field a { display: block; border-radius: 4px; line-height: 0; }
+/* 77 auras in 13 columns: six short rows, so the field is no taller than the copy beside it. */
+.aura-field { display: grid; grid-template-columns: repeat(13, minmax(0, 1fr)); gap: 6px; }
+.aura-field .aura-cell { display: block; line-height: 0; }
 .aura-field .aura { width: 100%; }
-.aura-key { margin-top: 20px; font-size: .8rem; color: var(--muted); }
+.aura-key { margin-top: 14px; font-size: .78rem; color: var(--muted); }
 .aura-key-h { margin: 0 0 8px; }
 .aura-key-h a { text-decoration: underline; text-underline-offset: 2px; }
 .aura-key ul { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 8px 16px; }
@@ -300,6 +303,7 @@ h1 { font-size: clamp(1.9rem, 4.4vw, 3rem); line-height: 1.1; margin: 0 auto 18p
 .hue-dot { width: 10px; height: 10px; border-radius: 2px; flex: none; box-shadow: 0 0 0 1px var(--border); }
 .hue-text { background: var(--h-text); } .hue-vision { background: var(--h-vision); } .hue-image { background: var(--h-image); }
 .hue-audio { background: var(--h-audio); } .hue-embeddings { background: var(--h-embeddings); } .hue-rerank { background: var(--h-rerank); } .hue-ocr { background: var(--h-ocr); }
+@media (width <= 1180px) { .aura-key-shapes { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (width <= 900px) {
   .hero-inner { grid-template-columns: minmax(0, 1fr); }
   .aura-field { grid-template-columns: repeat(13, minmax(0, 1fr)); gap: 6px; }
@@ -313,10 +317,13 @@ h1 { font-size: clamp(1.9rem, 4.4vw, 3rem); line-height: 1.1; margin: 0 auto 18p
 }
 @media (width <= 480px) {
   .hero h1 { font-size: 2.3rem; }
-  /* Phones: the Popular row repeats the menu (Models, Compare, Guides) and the star button repeats the header's star
-     count; both go, so the search box and the first rows come up (Q2). The Get started row stays. */
-  .hero-links.hl-popular, .hero-star, .aura-key-hues { display: none; }
+  .aura-key-hues { display: none; }
 }
+/* The home hero has ONE primary action (the guided finder) and one quiet secondary link down to the table. */
+.hero-cta { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px 22px; margin: 4px 0 16px; }
+.hero-browse { font-family: var(--font-mono); font-size: .9rem; font-weight: 600; }
+.hero .stats-line { font-size: .8rem; }
+.hero .stats-line strong { font-weight: 600; }
 .cta { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-bottom: 40px; }
 
 /* star button */
@@ -381,26 +388,51 @@ h1 { font-size: clamp(1.9rem, 4.4vw, 3rem); line-height: 1.1; margin: 0 auto 18p
 
 /* Verified cell: check badge + date stacked and centered against the row, so the
    unit lands on the provider-name line instead of hugging the top of a tall row. */
-.ver-cell { display: inline-flex; flex-direction: column; align-items: center; gap: 4px; }
+.ver-cell { display: inline-flex; flex-direction: row; align-items: center; gap: 7px; }
 #table td.pver { vertical-align: middle; text-align: center; }
 .ver-date { font-size: .72rem; color: var(--muted); font-family: var(--font-mono); }
 .sel { cursor: pointer; } .sel:hover { border-color: var(--border-strong); }
 .seg { display: flex; gap: 3px; background: var(--panel-2); border: 1px solid var(--control); border-radius: 9px; padding: 3px; }
 .seg button { background: transparent; border: 0; color: var(--muted); padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: .82rem; font-weight: 600; font-family: var(--font-mono); }
 .seg button.active { background: var(--accent); color: var(--accent-ink); }
-.chips { display: flex; flex-wrap: wrap; gap: 6px; }
-.chip { display: inline-flex; align-items: center; gap: 6px; background: var(--panel-2); border: 1px solid var(--control); color: var(--muted); padding: 6px 10px; border-radius: 7px; cursor: pointer; font-size: .8rem; font-family: var(--font-mono); user-select: none; }
-.chip svg { width: 13px; height: 13px; }
-.chip { position: relative; }
-.chip input { position: absolute; opacity: 0; width: 100%; height: 100%; inset: 0; margin: 0; cursor: pointer; }
-.chip:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
-.chip.on { background: color-mix(in srgb, var(--accent) 14%, transparent); border-color: var(--accent); color: var(--accent-dim); }
+/* The Requirements dropdown: the boolean filters and the type, behind one button that says how many are on. The checkboxes are
+   real, visible inputs inside their labels, so each option is one tab stop with the native focus ring. */
+.req { position: relative; }
+.req-btn { list-style: none; display: inline-flex; align-items: center; gap: 6px; user-select: none; }
+.req-btn::-webkit-details-marker { display: none; }
+.req-btn::after { content: "▾"; font-size: .75em; opacity: .8; }
+.req[open] > .req-btn::after { content: "▴"; }
+.req-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.req-n { color: var(--accent); }
+.req-panel { position: absolute; top: calc(100% + 6px); left: 0; z-index: 40; min-width: 270px; padding: 12px 14px; display: grid; gap: 12px;
+  background: var(--panel-2); border: 1px solid var(--control); border-radius: 10px; box-shadow: var(--shadow-md); }
+.req-group { border: 0; margin: 0; padding: 0; display: grid; gap: 2px; }
+.req-group legend { padding: 0; margin-bottom: 4px; font-family: var(--font-mono); font-size: .72rem; color: var(--faint); text-transform: uppercase; letter-spacing: .06em; }
+.req-opt { display: flex; align-items: center; gap: 9px; padding: 5px 2px; font-size: .88rem; color: var(--text); cursor: pointer; }
+.req-opt input { width: 16px; height: 16px; margin: 0; accent-color: var(--accent); cursor: pointer; }
+.req .seg { width: fit-content; }
+.req .seg button { white-space: nowrap; }
+/* Active filters: one removable chip per filter that is on, under the bar; nothing at all when nothing is filtered. */
+.active-filters { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; padding-top: 9px; max-width: 1480px; }
+.active-filters[hidden] { display: none; }
+.af-label { font-family: var(--font-mono); font-size: .72rem; color: var(--faint); text-transform: uppercase; letter-spacing: .06em; }
+.af-list { display: contents; }
+.af-chip { display: inline-flex; align-items: center; gap: 7px; background: color-mix(in srgb, var(--accent) 14%, transparent); border: 1px solid var(--accent); color: var(--accent-dim); padding: 3px 9px; border-radius: 999px; cursor: pointer; font-size: .78rem; font-family: var(--font-mono); }
+.af-x { font-size: .8em; }
 .clear-btn { background: transparent; border: 1px solid var(--control); color: var(--muted); padding: 7px 11px; border-radius: 7px; cursor: pointer; font-size: .8rem; font-weight: 600; font-family: var(--font-mono); }
+.active-filters .clear-btn { border: 0; padding: 3px 4px; text-decoration: underline; text-underline-offset: 2px; }
 .clear-btn:hover { border-color: var(--bad); color: var(--bad); }
 
 /* ---------- presets ---------- */
+/* Above the home table: the "All providers" heading and the collections as plain text links (no chips). */
+.explorer-intro .explorer-intro-inner { max-width: 1480px; display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 18px; padding-top: 18px; padding-bottom: 6px; }
+.explorer-h { margin: 0; font-size: 1.15rem; }
 .presets { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 11px; }
+.explorer-intro .presets { display: block; margin: 0; font-size: .82rem; color: var(--muted); }
+.explorer-intro .presets a { text-decoration: underline; text-underline-offset: 2px; text-decoration-color: color-mix(in srgb, currentColor 40%, transparent); }
+.presets-sep { color: var(--faint); }
 .presets-label { font-family: var(--font-mono); font-size: .72rem; color: var(--faint); text-transform: uppercase; letter-spacing: .06em; }
+.explorer-intro .presets-label { margin-right: 6px; }
 .presets button { background: var(--panel-2); border: 1px solid var(--border); color: var(--muted); padding: 5px 11px; border-radius: 999px; cursor: pointer; font-size: .8rem; font-family: var(--font-mono); transition: border-color .12s, color .12s, background .12s; }
 .presets button:hover { border-color: var(--accent); color: var(--accent); }
 .presets button.active { background: color-mix(in srgb, var(--accent) 16%, transparent); border-color: var(--accent); color: var(--accent-dim); }
@@ -414,9 +446,6 @@ main:has(> .page-hero:first-child) { padding-top: 0; } /* the page hero sits ins
 table { width: 100%; border-collapse: collapse; font-size: .9rem; }
 thead th { text-align: left; padding: 14px 14px; border-bottom: 1px solid var(--border-strong); color: var(--text); font-weight: 700; white-space: nowrap; font-family: var(--font-mono); font-size: .95rem; text-transform: uppercase; letter-spacing: .03em; }
 main#explorer > .wrap, .controls .controls-inner { max-width: 1480px; }
-.fmini { display: flex; flex-wrap: wrap; gap: 7px 8px; margin-top: 8px; }
-.fmini-i { display: inline-flex; color: var(--muted); }
-.fmini-i svg.i { width: 15px; height: 15px; }
 table.sortable thead th { cursor: pointer; }
 table.sortable thead th:hover { color: var(--text); }
 thead th.sorted { color: var(--accent); }
@@ -434,11 +463,12 @@ tbody tr:hover { background: var(--panel); }
    title and on the provider page). The header row stays pinned under the header and, where the controls are pinned, under them. */
 @media (min-width: 721px) {
   #table { table-layout: fixed; }
-  #table th:nth-child(1) { width: 22%; }
-  #table th:nth-child(2) { width: 8%; }
-  #table th:nth-child(3) { width: 26%; }
-  #table th:nth-child(4) { width: 20%; }
-  #table th:nth-child(5) { width: 24%; }
+  #table th:nth-child(1) { width: 30%; }
+  #table th:nth-child(2) { width: 31%; }
+  #table th:nth-child(3) { width: 20%; }
+  #table th:nth-child(4) { width: 19%; }
+  /* Row height budget (≤ 72px, home-density.test.mjs): 2 × 9px padding + two text lines of at most 22px + a 1px border. */
+  #table tbody td { padding-top: 9px; padding-bottom: 9px; }
   #table td { vertical-align: middle; }
   #table tbody tr:focus-within { background: var(--panel); }
   #table thead th { position: sticky; top: var(--header-h); z-index: 5; background: var(--bg); }
@@ -446,11 +476,19 @@ tbody tr:hover { background: var(--panel); }
 .clamp2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; line-height: 1.45; }
 .name .best { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 /* The provider name looks like a link-button (a faint frame and an arrow); the whole row is highlighted on hover and on keyboard focus. */
-.name a.name-link { display: inline-flex; align-items: center; gap: 4px; padding: 2px 9px; border-radius: 7px; border: 1px solid color-mix(in srgb, var(--accent) 30%, var(--border)); background: color-mix(in srgb, var(--accent) 6%, transparent); }
-.name a.name-link .name-go { opacity: .7; }
-.name a.name-link:hover, #table tbody tr:hover .name-link, #table tbody tr:focus-within .name-link { color: var(--accent-dim); border-color: var(--accent); background: color-mix(in srgb, var(--accent) 14%, transparent); }
-.catch-tag { display: inline-block; margin: 0 4px 4px 0; padding: 1px 7px; border-radius: 6px; font-size: .7rem; font-family: var(--font-mono); color: var(--text); border: 1px solid color-mix(in srgb, var(--unk) 45%, transparent); background: color-mix(in srgb, var(--unk) 12%, transparent); }
-.catch-more { font-size: .78rem; font-family: var(--font-mono); white-space: nowrap; }
+/* The provider name is a plain link; the type (Ongoing / Trial) sits right after it on the same line. */
+.name-line { display: flex; align-items: center; gap: 8px; line-height: 1.4; min-width: 0; }
+.name-line .badge { flex: none; }
+/* One line: a long name is cut with an ellipsis (its full text is the link's title and the provider page). */
+.name-line .name-link { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.name a.name-link:hover, #table tbody tr:hover .name-link, #table tbody tr:focus-within .name-link { color: var(--accent-dim); }
+.name .best { line-height: 1.4; margin-top: 2px; }
+/* «Needs / unknown»: words, at most two lines. What is required reads in the text colour, what is unknown is muted. */
+#table td.needs { font-size: .84rem; }
+.needs .need-req, .needs .need-unk, .needs .need-none { display: block; }
+.needs .need-req { color: var(--text); }
+.needs .need-unk, .needs .need-none { color: var(--muted); }
+
 /* keyboard row navigation (#174): the focused row gets the same accent ring as every other focusable control */
 #table tbody tr:focus { outline: none; }
 #table tbody tr:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; background: var(--panel); }
@@ -589,6 +627,7 @@ pre code { color: var(--text); }
 .cov-field summary { cursor: pointer; }
 .cov-list { list-style: none; margin: 10px 0 2px; padding: 0; display: flex; flex-direction: column; gap: 6px; }
 .cov-task { line-height: 1.5; overflow-wrap: anywhere; }
+.tool-sources a { overflow-wrap: anywhere; } /* a source is listed by its full URL, which has no break point: without this it widens the page on a phone */
 .cov-pop { display: none; }
 /* /quality/ — the week histogram: a bar beside each number (decoration; the number is the data) */
 .q-barcell { width: 40%; min-width: 60px; padding-left: 12px !important; }
@@ -611,7 +650,24 @@ pre code { color: var(--text); }
 .prov-card p { margin: 0; font-size: .92rem; }
 .prov-card code { word-break: break-all; }
 .prov-summary { background: var(--panel); border: 1px solid var(--border); border-radius: 20px; padding: 22px 24px; margin: 22px 0; }
-.prov-summary h2 { margin: 0 0 8px; font-size: 1.6rem; color: var(--text); }
+.prov-summary h2 { margin: 0 0 8px; font-size: 1.6rem; color: var(--text); border-top: 0; padding-top: 0; }
+/* Right under What's free: the two actions (a free key, the base URL) and the Compare link, before the quickstart. */
+.prov-key { align-items: center; margin: 0 0 8px; }
+.prov-key .prov-compare { font-size: .9rem; text-decoration: underline; text-underline-offset: 2px; }
+.prov-key .api-copy-status { flex-basis: 100%; min-height: 0; }
+.prov-key .api-copy-status:empty { display: none; }
+.prov-key .prov-key-hint { flex-basis: 100%; margin: 0; font-size: .86rem; }
+/* The requirement cards behind one summary line (the hero already shows the flags as marks). */
+.prov-reqs-box { margin: 26px 0 0; border: 1px solid var(--border); border-radius: var(--radius); background: var(--panel); }
+.prov-reqs-box > summary { cursor: pointer; padding: 12px 16px; font-weight: 600; }
+.prov-reqs-box > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.prov-reqs-box[open] > summary { border-bottom: 1px solid var(--border); }
+.prov-reqs-box .prov-reqs { margin: 0; padding: 14px; }
+/* The score on the provider page: one line (place, a small bar, the method link). */
+.prov-score.prov-score-line { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 6px 14px; margin: 18px 0 0; }
+.prov-score-line .score-rank strong { font-size: 1.05rem; font-stretch: 100%; font-weight: 700; vertical-align: 0; }
+.prov-score-line .score-bar { flex: 0 0 160px; height: 10px; }
+@media (max-width: 480px) { .prov-score-line .score-bar { display: none; } }
 .prov-score { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 14px 0; font-size: .92rem; }
 .prov-score .best-score { margin-left: 0; }
 /* Q13: the score as a place ("#1 of 69") and a bar of the six inputs of lib/score.mjs, each segment as wide as its
@@ -812,10 +868,12 @@ pre code { color: var(--text); }
     position: absolute; top: var(--header-h); left: 0; right: 0;
     flex-direction: column; align-items: stretch; gap: 2px; margin: 0;
     padding: 8px 16px 14px;
-    background: var(--header-bg); border-bottom: 1px solid var(--border);
-    box-shadow: var(--shadow-sm);
+    background: var(--bg); border-bottom: 1px solid var(--border-strong);
+    box-shadow: var(--shadow-md);
     display: none;
   }
+  .nav a.nav-find { display: flex; margin-bottom: 6px; justify-content: center; color: var(--accent-ink); background: var(--accent); font-weight: 700; }
+  .nav a.nav-find:hover { color: var(--accent-ink); background: var(--accent-dim); }
   .site-header.nav-open .nav { display: flex; }
   .nav a { padding: 11px 12px; font-size: .95rem; border-radius: 8px; }
   .nav a.nav-best { padding: 11px 14px; border-radius: 999px; }
@@ -843,11 +901,12 @@ pre code { color: var(--text); }
   #table td::before { content: attr(data-label); content: attr(data-label) / ""; flex: 0 0 40%; color: var(--faint); font-weight: 600; font-size: .7rem; text-transform: uppercase; letter-spacing: .04em; font-family: var(--font-mono); }
   #table td.name { display: block; padding: 12px 14px 8px; border-bottom: 1px solid var(--border); margin-bottom: 4px; }
   #table td.name::before { content: none; }
-  #table td.notes { max-width: none; }
-  /* The two long text cells stack their label above the text and use the whole card width: beside a 40% label the text was a
-     narrow column (the catch alone was 43% of a 54,000px page at 360px). */
-  #table td.notes, #table td:nth-child(3) { display: block; }
-  #table td.notes::before, #table td:nth-child(3)::before { display: block; margin-bottom: 3px; }
+  .name-line { flex-wrap: wrap; }
+  .name-line .name-link { white-space: normal; }
+  /* "What's free" stacks its label above the text and uses the whole card width: beside a 40% label the text was a
+     narrow column. The short «Needs / unknown» cell keeps its label beside it. */
+  #table td.free { display: block; }
+  #table td.free::before { display: block; margin-bottom: 3px; }
 }
 @media (max-width: 640px) { .stats { grid-template-columns: repeat(2, 1fr); } .footer-top { grid-template-columns: 1fr; } .notes { max-width: none; } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto; transition: none !important; animation: none !important; } }
@@ -856,8 +915,7 @@ pre code { color: var(--text); }
 p.muted a, .prose p a, .prov-summary p a { text-decoration: underline; text-underline-offset: 2px; }
 
 /* Sorting on small screens: the column headers are hidden there, so a select takes their place. */
-.sort-mobile { display: none; align-items: center; gap: 8px; font-size: .85rem; color: var(--muted); font-family: var(--font-mono); }
-@media (max-width: 720px) { .sort-mobile { display: inline-flex; } }
+.sort-by { display: inline-flex; align-items: center; gap: 8px; font-size: .85rem; color: var(--muted); font-family: var(--font-mono); }
 /* The modality filter: a native select (its value drives explorer.js and the GA4 hook) with a small decorative dot in
    the colour of the selected modality (--m-*, set by explorer.js through data-mod). No dot for "All modalities". */
 .mod-pick { position: relative; display: inline-flex; }
@@ -871,7 +929,8 @@ p.muted a, .prose p a, .prov-summary p a { text-decoration: underline; text-unde
 .mod-dot[data-mod="embeddings"] { background: var(--m-embeddings); }
 .mod-dot[data-mod="rerank"] { background: var(--m-rerank); }
 .mod-dot[data-mod="ocr"] { background: var(--m-ocr); }
-.search-input { cursor: text; flex: 1 1 180px; max-width: 260px; min-width: 150px; }
+.search-input { cursor: text; flex: 1 1 220px; max-width: 340px; min-width: 150px; }
+.controls .filter-count { margin: 0 0 0 auto; }
 
 /* Narrow phones: the brand and the three header buttons must fit without the theme toggle leaving the viewport. */
 @media (max-width: 420px) {
@@ -916,6 +975,16 @@ p.muted a, .prose p a, .prov-summary p a { text-decoration: underline; text-unde
    provider name to 64px and pushed long notes past the viewport; cells may now shrink and wrap.
    Tablet (721 to 1000px): the table needed 939px, so the headers wrap and the cells take less padding.
    /models/: same for its four columns on phones. */
+/* The control bar on a phone: the search box on its own row, then Requirements and the modality side by side, then the sort. */
+@media (max-width: 720px) {
+  .controls-inner .search-input { flex: 1 1 100%; max-width: none; }
+  .controls-inner .req, .controls-inner .mod-pick { flex: 1 1 0; min-width: 0; }
+  .controls-inner .req-btn, .controls-inner .mod-pick .sel { width: 100%; justify-content: space-between; }
+  /* the sort takes its own row (flex-basis 100%); on "auto" it shared the row and crushed the two pickers to their arrows */
+  .controls-inner .sort-by { flex: 1 1 100%; }
+  .controls-inner .sort-by .sel { flex: 1 1 auto; min-width: 0; }
+  .req-panel { min-width: min(300px, calc(100vw - 32px)); }
+}
 @media (max-width: 720px) {
   #table td:nth-child(1) { width: 100%; }
   #table td { min-width: 0; overflow-wrap: anywhere; }
@@ -923,7 +992,7 @@ p.muted a, .prose p a, .prov-summary p a { text-decoration: underline; text-unde
 @media (min-width: 721px) and (max-width: 1000px) {
   #table thead th { white-space: normal; padding: 12px 6px; letter-spacing: 0; }
   #table td { padding-left: 6px; padding-right: 6px; }
-  #table td.notes { max-width: 24ch; }
+
 }
 .model-table th, .model-table td { overflow-wrap: anywhere; }
 @media (max-width: 480px) {
@@ -994,7 +1063,9 @@ p.muted a, .prose p a, .prov-summary p a { text-decoration: underline; text-unde
 .month-summary { max-width: 70ch; margin: 0 auto 22px; text-align: center; }
 /* /changes/: one table by year and month; a month without a revision is dimmed. */
 .months-table th[scope="rowgroup"] { vertical-align: top; text-align: left; font-family: var(--font-mono); }
-.months-table tr.empty td { color: var(--muted); }
+.months-table tr.empty td { color: var(--muted); font-family: inherit; }
+/* A date in a table cell (the guides' "Checked" column) never breaks across lines. */
+td time { white-space: nowrap; }
 
 /* The "About" block of a provider page: each line with its source and the day it was read. */
 .prov-about { display: grid; gap: 0; margin: 0 0 12px; }
@@ -1087,8 +1158,13 @@ a.stamp:hover { text-decoration: none; }
 .stamp-pill.b-stale .stamp-dot { background: var(--bad); width: 12px; height: 12px; }
 #table td.pver { text-align: left; }
 #table td.pver .ver-cell { display: inline-flex; justify-content: flex-start; max-width: 100%; }
-/* In the explorer the pill is a little smaller, and on a narrow column its text may wrap instead of overflowing. */
-#table .stamp-pill { font-size: 11px; white-space: normal; row-gap: 0; flex-wrap: wrap; border-radius: 14px; }
+/* In the explorer the pill is a little smaller and always one line (the row budget is 72px); where the column is
+   narrow the source count steps out (it stays on the provider page and in the stamp's title). */
+#table .stamp-pill { font-family: var(--font-sans); font-variant-numeric: tabular-nums; font-size: 12px; white-space: nowrap; gap: 6px;
+  padding: 3px 10px 3px 8px; max-width: 100%; }
+@media (max-width: 1279px) { #table .stamp-pill .stamp-n { display: none; } }
+/* A tight desktop column keeps the dot and the date; "Verified" is still read out (the sr-only state before it). */
+@media (min-width: 721px) and (max-width: 959px) { #table .stamp-pill b, #table .stamp-pill b + span { display: none; } }
 @media (prefers-reduced-motion: no-preference) {
   .stamp-ticket { animation: stamp-in 180ms var(--ease) both; transition: transform var(--t-base) var(--ease); }
   .stamp-ticket:hover, .stamp-ticket:focus-visible { transform: rotate(0) scale(1.04); }
@@ -1159,3 +1235,7 @@ a.stamp:hover { text-decoration: none; }
   .find-opts { grid-template-columns: 1fr; }
   .find-nav .btn, .find-tools .btn { flex: 1 1 auto; justify-content: center; }
 }
+/* "Copy base URL" on the provider page is a secondary button like its neighbours, not the API page's small copy chip. */
+.btn.base-copy { margin: 0; padding: 11px 18px; border: 1px solid var(--border-strong); border-radius: 9px; background: var(--panel); color: var(--text); font-family: var(--font-mono); font-weight: 700; font-size: .92rem; }
+.btn.base-copy:hover { border-color: var(--accent); color: var(--accent-dim); }
+.btn.base-copy.copied { border-color: var(--ok); color: var(--ok); }

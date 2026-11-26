@@ -6,15 +6,16 @@ import { readFileSync, existsSync } from 'node:fs';
 const read = (rel) => readFileSync(new URL(`../${rel}`, import.meta.url), 'utf8');
 const providers = JSON.parse(read('data/providers.json')).providers;
 
-test('home hero: one aura per provider, decorative, with no tab stop, and the key to read it', () => {
-  // Mutant: give the 70 field links tab stops (a keyboard user would cross them all before the explorer), or drop the key.
+test('home hero: one aura per provider, decorative, with no links, and the key to read it', () => {
+  // Mutant: turn the field into links (they would count as hero controls and cross a keyboard user's path), or drop the key.
   const html = read('site/index.html');
   const field = html.match(/<div class="aura-field" aria-hidden="true">([\s\S]*?)<\/div>/);
   assert.ok(field, 'the field, hidden from assistive technology');
-  const links = field[1].match(/<a href="p\/[a-z0-9-]+" tabindex="-1"><span class="aura[ "]/g) || [];
-  assert.equal(links.length, providers.length, 'one aura per provider');
-  assert.doesNotMatch(field[1], /<a (?![^>]*tabindex="-1")/, 'no link in the field takes a tab stop');
-  assert.match(html, /<div class="aura-key"><p class="aura-key-h">Each aura is one provider, drawn from its own data: a colour sector per modality\. <a href="methodology\/#how-to-read-an-aura">How to read it<\/a>/);
+  const cells = field[1].match(/<span class="aura-cell"><span class="aura[ "]/g) || [];
+  assert.equal(cells.length, providers.length, 'one aura per provider');
+  assert.doesNotMatch(field[1], /<a[ >]/, 'no link in the field');
+  assert.match(html, /<div class="aura-key"><p class="aura-key-h">Each aura is one provider, drawn from its own data: a colour sector per modality; each provider page reads its own in words\.<\/p>/);
+  assert.doesNotMatch(html.match(/<div class="aura-key">[\s\S]*?<\/div>/)[0], /<a[ >]/, 'the key adds no control to the hero');
   for (const w of ['rays from the centre', 'outer crown only', 'dashed circle', 'faded']) assert.ok(html.includes(`</b>${w}</span>`), 'key reading: ' + w);
   for (const w of ['Ongoing', 'Trial', 'Not stated', 'Checked 30+ days ago']) assert.ok(html.includes(`<b>${w}</b>`), 'key: ' + w);
   for (const w of ['text', 'vision', 'image', 'speech', 'embeddings', 'rerank', 'OCR']) assert.match(html, new RegExp(`aria-hidden="true"></span>${w}</li>`), 'hue named: ' + w);

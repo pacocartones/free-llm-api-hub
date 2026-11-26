@@ -24,6 +24,8 @@ Every entry is dated and sourced to the provider's own docs, and what we could n
 
 **[🔎 Interactive explorer](https://freellmapihub.com/)** &nbsp;·&nbsp; **[📊 Dataset](data/providers.json)** &nbsp;·&nbsp; **[🧪 How we verify](docs/methodology.md)** &nbsp;·&nbsp; **[➕ Add a provider](CONTRIBUTING.md)**
 
+Not sure where to start? [Find my free API](https://freellmapihub.com/find/) asks six questions and gives you a shortlist.
+
 ⭐ **Useful? [Star the repo](https://github.com/pacocartones/free-llm-api-hub)** so other builders find it. &nbsp;·&nbsp; 🛠 **Want to help?** Start with a [good first issue](https://github.com/pacocartones/free-llm-api-hub/contribute) or the [first-contribution steps](CONTRIBUTING.md#your-first-contribution-step-by-step).
 
 </div>
