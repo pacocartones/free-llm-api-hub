@@ -24,11 +24,14 @@ import { andList } from './long-guides.mjs';
 import { NOT_STATED } from './provider-faq.mjs';
 import { FAMILY_PATH } from './model-families.mjs';
 import { triStateHtml } from './compare.mjs';
-import { datasetRef } from './site-entity.mjs';
+import { datasetRef, websiteRef } from './site-entity.mjs';
+import { safeUrl } from './text.mjs';
+import { isoDateTime } from './structured-data.mjs';
 import { collectionPageJsonLd, breadcrumbList } from './page-jsonld.mjs';
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
-const safeUrl = (u) => (/^https:\/\/[^\s]+$/i.test(String(u || '')) ? escapeHtml(u) : '');
+// Sources on these pages must be https with no white space: stricter than text.mjs's http(s), built on its safeUrl.
+const httpsUrl = (u) => (/^https:\/\/[^\s]+$/i.test(String(u || '')) ? safeUrl(u) : '');
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 /** 2026-11-24 -> "24 Nov 2026". */
 export const dayLabel = (iso) => (DATE_RE.test(String(iso || '')) ? `${Number(iso.slice(8, 10))} ${MONTHS[Number(iso.slice(5, 7)) - 1]} ${iso.slice(0, 4)}` : '');
@@ -55,17 +58,17 @@ export const LIMIT_FACTS = Object.freeze(['free_limits', 'data_policy', 'card_re
  */
 export const LIMITS_MIN_FACTS = 4;
 
-const hasSourcedLimits = (p) => !!(p.free_limits && safeUrl(p.free_limits.source) && DATE_RE.test(String(p.free_limits.checked || '')));
+const hasSourcedLimits = (p) => !!(p.free_limits && httpsUrl(p.free_limits.source) && DATE_RE.test(String(p.free_limits.checked || '')));
 const hasRecordedCheck = (p, field) => {
   const c = fieldCheck(p, field);
-  return !!(c && DATE_RE.test(String(c.checked || '')) && Array.isArray(c.sources) && c.sources.some((s) => safeUrl(s)));
+  return !!(c && DATE_RE.test(String(c.checked || '')) && Array.isArray(c.sources) && c.sources.some((s) => httpsUrl(s)));
 };
 
 /** The LIMIT_FACTS this entry records with a source. */
 export function sourcedFacts(p) {
   return LIMIT_FACTS.filter((f) => {
     if (f === 'free_limits') return hasSourcedLimits(p);
-    if (f === 'data_policy') return !!(p.data_policy && typeof p.data_policy === 'object' && safeUrl(p.data_policy.source));
+    if (f === 'data_policy') return !!(p.data_policy && typeof p.data_policy === 'object' && httpsUrl(p.data_policy.source));
     return hasRecordedCheck(p, f);
   });
 }
@@ -117,10 +120,10 @@ export const limitsPageDescription = (p) => limitsAnswer(p);
 /** Data policy with the provider's sentence, its page, the day it was read and whether the page names the free plan. */
 function policyHtml(p) {
   const dp = p.data_policy;
-  if (!dp || typeof dp !== 'object' || !safeUrl(dp.source)) {
+  if (!dp || typeof dp !== 'object' || !httpsUrl(dp.source)) {
     return `<h2 id="data-policy">Data policy</h2><p class="muted">No data policy is recorded for this provider yet.</p>`;
   }
-  const src = safeUrl(dp.source);
+  const src = httpsUrl(dp.source);
   const day = DATE_RE.test(String(dp.checked || '')) ? `, read ${escapeHtml(dp.checked)}` : '';
   const plan = dp.plan_named === false ? ' The page does not name the free plan, so this is the provider\'s general policy.' : '';
   return `<h2 id="data-policy">Data policy</h2><dl class="prov-reqs">` +
@@ -179,8 +182,8 @@ export function limitsPageJsonLd(p, { site, facts }) {
     '@graph': [
       {
         '@type': 'WebPage', name: `${p.name} free tier limits`, description: limitsAnswer(p), url,
-        dateModified: p.last_verified,
-        isPartOf: datasetRef(site, facts),
+        dateModified: isoDateTime(p.last_verified),
+        isPartOf: websiteRef(site), about: datasetRef(site, facts),
       },
       breadcrumbList(site, [['Free tier limits', `${site}/limits/`], [p.name, url]]),
     ],

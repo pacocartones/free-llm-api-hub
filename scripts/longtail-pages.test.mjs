@@ -90,7 +90,7 @@ test('limits page: each fact with its source, quotes where the dataset has them,
   const facts = datasetFacts({ verified: 3, asOf: ASOF, license: 'https://opensource.org/licenses/MIT' });
   const ld = JSON.parse(limitsPageJsonLd(full, { site: 'https://x.test', facts }));
   const page = ld['@graph'][0];
-  assert.deepEqual([page['@type'], page.url, page.dateModified], ['WebPage', 'https://x.test/limits/alpha/', '2026-11-20']);
+  assert.deepEqual([page['@type'], page.url, page.dateModified], ['WebPage', 'https://x.test/limits/alpha/', '2026-11-20T00:00:00Z']);
   assert.deepEqual([page.isPartOf.publisher.name, page.isPartOf.creator.name], ['Tweakeo, Inc.', 'Paco Cartones']);
 });
 
@@ -237,7 +237,7 @@ test('built: a limits page shows the dataset numbers in its table and its dates 
       if (Number.isInteger(p.free_limits[k])) assert.ok(html.includes(`<td>${p.free_limits[k].toLocaleString('en-US')}</td>`), `${p.slug}: ${k}`);
     }
     const page = jsonld(html)['@graph'].find((n) => n['@type'] === 'WebPage');
-    assert.equal(page.dateModified, p.last_verified, p.slug);
+    assert.equal(page.dateModified, `${p.last_verified}T00:00:00Z`, p.slug);
     assert.ok(html.includes(`datetime="${p.last_verified}"`), `${p.slug}: date visible`);
   }
 });
