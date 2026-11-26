@@ -235,7 +235,7 @@ Found an outdated limit, a dead link, or a provider that belongs here? You'll ke
 
 - **Your first PR:** [choose a task, coordinate and run its checks](CONTRIBUTING.md#your-first-contribution-step-by-step).
 - **Fastest report:** the [structured issue form](../../issues/new?template=inaccuracy.yml) — provider, what changed, a source link.
-- **For a provider-data correction:** edit [`data/providers.json`](data/providers.json), run `npm run build && npm test`, and commit the generated files with the data. Never hand-edit the tables — they're generated.
+- **For a provider-data correction:** edit [`data/providers.json`](data/providers.json), run `npm run build && npm test`, and commit only the data change: the regeneration bot commits the generated files after the merge ([details](CONTRIBUTING.md#for-provider-data-edit-the-source)). Never hand-edit the tables — they're generated.
 
 Full guidelines, including what counts as an acceptable source: **[CONTRIBUTING.md](CONTRIBUTING.md)**.
 
