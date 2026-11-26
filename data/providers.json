@@ -1092,7 +1092,9 @@
       "model_tier": null,
       "verified": true,
       "last_verified": "2026-11-25",
-      "data_policy": {"trains_on_prompts":true,"retention":null,"source":"https://elevenlabs.io/terms-of-use","checked":"2026-11-25","quote":"you may opt out of our use of your Content for training at any time by navigating to the 'Data use' menu in the 'Terms and Privacy' section of your ElevenLabs account.","note":"Terms of Service (non-EEA), last updated 09 Oct 2026. The sentence is addressed to every user and does not name a plan; the same terms define Free Users separately. Whether the Data use menu exists on the free plan is not stated.","plan_named":false}
+      "data_policy": {"trains_on_prompts":true,"retention":null,"source":"https://elevenlabs.io/terms-of-use","checked":"2026-11-25","quote":"you may opt out of our use of your Content for training at any time by navigating to the 'Data use' menu in the 'Terms and Privacy' section of your ElevenLabs account.","note":"Terms of Service (non-EEA), last updated 09 Oct 2026. The sentence is addressed to every user and does not name a plan; the same terms define Free Users separately. Whether the Data use menu exists on the free plan is not stated.","plan_named":false},
+      "keys_url": "https://elevenlabs.io/app/api/api-keys",
+      "keys_url_source": "https://elevenlabs.io/docs/eleven-api/quickstart"
     },
     {
       "slug": "sarvam-ai",
