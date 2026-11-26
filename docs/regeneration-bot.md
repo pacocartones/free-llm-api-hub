@@ -2,7 +2,9 @@
 
 `.github/workflows/regenerate.yml` rebuilds the derived files (README tables, `collections/`, the committed site pages, `site/providers.csv`, `site/sitemap.xml`, `derived-fingerprints.json`, OG images) after every push to `main` that changes a canonical input, using the code already on `main`. The goal is that a data pull request only has to change `data/` plus a changelog fragment, so open data pull requests stop conflicting on generated files.
 
-It rolls out in three steps, controlled by the repository variable `REGEN_MODE`:
+It rolls out in three steps, controlled by the repository variable `REGEN_MODE` and, for pull requests from forks, the committed file [`.github/regen-mode`](../.github/regen-mode):
+
+**The mode lives in two places, and they must agree.** GitHub does not pass repository variables to workflows run for pull requests from forks, so there `vars.REGEN_MODE` is empty. When it is, the *Regeneration mode* step of `verify.yml` reads `.github/regen-mode` from the pull request's **base branch** (fetched from `origin`, never from the pull request's own tree, so a pull request cannot relax its own gate). When the variable has a value, it wins. Changing the mode therefore means setting the variable **and** merging a one-line change to `.github/regen-mode`; `scripts/regen-mode-file.test.mjs` fails if the file holds anything but `off`, `shadow` or `push`.
 
 | Step | `REGEN_MODE` | What happens | Risk to `main` |
 |---|---|---|---|
@@ -67,11 +69,11 @@ The switch itself is one variable, but it needs the protection of `main` to move
    - *Create*.
 3. Open a throwaway pull request and check the five checks still show as *Required*. Then *Settings → Branches* → delete the classic rule for `main`, and confirm `gh api repos/pacocartones/free-llm-api-hub/rules/branches/main` lists the rules of both rulesets.
 4. Merge the cut-over pull request. It changes nothing while `REGEN_MODE` is not `push`: every relaxation below is behind that value.
-5. Set `REGEN_MODE` = `push`. The next data pull request should show *Dataset integrity* green without derived files, and after its merge one `chore(generated):` commit by `free-llm-api-hub-regen[bot]` followed by one *Deploy site* run.
+5. Set `REGEN_MODE` = `push`, and merge a pull request that sets `.github/regen-mode` to `push` (pull requests from forks read the mode from that file). The next data pull request should show *Dataset integrity* green without derived files, and after its merge one `chore(generated):` commit by `free-llm-api-hub-regen[bot]` followed by one *Deploy site* run.
 
 ## What push mode changes
 
-Everything here is keyed on `REGEN_MODE` = `push`; with `shadow`, `off` or no value the workflows behave as before the cut-over.
+Everything here is keyed on `REGEN_MODE` = `push` (on fork pull requests, `.github/regen-mode` on the base branch); with `shadow`, `off` or no value the workflows behave as before the cut-over.
 
 - **Contributors.** A data pull request changes `data/` (and a changelog fragment) and nothing generated. It does not run `npm run build` or `npm run og` to commit their output. A release pull request (`npm run release:prepare`) still ships every derived file regenerated, because `tag-release.yml` tags its merge.
 - **`verify.yml`** (required checks *Dataset integrity* and *Windows tests*, names unchanged). Both jobs regenerate the derived files before running the checks, so the suite sees what `main` will hold after the bot. The last step of *Dataset integrity* rebuilds and calls `regenerate-guard.mjs drift-gate` (`driftGate()` in [scripts/lib/regenerate.mjs](../scripts/lib/regenerate.mjs), tested in `scripts/regenerate-cutover.test.mjs`). It blocks only:
@@ -85,6 +87,6 @@ Everything here is keyed on `REGEN_MODE` = `push`; with `shadow`, `off` or no va
 
 ## Rollback
 
-At any step: set `REGEN_MODE` to `off` (or delete it). Nothing needs reverting: outside push mode the cut-over's workflows behave as before, so the strict drift gate is back on the next run and contributors regenerate locally again. Pull requests opened during push mode without derived files then need `npm run build` (or the `regen-preview-patch` artifact) before they can merge.
+At any step: set `REGEN_MODE` to `off` **and** merge `.github/regen-mode` = `off`. Both are needed: the variable alone leaves pull requests from forks on the file's mode, and deleting the variable instead of setting it makes every pull request read the file. Nothing else needs reverting: outside push mode the cut-over's workflows behave as before, so the strict drift gate is back on the next run and contributors regenerate locally again. Pull requests opened during push mode without derived files then need `npm run build` (or the `regen-preview-patch` artifact) before they can merge.
 
 **If the App key leaks:** App page → *Private keys* → delete it, generate a new one, update `REGEN_APP_PRIVATE_KEY`, and review the `[bot]` commits. The App is never in the "main integrity" bypass list, so it cannot force-push or delete `main`.

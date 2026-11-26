@@ -2,6 +2,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://freellmapihub.com/</loc><lastmod>2026-11-25</lastmod></url>
   <url><loc>https://freellmapihub.com/models/</loc><lastmod>2026-11-25</lastmod></url>
+  <url><loc>https://freellmapihub.com/models/apertus-v1.5-70b/</loc><lastmod>2026-11-25</lastmod></url>
   <url><loc>https://freellmapihub.com/models/bge-reranker-v2-m3/</loc><lastmod>2026-11-25</lastmod></url>
   <url><loc>https://freellmapihub.com/models/deepseek-v4-flash/</loc><lastmod>2026-11-25</lastmod></url>
   <url><loc>https://freellmapihub.com/models/deepseek-v4-flash-0731/</loc><lastmod>2026-11-20</lastmod></url>
@@ -11,10 +12,11 @@
   <url><loc>https://freellmapihub.com/models/gemini-2.5-pro/</loc><lastmod>2026-11-25</lastmod></url>
   <url><loc>https://freellmapihub.com/models/gemma-3-4b-it/</loc><lastmod>2026-11-25</lastmod></url>
   <url><loc>https://freellmapihub.com/models/gemma-4-26b-a4b-it/</loc><lastmod>2026-11-24</lastmod></url>
-  <url><loc>https://freellmapihub.com/models/gemma-4-31b-it/</loc><lastmod>2026-11-24</lastmod></url>
+  <url><loc>https://freellmapihub.com/models/gemma-4-31b-it/</loc><lastmod>2026-11-25</lastmod></url>
   <url><loc>https://freellmapihub.com/models/glm-5.2/</loc><lastmod>2026-11-20</lastmod></url>
   <url><loc>https://freellmapihub.com/models/gpt-oss-120b/</loc><lastmod>2026-11-25</lastmod></url>
   <url><loc>https://freellmapihub.com/models/gpt-oss-20b/</loc><lastmod>2026-11-24</lastmod></url>
+  <url><loc>https://freellmapihub.com/models/kimi-k2.6/</loc><lastmod>2026-11-25</lastmod></url>
   <url><loc>https://freellmapihub.com/models/kimi-k3/</loc><lastmod>2026-11-25</lastmod></url>
   <url><loc>https://freellmapihub.com/models/l3-8b-stheno-v3.2/</loc><lastmod>2026-11-25</lastmod></url>
   <url><loc>https://freellmapihub.com/models/llama-3.3-70b-instruct/</loc><lastmod>2026-11-20</lastmod></url>
@@ -149,6 +151,9 @@
   <url><loc>https://freellmapihub.com/p/liquid-ai</loc><lastmod>2026-11-25</lastmod></url>
   <url><loc>https://freellmapihub.com/p/public-ai</loc><lastmod>2026-11-25</lastmod></url>
   <url><loc>https://freellmapihub.com/p/stability-ai</loc><lastmod>2026-11-25</lastmod></url>
+  <url><loc>https://freellmapihub.com/p/plamo</loc><lastmod>2026-11-25</lastmod></url>
+  <url><loc>https://freellmapihub.com/p/entrim</loc><lastmod>2026-11-25</lastmod></url>
+  <url><loc>https://freellmapihub.com/p/infomaniak</loc><lastmod>2026-11-25</lastmod></url>
   <url><loc>https://freellmapihub.com/compare/</loc><lastmod>2026-11-25</lastmod></url>
   <url><loc>https://freellmapihub.com/compare/typhoon-vs-cloudflare-workers-ai/</loc><lastmod>2026-11-24</lastmod></url>
   <url><loc>https://freellmapihub.com/compare/typhoon-vs-google-gemini/</loc><lastmod>2026-11-25</lastmod></url>
