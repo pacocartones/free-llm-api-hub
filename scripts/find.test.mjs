@@ -195,6 +195,8 @@ describe('payload and result markup', () => {
   test('"Get a free key" appears only with an https keys_url; without it the card degrades to the docs', () => {
     const withKey = find.resultHtml(find.findProvider({ ...base, docs_url: 'https://docs.example.com', keys_url: 'https://console.example.com/keys' }), {});
     assert.match(withKey, /<a class="btn primary" href="https:\/\/console\.example\.com\/keys"[^>]*>Get a free key/);
+    // tagged like the provider page's key button, so a click is an outbound_provider_click with link "keys"
+    assert.match(withKey, /href="https:\/\/console\.example\.com\/keys"[^>]*data-provider="x" data-link="keys"/);
     const without = find.resultHtml(find.findProvider({ ...base, docs_url: 'https://docs.example.com' }), {});
     assert.doesNotMatch(without, /Get a free key/);
     assert.match(without, /href="https:\/\/docs\.example\.com"[^>]*data-provider="x" data-link="docs"/);

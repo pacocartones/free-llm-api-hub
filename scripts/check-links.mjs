@@ -13,9 +13,13 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 
 // Include release docs, templates, package READMEs and nested plans, as well as
 // new Markdown awaiting git add. Ignored tool dependencies stay out of scope.
+// A file deleted but not yet staged (the changelog fragments right after
+// `npm run release:prepare`) is still in the index: skip it rather than crash.
+// Links that point to it are still reported, because their target is missing.
 const files = [...new Set(execFileSync('git', [
   'ls-files', '-z', '--cached', '--others', '--exclude-standard', '--', '*.md',
-], { cwd: ROOT, encoding: 'utf8' }).split('\0').filter(Boolean))];
+], { cwd: ROOT, encoding: 'utf8' }).split('\0').filter(Boolean))]
+  .filter((file) => existsSync(join(ROOT, file)));
 
 const LINK_RE = /\[[^\]]*\]\(([^)]+)\)/g;
 const broken = [];

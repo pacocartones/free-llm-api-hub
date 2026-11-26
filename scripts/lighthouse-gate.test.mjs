@@ -82,21 +82,22 @@ test('a failing audit in any raw run survives the median score envelope', () => 
 
 // The pages the gate measures are written in two places, the script and the comment of the workflow. They must agree,
 // and the pages that carry the tables and the comparison have to be among them.
-test('the gate measures all nineteen routes, and the workflow says which pages it measures', () => {
+test('the gate measures all twenty-one routes, and the workflow says which pages it measures', () => {
   const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
   const script = readFileSync(join(ROOT, 'scripts/lighthouse-gate.mjs'), 'utf8');
   const workflow = readFileSync(join(ROOT, '.github/workflows/lighthouse.yml'), 'utf8');
   const list = script.match(/const pages = \[([^\]]*)\];/);
   assert.ok(list, 'the page list is found in the script');
   const fixed = [...list[1].matchAll(/'(\/[^']*)'/g)].map((m) => m[1]);
-  for (const page of ['/quality/', '/free-gpu/', '/coding-tools/', '/compare/', '/find/', '/data-policy/', '/guides-and-collections/']) assert.ok(fixed.includes(page), `the gate measures ${page}`);
+  for (const page of ['/quality/', '/free-gpu/', '/coding-tools/', '/compare/', '/find/', '/data-policy/', '/guides-and-collections/', '/not-free/', '/embed/']) assert.ok(fixed.includes(page), `the gate measures ${page}`);
   for (const page of fixed.filter((p) => p !== '/')) assert.ok(workflow.includes(page), `the workflow names ${page}`);
   // two more pages than the fixed ones: the provider page and the model page come from the dataset
   assert.match(script, /pages\.push\(`\/models\/\$\{modelSample\.key\}\/`\)/, 'the gate measures one model page');
   assert.ok(workflow.includes('/models/'), 'the workflow names the model page');
   const count = fixed.length + 2;
-  const words = { 4: 'four', 5: 'five', 6: 'six', 7: 'seven', 8: 'eight', 9: 'nine', 16: 'sixteen', 17: 'seventeen', 18: 'eighteen', 19: 'nineteen' };
+  const words = { 4: 'four', 5: 'five', 6: 'six', 7: 'seven', 8: 'eight', 9: 'nine', 16: 'sixteen', 17: 'seventeen', 18: 'eighteen', 19: 'nineteen', 20: 'twenty', 21: 'twenty-one' };
   assert.ok(workflow.includes(`on ${words[count]} pages`) && workflow.includes(`Measure the ${words[count]} pages`), `the workflow says ${words[count]} pages`);
+  assert.ok(script.includes(`on ${words[count]} pages`), `the script header says ${words[count]} pages`);
 });
 
 // The runner passes this stricter category budget alongside the existing budgets.
@@ -167,7 +168,10 @@ test('the workflow keeps the required check on pull requests and moves performan
   assert.match(pr, /lighthouse-gate\.mjs --mode=accessibility-seo/);
   // Performance never runs on a pull request.
   const perf = job('performance');
-  assert.match(perf, /if: \$\{\{ github\.event_name != 'pull_request' \}\}/);
+  assert.match(perf, /if: \$\{\{ github\.event_name != 'pull_request' && /);
+  // Nor on the regeneration bot's pushes (docs/regeneration-bot.md).
+  assert.match(perf, /!\(github\.event_name == 'push' && github\.actor == 'free-llm-api-hub-regen\[bot\]'\)/);
+  assert.doesNotMatch(pr, /regen\[bot\]/, 'the required check is never skipped');
   assert.match(perf, /lighthouse-gate\.mjs --mode=performance/);
   // Only the report job may write, only issues, only on main, and it runs no repository code.
   assert.match(wf, /^permissions:\n {2}contents: read$/m);

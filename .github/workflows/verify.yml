@@ -3,11 +3,20 @@ name: Verify
 # Fast integrity gate on every change.
 #
 # What blocks: the dataset must satisfy the integrity rules, internal doc links
-# must resolve, and the generated artifacts must be in sync with the data. The
-# author regenerates them locally (`npm run build`, `npm run og`) and commits
-# them in the same PR. The regeneration bot (regenerate.yml) runs in shadow
-# mode and does not commit yet, so the author still regenerates locally; see
-# docs/regeneration-bot.md. The weekly-worklist workflow publishes issue
+# must resolve, and the derived files must agree with the data. How strictly
+# depends on the repository variable REGEN_MODE (docs/regeneration-bot.md; on a
+# pull request from a fork, which sees no repository variables, the committed
+# .github/regen-mode file on the base branch):
+#   - push: the regeneration bot (regenerate.yml) commits the derived files to
+#     main after the merge, so a data PR does not regenerate them. The checks
+#     run on a freshly regenerated tree, and only derived files the PR edits by
+#     hand (and that the build would not write), a release PR that is not fully
+#     regenerated, or drift outside the bot's allowlist block.
+#   - anything else (shadow, off, unset): the author regenerates locally
+#     (`npm run build`, `npm run og`) and commits the result in the same PR;
+#     any drift blocks, as before the bot existed.
+# The required check names (Dataset integrity, Windows tests) are the same in
+# every mode. The weekly-worklist workflow publishes issue
 # metadata only; provider re-verification, badge regeneration, probe and the
 # `models_free` backfill stay local and on-demand, see docs/update-playbook.md.
 on:
@@ -52,8 +61,39 @@ jobs:
       - name: Install locked development dependencies
         run: npm ci --ignore-scripts
 
+      # One parser for REGEN_MODE (scripts/lib/regenerate.mjs): only `push` relaxes the drift gate below.
+      # A pull request from a fork gets no repository variables, so vars.REGEN_MODE is empty there. It then reads the
+      # mode from .github/regen-mode on the base branch, never from the pull request's own tree, so a pull request
+      # cannot relax its own gate. When the variable is set it always wins. No --depth on the fetch: the clone is
+      # complete and a shallow fetch would truncate the history the build mines from git log. A base branch without
+      # the file reads as off, the strict gate.
+      - id: regen
+        name: Regeneration mode
+        shell: bash
+        env:
+          REGEN_MODE: ${{ vars.REGEN_MODE }}
+          EVENT: ${{ github.event_name }}
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          if [ -z "$REGEN_MODE" ] && [ "$EVENT" = pull_request ]; then
+            git fetch --no-tags origin "refs/heads/$BASE_REF"
+            REGEN_MODE="$(git show FETCH_HEAD:.github/regen-mode 2>/dev/null || true)"
+            echo "vars.REGEN_MODE is not visible to this run; the mode file on $BASE_REF says: ${REGEN_MODE:-<missing>}"
+            export REGEN_MODE
+          fi
+          node scripts/regenerate-guard.mjs mode
+
       - name: Validate dataset against integrity rules
         run: node scripts/validate.mjs
+
+      # In push mode the PR does not ship its derived files, so every check below
+      # must see what main will hold once the bot has run: regenerate first. The
+      # drift gate at the end compares against the PR's own commit, not this tree.
+      - name: Regenerate the derived files first (REGEN_MODE=push)
+        if: ${{ steps.regen.outputs.mode == 'push' }}
+        run: |
+          node scripts/build.mjs
+          node scripts/check-og.mjs || node scripts/og.mjs
 
       # `generated` is the release date: it moves only together with `version`
       # (npm run release:prepare). A data pull request that bumps it would put
@@ -94,13 +134,15 @@ jobs:
       - name: Run the pipeline test suite
         run: node scripts/run-tests.mjs
 
-      # The PR must ship its own regenerated files — the regeneration bot does
-      # not commit to main yet, so an out-of-sync main would otherwise stay broken.
+      # Outside push mode the PR must ship its own regenerated files: the
+      # regeneration bot does not commit to main, so an out-of-sync main would
+      # otherwise stay broken.
       # The freshness badge is date-relative (the oldest age in days moves
       # daily), so it is not committed at all: the build writes
       # site/badge-freshness.json and every deploy publishes it.
       # The list of files is derived from git (scripts/generated-targets.mjs); the `check` script in package.json uses the same.
       - name: Generated files must be in sync with the data
+        if: ${{ steps.regen.outputs.mode != 'push' }}
         run: |
           node scripts/build.mjs
           # The list comes from git (scripts/generated-targets.mjs): every committed page under site/ that the
@@ -130,6 +172,21 @@ jobs:
             exit 1
           fi
 
+      # Push mode: stale derived files this PR did not touch pass (the bot
+      # regenerates them after the merge). Still blocking: derived files the PR
+      # edits that do not match the build (the bot would silently overwrite
+      # them), a release PR that is not fully regenerated (tag-release.yml tags
+      # its merge), and drift outside the bot's allowlist. HEAD^1 is the base
+      # branch in the PR's merge commit and the previous main on a push. The
+      # decision is driftGate() in scripts/lib/regenerate.mjs, tested.
+      - name: Derived files must not be hand-edited, and a release ships them regenerated (REGEN_MODE=push)
+        if: ${{ steps.regen.outputs.mode == 'push' }}
+        env:
+          REGEN_MODE: ${{ steps.regen.outputs.mode }}
+        run: |
+          node scripts/build.mjs
+          BASE="$(git rev-parse HEAD^1)" node scripts/regenerate-guard.mjs drift-gate
+
   windows-tests:
     name: Windows tests
     runs-on: windows-latest
@@ -154,6 +211,32 @@ jobs:
 
       - name: Install locked development dependencies
         run: npm ci --ignore-scripts
+
+      # A pull request from a fork gets no repository variables, so vars.REGEN_MODE is empty there. It then reads the
+      # mode from .github/regen-mode on the base branch, never from the pull request's own tree, so a pull request
+      # cannot relax its own gate. When the variable is set it always wins. No --depth on the fetch: the clone is
+      # complete and a shallow fetch would truncate the history the build mines from git log. A base branch without
+      # the file reads as off, the strict gate.
+      - id: regen
+        name: Regeneration mode
+        shell: bash
+        env:
+          REGEN_MODE: ${{ vars.REGEN_MODE }}
+          EVENT: ${{ github.event_name }}
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          if [ -z "$REGEN_MODE" ] && [ "$EVENT" = pull_request ]; then
+            git fetch --no-tags origin "refs/heads/$BASE_REF"
+            REGEN_MODE="$(git show FETCH_HEAD:.github/regen-mode 2>/dev/null || true)"
+            echo "vars.REGEN_MODE is not visible to this run; the mode file on $BASE_REF says: ${REGEN_MODE:-<missing>}"
+            export REGEN_MODE
+          fi
+          node scripts/regenerate-guard.mjs mode
+
+      # As in Dataset integrity: in push mode the suite runs on the tree main will hold after the bot's run.
+      - name: Regenerate the derived files first (REGEN_MODE=push)
+        if: ${{ steps.regen.outputs.mode == 'push' }}
+        run: node scripts/build.mjs
 
       # The runner may create symlinks; a contributor without Developer Mode may not (#783). The preload refuses them
       # as Windows does there, junctions still work. A file URL, so the test processes in other folders find it too.

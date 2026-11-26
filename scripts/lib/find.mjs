@@ -164,7 +164,7 @@ export function firstModel(p) {
   return first || null;
 }
 
-/** One provider as the page inlines it. keys_url is optional in the dataset: absent (or not https) means no key link. */
+/** One provider as the page inlines it. keys_url (the provider's own key page, #810) is optional in the dataset: absent (or not https) means no key link. */
 export function findProvider(p) {
   const out = {};
   for (const k of FIND_FIELDS) if (p[k] !== undefined) out[k] = p[k];
@@ -244,7 +244,7 @@ export function resultHtml(p, answers, opts = {}) {
   const docs = httpsUrl(p.docs_url);
   const slugAttr = slugOk ? ` data-provider="${p.slug}"` : '';
   const actions = [
-    keys ? `<a class="btn primary" href="${htmlEsc(keys)}" target="_blank" rel="noopener">Get a free key<span class="sr-only"> for ${htmlEsc(p.name)} (opens in a new tab)</span></a>` : '',
+    keys ? `<a class="btn primary" href="${htmlEsc(keys)}" target="_blank" rel="noopener"${slugAttr ? slugAttr + ' data-link="keys"' : ''}>Get a free key<span class="sr-only"> for ${htmlEsc(p.name)} (opens in a new tab)</span></a>` : '',
     docs ? `<a class="btn ghost" href="${htmlEsc(docs)}" target="_blank" rel="noopener"${slugAttr ? slugAttr + ' data-link="docs"' : ''}>Official docs<span class="sr-only"> of ${htmlEsc(p.name)} (opens in a new tab)</span></a>` : '',
     slugOk ? `<a class="btn ghost" href="${prefix}p/${p.slug}">Details<span class="sr-only"> of ${htmlEsc(p.name)}</span></a>` : '',
   ].join('');
