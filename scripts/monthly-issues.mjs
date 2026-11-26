@@ -14,6 +14,7 @@ import { fileURLToPath } from 'node:url';
 import { assertHistoryPlausible, mineHistoryAndSnapshots } from './lib/history.mjs';
 import { flattenFieldChanges, formatValue } from './lib/changes.mjs';
 import { monthLabel } from './lib/state.mjs';
+import { plural } from './lib/text.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 export const REPO = 'pacocartones/free-llm-api-hub';
@@ -73,7 +74,6 @@ export const cell = (v) => {
 };
 
 const providerLink = (p, current) => (current.has(p.slug) ? `[${cell(p.name)}](${SITE}/p/${p.slug})` : cell(p.name));
-const plural = (n, one, many) => `${n} ${n === 1 ? one : many}`;
 
 /** The "Free tier changes" issue for a reported month. `current` is the set of slugs in today's dataset. */
 export function changesIssue({ month, added, removed, fieldChanges }, { current = new Set(), sourceSha } = {}) {
