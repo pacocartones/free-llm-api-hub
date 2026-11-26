@@ -70,6 +70,7 @@ import { SITEMAP_INDEX, sitemapIndexXml } from './lib/state-sitemap.mjs';
 import { SITEMAPS as INDEXNOW_SITEMAPS } from './lib/indexnow.mjs';
 import { groupModels, modelKey } from './lib/model-keys.mjs';
 import { providerMetaDescription } from './lib/provider-meta.mjs';
+import { answerFirst, providerFaq, providerFaqHtml, providerFaqJsonLd } from './lib/provider-faq.mjs';
 import { isIndexable, modelPageMainHtml, modelPageTitle, modelPageDescription, modelPageJsonLd } from './lib/model-pages.mjs';
 import { collectionPageJsonLd as pageJsonLd, comparePageJsonLd } from './lib/page-jsonld.mjs';
 import { notFreeErrors, notFreeReadmeMd, notFreeModel, notFreeMainHtml, notFreeJsonLd, notFreeTitle, notFreeDescription, NOT_FREE_PATH } from './lib/not-free.mjs';
@@ -990,7 +991,7 @@ let indexHtml = readFileSync(join(ROOT, 'site/index.html'), 'utf8');
 // build rewrites it on every run, so the number follows the data. It is worded "free tiers & credits" (ongoing tiers
 // and trial credits are both counted), which is also not the "N verified providers" phrasing that lib/figures.mjs
 // guards in hand-written sources: validate.mjs reads site/index.html before the build has rewritten it.
-const HOME_TITLE = `Free LLM APIs (${TITLE_MONTH}): ${providers.filter((p) => p.verified === true).length} verified free tiers & credits, sourced & dated`;
+const HOME_TITLE = `Free LLM APIs (${TITLE_MONTH}): ${providers.filter((p) => p.verified === true).length} verified free tiers & credits`;
 indexHtml = indexHtml.replace(/<title>[^<]*<\/title>/, `<title>${htmlEsc(HOME_TITLE)}</title>`)
   .replace(/<meta property="og:title" content="[^"]*">/, `<meta property="og:title" content="${htmlEsc(HOME_TITLE)}">`)
   .replace(/<meta name="twitter:title" content="[^"]*">/, `<meta name="twitter:title" content="${htmlEsc(HOME_TITLE)}">`);
@@ -1375,13 +1376,16 @@ for (const p of providers) {
     ...inColls.map((c) => `<a href="../collections/${c.slug}">${htmlEsc(c.title)}</a>`),
     ...inGuides.map((g) => `<a href="../guides/${g.slug}">${htmlEsc(g.card)}</a>`),
   ].join('');
+  // The FAQ (lib/provider-faq.mjs): the same items render visibly and as the FAQPage node of the JSON-LD.
+  const faq = providerFaq(p);
   const main =
     pageHero({
       cls: 'prov-hero',
       crumbs: `<a href="../">Home</a> / <a href="../#explorer">Providers</a> / ${htmlEsc(p.name)}`,
       h1: htmlEsc(p.name),
-      // The provider's aura (lib/aura.mjs) with its reading in words, so the picture never has to be decoded alone.
-      afterTitle: `<div class="prov-aura">${auraHtml(p, { now: ASOF, cls: 'aura-lg', digits: 1 })}<p class="aura-read"><span class="aura-read-h">Aura:</span> ${htmlEsc(auraSpec(p, { now: ASOF }).label)} · <a href="../methodology/#how-to-read-an-aura">how to read it</a></p></div>` +
+      // Right under the H1, the answer to "Is <Provider> API free?" from the data alone (lib/provider-faq.mjs), then the
+      // provider's aura (lib/aura.mjs) with its reading in words, so the picture never has to be decoded alone.
+      afterTitle: answerFirst(p).html + `<div class="prov-aura">${auraHtml(p, { now: ASOF, cls: 'aura-lg', digits: 1 })}<p class="aura-read"><span class="aura-read-h">Aura:</span> ${htmlEsc(auraSpec(p, { now: ASOF }).label)} · <a href="../methodology/#how-to-read-an-aura">how to read it</a></p></div>` +
         `<div class="prov-badges"><span class="type">${typeLabel(p)}</span> ${verifiedLine}${probedLine} ${provFlagsHtml(p)}</div>` +
         provNumsHtml(p) + provReceiptHtml(p),
       lede: p.best_for ? htmlEsc(p.best_for) : '',
@@ -1404,6 +1408,7 @@ for (const p of providers) {
     disclosureHtml(AGREEMENTS_FILE, p.slug) +
     (crossChips ? `<h2>Appears in</h2><div class="colls">${crossChips}</div>` : '') +
     compareHtml +
+    providerFaqHtml(p, faq) +
     historyHtml(p.slug) +
     useDataHtml(p) +
     `</div></main>`;
@@ -1423,6 +1428,7 @@ for (const p of providers) {
           { '@type': 'ListItem', position: 3, name: p.name, item: `${SITE}/p/${p.slug}` },
         ],
       },
+      providerFaqJsonLd(p, faq),
     ],
   });
   writeFileSync(
