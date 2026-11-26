@@ -1939,7 +1939,9 @@
       "added": "2026-11-25",
       "last_probed": null,
       "probe_status": null,
-      "data_policy": null
+      "data_policy": null,
+      "keys_url": "https://bytez.com/api/key",
+      "keys_url_source": "https://docs.bytez.com/model-api/docs/containers"
     },
     {
       "slug": "liquid-ai",
