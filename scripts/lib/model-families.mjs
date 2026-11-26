@@ -14,7 +14,7 @@
 //
 // Pure: build.mjs passes the providers, the dataset date and the model-page links; the tests call the same code.
 
-import { htmlEsc } from './rows.mjs';
+import { escapeHtml as htmlEsc } from './html.mjs';
 import { comparator } from './sort.mjs';
 import { bareModelId } from './model-keys.mjs';
 import { fieldCheck, REASON_LABEL } from './field-checks.mjs';

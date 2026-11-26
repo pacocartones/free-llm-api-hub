@@ -5,7 +5,7 @@ import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { privateTree } from './lib/private-tree.mjs';
-import { htmlEsc } from './lib/rows.mjs';
+import { escapeHtml as htmlEsc } from './lib/html.mjs';
 import { stripTags } from './lib/escape.mjs';
 import { MODEL_SAMPLE_CAVEAT } from './lib/model-pages.mjs';
 import {
