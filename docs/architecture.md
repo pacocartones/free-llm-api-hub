@@ -178,7 +178,7 @@ In the GA4 stream, enhanced measurement keeps page views on real loads, scrolls,
 **Mark as key events in GA4:** `outbound_provider_click` (a visitor leaves for a provider, the site's main outcome), `copy_snippet` (a visitor takes code to use a provider) and `api_download` (dataset or API reuse). `repo_click` measures the path to stars and contributions; mark it too if repository growth is a goal. The others are for understanding behaviour, not outcomes.
 
 ## 5. Design system (`site/styles.css`)
-- Terminal-green identity: `--accent:#3fce8f`, self-hosted JetBrains Mono, CSS vars + `[data-theme]` dark/light (persisted), SVG icon sprite (`ic-*`), `>_`-style prompts, AA contrast.
+- Brand H1 "Fingerprint + Receipts": white or near-black grounds, one graphic hue per modality (`--h-*`) and a magenta accent, self-hosted Roboto Flex (variable) and DM Mono, CSS vars + `[data-theme]` light/dark (light by default, dark on `prefers-color-scheme` or the toggle, persisted), SVG icon sprite (`ic-*`), AA contrast. Tokens and the font recipe: [brand.md](brand.md).
 - **Header identical on every page** — keep `--header-bg` opaque (a translucent value lets content bleed through the blur).
 - **Nav (5 items, each with an icon):** Home · Models · Guides & Collections · Startup credits · Student credits. Collapses to a hamburger below 900px.
 - **Explorer table** (home): 5 columns — API, Type, What's free, The catch, Verified.

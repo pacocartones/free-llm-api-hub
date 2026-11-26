@@ -8,6 +8,9 @@
 //   node scripts/lighthouse-gate.mjs --mode=accessibility-seo  accessibility and SEO, one run per page (pull requests)
 //   node scripts/lighthouse-gate.mjs --mode=performance        performance only, median of 3 (main and nightly)
 //
+// Every mode also checks each page's font budget (FONT_BUDGET_BYTES in lib/assets.mjs) from the served HTML, so a pull
+// request that adds a font weight over the budget fails here, not after the merge.
+//
 // In GitHub Actions the per-page scores go to the job summary, and the failures to the
 // step output `failures`, which lighthouse.yml turns into an issue for main and nightly runs.
 import { createServer } from 'node:http';
@@ -16,7 +19,8 @@ import { randomUUID } from 'node:crypto';
 import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, extname, normalize } from 'node:path';
-import { evaluate, medianReport, negotiateEncoding, parseMode } from './lib/lighthouse-gate.mjs';
+import { evaluate, fontBudgetFailures, medianReport, negotiateEncoding, parseMode } from './lib/lighthouse-gate.mjs';
+import { FONT_BUDGET_BYTES } from './lib/assets.mjs';
 import { brotliCompressSync, gzipSync } from 'node:zlib';
 import { makeTmpDir } from './lib/tmp.mjs';
 import { groupModels } from './lib/model-keys.mjs';
@@ -126,6 +130,13 @@ const summary = [`### Lighthouse (${mode.name}, ${RUNS === 1 ? 'one run' : `medi
   `| Page | ${mode.categories.join(' | ')} |`, `|---|${mode.categories.map(() => '---|').join('')}`];
 try {
   for (const page of pages) {
+    // The font budget does not depend on the runner: checked once per page, from the HTML that is served.
+    const htmlFile = resolveFile(page);
+    if (htmlFile) {
+      const pageDir = dirname(htmlFile.slice(SITE.length)) || '/';
+      const sizeOf = (ref) => { const f = resolveFile(ref.startsWith('/') ? ref : join(pageDir, ref)); return f ? statSync(f).size : null; };
+      failures.push(...fontBudgetFailures(page, readFileSync(htmlFile, 'utf8'), sizeOf, FONT_BUDGET_BYTES));
+    }
     // Asynchronous on purpose: a synchronous child process would block this process's event loop, and the server below could never answer Lighthouse.
     const reports = [];
     for (let i = 0; i < RUNS; i++) {

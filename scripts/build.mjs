@@ -611,7 +611,7 @@ const siteFooter = (p) => `<footer class="site-footer"><div class="wrap footer-t
 // Full page wrapper for generated (collection) pages. `p` is the path prefix to the site root.
 // Theme guard — runs before first paint to avoid the white flash. ONE source, shared by
 // htmlPage() (every generated page) and site/index.html (injected via AUTOGEN:themeguard).
-const THEME_GUARD = `<script>(function(){try{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: light)').matches?'light':'dark');document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>`;
+const THEME_GUARD = `<script>(function(){try{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>`;
 
 // Content-Security-Policy (all pages, injected into index.html via AUTOGEN:csp and hard-copied
 // in 404.html). script-src pins our two inline scripts by hash — the theme guard (every page)
@@ -624,7 +624,7 @@ const THEME_GUARD = `<script>(function(){try{var t=localStorage.getItem('theme')
 // the first-party file consent.js ('self'), so no inline hash changes.
 const GA_ID = measurementId();
 const GA_CSP = analyticsCspSources(GA_ID);
-const CSP = `<meta http-equiv="Content-Security-Policy" content="script-src 'self' 'sha256-r3FnVnP9W/uaNhK9XkZqH3GIfK4TudOQGYTwoNIjGR4=' 'sha256-YzEhxvq2BwovGsg/RCjKkQdwf+LZmTjIkiQcjXCZMHc='${CF_WA_CSP.script}${GA_CSP.script}; connect-src 'self' https://raw.githubusercontent.com${CF_WA_CSP.connect}${GA_CSP.connect}; object-src 'none'; base-uri 'self'">`;
+const CSP = `<meta http-equiv="Content-Security-Policy" content="script-src 'self' 'sha256-ByZJaawcxAiK85qnD6nIc7iBFGzp/nf/DTzzA7Dl5Qs=' 'sha256-YzEhxvq2BwovGsg/RCjKkQdwf+LZmTjIkiQcjXCZMHc='${CF_WA_CSP.script}${GA_CSP.script}; connect-src 'self' https://raw.githubusercontent.com${CF_WA_CSP.connect}${GA_CSP.connect}; object-src 'none'; base-uri 'self'">`;
 
 // Search engines cut a snippet around 155 characters. Every page's description goes through
 // here, so no page can ship a longer one: cut at a word boundary and end with an ellipsis.
@@ -666,7 +666,7 @@ function htmlPageRaw({ title, desc, canonical, main, jsonld, prefix = '../', noi
   // the JSON unicode escape (backslash-u-003c) keeps a "</script>" in the
   // data from ever closing the block.
   return `<!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -681,8 +681,9 @@ ${canonical ? `<link rel="canonical" href="${htmlEsc(canonical)}">
 <link rel="apple-touch-icon" href="${prefix}apple-touch-icon.png">
 <link rel="manifest" href="${prefix}site.webmanifest">
 ${fontHead(prefix)}
-<meta name="theme-color" content="#0a0d0b">
-<meta name="color-scheme" content="dark light">
+<meta name="theme-color" content="#fff9f6" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#17110f" media="(prefers-color-scheme: dark)">
+<meta name="color-scheme" content="light dark">
 <meta property="og:title" content="${htmlEsc(title)}">
 <meta property="og:description" content="${htmlEsc(fitDescription(desc))}">
 <meta property="og:type" content="website">
