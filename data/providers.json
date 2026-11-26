@@ -1016,7 +1016,9 @@
       "field_checks": {"phone_required":{"status":"source_silent","checked":"2026-11-25","sources":["https://www.speechmatics.com/terms-and-conditions","https://www.speechmatics.com/pricing","https://docs.speechmatics.com/get-started/quickstart"],"note":"The terms, the pricing FAQ and the quickstart describe sign-up and the free credits but name no phone or SMS step"}},
       "verified": true,
       "last_verified": "2026-11-20",
-      "data_policy": {"trains_on_prompts":false,"retention":null,"source":"https://www.speechmatics.com/legal/terms-of-service","checked":"2026-10-15","quote":"Speechmatics will not use Your inputs, outputs or any other data for machine learning or model training purposes unless You opt in by enabling model training within Your portal workspace.","note":"Section 5.1 gives «free Hours of use» per month; the clause on inputs, outputs and other data does not mention Free Usage.","plan_named":false}
+      "data_policy": {"trains_on_prompts":false,"retention":null,"source":"https://www.speechmatics.com/legal/terms-of-service","checked":"2026-10-15","quote":"Speechmatics will not use Your inputs, outputs or any other data for machine learning or model training purposes unless You opt in by enabling model training within Your portal workspace.","note":"Section 5.1 gives «free Hours of use» per month; the clause on inputs, outputs and other data does not mention Free Usage.","plan_named":false},
+      "keys_url": "https://portal.speechmatics.com/settings/api-keys/",
+      "keys_url_source": "https://docs.speechmatics.com/get-started/authentication"
     },
     {
       "slug": "speechify",
