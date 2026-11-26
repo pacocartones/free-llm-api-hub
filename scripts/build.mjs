@@ -1319,7 +1319,7 @@ for (const p of providers) {
   // What's free (only when the record says it: no empty box), then, further down, the requirement cards behind one
   // summary line and the score on one line.
   const summary = p.free_tier ? `<div class="prov-summary"><h2 id="whats-free">What's free</h2><p>${htmlEsc(p.free_tier)}</p></div>` : '';
-  const reqsHtml = `<details class="prov-reqs-box"><summary>What you need to start: card, phone, commercial use</summary>${requirementsHtml(p)}</details>`;
+  const reqsHtml = `<details class="prov-reqs-box"><summary>What you need to start: card, phone, commercial use, account rules</summary>${requirementsHtml(p, { terms: true })}</details>`;
   // Freshness relative to the current day (provider pages are regenerated on deploy, not diff-gated).
   const daysAgo = p.verified && p.last_verified ? ageInDays(p.last_verified, today) : null;
   // The receipt stamp (lib/stamp.mjs), the perforated ticket: "✓ | Verified 24 Nov 2026 · 7 sources", the quoted sentence in its title.

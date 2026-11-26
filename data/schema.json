@@ -38,6 +38,13 @@
         { "const": "conditional" }
       ]
     },
+    "multi_account_value": {
+      "description": "true / false / null, or 'conditional' when the ban covers only part of the users or of the free offer, recorded in multi_account_condition.",
+      "anyOf": [
+        { "$ref": "#/$defs/tristate" },
+        { "const": "conditional" }
+      ]
+    },
     "field_check": {
       "type": "object",
       "additionalProperties": false,
@@ -156,6 +163,18 @@
           "type": ["string", "null"],
           "description": "Condition summary when commercial_ok is 'conditional'. Required and non-blank for that value; null or absent otherwise."
         },
+        "multi_account_forbidden": {
+          "$ref": "#/$defs/multi_account_value",
+          "description": "Whether the provider's own terms forbid one person holding more than one account, outright or to exceed limits or get more free usage. true = forbidden; false = an official page explicitly allows several accounts or free keys; 'conditional' = the ban covers only part of the users or of the free offer (multi_account_condition says which); null = not recorded (field_checks says why). null is never permission."
+        },
+        "multi_account_condition": {
+          "type": ["string", "null"],
+          "description": "Which users or which part of the offer the ban covers, when multi_account_forbidden is 'conditional'. Required and non-blank for that value; null or absent otherwise."
+        },
+        "limit_circumvention_forbidden": {
+          "$ref": "#/$defs/tristate",
+          "description": "Whether the provider's own terms forbid getting around rate limits, quotas, usage limits or metering, by any means (rotating keys or accounts included). true = forbidden; false = an official page explicitly allows using several keys to raise throughput; null = not recorded (field_checks says why). null is never permission."
+        },
         "openai_compatible": { "$ref": "#/$defs/tristate", "description": "Whether the listed free offering exposes an OpenAI-compatible endpoint. Paid-only compatibility does not establish this; null means unconfirmed for the free offering." },
         "openai_base_url": {
           "type": ["string", "null"],
@@ -263,12 +282,14 @@
           "type": "object",
           "additionalProperties": false,
           "minProperties": 1,
-          "description": "Why a tri-state flag holds its value: the official pages read, the day, and what they said. A flag with no entry here has no recorded check (not_checked), which is never 'no'.",
+          "description": "Why a tri-state flag (including the two terms flags multi_account_forbidden and limit_circumvention_forbidden) holds its value: the official pages read, the day, and what they said. A flag with no entry here has no recorded check (not_checked), which is never 'no'.",
           "properties": {
             "phone_required": { "$ref": "#/$defs/field_check" },
             "card_required": { "$ref": "#/$defs/field_check" },
             "commercial_ok": { "$ref": "#/$defs/field_check" },
-            "openai_compatible": { "$ref": "#/$defs/field_check" }
+            "openai_compatible": { "$ref": "#/$defs/field_check" },
+            "multi_account_forbidden": { "$ref": "#/$defs/field_check" },
+            "limit_circumvention_forbidden": { "$ref": "#/$defs/field_check" }
           }
         },
         "published_speed": {
@@ -309,6 +330,14 @@
             "properties": { "commercial_ok_condition": { "type": "string", "pattern": "\\S" } }
           },
           "else": { "properties": { "commercial_ok_condition": { "type": "null" } } }
+        },
+        {
+          "if": { "required": ["multi_account_forbidden"], "properties": { "multi_account_forbidden": { "const": "conditional" } } },
+          "then": {
+            "required": ["multi_account_condition"],
+            "properties": { "multi_account_condition": { "type": "string", "pattern": "\\S" } }
+          },
+          "else": { "properties": { "multi_account_condition": { "type": "null" } } }
         },
         {
           "if": { "required": ["model_tier"], "properties": { "model_tier": { "type": "integer" } } },

@@ -6,7 +6,7 @@
 // board stays on /coverage/ (lib/coverage.mjs); this page reuses its populations and links there for the open items.
 
 import { htmlEsc } from './rows.mjs';
-import { FIELD_CHECK_FIELDS, fieldCheckCounts } from './field-checks.mjs';
+import { PRODUCTION_FLAG_FIELDS, fieldCheckCounts } from './field-checks.mjs';
 import { COVERAGE_FIELDS, percent } from './coverage.mjs';
 import { SLA_DAYS, DUE_SOON_DAYS, freshnessStatus } from './rules.mjs';
 
@@ -67,7 +67,7 @@ export function quality(providers, asOf) {
   const earlier = dates.filter((d) => d < firstWeek).length;
 
   // Tri-state flags, over the population /coverage/ counts them on (all verified providers).
-  const flags = FIELD_CHECK_FIELDS.map((key) => {
+  const flags = PRODUCTION_FLAG_FIELDS.map((key) => {
     const pop = providers.filter(popOf(key).inPop);
     const c = fieldCheckCounts(pop, key);
     return {

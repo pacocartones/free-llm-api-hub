@@ -59,6 +59,8 @@ export const VARIABLES = [
   ['card_required', 'Whether a payment card is required to use the free access (true, false, or null when not stated).'],
   ['phone_required', 'Whether a phone number is required to sign up (true, false, or null when not stated).'],
   ['commercial_ok', 'Whether the free access may be used commercially (true, false, or null when not stated).'],
+  ['multi_account_forbidden', 'Whether the provider\'s terms forbid one person holding several accounts (true, false, "conditional", or null when not stated).'],
+  ['limit_circumvention_forbidden', 'Whether the provider\'s terms forbid getting around rate limits, quotas or usage limits (true, false, or null when not stated).'],
   ['openai_compatible', 'Whether the free offering exposes an OpenAI-compatible endpoint (null when unconfirmed).'],
   ['modalities', 'Modalities reachable on the free tier (text, image, audio, embeddings, rerank, OCR, vision).'],
   ['data_policy.trains_on_prompts', 'Whether the provider says it trains on prompts sent through the free access (null when not recorded).'],

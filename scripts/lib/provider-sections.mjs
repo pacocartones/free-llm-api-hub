@@ -9,7 +9,7 @@ import { triStateHtml } from './compare.mjs';
 import { expiryHtml } from './expiry.mjs';
 import { fieldCheck } from './field-checks.mjs';
 import { publishedSpeed, speedFigure, SPEED_METRICS } from './published-speed.mjs';
-import { FLAG_DEFS, flagHtml } from './flags.mjs';
+import { FLAG_DEFS, TERMS_FLAG_DEFS, flagHtml } from './flags.mjs';
 
 // The shared flag component (lib/flags.mjs) around the page's own words: the shape, then the words, with the
 // whole sentence as the accessible text.
@@ -33,8 +33,35 @@ const LIMIT_UNITS = [
 
 const safeUrl = (u) => (/^https?:\/\//i.test(String(u || '')) ? htmlEsc(u) : '');
 
-/** What a visitor must give to start: three flags, each yes / no / "not confirmed" written out. */
-export function requirementsHtml(p) {
+/** The visible words of a terms flag: forbidden / allowed / conditional, and "Not stated" for null or absent. */
+export function termsValueHtml(v) {
+  if (v === true) return '<span class="tri tri-yes">forbidden</span>';
+  if (v === false) return '<span class="tri tri-no">allowed</span>';
+  if (v === 'conditional') return '<span class="tri tri-cond">conditional</span>';
+  return '<span class="tri tri-unk">Not stated</span>';
+}
+
+/**
+ * The two terms flags as rows of the requirements list: several accounts per person, and getting around limits.
+ * "Not stated" when the provider's terms are silent (or nothing is recorded yet), never "allowed".
+ */
+export function termsRowsHtml(p) {
+  return TERMS_FLAG_DEFS.map((def) => {
+    const check = fieldCheck(p, def.field);
+    const v = p[def.field];
+    const condition = v === 'conditional' && def.field === 'multi_account_forbidden' && p.multi_account_condition
+      ? `<div class="req-condition">${htmlEsc(p.multi_account_condition)}</div>`
+      : '';
+    const label = def.field === 'multi_account_forbidden' ? 'Several accounts per person' : 'Getting around rate limits';
+    return `<div class="req"><dt>${ICON(def.icon)}${label}</dt><dd>${flagHtml(def, p, { check, visible: termsValueHtml(v) })}${condition}${checkSourceHtml(check)}</dd></div>`;
+  }).join('');
+}
+
+/**
+ * What a visitor must give to start: three flags, each yes / no / "not confirmed" written out. With
+ * `{ terms: true }` (the provider page), the two terms flags follow in the same list.
+ */
+export function requirementsHtml(p, { terms = false } = {}) {
   const row = (icon, label, field, yes, no, extra = '') => {
     const check = fieldCheck(p, field);
     const def = FLAG_DEFS.find((d) => d.field === field);
@@ -47,6 +74,7 @@ export function requirementsHtml(p) {
     row('ic-card', 'Credit card', 'card_required', 'required', 'not required') +
     row('ic-phone', 'Phone verification', 'phone_required', 'required', 'not required') +
     row('ic-building', 'Commercial use', 'commercial_ok', 'allowed', 'evaluation only', commercialCondition) +
+    (terms ? termsRowsHtml(p) : '') +
     `</dl>`;
 }
 

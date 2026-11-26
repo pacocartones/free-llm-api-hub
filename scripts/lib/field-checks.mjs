@@ -7,7 +7,15 @@
 import { hasHiddenChars } from './hidden-chars.mjs';
 import { publicHttpsUrlError } from './public-fetch.mjs';
 
-export const FIELD_CHECK_FIELDS = Object.freeze(['phone_required', 'card_required', 'commercial_ok', 'openai_compatible']);
+/** The four production flags every provider carries (counted on /coverage/ and /quality/). */
+export const PRODUCTION_FLAG_FIELDS = Object.freeze(['phone_required', 'card_required', 'commercial_ok', 'openai_compatible']);
+/**
+ * The two terms flags (dataset 2.16.0): may one person hold several accounts, and may limits be got around. Optional on a
+ * provider; when present they always carry a field_checks entry. null is never permission.
+ */
+export const TERMS_FLAG_FIELDS = Object.freeze(['multi_account_forbidden', 'limit_circumvention_forbidden']);
+/** Every flag that may have a field_checks entry. */
+export const FIELD_CHECK_FIELDS = Object.freeze([...PRODUCTION_FLAG_FIELDS, ...TERMS_FLAG_FIELDS]);
 export const NULL_REASONS = Object.freeze(['source_silent', 'needs_account', 'sources_disagree']);
 export const STATUSES = Object.freeze(['stated', ...NULL_REASONS]);
 /** Every status a consumer can see for a flag: the recorded ones plus the derived not_checked. */

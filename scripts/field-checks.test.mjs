@@ -7,7 +7,7 @@ import { spawnSync } from 'node:child_process';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { makeTmpDir } from './lib/tmp.mjs';
-import { FIELD_CHECK_FIELDS, NULL_REASONS, REASON_LABEL, fieldCheckErrors, fieldCheckStatus, fieldCheckCounts } from './lib/field-checks.mjs';
+import { FIELD_CHECK_FIELDS, TERMS_FLAG_FIELDS, NULL_REASONS, REASON_LABEL, fieldCheckErrors, fieldCheckStatus, fieldCheckCounts } from './lib/field-checks.mjs';
 import { quoteErrors } from './lib/quotes.mjs';
 import { mergeRegistry, fieldEntriesFor } from './lib/quotes-add.mjs';
 import { triStateHtml, clientBundle } from './lib/compare.mjs';
@@ -38,7 +38,9 @@ function withCheck(field, value, check) {
   const p = data.providers.find((x) => x.verified === true && x.slug === 'groq') || data.providers.find((x) => x.verified === true);
   p[field] = value;
   if (field === 'commercial_ok' && value !== 'conditional') delete p.commercial_ok_condition;
-  p.field_checks = { [field]: check };
+  // The terms flags always carry their check, so keep those entries (scripts/terms-flags.test.mjs tests them).
+  const terms = Object.fromEntries(Object.entries(p.field_checks || {}).filter(([k]) => TERMS_FLAG_FIELDS.includes(k)));
+  p.field_checks = { ...terms, [field]: check };
   return { data, p };
 }
 

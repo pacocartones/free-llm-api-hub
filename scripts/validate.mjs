@@ -25,7 +25,7 @@ import { reportErrors } from './lib/quotes-report.mjs';
 import { keyHostErrors } from './lib/key-hosts.mjs';
 import { summaryErrors } from './lib/provider-summaries.mjs';
 import { publicHttpsUrlError } from './lib/public-fetch.mjs';
-import { fieldCheckErrors } from './lib/field-checks.mjs';
+import { fieldCheckErrors, TERMS_FLAG_FIELDS } from './lib/field-checks.mjs';
 import { publishedSpeedErrors } from './lib/published-speed.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -125,6 +125,20 @@ for (const p of data.providers ?? []) {
     check(typeof p.commercial_ok_condition === 'string' && p.commercial_ok_condition.trim().length > 0, `${id}: commercial_ok is conditional, so commercial_ok_condition is required`);
   } else {
     check(p.commercial_ok_condition === undefined || p.commercial_ok_condition === null, `${id}: commercial_ok_condition only allowed when commercial_ok is "conditional"`);
+  }
+
+  // The two terms flags (optional, dataset 2.16.0): absent = not recorded, like a flag with no field_checks entry.
+  if ('multi_account_forbidden' in p) check(TRISTATE.includes(p.multi_account_forbidden) || p.multi_account_forbidden === 'conditional', `${id}: multi_account_forbidden must be true/false/null or "conditional"`);
+  if (p.multi_account_forbidden === 'conditional') {
+    check(typeof p.multi_account_condition === 'string' && p.multi_account_condition.trim().length > 0 && !hasHiddenChars(p.multi_account_condition), `${id}: multi_account_forbidden is conditional, so multi_account_condition is required`);
+  } else {
+    check(p.multi_account_condition === undefined || p.multi_account_condition === null, `${id}: multi_account_condition only allowed when multi_account_forbidden is "conditional"`);
+  }
+  if ('limit_circumvention_forbidden' in p) check(TRISTATE.includes(p.limit_circumvention_forbidden), `${id}: limit_circumvention_forbidden must be true/false/null`);
+  for (const f of TERMS_FLAG_FIELDS) {
+    // A recorded value carries its check: the provider's sentence, or why it stays null.
+    if (f in p) check(p.field_checks != null && p.field_checks[f] != null, `${id}: ${f} is recorded, so field_checks.${f} must say why`);
+    else check(p.field_checks == null || p.field_checks[f] == null, `${id}: field_checks.${f} without a ${f} value (write ${f}: null for a null with its reason)`);
   }
 
   if (Array.isArray(p.modalities))
