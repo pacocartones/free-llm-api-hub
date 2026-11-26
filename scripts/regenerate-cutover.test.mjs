@@ -247,6 +247,8 @@ test('verify.yml: push mode regenerates before the checks and blocks through dri
   }
   const validate = jobOf(VERIFY, 'validate');
   assert.match(stepOf(validate, 'Regenerate the derived files first'), /node scripts\/check-og\.mjs \|\| node scripts\/og\.mjs/);
+  // Windows too: without the images, a pull request that changes how they are drawn fails the OG manifest test there.
+  assert.match(stepOf(jobOf(VERIFY, 'windows-tests'), 'Regenerate the derived files first'), /node scripts\/check-og\.mjs \|\| node scripts\/og\.mjs/);
   assert.ok(validate.indexOf('Regenerate the derived files first') > validate.indexOf('node scripts/validate.mjs'), 'the data is validated before it is built');
   assert.ok(validate.indexOf('Regenerate the derived files first') < validate.indexOf('node scripts/check-og.mjs\n'), 'the OG check sees the rendered images');
   const gate = stepOf(validate, 'regenerate-guard.mjs drift-gate');
