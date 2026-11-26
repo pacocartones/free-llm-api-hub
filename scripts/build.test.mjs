@@ -2433,7 +2433,9 @@ test('home table: «Needs / unknown» says in words only what is required or unk
     for (const n of needs) { assert.ok(NEED_LABELS.includes(n), p.slug + ': phrase outside the vocabulary: ' + n); seen.add(n); }
     for (const u of unknown) assert.ok(UNKNOWN_LABELS.includes(u), p.slug + ': unknown outside the vocabulary: ' + u);
     const cell = needsCellHtml(p);
-    const visible = cell.replace(/<[^>]+>/g, '');
+    // Strip tags until nothing changes, so no partial tag can survive one pass.
+    let visible = cell;
+    for (let prev = ''; prev !== visible; ) { prev = visible; visible = visible.replace(/<[^>]*>/g, ''); }
     assert.doesNotMatch(visible, /Not stated|✓/, p.slug + ': no "Not stated" and no tick marks');
     // Two lines at the reference desktop width (a 22% column of a 1480px table, about 45 characters of the body face a line).
     assert.ok(needs.join(', ').length <= 90 && ('Unknown: ' + unknown.join(', ')).length <= 90, p.slug + ': each part fits in two lines');
