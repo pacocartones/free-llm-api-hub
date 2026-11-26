@@ -109,6 +109,7 @@
       "best_for": "Highest free daily volume for a real side project",
       "modalities": ["text", "embeddings", "image", "audio"],
       "models_free": ["@cf/google/gemma-4-26b-a4b-it", "@cf/meta/llama-3.3-70b-instruct-fp8-fast", "@cf/mistralai/mistral-small-3.1-24b-instruct", "@cf/qwen/qwen2.5-coder-32b-instruct", "@cf/deepseek-ai/deepseek-r1-distill-qwen-32b"],
+      "models_url": "https://developers.cloudflare.com/workers-ai/models/",
       "expires": null,
       "docs_url": "https://developers.cloudflare.com/workers-ai/platform/pricing/",
       "phone_required": null,
