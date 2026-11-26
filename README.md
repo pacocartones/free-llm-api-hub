@@ -96,10 +96,10 @@ That's the shortlist. The full dataset — all <!-- FIG:providers -->82<!-- /FIG
 Focused, always-current collections — each is generated from the dataset and has a live web page too.
 
 <!-- AUTOGEN:collections:start -->
-- **[Free LLM APIs with no credit card](collections/no-credit-card.md)** (49) — start without a payment method · [live page ↗](https://freellmapihub.com/collections/no-credit-card)
+- **[Free LLM APIs with no credit card](collections/no-credit-card.md)** (47) — start without a payment method · [live page ↗](https://freellmapihub.com/collections/no-credit-card)
 - **[Free LLM APIs with no phone verification](collections/no-phone.md)** (14) — no SMS/phone verification · [live page ↗](https://freellmapihub.com/collections/no-phone)
-- **[Free AI APIs with no account needed](collections/anonymous-access.md)** (4) — call the API with no account at all · [live page ↗](https://freellmapihub.com/collections/anonymous-access)
-- **[Free LLM APIs for commercial use](collections/commercial-use.md)** (25) — safe to ship, not eval-only · [live page ↗](https://freellmapihub.com/collections/commercial-use)
+- **[Free AI APIs with no account needed](collections/anonymous-access.md)** (5) — call the API with no account at all · [live page ↗](https://freellmapihub.com/collections/anonymous-access)
+- **[Free LLM APIs for commercial use](collections/commercial-use.md)** (23) — safe to ship, not eval-only · [live page ↗](https://freellmapihub.com/collections/commercial-use)
 - **[OpenAI-compatible free LLM APIs](collections/openai-compatible.md)** (46) — drop-in OpenAI SDK swap · [live page ↗](https://freellmapihub.com/collections/openai-compatible)
 - **[Permanently free LLM APIs](collections/always-free.md)** (7) — $0 models, no trial clock · [live page ↗](https://freellmapihub.com/collections/always-free)
 - **[Free multimodal LLM APIs](collections/multimodal.md)** (60) — vision, audio, embeddings · [live page ↗](https://freellmapihub.com/collections/multimodal)
