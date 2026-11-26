@@ -1270,7 +1270,9 @@
       "verified": true,
       "last_verified": "2026-11-25",
       "added": "2026-07-31",
-      "data_policy": {"trains_on_prompts":true,"retention":null,"source":"https://www.cartesia.ai/legal/terms.html","checked":"2026-11-25","quote":"You may request that we not use certain categories of Your Content to train our Models by completing this online form","note":"Section «Training Opt-Out». The request covers selected categories and applies only to later use; earlier uses are not affected. The clause is not tied to a plan; the terms treat free trials in a separate section (2.6).","plan_named":false}
+      "data_policy": {"trains_on_prompts":true,"retention":null,"source":"https://www.cartesia.ai/legal/terms.html","checked":"2026-11-25","quote":"You may request that we not use certain categories of Your Content to train our Models by completing this online form","note":"Section «Training Opt-Out». The request covers selected categories and applies only to later use; earlier uses are not affected. The clause is not tied to a plan; the terms treat free trials in a separate section (2.6).","plan_named":false},
+      "keys_url": "https://play.cartesia.ai/keys",
+      "keys_url_source": "https://docs.cartesia.ai/get-started/realtime-text-to-speech-quickstart"
     },
     {
       "slug": "fish-audio",
