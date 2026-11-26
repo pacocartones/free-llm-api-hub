@@ -2142,6 +2142,8 @@ test('active providers retain models_url from their official catalogues', () => 
     ['plamo', 'https://docs.plamo.preferredai.jp/en/api'],
     ['entrim', 'https://entrim.ai/ai-models/'],
     ['infomaniak', 'https://www.infomaniak.com/en/hosting/ai-services/open-source-models'],
+    ['berget-ai', 'https://berget.ai/en/models'],
+    ['netlify-ai-gateway', 'https://docs.netlify.com/build/ai-gateway/overview/#model-availability'],
   ].sort(bySlug));
 });
 
@@ -3175,7 +3177,7 @@ test('data_policy lot 4: the 13 providers that say they do not train were read f
   for (const p of data.providers.filter((q) => q.data_policy && q.data_policy.trains_on_prompts !== false)) {
     // rows that say it may train were read for the plan later (lots 2, 3, 5 and the correction of the absence claims): true where the
     // clause names the free users or free usage (AssemblyAI, Voyage AI, Cohere), false where it does not
-    const READ = { assemblyai: true, 'voyage-ai': true, elevenlabs: false, cartesia: false, 'retell-ai': false, deepgram: false, 'arli-ai': false, 'sarvam-ai': false, poolside: false, typhoon: false, openrouter: false, nlpcloud: false, 'nvidia-nim': false, veryfi: false, voicegain: false, cohere: true, inception: false, 'azure-speech': false, lemonfox: false, gladia: true, 'liquid-ai': false, 'stability-ai': false, plamo: true };
+    const READ = { assemblyai: true, 'voyage-ai': true, elevenlabs: false, cartesia: false, 'retell-ai': false, deepgram: false, 'arli-ai': false, 'sarvam-ai': false, poolside: false, typhoon: false, openrouter: false, nlpcloud: false, 'nvidia-nim': false, veryfi: false, voicegain: false, cohere: true, inception: false, 'azure-speech': false, lemonfox: false, gladia: true, 'liquid-ai': false, 'stability-ai': false, plamo: true, 'netlify-ai-gateway': false };
     if (p.slug in READ) assert.equal(p.data_policy.plan_named, READ[p.slug], `${p.slug}: plan_named as read`);
     else assert.equal(p.data_policy.plan_named, undefined, `${p.slug}: not read for the plan yet, so no value is written`);
   }

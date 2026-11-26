@@ -89,7 +89,7 @@ Everything on the code side is built, tested and committed (harness, fields, bad
 
 **Two decisions for the VPS path** (both were deliberately left open; the code is agnostic to either):
 - [ ] **Infisical reachability** — localhost-only on the VPS (everything runs there) *or* a public HTTPS domain (lets probes also be piloted from a laptop session).
-- [ ] **Zero-Actions deploy** — VPS builds and pushes to a `gh-pages` branch (GitHub serves it, 0 Actions minutes) *or* the VPS serves the site via nginx *or* keep the light `pages.yml`. This unblocks the commented publish step in `scripts/probe-cron.sh`.
+- [ ] **Zero-Actions deploy** — VPS builds and pushes to a `gh-pages` branch (GitHub serves it, 0 Actions minutes) *or* the VPS serves the site via nginx *or* keep the light `pages.yml`.
 
 **Infisical setup (on the VPS):**
 - [ ] Create a project folder, e.g. `/free-llm-api-hub`, environment `prod`.
