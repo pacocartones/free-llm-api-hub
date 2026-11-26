@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
-import { badgeSvg, textWidth, COLORS } from './lib/badge-svg.mjs';
+import { badgeSvg, ticketBadgeSvg, TICKET, textWidth, COLORS } from './lib/badge-svg.mjs';
 import { execFileSync } from 'node:child_process';
 import { privateTree } from './lib/private-tree.mjs';
 
@@ -31,7 +31,7 @@ test('the built site serves the verified badge itself: it matches the endpoint f
   const ROOT = privateTree(REPO);
   execFileSync(process.execPath, [join(ROOT, 'scripts/build.mjs')], { cwd: ROOT, stdio: 'pipe' });
   const json = JSON.parse(readFileSync(join(ROOT, 'site/badge-verified.json'), 'utf8'));
-  assert.equal(readFileSync(join(ROOT, 'site/badge-verified.svg'), 'utf8'), badgeSvg(json).svg);
+  assert.equal(readFileSync(join(ROOT, 'site/badge-verified.svg'), 'utf8'), ticketBadgeSvg(json).svg);
   const walk = (dir) => readdirSync(dir).flatMap((f) => {
     const p = join(dir, f);
     return statSync(p).isDirectory() ? (f === 'node_modules' ? [] : walk(p)) : (p.endsWith('.html') ? [p] : []);
@@ -44,8 +44,21 @@ test('the built site serves the verified badge itself: it matches the endpoint f
   assert.deepEqual(offenders.slice(0, 5), [], 'no page may load an image from another origin: the privacy page says so');
   assert.match(readFileSync(join(ROOT, 'site/index.html'), 'utf8'), /<img class="trust-badge" src="badge-verified\.svg"/);
   // every footer image carries the width of the badge, so the footer does not move when it arrives
-  const w = badgeSvg(json).width;
+  const w = ticketBadgeSvg(json).width;
   for (const rel of ['site/index.html', 'site/legal/privacy.html', 'site/best/index.html']) {
     assert.match(readFileSync(join(ROOT, rel), 'utf8'), new RegExp(`<img class="trust-badge" src="[^"]*badge-verified\\.svg" alt="Verified providers" width="${w}" height="20"`), `${rel}: the badge image has width ${w}`);
   }
+});
+
+test('ticketBadgeSvg: the perforated ticket at badge size, apricot with the accent, notched, escaped and deterministic', () => {
+  // Mutant: a badge in the old palette, a lost notch or cut line, or text that reaches the markup raw.
+  const a = ticketBadgeSvg({ label: 'verified', message: '76/77' });
+  assert.equal(a.svg, ticketBadgeSvg({ label: 'verified', message: '76/77' }).svg);
+  assert.equal(a.height, 20);
+  assert.equal(a.width, TICKET.stub + 6 + textWidth('verified 76/77') + 9);
+  assert.match(a.svg, /fill="#ffebd9" mask="url\(#n\)"/, 'the apricot fill, through the notch mask');
+  assert.match(a.svg, /<circle cy="10" r="4" fill="#000"\/><circle cx="\d+" cy="10" r="4" fill="#000"\/>/, 'a notch on each side');
+  assert.match(a.svg, /stroke-dasharray="2 1.6"/, 'the cut line');
+  assert.match(a.svg, />verified 76\/77<\/text>/);
+  assert.ok(!ticketBadgeSvg({ label: 'a<b', message: '"x"' }).svg.includes('a<b'), 'escaped');
 });

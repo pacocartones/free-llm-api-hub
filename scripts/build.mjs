@@ -55,7 +55,7 @@ import { markdownToHtml } from './lib/markdown.mjs';
 import { bestFactsHtml } from './lib/best-facts.mjs';
 import { providerFigures, expandFigures, injectInlineFigures, figureErrors } from './lib/figures.mjs';
 import { firstUseHtml } from './lib/home-first-use.mjs';
-import { badgeSvg } from './lib/badge-svg.mjs';
+import { ticketBadgeSvg } from './lib/badge-svg.mjs';
 import { codeHtmlEsc, curlChatQuickstart, pythonChatQuickstart, pythonEmbeddingsQuickstart, pythonStringLiteral } from './lib/quickstart.mjs';
 import { providersCsv } from './lib/provider-csv.mjs';
 import { writeSchemaDocs } from './schema-docs.mjs';
@@ -107,7 +107,7 @@ const verifiedCount = providers.filter((p) => p.verified).length;
 // The footer badge: its data is one object (written as badge-verified.json and drawn as badge-verified.svg), and its width
 // goes into every <img> so the footer does not move when the image arrives.
 const badgeVerified = { schemaVersion: 1, label: 'verified', message: `${verifiedCount}/${total}`, color: 'brightgreen' };
-const BADGE_W = badgeSvg(badgeVerified).width;
+const BADGE_W = ticketBadgeSvg(badgeVerified).width;
 
 // ---------- markdown helpers ----------
 function flags(p) {
@@ -978,9 +978,9 @@ indexHtml = indexHtml.replace(/<title>[^<]*<\/title>/, `<title>${htmlEsc(HOME_TI
 indexHtml = inject(indexHtml, 'csp', CSP);
 indexHtml = inject(indexHtml, 'themeguard', THEME_GUARD);
 indexHtml = inject(indexHtml, 'fonts', fontHead(''));
-// The tagline (lib/brand.mjs, a placeholder until the owner picks one): the home H1, its closing phrase in the accent.
+// The tagline (lib/brand.mjs, the owner's choice): the home H1, its closing sentence in the accent.
 const [TAG_LEAD, TAG_KEY] = taglineParts();
-indexHtml = inject(indexHtml, 'tagline', `    <h1>${htmlEsc(TAG_LEAD)}${TAG_KEY ? `<br> <span class="h1-key">${htmlEsc(TAG_KEY)}</span>` : ''}</h1>`);
+indexHtml = inject(indexHtml, 'tagline', `    <h1>${htmlEsc(TAG_LEAD)}${TAG_KEY ? ` <span class="h1-key">${htmlEsc(TAG_KEY)}</span>` : ''}</h1>`);
 indexHtml = inject(indexHtml, 'rows', homeRows);
 // The hero's field of auras (brand H1): every provider in the explorer's order, then the key to read them. Dated by ASOF
 // like the rows, so the field is deterministic. Each aura links its provider page for the mouse; the whole field is
@@ -1037,7 +1037,8 @@ writeFileSync(join(ROOT, 'site/badge-freshness.json'), JSON.stringify(badge, nul
 writeFileSync(join(ROOT, 'badge-verified.json'), JSON.stringify(badgeVerified, null, 2) + '\n');
 writeFileSync(join(ROOT, 'site/badge-verified.json'), JSON.stringify(badgeVerified, null, 2) + '\n');
 // The footer badge is this SVG, served by the site itself: no page asks a third party for it (see the privacy page).
-const verifiedBadge = badgeSvg(badgeVerified);
+// Brand H1: it is the perforated ticket, the main receipt (lib/badge-svg.mjs ticketBadgeSvg).
+const verifiedBadge = ticketBadgeSvg(badgeVerified);
 writeFileSync(join(ROOT, 'site/badge-verified.svg'), verifiedBadge.svg);
 
 // ---------- ship data with the site ----------

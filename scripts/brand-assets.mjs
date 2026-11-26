@@ -14,16 +14,17 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { OG, OG_FONT_FILES, frameSvg, ogAuraSpec, esc, wrap } from './lib/og-art.mjs';
 import { homeTaglineSvg, homeAurasSvg } from './lib/og.mjs';
-import { auraSvg, HUB_AURA, AURA_DASH } from './lib/aura.mjs';
+import { auraSvg, HUB_AURA } from './lib/aura.mjs';
 import { wordmarkSvg } from './lib/wordmark.mjs';
-import { TAGLINE } from './lib/brand.mjs';
+import { TAGLINE, taglineParts } from './lib/brand.mjs';
 import { providerFigures } from './lib/figures.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 export const REPO_URL = 'github.com/pacocartones/free-llm-api-hub';
 
-const LIGHT = { ground: '#fafafa', ink: '#0f0f12', muted: '#55565e', accent: '#c2255c', dash: AURA_DASH.light };
-const DARK = { ground: OG.ground, ink: OG.ink, muted: OG.muted, accent: OG.accent, dash: AURA_DASH.dark };
+// The Cálida tokens of each theme (site/styles.css): the banner follows the reader's GitHub theme.
+const LIGHT = { theme: 'light', ground: '#fff9f6', ink: '#22140f', muted: '#6a5048', accent: '#9c4a00' };
+const DARK = { theme: 'dark', ground: '#17110f', ink: '#fbf1ec', muted: '#c2a89e', accent: '#ffb25c' };
 
 /** The GitHub social preview: the home card at 1280×640 with the repository's address. */
 export function socialPreviewSvg(providers) {
@@ -43,13 +44,13 @@ export function bannerSvg(providers, theme) {
   const specs = providers.map(ogAuraSpec);
   const cols = Math.ceil(specs.length / 4);
   const field = specs.map((s, i) => auraSvg(s, {
-    cx: 760 + (i % cols) * 48 + 20, cy: 92 + Math.floor(i / cols) * 76 + (i % 2) * 18, r: 19, ground: t.ground, dash: t.dash, id: `b${i}`,
+    cx: 760 + (i % cols) * 48 + 20, cy: 92 + Math.floor(i / cols) * 76 + (i % 2) * 18, r: 21, theme: t.theme, id: `b${i}`,
   })).join('');
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">` +
     `<rect width="${W}" height="${H}" rx="28" fill="${t.ground}"/>` +
-    auraSvg(HUB_AURA, { cx: 108, cy: 120, r: 40, id: 'hub' }) +
+    auraSvg(HUB_AURA, { cx: 108, cy: 120, r: 42, id: 'hub', theme: t.theme }) +
     wordmarkSvg({ x: 168, y: 136, size: 46, fill: t.ink }) +
-    wrap(TAGLINE, 22, 2).map((l, i) => `<text x="72" y="${236 + i * 64}" fill="${t.ink}" font-family="OG Display" font-size="62" letter-spacing="-1">${esc(l)}</text>`).join('') +
+    taglineParts().map((l, i) => `<text x="72" y="${236 + i * 64}" fill="${i ? t.accent : t.ink}" font-family="OG Display" font-size="62" letter-spacing="-1">${esc(l)}</text>`).join('') +
     `<text x="74" y="360" fill="${t.muted}" font-family="OG Mono" font-size="26">${providers.length} free AI APIs, each dated and sourced</text>` +
     field + `</svg>`;
 }

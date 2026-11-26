@@ -13,6 +13,7 @@ import { COLLECTIONS } from './collections.mjs';
 import { injectInlineFigures, providerFigures } from './figures.mjs';
 import { LONG_GUIDES } from './long-guides.mjs';
 import { OG, ogAuraSpec, ogLimits, auraGridSvg, esc, wrap } from './og-art.mjs';
+import { stampSources } from './stamp.mjs';
 import { TAGLINE, taglineParts } from './brand.mjs';
 
 const sha256 = (s) => createHash('sha256').update(s, 'utf8').digest('hex');
@@ -20,15 +21,17 @@ const sha256 = (s) => createHash('sha256').update(s, 'utf8').digest('hex');
 // What a provider OG image draws (scripts/og.mjs, lib/og-art.mjs providerCardSvg): the name and the plan in words, its
 // aura (modalities, disc or ring, dashed edge), up to three published limits and the "verified" stamp. The fingerprint
 // hashes exactly that projection, so a change to any of it re-renders the image and nothing else does: the date of the
-// last check is NOT drawn (the stamp says "verified · sourced"), so a weekly re-verification does not stale the image.
+// last check is NOT drawn (the ticket says "Verified · N sources"), so a weekly re-verification does not stale the image.
+// OG_ART is the version of the artwork: bump it when the drawing changes, so every image is flagged and re-rendered.
+export const OG_ART = 'calida-1';
 export const PROVIDER_OG_FIELDS = ['name', 'category', 'card_required', 'commercial_ok', 'openai_compatible', 'verified'];
 
-const auraKey = (p) => { const s = ogAuraSpec(p); return [s.modalities, s.ongoing, s.unknown]; };
-export const providerOgFingerprint = (p) => sha256(JSON.stringify([PROVIDER_OG_FIELDS.map((f) => p[f]), auraKey(p), ogLimits(p)]));
+const auraKey = (p) => { const s = ogAuraSpec(p); return [s.seed, s.modalities, s.ongoing, s.unknown]; };
+export const providerOgFingerprint = (p) => sha256(JSON.stringify([OG_ART, PROVIDER_OG_FIELDS.map((f) => p[f]), auraKey(p), ogLimits(p), stampSources(p).length]));
 
 /** The members a collection or guide image draws: the first 16, in dataset order. */
 export const ogMembers = (list) => list.slice(0, 16);
-const membersFingerprint = (list) => sha256(JSON.stringify([list.length, ogMembers(list).map(auraKey)]));
+const membersFingerprint = (list) => sha256(JSON.stringify([OG_ART, list.length, ogMembers(list).map(auraKey)]));
 
 export const COLLS = COLLECTIONS.map((c) => ({ ...c, title: c.ogTitle }));
 
@@ -81,7 +84,7 @@ export const buildOgManifest = (providers, homeSvg = readFileSync(new URL('../..
   for (const g of GUIDES) og[`guides/${g.slug}.png`] = membersFingerprint(providers.filter(g.filter));
   const modelCount = providers.reduce((n, p) => n + (p.models_free || []).length, 0);
   const modelProviders = providers.filter((p) => p.models_free && p.models_free.length).length;
-  og['models.png'] = sha256(`${modelCount}:${modelProviders}`);
+  og['models.png'] = sha256(`${OG_ART}:${modelCount}:${modelProviders}`);
   for (const p of providers) og[`p/${p.slug}.png`] = providerOgFingerprint(p);
   for (const o of SECTION_OGS) og[o.file] = sha256(JSON.stringify([o.label, o.title, o.subtitle]));
   return og;

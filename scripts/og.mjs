@@ -13,6 +13,7 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 // shared with the CI check (scripts/check-og.mjs) so both always agree.
 import { COLLS, GUIDES, SECTION_OGS, buildOgManifest, renderHomeOg } from './lib/og.mjs';
 import { OG_FONT_FILES, tagCardSvg, providerCardSvg, ogAuraSpec } from './lib/og-art.mjs';
+import { stampSources } from './lib/stamp.mjs';
 const { Resvg } = await import('@resvg/resvg-js');
 const FONT = { fontFiles: OG_FONT_FILES.map((f) => join(ROOT, 'tools/og-fonts', f)), loadSystemFonts: false, defaultFontFamily: 'OG Text' };
 const render = (svg, out) => {
@@ -63,7 +64,7 @@ const provSub = (p) => {
   return bits.join(' · ');
 };
 for (const p of providers) {
-  render(providerCardSvg(p, provSub(p)), join(ROOT, `site/og/p/${p.slug}.png`));
+  render(providerCardSvg(p, provSub(p), stampSources(p).length), join(ROOT, `site/og/p/${p.slug}.png`));
 }
 console.log(`per-provider OG: ${providers.length} rendered.`);
 

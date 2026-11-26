@@ -1,8 +1,11 @@
-### Changed and fixed
+### Changed
 
-- Social images in the new brand: a dark card with the mark, the title in Roboto Flex, and the auras of the
-  collection's or guide's providers; provider cards show three published limits, a "verified · sourced" stamp and the
-  provider's own aura. They are rendered with fonts kept in the repository, so every machine draws the same image.
-- The README opens with a banner of every provider's aura (light and dark), and its badges use the brand colours.
-- The tagline is one constant (`scripts/lib/brand.mjs`, still a placeholder) that the home title, the README, the
-  social image, the banner and the GitHub social preview (`assets/social-preview.png`, `npm run brand-assets`) all read.
+- The tagline is the owner's choice, "We read the docs. You ship the code.", kept in one constant
+  (`scripts/lib/brand.mjs`) that the home title, the README, the home social image, the README banner and the GitHub
+  social preview all read.
+- Social images in the Cálida palette: warm off-white cards with the hub's mark, the title in Roboto Flex and the
+  radial-bar auras. Provider cards show up to three published limits, their own aura and the perforated-ticket receipt
+  "Verified · N sources"; collections and guides show their first members' auras. They are rendered with bundled
+  fonts only, so every machine draws the same image.
+- The README opens with a banner of every provider's aura (light and dark), and its static badges use the Cálida
+  colours. The site's own footer badge is now the perforated ticket.
