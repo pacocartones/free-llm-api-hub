@@ -41,6 +41,7 @@ import { scoreBlockHtml } from './lib/score-bar.mjs';
 import { publishableClientConfigs } from './lib/client-config.mjs';
 import { COLLECTIONS as SHARED_COLLECTIONS } from './lib/collections.mjs';
 import * as compareLib from './lib/compare.mjs';
+import { redirectErrors, redirectEntries, redirectFile } from './lib/redirects.mjs';
 import * as findLib from './lib/find.mjs';
 import { FIND_PATH, FIND_TITLE, FIND_DESC, findMainHtml, findJsonLd } from './lib/find-page.mjs';
 import { requirementsHtml, limitsHtml, glanceHtml, modelsHtml, dataPolicyHtml, speedHtml } from './lib/provider-sections.mjs';
@@ -66,7 +67,7 @@ import { isIndexable, modelPageMainHtml, modelPageTitle, modelPageDescription, m
 import { collectionPageJsonLd as pageJsonLd, comparePageJsonLd } from './lib/page-jsonld.mjs';
 import { notFreeErrors, notFreeReadmeMd, notFreeModel, notFreeMainHtml, notFreeJsonLd, notFreeTitle, notFreeDescription, NOT_FREE_PATH } from './lib/not-free.mjs';
 import { embedMainHtml, embedTitle, embedDescription, EMBED_PATH } from './lib/embed-page.mjs';
-import { citationRecord } from './lib/citation.mjs';
+import { citationRecord, citeBlockHtml } from './lib/citation.mjs';
 import { LONG_GUIDES, longGuidePage } from './lib/long-guides.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -791,6 +792,12 @@ const QUOTES = JSON.parse(readFileSync(join(ROOT, 'data/quotes.json'), 'utf8')).
 {
   const errs = notFreeErrors(NOT_FREE, { providers, quotes: QUOTES });
   if (errs.length) throw new Error('data/not-free.json:\n' + errs.join('\n'));
+}
+// Retired URLs search engines still know (data/redirects.json): checked here, written as stubs after the compare pages.
+const REDIRECTS = JSON.parse(readFileSync(join(ROOT, 'data/redirects.json'), 'utf8'));
+{
+  const errs = redirectErrors(REDIRECTS, { providerSlugs: providers.map((p) => p.slug), comparePaths: [...COMPARE_PATHS], notFree: NOT_FREE });
+  if (errs.length) throw new Error('data/redirects.json:\n' + errs.join('\n'));
 }
 
 let readme = readFileSync(join(ROOT, 'README.md'), 'utf8');
@@ -2071,6 +2078,7 @@ const apiDocMain =
   `<h2>Stability</h2><p>Paths under <code>/api/v1/</code> stay put and fields are only ever added within v1; a breaking change ships as <code>/api/v2/</code>. The full policy, and how the dataset <code>version</code> relates to the path, is in <a href="${REPO}/blob/main/docs/api.md">docs/api.md</a>. The JSON Schema is published at <a href="v1/schema.json"><code>/api/v1/schema.json</code></a>.</p>` +
   `<p class="muted">Every object carries the dataset <code>version</code> and <code>generated</code> date. Prefer a stable snapshot? Pin a Git tag of <a href="${REPO}">the repo</a>. For AI agents, see <a href="../llms.txt">llms.txt</a>.</p>` +
   `<p>Want the widget, a badge or a citation instead? See <a href="../embed/">Use the data</a>.</p>` +
+  citeBlockHtml(citationRecord(citation)) +
   `</div></main>`;
 mkdirSync(join(ROOT, 'site/api'), { recursive: true });
 writeFileSync(join(ROOT, 'site/api/index.html'), htmlPage({
@@ -2313,7 +2321,10 @@ writeFileSync(
     canonical: SITE + '/quality/',
     main:
       pageHero({ crumbs: `<a href="../">Home</a> / ${qualityTitle}`, h1: qualityTitle, lede: `Verified share, freshness and unknowns, counted from the data. Nothing on this page is typed by hand.` }) +
-      qualityMainHtml(quality(providers, ASOF), { prefix: '../', repo: REPO }),
+      qualityMainHtml(quality(providers, ASOF), { prefix: '../', repo: REPO }).replace(
+        /<\/div><\/main>$/,
+        `${citeBlockHtml(citationRecord(citation))}</div></main>`,
+      ),
     prefix: '../',
     jsonld: collectionPageJsonLd({ type: 'WebPage', name: qualityTitle, url: `${SITE}/quality/`, description: qualityDesc, about: datasetRef(SITE), crumbs: [[qualityTitle, `${SITE}/quality/`]] }),
   })
@@ -2556,6 +2567,15 @@ writeFileSync(join(ROOT, 'site/compare/index.html'), htmlPage({
     items: comparePairs.map((cp) => ({ name: `${cp.a.name} vs ${cp.b.name}`, url: `${SITE}/compare/${cp.path}/` })),
   }),
 }));
+
+// ---------- retired URLs (data/redirects.json) ----------
+// After site/p/ and site/compare/ are regenerated: a noindex meta-refresh stub at each retired provider or compare
+// URL, so search engines that still know it follow it to its new home. Never listed in the sitemap.
+for (const [from, to] of redirectEntries(REDIRECTS)) {
+  const file = join(ROOT, 'site', redirectFile(from));
+  mkdirSync(dirname(file), { recursive: true });
+  writeFileSync(file, redirectPage(to));
+}
 
 // ---------- /find/: the "Find my free API" wizard ----------
 // Questions, filters, hash and result markup live in lib/find.mjs (serialised to site/shared-find.js, the code

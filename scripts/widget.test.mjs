@@ -53,3 +53,16 @@ test('widget keeps its load-error message for network, HTTP and invalid data fai
     assert.doesNotMatch(html, /verified · see all/);
   }
 });
+
+test('widget box style stays one well-formed attribute: no double quote inside it (the font stack quotes Segoe UI with single quotes)', { timeout: 1000 }, async () => {
+  const html = await render([{ slug: 'alpha', name: 'Alpha', verified: true, modalities: ['text'] }]);
+  const m = html.match(/^<div style="([^"]*)">/);
+  assert.ok(m, 'the outer div opens with a quoted style attribute');
+  const style = m[1];
+  assert.match(style, /^font:14px\/1\.5 /);
+  assert.ok(style.includes("'Segoe UI'"), 'Segoe UI is quoted with single quotes');
+  assert.ok(style.endsWith('box-sizing:border-box'), 'the attribute holds every declaration, up to the last one');
+  for (const decl of ['color:#d8e2dc', 'background:#0f1512', 'border-radius:10px', 'max-width:440px']) assert.ok(style.includes(decl), decl);
+  // Every style attribute the widget writes is closed by the same quote character it opens with.
+  for (const attr of html.match(/style="[^"]*"/g)) assert.doesNotMatch(attr.slice(7, -1), /["<>]/, attr);
+});
