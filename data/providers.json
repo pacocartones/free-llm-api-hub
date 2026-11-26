@@ -169,6 +169,7 @@
       "best_for": "Wafer-scale inference hardware, with a per-model speed on its models page",
       "modalities": ["text"],
       "models_free": ["gpt-oss-120b", "qwen-3.8-27b"],
+      "models_url": "https://inference-docs.cerebras.ai/models/overview",
       "expires": "30 days",
       "docs_url": "https://inference-docs.cerebras.ai/support/rate-limits",
       "phone_required": null,
