@@ -19,7 +19,10 @@ import { freshnessBadge, freshnessColor, freshnessStatus, recScore, SLA_DAYS, DU
 import { esc, stripTags } from './lib/escape.mjs';
 import { mineProviderHistory, assertHistoryPlausible, historyFromRevisions } from './lib/history.mjs';
 import { isoWeek, flattenFieldChanges, groupChangesByWeek, changesRss, xmlEsc, reportChangeUrl } from './lib/changes.mjs';
-import { monthlyReport, reportMonths, monthEndDate, fillMonths, monthSummary, monthBrief } from './lib/state.mjs';
+import { monthlyReport, reportMonths, fillMonths, monthSummary, monthBrief } from './lib/state.mjs';
+import { monthEndDate, humanDate } from './lib/dates.mjs';
+import { REASON_LABEL } from './lib/field-checks.mjs';
+const timeOf = (d) => `<time datetime="${d}">${humanDate(d)}</time>`;
 import { buildOgManifest } from './lib/og.mjs';
 import { explorerRowHtml, needsOf, needsCellHtml, NEED_LABELS, UNKNOWN_LABELS } from './lib/rows.mjs';
 import { labelTables } from './lib/tables.mjs';
@@ -688,7 +691,7 @@ test('the README top-10 table renders every provider of the score top with its s
   assert.ok(top.length > 0 && top.length <= 10, 'the README shows up to ten providers');
   for (const e of top) {
     assert.ok(readme.includes(`[${e.p.name}](${e.p.docs_url})`), `${e.p.slug}: README links the provider docs`);
-    assert.ok(readme.includes(`✅ ${e.p.last_verified}`), `${e.p.slug}: README shows the verification date`);
+    assert.ok(readme.includes(`✅ ${humanDate(e.p.last_verified)}`), `${e.p.slug}: README shows the verification date`);
     assert.ok(readme.includes(`${e.total.toFixed(1)}<br><sub>${e.confirmed} of ${e.of} inputs</sub>`), `${e.p.slug}: README shows the score and its confirmed inputs`);
   }
   assert.ok(!/top 20|top-20/i.test(readme), 'no top 20 text remains in the README');
@@ -723,7 +726,7 @@ test('/best shows the podium of three and the methodology page states the rules'
   assert.match(method, /editorial rating/);
   assert.match(method, /30/);
   assert.match(method, /internal rubric behind those ratings is not published/);
-  assert.match(method, new RegExp(`Data of ${datasetAsOf(JSON.parse(readFileSync(DATA, 'utf8')))}`));
+  assert.match(method, new RegExp(`Data of <time datetime="[0-9-]+">${humanDate(datasetAsOf(JSON.parse(readFileSync(DATA, 'utf8'))))}</time>`));
   assert.match(readFileSync(join(ROOT, 'site/sitemap.xml'), 'utf8'), /<loc>https:\/\/freellmapihub\.com\/best\/methodology\/<\/loc>/);
 });
 
@@ -1435,7 +1438,7 @@ test('the summary of a month is built from the figures of its report: singular, 
   assert.equal(monthBrief({ ...base, carried: true }), 'no changes');
   assert.equal(monthBrief(base), '3 field changes, 1 added');
   assert.equal(monthBrief({ ...base, fieldChanges: 0, added: [] }), 'no field changes');
-  assert.equal(monthBrief({ ...base, inProgress: true, asOf: '2026-07-14' }), '3 field changes, 1 added · in progress, data to 2026-07-14');
+  assert.equal(monthBrief({ ...base, inProgress: true, asOf: '2026-07-14' }), '3 field changes, 1 added · in progress, data to 14 Jul 2026');
 });
 
 test('/changes/ is one table by year and month with every month in a row; each month page has three tiles, its summary and what moved in order', () => {
@@ -1467,7 +1470,7 @@ test('/changes/ is one table by year and month with every month in a row; each m
     assert.equal(tiles.length, 3, `${month}: three tiles, each with a decorative icon`);
     const changes = Number(main.match(/<div class="num">(\d+)<\/div><div class="lbl">field changes? this month/)[1]);
     const moved = main.slice(main.indexOf('What moved in'), main.indexOf('Providers by category'));
-    const dates = [...moved.matchAll(/<tr><td class="notes">(\d{4}-\d{2}-\d{2})<\/td>/g)].map((m) => m[1]);
+    const dates = [...moved.matchAll(/<tr><td class="notes"><time datetime="(\d{4}-\d{2}-\d{2})">[^<]+<\/time><\/td>/g)].map((m) => m[1]);
     assert.equal(dates.length, changes, `${month}: the rows of "What moved" are the field changes of the figure`);
     assert.ok(dates.every((d) => d.startsWith(month + '-')), `${month}: only changes of that month`);
     assert.deepEqual(dates, [...dates].sort(), `${month}: in the order they happened`);
@@ -1670,7 +1673,7 @@ describe('read-only generated output', () => {
     }
   });
 
-  test('the compare view loads its scripts under the CSP and the null tri-state reads "not confirmed"', () => {
+  test('the compare view loads its scripts under the CSP and the null tri-state reads "not stated"', () => {
     const index = readFileSync(join(ROOT, 'site/compare/index.html'), 'utf8');
     assert.match(index, /<script src="\.\.\/shared-compare\.js\?v=[0-9a-f]{8}" defer><\/script>\n<script src="\.\.\/compare\.js\?v=[0-9a-f]{8}" defer><\/script>\n<\/body>/);
     assert.equal(index.split('<script>').length - 1, 1, 'only the hashed theme guard runs inline');
@@ -1684,7 +1687,7 @@ describe('read-only generated output', () => {
       return d.split('-vs-').some((s) => { const p = providers.find((x) => x.slug === s); return p && p.commercial_ok === null && !(p.field_checks && p.field_checks.commercial_ok); });
     });
     assert.ok(page, 'the real set contains a provider with an unconfirmed flag');
-    assert.match(readFileSync(join(ROOT, `site/compare/${page}/index.html`), 'utf8'), /<span class="tri tri-unk">not confirmed<\/span>/);
+    assert.match(readFileSync(join(ROOT, `site/compare/${page}/index.html`), 'utf8'), /<span class="tri tri-unk">not stated<\/span>/);
   });
 
   test('keyboard navigation is client-only: the server-rendered rows carry no tabindex', () => {
@@ -1866,30 +1869,30 @@ test('the privacy page and SECURITY.md say what the star count really does: no G
 
 test('provider sections: honest empty states, numbers only with source and date, no filler', () => {
   const base = { slug: 'x', name: 'X', modalities: ['text'], free_type: 'perpetual', category: 'ongoing' };
-  // flags read in words, and "not confirmed" is its own text, not a colour
+  // flags read in words, and "not stated" is its own text, not a colour
   const reqs = requirementsHtml({ ...base, card_required: null, phone_required: false, commercial_ok: true });
   // Each value sits in the shared flag component (lib/flags.mjs): its shape, then the page's own words.
-  assert.match(reqs, /Credit card<\/dt><dd><span class="pflag pflag-unk" data-flag="card"[^>]*><span class="pflag-mark" aria-hidden="true">\?<\/span><span class="pflag-vis" aria-hidden="true"><span class="tri tri-unk">not confirmed<\/span>/);
+  assert.match(reqs, /Credit card<\/dt><dd><span class="pflag pflag-unk" data-flag="card"[^>]*><span class="pflag-mark" aria-hidden="true">\?<\/span><span class="pflag-vis" aria-hidden="true"><span class="tri tri-unk">not stated<\/span>/);
   assert.match(reqs, /Phone verification<\/dt><dd><span class="pflag pflag-ok" data-flag="phone"[^>]*><span class="pflag-mark" aria-hidden="true">✓<\/span><span class="pflag-vis" aria-hidden="true"><span class="tri tri-no">not required<\/span>/);
   assert.match(reqs, /Commercial use<\/dt><dd><span class="pflag pflag-ok" data-flag="commercial"[^>]*><span class="pflag-mark" aria-hidden="true">✓<\/span><span class="pflag-vis" aria-hidden="true"><span class="tri tri-yes">allowed<\/span>/);
   // limits: numbers appear with their source and reading date; without them one honest line
   const withNumbers = limitsHtml({ ...base, rate_limits: '30 RPM', free_limits: { requests_per_minute: 30, requests_per_day: 14400, scope: 'free plan', source: 'https://example.com/limits', checked: '2026-10-08' } });
   assert.match(withNumbers, /<th scope="row">requests per minute<\/th><td>30<\/td>/);
   assert.match(withNumbers, /14,400/);
-  assert.match(withNumbers, /href="https:\/\/example\.com\/limits"[^>]*>the provider's page<\/a>, read 2026-10-08/);
+  assert.match(withNumbers, /href="https:\/\/example\.com\/limits"[^>]*>the provider's page<\/a>, read <time datetime="2026-10-08">8 Oct 2026<\/time>/);
   const without = limitsHtml({ ...base, rate_limits: 'Not published' });
   assert.doesNotMatch(without, /<table/);
-  assert.match(without, /Numeric limits are not recorded in structured form/);
+  assert.match(without, /Numeric limits: not stated in structured form/);
   assert.doesNotMatch(limitsHtml({ ...base, free_limits: { requests_per_day: 5, scope: 's', source: 'javascript:alert(1)', checked: '2026-10-08' } }), /javascript:/, 'a non-http source never becomes a link');
   // numbers without an http(s) source or a read date are not shown at all
   for (const bad of [{ source: 'javascript:alert(1)', checked: '2026-10-08' }, { source: 'https://example.com/x', checked: '' }, { checked: '2026-10-08' }]) {
     const out = limitsHtml({ ...base, free_limits: { requests_per_day: 5, scope: 's', ...bad } });
     assert.doesNotMatch(out, /<table/, `no table for ${JSON.stringify(bad)}`);
-    assert.match(out, /Numeric limits are not recorded in structured form/);
+    assert.match(out, /Numeric limits: not stated in structured form/);
   }
-  // Expires: an ongoing free tier with no end date reads "no expiry"; a trial credit with none is "not confirmed"
+  // Expires: an ongoing free tier with no end date reads "no expiry"; a trial credit with none is "not stated"
   assert.match(glanceHtml({ ...base, expires: null }, 'Ongoing'), /Expires<\/span><span class="meta-v">no expiry/);
-  assert.match(glanceHtml({ ...base, free_type: 'trial-credit', category: 'trial', expires: null }, 'Trial'), /Expires<\/span><span class="meta-v"><span class="tri tri-unk">not confirmed<\/span>/);
+  assert.match(glanceHtml({ ...base, free_type: 'trial-credit', category: 'trial', expires: null }, 'Trial'), /Expires<\/span><span class="meta-v"><span class="tri tri-unk">not stated<\/span>/);
   assert.match(glanceHtml({ ...base, free_type: 'trial-credit', category: 'trial', expires: '2026-12-31' }, 'Trial'), /Expires<\/span><span class="meta-v">2026-12-31/);
   // models: one line when none are listed, a section when they are
   assert.match(modelsHtml(base), /Free models: not listed yet\./);
@@ -1930,14 +1933,14 @@ test('every provider page has the same sections in the same order, unnumbered, w
   }
 });
 
-test('real pages: a trial credit without an end date says "not confirmed", an ongoing free tier says "no expiry"', () => {
+test('real pages: a trial credit without an end date says "not stated", an ongoing free tier says "no expiry"', () => {
   run(['scripts/build.mjs']);
   const { providers } = JSON.parse(readFileSync(DATA, 'utf8'));
   const trial = providers.find((p) => p.free_type === 'trial-credit' && !p.expires);
   const ongoing = providers.find((p) => p.free_type !== 'trial-credit' && !p.expires);
   assert.ok(trial && ongoing, 'the real data has both cases');
   const expiresCell = (slug) => readFileSync(join(ROOT, 'site/p', `${slug}.html`), 'utf8').match(/Expires<\/span><span class="meta-v">([\s\S]*?)<\/span>(?:<\/span>)?<\/div>/)[1];
-  assert.match(expiresCell(trial.slug), /not confirmed/, `${trial.slug}: trial credit without expires`);
+  assert.match(expiresCell(trial.slug), /not stated/, `${trial.slug}: trial credit without expires`);
   assert.match(expiresCell(ongoing.slug), /no expiry/, `${ongoing.slug}: ongoing free tier without expires`);
   const known = providers.find((p) => p.expires);
   if (known) assert.ok(readFileSync(join(ROOT, 'site/p', `${known.slug}.html`), 'utf8').includes(known.expires), 'a recorded end date is still shown');
@@ -1993,11 +1996,11 @@ test('expiry reads the same on the provider page, the comparison and the API', (
   // a trial credit whose provider says it never expires, a trial credit nobody has spoken for, and a continuous free tier
   const never = by('deepgram'), unknown = by('scaleway'), ongoing = by('groq');
   assert.ok(never.no_expiry && !unknown.no_expiry && !unknown.expires && ongoing.free_type !== 'trial-credit');
-  assert.match(pageCell('deepgram'), new RegExp(`no expiry[\\s\\S]*per the provider[\\s\\S]*read ${never.no_expiry.checked}`));
+  assert.match(pageCell('deepgram'), new RegExp(`no expiry[\\s\\S]*per the provider[\\s\\S]*read ${humanDate(never.no_expiry.checked)}`));
   assert.match(compareCell(never, ongoing), /no expiry[\s\S]*per the provider/);
   assert.ok(api.find((p) => p.slug === 'deepgram').no_expiry, 'the API carries the field');
-  assert.match(pageCell('scaleway'), /not confirmed/);
-  assert.match(compareCell(unknown, ongoing), /not confirmed/, 'a trial credit with no data is no longer "no expiry" in comparisons');
+  assert.match(pageCell('scaleway'), /not stated/);
+  assert.match(compareCell(unknown, ongoing), /not stated/, 'a trial credit with no data is no longer "no expiry" in comparisons');
   assert.equal(api.find((p) => p.slug === 'scaleway').no_expiry, undefined);
   assert.match(pageCell('groq'), /^no expiry<\/span>$/);
 });
@@ -2009,7 +2012,7 @@ test('compare links the official model catalogue under the free-model sample (#7
   assert.match(row({ ...base, slug: 'fx-sample', models_free: ['a/b'], models_url: 'https://example.com/models' }),
     /<code>a\/b<\/code><div class="cmp-sub"><a href="https:\/\/example\.com\/models" target="_blank" rel="noopener">official catalogue ↗<\/a><\/div>/);
   assert.match(row({ ...base, slug: 'fx-nosample', models_url: 'https://example.com/models' }),
-    /no sample<\/span><div class="cmp-sub"><a href="https:\/\/example\.com\/models" target="_blank" rel="noopener">official catalogue ↗<\/a><\/div>/);
+    /not stated<\/span><div class="cmp-sub"><a href="https:\/\/example\.com\/models" target="_blank" rel="noopener">official catalogue ↗<\/a><\/div>/);
   // without models_url the cell renders exactly as before: no link, no cmp-sub line
   assert.doesNotMatch(row({ ...base, slug: 'fx-plain', models_free: ['a/b'] }), /cmp-sub|official catalogue/);
   // an unsafe models_url never becomes a link
@@ -2391,7 +2394,7 @@ test('best-facts: the three cards show fields of the record as they are, and a m
   assert.equal((html.match(/class="best-fact[ "]/g) || []).length, 3, 'three cards');
   assert.match(html, /Free quota<\/h3><p class="best-fact-v" title="10k &lt;b&gt;tokens&lt;\/b&gt;\/day">10k &lt;b&gt;tokens&lt;\/b&gt;\/day<\/p>/, 'the free_tier text, escaped');
   assert.match(html, /Rate limit<\/h3><p class="best-fact-v" title="5 RPM">5 RPM<\/p>/, 'the rate_limits text');
-  assert.equal((html.match(/Checked 2026-10-08 · <a href="https:\/\/acme\.example\/docs"/g) || []).length, 3, 'each card carries the date and the source of the record');
+  assert.equal((html.match(/Checked <time datetime="2026-10-08">8 Oct 2026<\/time> · <a href="https:\/\/acme\.example\/docs"/g) || []).length, 3, 'each card carries the date and the source of the record');
   assert.match(html, /data-icon="ic-nocard"[^>]*><\/i><span>No credit card<\/span>/);
   assert.match(html, /data-icon="ic-phone"[^>]*><\/i><span>Phone required<\/span>/);
   assert.match(html, /best-req-unknown"><i data-icon="ic-building"><\/i><span>Commercial use: not stated<\/span>/, 'an unknown flag is said, not guessed');
@@ -2412,7 +2415,7 @@ test('explorer rows and best facts show conditional commercial use with its esca
   assert.match(row, /<span class="need-req">Commercial use conditional<\/span>/);
   assert.match(row, /Conditional/);
   assert.ok(row.includes('Per-model &lt;licence&gt; applies.'));
-  assert.doesNotMatch(row, /Not stated/);
+  assert.doesNotMatch(row, /Not stated: [^<]*commercial use/, 'a conditional answer is stated, not missing');
 
   const facts = bestFactsHtml(p, (id) => `<i>${id}</i>`);
   assert.match(facts, /best-req-conditional/);
@@ -2439,9 +2442,9 @@ test('/best/ layout: three cards per entry, a separator instead of the «Ranks 4
   assert.match(css, /\.best-intro \{[^}]*text-align: center/, 'the introduction is centred');
 });
 
-test('home table: «Needs / unknown» says in words only what is required or unknown, from a closed vocabulary; the free text stays in the title', () => {
-  // Mutant: put the free text of the record (notes) back in the cell, add a phrase outside the lists, or bring back
-  // "Not stated"; this test turns red.
+test('home table: «Needs / not stated» says in words only what is required or not stated, from a closed vocabulary; the free text stays in the title', () => {
+  // Mutant: put the free text of the record (notes) back in the cell, add a phrase outside the lists, repeat "Not stated"
+  // per flag or bring back "Unknown"; this test turns red.
   const providers = JSON.parse(readFileSync(join(ROOT, 'data/providers.json'), 'utf8')).providers;
   const seen = new Set();
   for (const p of providers) {
@@ -2452,9 +2455,10 @@ test('home table: «Needs / unknown» says in words only what is required or unk
     // Strip tags until nothing changes, so no partial tag can survive one pass.
     let visible = cell;
     for (let prev = ''; prev !== visible; ) { prev = visible; visible = visible.replace(/<[^>]*>/g, ''); }
-    assert.doesNotMatch(visible, /Not stated|✓/, p.slug + ': no "Not stated" and no tick marks');
+    assert.doesNotMatch(visible, /Unknown|✓/, p.slug + ': no "Unknown" and no tick marks');
+    assert.ok((visible.match(/Not stated/g) || []).length <= 1, p.slug + ': one "Not stated:" group, not one per flag');
     // Two lines at the reference desktop width (a 22% column of a 1480px table, about 45 characters of the body face a line).
-    assert.ok(needs.join(', ').length <= 90 && ('Unknown: ' + unknown.join(', ')).length <= 90, p.slug + ': each part fits in two lines');
+    assert.ok(needs.join(', ').length <= 90 && ('Not stated: ' + unknown.join(', ')).length <= 90, p.slug + ': each part fits in two lines');
     if (p.notes) {
       assert.ok(!visible.includes(p.notes.slice(0, 25)), p.slug + ': the free text is not in the cell');
       assert.ok(cell.includes(htmlEsc(p.notes) + '"'), p.slug + ': the free text is in the title');
@@ -2464,7 +2468,7 @@ test('home table: «Needs / unknown» says in words only what is required or unk
   assert.ok(seen.size >= 2, 'the dataset exercises at least two of the phrases');
   assert.deepEqual(needsOf({ card_required: false, phone_required: false, commercial_ok: true, data_policy: { trains_on_prompts: false } }), { needs: [], unknown: [] });
   assert.deepEqual(needsOf({ card_required: true, phone_required: null, commercial_ok: false }), { needs: ['Card required', 'Non-commercial only'], unknown: ['phone', 'training'] });
-  assert.match(needsCellHtml({ card_required: true, phone_required: null, commercial_ok: false }), /<span class="need-req">Card required, Non-commercial only<\/span><span class="need-unk">Unknown: phone, training<\/span>/);
+  assert.match(needsCellHtml({ card_required: true, phone_required: null, commercial_ok: false }), /<span class="need-req">Card required, Non-commercial only<\/span><span class="need-unk">Not stated: phone, training<\/span>/);
 });
 
 test('home: no good-first-issues button in the hero, a fixed table layout, a link-button name and a pinned header row', () => {
@@ -2677,7 +2681,7 @@ import { coverageMainHtml, coverage as coverageOf } from './lib/coverage.mjs';
 // A separate path from lib/coverage.mjs on purpose: plain loops and the populations as the card words them.
 const coverageByHand = (providers) => {
   const out = {};
-  // A null flag with a recorded reason (field_checks) is resolved without an answer: not confirmed, and not an open task either.
+  // A null flag with a recorded reason (field_checks) is resolved without an answer: not stated, and not an open task either.
   const REASONS = ['source_silent', 'needs_account', 'sources_disagree'];
   const add = (key, inPop, has) => {
     let total = 0; let confirmed = 0; let resolved = 0;
@@ -2737,11 +2741,11 @@ test('/coverage/ has one task row per open gap, each with the official docs and 
     const url = docs.get(name);
     assert.ok(url && row.includes(`href="${url.replace(/&/g, '&amp;')}"`), `${name}: the row links the provider's own docs_url`);
   }
-  // an unknown value reads "not confirmed", never "no": every open group says so, and no task row states a value
+  // an unknown value reads "not stated", never "no": every open group says so, and no task row states a value
   // the page's own groups: the header menu has a <summary> too (Providers)
   const summaries = html.slice(html.indexOf('<main')).match(/<summary>[\s\S]*?<\/summary>/g) || [];
   assert.ok(summaries.length >= 1, 'there are open groups');
-  assert.ok(summaries.every((x) => /not confirmed/.test(x)), 'every open group says not confirmed');
+  assert.ok(summaries.every((x) => /not stated/.test(x)), 'every open group says not stated');
   assert.ok(rows.every((r) => !/\b(yes|no)\b/i.test(r.replace(/<a href="\.\.\/p\/[^"]*">[^<]*<\/a>/, '').replace(/<[^>]+>/g, ' ').replace(/official docs|propose the value/g, ''))), 'a task row never states a value, only that it is open');
 });
 
@@ -2759,7 +2763,7 @@ test('/coverage/ escapes hostile provider text and refuses a non-http docs link'
 test('field_checks reach every public surface: provider page, API v1, llms-full.txt and /coverage/, but not the CSV', () => {
   run(['scripts/build.mjs']);
   const { providers } = JSON.parse(readFileSync(DATA, 'utf8'));
-  const LABEL = { source_silent: 'not stated by the provider', needs_account: 'needs an account to check', sources_disagree: 'provider pages disagree' };
+  const LABEL = { source_silent: REASON_LABEL.source_silent, needs_account: REASON_LABEL.needs_account, sources_disagree: REASON_LABEL.sources_disagree };
   const withReason = providers.filter((p) => p.verified === true && Object.entries(p.field_checks || {}).some(([f, c]) => p[f] === null && LABEL[c.status]));
   assert.ok(withReason.length >= 5, 'the dataset records reasons');
   const api = new Map(JSON.parse(readFileSync(join(ROOT, 'site/api/v1/providers.json'), 'utf8')).providers.map((p) => [p.slug, p]));
@@ -2769,8 +2773,8 @@ test('field_checks reach every public surface: provider page, API v1, llms-full.
     const page = readFileSync(join(ROOT, `site/p/${p.slug}.html`), 'utf8');
     for (const [f, c] of Object.entries(p.field_checks)) {
       if (p[f] !== null || !LABEL[c.status] || f === 'openai_compatible') continue;
-      assert.ok(page.includes(`${LABEL[c.status]} (checked ${c.checked})`), `${p.slug}.${f}: the page says the reason and the day`);
-      assert.ok(full.includes(`unknown, ${LABEL[c.status]} (checked ${c.checked})`), `${p.slug}.${f}: llms-full.txt says the reason`);
+      assert.ok(page.includes(`${htmlEsc(LABEL[c.status])} (checked ${humanDate(c.checked)})`), `${p.slug}.${f}: the page says the reason and the day`);
+      assert.ok(full.includes(`${LABEL[c.status]} (checked ${c.checked})`), `${p.slug}.${f}: llms-full.txt says the reason`);
     }
   }
   assert.ok(!readFileSync(join(ROOT, 'site/providers.csv'), 'utf8').split('\n')[0].includes('field_checks'), 'the CSV columns stay the explicit list');
@@ -2821,7 +2825,7 @@ test('llms-full.txt gives each provider with a data_policy one prompt data polic
 
   const valueOnly = providers.find((p) => trainState(p) === 'recorded');
   assert.ok(valueOnly, 'the dataset has a provider with a recorded value but no quote');
-  assert.match(policyLines(valueOnly)[0], /trains on prompts: not confirmed;/, `${valueOnly.slug}: a value alone is not confirmed`);
+  assert.match(policyLines(valueOnly)[0], /trains on prompts: not stated;/, `${valueOnly.slug}: a value alone is not stated`);
 
   const without = providers.find((p) => !p.data_policy);
   assert.ok(without, 'the dataset has a provider without a data_policy');
@@ -2832,7 +2836,7 @@ test('llms-full.txt gives each provider with a data_policy one prompt data polic
   assert.equal(lines.length, withPolicy.length, 'exactly one line per provider with a data_policy');
 });
 
-test('/coverage/ treats conditional commercial use as open, not confirmed', () => {
+test('/coverage/ treats conditional commercial use as open, not stated', () => {
   const provider = { slug: 'conditional', name: 'Conditional', docs_url: 'https://example.com/terms', verified: true, commercial_ok: 'conditional' };
   const row = coverageOf([provider]).find((entry) => entry.key === 'commercial_ok');
   assert.equal(row.total, 1);
@@ -2962,7 +2966,7 @@ test('a11y: small fixes stay in place (no endless animation, placeholder colour,
 // ---- /data-policy/ — who trains on your data -----------------------------------------------------
 import { trainState, dataPolicyRows, dataPolicyCounts, dataPolicyMainHtml } from './lib/data-policy-page.mjs';
 
-test('data-policy page: yes or no only with the provider\'s sentence; a value without one reads not confirmed', () => {
+test('data-policy page: yes or no only with the provider\'s sentence; a value without one reads not stated', () => {
   const q = 'We do not use your prompts to train models.';
   assert.equal(trainState({ data_policy: { trains_on_prompts: true, quote: q } }), 'yes');
   assert.equal(trainState({ data_policy: { trains_on_prompts: false, quote: q } }), 'no');
@@ -2976,7 +2980,7 @@ test('data-policy page: yes or no only with the provider\'s sentence; a value wi
   const html = dataPolicyMainHtml(rows, { repo: 'https://github.com/x/y', generated: '2026-10-15', prefix: '../' });
   const row = html.slice(html.indexOf('<tbody>'));
   assert.doesNotMatch(row, /Sentence: does not train|Sentence: may train/, 'a true or false without a sentence must not read as a statement');
-  assert.match(row, /Not confirmed: a value is recorded, no sentence yet/);
+  assert.match(row, /Not stated: a value is recorded, no sentence yet/);
 });
 
 test('data-policy page: the counts come from the rows, every verified provider has one row, and nothing is written by hand', () => {
@@ -2989,8 +2993,8 @@ test('data-policy page: the counts come from the rows, every verified provider h
   assert.equal(c.withTrainingQuote + c.withRetentionQuote, c.withQuote, 'every sentence is either about training or about retention');
   assert.equal(c.withTrainingQuote, rows.filter((r) => r.quote && (r.state === 'yes' || r.state === 'no')).length);
   const html = readFileSync(join(ROOT, 'site/data-policy/index.html'), 'utf8');
-  assert.match(html, new RegExp(`For each of ${c.total} verified providers, this page shows the sentence from the provider's own page about training on prompts where one is recorded\\. ${c.withTrainingQuote} rows have one about training; the other ${c.notConfirmed} are not confirmed \\(${c.withRetentionQuote ? `${c.withRetentionQuote} of them carry a sentence about retention only, and ` : ''}${c.recorded} have a value in the dataset but no sentence yet\\)`));
-  assert.match(html, new RegExp(`${c.no} have a recorded sentence that says they do not train on prompts, ${c.yes} have one that says they may, and ${c.notConfirmed} are not confirmed`));
+  assert.match(html, new RegExp(`For each of ${c.total} verified providers, this page shows the sentence from the provider's own page about training on prompts where one is recorded\\. ${c.withTrainingQuote} rows have one about training; for the other ${c.notConfirmed} it is not stated \\(${c.withRetentionQuote ? `${c.withRetentionQuote} of them carry a sentence about retention only, and ` : ''}${c.recorded} have a value in the dataset but no sentence yet\\)`));
+  assert.match(html, new RegExp(`${c.no} have a recorded sentence that says they do not train on prompts, ${c.yes} have one that says they may, and for ${c.notConfirmed} it is not stated`));
   assert.equal((html.match(/<tr><th scope="row">/g) || []).length, c.total, 'one row per verified provider');
   assert.match(readFileSync(join(ROOT, 'site/sitemap.xml'), 'utf8'), /<loc>https:\/\/freellmapihub\.com\/data-policy\/<\/loc>/);
   assert.match(html, /<link rel="canonical" href="https:\/\/freellmapihub\.com\/data-policy\/">/);
@@ -3005,12 +3009,12 @@ test('data-policy page: a missing sentence and a missing source are said so; a s
     { ...base, slug: 'gamma', data_policy: { trains_on_prompts: true, retention: null, source: 'https://example.com/terms', checked: '2026-10-15', quote: 'We may use "your" <content>.', note: 'Free plan only.' } },
   ]);
   const html = dataPolicyMainHtml(rows, { repo: 'https://github.com/x/y', generated: '2026-10-15', prefix: '../' });
-  assert.match(html, /Not confirmed/);
+  assert.match(html, /Not stated/);
   assert.match(html, /No sentence recorded yet\./);
   assert.match(html, /no source recorded/);
   assert.doesNotMatch(html, /javascript:/);
   assert.match(html, /We may use &quot;your&quot; &lt;content&gt;\./);
-  assert.match(html, /&ldquo;We may use &quot;your&quot; &lt;content&gt;\.&rdquo;<\/blockquote><p class="muted dp-foot">Acme &lt;b&gt;, page: <a href="https:\/\/example\.com\/terms"[^>]*>https:\/\/example\.com\/terms<\/a>, read on 2026-10-15\.<\/p>/, 'a sentence carries its provider, page and day');
+  assert.match(html, /&ldquo;We may use &quot;your&quot; &lt;content&gt;\.&rdquo;<\/blockquote><p class="muted dp-foot">Acme &lt;b&gt;, page: <a href="https:\/\/example\.com\/terms"[^>]*>https:\/\/example\.com\/terms<\/a>, read on <time datetime="2026-10-15">15 Oct 2026<\/time>\.<\/p>/, 'a sentence carries its provider, page and day');
   assert.match(html, /Sentence: may train/);
   assert.match(html, /Free plan only\./);
   assert.match(html, /href="https:\/\/example\.com\/terms"/);
@@ -3035,7 +3039,7 @@ test('data-policy page: no word that promises safety or ranks providers, no proc
   assert.doesNotMatch(visible, /not legal advice|before you rely|always confirm/i, 'no advice and no disclaimer in our voice');
   assert.equal((html.slice(html.indexOf('<main id="main"'), html.indexOf('</main>')).match(/<h3>/g) || []).length, 5, 'five questions, as text only');
   assert.doesNotMatch(html, /FAQPage/, 'no FAQPage markup until enough rows carry a sentence');
-  assert.match(visible, /Sentence: does not train.*Sentence: may train.*Not confirmed/is, 'the legend of the three states is on the page');
+  assert.match(visible, /Sentence: does not train.*Sentence: may train.*Not stated/is, 'the legend of the three states is on the page');
   assert.match(visible, /That never means &ldquo;no&rdquo;/i);
   // A provider's quoted sentence may contain a banned word: it is shown as written and is not scanned.
   const rows = dataPolicyRows([{ name: 'Acme', slug: 'acme', verified: true, data_policy: { trains_on_prompts: false, source: 'https://example.com/privacy-policy', checked: '2026-10-15', quote: 'We guarantee that your prompts are private.' } }]);
@@ -3082,7 +3086,7 @@ test('a11y: a plain link inside a paragraph or a list item is underlined, so it 
   assert.match(css, /main p a:not\(\[class\]\), main li a:not\(\[class\]\) \{ text-decoration: underline; text-underline-offset: 2px; \}/);
   // The case that axe found on /best/: a classless link in the lead paragraph.
   const best = readFileSync(join(ROOT, 'site/best/index.html'), 'utf8');
-  assert.match(best, /<p[^>]*>[^<]*<a href="methodology\/">how the score works<\/a>/, 'the link axe measured is a classless link inside a paragraph, so the rule reaches it');
+  assert.match(best, /<p[^>]*>(?:[^<]|<time[^>]*>[^<]*<\/time>)*<a href="methodology\/">how the score works<\/a>/, 'the link axe measured is a classless link inside a paragraph, so the rule reaches it');
 });
 
 // ---- reflow at 320 CSS px (WCAG 1.4.10): a wide data table scrolls inside its own region, and the header fits ----

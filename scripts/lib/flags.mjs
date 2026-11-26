@@ -5,16 +5,17 @@
 //   ✓  the favourable answer (no card, no phone, commercial use allowed, does not train on prompts)
 //   ✕  the unfavourable answer
 //   ~  commercial use is conditional
-//   ?  unknown: null or absent. Drawn with a dashed border. Unknown is the dataset's core idea:
-//      null means nobody has confirmed the field, never "no".
+//   ?  not stated: null or absent. Drawn with a dashed border. Not stated is the dataset's core idea:
+//      null means the provider's pages do not say it (or nobody has recorded it yet), never "no".
 // Each flag also carries its whole meaning as text for screen readers and as a tooltip, for example
-// "Card required: unknown — not stated in the provider's docs".
+// "Card required: not stated in the provider's docs". The words come from not-stated.mjs.
 //
 // Like rows.mjs, this module is shipped to the browser as source text (rows.clientBundle serialises these
 // functions into site/shared-rows.js), so the explorer's server render and its client repaint run the same
 // code. Keep the functions self-contained: they may only use htmlEsc, ICON and the constants below.
 
 import { htmlEsc, ICON } from './rows.mjs';
+import { REASON_LABEL } from './field-checks.mjs';
 
 /**
  * The four flags, in display order. `field` is a dotted path into the provider record; `good` is the value
@@ -30,12 +31,12 @@ export const FLAG_DEFS = [
 /** The shape of each state; the CSS colours it (.pflag-ok, .pflag-bad, .pflag-cond, .pflag-unk). */
 export const FLAG_MARKS = { ok: '✓', bad: '✕', cond: '~', unk: '?' };
 
-/** The words for an unknown value, by field_checks status (REASON_LABEL in field-checks.mjs says the same). */
+/** The words for a value that is not stated, by field_checks status: REASON_LABEL, keyed '' when nothing is recorded. */
 export const FLAG_UNKNOWN_WHY = {
-  source_silent: "not stated in the provider's docs",
-  needs_account: 'needs an account to check',
-  sources_disagree: "the provider's pages disagree",
-  '': "not confirmed in the provider's docs yet",
+  source_silent: REASON_LABEL.source_silent,
+  needs_account: REASON_LABEL.needs_account,
+  sources_disagree: REASON_LABEL.sources_disagree,
+  '': REASON_LABEL.not_checked,
 };
 
 /** The raw value of a flag in a record (undefined when absent). */
@@ -43,7 +44,7 @@ export function flagValue(def, p) {
   return String(def.field).split('.').reduce((o, k) => (o && typeof o === 'object' ? o[k] : undefined), p);
 }
 
-/** 'ok' | 'bad' | 'cond' | 'unk' for a raw value. Anything that is not a confirmed boolean or 'conditional' is unknown. */
+/** 'ok' | 'bad' | 'cond' | 'unk' for a raw value. Anything that is not a stated boolean or 'conditional' is 'unk' (not stated). */
 export function flagState(def, v) {
   if (v === true || v === false) return v === def.good ? 'ok' : 'bad';
   if (v === 'conditional') return 'cond';
@@ -52,21 +53,21 @@ export function flagState(def, v) {
 
 /**
  * The accessible sentence of a flag: "Card required: no", "Commercial use allowed: conditional",
- * "Card required: unknown — not stated in the provider's docs". `check` is the field_checks entry, if any.
+ * "Card required: not stated in the provider's docs". `check` is the field_checks entry, if any.
  */
 export function flagText(def, v, check) {
   const st = flagState(def, v);
   if (st === 'cond') return def.name + ': conditional';
   if (st !== 'unk') return def.name + ': ' + (v ? 'yes' : 'no');
   const status = check && typeof check === 'object' && Object.prototype.hasOwnProperty.call(FLAG_UNKNOWN_WHY, String(check.status)) ? String(check.status) : '';
-  return def.name + ': unknown — ' + FLAG_UNKNOWN_WHY[status];
+  return def.name + ': ' + FLAG_UNKNOWN_WHY[status];
 }
 
 /**
  * One flag as HTML. The mark and the visible part are aria-hidden; the sentence is the accessible text.
  *   opts.mini    — the explorer form: the flag's icon then the mark (the sentence stays as tooltip and sr-only text)
  *   opts.visible — HTML for the visible words (the provider page passes its own wording); default: the short label
- *   opts.check   — the field_checks entry, which names the reason of an unknown
+ *   opts.check   — the field_checks entry, which names the reason a value is not stated
  */
 export function flagHtml(def, p, opts) {
   const o = opts || {};

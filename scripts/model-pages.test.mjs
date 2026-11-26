@@ -36,8 +36,8 @@ test('the page shows the literal ID each provider lists and links each provider 
   assert.ok(html.includes('href="../../p/alpha"') && html.includes('href="../../p/beta"'));
 });
 
-test('a null flag reads "not confirmed", an unverified provider is marked', () => {
-  assert.match(page(groupOf([alpha], 'shared-7b')), /Phone verification<\/dt><dd><span class="pflag pflag-unk" data-flag="phone"[^>]*><span class="pflag-mark" aria-hidden="true">\?<\/span><span class="pflag-vis" aria-hidden="true"><span class="tri tri-unk">not confirmed<\/span>/);
+test('a null flag reads "not stated", an unverified provider is marked', () => {
+  assert.match(page(groupOf([alpha], 'shared-7b')), /Phone verification<\/dt><dd><span class="pflag pflag-unk" data-flag="phone"[^>]*><span class="pflag-mark" aria-hidden="true">\?<\/span><span class="pflag-vis" aria-hidden="true"><span class="tri tri-unk">not stated<\/span>/);
   assert.match(page(groupOf([ghost], 'solo-1b')), /tri-unk">unverified</);
 });
 

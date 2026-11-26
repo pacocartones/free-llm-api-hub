@@ -62,7 +62,7 @@
   function announce(r) {
     var text = (done ? '' : 'So far: ') + plural(r.matches.length, 'provider matches', 'providers match') +
       (done ? ' your answers' : '') + '.';
-    if (r.possible.length) text += ' ' + plural(r.possible.length, 'more might fit', 'more might fit') + ' (not confirmed).';
+    if (r.possible.length) text += ' ' + plural(r.possible.length, 'more might fit', 'more might fit') + ' (not stated).';
     count.textContent = text;
   }
 
@@ -116,9 +116,9 @@
     allBtn.textContent = 'Show all ' + r.matches.length;
     empty.hidden = r.matches.length > 0;
     empty.textContent = r.matches.length ? '' : 'No provider confirms every answer. ' +
-      (r.possible.length ? 'The ones below might: check what is not confirmed, or change an answer.' : 'Try changing an answer: a commercial-use or no-training requirement narrows the list the most.');
+      (r.possible.length ? 'The ones below might: check what is not stated, or change an answer.' : 'Try changing an answer: a commercial-use or no-training requirement narrows the list the most.');
     maybe.hidden = !r.possible.length;
-    maybeSum.textContent = plural(r.possible.length, 'more provider might fit', 'more providers might fit') + ': not confirmed';
+    maybeSum.textContent = plural(r.possible.length, 'more provider might fit', 'more providers might fit') + ': not stated';
     fill(maybeList, r.possible, false);
     if (!r.matches.length && r.possible.length) maybe.open = true;
     return r;

@@ -1,6 +1,6 @@
 // coverage.mjs — what the dataset does not know yet, field by field, as a task board.
 //
-// A value that is null (or empty, or absent) is "not confirmed": nobody has recorded it, which is never
+// A value that is null (or empty, or absent) is "not stated": nobody has recorded it, which is never
 // the same as "no". Each field has a stated population, because a one-time trial credit cannot carry a
 // model tier or free limits (the validator rejects them), so counting trial credits as gaps there would
 // be a gap nobody can close. The page lists every open gap with the provider's own docs link and a
@@ -11,6 +11,7 @@
 // do not settle it. Those are counted apart and are not open tasks; only a null with no recorded check
 // (not_checked) is. byStatus gives every count by status, plus the non-null values with no stated source.
 
+import { timeHtml } from './dates.mjs';
 import { htmlEsc, SLUG_RE } from './rows.mjs';
 import { FIELD_CHECK_FIELDS, NULL_REASONS, REASON_LABEL, fieldCheck, fieldCheckStatus, fieldCheckCounts } from './field-checks.mjs';
 import { safeHttp } from './text.mjs';
@@ -30,7 +31,7 @@ export const COVERAGE_FIELDS = Object.freeze([
 
 /**
  * [{ key, label, population, total, confirmed, open: [provider], resolved: [provider], byStatus? }] computed from the
- * providers, in field order. open = not confirmed and no recorded reason; resolved = null with a recorded reason (flags only).
+ * providers, in field order. open = not stated and no recorded reason; resolved = null with a recorded reason (flags only).
  */
 export function coverage(providers) {
   return COVERAGE_FIELDS.map((f) => {
@@ -62,9 +63,9 @@ export function coverageMainHtml(rows, { repo, generated, prefix = '../', histog
     `<td class="num">${r.byStatus ? r.resolved.length : '—'}</td></tr>`).join('');
   const flagRows = rows.filter((r) => r.byStatus);
   const reasonsTable = flagRows.length
-    ? '<h2 id="reasons">Why a flag is still unknown</h2>' +
-      '<p>For the four yes/no flags, the dataset records why an unknown value is unknown: the provider’s pages were read on a stated day and <strong>do not say it</strong>, only <strong>an account</strong> would tell (this project does not create accounts), or <strong>two official pages disagree</strong>. Those are resolved without an answer and are not open tasks. A value with no recorded check is still open. Known values with no recorded source are counted as <em>unsourced</em>. Counted over all verified providers.</p>' +
-      '<div class="table-scroll" role="region" aria-label="Why a flag is still unknown, by flag" tabindex="0"><table class="cov-table cov-reasons"><thead><tr><th>Flag</th><th class="num">Stated, with source</th><th class="num">Unsourced</th><th class="num">Not checked</th><th class="num">Not stated by the provider</th><th class="num">Needs an account</th><th class="num">Pages disagree</th></tr></thead><tbody>' +
+    ? '<h2 id="reasons">Why a flag is still not stated</h2>' +
+      '<p>For the four yes/no flags, the dataset records why a value is not stated: the provider’s pages were read on a stated day and <strong>do not say it</strong>, only <strong>an account</strong> would tell (this project does not create accounts), or <strong>two official pages disagree</strong>. Those are resolved without an answer and are not open tasks. A value with no recorded check is still open. Known values with no recorded source are counted as <em>unsourced</em>. Counted over all verified providers.</p>' +
+      '<div class="table-scroll" role="region" aria-label="Why a flag is still not stated, by flag" tabindex="0"><table class="cov-table cov-reasons"><thead><tr><th>Flag</th><th class="num">Stated, with source</th><th class="num">Unsourced</th><th class="num">Not checked</th><th class="num">Not in the provider’s docs</th><th class="num">Needs an account</th><th class="num">Pages disagree</th></tr></thead><tbody>' +
       flagRows.map((r) => `<tr id="reasons-${r.key}"><th scope="row">${htmlEsc(r.key)}</th>` +
         ['stated', 'unsourced', 'not_checked', 'source_silent', 'needs_account', 'sources_disagree'].map((k) => `<td class="num">${r.byStatus[k]}</td>`).join('') + '</tr>').join('') +
       '</tbody></table></div>'
@@ -73,9 +74,9 @@ export function coverageMainHtml(rows, { repo, generated, prefix = '../', histog
     const items = r.resolved.map((p) => {
       const c = fieldCheck(p, r.key);
       const name = SLUG_RE.test(String(p.slug || '')) ? `<a href="${prefix}p/${p.slug}">${htmlEsc(p.name)}</a>` : htmlEsc(p.name);
-      return `<li class="cov-resolved">${name} <span class="sep">·</span> ${htmlEsc(REASON_LABEL[c.status])} <span class="sep">·</span> checked ${htmlEsc(c.checked)}</li>`;
+      return `<li class="cov-resolved">${name} <span class="sep">·</span> ${htmlEsc(REASON_LABEL[c.status])} <span class="sep">·</span> checked ${timeHtml(c.checked, htmlEsc)}</li>`;
     }).join('');
-    return `<details class="cov-field" id="${r.key}-resolved"><summary><strong>${htmlEsc(r.label)}</strong> <span class="muted">· ${r.resolved.length} not confirmed, resolved without an answer</span></summary><ul class="cov-list">${items}</ul></details>`;
+    return `<details class="cov-field" id="${r.key}-resolved"><summary><strong>${htmlEsc(r.label)}</strong> <span class="muted">· ${r.resolved.length} not stated, resolved without an answer</span></summary><ul class="cov-list">${items}</ul></details>`;
   }).join('');
   const sections = rows.filter((r) => r.open.length).map((r) => {
     const items = r.open.map((p) => {
@@ -85,11 +86,11 @@ export function coverageMainHtml(rows, { repo, generated, prefix = '../', histog
       return `<li class="cov-task">${name} <span class="sep">·</span> ${docsLink} <span class="sep">·</span> ` +
         `<a href="${htmlEsc(coverageIssueUrl(p, r, repo))}" target="_blank" rel="noopener">propose the value<span class="sr-only"> for ${htmlEsc(p.name)}</span></a></li>`;
     }).join('');
-    return `<details class="cov-field" id="${r.key}"><summary><strong>${htmlEsc(r.label)}</strong> <span class="muted">· ${r.open.length} not confirmed</span></summary><ul class="cov-list">${items}</ul></details>`;
+    return `<details class="cov-field" id="${r.key}"><summary><strong>${htmlEsc(r.label)}</strong> <span class="muted">· ${r.open.length} not stated</span></summary><ul class="cov-list">${items}</ul></details>`;
   }).join('');
   return '<main id="main"><div class="wrap prose">' +
     '<h2>What the dataset does not know yet</h2>' +
-    '<p>Every field below is counted over the providers it can apply to. A value nobody has recorded reads <strong>not confirmed</strong>: that is not the same as <em>no</em>. Data of ' + htmlEsc(generated) + '.</p>' +
+    '<p>Every field below is counted over the providers it can apply to. A value nobody has recorded reads <strong>not stated</strong>: that is not the same as <em>no</em>. Data of ' + timeHtml(generated, htmlEsc) + '.</p>' +
     '<div class="table-scroll" role="region" aria-label="What the dataset does not know yet, by field" tabindex="0"><table class="cov-table"><thead><tr><th>Field</th><th class="cov-popcol">Counted over</th><th class="num">Confirmed</th><th class="num">Share</th><th class="num">Open</th><th class="num">Resolved, no answer</th></tr></thead><tbody>' + summary + '</tbody></table></div>' +
     '<p class="muted">A one-time trial credit cannot carry a model tier or published limits (the validator rejects them), so trial credits are not counted as gaps for those two fields.</p>' +
     '<h2>Pick one value</h2>' +
@@ -110,7 +111,7 @@ export function freshnessHistogramHtml(h, { repo, prefix = '../' }) {
   if (!h || !Array.isArray(h.rows) || !h.rows.length) return '';
   const limit = Number(h.limit) || 8;
   const body = h.rows.map((r) =>
-    `<tr${r.clustered ? ' class="cov-cluster"' : ''}><th scope="row">${htmlEsc(r.week)}</th><td class="num">${Number(r.due)}${r.clustered ? ' <span class="muted">(cluster)</span>' : ''}</td><td class="num">${Number(r.stale)}</td></tr>`).join('');
+    `<tr${r.clustered ? ' class="cov-cluster"' : ''}><th scope="row">${timeHtml(r.week, htmlEsc)}</th><td class="num">${Number(r.due)}${r.clustered ? ' <span class="muted">(cluster)</span>' : ''}</td><td class="num">${Number(r.stale)}</td></tr>`).join('');
   const before = h.dueBefore ? `<p class="muted">${Number(h.dueBefore)} entries were already due when this window opens (${Number(h.staleBefore)} past the SLA).</p>` : '';
   return '<h2 id="freshness">When entries come due</h2>' +
     `<p>Every verified entry is re-checked against the provider’s own docs within 90 days. It counts as <strong>due</strong> from day 61 and <strong>past the SLA</strong> from day 91. The table counts, per week, the entries that cross each line if nobody re-checks them first. A week with more than ${limit} entries becoming due is a cluster: the <a href="${htmlEsc(repo)}/issues/4">weekly worklist</a> pulls those entries forward, a few each week, so they do not all expire together. Weeks start on Monday (UTC), from the week of the data date. The same entries counted by the week of their last verification are on the <a href="${prefix}quality/#freshness-weeks">data quality</a> page.</p>` +

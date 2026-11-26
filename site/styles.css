@@ -483,7 +483,7 @@ tbody tr:hover { background: var(--panel); }
 .name-line .name-link { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .name a.name-link:hover, #table tbody tr:hover .name-link, #table tbody tr:focus-within .name-link { color: var(--accent-dim); }
 .name .best { line-height: 1.4; margin-top: 2px; }
-/* «Needs / unknown»: words, at most two lines. What is required reads in the text colour, what is unknown is muted. */
+/* «Needs / not stated»: words, at most two lines. What is required reads in the text colour, what is not stated is muted. */
 #table td.needs { font-size: .84rem; }
 .needs .need-req, .needs .need-unk, .needs .need-none { display: block; }
 .needs .need-req { color: var(--text); }
@@ -904,7 +904,7 @@ pre code { color: var(--text); }
   .name-line { flex-wrap: wrap; }
   .name-line .name-link { white-space: normal; }
   /* "What's free" stacks its label above the text and uses the whole card width: beside a 40% label the text was a
-     narrow column. The short «Needs / unknown» cell keeps its label beside it. */
+     narrow column. The short «Needs / not stated» cell keeps its label beside it. */
   #table td.free { display: block; }
   #table td.free::before { display: block; margin-bottom: 3px; }
 }

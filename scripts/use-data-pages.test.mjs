@@ -1,6 +1,7 @@
 // The /not-free/ and /embed/ ("Use the data") pages: they are built, every internal link resolves, "Notably NOT free"
 // has one source (data/not-free.json) for the README and the page, its quotes are the ones already recorded, and the
 // Cite block is CITATION.cff.
+import { humanDate } from './lib/dates.mjs';
 import { before, describe, test } from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
@@ -130,7 +131,7 @@ describe('/not-free/: one source for the README and the page', () => {
     for (const e of NF.entries) {
       assert.ok(html.includes(`<section class="gpu-entry" id="${e.id}"><h3>${htmlEsc(e.name)}</h3>`), `${e.id} on the page`);
       assert.ok(readme.includes(`- **${e.name}** — `), `${e.id} in the README`);
-      if (e.checked) assert.ok(html.includes(e.checked) && readme.includes(`checked ${e.checked}`), `${e.id}: date`);
+      if (e.checked) assert.ok(html.includes(e.checked) && readme.includes(`checked ${humanDate(e.checked) || e.checked}`), `${e.id}: date`);
     }
   });
 

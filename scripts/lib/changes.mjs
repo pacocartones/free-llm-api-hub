@@ -7,9 +7,11 @@
 // a squash merge), so build.mjs keeps them out of derived-fingerprints.json.
 
 import { HISTORY_FIELDS } from './history.mjs';
+import { isoDay } from './dates.mjs';
+import { NOT_STATED } from './not-stated.mjs';
 
 const DAY = 86400000;
-const ymd = (d) => d.toISOString().slice(0, 10);
+const ymd = isoDay;
 const pad2 = (n) => String(n).padStart(2, '0');
 
 // ISO-8601 week of a YYYY-MM-DD date (UTC): weeks start on Monday and week 1 is
@@ -71,7 +73,7 @@ export const groupChangesByWeek = (changes, { weeks = 12 } = {}) => {
 
 // Human rendering of a tracked value (strings, tri-state flags, arrays).
 export const formatValue = (v) => {
-  if (v === null || v === undefined) return 'unknown';
+  if (v === null || v === undefined) return NOT_STATED;
   if (v === true) return 'yes';
   if (v === false) return 'no';
   if (Array.isArray(v)) return v.join(', ');

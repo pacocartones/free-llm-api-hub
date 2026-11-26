@@ -68,7 +68,7 @@ Per-provider fields (grouped for reference; the authoritative serialization orde
 | `models_url` | url (optional) | the provider's own model catalogue page; may include paid models |
 | `expires` | string \| null | e.g. "30 days" |
 | `docs_url` | url | **primary source** — provider's own page. Required when `verified:true`. Also drives the "Visit website" button. |
-| `phone_required` | true/false/null | null = not confirmed |
+| `phone_required` | true/false/null | null = not stated (pages and the README show "not stated") |
 | `card_required` | true/false/null | |
 | `commercial_ok` | true/false/null, or `"conditional"` in the canonical dataset | `"conditional"` requires `commercial_ok_condition`; API v1 projects it to null and scoring/coverage treat it as unconfirmed |
 | `commercial_ok_condition` | string \| null | concise provider condition; required only for `commercial_ok: "conditional"`, retained when API v1 projects the flag to null |

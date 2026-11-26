@@ -8,6 +8,7 @@
 import { htmlEsc, SLUG_RE } from './rows.mjs';
 import { claimsTableHtml } from './claims-table.mjs';
 import { safeHttp } from './text.mjs';
+import { timeHtml } from './dates.mjs';
 
 const LABELS = Object.freeze({
   free_access: 'Free access',
@@ -24,7 +25,7 @@ const KIND_LABEL = Object.freeze({ 'ide-extension': 'IDE extension', editor: 'ed
 const quoteHtml = (q) => {
   const src = safeHttp(q.source);
   const link = src ? `<a href="${htmlEsc(src)}" target="_blank" rel="noopener">${htmlEsc(new URL(src).hostname)}</a>` : '';
-  return `<blockquote class="gpu-quote"><p>&ldquo;${htmlEsc(q.text)}&rdquo;</p><footer class="muted">${link}${link ? ' · ' : ''}read ${htmlEsc(q.read)}</footer></blockquote>`;
+  return `<blockquote class="gpu-quote"><p>&ldquo;${htmlEsc(q.text)}&rdquo;</p><footer class="muted">${link}${link ? ' · ' : ''}read ${timeHtml(q.read, htmlEsc)}</footer></blockquote>`;
 };
 
 function claimHtml(slug, field, claim) {
@@ -101,7 +102,7 @@ export function codingToolMainHtml(entry, { prefix = '../../', group = 'free', o
     (unstated.length ? claims(unstated) : '<p class="muted">Everything is stated.</p>') +
     '<h2 id="sources">Sources</h2>' +
     (sources.length
-      ? `<ul class="plain tool-sources">${sources.map((x) => `<li><a href="${htmlEsc(x.src)}" target="_blank" rel="noopener">${htmlEsc(x.src)}</a> · read ${x.days.map(htmlEsc).join(', ')}</li>`).join('')}</ul>`
+      ? `<ul class="plain tool-sources">${sources.map((x) => `<li><a href="${htmlEsc(x.src)}" target="_blank" rel="noopener">${htmlEsc(x.src)}</a> · read ${x.days.map((d) => timeHtml(d, htmlEsc)).join(', ')}</li>`).join('')}</ul>`
       : '<p class="muted">No source page is quoted.</p>') +
     (others.length
       ? `<h2 id="others">Other free AI coding tools</h2><div class="colls">${others.filter((o) => SLUG_RE.test(o.slug)).map((o) => `<a href="${prefix}coding-tools/${o.slug}/">${htmlEsc(o.name)}</a>`).join('')}</div>`

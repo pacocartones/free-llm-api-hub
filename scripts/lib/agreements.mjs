@@ -10,6 +10,7 @@
 //    and never in a table of providers.
 //  - Copy that sells (featured, partner, recommended) does not appear in the text of a block or a row.
 
+import { timeHtml } from './dates.mjs';
 import { htmlEsc, SLUG_RE } from './rows.mjs';
 
 export const AGREEMENT_TYPES = { sponsored_block: 'Sponsored block', sponsored_section: 'Sponsored section', paid_link: 'Paid link' };
@@ -77,7 +78,7 @@ const date = (s) => (s ? htmlEsc(s) : 'no end date');
 /** "Agreements in force": the table, or the one sentence when it is empty. Computed from the rows. */
 export function agreementsTableHtml(file, day) {
   const rows = inForce(file, day);
-  const head = '<h2 id="agreements">Agreements in force</h2><p>Every paid relationship Free LLM API Hub has today, with its dates and what each side gets. Updated ' + htmlEsc(file.generated) + '.</p>';
+  const head = '<h2 id="agreements">Agreements in force</h2><p>Every paid relationship Free LLM API Hub has today, with its dates and what each side gets. Updated ' + timeHtml(file.generated, htmlEsc) + '.</p>';
   if (!rows.length) return head + '<p class="agreements-empty"><strong>No agreement is in force.</strong> (as of ' + htmlEsc(day) + ')</p>';
   const body = rows.map((a) => '<tr><th scope="row"><a href="' + htmlEsc(a.url) + '" rel="sponsored nofollow noopener">' + htmlEsc(a.company) + '</a></th><td>' + htmlEsc(AGREEMENT_TYPES[a.type]) + '</td><td>' + date(a.since) + '</td><td>' + date(a.until) + '</td><td>' + htmlEsc(a.receives) + '</td><td>' + htmlEsc(a.does_not_receive) + '</td><td>' + htmlEsc(a.data_checked_by) + '</td><td>' + htmlEsc(a.last_review) + '</td></tr>').join('');
   return head + '<div class="table-scroll"><table class="agreements"><thead><tr><th scope="col">Company</th><th scope="col">Type</th><th scope="col">Since</th><th scope="col">Until</th><th scope="col">What it receives</th><th scope="col">What it does not receive</th><th scope="col">Who checked its data</th><th scope="col">Last review of this row</th></tr></thead><tbody>' + body + '</tbody></table></div>';

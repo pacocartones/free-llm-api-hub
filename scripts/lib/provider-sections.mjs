@@ -1,9 +1,11 @@
 // provider-sections.mjs — the sections of a provider page (/p/<slug>), kept apart from build.mjs so they can be
 // tested on their own. Every section reads only fields that are in data/providers.json and says so honestly
-// when a field is missing: a tri-state flag reads "not confirmed" in words (never just a colour), numbers
+// when a field is missing: a tri-state flag reads "not stated" in words (never just a colour), numbers
 // appear only with the provider page they come from and the day they were read, and a section with nothing
 // to show is left out (or reduced to one line) instead of repeating filler on every page.
 
+import { timeHtml } from './dates.mjs';
+import { NOT_STATED, NOT_STATED_HTML } from './not-stated.mjs';
 import { htmlEsc, ICON } from './rows.mjs';
 import { triStateHtml } from './compare.mjs';
 import { expiryHtml } from './expiry.mjs';
@@ -33,7 +35,7 @@ const LIMIT_UNITS = [
 
 const safeUrl = (u) => (/^https?:\/\//i.test(String(u || '')) ? htmlEsc(u) : '');
 
-/** What a visitor must give to start: three flags, each yes / no / "not confirmed" written out. */
+/** What a visitor must give to start: three flags, each yes / no / "not stated" written out. */
 export function requirementsHtml(p) {
   const row = (icon, label, field, yes, no, extra = '') => {
     const check = fieldCheck(p, field);
@@ -57,7 +59,7 @@ export function checkSourceHtml(check) {
   const pages = links.map((u, i) => `<a href="${u}" target="_blank" rel="noopener">${links.length > 1 ? `page ${i + 1}` : "the provider's page"}</a>`).join(', ');
   const quote = check.status === 'stated' && check.quote ? `&ldquo;${htmlEsc(check.quote)}&rdquo; ` : '';
   const lead = check.status === 'stated' ? 'Per' : 'Read';
-  return `<div class="req-source muted">${quote}${pages ? `${lead} ${pages}, ` : ''}checked ${htmlEsc(check.checked)}.${check.note ? ` ${htmlEsc(check.note)}` : ''}</div>`;
+  return `<div class="req-source muted">${quote}${pages ? `${lead} ${pages}, ` : ''}checked ${timeHtml(check.checked, htmlEsc)}.${check.note ? ` ${htmlEsc(check.note)}` : ''}</div>`;
 }
 
 /**
@@ -72,7 +74,7 @@ export function freeLimitsTableHtml(p) {
   const src = safeUrl(fl.source);
   return `<table class="limits-table"><caption class="sr-only">Free limits as the provider publishes them</caption><tbody>${rows}</tbody></table>` +
     `<p class="muted limits-src">${htmlEsc(fl.scope || '')}${/[.!?]$/.test(fl.scope || '') || !fl.scope ? '' : '.'}` +
-    (src ? ` Source: <a href="${src}" target="_blank" rel="noopener">the provider's page</a>, read ${htmlEsc(fl.checked)}.` : '') + `</p>`;
+    (src ? ` Source: <a href="${src}" target="_blank" rel="noopener">the provider's page</a>, read ${timeHtml(fl.checked, htmlEsc)}.` : '') + `</p>`;
 }
 
 /** Free limits: the structured numbers with their source and reading date, then the provider's wording. */
@@ -80,21 +82,21 @@ export function limitsHtml(p) {
   const table = freeLimitsTableHtml(p);
   const prose = p.rate_limits ? `<div class="prov-card"><h3>In the provider's words</h3><p>${htmlEsc(p.rate_limits)}</p></div>` : '';
   const catchCard = p.notes ? `<div class="prov-card"><h3>The catch</h3><p>${htmlEsc(p.notes)}</p></div>` : '';
-  const none = table ? '' : `<p class="muted">Numeric limits are not recorded in structured form for this provider.</p>`;
+  const none = table ? '' : `<p class="muted">Numeric limits: not stated in structured form for this provider.</p>`;
   return `<h2 id="limits">Free limits</h2>${table}${none}<div class="prov-grid">${prose}${catchCard}</div>`;
 }
 
 /** The at-a-glance list: plain words instead of the dataset's internal labels. */
 export function glanceHtml(p, typeLabel) {
-  const mods = (p.modalities || []).join(', ') || 'not listed';
+  const mods = (p.modalities || []).join(', ') || NOT_STATED;
   const base = p.openai_base_url ? `<code>${htmlEsc(p.openai_base_url)}</code>` : 'Not OpenAI-compatible: see the official docs';
   const rows = [
     ['Plan', `${htmlEsc(typeLabel)}${p.category === 'ongoing' ? ' free tier' : ' credit'}`],
-    ['How it renews', htmlEsc(FREE_TYPE_LABEL[p.free_type] || p.free_type || 'not recorded')],
+    ['How it renews', htmlEsc(FREE_TYPE_LABEL[p.free_type] || p.free_type || NOT_STATED)],
     ['Expires', expiryHtml(p)],
     ['Modalities', htmlEsc(mods)],
     ['OpenAI base URL', base],
-    ...(p.added ? [['Added to the hub', htmlEsc(p.added)]] : []),
+    ...(p.added ? [['Added to the hub', timeHtml(p.added, htmlEsc)]] : []),
   ];
   return `<div class="prov-meta">${rows.map(([k, v]) => `<div class="meta-row"><span class="meta-k">${k}</span><span class="meta-v">${v}</span></div>`).join('')}</div>`;
 }
@@ -125,7 +127,7 @@ export function modelsHtml(p, { modelHref = () => '' } = {}) {
 
 /**
  * Data policy: the slot REPO-064 fills. Nothing is rendered while a provider has no `data_policy`, so no page
- * carries a "not recorded yet" block; once the field exists the same function shows it.
+ * carries a "not stated" block; once the field exists the same function shows it.
  */
 export function dataPolicyHtml(p) {
   const dp = p.data_policy;
@@ -133,7 +135,7 @@ export function dataPolicyHtml(p) {
   const src = safeUrl(dp.source);
   return `<h2 id="data-policy">Data policy</h2><dl class="prov-reqs">` +
     `<div class="req"><dt>${ICON('ic-shield')}Trains on your prompts</dt><dd>${flagHtml(flagById('training'), p, { visible: triStateHtml(dp.trains_on_prompts, 'yes', 'no') })}</dd></div>` +
-    `<div class="req"><dt>${ICON('ic-clock')}Retention</dt><dd>${dp.retention ? htmlEsc(dp.retention) : '<span class="tri tri-unk">not confirmed</span>'}</dd></div></dl>` +
+    `<div class="req"><dt>${ICON('ic-clock')}Retention</dt><dd>${dp.retention ? htmlEsc(dp.retention) : NOT_STATED_HTML}</dd></div></dl>` +
     (src ? `<p class="muted">Source: <a href="${src}" target="_blank" rel="noopener">the provider's page</a>.</p>` : '');
 }
 
@@ -150,7 +152,7 @@ export function speedHtml(p) {
     const src = safeUrl(e.source);
     const plan = e.plan_named === false ? ' The page ties this figure to no plan, so it is not stated for the free tier.' : '';
     return `<li><strong><code>${htmlEsc(e.model)}</code>: ${htmlEsc(speedFigure(e))}</strong> ${m ? htmlEsc(m.label) : ''}` +
-      `<div class="req-source muted">&ldquo;${htmlEsc(e.quote)}&rdquo; ${src ? `Per <a href="${src}" target="_blank" rel="noopener">the provider's page</a>, ` : ''}checked ${htmlEsc(e.checked)}.` +
+      `<div class="req-source muted">&ldquo;${htmlEsc(e.quote)}&rdquo; ${src ? `Per <a href="${src}" target="_blank" rel="noopener">the provider's page</a>, ` : ''}checked ${timeHtml(e.checked, htmlEsc)}.` +
       `${e.conditions ? ` ${htmlEsc(e.conditions)}.` : ''}${plan}</div></li>`;
   }).join('');
   return `<h2 id="published-speed">Published speed</h2>` +

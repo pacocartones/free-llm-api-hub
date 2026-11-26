@@ -111,7 +111,7 @@ test('aboutHtml: each line with its sources and day, escaped; nothing for a prov
   assert.match(html, /<dt>What it is<\/dt>/);
   assert.match(html, /<dt>Operated by<\/dt>/);
   assert.doesNotMatch(html, /<dt>Owned by<\/dt>|<dt>Origin<\/dt>/, 'an empty line is not shown');
-  assert.match(html, /<a href="https:\/\/acme\.ai\/about" target="_blank" rel="noopener">acme\.ai<\/a>, read 2026-10-19/);
+  assert.match(html, /<a href="https:\/\/acme\.ai\/about" target="_blank" rel="noopener">acme\.ai<\/a>, read <time datetime="2026-10-19">19 Oct 2026<\/time>/);
   assert.equal((html.match(/<div class="about-row">/g) || []).length, 3);
 });
 

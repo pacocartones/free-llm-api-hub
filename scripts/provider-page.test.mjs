@@ -9,7 +9,8 @@ import { join } from 'node:path';
 import { historyFromRevisions, collapseSameDay } from './lib/history.mjs';
 import { flattenFieldChanges, beforeAfter } from './lib/changes.mjs';
 import { comparisonCategory, comparePeers } from './lib/compare.mjs';
-import { providerMetaDescription, trimAtWord, compactNumber, shortDate } from './lib/provider-meta.mjs';
+import { providerMetaDescription, trimAtWord, compactNumber } from './lib/provider-meta.mjs';
+import { humanDate } from './lib/dates.mjs';
 import { scoreBlockHtml } from './lib/score-bar.mjs';
 import { SCORE_WEIGHTS } from './lib/score.mjs';
 import { privateTree } from './lib/private-tree.mjs';
@@ -51,7 +52,7 @@ test('history: repeated commits of one day give one entry per field, with the da
 
 test('history: a limits or flag change spells out before → after; paragraphs keep their label only', () => {
   const e = { kind: 'changed', changes: [{ field: 'notes', from: 'a', to: 'b' }, { field: 'rate_limits', from: '10 RPM', to: '30 RPM' }, { field: 'commercial_ok', from: true, to: null }] };
-  assert.deepEqual(beforeAfter(e), [{ label: 'rate limits', from: '10 RPM', to: '30 RPM' }, { label: 'commercial-use terms', from: 'yes', to: 'unknown' }]);
+  assert.deepEqual(beforeAfter(e), [{ label: 'rate limits', from: '10 RPM', to: '30 RPM' }, { label: 'commercial-use terms', from: 'yes', to: 'not stated' }]);
   assert.deepEqual(beforeAfter({ kind: 'added' }), []);
 });
 
@@ -118,7 +119,7 @@ test('Q11: the meta description leads with the published limits, else trims the 
   assert.equal(compactNumber(14400), '14.4K');
   assert.equal(compactNumber(200000), '200K');
   assert.equal(compactNumber(1500000), '1.5M');
-  assert.equal(shortDate('2026-11-24'), '24 Nov 2026');
+  assert.equal(humanDate('2026-11-24'), '24 Nov 2026');
   const groq = { name: 'Groq', verified: true, last_verified: '2026-11-24', card_required: false, free_tier: 'x', free_limits: { requests_per_minute: 30, requests_per_day: 1000, tokens_per_day: 200000, checked: '2026-11-24' } };
   assert.equal(providerMetaDescription(groq), 'Groq free tier: 30 RPM, 1,000 RPD, 200K TPD, no card. Verified 24 Nov 2026 with source.');
   assert.equal(providerMetaDescription({ ...groq, card_required: null }), 'Groq free tier: 30 RPM, 1,000 RPD, 200K TPD. Verified 24 Nov 2026 with source.', 'an unknown card requirement says nothing');
@@ -138,7 +139,7 @@ test('Q13: the score reads as a place with a bar of its six inputs, unknowns in 
   assert.equal((out.match(/class="sb-seg sb-unknown"/g) || []).length, 3, 'the three unknown inputs are grey');
   assert.match(out, /style="flex-grow:22"><span class="sb-fill" style="width:75%">/, 'a segment is as wide as its weight and filled as far as earned');
   assert.match(out, /Unknowns lower the score on purpose/);
-  assert.match(out, /role="img" aria-label="Score inputs: Model quality 16\.5 of 22; Free limits not confirmed, 0 of 18;/);
+  assert.match(out, /role="img" aria-label="Score inputs: Model quality 16\.5 of 22; Free limits not stated, 0 of 18;/);
   const html = readFileSync(join(ROOT, 'site/p/groq.html'), 'utf8');
   assert.match(html, /<p class="score-rank"><strong>#\d+ of \d+<\/strong> scored/);
   assert.doesNotMatch(html, /<span class="best-score" title="Out of 100">/, 'no bare "N / 100" badge');

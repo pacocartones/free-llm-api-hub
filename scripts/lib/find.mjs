@@ -8,8 +8,8 @@
 //
 // No ranking of its own. The order is recommendedCmp from rules.mjs (window.FLLM_RULES, the explorer's "Recommended"
 // order), and every constraint is the explorer's own filter chip, word for word (site/explorer.js render()): a provider
-// matches only when the field holds the confirmed value. A null ("not confirmed") never counts as yes. Providers that
-// would match except for a field that is not confirmed are returned apart (`possible`), never mixed into the matches,
+// matches only when the field holds the confirmed value. A null ("not stated") never counts as yes. Providers that
+// would match except for a field that is not stated are returned apart (`possible`), never mixed into the matches,
 // so the shortlist and the explorer link always show the same providers in the same order.
 //
 // Provider fields come from providers.json, which community PRs can edit: everything is escaped before it reaches
@@ -17,6 +17,7 @@
 
 import { htmlEsc, ICON, SLUG_RE } from './rows.mjs';
 import { recommendedCmp } from './rules.mjs';
+import { DATE_MONTHS, humanDate } from './dates.mjs';
 import { pythonStringLiteral, pythonChatQuickstart, pythonEmbeddingsQuickstart } from './quickstart.mjs';
 
 // What the visitor builds. `text` maps to the explorer's "Text LLMs only" chip (is_text_llm), `mod` to its modality menu.
@@ -31,22 +32,22 @@ export const USES = [
 
 // The yes/no questions. `when` is the answer that constrains; `param` is the explorer chip (?nocard=1 …) it turns on;
 // `value` reads the tri-state field; `want` is the one confirmed value that passes, exactly as explorer.js filters.
-// commercial_ok "conditional" is not a confirmed yes: it fails the explorer chip, and here it is shown as not confirmed.
+// commercial_ok "conditional" is not a confirmed yes: it fails the explorer chip, and here it is shown as not stated.
 export const CONSTRAINTS = [
   {
     key: 'card', when: 'no', param: 'nocard', want: false, value: (p) => p.card_required,
     legend: 'Can you add a credit card when you sign up?', yes: 'Yes, a card is fine', no: 'No card',
-    words: { yes: 'no card', no: 'card required', unknown: 'card: not confirmed' }, icons: { yes: 'ic-nocard', no: 'ic-card' },
+    words: { yes: 'no card', no: 'card required', unknown: 'card: not stated' }, icons: { yes: 'ic-nocard', no: 'ic-card' },
   },
   {
     key: 'phone', when: 'no', param: 'nophone', want: false, value: (p) => p.phone_required,
     legend: 'Can you verify a phone number?', yes: 'Yes, a phone is fine', no: 'No phone',
-    words: { yes: 'no phone', no: 'phone required', unknown: 'phone: not confirmed' }, icons: { yes: 'ic-nophone', no: 'ic-phone' },
+    words: { yes: 'no phone', no: 'phone required', unknown: 'phone: not stated' }, icons: { yes: 'ic-nophone', no: 'ic-phone' },
   },
   {
     key: 'commercial', when: 'yes', param: 'commercial', want: true, value: (p) => (p.commercial_ok === 'conditional' ? null : p.commercial_ok),
     legend: 'Will you use it in a commercial product?', yes: 'Yes, commercially', no: 'No, just testing',
-    words: { yes: 'commercial OK', no: 'eval only', unknown: 'commercial use: not confirmed' }, icons: { yes: 'ic-building', no: 'ic-flask' },
+    words: { yes: 'commercial OK', no: 'eval only', unknown: 'commercial use: not stated' }, icons: { yes: 'ic-building', no: 'ic-flask' },
   },
   {
     key: 'train', when: 'yes', param: 'notrain', want: false, value: (p) => (p.data_policy ? p.data_policy.trains_on_prompts : null),
@@ -56,7 +57,7 @@ export const CONSTRAINTS = [
   {
     key: 'openai', when: 'yes', param: 'openai', want: true, value: (p) => p.openai_compatible,
     legend: 'Do you need an OpenAI-compatible API?', yes: 'Yes, OpenAI-compatible', no: 'No, any API',
-    words: { yes: 'OpenAI-compatible', no: 'not OpenAI-compatible', unknown: 'OpenAI-compatible: not confirmed' }, icons: { yes: 'ic-code', no: 'ic-code' },
+    words: { yes: 'OpenAI-compatible', no: 'not OpenAI-compatible', unknown: 'OpenAI-compatible: not stated' }, icons: { yes: 'ic-code', no: 'ic-code' },
   },
 ];
 
@@ -91,7 +92,7 @@ export function activeConstraints(answers) {
   return CONSTRAINTS.filter((c) => answers && answers[c.key] === c.when);
 }
 
-/** 'yes' when the field holds the confirmed value the constraint wants, 'unknown' when it is not confirmed, else 'no'. */
+/** 'yes' when the field holds the confirmed value the constraint wants, 'unknown' when it is not stated, else 'no'. */
 export function constraintState(p, c) {
   const v = c.value(p);
   if (v === c.want) return 'yes';
@@ -107,7 +108,7 @@ export function usesMatch(p, use) {
   return (p.modalities || []).includes(u.mod);
 }
 
-/** One provider against the answers: does it offer the use, and which constraints are not confirmed or contradicted. */
+/** One provider against the answers: does it offer the use, and which constraints are not stated or contradicted. */
 export function evaluateProvider(p, answers) {
   const unknown = [], failed = [];
   for (const c of activeConstraints(answers)) {
@@ -120,7 +121,7 @@ export function evaluateProvider(p, answers) {
 
 /**
  * The shortlist: `matches` (every active constraint confirmed: the providers the explorer link shows) and `possible`
- * (nothing contradicted, at least one constraint not confirmed), each in the explorer's "Recommended" order.
+ * (nothing contradicted, at least one constraint not stated), each in the explorer's "Recommended" order.
  */
 export function shortlist(providers, answers) {
   const matches = [], possible = [];
@@ -223,7 +224,7 @@ export function resultHtml(p, answers, opts = {}) {
   const name = slugOk ? `<a href="${prefix}p/${p.slug}">${htmlEsc(p.name)}</a>` : htmlEsc(p.name);
   const type = `<span class="badge ${p.category === 'ongoing' ? 'b-ongoing' : 'b-trial'}">${p.category === 'ongoing' ? 'Ongoing' : 'Trial'}</span>`;
   const verified = p.verified && p.last_verified
-    ? `<span class="find-ver">Verified ${htmlEsc(p.last_verified)}</span>`
+    ? `<span class="find-ver">Verified ${humanDate(p.last_verified) ? `<time datetime="${htmlEsc(p.last_verified)}">${humanDate(p.last_verified)}</time>` : htmlEsc(p.last_verified)}</span>`
     : `<span class="find-ver">${ICON('ic-warn')} unverified</span>`;
 
   const flags = resultFlags(p, answers).map((f) => {
@@ -304,6 +305,8 @@ window.FLLM_FIND = (function () {
   const SLUG_RE = ${SLUG_RE.toString()};
   const htmlEsc = ${htmlEsc.toString()};
   const ICON = ${ICON.toString()};
+  const DATE_MONTHS = ${JSON.stringify(DATE_MONTHS)};
+  const humanDate = ${humanDate.toString()};
   const httpsUrl = ${httpsUrl.toString()};
 ${fns.map((f) => `  ${f.toString()}`).join('\n')}
   return { USES, CONSTRAINTS, HASH_KEYS, parseHash, toHash, activeConstraints, constraintState, usesMatch, evaluateProvider,

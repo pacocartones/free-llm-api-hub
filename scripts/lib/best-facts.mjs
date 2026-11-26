@@ -1,6 +1,7 @@
 // The three cards of an entry on /best/: Free quota, Rate limit and Requirements.
 // Every value is a field of data/providers.json shown as it is, with the date and the source the provider record already carries
 // (last_verified and docs_url); nothing is computed or added. A field the record does not have reads «not stated», never a guess.
+import { timeHtml } from './dates.mjs';
 import { htmlEsc } from './rows.mjs';
 import { safeUrl } from './text.mjs';
 
@@ -9,7 +10,7 @@ const text = (v) => (typeof v === 'string' && v.trim() ? v.trim() : '');
 
 const source = (p) => {
   const url = safeUrl(p.docs_url);
-  const day = /^\d{4}-\d{2}-\d{2}$/.test(String(p.last_verified || '')) ? `Checked ${htmlEsc(p.last_verified)}` : 'Not yet verified';
+  const day = /^\d{4}-\d{2}-\d{2}$/.test(String(p.last_verified || '')) ? `Checked ${timeHtml(p.last_verified, htmlEsc)}` : 'Not yet verified';
   return `<p class="best-fact-src">${day}${url ? ` · <a href="${url}" target="_blank" rel="noopener">source</a>` : ''}</p>`;
 };
 

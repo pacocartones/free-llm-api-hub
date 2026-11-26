@@ -69,7 +69,7 @@ export const SECTION_OGS = [
   { file: 'api.png', label: 'API', title: 'Static JSON API', subtitle: 'versioned · CORS-open · no key' },
   { file: 'not-free.png', label: 'NOT FREE', title: 'LLM APIs that are not free', subtitle: "the provider's own words · dated · free alternatives" },
   { file: 'embed.png', label: 'USE THE DATA', title: 'Widget, badges, API, citation', subtitle: 'MIT · no key · no tracking' },
-  { file: 'find.png', label: 'FIND MY FREE API', title: 'A shortlist of free APIs that fit you', subtitle: 'six questions · ranked · not confirmed is never yes' },
+  { file: 'find.png', label: 'FIND MY FREE API', title: 'A shortlist of free APIs that fit you', subtitle: 'six questions · ranked · not stated is never yes' },
   // The long-form guides carry fixed text too (no count), so a dataset change never stales their image.
   ...LONG_GUIDES.map((g) => ({ file: `guides/${g.slug}.png`, label: 'GUIDE', title: g.ogTitle, subtitle: g.ogSubtitle })),
 ];

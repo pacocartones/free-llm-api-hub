@@ -21,7 +21,9 @@ import * as sortLib from './lib/sort.mjs';
 import { esc, stripTags } from './lib/escape.mjs';
 import { mineHistoryAndSnapshots, HISTORY_FIELDS } from './lib/history.mjs';
 import { flattenFieldChanges, groupChangesByWeek, changesRss, weekTitle, formatValue, beforeAfter } from './lib/changes.mjs';
-import { monthlyReport, reportMonths, monthEndDate, monthName, monthLabel, pct, monthSummary, monthBrief } from './lib/state.mjs';
+import { monthlyReport, reportMonths, pct, monthSummary, monthBrief } from './lib/state.mjs';
+import { monthEndDate, monthName, monthLabel, shortMonthLabel, humanDate, humanDates, timeHtml } from './lib/dates.mjs';
+import { NOT_STATED, NOT_STATED_HTML } from './lib/not-stated.mjs';
 import { resolveBestEntries, topEntries, PODIUM_SIZE } from './lib/best.mjs';
 import { agreementsTableHtml, sponsoredBlockHtml, disclosureHtml, inForce, NOT_IN_DATA_SENTENCE, MACHINE_SENTENCE } from './lib/agreements.mjs';
 import { coverage, coverageMainHtml } from './lib/coverage.mjs';
@@ -88,7 +90,7 @@ const data = JSON.parse(readFileSync(join(ROOT, 'data/providers.json'), 'utf8'))
 const ASOF = datasetAsOf(data);
 // The dataset month in page titles ("Free LLM APIs (Nov 2026): ..."), Q10: from ASOF, the date of the last dataset
 // change, never the clock, so a title moves only when the data does and the build stays deterministic.
-const TITLE_MONTH = `${monthName(ASOF.slice(0, 7)).slice(0, 3)} ${ASOF.slice(0, 4)}`;
+const TITLE_MONTH = shortMonthLabel(ASOF.slice(0, 7));
 const datedTitle = (t) => (t.includes(' · Free LLM API Hub') ? t.replace(' · Free LLM API Hub', ` (${TITLE_MONTH}) · Free LLM API Hub`) : `${t} (${TITLE_MONTH})`);
 const providers = data.providers;
 const summaryBySlug = new Map(JSON.parse(readFileSync(join(ROOT, 'data/provider-summaries.json'), 'utf8')).summaries.map((x) => [x.id, x]));
@@ -138,7 +140,7 @@ function nameCell(p) {
 }
 
 function verifiedCell(p) {
-  return p.verified ? `✅ ${p.last_verified}` : '⚠️ unverified';
+  return p.verified ? `✅ ${humanDate(p.last_verified) || p.last_verified}` : '⚠️ unverified';
 }
 
 // The single README table: the top 10 by the FLLMAPIHUB score, in rank order. The score and
@@ -172,7 +174,7 @@ const COLLECTION_COPY = [
     title: 'Free LLM APIs with no credit card',
     h1: 'Free LLM APIs with no credit card required',
     desc: 'LLM APIs you can start calling without entering a payment method — filtered live from a continuously-verified dataset.',
-    intro: 'Every provider below offers free API access with **no card required** to get started (`card_required: false`, confirmed against their own docs). Rows where the requirement is unknown are excluded rather than assumed.',
+    intro: 'Every provider below offers free API access with **no card required** to get started (`card_required: false`, confirmed against their own docs). Rows where the requirement is not stated are excluded rather than assumed.',
     guides: ['free-llm-api-without-credit-card', 'free-llm-api-no-signup', 'free-llm-api-no-credit-card-no-phone'],
     faq: [
       { q: 'Can I use an LLM API for free without a credit card?', a: 'Yes — every provider on this page offers a free tier with no card required, confirmed against its own docs. You are limited by rate, not billing.' },
@@ -225,7 +227,7 @@ const COLLECTION_COPY = [
     intro: 'Free tiers that **allow commercial/production use** (`commercial_ok: true`). Evaluation-only tiers (`commercial_ok: false`) and tiers whose terms do not say are deliberately left out — read their rows in the main list for the restriction.',
     guides: ['openai-compatible-free-apis', 'free-llm-api-without-credit-card', 'choose-free-llm-api-for-production'],
     faq: [
-      { q: 'Can I use this list in a commercial product?', a: 'Yes. Free LLM API Hub and its dataset are MIT licensed, so you can reuse, fork and adapt them, including commercially. A link back is appreciated but not required. Each provider’s page has a Commercial use line that reads allowed, evaluation only or not confirmed, and the explorer on the home page marks the first two with an icon. Not confirmed means no reading of the provider’s terms has confirmed that commercial use is allowed: some terms do not clearly say so, and for other providers the question is still open. It is not a permission. The data describes other companies’ free tiers, whose terms change without notice, so confirm against the provider’s own docs before you ship. This list is independent: it is not affiliated with, endorsed by or sponsored by any provider on it, and it is not legal advice.' },
+      { q: 'Can I use this list in a commercial product?', a: 'Yes. Free LLM API Hub and its dataset are MIT licensed, so you can reuse, fork and adapt them, including commercially. A link back is appreciated but not required. Each provider’s page has a Commercial use line that reads allowed, evaluation only or not stated, and the explorer on the home page marks the first two with an icon. Not stated means the provider’s terms, as we read them, do not say that commercial use is allowed: some terms do not clearly say so, and for other providers the question is still open. It is not a permission. The data describes other companies’ free tiers, whose terms change without notice, so confirm against the provider’s own docs before you ship. This list is independent: it is not affiliated with, endorsed by or sponsored by any provider on it, and it is not legal advice.' },
       { q: 'Which free LLM APIs allow commercial use?', a: 'Every provider on this page permits commercial/production use on its free tier (`commercial_ok: true`), confirmed against its own terms. Evaluation-only tiers are excluded.' },
       { q: 'Is a free tier safe to ship to production?', a: 'Check the rate limits and whether the free tier is renewing or a one-time credit — both are on each provider’s row. For steady load, a renewing free tier or a paid plan is safer than a trial credit.' },
       { q: 'How often does this list change?', a: 'It is a live filter of the dataset: it is regenerated whenever the dataset changes, and every row shows the day its source was read.' },
@@ -460,7 +462,7 @@ function planMark(dp) {
 // (both table renderers escape it).
 function anonMark(aa) {
   if (!aa) return '';
-  return `“${aa.quote}” (read ${aa.checked})${aa.note ? ` — ${aa.note}` : ''}`;
+  return `“${aa.quote}” (read ${humanDate(aa.checked) || aa.checked})${aa.note ? ` — ${aa.note}` : ''}`;
 }
 
 function collectionTableMd(rows, opts = {}) {
@@ -529,7 +531,7 @@ function collectionTableHtml(rows, opts = {}) {
         ? `<a href="${htmlEsc(docsHref(p.docs_url))}" target="_blank" rel="noopener">${htmlEsc(p.name)}</a>`
         : htmlEsc(p.name);
       const v = p.verified
-        ? `<span class="v ok">${IC('ic-check')} ${htmlEsc(p.last_verified)}</span>`
+        ? `<span class="v ok">${IC('ic-check')} ${timeHtml(p.last_verified, htmlEsc)}</span>`
         : `<span class="v warn">${IC('ic-warn')} unverified</span>`;
       const col2 = bu
         ? (p.openai_base_url ? `<code>${htmlEsc(p.openai_base_url)}</code>` : '<span class="notes">see docs</span>')
@@ -599,7 +601,7 @@ function provReceiptHtml(p) {
   const cite = host ? `<a href="${htmlEsc(r.u)}" rel="noopener">${htmlEsc(host)}</a>` : 'the provider\'s docs';
   const entry = QUOTE_REGISTRY.entries.find((e) => e.slug === p.slug && e.kind === 'sentence');
   const readOn = entry ? entry.read_on : (p.data_policy && p.data_policy.checked) || '';
-  return `<blockquote class="prov-receipt"><p>“${htmlEsc(r.q)}”</p><cite>${cite}${readOn ? ` · read ${htmlEsc(readOn)}` : ''}</cite></blockquote>`;
+  return `<blockquote class="prov-receipt"><p>“${htmlEsc(r.q)}”</p><cite>${cite}${readOn ? ` · read ${timeHtml(readOn, htmlEsc)}` : ''}</cite></blockquote>`;
 }
 
 // The page header that every generated page shares: breadcrumbs, title, an optional subtitle (the lede) and optional
@@ -1077,7 +1079,7 @@ const collNavMd = COLLECTIONS.map((c) => `[${c.title}](${c.slug}.md)`).join(' ·
 
 for (const c of COLLECTIONS) {
   const rows = collRows(c);
-  const fill = (t) => t.replaceAll('{n}', String(rows.length)).replaceAll('{total}', String(total)).replaceAll('{date}', ASOF);
+  const fill = (t) => t.replaceAll('{n}', String(rows.length)).replaceAll('{total}', String(total)).replaceAll('{date}', humanDate(ASOF));
   const metaDesc = fill(c.metaDesc);
   const nav = COLLECTIONS.map(
     (o) => `<a href="${o.slug}"${o.slug === c.slug ? ' class="active" aria-current="page"' : ''}>${htmlEsc(o.title)}</a>`
@@ -1246,9 +1248,9 @@ const historyHtml = (slug) => {
     const rows = beforeAfter(e);
     return rows.length ? `<ul class="upd-diff">${rows.map((r) => `<li><span class="upd-field">${htmlEsc(r.label)}:</span> <del>${htmlEsc(r.from)}</del> → <ins>${htmlEsc(r.to)}</ins></li>`).join('')}</ul>` : '';
   };
-  const items = all.slice().reverse().map((e) => `<li class="upd"><span class="upd-date">${e.date}</span> <span>${htmlEsc(e.text)}</span>${diff(e)}</li>`).join('');
+  const items = all.slice().reverse().map((e) => `<li class="upd"><span class="upd-date">${timeHtml(e.date, htmlEsc)}</span> <span>${htmlEsc(e.text)}</span>${diff(e)}</li>`).join('');
   return `<h2>Change history</h2>` +
-    `<p class="muted">How this free tier has changed since we started tracking it (${all[0].date}) — generated from the git history of <a href="${REPO}/commits/main/data/providers.json">providers.json</a>.</p>` +
+    `<p class="muted">How this free tier has changed since we started tracking it (${timeHtml(all[0].date, htmlEsc)}) — generated from the git history of <a href="${REPO}/commits/main/data/providers.json">providers.json</a>.</p>` +
     `<ul class="upd-list" data-pager="5">${items}</ul>`;
 };
 
@@ -1326,9 +1328,9 @@ for (const p of providers) {
     : `<span class="v warn">${IC('ic-warn')} unverified</span>`;
   // Live-test badge: an actual successful API call, separate from the docs-based `verified`.
   const probedLine = p.probe_status === 'live'
-    ? ` <span class="v live" title="A real free-tier API call succeeded on this date">${IC('ic-check')} live-tested ${htmlEsc(p.last_probed || '')}</span>`
+    ? ` <span class="v live" title="A real free-tier API call succeeded on this date">${IC('ic-check')} live-tested ${timeHtml(p.last_probed || '', htmlEsc)}</span>`
     : (p.probe_status === 'auth-ok'
-        ? ` <span class="v ok" title="Credentials accessed /models; no inference was attempted">${IC('ic-check')} credentials checked ${htmlEsc(p.last_probed || '')}</span>`
+        ? ` <span class="v ok" title="Credentials accessed /models; no inference was attempted">${IC('ic-check')} credentials checked ${timeHtml(p.last_probed || '', htmlEsc)}</span>`
         : (p.probe_status === 'tier-ended'
         ? ` <span class="v warn" title="The key authenticated but the free tier appears gone">${IC('ic-warn')} free tier unconfirmed live</span>`
         : ''));
@@ -1581,7 +1583,7 @@ if (commits.length) {
     const prefix = page === 1 ? '' : '../../../';
     const pageCommits = commits.slice((page - 1) * UPDATES_PER_PAGE, page * UPDATES_PER_PAGE);
     const updItems = pageCommits
-      .map((c) => `<li class="upd"><span class="upd-date">${c.date}</span> <a href="${REPO}/commit/${c.hash}" target="_blank" rel="noopener">${htmlEsc(c.subject)}</a></li>`)
+      .map((c) => `<li class="upd"><span class="upd-date">${timeHtml(c.date, htmlEsc)}</span> <a href="${REPO}/commit/${c.hash}" target="_blank" rel="noopener">${htmlEsc(c.subject)}</a></li>`)
       .join('\n');
     const updMain =
       pageHero({ crumbs: `<a href="${prefix}">Home</a> / Updates`, h1: `Updates`, lede: `Every published change to the dataset and site, newest first. Subscribe via <a href="${prefix}feed.xml">RSS</a>. For field-level changes to the providers themselves, week by week, see <a href="${prefix}changes/">what changed this week</a>.` }) +
@@ -1622,7 +1624,7 @@ const provLink = (slug, name, prefix) => currentSlugs.has(slug) ? `<a href="${pr
 writeFileSync(join(ROOT, 'site/changes.xml'), changesRss(changeWeeks, { site: SITE }));
 
 const changeRowHtml = (c, prefix = '../') =>
-  `<tr><td class="notes">${c.date}</td><td class="name">${provLink(c.slug, c.name, prefix)}</td><td>${htmlEsc(c.label)}</td>` +
+  `<tr><td class="notes">${timeHtml(c.date, htmlEsc)}</td><td class="name">${provLink(c.slug, c.name, prefix)}</td><td>${htmlEsc(c.label)}</td>` +
   `<td class="notes">${htmlEsc(formatValue(c.from))}</td><td>${htmlEsc(formatValue(c.to))}</td></tr>`;
 
 const addedBySlug = Object.fromEntries(providers.filter((p) => p.added).map((p) => [p.slug, p.added]));
@@ -1648,7 +1650,7 @@ stateReports.forEach((r, i) => {
   const label = monthLabel(r.month);
   const prev = stateReports[i - 1];
   const next = stateReports[i + 1];
-  const days = (d) => (d === null ? '—' : `${d}d`);
+  const days = (d) => (d === null ? NOT_STATED : `${d}d`);
   const main =
     pageHero({ crumbs: `<a href="../../">Home</a> / <a href="../../changes/#months">What changed</a> / ${label}`, h1: `State of free LLM APIs — ${label}`, lede: r.carried
       ? `No revision of providers.json was committed in ${label}: the figures repeat the last revision, of ${r.snapshotDate}, and ages are measured at the end of ${label}, ${r.asOf}.`
@@ -1669,12 +1671,12 @@ stateReports.forEach((r, i) => {
     kvTable(['Measure', 'Value'], [
       ['Verified', `${r.verified} of ${r.total} (${pct(r.verifiedShare)})`],
       ['Verified with a date', r.freshness.dated],
-      [`Oldest verification, as of ${r.asOf}`, days(r.freshness.oldestDays)],
-      [`Median verification age, as of ${r.asOf}`, days(r.freshness.medianDays)],
+      [`Oldest verification, as of ${humanDate(r.asOf) || r.asOf}`, days(r.freshness.oldestDays)],
+      [`Median verification age, as of ${humanDate(r.asOf) || r.asOf}`, days(r.freshness.medianDays)],
     ]) +
     `<h2>Providers added in ${label}</h2>` +
     (r.added.length
-      ? kvTable(['Provider', 'Added'], r.added.map((a) => [provLink(a.slug, a.name, '../../'), a.added]))
+      ? kvTable(['Provider', 'Added'], r.added.map((a) => [provLink(a.slug, a.name, '../../'), timeHtml(a.added, htmlEsc)]))
       : `<p class="muted">No provider in the snapshot has an <code>added</code> date in ${label}.</p>`) +
     `<p class="muted">The data: <a href="../../api/v1/changes.json">api/v1/changes.json</a> has every field change, with its date, before and after.</p>` +
     `<nav class="pagination" aria-label="State reports">` +
@@ -1807,7 +1809,7 @@ const modelRowHtml = ({ m, p }) =>
   `<td class="name">${MODEL_PAGE_KEYS.has(modelKey(m)) ? `<a href="${modelKey(m)}/"><code>${htmlEsc(m)}</code></a>` : `<code>${htmlEsc(m)}</code>`}</td>` +
   `<td><a href="../p/${p.slug}">${htmlEsc(p.name)}</a></td>` +
   `<td>${htmlEsc(p.free_type)}</td>` +
-  `<td class="notes">${(p.modalities || []).join(', ') || '—'}</td></tr>`;
+  `<td class="notes">${(p.modalities || []).join(', ') || NOT_STATED}</td></tr>`;
 const modelsMain =
   pageHero({ crumbs: `<a href="../">Home</a> / Free model index`, h1: `Free model index`, lede: `Every model our verified providers expose on a free tier — <strong>${modelIndex.length}</strong> entries across <strong>${modelProviderCount}</strong> providers, pulled from each provider's own <code>/models</code> endpoint where possible. The same model can appear under more than one provider.` }) +
   `<main id="main"><div class="wrap"><table class="model-table"><thead><tr><th>Model</th><th>Provider</th><th>Free type</th><th>Modalities</th></tr></thead><tbody>\n` +
@@ -1854,14 +1856,14 @@ mkdirSync(join(ROOT, 'site/guides'), { recursive: true });
 // A guide's modality is its `modality` field; a guide without one is about text LLMs (no card, OpenAI-compatible, no signup).
 const guideFits = (g, p) => (g.modality ? (p.modalities || []).includes(g.modality) : p.is_text_llm === true);
 const guideRow = (p) =>
-  `<tr><td class="name"><a href="../p/${p.slug}">${htmlEsc(p.name)}</a><br><small>Verified <time datetime="${htmlEsc(p.last_verified)}">${htmlEsc(p.last_verified)}</time></small></td>` +
+  `<tr><td class="name"><a href="../p/${p.slug}">${htmlEsc(p.name)}</a><br><small>Verified ${timeHtml(p.last_verified, htmlEsc)}</small></td>` +
   `<td>${htmlEsc(p.free_tier)}</td>` +
   `<td class="notes">${htmlEsc(p.rate_limits)}</td>` +
   `<td>${provFlagsHtml(p)}</td></tr>`;
 for (const g of GUIDES) {
   // These pages explicitly promise verified providers; collections still show all tracked rows.
   const list = providers.filter((p) => p.verified === true && g.filter(p));
-  const fill = (t) => t.replaceAll('{n}', String(list.length)).replaceAll('{date}', ASOF);
+  const fill = (t) => t.replaceAll('{n}', String(list.length)).replaceAll('{date}', humanDate(ASOF));
   const metaDesc = fill(g.metaDesc);
   const twins = COLLECTIONS.filter((c) => (c.guides || []).includes(g.slug));
   // The pick is the guide's own (g.pick) or the first row of the shared "Recommended" order. It is shown only when it
@@ -1924,14 +1926,14 @@ for (const g of LONG_GUIDE_PAGES) {
   const faqHtml = `<h2 id="faq">FAQ</h2>` + g.faq.map((f) => `<div class="faq-item"><h3>${htmlEsc(f.q)}</h3><p>${f.a}</p></div>`).join('');
   const related = ALL_GUIDE_LINKS.filter((x) => x.slug !== g.slug).map((x) => `<a href="${x.slug}">${htmlEsc(x.card)}</a>`).join('');
   const main =
-    pageHero({ crumbs: `<a href="../">Home</a> / <a href="../guides-and-collections/">Guides &amp; Collections</a> / ${htmlEsc(g.h1)}`, h1: htmlEsc(g.h1), lede: `Data as of <time datetime="${ASOF}">${ASOF}</time>. Every limit is quoted from the provider’s own page and dated.` }) +
+    pageHero({ crumbs: `<a href="../">Home</a> / <a href="../guides-and-collections/">Guides &amp; Collections</a> / ${htmlEsc(g.h1)}`, h1: htmlEsc(g.h1), lede: `Data as of ${timeHtml(ASOF)}. Every limit is quoted from the provider’s own page and dated.` }) +
     `<main id="main"><div class="wrap prose">` +
     `<p class="answer"><strong>${g.answer}</strong></p>` +
     g.body +
     faqHtml +
     (g.slug === 'openai-api-alternatives' ? '' : `<p class="muted">Looking for OpenAI, Anthropic, Mistral or GitHub Models? <a href="../not-free/">Why they are not on this list</a>.</p>`) +
     `<h2>More guides</h2><nav class="colls">${related}</nav>` +
-    `<p class="muted">Data from the Free LLM API Hub dataset, as of ${ASOF}. Every limit is quoted from the provider’s own page; follow the source link before relying on it.</p>` +
+    `<p class="muted">Data from the Free LLM API Hub dataset, as of ${timeHtml(ASOF)}. Every limit is quoted from the provider’s own page; follow the source link before relying on it.</p>` +
     `<p class="prov-back"><a href="../guides-and-collections/">← All guides</a></p>` +
     `</div></main>`;
   const jsonld = JSON.stringify({
@@ -2216,7 +2218,7 @@ const llmsTxt =
   `- [Provider status, JSON](${SITE}/api/v1/status.json): per provider, last verified, freshness against the ${DUE_SOON_DAYS}/${SLA_DAYS}-day SLA, free now, and the day of its last change\n` +
   `- [JSON Schema](${REPO}/blob/main/data/schema.json)\n` +
   `- [Full provider list expanded, markdown](${SITE}/llms-full.txt)\n` +
-  `- [Data quality](${SITE}/quality/): how much of the dataset is verified, how fresh it is, and which answers are still unknown\n` +
+  `- [Data quality](${SITE}/quality/): how much of the dataset is verified, how fresh it is, and which answers are still not stated\n` +
   `- [Use the data](${SITE}/embed/): the widget, verified badges, JSON and CSV downloads, and how to cite the dataset\n` +
   `- [Methodology](${SITE}/methodology/): how entries are verified, sourced and dated\n\n` +
   `## Guides\n` +
@@ -2230,16 +2232,17 @@ const llmsTxt =
   providers.map((p) => llmsProviderLine(p, { site: SITE })).join('\n') + `\n`;
 writeFileSync(join(ROOT, 'site/llms.txt'), llmsTxt);
 
-// A null flag with a recorded reason (field_checks) says the reason instead of "unknown".
+// A null flag reads "not stated", with the recorded reason (field_checks) and its day when there is one. llms-full.txt is
+// machine output, so the day stays ISO.
 const yn = (v, yes, no, check) => v === true ? yes : v === false ? no : v === 'conditional' ? 'conditional'
-  : check && check.status !== 'stated' && REASON_LABEL[check.status] ? `unknown, ${REASON_LABEL[check.status]} (checked ${check.checked})` : 'unknown';
-// yes / no only where /data-policy/ says so (trainState); a value without the provider's sentence, or none, is not confirmed.
+  : check && check.status !== 'stated' && REASON_LABEL[check.status] ? `${REASON_LABEL[check.status]} (checked ${check.checked})` : NOT_STATED;
+// yes / no only where /data-policy/ says so (trainState); a value without the provider's sentence, or none, is not stated.
 const TRAINS_ON_PROMPTS = { yes: 'yes', no: 'no' };
 const dataPolicyLine = (p) => {
   const dp = p.data_policy && typeof p.data_policy === 'object' ? p.data_policy : null;
   if (!dp) return '';
-  const trains = TRAINS_ON_PROMPTS[trainState(p)] || 'not confirmed';
-  const retention = dp.retention ? String(dp.retention).replace(/\s+/g, ' ').trim() : 'not confirmed';
+  const trains = TRAINS_ON_PROMPTS[trainState(p)] || NOT_STATED;
+  const retention = dp.retention ? String(dp.retention).replace(/\s+/g, ' ').trim() : NOT_STATED;
   return `- Prompt data policy: trains on prompts: ${trains}; retention: ${retention} (source ${dp.source}, checked ${dp.checked})\n`;
 };
 const provBlock = (p) => {
@@ -2254,9 +2257,9 @@ const provBlock = (p) => {
   const conditionLine = p.commercial_ok === 'conditional' && p.commercial_ok_condition ? `- Commercial-use condition: ${String(p.commercial_ok_condition).replace(/\s+/g, ' ').trim()}\n` : '';
   return `### ${p.name} — ${p.category === 'ongoing' ? 'ongoing free tier' : 'trial credit'}\n` +
     `- Free: ${p.free_tier}\n` +
-    `- Rate limits: ${p.rate_limits || 'not specified'}\n` +
-    `- The catch: ${p.notes || '—'}\n` +
-    `- Modalities: ${(p.modalities || ['text']).join(', ')}\n` +
+    `- Rate limits: ${p.rate_limits || NOT_STATED}\n` +
+    `- The catch: ${p.notes || NOT_STATED}\n` +
+    `- Modalities: ${(p.modalities || []).length ? p.modalities.join(', ') : NOT_STATED}\n` +
     `- Gates: ${gates}\n` +
     conditionLine +
     (publishedSpeed(p).length ? `- Published speed (the provider's own figures, not measured by us; not stated for the free tier unless the page says so): ${publishedSpeed(p).map((e) => `${e.model} ${speedFigure(e)} (${e.source}, checked ${e.checked})`).join('; ')}\n` : '') +
@@ -2318,7 +2321,7 @@ const bestMain =
   '<h2 class="best-section">The podium</h2><ol class="best-list best-podium-list">' + podiumHtml + '</ol>' +
   (restHtml ? '<hr class="best-sep" aria-hidden="true"><h2 class="sr-only">Ranks ' + (PODIUM_SIZE + 1) + ' to ' + topList.length + '</h2><ol class="best-list" start="' + (PODIUM_SIZE + 1) + '">' + restHtml + '</ol>' : '') +
   '<p class="count best-note">' + (topList.length < TOP_SIZE ? 'Only ' + topList.length + ' providers meet the minimum evidence today; the list is never padded to ' + TOP_SIZE + '. ' : '') +
-  'Computed from the data on ' + htmlEsc(ASOF) + ' — <a href="methodology/">how the score works</a>. Every provider links to its full verified profile.</p>' +
+  'Computed from the data on ' + timeHtml(ASOF) + ' — <a href="methodology/">how the score works</a>. Every provider links to its full verified profile.</p>' +
   '</div></main>';
 mkdirSync(join(ROOT, 'site/best'), { recursive: true });
 writeFileSync(
@@ -2333,7 +2336,7 @@ const editorialNeutral = providers.every((p) => editorialRating(EDITORIAL, p.slu
 const methodRows = MATH_INPUTS.map((k) => '<tr><td>' + WEIGHT_LABELS[k] + '</td><td class="num">' + SCORE_WEIGHTS[k] + '</td></tr>').join('') +
   '<tr><td>Editorial rating</td><td class="num">' + EDITORIAL_WEIGHT + '</td></tr>';
 const methodMain =
-  pageHero({ crumbs: `<a href="../../">Home</a> / <a href="../">The best</a> / Methodology`, h1: `How the score works`, lede: `Every provider on /best gets a score from 0 to 100, computed from the data each time the site is built. Data of ${htmlEsc(ASOF)}.` }) +
+  pageHero({ crumbs: `<a href="../../">Home</a> / <a href="../">The best</a> / Methodology`, h1: `How the score works`, lede: `Every provider on /best gets a score from 0 to 100, computed from the data each time the site is built. Data of ${timeHtml(ASOF)}.` }) +
   '<main id="main"><div class="wrap best-method">' +
   '<h2>The parameters and their weights</h2>' +
   '<table class="best-weights"><thead><tr><th>Part</th><th class="num">Points</th></tr></thead><tbody>' + methodRows + '</tbody></table>' +
@@ -2348,7 +2351,7 @@ const methodMain =
   '<li><strong>The editorial part cannot outweigh the data.</strong> It can move a provider away from ' + EDITORIAL_DEFAULT + ' only by as much as its confirmed inputs allow.</li>' +
   '<li><strong>Stability is not measured yet.</strong> It needs probes over at least ' + STABILITY_MIN_DAYS + ' days (' + STABILITY_MIN_SAMPLES + ' samples); until then it is unmeasured for everyone.</li>' +
   '<li><strong>Deterministic.</strong> The same data gives the same order; ties break by the mathematical score, then by name.</li></ul>' +
-  '<p class="count best-note">Last data update: ' + htmlEsc(ASOF) + '. Full text and every constant: <a href="' + REPO + '/blob/main/docs/methodology.md">docs/methodology.md</a> and <a href="' + REPO + '/blob/main/scripts/lib/score.mjs">scripts/lib/score.mjs</a>.</p>' +
+  '<p class="count best-note">Last data update: ' + timeHtml(ASOF) + '. Full text and every constant: <a href="' + REPO + '/blob/main/docs/methodology.md">docs/methodology.md</a> and <a href="' + REPO + '/blob/main/scripts/lib/score.mjs">scripts/lib/score.mjs</a>.</p>' +
   '</div></main>';
 mkdirSync(join(ROOT, 'site/best/methodology'), { recursive: true });
 writeFileSync(
@@ -2428,7 +2431,7 @@ writeFileSync(
 
 // ---------- /quality/ — verified share, freshness and how many answers are known, from the data ----------
 const qualityTitle = 'Data quality';
-const qualityDesc = 'How much of the free LLM API dataset is verified, how fresh it is, and how many answers are known, unknown with a recorded reason, or not checked yet. Computed from the data.';
+const qualityDesc = 'How much of the free LLM API dataset is verified, how fresh it is, and how many answers are known, not stated with a recorded reason, or not checked yet. Computed from the data.';
 mkdirSync(join(ROOT, 'site/quality'), { recursive: true });
 writeFileSync(
   join(ROOT, 'site/quality/index.html'),
@@ -2533,13 +2536,13 @@ for (const { e, group } of CODING_TOOL_PAGES) {
 }
 
 // ---------- /data-policy/ — who trains on your data, with the provider's own words ----------
-// Reads data_policy only. A row without a recorded sentence says so; "not confirmed" is never "no".
+// Reads data_policy only. A row without a recorded sentence says so; "not stated" is never "no".
 mkdirSync(join(ROOT, 'site/data-policy'), { recursive: true });
 writeFileSync(
   join(ROOT, 'site/data-policy/index.html'),
   htmlPage({
     title: 'Who trains on your data · Free LLM API Hub',
-    desc: 'The sentence from each free LLM API provider\'s own page about training on prompts, where one is recorded, with the page and the day it was read. Not confirmed is never no.',
+    desc: 'The sentence from each free LLM API provider\'s own page about training on prompts, where one is recorded, with the page and the day it was read. Not stated is never no.',
     canonical: SITE + '/data-policy/',
     main:
       pageHero({ crumbs: `<a href="../">Home</a> / Who trains on your data`, h1: `Who trains on your data`, lede: `The provider's own sentence about training on prompts, where one is recorded, with its page and the day it was read.` }) +
@@ -2642,7 +2645,7 @@ for (const cp of comparePairs) {
   const title = `${a.name} vs ${b.name}`;
   const desc = `${a.name} vs ${b.name}: free tier, rate limits, card, phone and commercial-use requirements, OpenAI compatibility and docs, side by side from the verified dataset.`;
   const main =
-    pageHero({ crumbs: `<a href="../../">Home</a> / <a href="../">Compare</a> / ${htmlEsc(title)}`, h1: `${htmlEsc(title)}`, lede: `Both offer ${htmlEsc(cp.shared.join(', '))} on their free plan. Every field below comes from the dataset and is checked against each provider's own docs; <em>not confirmed</em> means nobody has confirmed that field yet — not that the answer is no.` }) +
+    pageHero({ crumbs: `<a href="../../">Home</a> / <a href="../">Compare</a> / ${htmlEsc(title)}`, h1: `${htmlEsc(title)}`, lede: `Both offer ${htmlEsc(cp.shared.join(', '))} on their free plan. Every field below comes from the dataset and is checked against each provider's own docs; <em>not stated</em> means the provider's pages do not say it (or nobody has recorded it yet) — not that the answer is no.` }) +
     `<main id="main"><div class="wrap prose">` +
     tagProviderLinks(compareLib.compareTableHtml([a, b], { prefix: '../../', scores: scoreMap }), [...providerLinkTargets(a), ...providerLinkTargets(b)]) +
     `<div class="prov-actions" style="margin-top:22px"><a class="btn primary" href="../?compare=${a.slug},${b.slug}">Add a provider to this comparison →</a></div>` +

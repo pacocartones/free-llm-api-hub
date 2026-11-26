@@ -16,6 +16,9 @@
 
 import { htmlEsc, SLUG_RE } from './rows.mjs';
 import { expiryHtml } from './expiry.mjs';
+import { NOT_STATED_HTML } from './not-stated.mjs';
+import { REASON_LABEL } from './field-checks.mjs';
+import { DATE_MONTHS, humanDate } from './dates.mjs';
 
 export const COMPARE_MIN = 2;
 export const COMPARE_MAX = 4;
@@ -112,24 +115,21 @@ export function comparePeers(p, providers, { staticPaths = new Set(), score = ()
 }
 
 /**
- * A tri-state flag (true / false / null) as escaped HTML. null means nobody
- * has confirmed the field yet — never "no" — so it reads "not confirmed".
- * `check` is the flag's field_checks entry, if any: a recorded reason replaces
- * "not confirmed" with that reason and the day it was checked. The words match
- * REASON_LABEL in field-checks.mjs (a test keeps them equal); they are inlined
- * because this function is also shipped to the browser as source text.
+ * A tri-state flag (true / false / null) as escaped HTML. null means the provider's pages do not say it (or nobody
+ * has recorded it yet) — never "no" — so it reads "not stated". `check` is the flag's field_checks entry, if any: a
+ * recorded reason adds the reason and the day it was checked ("not stated in the provider's docs (checked 24 Nov
+ * 2026)"). The words are REASON_LABEL (field-checks.mjs), serialised with this function into the browser bundle.
  */
 export function triStateHtml(v, yes, no, check) {
   if (v === true) return `<span class="tri tri-yes">${htmlEsc(yes)}</span>`;
   if (v === false) return `<span class="tri tri-no">${htmlEsc(no)}</span>`;
   if (v === 'conditional') return '<span class="tri tri-cond">conditional</span>';
-  const why = { source_silent: 'not stated by the provider', needs_account: 'needs an account to check', sources_disagree: 'provider pages disagree' };
   const status = check && typeof check === 'object' ? String(check.status) : '';
-  if (Object.prototype.hasOwnProperty.call(why, status)) {
-    const day = /^\d{4}-\d{2}-\d{2}$/.test(String(check.checked || '')) ? ` (checked ${check.checked})` : '';
-    return `<span class="tri tri-unk tri-why" title="Not confirmed: ${htmlEsc(why[status])}">${htmlEsc(why[status] + day)}</span>`;
+  if (status !== 'not_checked' && Object.prototype.hasOwnProperty.call(REASON_LABEL, status)) {
+    const day = humanDate(check.checked) ? ` (checked ${humanDate(check.checked)})` : '';
+    return `<span class="tri tri-unk tri-why" title="${htmlEsc(REASON_LABEL[status])}">${htmlEsc(REASON_LABEL[status] + day)}</span>`;
   }
-  return '<span class="tri tri-unk">not confirmed</span>';
+  return NOT_STATED_HTML;
 }
 
 /**
@@ -164,10 +164,10 @@ export function compareTableHtml(list, opts = {}) {
   const safeUrl = (u) => (/^https?:\/\//i.test(String(u || '')) ? String(u) : '');
   const fields = [
     ['Type', (p) => cell((p.category === 'ongoing' ? 'Ongoing free tier' : 'Trial credit') + (p.free_type ? ' · ' + p.free_type : ''))],
-    ["What's free", (p) => cell(p.free_tier || '—')],
-    ['Rate limits', (p) => cell(p.rate_limits || 'not specified')],
+    ["What's free", (p) => (p.free_tier ? cell(p.free_tier) : NOT_STATED_HTML)],
+    ['Rate limits', (p) => (p.rate_limits ? cell(p.rate_limits) : NOT_STATED_HTML)],
     ['Expires', (p) => expiryHtml(p)],
-    ['The catch', (p) => cell(p.notes || '—')],
+    ['The catch', (p) => (p.notes ? cell(p.notes) : NOT_STATED_HTML)],
     ['Credit card', (p) => triStateHtml(p.card_required, 'required', 'not required', p.field_checks && p.field_checks.card_required)],
     ['Phone verification', (p) => triStateHtml(p.phone_required, 'required', 'not required', p.field_checks && p.field_checks.phone_required)],
     ['Commercial use', (p) => p.commercial_ok === 'conditional'
@@ -180,23 +180,23 @@ export function compareTableHtml(list, opts = {}) {
     // browser as source text; the signs and units match speedFigure in published-speed.mjs (a test keeps them equal).
     ['Published speed', (p) => {
       const list = Array.isArray(p.published_speed) ? p.published_speed : [];
-      if (!list.length) return '<span class="tri tri-unk">none recorded</span>';
+      if (!list.length) return NOT_STATED_HTML;
       const sign = { exact: '', approx: '~', at_least: '≥', up_to: '≤' };
       const unit = { output_tokens_per_second: 'tok/s', time_to_first_token_ms: 'ms' };
       return list.map((e) => `<div><code>${cell(e.model)}</code> ${cell((sign[e.qualifier] || '') + Number(e.value).toLocaleString('en-US') + ' ' + (unit[e.metric] || ''))}` +
         (safeUrl(e.source) ? ` <a href="${cell(safeUrl(e.source))}" target="_blank" rel="noopener">source</a>` : '') + '</div>').join('') +
-        `<div class="cmp-sub">The provider's own ${list.length > 1 ? 'figures' : 'figure'}, checked ${cell([...new Set(list.map((e) => e.checked))].join(', '))}; not our measurement and not a like-for-like benchmark</div>`;
+        `<div class="cmp-sub">The provider's own ${list.length > 1 ? 'figures' : 'figure'}, checked ${cell([...new Set(list.map((e) => humanDate(e.checked) || e.checked))].join(', '))}; not our measurement and not a like-for-like benchmark</div>`;
     }],
-    ['Modalities', (p) => cell((p.modalities || []).join(', ') || '—')],
+    ['Modalities', (p) => ((p.modalities || []).length ? cell(p.modalities.join(', ')) : NOT_STATED_HTML)],
     ['Free models (sample)', (p) => ((p.models_free && p.models_free.length)
       ? p.models_free.map((m) => `<code>${cell(m)}</code>`).join(' ')
-      : '<span class="tri tri-unk">no sample</span>') +
+      : NOT_STATED_HTML) +
       (safeUrl(p.models_url) ? `<div class="cmp-sub"><a href="${cell(safeUrl(p.models_url))}" target="_blank" rel="noopener">official catalogue ↗</a></div>` : '')],
     ['Official docs', (p) => safeUrl(p.docs_url)
       ? `<a href="${cell(safeUrl(p.docs_url))}" target="_blank" rel="noopener">${cell(safeUrl(p.docs_url).replace(/^https?:\/\//i, ''))}</a>`
-      : '—'],
+      : NOT_STATED_HTML],
     ['Last verified', (p) => (p.verified && p.last_verified)
-      ? `<span class="v ok">${cell(p.last_verified)}</span>`
+      ? `<span class="v ok">${humanDate(p.last_verified) ? `<time datetime="${cell(p.last_verified)}">${humanDate(p.last_verified)}</time>` : cell(p.last_verified)}</span>`
       : '<span class="v warn">unverified</span>'],
   ];
   // With a scores map ({ slug: { total, confirmed, of, rank } }) the table also shows the score and the model quality
@@ -244,6 +244,10 @@ window.FLLM_COMPARE = (function () {
   const SLUG_RE = ${SLUG_RE.toString()};
   const COMPARE_MIN = ${COMPARE_MIN};
   const COMPARE_MAX = ${COMPARE_MAX};
+  const NOT_STATED_HTML = ${JSON.stringify(NOT_STATED_HTML)};
+  const REASON_LABEL = ${JSON.stringify(REASON_LABEL)};
+  const DATE_MONTHS = ${JSON.stringify(DATE_MONTHS)};
+  const humanDate = ${humanDate.toString()};
   const triStateHtml = ${triStateHtml.toString()};
   const expiryHtml = ${expiryHtml.toString()};
   const parseCompareSlugs = ${parseCompareSlugs.toString()};

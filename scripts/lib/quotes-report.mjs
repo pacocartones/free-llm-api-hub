@@ -2,6 +2,7 @@
 //
 // It is a data file (data/quotes-report.json) written by a person's run on the server, committed through a normal pull request, and read by the
 // build; nothing regenerates it by itself. The page shows the AGE of the report, because a report nobody renews says nothing.
+import { timeHtml } from './dates.mjs';
 import { judgeReading, readingText, absenceHits, sha256, METHOD } from './page-text.mjs';
 import { totalHits } from './quotes.mjs';
 import { htmlEsc } from './rows.mjs';
@@ -108,7 +109,7 @@ export function quotesReportHtml(report, registry, nowMs) {
     const persistent = r.result === 'unreachable' && r.runs_in_a_row >= PERSISTENT_RUNS;
     const text = RESULT_TEXT[r.result] + (r.result === 'unreachable' ? (persistent ? `. It has not been read for ${r.runs_in_a_row} runs in a row` : `. Run ${r.runs_in_a_row}: a block of the server is not yet a lasting problem`) : '');
     const what = e.kind === 'absence_check' ? 'the claim that the page has none of the four words' : `<blockquote class="dp-quote">&ldquo;${htmlEsc(String(e.text || '').slice(0, 90))}${(e.text || '').length > 90 ? '&hellip;' : ''}&rdquo;</blockquote>`;
-    return `<tr><th scope="row">${htmlEsc(r.slug)}</th><td>${what}</td><td>${htmlEsc(text)}</td><td>read ${htmlEsc(r.read_on)}</td></tr>`;
+    return `<tr><th scope="row">${htmlEsc(r.slug)}</th><td>${what}</td><td>${htmlEsc(text)}</td><td>read ${timeHtml(r.read_on, htmlEsc)}</td></tr>`;
   }).join('');
   const list = bad.length
     ? `<div class="table-scroll" role="region" aria-label="Table: quoted passages that need a person" tabindex="0"><table class="dp-table"><thead><tr><th scope="col">Provider</th><th scope="col">Passage</th><th scope="col">Result</th><th scope="col">Last read as found</th></tr></thead><tbody>${rows}</tbody></table></div>`

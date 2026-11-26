@@ -28,9 +28,9 @@ export const ICON = (id) => `<svg class="i" aria-hidden="true"><use href="#${id}
 // here because the client fetch path bypasses that guarantee.
 export const SLUG_RE = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 
-// «Needs / unknown» column: in words, only what a provider requires (or restricts) and which of the four production flags are
-// unknown. Nothing else: the free text of the record (`notes`) stays on the provider page, reachable by the name link and by the
-// title of the cell. A provider with nothing required and nothing unknown says so ("Nothing required"). The two vocabularies
+// «Needs / not stated» column: in words, only what a provider requires (or restricts) and which of the four production flags are
+// not stated (not-stated.mjs). Nothing else: the free text of the record (`notes`) stays on the provider page, reachable by the
+// name link and by the title of the cell. A provider with nothing required and nothing unstated says so ("Nothing required"). The two vocabularies
 // below are the whole set of phrases; a test fails if another one appears.
 export const NEED_LABELS = ['Card required', 'Phone required', 'Non-commercial only', 'Commercial use conditional', 'Trains on prompts'];
 export const UNKNOWN_LABELS = ['card', 'phone', 'commercial use', 'training'];
@@ -51,16 +51,16 @@ export function needsOf(p) {
   return { needs, unknown };
 }
 
-/** The whole «Needs / unknown» cell. */
+/** The whole «Needs / not stated» cell. */
 export function needsCellHtml(p) {
   const { needs, unknown } = needsOf(p);
   const cond = p.commercial_ok === 'conditional' && p.commercial_ok_condition ? 'Commercial use conditional: ' + p.commercial_ok_condition : '';
   const tip = [cond, p.notes].filter(Boolean).join(' — ');
   let inner = '';
   if (needs.length) inner += `<span class="need-req">${htmlEsc(needs.join(', '))}</span>`;
-  if (unknown.length) inner += `<span class="need-unk">Unknown: ${htmlEsc(unknown.join(', '))}</span>`;
+  if (unknown.length) inner += `<span class="need-unk">Not stated: ${htmlEsc(unknown.join(', '))}</span>`;
   if (!inner) inner = '<span class="need-none">Nothing required</span>';
-  return `<td class="needs" role="cell" data-label="Needs / unknown"${tip ? ` title="${htmlEsc(tip)}"` : ''}><div class="clamp2">${inner}</div></td>`;
+  return `<td class="needs" role="cell" data-label="Needs / not stated"${tip ? ` title="${htmlEsc(tip)}"` : ''}><div class="clamp2">${inner}</div></td>`;
 }
 
 /**
@@ -126,7 +126,8 @@ export function rowKeyTarget(key, index, count) {
 import { freshnessStatus } from './rules.mjs';
 import { FLAG_DEFS, FLAG_MARKS, FLAG_UNKNOWN_WHY, flagValue, flagState, flagText, flagHtml, flagsHtml } from './flags.mjs';
 import { AURA_ORDER, AURA_OLD_DAYS, AURA_NAMES, AURA_GEOMETRY, auraRng, auraSpec, auraPaths, auraHtml } from './aura.mjs';
-import { STAMP_MONTHS, STAMP_WORDS, stampDate, stampState, stampHtml } from './stamp.mjs';
+import { STAMP_WORDS, stampState, stampHtml } from './stamp.mjs';
+import { DATE_MONTHS, humanDate } from './dates.mjs';
 
 /**
  * The exact client bundle the browser runs (written to site/shared-rows.js by
@@ -158,9 +159,9 @@ window.FLLM_ROWS = (function () {
   const auraSpec = ${auraSpec.toString()};
   const auraPaths = ${auraPaths.toString()};
   const auraHtml = ${auraHtml.toString()};
-  const STAMP_MONTHS = ${JSON.stringify(STAMP_MONTHS)};
+  const DATE_MONTHS = ${JSON.stringify(DATE_MONTHS)};
+  const humanDate = ${humanDate.toString()};
   const STAMP_WORDS = ${JSON.stringify(STAMP_WORDS)};
-  const stampDate = ${stampDate.toString()};
   const stampState = ${stampState.toString()};
   const stampHtml = ${stampHtml.toString()};
   const rowHtml = ${explorerRowHtml.toString()};

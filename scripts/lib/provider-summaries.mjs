@@ -7,6 +7,7 @@
 // (docs_url, openai_base_url), or a host that data/provider-summaries.json lists in `exceptions` with the reason
 // (the parent company that owns it, the project's own repository, the same service on its other domain).
 // A line nobody could source is left empty and not shown: empty is a valid state, an invented line is not.
+import { timeHtml } from './dates.mjs';
 import { hasHiddenChars } from './hidden-chars.mjs';
 import { htmlEsc } from './rows.mjs';
 
@@ -118,7 +119,7 @@ export const aboutHtml = (summary, name) => {
   const rows = SUMMARY_FIELDS.filter((f) => summary[f]).map((f) => {
     const links = summary.sources.filter((s) => s.supports.includes(f)).map((s) => {
       const host = hostOf(s.url);
-      return `<a href="${htmlEsc(s.url)}" target="_blank" rel="noopener">${htmlEsc(host)}</a>, read ${htmlEsc(s.fetched_at.slice(0, 10))}`;
+      return `<a href="${htmlEsc(s.url)}" target="_blank" rel="noopener">${htmlEsc(host)}</a>, read ${timeHtml(s.fetched_at.slice(0, 10), htmlEsc)}`;
     });
     return `<div class="about-row"><dt>${FIELD_LABELS[f]}</dt><dd>${htmlEsc(summary[f])}<span class="about-src">Source: ${links.join('; ')}</span></dd></div>`;
   });
