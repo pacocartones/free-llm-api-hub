@@ -1718,7 +1718,9 @@
       "verified": true,
       "last_verified": "2026-11-24",
       "added": "2026-11-24",
-      "data_policy": {"trains_on_prompts":false,"retention":"implicit cache deleted within 24 hours; prompts may be logged for abuse monitoring","source":"https://docs.cloud.google.com/gemini-enterprise-agent-platform/resources/zero-data-retention","checked":"2026-11-24","quote":"Google won't use your data to train or fine-tune any AI/ML models without your prior permission or instruction.","note":"Platform-wide Agent Platform page; whether it governs express-mode free-tier accounts is not stated on the pages read. Implicit caching is enabled by default and the Interactions API store setting defaults to true.","plan_named":false}
+      "data_policy": {"trains_on_prompts":false,"retention":"implicit cache deleted within 24 hours; prompts may be logged for abuse monitoring","source":"https://docs.cloud.google.com/gemini-enterprise-agent-platform/resources/zero-data-retention","checked":"2026-11-24","quote":"Google won't use your data to train or fine-tune any AI/ML models without your prior permission or instruction.","note":"Platform-wide Agent Platform page; whether it governs express-mode free-tier accounts is not stated on the pages read. Implicit caching is enabled by default and the Interactions API store setting defaults to true.","plan_named":false},
+      "keys_url": "https://console.cloud.google.com/agent-platform/studio/settings/api-keys",
+      "keys_url_source": "https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/start/express-mode/overview"
     },
     {
       "slug": "inception",
