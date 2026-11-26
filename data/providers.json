@@ -1781,7 +1781,9 @@
       "added": "2026-11-25",
       "last_probed": null,
       "probe_status": null,
-      "data_policy": {"trains_on_prompts":false,"retention":"prompts and responses not stored; request metadata (time, model, token counts, cost, status, IP) recorded","source":"https://www.aionlabs.ai/privacy/","checked":"2026-11-25","quote":"the prompts you send through the API or browser chat and the responses you receive are processed to generate the response and returned to you. We do not store them.","note":"The terms (version 2026-10-17) add: \"We do not use your Input or Output to train models and we do not sell them.\" Neither sentence names a plan.","plan_named":false}
+      "data_policy": {"trains_on_prompts":false,"retention":"prompts and responses not stored; request metadata (time, model, token counts, cost, status, IP) recorded","source":"https://www.aionlabs.ai/privacy/","checked":"2026-11-25","quote":"the prompts you send through the API or browser chat and the responses you receive are processed to generate the response and returned to you. We do not store them.","note":"The terms (version 2026-10-17) add: \"We do not use your Input or Output to train models and we do not sell them.\" Neither sentence names a plan.","plan_named":false},
+      "keys_url": "https://www.aionlabs.ai/app/api-keys/",
+      "keys_url_source": "https://www.aionlabs.ai/docs/"
     },
     {
       "slug": "meganova",
