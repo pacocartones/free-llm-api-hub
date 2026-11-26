@@ -1763,7 +1763,7 @@ test('the client makes no GitHub API call and the home search covers model names
   assert.ok(searchText(groq).includes(groq.models_free[0].toLowerCase()), 'a real provider is found by one of its models');
 });
 
-test('header menu: Providers (with The Best inside), Models, Compare, Changes, API, Guides; the same on the home and the generated pages', () => {
+test('header menu: Providers (with Find my free API and The Best inside), Models, Compare, Changes, API, Guides; the same on the home and the generated pages', () => {
   // Q8: the menu names the site's main sections. Providers is a <details> holding the explorer and The Best (still the
   // one highlighted entry); Submit moved out of the menu to the secondary Contribute button. The home's header is
   // hand-written, so this also keeps it equal to siteHeader() in build.mjs.
@@ -1773,8 +1773,8 @@ test('header menu: Providers (with The Best inside), Models, Compare, Changes, A
     const html = readFileSync(join(ROOT, rel), 'utf8');
     const nav = html.slice(html.indexOf('id="primary-nav"'), html.indexOf('</nav>', html.indexOf('id="primary-nav"')));
     const hrefs = [...nav.matchAll(/<a [^>]*href="([^"]+)"/g)].map((m) => m[1].replace(/^(\.\.\/)+|^\.\//, ''));
-    assert.deepEqual(hrefs, ['#explorer', 'best/', 'models/', 'compare/', 'changes/', 'api/', 'guides-and-collections/'], `${rel}: the header menu entries, in order`);
-    assert.match(nav, /<details class="nav-group"><summary>Providers<\/summary><div class="nav-sub"><a href="[^"]*#explorer">All providers<\/a><a class="nav-best" href="[^"]*best\/"[^>]*>.*The Best<\/a><\/div><\/details>/s, `${rel}: The Best sits inside Providers`);
+    assert.deepEqual(hrefs, ['#explorer', 'find/', 'best/', 'models/', 'compare/', 'changes/', 'api/', 'guides-and-collections/'], `${rel}: the header menu entries, in order`);
+    assert.match(nav, /<details class="nav-group"><summary>Providers<\/summary><div class="nav-sub"><a href="[^"]*#explorer">All providers<\/a><a href="[^"]*find\/">Find my free API<\/a><a class="nav-best" href="[^"]*best\/"[^>]*>.*The Best<\/a><\/div><\/details>/s, `${rel}: The Best sits inside Providers`);
     assert.equal((nav.match(/class="nav-best"/g) || []).length, 1, `${rel}: only one highlighted entry`);
     assert.doesNotMatch(nav, /submit\//, `${rel}: Submit is not a menu entry`);
     const footer = html.slice(html.indexOf('<footer'));
@@ -1993,6 +1993,29 @@ test('expiry reads the same on the provider page, the comparison and the API', (
   assert.match(pageCell('groq'), /^no expiry<\/span>$/);
 });
 
+test('compare links the official model catalogue under the free-model sample (#705)', () => {
+  const row = (p) => compareTableHtml([p, p]).match(/Free models \(sample\)[\s\S]*?<\/tr>/)[0];
+  const base = { name: 'Fixture', category: 'ongoing' };
+  // a provider with a sample and one with "no sample" both get the link
+  assert.match(row({ ...base, slug: 'fx-sample', models_free: ['a/b'], models_url: 'https://example.com/models' }),
+    /<code>a\/b<\/code><div class="cmp-sub"><a href="https:\/\/example\.com\/models" target="_blank" rel="noopener">official catalogue ↗<\/a><\/div>/);
+  assert.match(row({ ...base, slug: 'fx-nosample', models_url: 'https://example.com/models' }),
+    /no sample<\/span><div class="cmp-sub"><a href="https:\/\/example\.com\/models" target="_blank" rel="noopener">official catalogue ↗<\/a><\/div>/);
+  // without models_url the cell renders exactly as before: no link, no cmp-sub line
+  assert.doesNotMatch(row({ ...base, slug: 'fx-plain', models_free: ['a/b'] }), /cmp-sub|official catalogue/);
+  // an unsafe models_url never becomes a link
+  assert.doesNotMatch(row({ ...base, slug: 'fx-unsafe', models_free: ['a/b'], models_url: 'javascript:alert(1)' }),
+    /javascript:|official catalogue/);
+  // the browser bundle ships the same function
+  run(['scripts/build.mjs']);
+  const bundle = readFileSync(join(ROOT, 'site/shared-compare.js'), 'utf8');
+  assert.match(bundle, /official catalogue/, 'the browser bundle carries the catalogue link');
+  const { compareTableHtml: bundledCompare } = (new Function('window', bundle + '; return window.FLLM_COMPARE;'))({});
+  assert.match(bundledCompare([{ ...base, slug: 'fx-bundle', models_url: 'https://example.com/models' }, base2()]),
+    /official catalogue ↗/, 'the bundled function renders the link');
+  function base2() { return { name: 'Other', category: 'ongoing', slug: 'fx-other' }; }
+});
+
 // ---------- weekly re-verification pacing (lib/pacing.mjs) ----------
 // Simulate doing exactly the proposed batch every week and check the two
 // promises the worklist makes: nothing goes overdue, and a same-day cohort
@@ -2087,10 +2110,12 @@ test('active providers retain models_url from their official catalogues', () => 
     ['groq', 'https://console.groq.com/docs/models'],
     ['openrouter', 'https://openrouter.ai/models'],
     ['cohere', 'https://docs.cohere.com/docs/models'],
+    ['cloudflare-workers-ai', 'https://developers.cloudflare.com/workers-ai/models/'],
     ['ibm-watsonx', 'https://www.ibm.com/docs/en/watsonx/saas?topic=solutions-supported-foundation-models'],
     ['fireworks-ai', 'https://fireworks.ai/models'],
     ['baseten', 'https://docs.baseten.co/inference/model-apis/overview'],
     ['alibaba-model-studio', 'https://www.alibabacloud.com/help/en/model-studio/model-pricing'],
+    ['sambanova', 'https://docs.sambanova.ai/docs/en/models/sambacloud-models'],
     ['sarvam-ai', 'https://docs.sarvam.ai/api/token-factory/models'],
     ['tencent-hunyuan', 'https://cloud.tencent.com/document/product/1823/130051'],
     ['voyage-ai', 'https://docs.voyageai.com/docs/embeddings'],
@@ -2282,7 +2307,7 @@ test('the 404 page is built with the shared header, menu and footer and root-abs
   assert.ok(html.includes(hash), 'the path read-out is pinned by hash in the CSP: ' + hash);
 });
 
-test('the menu has Providers (All providers, The Best), Models, Compare, Changes, API and Guides, and the footer no longer carries the removed entries', () => {
+test('the menu has Providers (All providers, Find my free API, The Best), Models, Compare, Changes, API and Guides, and the footer no longer carries the removed entries', () => {
   // Mutant: put Submit back in the menu, or the «Interactive explorer» link or the «Independent, community-maintained» line back in
   // the footer; this test turns red.
   const home = readFileSync(join(ROOT, 'site/index.html'), 'utf8');
@@ -2291,7 +2316,7 @@ test('the menu has Providers (All providers, The Best), Models, Compare, Changes
     const nav = html.match(/<nav class="nav" id="primary-nav"[\s\S]*?<\/nav>/);
     assert.ok(nav, name + ': the menu');
     const labels = [...nav[0].matchAll(/<(?:a [^>]*|summary)>(?:<svg[\s\S]*?<\/svg>)?([^<]+)<\/(?:a|summary)>/g)].map((m) => m[1].replace(/&amp;/g, '&').trim());
-    assert.deepEqual(labels, ['Providers', 'All providers', 'The Best', 'Models', 'Compare', 'Changes', 'API', 'Guides'], name + ': the menu entries');
+    assert.deepEqual(labels, ['Providers', 'All providers', 'Find my free API', 'The Best', 'Models', 'Compare', 'Changes', 'API', 'Guides'], name + ': the menu entries');
     assert.ok(!/Interactive explorer/.test(html), name + ': no «Interactive explorer» link');
     assert.ok(!/Independent, community-maintained/.test(html), name + ': no «Independent, community-maintained» line');
     assert.ok(/<a href="[^"]*submit\/">Submit<\/a>/.test(html), name + ': Submit in the footer');
