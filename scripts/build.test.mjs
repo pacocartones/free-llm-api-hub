@@ -2899,7 +2899,7 @@ test('a11y: small fixes stay in place (no endless animation, placeholder colour,
   // Brand H1 dropped the blinking caret; the title's "breathing" runs once, and nothing on the site loops forever (WCAG 2.2.2).
   assert.doesNotMatch(css, /animation:[^;}]*infinite/, 'no animation loops forever');
   assert.match(css, /\.h1-key \{ display: inline-block; animation: breathe 5s ease-in-out 1; \}/, 'the title breathes once');
-  assert.match(css, /@media \(prefers-reduced-motion: no-preference\) \{\n  \.h1-key \{ animation/, 'and only when motion is welcome');
+  assert.match(css, /@media \(prefers-reduced-motion: no-preference\) \{\n  \.h1-key \{ display: inline-block; animation/, 'and only when motion is welcome');
   assert.match(css, /::placeholder\s*\{[^}]*color:\s*var\(--muted\)/, 'placeholder text uses the muted colour');
   assert.doesNotMatch(css, /\.limits-table\s*\{[^}]*min-width:\s*320px/, 'the limits table has no 320px minimum (reflow at 320px)');
   assert.match(css, /minmax\(min\(280px, 100%\), 1fr\)/, 'collection tracks never exceed the container');
