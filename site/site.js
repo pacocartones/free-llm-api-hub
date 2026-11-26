@@ -132,6 +132,16 @@
     header.classList.add('nav-ready');
   }
 
+  // --- the menu's Providers group (a <details>): Escape or a click outside closes it. It opens and works without this. ---
+  var navGroups = document.querySelectorAll('.nav-group');
+  if (navGroups.length) {
+    var closeGroups = function (keep) {
+      for (var i = 0; i < navGroups.length; i++) if (navGroups[i] !== keep) navGroups[i].removeAttribute('open');
+    };
+    document.addEventListener('click', function (e) { closeGroups(e.target && e.target.closest ? e.target.closest('.nav-group') : null); });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeGroups(null); });
+  }
+
   // --- dated banner: leaves the page after its data-until day (UTC, inclusive) ---
   var banner = document.getElementById('event-banner');
   if (banner) {

@@ -10,13 +10,17 @@
 // that is not in data/providers.json, and a null flag is written as the reason recorded in field_checks ("not stated by
 // the provider", "needs an account to check", ...), never as "no".
 //
-// Pure: build.mjs passes the providers and the dataset date (ASOF); the tests call the same functions.
+// Pure: build.mjs passes the providers, the dataset date (ASOF), data/not-free.json and its pageHero (the shared hero of
+// every generated page, as for /not-free/); the tests call the same functions. An original that /not-free/ already
+// covers (it stopped being free, or never was) gets no alternatives page: its entry there lists the closest free
+// alternatives, and the /alternatives/ index links it.
 
 import { htmlEsc } from './rows.mjs';
 import { comparator } from './sort.mjs';
 import { ageInDays, SLA_DAYS } from './rules.mjs';
 import { fieldCheck, REASON_LABEL } from './field-checks.mjs';
-import { requirementsHtml, freeLimitsTableHtml } from './provider-sections.mjs';
+import { requirementsHtml, freeLimitsTableHtml, keysButtonHtml } from './provider-sections.mjs';
+import { andList } from './long-guides.mjs';
 import { triStateHtml } from './compare.mjs';
 import { datasetRef } from './site-entity.mjs';
 import { collectionPageJsonLd, breadcrumbList } from './page-jsonld.mjs';
@@ -76,7 +80,6 @@ const LIMIT_WORDS = [
   ['tokens_per_day', 'tokens per day'],
   ['tokens_per_month', 'tokens per month'],
 ];
-const listJoin = (xs) => (xs.length <= 1 ? xs.join('') : `${xs.slice(0, -1).join(', ')} and ${xs[xs.length - 1]}`);
 /** A dataset string as a sentence: trimmed, ending with a full stop. */
 const sentence = (t) => { const x = String(t || '').trim(); return /[.!?]$/.test(x) ? x : `${x}.`; };
 const sourceHost = (u) => { try { return new URL(u).hostname; } catch { return ''; } };
@@ -96,7 +99,7 @@ export function limitsAnswer(p) {
   const fl = p.free_limits;
   const nums = LIMIT_WORDS.filter(([k]) => Number.isInteger(fl[k])).map(([k, w]) => `${fl[k].toLocaleString('en-US')} ${w}`);
   const scope = fl.scope ? ` (${String(fl.scope).replace(/[.\s]+$/, '')})` : '';
-  const first = `As of ${dayLabel(fl.checked)}, ${p.name} publishes these free limits: ${listJoin(nums)}${scope}.`;
+  const first = `As of ${dayLabel(fl.checked)}, ${p.name} publishes these free limits: ${andList(nums)}${scope}.`;
   const second = `Credit card: ${flagWords(p, 'card_required', 'required', 'not required')}. Phone verification: ${flagWords(p, 'phone_required', 'required', 'not required')}.`;
   const host = sourceHost(fl.source);
   return `${first} ${second}${host ? ` Source: ${host}.` : ''}`;
@@ -124,20 +127,20 @@ function policyHtml(p) {
     `<p class="req-source muted">${dp.quote ? `&ldquo;${htmlEsc(dp.quote)}&rdquo; ` : ''}Per <a href="${src}" target="_blank" rel="noopener">the provider's page</a>${day}.${plan}</p>`;
 }
 
-/** The main of /limits/<slug>/. `links` = { alternatives: bool }. */
-export function limitsPageMainHtml(p, { asOf, prefix = '../../', alternatives = false }) {
+/** The main of /limits/<slug>/. `alternatives`: whether /alternatives/<slug>/ exists; `pageHero`: build.mjs's hero. */
+export function limitsPageMainHtml(p, { asOf, pageHero, prefix = '../../', alternatives = false }) {
   const age = ageAt(p.last_verified, asOf);
   const stale = age > TITLE_DATE_MAX_DAYS
     ? `<p class="v warn">Last verified ${htmlEsc(p.last_verified)}, ${age} days before the dataset date (${htmlEsc(asOf)}): these limits may be out of date.</p>`
     : '';
   const crumbs = `<a href="${prefix}">Home</a> / <a href="${prefix}limits/">Free tier limits</a> / ${htmlEsc(p.name)}`;
   const facts = sourcedFacts(p);
-  return `<section class="page-hero model-hero"><div class="wrap"><nav class="crumbs" aria-label="Breadcrumb">${crumbs}</nav>` +
-    `<h1>${htmlEsc(p.name)} free tier limits</h1><p class="lede">${htmlEsc(limitsAnswer(p))}</p></div></section>` +
+  return pageHero({ crumbs, h1: `${htmlEsc(p.name)} free tier limits`, lede: htmlEsc(limitsAnswer(p)) }) +
     `<main id="main"><div class="wrap prose prov-prose">` +
     stale +
     `<h2 id="limits">Free limits</h2>` +
     freeLimitsTableHtml(p) +
+    keysButtonHtml(p) +
     (p.rate_limits ? `<div class="prov-card"><h3>As published</h3><p>${htmlEsc(p.rate_limits)}</p></div>` : '') +
     (p.free_tier ? `<div class="prov-card"><h3>What's free</h3><p>${htmlEsc(p.free_tier)}</p></div>` : '') +
     (p.notes ? `<div class="prov-card"><h3>The catch</h3><p>${htmlEsc(p.notes)}</p></div>` : '') +
@@ -218,10 +221,20 @@ export function alternativesFor(orig, providers, asOf) {
   });
 }
 
-/** The alternatives pages to build: [{ p, alts }] for each listed original in the dataset that passes the threshold. */
-export function alternativesPages(providers, asOf) {
+/** The not-free.json entries for the listed originals, by slug (an entry's dataset slug, else its id). */
+export function notFreeOriginals(notFree) {
+  const bySlug = new Map(((notFree && notFree.entries) || []).map((e) => [e.slug || e.id, e]));
+  return ALTERNATIVES_FOR.filter((slug) => bySlug.has(slug)).map((slug) => bySlug.get(slug));
+}
+
+/**
+ * The alternatives pages to build: [{ p, alts }] for each listed original in the dataset that passes the threshold and
+ * that /not-free/ does not already cover (`notFree`: data/not-free.json).
+ */
+export function alternativesPages(providers, asOf, { notFree } = {}) {
   const bySlug = new Map(providers.map((p) => [p.slug, p]));
-  return ALTERNATIVES_FOR.map((slug) => bySlug.get(slug))
+  const covered = new Set(notFreeOriginals(notFree).map((e) => e.slug || e.id));
+  return ALTERNATIVES_FOR.filter((slug) => !covered.has(slug)).map((slug) => bySlug.get(slug))
     .filter((p) => p && freshEnough(p, asOf))
     .map((p) => ({ p, alts: alternativesFor(p, providers, asOf) }))
     .filter(({ alts }) => alts.length >= ALTERNATIVES_MIN)
@@ -249,9 +262,9 @@ export function differenceLine(orig, cand) {
   const b = hasSourcedLimits(cand) && Number.isInteger(cand.free_limits.requests_per_day) ? cand.free_limits.requests_per_day : null;
   if (a !== null && b !== null && a !== b) out.push(`${b > a ? 'higher' : 'lower'} published daily request cap: ${b.toLocaleString('en-US')} vs ${a.toLocaleString('en-US')}`);
   const extra = (cand.modalities || []).filter((m) => !(orig.modalities || []).includes(m));
-  if (extra.length) out.push(`also lists ${listJoin(extra)}`);
+  if (extra.length) out.push(`also lists ${andList(extra)}`);
   const missing = (orig.modalities || []).filter((m) => !(cand.modalities || []).includes(m));
-  if (missing.length) out.push(`no ${listJoin(missing)} listed`);
+  if (missing.length) out.push(`no ${andList(missing)} listed`);
   return out.length ? out.slice(0, 4).join('; ') : `no recorded difference in plan, card, phone, commercial use or modalities`;
 }
 
@@ -264,7 +277,7 @@ export function alternativesCriteria(orig) {
   const parts = [`share ${orig.name}'s primary modality (${primaryModality(orig)})`];
   if (orig.openai_compatible === true) parts.push(`are OpenAI-compatible like ${orig.name}`);
   parts.push(orig.category === 'ongoing' ? 'offer an ongoing free tier' : 'offer an ongoing free tier or a trial credit');
-  return `Verified providers that ${listJoin(parts)}, closest first.`;
+  return `Verified providers that ${andList(parts)}, closest first.`;
 }
 
 export const alternativesPageDescription = (orig, alts) =>
@@ -277,8 +290,8 @@ function limitsCell(c, prefix, limitPages) {
   return limitPages.has(c.slug) ? `<a href="${prefix}limits/${htmlEsc(c.slug)}/">${text}</a>` : text;
 }
 
-/** The main of /alternatives/<slug>/. `limitPages` = Set of slugs with a /limits/ page. */
-export function alternativesPageMainHtml(orig, alts, { prefix = '../../', limitPages = new Set() } = {}) {
+/** The main of /alternatives/<slug>/. `limitPages` = Set of slugs with a /limits/ page; `pageHero`: build.mjs's hero. */
+export function alternativesPageMainHtml(orig, alts, { pageHero, prefix = '../../', limitPages = new Set() }) {
   const yes = (v, y, n, c) => triStateHtml(v, y, n, c);
   const rows = alts.map((c) => `<tr>` +
     `<th scope="row" class="name"><a href="${prefix}p/${htmlEsc(c.slug)}">${htmlEsc(c.name)}</a></th>` +
@@ -291,17 +304,18 @@ export function alternativesPageMainHtml(orig, alts, { prefix = '../../', limitP
   const crumbs = `<a href="${prefix}">Home</a> / <a href="${prefix}alternatives/">Free alternatives</a> / ${htmlEsc(orig.name)}`;
   const origLinks = [`<a href="${prefix}p/${htmlEsc(orig.slug)}">${htmlEsc(orig.name)} provider page</a>`];
   if (limitPages.has(orig.slug)) origLinks.push(`<a href="${prefix}limits/${htmlEsc(orig.slug)}/">${htmlEsc(orig.name)} free tier limits</a>`);
-  return `<section class="page-hero model-hero"><div class="wrap"><nav class="crumbs" aria-label="Breadcrumb">${crumbs}</nav>` +
-    `<h1>Free ${htmlEsc(orig.name)} alternatives</h1><p class="lede">${htmlEsc(alternativesCriteria(orig))}</p></div></section>` +
+  return pageHero({ crumbs, h1: `Free ${htmlEsc(orig.name)} alternatives`, lede: htmlEsc(alternativesCriteria(orig)) }) +
     `<main id="main"><div class="wrap prose prov-prose">` +
     `<h2 id="original">${htmlEsc(orig.name)} today</h2>` +
     `<p>${orig.free_tier ? htmlEsc(sentence(orig.free_tier)) + ' ' : ''}Verified <time datetime="${htmlEsc(orig.last_verified)}">${htmlEsc(orig.last_verified)}</time>. ` +
     `Credit card: ${htmlEsc(flagWords(orig, 'card_required', 'required', 'not required'))}. Phone verification: ${htmlEsc(flagWords(orig, 'phone_required', 'required', 'not required'))}.</p>` +
     `<div class="colls">${origLinks.join('')}</div>` +
     `<h2 id="alternatives">${alts.length} alternatives</h2>` +
+    // Seven columns: scrolls inside its own region on a phone, like the guides' tables.
+    `<div class="table-scroll" role="region" aria-label="Free alternatives to ${htmlEsc(orig.name)}" tabindex="0">` +
     `<table class="alt-table"><caption>Free alternatives to ${htmlEsc(orig.name)}, closest first</caption>` +
     `<thead><tr><th scope="col">Provider</th><th scope="col">Limits</th><th scope="col">Credit card</th><th scope="col">Phone</th><th scope="col">OpenAI-compatible</th><th scope="col">Verified</th><th scope="col">How it differs from ${htmlEsc(orig.name)}</th></tr></thead>` +
-    `<tbody>${rows}</tbody></table>` +
+    `<tbody>${rows}</tbody></table></div>` +
     `<p class="muted">Every value comes from the dataset; a flag nobody has confirmed reads as the reason recorded for it. Terms change without notice: confirm on each provider's page before you switch.</p>` +
     `<div class="colls"><a href="${prefix}alternatives/">Alternatives to other providers</a><a href="${prefix}compare/?compare=${htmlEsc([orig, ...alts.slice(0, 3)].map((c) => c.slug).join(','))}">Compare ${htmlEsc(orig.name)} with the first three</a></div>` +
     `</div></main>`;

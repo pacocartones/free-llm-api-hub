@@ -10,8 +10,11 @@ import { datasetAsOf } from './lib/release-stamp.mjs';
 import {
   LIMIT_FACTS, LIMITS_MIN_FACTS, TITLE_DATE_MAX_DAYS, PAGE_MAX_AGE_DAYS, ALTERNATIVES_FOR, ALTERNATIVES_MIN, ALTERNATIVES_MAX,
   sourcedFacts, hasLimitsPage, limitsAnswer, limitsPageTitle, limitsPageMainHtml, limitsPageJsonLd,
-  isAlternative, alternativesFor, alternativesPages, differenceLine, alternativesPageMainHtml, alternativesPageJsonLd, providerLongtailHtml,
+  isAlternative, alternativesFor, alternativesPages, notFreeOriginals, differenceLine, alternativesPageMainHtml, alternativesPageJsonLd, providerLongtailHtml,
 } from './lib/longtail-pages.mjs';
+
+// build.mjs passes its pageHero (the hero of every generated page); the templates only fill it.
+const pageHero = ({ crumbs, h1, lede = '' }) => `<section class="page-hero model-hero"><div class="wrap"><nav class="crumbs" aria-label="Breadcrumb">${crumbs}</nav><h1>${h1}</h1>${lede ? `<p class="lede">${lede}</p>` : ''}</div></section>`;
 
 // The long-tail templates of the Q1 2027 SEO plan (§3.2 P1/P2, §3.3): /limits/<slug>/ and /alternatives/<slug>/.
 const ASOF = '2026-11-25';
@@ -62,12 +65,12 @@ test('limits title: the verified date only while it is at most 30 days old, with
   const old = { ...full, last_verified: '2026-10-01' };
   assert.equal(limitsPageTitle(old, ASOF), 'Alpha free tier limits · Free LLM API Hub');
   assert.ok(TITLE_DATE_MAX_DAYS === 30);
-  assert.match(limitsPageMainHtml(old, { asOf: ASOF }), /may be out of date/);
-  assert.doesNotMatch(limitsPageMainHtml(full, { asOf: ASOF }), /may be out of date/);
+  assert.match(limitsPageMainHtml(old, { asOf: ASOF, pageHero }), /may be out of date/);
+  assert.doesNotMatch(limitsPageMainHtml(full, { asOf: ASOF, pageHero }), /may be out of date/);
 });
 
 test('limits page: each fact with its source, quotes where the dataset has them, and honest wording for nulls', () => {
-  const html = limitsPageMainHtml(full, { asOf: ASOF, alternatives: true });
+  const html = limitsPageMainHtml(full, { asOf: ASOF, pageHero, alternatives: true });
   assert.match(html, /<h1>Alpha free tier limits<\/h1>/);
   assert.ok(html.includes('href="https://alpha.test/limits"'), 'limits source');
   assert.ok(html.includes('href="https://alpha.test/data"'), 'data policy source');
@@ -77,7 +80,11 @@ test('limits page: each fact with its source, quotes where the dataset has them,
   assert.match(html, /needs an account to check/, 'needs_account reason');
   assert.match(html, /does not name the free plan/);
   assert.ok(html.includes('href="../../alternatives/alpha/"') && html.includes('href="../../p/alpha"') && html.includes('href="../../limits/"'));
-  assert.doesNotMatch(limitsPageMainHtml(full, { asOf: ASOF, alternatives: false }), /alternatives\/alpha/);
+  assert.doesNotMatch(limitsPageMainHtml(full, { asOf: ASOF, pageHero, alternatives: false }), /alternatives\/alpha/);
+  assert.doesNotMatch(html, /Get a free key/, 'no keys_url, no key button');
+  const keyed = limitsPageMainHtml({ ...full, keys_url: 'https://alpha.test/keys' }, { asOf: ASOF, pageHero });
+  assert.equal((keyed.match(/<a class="btn primary" href="https:\/\/alpha\.test\/keys"[^>]*>Get a free key ↗<\/a>/g) || []).length, 1, 'the provider page\'s key button');
+  assert.ok(keyed.indexOf('id="limits"') < keyed.indexOf('Get a free key') && keyed.indexOf('Get a free key') < keyed.indexOf('id="requirements"'), 'right after the limits, as on the provider page');
   assert.doesNotMatch(html, /\b(best|fastest|cheapest|leading|unbeatable)\b/i, 'no superlatives');
   const ld = JSON.parse(limitsPageJsonLd(full, { site: 'https://x.test' }));
   const page = ld['@graph'][0];
@@ -115,6 +122,14 @@ test('alternatives gate: at least five qualifying providers, at most eight rows,
   assert.deepEqual(alternativesPages([{ ...groq, verified: false }, ...many], ASOF), [], 'an unverified original gets no page');
 });
 
+test('alternatives and /not-free/: an original on the Not free list gets no page here, only a link to its entry', () => {
+  const many = 'abcdefghijk'.split('').map((s) => prov(s));
+  const notFree = { entries: [{ id: 'cerebras', slug: 'cerebras', name: 'Cerebras' }, { id: 'mistral', name: 'Mistral' }, { id: 'openai', name: 'OpenAI' }] };
+  assert.deepEqual(notFreeOriginals(notFree).map((e) => e.id), ['mistral', 'cerebras'], 'listed originals only, in list order; matched by slug, else id');
+  assert.deepEqual(alternativesPages([prov('groq'), prov('cerebras'), ...many], ASOF).map(({ p }) => p.slug), ['groq', 'cerebras']);
+  assert.deepEqual(alternativesPages([prov('groq'), prov('cerebras'), ...many], ASOF, { notFree }).map(({ p }) => p.slug), ['groq'], 'cerebras is covered by /not-free/');
+});
+
 test('alternatives order: closest modality set first, then the same kind of free offer', () => {
   const orig = prov('orig', { modalities: ['text', 'embeddings'] });
   const near = prov('near', { modalities: ['text', 'embeddings'] });
@@ -133,9 +148,9 @@ test('difference line: derived from fields, with the original value for context,
 test('alternatives page: a captioned table of internal provider links, and JSON-LD with an ItemList of them', () => {
   const orig = prov('groq');
   const alts = 'abcde'.split('').map((s) => prov(s));
-  const html = alternativesPageMainHtml(orig, alts, { limitPages: new Set(['a', 'groq']) });
+  const html = alternativesPageMainHtml(orig, alts, { pageHero, limitPages: new Set(['a', 'groq']) });
   assert.match(html, /<h1>Free GROQ alternatives<\/h1>/);
-  assert.match(html, /<table class="alt-table"><caption>/);
+  assert.match(html, /<div class="table-scroll" role="region" aria-label="Free alternatives to GROQ" tabindex="0"><table class="alt-table"><caption>/, 'scrolls in its own region, like the guides');
   for (const c of alts) assert.ok(html.includes(`href="../../p/${c.slug}"`), c.slug);
   assert.ok(html.includes('href="../../limits/a/"') && html.includes('href="../../limits/groq/"'));
   assert.ok(!html.includes('href="../../limits/b/"'), 'no link to a limits page that is not built');
@@ -175,7 +190,12 @@ const sitemapLocs = (dir) => [...read('sitemap.xml').matchAll(new RegExp(`<loc>$
 test('built: exactly the gated pages, each in the sitemap, canonical, indexable, pinned and linked from its index', () => {
   const pins = JSON.parse(readFileSync(join(ROOT, 'derived-fingerprints.json'), 'utf8'));
   const limitSlugs = data.providers.filter((p) => hasLimitsPage(p, asOf)).map((p) => p.slug).sort();
-  const altSlugs = alternativesPages(data.providers, asOf).map(({ p }) => p.slug).sort();
+  const notFree = JSON.parse(readFileSync(join(ROOT, 'data/not-free.json'), 'utf8'));
+  const altSlugs = alternativesPages(data.providers, asOf, { notFree }).map(({ p }) => p.slug).sort();
+  for (const e of notFreeOriginals(notFree)) {
+    assert.ok(!existsSync(join(ROOT, `site/alternatives/${e.slug || e.id}`)), `${e.id}: on /not-free/, so no alternatives page`);
+    assert.ok(read('alternatives/index.html').includes(`href="../not-free/#${e.id}"`), `/alternatives/ links ${e.id}'s Not free entry`);
+  }
   assert.ok(limitSlugs.length > 0 && altSlugs.length > 0);
   assert.deepEqual(builtDirs('limits'), limitSlugs, 'no page for an entry under the threshold');
   assert.deepEqual(builtDirs('alternatives'), altSlugs);
@@ -231,7 +251,7 @@ const shingles = (html) => {
 const jaccard = (a, b) => { let n = 0; for (const x of a) if (b.has(x)) n++; return n / (a.size + b.size - n); };
 
 test('near-duplicate guard: the test fails on a synthetic duplicate', () => {
-  const a = shingles(`<main>${limitsPageMainHtml(full, { asOf: ASOF })}</main>`);
+  const a = shingles(`<main>${limitsPageMainHtml(full, { asOf: ASOF, pageHero })}</main>`);
   assert.ok(jaccard(a, a) > MAX_OVERLAP);
 });
 

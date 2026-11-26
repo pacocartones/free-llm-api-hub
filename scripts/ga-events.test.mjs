@@ -64,6 +64,7 @@ describe('consent gate', () => {
       const p = page({ consent, path: '/compare/groq-vs-openrouter/' });
       p.fire('click', link('https://groq.com', { 'data-provider': 'groq', 'data-link': 'website' }));
       p.fire('click', link('/providers.json'));
+      p.fire('click', link('https://github.com/pacocartones/free-llm-api-hub'));
       p.fire('change', el({ id: 'f-nocard', checked: true }));
       p.q.value = 'llama';
       p.fire('keydown', p.q, { key: 'Enter' });
@@ -91,6 +92,33 @@ describe('event payloads (analytics granted)', () => {
     assert.deepEqual(p.events(), [...LINK_TYPES.map((t) => ['outbound_provider_click', { provider: 'groq', link_type: t }]), ['outbound_provider_click', { provider: 'groq', link_type: 'docs' }]]);
   });
 
+  test('repo_click: links to this repository only, with the location from the fixed list', () => {
+    const p = on({ path: '/p/groq' });
+    const REPO = 'https://github.com/pacocartones/free-llm-api-hub';
+    const inside = (sel, href) => el({ sels: ['a[href]'], attrs: { href }, parent: el({ sels: [sel] }) });
+    p.fire('click', inside('.site-header', REPO));
+    p.fire('click', inside('.site-footer', REPO));
+    p.fire('auxclick', inside('.site-footer', REPO), { button: 1 });
+    p.fire('click', link(`${REPO}/issues/new?template=add-provider.yml`));
+    p.fire('click', link(`${REPO}/discussions`));
+    p.fire('click', link(`${REPO}/blob/main/CONTRIBUTING.md`));
+    p.fire('click', link(`${REPO}/blob/main/docs/api.md`));
+    p.fire('click', link(REPO, { 'data-repo-location': 'contribute' }));
+    p.fire('click', link(REPO, { 'data-repo-location': 'someone@example.com' }));
+    // not this repository: no event
+    for (const href of ['https://github.com/pacocartones', 'https://github.com/someone/free-llm-api-hub', 'https://github.com/pacocartones/free-llm-api-hub-fork', 'https://example.com/pacocartones/free-llm-api-hub']) p.fire('click', link(href));
+    assert.deepEqual(p.events(), ['header', 'footer', 'footer', 'contribute', 'contribute', 'contribute', 'content', 'contribute', 'content'].map((location) => ['repo_click', { location }]));
+  });
+
+  test('repo_click: any repository link on /contributing/ or /submit/ counts as contribute', () => {
+    for (const path of ['/contributing/', '/submit/']) {
+      const p = on({ path });
+      p.fire('click', link('https://github.com/pacocartones/free-llm-api-hub/blob/main/README.md'));
+      p.fire('click', el({ sels: ['a[href]'], attrs: { href: 'https://github.com/pacocartones/free-llm-api-hub' }, parent: el({ sels: ['.site-header'] }) }));
+      assert.deepEqual(p.events(), [['repo_click', { location: 'contribute' }], ['repo_click', { location: 'header' }]]);
+    }
+  });
+
   test('copy_snippet: kind from the code block, never its text', () => {
     const p = on();
     const block = (text) => {
@@ -105,6 +133,23 @@ describe('event payloads (analytics granted)', () => {
     p.fire('click', block('something else'));
     p.fire('click', el({ sels: ['.api-copy'], attrs: { 'data-api-url': 'https://freellmapihub.com/api/v1/providers.json' } }));
     assert.deepEqual(p.events().map((e) => e[1].snippet), ['curl', 'python', 'env_key', 'embed', 'other', 'api_url']);
+    assert.ok(p.events().every(([n, prm]) => n === 'copy_snippet' && Object.keys(prm).join() === 'snippet'));
+  });
+
+  test('copy_snippet: a block of /embed/ names its kind from the fixed list; anything else falls back to the text', () => {
+    const p = on({ path: '/embed/' });
+    const block = (kind, text) => {
+      const pre = el({ sels: ['pre'], attrs: kind ? { 'data-snippet': kind } : {} });
+      pre.querySelector = () => ({ textContent: text });
+      return el({ sels: ['.pre-copy'], parent: pre });
+    };
+    p.fire('click', block('citation', '@misc{freellmapihub2026,'));
+    p.fire('click', block('citation', 'pacocartones. (2026). Free LLM API Hub'));
+    p.fire('click', block('badge', '[![Groq on Free LLM API Hub](https://img.shields.io/endpoint?url=x)](y)'));
+    p.fire('click', block('embed', '<div id="flh-widget" data-count="6"></div>'));
+    p.fire('click', block(null, '<div id="flh-widget" data-count="6"></div>'));
+    p.fire('click', block('someone@example.com', 'curl https://x'));
+    assert.deepEqual(p.events().map((e) => e[1].snippet), ['citation', 'citation', 'badge', 'embed', 'embed', 'curl']);
     assert.ok(p.events().every(([n, prm]) => n === 'copy_snippet' && Object.keys(prm).join() === 'snippet'));
   });
 
@@ -193,16 +238,16 @@ describe('event payloads (analytics granted)', () => {
   test('no event carries more than the documented parameters', () => {
     const src = consentScript(ID);
     const names = [...src.matchAll(/track\('([a-z_]+)'/g)].map((m) => m[1]);
-    assert.deepEqual([...new Set(names)].sort(), ['api_download', 'collection_view', 'compare_view', 'copy_snippet', 'explorer_filter', 'explorer_sort', 'outbound_provider_click', 'site_search']);
+    assert.deepEqual([...new Set(names)].sort(), ['api_download', 'collection_view', 'compare_view', 'copy_snippet', 'explorer_filter', 'explorer_sort', 'outbound_provider_click', 'repo_click', 'site_search']);
   });
 });
 
 describe('provider link attributes', () => {
-  const p = { slug: 'acme', docs_url: 'https://docs.acme.ai/limits?a=1&b=2', models_url: 'https://docs.acme.ai/models', playground_url: 'https://play.acme.ai', free_limits: { source: 'https://docs.acme.ai/limits?a=1&b=2' }, data_policy: { source: 'https://acme.ai/privacy' } };
+  const p = { slug: 'acme', docs_url: 'https://docs.acme.ai/limits?a=1&b=2', keys_url: 'https://console.acme.ai/keys', models_url: 'https://docs.acme.ai/models', playground_url: 'https://play.acme.ai', free_limits: { source: 'https://docs.acme.ai/limits?a=1&b=2' }, data_policy: { source: 'https://acme.ai/privacy' } };
 
   test('targets in priority order; a URL shared by two fields keeps the first label', () => {
     assert.deepEqual(providerLinkTargets(p, { website: 'https://acme.ai' }).map((t) => [t.link, t.href]), [
-      ['docs', p.docs_url], ['playground', p.playground_url], ['website', 'https://acme.ai'], ['models', p.models_url], ['data_policy', 'https://acme.ai/privacy'],
+      ['docs', p.docs_url], ['keys', p.keys_url], ['playground', p.playground_url], ['website', 'https://acme.ai'], ['models', p.models_url], ['data_policy', 'https://acme.ai/privacy'],
     ]);
   });
 

@@ -55,6 +55,17 @@ export function checkSourceHtml(check) {
 }
 
 /**
+ * "Get a free key": the provider's own key page, exactly as its docs link it (keys_url), or '' without one. Shared by the
+ * provider page and its /limits/ page. Tagged data-link="keys" by tagProviderLinks, so a click is an
+ * outbound_provider_click (consent-gated).
+ */
+export function keysButtonHtml(p) {
+  return p.keys_url
+    ? `<div class="prov-actions prov-key" style="align-items:center"><a class="btn primary" href="${htmlEsc(p.keys_url)}" target="_blank" rel="noopener">Get a free key ↗</a><span class="muted">Sign up or sign in on ${htmlEsc(p.name)}'s own site, then create an API key there.</span></div>`
+    : '';
+}
+
+/**
  * The structured free limits with their source and reading date, or '' when they are missing or
  * unsourced. Numbers appear only with the provider page they come from and the day they were read.
  */

@@ -33,7 +33,15 @@ export const comparePath = (a, b) => `${a}-vs-${b}`;
  * Suggested comparisons (the "Compare with" links) only join providers of one
  * category; the pages for other pairs still exist and stay in the sitemap.
  */
-export const comparisonCategory = (p) => (p.modalities || [])[0] ?? null;
+// The main modality of a provider: 'text' for a text LLM (is_text_llm). Any other provider takes its most specific
+// modality, in this order: Jina AI lists text and image before embeddings and rerank, and it is compared with Voyage AI,
+// not with Groq or an image generator. A text-only non-LLM keeps 'text'.
+const MAIN_MODALITY_ORDER = ['embeddings', 'rerank', 'ocr', 'audio', 'vision', 'image'];
+export const comparisonCategory = (p) => {
+  const m = (p && p.modalities) || [];
+  if (p && p.is_text_llm === true && m.includes('text')) return 'text';
+  return MAIN_MODALITY_ORDER.find((x) => m.includes(x)) ?? m[0] ?? null;
+};
 export const sameComparisonCategory = (a, b) => {
   const ca = comparisonCategory(a);
   return ca !== null && ca === comparisonCategory(b);
@@ -77,6 +85,30 @@ export function selectComparePairs(ranked, opts = {}) {
     out.push({ a: c.a, b: c.b, shared: c.shared, path: comparePath(c.a.slug, c.b.slug) });
   }
   return out;
+}
+
+/**
+ * The comparisons a provider page suggests (Q9): up to `limit` (3) verified providers with the same main modality
+ * (comparisonCategory). The closest offers come first: both publish speed figures (published_speed) +3, the same
+ * category +1, the same free_type +1; then the higher score (`score(p)`, larger first, unscored last), then the name.
+ * Each peer carries the path of its published compare page when there is one (`staticPaths`), else null, and the page
+ * links the interactive view instead, so no compare page is added or removed. Pure and deterministic.
+ */
+export function comparePeers(p, providers, { staticPaths = new Set(), score = () => null, limit = 3 } = {}) {
+  const cat = comparisonCategory(p);
+  if (cat === null || !SLUG_RE.test(String(p.slug || ''))) return [];
+  const speed = (x) => Array.isArray(x.published_speed) && x.published_speed.length > 0;
+  const near = (o) => (speed(p) && speed(o) ? 3 : 0) + (o.category === p.category ? 1 : 0) + (o.free_type === p.free_type ? 1 : 0);
+  const sc = (o) => { const v = score(o); return typeof v === 'number' && Number.isFinite(v) ? v : -Infinity; };
+  return (providers || [])
+    .filter((o) => o && o.slug !== p.slug && o.verified === true && SLUG_RE.test(String(o.slug || '')) && comparisonCategory(o) === cat)
+    .map((o) => {
+      const ab = comparePath(p.slug, o.slug), ba = comparePath(o.slug, p.slug);
+      return { other: o, path: staticPaths.has(ab) ? ab : staticPaths.has(ba) ? ba : null, near: near(o) };
+    })
+    .sort((x, y) => (y.near - x.near) || (sc(y.other) - sc(x.other) || 0) || (x.other.name < y.other.name ? -1 : x.other.name > y.other.name ? 1 : 0))
+    .slice(0, limit)
+    .map(({ other, path }) => ({ other, path }));
 }
 
 /**

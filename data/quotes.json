@@ -14,6 +14,18 @@
    "page_sha256": "296d96034f56cc95ddbf4be680e92510a4fd38d651d6499dff2fcfc079305cec"
   },
   {
+   "id": "google-gemini.card_required.sentence",
+   "slug": "google-gemini",
+   "kind": "field_sentence",
+   "field": "card_required",
+   "text": "To access higher tiers, you must set up billing on your project.",
+   "source_url": "https://ai.google.dev/gemini-api/docs/billing",
+   "read_on": "2026-11-25",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "c2e65f691948a01f9abdf12423ecb72703e9066255fa8da5335d9f83ba347bf9"
+  },
+  {
    "id": "groq.sentence",
    "slug": "groq",
    "kind": "sentence",
@@ -34,6 +46,18 @@
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "645fa99e301839336160d9b0387edad3a965dc30e8bed95efb9e54116c2f2f1e"
+  },
+  {
+   "id": "groq.openai_compatible.sentence",
+   "slug": "groq",
+   "kind": "field_sentence",
+   "field": "openai_compatible",
+   "text": "We designed Groq API to be mostly compatible with OpenAI's client libraries, making it easy to configure your existing applications to run on Groq and try our inference speed.",
+   "source_url": "https://console.groq.com/docs/openai",
+   "read_on": "2026-11-25",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "eadb5c138a45b332d56e854038b2b551efb75b87310772cc467ccddcd7f7cc59"
   },
   {
    "id": "groq.speed.openai/gpt-oss-20b.output_tokens_per_second",
@@ -189,6 +213,18 @@
    "page_sha256": "2aba6287e39902eab9da378b3dbe62debf9c3b99c2d728b141f6d54f87ee7ee7"
   },
   {
+   "id": "cerebras.openai_compatible.sentence",
+   "slug": "cerebras",
+   "kind": "field_sentence",
+   "field": "openai_compatible",
+   "text": "The Cerebras API is compatible with OpenAI client libraries for many common workflows.",
+   "source_url": "https://inference-docs.cerebras.ai/resources/openai",
+   "read_on": "2026-11-25",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "ed338420bd3ed2b5f9306615eea78b26c0806a5d461a689173439c61b9d7e3c1"
+  },
+  {
    "id": "cerebras.speed.gpt-oss-120b.output_tokens_per_second",
    "slug": "cerebras",
    "kind": "speed_quote",
@@ -231,7 +267,19 @@
    "kind": "sentence",
    "text": "不会将您的业务数据用于任何大模型的预训练、微调或其他商业用途",
    "source_url": "https://docs.siliconflow.cn/docs/legals/privacy-policy",
-   "read_on": "2026-11-14",
+   "read_on": "2026-11-25",
+   "lang": "cn",
+   "method": "html-text-v1: page requested with Accept-Language cn, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "2b1f6094bc6b9be389829567109f290c41ed0f0504bbc3a385e4ff9e908486e1"
+  },
+  {
+   "id": "siliconflow.phone_required.sentence",
+   "slug": "siliconflow",
+   "kind": "field_sentence",
+   "field": "phone_required",
+   "text": "您需要向我们提供的必要信息包括：您的手机号码、验证码。",
+   "source_url": "https://docs.siliconflow.cn/docs/legals/privacy-policy",
+   "read_on": "2026-11-25",
    "lang": "cn",
    "method": "html-text-v1: page requested with Accept-Language cn, tags removed, character references decoded, white space collapsed",
    "page_sha256": "2b1f6094bc6b9be389829567109f290c41ed0f0504bbc3a385e4ff9e908486e1"
@@ -264,10 +312,10 @@
    "kind": "sentence",
    "text": "Your data is never used to train our models, and we only keep what is strictly necessary for billing.",
    "source_url": "https://www.ovhcloud.com/en/public-cloud/ai-endpoints/",
-   "read_on": "2026-11-24",
+   "read_on": "2026-11-25",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
-   "page_sha256": "8af77e3bbb08fc31dbddc393fd03daff46547e4fd941bc175c0065f618b5c076"
+   "page_sha256": "49999e4300e58dfb54cb27525609e53154c5cba77fe3c03cdbcdfe74ec087e50"
   },
   {
    "id": "fireworks-ai.sentence",
@@ -308,10 +356,10 @@
    "kind": "sentence",
    "text": "Baseten does not use customer content to train or fine-tune models.",
    "source_url": "https://www.baseten.co/security/",
-   "read_on": "2026-11-19",
+   "read_on": "2026-11-25",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
-   "page_sha256": "846bd82b1e5911e170e3dda6695730635e6800dfe9b69b64e722ef373977b5b9"
+   "page_sha256": "73dac62814320997cebc0cf22e65d868e8050142b07d7398a1aa0172962df95b"
   },
   {
    "id": "novita.sentence",
@@ -833,6 +881,17 @@
    "page_sha256": "111e4ae255c3139b488489ef97e06fdf9663b187aed9e7edcea0d3abde7854a8"
   },
   {
+   "id": "gladia.sentence",
+   "slug": "gladia",
+   "kind": "sentence",
+   "text": "By default, Free accounts retain all data types for 1 year",
+   "source_url": "https://docs.gladia.io/chapters/limits-and-specifications/data-retention",
+   "read_on": "2026-11-25",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "8199a79cf4890054e316b11bd184337978d71b68d2d76a322f0bbb012aac377e"
+  },
+  {
    "id": "voyage-ai.sentence",
    "slug": "voyage-ai",
    "kind": "sentence",
@@ -914,12 +973,12 @@
    "id": "upstage.sentence",
    "slug": "upstage",
    "kind": "sentence",
-   "text": "may be used for service provision and improvement, as well as for research and development of artificial intelligence technologies (including training).",
+   "text": "may be used for service provision and improvement, as well as for research and development of artificial intelligence technologies (including training)",
    "source_url": "https://www.upstage.ai/terms-of-service",
-   "read_on": "2026-11-19",
+   "read_on": "2026-11-25",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
-   "page_sha256": "44b85514e26fda3834a5030d2763ea37e107fa328fe2261b2e0e7255fe5b8d1f"
+   "page_sha256": "c65d5a4023f4655c2bde4e5274c6d92f39f9c016871dd032ba27dc9e9f641f3d"
   },
   {
    "id": "veryfi.sentence",
@@ -1204,6 +1263,88 @@
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "40478f541d44f4d95c552d87750c0a781736f7e0b92ee9ba600ae0a75fb16512"
+  },
+  {
+   "id": "bytez.openai_compatible.sentence",
+   "slug": "bytez",
+   "kind": "field_sentence",
+   "field": "openai_compatible",
+   "text": "Use OpenAI-compatible endpoints for chat and text completions via OpenAI clients, supporting streaming and custom parameters.",
+   "source_url": "https://docs.bytez.com/http-reference/examples/openai-compliant/chatCompletionsExample",
+   "read_on": "2026-11-25",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "cfaabcdc6e87325be011decd0b0803780f2ab0abccaf81eb729ca23deb734eb0"
+  },
+  {
+   "id": "liquid-ai.sentence",
+   "slug": "liquid-ai",
+   "kind": "sentence",
+   "text": "You also grant Liquid AI and its affiliates a worldwide, non-exclusive, royalty-free license to use Your Content to develop and improve Liquid AI’s models, products, and services, including through training, fine-tuning, evaluation, and testing.",
+   "source_url": "https://www.liquid.ai/terms-conditions",
+   "read_on": "2026-11-25",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "014c19a7a35d979e41a99390e8d0d0939f434742fd1396fcedfb7295e229aa14"
+  },
+  {
+   "id": "liquid-ai.commercial_ok.sentence",
+   "slug": "liquid-ai",
+   "kind": "field_sentence",
+   "field": "commercial_ok",
+   "text": "Subject to your compliance with these Terms, you may access and use the Services for your internal business purposes and to develop, evaluate, and operate applications that use the Services.",
+   "source_url": "https://www.liquid.ai/terms-conditions",
+   "read_on": "2026-11-25",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "014c19a7a35d979e41a99390e8d0d0939f434742fd1396fcedfb7295e229aa14"
+  },
+  {
+   "id": "liquid-ai.openai_compatible.sentence",
+   "slug": "liquid-ai",
+   "kind": "field_sentence",
+   "field": "openai_compatible",
+   "text": "The API speaks OpenAI’s protocol, so the official OpenAI SDKs work with a new base URL.",
+   "source_url": "https://docs.liquid.ai/api/overview",
+   "read_on": "2026-11-25",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "567e264be4616a1ebc34cb01b6f2ef414f2b3daad41119b523c56a5a3d79552f"
+  },
+  {
+   "id": "public-ai.openai_compatible.sentence",
+   "slug": "public-ai",
+   "kind": "field_sentence",
+   "field": "openai_compatible",
+   "text": "The Public AI Gateway provides a unified, OpenAI-compatible API for open-source models from multiple inference partners.",
+   "source_url": "https://platform.publicai.co/models",
+   "read_on": "2026-11-25",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "808293cf00a3a9775ddb61f88e6a79ca454a44147ea6529c372431c194d63829"
+  },
+  {
+   "id": "stability-ai.sentence",
+   "slug": "stability-ai",
+   "kind": "sentence",
+   "text": "As described in our Privacy Policy , we may use Content to improve and develop our Services (but you can opt-out to prevent us from using your Inputs and Outputs to train our models, learn more ), comply with applicable law, enforce our terms and policies, and to keep our Services safe.",
+   "source_url": "https://stability.ai/terms-of-service",
+   "read_on": "2026-11-25",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "a41f4b6a2cb03d0bbc1d950b712cc6624329460356ede6b07ef40e87af372564"
+  },
+  {
+   "id": "stability-ai.commercial_ok.sentence",
+   "slug": "stability-ai",
+   "kind": "field_sentence",
+   "field": "commercial_ok",
+   "text": "Can I use the API outputs for commercial purposes? Yes, as long as the output doesn’t violate anyone’s copyright.",
+   "source_url": "https://docs.stability.ai/faq",
+   "read_on": "2026-11-25",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "27111e3b30e1b741e61defa6ae5d1d3c6c2ef63324b09603e76548d505b7c67a"
   }
  ]
 }
