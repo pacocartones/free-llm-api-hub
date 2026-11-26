@@ -30,8 +30,11 @@ on:
   pull_request:
   push:
     branches: [main]
+    # Not the bot's data/probe-report.json: its commit only rewrites derived files after a merge Verify already checked
+    # (regenerate.yml's own filter excludes it the same way).
     paths:
       - 'data/**'
+      - '!data/probe-report.json'
       - 'scripts/**'
   workflow_dispatch: {}
 
