@@ -55,6 +55,7 @@ jobs:
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: .nvmrc
+          cache: npm
 
       # JSON Schema validation uses locked development dependencies. Disable
       # lifecycle scripts so CI only installs the declared tooling.
@@ -179,13 +180,14 @@ jobs:
       # its merge), and drift outside the bot's allowlist. HEAD^1 is the base
       # branch in the PR's merge commit and the previous main on a push. The
       # decision is driftGate() in scripts/lib/regenerate.mjs, tested.
+      # It compares the tree "Regenerate the derived files first" wrote. Nothing in between writes to the working
+      # tree (the checks only read, and the test suite builds into temporary copies), and a second build of the
+      # same tree is byte-identical (regenerate.yml asserts that on main), so the job builds once.
       - name: Derived files must not be hand-edited, and a release ships them regenerated (REGEN_MODE=push)
         if: ${{ steps.regen.outputs.mode == 'push' }}
         env:
           REGEN_MODE: ${{ steps.regen.outputs.mode }}
-        run: |
-          node scripts/build.mjs
-          BASE="$(git rev-parse HEAD^1)" node scripts/regenerate-guard.mjs drift-gate
+        run: BASE="$(git rev-parse HEAD^1)" node scripts/regenerate-guard.mjs drift-gate
 
   windows-tests:
     name: Windows tests
@@ -208,6 +210,7 @@ jobs:
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: .nvmrc
+          cache: npm
 
       - name: Install locked development dependencies
         run: npm ci --ignore-scripts

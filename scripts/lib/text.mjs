@@ -9,10 +9,10 @@
 //
 // Not for code that is shipped to the browser as source text (rows.mjs,
 // compare.mjs, find.mjs clientBundle): those functions cannot import.
-import { htmlEsc } from './rows.mjs';
+import { escapeHtml } from './html.mjs';
 
 export const safeHttp = (u) => (/^https?:\/\//i.test(String(u || '')) ? String(u) : '');
 
-export const safeUrl = (u) => (safeHttp(u) ? htmlEsc(u) : '');
+export const safeUrl = (u) => (safeHttp(u) ? escapeHtml(u) : '');
 
 export const plural = (n, one, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;

@@ -1,8 +1,8 @@
 // The three cards of an entry on /best/: Free quota, Rate limit and Requirements.
 // Every value is a field of data/providers.json shown as it is, with the date and the source the provider record already carries
 // (last_verified and docs_url); nothing is computed or added. A field the record does not have reads «not stated», never a guess.
+import { escapeHtml } from './html.mjs';
 import { timeHtml } from './dates.mjs';
-import { htmlEsc } from './rows.mjs';
 import { safeUrl } from './text.mjs';
 
 const NOT_STATED = 'not stated';
@@ -10,14 +10,14 @@ const text = (v) => (typeof v === 'string' && v.trim() ? v.trim() : '');
 
 const source = (p) => {
   const url = safeUrl(p.docs_url);
-  const day = /^\d{4}-\d{2}-\d{2}$/.test(String(p.last_verified || '')) ? `Checked ${timeHtml(p.last_verified, htmlEsc)}` : 'Not yet verified';
+  const day = /^\d{4}-\d{2}-\d{2}$/.test(String(p.last_verified || '')) ? `Checked ${timeHtml(p.last_verified, escapeHtml)}` : 'Not yet verified';
   return `<p class="best-fact-src">${day}${url ? ` · <a href="${url}" target="_blank" rel="noopener">source</a>` : ''}</p>`;
 };
 
 const textCard = (label, value, p) => {
   const v = text(value);
   return `<div class="best-fact"><h3 class="best-fact-h">${label}</h3>` +
-    `<p class="best-fact-v${v ? '' : ' muted'}"${v ? ` title="${htmlEsc(v)}"` : ''}>${v ? htmlEsc(v) : NOT_STATED}</p>${source(p)}</div>`;
+    `<p class="best-fact-v${v ? '' : ' muted'}"${v ? ` title="${escapeHtml(v)}"` : ''}>${v ? escapeHtml(v) : NOT_STATED}</p>${source(p)}</div>`;
 };
 
 // icon(id) is the sprite helper of the build; the three flags are tri-state: true, false or unknown (null).
@@ -29,7 +29,7 @@ const flag = (icon, v, yes, no, unknown) => {
 /** @returns {string} the three cards, as one block */
 export function bestFactsHtml(p, icon) {
   const commercial = p.commercial_ok === 'conditional'
-    ? `<li class="best-req-conditional">${icon('ic-building')}<span>Commercial use conditional${p.commercial_ok_condition ? ': ' + htmlEsc(p.commercial_ok_condition) : ''}</span></li>`
+    ? `<li class="best-req-conditional">${icon('ic-building')}<span>Commercial use conditional${p.commercial_ok_condition ? ': ' + escapeHtml(p.commercial_ok_condition) : ''}</span></li>`
     : flag(icon, p.commercial_ok, ['ic-building', 'Commercial use allowed'], ['ic-flask', 'Evaluation only'], ['ic-building', 'Commercial use: not stated']);
   const requirements = `<div class="best-fact best-req"><h3 class="best-fact-h">Requirements</h3><ul class="best-req-list">` +
     flag(icon, p.card_required, ['ic-card', 'Credit card required'], ['ic-nocard', 'No credit card'], ['ic-card', 'Credit card: not stated']) +

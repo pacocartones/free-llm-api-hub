@@ -14,7 +14,8 @@
 // http(s) URL. Nothing here reads the current date: the static pages are
 // pinned in derived-fingerprints.json and must be byte-stable per dataset.
 
-import { htmlEsc, SLUG_RE } from './rows.mjs';
+import { escapeHtml as htmlEsc } from './html.mjs'; // serialised by name into the client bundle below
+import { SLUG_RE } from './rows.mjs';
 import { expiryHtml } from './expiry.mjs';
 import { NOT_STATED_HTML } from './not-stated.mjs';
 import { REASON_LABEL } from './field-checks.mjs';

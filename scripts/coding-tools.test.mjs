@@ -11,7 +11,7 @@ import { privateTree } from './lib/private-tree.mjs';
 import { codingToolsErrors, CLAIM_FIELDS, KINDS } from './lib/coding-tools.mjs';
 import { hasHiddenChars } from './lib/hidden-chars.mjs';
 import { codingToolsMainHtml, codingToolsCounts, codingToolTitle, codingToolDescription } from './lib/free-coding-tools.mjs';
-import { htmlEsc } from './lib/rows.mjs';
+import { escapeHtml } from './lib/html.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const providers = JSON.parse(readFileSync(join(ROOT, 'data/providers.json'), 'utf8')).providers;
@@ -42,7 +42,6 @@ const ourWords = (html) => {
   const main = html.slice(html.indexOf('<main id="main"'), html.indexOf('</main>'));
   return [title, desc, hero, main].join(' ').replace(/<blockquote[\s\S]*?<\/blockquote>/g, ' ').replace(/<[^>]*>/g, ' ');
 };
-const esc = (t) => t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 
 test('the section exists, passes its own rules and its JSON Schema', () => {
   assert.ok(existsSync(join(ROOT, 'data/coding-tools.json')), 'data/coding-tools.json is missing');
@@ -98,9 +97,9 @@ test('the page of the real data shows its quotations and stays out of every prov
   const html = readFileSync(page, 'utf8');
   const s = section();
   for (const e of s.entries) {
-    assert.ok(html.includes(esc(e.name)), `${e.name} is missing from the page`);
+    assert.ok(html.includes(escapeHtml(e.name)), `${e.name} is missing from the page`);
     for (const c of Object.values(e.claims)) for (const q of c.quotes) {
-      assert.ok(html.includes(esc(q.text)), `a sentence of ${e.name} is missing from the page`);
+      assert.ok(html.includes(escapeHtml(q.text)), `a sentence of ${e.name} is missing from the page`);
       assert.ok(html.includes(`read <time datetime="${q.read}">${humanDate(q.read)}</time>`), `the read date of a sentence of ${e.name} is missing`);
     }
   }
@@ -202,9 +201,9 @@ test('own-key page: the subsection shows every sentence and links the free APIs,
   assert.match(html, /href="\.\.\/collections\/openai-compatible"/);
   assert.match(html, /href="\.\.\/#explorer"/);
   for (const e of ownKey().entries) {
-    assert.ok(html.includes(esc(e.name)), `${e.name} is missing from the page`);
+    assert.ok(html.includes(escapeHtml(e.name)), `${e.name} is missing from the page`);
     for (const c of Object.values(e.claims)) for (const q of c.quotes) {
-      assert.ok(html.includes(esc(q.text)), `a sentence of ${e.name} is missing from the page`);
+      assert.ok(html.includes(escapeHtml(q.text)), `a sentence of ${e.name} is missing from the page`);
       assert.ok(html.includes(`read <time datetime="${q.read}">${humanDate(q.read)}</time>`));
     }
     assert.ok(!existsSync(join(out(), `site/p/${e.slug}.html`)), `${e.slug} got a provider page`);
@@ -318,7 +317,7 @@ test('each tool has its own page, with its sentences, sources and days, and what
     assert.ok(statedAt > 0 && notStatedAt > statedAt && sourcesAt > notStatedAt, `${t.slug}: the three sections, in order`);
     for (const [field, c] of Object.entries(t.claims)) {
       for (const q of c.quotes) {
-        assert.ok(main.includes(htmlEsc(q.text)), `${t.slug}: the sentence of ${field} is on the page`);
+        assert.ok(main.includes(escapeHtml(q.text)), `${t.slug}: the sentence of ${field} is on the page`);
         assert.ok(main.includes(`read <time datetime="${q.read}">${humanDate(q.read)}</time>`), `${t.slug}: the day it was read`);
         assert.ok(main.includes(new URL(q.source).hostname), `${t.slug}: the page it comes from`);
       }

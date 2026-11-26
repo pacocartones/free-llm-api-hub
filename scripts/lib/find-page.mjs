@@ -7,23 +7,23 @@
 
 import { USES, CONSTRAINTS, explorerHref } from './find.mjs';
 import { websiteRef, SITE_NAME } from './site-entity.mjs';
+import { escapeAttr } from './html.mjs';
+import { isoDateTime } from './structured-data.mjs';
 
 export const FIND_PATH = '/find/';
 export const FIND_TITLE = 'Find my free API: a shortlist of free LLM APIs that fit you · Free LLM API Hub';
 export const FIND_DESC = 'Answer six quick questions (what you build, card, phone, commercial use, training, OpenAI compatibility) and get a ranked shortlist of free LLM APIs, with sources.';
 export const FIND_H1 = 'Find my free API';
 
-const esc = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-
 // One question: a fieldset of radios. The legend is the question; each option is a real <label>, so the whole row is
 // a click and keyboard target (arrow keys move inside the group, as for any radio group).
 function fieldset(step, total, key, legend, options, help = '') {
   const opts = options.map((o) =>
-    `<label class="find-opt"><input type="radio" name="${key}" value="${esc(o.value)}"><span class="find-opt-label">${esc(o.label)}</span>` +
-    (o.hint ? `<span class="find-opt-hint">${esc(o.hint)}</span>` : '') + `</label>`).join('');
+    `<label class="find-opt"><input type="radio" name="${key}" value="${escapeAttr(o.value)}"><span class="find-opt-label">${escapeAttr(o.label)}</span>` +
+    (o.hint ? `<span class="find-opt-hint">${escapeAttr(o.hint)}</span>` : '') + `</label>`).join('');
   return `<fieldset class="find-q" id="find-q-${key}" data-step="${step}" tabindex="-1"${step ? ' hidden' : ''}>` +
-    `<legend><span class="find-step">Question ${step + 1} of ${total}</span> ${esc(legend)}</legend>` +
-    (help ? `<p class="find-help muted">${esc(help)}</p>` : '') +
+    `<legend><span class="find-step">Question ${step + 1} of ${total}</span> ${escapeAttr(legend)}</legend>` +
+    (help ? `<p class="find-help muted">${escapeAttr(help)}</p>` : '') +
     `<div class="find-opts">${opts}</div></fieldset>`;
 }
 
@@ -58,7 +58,7 @@ export function findMainHtml({ pageHero, total, verified }) {
   }) +
     `<main id="main"><div class="wrap find-wrap">` +
     `<noscript><div class="find-noscript"><p><strong>This finder needs JavaScript.</strong> The same filters work in the <a href="${prefix}#explorer">provider explorer</a>. Common starting points:</p>` +
-    `<ul>${NOSCRIPT_PRESETS.map(([label, a]) => `<li><a href="${esc(explorerHref(a, prefix))}">${esc(label)}</a></li>`).join('')}</ul></div></noscript>` +
+    `<ul>${NOSCRIPT_PRESETS.map(([label, a]) => `<li><a href="${escapeAttr(explorerHref(a, prefix))}">${escapeAttr(label)}</a></li>`).join('')}</ul></div></noscript>` +
     `<form id="find-form" class="find-form" novalidate hidden aria-describedby="find-count">` +
     questionsHtml() +
     `<p id="find-error" class="find-error" role="alert"></p>` +
@@ -106,7 +106,7 @@ export function findJsonLd({ site, asof }) {
         operatingSystem: 'Any (runs in the browser)',
         browserRequirements: 'Requires JavaScript',
         isAccessibleForFree: true,
-        dateModified: asof,
+        dateModified: isoDateTime(asof),
         isPartOf: websiteRef(site),
       },
       {

@@ -9,6 +9,7 @@ import { dirname, join } from 'node:path';
 import Ajv2020 from 'ajv/dist/2020.js';
 import addFormats from 'ajv-formats';
 import { gpuComputeErrors, CLAIM_FIELDS } from './lib/gpu-compute.mjs';
+import { escapeHtml } from './lib/html.mjs';
 import { providerFigures } from './lib/figures.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -115,12 +116,11 @@ test('the section has a page that shows its quotations and stays out of every pr
   assert.ok(existsSync(page), 'site/free-gpu/index.html is not generated');
   const html = readFileSync(page, 'utf8');
   const s = section();
-  const esc = (t) => t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
   for (const e of s.entries) {
-    assert.ok(html.includes(esc(e.name)), `${e.name} is missing from the page`);
+    assert.ok(html.includes(escapeHtml(e.name)), `${e.name} is missing from the page`);
     for (const c of Object.values(e.claims)) {
       for (const q of c.quotes) {
-        assert.ok(html.includes(esc(q.text)), `a quotation of ${e.name} is missing from the page`);
+        assert.ok(html.includes(escapeHtml(q.text)), `a quotation of ${e.name} is missing from the page`);
         assert.ok(html.includes(`read <time datetime="${q.read}">${humanDate(q.read)}</time>`), `the read date of a quotation of ${e.name} is missing`);
       }
     }

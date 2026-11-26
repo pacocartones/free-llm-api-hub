@@ -6,7 +6,7 @@
 //   a trial credit with neither               -> "not stated" (not-stated.mjs: nobody has said)
 //   anything else with a null `expires`       -> "no expiry" (a continuous free tier has no end date)
 
-import { htmlEsc } from './rows.mjs';
+import { escapeHtml as htmlEsc } from './html.mjs'; // expiryHtml is serialised by name into lib/compare.mjs's client bundle
 import { NOT_STATED_HTML } from './not-stated.mjs';
 import { humanDate } from './dates.mjs';
 

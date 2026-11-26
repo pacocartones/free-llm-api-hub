@@ -6,8 +6,7 @@
 
 import { timeHtml } from './dates.mjs';
 import { parseCitation } from './dataset-jsonld.mjs';
-import { htmlEsc } from './rows.mjs';
-import { codeHtmlEsc } from './quickstart.mjs';
+import { escapeHtml, escapeText } from './html.mjs';
 
 /** The fields a citation needs: title, url, version, year and date released, authors, repository, licence. */
 export function citationRecord(cffText) {
@@ -52,12 +51,12 @@ export function apa(r) {
 
 /** Shared "Cite this dataset" section rendered from a `citationRecord()` object. */
 export function citeBlockHtml(r, { heading = 'Cite this dataset' } = {}) {
-  const pre = (text, id) => `<pre data-snippet="citation"><code id="${id}">${codeHtmlEsc(text)}</code></pre>`;
+  const pre = (text, id) => `<pre data-snippet="citation"><code id="${id}">${escapeText(text)}</code></pre>`;
   return (
-    `<h2 id="cite">${htmlEsc(heading)}</h2>` +
-    `<p>From the repository’s <a href="${htmlEsc(r.repository)}/blob/main/CITATION.cff" target="_blank" rel="noopener">CITATION.cff</a>, version ${htmlEsc(r.version)} of ${timeHtml(r.date || '', htmlEsc)}. GitHub’s “Cite this repository” reads the same file.</p>` +
+    `<h2 id="cite">${escapeHtml(heading)}</h2>` +
+    `<p>From the repository’s <a href="${escapeHtml(r.repository)}/blob/main/CITATION.cff" target="_blank" rel="noopener">CITATION.cff</a>, version ${escapeHtml(r.version)} of ${timeHtml(r.date || '', escapeHtml)}. GitHub’s “Cite this repository” reads the same file.</p>` +
     `<h3>BibTeX</h3>` + pre(bibtex(r), 'cite-bibtex') +
     `<h3>APA</h3>` + pre(apa(r), 'cite-apa') +
-    `<p class="muted">The data is ${htmlEsc(r.license)} licensed. Terms change without notice: say which version or date you used, and link back so readers can check the current entry.</p>`
+    `<p class="muted">The data is ${escapeHtml(r.license)} licensed. Terms change without notice: say which version or date you used, and link back so readers can check the current entry.</p>`
   );
 }

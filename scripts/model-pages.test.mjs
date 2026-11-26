@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { groupModels } from './lib/model-keys.mjs';
-import { htmlEsc } from './lib/rows.mjs';
+import { escapeHtml } from './lib/html.mjs';
 import { isIndexable, modelPageMainHtml, modelPageTitle, modelPageDescription, modelPageJsonLd, MODEL_SAMPLE_CAVEAT, MODEL_PAGE_INDEX_RULE } from './lib/model-pages.mjs';
 
 const base = {
@@ -21,7 +21,7 @@ const page = (g) => modelPageMainHtml(g, { asOf: '2026-11-20' });
 test('every page carries the sample caveat and never says "available on"', () => {
   for (const g of groupModels([alpha, beta, ghost, tiered])) {
     const html = page(g);
-    assert.ok(html.includes(htmlEsc(MODEL_SAMPLE_CAVEAT)), `${g.key}: caveat`);
+    assert.ok(html.includes(escapeHtml(MODEL_SAMPLE_CAVEAT)), `${g.key}: caveat`);
     assert.match(html, /Listed in the free-model sample of/);
     assert.ok(html.includes("not part of the dataset's verified core claim"), `${g.key}: core-claim note`);
     assert.doesNotMatch(html, /available on|free forever|best|fastest/i);

@@ -5,7 +5,7 @@
 import { timeHtml } from './dates.mjs';
 import { judgeReading, readingText, absenceHits, sha256, METHOD } from './page-text.mjs';
 import { totalHits } from './quotes.mjs';
-import { htmlEsc } from './rows.mjs';
+import { escapeHtml } from './html.mjs';
 
 export const RESULTS = ['ok', 'expired', 'unreachable', 'other_language'];
 export const AMBER_DAYS = 8;
@@ -108,13 +108,13 @@ export function quotesReportHtml(report, registry, nowMs) {
     const e = byId.get(r.id) || {};
     const persistent = r.result === 'unreachable' && r.runs_in_a_row >= PERSISTENT_RUNS;
     const text = RESULT_TEXT[r.result] + (r.result === 'unreachable' ? (persistent ? `. It has not been read for ${r.runs_in_a_row} runs in a row` : `. Run ${r.runs_in_a_row}: a block of the server is not yet a lasting problem`) : '');
-    const what = e.kind === 'absence_check' ? 'the claim that the page has none of the four words' : `<blockquote class="dp-quote">&ldquo;${htmlEsc(String(e.text || '').slice(0, 90))}${(e.text || '').length > 90 ? '&hellip;' : ''}&rdquo;</blockquote>`;
-    return `<tr><th scope="row">${htmlEsc(r.slug)}</th><td>${what}</td><td>${htmlEsc(text)}</td><td>read ${timeHtml(r.read_on, htmlEsc)}</td></tr>`;
+    const what = e.kind === 'absence_check' ? 'the claim that the page has none of the four words' : `<blockquote class="dp-quote">&ldquo;${escapeHtml(String(e.text || '').slice(0, 90))}${(e.text || '').length > 90 ? '&hellip;' : ''}&rdquo;</blockquote>`;
+    return `<tr><th scope="row">${escapeHtml(r.slug)}</th><td>${what}</td><td>${escapeHtml(text)}</td><td>read ${timeHtml(r.read_on, escapeHtml)}</td></tr>`;
   }).join('');
   const list = bad.length
     ? `<div class="table-scroll" role="region" aria-label="Table: quoted passages that need a person" tabindex="0"><table class="dp-table"><thead><tr><th scope="col">Provider</th><th scope="col">Passage</th><th scope="col">Result</th><th scope="col">Last read as found</th></tr></thead><tbody>${rows}</tbody></table></div>`
     : '<p>Every passage was found on its page.</p>';
-  return `${head}<p class="dp-check" data-level="${age.level}" data-ran-at="${htmlEsc(report.ran_at)}"><strong>${s.ok} of ${s.total}</strong> found on their pages in the run of ${htmlEsc(report.ran_at.slice(0, 10))} ` +
+  return `${head}<p class="dp-check" data-level="${age.level}" data-ran-at="${escapeHtml(report.ran_at)}"><strong>${s.ok} of ${s.total}</strong> found on their pages in the run of ${escapeHtml(report.ran_at.slice(0, 10))} ` +
     `(<span class="dp-age">${age.days} day${age.days === 1 ? '' : 's'} old</span>). <span class="dp-level">${LEVEL_TEXT[age.level]}</span></p>${list}` +
     (cov.notRead.length ? `<p>${cov.notRead.length} quoted passage${cov.notRead.length === 1 ? ' was' : 's were'} added after that run and ${cov.notRead.length === 1 ? 'has' : 'have'} not been read from the server yet.</p>` : '');
 }

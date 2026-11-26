@@ -15,12 +15,8 @@
 // treat every field as untrusted: htmlEsc before it reaches innerHTML, and the
 // slug goes into an href only after SLUG_RE confirms it is kebab-case.
 
-export const htmlEsc = (s) => String(s ?? '')
-  .replace(/&/g, '&amp;')
-  .replace(/</g, '&lt;')
-  .replace(/>/g, '&gt;')
-  .replace(/"/g, '&quot;')
-  .replace(/'/g, '&#39;');
+// The local name stays htmlEsc: clientBundle() serialises rowHtml & co. with toString(), and their bodies call it by that name.
+import { escapeHtml as htmlEsc } from './html.mjs';
 
 export const ICON = (id) => `<svg class="i" aria-hidden="true"><use href="#${id}"/></svg>`;
 

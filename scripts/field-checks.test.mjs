@@ -1,6 +1,6 @@
 // field_checks: why a tri-state flag holds its value (data/schema.json, scripts/lib/field-checks.mjs).
 // The validator rules, the quote registry kind, the site wording, the coverage counts and the v1 projection.
-import { htmlEsc } from './lib/rows.mjs';
+import { escapeHtml } from './lib/html.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, writeFileSync } from 'node:fs';
@@ -162,7 +162,7 @@ test('quotes:add --field writes only that sentence and a data_policy run keeps i
 test('the site says the reason and the day instead of "not stated", and never turns null into no', () => {
   for (const s of NULL_REASONS) {
     const html = triStateHtml(null, 'required', 'not required', { ...silent, status: s });
-    assert.ok(html.includes(`${htmlEsc(REASON_LABEL[s])} (checked 24 Nov 2026)`), s);
+    assert.ok(html.includes(`${escapeHtml(REASON_LABEL[s])} (checked 24 Nov 2026)`), s);
     assert.ok(!/not required/.test(html), s);
   }
   assert.equal(triStateHtml(null, 'required', 'not required'), '<span class="tri tri-unk">not stated</span>');

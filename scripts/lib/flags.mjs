@@ -14,7 +14,8 @@
 // functions into site/shared-rows.js), so the explorer's server render and its client repaint run the same
 // code. Keep the functions self-contained: they may only use htmlEsc, ICON and the constants below.
 
-import { htmlEsc, ICON } from './rows.mjs';
+import { escapeHtml as htmlEsc } from './html.mjs'; // the name these functions use when serialised
+import { ICON } from './rows.mjs';
 import { REASON_LABEL } from './field-checks.mjs';
 
 /**

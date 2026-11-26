@@ -9,7 +9,7 @@
 // A line nobody could source is left empty and not shown: empty is a valid state, an invented line is not.
 import { timeHtml } from './dates.mjs';
 import { hasHiddenChars } from './hidden-chars.mjs';
-import { htmlEsc } from './rows.mjs';
+import { escapeHtml } from './html.mjs';
 
 export const SUMMARY_FIELDS = ['what', 'good_for', 'operator', 'owner', 'origin'];
 export const FIELD_LABELS = { what: 'What it is', good_for: 'Good for', operator: 'Operated by', owner: 'Owned by', origin: 'Origin' };
@@ -119,11 +119,11 @@ export const aboutHtml = (summary, name) => {
   const rows = SUMMARY_FIELDS.filter((f) => summary[f]).map((f) => {
     const links = summary.sources.filter((s) => s.supports.includes(f)).map((s) => {
       const host = hostOf(s.url);
-      return `<a href="${htmlEsc(s.url)}" target="_blank" rel="noopener">${htmlEsc(host)}</a>, read ${timeHtml(s.fetched_at.slice(0, 10), htmlEsc)}`;
+      return `<a href="${escapeHtml(s.url)}" target="_blank" rel="noopener">${escapeHtml(host)}</a>, read ${timeHtml(s.fetched_at.slice(0, 10), escapeHtml)}`;
     });
-    return `<div class="about-row"><dt>${FIELD_LABELS[f]}</dt><dd>${htmlEsc(summary[f])}<span class="about-src">Source: ${links.join('; ')}</span></dd></div>`;
+    return `<div class="about-row"><dt>${FIELD_LABELS[f]}</dt><dd>${escapeHtml(summary[f])}<span class="about-src">Source: ${links.join('; ')}</span></dd></div>`;
   });
   if (!rows.length) return '';
-  return `<h2 id="about">About ${htmlEsc(name)}</h2><dl class="prov-about">${rows.join('')}</dl>` +
+  return `<h2 id="about">About ${escapeHtml(name)}</h2><dl class="prov-about">${rows.join('')}</dl>` +
     `<p class="muted">Each line is written from the provider's own pages, with the page and the day it was read next to it. A line nobody could source is left out.</p>`;
 };

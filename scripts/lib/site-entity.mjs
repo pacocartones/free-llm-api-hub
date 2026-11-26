@@ -47,4 +47,9 @@ const authorship = (site) => ({
 
 export const websiteRef = (site) => ({ '@type': 'WebSite', '@id': entityIds(site).website, name: SITE_NAME, url: `${site}/`, ...authorship(site) });
 
-export const datasetRef = (site) => ({ '@type': 'Dataset', '@id': entityIds(site).dataset, name: SITE_NAME, url: `${site}/`, ...authorship(site) });
+// A Dataset node needs a `description` (and should carry a `license`) wherever it appears, or Google marks it invalid:
+// `facts` is { description, license } from lib/structured-data.mjs (datasetFacts), the same on every page.
+export const datasetRef = (site, facts) => {
+  if (!facts?.description || !facts?.license) throw new Error('datasetRef needs the dataset description and license (datasetFacts)');
+  return { '@type': 'Dataset', '@id': entityIds(site).dataset, name: SITE_NAME, description: facts.description, license: facts.license, url: `${site}/`, ...authorship(site) };
+};
