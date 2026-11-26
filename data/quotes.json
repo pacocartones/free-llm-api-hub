@@ -422,7 +422,19 @@
    "kind": "sentence",
    "text": "For enterprises and developers using API Services, we will not use your User Content for developing or improving Services unless you explicitly agree to such use.",
    "source_url": "https://docs.z.ai/legal-agreement/terms-of-use",
-   "read_on": "2026-11-24",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "f5d2dd21f39c0eb00e91089dca2c2d3a5b1f6cb8635a8189bfbb3e422fe8327a"
+  },
+  {
+   "id": "zai-glm.commercial_ok.sentence",
+   "slug": "zai-glm",
+   "kind": "field_sentence",
+   "field": "commercial_ok",
+   "text": "These terms of use (“Terms”) form an agreement between JINGSHENG HENGXING TECHNOLOGY PTE.LTD (“we”, “our”, or “us”) and you (“you”) as a user of the Z.ai accessible via z.ai/model-api (“Services”), governing your access and use of Z.ai for services or tools for your own purposes, internal organizational use, or for the benefit of end users.",
+   "source_url": "https://docs.z.ai/legal-agreement/terms-of-use",
+   "read_on": "2026-11-26",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "f5d2dd21f39c0eb00e91089dca2c2d3a5b1f6cb8635a8189bfbb3e422fe8327a"
@@ -881,10 +893,22 @@
    "kind": "sentence",
    "text": "The gateway layer does not retain prompts, outputs, or sensitive data, and user data is deleted immediately after a request completes.",
    "source_url": "https://vercel.com/i/secure-ai-gateway",
-   "read_on": "2026-10-15",
+   "read_on": "2026-11-26",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
-   "page_sha256": null
+   "page_sha256": "6d757d421a8b3ef7f2ffd37245f3939a527beec02005a31f6b0a1a5f4024b2de"
+  },
+  {
+   "id": "vercel-ai-gateway.card_required.sentence",
+   "slug": "vercel-ai-gateway",
+   "kind": "field_sentence",
+   "field": "card_required",
+   "text": "To use free AI Gateway Credits, add a valid payment method to your team.",
+   "source_url": "https://vercel.com/docs/ai-gateway/getting-started",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "e0360a9bc57ad575f439d176a04f6bc05c6123a05a581751538690e512fd27f7"
   },
   {
    "id": "vercel-ai-gateway.multi_account_forbidden.sentence",
@@ -1105,6 +1129,64 @@
    "page_sha256": null
   },
   {
+   "id": "ocr-space.sentence",
+   "slug": "ocr-space",
+   "kind": "sentence",
+   "text": "All uploaded documents are deleted after processing.",
+   "source_url": "https://ocr.space/privacypolicy",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "c6e8fbf36196841c2d201ceab6adcc1f6fc35f7c75aea750fc20944b5aefac1b"
+  },
+  {
+   "id": "ocr-space.note_passage.1",
+   "slug": "ocr-space",
+   "kind": "note_passage",
+   "text": "will be available on our servers for 60 minutes to allow the download, and then deleted as well",
+   "source_url": "https://ocr.space/privacypolicy",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "c6e8fbf36196841c2d201ceab6adcc1f6fc35f7c75aea750fc20944b5aefac1b"
+  },
+  {
+   "id": "ocr-space.card_required.sentence",
+   "slug": "ocr-space",
+   "kind": "field_sentence",
+   "field": "card_required",
+   "text": "All information except the email is optional.",
+   "source_url": "https://ocr.space/ocrapi/freekey",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "bcce94f7223d2b104ff0a1ec33569b948de445911bcd02e56fb0647606975e30"
+  },
+  {
+   "id": "ocr-space.commercial_ok.sentence",
+   "slug": "ocr-space",
+   "kind": "field_sentence",
+   "field": "commercial_ok",
+   "text": "Yes, you can use the free API in a commercial project, but the free plan comes with no (uptime) guarantees.",
+   "source_url": "https://ocr.space/faq",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "e5e292454d3e076412f8a25b1b664a1f5888e050b95b662cf94141e2d06deaa8"
+  },
+  {
+   "id": "ocr-space.phone_required.sentence",
+   "slug": "ocr-space",
+   "kind": "field_sentence",
+   "field": "phone_required",
+   "text": "All information except the email is optional.",
+   "source_url": "https://ocr.space/ocrapi/freekey",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "bcce94f7223d2b104ff0a1ec33569b948de445911bcd02e56fb0647606975e30"
+  },
+  {
    "id": "ocr-space.multi_account_forbidden.sentence",
    "slug": "ocr-space",
    "kind": "field_sentence",
@@ -1283,10 +1365,10 @@
    "kind": "sentence",
    "text": "Until an Owner sets a retention period, your workspace’s data is retained indefinitely.",
    "source_url": "https://docs.sarvam.ai/api/platform/data-retention",
-   "read_on": "2026-10-15",
+   "read_on": "2026-11-26",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
-   "page_sha256": "57f3bc7b7807b7c0d80c5c1011f0aa620a727f2b4efa6c84753b7d376862c336"
+   "page_sha256": "0b77eeab4230d717b0d5948629a3e931c4f83efcc065ae6f858de3bf3e29900d"
   },
   {
    "id": "sarvam-ai.absence_check",
@@ -1305,10 +1387,22 @@
     "plan": 0
    },
    "source_url": "https://docs.sarvam.ai/api/platform/data-retention",
-   "read_on": "2026-10-15",
+   "read_on": "2026-11-26",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
-   "page_sha256": "57f3bc7b7807b7c0d80c5c1011f0aa620a727f2b4efa6c84753b7d376862c336"
+   "page_sha256": "0b77eeab4230d717b0d5948629a3e931c4f83efcc065ae6f858de3bf3e29900d"
+  },
+  {
+   "id": "sarvam-ai.commercial_ok.sentence",
+   "slug": "sarvam-ai",
+   "kind": "field_sentence",
+   "field": "commercial_ok",
+   "text": "These credits are not limited to evaluation-only or non-commercial use.",
+   "source_url": "https://docs.sarvam.ai/api/getting-started/commercial-licensing",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "bd7a4a3ef99f9d8826647b5027f0b7adda9ee72b46470fda5388250c311a2416"
   },
   {
    "id": "sarvam-ai.speed.deepseekv4.1-flash-1017.output_tokens_per_second",
@@ -1318,7 +1412,7 @@
    "metric": "output_tokens_per_second",
    "text": "It generates more than 200 output tokens per second , against about 80 on deepseekv4.1-flash-1017",
    "source_url": "https://docs.sarvam.ai/api/token-factory/models/deepseek-v4.1-flash-1017",
-   "read_on": "2026-11-24",
+   "read_on": "2026-11-26",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "111e4ae255c3139b488489ef97e06fdf9663b187aed9e7edcea0d3abde7854a8"
@@ -1381,6 +1475,18 @@
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": null
+  },
+  {
+   "id": "rime.card_required.sentence",
+   "slug": "rime",
+   "kind": "field_sentence",
+   "field": "card_required",
+   "text": "Every account starts with $50 of usage free every month, across every Rime model, with no card required.",
+   "source_url": "https://www.rime.ai/pricing",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "316133d3bd5d13f90b870d332e64c3ce887c7b963b6fb7e4a3b5547da7875db6"
   },
   {
    "id": "rime.multi_account_forbidden.sentence",
@@ -1499,6 +1605,28 @@
    "page_sha256": "0c51c8696a9f516079d1332bcee43aa520d8df7160ceef16b61254b01b82f258"
   },
   {
+   "id": "rev-ai.sentence",
+   "slug": "rev-ai",
+   "kind": "sentence",
+   "text": "If you subscribe to any of Rev’s speech-to-text services, your Customer Content will be analyzed by our ASR models and other Rev artificial intelligence models and may be used for continuous training of those models.",
+   "source_url": "https://www.rev.com/legal/terms",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "6190c213053e17b7ef6165ea85dbc13089102985bb0328e69743661d4b9150aa"
+  },
+  {
+   "id": "rev-ai.note_passage.1",
+   "slug": "rev-ai",
+   "kind": "note_passage",
+   "text": "Customer Content will not be used for any generative AI model training.",
+   "source_url": "https://www.rev.com/legal/terms",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "6190c213053e17b7ef6165ea85dbc13089102985bb0328e69743661d4b9150aa"
+  },
+  {
    "id": "unstructured.limit_circumvention_forbidden.sentence",
    "slug": "unstructured",
    "kind": "field_sentence",
@@ -1540,10 +1668,10 @@
    "kind": "sentence",
    "text": "For clarity, our model improvement does not apply to the images processed through our Application Programming Interface (API).",
    "source_url": "https://www.photoroom.com/privacy",
-   "read_on": "2026-11-24",
+   "read_on": "2026-11-26",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
-   "page_sha256": "76a536b858ef4430c67415493f49d2280f1e902c009bdb176d5356cfb0bd0984"
+   "page_sha256": "ff9112a0828ec60617cb2d36285538a8c7d015f4faa875be3b3ab40e970f9a64"
   },
   {
    "id": "photoroom.commercial_ok.sentence",
@@ -1552,10 +1680,10 @@
    "field": "commercial_ok",
    "text": "We grant Free Accounts a non-exclusive, non-transferable license to access and use the Services, in accordance with the Terms, for your own personal, non commercial purposes.",
    "source_url": "https://www.photoroom.com/legal/terms-and-conditions",
-   "read_on": "2026-11-24",
+   "read_on": "2026-11-26",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
-   "page_sha256": "435f0c9bc0bae695f6f54a36cf6b2006210267288d3e8bc0c9e16e1db929201a"
+   "page_sha256": "517a925b6ad82034f7cc7e4c32aa980f5c3a3a124d0ed0c691ce2aa5f2786808"
   },
   {
    "id": "photoroom.limit_circumvention_forbidden.sentence",
@@ -1770,10 +1898,10 @@
    "kind": "sentence",
    "text": "The Applicant hereby perpetually grants, on a royalty-free basis, the Company the right to use such Input and the Intellectual Property Rights relating thereto for the purpose of providing the Services, developing and training the Company's Artificial Intelligence models",
    "source_url": "https://opentyphoon.ai/tac",
-   "read_on": "2026-10-17",
+   "read_on": "2026-11-26",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
-   "page_sha256": "ebe16a520e4f71baba1802bb45e168f3d8dd928c796381c9b25a79f599fc36c2"
+   "page_sha256": "bd294bf5437a25ebb49ff3016ef56cfb12cdf642834476da65a8309f20ff23cd"
   },
   {
    "id": "typhoon.note_passage.1",
@@ -1781,10 +1909,10 @@
    "kind": "note_passage",
    "text": "developing and training the Company's Artificial Intelligence models",
    "source_url": "https://opentyphoon.ai/tac",
-   "read_on": "2026-10-17",
+   "read_on": "2026-11-26",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
-   "page_sha256": "ebe16a520e4f71baba1802bb45e168f3d8dd928c796381c9b25a79f599fc36c2"
+   "page_sha256": "bd294bf5437a25ebb49ff3016ef56cfb12cdf642834476da65a8309f20ff23cd"
   },
   {
    "id": "typhoon.note_passage.2",
@@ -1792,7 +1920,7 @@
    "kind": "note_passage",
    "text": "Yes, we are collecting usage data from the Typhoon API. We use this data to improve the model and the API.",
    "source_url": "https://docs.opentyphoon.ai/en/faq/",
-   "read_on": "2026-10-17",
+   "read_on": "2026-11-26",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "6c6f959b0156ecf8549b8846d173a7d43be68908a894c2cc5df061b541f6be4a"
