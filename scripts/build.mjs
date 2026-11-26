@@ -53,6 +53,7 @@ import { bestFactsHtml } from './lib/best-facts.mjs';
 import { providerFigures, expandFigures, injectInlineFigures, figureErrors } from './lib/figures.mjs';
 import { firstUseHtml } from './lib/home-first-use.mjs';
 import { badgeSvg } from './lib/badge-svg.mjs';
+import { providerMarkdown, llmsProviderLine } from './lib/provider-markdown.mjs';
 import { codeHtmlEsc, curlChatQuickstart, pythonChatQuickstart, pythonEmbeddingsQuickstart, pythonStringLiteral } from './lib/quickstart.mjs';
 import { providersCsv } from './lib/provider-csv.mjs';
 import { writeSchemaDocs } from './schema-docs.mjs';
@@ -1344,6 +1345,9 @@ for (const p of providers) {
     join(ROOT, `site/p/${p.slug}.html`),
     htmlPage({ title: `${p.name} — free tier & limits · Free LLM API Hub`, desc: providerMetaDescription(p), canonical: `${SITE}/p/${p.slug}`, main: tagProviderLinks(main, providerLinkTargets(p, { website: websiteHref })), jsonld, ogImage: `${SITE}/og/p/${p.slug}.png`, scripts: ['pager.js'] })
   );
+  // The Markdown twin of the page (/p/<slug>.md, lib/provider-markdown.mjs), for answer engines and agents. Linked from
+  // llms.txt; not in sitemap.xml (an alternate of the canonical HTML page, not a page of its own).
+  writeFileSync(join(ROOT, `site/p/${p.slug}.md`), providerMarkdown(p, { site: SITE, asOf: ASOF, version: data.version }));
 
   // Embeddable per-provider badge. Same rule as the repo badge: the colour tracks
   // the age of the verification, so an entry someone embedded and forgot goes amber
@@ -2106,20 +2110,33 @@ writeFileSync(join(ROOT, 'site/api/index.html'), htmlPage({
 // llms.txt (concise index) + llms-full.txt (every provider expanded) — llmstxt.org
 const programCount = programs.startups.length + programs.research.length;
 const llmsSummary = `A continuously-verified, machine-readable dataset of free-tier and trial-credit LLM (and adjacent AI-model) APIs for developers. Every entry is dated and sourced to the provider's own docs.`;
+// llmstxt.org layout: H1, a blockquote summary, the dataset date and counts first, then H2 sections of links.
+// Each provider has one line (name, free type, one-line limits, its page and the Markdown twin at /p/<slug>.md).
 const llmsTxt =
   `# Free LLM API Hub\n\n> ${llmsSummary}\n\n` +
-  `${total} providers (${ongoing.length} ongoing free tiers, ${trial.length} trial credits) and ${programCount} apply-to-get credit programs. Dataset v${data.version}. Terms change often — always confirm against each provider's own docs, linked from every entry. This whole site is static and machine-readable.\n\n` +
+  `Data of ${ASOF} · dataset v${data.version} · ${total} providers (${ongoing.length} ongoing free tiers, ${trial.length} trial credits) and ${programCount} apply-to-get credit programs. MIT-licensed. Terms change often: confirm against each provider's own docs, linked from every entry. Every provider page has a Markdown version at the same URL plus \`.md\`.\n\n` +
+  `## Start here\n` +
+  `- [Find my free API](${SITE}/find/): answer a few questions (modality, card, commercial use) and get the matching providers\n` +
+  `- [Top 10 by score](${SITE}/best/): the ranking and [how the score is computed](${SITE}/best/methodology/)\n` +
+  `- [APIs that are not free](${SITE}/not-free/): OpenAI, Anthropic and others people expect to be free, why they are not, and the closest free alternatives\n` +
+  `- [Compare providers](${SITE}/compare/): two to four providers side by side\n\n` +
   `## Dataset\n` +
   `- [Full dataset, JSON](${SITE}/api/v1/providers.json): every provider, all fields\n` +
-  `- [JSON Schema](${REPO}/blob/main/data/schema.json)\n` +
   `- [Static JSON API](${SITE}/api/): versioned endpoints + pre-filtered slices (category, modality, no-card, commercial, OpenAI-compatible, …)\n` +
-  `- [Full provider list expanded, markdown](${SITE}/llms-full.txt)\n\n` +
+  `- [JSON Schema](${REPO}/blob/main/data/schema.json)\n` +
+  `- [Full provider list expanded, markdown](${SITE}/llms-full.txt)\n` +
+  `- [Data quality](${SITE}/quality/): how much of the dataset is verified, how fresh it is, and which answers are still unknown\n` +
+  `- [Use the data](${SITE}/embed/): the widget, verified badges, JSON and CSV downloads, and how to cite the dataset\n` +
+  `- [Methodology](${SITE}/methodology/): how entries are verified, sourced and dated\n\n` +
   `## Guides\n` +
+  `- [All guides and collections](${SITE}/guides-and-collections/): every guide and filtered list on one page\n` +
   [...GUIDES, ...LONG_GUIDE_PAGES].map((g) => `- [${g.h1}](${SITE}/guides/${g.slug}): ${g.blurb}`).join('\n') + `\n\n` +
   `## Collections\n` +
   COLLECTIONS.map((c) => `- [${c.title}](${SITE}/collections/${c.slug})`).join('\n') + `\n\n` +
   `## Credit programs\n` +
-  `- [Startup credits](${SITE}/programs/startups)\n- [Student & research credits](${SITE}/programs/research)\n`;
+  `- [Startup credits](${SITE}/programs/startups)\n- [Student & research credits](${SITE}/programs/research)\n\n` +
+  `## Providers\n` +
+  providers.map((p) => llmsProviderLine(p, { site: SITE })).join('\n') + `\n`;
 writeFileSync(join(ROOT, 'site/llms.txt'), llmsTxt);
 
 // A null flag with a recorded reason (field_checks) says the reason instead of "unknown".
@@ -2158,7 +2175,7 @@ const provBlock = (p) => {
 };
 const llmsFull =
   `# Free LLM API Hub — full provider list\n\n> ${llmsSummary}\n\n` +
-  `${total} providers, dataset v${data.version}, generated ${ASOF}. Confirm every figure against the linked docs.\n\n` +
+  `Data of ${ASOF} · dataset v${data.version} · ${total} providers. Confirm every figure against the linked docs.\n\n` +
   `## Providers\n\n` +
   providers.map(provBlock).join('\n') + `\n`;
 writeFileSync(join(ROOT, 'site/llms-full.txt'), llmsFull);
