@@ -2129,6 +2129,7 @@ test('active providers retain models_url from their official catalogues', () => 
     ['sarvam-ai', 'https://docs.sarvam.ai/api/token-factory/models'],
     ['tencent-hunyuan', 'https://cloud.tencent.com/document/product/1823/130051'],
     ['bytez', 'https://bytez.com/models'],
+    ['public-ai', 'https://platform.publicai.co/models'],
     ['liquid-ai', 'https://docs.liquid.ai/api/models'],
     ['voyage-ai', 'https://docs.voyageai.com/docs/embeddings'],
     ['stability-ai', 'https://docs.stability.ai/api-reference'],
