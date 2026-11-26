@@ -17,7 +17,7 @@ test('what is generated: the pages, feeds, badges and data under site/; not the 
   for (const f of ['site/index.html', 'site/404.html', 'site/sitemap.xml', 'site/robots.txt', 'site/scores.json', 'site/badge-verified.svg',
     'site/coding-tools/index.html', 'site/coding-tools/zed-own-key/index.html', 'site/free-gpu/index.html', 'site/data-policy/index.html',
     'site/agreements/index.html', 'site/coverage/index.html', 'site/submit/index.html', 'site/.well-known/security.txt']) assert.ok(isGenerated(f), `${f} is compared`);
-  for (const f of ['site/og/p/groq.png', 'site/og/guides/x.png', 'site/fonts/jetbrains-mono.woff2', 'site/CNAME', 'site/96087c6012c181da7cf7f9dcc88f9996.txt', 'site/og.png', 'site/og.svg',
+  for (const f of ['site/og/p/groq.png', 'site/og/guides/x.png', 'site/fonts/roboto-flex.woff2', 'site/CNAME', 'site/96087c6012c181da7cf7f9dcc88f9996.txt', 'site/og.png', 'site/og.svg',
     'site/favicon.svg', 'site/favicon.ico', 'site/styles.css', 'site/tables.css', 'site/site.js', 'site/explorer.js', 'site/pager.js', 'site/widget.js', 'site/compare.js',
     'README.md', 'data/providers.json']) assert.ok(!isGenerated(f), `${f} is not compared as site output`);
 });

@@ -1,0 +1,84 @@
+name: 🌱 Prepared task (maintainers)
+description: For maintainers. A task a newcomer can finish from the issue alone, for good first issues, help wanted and programs.
+title: "<type>: "
+labels: ["help wanted"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **For maintainers.** Contributors: please pick an existing task instead (see [Your first contribution](https://github.com/pacocartones/free-llm-api-hub/blob/main/CONTRIBUTING.md#your-first-contribution-step-by-step)). To report wrong data, use the "Report an outdated or incorrect entry" form.
+
+        After opening it, add:
+        - ONE type label (`bug`, `feature`, `docs`, `data` or `chore`) and the matching issue type (Bug, Feature, Docs, Data or Task);
+        - `good first issue` only if it meets [every condition](https://github.com/pacocartones/free-llm-api-hub/blob/main/CONTRIBUTING.md#good-first-issues);
+        - during a program, the program label and ONE level label from the table in [CONTRIBUTING.md › Programs](https://github.com/pacocartones/free-llm-api-hub/blob/main/CONTRIBUTING.md#programs-social-winter-of-code-and-similar).
+
+        **Choosing the level**
+        - **Easy:** one or two files named below, one named check, no third-party account, under about 2 hours for someone new to the repository. Data tasks name the provider and the field.
+        - **Medium:** reading existing code or tests, or comparing several official pages; about 2 to 6 hours. Name every file and the check.
+        - **Hard:** a design decision, several files, or a re-verification with quotes. Describe the approach to agree in the issue before any code; split it into steps if it is longer than a few days.
+  - type: dropdown
+    id: level
+    attributes:
+      label: Level
+      options:
+        - Easy
+        - Medium
+        - Hard
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Why this matters and what exists today, with links to the files or pages at the reviewed commit.
+    validations:
+      required: true
+  - type: textarea
+    id: task
+    attributes:
+      label: Task
+      description: Exactly what to change and what not to change. For data, the provider's own page to read and the field to fill; say that the field stays `null` (not stated) if the page doesn't answer.
+    validations:
+      required: true
+  - type: textarea
+    id: how-to-check
+    attributes:
+      label: How to check
+      description: The fast check for this change (for example `npm run validate` for `data/` changes, or `node --test scripts/x.test.mjs`) and anything to look at by hand. Keep the push-mode lines.
+      value: |
+        `npm run validate`, then `npm run build && npm test` if you have the project set up.
+        Commit only the files you edited (and a changelog fragment for user-visible changes). **Do not regenerate or commit derived files:** the regeneration bot commits them to `main` after the merge. If a check on your PR asks for regenerated files, say so in the PR and a maintainer will handle it.
+    validations:
+      required: true
+  - type: textarea
+    id: done-when
+    attributes:
+      label: Done when
+      description: The acceptance criteria a reviewer will check, as observable results (a checklist).
+    validations:
+      required: true
+  - type: textarea
+    id: files
+    attributes:
+      label: Files
+      description: Every file the change should touch. Never list generated files.
+    validations:
+      required: true
+  - type: input
+    id: size
+    attributes:
+      label: Size
+      placeholder: "about 1 hour"
+    validations:
+      required: true
+  - type: textarea
+    id: footer
+    attributes:
+      label: For contributors
+      description: Keep this text; it ends every prepared task.
+      value: |
+        To take it, comment `/take` and the bot assigns it to you (see `CONTRIBUTING.md` › Claiming an issue). Tasks labelled both `good first issue` and `data` are not assigned: the first correct, sourced pull request is merged.
+        Questions are welcome here before you start. AI-assisted work is welcome and must follow `AI_POLICY.md`. A partial answer is useful: tell us what you did and what you could not confirm.
+    validations:
+      required: true

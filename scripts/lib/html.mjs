@@ -13,7 +13,8 @@
 // Keep escapeHtml self-contained and its body exactly as written: lib/rows.mjs, lib/compare.mjs and lib/find.mjs
 // serialise it with toString() into the browser bundles (site/shared-rows.js and friends), so the browser runs the same
 // code as the server render, and reformatting it changes those generated files. The modules whose functions are (or are
-// meant to be) serialised import it as `htmlEsc`, the name those function bodies call.
+// meant to be) serialised (rows, compare, find, expiry, flags, aura, stamp) import it as `htmlEsc`, the name those
+// function bodies call.
 
 export const escapeHtml = (s) => String(s ?? '')
   .replace(/&/g, '&amp;')

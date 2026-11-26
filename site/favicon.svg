@@ -1,12 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
-  <rect width="32" height="32" rx="8" fill="#0a0d0b"/>
-  <rect x="2.5" y="2.5" width="27" height="27" rx="6.5" fill="none" stroke="#3fce8f" stroke-width="1.6" stroke-opacity=".35">
-    <animate attributeName="stroke-opacity" values="0.35;0.65;0.35" dur="3s" repeatCount="indefinite"/>
-  </rect>
-  <path d="M9 11 L14 16 L9 21" fill="none" stroke="#3fce8f" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="14" stroke-dashoffset="14">
-    <animate attributeName="stroke-dashoffset" from="14" to="0" dur="0.8s" begin="0.3s" fill="freeze"/>
-  </path>
-  <rect x="16.5" y="19.4" width="7" height="2.4" rx="1.2" fill="#3fce8f">
-    <animate attributeName="opacity" values="1;0.75;1" dur="3s" repeatCount="indefinite"/>
-  </rect>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32"><rect width="32" height="32" rx="7" fill="#17110f"/><g transform="translate(1 1) scale(0.3)"><g fill="none" stroke-linecap="round" stroke-width="8"><path d="M51.8 58.8L58.6 92.9M47.1 58.5L35.8 92M43.2 56L16.5 79.5" stroke="#ff7a4d"/><path d="M41.2 51.8L5.3 59M41.5 47.1L8.4 36M44 43.2L22.8 19.1" stroke="#f5b21f"/><path d="M48.2 41.2L41.4 7.3M52.9 41.5L63.5 9.9M56.8 44L82.8 21.1" stroke="#ff9cbc"/><path d="M58.8 48.2L90.6 41.8M58.5 52.9L91.9 64.1M56 56.8L80.4 84.5" stroke="#ff5c93"/></g></g></svg>

@@ -83,24 +83,16 @@ export function explorerRowHtml(p, opts = {}) {
   name = `<div class="name-line">${name} ${type}${isNew ? ' <span class="badge b-new" title="Recently added to the hub">NEW</span>' : ''}</div>`;
   if (p.best_for) name += `<div class="best" title="${htmlEsc(p.best_for)}">${htmlEsc(p.best_for)}</div>`;
 
-  let v;
-  if (p.verified) {
-    const date = htmlEsc(p.last_verified || '');
-    const age = p.last_verified ? Math.floor((nowMs - Date.parse(p.last_verified + 'T00:00:00Z')) / 86400000) : null;
-    const st = freshnessStatus(age);
-    const cls = st === 'stale' ? 'b-stale' : st === 'due' ? 'b-warn' : 'b-ok';
-    const tip = age != null ? ` title="Verified ${age}d ago · ${date}"` : '';
-    // The state is said in words (and by the icon shape), not only by colour and a title.
-    const word = st === 'stale' ? 'Verified, stale: re-check overdue' : st === 'due' ? 'Verified, due for re-check' : 'Verified, fresh';
-    v = `<span class="ver-cell"><span class="badge ${cls}"${tip}>${ICON(st === 'fresh' ? 'ic-check' : 'ic-warn')}<span class="sr-only">${word}</span></span><span class="ver-date">${date}</span></span>`;
-  } else {
-    v = `<span class="badge b-warn">${ICON('ic-warn')} unverified</span>`;
-  }
+  // Verified: the compact receipt, the pill (lib/stamp.mjs), dated, linked to the page the entry was checked on, the quote in its title.
+  const v = p.verified && p.last_verified
+    ? `<span class="ver-cell">${stampHtml(p, { now: nowMs, shape: 'pill' })}</span>`
+    : `<span class="badge b-warn">${ICON('ic-warn')} unverified</span>`;
 
   // Explicit row/cell roles: on a phone the stylesheet turns the table into cards (display: block), which makes some
   // screen readers (VoiceOver on iOS, some Chromium versions) drop the implicit table semantics. See styles.css.
+  // The provider's aura (lib/aura.mjs) leads the name: decorative here (its meaning is in the title and on the provider page).
   return `<tr role="row">` +
-    `<td class="name" role="cell" data-label="API">${name}</td>` +
+    `<td class="name" role="cell" data-label="API"><div class="name-row">${auraHtml(p, { now: nowMs, cls: 'aura-sm' })}<div class="name-main">${name}</div></div></td>` +
     `<td class="free" role="cell" data-label="What's free"><div class="clamp2" title="${htmlEsc(p.free_tier)}">${htmlEsc(p.free_tier)}</div></td>` +
     needsCellHtml(p) +
     `<td class="pver" role="cell" data-label="Verified">${v}</td></tr>`;
@@ -124,10 +116,13 @@ export function rowKeyTarget(key, index, count) {
   return null;
 }
 
-// freshnessStatus is referenced by name inside explorerRowHtml so the serialised
+// freshnessStatus is referenced by name inside the stamp helpers so the serialised
 // copy (shared-rows.js) can pick it up from window.FLLM_RULES; importing it here
 // keeps the same name in scope for the server render.
 import { freshnessStatus } from './rules.mjs';
+import { FLAG_DEFS, FLAG_MARKS, FLAG_UNKNOWN_WHY, flagValue, flagState, flagText, flagHtml, flagsHtml } from './flags.mjs';
+import { AURA_ORDER, AURA_OLD_DAYS, AURA_NAMES, AURA_GEOMETRY, auraRng, auraSpec, auraPaths, auraHtml } from './aura.mjs';
+import { STAMP_MONTHS, STAMP_WORDS, stampDate, stampState, stampHtml } from './stamp.mjs';
 
 /**
  * The exact client bundle the browser runs (written to site/shared-rows.js by
@@ -143,11 +138,32 @@ window.FLLM_ROWS = (function () {
   const htmlEsc = ${htmlEsc.toString()};
   const ICON = ${ICON.toString()};
   const SLUG_RE = ${SLUG_RE.toString()};
+  const FLAG_DEFS = ${JSON.stringify(FLAG_DEFS)};
+  const FLAG_MARKS = ${JSON.stringify(FLAG_MARKS)};
+  const FLAG_UNKNOWN_WHY = ${JSON.stringify(FLAG_UNKNOWN_WHY)};
+  const flagValue = ${flagValue.toString()};
+  const flagState = ${flagState.toString()};
+  const flagText = ${flagText.toString()};
+  const flagHtml = ${flagHtml.toString()};
+  const flagsHtml = ${flagsHtml.toString()};
+  const AURA_ORDER = ${JSON.stringify(AURA_ORDER)};
+  const AURA_OLD_DAYS = ${AURA_OLD_DAYS};
+  const AURA_NAMES = ${JSON.stringify(AURA_NAMES)};
+  const AURA_GEOMETRY = ${JSON.stringify(AURA_GEOMETRY)};
+  const auraRng = ${auraRng.toString()};
+  const auraSpec = ${auraSpec.toString()};
+  const auraPaths = ${auraPaths.toString()};
+  const auraHtml = ${auraHtml.toString()};
+  const STAMP_MONTHS = ${JSON.stringify(STAMP_MONTHS)};
+  const STAMP_WORDS = ${JSON.stringify(STAMP_WORDS)};
+  const stampDate = ${stampDate.toString()};
+  const stampState = ${stampState.toString()};
+  const stampHtml = ${stampHtml.toString()};
   const rowHtml = ${explorerRowHtml.toString()};
   const needsOf = ${needsOf.toString()};
   const needsCellHtml = ${needsCellHtml.toString()};
   const rowKeyTarget = ${rowKeyTarget.toString()};
-  return { rowHtml, rowKeyTarget, needsOf };
+  return { rowHtml, rowKeyTarget, needsOf, flagHtml, flagsHtml, auraHtml, stampHtml };
 })();
 `;
 }

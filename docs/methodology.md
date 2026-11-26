@@ -98,3 +98,24 @@ The score ranks providers from 0 to 100. `scripts/lib/score.mjs` computes it fro
 - **Money scores nothing.** The score reads only the provider's own record. A paid relationship lives in `data/sponsorships.json`, never in `data/providers.json`: the field `partner` is retired and `validate` rejects it. Paid items appear on [/agreements/](https://freellmapihub.com/agreements/) with a visible “Sponsored” label, and not in the dataset, `/api/v1/`, `llms.txt`, the structured data of a page or the ranking. A relationship without money (free credit, early access, a test account) is declared as a “Disclosure” next to the provider page, never on the podium or in a table. The validator rejects the words featured, partner, partners and recommended in those rows, because the labels do not use them: a company whose name contains one of them has to be written without it.
 - **No position is fixed.** The ranking is recomputed from the data; tests pin properties of the method (weights add up to 100, ranges, determinism), never who ranks where.
 
+
+## How to read an aura
+
+Every provider has an *aura*, a fan of 40 radial bars drawn at build time from its own record (`scripts/lib/aura.mjs`);
+nobody draws it by hand, so it changes when the data does.
+
+- **Colours: what it serves.** Each colour sector is one modality, always in the same order and colour: text
+  (vermilion), vision (amber), image (rose), speech (raspberry), embeddings (mustard), rerank (plum), OCR (rust). The
+  modalities are also written next to every aura, so the colours never have to be told apart.
+- **Rays or crown: how long it lasts.** Bars that grow from the centre (a sun) are an ongoing free tier; an outer crown
+  only is a one-off trial credit.
+- **Dashed circle: what the docs leave unsaid.** At least one of the four production flags (card, phone, commercial use,
+  training on prompts) is not stated in the provider's own docs.
+- **Faded: an old check.** The entry was last checked more than 30 days before the dataset's date.
+- **The rest is a fingerprint.** The rotation of the fan and the length of each bar come from the provider's slug, so
+  each aura is its own and stays the same from build to build; they carry no data.
+
+The *receipt* says how we know: the date of the last check, how many distinct pages back the entry, and a link to the
+page it was checked on; hover it to read the sentence we quoted from that page. On a provider page it is a perforated
+ticket ("✓ | Verified 24 Nov 2026 · 7 sources"); in tables and lists it is a flat pill ("● Verified · 24 Nov 2026 ·
+7 sources"). A `!` mark is past the 90-day re-check promise, and a dashed border means a re-check is due.
