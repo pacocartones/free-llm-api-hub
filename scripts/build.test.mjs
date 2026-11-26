@@ -3099,7 +3099,7 @@ test('data_policy lot 3: at least 23 of 68, LlamaParse says it does not train, R
   assert.match(retell.note, /Only if you do not opt out of recording/, 'the condition is in the note');
   for (const dp of [llama, retell]) {
     assert.match(dp.source, /^https:\/\//);
-    assert.equal(dp.checked, dp === llama ? '2026-11-17' : '2026-10-15');
+    assert.ok(dp.checked >= (dp === llama ? '2026-11-17' : '2026-10-15'), 'read on or after the lot 3 day (a later re-read of a row is fine)');
   }
 });
 
