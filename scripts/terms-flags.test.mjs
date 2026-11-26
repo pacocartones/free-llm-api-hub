@@ -67,10 +67,10 @@ test('validate: the dataset as committed passes with both flags', () => {
 test('validate: conditional needs its condition, and a condition needs conditional', () => {
   let r = runValidate(withTerms({ values: { multi_account_forbidden: 'conditional' }, checks: { multi_account_forbidden: stated } }).data);
   assert.notEqual(r.status, 0);
-  assert.match(r.output, /multi_account_forbidden is conditional, so multi_account_condition is required/);
+  assert.match(r.output, /multi_account_forbidden is conditional, so multi_account_condition is required|must have required property 'multi_account_condition'/);
   r = runValidate(withTerms({ values: { multi_account_forbidden: true, multi_account_condition: 'Free plan only.' }, checks: { multi_account_forbidden: stated } }).data);
   assert.notEqual(r.status, 0);
-  assert.match(r.output, /multi_account_condition only allowed when multi_account_forbidden is "conditional"/);
+  assert.match(r.output, /multi_account_condition only allowed when multi_account_forbidden is "conditional"|multi_account_condition must be null/);
   r = runValidate(withTerms({ values: { multi_account_forbidden: 'conditional', multi_account_condition: 'Free plan only: one per IP address.' }, checks: { multi_account_forbidden: stated } }).data);
   assert.equal(r.status, 0, r.output);
 });
@@ -78,7 +78,7 @@ test('validate: conditional needs its condition, and a condition needs condition
 test('validate: limit_circumvention_forbidden has no conditional value', () => {
   const r = runValidate(withTerms({ values: { limit_circumvention_forbidden: 'conditional' }, checks: { limit_circumvention_forbidden: stated } }).data);
   assert.notEqual(r.status, 0);
-  assert.match(r.output, /limit_circumvention_forbidden must be true\/false\/null/);
+  assert.match(r.output, /limit_circumvention_forbidden must be (true\/false\/null|boolean,null)/);
 });
 
 test('validate: a recorded value carries its check, a check carries its value, and a reason goes with null', () => {
@@ -144,7 +144,7 @@ test('provider page: a row per flag, "Not stated" for null or absent, the condit
   assert.match(html, /Free plan only: &lt;one&gt; per IP\./, 'the condition is shown, escaped');
   assert.match(html, /&ldquo;Only one free plan per IP\.&rdquo;/);
   assert.match(html, /Read <a href="https:\/\/example.com\/tos"[^>]*>the provider's page<\/a>, checked 2026-11-20\. Terms read in full\./);
-  assert.match(html, /Getting around limits forbidden: unknown — not stated in the provider's docs/);
+  assert.match(html, /<span class="sr-only">Getting around limits forbidden: unknown — not stated in the provider&#39;s docs<\/span>/);
   assert.doesNotMatch(html, /allowed/, 'null is never shown as allowed');
 
   const forbidden = termsRowsHtml({ multi_account_forbidden: true, limit_circumvention_forbidden: false });

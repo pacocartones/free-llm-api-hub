@@ -2768,7 +2768,8 @@ test('field_checks reach every public surface: provider page, API v1, llms-full.
     assert.deepEqual(api.get(p.slug).field_checks, p.field_checks, `${p.slug}: API v1 carries field_checks unchanged`);
     const page = readFileSync(join(ROOT, `site/p/${p.slug}.html`), 'utf8');
     for (const [f, c] of Object.entries(p.field_checks)) {
-      if (p[f] !== null || !LABEL[c.status] || f === 'openai_compatible') continue;
+      // The terms flags read "Not stated" with their source line instead (scripts/terms-flags.test.mjs).
+      if (p[f] !== null || !LABEL[c.status] || f === 'openai_compatible' || f === 'multi_account_forbidden' || f === 'limit_circumvention_forbidden') continue;
       assert.ok(page.includes(`${LABEL[c.status]} (checked ${c.checked})`), `${p.slug}.${f}: the page says the reason and the day`);
       assert.ok(full.includes(`unknown, ${LABEL[c.status]} (checked ${c.checked})`), `${p.slug}.${f}: llms-full.txt says the reason`);
     }
