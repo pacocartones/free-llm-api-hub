@@ -363,6 +363,18 @@
    "page_sha256": "abe7586d38f3e1474f906d6ba8b3e833f0c8816bb776800f8009747a7d52174a"
   },
   {
+   "id": "fireworks-ai.card_required.sentence",
+   "slug": "fireworks-ai",
+   "kind": "field_sentence",
+   "field": "card_required",
+   "text": "Adding a payment method is required to continue service after credit depletion",
+   "source_url": "https://docs.fireworks.ai/faq-new/billing-pricing/what-happens-when-i-finish-my-1-dollar-credit",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "304d36025e9bd9210f82b0fa2956a045c6ec8001916e0d32afcc1e9c94aeac77"
+  },
+  {
    "id": "baseten.sentence",
    "slug": "baseten",
    "kind": "sentence",
@@ -382,7 +394,31 @@
    "read_on": "2026-11-26",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
-   "page_sha256": "e759ea7c23ca3265ea9806e010c0ed0e0e865eb5e21b54799e92aeeb5ec2a279"
+   "page_sha256": "98414c14ebd7b5778d66cf24485c1aa8acce396b597f7ac067e893c041e02ab4"
+  },
+  {
+   "id": "novita.card_required.sentence",
+   "slug": "novita",
+   "kind": "field_sentence",
+   "field": "card_required",
+   "text": "No credit card is required.",
+   "source_url": "https://docs.novita.ai/guides/sandbox-pricing",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "5f1a0c8030fdba8a9e1a63ab425e177df565d7385efcd9f648c664d32907c75f"
+  },
+  {
+   "id": "novita.commercial_ok.sentence",
+   "slug": "novita",
+   "kind": "field_sentence",
+   "field": "commercial_ok",
+   "text": "exploited for any commercial purpose whatsoever, without our express prior written permission",
+   "source_url": "https://novita.ai/legal/terms-of-service",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "98414c14ebd7b5778d66cf24485c1aa8acce396b597f7ac067e893c041e02ab4"
   },
   {
    "id": "ai21.sentence",
@@ -390,7 +426,7 @@
    "kind": "sentence",
    "text": "Consistent with our Terms of Service, and unless otherwise agreed in writing or required to provide the Services, we do not use your inputs or outputs to train AI21’s foundational or generally available AI models.",
    "source_url": "https://www.ai21.com/terms-policies/privacy-policy/",
-   "read_on": "2026-11-25",
+   "read_on": "2026-11-26",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "9ef422aee409e1aa63a2d4ae16a3e265bd4a572aa864ba909b9f7aea3988bf3f"
@@ -401,7 +437,7 @@
    "kind": "note_passage",
    "text": "Privacy Policy",
    "source_url": "https://www.ai21.com/terms-policies/privacy-policy/",
-   "read_on": "2026-11-25",
+   "read_on": "2026-11-26",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "9ef422aee409e1aa63a2d4ae16a3e265bd4a572aa864ba909b9f7aea3988bf3f"
@@ -412,7 +448,7 @@
    "kind": "note_passage",
    "text": "for example, for individual-developer accounts",
    "source_url": "https://www.ai21.com/terms-policies/privacy-policy/",
-   "read_on": "2026-11-25",
+   "read_on": "2026-11-26",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "9ef422aee409e1aa63a2d4ae16a3e265bd4a572aa864ba909b9f7aea3988bf3f"
@@ -423,7 +459,7 @@
    "kind": "note_passage",
    "text": "that processing is governed by our agreement with the customer",
    "source_url": "https://www.ai21.com/terms-policies/privacy-policy/",
-   "read_on": "2026-11-25",
+   "read_on": "2026-11-26",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "9ef422aee409e1aa63a2d4ae16a3e265bd4a572aa864ba909b9f7aea3988bf3f"
@@ -445,10 +481,34 @@
     "plan": 0
    },
    "source_url": "https://www.ai21.com/terms-policies/privacy-policy/",
-   "read_on": "2026-11-25",
+   "read_on": "2026-11-26",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "9ef422aee409e1aa63a2d4ae16a3e265bd4a572aa864ba909b9f7aea3988bf3f"
+  },
+  {
+   "id": "ai21.card_required.sentence",
+   "slug": "ai21",
+   "kind": "field_sentence",
+   "field": "card_required",
+   "text": "Free Trial $10 credits for 7 days. No credit card needed",
+   "source_url": "https://www.ai21.com/pricing/",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "9004ddfee7fd8ebcb5401b5bf85bb33131278bda55cf8d3f157fbcb91dc15c0f"
+  },
+  {
+   "id": "ai21.commercial_ok.sentence",
+   "slug": "ai21",
+   "kind": "field_sentence",
+   "field": "commercial_ok",
+   "text": "FOR YOUR INTERNAL EVALUATION ONLY",
+   "source_url": "https://www.ai21.com/terms-policies/terms-of-use/",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "60b28d1b6c511e254b3d8082da71e3f707ebdfb7c3a263e66182b5cb137a161c"
   },
   {
    "id": "nlpcloud.sentence",
@@ -608,7 +668,7 @@
    "kind": "sentence",
    "text": "User Content and Generated Content to improve NVIDIA products and services, including AI models.",
    "source_url": "https://assets.ngc.nvidia.com/products/api-catalog/legal/NVIDIA%20API%20Trial%20Terms%20of%20Service.pdf",
-   "read_on": "2026-11-20",
+   "read_on": "2026-11-26",
    "lang": "en",
    "method": "pdf-text-v1: PDF parsed with unpdf (pdf.js), text of all pages joined, white space collapsed",
    "page_sha256": "3a6dc711bca9e4736db07906481daa0407faf4a11ed216701691e32dfb4459a4"
@@ -619,7 +679,7 @@
    "kind": "note_passage",
    "text": "to improve NVIDIA products and services, including AI models",
    "source_url": "https://assets.ngc.nvidia.com/products/api-catalog/legal/NVIDIA%20API%20Trial%20Terms%20of%20Service.pdf",
-   "read_on": "2026-11-20",
+   "read_on": "2026-11-26",
    "lang": "en",
    "method": "pdf-text-v1: PDF parsed with unpdf (pdf.js), text of all pages joined, white space collapsed",
    "page_sha256": "3a6dc711bca9e4736db07906481daa0407faf4a11ed216701691e32dfb4459a4"
@@ -630,7 +690,7 @@
    "kind": "note_passage",
    "text": "will not store or use User Content or Generated Content at the end of each API Service session",
    "source_url": "https://assets.ngc.nvidia.com/products/api-catalog/legal/NVIDIA%20API%20Trial%20Terms%20of%20Service.pdf",
-   "read_on": "2026-11-20",
+   "read_on": "2026-11-26",
    "lang": "en",
    "method": "pdf-text-v1: PDF parsed with unpdf (pdf.js), text of all pages joined, white space collapsed",
    "page_sha256": "3a6dc711bca9e4736db07906481daa0407faf4a11ed216701691e32dfb4459a4"
@@ -1014,10 +1074,10 @@
    "kind": "sentence",
    "text": "(iii) to train, improve, and otherwise further develop the Service (such as by training the artificial intelligence models we use).",
    "source_url": "https://www.voyageai.com/tos",
-   "read_on": "2026-10-15",
+   "read_on": "2026-11-26",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
-   "page_sha256": "fe6ffaf647e5b7e0038fdd3146890e326f28488a6bdde4640408d7feccc5b39c"
+   "page_sha256": "b2c68787c0c9d72ef8a21301f2e6ace4a4d8286cb5dc8faee4125dbebb685553"
   },
   {
    "id": "voyage-ai.note_passage.1",
@@ -1025,10 +1085,10 @@
    "kind": "note_passage",
    "text": "If you opt out, any credits or tokens for free usage of the Service may be automatically void (as determined by Voyage AI in its sole discretion).",
    "source_url": "https://www.voyageai.com/tos",
-   "read_on": "2026-10-15",
+   "read_on": "2026-11-26",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
-   "page_sha256": "fe6ffaf647e5b7e0038fdd3146890e326f28488a6bdde4640408d7feccc5b39c"
+   "page_sha256": "b2c68787c0c9d72ef8a21301f2e6ace4a4d8286cb5dc8faee4125dbebb685553"
   },
   {
    "id": "cartesia.sentence",
@@ -1103,7 +1163,7 @@
    "kind": "sentence",
    "text": "We may use your Content to provide, maintain, improve, and develop the Products and other Poolside offerings, including training our models, unless you opt-out.",
    "source_url": "https://poolside.ai/legal/eula",
-   "read_on": "2026-10-16",
+   "read_on": "2026-11-26",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "e61bfb4ed61a5d4ffb954d7f42d9b8a30322dae299ad4fd317dd9ed0b1fe1aea"
@@ -1114,10 +1174,22 @@
    "kind": "sentence",
    "text": "may be used for service provision and improvement, as well as for research and development of artificial intelligence technologies (including training)",
    "source_url": "https://www.upstage.ai/terms-of-service",
-   "read_on": "2026-11-25",
+   "read_on": "2026-11-26",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "c65d5a4023f4655c2bde4e5274c6d92f39f9c016871dd032ba27dc9e9f641f3d"
+  },
+  {
+   "id": "upstage.card_required.sentence",
+   "slug": "upstage",
+   "kind": "field_sentence",
+   "field": "card_required",
+   "text": "No login or credit card is required for basic testing.",
+   "source_url": "https://console.upstage.ai/docs/resources/faq.md",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "30ef1e01fbb425bf47e64c0c4823bc99ed3a0502b0350b330aa0bb365b5d8641"
   },
   {
    "id": "veryfi.sentence",
@@ -1125,10 +1197,34 @@
    "kind": "sentence",
    "text": "To deliver and continually improve this service, we may use data you submit, which can include personal data contained in your documents, to train, validate, and improve our proprietary machine learning models.",
    "source_url": "https://www.veryfi.com/privacy/",
-   "read_on": "2026-11-24",
+   "read_on": "2026-11-26",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "9f56ce536cfe568f0414491ff53d5d4201c9f093d6633ed73cb73509288281ca"
+  },
+  {
+   "id": "veryfi.card_required.sentence",
+   "slug": "veryfi",
+   "kind": "field_sentence",
+   "field": "card_required",
+   "text": "Yes. Start with a free 14-day trial. After that, up to 100 documents a month, free. No credit card required.",
+   "source_url": "https://www.veryfi.com/pricing/",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "8c1823842993dbf89809e385dac8eb4fb7daf7b6f38ca2291464d754af354ddd"
+  },
+  {
+   "id": "veryfi.commercial_ok.sentence",
+   "slug": "veryfi",
+   "kind": "field_sentence",
+   "field": "commercial_ok",
+   "text": "Offer as part of your commercial product (B2B2C is fine!)",
+   "source_url": "https://www.veryfi.com/terms-api-starter/",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "8ac7a3d3f094b2470b39c6b8c6571ef8ca632c9aea601f0ca7bf677b121bbd72"
   },
   {
    "id": "voicegain.sentence",
@@ -1147,10 +1243,10 @@
    "kind": "sentence",
    "text": "We will not use such User Content or Input to train and improve our Services or to develop new products and services.",
    "source_url": "https://smallest.ai/terms-of-service",
-   "read_on": "2026-10-15",
+   "read_on": "2026-11-26",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
-   "page_sha256": "c3e061e0e2175c2af4cbeddfd0cdee6a31724821f21c9be0c43064eee841e10a"
+   "page_sha256": "38b46496e61c07b4be1e75771589e6d50204858cceaf9930571743272db7b9d6"
   },
   {
    "id": "smallest-ai.note_passage.1",
@@ -1158,10 +1254,22 @@
    "kind": "note_passage",
    "text": "free or trial versions",
    "source_url": "https://smallest.ai/terms-of-service",
-   "read_on": "2026-10-15",
+   "read_on": "2026-11-26",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
-   "page_sha256": "c3e061e0e2175c2af4cbeddfd0cdee6a31724821f21c9be0c43064eee841e10a"
+   "page_sha256": "38b46496e61c07b4be1e75771589e6d50204858cceaf9930571743272db7b9d6"
+  },
+  {
+   "id": "smallest-ai.commercial_ok.sentence",
+   "slug": "smallest-ai",
+   "kind": "field_sentence",
+   "field": "commercial_ok",
+   "text": "Use the Services, or any portion thereof, for any commercial purpose or for the benefit of any third party or in any manner not permitted by these Terms",
+   "source_url": "https://smallest.ai/terms-of-service",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "38b46496e61c07b4be1e75771589e6d50204858cceaf9930571743272db7b9d6"
   },
   {
    "id": "retell-ai.sentence",
@@ -1203,7 +1311,7 @@
    "kind": "sentence",
    "text": "CoreWeave does not use Inference Content to train models.",
    "source_url": "https://docs.coreweave.com/products/inference/serverless/privacy-and-security",
-   "read_on": "2026-11-24",
+   "read_on": "2026-11-26",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "1548ca23c669294dff7b31bd3f63b42702d769f7b49a22ee01993d8329a834f1"
