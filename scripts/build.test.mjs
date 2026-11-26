@@ -2122,6 +2122,7 @@ test('active providers retain models_url from their official catalogues', () => 
     ['fireworks-ai', 'https://fireworks.ai/models'],
     ['baseten', 'https://docs.baseten.co/inference/model-apis/overview'],
     ['alibaba-model-studio', 'https://www.alibabacloud.com/help/en/model-studio/model-pricing'],
+    ['assemblyai', 'https://www.assemblyai.com/docs/getting-started/models'],
     ['deepgram', 'https://developers.deepgram.com/docs/models-languages-overview'],
     ['nvidia-nim', 'https://build.nvidia.com/models'],
     ['sambanova', 'https://docs.sambanova.ai/docs/en/models/sambacloud-models'],
