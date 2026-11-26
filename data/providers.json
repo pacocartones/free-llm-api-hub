@@ -139,6 +139,7 @@
       "best_for": "Free embeddings and rerank for RAG prototypes",
       "modalities": ["text", "embeddings", "rerank"],
       "models_free": ["command-a-03-2025", "command-r-plus-08-2024", "command-r-08-2024", "command-r7b-12-2024", "embed-v4.0", "rerank-v3.5"],
+      "models_url": "https://docs.cohere.com/docs/models",
       "expires": null,
       "docs_url": "https://docs.cohere.com/docs/rate-limits",
       "phone_required": null,
