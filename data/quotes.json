@@ -1461,6 +1461,88 @@
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "3862774fa7327cede659b450d922ed202006d069097a4b761cad90d0064eaa1a"
+  },
+  {
+   "id": "gigachat.commercial_ok.sentence",
+   "slug": "gigachat",
+   "kind": "field_sentence",
+   "field": "commercial_ok",
+   "text": "Бесплатный доступ (Freemium-режим) к контенту, сгенерированному с помощью GigaChat API, предоставляется исключительно для личного некоммерческого использования.",
+   "source_url": "https://developers.sber.ru/docs/ru/gigachat/tariffs/commercial",
+   "read_on": "2026-11-26",
+   "lang": "ru",
+   "method": "html-text-v1: page requested with Accept-Language ru, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "899238bdf9f7f26217224494ae12227e7214efec6f698670fc3129a7ae2d1fb0"
+  },
+  {
+   "id": "gigachat.openai_compatible.sentence",
+   "slug": "gigachat",
+   "kind": "field_sentence",
+   "field": "openai_compatible",
+   "text": "Тем не менее формат сообщений GigaChat API частично совместим с OpenAI API.",
+   "source_url": "https://developers.sber.ru/docs/ru/gigachat/guides/compatible-openai",
+   "read_on": "2026-11-26",
+   "lang": "ru",
+   "method": "html-text-v1: page requested with Accept-Language ru, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "b6f506ff3905189b4a69e26a95d63782e4e558dfa72db162618f5f1858f768df"
+  },
+  {
+   "id": "berget-ai.sentence",
+   "slug": "berget-ai",
+   "kind": "sentence",
+   "text": "No data retention, no training on your data, and new models within days of release.",
+   "source_url": "https://berget.ai/en/serverless-inference",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "f361b079a6eb3569e2fb7ffe02532f753d66e12aa8db8f23143256da15631bbd"
+  },
+  {
+   "id": "berget-ai.card_required.sentence",
+   "slug": "berget-ai",
+   "kind": "field_sentence",
+   "field": "card_required",
+   "text": "The Trial plan includes €5 in starting credits so you can try the API without a subscription — a card is required at signup to prevent abuse, but nothing is charged.",
+   "source_url": "https://berget.ai/en/pricing",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "6fdce1bd991263af58b5808cf8a0cf3811ec09fd218c80ebe7304cc6e8e3e8ef"
+  },
+  {
+   "id": "berget-ai.openai_compatible.sentence",
+   "slug": "berget-ai",
+   "kind": "field_sentence",
+   "field": "openai_compatible",
+   "text": "OpenAI-compatible API for leading open models.",
+   "source_url": "https://berget.ai/en/serverless-inference",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "f361b079a6eb3569e2fb7ffe02532f753d66e12aa8db8f23143256da15631bbd"
+  },
+  {
+   "id": "netlify-ai-gateway.sentence",
+   "slug": "netlify-ai-gateway",
+   "kind": "sentence",
+   "text": "The AI Gateway does not store your prompts or model outputs.",
+   "source_url": "https://docs.netlify.com/build/ai-gateway/overview/",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "9c7ca9d3f4839b0de12a8316b3aa2a6da8a2f564d7ce7fdb547c96c25e6d5745"
+  },
+  {
+   "id": "netlify-ai-gateway.openai_compatible.sentence",
+   "slug": "netlify-ai-gateway",
+   "kind": "field_sentence",
+   "field": "openai_compatible",
+   "text": "Use the official OpenAI, Anthropic, Google, and OpenRouter SDKs you already know.",
+   "source_url": "https://www.netlify.com/platform/ai-gateway/",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "ba012e49c6059f0dc69699e5d3e6d9fa2fb18e82b53ddc46ae7d487ff78b59f7"
   }
  ]
 }
