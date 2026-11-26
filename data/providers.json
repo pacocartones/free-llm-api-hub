@@ -669,6 +669,7 @@
       "best_for": "Biggest free credit here, for speech (STT/TTS)",
       "modalities": ["audio"],
       "models_free": null,
+      "models_url": "https://developers.deepgram.com/docs/models-languages-overview",
       "expires": null,
       "docs_url": "https://deepgram.com/pricing",
       "phone_required": false,

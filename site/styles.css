@@ -885,7 +885,9 @@ p.muted a, .prose p a, .prov-summary p a { text-decoration: underline; text-unde
 .month-summary { max-width: 70ch; margin: 0 auto 22px; text-align: center; }
 /* /changes/: one table by year and month; a month without a revision is dimmed. */
 .months-table th[scope="rowgroup"] { vertical-align: top; text-align: left; font-family: var(--font-mono); }
-.months-table tr.empty td { color: var(--muted); }
+.months-table tr.empty td { color: var(--muted); font-family: inherit; }
+/* A date in a table cell (the guides' "Checked" column) never breaks across lines. */
+td time { white-space: nowrap; }
 
 /* The "About" block of a provider page: each line with its source and the day it was read. */
 .prov-about { display: grid; gap: 0; margin: 0 0 12px; }
