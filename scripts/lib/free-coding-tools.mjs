@@ -7,8 +7,7 @@
 
 import { htmlEsc, SLUG_RE } from './rows.mjs';
 import { claimsTableHtml } from './claims-table.mjs';
-
-const safeHttp = (u) => (/^https?:\/\//i.test(String(u || '')) ? String(u) : '');
+import { safeHttp } from './text.mjs';
 
 const LABELS = Object.freeze({
   free_access: 'Free access',

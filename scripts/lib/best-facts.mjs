@@ -2,9 +2,9 @@
 // Every value is a field of data/providers.json shown as it is, with the date and the source the provider record already carries
 // (last_verified and docs_url); nothing is computed or added. A field the record does not have reads «not stated», never a guess.
 import { htmlEsc } from './rows.mjs';
+import { safeUrl } from './text.mjs';
 
 const NOT_STATED = 'not stated';
-const safeUrl = (u) => (/^https?:\/\//i.test(String(u || '')) ? htmlEsc(u) : '');
 const text = (v) => (typeof v === 'string' && v.trim() ? v.trim() : '');
 
 const source = (p) => {
