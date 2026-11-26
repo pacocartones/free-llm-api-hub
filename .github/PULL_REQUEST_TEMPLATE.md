@@ -29,7 +29,7 @@ If a relevant check could not run, include the error and why it is blocked. -->
 - [ ] **Code, data or build-input changes:** I ran `npm test` and it passed.
 - [ ] **Docs or template text:** I previewed the changed text and opened its links.
 - [ ] **Data or build-input changes:** I ran `npm run build` (and `npm run og` if the OG check asked for it). Outside push mode I committed the regenerated files; in push mode I committed none of them (the bot does it after the merge).
-- [ ] **Build-input changes, outside push mode:** I ran `npm run check` and it found no drift.
+- [ ] **Build-input changes:** I ran `npm run check` and it passed (in push mode it runs CI's push-mode gate).
 - [ ] **Data changes:** I edited the canonical data by hand, not the generated files, and left `generated` and `version` as they are (they move only in a release).
 - [ ] **User-visible changes:** I added a changelog fragment `changes/unreleased/<short-name>.md` instead of editing `CHANGELOG.md`.
 - [ ] **Data changes:** for a verified change, I set `verified: true` **with** a `last_verified` date (the day I checked) **and** a real `docs_url`.
@@ -47,6 +47,6 @@ regeneration bot's mode, printed by the "Regeneration mode" step of the "Dataset
 - mode=push: do not regenerate or commit derived files. The bot commits them to main after the
   merge. The check fails only if you edited a derived file by hand or this is a release PR.
 - any other mode: the check fails until they are in sync. Run `npm run build`, commit, push again.
-The non-blocking "Regeneration preview" run lists the stale files and offers them as a patch
+Either way the check lists the stale files in its run summary and offers them as a patch
 artifact (`regen-preview-patch`).
 -->
