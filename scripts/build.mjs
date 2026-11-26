@@ -72,6 +72,7 @@ import { SITEMAPS as INDEXNOW_SITEMAPS } from './lib/indexnow.mjs';
 import { groupModels, modelKey } from './lib/model-keys.mjs';
 import { providerMetaDescription } from './lib/provider-meta.mjs';
 import { answerFirst, providerFaq, providerFaqHtml, providerFaqJsonLd } from './lib/provider-faq.mjs';
+import { reportMistakeHtml } from './lib/report-mistake.mjs';
 import { isIndexable, modelPageMainHtml, modelPageTitle, modelPageDescription, modelPageJsonLd } from './lib/model-pages.mjs';
 import { FAMILY_PATH, familyGroups, isFamilyIndexable, familyUrl, familyH1, familyPageTitle, familyPageDescription, familyBlurb, familyPageMainHtml, familyNavHtml } from './lib/model-families.mjs';
 import { collectionPageJsonLd as pageJsonLd, comparePageJsonLd } from './lib/page-jsonld.mjs';
@@ -1411,6 +1412,8 @@ for (const p of providers) {
     (crossChips ? `<h2>Appears in</h2><div class="colls">${crossChips}</div>` : '') +
     compareHtml +
     providerFaqHtml(p, faq) +
+    // At the end of the FAQ, the way to flag a wrong value: the data-correction form, prefilled (lib/report-mistake.mjs).
+    reportMistakeHtml(p, { repo: REPO, pageUrl: `${SITE}/p/${p.slug}`, prefix: '../' }) +
     historyHtml(p.slug) +
     useDataHtml(p) +
     `</div></main>`;
@@ -1872,7 +1875,7 @@ for (const g of FAMILY_GROUPS) {
     title: datedTitle(familyPageTitle(g)),
     desc: familyPageDescription(g),
     canonical: url,
-    main: familyPageMainHtml(g, { asOf: ASOF, prefix: '../../', modelHref: modelPageHref('../../'), others: FAMILY_GROUPS }),
+    main: familyPageMainHtml(g, { asOf: ASOF, prefix: '../../', modelHref: modelPageHref('../../'), others: FAMILY_GROUPS, repo: REPO, pageUrl: url }),
     jsonld: pageJsonLd({
       site: SITE, type: 'WebPage', name: familyH1(g), url, description: familyPageDescription(g),
       about: datasetRef(SITE, DATASET_FACTS),
