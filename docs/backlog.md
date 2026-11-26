@@ -87,6 +87,15 @@ only what confirms.
   tiers but mainland phone/ID gates make them poor fits for an international
   builder audience. Revisit if any drops the ID wall for overseas devs.
 
+- [ ] **Rejected by maintainer decision (do not add):** GigaChat API (Sber /
+  SaluteDevices), proposed in #903 and dropped on 2026-11-26. It is operated by
+  Sber (SaluteDevices), a Russian bank under EU and US sanctions; its free
+  Freemium mode bars commercial use and is effectively unusable for most users
+  outside Russia. Its free offer was real when checked (365M yearly tokens,
+  [individual tariffs](https://developers.sber.ru/docs/ru/gigachat/tariffs/individual-tariffs)),
+  so the reason is the operator, not the offer. Revisit only if the sanctions
+  situation changes.
+
 - [ ] **Explicitly NOT free (do not add; leave in "Notably NOT free" thinking):**
 
   Moonshot/Kimi intl (needs a $1 minimum recharge; the $5 voucher needs $5 of

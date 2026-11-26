@@ -6,4 +6,4 @@
   What changed page) and asking for changes we missed with a source link, and "New provider
   candidates — <Month YYYY>", one proposal per comment under the inclusion criteria with the current
   non-text share against the 35% guardrail. It never opens the same month's issue twice and never
-  edits data. `CONTRIBUTING.md` lists where to find work each month. Agent-assisted.
+  edits data. `CONTRIBUTING.md` lists where to find work each month. Agent-assisted (#784).

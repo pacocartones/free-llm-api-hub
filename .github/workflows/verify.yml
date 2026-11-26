@@ -4,7 +4,9 @@ name: Verify
 #
 # What blocks: the dataset must satisfy the integrity rules, internal doc links
 # must resolve, and the derived files must agree with the data. How strictly
-# depends on the repository variable REGEN_MODE (docs/regeneration-bot.md):
+# depends on the repository variable REGEN_MODE (docs/regeneration-bot.md; on a
+# pull request from a fork, which sees no repository variables, the committed
+# .github/regen-mode file on the base branch):
 #   - push: the regeneration bot (regenerate.yml) commits the derived files to
 #     main after the merge, so a data PR does not regenerate them. The checks
 #     run on a freshly regenerated tree, and only derived files the PR edits by
@@ -53,6 +55,7 @@ jobs:
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: .nvmrc
+          cache: npm
 
       # JSON Schema validation uses locked development dependencies. Disable
       # lifecycle scripts so CI only installs the declared tooling.
@@ -60,11 +63,26 @@ jobs:
         run: npm ci --ignore-scripts
 
       # One parser for REGEN_MODE (scripts/lib/regenerate.mjs): only `push` relaxes the drift gate below.
+      # A pull request from a fork gets no repository variables, so vars.REGEN_MODE is empty there. It then reads the
+      # mode from .github/regen-mode on the base branch, never from the pull request's own tree, so a pull request
+      # cannot relax its own gate. When the variable is set it always wins. No --depth on the fetch: the clone is
+      # complete and a shallow fetch would truncate the history the build mines from git log. A base branch without
+      # the file reads as off, the strict gate.
       - id: regen
         name: Regeneration mode
+        shell: bash
         env:
           REGEN_MODE: ${{ vars.REGEN_MODE }}
-        run: node scripts/regenerate-guard.mjs mode
+          EVENT: ${{ github.event_name }}
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          if [ -z "$REGEN_MODE" ] && [ "$EVENT" = pull_request ]; then
+            git fetch --no-tags origin "refs/heads/$BASE_REF"
+            REGEN_MODE="$(git show FETCH_HEAD:.github/regen-mode 2>/dev/null || true)"
+            echo "vars.REGEN_MODE is not visible to this run; the mode file on $BASE_REF says: ${REGEN_MODE:-<missing>}"
+            export REGEN_MODE
+          fi
+          node scripts/regenerate-guard.mjs mode
 
       - name: Validate dataset against integrity rules
         run: node scripts/validate.mjs
@@ -162,13 +180,14 @@ jobs:
       # its merge), and drift outside the bot's allowlist. HEAD^1 is the base
       # branch in the PR's merge commit and the previous main on a push. The
       # decision is driftGate() in scripts/lib/regenerate.mjs, tested.
+      # It compares the tree "Regenerate the derived files first" wrote. Nothing in between writes to the working
+      # tree (the checks only read, and the test suite builds into temporary copies), and a second build of the
+      # same tree is byte-identical (regenerate.yml asserts that on main), so the job builds once.
       - name: Derived files must not be hand-edited, and a release ships them regenerated (REGEN_MODE=push)
         if: ${{ steps.regen.outputs.mode == 'push' }}
         env:
           REGEN_MODE: ${{ steps.regen.outputs.mode }}
-        run: |
-          node scripts/build.mjs
-          BASE="$(git rev-parse HEAD^1)" node scripts/regenerate-guard.mjs drift-gate
+        run: BASE="$(git rev-parse HEAD^1)" node scripts/regenerate-guard.mjs drift-gate
 
   windows-tests:
     name: Windows tests
@@ -191,20 +210,40 @@ jobs:
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: .nvmrc
+          cache: npm
 
       - name: Install locked development dependencies
         run: npm ci --ignore-scripts
 
+      # A pull request from a fork gets no repository variables, so vars.REGEN_MODE is empty there. It then reads the
+      # mode from .github/regen-mode on the base branch, never from the pull request's own tree, so a pull request
+      # cannot relax its own gate. When the variable is set it always wins. No --depth on the fetch: the clone is
+      # complete and a shallow fetch would truncate the history the build mines from git log. A base branch without
+      # the file reads as off, the strict gate.
       - id: regen
         name: Regeneration mode
+        shell: bash
         env:
           REGEN_MODE: ${{ vars.REGEN_MODE }}
-        run: node scripts/regenerate-guard.mjs mode
+          EVENT: ${{ github.event_name }}
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          if [ -z "$REGEN_MODE" ] && [ "$EVENT" = pull_request ]; then
+            git fetch --no-tags origin "refs/heads/$BASE_REF"
+            REGEN_MODE="$(git show FETCH_HEAD:.github/regen-mode 2>/dev/null || true)"
+            echo "vars.REGEN_MODE is not visible to this run; the mode file on $BASE_REF says: ${REGEN_MODE:-<missing>}"
+            export REGEN_MODE
+          fi
+          node scripts/regenerate-guard.mjs mode
 
-      # As in Dataset integrity: in push mode the suite runs on the tree main will hold after the bot's run.
+      # As in Dataset integrity: in push mode the suite runs on the tree main will hold after the bot's run, social
+      # images included (a pull request that changes how they are drawn does not ship them either).
       - name: Regenerate the derived files first (REGEN_MODE=push)
         if: ${{ steps.regen.outputs.mode == 'push' }}
-        run: node scripts/build.mjs
+        shell: bash
+        run: |
+          node scripts/build.mjs
+          node scripts/check-og.mjs || node scripts/og.mjs
 
       # The runner may create symlinks; a contributor without Developer Mode may not (#783). The preload refuses them
       # as Windows does there, junctions still work. A file URL, so the test processes in other folders find it too.

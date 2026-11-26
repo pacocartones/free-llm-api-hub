@@ -88,6 +88,7 @@ function render(first) {
     (sortKey !== 'recommended' ? 1 : 0) +
     [nocard, nophone, commercial, textOnly, notrain, openai, verifiedOnly].filter(Boolean).length;
   document.getElementById('clearFilters').hidden = activeCount === 0;
+  syncActiveFilters();
   syncEmptyClear(emptyEl, rows.length === 0 && activeCount > 0);
 
   // Rows come from shared-rows.js — the same function the server used to SSR
@@ -100,6 +101,9 @@ function render(first) {
   syncSortSel();
   syncRoving();
   syncURL();
+  // The coloured dot of the modality filter (decorative, aria-hidden): its colour is the selected modality's --m-* token.
+  const modDot = document.getElementById('modality-dot');
+  if (modDot) modDot.setAttribute('data-mod', modality);
 }
 
 // --- keyboard navigation (#174): roving tabindex over the rows ---
@@ -219,9 +223,65 @@ document.querySelectorAll('thead th[data-key]').forEach(th => {
 });
 ['f-nocard', 'f-nophone', 'f-commercial', 'f-text', 'f-notrain', 'f-openai', 'f-verified'].forEach(id =>
   document.getElementById(id).addEventListener('input', e => {
-    const chip = e.target.closest('.chip'); if (chip) chip.classList.toggle('on', e.target.checked);
     render();
   }));
+
+// --- one control bar: the Requirements dropdown and the active-filter chips ---
+// The boolean filters and the type live in one <details> dropdown; its summary says how many are on ("Requirements (2)").
+// Every active filter (search, type, modality, requirement) is repeated under the bar as a removable chip with ✕. Removing a
+// chip resets the real control and fires the same events a visitor's own click would, so the explorer and the GA4 hooks
+// (explorer_filter, site_search: lib/consent.client.js listens on the document) see exactly the same thing.
+const REQ_LABELS = { 'f-nocard': 'No credit card', 'f-nophone': 'No phone number', 'f-commercial': 'Commercial use', 'f-notrain': "Doesn't train on prompts",
+  'f-openai': 'OpenAI-compatible', 'f-text': 'Text LLMs only', 'f-verified': 'Verified only' };
+const CAT_LABELS = { ongoing: 'Ongoing free tiers', trial: 'Trial credits' };
+const afEsc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+function syncActiveFilters() {
+  const reqIds = Object.keys(REQ_LABELS).filter((id) => { const el = document.getElementById(id); return el && el.checked; });
+  const nReq = reqIds.length + (category !== 'all' ? 1 : 0);
+  const n = document.getElementById('reqCount');
+  if (n) n.textContent = nReq ? ' (' + nReq + ')' : '';
+  const list = document.getElementById('afList');
+  const row = document.getElementById('activeFilters');
+  if (!list || !row) return;
+  const chips = [];
+  if (query.trim()) chips.push(['q', 'Search: “' + query.trim().slice(0, 40) + '”']);
+  if (category !== 'all') chips.push(['cat', CAT_LABELS[category] || category]);
+  if (modality !== 'all') {
+    const sel = document.getElementById('modality');
+    const opt = sel && sel.options ? [...sel.options].find((o) => o.value === modality) : null;
+    chips.push(['modality', opt ? opt.textContent : modality]);
+  }
+  reqIds.forEach((id) => chips.push([id, REQ_LABELS[id]]));
+  list.innerHTML = chips.map(([k, label]) => `<button type="button" class="af-chip" data-clear="${afEsc(k)}">${afEsc(label)}<span class="af-x" aria-hidden="true">✕</span><span class="sr-only"> (remove filter)</span></button>`).join('');
+  row.hidden = chips.length === 0 && sortKey === 'recommended';
+}
+function fire(el, type) {
+  if (el && typeof el.dispatchEvent === 'function' && typeof Event === 'function') el.dispatchEvent(new Event(type, { bubbles: true }));
+}
+(() => {
+  const list = document.getElementById('afList');
+  if (list && list.addEventListener) list.addEventListener('click', (e) => {
+    const chip = e.target && e.target.closest ? e.target.closest('[data-clear]') : null;
+    if (!chip) return;
+    const k = chip.getAttribute('data-clear');
+    if (k === 'q') { const q = document.getElementById('q'); q.value = ''; fire(q, 'input'); }
+    else if (k === 'cat') { const all = document.querySelector('#cat button[data-cat="all"]'); if (all) all.click(); }
+    else if (k === 'modality') { const m = document.getElementById('modality'); m.value = 'all'; fire(m, 'change'); }
+    else if (REQ_LABELS[k]) { const el = document.getElementById(k); el.checked = false; fire(el, 'input'); fire(el, 'change'); }
+    // The chip is gone after the repaint: keep the keyboard focus in the bar.
+    const next = list.querySelector('[data-clear]');
+    (next || document.getElementById('q')).focus();
+  });
+  // The dropdown closes on Escape (focus back on its button) and on a click outside it.
+  const req = document.getElementById('req');
+  if (!req || !req.addEventListener) return;
+  req.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape' || !req.open) return;
+    req.open = false;
+    const s = req.querySelector('summary'); if (s) s.focus();
+  });
+  document.addEventListener('click', (e) => { if (req.open && !req.contains(e.target)) req.open = false; });
+})();
 
 // --- shareable state: sync filters to the URL and restore them on load ---
 const URL_FLAGS = [['nocard', 'f-nocard'], ['nophone', 'f-nophone'], ['commercial', 'f-commercial'], ['text', 'f-text'], ['notrain', 'f-notrain'], ['openai', 'f-openai'], ['verified', 'f-verified']];
@@ -259,7 +319,7 @@ function applyURL() {
   const modSel = document.getElementById('modality');
   if (mod && [...modSel.options].some(o => o.value === mod)) { modality = mod; modSel.value = mod; }
   URL_FLAGS.forEach(([k, id]) => {
-    if (params.get(k) === '1') { const el = document.getElementById(id); el.checked = true; const chip = el.closest('.chip'); if (chip) chip.classList.add('on'); }
+    if (params.get(k) === '1') document.getElementById(id).checked = true;
   });
   const sort = params.get('sort');
   const dir = params.get('dir');
@@ -284,7 +344,7 @@ function resetControls() {
   category = 'all';
   document.querySelectorAll('#cat button').forEach(b => { const on = b.dataset.cat === 'all'; b.classList.toggle('active', on); b.setAttribute('aria-pressed', String(on)); });
   modality = 'all'; document.getElementById('modality').value = 'all';
-  URL_FLAGS.forEach(([, id]) => { const el = document.getElementById(id); el.checked = false; const chip = el.closest('.chip'); if (chip) chip.classList.remove('on'); });
+  URL_FLAGS.forEach(([, id]) => { document.getElementById(id).checked = false; });
 }
 // The pinned filter bar's real height (it wraps) keeps a focused row from sitting under it: the style sheet reads --controls-h.
 (() => {

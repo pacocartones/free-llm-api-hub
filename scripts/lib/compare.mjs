@@ -14,7 +14,8 @@
 // http(s) URL. Nothing here reads the current date: the static pages are
 // pinned in derived-fingerprints.json and must be byte-stable per dataset.
 
-import { htmlEsc, SLUG_RE } from './rows.mjs';
+import { escapeHtml as htmlEsc } from './html.mjs'; // serialised by name into the client bundle below
+import { SLUG_RE } from './rows.mjs';
 import { expiryHtml } from './expiry.mjs';
 
 export const COMPARE_MIN = 2;
@@ -188,9 +189,10 @@ export function compareTableHtml(list, opts = {}) {
         `<div class="cmp-sub">The provider's own ${list.length > 1 ? 'figures' : 'figure'}, checked ${cell([...new Set(list.map((e) => e.checked))].join(', '))}; not our measurement and not a like-for-like benchmark</div>`;
     }],
     ['Modalities', (p) => cell((p.modalities || []).join(', ') || '—')],
-    ['Free models (sample)', (p) => (p.models_free && p.models_free.length)
+    ['Free models (sample)', (p) => ((p.models_free && p.models_free.length)
       ? p.models_free.map((m) => `<code>${cell(m)}</code>`).join(' ')
-      : '<span class="tri tri-unk">no sample</span>'],
+      : '<span class="tri tri-unk">no sample</span>') +
+      (safeUrl(p.models_url) ? `<div class="cmp-sub"><a href="${cell(safeUrl(p.models_url))}" target="_blank" rel="noopener">official catalogue ↗</a></div>` : '')],
     ['Official docs', (p) => safeUrl(p.docs_url)
       ? `<a href="${cell(safeUrl(p.docs_url))}" target="_blank" rel="noopener">${cell(safeUrl(p.docs_url).replace(/^https?:\/\//i, ''))}</a>`
       : '—'],
@@ -223,7 +225,9 @@ export function compareTableHtml(list, opts = {}) {
   const body = fields.map(([label, fn]) =>
     `<tr><th scope="row">${cell(label)}</th>${list.map((p) => `<td>${fn(p)}</td>`).join('')}</tr>`
   ).join('\n');
-  return `<div class="compare-scroll"><table class="compare-table">` +
+  // The same scroll region as every other wide table (.table-scroll is positioned, so the screen-reader-only text inside
+  // the table is clipped by the region instead of widening the page on a phone), focusable so a keyboard can scroll it.
+  return `<div class="table-scroll compare-scroll" role="region" aria-label="Comparison of ${cell(list.map((p) => p.name).join(', '))}" tabindex="0"><table class="compare-table">` +
     `<caption class="sr-only">Side-by-side comparison of ${cell(list.map((p) => p.name).join(', '))}</caption>` +
     `<thead><tr><th scope="col"><span class="sr-only">Field</span></th>${head}</tr></thead>` +
     `<tbody>\n${body}\n</tbody></table></div>`;

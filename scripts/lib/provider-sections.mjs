@@ -4,12 +4,18 @@
 // appear only with the provider page they come from and the day they were read, and a section with nothing
 // to show is left out (or reduced to one line) instead of repeating filler on every page.
 
-import { htmlEsc, ICON } from './rows.mjs';
+import { escapeHtml } from './html.mjs';
+import { ICON } from './rows.mjs';
 import { triStateHtml } from './compare.mjs';
 import { expiryHtml } from './expiry.mjs';
 import { fieldCheck } from './field-checks.mjs';
 import { publishedSpeed, speedFigure, SPEED_METRICS } from './published-speed.mjs';
 import { LIMIT_UNITS, limitNumbers, limitsForModel, perModelLimits } from './free-limits.mjs';
+import { FLAG_DEFS, flagHtml } from './flags.mjs';
+
+// The shared flag component (lib/flags.mjs) around the page's own words: the shape, then the words, with the
+// whole sentence as the accessible text.
+const flagById = (id) => FLAG_DEFS.find((d) => d.id === id);
 
 const FREE_TYPE_LABEL = {
   'renewing-quota': 'Free quota that renews',
@@ -19,16 +25,17 @@ const FREE_TYPE_LABEL = {
 };
 
 
-const safeUrl = (u) => (/^https?:\/\//i.test(String(u || '')) ? htmlEsc(u) : '');
+const safeUrl = (u) => (/^https?:\/\//i.test(String(u || '')) ? escapeHtml(u) : '');
 
 /** What a visitor must give to start: three flags, each yes / no / "not confirmed" written out. */
 export function requirementsHtml(p) {
   const row = (icon, label, field, yes, no, extra = '') => {
     const check = fieldCheck(p, field);
-    return `<div class="req"><dt>${ICON(icon)}${label}</dt><dd>${triStateHtml(p[field], yes, no, check)}${extra}${checkSourceHtml(check)}</dd></div>`;
+    const def = FLAG_DEFS.find((d) => d.field === field);
+    return `<div class="req"><dt>${ICON(icon)}${label}</dt><dd>${flagHtml(def, p, { check, visible: triStateHtml(p[field], yes, no, check) })}${extra}${checkSourceHtml(check)}</dd></div>`;
   };
   const commercialCondition = p.commercial_ok === 'conditional' && p.commercial_ok_condition
-    ? `<div class="req-condition">${htmlEsc(p.commercial_ok_condition)}</div>`
+    ? `<div class="req-condition">${escapeHtml(p.commercial_ok_condition)}</div>`
     : '';
   return `<dl class="prov-reqs" aria-label="What you need to start">` +
     row('ic-card', 'Credit card', 'card_required', 'required', 'not required') +
@@ -42,9 +49,9 @@ export function checkSourceHtml(check) {
   if (!check || !/^\d{4}-\d{2}-\d{2}$/.test(String(check.checked || ''))) return '';
   const links = (Array.isArray(check.sources) ? check.sources : []).map(safeUrl).filter(Boolean);
   const pages = links.map((u, i) => `<a href="${u}" target="_blank" rel="noopener">${links.length > 1 ? `page ${i + 1}` : "the provider's page"}</a>`).join(', ');
-  const quote = check.status === 'stated' && check.quote ? `&ldquo;${htmlEsc(check.quote)}&rdquo; ` : '';
+  const quote = check.status === 'stated' && check.quote ? `&ldquo;${escapeHtml(check.quote)}&rdquo; ` : '';
   const lead = check.status === 'stated' ? 'Per' : 'Read';
-  return `<div class="req-source muted">${quote}${pages ? `${lead} ${pages}, ` : ''}checked ${htmlEsc(check.checked)}.${check.note ? ` ${htmlEsc(check.note)}` : ''}</div>`;
+  return `<div class="req-source muted">${quote}${pages ? `${lead} ${pages}, ` : ''}checked ${escapeHtml(check.checked)}.${check.note ? ` ${escapeHtml(check.note)}` : ''}</div>`;
 }
 
 /**
@@ -58,15 +65,15 @@ export function freeLimitsTableHtml(p, { model } = {}) {
   const fl = p.free_limits && safeUrl(p.free_limits.source) && /^\d{4}-\d{2}-\d{2}$/.test(String(p.free_limits.checked || '')) ? p.free_limits : null;
   if (!fl) return '';
   const src = safeUrl(fl.source);
-  const sourceLine = src ? ` Source: <a href="${src}" target="_blank" rel="noopener">the provider's page</a>, read ${htmlEsc(fl.checked)}.` : '';
-  const sentence = (text) => `${htmlEsc(text || '')}${/[.!?]$/.test(text || '') || !text ? '' : '.'}`;
+  const sourceLine = src ? ` Source: <a href="${src}" target="_blank" rel="noopener">the provider's page</a>, read ${escapeHtml(fl.checked)}.` : '';
+  const sentence = (text) => `${escapeHtml(text || '')}${/[.!?]$/.test(text || '') || !text ? '' : '.'}`;
   const unitRows = (obj) => LIMIT_UNITS.filter(([k]) => Number.isInteger(obj[k]))
     .map(([k, unit]) => `<tr><th scope="row">${unit}</th><td>${obj[k].toLocaleString('en-US')}</td></tr>`).join('');
   if (model !== undefined) {
     const m = limitsForModel(p, model);
     if (m.applies_to === 'model') {
       return `<table class="limits-table"><caption class="sr-only">Free limits the provider publishes for this model</caption><tbody>${unitRows(m.limits)}</tbody></table>` +
-        `<p class="muted limits-src">Published for <code>${htmlEsc(model)}</code>.${m.scope ? ` ${sentence(m.scope)}` : ''}${sourceLine}</p>`;
+        `<p class="muted limits-src">Published for <code>${escapeHtml(model)}</code>.${m.scope ? ` ${sentence(m.scope)}` : ''}${sourceLine}</p>`;
     }
   }
   const wide = unitRows(fl);
@@ -77,7 +84,7 @@ export function freeLimitsTableHtml(p, { model } = {}) {
     const units = LIMIT_UNITS.filter(([k]) => perModel.some((e) => Number.isInteger(e[k])));
     return `<table class="limits-table limits-per-model"><caption>Limits the provider publishes per model</caption>` +
       `<thead><tr><th scope="col">Model ID</th>${units.map(([, unit]) => `<th scope="col">${unit}</th>`).join('')}</tr></thead><tbody>` +
-      perModel.map((e) => `<tr><th scope="row"><code>${htmlEsc(e.model)}</code>${e.scope ? `<br><small>${htmlEsc(e.scope)}</small>` : ''}</th>` +
+      perModel.map((e) => `<tr><th scope="row"><code>${escapeHtml(e.model)}</code>${e.scope ? `<br><small>${escapeHtml(e.scope)}</small>` : ''}</th>` +
         units.map(([k]) => `<td>${Number.isInteger(e[k]) ? e[k].toLocaleString('en-US') : '<span class="muted">not published</span>'}</td>`).join('') + `</tr>`).join('') +
       `</tbody></table>`;
   })();
@@ -91,8 +98,8 @@ export function freeLimitsTableHtml(p, { model } = {}) {
 /** Free limits: the structured numbers with their source and reading date, then the provider's wording. */
 export function limitsHtml(p) {
   const table = freeLimitsTableHtml(p);
-  const prose = p.rate_limits ? `<div class="prov-card"><h3>In the provider's words</h3><p>${htmlEsc(p.rate_limits)}</p></div>` : '';
-  const catchCard = p.notes ? `<div class="prov-card"><h3>The catch</h3><p>${htmlEsc(p.notes)}</p></div>` : '';
+  const prose = p.rate_limits ? `<div class="prov-card"><h3>In the provider's words</h3><p>${escapeHtml(p.rate_limits)}</p></div>` : '';
+  const catchCard = p.notes ? `<div class="prov-card"><h3>The catch</h3><p>${escapeHtml(p.notes)}</p></div>` : '';
   const none = table ? '' : `<p class="muted">Numeric limits are not recorded in structured form for this provider.</p>`;
   return `<h2 id="limits">Free limits</h2>${table}${none}<div class="prov-grid">${prose}${catchCard}</div>`;
 }
@@ -100,14 +107,14 @@ export function limitsHtml(p) {
 /** The at-a-glance list: plain words instead of the dataset's internal labels. */
 export function glanceHtml(p, typeLabel) {
   const mods = (p.modalities || []).join(', ') || 'not listed';
-  const base = p.openai_base_url ? `<code>${htmlEsc(p.openai_base_url)}</code>` : 'Not OpenAI-compatible: see the official docs';
+  const base = p.openai_base_url ? `<code>${escapeHtml(p.openai_base_url)}</code>` : 'Not OpenAI-compatible: see the official docs';
   const rows = [
-    ['Plan', `${htmlEsc(typeLabel)}${p.category === 'ongoing' ? ' free tier' : ' credit'}`],
-    ['How it renews', htmlEsc(FREE_TYPE_LABEL[p.free_type] || p.free_type || 'not recorded')],
+    ['Plan', `${escapeHtml(typeLabel)}${p.category === 'ongoing' ? ' free tier' : ' credit'}`],
+    ['How it renews', escapeHtml(FREE_TYPE_LABEL[p.free_type] || p.free_type || 'not recorded')],
     ['Expires', expiryHtml(p)],
-    ['Modalities', htmlEsc(mods)],
+    ['Modalities', escapeHtml(mods)],
     ['OpenAI base URL', base],
-    ...(p.added ? [['Added to the hub', htmlEsc(p.added)]] : []),
+    ...(p.added ? [['Added to the hub', escapeHtml(p.added)]] : []),
   ];
   return `<div class="prov-meta">${rows.map(([k, v]) => `<div class="meta-row"><span class="meta-k">${k}</span><span class="meta-v">${v}</span></div>`).join('')}</div>`;
 }
@@ -129,10 +136,10 @@ export function modelsHtml(p, { modelHref = () => '' } = {}) {
   return `<h2 id="models">Free models <span class="muted">· sample</span></h2>` +
     `<div class="model-chips">${p.models_free.map((m) => {
       const href = modelHref(m);
-      return href ? `<a href="${htmlEsc(href)}"><code>${htmlEsc(m)}</code></a>` : `<code>${htmlEsc(m)}</code>`;
+      return href ? `<a href="${escapeHtml(href)}"><code>${escapeHtml(m)}</code></a>` : `<code>${escapeHtml(m)}</code>`;
     }).join('')}</div>` +
     `<p class="muted">A sample of models reachable on the free tier — the live catalogue changes.` +
-    (p.openai_base_url ? ` Pull the current set with <code>GET ${htmlEsc(p.openai_base_url)}/models</code>.` : '') +
+    (p.openai_base_url ? ` Pull the current set with <code>GET ${escapeHtml(p.openai_base_url)}/models</code>.` : '') +
     (catalogLink ? ` ${catalogLink}` : '') + `</p>`;
 }
 
@@ -145,8 +152,8 @@ export function dataPolicyHtml(p) {
   if (!dp || typeof dp !== 'object') return '';
   const src = safeUrl(dp.source);
   return `<h2 id="data-policy">Data policy</h2><dl class="prov-reqs">` +
-    `<div class="req"><dt>${ICON('ic-shield')}Trains on your prompts</dt><dd>${triStateHtml(dp.trains_on_prompts, 'yes', 'no')}</dd></div>` +
-    `<div class="req"><dt>${ICON('ic-clock')}Retention</dt><dd>${dp.retention ? htmlEsc(dp.retention) : '<span class="tri tri-unk">not confirmed</span>'}</dd></div></dl>` +
+    `<div class="req"><dt>${ICON('ic-shield')}Trains on your prompts</dt><dd>${flagHtml(flagById('training'), p, { visible: triStateHtml(dp.trains_on_prompts, 'yes', 'no') })}</dd></div>` +
+    `<div class="req"><dt>${ICON('ic-clock')}Retention</dt><dd>${dp.retention ? escapeHtml(dp.retention) : '<span class="tri tri-unk">not confirmed</span>'}</dd></div></dl>` +
     (src ? `<p class="muted">Source: <a href="${src}" target="_blank" rel="noopener">the provider's page</a>.</p>` : '');
 }
 
@@ -162,9 +169,9 @@ export function speedHtml(p) {
     const m = SPEED_METRICS[e.metric];
     const src = safeUrl(e.source);
     const plan = e.plan_named === false ? ' The page ties this figure to no plan, so it is not stated for the free tier.' : '';
-    return `<li><strong><code>${htmlEsc(e.model)}</code>: ${htmlEsc(speedFigure(e))}</strong> ${m ? htmlEsc(m.label) : ''}` +
-      `<div class="req-source muted">&ldquo;${htmlEsc(e.quote)}&rdquo; ${src ? `Per <a href="${src}" target="_blank" rel="noopener">the provider's page</a>, ` : ''}checked ${htmlEsc(e.checked)}.` +
-      `${e.conditions ? ` ${htmlEsc(e.conditions)}.` : ''}${plan}</div></li>`;
+    return `<li><strong><code>${escapeHtml(e.model)}</code>: ${escapeHtml(speedFigure(e))}</strong> ${m ? escapeHtml(m.label) : ''}` +
+      `<div class="req-source muted">&ldquo;${escapeHtml(e.quote)}&rdquo; ${src ? `Per <a href="${src}" target="_blank" rel="noopener">the provider's page</a>, ` : ''}checked ${escapeHtml(e.checked)}.` +
+      `${e.conditions ? ` ${escapeHtml(e.conditions)}.` : ''}${plan}</div></li>`;
   }).join('');
   return `<h2 id="published-speed">Published speed</h2>` +
     `<p class="muted">The provider's own figures, under its own conditions. We do not measure speed, and figures from different providers are not a like-for-like benchmark.</p>` +

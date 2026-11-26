@@ -14,5 +14,3 @@
   generation. Whether the trial needs a payment method is not public, so
   `card_required` stays unknown (`needs_account`). The homepage says data is
   deleted right after processing. Checked 2026-11-25, agent-assisted (#755).
-
-The dataset stays under the non-text cap: 24 of 70 providers (34.3%).

@@ -77,7 +77,7 @@ test('the browser copy (shared-rules.js + shared-sort.js) sorts the dataset exac
 test('the server-rendered home rows follow the shared order', () => {
   const html = readFileSync(join(ROOT, 'site/index.html'), 'utf8');
   const rows = html.slice(html.indexOf('<!-- AUTOGEN:rows:start -->'), html.indexOf('<!-- AUTOGEN:rows:end -->'));
-  const shown = [...rows.matchAll(/<tr role="row"><td class="name"[^>]*><a class="name-link" href="p\/([a-z0-9-]+)"/g)].map((m) => m[1]);
+  const shown = [...rows.matchAll(/<tr role="row"><td class="name"[^>]*><div class="name-row">(?:<span class="aura[^>]*>.*?<\/svg><\/span>)?<div class="name-main"><div class="name-line"><a class="name-link" href="p\/([a-z0-9-]+)"/g)].map((m) => m[1]);
   assert.deepEqual(shown, [...providers].sort(recommendedCmp).map((p) => p.slug));
 });
 

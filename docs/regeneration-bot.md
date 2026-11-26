@@ -2,7 +2,9 @@
 
 `.github/workflows/regenerate.yml` rebuilds the derived files (README tables, `collections/`, the committed site pages, `site/providers.csv`, `site/sitemap.xml`, `derived-fingerprints.json`, OG images) after every push to `main` that changes a canonical input, using the code already on `main`. The goal is that a data pull request only has to change `data/` plus a changelog fragment, so open data pull requests stop conflicting on generated files.
 
-It rolls out in three steps, controlled by the repository variable `REGEN_MODE`:
+It rolls out in three steps, controlled by the repository variable `REGEN_MODE` and, for pull requests from forks, the committed file [`.github/regen-mode`](../.github/regen-mode):
+
+**The mode lives in two places, and they must agree.** GitHub does not pass repository variables to workflows run for pull requests from forks, so there `vars.REGEN_MODE` is empty. When it is, the *Regeneration mode* step of `verify.yml` reads `.github/regen-mode` from the pull request's **base branch** (fetched from `origin`, never from the pull request's own tree, so a pull request cannot relax its own gate). When the variable has a value, it wins. Changing the mode therefore means setting the variable **and** merging a one-line change to `.github/regen-mode`; `scripts/regen-mode-file.test.mjs` fails if the file holds anything but `off`, `shadow` or `push`.
 
 | Step | `REGEN_MODE` | What happens | Risk to `main` |
 |---|---|---|---|
@@ -10,7 +12,7 @@ It rolls out in three steps, controlled by the repository variable `REGEN_MODE`:
 | 1. Shadow | `shadow` | Rebuilds after each merge (and nightly). With the GitHub App configured it opens or updates a **draft** pull request from `chore/regenerate-derived`; without it, it only reports the diff in the run summary and as the `regen-patch` artifact. The pull-request drift gate in `verify.yml` stays blocking. | None: nothing is pushed to `main` |
 | 2. Push | `push` | Commits the regenerated files straight to `main` as the App. The drift gate in `verify.yml` blocks only hand-edited derived files, release pull requests that are not regenerated and drift outside the allowlist; `pages.yml` deploys after the bot; Lighthouse skips the bot's pushes (see [What push mode changes](#what-push-mode-changes)). | Needs the ruleset bypass below |
 
-**Until step 2 is live, contributors keep regenerating locally** exactly as [CONTRIBUTING.md](../CONTRIBUTING.md) says. **In push mode, data pull requests no longer regenerate or commit derived files:** they change `data/` plus a changelog fragment, and the bot commits the derived files to `main` after the merge. During shadow mode `main` is already in sync when a pull request merges, so every shadow pull request is a determinism bug in the bot's environment (fonts, Node, git history). Close it, note the cause, and fix it before moving on. Exit criterion for shadow: at least 7 days and 10 merges with no shadow pull request.
+**Step 2 is live:** `.github/regen-mode` says `push`. **In push mode, data pull requests no longer regenerate or commit derived files:** they change `data/` plus a changelog fragment, and the bot commits the derived files to `main` after the merge. In any other mode (after a rollback), contributors regenerate locally as [CONTRIBUTING.md](../CONTRIBUTING.md#for-provider-data-edit-the-source) says. During shadow mode `main` is already in sync when a pull request merges, so every shadow pull request is a determinism bug in the bot's environment (fonts, Node, git history). Close it, note the cause, and fix it before moving on. Exit criterion for shadow: at least 7 days and 10 merges with no shadow pull request.
 
 ## How it is built
 
@@ -26,7 +28,7 @@ It rolls out in three steps, controlled by the repository variable `REGEN_MODE`:
 `.github/workflows/regenerate-preview.yml` is the pull-request side of shadow mode. On every pull request that touches data, scripts, docs or derived files it rebuilds on the pull request's merge commit and, without ever failing on drift:
 
 - lists the derived files a fresh build changes in the run summary and uploads them as the `regen-preview-patch` artifact (7 days), so a contributor without Node, or the maintainer, can `git apply --binary regen-preview.patch` on the pull request branch (it is cut against the merge commit, so it applies cleanly while the branch is up to date with `main`);
-- says what the drift gate planned for step C would decide: `in-sync`, `bot-would-regenerate` (only derived files the pull request did not touch are stale: informative after the switch), `would-block-hand-edit` (the pull request edits derived files that do not match the build) or `would-block-release` (a release pull request must ship fully regenerated). The logic is `previewVerdict()` in [scripts/lib/regenerate.mjs](../scripts/lib/regenerate.mjs); paths outside the allowlist raise a warning.
+- says what the push-mode drift gate decides: `in-sync`, `bot-would-regenerate` (only derived files the pull request did not touch are stale: informative after the switch), `would-block-hand-edit` (the pull request edits derived files that do not match the build) or `would-block-release` (a release pull request must ship fully regenerated). The logic is `previewVerdict()` in [scripts/lib/regenerate.mjs](../scripts/lib/regenerate.mjs); paths outside the allowlist raise a warning.
 
 It is not a required check and changes nothing about the blocking gate in `verify.yml`; in push mode that gate makes the same decision with the same function (`driftGate()`), so the preview's verdict tells a contributor in advance what *Dataset integrity* will say. It uses only the `pull_request` event with a read-only token: no secret, no App, nothing pushed or commented, so it is safe for pull requests from forks. Counting its verdicts over the shadow week is the audit §6 of the ADR asks for before the gate is relaxed.
 
@@ -67,11 +69,11 @@ The switch itself is one variable, but it needs the protection of `main` to move
    - *Create*.
 3. Open a throwaway pull request and check the five checks still show as *Required*. Then *Settings → Branches* → delete the classic rule for `main`, and confirm `gh api repos/pacocartones/free-llm-api-hub/rules/branches/main` lists the rules of both rulesets.
 4. Merge the cut-over pull request. It changes nothing while `REGEN_MODE` is not `push`: every relaxation below is behind that value.
-5. Set `REGEN_MODE` = `push`. The next data pull request should show *Dataset integrity* green without derived files, and after its merge one `chore(generated):` commit by `free-llm-api-hub-regen[bot]` followed by one *Deploy site* run.
+5. Set `REGEN_MODE` = `push`, and merge a pull request that sets `.github/regen-mode` to `push` (pull requests from forks read the mode from that file). The next data pull request should show *Dataset integrity* green without derived files, and after its merge one `chore(generated):` commit by `free-llm-api-hub-regen[bot]` followed by one *Deploy site* run.
 
 ## What push mode changes
 
-Everything here is keyed on `REGEN_MODE` = `push`; with `shadow`, `off` or no value the workflows behave as before the cut-over.
+Everything here is keyed on `REGEN_MODE` = `push` (on fork pull requests, `.github/regen-mode` on the base branch); with `shadow`, `off` or no value the workflows behave as before the cut-over.
 
 - **Contributors.** A data pull request changes `data/` (and a changelog fragment) and nothing generated. It does not run `npm run build` or `npm run og` to commit their output. A release pull request (`npm run release:prepare`) still ships every derived file regenerated, because `tag-release.yml` tags its merge.
 - **`verify.yml`** (required checks *Dataset integrity* and *Windows tests*, names unchanged). Both jobs regenerate the derived files before running the checks, so the suite sees what `main` will hold after the bot. The last step of *Dataset integrity* rebuilds and calls `regenerate-guard.mjs drift-gate` (`driftGate()` in [scripts/lib/regenerate.mjs](../scripts/lib/regenerate.mjs), tested in `scripts/regenerate-cutover.test.mjs`). It blocks only:
@@ -85,6 +87,6 @@ Everything here is keyed on `REGEN_MODE` = `push`; with `shadow`, `off` or no va
 
 ## Rollback
 
-At any step: set `REGEN_MODE` to `off` (or delete it). Nothing needs reverting: outside push mode the cut-over's workflows behave as before, so the strict drift gate is back on the next run and contributors regenerate locally again. Pull requests opened during push mode without derived files then need `npm run build` (or the `regen-preview-patch` artifact) before they can merge.
+At any step: set `REGEN_MODE` to `off` **and** merge `.github/regen-mode` = `off`. Both are needed: the variable alone leaves pull requests from forks on the file's mode, and deleting the variable instead of setting it makes every pull request read the file. Nothing else needs reverting: outside push mode the cut-over's workflows behave as before, so the strict drift gate is back on the next run and contributors regenerate locally again. Pull requests opened during push mode without derived files then need `npm run build` (or the `regen-preview-patch` artifact) before they can merge.
 
 **If the App key leaks:** App page → *Private keys* → delete it, generate a new one, update `REGEN_APP_PRIVATE_KEY`, and review the `[bot]` commits. The App is never in the "main integrity" bypass list, so it cannot force-push or delete `main`.

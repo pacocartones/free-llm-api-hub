@@ -227,6 +227,17 @@ test('verify.yml: push mode regenerates before the checks and blocks through dri
     const mode = stepOf(body, 'id: regen');
     assert.match(mode, /REGEN_MODE: \$\{\{ vars\.REGEN_MODE \}\}/);
     assert.match(mode, /node scripts\/regenerate-guard\.mjs mode/);
+    // Fork pull requests see no repository variables: the mode then comes from .github/regen-mode on the base branch.
+    assert.match(mode, /\n {8}shell: bash\n/, `${id}: one script for Linux and Windows`);
+    assert.match(mode, /EVENT: \$\{\{ github\.event_name \}\}/);
+    assert.match(mode, /BASE_REF: \$\{\{ github\.base_ref \}\}/, 'the base branch arrives through env, not pasted into the script');
+    assert.match(mode, /if \[ -z "\$REGEN_MODE" \] && \[ "\$EVENT" = pull_request \]; then/, 'the variable wins whenever it has a value');
+    assert.match(mode, /git fetch --no-tags origin "refs\/heads\/\$BASE_REF"/);
+    assert.match(mode, /git show FETCH_HEAD:\.github\/regen-mode/, 'read from the fetched base branch');
+    assert.doesNotMatch(noComments(mode), /--depth|--shallow/, 'the clone stays complete: the build mines git log');
+    const reads = noComments(mode).match(/\.github\/regen-mode/g) ?? [];
+    assert.equal(reads.length, 1, `${id}: the pull request's own .github/regen-mode is never read`);
+    assert.ok(mode.indexOf('git show FETCH_HEAD') < mode.indexOf('node scripts/regenerate-guard.mjs mode'), 'resolved before it is parsed');
     const regen = stepOf(body, 'name: Regenerate the derived files first (REGEN_MODE=push)');
     assert.match(regen, /if: \$\{\{ steps\.regen\.outputs\.mode == 'push' \}\}/);
     assert.match(regen, /node scripts\/build\.mjs/);
@@ -236,12 +247,16 @@ test('verify.yml: push mode regenerates before the checks and blocks through dri
   }
   const validate = jobOf(VERIFY, 'validate');
   assert.match(stepOf(validate, 'Regenerate the derived files first'), /node scripts\/check-og\.mjs \|\| node scripts\/og\.mjs/);
+  // Windows too: without the images, a pull request that changes how they are drawn fails the OG manifest test there.
+  assert.match(stepOf(jobOf(VERIFY, 'windows-tests'), 'Regenerate the derived files first'), /node scripts\/check-og\.mjs \|\| node scripts\/og\.mjs/);
   assert.ok(validate.indexOf('Regenerate the derived files first') > validate.indexOf('node scripts/validate.mjs'), 'the data is validated before it is built');
   assert.ok(validate.indexOf('Regenerate the derived files first') < validate.indexOf('node scripts/check-og.mjs\n'), 'the OG check sees the rendered images');
   const gate = stepOf(validate, 'regenerate-guard.mjs drift-gate');
   assert.match(gate, /if: \$\{\{ steps\.regen\.outputs\.mode == 'push' \}\}/);
   assert.match(gate, /BASE="\$\(git rev-parse HEAD\^1\)" node scripts\/regenerate-guard\.mjs drift-gate/);
-  assert.ok(gate.indexOf('node scripts/build.mjs') < gate.indexOf('drift-gate'), 'it builds again right before it compares');
+  // It compares the tree the regeneration step wrote: no second build (the suite leaves the working tree as it found it).
+  assert.doesNotMatch(noComments(gate), /node scripts\/build\.mjs/, 'the job builds once');
+  assert.ok(validate.indexOf('Regenerate the derived files first') < validate.indexOf('regenerate-guard.mjs drift-gate'), 'regenerated before it compares');
 });
 
 test('verify.yml: read-only, no secret, no credentials, pinned actions, no expression inside run:', () => {

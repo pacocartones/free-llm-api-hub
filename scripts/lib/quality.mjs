@@ -5,7 +5,7 @@
 // by the clock, so the page is byte-stable for a given dataset and can sit under the drift gate. The per-field task
 // board stays on /coverage/ (lib/coverage.mjs); this page reuses its populations and links there for the open items.
 
-import { htmlEsc } from './rows.mjs';
+import { escapeHtml } from './html.mjs';
 import { FIELD_CHECK_FIELDS, fieldCheckCounts } from './field-checks.mjs';
 import { COVERAGE_FIELDS, percent } from './coverage.mjs';
 import { SLA_DAYS, DUE_SOON_DAYS, freshnessStatus } from './rules.mjs';
@@ -135,19 +135,19 @@ export function qualityMainHtml(q, { prefix = '../', repo }) {
   const f = q.freshness;
   const maxWeek = Math.max(1, ...f.weeks.map((w) => w.count));
   const weekRows = f.weeks.map((w) =>
-    `<tr><th scope="row">${htmlEsc(w.start)}</th>${num(w.count)}${bar(w.count, maxWeek)}` +
-    `<td>${w.count ? (w.dueFrom === w.dueTo ? htmlEsc(w.dueFrom) : `${htmlEsc(w.dueFrom)} to ${htmlEsc(w.dueTo)}`) : '—'}</td></tr>`).join('');
+    `<tr><th scope="row">${escapeHtml(w.start)}</th>${num(w.count)}${bar(w.count, maxWeek)}` +
+    `<td>${w.count ? (w.dueFrom === w.dueTo ? escapeHtml(w.dueFrom) : `${escapeHtml(w.dueFrom)} to ${escapeHtml(w.dueTo)}`) : '—'}</td></tr>`).join('');
 
   const flagRows = q.flags.map((r) =>
-    `<tr><th scope="row"><code>${htmlEsc(r.key)}</code></th>${share(r.answered, r.total)}${share(r.withReason, r.total)}${share(r.unchecked, r.total)}</tr>`).join('');
+    `<tr><th scope="row"><code>${escapeHtml(r.key)}</code></th>${share(r.answered, r.total)}${share(r.withReason, r.total)}${share(r.unchecked, r.total)}</tr>`).join('');
   const reasonRows = q.flags.map((r) =>
-    `<tr><th scope="row"><code>${htmlEsc(r.key)}</code></th>${num(r.stated)}${num(r.unsourced)}${num(r.source_silent)}${num(r.needs_account)}${num(r.sources_disagree)}</tr>`).join('');
+    `<tr><th scope="row"><code>${escapeHtml(r.key)}</code></th>${num(r.stated)}${num(r.unsourced)}${num(r.source_silent)}${num(r.needs_account)}${num(r.sources_disagree)}</tr>`).join('');
 
   const dp = q.dataPolicy; const fl = q.freeLimits; const mf = q.modelsFree; const nt = q.nonText;
   const ntPct = percent1(nt.noTextModality, nt.total);
 
   return '<main id="main"><div class="wrap prose">' +
-    `<p>How much of the dataset is verified, how fresh it is, and how many answers are known, unknown with a recorded reason, or not checked yet. Every number on this page is computed from <a href="${prefix}providers.json">providers.json</a> when the site is built. Data of ${htmlEsc(q.asOf)}; ages are counted to that day.</p>` +
+    `<p>How much of the dataset is verified, how fresh it is, and how many answers are known, unknown with a recorded reason, or not checked yet. Every number on this page is computed from <a href="${prefix}providers.json">providers.json</a> when the site is built. Data of ${escapeHtml(q.asOf)}; ages are counted to that day.</p>` +
     `<p>To fill a gap, use <a href="${prefix}coverage/">Data coverage</a>: it lists every open item with the provider's own docs and a prefilled issue. How an entry is checked is in the <a href="${prefix}methodology/">methodology</a>.</p>` +
 
     '<h2 id="verified">Verified entries</h2>' +
@@ -158,7 +158,7 @@ export function qualityMainHtml(q, { prefix = '../', repo }) {
 
     '<h2 id="freshness">Freshness</h2>' +
     `<p>An entry is <strong>fresh</strong> up to ${DUE_SOON_DAYS} days after its last verification, <strong>due</strong> for a re-check from day ${DUE_SOON_DAYS + 1}, and <strong>stale</strong> after ${SLA_DAYS} days (the SLA). Counted over verified entries.` +
-    (f.oldest ? ` Oldest verification: ${htmlEsc(f.oldest)}; newest: ${htmlEsc(f.newest)}.` : '') + '</p>' +
+    (f.oldest ? ` Oldest verification: ${escapeHtml(f.oldest)}; newest: ${escapeHtml(f.newest)}.` : '') + '</p>' +
     '<table class="cov-table"><caption class="sr-only">Verified entries by freshness</caption><thead><tr><th>State</th><th class="num">Entries</th><th class="num">Share</th></tr></thead><tbody>' +
     `<tr><th scope="row">Fresh (${DUE_SOON_DAYS} days or less)</th>${share(f.fresh, q.verified)}</tr>` +
     `<tr><th scope="row">Due for a re-check (${DUE_SOON_DAYS + 1} to ${SLA_DAYS} days)</th>${share(f.due, q.verified)}</tr>` +
@@ -168,10 +168,10 @@ export function qualityMainHtml(q, { prefix = '../', repo }) {
     `<p>Verified entries by the week (Monday, UTC) of their last verification, from the week of the oldest one (at most ${QUALITY_WEEKS} weeks back), empty weeks included. The last column is when they turn due for a re-check, unless they are re-verified first: a tall bar is a week of re-checks coming due together. The same entries counted by the week they turn due, with clustered weeks marked, are on <a href="${prefix}coverage/#freshness">Data coverage</a>.</p>` +
     '<div class="table-scroll" role="region" aria-label="Last verification by week" tabindex="0"><table class="cov-table q-weeks"><caption class="sr-only">Verified entries by week of last verification</caption><thead><tr><th>Week of</th><th class="num">Entries</th><th class="q-barcell"><span class="sr-only">Bar</span></th><th>Due for a re-check</th></tr></thead><tbody>' +
     weekRows + '</tbody></table></div>' +
-    (f.earlier ? `<p class="muted">${f.earlier} verified ${f.earlier === 1 ? 'entry was' : 'entries were'} last verified before ${htmlEsc(f.firstWeek)}.</p>` : '') +
+    (f.earlier ? `<p class="muted">${f.earlier} verified ${f.earlier === 1 ? 'entry was' : 'entries were'} last verified before ${escapeHtml(f.firstWeek)}.</p>` : '') +
 
     '<h2 id="flags">Yes/no flags: answered, unknown with a reason, not checked</h2>' +
-    `<p>Each yes/no flag is <strong>answered</strong> (a known value), <strong>null with a recorded reason</strong> (the provider's pages were read on a stated day and do not settle it; see <code>field_checks</code>), or <strong>not checked</strong> yet. Unknown is never <em>no</em>. Counted over ${htmlEsc(q.flags[0]?.population ?? 'all verified providers')}.</p>` +
+    `<p>Each yes/no flag is <strong>answered</strong> (a known value), <strong>null with a recorded reason</strong> (the provider's pages were read on a stated day and do not settle it; see <code>field_checks</code>), or <strong>not checked</strong> yet. Unknown is never <em>no</em>. Counted over ${escapeHtml(q.flags[0]?.population ?? 'all verified providers')}.</p>` +
     '<div class="table-scroll" role="region" aria-label="Flags by state" tabindex="0"><table class="cov-table"><caption class="sr-only">Yes/no flags by state</caption><thead><tr><th>Flag</th><th class="num">Answered</th><th class="num">Share</th><th class="num">Null, with reason</th><th class="num">Share</th><th class="num">Not checked</th><th class="num">Share</th></tr></thead><tbody>' +
     flagRows + '</tbody></table></div>' +
     '<div class="table-scroll" role="region" aria-label="Flags by recorded status" tabindex="0"><table class="cov-table"><caption class="sr-only">Yes/no flags by recorded status</caption><thead><tr><th>Flag</th><th class="num">Stated, with source</th><th class="num">Known, unsourced</th><th class="num">Not stated by the provider</th><th class="num">Needs an account</th><th class="num">Pages disagree</th></tr></thead><tbody>' +
@@ -179,23 +179,23 @@ export function qualityMainHtml(q, { prefix = '../', repo }) {
 
     '<h2 id="fine-print">Fine print fields</h2>' +
     '<table class="cov-table"><caption class="sr-only">Coverage of the fine print fields</caption><thead><tr><th>Field and state</th><th class="num">Count</th><th class="num">Share</th></tr></thead><tbody>' +
-    `<tr><th scope="row" colspan="3"><code>data_policy</code>, counted over ${htmlEsc(dp.population)}</th></tr>` +
+    `<tr><th scope="row" colspan="3"><code>data_policy</code>, counted over ${escapeHtml(dp.population)}</th></tr>` +
     `<tr><th scope="row">Recorded from the provider's own terms</th>${share(dp.recorded, dp.total)}</tr>` +
     `<tr><th scope="row">… says whether it trains on prompts</th>${share(dp.trainsKnown, dp.total)}</tr>` +
     `<tr><th scope="row">… says how long it keeps them</th>${share(dp.retentionKnown, dp.total)}</tr>` +
     `<tr><th scope="row">Not recorded yet</th>${share(dp.notRecorded, dp.total)}</tr>` +
-    `<tr><th scope="row" colspan="3"><code>free_limits</code>, counted over ${htmlEsc(fl.population)}</th></tr>` +
+    `<tr><th scope="row" colspan="3"><code>free_limits</code>, counted over ${escapeHtml(fl.population)}</th></tr>` +
     `<tr><th scope="row">Numbers published by the provider</th>${share(fl.published, fl.total)}</tr>` +
     `<tr><th scope="row">Recorded as publishing none (<code>null</code>)</th>${share(fl.noneRecorded, fl.total)}</tr>` +
     `<tr><th scope="row">Not recorded yet</th>${share(fl.absent, fl.total)}</tr>` +
-    `<tr><th scope="row" colspan="3"><code>models_free</code>, counted over ${htmlEsc(mf.population)}</th></tr>` +
+    `<tr><th scope="row" colspan="3"><code>models_free</code>, counted over ${escapeHtml(mf.population)}</th></tr>` +
     `<tr><th scope="row">With a sample of free models</th>${share(mf.withSample, mf.total)}</tr>` +
     `<tr><th scope="row">Distinct model IDs in those samples</th>${num(mf.distinctModels)}<td class="num">—</td></tr>` +
     '</tbody></table>' +
     `<p class="muted">A sample of free models is a sample, not the full catalogue; see the <a href="${prefix}models/">free model index</a>.</p>` +
 
     '<h2 id="non-text">Text and non-text providers</h2>' +
-    `<p>The project is about free <em>text</em> LLM APIs. By the <a href="${htmlEsc(repo)}/blob/main/docs/inclusion-criteria.md">inclusion criteria</a>, providers whose <code>modalities</code> do not include <code>text</code> (speech, image and similar) stay at or under ${nt.limitPct}% of the dataset. The stricter <code>is_text_llm: false</code> also counts embeddings, rerank and OCR services that take text but are not chat models.</p>` +
+    `<p>The project is about free <em>text</em> LLM APIs. By the <a href="${escapeHtml(repo)}/blob/main/docs/inclusion-criteria.md">inclusion criteria</a>, providers whose <code>modalities</code> do not include <code>text</code> (speech, image and similar) stay at or under ${nt.limitPct}% of the dataset. The stricter <code>is_text_llm: false</code> also counts embeddings, rerank and OCR services that take text but are not chat models.</p>` +
     '<table class="cov-table"><caption class="sr-only">Text and non-text providers</caption><thead><tr><th>Definition</th><th class="num">Providers</th><th class="num">Share</th></tr></thead><tbody>' +
     `<tr><th scope="row">No <code>text</code> in <code>modalities</code> (the ${nt.limitPct}% guardrail)</th><td class="num">${nt.noTextModality} of ${nt.total}</td><td class="num">${ntPct}%</td></tr>` +
     `<tr><th scope="row"><code>is_text_llm: false</code></th><td class="num">${nt.notTextLlm} of ${nt.total}</td><td class="num">${percent1(nt.notTextLlm, nt.total)}%</td></tr>` +

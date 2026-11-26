@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-25",
+  "generated": "2026-11-26",
   "scores": {
     "groq": {
       "total": 62.4,
@@ -19,12 +19,6 @@
       "of": 6,
       "rank": 2
     },
-    "zai-glm": {
-      "total": 52,
-      "confirmed": 4,
-      "of": 6,
-      "rank": 3
-    },
     "cloudflare-workers-ai": {
       "total": 50.4,
       "confirmed": 3,
@@ -35,11 +29,17 @@
       "total": 48.8,
       "confirmed": 4,
       "of": 6,
-      "rank": 4
+      "rank": 3
     },
     "ocr-space": {
       "total": 47.2,
       "confirmed": 4,
+      "of": 6,
+      "rank": null
+    },
+    "zai-glm": {
+      "total": 45.5,
+      "confirmed": 3,
       "of": 6,
       "rank": null
     },
@@ -53,21 +53,15 @@
       "total": 44.3,
       "confirmed": 4,
       "of": 6,
-      "rank": 5
+      "rank": 4
     },
     "cohere": {
       "total": 43.5,
       "confirmed": 5,
       "of": 6,
-      "rank": 6
+      "rank": 5
     },
     "jina-ai": {
-      "total": 41,
-      "confirmed": 3,
-      "of": 6,
-      "rank": null
-    },
-    "typhoon": {
       "total": 41,
       "confirmed": 3,
       "of": 6,
@@ -95,7 +89,7 @@
       "total": 37.1,
       "confirmed": 4,
       "of": 6,
-      "rank": 7
+      "rank": 6
     },
     "assemblyai": {
       "total": 37,
@@ -223,12 +217,6 @@
       "of": 6,
       "rank": null
     },
-    "vercel-ai-gateway": {
-      "total": 33.9,
-      "confirmed": 2,
-      "of": 6,
-      "rank": null
-    },
     "pinecone-inference": {
       "total": 33.3,
       "confirmed": 2,
@@ -245,7 +233,7 @@
       "total": 32.4,
       "confirmed": 4,
       "of": 6,
-      "rank": 8
+      "rank": 7
     },
     "alibaba-model-studio": {
       "total": 31.3,
@@ -260,6 +248,12 @@
       "rank": null
     },
     "cerebras": {
+      "total": 30.6,
+      "confirmed": 3,
+      "of": 6,
+      "rank": null
+    },
+    "infomaniak": {
       "total": 30.6,
       "confirmed": 3,
       "of": 6,
@@ -289,7 +283,25 @@
       "of": 6,
       "rank": null
     },
+    "netlify-ai-gateway": {
+      "total": 30,
+      "confirmed": 1,
+      "of": 6,
+      "rank": null
+    },
+    "plamo": {
+      "total": 30,
+      "confirmed": 1,
+      "of": 6,
+      "rank": null
+    },
     "public-ai": {
+      "total": 30,
+      "confirmed": 1,
+      "of": 6,
+      "rank": null
+    },
+    "typhoon": {
       "total": 30,
       "confirmed": 1,
       "of": 6,
@@ -320,12 +332,6 @@
       "rank": null
     },
     "retell-ai": {
-      "total": 29.9,
-      "confirmed": 2,
-      "of": 6,
-      "rank": null
-    },
-    "rev-ai": {
       "total": 29.9,
       "confirmed": 2,
       "of": 6,
@@ -385,7 +391,31 @@
       "of": 6,
       "rank": null
     },
+    "berget-ai": {
+      "total": 26.1,
+      "confirmed": 2,
+      "of": 6,
+      "rank": null
+    },
+    "entrim": {
+      "total": 26.1,
+      "confirmed": 2,
+      "of": 6,
+      "rank": null
+    },
+    "vercel-ai-gateway": {
+      "total": 26.1,
+      "confirmed": 2,
+      "of": 6,
+      "rank": null
+    },
     "camb-ai": {
+      "total": 26,
+      "confirmed": 1,
+      "of": 6,
+      "rank": null
+    },
+    "rev-ai": {
       "total": 26,
       "confirmed": 1,
       "of": 6,
@@ -415,14 +445,14 @@
       "of": 6,
       "rank": null
     },
-    "photoroom": {
-      "total": 25.4,
-      "confirmed": 3,
+    "modal": {
+      "total": 22.1,
+      "confirmed": 2,
       "of": 6,
       "rank": null
     },
-    "modal": {
-      "total": 22.1,
+    "photoroom": {
+      "total": 21.5,
       "confirmed": 2,
       "of": 6,
       "rank": null

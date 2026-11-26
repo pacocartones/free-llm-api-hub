@@ -5,10 +5,10 @@
 // the provider's own page did not state reads "Not stated" and is never filled in; the quoted sentences
 // are shown with the page they come from and the day they were read.
 
-import { htmlEsc, SLUG_RE } from './rows.mjs';
+import { escapeHtml } from './html.mjs';
+import { SLUG_RE } from './rows.mjs';
 import { claimsTableHtml } from './claims-table.mjs';
-
-const safeHttp = (u) => (/^https?:\/\//i.test(String(u || '')) ? String(u) : '');
+import { safeHttp } from './text.mjs';
 
 const LABELS = Object.freeze({
   gpu_access: 'Free GPU access',
@@ -20,8 +20,8 @@ const LABELS = Object.freeze({
 
 const quoteHtml = (q) => {
   const src = safeHttp(q.source);
-  const link = src ? `<a href="${htmlEsc(src)}" target="_blank" rel="noopener">${htmlEsc(new URL(src).hostname)}</a>` : '';
-  return `<blockquote class="gpu-quote"><p>“${htmlEsc(q.text)}”</p><footer class="muted">${link}${link ? ' · ' : ''}read ${htmlEsc(q.read)}</footer></blockquote>`;
+  const link = src ? `<a href="${escapeHtml(src)}" target="_blank" rel="noopener">${escapeHtml(new URL(src).hostname)}</a>` : '';
+  return `<blockquote class="gpu-quote"><p>“${escapeHtml(q.text)}”</p><footer class="muted">${link}${link ? ' · ' : ''}read ${escapeHtml(q.read)}</footer></blockquote>`;
 };
 
 function claimHtml(slug, field, claim) {
@@ -31,7 +31,7 @@ function claimHtml(slug, field, claim) {
   else if (claim.quotes.length > 1) state = '<span class="gpu-unstated">Not stated: the sentences below do not settle it</span>';
   else if (claim.quotes.length === 1) state = '<span class="gpu-unstated">Not stated as a figure; what the page says is below</span>';
   else state = '<span class="gpu-unstated">Not stated</span>';
-  return `<div class="gpu-claim"${SLUG_RE.test(slug) ? ` id="${slug}-${field}"` : ''}><dt>${htmlEsc(LABELS[field] || field)}</dt><dd>${state}${quotes}</dd></div>`;
+  return `<div class="gpu-claim"${SLUG_RE.test(slug) ? ` id="${slug}-${field}"` : ''}><dt>${escapeHtml(LABELS[field] || field)}</dt><dd>${state}${quotes}</dd></div>`;
 }
 
 const kindLabel = (k) => (k === 'notebook' ? 'notebook service' : 'serverless API');
@@ -39,17 +39,17 @@ const kindLabel = (k) => (k === 'notebook' ? 'notebook service' : 'serverless AP
 export function freeGpuMainHtml(section, { prefix = '../' } = {}) {
   const entries = section.entries.map((e) => {
     const url = safeHttp(e.url);
-    const name = url ? `<a href="${htmlEsc(url)}" target="_blank" rel="noopener">${htmlEsc(e.name)}</a>` : htmlEsc(e.name);
+    const name = url ? `<a href="${escapeHtml(url)}" target="_blank" rel="noopener">${escapeHtml(e.name)}</a>` : escapeHtml(e.name);
     const claims = Object.keys(LABELS).map((f) => claimHtml(e.slug, f, e.claims[f])).join('');
-    return `<section class="gpu-entry" id="${SLUG_RE.test(e.slug) ? e.slug : ''}"><h3>${name} <span class="muted">· ${htmlEsc(kindLabel(e.kind))}</span></h3><dl class="gpu-claims">${claims}</dl></section>`;
+    return `<section class="gpu-entry" id="${SLUG_RE.test(e.slug) ? e.slug : ''}"><h3>${name} <span class="muted">· ${escapeHtml(kindLabel(e.kind))}</span></h3><dl class="gpu-claims">${claims}</dl></section>`;
   }).join('');
   const notes = (section.notes || []).map((n) =>
-    `<section class="gpu-note"><h3>${htmlEsc(n.subject)}</h3><p>${htmlEsc(n.text)}</p>${n.quotes.map(quoteHtml).join('')}</section>`).join('');
+    `<section class="gpu-note"><h3>${escapeHtml(n.subject)}</h3><p>${escapeHtml(n.text)}</p>${n.quotes.map(quoteHtml).join('')}</section>`).join('');
   return '<main id="main"><div class="wrap prose">' +
     '<h2>What each service says about free GPU time</h2>' +
     '<p>This is a separate list from the free LLM APIs: these services give you compute, not a hosted model. It is <strong>not part of the ranking</strong> and no count, score or collection of the site includes it. ' +
     'Each value below is written only when the provider\'s own page says it, with the sentence and the day it was read; otherwise it reads <strong>Not stated</strong>, which is not the same as <em>no</em>. ' +
-    'A service is listed only when its own page, read as plain text, says what it offers; pages that need a browser to read are not covered yet. A listed service can still have <strong>Not stated</strong> next to "Free GPU access": the page does not say that its free credit pays for GPU time, and the page then does not claim it. Data of ' + htmlEsc(section.generated) + '.</p>' +
+    'A service is listed only when its own page, read as plain text, says what it offers; pages that need a browser to read are not covered yet. A listed service can still have <strong>Not stated</strong> next to "Free GPU access": the page does not say that its free credit pays for GPU time, and the page then does not claim it. Data of ' + escapeHtml(section.generated) + '.</p>' +
     claimsTableHtml({ id: 'gpu', entries: section.entries, labels: LABELS, kindLabel, subject: 'service' }) +
     entries +
     (notes ? '<h2>Worth knowing</h2>' + notes : '') +
