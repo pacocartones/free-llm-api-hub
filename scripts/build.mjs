@@ -2338,11 +2338,39 @@ writeFileSync(
 // Reads data/coding-tools.json only; nothing here enters a provider count, score or collection.
 rmSync(join(ROOT, 'site/coding-tools'), { recursive: true, force: true });
 mkdirSync(join(ROOT, 'site/coding-tools'), { recursive: true });
+// Both data files, in the order the list page shows them: the free tools, then the ones that run on your own key.
+const CODING_TOOL_PAGES = [
+  ...codingTools.entries.map((e) => ({ e, group: 'free', generated: codingTools.generated })),
+  ...codingToolsOwnKey.entries.map((e) => ({ e, group: 'own-key', generated: codingToolsOwnKey.generated })),
+];
+const CODING_TOOLS_DESC = 'Coding tools that say they have a free plan, each value with the tool\'s own sentence and the day it was read. A separate list from the ranking of free LLM APIs; not stated is never no.';
+// CollectionPage + ItemList + BreadcrumbList, like the guides hub. No Product or Offer: a free plan is a quoted claim, not a price.
+const codingToolsJsonLd = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'CollectionPage', name: 'Free AI coding tools', description: CODING_TOOLS_DESC,
+      url: `${SITE}/coding-tools/`, dateModified: ASOF,
+      isPartOf: websiteRef(SITE),
+      mainEntity: {
+        '@type': 'ItemList', numberOfItems: CODING_TOOL_PAGES.length,
+        itemListElement: CODING_TOOL_PAGES.map(({ e }, i) => ({ '@type': 'ListItem', position: i + 1, name: e.name, url: `${SITE}/coding-tools/${e.slug}/` })),
+      },
+    },
+    {
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Free LLM API Hub', item: `${SITE}/` },
+        { '@type': 'ListItem', position: 2, name: 'Free AI coding tools', item: `${SITE}/coding-tools/` },
+      ],
+    },
+  ],
+});
 writeFileSync(
   join(ROOT, 'site/coding-tools/index.html'),
   htmlPage({
     title: 'Free AI coding tools · Free LLM API Hub',
-    desc: 'Coding tools that say they have a free plan, each value with the tool\'s own sentence and the day it was read. A separate list from the ranking of free LLM APIs; not stated is never no.',
+    desc: CODING_TOOLS_DESC,
     canonical: SITE + '/coding-tools/',
     main:
       pageHero({ crumbs: `<a href="../">Home</a> / Free AI coding tools`, h1: `Free AI coding tools`, lede: `Coding tools that say they have a free plan. Apart from the ranking, and every value written only where the tool's own page says it.` }) +
@@ -2350,15 +2378,12 @@ writeFileSync(
     prefix: '../',
     ogImage: `${SITE}/og/coding-tools.png`,
     styles: ['tables.css'],
+    jsonld: codingToolsJsonLd,
   })
 );
 
 // One page per tool: /coding-tools/<slug>/. The same data as the list, with the sentence, the source and the day of each value, and the
 // values the tool's page does not state shown as «Not stated».
-const CODING_TOOL_PAGES = [
-  ...codingTools.entries.map((e) => ({ e, group: 'free', generated: codingTools.generated })),
-  ...codingToolsOwnKey.entries.map((e) => ({ e, group: 'own-key', generated: codingToolsOwnKey.generated })),
-];
 for (const { e, group } of CODING_TOOL_PAGES) {
   if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(e.slug)) throw new Error('coding tool slug is not kebab-case: ' + e.slug);
   const canonical = `${SITE}/coding-tools/${e.slug}/`;
