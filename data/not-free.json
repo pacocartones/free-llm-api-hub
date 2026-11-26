@@ -136,11 +136,18 @@
       "slug": null,
       "modalities": ["image", "text"],
       "expectation": "Often listed as free on other lists.",
-      "summary": "Currently requires a card or prepayment before any API use, per its own docs. It was held back from the dataset for lack of a citable, quantifiable free tier. No quote has been recorded in this repository yet.",
+      "summary": "Currently requires a card or prepayment before any API use, per its own docs. It was held back from the dataset for lack of a citable, quantifiable free tier.",
       "short": "a card or prepayment before any API use",
-      "quotes": [],
-      "sources": [],
-      "checked": null,
+      "quotes": [
+        "To use Replicate, you must first purchase credit upfront."
+      ],
+      "sources": [
+        {
+          "label": "Prepaid credit",
+          "url": "https://replicate.com/docs/topics/billing/prepaid-credit"
+        }
+      ],
+      "checked": "2026-11-25",
       "faq": null
     },
     {

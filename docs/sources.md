@@ -95,7 +95,7 @@ The primary keyword is **"free LLM API"**. Direct competitors on that head term:
 
 ## Checked, with what each page says
 
-_Checked: 2026-11-14; four rows added 2026-11-20._
+_Checked: 2026-11-14; four rows added 2026-11-20, one on 2026-11-25._
 
 Well-known providers checked for free API access or trial credit, with the quoted statement from each provider's own public documentation, the source URL, and the UTC date read.
 
@@ -109,6 +109,7 @@ Well-known providers checked for free API access or trial credit, with the quote
 | Anthropic | No ongoing free API tier. Credits are bought before use; recurring monthly API credits come only with the paid Max, Ultra and Team plans. The consumer Free plan is chat, not API. | "Buy credits before you use the API, and they're applied to your usage according to our current pricing." "If you run out of credits, you can no longer call the API or use the playground until you add more." | [How to pay for Claude API usage](https://support.claude.com/en/articles/8977456-how-do-i-pay-for-my-claude-api-usage) | 2026-11-20 |
 | xAI | No ongoing free API tier. "Tier 0 / $0" is a rate-limit tier based on cumulative spend, not a usage allowance; by default only prepaid credits are used. | "Your API requests will be automatically rejected once your prepaid credits are depleted." | [Billing](https://docs.x.ai/console/billing) · [Consumption and rate limits](https://docs.x.ai/docs/key-information/consumption-and-rate-limits) | 2026-11-20 |
 | Kimi (Moonshot AI) | Not free to start: the API needs a $1 minimum recharge. The $5 voucher is conditional on paying: it arrives only once cumulative recharges reach $5, and vouchers do not count towards that total. | "To prevent abuse, a minimum recharge of $1 is required to start using the API; when your cumulative recharge reaches $5, you receive a $5 voucher." "Vouchers do not count towards the cumulative recharge total." | [Recharge and rate limiting](https://platform.kimi.ai/docs/pricing/limits) | 2026-11-20 |
+| Replicate | Credit is bought before use: usage is deducted from a prepaid balance, and buying credit needs a payment method. The billing page also says select models can be run for free for a while before billing has to be set up; that is not a stated allowance. | "To use Replicate, you must first purchase credit upfront." | [Prepaid credit](https://replicate.com/docs/topics/billing/prepaid-credit) | 2026-11-25 |
 
 **Review scope:** Read the four public official pages linked above on 2026-11-14 (UTC), covering documented access requirements, credit and billing only. Provider legal terms, commercial-use permissions, prompt retention/training, credit expiry and account/region eligibility beyond the stated phone requirement were not reviewed. No account was created and no API was tested. This is a documentation check, not a complete provider inclusion review; it does not establish a recurring free allowance or change the provider dataset.
 
