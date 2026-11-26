@@ -3236,7 +3236,7 @@ test('data_policy lot 7: Poolside may train on your Content by its Terms of Use 
   assert.equal(dp.trains_on_prompts, true, 'may train, even though you can opt out');
   assert.equal(dp.retention, null, 'the terms state no retention period for Content');
   assert.equal(dp.source, 'https://poolside.ai/legal/eula', 'the Terms of Use, which cover the APIs and Poolside Platform');
-  assert.equal(dp.checked, '2026-10-15'); assert.equal(dp.plan_named, false);
+  assert.equal(dp.checked, '2026-11-26'); assert.equal(dp.plan_named, false);
   assert.equal(dp.quote, 'We may use your Content to provide, maintain, improve, and develop the Products and other Poolside offerings, including training our models, unless you opt-out.', 'section 4, literal');
   assert.match(dp.note, /if you give Feedback or it is flagged for safety review/, 'the exceptions to the opt-out are in the note');
   assert.ok(dp.quote.length <= 400 && dp.note.length <= 300);

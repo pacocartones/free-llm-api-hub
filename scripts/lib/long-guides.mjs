@@ -1480,7 +1480,8 @@ function chatbotGuide({ providers, prefix }) {
     (S.close.length
       ? `<ul>${S.close.map((x) => { const u = unknownOf(x); const f = CHATBOT_REASON_FIELD[u.key]; const fc = f && fieldCheck(x, f); return `<li><strong>${L(x)}:</strong> ${escapeAttr(CHECK_HEAD[u.key].toLowerCase())} is not stated${fc && fc.note ? `: “${escProse(fc.note)}” (read ${time(fc.checked)})` : u.key === 'train' ? ` (${escapeAttr(dataUseWords(x).toLowerCase())})` : ` (${escapeAttr(reasonOf(x, f))})`}.</li>`; }).join('')}</ul>` + p('Ask the provider in writing before you rely on the missing check.')
       : p('No free text LLM passes three checks with the fourth only unconfirmed today.')) +
-    (S.close.length >= 2 || S.all.length >= 2 ? related([compareLink([...S.all, ...S.close], prefix)]) : '') +
+    // Fewer than two at four or three checks: compare the two that pass the most checks instead.
+    (S.ranked.length >= 2 ? related([compareLink(S.all.length + S.close.length >= 2 ? [...S.all, ...S.close] : S.ranked.slice(0, 2), prefix)]) : '') +
     h2('What happens to your users’ messages', 'data') +
     p(`Of the ${S.text.length}, ${t.no.length} say they don’t train on your inputs, ${t.yes.length} say they can, and for ${t.open.length} no quoted policy settles it. Retention is a separate question: ${withRetention} of the ${S.text.length} have a quoted retention sentence.${retention.length ? ` For the providers above: ${retention.map((x) => `${L(x)}: ${escProse(x.data_policy.retention)}`).join('; ')}.` : ''} Tell your users which provider reads their messages. See <a href="${prefix}data-policy/">data policy, provider by provider</a>.`) +
     h2('Quickstart', 'quickstart') +
