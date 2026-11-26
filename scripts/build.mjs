@@ -1303,9 +1303,13 @@ for (const p of providers) {
     ? scoreBlockHtml({
       position: scorePlace.get(p.slug).position, of: rankedAll.length, total: sc.total, editorial: scorePlace.get(p.slug).editorial, editorialWeight: EDITORIAL_WEIGHT,
       fractions: inputFractions(p, stabilityFromProbe(PROBE_REPORT, p.slug, new Date(ASOF + 'T12:00:00Z'))), weights: SCORE_WEIGHTS, topRank: sc.rank,
+      compact: true,
     })
     : `<div class="prov-score"><span class="muted">No score: only verified providers inside the freshness window are scored · <a href="../best/methodology/">how it is computed</a></span></div>`;
-  const summary = `<div class="prov-summary"><h2 id="whats-free">What's free</h2><p>${htmlEsc(p.free_tier)}</p></div>` + scoreHtml + requirementsHtml(p);
+  // What's free (only when the record says it: no empty box), then, further down, the requirement cards behind one
+  // summary line and the score on one line.
+  const summary = p.free_tier ? `<div class="prov-summary"><h2 id="whats-free">What's free</h2><p>${htmlEsc(p.free_tier)}</p></div>` : '';
+  const reqsHtml = `<details class="prov-reqs-box"><summary>What you need to start: card, phone, commercial use</summary>${requirementsHtml(p)}</details>`;
   // Freshness relative to the current day (provider pages are regenerated on deploy, not diff-gated).
   const daysAgo = p.verified && p.last_verified ? ageInDays(p.last_verified, today) : null;
   // The receipt stamp (lib/stamp.mjs), the perforated ticket: "✓ | Verified 24 Nov 2026 · 7 sources", the quoted sentence in its title.
@@ -1324,8 +1328,18 @@ for (const p of providers) {
   const docsBtn = docsHref(p.docs_url) ? `<a class="btn primary" href="${htmlEsc(docsHref(p.docs_url))}" target="_blank" rel="noopener">Official docs ↗</a>` : '';
   // "Get a free key": the provider's own key page, exactly as its docs link it (keys_url), next to the limits and the
   // quickstart. Tagged data-link="keys" by tagProviderLinks, so a click is an outbound_provider_click (consent-gated).
-  const keysHtml = p.keys_url
-    ? `<div class="prov-actions prov-key" style="align-items:center"><a class="btn primary" href="${htmlEsc(p.keys_url)}" target="_blank" rel="noopener">Get a free key ↗</a><span class="muted">Sign up or sign in on ${htmlEsc(p.name)}'s own site, then create an API key there.</span></div>`
+  // "Copy base URL": the OpenAI-compatible base URL to the clipboard (site.js, the .api-copy handler: the result is
+  // announced in the status line next to it). Both sit right under What's free, before the quickstart.
+  const baseCopy = p.openai_base_url
+    ? `<button type="button" class="btn api-copy base-copy" data-api-url="${htmlEsc(p.openai_base_url)}" data-label="Copy base URL" data-copy-fail="Copy failed. Select the base URL in the quickstart and copy it by hand.">Copy base URL</button>`
+    : '';
+  const keysHtml = p.keys_url || baseCopy
+    ? `<div class="prov-actions prov-key">` +
+      (p.keys_url ? `<a class="btn primary" href="${htmlEsc(p.keys_url)}" target="_blank" rel="noopener">Get a free key ↗</a>` : '') +
+      baseCopy + `<a class="prov-compare" href="#compare">Compare with…</a>` +
+      (baseCopy ? `<span class="api-copy-status" role="status"></span>` : '') +
+      (p.keys_url ? `<p class="muted prov-key-hint">Sign up or sign in on ${htmlEsc(p.name)}'s own site, then create an API key there.</p>` : '') +
+      `</div>`
     : '';
   const playgroundBtn = p.playground_url ? `<a class="btn" href="${htmlEsc(p.playground_url)}" target="_blank" rel="noopener">Try it ↗</a>` : '';
   // "Visit website": the provider's main site, derived from the docs URL by stripping
@@ -1344,7 +1358,7 @@ for (const p of providers) {
   // else the interactive view with both providers in it.
   const comparePeers = compareLib.comparePeers(p, providers, { staticPaths: COMPARE_PATHS, score: (o) => scoreMap[o.slug]?.total ?? null });
   const compareHtml =
-    `<h2>Compare</h2><div class="colls">` +
+    `<h2 id="compare">Compare</h2><div class="colls">` +
     comparePeers.map((c) => `<a href="../compare/${c.path ? `${c.path}/` : `?compare=${p.slug},${c.other.slug}`}">Compare with ${htmlEsc(c.other.name)}</a>`).join('') +
     `<a href="../compare/?compare=${p.slug}">Compare with another provider →</a></div>`;
   const crossChips = [
@@ -1364,12 +1378,14 @@ for (const p of providers) {
       extra: `<div class="prov-actions">${docsBtn}${websiteBtn}${playgroundBtn}</div>`,
     }) +
     `<main id="main"><div class="wrap prose prov-prose">` +
+    // The owner's order: What's free, then the two actions (a free key, the base URL), then the quickstart; the limits,
+    // the requirement cards and the score (one line) follow. Speed, data policy and the provider's description come after.
     summary +
-    limitsHtml(p) +
     keysHtml +
-    // Q3: the snippet right after the limits (it sat ~4,500px down /p/groq on a phone); speed, data policy and the
-    // provider's own description follow it.
     quick +
+    limitsHtml(p) +
+    reqsHtml +
+    scoreHtml +
     glanceHtml(p, typeLabel(p)) +
     modelsHtml(p, { modelHref: modelPageHref('../') }) +
     speedHtml(p) +

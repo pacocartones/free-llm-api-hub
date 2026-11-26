@@ -650,7 +650,24 @@ pre code { color: var(--text); }
 .prov-card p { margin: 0; font-size: .92rem; }
 .prov-card code { word-break: break-all; }
 .prov-summary { background: var(--panel); border: 1px solid var(--border); border-radius: 20px; padding: 22px 24px; margin: 22px 0; }
-.prov-summary h2 { margin: 0 0 8px; font-size: 1.6rem; color: var(--text); }
+.prov-summary h2 { margin: 0 0 8px; font-size: 1.6rem; color: var(--text); border-top: 0; padding-top: 0; }
+/* Right under What's free: the two actions (a free key, the base URL) and the Compare link, before the quickstart. */
+.prov-key { align-items: center; margin: 0 0 8px; }
+.prov-key .prov-compare { font-size: .9rem; text-decoration: underline; text-underline-offset: 2px; }
+.prov-key .api-copy-status { flex-basis: 100%; min-height: 0; }
+.prov-key .api-copy-status:empty { display: none; }
+.prov-key .prov-key-hint { flex-basis: 100%; margin: 0; font-size: .86rem; }
+/* The requirement cards behind one summary line (the hero already shows the flags as marks). */
+.prov-reqs-box { margin: 26px 0 0; border: 1px solid var(--border); border-radius: var(--radius); background: var(--panel); }
+.prov-reqs-box > summary { cursor: pointer; padding: 12px 16px; font-weight: 600; }
+.prov-reqs-box > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.prov-reqs-box[open] > summary { border-bottom: 1px solid var(--border); }
+.prov-reqs-box .prov-reqs { margin: 0; padding: 14px; }
+/* The score on the provider page: one line (place, a small bar, the method link). */
+.prov-score.prov-score-line { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 6px 14px; margin: 18px 0 0; }
+.prov-score-line .score-rank strong { font-size: 1.05rem; font-stretch: 100%; font-weight: 700; vertical-align: 0; }
+.prov-score-line .score-bar { flex: 0 0 160px; height: 10px; }
+@media (max-width: 480px) { .prov-score-line .score-bar { display: none; } }
 .prov-score { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 14px 0; font-size: .92rem; }
 .prov-score .best-score { margin-left: 0; }
 /* Q13: the score as a place ("#1 of 69") and a bar of the six inputs of lib/score.mjs, each segment as wide as its
@@ -1218,3 +1235,7 @@ a.stamp:hover { text-decoration: none; }
   .find-opts { grid-template-columns: 1fr; }
   .find-nav .btn, .find-tools .btn { flex: 1 1 auto; justify-content: center; }
 }
+/* "Copy base URL" on the provider page is a secondary button like its neighbours, not the API page's small copy chip. */
+.btn.base-copy { margin: 0; padding: 11px 18px; border: 1px solid var(--border-strong); border-radius: 9px; background: var(--panel); color: var(--text); font-family: var(--font-mono); font-weight: 700; font-size: .92rem; }
+.btn.base-copy:hover { border-color: var(--accent); color: var(--accent-dim); }
+.btn.base-copy.copied { border-color: var(--ok); color: var(--ok); }

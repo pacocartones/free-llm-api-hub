@@ -98,9 +98,9 @@ test('provider "Get a free key" button is conditional, tracked as data-link="key
     const present = readFileSync(join(ROOT, 'site/p', `${first.slug}.html`), 'utf8');
     assert.equal((present.match(/>Get a free key ↗/g) || []).length, 1);
     assert.ok(present.includes(`<a class="btn primary" href="https://example.com/keys?tab=api&amp;new=1" target="_blank" rel="noopener" data-provider="${first.slug}" data-link="keys">Get a free key ↗<span class="sr-only"> (opens in a new tab)</span></a>`));
-    // between the free limits and the quickstart
+    // right after What's free, before the quickstart and the limits (the owner's order)
     const at = (s) => present.indexOf(s);
-    assert.ok(at('id="limits"') < at('>Get a free key ↗') && at('>Get a free key ↗') < at('id="quickstart"'));
+    assert.ok(at('id="whats-free"') < at('>Get a free key ↗') && at('>Get a free key ↗') < at('id="quickstart"') && at('id="quickstart"') < at('id="limits"'));
     const absent = readFileSync(join(ROOT, 'site/p', `${second.slug}.html`), 'utf8');
     assert.doesNotMatch(absent, /Get a free key/);
     for (const file of ['site/providers.json', 'site/api/v1/providers.json']) {
@@ -2488,7 +2488,7 @@ test('provider page: the score is visible, no «All providers» link or «Report
   // Mutant: show the old button or link again, drop data-pager, or lose the score line; this test turns red.
   const html = readFileSync(join(ROOT, 'site/p/groq.html'), 'utf8');
   const main = html.slice(html.indexOf('<main id="main">'));
-  assert.match(main, /<div class="prov-score"><p class="score-rank"><strong>#\d+ of \d+<\/strong> scored <span class="muted">\(\d+(\.\d)? \/ 100\)<\/span>/, 'the score of the provider, as a place (Q13)');
+  assert.match(main, /<div class="prov-score prov-score-line"><p class="score-rank"><strong>#\d+ of \d+<\/strong> scored <span class="muted">\(\d+(\.\d)? \/ 100\)<\/span>/, 'the score of the provider, as a place (Q13)');
   assert.match(main, /<a href="\.\.\/best\/methodology\/">how it is computed<\/a>/, 'a link to the method');
   // Mutant: drop the underline and the links in the score line rely on colour alone, which Lighthouse fails (link-in-text-block).
   assert.match(readFileSync(join(ROOT, 'site/styles.css'), 'utf8'), /\.prov-score a \{[^}]*text-decoration: underline/, 'the links of the score line are underlined');

@@ -21,7 +21,7 @@ const pts = (n) => (Math.round(n * 10) / 10).toString();
  * - fractions: inputFractions() of lib/score.mjs ({ [input]: { frac, known } }); weights: SCORE_WEIGHTS;
  * - topRank: its place on The Best, or null; prefix: the path to the site root.
  */
-export function scoreBlockHtml({ position, of, total, editorial, editorialWeight = 30, fractions, weights, topRank = null, prefix = '../' }) {
+export function scoreBlockHtml({ position, of, total, editorial, editorialWeight = 30, fractions, weights, topRank = null, prefix = '../', compact = false }) {
   const inputs = Object.keys(weights);
   const rows = inputs.map((k) => {
     const f = fractions[k] || { frac: 0, known: false };
@@ -32,6 +32,18 @@ export function scoreBlockHtml({ position, of, total, editorial, editorialWeight
     : `<span class="sb-seg sb-unknown" style="flex-grow:${r.weight}"></span>`).join('');
   const said = rows.map((r) => `${r.label} ${r.known ? `${pts(r.points)} of ${r.weight}` : `not confirmed, ${pts(r.points)} of ${r.weight}`}`).join('; ');
   const legend = rows.map((r) => `<li${r.known ? '' : ' class="sb-u"'}><span class="sb-key" aria-hidden="true"></span>${esc(r.label)} <span class="sb-pts">${r.known ? `${pts(r.points)}/${r.weight}` : `? · ${pts(r.points)}/${r.weight}`}</span></li>`).join('');
+  const note = `Unknowns lower the score on purpose: an input nobody has confirmed (grey) earns nothing, or the neutral middle for card, phone and commercial use. ` +
+    `Plus ${pts(editorial)} of ${editorialWeight} editorial points.`;
+  // compact (the provider page): ONE line, the place, a small bar and the method link; the legend and the note go
+  // (the bar still says every input to assistive technology, and the note is its title).
+  if (compact) {
+    return `<div class="prov-score prov-score-line">` +
+      `<p class="score-rank"><strong>#${position} of ${of}</strong> scored <span class="muted">(${pts(total)} / 100)</span>` +
+      (topRank ? ` · #${topRank} on <a href="${prefix}best/">The Best</a>` : '') +
+      ` · <a href="${prefix}best/methodology/">how it is computed</a></p>` +
+      `<div class="score-bar" role="img" aria-label="${esc(`Score inputs: ${said}`)}" title="${esc(note)}">${segs}</div>` +
+      `</div>`;
+  }
   return `<div class="prov-score">` +
     `<p class="score-rank"><strong>#${position} of ${of}</strong> scored <span class="muted">(${pts(total)} / 100)</span>` +
     (topRank ? ` · #${topRank} on <a href="${prefix}best/">The Best</a>` : '') +
