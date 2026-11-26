@@ -2142,7 +2142,6 @@ test('active providers retain models_url from their official catalogues', () => 
     ['plamo', 'https://docs.plamo.preferredai.jp/en/api'],
     ['entrim', 'https://entrim.ai/ai-models/'],
     ['infomaniak', 'https://www.infomaniak.com/en/hosting/ai-services/open-source-models'],
-    ['gigachat', 'https://developers.sber.ru/docs/ru/gigachat/models'],
     ['berget-ai', 'https://berget.ai/en/models'],
     ['netlify-ai-gateway', 'https://docs.netlify.com/build/ai-gateway/overview/#model-availability'],
   ].sort(bySlug));

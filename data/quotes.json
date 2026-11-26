@@ -1463,30 +1463,6 @@
    "page_sha256": "3862774fa7327cede659b450d922ed202006d069097a4b761cad90d0064eaa1a"
   },
   {
-   "id": "gigachat.commercial_ok.sentence",
-   "slug": "gigachat",
-   "kind": "field_sentence",
-   "field": "commercial_ok",
-   "text": "Бесплатный доступ (Freemium-режим) к контенту, сгенерированному с помощью GigaChat API, предоставляется исключительно для личного некоммерческого использования.",
-   "source_url": "https://developers.sber.ru/docs/ru/gigachat/tariffs/commercial",
-   "read_on": "2026-11-26",
-   "lang": "ru",
-   "method": "html-text-v1: page requested with Accept-Language ru, tags removed, character references decoded, white space collapsed",
-   "page_sha256": "899238bdf9f7f26217224494ae12227e7214efec6f698670fc3129a7ae2d1fb0"
-  },
-  {
-   "id": "gigachat.openai_compatible.sentence",
-   "slug": "gigachat",
-   "kind": "field_sentence",
-   "field": "openai_compatible",
-   "text": "Тем не менее формат сообщений GigaChat API частично совместим с OpenAI API.",
-   "source_url": "https://developers.sber.ru/docs/ru/gigachat/guides/compatible-openai",
-   "read_on": "2026-11-26",
-   "lang": "ru",
-   "method": "html-text-v1: page requested with Accept-Language ru, tags removed, character references decoded, white space collapsed",
-   "page_sha256": "b6f506ff3905189b4a69e26a95d63782e4e558dfa72db162618f5f1858f768df"
-  },
-  {
    "id": "berget-ai.sentence",
    "slug": "berget-ai",
    "kind": "sentence",
