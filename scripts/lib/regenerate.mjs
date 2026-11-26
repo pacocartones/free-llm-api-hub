@@ -115,9 +115,10 @@ export const driftGate = ({ mode, release = false, touched = [], drift = [] }) =
 export const REGENERATE_INPUTS = Object.freeze([
   'data/**', '!data/probe-report.json', 'scripts/**', 'CONTRIBUTING.md', 'docs/methodology.md', '.github/workflows/regenerate.yml',
 ]);
-export const startsRegeneration = (path) => typeof path === 'string' && path !== 'data/probe-report.json'
-  && (path.startsWith('data/') || path.startsWith('scripts/')
-    || ['CONTRIBUTING.md', 'docs/methodology.md', '.github/workflows/regenerate.yml'].includes(path));
+// The same list, read as GitHub reads a paths filter of this shape: `dir/**` matches everything under dir/, a plain
+// entry one file, and a `!` entry excludes that file.
+export const startsRegeneration = (path) => typeof path === 'string' && !REGENERATE_INPUTS.includes(`!${path}`)
+  && REGENERATE_INPUTS.some((p) => !p.startsWith('!') && (p.endsWith('/**') ? path.startsWith(p.slice(0, -2)) : path === p));
 
 // Whether pages.yml deploys this run.
 //   event       github.event_name
