@@ -579,8 +579,10 @@ const pageHero = ({ crumbs, h1, lede = '', afterTitle = '', extra = '', cls = 'm
 
 // The primary menu, shared by every generated page; site/index.html carries the same markup by hand (the test
 // "header menu" in build.test.mjs keeps the two equal). Providers is a disclosure (<details>) holding the explorer and
-// The Best, so the six entries fit one desktop row; Submit is the secondary Contribute button next to the menu.
+// The Best, so the six entries fit one desktop row; Submit is the secondary Contribute button next to the menu. The first
+// link, "Find my free API", shows only in the phone menu (styles.css), where it heads the list.
 const primaryNav = (p) => `<nav class="nav" id="primary-nav" aria-label="Primary">` +
+  `<a class="nav-find" href="${p}find/">Find my free API</a>` +
   `<details class="nav-group"><summary>Providers</summary><div class="nav-sub"><a href="${p}#explorer">All providers</a>` +
   `<a href="${p}find/">Find my free API</a>` +
   `<a class="nav-best" href="${p}best/" title="The top 10 by score, recomputed from the data at every build">${IC('ic-spark')}The Best</a></div></details>` +
