@@ -511,6 +511,7 @@ pre code { color: var(--text); }
 .cov-field summary { cursor: pointer; }
 .cov-list { list-style: none; margin: 10px 0 2px; padding: 0; display: flex; flex-direction: column; gap: 6px; }
 .cov-task { line-height: 1.5; overflow-wrap: anywhere; }
+.tool-sources a { overflow-wrap: anywhere; } /* a source is listed by its full URL, which has no break point: without this it widens the page on a phone */
 .cov-pop { display: none; }
 /* /quality/ — the week histogram: a bar beside each number (decoration; the number is the data) */
 .q-barcell { width: 40%; min-width: 60px; padding-left: 12px !important; }
