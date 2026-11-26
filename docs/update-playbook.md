@@ -77,7 +77,7 @@ For each provider on the worklist (`npm run worklist`, or just the reverify batc
    - Gone → remove the entry (note it in a changelog fragment, `changes/unreleased/<short-name>.md`, see [CONTRIBUTING.md](../CONTRIBUTING.md)) or, if the free tier ended, move the note to the README's "Notably NOT free" section.
    - Couldn't confirm → `verified: false`, `last_verified: null`, explain in `notes`.
    - **Leave `generated` alone.** It is the release date (top of `data/providers.json`) and moves only with `version` in a release pull request (`npm run release:prepare`, see [RELEASING.md](../RELEASING.md)); the integrity gate fails a data pull request that moves it. Dates after today in UTC are rejected.
-4. **Regenerate and check (same PR):**
+4. **Regenerate and check:**
    ```bash
    npm run build      # README, exports, collections, site payload (the badge goes to site/, not committed)
    npm test           # dataset integrity gate
@@ -86,8 +86,8 @@ For each provider on the worklist (`npm run worklist`, or just the reverify batc
    ```
    `npm run og` uses `@resvg/resvg-js`; JSON Schema validation also uses locked development tooling. Run `npm ci --ignore-scripts` before the first pass. The CI gate checks that every PNG exists **and matches the current data** (a fingerprint check via `site/og/manifest.json`), not just that it is present — so a changed count, flag or category fails the check until you run `npm run og`.
 
-`npm run build` also rewrites `derived-fingerprints.json` - the sha256 pin of every gitignored build output under `site/` (see [architecture.md](architecture.md)). Commit it with the rest; the drift gate fails if it is missing or out of sync. The git-log-derived files (`updates.html`, `feed.xml`, `api/v1/history.json`) are deliberately excluded from the pin: their content embeds the commit hash/subject or dates, so it shifts across a squash merge — they are regenerated on every deploy.
-5. **Commit `data/providers.json` + the regenerated files in one PR.** The required "Dataset integrity" check fails if the derived files are out of sync, so the PR is complete only when both ship together.
+`npm run build` also rewrites `derived-fingerprints.json` - the sha256 pin of every gitignored build output under `site/` (see [architecture.md](architecture.md)); like the other derived files, it is committed by the regeneration bot in push mode, or by you in any other mode. The git-log-derived files (`updates.html`, `feed.xml`, `api/v1/history.json`) are deliberately excluded from the pin: their content embeds the commit hash/subject or dates, so it shifts across a squash merge — they are regenerated on every deploy.
+5. **Commit what depends on the regeneration mode** ([regeneration-bot.md](regeneration-bot.md)). In push mode (the current one), commit `data/providers.json`, your changelog fragment and any `data/quotes.json` change, but no regenerated file: the bot commits them to `main` after the merge, and "Dataset integrity" fails only if the pull request hand-edits a derived file. In any other mode, commit the regenerated files with the data in the same pull request; the check fails until they are in sync.
 
 ### Also scan for what's new (monthly is enough)
 

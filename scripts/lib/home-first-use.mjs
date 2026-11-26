@@ -11,6 +11,7 @@
 // so the server render is deterministic and explorer.js has nothing to repaint.
 
 import { esc } from './escape.mjs';
+import { plural } from './text.mjs';
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -33,7 +34,6 @@ export function firstUseFacts(providers) {
   };
 }
 
-const plural = (n, one, many) => `${n} ${n === 1 ? one : many}`;
 const time = (d) => `<time datetime="${esc(d)}">${esc(d)}</time>`;
 
 /**

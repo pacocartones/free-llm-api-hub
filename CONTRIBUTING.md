@@ -78,7 +78,7 @@ Run these commands from the repository root after installing dependencies. Follo
 | Change | Local validation before opening a PR |
 | --- | --- |
 | Hand-written docs or issue/PR template text | `npm run links`, then preview the changed Markdown or form and open its links. The link checker checks local paths in tracked and non-ignored new Markdown files, including nested docs and package READMEs. Absolute paths and paths escaping the repository are rejected; it does not validate GitHub forms, external issue searches or heading anchors. |
-| Provider data or build inputs (including `CONTRIBUTING.md`, which generates the site's contributing page) | `npm run build && npm test`; commit your changes and regenerated files, then run `npm run check` (it compares generated output with the committed version). Run `npm run og` too if the OG check flags drift. In push mode, run the same checks but commit only your source changes, not the regenerated files (see [For provider data, edit the source](#for-provider-data-edit-the-source)). |
+| Provider data or build inputs (including `CONTRIBUTING.md`, which generates the site's contributing page) | `npm run build && npm test`. **In push mode** commit only your source changes, not the files the build rewrote (once your changes are committed, `git restore .` discards them). Skip `npm run check` there: it compares the build with the committed derived files, which your pull request leaves stale on purpose, so it reports drift. To run CI's push-mode gate locally after a build, use `REGEN_MODE=push BASE=$(git merge-base origin/main HEAD) node scripts/regenerate-guard.mjs drift-gate`. **In any other mode** commit your changes and the regenerated files, then run `npm run check` (it must find no drift), and run `npm run og` too if the OG check flags drift. See [For provider data, edit the source](#for-provider-data-edit-the-source). |
 | Code | `npm test`, plus the focused check named in the issue. If the change affects generated output, also follow the build-input row above. |
 
 CI runs the full integrity suite on every PR, including docs-only changes. Paste your local commands and their results in the PR; a focused check is useful evidence, and a check you could not run needs an explanation. See [the first-fork checks note](#your-first-pr-from-a-fork-the-checks-may-wait) if CI is waiting for approval.
@@ -87,7 +87,7 @@ CI runs the full integrity suite on every PR, including docs-only changes. Paste
 
 Commit all your work first, including new files, and check that `origin` names the repository whose `main` you intend to merge. Run `npm run sync-main` from your full clone on an attached branch. It fetches `origin/main` and merges it; conflicts confined to the shared generated-file list are rebuilt and committed locally. Any source or OG conflict aborts the merge with the conflicting files listed and restores your original local state. Already-current branches, fast-forwards and clean merges need no automatic rebuild. The helper never pushes.
 
-OG files are left for you to check: run `node scripts/check-og.mjs`; if it reports drift, run `npm run og` and commit the resulting OG files yourself. Run `npm test` and the normal generated drift check, `npm run check`, before submitting. If a commit fails, inspect `git status`, fix the identity or hook error and retry `git commit`. After an interruption or cleanup failure, inspect `git status` and the reported files; use `git merge --abort` if a merge remains and you want to abandon it. New build outputs are retained for inspection. This local helper runs repository build code and your normal Git hooks; use it only in a repository you trust, not as a privileged workflow for untrusted PRs.
+OG files are left for you to check: run `node scripts/check-og.mjs`; if it reports drift, run `npm run og` and commit the resulting OG files yourself. Run `npm test` before submitting, and outside push mode the generated drift check, `npm run check`, too. If a commit fails, inspect `git status`, fix the identity or hook error and retry `git commit`. After an interruption or cleanup failure, inspect `git status` and the reported files; use `git merge --abort` if a merge remains and you want to abandon it. New build outputs are retained for inspection. This local helper runs repository build code and your normal Git hooks; use it only in a repository you trust, not as a privileged workflow for untrusted PRs.
 
 > **You need the full git history.** `npm test` and `npm run build` mine the per-provider change history from `git log` (see [docs/architecture.md](docs/architecture.md)), so they require a **full clone** — not a shallow clone (`git clone --depth 1`), not a tarball download, and `git` must be on your `PATH`. Without full history the suite fails with a message like:
 >
@@ -107,7 +107,7 @@ OG files are left for you to check: run `node scripts/check-og.mjs`; if it repor
 - **Windows:** Developer Mode is not needed. The test copies link `node_modules` with a junction, which needs no privileges, and copy it where a junction is impossible. Tests of Bash scripts are skipped on Windows, and the Linux job runs them.
 - **Line endings:** `.gitattributes` checks text files out with LF whatever `core.autocrlf` says. If `npm test` stops with "tracked text file(s) have CRLF line endings", an editor saved those files with CRLF: save them with LF (or `git checkout -- <file>` for a file you have not edited).
 - **Commit signing:** if your git config signs commits (`commit.gpgsign`), `npm test` turns signing off for the throwaway repositories the tests create. Your own commits are not affected.
-- **A data-only change:** `npm run validate` checks `data/` in seconds while you edit; before the pull request, run `npm run build && npm test`, commit, then `npm run check`, as in [Which checks to run](#which-checks-to-run).
+- **A data-only change:** `npm run validate` checks `data/` in seconds while you edit; before the pull request, run `npm run build && npm test` and commit as [Which checks to run](#which-checks-to-run) says for the current mode.
 
 If you want to preview how your entry renders on the site before opening the PR:
 
@@ -115,7 +115,7 @@ If you want to preview how your entry renders on the site before opening the PR:
 npm run build     # regenerates README tables, badge, site payload, and other derived artifacts
 ```
 
-Commit regenerated tracked artifacts when your data or generator change requires them. Do not commit a no-op preview.
+In push mode, commit none of the regenerated files: the bot does it after the merge. In any other mode, commit regenerated tracked artifacts when your data or generator change requires them. Never commit a no-op preview.
 
 ## Adding or updating a provider
 
