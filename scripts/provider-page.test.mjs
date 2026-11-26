@@ -59,7 +59,7 @@ test('history: a limits or flag change spells out before → after; paragraphs k
 test('the built Groq page: one history entry per day, and its limits change shows before → after', () => {
   const html = readFileSync(join(ROOT, 'site/p/groq.html'), 'utf8');
   const list = html.slice(html.indexOf('<h2>Change history</h2>'));
-  const dates = [...list.matchAll(/<li class="upd"><span class="upd-date">(\d{4}-\d{2}-\d{2})<\/span>/g)].map((m) => m[1]);
+  const dates = [...list.matchAll(/<li class="upd"><span class="upd-date"><time datetime="(\d{4}-\d{2}-\d{2})">\d{1,2} [A-Z][a-z]{2} \d{4}<\/time><\/span>/g)].map((m) => m[1]);
   assert.ok(dates.length > 1);
   assert.equal(new Set(dates).size, dates.length, 'no day appears twice');
   assert.match(list, /<ul class="upd-diff"><li><span class="upd-field">rate limits:<\/span> <del>[^<]+<\/del> → <ins>[^<]+<\/ins><\/li>/);
