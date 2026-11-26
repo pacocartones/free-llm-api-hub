@@ -10,6 +10,7 @@ import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js'
 const SERVER = fileURLToPath(new URL('../src/index.js', import.meta.url));
 const FIXTURE = fileURLToPath(new URL('./fixtures/providers.json', import.meta.url));
 const CLIENTS = fileURLToPath(new URL('./fixtures/openai-clients.json', import.meta.url));
+const STATUS = fileURLToPath(new URL('./fixtures/status.json', import.meta.url));
 
 test('stdio server lists its tools and answers calls', async (t) => {
   const transport = new StdioClientTransport({
@@ -25,7 +26,7 @@ test('stdio server lists its tools and answers calls', async (t) => {
 
   const { tools } = await client.listTools();
   assert.deepEqual(tools.map((x) => x.name).sort(), [
-    'dataset_info', 'get_provider', 'openai_client_config', 'search_providers',
+    'dataset_info', 'get_provider', 'get_provider_status', 'is_free', 'openai_client_config', 'search_providers',
   ]);
   for (const tool of tools) {
     assert.equal(tool.annotations.openWorldHint, true, `${tool.name} can fetch external static JSON`);
@@ -61,6 +62,43 @@ test('stdio server lists its tools and answers calls', async (t) => {
   const bad = await client.callTool({ name: 'get_provider', arguments: { slug: 'nope' } });
   assert.equal(bad.isError, true);
   assert.match(bad.content[0].text, /Unknown provider slug "nope"/);
+
+  // A local providers.json without a local status.json is never graded with the published status.json.
+  const plain = JSON.parse((await client.callTool({ name: 'get_provider', arguments: { slug: 'alpha-ai' } })).content[0].text);
+  assert.equal('freshness' in plain, false);
+  const free = JSON.parse((await client.callTool({ name: 'is_free', arguments: { slug: 'beta-cloud' } })).content[0].text);
+  assert.match(free.answer, /^Not permanently\. Beta Cloud gives a one-time trial credit/);
+  assert.equal('freshness' in free, false);
+});
+
+test('stdio server reads a local status.json for get_provider_status and the freshness field', async (t) => {
+  const transport = new StdioClientTransport({
+    command: process.execPath,
+    args: [SERVER, '--data', FIXTURE, '--clients', CLIENTS],
+    env: { ...process.env, FLAH_STATUS: STATUS },
+    stderr: 'pipe',
+  });
+  const client = new Client({ name: 'flah-mcp-test', version: '0.0.0' });
+  await client.connect(transport);
+  t.after(() => client.close());
+
+  const all = await client.callTool({ name: 'get_provider_status', arguments: {} });
+  assert.equal(all.isError, undefined);
+  const allBody = JSON.parse(all.content[0].text);
+  assert.equal(allBody.count, 4);
+  assert.deepEqual(allBody.counts, { fresh: 2, due: 0, stale: 1, unverified: 1, free_now: 2 });
+
+  const one = JSON.parse((await client.callTool({ name: 'get_provider_status', arguments: { slug: 'gamma-labs' } })).content[0].text);
+  assert.equal(one.free_now, false);
+  assert.equal(one.last_change, '2026-08-20');
+
+  const search = JSON.parse((await client.callTool({ name: 'search_providers', arguments: { no_card: true } })).content[0].text);
+  assert.deepEqual(search.providers.map((p) => [p.slug, p.freshness]).sort(), [['alpha-ai', 'fresh'], ['delta-free', 'unverified']]);
+  assert.equal(search.freshness_source.generated_at, '2026-10-01');
+
+  const unknown = await client.callTool({ name: 'get_provider_status', arguments: { slug: 'alpha' } });
+  assert.equal(unknown.isError, true);
+  assert.match(unknown.content[0].text, /Did you mean: alpha-ai/);
 });
 
 test('stdio server redacts local loader errors', async (t) => {

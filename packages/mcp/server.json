@@ -9,12 +9,12 @@
     "subfolder": "packages/mcp"
   },
   "websiteUrl": "https://freellmapihub.com/",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "packages": [
     {
       "registryType": "npm",
       "identifier": "free-llm-api-hub-mcp",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "transport": {
         "type": "stdio"
       },
@@ -28,6 +28,12 @@
         {
           "name": "FLAH_CLIENTS",
           "description": "Optional path to a local openai-clients.json instead of fetching the published file",
+          "isRequired": false,
+          "format": "string"
+        },
+        {
+          "name": "FLAH_STATUS",
+          "description": "Optional path to a local status.json instead of fetching the published file",
           "isRequired": false,
           "format": "string"
         }
