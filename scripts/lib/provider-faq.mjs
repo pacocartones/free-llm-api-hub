@@ -7,7 +7,7 @@
 // field_checks) is answered with "not stated" and nothing else: no "probably", no default. Each FAQ answer ends with
 // the day its source was read. The same items feed the visible FAQ and the FAQPage JSON-LD, so the two cannot differ.
 
-import { htmlEsc } from './rows.mjs';
+import { escapeHtml as htmlEsc } from './html.mjs';
 import { limitFigures, shortDate, trimAtWord } from './provider-meta.mjs';
 import { fieldCheck } from './field-checks.mjs';
 import { safeHttp as safeUrl } from './text.mjs';

@@ -18,7 +18,7 @@
 // record as `stamp` ({ q, u, n }), set by the build from data/quotes.json (stampSource), so the server render and the
 // browser repaint print the same receipt.
 
-import { htmlEsc } from './rows.mjs';
+import { escapeHtml as htmlEsc } from './html.mjs'; // the name these functions use when serialised
 import { freshnessStatus } from './rules.mjs';
 
 export const STAMP_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];

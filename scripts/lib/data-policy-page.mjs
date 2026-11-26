@@ -6,7 +6,8 @@
 // when the data carries one (data_policy.quote) and the row says so plainly when it does not. The counts at the top
 // are computed from the rows; nothing is written by hand, nothing is interpreted and nothing is ranked.
 
-import { htmlEsc, SLUG_RE } from './rows.mjs';
+import { escapeHtml } from './html.mjs';
+import { SLUG_RE } from './rows.mjs';
 import { safeHttp } from './text.mjs';
 
 /**
@@ -80,7 +81,7 @@ const FAQ = (c) => [
 /** The visible questions of the page. Text only: no FAQPage markup until enough rows carry a sentence. */
 export function dataPolicyFaqHtml(counts) {
   return '<section id="faq"><h2>Questions</h2>' +
-    FAQ(counts).map(([q, a]) => `<h3>${htmlEsc(q)}</h3><p>${htmlEsc(a)}</p>`).join('') + '</section>';
+    FAQ(counts).map(([q, a]) => `<h3>${escapeHtml(q)}</h3><p>${escapeHtml(a)}</p>`).join('') + '</section>';
 }
 
 /** The main content of /data-policy/. `prefix` is the path from the page to the site root. */
@@ -88,28 +89,28 @@ export function dataPolicyMainHtml(rows, { repo, generated, prefix = '../', quot
   const c = dataPolicyCounts(rows);
   const body = rows.map((r) => {
     const p = r.provider;
-    const name = SLUG_RE.test(String(p.slug || '')) ? `<a href="${prefix}p/${p.slug}">${htmlEsc(p.name)}</a>` : htmlEsc(p.name);
+    const name = SLUG_RE.test(String(p.slug || '')) ? `<a href="${prefix}p/${p.slug}">${escapeHtml(p.name)}</a>` : escapeHtml(p.name);
     const foot = r.source
-      ? `<p class="muted dp-foot">${htmlEsc(p.name)}, page: <a href="${htmlEsc(r.source)}" target="_blank" rel="noopener">${htmlEsc(r.source)}</a>${r.checked ? `, read on ${htmlEsc(r.checked)}` : ''}.</p>`
+      ? `<p class="muted dp-foot">${escapeHtml(p.name)}, page: <a href="${escapeHtml(r.source)}" target="_blank" rel="noopener">${escapeHtml(r.source)}</a>${r.checked ? `, read on ${escapeHtml(r.checked)}` : ''}.</p>`
       : '';
     const quote = r.quote
-      ? `<blockquote class="dp-quote">&ldquo;${htmlEsc(r.quote)}&rdquo;</blockquote>${foot}`
+      ? `<blockquote class="dp-quote">&ldquo;${escapeHtml(r.quote)}&rdquo;</blockquote>${foot}`
       : '<span class="muted">No sentence recorded yet. Do you know the page? Send it with the sentence.</span>';
-    const note = r.note ? `<p class="muted">${htmlEsc(r.note)}</p>` : '';
+    const note = r.note ? `<p class="muted">${escapeHtml(r.note)}</p>` : '';
     const src = r.source
-      ? `<a href="${htmlEsc(r.source)}" target="_blank" rel="noopener">the provider's page</a>${r.checked ? ` · read ${htmlEsc(r.checked)}` : ''}`
+      ? `<a href="${escapeHtml(r.source)}" target="_blank" rel="noopener">the provider's page</a>${r.checked ? ` · read ${escapeHtml(r.checked)}` : ''}`
       : '<span class="muted">no source recorded</span>';
-    const ret = r.retention ? htmlEsc(r.retention) : '<span class="tri tri-unk">not confirmed</span>';
+    const ret = r.retention ? escapeHtml(r.retention) : '<span class="tri tri-unk">not confirmed</span>';
     const cls = r.state === 'yes' ? 'yes' : r.state === 'no' ? 'no' : 'unk';
     return `<tr><th scope="row">${name}</th><td><span class="tri tri-${cls}">${STATE_LABEL[r.state]}</span></td>` +
       `<td>${ret}</td><td>${quote}${note}</td>` +
-      `<td>${src}<p class="muted dp-foot"><a href="${htmlEsc(dataPolicyIssueUrl(p, repo))}" target="_blank" rel="noopener">add or correct</a></p></td></tr>`;
+      `<td>${src}<p class="muted dp-foot"><a href="${escapeHtml(dataPolicyIssueUrl(p, repo))}" target="_blank" rel="noopener">add or correct</a></p></td></tr>`;
   }).join('');
   return '<main id="main"><div class="wrap prose">' +
     '<h2>The provider\'s own sentence about your prompts</h2>' +
     `<p>For each of ${c.total} verified providers, this page shows the sentence from the provider's own page about training on prompts where one is recorded. ` +
     `${c.withTrainingQuote} rows have one about training; the other ${c.notConfirmed} are not confirmed (${c.withRetentionQuote ? `${c.withRetentionQuote} of them carry a sentence about retention only, and ` : ''}${c.recorded} have a value in the dataset but no sentence yet). ` +
-    `Each row shows the day its page was read. Data of ${htmlEsc(String(generated))}.</p>` +
+    `Each row shows the day its page was read. Data of ${escapeHtml(String(generated))}.</p>` +
     '<p class="dp-legend"><strong>Sentence: does not train</strong>: a recorded sentence from the provider\'s page says it does not train on prompts. <strong>Sentence: may train</strong>: a recorded sentence says it may. ' +
     '<strong>Not confirmed</strong>: no sentence is recorded. That never means &ldquo;no&rdquo;.</p>' +
     '<div class="table-scroll" role="region" aria-label="Table: the sentence of each verified provider about training on prompts" tabindex="0"><table class="dp-table"><caption class="sr-only">The sentence of each verified provider about training on prompts, with its source</caption>' +
@@ -117,6 +118,6 @@ export function dataPolicyMainHtml(rows, { repo, generated, prefix = '../', quot
     `<tbody>${body}</tbody></table></div>` +
     quotesCheck +
     dataPolicyFaqHtml(c) +
-    `<p class="muted">To add a sentence or fix one, <a href="${htmlEsc(repo)}/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener">read how we take a value</a> and open an issue from the row.</p>` +
+    `<p class="muted">To add a sentence or fix one, <a href="${escapeHtml(repo)}/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener">read how we take a value</a> and open an issue from the row.</p>` +
     '</div></main>';
 }
