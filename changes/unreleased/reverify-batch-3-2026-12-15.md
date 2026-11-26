@@ -4,19 +4,19 @@
   official pages only, run 2026-11-26). Hugging Face, IBM watsonx.ai, LlamaParse,
   Mixedbread, Nanonets, Nutrient, Retell AI and Runware move `last_verified` to
   2026-11-26; their free tiers, headline numbers and catches match the
-  providers' own pages.
+  providers' own pages (#875).
 - IBM watsonx.ai's Lite limits (2 inference requests per second, 300,000 tokens
   per month) were re-read on the runtime plans page, so `free_limits.checked`
-  moves to 2026-11-26.
+  moves to 2026-11-26 (#875).
 - Novita AI updated its Terms of Service on 2026-11-26; the training sentence and
   the commercial-use clause are unchanged, and the dates in its notes are
   updated. Its rate-limit numbers could not be read from the docs page, so it
-  keeps its `last_verified`.
+  keeps its `last_verified` (#875).
 - Retell AI updated its Terms of Service on 2026-10-25; the recording and
-  training sentence is unchanged, and the dates in its notes are updated.
+  training sentence is unchanged, and the dates in its notes are updated (#875).
 - Fireworks AI's data policy was re-read. Its $1 trial credit is still not
-  stated on the pages read, so it keeps its `last_verified`.
+  stated on the pages read, so it keeps its `last_verified` (#875).
 - The source watch reported changed pages behind the quotes of Novita AI,
   Retell AI and Runware. Every quoted passage is still on its page; the quotes
   of these three and of Fireworks AI, Hugging Face, IBM watsonx.ai, LlamaParse
-  and Mixedbread were re-read and their register entries refreshed.
+  and Mixedbread were re-read and their register entries refreshed (#875).

@@ -126,14 +126,14 @@ test('Q11: the meta description leads with the published limits, else trims the 
 test('Q13: the score reads as a place with a bar of its six inputs, unknowns in grey', () => {
   const fractions = { quality: { frac: 0.75, known: true }, limits: { frac: 0, known: false }, friction: { frac: 0.5, known: true }, commercial: { frac: 0.5, known: false }, openai: { frac: 1, known: true }, stability: { frac: 0, known: false } };
   const out = scoreBlockHtml({ position: 1, of: 69, total: 62.4, editorial: 15, fractions, weights: SCORE_WEIGHTS, topRank: 1 });
-  assert.match(out, /<strong>#1 of 69<\/strong> by score <span class="muted">\(62\.4 \/ 100\)<\/span>/);
+  assert.match(out, /<strong>#1 of 69<\/strong> scored <span class="muted">\(62\.4 \/ 100\)<\/span>/);
   assert.equal((out.match(/class="sb-seg/g) || []).length, 6, 'six segments');
   assert.equal((out.match(/class="sb-seg sb-unknown"/g) || []).length, 3, 'the three unknown inputs are grey');
   assert.match(out, /style="flex-grow:22"><span class="sb-fill" style="width:75%">/, 'a segment is as wide as its weight and filled as far as earned');
   assert.match(out, /Unknowns lower the score on purpose/);
   assert.match(out, /role="img" aria-label="Score inputs: Model quality 16\.5 of 22; Free limits not confirmed, 0 of 18;/);
   const html = readFileSync(join(ROOT, 'site/p/groq.html'), 'utf8');
-  assert.match(html, /<p class="score-rank"><strong>#\d+ of \d+<\/strong> by score/);
+  assert.match(html, /<p class="score-rank"><strong>#\d+ of \d+<\/strong> scored/);
   assert.doesNotMatch(html, /<span class="best-score" title="Out of 100">/, 'no bare "N / 100" badge');
 });
 

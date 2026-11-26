@@ -5,20 +5,12 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { FLAG_DEFS, FLAG_MARKS, flagHtml, flagsHtml, flagState, flagText } from './lib/flags.mjs';
-import { clientBundle, explorerRowHtml } from './lib/rows.mjs';
-import { FLAG_PAIRS, freshnessStatus } from './lib/rules.mjs';
+import { explorerRowHtml } from './lib/rows.mjs';
 import { requirementsHtml, dataPolicyHtml } from './lib/provider-sections.mjs';
 
 const ROOT = new URL('../', import.meta.url);
 const read = (p) => readFileSync(new URL(p, ROOT), 'utf8');
 const PROVIDERS = JSON.parse(read('data/providers.json')).providers;
-
-// The browser's copy: the exact string build.mjs writes to site/shared-rows.js, run against the real rules.
-function client() {
-  const win = { FLLM_RULES: { FLAG_PAIRS, freshnessStatus } };
-  new Function('window', clientBundle())(win);
-  return win.FLLM_ROWS;
-}
 
 const def = (id) => FLAG_DEFS.find((d) => d.id === id);
 const flagOf = (html, id) => (html.match(new RegExp(`<span class="pflag [^"]*" data-flag="${id}"[\\s\\S]*?<span class="sr-only">[^<]*</span></span>`)) || [''])[0];
@@ -85,28 +77,13 @@ test('flags: escaping holds for every field the component prints', () => {
   assert.match(html, /data-flag="card"[^>]*>/);
 });
 
-test('flags: the server render and the browser copy produce the same markup, for every provider and state', () => {
-  const rows = client();
-  assert.equal(typeof rows.flagHtml, 'function');
-  const synthetic = [];
-  for (const card of [true, false, null]) for (const commercial of [true, false, 'conditional', null]) for (const train of [true, false, null, undefined]) {
-    synthetic.push({ slug: 'x', name: 'X', category: 'ongoing', free_tier: 'f', card_required: card, phone_required: card, commercial_ok: commercial, ...(train === undefined ? {} : { data_policy: { trains_on_prompts: train } }) });
-  }
-  for (const p of [...PROVIDERS, ...synthetic]) {
-    assert.equal(rows.flagsHtml(p, { mini: true }), flagsHtml(p, { mini: true }), `${p.slug}: flags`);
-    assert.equal(rows.rowHtml(p, { now: '2026-11-25' }), explorerRowHtml(p, { now: '2026-11-25' }), `${p.slug}: the whole row`);
-  }
-});
-
-test('flags: the explorer row shows the four flags first, then the other icons (OpenAI-compatible) once', () => {
+// The home explorer no longer draws the flags as icons with ✓ marks: it says what is required or unknown in words (lib/rows.mjs
+// needsOf), and its server/client parity is covered by home-density.test.mjs. The component stays on the provider pages.
+test('flags: the explorer row says the four flags in words, with no icon marks', () => {
   const p = { slug: 'acme', name: 'Acme', category: 'ongoing', free_tier: 'f', card_required: false, phone_required: null, commercial_ok: true, openai_compatible: true, data_policy: { trains_on_prompts: true } };
   const html = explorerRowHtml(p, { now: '2026-11-25' });
-  const fmini = html.match(/<div class="fmini">([\s\S]*?)<\/div>/)[1];
-  assert.deepEqual([...fmini.matchAll(/data-flag="([a-z]+)"|aria-label="([^"]+)"/g)].map((m) => m[1] || m[2]), ['card', 'phone', 'commercial', 'training', 'OpenAI-compat']);
-  assert.ok(!/ic-nocard|ic-nophone|ic-flask/.test(fmini), 'the four flags replace their old icons, nothing is said twice');
-  assert.match(flagOf(html, 'card'), /pflag-ok/);
-  assert.match(flagOf(html, 'phone'), /pflag-unk[\s\S]*>\?</);
-  assert.match(flagOf(html, 'training'), /pflag-bad[\s\S]*>✕</);
+  assert.doesNotMatch(html, /data-flag=|pflag|fmini|✓/, 'no flag icons and no tick marks in the row');
+  assert.match(html, /<span class="need-req">Trains on prompts<\/span><span class="need-unk">Unknown: phone<\/span>/);
 });
 
 test('flags: the provider page uses the same component around its own words, with the field_checks reason', () => {
@@ -124,13 +101,13 @@ test('flags: the provider page uses the same component around its own words, wit
   assert.match(flagOf(dataPolicyHtml(p), 'training'), /pflag-ok[\s\S]*Trains on prompts: no/);
 });
 
-test('flags: the built pages carry the component (explorer and a provider page) and the styles draw each shape', () => {
+test('flags: the built provider pages carry the component and the styles draw each shape', () => {
   const home = read('site/index.html');
   const groq = read('site/p/groq.html');
   for (const id of ['card', 'phone', 'commercial', 'training']) {
-    assert.ok(home.includes(`data-flag="${id}"`), `the explorer shows the ${id} flag`);
     assert.ok(groq.includes(`data-flag="${id}"`), `the Groq page shows the ${id} flag`);
   }
+  assert.ok(!home.includes('data-flag='), 'the explorer says the flags in words instead (Needs / unknown)');
   const css = read('site/styles.css');
   assert.match(css, /\.pflag-ok \.pflag-mark \{ color: var\(--ok\); \}/);
   assert.match(css, /\.pflag-bad \.pflag-mark \{ color: var\(--bad\); \}/);

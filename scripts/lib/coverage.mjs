@@ -65,10 +65,10 @@ export function coverageMainHtml(rows, { repo, generated, prefix = '../', histog
   const reasonsTable = flagRows.length
     ? '<h2 id="reasons">Why a flag is still unknown</h2>' +
       '<p>For the four yes/no flags, the dataset records why an unknown value is unknown: the provider’s pages were read on a stated day and <strong>do not say it</strong>, only <strong>an account</strong> would tell (this project does not create accounts), or <strong>two official pages disagree</strong>. Those are resolved without an answer and are not open tasks. A value with no recorded check is still open. Known values with no recorded source are counted as <em>unsourced</em>. Counted over all verified providers.</p>' +
-      '<table class="cov-table cov-reasons"><thead><tr><th>Flag</th><th class="num">Stated, with source</th><th class="num">Unsourced</th><th class="num">Not checked</th><th class="num">Not stated by the provider</th><th class="num">Needs an account</th><th class="num">Pages disagree</th></tr></thead><tbody>' +
+      '<div class="table-scroll" role="region" aria-label="Why a flag is still unknown, by flag" tabindex="0"><table class="cov-table cov-reasons"><thead><tr><th>Flag</th><th class="num">Stated, with source</th><th class="num">Unsourced</th><th class="num">Not checked</th><th class="num">Not stated by the provider</th><th class="num">Needs an account</th><th class="num">Pages disagree</th></tr></thead><tbody>' +
       flagRows.map((r) => `<tr id="reasons-${r.key}"><th scope="row">${htmlEsc(r.key)}</th>` +
         ['stated', 'unsourced', 'not_checked', 'source_silent', 'needs_account', 'sources_disagree'].map((k) => `<td class="num">${r.byStatus[k]}</td>`).join('') + '</tr>').join('') +
-      '</tbody></table>'
+      '</tbody></table></div>'
     : '';
   const resolvedSections = flagRows.filter((r) => r.resolved.length).map((r) => {
     const items = r.resolved.map((p) => {
@@ -91,7 +91,7 @@ export function coverageMainHtml(rows, { repo, generated, prefix = '../', histog
   return '<main id="main"><div class="wrap prose">' +
     '<h2>What the dataset does not know yet</h2>' +
     '<p>Every field below is counted over the providers it can apply to. A value nobody has recorded reads <strong>not confirmed</strong>: that is not the same as <em>no</em>. Data of ' + htmlEsc(generated) + '.</p>' +
-    '<table class="cov-table"><thead><tr><th>Field</th><th class="cov-popcol">Counted over</th><th class="num">Confirmed</th><th class="num">Share</th><th class="num">Open</th><th class="num">Resolved, no answer</th></tr></thead><tbody>' + summary + '</tbody></table>' +
+    '<div class="table-scroll" role="region" aria-label="What the dataset does not know yet, by field" tabindex="0"><table class="cov-table"><thead><tr><th>Field</th><th class="cov-popcol">Counted over</th><th class="num">Confirmed</th><th class="num">Share</th><th class="num">Open</th><th class="num">Resolved, no answer</th></tr></thead><tbody>' + summary + '</tbody></table></div>' +
     '<p class="muted">A one-time trial credit cannot carry a model tier or published limits (the validator rejects them), so trial credits are not counted as gaps for those two fields.</p>' +
     '<h2>Pick one value</h2>' +
     '<p>Each open item has the provider\'s own docs and a prefilled issue. A good contribution is <strong>one value with its source</strong>: the provider\'s own page, the sentence it rests on and the day you read it. Third-party summaries are not sources. Prefer an issue if you are unsure; to edit the data yourself, see the <a href="' + htmlEsc(repo) + '/blob/main/CONTRIBUTING.md">contributing guide</a> (data is edited only in <code>data/*.json</code>).</p>' +
@@ -115,6 +115,6 @@ export function freshnessHistogramHtml(h, { repo, prefix = '../' }) {
   const before = h.dueBefore ? `<p class="muted">${Number(h.dueBefore)} entries were already due when this window opens (${Number(h.staleBefore)} past the SLA).</p>` : '';
   return '<h2 id="freshness">When entries come due</h2>' +
     `<p>Every verified entry is re-checked against the provider’s own docs within 90 days. It counts as <strong>due</strong> from day 61 and <strong>past the SLA</strong> from day 91. The table counts, per week, the entries that cross each line if nobody re-checks them first. A week with more than ${limit} entries becoming due is a cluster: the <a href="${htmlEsc(repo)}/issues/4">weekly worklist</a> pulls those entries forward, a few each week, so they do not all expire together. Weeks start on Monday (UTC), from the week of the data date. The same entries counted by the week of their last verification are on the <a href="${prefix}quality/#freshness-weeks">data quality</a> page.</p>` +
-    '<table class="cov-table cov-fresh"><thead><tr><th>Week of</th><th class="num">Become due (day 61)</th><th class="num">Past the SLA (day 91)</th></tr></thead><tbody>' + body + '</tbody></table>' +
+    '<div class="table-scroll" role="region" aria-label="Entries coming due, by week" tabindex="0"><table class="cov-table cov-fresh"><thead><tr><th>Week of</th><th class="num">Become due (day 61)</th><th class="num">Past the SLA (day 91)</th></tr></thead><tbody>' + body + '</tbody></table></div>' +
     before;
 }

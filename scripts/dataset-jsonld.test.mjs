@@ -86,8 +86,8 @@ test('home and /changes/ advertise the change feed; both link to the change hist
   for (const [name, html] of [['home', home], ['changes', changes]]) {
     assert.match(head(html), /<link rel="alternate" type="application\/rss\+xml" title="[^"]+" href="(\.\.\/)?changes\.xml">/, `${name}: the change feed in <head>`);
   }
-  const start = home.match(/<nav\b[^>]*aria-label="Get started"[^>]*>([\s\S]*?)<\/nav>/)?.[1];
-  assert.match(start, /<a href="changes\/">See what changed<\/a>/, 'home: a visible link to /changes/');
+  const nav = home.match(/<nav class="nav" id="primary-nav"[\s\S]*?<\/nav>/)?.[0];
+  assert.match(nav, /<a href="changes\/">Changes<\/a>/, 'home: a visible link to /changes/ in the menu');
   assert.match(home.slice(home.indexOf('<footer')), /<a href="changes\/">What changed<\/a>/, 'home footer: What changed');
   const hero = changes.match(/<section class="page-hero[^"]*">([\s\S]*?)<\/section>/)?.[1];
   assert.match(hero, /<a class="btn primary" href="\.\.\/changes\.xml" type="application\/rss\+xml">Subscribe via RSS<\/a>/, '/changes/: a Subscribe button');

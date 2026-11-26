@@ -81,7 +81,7 @@
         .filter(function (p) { return (!modality || (p.modalities || []).indexOf(modality) >= 0) && (!category || p.category === category); })
         .sort(function (a, b) { return compare(sort, SORT_DIRS[sort], a, b); })
         .slice(0, count);
-      var box = 'font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif;color:#d8e2dc;background:#0f1512;border:1px solid #232c25;border-radius:10px;padding:14px 16px;max-width:440px;box-sizing:border-box';
+      var box = 'font:14px/1.5 -apple-system,BlinkMacSystemFont,\'Segoe UI\',Inter,Roboto,sans-serif;color:#d8e2dc;background:#0f1512;border:1px solid #232c25;border-radius:10px;padding:14px 16px;max-width:440px;box-sizing:border-box';
       var html = '<div style="' + box + '">';
       html += '<div style="font-weight:700;font-size:12px;color:#c2255c;letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px">Free LLM API Hub · top free APIs</div>';
       list.forEach(function (p) {

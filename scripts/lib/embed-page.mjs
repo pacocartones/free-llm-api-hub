@@ -7,7 +7,7 @@
 
 import { htmlEsc } from './rows.mjs';
 import { codeHtmlEsc } from './quickstart.mjs';
-import { bibtex, apa } from './citation.mjs';
+import { citeBlockHtml } from './citation.mjs';
 
 export const EMBED_PATH = '/embed/';
 // The widget's own options (site/widget.js): the modalities it filters on and its two categories.
@@ -85,10 +85,6 @@ export function embedMainHtml({ pageHero, site, prefix = '../', providers, badge
     `<li><a href="${prefix}llms.txt">llms.txt</a>: an index of the site for AI agents.</li>` +
     `</ul>` +
     `<p class="muted">No key, no rate limit, no tracking on the files. Fields are only added within <code>/api/v1/</code>; prefer a fixed snapshot? Pin a release tag of <a href="${citation.repository}" target="_blank" rel="noopener">the repository</a>.</p>` +
-    `<h2 id="cite">Cite</h2>` +
-    `<p>From the repository’s <a href="${citation.repository}/blob/main/CITATION.cff" target="_blank" rel="noopener">CITATION.cff</a>, version ${htmlEsc(citation.version)} of ${htmlEsc(citation.date || '')}. GitHub’s “Cite this repository” reads the same file.</p>` +
-    `<h3>BibTeX</h3>` + pre('citation', bibtex(citation), 'cite-bibtex') +
-    `<h3>APA</h3>` + pre('citation', apa(citation), 'cite-apa') +
-    `<p class="muted">The data is ${htmlEsc(citation.license)} licensed. Terms change without notice: say which version or date you used, and link back so readers can check the current entry.</p>` +
+    citeBlockHtml(citation, { heading: 'Cite' }) +
     `</div></main>`;
 }

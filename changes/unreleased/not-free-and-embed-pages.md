@@ -6,17 +6,19 @@
   recorded in `docs/sources.md` or `data/quotes.json`), the day it was read, and the closest free alternatives in
   the dataset with a shared modality. It has a FAQ (with `FAQPage` JSON-LD) and is in the sitemap, the footer, the
   guides and the comparisons. The README's "Notably NOT free" section and the page are now generated from one
-  file, `data/not-free.json`, so they cannot drift. Agent-assisted.
+  file, `data/not-free.json`, so they cannot drift (#787). Agent-assisted.
 - A [`/embed/`](https://freellmapihub.com/embed/) page, "Use the data": a snippet generator for the widget (count,
   modality, category) with a live preview, the verified badge and each provider's badge, links to the JSON API,
   `providers.json` and `providers.csv`, and a Cite block (BibTeX and APA generated from `CITATION.cff` at build
   time). First-party script only. Linked from the footer, `/api/` and every provider page ("Embed this provider's
-  badge"). Agent-assisted.
+  badge") (#787). Agent-assisted.
+- The same "Cite this dataset" block (BibTeX and APA from `CITATION.cff`) is also on
+  `/api/` and `/quality/` (#868, issue #801). Thanks @playlikeboy.
 
 ### Changed and fixed
 
 - The `copy_snippet` GA4 event (sent only with analytics consent) recognises the widget snippet, which starts
   with `<div`, as `embed` instead of `other`, and takes two new values, `badge` and `citation`, from the code
-  blocks of `/embed/`.
+  blocks of `/embed/` (#787).
 - The widget's "Could not load" fallback line takes the host page's text colour instead of a fixed grey that
-  failed contrast on dark pages.
+  failed contrast on dark pages (#787).

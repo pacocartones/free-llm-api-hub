@@ -9,6 +9,4 @@
   unless you opt out (a toggle in the Platform API account settings). The terms say
   unused service credits expire one year after issuance. Whether the credits
   need a card or a phone is not stated (`source_silent`). Checked 2026-11-25,
-  agent-assisted.
-
-The dataset stays under the non-text cap: 25 of 74 providers (33.8%).
+  agent-assisted (#805).
