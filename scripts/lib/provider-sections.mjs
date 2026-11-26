@@ -11,6 +11,7 @@ import { expiryHtml } from './expiry.mjs';
 import { fieldCheck } from './field-checks.mjs';
 import { publishedSpeed, speedFigure, SPEED_METRICS } from './published-speed.mjs';
 import { FLAG_DEFS, TERMS_FLAG_DEFS, flagHtml } from './flags.mjs';
+import { NOT_STATED, flagWords } from './provider-faq.mjs';
 
 // The shared flag component (lib/flags.mjs) around the page's own words: the shape, then the words, with the
 // whole sentence as the accessible text.
@@ -34,12 +35,12 @@ const LIMIT_UNITS = [
 
 const safeUrl = (u) => (/^https?:\/\//i.test(String(u || '')) ? escapeHtml(u) : '');
 
-/** The visible words of a terms flag: forbidden / allowed / conditional, and "Not stated" for null or absent. */
-export function termsValueHtml(v) {
-  if (v === true) return '<span class="tri tri-yes">forbidden</span>';
-  if (v === false) return '<span class="tri tri-no">allowed</span>';
-  if (v === 'conditional') return '<span class="tri tri-cond">conditional</span>';
-  return '<span class="tri tri-unk">Not stated</span>';
+/** The visible words of a terms flag: forbidden / allowed / conditional, and "Not stated" (NOT_STATED) for null or absent. */
+export function termsValueHtml(v, field = 'multi_account_forbidden') {
+  const cls = { true: 'tri-yes', false: 'tri-no', conditional: 'tri-cond' }[String(v)];
+  const words = flagWords(field, v);
+  if (!cls || words === NOT_STATED) return `<span class="tri tri-unk">${NOT_STATED.charAt(0).toUpperCase()}${NOT_STATED.slice(1)}</span>`;
+  return `<span class="tri ${cls}">${escapeHtml(words)}</span>`;
 }
 
 /**
@@ -54,7 +55,7 @@ export function termsRowsHtml(p) {
       ? `<div class="req-condition">${escapeHtml(p.multi_account_condition)}</div>`
       : '';
     const label = def.field === 'multi_account_forbidden' ? 'Several accounts per person' : 'Getting around rate limits';
-    return `<div class="req"><dt>${ICON(def.icon)}${label}</dt><dd>${flagHtml(def, p, { check, visible: termsValueHtml(v) })}${condition}${checkSourceHtml(check)}</dd></div>`;
+    return `<div class="req"><dt>${ICON(def.icon)}${label}</dt><dd>${flagHtml(def, p, { check, visible: termsValueHtml(v, def.field) })}${condition}${checkSourceHtml(check)}</dd></div>`;
   }).join('');
 }
 

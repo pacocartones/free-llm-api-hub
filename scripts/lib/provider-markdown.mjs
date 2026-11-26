@@ -17,6 +17,7 @@ import { fieldCheck, REASON_LABEL } from './field-checks.mjs';
 import { trainState } from './data-policy-page.mjs';
 import { limitFigures } from './provider-meta.mjs';
 import { shortenProse } from './short-text.mjs';
+import { flagWords as faqFlagWords } from './provider-faq.mjs';
 
 export const FREE_TYPE_WORDS = Object.freeze({
   'renewing-quota': 'free quota that renews',
@@ -119,8 +120,7 @@ function flagsMd(p) {
   const terms = (label, field, extra = '') => {
     const check = fieldCheck(p, field);
     const src = checkSourceMd(check);
-    const v = p[field];
-    const words = v === true ? 'forbidden' : v === false ? 'allowed' : v === 'conditional' ? 'conditional' : 'not stated';
+    const words = faqFlagWords(field, p[field]);
     return `- **${label}:** ${words}${extra}${src ? `. ${src}` : ''}`;
   };
   const maCondition = p.multi_account_forbidden === 'conditional' && p.multi_account_condition ? ` (${mdText(p.multi_account_condition)})` : '';
