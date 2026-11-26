@@ -725,7 +725,9 @@
       "model_tier": null,
       "verified": true,
       "last_verified": "2026-11-19",
-      "data_policy": {"trains_on_prompts":null,"retention":"Free Tier data retained indefinitely","source":"https://www.mixedbread.com/pages/privacy","checked":"2026-11-20","quote":"Data collected under the Free Tier is retained indefinitely.","note":"Both pages agree Free Tier data is retained indefinitely; they conflict on training: one says no Free Tier data is used for model training, the other allows it."}
+      "data_policy": {"trains_on_prompts":null,"retention":"Free Tier data retained indefinitely","source":"https://www.mixedbread.com/pages/privacy","checked":"2026-11-20","quote":"Data collected under the Free Tier is retained indefinitely.","note":"Both pages agree Free Tier data is retained indefinitely; they conflict on training: one says no Free Tier data is used for model training, the other allows it."},
+      "keys_url": "https://platform.mixedbread.com/platform?next=api-keys",
+      "keys_url_source": "https://www.mixedbread.com/docs/quickstart"
     },
     {
       "slug": "ai-horde",
