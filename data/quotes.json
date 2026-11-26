@@ -1345,6 +1345,111 @@
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "27111e3b30e1b741e61defa6ae5d1d3c6c2ef63324b09603e76548d505b7c67a"
+  },
+  {
+   "id": "plamo.sentence",
+   "slug": "plamo",
+   "kind": "sentence",
+   "text": "On the Free plan, input and output are stored and used for training in every feature.",
+   "source_url": "https://docs.plamo.preferredai.jp/en/pricing",
+   "read_on": "2026-11-25",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "ca7a4d50a6eb144d0a0e125b0d7791ba7ff755b7365d0d5047b78b9d017a850f"
+  },
+  {
+   "id": "plamo.openai_compatible.sentence",
+   "slug": "plamo",
+   "kind": "field_sentence",
+   "field": "openai_compatible",
+   "text": "The PLaMo API provides a mostly compatible environment with the openai library.",
+   "source_url": "https://docs.plamo.preferredai.jp/en/getting-started",
+   "read_on": "2026-11-25",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "65c25c7cf5da989eb817b55cb8284e0c9dc0d8d0eb7f994b8ab6c8ea9c9c41c7"
+  },
+  {
+   "id": "entrim.sentence",
+   "slug": "entrim",
+   "kind": "sentence",
+   "text": "Entrim does not use customer prompts or outputs to train machine learning models.",
+   "source_url": "https://entrim.ai/terms-of-service/",
+   "read_on": "2026-11-25",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "84f0efb489e7c1e870915cc60fdba2f842777e752f9359f04361add30f7a6ca2"
+  },
+  {
+   "id": "entrim.card_required.sentence",
+   "slug": "entrim",
+   "kind": "field_sentence",
+   "field": "card_required",
+   "text": "To claim complimentary card-setup credits, Entrim places a temporary $1 authorization hold on your payment card to verify it, then releases the hold.",
+   "source_url": "https://entrim.ai/terms-of-service/",
+   "read_on": "2026-11-25",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "84f0efb489e7c1e870915cc60fdba2f842777e752f9359f04361add30f7a6ca2"
+  },
+  {
+   "id": "entrim.openai_compatible.sentence",
+   "slug": "entrim",
+   "kind": "field_sentence",
+   "field": "openai_compatible",
+   "text": "Run open-source models through an OpenAI-compatible API at up to 80% lower cost",
+   "source_url": "https://entrim.ai/llm-inference",
+   "read_on": "2026-11-25",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "95eb0bda4762d4a0767dc17a7a719d72be545bfd366eac2a78bb37f8251bf8b4"
+  },
+  {
+   "id": "infomaniak.sentence",
+   "slug": "infomaniak",
+   "kind": "sentence",
+   "text": "Your queries are neither recorded nor used to train models or improve our services.",
+   "source_url": "https://www.infomaniak.com/en/hosting/ai-services",
+   "read_on": "2026-11-25",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "3862774fa7327cede659b450d922ed202006d069097a4b761cad90d0064eaa1a"
+  },
+  {
+   "id": "infomaniak.card_required.sentence",
+   "slug": "infomaniak",
+   "kind": "field_sentence",
+   "field": "card_required",
+   "text": "A credit card is required to start using the API.",
+   "source_url": "https://www.infomaniak.com/en/support/faq/2845/getting-started-guide-ai-services-sovereign-ai-services",
+   "read_on": "2026-11-25",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "004bed3f277ec284ba876a06693d751832af4bcdd5b37e773af7e98d6268f594"
+  },
+  {
+   "id": "infomaniak.commercial_ok.sentence",
+   "slug": "infomaniak",
+   "kind": "field_sentence",
+   "field": "commercial_ok",
+   "text": "Yes, AI Services can be integrated into your apps, which you are free to monetise.",
+   "source_url": "https://www.infomaniak.com/en/hosting/ai-services",
+   "read_on": "2026-11-25",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "3862774fa7327cede659b450d922ed202006d069097a4b761cad90d0064eaa1a"
+  },
+  {
+   "id": "infomaniak.openai_compatible.sentence",
+   "slug": "infomaniak",
+   "kind": "field_sentence",
+   "field": "openai_compatible",
+   "text": "Access the best open source AI models via OpenAI-compatible APIs, while keeping your sensitive data in Europe.",
+   "source_url": "https://www.infomaniak.com/en/hosting/ai-services",
+   "read_on": "2026-11-25",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "3862774fa7327cede659b450d922ed202006d069097a4b761cad90d0064eaa1a"
   }
  ]
 }
