@@ -209,6 +209,8 @@ Tags track the dataset `version` in [`data/providers.json`](data/providers.json)
 
 It renders the age of the oldest verified entry as of the site's last deploy (every deploy rebuilds `badge-freshness.json`, at least daily; it is not committed). It does not recompute with each view; use the live explorer for freshness calculated in the browser.
 
+Prefer a generator? [Use the data](https://freellmapihub.com/embed/) builds a badge for any provider — including the "verified" badge — and the citation for you.
+
 **Embed a live widget** on any site — a compact, always-current list of the top verified free APIs:
 
 ```html
@@ -217,6 +219,8 @@ It renders the age of the oldest verified entry as of the site's last deploy (ev
 ```
 
 Self-contained (inline styles, no CSS conflicts). All attributes are optional: `data-count` (1-20, default 6), `data-modality` (`text`, `audio`, `embeddings`, `image`, `vision`, `ocr`, `rerank`), `data-category` (`ongoing` or `trial`; default both), `data-sort` (an explorer sort key - `recommended` (default), `name`, `category`, `free_tier`, `notes`, `verified`).
+
+Prefer a generator? [Use the data](https://freellmapihub.com/embed/) builds this widget snippet for you.
 
 **Follow changes** — [updates page](https://freellmapihub.com/updates) or the [RSS feed](https://freellmapihub.com/feed.xml).
 
