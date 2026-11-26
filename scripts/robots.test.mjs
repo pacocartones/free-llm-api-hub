@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
 // site/robots.txt is the whole crawler policy (it replaced Cloudflare's managed robots.txt): search engines and AI
-// search / user agents crawl everything; AI training crawlers fetch the data files only, not the HTML pages.
+// search / user agents crawl everything; Google-Extended crawls everything too (it also governs Gemini grounding and
+// citations, owner decision 2026-11); every other AI training crawler fetches the data files only, not the HTML pages.
 const ROBOTS = readFileSync(new URL('../site/robots.txt', import.meta.url), 'utf8');
 const SITE = 'https://freellmapihub.com';
 
@@ -49,8 +50,8 @@ function allowed(agent, path) {
 }
 
 const SEARCH = ['Googlebot', 'Bingbot', 'Baiduspider', 'PetalBot', 'OAI-SearchBot', 'ChatGPT-User', 'Claude-SearchBot', 'Claude-User', 'PerplexityBot'];
-const TRAINING = ['GPTBot', 'ClaudeBot', 'anthropic-ai', 'CCBot', 'Google-Extended', 'Applebot-Extended', 'Bytespider', 'meta-externalagent', 'cohere-ai', 'MistralAI-Training', 'Amazonbot'];
-const HTML = ['/', '/p/groq', '/models/', '/guides/free-llm-api-for-beginners', '/compare/', '/changes/', '/state/2026-10/'];
+const TRAINING = ['GPTBot', 'ClaudeBot', 'anthropic-ai', 'CCBot', 'GoogleOther', 'Google-CloudVertexBot', 'Applebot-Extended', 'Bytespider', 'meta-externalagent', 'cohere-ai', 'MistralAI-Training', 'Amazonbot'];
+const HTML = ['/', '/p/groq', '/p/groq.md', '/find/', '/not-free/', '/models/', '/guides/free-llm-api-for-beginners', '/compare/', '/changes/', '/state/2026-10/'];
 const DATA = ['/robots.txt', '/llms.txt', '/llms-full.txt', '/providers.json', '/providers.csv', '/feed.xml', '/changes.xml',
   '/sitemap.xml', '/sitemap-state.xml', '/sitemap-index.xml', '/api/v1/providers.json', '/api/v1/changes.json'];
 
@@ -68,7 +69,23 @@ test('robots.txt: everyone else, search engines and AI search / user agents may 
   }
 });
 
-test('robots.txt: AI training crawlers get the data files, not the HTML pages', () => {
+test('robots.txt: Google-Extended may crawl every HTML page and data file, in a group of its own', () => {
+  for (const path of [...HTML, ...DATA]) assert.ok(allowed('Google-Extended', path), `Google-Extended ${path}`);
+  const group = groups.find((g) => g.agents.includes('google-extended'));
+  assert.ok(group, 'Google-Extended is named, so it does not fall back to the `*` group by accident');
+  assert.deepEqual(group.agents, ['google-extended'], 'its own group: a change to it cannot move another crawler');
+  assert.deepEqual(group.rules, [{ allow: true, path: '/' }]);
+});
+
+test('robots.txt: the header comment explains the Google-Extended decision', () => {
+  const header = ROBOTS.split(/\r?\n/).filter((l) => l.startsWith('#')).slice(0, 12).join('\n');
+  assert.match(header, /Google-Extended/);
+  assert.match(header, /Gemini/);
+  assert.match(header, /ground/i);
+  assert.match(header, /cit/i);
+});
+
+test('robots.txt: the other AI training crawlers get the data files, not the HTML pages', () => {
   for (const agent of TRAINING) {
     for (const path of HTML) assert.equal(allowed(agent, path), false, `${agent} must not fetch ${path}`);
     for (const path of DATA) assert.ok(allowed(agent, path), `${agent} may fetch ${path}`);

@@ -1,6 +1,12 @@
 # robots.txt for freellmapihub.com. This file is the whole policy: review changes in a pull request.
-# The dataset is MIT-licensed. Search engines and AI search or user agents may crawl everything.
-# AI training crawlers may fetch the machine-readable data files listed below, but not the HTML pages.
+# The dataset is MIT-licensed. The policy has three groups:
+# 1. Search engines and AI search or user agents may crawl everything.
+# 2. Google-Extended may crawl everything too. It is not a separate crawler: Googlebot fetches the pages, and this
+#    token decides whether Google may use them for Gemini, which covers grounding Gemini answers on these pages and
+#    citing them, not only training. The project wants Gemini to cite its sourced pages, so it is not limited to the
+#    data files (owner decision, 2026-11).
+# 3. Every other AI training crawler may fetch the machine-readable data files listed below, but not the HTML pages
+#    or the Markdown versions of the provider pages under /p/.
 # Tested by scripts/robots.test.mjs.
 
 User-agent: *
@@ -18,13 +24,16 @@ User-agent: Claude-User
 User-agent: PerplexityBot
 Allow: /
 
-# AI training crawlers: the data files only, no HTML pages.
+# Google-Extended: everything, so Gemini can ground answers on the HTML pages and cite them (see the top of this file).
+User-agent: Google-Extended
+Allow: /
+
+# Other AI training crawlers: the data files only, no HTML pages.
 User-agent: GPTBot
 User-agent: ClaudeBot
 User-agent: anthropic-ai
 User-agent: Claude-Web
 User-agent: CCBot
-User-agent: Google-Extended
 User-agent: GoogleOther
 User-agent: Google-CloudVertexBot
 User-agent: Applebot-Extended

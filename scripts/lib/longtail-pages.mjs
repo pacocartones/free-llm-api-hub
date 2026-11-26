@@ -15,18 +15,20 @@
 // covers (it stopped being free, or never was) gets no alternatives page: its entry there lists the closest free
 // alternatives, and the /alternatives/ index links it.
 
-import { htmlEsc } from './rows.mjs';
+import { escapeHtml } from './html.mjs';
 import { comparator } from './sort.mjs';
 import { ageInDays, SLA_DAYS } from './rules.mjs';
 import { fieldCheck, REASON_LABEL } from './field-checks.mjs';
 import { requirementsHtml, freeLimitsTableHtml, keysButtonHtml } from './provider-sections.mjs';
 import { andList } from './long-guides.mjs';
+import { NOT_STATED } from './provider-faq.mjs';
+import { FAMILY_PATH } from './model-families.mjs';
 import { triStateHtml } from './compare.mjs';
 import { datasetRef } from './site-entity.mjs';
 import { collectionPageJsonLd, breadcrumbList } from './page-jsonld.mjs';
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
-const safeUrl = (u) => (/^https:\/\/[^\s]+$/i.test(String(u || '')) ? htmlEsc(u) : '');
+const safeUrl = (u) => (/^https:\/\/[^\s]+$/i.test(String(u || '')) ? escapeHtml(u) : '');
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 /** 2026-11-24 -> "24 Nov 2026". */
 export const dayLabel = (iso) => (DATE_RE.test(String(iso || '')) ? `${Number(iso.slice(8, 10))} ${MONTHS[Number(iso.slice(5, 7)) - 1]} ${iso.slice(0, 4)}` : '');
@@ -85,7 +87,7 @@ const sentence = (t) => { const x = String(t || '').trim(); return /[.!?]$/.test
 const sourceHost = (u) => { try { return new URL(u).hostname; } catch { return ''; } };
 
 /** What one flag says, in words: the value, or the recorded reason it stays unknown. Plain text. */
-function flagWords(p, field, yes, no) {
+function flagReasonWords(p, field, yes, no) {
   const v = p[field];
   if (v === true) return yes;
   if (v === false) return no;
@@ -100,7 +102,7 @@ export function limitsAnswer(p) {
   const nums = LIMIT_WORDS.filter(([k]) => Number.isInteger(fl[k])).map(([k, w]) => `${fl[k].toLocaleString('en-US')} ${w}`);
   const scope = fl.scope ? ` (${String(fl.scope).replace(/[.\s]+$/, '')})` : '';
   const first = `As of ${dayLabel(fl.checked)}, ${p.name} publishes these free limits: ${andList(nums)}${scope}.`;
-  const second = `Credit card: ${flagWords(p, 'card_required', 'required', 'not required')}. Phone verification: ${flagWords(p, 'phone_required', 'required', 'not required')}.`;
+  const second = `Credit card: ${flagReasonWords(p, 'card_required', 'required', 'not required')}. Phone verification: ${flagReasonWords(p, 'phone_required', 'required', 'not required')}.`;
   const host = sourceHost(fl.source);
   return `${first} ${second}${host ? ` Source: ${host}.` : ''}`;
 }
@@ -119,45 +121,58 @@ function policyHtml(p) {
     return `<h2 id="data-policy">Data policy</h2><p class="muted">No data policy is recorded for this provider yet.</p>`;
   }
   const src = safeUrl(dp.source);
-  const day = DATE_RE.test(String(dp.checked || '')) ? `, read ${htmlEsc(dp.checked)}` : '';
+  const day = DATE_RE.test(String(dp.checked || '')) ? `, read ${escapeHtml(dp.checked)}` : '';
   const plan = dp.plan_named === false ? ' The page does not name the free plan, so this is the provider\'s general policy.' : '';
   return `<h2 id="data-policy">Data policy</h2><dl class="prov-reqs">` +
     `<div class="req"><dt>Trains on your prompts</dt><dd>${triStateHtml(dp.trains_on_prompts, 'yes', 'no')}</dd></div>` +
-    `<div class="req"><dt>Retention</dt><dd>${dp.retention ? htmlEsc(dp.retention) : '<span class="tri tri-unk">not confirmed</span>'}</dd></div></dl>` +
-    `<p class="req-source muted">${dp.quote ? `&ldquo;${htmlEsc(dp.quote)}&rdquo; ` : ''}Per <a href="${src}" target="_blank" rel="noopener">the provider's page</a>${day}.${plan}</p>`;
+    `<div class="req"><dt>Retention</dt><dd>${dp.retention ? escapeHtml(dp.retention) : `<span class="tri tri-unk">${NOT_STATED}</span>`}</dd></div></dl>` +
+    `<p class="req-source muted">${dp.quote ? `&ldquo;${escapeHtml(dp.quote)}&rdquo; ` : ''}Per <a href="${src}" target="_blank" rel="noopener">the provider's page</a>${day}.${plan}</p>`;
+}
+
+/**
+ * Links to the model-family pages (/free-api/<family>/, lib/model-families.mjs) whose provider list includes `p`, so a
+ * provider page here and a family page point at each other instead of repeating each other's tables. `families`: the
+ * indexable family groups ({ slug, name, entries }).
+ */
+export function familyLinksHtml(p, families, prefix) {
+  const mine = (families || []).filter((g) => (g.entries || []).some((e) => e.p && e.p.slug === p.slug));
+  if (!mine.length) return '';
+  return `<p>Open model families in ${escapeHtml(p.name)}'s free-model sample, with every provider that lists them: ` +
+    andList(mine.map((g) => `<a href="${prefix}${FAMILY_PATH}${escapeHtml(g.slug)}/">${escapeHtml(g.name)}</a>`)) + `.</p>`;
 }
 
 /** The main of /limits/<slug>/. `alternatives`: whether /alternatives/<slug>/ exists; `pageHero`: build.mjs's hero. */
-export function limitsPageMainHtml(p, { asOf, pageHero, prefix = '../../', alternatives = false }) {
+export function limitsPageMainHtml(p, { asOf, pageHero, prefix = '../../', alternatives = false, families = [] }) {
   const age = ageAt(p.last_verified, asOf);
   const stale = age > TITLE_DATE_MAX_DAYS
-    ? `<p class="v warn">Last verified ${htmlEsc(p.last_verified)}, ${age} days before the dataset date (${htmlEsc(asOf)}): these limits may be out of date.</p>`
+    ? `<p class="v warn">Last verified ${escapeHtml(p.last_verified)}, ${age} days before the dataset date (${escapeHtml(asOf)}): these limits may be out of date.</p>`
     : '';
-  const crumbs = `<a href="${prefix}">Home</a> / <a href="${prefix}limits/">Free tier limits</a> / ${htmlEsc(p.name)}`;
+  const crumbs = `<a href="${prefix}">Home</a> / <a href="${prefix}limits/">Free tier limits</a> / ${escapeHtml(p.name)}`;
   const facts = sourcedFacts(p);
-  return pageHero({ crumbs, h1: `${htmlEsc(p.name)} free tier limits`, lede: htmlEsc(limitsAnswer(p)) }) +
+  return pageHero({ crumbs, h1: `${escapeHtml(p.name)} free tier limits`, lede: escapeHtml(limitsAnswer(p)) }) +
     `<main id="main"><div class="wrap prose prov-prose">` +
     stale +
     `<h2 id="limits">Free limits</h2>` +
     freeLimitsTableHtml(p) +
     keysButtonHtml(p) +
-    (p.rate_limits ? `<div class="prov-card"><h3>As published</h3><p>${htmlEsc(p.rate_limits)}</p></div>` : '') +
-    (p.free_tier ? `<div class="prov-card"><h3>What's free</h3><p>${htmlEsc(p.free_tier)}</p></div>` : '') +
-    (p.notes ? `<div class="prov-card"><h3>The catch</h3><p>${htmlEsc(p.notes)}</p></div>` : '') +
+    (p.rate_limits ? `<div class="prov-card"><h3>As published</h3><p>${escapeHtml(p.rate_limits)}</p></div>` : '') +
+    (p.free_tier ? `<div class="prov-card"><h3>What's free</h3><p>${escapeHtml(p.free_tier)}</p></div>` : '') +
+    (p.notes ? `<div class="prov-card"><h3>The catch</h3><p>${escapeHtml(p.notes)}</p></div>` : '') +
     `<h2 id="requirements">What you need to start</h2>` +
     requirementsHtml(p) +
     policyHtml(p) +
     `<h2 id="verification">Verification</h2>` +
-    `<p>Entry last verified <time datetime="${htmlEsc(p.last_verified)}">${htmlEsc(p.last_verified)}</time>. ` +
+    `<p>Entry last verified <time datetime="${escapeHtml(p.last_verified)}">${escapeHtml(p.last_verified)}</time>. ` +
     `${facts.length} of ${LIMIT_FACTS.length} facts on this page carry a recorded source. Limits change without notice: confirm on the provider's page before you build.</p>` +
-    `<h2 id="more">More on ${htmlEsc(p.name)}</h2><div class="colls">` +
-    `<a href="${prefix}p/${htmlEsc(p.slug)}">${htmlEsc(p.name)}: models, quickstart and change history</a>` +
-    (alternatives ? `<a href="${prefix}alternatives/${htmlEsc(p.slug)}/">Free ${htmlEsc(p.name)} alternatives</a>` : '') +
+    `<h2 id="more">More on ${escapeHtml(p.name)}</h2><div class="colls">` +
+    `<a href="${prefix}p/${escapeHtml(p.slug)}">${escapeHtml(p.name)}: models, quickstart and change history</a>` +
+    (alternatives ? `<a href="${prefix}alternatives/${escapeHtml(p.slug)}/">Free ${escapeHtml(p.name)} alternatives</a>` : '') +
     `<a href="${prefix}limits/">Free tier limits of other providers</a></div>` +
+    familyLinksHtml(p, families, prefix) +
     `</div></main>`;
 }
 
-export function limitsPageJsonLd(p, { site }) {
+export function limitsPageJsonLd(p, { site, facts }) {
   const url = `${site}/limits/${p.slug}/`;
   return JSON.stringify({
     '@context': 'https://schema.org',
@@ -165,7 +180,7 @@ export function limitsPageJsonLd(p, { site }) {
       {
         '@type': 'WebPage', name: `${p.name} free tier limits`, description: limitsAnswer(p), url,
         dateModified: p.last_verified,
-        isPartOf: datasetRef(site),
+        isPartOf: datasetRef(site, facts),
       },
       breadcrumbList(site, [['Free tier limits', `${site}/limits/`], [p.name, url]]),
     ],
@@ -252,12 +267,12 @@ const FREE_TYPE_WORDS = {
 export function differenceLine(orig, cand) {
   const out = [];
   if (cand.free_type !== orig.free_type && FREE_TYPE_WORDS[cand.free_type]) out.push(`${FREE_TYPE_WORDS[cand.free_type]} (${orig.name}: ${FREE_TYPE_WORDS[orig.free_type] || 'not recorded'})`);
-  if (cand.card_required === false && orig.card_required !== false) out.push(`no credit card required (${orig.name}: ${flagWords(orig, 'card_required', 'required', 'not required')})`);
+  if (cand.card_required === false && orig.card_required !== false) out.push(`no credit card required (${orig.name}: ${flagReasonWords(orig, 'card_required', 'required', 'not required')})`);
   if (cand.card_required === true && orig.card_required !== true) out.push('credit card required');
   if (cand.phone_required === true && orig.phone_required !== true) out.push('phone verification required');
-  if (cand.phone_required === false && orig.phone_required !== false) out.push(`no phone verification (${orig.name}: ${flagWords(orig, 'phone_required', 'required', 'not required')})`);
+  if (cand.phone_required === false && orig.phone_required !== false) out.push(`no phone verification (${orig.name}: ${flagReasonWords(orig, 'phone_required', 'required', 'not required')})`);
   if (cand.commercial_ok === false && orig.commercial_ok !== false) out.push('evaluation only');
-  if (cand.commercial_ok === true && orig.commercial_ok !== true) out.push(`commercial use allowed (${orig.name}: ${flagWords(orig, 'commercial_ok', 'allowed', 'evaluation only')})`);
+  if (cand.commercial_ok === true && orig.commercial_ok !== true) out.push(`commercial use allowed (${orig.name}: ${flagReasonWords(orig, 'commercial_ok', 'allowed', 'evaluation only')})`);
   const a = hasSourcedLimits(orig) && Number.isInteger(orig.free_limits.requests_per_day) ? orig.free_limits.requests_per_day : null;
   const b = hasSourcedLimits(cand) && Number.isInteger(cand.free_limits.requests_per_day) ? cand.free_limits.requests_per_day : null;
   if (a !== null && b !== null && a !== b) out.push(`${b > a ? 'higher' : 'lower'} published daily request cap: ${b.toLocaleString('en-US')} vs ${a.toLocaleString('en-US')}`);
@@ -286,38 +301,39 @@ export const alternativesPageDescription = (orig, alts) =>
 function limitsCell(c, prefix, limitPages) {
   const fl = hasSourcedLimits(c) ? c.free_limits : null;
   const bits = fl ? [['requests_per_minute', 'RPM'], ['requests_per_day', 'RPD'], ['tokens_per_day', 'TPD']].filter(([k]) => Number.isInteger(fl[k])).map(([k, u]) => `${fl[k].toLocaleString('en-US')} ${u}`) : [];
-  const text = bits.length ? htmlEsc(bits.join(' · ')) : 'as published on the provider page';
-  return limitPages.has(c.slug) ? `<a href="${prefix}limits/${htmlEsc(c.slug)}/">${text}</a>` : text;
+  const text = bits.length ? escapeHtml(bits.join(' · ')) : 'as published on the provider page';
+  return limitPages.has(c.slug) ? `<a href="${prefix}limits/${escapeHtml(c.slug)}/">${text}</a>` : text;
 }
 
 /** The main of /alternatives/<slug>/. `limitPages` = Set of slugs with a /limits/ page; `pageHero`: build.mjs's hero. */
-export function alternativesPageMainHtml(orig, alts, { pageHero, prefix = '../../', limitPages = new Set() }) {
+export function alternativesPageMainHtml(orig, alts, { pageHero, prefix = '../../', limitPages = new Set(), families = [] }) {
   const yes = (v, y, n, c) => triStateHtml(v, y, n, c);
   const rows = alts.map((c) => `<tr>` +
-    `<th scope="row" class="name"><a href="${prefix}p/${htmlEsc(c.slug)}">${htmlEsc(c.name)}</a></th>` +
+    `<th scope="row" class="name"><a href="${prefix}p/${escapeHtml(c.slug)}">${escapeHtml(c.name)}</a></th>` +
     `<td>${limitsCell(c, prefix, limitPages)}</td>` +
     `<td>${yes(c.card_required, 'required', 'not required', fieldCheck(c, 'card_required'))}</td>` +
     `<td>${yes(c.phone_required, 'required', 'not required', fieldCheck(c, 'phone_required'))}</td>` +
     `<td>${yes(c.openai_compatible, 'yes', 'no', fieldCheck(c, 'openai_compatible'))}</td>` +
-    `<td><time datetime="${htmlEsc(c.last_verified)}">${htmlEsc(c.last_verified)}</time></td>` +
-    `<td class="notes">${htmlEsc(differenceLine(orig, c))}</td></tr>`).join('');
-  const crumbs = `<a href="${prefix}">Home</a> / <a href="${prefix}alternatives/">Free alternatives</a> / ${htmlEsc(orig.name)}`;
-  const origLinks = [`<a href="${prefix}p/${htmlEsc(orig.slug)}">${htmlEsc(orig.name)} provider page</a>`];
-  if (limitPages.has(orig.slug)) origLinks.push(`<a href="${prefix}limits/${htmlEsc(orig.slug)}/">${htmlEsc(orig.name)} free tier limits</a>`);
-  return pageHero({ crumbs, h1: `Free ${htmlEsc(orig.name)} alternatives`, lede: htmlEsc(alternativesCriteria(orig)) }) +
+    `<td><time datetime="${escapeHtml(c.last_verified)}">${escapeHtml(c.last_verified)}</time></td>` +
+    `<td class="notes">${escapeHtml(differenceLine(orig, c))}</td></tr>`).join('');
+  const crumbs = `<a href="${prefix}">Home</a> / <a href="${prefix}alternatives/">Free alternatives</a> / ${escapeHtml(orig.name)}`;
+  const origLinks = [`<a href="${prefix}p/${escapeHtml(orig.slug)}">${escapeHtml(orig.name)} provider page</a>`];
+  if (limitPages.has(orig.slug)) origLinks.push(`<a href="${prefix}limits/${escapeHtml(orig.slug)}/">${escapeHtml(orig.name)} free tier limits</a>`);
+  return pageHero({ crumbs, h1: `Free ${escapeHtml(orig.name)} alternatives`, lede: escapeHtml(alternativesCriteria(orig)) }) +
     `<main id="main"><div class="wrap prose prov-prose">` +
-    `<h2 id="original">${htmlEsc(orig.name)} today</h2>` +
-    `<p>${orig.free_tier ? htmlEsc(sentence(orig.free_tier)) + ' ' : ''}Verified <time datetime="${htmlEsc(orig.last_verified)}">${htmlEsc(orig.last_verified)}</time>. ` +
-    `Credit card: ${htmlEsc(flagWords(orig, 'card_required', 'required', 'not required'))}. Phone verification: ${htmlEsc(flagWords(orig, 'phone_required', 'required', 'not required'))}.</p>` +
+    `<h2 id="original">${escapeHtml(orig.name)} today</h2>` +
+    `<p>${orig.free_tier ? escapeHtml(sentence(orig.free_tier)) + ' ' : ''}Verified <time datetime="${escapeHtml(orig.last_verified)}">${escapeHtml(orig.last_verified)}</time>. ` +
+    `Credit card: ${escapeHtml(flagReasonWords(orig, 'card_required', 'required', 'not required'))}. Phone verification: ${escapeHtml(flagReasonWords(orig, 'phone_required', 'required', 'not required'))}.</p>` +
     `<div class="colls">${origLinks.join('')}</div>` +
+    familyLinksHtml(orig, families, prefix) +
     `<h2 id="alternatives">${alts.length} alternatives</h2>` +
     // Seven columns: scrolls inside its own region on a phone, like the guides' tables.
-    `<div class="table-scroll" role="region" aria-label="Free alternatives to ${htmlEsc(orig.name)}" tabindex="0">` +
-    `<table class="alt-table"><caption>Free alternatives to ${htmlEsc(orig.name)}, closest first</caption>` +
-    `<thead><tr><th scope="col">Provider</th><th scope="col">Limits</th><th scope="col">Credit card</th><th scope="col">Phone</th><th scope="col">OpenAI-compatible</th><th scope="col">Verified</th><th scope="col">How it differs from ${htmlEsc(orig.name)}</th></tr></thead>` +
+    `<div class="table-scroll" role="region" aria-label="Free alternatives to ${escapeHtml(orig.name)}" tabindex="0">` +
+    `<table class="alt-table"><caption>Free alternatives to ${escapeHtml(orig.name)}, closest first</caption>` +
+    `<thead><tr><th scope="col">Provider</th><th scope="col">Limits</th><th scope="col">Credit card</th><th scope="col">Phone</th><th scope="col">OpenAI-compatible</th><th scope="col">Verified</th><th scope="col">How it differs from ${escapeHtml(orig.name)}</th></tr></thead>` +
     `<tbody>${rows}</tbody></table></div>` +
     `<p class="muted">Every value comes from the dataset; a flag nobody has confirmed reads as the reason recorded for it. Terms change without notice: confirm on each provider's page before you switch.</p>` +
-    `<div class="colls"><a href="${prefix}alternatives/">Alternatives to other providers</a><a href="${prefix}compare/?compare=${htmlEsc([orig, ...alts.slice(0, 3)].map((c) => c.slug).join(','))}">Compare ${htmlEsc(orig.name)} with the first three</a></div>` +
+    `<div class="colls"><a href="${prefix}alternatives/">Alternatives to other providers</a><a href="${prefix}compare/?compare=${escapeHtml([orig, ...alts.slice(0, 3)].map((c) => c.slug).join(','))}">Compare ${escapeHtml(orig.name)} with the first three</a></div>` +
     `</div></main>`;
 }
 
@@ -341,10 +357,10 @@ export function alternativesPageJsonLd(orig, alts, { site }) {
  */
 export function providerLongtailHtml(p, providers, { asOf, prefix = '../', limitPages = new Set(), altPages = new Set() }) {
   const links = [];
-  if (limitPages.has(p.slug)) links.push(`<a href="${prefix}limits/${htmlEsc(p.slug)}/">${htmlEsc(p.name)} free tier limits, with sources</a>`);
-  if (altPages.has(p.slug)) links.push(`<a href="${prefix}alternatives/${htmlEsc(p.slug)}/">Free ${htmlEsc(p.name)} alternatives</a>`);
+  if (limitPages.has(p.slug)) links.push(`<a href="${prefix}limits/${escapeHtml(p.slug)}/">${escapeHtml(p.name)} free tier limits, with sources</a>`);
+  if (altPages.has(p.slug)) links.push(`<a href="${prefix}alternatives/${escapeHtml(p.slug)}/">Free ${escapeHtml(p.name)} alternatives</a>`);
   const near = alternativesFor(p, providers, asOf).slice(0, 3);
-  for (const c of near) links.push(`<a href="${prefix}p/${htmlEsc(c.slug)}">${htmlEsc(c.name)}</a>`);
+  for (const c of near) links.push(`<a href="${prefix}p/${escapeHtml(c.slug)}">${escapeHtml(c.name)}</a>`);
   if (!links.length) return '';
   return `<h2 id="hit-the-limit">Hit the limit?</h2>` +
     (near.length ? `<p class="muted">Similar free tiers: same primary modality${p.openai_compatible === true ? ', OpenAI-compatible' : ''}, verified.</p>` : '') +

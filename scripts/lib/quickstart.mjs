@@ -22,12 +22,6 @@ export function posixShellQuote(value) {
   return "'" + text.replace(/'/g, "'\\''") + "'";
 }
 
-/** Escape a complete code block for an HTML text node after language encoding. */
-export const codeHtmlEsc = (source) => String(source)
-  .replace(/&/g, '&amp;')
-  .replace(/</g, '&lt;')
-  .replace(/>/g, '&gt;');
-
 function chatRequestJson(model, spaced) {
   const encodedModel = JSON.stringify(String(model));
   return spaced

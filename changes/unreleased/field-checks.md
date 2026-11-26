@@ -32,7 +32,8 @@
   `phone_required` becomes `true`: Tencent Cloud's sign-up guide binds a
   mainland China phone number by SMS code. These five entries, re-verified in
   #701, move `last_verified` to 2026-11-24 (#719).
-- First recorded reasons for 22 more null flags, all read 2026-11-24, among
+- First recorded reasons for 22 more null flags, all read 2026-11-24
+  (agent-assisted reading), among
   them Modal and Alibaba Cloud Model Studio commercial use (not stated),
   Hugging Face phone (needs an account, issue #12) and SambaNova card (pages
   disagree) (#719).

@@ -10,4 +10,4 @@
   embeddings guide has the repository's embeddings quickstart, filled from the data. The speech guide's
   speech-to-text and text-to-speech labels and the image guide's split between generation and other image APIs are
   read from the words of each entry, and the pages say so. Every number and list is computed from
-  `data/providers.json` at build time (`scripts/lib/long-guides.mjs`). Agent-assisted.
+  `data/providers.json` at build time (`scripts/lib/long-guides.mjs`). Agent-assisted (#820).

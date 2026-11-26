@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// lighthouse-gate.mjs — serve site/ locally, run Lighthouse on twenty-two pages and
+// lighthouse-gate.mjs — serve site/ locally, run Lighthouse on twenty-four pages and
 // fail when a category drops below the thresholds in lib/lighthouse-gate.mjs.
 // Needs the runner from tools/lighthouse (npm ci there) and a Chrome binary in
 // CHROME_PATH. Nothing is published and nothing leaves the machine.
@@ -7,6 +7,9 @@
 //   node scripts/lighthouse-gate.mjs                          accessibility, performance and SEO, median of 3 (local default)
 //   node scripts/lighthouse-gate.mjs --mode=accessibility-seo  accessibility and SEO, one run per page (pull requests)
 //   node scripts/lighthouse-gate.mjs --mode=performance        performance only, median of 3 (main and nightly)
+//
+// Every mode also checks each page's font budget (FONT_BUDGET_BYTES in lib/assets.mjs) from the served HTML, so a pull
+// request that adds a font weight over the budget fails here, not after the merge.
 //
 // In GitHub Actions the per-page scores go to the job summary, and the failures to the
 // step output `failures`, which lighthouse.yml turns into an issue for main and nightly runs.
@@ -16,7 +19,8 @@ import { randomUUID } from 'node:crypto';
 import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, extname, normalize } from 'node:path';
-import { evaluate, medianReport, negotiateEncoding, parseMode } from './lib/lighthouse-gate.mjs';
+import { evaluate, fontBudgetFailures, medianReport, negotiateEncoding, parseMode } from './lib/lighthouse-gate.mjs';
+import { FONT_BUDGET_BYTES } from './lib/assets.mjs';
 import { brotliCompressSync, gzipSync } from 'node:zlib';
 import { makeTmpDir } from './lib/tmp.mjs';
 import { groupModels } from './lib/model-keys.mjs';
@@ -109,11 +113,11 @@ const base = `http://127.0.0.1:${server.address().port}`;
 const providers = JSON.parse(readFileSync(join(ROOT, 'data/providers.json'), 'utf8')).providers;
 const sample = providers.find((p) => existsSync(join(SITE, 'p', `${p.slug}.html`)));
 if (!sample) { console.error('No generated provider page under site/p/: run `node scripts/build.mjs` first.'); process.exit(1); }
-const pages = ['/', '/best/', '/coverage/', '/quality/', '/free-gpu/', '/coding-tools/', '/compare/', '/data-policy/', '/guides-and-collections/', `/p/${sample.slug}.html`,
+const pages = ['/', '/best/', '/coverage/', '/quality/', '/free-gpu/', '/coding-tools/', '/compare/', '/find/', '/data-policy/', '/guides-and-collections/', `/p/${sample.slug}.html`,
   '/collections/no-credit-card.html', '/collections/openai-compatible.html',
   '/guides/free-llm-api-no-signup.html', '/guides/free-embeddings-apis.html',
   '/guides/free-ocr-document-ai-apis.html', '/guides/free-speech-to-text-apis.html',
-  '/guides/free-image-generation-apis.html', '/not-free/', '/embed/'];
+  '/guides/free-image-generation-apis.html', '/not-free/', '/embed/', '/free-api/qwen/'];
 // One model page, also from the dataset (model samples rotate): the indexable one listed by the most providers.
 const modelSample = groupModels(providers).filter((g) => isIndexable(g) && existsSync(join(SITE, 'models', g.key, 'index.html')))
   .sort((a, b) => b.entries.length - a.entries.length || (a.key < b.key ? -1 : 1))[0];
@@ -133,6 +137,13 @@ const summary = [`### Lighthouse (${mode.name}, ${RUNS === 1 ? 'one run' : `medi
   `| Page | ${mode.categories.join(' | ')} |`, `|---|${mode.categories.map(() => '---|').join('')}`];
 try {
   for (const page of pages) {
+    // The font budget does not depend on the runner: checked once per page, from the HTML that is served.
+    const htmlFile = resolveFile(page);
+    if (htmlFile) {
+      const pageDir = dirname(htmlFile.slice(SITE.length)) || '/';
+      const sizeOf = (ref) => { const f = resolveFile(ref.startsWith('/') ? ref : join(pageDir, ref)); return f ? statSync(f).size : null; };
+      failures.push(...fontBudgetFailures(page, readFileSync(htmlFile, 'utf8'), sizeOf, FONT_BUDGET_BYTES));
+    }
     // Asynchronous on purpose: a synchronous child process would block this process's event loop, and the server below could never answer Lighthouse.
     const reports = [];
     for (let i = 0; i < RUNS; i++) {

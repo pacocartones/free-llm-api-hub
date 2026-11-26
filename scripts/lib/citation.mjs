@@ -5,6 +5,7 @@
 // strings, so they move with the file and are never typed twice. Reuses the small reader of lib/dataset-jsonld.mjs.
 
 import { parseCitation } from './dataset-jsonld.mjs';
+import { escapeHtml, escapeText } from './html.mjs';
 
 /** The fields a citation needs: title, url, version, year and date released, authors, repository, licence. */
 export function citationRecord(cffText) {
@@ -45,4 +46,16 @@ export function bibtex(r) {
 export function apa(r) {
   const who = r.author ? `${r.author}.` : '';
   return `${who} (${r.year || 'n.d.'}). ${r.title}${r.version ? ` (Version ${r.version})` : ''} [Data set]. ${r.url}`.trim();
+}
+
+/** Shared "Cite this dataset" section rendered from a `citationRecord()` object. */
+export function citeBlockHtml(r, { heading = 'Cite this dataset' } = {}) {
+  const pre = (text, id) => `<pre data-snippet="citation"><code id="${id}">${escapeText(text)}</code></pre>`;
+  return (
+    `<h2 id="cite">${escapeHtml(heading)}</h2>` +
+    `<p>From the repository’s <a href="${escapeHtml(r.repository)}/blob/main/CITATION.cff" target="_blank" rel="noopener">CITATION.cff</a>, version ${escapeHtml(r.version)} of ${escapeHtml(r.date || '')}. GitHub’s “Cite this repository” reads the same file.</p>` +
+    `<h3>BibTeX</h3>` + pre(bibtex(r), 'cite-bibtex') +
+    `<h3>APA</h3>` + pre(apa(r), 'cite-apa') +
+    `<p class="muted">The data is ${escapeHtml(r.license)} licensed. Terms change without notice: say which version or date you used, and link back so readers can check the current entry.</p>`
+  );
 }

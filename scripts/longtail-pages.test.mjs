@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { privateTree } from './lib/private-tree.mjs';
 import { datasetAsOf } from './lib/release-stamp.mjs';
+import { datasetFacts } from './lib/structured-data.mjs';
 import {
   LIMIT_FACTS, LIMITS_MIN_FACTS, TITLE_DATE_MAX_DAYS, PAGE_MAX_AGE_DAYS, ALTERNATIVES_FOR, ALTERNATIVES_MIN, ALTERNATIVES_MAX,
   sourcedFacts, hasLimitsPage, limitsAnswer, limitsPageTitle, limitsPageMainHtml, limitsPageJsonLd,
@@ -86,7 +87,8 @@ test('limits page: each fact with its source, quotes where the dataset has them,
   assert.equal((keyed.match(/<a class="btn primary" href="https:\/\/alpha\.test\/keys"[^>]*>Get a free key ↗<\/a>/g) || []).length, 1, 'the provider page\'s key button');
   assert.ok(keyed.indexOf('id="limits"') < keyed.indexOf('Get a free key') && keyed.indexOf('Get a free key') < keyed.indexOf('id="requirements"'), 'right after the limits, as on the provider page');
   assert.doesNotMatch(html, /\b(best|fastest|cheapest|leading|unbeatable)\b/i, 'no superlatives');
-  const ld = JSON.parse(limitsPageJsonLd(full, { site: 'https://x.test' }));
+  const facts = datasetFacts({ verified: 3, asOf: ASOF, license: 'https://opensource.org/licenses/MIT' });
+  const ld = JSON.parse(limitsPageJsonLd(full, { site: 'https://x.test', facts }));
   const page = ld['@graph'][0];
   assert.deepEqual([page['@type'], page.url, page.dateModified], ['WebPage', 'https://x.test/limits/alpha/', '2026-11-20']);
   assert.deepEqual([page.isPartOf.publisher.name, page.isPartOf.creator.name], ['Tweakeo, Inc.', 'Paco Cartones']);

@@ -9,6 +9,7 @@ site/collections/
 site/models/
 site/limits/
 site/alternatives/
+site/free-api/
 site/guides/
 site/guides-and-collections/
 site/best/
@@ -58,3 +59,7 @@ site/shared-compare.js
 
 # Lighthouse runner dependencies (installed by CI from tools/lighthouse/package-lock.json)
 tools/lighthouse/node_modules/
+
+# "Find my free API" (/find/): the page and its shared filter bundle, emitted by build.mjs from scripts/lib/find.mjs + find-page.mjs
+site/find/
+site/shared-find.js
