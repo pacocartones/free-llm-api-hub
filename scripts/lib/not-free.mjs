@@ -12,6 +12,7 @@ import { SLUG_RE } from './rows.mjs';
 import { inlineHtml } from './markdown.mjs';
 import { breadcrumbList } from './page-jsonld.mjs';
 import { websiteRef, datasetRef } from './site-entity.mjs';
+import { isoDateTime } from './structured-data.mjs';
 
 export const NOT_FREE_PATH = '/not-free/';
 const MODALITIES = new Set(['text', 'vision', 'image', 'audio', 'embeddings', 'rerank', 'ocr']);
@@ -184,12 +185,12 @@ export function notFreeMainHtml(model, { pageHero, site, prefix = '../' }) {
 }
 
 /** JSON-LD: the page (about the dataset), its trail and the FAQ. No Product or Offer: nothing here is a price. */
-export function notFreeJsonLd(model, { site, dateModified }) {
+export function notFreeJsonLd(model, { site, dateModified, dataset }) {
   const url = `${site}${NOT_FREE_PATH}`;
   return JSON.stringify({
     '@context': 'https://schema.org',
     '@graph': [
-      { '@type': 'WebPage', name: 'Which LLM APIs are not free', url, description: notFreeDescription(model), ...(dateModified ? { dateModified } : {}), isPartOf: websiteRef(site), about: datasetRef(site) },
+      { '@type': 'WebPage', name: 'Which LLM APIs are not free', url, description: notFreeDescription(model), ...(dateModified ? { dateModified: isoDateTime(dateModified) } : {}), isPartOf: websiteRef(site), about: datasetRef(site, dataset) },
       breadcrumbList(site, [['Not free', url]]),
       ...(model.faq.length ? [{
         '@type': 'FAQPage',

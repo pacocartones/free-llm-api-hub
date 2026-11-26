@@ -254,7 +254,9 @@ test('verify.yml: push mode regenerates before the checks and blocks through dri
   const gate = stepOf(validate, 'regenerate-guard.mjs drift-gate');
   assert.match(gate, /if: \$\{\{ steps\.regen\.outputs\.mode == 'push' \}\}/);
   assert.match(gate, /BASE="\$\(git rev-parse HEAD\^1\)" node scripts\/regenerate-guard\.mjs drift-gate/);
-  assert.ok(gate.indexOf('node scripts/build.mjs') < gate.indexOf('drift-gate'), 'it builds again right before it compares');
+  // It compares the tree the regeneration step wrote: no second build (the suite leaves the working tree as it found it).
+  assert.doesNotMatch(noComments(gate), /node scripts\/build\.mjs/, 'the job builds once');
+  assert.ok(validate.indexOf('Regenerate the derived files first') < validate.indexOf('regenerate-guard.mjs drift-gate'), 'regenerated before it compares');
 });
 
 test('verify.yml: read-only, no secret, no credentials, pinned actions, no expression inside run:', () => {

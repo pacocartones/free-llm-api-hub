@@ -158,7 +158,7 @@ test('provider pages: dateModified is the last_verified date the page shows', ()
   for (const p of data.providers.filter((x) => x.last_verified).slice(0, 10)) {
     const html = read(`p/${p.slug}.html`);
     const page = jsonld(html)['@graph'].find((n) => n['@type'] === 'WebPage');
-    assert.equal(page.dateModified, p.last_verified, p.slug);
+    assert.equal(page.dateModified, `${p.last_verified}T00:00:00Z`, p.slug);
     assert.ok(html.includes(p.last_verified), `${p.slug}: the date is visible on the page`);
   }
 });

@@ -8,6 +8,7 @@
 import { USES, CONSTRAINTS, explorerHref } from './find.mjs';
 import { websiteRef, SITE_NAME } from './site-entity.mjs';
 import { escapeAttr } from './html.mjs';
+import { isoDateTime } from './structured-data.mjs';
 
 export const FIND_PATH = '/find/';
 export const FIND_TITLE = 'Find my free API: a shortlist of free LLM APIs that fit you · Free LLM API Hub';
@@ -105,7 +106,7 @@ export function findJsonLd({ site, asof }) {
         operatingSystem: 'Any (runs in the browser)',
         browserRequirements: 'Requires JavaScript',
         isAccessibleForFree: true,
-        dateModified: asof,
+        dateModified: isoDateTime(asof),
         isPartOf: websiteRef(site),
       },
       {
