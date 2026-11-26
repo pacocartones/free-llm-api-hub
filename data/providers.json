@@ -1205,6 +1205,7 @@
       "best_for": "Best-in-class embeddings and reranking with a large free allotment",
       "modalities": ["text", "image", "embeddings", "rerank"],
       "models_free": null,
+      "models_url": "https://docs.voyageai.com/docs/embeddings",
       "expires": null,
       "docs_url": "https://docs.voyageai.com/docs/pricing",
       "phone_required": null,
