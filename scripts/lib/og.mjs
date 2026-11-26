@@ -12,7 +12,8 @@ import { readFileSync } from 'node:fs';
 import { COLLECTIONS } from './collections.mjs';
 import { injectInlineFigures, providerFigures } from './figures.mjs';
 import { LONG_GUIDES } from './long-guides.mjs';
-import { OG, ogAuraSpec, ogLimits, auraGridSvg, esc, wrap } from './og-art.mjs';
+import { OG, ogAuraSpec, ogLimits, auraGridSvg, wrap } from './og-art.mjs';
+import { escapeAttr } from './html.mjs';
 import { stampSources } from './stamp.mjs';
 import { TAGLINE, taglineParts } from './brand.mjs';
 
@@ -42,8 +43,8 @@ const replaceBetween = (svg, name, content) => svg.replace(new RegExp(`(<!-- ${n
 export function homeTaglineSvg(tagline = TAGLINE) {
   const [lead, key] = taglineParts(tagline);
   const lines = wrap(lead, 15, key ? 2 : 3);
-  const out = lines.map((l, i) => `<text x="78" y="${236 + i * 80}" fill="${OG.ink}" font-family="OG Display" font-size="84" letter-spacing="-1.5">${esc(l)}</text>`);
-  if (key) out.push(`<text x="78" y="${236 + lines.length * 80}" fill="${OG.accent}" font-family="OG Display" font-size="84" letter-spacing="-1.5">${esc(key)}</text>`);
+  const out = lines.map((l, i) => `<text x="78" y="${236 + i * 80}" fill="${OG.ink}" font-family="OG Display" font-size="84" letter-spacing="-1.5">${escapeAttr(l)}</text>`);
+  if (key) out.push(`<text x="78" y="${236 + lines.length * 80}" fill="${OG.accent}" font-family="OG Display" font-size="84" letter-spacing="-1.5">${escapeAttr(key)}</text>`);
   return out.join('');
 }
 export const homeAurasSvg = (providers) => auraGridSvg(providers.slice(0, HOME_AURA_COUNT).map(ogAuraSpec), { x: 840, y: 150, w: 290, cols: 4, id: 'h' });

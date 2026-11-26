@@ -8,12 +8,11 @@
 import { auraSpec, auraSvg, HUB_AURA } from './aura.mjs';
 import { STAMP_SHAPES } from './stamp.mjs';
 import { wordmarkSvg } from './wordmark.mjs';
+import { escapeAttr } from './html.mjs';
 
 /** The light Cálida tokens (site/styles.css, [data-theme="light"]) the images use; THEME picks the aura hues. */
 export const OG = Object.freeze({ ground: '#fff9f6', panel: '#ffffff', line: '#f0e2db', ink: '#22140f', muted: '#6a5048', accent: '#9c4a00', ok: '#2f6b1f', sealBg: '#ffebd9', theme: 'light' });
 export const OG_FONT_FILES = ['og-display.ttf', 'og-text-400.ttf', 'og-text-650.ttf', 'og-mono-400.ttf', 'og-mono-500.ttf'];
-
-export const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
 /** Greedy word wrap to `max` characters per line, at most `lines` lines (the last one ends with … when cut). */
 export function wrap(text, max, lines) {
@@ -54,7 +53,7 @@ export function stampSvg(text, { x, y, size = 22, ground = OG.ground, fill = OG.
     `<circle cx="0" cy="${h / 2}" r="${r}" fill="${ground}"/><circle cx="${w}" cy="${h / 2}" r="${r}" fill="${ground}"/>` +
     `<path d="M${stub} ${Math.round(size * 0.3)}V${h - Math.round(size * 0.3)}" stroke="${ink}" stroke-width="${T.cut * k}" stroke-dasharray="${Math.round(3 * k)} ${Math.round(2.5 * k)}"/>` +
     `<path d="M${size * 0.7} ${h / 2}l${size * 0.28} ${size * 0.28} ${size * 0.5} -${size * 0.56}" fill="none" stroke="${ink}" stroke-width="${2.4 * k}" stroke-linecap="round" stroke-linejoin="round"/>` +
-    `<text x="${stub + Math.round(size * 0.6)}" y="${Math.round(h / 2 + size * 0.36)}" fill="${ink}" font-family="OG Mono" font-weight="500" font-size="${size}">${esc(text)}</text></g>`;
+    `<text x="${stub + Math.round(size * 0.6)}" y="${Math.round(h / 2 + size * 0.36)}" fill="${ink}" font-family="OG Mono" font-weight="500" font-size="${size}">${escapeAttr(text)}</text></g>`;
 }
 
 /** The frame every card shares: ground, the hub's aura and the outlined wordmark, the footer URL. */
@@ -64,7 +63,7 @@ export function frameSvg(body, { width = 1200, height = 630, footer = 'freellmap
     auraSvg(HUB_AURA, { cx: 104, cy: 96, r: 26, id: 'hub', theme: OG.theme }) +
     wordmarkSvg({ x: 144, y: 107, size: 30, fill: OG.ink }) +
     body +
-    `<text x="80" y="${height - 46}" fill="${OG.muted}" font-family="OG Mono" font-size="22">${esc(footer)}</text></svg>`;
+    `<text x="80" y="${height - 46}" fill="${OG.muted}" font-family="OG Mono" font-size="22">${escapeAttr(footer)}</text></svg>`;
 }
 
 /** Label, title and subtitle on the left (the text column is `textW` wide). */
@@ -72,11 +71,11 @@ export function copySvg({ label, title, subtitle, textW = 600, titleSize = 84 })
   const per = Math.max(10, Math.floor(textW / (titleSize * 0.43)));
   const lines = wrap(title, per, 3);
   const top = 300 - (lines.length - 1) * titleSize * 0.42;
-  const titleSvg = lines.map((l, i) => `<text x="78" y="${Math.round(top + i * titleSize * 0.98)}" fill="${OG.ink}" font-family="OG Display" font-size="${titleSize}" letter-spacing="-1.5">${esc(l)}</text>`).join('');
+  const titleSvg = lines.map((l, i) => `<text x="78" y="${Math.round(top + i * titleSize * 0.98)}" fill="${OG.ink}" font-family="OG Display" font-size="${titleSize}" letter-spacing="-1.5">${escapeAttr(l)}</text>`).join('');
   const subY = Math.round(top + (lines.length - 1) * titleSize * 0.98 + 66);
   const subLines = subtitle ? wrap(subtitle, Math.floor(textW / 14.5), 2) : [];
-  return (label ? `<text x="80" y="${Math.round(top - titleSize - 12)}" fill="${OG.accent}" font-family="OG Mono" font-weight="500" font-size="22" letter-spacing="4">${esc(label)}</text>` : '') +
-    titleSvg + subLines.map((l, i) => `<text x="80" y="${subY + i * 34}" fill="${OG.muted}" font-family="OG Mono" font-size="24">${esc(l)}</text>`).join('');
+  return (label ? `<text x="80" y="${Math.round(top - titleSize - 12)}" fill="${OG.accent}" font-family="OG Mono" font-weight="500" font-size="22" letter-spacing="4">${escapeAttr(label)}</text>` : '') +
+    titleSvg + subLines.map((l, i) => `<text x="80" y="${subY + i * 34}" fill="${OG.muted}" font-family="OG Mono" font-size="24">${escapeAttr(l)}</text>`).join('');
 }
 
 /** Collections, guides, sections and the model index: copy on the left, art on the right (auras of the members, or the hub's aura). */
@@ -102,14 +101,14 @@ export function providerCardSvg(p, subtitle, sources = 0) {
   const nums = ogLimits(p);
   const lines = wrap(p.name, 16, 2);
   const size = lines.length > 1 || p.name.length > 12 ? 78 : 96;
-  let body = lines.map((l, i) => `<text x="78" y="${238 + i * size * 0.98}" fill="${OG.ink}" font-family="OG Display" font-size="${size}" letter-spacing="-1.5">${esc(l)}</text>`).join('');
+  let body = lines.map((l, i) => `<text x="78" y="${238 + i * size * 0.98}" fill="${OG.ink}" font-family="OG Display" font-size="${size}" letter-spacing="-1.5">${escapeAttr(l)}</text>`).join('');
   const y = 238 + (lines.length - 1) * size * 0.98;
   if (nums.length) {
-    body += nums.map(([v, l], i) => `<text x="${80 + i * 200}" y="${Math.round(y + 112)}" fill="${OG.ink}" font-family="OG Display" font-size="64">${esc(v)}</text>` +
-      `<text x="${82 + i * 200}" y="${Math.round(y + 146)}" fill="${OG.muted}" font-family="OG Mono" font-size="20">${esc(l)}</text>`).join('');
-    body += `<text x="80" y="${Math.round(y + 196)}" fill="${OG.muted}" font-family="OG Mono" font-size="22">${esc(subtitle)}</text>`;
+    body += nums.map(([v, l], i) => `<text x="${80 + i * 200}" y="${Math.round(y + 112)}" fill="${OG.ink}" font-family="OG Display" font-size="64">${escapeAttr(v)}</text>` +
+      `<text x="${82 + i * 200}" y="${Math.round(y + 146)}" fill="${OG.muted}" font-family="OG Mono" font-size="20">${escapeAttr(l)}</text>`).join('');
+    body += `<text x="80" y="${Math.round(y + 196)}" fill="${OG.muted}" font-family="OG Mono" font-size="22">${escapeAttr(subtitle)}</text>`;
   } else {
-    body += wrap(subtitle, 40, 2).map((l, i) => `<text x="80" y="${Math.round(y + 84 + i * 34)}" fill="${OG.muted}" font-family="OG Mono" font-size="24">${esc(l)}</text>`).join('');
+    body += wrap(subtitle, 40, 2).map((l, i) => `<text x="80" y="${Math.round(y + 84 + i * 34)}" fill="${OG.muted}" font-family="OG Mono" font-size="24">${escapeAttr(l)}</text>`).join('');
   }
   if (p.verified) body += stampSvg(ogStampText(sources), { x: 80, y: 484, size: 22 });
   body += auraSvg(ogAuraSpec(p), { cx: 948, cy: 318, r: 170, id: 'p', theme: OG.theme });

@@ -7,7 +7,8 @@
 // tell the services apart are offered (a point that every service states, or none does, filters nothing), and a
 // browser without :has() simply shows the whole table.
 
-import { htmlEsc, SLUG_RE } from './rows.mjs';
+import { escapeHtml } from './html.mjs';
+import { SLUG_RE } from './rows.mjs';
 
 /** The filters worth offering for these entries: fields that some state and some do not, and the kinds if there are two or more. */
 export function claimsFilters(entries, labels) {
@@ -35,29 +36,29 @@ export function claimsTableHtml({ id, entries, labels, kindLabel, subject }) {
   const filters = (filterFields.length || kinds.length)
     ? `<fieldset class="cmp-filters"><legend>Show only</legend>` +
       (kinds.length
-        ? `<span class="cmp-group" role="radiogroup" aria-label="Kind of ${htmlEsc(subject)}">` +
+        ? `<span class="cmp-group" role="radiogroup" aria-label="Kind of ${escapeHtml(subject)}">` +
           `<label><input type="radio" name="${id}-kind" value="" checked> All kinds</label>` +
-          kinds.map((k) => `<label><input type="radio" name="${id}-kind" value="${htmlEsc(k)}"> ${htmlEsc(kindLabel(k))}</label>`).join('') + `</span>`
+          kinds.map((k) => `<label><input type="radio" name="${id}-kind" value="${escapeHtml(k)}"> ${escapeHtml(kindLabel(k))}</label>`).join('') + `</span>`
         : '') +
       (filterFields.length
         ? `<span class="cmp-group">` +
-          filterFields.map((f) => `<label><input type="checkbox" name="${id}-state" value="${htmlEsc(f)}"> ${htmlEsc(labels[f])} stated</label>`).join('') + `</span>`
+          filterFields.map((f) => `<label><input type="checkbox" name="${id}-state" value="${escapeHtml(f)}"> ${escapeHtml(labels[f])} stated</label>`).join('') + `</span>`
         : '') +
       `</fieldset>`
     : '';
   const rows = entries.map((e) => {
     const stated = allFields.filter((f) => e.claims[f] && e.claims[f].state === 'stated').join(' ');
-    const anchor = SLUG_RE.test(e.slug) ? `<a href="#${e.slug}">${htmlEsc(e.name)}</a>` : htmlEsc(e.name);
-    return `<tr data-kind="${htmlEsc(e.kind)}" data-stated="${htmlEsc(stated)}"><th scope="row">${anchor}</th><td>${htmlEsc(kindLabel(e.kind))}</td>` +
+    const anchor = SLUG_RE.test(e.slug) ? `<a href="#${e.slug}">${escapeHtml(e.name)}</a>` : escapeHtml(e.name);
+    return `<tr data-kind="${escapeHtml(e.kind)}" data-stated="${escapeHtml(stated)}"><th scope="row">${anchor}</th><td>${escapeHtml(kindLabel(e.kind))}</td>` +
       fields.map((f) => cell(e, f)).join('') + `</tr>`;
   }).join('');
   return `<div class="cmp" id="${id}-glance"><h3>At a glance</h3>` +
-    `<p class="muted">One row per ${htmlEsc(subject)}. <strong>Stated</strong> means the page's own sentence says it, and the cell links to that sentence in the entry below; ` +
-    `<strong>Not stated</strong> is never <em>no</em>. ${filterFields.length > 1 ? `If the filters leave no row, no ${htmlEsc(subject)} states all of the points you chose.` : ''}</p>` +
+    `<p class="muted">One row per ${escapeHtml(subject)}. <strong>Stated</strong> means the page's own sentence says it, and the cell links to that sentence in the entry below; ` +
+    `<strong>Not stated</strong> is never <em>no</em>. ${filterFields.length > 1 ? `If the filters leave no row, no ${escapeHtml(subject)} states all of the points you chose.` : ''}</p>` +
     filters +
-    `<div class="table-scroll" role="region" aria-label="Comparison of the ${htmlEsc(subject)}s" tabindex="0">` +
-    `<table class="cmp-table"><caption class="sr-only">What each ${htmlEsc(subject)} says about each point</caption>` +
-    `<thead><tr><th scope="col">${htmlEsc(subject[0].toUpperCase() + subject.slice(1))}</th><th scope="col">Kind</th>` +
-    fields.map((f) => `<th scope="col">${htmlEsc(labels[f])}</th>`).join('') + `</tr></thead><tbody>${rows}</tbody></table></div>` +
-    (none.length ? `<p class="muted">No ${htmlEsc(subject)} states: ${none.map((f) => htmlEsc(labels[f].toLowerCase())).join(', ')}. That is <strong>Not stated</strong>, never <em>no</em>; each entry below says what its page does say.</p>` : '') + `</div>`;
+    `<div class="table-scroll" role="region" aria-label="Comparison of the ${escapeHtml(subject)}s" tabindex="0">` +
+    `<table class="cmp-table"><caption class="sr-only">What each ${escapeHtml(subject)} says about each point</caption>` +
+    `<thead><tr><th scope="col">${escapeHtml(subject[0].toUpperCase() + subject.slice(1))}</th><th scope="col">Kind</th>` +
+    fields.map((f) => `<th scope="col">${escapeHtml(labels[f])}</th>`).join('') + `</tr></thead><tbody>${rows}</tbody></table></div>` +
+    (none.length ? `<p class="muted">No ${escapeHtml(subject)} states: ${none.map((f) => escapeHtml(labels[f].toLowerCase())).join(', ')}. That is <strong>Not stated</strong>, never <em>no</em>; each entry below says what its page does say.</p>` : '') + `</div>`;
 }
