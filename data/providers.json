@@ -2017,6 +2017,7 @@
       "best_for": "Trying public and sovereign open models (Apertus, SEA-LION, Olmo) through one OpenAI-compatible endpoint",
       "modalities": ["text"],
       "models_free": ["swiss-ai/apertus-v1.5-8b", "swiss-ai/apertus-v1.5-70b", "aisingapore/Gemma-SEA-LION-v4-27B-IT", "allenai/Olmo-3-7B-Instruct"],
+      "models_url": "https://platform.publicai.co/models",
       "expires": null,
       "docs_url": "https://platform.publicai.co/plans",
       "phone_required": null,
