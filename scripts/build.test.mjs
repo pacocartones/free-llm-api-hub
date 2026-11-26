@@ -924,7 +924,7 @@ test('a confirmed card requirement is never hidden in the README top-20 or the e
   for (const p of walled) {
     const row = explorer.split('\n').find((l) => l.includes(`href="p/${p.slug}"`));
     assert.ok(row, `${p.slug}: no explorer row found`);
-    assert.match(row, /aria-label="card"/, `${p.slug}: explorer row hides the card requirement`);
+    assert.match(row, /<span class="pflag pflag-bad pflag-mini" data-flag="card" title="Card required: yes">/, `${p.slug}: explorer row hides the card requirement`);
   }
 });
 
@@ -1763,7 +1763,7 @@ test('the client makes no GitHub API call and the home search covers model names
   assert.ok(searchText(groq).includes(groq.models_free[0].toLowerCase()), 'a real provider is found by one of its models');
 });
 
-test('header menu: Providers (with The Best inside), Models, Compare, Changes, API, Guides; the same on the home and the generated pages', () => {
+test('header menu: Providers (with Find my free API and The Best inside), Models, Compare, Changes, API, Guides; the same on the home and the generated pages', () => {
   // Q8: the menu names the site's main sections. Providers is a <details> holding the explorer and The Best (still the
   // one highlighted entry); Submit moved out of the menu to the secondary Contribute button. The home's header is
   // hand-written, so this also keeps it equal to siteHeader() in build.mjs.
@@ -1773,8 +1773,8 @@ test('header menu: Providers (with The Best inside), Models, Compare, Changes, A
     const html = readFileSync(join(ROOT, rel), 'utf8');
     const nav = html.slice(html.indexOf('id="primary-nav"'), html.indexOf('</nav>', html.indexOf('id="primary-nav"')));
     const hrefs = [...nav.matchAll(/<a [^>]*href="([^"]+)"/g)].map((m) => m[1].replace(/^(\.\.\/)+|^\.\//, ''));
-    assert.deepEqual(hrefs, ['#explorer', 'best/', 'models/', 'compare/', 'changes/', 'api/', 'guides-and-collections/'], `${rel}: the header menu entries, in order`);
-    assert.match(nav, /<details class="nav-group"><summary>Providers<\/summary><div class="nav-sub"><a href="[^"]*#explorer">All providers<\/a><a class="nav-best" href="[^"]*best\/"[^>]*>.*The Best<\/a><\/div><\/details>/s, `${rel}: The Best sits inside Providers`);
+    assert.deepEqual(hrefs, ['#explorer', 'find/', 'best/', 'models/', 'compare/', 'changes/', 'api/', 'guides-and-collections/'], `${rel}: the header menu entries, in order`);
+    assert.match(nav, /<details class="nav-group"><summary>Providers<\/summary><div class="nav-sub"><a href="[^"]*#explorer">All providers<\/a><a href="[^"]*find\/">Find my free API<\/a><a class="nav-best" href="[^"]*best\/"[^>]*>.*The Best<\/a><\/div><\/details>/s, `${rel}: The Best sits inside Providers`);
     assert.equal((nav.match(/class="nav-best"/g) || []).length, 1, `${rel}: only one highlighted entry`);
     assert.doesNotMatch(nav, /submit\//, `${rel}: Submit is not a menu entry`);
     const footer = html.slice(html.indexOf('<footer'));
@@ -1859,9 +1859,10 @@ test('provider sections: honest empty states, numbers only with source and date,
   const base = { slug: 'x', name: 'X', modalities: ['text'], free_type: 'perpetual', category: 'ongoing' };
   // flags read in words, and "not confirmed" is its own text, not a colour
   const reqs = requirementsHtml({ ...base, card_required: null, phone_required: false, commercial_ok: true });
-  assert.match(reqs, /Credit card<\/dt><dd><span class="tri tri-unk">not confirmed<\/span>/);
-  assert.match(reqs, /Phone verification<\/dt><dd><span class="tri tri-no">not required<\/span>/);
-  assert.match(reqs, /Commercial use<\/dt><dd><span class="tri tri-yes">allowed<\/span>/);
+  // Each value sits in the shared flag component (lib/flags.mjs): its shape, then the page's own words.
+  assert.match(reqs, /Credit card<\/dt><dd><span class="pflag pflag-unk" data-flag="card"[^>]*><span class="pflag-mark" aria-hidden="true">\?<\/span><span class="pflag-vis" aria-hidden="true"><span class="tri tri-unk">not confirmed<\/span>/);
+  assert.match(reqs, /Phone verification<\/dt><dd><span class="pflag pflag-ok" data-flag="phone"[^>]*><span class="pflag-mark" aria-hidden="true">✓<\/span><span class="pflag-vis" aria-hidden="true"><span class="tri tri-no">not required<\/span>/);
+  assert.match(reqs, /Commercial use<\/dt><dd><span class="pflag pflag-ok" data-flag="commercial"[^>]*><span class="pflag-mark" aria-hidden="true">✓<\/span><span class="pflag-vis" aria-hidden="true"><span class="tri tri-yes">allowed<\/span>/);
   // limits: numbers appear with their source and reading date; without them one honest line
   const withNumbers = limitsHtml({ ...base, rate_limits: '30 RPM', free_limits: { requests_per_minute: 30, requests_per_day: 14400, scope: 'free plan', source: 'https://example.com/limits', checked: '2026-10-08' } });
   assert.match(withNumbers, /<th scope="row">requests per minute<\/th><td>30<\/td>/);
@@ -1895,7 +1896,7 @@ test('provider sections: honest empty states, numbers only with source and date,
   assert.equal(dataPolicyHtml(base), '');
   const dp = dataPolicyHtml({ ...base, data_policy: { trains_on_prompts: false, retention: '30 days', source: 'https://example.com/p' } });
   assert.match(dp, /<h2 id="data-policy">Data policy<\/h2>/);
-  assert.match(dp, /Trains on your prompts<\/dt><dd><span class="tri tri-no">no<\/span>/);
+  assert.match(dp, /Trains on your prompts<\/dt><dd><span class="pflag pflag-ok" data-flag="training"[^>]*><span class="pflag-mark" aria-hidden="true">✓<\/span><span class="pflag-vis" aria-hidden="true"><span class="tri tri-no">no<\/span>/);
   assert.match(dp, /30 days/);
 });
 
@@ -1968,7 +1969,7 @@ test('data_policy: a provider that has it shows the section on its page, and the
   assert.equal(roundTripError(serialize(data)), null, 'the serializer round-trips the field');
   assert.ok(serialize(data).includes('"data_policy"'), 'the serializer writes it');
   const html = dataPolicyHtml(data.providers[0]);
-  assert.match(html, /Trains on your prompts<\/dt><dd><span class="tri tri-yes">yes<\/span>/);
+  assert.match(html, /Trains on your prompts<\/dt><dd><span class="pflag pflag-bad" data-flag="training" title="Trains on prompts: yes"><span class="pflag-mark" aria-hidden="true">✕<\/span><span class="pflag-vis" aria-hidden="true"><span class="tri tri-yes">yes<\/span>/);
   assert.match(html, /30 days/);
   assert.match(html, /href="https:\/\/example\.com\/privacy"/);
 });
@@ -1990,6 +1991,29 @@ test('expiry reads the same on the provider page, the comparison and the API', (
   assert.match(compareCell(unknown, ongoing), /not confirmed/, 'a trial credit with no data is no longer "no expiry" in comparisons');
   assert.equal(api.find((p) => p.slug === 'scaleway').no_expiry, undefined);
   assert.match(pageCell('groq'), /^no expiry<\/span>$/);
+});
+
+test('compare links the official model catalogue under the free-model sample (#705)', () => {
+  const row = (p) => compareTableHtml([p, p]).match(/Free models \(sample\)[\s\S]*?<\/tr>/)[0];
+  const base = { name: 'Fixture', category: 'ongoing' };
+  // a provider with a sample and one with "no sample" both get the link
+  assert.match(row({ ...base, slug: 'fx-sample', models_free: ['a/b'], models_url: 'https://example.com/models' }),
+    /<code>a\/b<\/code><div class="cmp-sub"><a href="https:\/\/example\.com\/models" target="_blank" rel="noopener">official catalogue ↗<\/a><\/div>/);
+  assert.match(row({ ...base, slug: 'fx-nosample', models_url: 'https://example.com/models' }),
+    /no sample<\/span><div class="cmp-sub"><a href="https:\/\/example\.com\/models" target="_blank" rel="noopener">official catalogue ↗<\/a><\/div>/);
+  // without models_url the cell renders exactly as before: no link, no cmp-sub line
+  assert.doesNotMatch(row({ ...base, slug: 'fx-plain', models_free: ['a/b'] }), /cmp-sub|official catalogue/);
+  // an unsafe models_url never becomes a link
+  assert.doesNotMatch(row({ ...base, slug: 'fx-unsafe', models_free: ['a/b'], models_url: 'javascript:alert(1)' }),
+    /javascript:|official catalogue/);
+  // the browser bundle ships the same function
+  run(['scripts/build.mjs']);
+  const bundle = readFileSync(join(ROOT, 'site/shared-compare.js'), 'utf8');
+  assert.match(bundle, /official catalogue/, 'the browser bundle carries the catalogue link');
+  const { compareTableHtml: bundledCompare } = (new Function('window', bundle + '; return window.FLLM_COMPARE;'))({});
+  assert.match(bundledCompare([{ ...base, slug: 'fx-bundle', models_url: 'https://example.com/models' }, base2()]),
+    /official catalogue ↗/, 'the bundled function renders the link');
+  function base2() { return { name: 'Other', category: 'ongoing', slug: 'fx-other' }; }
 });
 
 // ---------- weekly re-verification pacing (lib/pacing.mjs) ----------
@@ -2085,13 +2109,16 @@ test('active providers retain models_url from their official catalogues', () => 
     ['google-gemini', 'https://ai.google.dev/gemini-api/docs/models'],
     ['groq', 'https://console.groq.com/docs/models'],
     ['openrouter', 'https://openrouter.ai/models'],
+    ['cloudflare-workers-ai', 'https://developers.cloudflare.com/workers-ai/models/'],
     ['ibm-watsonx', 'https://www.ibm.com/docs/en/watsonx/saas?topic=solutions-supported-foundation-models'],
     ['fireworks-ai', 'https://fireworks.ai/models'],
     ['baseten', 'https://docs.baseten.co/inference/model-apis/overview'],
     ['alibaba-model-studio', 'https://www.alibabacloud.com/help/en/model-studio/model-pricing'],
+    ['sambanova', 'https://docs.sambanova.ai/docs/en/models/sambacloud-models'],
     ['sarvam-ai', 'https://docs.sarvam.ai/api/token-factory/models'],
     ['tencent-hunyuan', 'https://cloud.tencent.com/document/product/1823/130051'],
     ['bytez', 'https://bytez.com/models'],
+    ['voyage-ai', 'https://docs.voyageai.com/docs/embeddings'],
     ['stability-ai', 'https://docs.stability.ai/api-reference'],
     ['plamo', 'https://docs.plamo.preferredai.jp/en/api'],
     ['entrim', 'https://entrim.ai/ai-models/'],
@@ -2280,7 +2307,7 @@ test('the 404 page is built with the shared header, menu and footer and root-abs
   assert.ok(html.includes(hash), 'the path read-out is pinned by hash in the CSP: ' + hash);
 });
 
-test('the menu has Providers (All providers, The Best), Models, Compare, Changes, API and Guides, and the footer no longer carries the removed entries', () => {
+test('the menu has Providers (All providers, Find my free API, The Best), Models, Compare, Changes, API and Guides, and the footer no longer carries the removed entries', () => {
   // Mutant: put Submit back in the menu, or the «Interactive explorer» link or the «Independent, community-maintained» line back in
   // the footer; this test turns red.
   const home = readFileSync(join(ROOT, 'site/index.html'), 'utf8');
@@ -2289,7 +2316,7 @@ test('the menu has Providers (All providers, The Best), Models, Compare, Changes
     const nav = html.match(/<nav class="nav" id="primary-nav"[\s\S]*?<\/nav>/);
     assert.ok(nav, name + ': the menu');
     const labels = [...nav[0].matchAll(/<(?:a [^>]*|summary)>(?:<svg[\s\S]*?<\/svg>)?([^<]+)<\/(?:a|summary)>/g)].map((m) => m[1].replace(/&amp;/g, '&').trim());
-    assert.deepEqual(labels, ['Providers', 'All providers', 'The Best', 'Models', 'Compare', 'Changes', 'API', 'Guides'], name + ': the menu entries');
+    assert.deepEqual(labels, ['Providers', 'All providers', 'Find my free API', 'The Best', 'Models', 'Compare', 'Changes', 'API', 'Guides'], name + ': the menu entries');
     assert.ok(!/Interactive explorer/.test(html), name + ': no «Interactive explorer» link');
     assert.ok(!/Independent, community-maintained/.test(html), name + ': no «Independent, community-maintained» line');
     assert.ok(/<a href="[^"]*submit\/">Submit<\/a>/.test(html), name + ': Submit in the footer');
@@ -2354,7 +2381,7 @@ test('explorer rows and best facts show conditional commercial use with its esca
     verified: true, last_verified: '2026-10-08', docs_url: 'https://example.com/terms',
   };
   const row = explorerRowHtml(p, { now: '2026-10-08' });
-  assert.match(row, /aria-label="commercial conditional"/);
+  assert.match(row, /<span class="pflag pflag-cond pflag-mini" data-flag="commercial" title="Commercial use allowed: conditional">/);
   assert.match(row, /Conditional/);
   assert.ok(row.includes('Per-model &lt;licence&gt; applies.'));
   assert.doesNotMatch(row, /Not stated/);
@@ -3047,7 +3074,7 @@ test('data_policy lot 2: at least 21 of 68, the four new rows carry a quote and 
     assert.ok(dp, `${slug} has a data_policy`);
     assert.equal(dp.trains_on_prompts, true, `${slug}: the provider's own sentence says it trains`);
     assert.match(dp.source, /^https:\/\//, `${slug}: https source`);
-    assert.equal(dp.checked, '2026-10-15', `${slug}: read date`);
+    assert.ok(dp.checked >= '2026-10-15', `${slug}: read on or after the lot 2 day (a later re-read of a row is fine)`);
     assert.ok(dp.quote && dp.quote.length <= 400, `${slug}: literal quote within the limit`);
   }
   const assembly = data.providers.find((p) => p.slug === 'assemblyai').data_policy;
@@ -3116,14 +3143,14 @@ test('data_policy lot 5: at least 25 of 68, Deepgram trains by its terms with an
   const rw = data.providers.find((p) => p.slug === 'runware').data_policy;
   assert.equal(rw.trains_on_prompts, false); assert.equal(rw.source, 'https://runware.ai/terms'); assert.equal(rw.plan_named, false);
   assert.match(rw.note, /aggregated or de-identified operational data/);
-  for (const dp of [dg, rw]) { assert.equal(dp.checked, '2026-10-15'); assert.ok(dp.quote.length <= 400 && dp.note.length <= 300); }
+  for (const dp of [dg, rw]) { assert.ok(dp.checked >= '2026-10-15', 'read on or after the lot 5 day (a later re-read of a row is fine)'); assert.ok(dp.quote.length <= 400 && dp.note.length <= 300); }
 });
 
 test('data_policy lot 6: at least 27 of 68, AI21 says it does not train, with the conditions of its own sentence', () => {
   const data = JSON.parse(readFileSync(DATA, 'utf8'));
   assert.ok(data.providers.filter((p) => p.data_policy).length >= 27, 'at least 27 providers have a data_policy');
   const dp = data.providers.find((p) => p.slug === 'ai21').data_policy;
-  assert.equal(dp.trains_on_prompts, false); assert.equal(dp.plan_named, false); assert.equal(dp.checked, '2026-10-15');
+  assert.equal(dp.trains_on_prompts, false); assert.equal(dp.plan_named, false); assert.ok(dp.checked >= '2026-10-15', 'read on or after the lot 6 day (a later re-read of a row is fine)');
   assert.equal(dp.source, 'https://www.ai21.com/terms-policies/privacy-policy/', 'the final address, not the one that redirects');
   assert.match(dp.quote, /unless otherwise agreed in writing or required to provide the Services/, 'the condition is in the quote');
   assert.match(dp.note, /for example, for individual-developer accounts/); assert.match(dp.note, /has no mention of a free, trial, paid or other plan/);

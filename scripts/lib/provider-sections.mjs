@@ -9,6 +9,11 @@ import { triStateHtml } from './compare.mjs';
 import { expiryHtml } from './expiry.mjs';
 import { fieldCheck } from './field-checks.mjs';
 import { publishedSpeed, speedFigure, SPEED_METRICS } from './published-speed.mjs';
+import { FLAG_DEFS, flagHtml } from './flags.mjs';
+
+// The shared flag component (lib/flags.mjs) around the page's own words: the shape, then the words, with the
+// whole sentence as the accessible text.
+const flagById = (id) => FLAG_DEFS.find((d) => d.id === id);
 
 const FREE_TYPE_LABEL = {
   'renewing-quota': 'Free quota that renews',
@@ -32,7 +37,8 @@ const safeUrl = (u) => (/^https?:\/\//i.test(String(u || '')) ? htmlEsc(u) : '')
 export function requirementsHtml(p) {
   const row = (icon, label, field, yes, no, extra = '') => {
     const check = fieldCheck(p, field);
-    return `<div class="req"><dt>${ICON(icon)}${label}</dt><dd>${triStateHtml(p[field], yes, no, check)}${extra}${checkSourceHtml(check)}</dd></div>`;
+    const def = FLAG_DEFS.find((d) => d.field === field);
+    return `<div class="req"><dt>${ICON(icon)}${label}</dt><dd>${flagHtml(def, p, { check, visible: triStateHtml(p[field], yes, no, check) })}${extra}${checkSourceHtml(check)}</dd></div>`;
   };
   const commercialCondition = p.commercial_ok === 'conditional' && p.commercial_ok_condition
     ? `<div class="req-condition">${htmlEsc(p.commercial_ok_condition)}</div>`
@@ -126,7 +132,7 @@ export function dataPolicyHtml(p) {
   if (!dp || typeof dp !== 'object') return '';
   const src = safeUrl(dp.source);
   return `<h2 id="data-policy">Data policy</h2><dl class="prov-reqs">` +
-    `<div class="req"><dt>${ICON('ic-shield')}Trains on your prompts</dt><dd>${triStateHtml(dp.trains_on_prompts, 'yes', 'no')}</dd></div>` +
+    `<div class="req"><dt>${ICON('ic-shield')}Trains on your prompts</dt><dd>${flagHtml(flagById('training'), p, { visible: triStateHtml(dp.trains_on_prompts, 'yes', 'no') })}</dd></div>` +
     `<div class="req"><dt>${ICON('ic-clock')}Retention</dt><dd>${dp.retention ? htmlEsc(dp.retention) : '<span class="tri tri-unk">not confirmed</span>'}</dd></div></dl>` +
     (src ? `<p class="muted">Source: <a href="${src}" target="_blank" rel="noopener">the provider's page</a>.</p>` : '');
 }
