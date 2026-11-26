@@ -105,10 +105,10 @@ git rev-parse vX.Y.Z^{commit}
 git show vX.Y.Z:data/providers.json | sha256sum
 git switch --detach vX.Y.Z
 npm ci --ignore-scripts
-npm test && npm run check
+npm test && npm run check -- --strict
 ```
 
-Use a clean full clone; inspect `git status` before switching revisions. The checks above run against the selected tag, not whichever branch happened to be checked out. `npm run check` excludes the date-relative freshness badge.
+Use a clean full clone; inspect `git status` before switching revisions. The checks above run against the selected tag, not whichever branch happened to be checked out. `--strict` compares every derived file with the build in any regeneration mode (a release ships fully regenerated); it excludes the date-relative freshness badge.
 
 The notes of each release give the commit and the sha256 of `data/providers.json` at the tag.
 

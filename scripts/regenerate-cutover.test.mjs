@@ -214,8 +214,7 @@ test('verify.yml: outside push mode the drift gate is exactly the old one', () =
   const strict = stepOf(validate, 'name: Generated files must be in sync with the data');
   assert.match(strict, /if: \$\{\{ steps\.regen\.outputs\.mode != 'push' \}\}/);
   assert.match(strict, /node scripts\/build\.mjs/);
-  assert.match(strict, /git diff --quiet -- \$targets && \[ -z "\$untracked" \]/);
-  assert.match(strict, /exit 1/);
+  assert.match(strict, /node scripts\/check-generated\.mjs --strict/, 'the strict gate, whatever .github/regen-mode says');
   // The OG check stays unconditional and blocking (in push mode it runs after the images were rendered).
   const og = stepOf(validate, 'name: Check OG images are committed and match the dataset');
   assert.doesNotMatch(og, /\n {8}if:/);
