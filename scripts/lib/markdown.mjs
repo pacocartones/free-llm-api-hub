@@ -128,6 +128,7 @@ export const markdownToHtml = (md, ctx) => {
   const lines = md.replace(/\r\n?/g, '\n').split('\n');
   const used = new Map();
   const blocks = [];
+  let tableLabel = 'Table';
   const render = (ls) => {
     const out = [];
     for (let i = 0; i < ls.length;) {
@@ -144,7 +145,10 @@ export const markdownToHtml = (md, ctx) => {
         let id = headingId(text.replace(/[`*]/g, ''));
         const n = used.get(id) || 0; used.set(id, n + 1);
         if (n) id += `-${n}`;
-        out.push(`<h${hashes.length} id="${escapeHtml(id)}">${inlineHtml(text, ctx)}</h${hashes.length}>`); i++; continue;
+        const heading = inlineHtml(text, ctx);
+        // The heading text is already escaped. Strip the generated tags for the label.
+        tableLabel = heading.replace(/<[^>]+>/g, '').trim() || 'Table';
+        out.push(`<h${hashes.length} id="${escapeHtml(id)}">${heading}</h${hashes.length}>`); i++; continue;
       }
       if (isRule(l)) { out.push('<hr>'); i++; continue; }
       if (isQuote(l)) {
@@ -156,7 +160,7 @@ export const markdownToHtml = (md, ctx) => {
         const head = splitRow(l); i += 2;
         const rows = [];
         while (i < ls.length && isTableRow(ls[i])) rows.push(splitRow(ls[i++]));
-        out.push(`<div class="table-wrap"><table class="model-table"><thead><tr>${head.map((c) => `<th>${inlineHtml(c, ctx)}</th>`).join('')}</tr></thead><tbody>` +
+        out.push(`<div class="table-wrap" role="region" aria-label="${tableLabel}" tabindex="0"><table class="model-table"><thead><tr>${head.map((c) => `<th>${inlineHtml(c, ctx)}</th>`).join('')}</tr></thead><tbody>` +
           rows.map((r) => `<tr>${r.map((c) => `<td>${inlineHtml(c, ctx)}</td>`).join('')}</tr>`).join('') + `</tbody></table></div>`); continue;
       }
       if (bullet(l)) {

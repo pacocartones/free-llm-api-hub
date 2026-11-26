@@ -52,6 +52,25 @@ test('the blocks: headings with GitHub ids (each id once), lists nested, numbere
   assert.match(h, /<pre><code>const x = &quot;&lt;b&gt;&quot;;<\/code><\/pre>/);
 });
 
+const smallTable = '| Header |\n|---|\n| Cell |';
+
+test('table wrappers are focusable regions named after the nearest heading', () => {
+  const h = md(`# Guide\n\n## Checks\n\nIntro text.\n\n${smallTable}`);
+  assert.match(h, /<div class="table-wrap" role="region" aria-label="Checks" tabindex="0">/);
+});
+
+test('table wrappers use the rendered heading text escaped for an attribute', () => {
+  const h = md(`## **Check** [links](#checks) and \`a<b\` & "quotes"\n\n${smallTable}`);
+  assert.match(h, /<div class="table-wrap" role="region" aria-label="Check links and a&lt;b &amp; &quot;quotes&quot;" tabindex="0">/);
+  assert.match(h, /<strong>Check<\/strong> <a href="#checks">links<\/a> and <code>a&lt;b<\/code>/);
+});
+
+test('table wrappers fall back to Table without heading text', () => {
+  for (const source of [smallTable, `# Guide\n\n## ###\n\n${smallTable}`]) {
+    assert.match(md(source), /<div class="table-wrap" role="region" aria-label="Table" tabindex="0">/);
+  }
+});
+
 test('/methodology/ and /contributing/: linked from the footer, in the sitemap, titled and described, and they say what the files say', () => {
   const out = privateTree(ROOT);
   execFileSync(process.execPath, [join(out, 'scripts/build.mjs')], { cwd: out, stdio: 'pipe' });
