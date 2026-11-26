@@ -1763,7 +1763,7 @@ test('the client makes no GitHub API call and the home search covers model names
   assert.ok(searchText(groq).includes(groq.models_free[0].toLowerCase()), 'a real provider is found by one of its models');
 });
 
-test('header menu: Providers (with The Best inside), Models, Compare, Changes, API, Guides; the same on the home and the generated pages', () => {
+test('header menu: Providers (with Find my free API and The Best inside), Models, Compare, Changes, API, Guides; the same on the home and the generated pages', () => {
   // Q8: the menu names the site's main sections. Providers is a <details> holding the explorer and The Best (still the
   // one highlighted entry); Submit moved out of the menu to the secondary Contribute button. The home's header is
   // hand-written, so this also keeps it equal to siteHeader() in build.mjs.
@@ -1773,8 +1773,8 @@ test('header menu: Providers (with The Best inside), Models, Compare, Changes, A
     const html = readFileSync(join(ROOT, rel), 'utf8');
     const nav = html.slice(html.indexOf('id="primary-nav"'), html.indexOf('</nav>', html.indexOf('id="primary-nav"')));
     const hrefs = [...nav.matchAll(/<a [^>]*href="([^"]+)"/g)].map((m) => m[1].replace(/^(\.\.\/)+|^\.\//, ''));
-    assert.deepEqual(hrefs, ['#explorer', 'best/', 'models/', 'compare/', 'changes/', 'api/', 'guides-and-collections/'], `${rel}: the header menu entries, in order`);
-    assert.match(nav, /<details class="nav-group"><summary>Providers<\/summary><div class="nav-sub"><a href="[^"]*#explorer">All providers<\/a><a class="nav-best" href="[^"]*best\/"[^>]*>.*The Best<\/a><\/div><\/details>/s, `${rel}: The Best sits inside Providers`);
+    assert.deepEqual(hrefs, ['#explorer', 'find/', 'best/', 'models/', 'compare/', 'changes/', 'api/', 'guides-and-collections/'], `${rel}: the header menu entries, in order`);
+    assert.match(nav, /<details class="nav-group"><summary>Providers<\/summary><div class="nav-sub"><a href="[^"]*#explorer">All providers<\/a><a href="[^"]*find\/">Find my free API<\/a><a class="nav-best" href="[^"]*best\/"[^>]*>.*The Best<\/a><\/div><\/details>/s, `${rel}: The Best sits inside Providers`);
     assert.equal((nav.match(/class="nav-best"/g) || []).length, 1, `${rel}: only one highlighted entry`);
     assert.doesNotMatch(nav, /submit\//, `${rel}: Submit is not a menu entry`);
     const footer = html.slice(html.indexOf('<footer'));
@@ -2092,6 +2092,7 @@ test('active providers retain models_url from their official catalogues', () => 
     ['alibaba-model-studio', 'https://www.alibabacloud.com/help/en/model-studio/model-pricing'],
     ['sarvam-ai', 'https://docs.sarvam.ai/api/token-factory/models'],
     ['tencent-hunyuan', 'https://cloud.tencent.com/document/product/1823/130051'],
+    ['voyage-ai', 'https://docs.voyageai.com/docs/embeddings'],
     ['stability-ai', 'https://docs.stability.ai/api-reference'],
     ['plamo', 'https://docs.plamo.preferredai.jp/en/api'],
     ['entrim', 'https://entrim.ai/ai-models/'],
@@ -2280,7 +2281,7 @@ test('the 404 page is built with the shared header, menu and footer and root-abs
   assert.ok(html.includes(hash), 'the path read-out is pinned by hash in the CSP: ' + hash);
 });
 
-test('the menu has Providers (All providers, The Best), Models, Compare, Changes, API and Guides, and the footer no longer carries the removed entries', () => {
+test('the menu has Providers (All providers, Find my free API, The Best), Models, Compare, Changes, API and Guides, and the footer no longer carries the removed entries', () => {
   // Mutant: put Submit back in the menu, or the «Interactive explorer» link or the «Independent, community-maintained» line back in
   // the footer; this test turns red.
   const home = readFileSync(join(ROOT, 'site/index.html'), 'utf8');
@@ -2289,7 +2290,7 @@ test('the menu has Providers (All providers, The Best), Models, Compare, Changes
     const nav = html.match(/<nav class="nav" id="primary-nav"[\s\S]*?<\/nav>/);
     assert.ok(nav, name + ': the menu');
     const labels = [...nav[0].matchAll(/<(?:a [^>]*|summary)>(?:<svg[\s\S]*?<\/svg>)?([^<]+)<\/(?:a|summary)>/g)].map((m) => m[1].replace(/&amp;/g, '&').trim());
-    assert.deepEqual(labels, ['Providers', 'All providers', 'The Best', 'Models', 'Compare', 'Changes', 'API', 'Guides'], name + ': the menu entries');
+    assert.deepEqual(labels, ['Providers', 'All providers', 'Find my free API', 'The Best', 'Models', 'Compare', 'Changes', 'API', 'Guides'], name + ': the menu entries');
     assert.ok(!/Interactive explorer/.test(html), name + ': no «Interactive explorer» link');
     assert.ok(!/Independent, community-maintained/.test(html), name + ': no «Independent, community-maintained» line');
     assert.ok(/<a href="[^"]*submit\/">Submit<\/a>/.test(html), name + ': Submit in the footer');
@@ -3054,7 +3055,7 @@ test('data_policy lot 2: at least 21 of 68, the four new rows carry a quote and 
     assert.ok(dp, `${slug} has a data_policy`);
     assert.equal(dp.trains_on_prompts, true, `${slug}: the provider's own sentence says it trains`);
     assert.match(dp.source, /^https:\/\//, `${slug}: https source`);
-    assert.equal(dp.checked, '2026-10-15', `${slug}: read date`);
+    assert.ok(dp.checked >= '2026-10-15', `${slug}: read on or after the lot 2 day (a later re-read of a row is fine)`);
     assert.ok(dp.quote && dp.quote.length <= 400, `${slug}: literal quote within the limit`);
   }
   const assembly = data.providers.find((p) => p.slug === 'assemblyai').data_policy;
@@ -3123,14 +3124,14 @@ test('data_policy lot 5: at least 25 of 68, Deepgram trains by its terms with an
   const rw = data.providers.find((p) => p.slug === 'runware').data_policy;
   assert.equal(rw.trains_on_prompts, false); assert.equal(rw.source, 'https://runware.ai/terms'); assert.equal(rw.plan_named, false);
   assert.match(rw.note, /aggregated or de-identified operational data/);
-  for (const dp of [dg, rw]) { assert.equal(dp.checked, '2026-10-15'); assert.ok(dp.quote.length <= 400 && dp.note.length <= 300); }
+  for (const dp of [dg, rw]) { assert.ok(dp.checked >= '2026-10-15', 'read on or after the lot 5 day (a later re-read of a row is fine)'); assert.ok(dp.quote.length <= 400 && dp.note.length <= 300); }
 });
 
 test('data_policy lot 6: at least 27 of 68, AI21 says it does not train, with the conditions of its own sentence', () => {
   const data = JSON.parse(readFileSync(DATA, 'utf8'));
   assert.ok(data.providers.filter((p) => p.data_policy).length >= 27, 'at least 27 providers have a data_policy');
   const dp = data.providers.find((p) => p.slug === 'ai21').data_policy;
-  assert.equal(dp.trains_on_prompts, false); assert.equal(dp.plan_named, false); assert.equal(dp.checked, '2026-10-15');
+  assert.equal(dp.trains_on_prompts, false); assert.equal(dp.plan_named, false); assert.ok(dp.checked >= '2026-10-15', 'read on or after the lot 6 day (a later re-read of a row is fine)');
   assert.equal(dp.source, 'https://www.ai21.com/terms-policies/privacy-policy/', 'the final address, not the one that redirects');
   assert.match(dp.quote, /unless otherwise agreed in writing or required to provide the Services/, 'the condition is in the quote');
   assert.match(dp.note, /for example, for individual-developer accounts/); assert.match(dp.note, /has no mention of a free, trial, paid or other plan/);
