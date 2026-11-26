@@ -1993,6 +1993,29 @@ test('expiry reads the same on the provider page, the comparison and the API', (
   assert.match(pageCell('groq'), /^no expiry<\/span>$/);
 });
 
+test('compare links the official model catalogue under the free-model sample (#705)', () => {
+  const row = (p) => compareTableHtml([p, p]).match(/Free models \(sample\)[\s\S]*?<\/tr>/)[0];
+  const base = { name: 'Fixture', category: 'ongoing' };
+  // a provider with a sample and one with "no sample" both get the link
+  assert.match(row({ ...base, slug: 'fx-sample', models_free: ['a/b'], models_url: 'https://example.com/models' }),
+    /<code>a\/b<\/code><div class="cmp-sub"><a href="https:\/\/example\.com\/models" target="_blank" rel="noopener">official catalogue ↗<\/a><\/div>/);
+  assert.match(row({ ...base, slug: 'fx-nosample', models_url: 'https://example.com/models' }),
+    /no sample<\/span><div class="cmp-sub"><a href="https:\/\/example\.com\/models" target="_blank" rel="noopener">official catalogue ↗<\/a><\/div>/);
+  // without models_url the cell renders exactly as before: no link, no cmp-sub line
+  assert.doesNotMatch(row({ ...base, slug: 'fx-plain', models_free: ['a/b'] }), /cmp-sub|official catalogue/);
+  // an unsafe models_url never becomes a link
+  assert.doesNotMatch(row({ ...base, slug: 'fx-unsafe', models_free: ['a/b'], models_url: 'javascript:alert(1)' }),
+    /javascript:|official catalogue/);
+  // the browser bundle ships the same function
+  run(['scripts/build.mjs']);
+  const bundle = readFileSync(join(ROOT, 'site/shared-compare.js'), 'utf8');
+  assert.match(bundle, /official catalogue/, 'the browser bundle carries the catalogue link');
+  const { compareTableHtml: bundledCompare } = (new Function('window', bundle + '; return window.FLLM_COMPARE;'))({});
+  assert.match(bundledCompare([{ ...base, slug: 'fx-bundle', models_url: 'https://example.com/models' }, base2()]),
+    /official catalogue ↗/, 'the bundled function renders the link');
+  function base2() { return { name: 'Other', category: 'ongoing', slug: 'fx-other' }; }
+});
+
 // ---------- weekly re-verification pacing (lib/pacing.mjs) ----------
 // Simulate doing exactly the proposed batch every week and check the two
 // promises the worklist makes: nothing goes overdue, and a same-day cohort
@@ -2081,15 +2104,20 @@ test('models_url is an optional public HTTPS URL', () => {
 
 test('active providers retain models_url from their official catalogues', () => {
   const { providers } = JSON.parse(readFileSync(DATA, 'utf8'));
-  const seeded = providers.filter((p) => Object.hasOwn(p, 'models_url')).map((p) => [p.slug, p.models_url]);
+  // Compared by slug, not by file order: each contributor PR appends one row, and merged rows land in any order.
+  const bySlug = (x, y) => x[0].localeCompare(y[0]);
+  const seeded = providers.filter((p) => Object.hasOwn(p, 'models_url')).map((p) => [p.slug, p.models_url]).sort(bySlug);
   assert.deepEqual(seeded, [
     ['google-gemini', 'https://ai.google.dev/gemini-api/docs/models'],
     ['groq', 'https://console.groq.com/docs/models'],
     ['openrouter', 'https://openrouter.ai/models'],
+    ['cerebras', 'https://inference-docs.cerebras.ai/models/overview'],
+    ['cloudflare-workers-ai', 'https://developers.cloudflare.com/workers-ai/models/'],
     ['ibm-watsonx', 'https://www.ibm.com/docs/en/watsonx/saas?topic=solutions-supported-foundation-models'],
     ['fireworks-ai', 'https://fireworks.ai/models'],
     ['baseten', 'https://docs.baseten.co/inference/model-apis/overview'],
     ['alibaba-model-studio', 'https://www.alibabacloud.com/help/en/model-studio/model-pricing'],
+    ['sambanova', 'https://docs.sambanova.ai/docs/en/models/sambacloud-models'],
     ['sarvam-ai', 'https://docs.sarvam.ai/api/token-factory/models'],
     ['tencent-hunyuan', 'https://cloud.tencent.com/document/product/1823/130051'],
     ['voyage-ai', 'https://docs.voyageai.com/docs/embeddings'],
@@ -2097,7 +2125,7 @@ test('active providers retain models_url from their official catalogues', () => 
     ['plamo', 'https://docs.plamo.preferredai.jp/en/api'],
     ['entrim', 'https://entrim.ai/ai-models/'],
     ['infomaniak', 'https://www.infomaniak.com/en/hosting/ai-services/open-source-models'],
-  ]);
+  ].sort(bySlug));
 });
 
 // A `generated` after today in UTC is what a contributor in a time zone ahead of UTC writes at the end of their day (2026-10-16 when it is still
@@ -3081,7 +3109,7 @@ test('data_policy lot 3: at least 23 of 68, LlamaParse says it does not train, R
   assert.match(retell.note, /Only if you do not opt out of recording/, 'the condition is in the note');
   for (const dp of [llama, retell]) {
     assert.match(dp.source, /^https:\/\//);
-    assert.equal(dp.checked, dp === llama ? '2026-11-17' : '2026-10-15');
+    assert.ok(dp.checked >= (dp === llama ? '2026-11-17' : '2026-10-15'), 'read on or after the lot 3 day (a later re-read of a row is fine)');
   }
 });
 
