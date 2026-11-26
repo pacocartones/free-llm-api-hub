@@ -13,6 +13,3 @@
   date from `scripts/lib/dates.mjs`, which replaces the month tables and day helpers that were repeated in
   `stamp.mjs`, `provider-meta.mjs`, `state.mjs`, `changes.mjs`, `quality.mjs`, `freshness-histogram.mjs` and the
   scripts. CONTRIBUTING.md's style section states the rule.
-- The build runs again: the model-family pages imported the old `htmlEsc` from `rows.mjs`, which the shared HTML
-  escaper change no longer exports; they now use `escapeHtml` from `html.mjs`, with the same "not stated" wording and
-  dates as the other pages.
