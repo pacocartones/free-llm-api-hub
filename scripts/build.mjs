@@ -980,19 +980,20 @@ indexHtml = inject(indexHtml, 'rows', homeRows);
 // The hero's field of auras (brand H1): every provider in the explorer's order, then the key to read them. Dated by ASOF
 // like the rows, so the field is deterministic. Each aura links its provider page for the mouse; the whole field is
 // aria-hidden with no tab stop, because the explorer right below lists the same providers with the same links.
+// The key's four auras share one seed (slug 'key-a'), so only the state differs between them.
 const AURA_KEY = [
-  ['Ongoing', 'full disc', { category: 'ongoing', modalities: ['text', 'audio'], verified: true, last_verified: ASOF, card_required: false, phone_required: false, commercial_ok: true, data_policy: { trains_on_prompts: false } }],
-  ['Trial', 'ring', { category: 'trial', modalities: ['text', 'audio'], verified: true, last_verified: ASOF, card_required: false, phone_required: false, commercial_ok: true, data_policy: { trains_on_prompts: false } }],
-  ['Not stated', 'dashed edge', { category: 'ongoing', modalities: ['text', 'audio'], verified: true, last_verified: ASOF }],
-  ['Checked 30+ days ago', 'faded', { category: 'ongoing', modalities: ['text', 'audio'], verified: false, card_required: false, phone_required: false, commercial_ok: true, data_policy: { trains_on_prompts: false } }],
+  ['Ongoing', 'rays from the centre', { slug: 'key-a', category: 'ongoing', modalities: ['text', 'audio'], verified: true, last_verified: ASOF, card_required: false, phone_required: false, commercial_ok: true, data_policy: { trains_on_prompts: false } }],
+  ['Trial', 'outer crown only', { slug: 'key-a', category: 'trial', modalities: ['text', 'audio'], verified: true, last_verified: ASOF, card_required: false, phone_required: false, commercial_ok: true, data_policy: { trains_on_prompts: false } }],
+  ['Not stated', 'dashed circle', { slug: 'key-a', category: 'ongoing', modalities: ['text', 'audio'], verified: true, last_verified: ASOF }],
+  ['Checked 30+ days ago', 'faded', { slug: 'key-a', category: 'ongoing', modalities: ['text', 'audio'], verified: false, card_required: false, phone_required: false, commercial_ok: true, data_policy: { trains_on_prompts: false } }],
 ];
 const AURA_HUE_NAMES = [['text', 'text'], ['vision', 'vision'], ['image', 'image'], ['audio', 'speech'], ['embeddings', 'embeddings'], ['rerank', 'rerank'], ['ocr', 'OCR']];
 const auraFieldHtml = `<div class="aura-field" aria-hidden="true">` +
   [...providers].sort((a, b) => sortLib.comparator('recommended', 1, a, b))
     .map((p) => `<a href="p/${p.slug}" tabindex="-1">${auraHtml(p, { now: ASOF })}</a>`).join('') +
-  `</div>\n<div class="aura-key"><p class="aura-key-h">Each circle is one provider, drawn from its own data. <a href="methodology/#how-to-read-an-aura">How to read it</a></p>` +
-  `<ul class="aura-key-shapes">${AURA_KEY.map(([t, s, p]) => `<li>${auraHtml(p, { now: ASOF })}<span><b>${t}</b> ${s}</span></li>`).join('')}</ul>` +
-  `<ul class="aura-key-hues">${AURA_HUE_NAMES.map(([m, n]) => `<li><span class="hue-dot" style="background:var(--h-${m})" aria-hidden="true"></span>${n}</li>`).join('')}</ul></div>`;
+  `</div>\n<div class="aura-key"><p class="aura-key-h">Each aura is one provider, drawn from its own data: a colour sector per modality. <a href="methodology/#how-to-read-an-aura">How to read it</a></p>` +
+  `<ul class="aura-key-shapes">${AURA_KEY.map(([t, s, p]) => `<li>${auraHtml(p, { now: ASOF })}<span><b>${t}</b>${s}</span></li>`).join('')}</ul>` +
+  `<ul class="aura-key-hues">${AURA_HUE_NAMES.map(([m, n]) => `<li><span class="hue-dot hue-${m}" aria-hidden="true"></span>${n}</li>`).join('')}</ul></div>`;
 indexHtml = inject(indexHtml, 'aurafield', auraFieldHtml);
 
 indexHtml = inject(indexHtml, 'stats', homeStatsHtml);
