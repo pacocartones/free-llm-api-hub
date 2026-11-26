@@ -144,7 +144,8 @@ jobs:
       # The gate is scripts/check-generated.mjs --strict, the same one `npm run check` runs outside push mode: the
       # files come from git (scripts/generated-targets.mjs, NUL-separated), so a new page is covered the day it is
       # committed, and a page the build writes that was never `git add`ed is reported too.
-      - name: Generated files must be in sync with the data
+      - id: strict
+        name: Generated files must be in sync with the data
         if: ${{ steps.regen.outputs.mode != 'push' }}
         run: |
           node scripts/build.mjs
@@ -160,11 +161,29 @@ jobs:
       # It compares the tree "Regenerate the derived files first" wrote. Nothing in between writes to the working
       # tree (the checks only read, and the test suite builds into temporary copies), and a second build of the
       # same tree is byte-identical (regenerate.yml asserts that on main), so the job builds once.
-      - name: Derived files must not be hand-edited, and a release ships them regenerated (REGEN_MODE=push)
+      - id: drift
+        name: Derived files must not be hand-edited, and a release ships them regenerated (REGEN_MODE=push)
         if: ${{ steps.regen.outputs.mode == 'push' }}
         env:
           REGEN_MODE: ${{ steps.regen.outputs.mode }}
         run: BASE="$(git rev-parse HEAD^1)" node scripts/regenerate-guard.mjs drift-gate
+
+      # On a pull request whose derived files differ from a fresh build (in any mode, blocking or not), the files
+      # the build wrote become the `regen-preview-patch` artifact: a contributor without Node, or the maintainer, can
+      # `git apply --binary regen-preview.patch` on the branch. It is cut against the merge commit, so it applies
+      # cleanly while the branch is up to date with main. Read-only: nothing is pushed or commented.
+      - name: Write the derived files a fresh build changed as a patch
+        if: ${{ !cancelled() && github.event_name == 'pull_request' && (steps.drift.outputs.changed == 'true' || steps.strict.outcome == 'failure') }}
+        run: |
+          git add -A
+          git diff --cached --binary > "$RUNNER_TEMP/regen-preview.patch"
+      - if: ${{ !cancelled() && github.event_name == 'pull_request' && (steps.drift.outputs.changed == 'true' || steps.strict.outcome == 'failure') }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: regen-preview-patch
+          path: ${{ runner.temp }}/regen-preview.patch
+          retention-days: 7
+          if-no-files-found: error
 
   windows-tests:
     name: Windows tests

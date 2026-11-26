@@ -47,11 +47,7 @@ export const loopGuard = ({ mode, event, actor = '', botLogin = '', headMessage 
   return { run: true, reason: `mode ${m}, event ${event}` };
 };
 
-// --- pull-request preview (.github/workflows/regenerate-preview.yml) ------------------------------------------------
-//
-// Shadow evaluation of the drift gate planned for the switch to direct push (ADR, docs/regeneration-bot.md step C).
-// It never blocks a pull request; it says what that gate *would* decide, so the maintainer can measure it on real
-// pull requests before relaxing the blocking gate in verify.yml.
+// --- the drift verdict: what a pull request's derived files mean for the bot (the core of driftGate below) --------
 //
 //   release  the pull request changes `version` in data/providers.json (a release pull request)
 //   touched  paths the pull request itself changes (base..head)
@@ -61,9 +57,9 @@ export const loopGuard = ({ mode, event, actor = '', botLogin = '', headMessage 
 //   in-sync                nothing to regenerate
 //   would-block-release    a release pull request must ship fully regenerated (tag-release.yml tags its merge)
 //   would-block-hand-edit  the pull request edits derived files that do not match the build; the bot would
-//                          silently overwrite them, so the future gate keeps blocking these
-//   bot-would-regenerate   only derived files the pull request did not touch are stale: informative once the bot
-//                          pushes (driftGate below lets it pass in push mode)
+//                          silently overwrite them, so the gate blocks these
+//   bot-would-regenerate   only derived files the pull request did not touch are stale: driftGate lets it pass in
+//                          push mode, because the bot regenerates them after the merge
 // `outside` lists drift paths the bot could never write (a build that writes outside the allowlist is a bug).
 export const PREVIEW_VERDICTS = Object.freeze(['in-sync', 'would-block-release', 'would-block-hand-edit', 'bot-would-regenerate']);
 

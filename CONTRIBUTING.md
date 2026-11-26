@@ -39,7 +39,7 @@ For a **provider data correction**, edit [`data/providers.json`](data/providers.
 - **Push mode (`mode=push`): do not regenerate.** Your data pull request changes `data/` plus a changelog fragment, and nothing generated: no `npm run build` or `npm run og` output in the commit. After the merge the bot commits the derived files to `main`. "Dataset integrity" fails only if your pull request edits a derived file that does not match the build (undo it with `git checkout origin/main -- <file>`) or is a release pull request that is not fully regenerated.
 - **Any other mode: your pull request ships its own regenerated files.** After editing `data/providers.json`, run `npm run build` (and `npm run og` if the OG check flags drift) and commit the regenerated files together with the data change. The required "Dataset integrity" check fails until the derived files are in sync.
 
-In both cases the non-blocking *Regeneration preview* run on your pull request lists the stale derived files, says what the push-mode gate decides, and offers the files as a patch (`regen-preview-patch`) if you cannot build locally.
+In both cases, when your pull request's derived files differ from a fresh build, "Dataset integrity" lists them in its run summary and offers them as a patch, the `regen-preview-patch` artifact, if you cannot build locally.
 
 Fixing a rate limit means editing one field (plus, outside push mode, the files regenerated from it) — a small, reviewable diff.
 

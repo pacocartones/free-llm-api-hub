@@ -47,6 +47,6 @@ regeneration bot's mode, printed by the "Regeneration mode" step of the "Dataset
 - mode=push: do not regenerate or commit derived files. The bot commits them to main after the
   merge. The check fails only if you edited a derived file by hand or this is a release PR.
 - any other mode: the check fails until they are in sync. Run `npm run build`, commit, push again.
-The non-blocking "Regeneration preview" run lists the stale files and offers them as a patch
+Either way the check lists the stale files in its run summary and offers them as a patch
 artifact (`regen-preview-patch`).
 -->
