@@ -924,7 +924,7 @@ test('a confirmed card requirement is never hidden in the README top-20 or the e
   for (const p of walled) {
     const row = explorer.split('\n').find((l) => l.includes(`href="p/${p.slug}"`));
     assert.ok(row, `${p.slug}: no explorer row found`);
-    assert.match(row, /aria-label="card"/, `${p.slug}: explorer row hides the card requirement`);
+    assert.match(row, /<span class="pflag pflag-bad pflag-mini" data-flag="card" title="Card required: yes">/, `${p.slug}: explorer row hides the card requirement`);
   }
 });
 
@@ -1859,9 +1859,10 @@ test('provider sections: honest empty states, numbers only with source and date,
   const base = { slug: 'x', name: 'X', modalities: ['text'], free_type: 'perpetual', category: 'ongoing' };
   // flags read in words, and "not confirmed" is its own text, not a colour
   const reqs = requirementsHtml({ ...base, card_required: null, phone_required: false, commercial_ok: true });
-  assert.match(reqs, /Credit card<\/dt><dd><span class="tri tri-unk">not confirmed<\/span>/);
-  assert.match(reqs, /Phone verification<\/dt><dd><span class="tri tri-no">not required<\/span>/);
-  assert.match(reqs, /Commercial use<\/dt><dd><span class="tri tri-yes">allowed<\/span>/);
+  // Each value sits in the shared flag component (lib/flags.mjs): its shape, then the page's own words.
+  assert.match(reqs, /Credit card<\/dt><dd><span class="pflag pflag-unk" data-flag="card"[^>]*><span class="pflag-mark" aria-hidden="true">\?<\/span><span class="pflag-vis" aria-hidden="true"><span class="tri tri-unk">not confirmed<\/span>/);
+  assert.match(reqs, /Phone verification<\/dt><dd><span class="pflag pflag-ok" data-flag="phone"[^>]*><span class="pflag-mark" aria-hidden="true">✓<\/span><span class="pflag-vis" aria-hidden="true"><span class="tri tri-no">not required<\/span>/);
+  assert.match(reqs, /Commercial use<\/dt><dd><span class="pflag pflag-ok" data-flag="commercial"[^>]*><span class="pflag-mark" aria-hidden="true">✓<\/span><span class="pflag-vis" aria-hidden="true"><span class="tri tri-yes">allowed<\/span>/);
   // limits: numbers appear with their source and reading date; without them one honest line
   const withNumbers = limitsHtml({ ...base, rate_limits: '30 RPM', free_limits: { requests_per_minute: 30, requests_per_day: 14400, scope: 'free plan', source: 'https://example.com/limits', checked: '2026-10-08' } });
   assert.match(withNumbers, /<th scope="row">requests per minute<\/th><td>30<\/td>/);
@@ -1895,7 +1896,7 @@ test('provider sections: honest empty states, numbers only with source and date,
   assert.equal(dataPolicyHtml(base), '');
   const dp = dataPolicyHtml({ ...base, data_policy: { trains_on_prompts: false, retention: '30 days', source: 'https://example.com/p' } });
   assert.match(dp, /<h2 id="data-policy">Data policy<\/h2>/);
-  assert.match(dp, /Trains on your prompts<\/dt><dd><span class="tri tri-no">no<\/span>/);
+  assert.match(dp, /Trains on your prompts<\/dt><dd><span class="pflag pflag-ok" data-flag="training"[^>]*><span class="pflag-mark" aria-hidden="true">✓<\/span><span class="pflag-vis" aria-hidden="true"><span class="tri tri-no">no<\/span>/);
   assert.match(dp, /30 days/);
 });
 
@@ -1968,7 +1969,7 @@ test('data_policy: a provider that has it shows the section on its page, and the
   assert.equal(roundTripError(serialize(data)), null, 'the serializer round-trips the field');
   assert.ok(serialize(data).includes('"data_policy"'), 'the serializer writes it');
   const html = dataPolicyHtml(data.providers[0]);
-  assert.match(html, /Trains on your prompts<\/dt><dd><span class="tri tri-yes">yes<\/span>/);
+  assert.match(html, /Trains on your prompts<\/dt><dd><span class="pflag pflag-bad" data-flag="training" title="Trains on prompts: yes"><span class="pflag-mark" aria-hidden="true">✕<\/span><span class="pflag-vis" aria-hidden="true"><span class="tri tri-yes">yes<\/span>/);
   assert.match(html, /30 days/);
   assert.match(html, /href="https:\/\/example\.com\/privacy"/);
 });
@@ -2354,7 +2355,7 @@ test('explorer rows and best facts show conditional commercial use with its esca
     verified: true, last_verified: '2026-10-08', docs_url: 'https://example.com/terms',
   };
   const row = explorerRowHtml(p, { now: '2026-10-08' });
-  assert.match(row, /aria-label="commercial conditional"/);
+  assert.match(row, /<span class="pflag pflag-cond pflag-mini" data-flag="commercial" title="Commercial use allowed: conditional">/);
   assert.match(row, /Conditional/);
   assert.ok(row.includes('Per-model &lt;licence&gt; applies.'));
   assert.doesNotMatch(row, /Not stated/);
