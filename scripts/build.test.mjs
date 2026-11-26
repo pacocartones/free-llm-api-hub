@@ -3048,7 +3048,7 @@ test('data_policy lot 2: at least 21 of 68, the four new rows carry a quote and 
     assert.ok(dp, `${slug} has a data_policy`);
     assert.equal(dp.trains_on_prompts, true, `${slug}: the provider's own sentence says it trains`);
     assert.match(dp.source, /^https:\/\//, `${slug}: https source`);
-    assert.equal(dp.checked, '2026-10-15', `${slug}: read date`);
+    assert.ok(dp.checked >= '2026-10-15', `${slug}: read on or after the lot 2 day (a later re-read of a row is fine)`);
     assert.ok(dp.quote && dp.quote.length <= 400, `${slug}: literal quote within the limit`);
   }
   const assembly = data.providers.find((p) => p.slug === 'assemblyai').data_policy;
@@ -3117,14 +3117,14 @@ test('data_policy lot 5: at least 25 of 68, Deepgram trains by its terms with an
   const rw = data.providers.find((p) => p.slug === 'runware').data_policy;
   assert.equal(rw.trains_on_prompts, false); assert.equal(rw.source, 'https://runware.ai/terms'); assert.equal(rw.plan_named, false);
   assert.match(rw.note, /aggregated or de-identified operational data/);
-  for (const dp of [dg, rw]) { assert.equal(dp.checked, '2026-10-15'); assert.ok(dp.quote.length <= 400 && dp.note.length <= 300); }
+  for (const dp of [dg, rw]) { assert.ok(dp.checked >= '2026-10-15', 'read on or after the lot 5 day (a later re-read of a row is fine)'); assert.ok(dp.quote.length <= 400 && dp.note.length <= 300); }
 });
 
 test('data_policy lot 6: at least 27 of 68, AI21 says it does not train, with the conditions of its own sentence', () => {
   const data = JSON.parse(readFileSync(DATA, 'utf8'));
   assert.ok(data.providers.filter((p) => p.data_policy).length >= 27, 'at least 27 providers have a data_policy');
   const dp = data.providers.find((p) => p.slug === 'ai21').data_policy;
-  assert.equal(dp.trains_on_prompts, false); assert.equal(dp.plan_named, false); assert.equal(dp.checked, '2026-10-15');
+  assert.equal(dp.trains_on_prompts, false); assert.equal(dp.plan_named, false); assert.ok(dp.checked >= '2026-10-15', 'read on or after the lot 6 day (a later re-read of a row is fine)');
   assert.equal(dp.source, 'https://www.ai21.com/terms-policies/privacy-policy/', 'the final address, not the one that redirects');
   assert.match(dp.quote, /unless otherwise agreed in writing or required to provide the Services/, 'the condition is in the quote');
   assert.match(dp.note, /for example, for individual-developer accounts/); assert.match(dp.note, /has no mention of a free, trial, paid or other plan/);
