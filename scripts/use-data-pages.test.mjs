@@ -12,7 +12,8 @@ import { htmlEsc } from './lib/rows.mjs';
 import { codeHtmlEsc } from './lib/quickstart.mjs';
 import { notFreeErrors, notFreeReadmeMd, closestAlternatives, entryQuotes } from './lib/not-free.mjs';
 import { citationRecord, bibtex, apa } from './lib/citation.mjs';
-import { widgetSnippet, WIDGET_DEFAULT, providerBadgeMarkdown } from './lib/embed-page.mjs';
+import { Script, createContext } from 'node:vm';
+import { widgetSnippet, WIDGET_DEFAULT, providerBadgeMarkdown, providerBadgeHtml } from './lib/embed-page.mjs';
 
 const REPO = join(dirname(fileURLToPath(import.meta.url)), '..');
 const ROOT = privateTree(REPO);
@@ -213,6 +214,46 @@ describe('/embed/: Use the data', () => {
     const groq = providers.find((p) => p.slug === 'groq');
     assert.ok(html.includes(codeHtmlEsc(providerBadgeMarkdown(groq, SITE))), 'default badge snippet');
     assert.doesNotMatch(html, /<img[^>]+src="https:\/\/img\.shields\.io/, 'no image is loaded from shields.io');
+  });
+
+  test('the provider badge as HTML: the name is escaped and the snippet is text, not an image', () => {
+    assert.equal(
+      providerBadgeHtml({ slug: 'wandb-inference', name: 'W&B "Inference"' }, SITE),
+      `<a href="${SITE}/p/wandb-inference"><img src="https://img.shields.io/endpoint?url=${SITE}/badges/wandb-inference.json" alt="W&amp;B &quot;Inference&quot; on Free LLM API Hub" height="20"></a>`,
+    );
+    const html = read(PAGES.embed);
+    const groq = providers.find((p) => p.slug === 'groq');
+    assert.ok(html.includes(`<p>Markdown:</p><pre data-snippet="badge"><code id="badge-snippet">${codeHtmlEsc(providerBadgeMarkdown(groq, SITE))}</code></pre>`), 'Markdown snippet');
+    assert.ok(html.includes(`<p>HTML:</p><pre data-snippet="badge"><code id="badge-snippet-html">${codeHtmlEsc(providerBadgeHtml(groq, SITE))}</code></pre>`), 'HTML snippet');
+  });
+
+  test('embed.js rewrites both badge snippets for the picked provider, as the build writes them', () => {
+    const source = read('site/embed.js');
+    assert.match(source, /getElementById\('badge-snippet-html'\)/);
+    assert.doesNotMatch(source, /innerHTML/);
+    // Run the real script against a stub page: ?p= picks the provider, then the picker changes it.
+    const run = (search, names) => {
+      const ids = { 'badge-snippet': { textContent: '' }, 'badge-snippet-html': { textContent: '' } };
+      const listeners = {};
+      const pick = {
+        options: names.map((p) => ({ value: p.slug, textContent: p.name })),
+        selectedIndex: 0,
+        addEventListener: (type, fn) => { listeners[type] = fn; },
+      };
+      ids['badge-provider'] = pick;
+      const document = { getElementById: (id) => ids[id] || null };
+      new Script(source).runInContext(createContext({ document, location: { search } }));
+      return { ids, pick, change: () => listeners.change() };
+    };
+    const wandb = providers.find((p) => p.name.includes('&')) || { slug: 'wandb-inference', name: 'W&B Inference' };
+    const groq = providers.find((p) => p.slug === 'groq');
+    const page = run(`?p=${wandb.slug}`, [groq, wandb]);
+    assert.equal(page.ids['badge-snippet'].textContent, providerBadgeMarkdown(wandb, SITE));
+    assert.equal(page.ids['badge-snippet-html'].textContent, providerBadgeHtml(wandb, SITE));
+    page.pick.selectedIndex = 0;
+    page.change();
+    assert.equal(page.ids['badge-snippet'].textContent, providerBadgeMarkdown(groq, SITE));
+    assert.equal(page.ids['badge-snippet-html'].textContent, providerBadgeHtml(groq, SITE));
   });
 
   test('links the data files and the API', () => {

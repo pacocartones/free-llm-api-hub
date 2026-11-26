@@ -168,6 +168,26 @@ test('the hub has a direct answer, a title and a description from its live count
   for (const q of graph.find((g) => g['@type'] === 'FAQPage').mainEntity) assert.ok(visible.includes(q.acceptedAnswer.text), q.name);
 });
 
+test('/coding-tools/ has a CollectionPage whose ItemList names every tool of both data files, a BreadcrumbList, and no Product or Offer', () => {
+  const html = readFileSync(join(ROOT, 'site/coding-tools/index.html'), 'utf8');
+  const graph = jsonld(html)['@graph'];
+  for (const t of ['CollectionPage', 'BreadcrumbList']) assert.ok(graph.some((g) => g['@type'] === t), t);
+  const page = graph.find((g) => g['@type'] === 'CollectionPage');
+  assert.equal(page.mainEntity['@type'], 'ItemList');
+  const tools = [
+    ...JSON.parse(readFileSync(join(ROOT, 'data/coding-tools.json'), 'utf8')).entries,
+    ...JSON.parse(readFileSync(join(ROOT, 'data/coding-tools-own-key.json'), 'utf8')).entries,
+  ];
+  assert.equal(page.mainEntity.numberOfItems, tools.length);
+  assert.deepEqual(page.mainEntity.itemListElement.map((e) => [e.position, e.name]), tools.map((t, i) => [i + 1, t.name]), 'every tool, in the order the page shows them');
+  for (const e of page.mainEntity.itemListElement) {
+    const path = e.url.replace('https://freellmapihub.com/', '');
+    assert.match(path, /^coding-tools\/[a-z0-9-]+\/$/);
+    assert.ok(readFileSync(join(ROOT, 'site', path, 'index.html'), 'utf8').length > 0, `${e.url} has no page`);
+  }
+  assert.doesNotMatch(JSON.stringify(graph), /"(Product|Offer|AggregateOffer|SoftwareApplication)"/, 'a free plan is a quoted claim, not a price the dataset verifies');
+});
+
 test('image guide lists the image APIs that don’t generate images in their own table, matching the broad image modality', () => {
   const html = read('free-image-generation-apis');
   assert.match(html, /<h1>Free image generation APIs<\/h1>/);
