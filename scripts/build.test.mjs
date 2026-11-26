@@ -2091,6 +2091,7 @@ test('active providers retain models_url from their official catalogues', () => 
     ['fireworks-ai', 'https://fireworks.ai/models'],
     ['baseten', 'https://docs.baseten.co/inference/model-apis/overview'],
     ['alibaba-model-studio', 'https://www.alibabacloud.com/help/en/model-studio/model-pricing'],
+    ['sambanova', 'https://docs.sambanova.ai/docs/en/models/sambacloud-models'],
     ['sarvam-ai', 'https://docs.sarvam.ai/api/token-factory/models'],
     ['tencent-hunyuan', 'https://cloud.tencent.com/document/product/1823/130051'],
     ['voyage-ai', 'https://docs.voyageai.com/docs/embeddings'],
