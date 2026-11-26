@@ -1612,7 +1612,9 @@
       "verified": true,
       "last_verified": "2026-11-24",
       "added": "2026-07-31",
-      "data_policy": {"trains_on_prompts":null,"retention":"Conversion results: deleted about one day after processing; uploaded source-file retention unconfirmed","source":"https://documentation.datalab.to/platform/security","checked":"2026-11-24","quote":"Conversion results are automatically deleted from Datalab servers about one day after processing completes.","note":"Use of documents to improve models is opt-in in team settings; opting in receives discounted rates. Retention statement covers conversion results only. The quoted sentence does not name a plan."}
+      "data_policy": {"trains_on_prompts":null,"retention":"Conversion results: deleted about one day after processing; uploaded source-file retention unconfirmed","source":"https://documentation.datalab.to/platform/security","checked":"2026-11-24","quote":"Conversion results are automatically deleted from Datalab servers about one day after processing completes.","note":"Use of documents to improve models is opt-in in team settings; opting in receives discounted rates. Retention statement covers conversion results only. The quoted sentence does not name a plan."},
+      "keys_url": "https://www.datalab.to/app/keys",
+      "keys_url_source": "https://documentation.datalab.to/docs/recipes/conversion/conversion-api-overview"
     },
     {
       "slug": "wandb-inference",
