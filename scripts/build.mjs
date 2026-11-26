@@ -17,6 +17,7 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join, relative } from 'node:path';
 import { recScore, intentRank, recommendedCmp, FREE_TYPE_RANK, freeTypeRank, FLAG_PAIRS, SLA_DAYS, DUE_SOON_DAYS, ageInDays, freshnessColor, freshnessBadge, freshnessStatus } from './lib/rules.mjs';
 import * as rows from './lib/rows.mjs';
+import { escapeAttr, escapeText } from './lib/html.mjs';
 import * as sortLib from './lib/sort.mjs';
 import { esc, stripTags } from './lib/escape.mjs';
 import { mineHistoryAndSnapshots, HISTORY_FIELDS } from './lib/history.mjs';
@@ -59,7 +60,7 @@ import { providerFigures, expandFigures, injectInlineFigures, figureErrors } fro
 import { firstUseHtml } from './lib/home-first-use.mjs';
 import { ticketBadgeSvg } from './lib/badge-svg.mjs';
 import { providerMarkdown, llmsProviderLine } from './lib/provider-markdown.mjs';
-import { codeHtmlEsc, curlChatQuickstart, pythonChatQuickstart, pythonEmbeddingsQuickstart, pythonStringLiteral } from './lib/quickstart.mjs';
+import { curlChatQuickstart, pythonChatQuickstart, pythonEmbeddingsQuickstart, pythonStringLiteral } from './lib/quickstart.mjs';
 import { providersCsv } from './lib/provider-csv.mjs';
 import { writeSchemaDocs } from './schema-docs.mjs';
 import { datasetAsOf } from './lib/release-stamp.mjs';
@@ -71,6 +72,7 @@ import { SITEMAPS as INDEXNOW_SITEMAPS } from './lib/indexnow.mjs';
 import { groupModels, modelKey } from './lib/model-keys.mjs';
 import { providerMetaDescription } from './lib/provider-meta.mjs';
 import { isIndexable, modelPageMainHtml, modelPageTitle, modelPageDescription, modelPageJsonLd } from './lib/model-pages.mjs';
+import { FAMILY_PATH, familyGroups, isFamilyIndexable, familyUrl, familyH1, familyPageTitle, familyPageDescription, familyBlurb, familyPageMainHtml, familyNavHtml } from './lib/model-families.mjs';
 import { collectionPageJsonLd as pageJsonLd, comparePageJsonLd } from './lib/page-jsonld.mjs';
 import { notFreeErrors, notFreeReadmeMd, notFreeModel, notFreeMainHtml, notFreeJsonLd, notFreeTitle, notFreeDescription, NOT_FREE_PATH } from './lib/not-free.mjs';
 import { embedMainHtml, embedTitle, embedDescription, EMBED_PATH } from './lib/embed-page.mjs';
@@ -509,8 +511,6 @@ Swap the \`base_url\` (and a model that provider offers free) for any row above.
 `;
 
 // ---------- HTML page shell (shared by collection pages) ----------
-const htmlEsc = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-
 function collectionTableHtml(rows, opts = {}) {
   const bu = opts.baseUrl;
   const flagsHtml = (p) => {
@@ -529,16 +529,16 @@ function collectionTableHtml(rows, opts = {}) {
   const rowsHtml = rows
     .map((p) => {
       const name = docsHref(p.docs_url)
-        ? `<a href="${htmlEsc(docsHref(p.docs_url))}" target="_blank" rel="noopener">${htmlEsc(p.name)}</a>`
-        : htmlEsc(p.name);
+        ? `<a href="${escapeAttr(docsHref(p.docs_url))}" target="_blank" rel="noopener">${escapeAttr(p.name)}</a>`
+        : escapeAttr(p.name);
       const v = p.verified
-        ? `<span class="v ok">${IC('ic-check')} ${htmlEsc(p.last_verified)}</span>`
+        ? `<span class="v ok">${IC('ic-check')} ${escapeAttr(p.last_verified)}</span>`
         : `<span class="v warn">${IC('ic-warn')} unverified</span>`;
       const col2 = bu
-        ? (p.openai_base_url ? `<code>${htmlEsc(p.openai_base_url)}</code>` : '<span class="notes">see docs</span>')
+        ? (p.openai_base_url ? `<code>${escapeAttr(p.openai_base_url)}</code>` : '<span class="notes">see docs</span>')
         : `<span class="type">${typeLabel(p)}</span>`;
-      const mark = opts.rowMark ? `<div class="flags"><span>${htmlEsc(opts.rowMark(p))}</span></div>` : '';
-      return `<tr><td class="name">${name}${flagsHtml(p)}${mark}</td><td>${col2}</td><td>${htmlEsc(p.free_tier)}</td><td class="notes">${htmlEsc(p.notes)}</td><td>${v}</td></tr>`;
+      const mark = opts.rowMark ? `<div class="flags"><span>${escapeAttr(opts.rowMark(p))}</span></div>` : '';
+      return `<tr><td class="name">${name}${flagsHtml(p)}${mark}</td><td>${col2}</td><td>${escapeAttr(p.free_tier)}</td><td class="notes">${escapeAttr(p.notes)}</td><td>${v}</td></tr>`;
     })
     .join('\n');
   // The table scrolls inside its own region when it is wider than the column (it is 611px at a 360px screen): the page never scrolls sideways.
@@ -592,17 +592,17 @@ function provNumsHtml(p) {
   const nums = LIMIT_NUMS.filter(([k]) => Number.isInteger(fl[k])).slice(0, 3);
   if (!nums.length) return '';
   return `<dl class="prov-nums">${nums.map(([k, label]) => `<div><dt>${label}</dt><dd>${bigNum(fl[k])}</dd></div>`).join('')}</dl>` +
-    (fl.scope ? `<p class="prov-nums-scope">${htmlEsc(fl.scope)} · <a href="#limits">all limits</a></p>` : '');
+    (fl.scope ? `<p class="prov-nums-scope">${escapeAttr(fl.scope)} · <a href="#limits">all limits</a></p>` : '');
 }
 function provReceiptHtml(p) {
   const r = stampSource(p, QUOTE_REGISTRY);
   if (!r.q) return '';
   let host = '';
   try { host = new URL(r.u).host + new URL(r.u).pathname.replace(/\/$/, ''); } catch { /* no URL: no cite link */ }
-  const cite = host ? `<a href="${htmlEsc(r.u)}" rel="noopener">${htmlEsc(host)}</a>` : 'the provider\'s docs';
+  const cite = host ? `<a href="${escapeAttr(r.u)}" rel="noopener">${escapeAttr(host)}</a>` : 'the provider\'s docs';
   const entry = QUOTE_REGISTRY.entries.find((e) => e.slug === p.slug && e.kind === 'sentence');
   const readOn = entry ? entry.read_on : (p.data_policy && p.data_policy.checked) || '';
-  return `<blockquote class="prov-receipt"><p>“${htmlEsc(r.q)}”</p><cite>${cite}${readOn ? ` · read ${htmlEsc(readOn)}` : ''}</cite></blockquote>`;
+  return `<blockquote class="prov-receipt"><p>“${escapeAttr(r.q)}”</p><cite>${cite}${readOn ? ` · read ${escapeAttr(readOn)}` : ''}</cite></blockquote>`;
 }
 
 // The page header that every generated page shares: breadcrumbs, title, an optional subtitle (the lede) and optional
@@ -703,11 +703,11 @@ function htmlPageRaw({ title, desc, canonical, main, jsonld, prefix = '../', noi
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>${htmlEsc(title)}</title>
-<meta name="description" content="${htmlEsc(fitDescription(desc))}">${noindex ? `\n<meta name="robots" content="${noindex === true ? 'noindex' : htmlEsc(noindex)}">` : ''}
+<title>${escapeAttr(title)}</title>
+<meta name="description" content="${escapeAttr(fitDescription(desc))}">${noindex ? `\n<meta name="robots" content="${noindex === true ? 'noindex' : escapeAttr(noindex)}">` : ''}
 ${CSP}
 ${THEME_GUARD}
-${canonical ? `<link rel="canonical" href="${htmlEsc(canonical)}">
+${canonical ? `<link rel="canonical" href="${escapeAttr(canonical)}">
 ` : ''}<link rel="icon" href="${prefix}favicon.ico" sizes="32x32">
 <link rel="icon" href="${prefix}favicon.svg" type="image/svg+xml">
 <link rel="icon" href="${prefix}favicon-32.png" type="image/png" sizes="32x32">
@@ -717,21 +717,21 @@ ${fontHead(prefix)}
 <meta name="theme-color" content="#fff9f6" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#17110f" media="(prefers-color-scheme: dark)">
 <meta name="color-scheme" content="light dark">
-<meta property="og:title" content="${htmlEsc(title)}">
-<meta property="og:description" content="${htmlEsc(fitDescription(desc))}">
+<meta property="og:title" content="${escapeAttr(title)}">
+<meta property="og:description" content="${escapeAttr(fitDescription(desc))}">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Free LLM API Hub">
-${canonical ? `<meta property="og:url" content="${htmlEsc(canonical)}">
+${canonical ? `<meta property="og:url" content="${escapeAttr(canonical)}">
 ` : ''}<meta property="og:image" content="${ogImage}">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="${htmlEsc(title)}">
-<meta name="twitter:description" content="${htmlEsc(fitDescription(desc))}">
+<meta name="twitter:title" content="${escapeAttr(title)}">
+<meta name="twitter:description" content="${escapeAttr(fitDescription(desc))}">
 <meta name="twitter:image" content="${ogImage}">
 <link rel="alternate" type="application/rss+xml" title="Free LLM API Hub — updates" href="${prefix}feed.xml">
-<link rel="alternate" type="application/rss+xml" title="${htmlEsc(CHANGES_FEED_TITLE)}" href="${prefix}changes.xml">
-${feeds.map((f) => `<link rel="alternate" type="application/rss+xml" title="${htmlEsc(f.title)}" href="${prefix}${f.href}">\n`).join('')}<link rel="stylesheet" href="${prefix}styles.css">
+<link rel="alternate" type="application/rss+xml" title="${escapeAttr(CHANGES_FEED_TITLE)}" href="${prefix}changes.xml">
+${feeds.map((f) => `<link rel="alternate" type="application/rss+xml" title="${escapeAttr(f.title)}" href="${prefix}${f.href}">\n`).join('')}<link rel="stylesheet" href="${prefix}styles.css">
 ${styles.map((s) => `<link rel="stylesheet" href="${prefix}${s}">\n`).join('')}${jsonld ? `<script type="application/ld+json">${jsonld.replace(/</g, '\\u003c')}</script>` : ''}
 </head>
 <body>
@@ -991,15 +991,15 @@ let indexHtml = readFileSync(join(ROOT, 'site/index.html'), 'utf8');
 // and trial credits are both counted), which is also not the "N verified providers" phrasing that lib/figures.mjs
 // guards in hand-written sources: validate.mjs reads site/index.html before the build has rewritten it.
 const HOME_TITLE = `Free LLM APIs (${TITLE_MONTH}): ${providers.filter((p) => p.verified === true).length} verified free tiers & credits, sourced & dated`;
-indexHtml = indexHtml.replace(/<title>[^<]*<\/title>/, `<title>${htmlEsc(HOME_TITLE)}</title>`)
-  .replace(/<meta property="og:title" content="[^"]*">/, `<meta property="og:title" content="${htmlEsc(HOME_TITLE)}">`)
-  .replace(/<meta name="twitter:title" content="[^"]*">/, `<meta name="twitter:title" content="${htmlEsc(HOME_TITLE)}">`);
+indexHtml = indexHtml.replace(/<title>[^<]*<\/title>/, `<title>${escapeAttr(HOME_TITLE)}</title>`)
+  .replace(/<meta property="og:title" content="[^"]*">/, `<meta property="og:title" content="${escapeAttr(HOME_TITLE)}">`)
+  .replace(/<meta name="twitter:title" content="[^"]*">/, `<meta name="twitter:title" content="${escapeAttr(HOME_TITLE)}">`);
 indexHtml = inject(indexHtml, 'csp', CSP);
 indexHtml = inject(indexHtml, 'themeguard', THEME_GUARD);
 indexHtml = inject(indexHtml, 'fonts', fontHead(''));
 // The tagline (lib/brand.mjs, the owner's choice): the home H1, its closing sentence in the accent.
 const [TAG_LEAD, TAG_KEY] = taglineParts();
-indexHtml = inject(indexHtml, 'tagline', `    <h1>${htmlEsc(TAG_LEAD)}${TAG_KEY ? ` <span class="h1-key">${htmlEsc(TAG_KEY)}</span>` : ''}</h1>`);
+indexHtml = inject(indexHtml, 'tagline', `    <h1>${escapeAttr(TAG_LEAD)}${TAG_KEY ? ` <span class="h1-key">${escapeAttr(TAG_KEY)}</span>` : ''}</h1>`);
 indexHtml = inject(indexHtml, 'rows', homeRows);
 // The hero's field of auras (brand H1): every provider in the explorer's order, then the key to read them. Dated by ASOF
 // like the rows, so the field is deterministic. The field is a picture, not a menu: aria-hidden and with no links, so the
@@ -1083,13 +1083,13 @@ for (const c of COLLECTIONS) {
   const fill = (t) => t.replaceAll('{n}', String(rows.length)).replaceAll('{total}', String(total)).replaceAll('{date}', ASOF);
   const metaDesc = fill(c.metaDesc);
   const nav = COLLECTIONS.map(
-    (o) => `<a href="${o.slug}"${o.slug === c.slug ? ' class="active" aria-current="page"' : ''}>${htmlEsc(o.title)}</a>`
+    (o) => `<a href="${o.slug}"${o.slug === c.slug ? ' class="active" aria-current="page"' : ''}>${escapeAttr(o.title)}</a>`
   ).join('');
   const guideLinks = (c.guides || [])
-    .map((s) => { const gx = ALL_GUIDE_LINKS.find((x) => x.slug === s); return gx ? `<a href="../guides/${gx.slug}">${htmlEsc(gx.card)}</a>` : ''; })
+    .map((s) => { const gx = ALL_GUIDE_LINKS.find((x) => x.slug === s); return gx ? `<a href="../guides/${gx.slug}">${escapeAttr(gx.card)}</a>` : ''; })
     .filter(Boolean).join('');
   const collFaqHtml = (c.faq && c.faq.length)
-    ? `<h2>FAQ</h2>` + c.faq.map((f) => `<div class="faq-item"><h3>${htmlEsc(f.q)}</h3><p>${f.a}</p></div>`).join('')
+    ? `<h2>FAQ</h2>` + c.faq.map((f) => `<div class="faq-item"><h3>${escapeAttr(f.q)}</h3><p>${f.a}</p></div>`).join('')
     : '';
 
   // --- repo markdown ---
@@ -1132,16 +1132,16 @@ for (const c of COLLECTIONS) {
       }] : []),
     ],
   });
-  const introHtml = htmlEsc(c.intro).replace(/`([^`]+)`/g, '<code>$1</code>').replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+  const introHtml = escapeAttr(c.intro).replace(/`([^`]+)`/g, '<code>$1</code>').replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
   const main =
-    pageHero({ crumbs: `<a href="../">Home</a> / <a href="../guides-and-collections/">Guides &amp; Collections</a> / ${htmlEsc(c.title)}`, h1: `${htmlEsc(c.h1)}`, lede: `${htmlEsc(c.desc)}`, extra: `<nav class="colls">${nav}</nav>` }) +
+    pageHero({ crumbs: `<a href="../">Home</a> / <a href="../guides-and-collections/">Guides &amp; Collections</a> / ${escapeAttr(c.title)}`, h1: `${escapeAttr(c.h1)}`, lede: `${escapeAttr(c.desc)}`, extra: `<nav class="colls">${nav}</nav>` }) +
     `<main id="main"><div class="wrap prose">` +
-    `<p class="answer"><strong>${htmlEsc(fill(c.answer))}</strong></p>` +
+    `<p class="answer"><strong>${escapeAttr(fill(c.answer))}</strong></p>` +
     `<p>${introHtml}</p>` +
     `<p class="count"><strong>${rows.length} of ${total}</strong> tracked providers match.</p>` +
-    `${c.header ? `<p>${htmlEsc(c.header)}</p>` : ''}${collectionTableHtml(rows, { baseUrl: c.quickstart, rowMark: c.rowMark })}` +
+    `${c.header ? `<p>${escapeAttr(c.header)}</p>` : ''}${collectionTableHtml(rows, { baseUrl: c.quickstart, rowMark: c.rowMark })}` +
     (c.quickstart
-      ? `<h2>Quickstart — reuse the OpenAI SDK</h2><p class="count">Point <code>base_url</code> at the provider (URLs in the table above) and use its free key. Example: ${htmlEsc(QS_NAME)}.</p><pre><code>${codeHtmlEsc(QS_PYTHON)}</code></pre><pre><code>${codeHtmlEsc(QS_CURL)}</code></pre>`
+      ? `<h2>Quickstart — reuse the OpenAI SDK</h2><p class="count">Point <code>base_url</code> at the provider (URLs in the table above) and use its free key. Example: ${escapeAttr(QS_NAME)}.</p><pre><code>${escapeText(QS_PYTHON)}</code></pre><pre><code>${escapeText(QS_CURL)}</code></pre>`
       : '') +
     collFaqHtml +
     (guideLinks ? `<h2>Related guides</h2><nav class="colls">${guideLinks}</nav>` : '') +
@@ -1162,13 +1162,13 @@ writeFileSync(join(ROOT, 'collections/README.md'), hubMd);
 
 // --- unified Guides & Collections hub (live HTML) ---
 const hubCards = COLLECTIONS.map((c) =>
-  `<a class="coll-card" href="../collections/${c.slug}"><div class="coll-card-head"><strong>${htmlEsc(c.title)}</strong><span class="count">${collRows(c).length}</span></div><p>${htmlEsc(c.desc)}</p></a>`
+  `<a class="coll-card" href="../collections/${c.slug}"><div class="coll-card-head"><strong>${escapeAttr(c.title)}</strong><span class="count">${collRows(c).length}</span></div><p>${escapeAttr(c.desc)}</p></a>`
 ).join('');
 const guidesCards = GUIDES.map((g) =>
-  `<a class="coll-card" href="../guides/${g.slug}"><div class="coll-card-head"><strong>${htmlEsc(g.card)}</strong><span class="count">${providers.filter(g.filter).length}</span></div><p>${htmlEsc(g.blurb)}</p></a>`
+  `<a class="coll-card" href="../guides/${g.slug}"><div class="coll-card-head"><strong>${escapeAttr(g.card)}</strong><span class="count">${providers.filter(g.filter).length}</span></div><p>${escapeAttr(g.blurb)}</p></a>`
 ).join('');
 const longGuideCard = (g) =>
-  `<a class="coll-card" href="../guides/${g.slug}"><div class="coll-card-head"><strong>${htmlEsc(g.card)}</strong><span class="count">${g.count}</span></div><p>${htmlEsc(g.blurb)}</p></a>`;
+  `<a class="coll-card" href="../guides/${g.slug}"><div class="coll-card-head"><strong>${escapeAttr(g.card)}</strong><span class="count">${g.count}</span></div><p>${escapeAttr(g.blurb)}</p></a>`;
 const longGuideCards = LONG_GUIDE_PAGES.filter((g) => g.group !== 'use-case').map(longGuideCard).join('');
 const useCaseGuideCards = LONG_GUIDE_PAGES.filter((g) => g.group === 'use-case').map(longGuideCard).join('');
 const HUB_ANSWER = `Which free LLM API fits your constraint? Each of the ${GUIDES.length} guides answers one “is there a free API for…?” question, and ${LONG_GUIDE_PAGES.length} longer ones walk through a choice; each of the ${COLLECTIONS.length} collections is a live filter of our dated, sourced dataset by one condition: no card, no phone or commercial use.`;
@@ -1181,13 +1181,13 @@ const HUB_FAQ = [
 const hubMain =
   pageHero({ crumbs: `<a href="../">Home</a> / Guides &amp; Collections`, h1: `Guides &amp; Collections`, lede: `Short, data-backed answers to the most common “is there a free API for…” questions, plus curated slices of the dataset by a single constraint — every card generated from the verified dataset so it stays current.` }) +
   `<main id="main"><div class="wrap">` +
-  `<p class="answer"><strong>${htmlEsc(HUB_ANSWER)}</strong></p>` +
+  `<p class="answer"><strong>${escapeAttr(HUB_ANSWER)}</strong></p>` +
   `<p class="hub-find">Several constraints at once? <a href="../find/">Find my free API</a>: answer six quick questions and get a ranked shortlist.</p>` +
   `<h2 class="eyebrow">Guides: answers to one question</h2><div class="coll-grid">${guidesCards}</div>` +
   `<h2 class="eyebrow" style="margin-top:26px">Guides: by what you’re building</h2><div class="coll-grid">${useCaseGuideCards}</div>` +
   `<h2 class="eyebrow" style="margin-top:26px">Guides: how to choose</h2><div class="coll-grid">${longGuideCards}</div>` +
   `<h2 class="eyebrow" style="margin-top:26px">Collections: one filter, live</h2><div class="coll-grid">${hubCards}</div>` +
-  `<h2 class="eyebrow" style="margin-top:26px">FAQ</h2>` + HUB_FAQ.map((f) => `<div class="faq-item"><h3>${htmlEsc(f.q)}</h3><p>${htmlEsc(f.a)}</p></div>`).join('') +
+  `<h2 class="eyebrow" style="margin-top:26px">FAQ</h2>` + HUB_FAQ.map((f) => `<div class="faq-item"><h3>${escapeAttr(f.q)}</h3><p>${escapeAttr(f.a)}</p></div>`).join('') +
   `</div></main>`;
 const hubJsonLd = JSON.stringify({
   '@context': 'https://schema.org',
@@ -1247,9 +1247,9 @@ const historyHtml = (slug) => {
   // One entry per day (lib/history.mjs collapseSameDay); a change to the limits or a flag shows its before → after.
   const diff = (e) => {
     const rows = beforeAfter(e);
-    return rows.length ? `<ul class="upd-diff">${rows.map((r) => `<li><span class="upd-field">${htmlEsc(r.label)}:</span> <del>${htmlEsc(r.from)}</del> → <ins>${htmlEsc(r.to)}</ins></li>`).join('')}</ul>` : '';
+    return rows.length ? `<ul class="upd-diff">${rows.map((r) => `<li><span class="upd-field">${escapeAttr(r.label)}:</span> <del>${escapeAttr(r.from)}</del> → <ins>${escapeAttr(r.to)}</ins></li>`).join('')}</ul>` : '';
   };
-  const items = all.slice().reverse().map((e) => `<li class="upd"><span class="upd-date">${e.date}</span> <span>${htmlEsc(e.text)}</span>${diff(e)}</li>`).join('');
+  const items = all.slice().reverse().map((e) => `<li class="upd"><span class="upd-date">${e.date}</span> <span>${escapeAttr(e.text)}</span>${diff(e)}</li>`).join('');
   return `<h2>Change history</h2>` +
     `<p class="muted">How this free tier has changed since we started tracking it (${all[0].date}) — generated from the git history of <a href="${REPO}/commits/main/data/providers.json">providers.json</a>.</p>` +
     `<ul class="upd-list" data-pager="5">${items}</ul>`;
@@ -1271,6 +1271,8 @@ const provFlagsHtml = (p) => {
 const MODEL_GROUPS = groupModels(providers);
 const MODEL_PAGE_KEYS = new Set(MODEL_GROUPS.map((g) => g.key));
 const modelPageHref = (prefix) => (id) => { const k = modelKey(id); return k && MODEL_PAGE_KEYS.has(k) ? `${prefix}models/${k}/` : ''; };
+// The model-family pages behind /free-api/<family>/ (lib/model-families.mjs), built after the model pages.
+const FAMILY_GROUPS = familyGroups(providers);
 
 // The last block of every provider page: its badge on /embed/ and, for a provider on /not-free/, why. One function,
 // appended after the change history, so a change to the section order elsewhere does not touch it.
@@ -1278,7 +1280,7 @@ const notFreeBySlug = new Map(NOT_FREE.entries.filter((e) => e.slug).map((e) => 
 const useDataHtml = (p) => {
   const nf = notFreeBySlug.get(p.slug);
   return `<p class="muted" id="use-the-data"><a href="../embed/?p=${p.slug}#provider-badge">Embed this provider's badge</a>` +
-    (nf ? ` · <a href="../not-free/#${nf.id}">Why ${htmlEsc(nf.name)} is on the Not free list</a>` : '') + `</p>`;
+    (nf ? ` · <a href="../not-free/#${nf.id}">Why ${escapeAttr(nf.name)} is on the Not free list</a>` : '') + `</p>`;
 };
 
 for (const p of providers) {
@@ -1297,11 +1299,11 @@ for (const p of providers) {
       ? pythonEmbeddingsQuickstart(p.openai_base_url, model)
       : pythonChatQuickstart(p.openai_base_url, model);
     quick = embeddingsFirst
-      ? `<h2 id="quickstart">Quickstart — embeddings</h2><pre><code>${codeHtmlEsc(python)}</code></pre>`
-      : `<h2 id="quickstart">Quickstart — chat completions</h2><pre><code>${codeHtmlEsc(python)}</code></pre><p class="muted">…or with curl:</p><pre><code>${codeHtmlEsc(curlChatQuickstart(p.openai_base_url, model))}</code></pre>`;
+      ? `<h2 id="quickstart">Quickstart — embeddings</h2><pre><code>${escapeText(python)}</code></pre>`
+      : `<h2 id="quickstart">Quickstart — chat completions</h2><pre><code>${escapeText(python)}</code></pre><p class="muted">…or with curl:</p><pre><code>${escapeText(curlChatQuickstart(p.openai_base_url, model))}</code></pre>`;
   } else {
     const docs = docsHref(p.docs_url);
-    const docsLink = docs ? `<a href="${htmlEsc(docs)}" target="_blank" rel="noopener">official docs</a>` : 'official docs';
+    const docsLink = docs ? `<a href="${escapeAttr(docs)}" target="_blank" rel="noopener">official docs</a>` : 'official docs';
     quick = `<h2 id="quickstart">Get started</h2><p class="muted">No OpenAI-compatible base URL is recorded for this offer. Check the ${docsLink} for endpoints, authentication and examples.</p>`;
   }
 
@@ -1318,7 +1320,7 @@ for (const p of providers) {
     : `<div class="prov-score"><span class="muted">No score: only verified providers inside the freshness window are scored · <a href="../best/methodology/">how it is computed</a></span></div>`;
   // What's free (only when the record says it: no empty box), then, further down, the requirement cards behind one
   // summary line and the score on one line.
-  const summary = p.free_tier ? `<div class="prov-summary"><h2 id="whats-free">What's free</h2><p>${htmlEsc(p.free_tier)}</p></div>` : '';
+  const summary = p.free_tier ? `<div class="prov-summary"><h2 id="whats-free">What's free</h2><p>${escapeAttr(p.free_tier)}</p></div>` : '';
   const reqsHtml = `<details class="prov-reqs-box"><summary>What you need to start: card, phone, commercial use, account rules</summary>${requirementsHtml(p, { terms: true })}</details>`;
   // Freshness relative to the current day (provider pages are regenerated on deploy, not diff-gated).
   const daysAgo = p.verified && p.last_verified ? ageInDays(p.last_verified, today) : null;
@@ -1329,29 +1331,29 @@ for (const p of providers) {
     : `<span class="v warn">${IC('ic-warn')} unverified</span>`;
   // Live-test badge: an actual successful API call, separate from the docs-based `verified`.
   const probedLine = p.probe_status === 'live'
-    ? ` <span class="v live" title="A real free-tier API call succeeded on this date">${IC('ic-check')} live-tested ${htmlEsc(p.last_probed || '')}</span>`
+    ? ` <span class="v live" title="A real free-tier API call succeeded on this date">${IC('ic-check')} live-tested ${escapeAttr(p.last_probed || '')}</span>`
     : (p.probe_status === 'auth-ok'
-        ? ` <span class="v ok" title="Credentials accessed /models; no inference was attempted">${IC('ic-check')} credentials checked ${htmlEsc(p.last_probed || '')}</span>`
+        ? ` <span class="v ok" title="Credentials accessed /models; no inference was attempted">${IC('ic-check')} credentials checked ${escapeAttr(p.last_probed || '')}</span>`
         : (p.probe_status === 'tier-ended'
         ? ` <span class="v warn" title="The key authenticated but the free tier appears gone">${IC('ic-warn')} free tier unconfirmed live</span>`
         : ''));
-  const docsBtn = docsHref(p.docs_url) ? `<a class="btn primary" href="${htmlEsc(docsHref(p.docs_url))}" target="_blank" rel="noopener">Official docs ↗</a>` : '';
+  const docsBtn = docsHref(p.docs_url) ? `<a class="btn primary" href="${escapeAttr(docsHref(p.docs_url))}" target="_blank" rel="noopener">Official docs ↗</a>` : '';
   // "Get a free key": the provider's own key page, exactly as its docs link it (keys_url), next to the limits and the
   // quickstart. Tagged data-link="keys" by tagProviderLinks, so a click is an outbound_provider_click (consent-gated).
   // "Copy base URL": the OpenAI-compatible base URL to the clipboard (site.js, the .api-copy handler: the result is
   // announced in the status line next to it). Both sit right under What's free, before the quickstart.
   const baseCopy = p.openai_base_url
-    ? `<button type="button" class="btn api-copy base-copy" data-api-url="${htmlEsc(p.openai_base_url)}" data-label="Copy base URL" data-copy-fail="Copy failed. Select the base URL in the quickstart and copy it by hand.">Copy base URL</button>`
+    ? `<button type="button" class="btn api-copy base-copy" data-api-url="${escapeAttr(p.openai_base_url)}" data-label="Copy base URL" data-copy-fail="Copy failed. Select the base URL in the quickstart and copy it by hand.">Copy base URL</button>`
     : '';
   const keysHtml = p.keys_url || baseCopy
     ? `<div class="prov-actions prov-key">` +
-      (p.keys_url ? `<a class="btn primary" href="${htmlEsc(p.keys_url)}" target="_blank" rel="noopener">Get a free key ↗</a>` : '') +
+      (p.keys_url ? `<a class="btn primary" href="${escapeAttr(p.keys_url)}" target="_blank" rel="noopener">Get a free key ↗</a>` : '') +
       baseCopy + `<a class="prov-compare" href="#compare">Compare with…</a>` +
       (baseCopy ? `<span class="api-copy-status" role="status"></span>` : '') +
-      (p.keys_url ? `<p class="muted prov-key-hint">Sign up or sign in on ${htmlEsc(p.name)}'s own site, then create an API key there.</p>` : '') +
+      (p.keys_url ? `<p class="muted prov-key-hint">Sign up or sign in on ${escapeAttr(p.name)}'s own site, then create an API key there.</p>` : '') +
       `</div>`
     : '';
-  const playgroundBtn = p.playground_url ? `<a class="btn" href="${htmlEsc(p.playground_url)}" target="_blank" rel="noopener">Try it ↗</a>` : '';
+  const playgroundBtn = p.playground_url ? `<a class="btn" href="${escapeAttr(p.playground_url)}" target="_blank" rel="noopener">Try it ↗</a>` : '';
   // "Visit website": the provider's main site, derived from the docs URL by stripping
   // common docs/console/api subdomains so it points at the marketing homepage.
   let websiteBtn = '';
@@ -1369,22 +1371,22 @@ for (const p of providers) {
   const comparePeers = compareLib.comparePeers(p, providers, { staticPaths: COMPARE_PATHS, score: (o) => scoreMap[o.slug]?.total ?? null });
   const compareHtml =
     `<h2 id="compare">Compare</h2><div class="colls">` +
-    comparePeers.map((c) => `<a href="../compare/${c.path ? `${c.path}/` : `?compare=${p.slug},${c.other.slug}`}">Compare with ${htmlEsc(c.other.name)}</a>`).join('') +
+    comparePeers.map((c) => `<a href="../compare/${c.path ? `${c.path}/` : `?compare=${p.slug},${c.other.slug}`}">Compare with ${escapeAttr(c.other.name)}</a>`).join('') +
     `<a href="../compare/?compare=${p.slug}">Compare with another provider →</a></div>`;
   const crossChips = [
-    ...inColls.map((c) => `<a href="../collections/${c.slug}">${htmlEsc(c.title)}</a>`),
-    ...inGuides.map((g) => `<a href="../guides/${g.slug}">${htmlEsc(g.card)}</a>`),
+    ...inColls.map((c) => `<a href="../collections/${c.slug}">${escapeAttr(c.title)}</a>`),
+    ...inGuides.map((g) => `<a href="../guides/${g.slug}">${escapeAttr(g.card)}</a>`),
   ].join('');
   const main =
     pageHero({
       cls: 'prov-hero',
-      crumbs: `<a href="../">Home</a> / <a href="../#explorer">Providers</a> / ${htmlEsc(p.name)}`,
-      h1: htmlEsc(p.name),
+      crumbs: `<a href="../">Home</a> / <a href="../#explorer">Providers</a> / ${escapeAttr(p.name)}`,
+      h1: escapeAttr(p.name),
       // The provider's aura (lib/aura.mjs) with its reading in words, so the picture never has to be decoded alone.
-      afterTitle: `<div class="prov-aura">${auraHtml(p, { now: ASOF, cls: 'aura-lg', digits: 1 })}<p class="aura-read"><span class="aura-read-h">Aura:</span> ${htmlEsc(auraSpec(p, { now: ASOF }).label)} · <a href="../methodology/#how-to-read-an-aura">how to read it</a></p></div>` +
+      afterTitle: `<div class="prov-aura">${auraHtml(p, { now: ASOF, cls: 'aura-lg', digits: 1 })}<p class="aura-read"><span class="aura-read-h">Aura:</span> ${escapeAttr(auraSpec(p, { now: ASOF }).label)} · <a href="../methodology/#how-to-read-an-aura">how to read it</a></p></div>` +
         `<div class="prov-badges"><span class="type">${typeLabel(p)}</span> ${verifiedLine}${probedLine} ${provFlagsHtml(p)}</div>` +
         provNumsHtml(p) + provReceiptHtml(p),
-      lede: p.best_for ? htmlEsc(p.best_for) : '',
+      lede: p.best_for ? escapeAttr(p.best_for) : '',
       extra: `<div class="prov-actions">${docsBtn}${websiteBtn}${playgroundBtn}</div>`,
     }) +
     `<main id="main"><div class="wrap prose prov-prose">` +
@@ -1453,7 +1455,7 @@ const ORG = 'Tweakeo, Inc.';
 const ADDRESS = 'Tweakeo, Inc., 2093 Philadelphia Pike, Suite #4108, Claymont, DE 19703';
 const legalPage = (slug, title, bodyHtml) => {
   const main =
-    pageHero({ crumbs: `<a href="../">Home</a> / ${htmlEsc(title)}`, h1: `${htmlEsc(title)}` }) +
+    pageHero({ crumbs: `<a href="../">Home</a> / ${escapeAttr(title)}`, h1: `${escapeAttr(title)}` }) +
     `<main id="main"><div class="wrap prose legal">${bodyHtml}` +
     `<p class="legal-org">${ADDRESS} · <a href="mailto:admin@freellmapihub.com">admin@freellmapihub.com</a></p>` +
     `</div></main>`;
@@ -1469,7 +1471,7 @@ const legalPage = (slug, title, bodyHtml) => {
 // root-absolute prefix '/'. The path read-out below is pinned by hash in the CSP: change its text and recompute the hash.
 // Q16: a search box that lands on the explorer (/?q=, which explorer.js reads on load) and six popular providers: the
 // first six of The Best, the score top (lib/score.mjs), so the list follows the data. Root-absolute links like the rest.
-const NOT_FOUND_POPULAR = topList.slice(0, 6).map((e) => `<a href="/p/${e.p.slug}">${htmlEsc(e.p.name)}</a>`).join('');
+const NOT_FOUND_POPULAR = topList.slice(0, 6).map((e) => `<a href="/p/${e.p.slug}">${escapeAttr(e.p.name)}</a>`).join('');
 const NOT_FOUND_PATH_SCRIPT = `<script>try{document.getElementById('path').textContent=location.pathname.replace('/free-llm-api-hub','')||'/';}catch(e){}</script>`;
 writeFileSync(
   join(ROOT, 'site/404.html'),
@@ -1584,7 +1586,7 @@ if (commits.length) {
     const prefix = page === 1 ? '' : '../../../';
     const pageCommits = commits.slice((page - 1) * UPDATES_PER_PAGE, page * UPDATES_PER_PAGE);
     const updItems = pageCommits
-      .map((c) => `<li class="upd"><span class="upd-date">${c.date}</span> <a href="${REPO}/commit/${c.hash}" target="_blank" rel="noopener">${htmlEsc(c.subject)}</a></li>`)
+      .map((c) => `<li class="upd"><span class="upd-date">${c.date}</span> <a href="${REPO}/commit/${c.hash}" target="_blank" rel="noopener">${escapeAttr(c.subject)}</a></li>`)
       .join('\n');
     const updMain =
       pageHero({ crumbs: `<a href="${prefix}">Home</a> / Updates`, h1: `Updates`, lede: `Every published change to the dataset and site, newest first. Subscribe via <a href="${prefix}feed.xml">RSS</a>. For field-level changes to the providers themselves, week by week, see <a href="${prefix}changes/">what changed this week</a>.` }) +
@@ -1601,7 +1603,7 @@ if (commits.length) {
   }
 
   const rssItems = commits.slice(0, UPDATES_PER_PAGE)
-    .map((c) => `    <item><title>${htmlEsc(c.subject)}</title><link>${REPO}/commit/${c.hash}</link><guid isPermaLink="true">${REPO}/commit/${c.hash}</guid><pubDate>${new Date(c.date + 'T00:00:00Z').toUTCString()}</pubDate></item>`)
+    .map((c) => `    <item><title>${escapeAttr(c.subject)}</title><link>${REPO}/commit/${c.hash}</link><guid isPermaLink="true">${REPO}/commit/${c.hash}</guid><pubDate>${new Date(c.date + 'T00:00:00Z').toUTCString()}</pubDate></item>`)
     .join('\n');
   const rss =
     `<?xml version="1.0" encoding="UTF-8"?>\n<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel>\n` +
@@ -1620,19 +1622,19 @@ const currentSlugs = new Set(providers.map((p) => p.slug));
 const allFieldChanges = flattenFieldChanges(historyBySlug, nameBySlug);
 const changeWeeks = groupChangesByWeek(allFieldChanges, { weeks: 12 }); // the human feed: the page is by month
 const apiV1ChangeWeeks = groupChangesByWeek(projectApiV1Changes(allFieldChanges), { weeks: 12 });
-const provLink = (slug, name, prefix) => currentSlugs.has(slug) ? `<a href="${prefix}p/${slug}">${htmlEsc(name)}</a>` : htmlEsc(name);
+const provLink = (slug, name, prefix) => currentSlugs.has(slug) ? `<a href="${prefix}p/${slug}">${escapeAttr(name)}</a>` : escapeAttr(name);
 
 writeFileSync(join(ROOT, 'site/changes.xml'), changesRss(changeWeeks, { site: SITE }));
 
 const changeRowHtml = (c, prefix = '../') =>
-  `<tr><td class="notes">${c.date}</td><td class="name">${provLink(c.slug, c.name, prefix)}</td><td>${htmlEsc(c.label)}</td>` +
-  `<td class="notes">${htmlEsc(formatValue(c.from))}</td><td>${htmlEsc(formatValue(c.to))}</td></tr>`;
+  `<tr><td class="notes">${c.date}</td><td class="name">${provLink(c.slug, c.name, prefix)}</td><td>${escapeAttr(c.label)}</td>` +
+  `<td class="notes">${escapeAttr(formatValue(c.from))}</td><td>${escapeAttr(formatValue(c.to))}</td></tr>`;
 
 const addedBySlug = Object.fromEntries(providers.filter((p) => p.added).map((p) => [p.slug, p.added]));
 const stateMonths = reportMonths(monthEndSnapshots);
 const stateReports = stateMonths.map((m) => ({ ...monthlyReport({ ...m, historyBySlug, addedBySlug }), snapshotDate: m.snapshotDate }));
 const kvTable = (head, rowsArr) =>
-  `<table class="model-table"><thead><tr>${head.map((h) => `<th>${htmlEsc(h)}</th>`).join('')}</tr></thead><tbody>` +
+  `<table class="model-table"><thead><tr>${head.map((h) => `<th>${escapeAttr(h)}</th>`).join('')}</tr></thead><tbody>` +
   rowsArr.map((r) => `<tr>${r.map((v, i) => `<td${i === 0 ? ' class="name"' : ''}>${v}</td>`).join('')}</tr>`).join('') + `</tbody></table>`;
 const statIcon = (icon, num, lbl) => `<div class="stat"><svg class="si" aria-hidden="true"><use href="#${icon}"/></svg><div class="num">${num}</div><div class="lbl">${lbl}</div></div>`;
 // What moved in a month, in the order it happened: the field changes of that month, oldest first.
@@ -1662,12 +1664,12 @@ stateReports.forEach((r, i) => {
     statIcon('ic-clock', days(r.freshness.medianDays), 'median verification age') +
     statIcon('ic-refresh', r.fieldChanges, r.fieldChanges === 1 ? 'field change this month' : 'field changes this month') +
     `</div>` +
-    `<p class="month-summary">${htmlEsc(monthSummary(r, prev))}</p>` +
+    `<p class="month-summary">${escapeAttr(monthSummary(r, prev))}</p>` +
     movedSection(r) +
     `<h2>Providers by category</h2>` +
     kvTable(['Category', 'Providers'], [['Ongoing free tier', r.byCategory.ongoing], ['Trial credit', r.byCategory.trial], ['Total', r.total]]) +
     `<h2>Providers by modality</h2><p class="muted">A provider counts once for every modality it offers free.</p>` +
-    kvTable(['Modality', 'Providers'], r.byModality.map((m) => [htmlEsc(m.modality), m.count])) +
+    kvTable(['Modality', 'Providers'], r.byModality.map((m) => [escapeAttr(m.modality), m.count])) +
     `<h2>Verification and freshness</h2>` +
     kvTable(['Measure', 'Value'], [
       ['Verified', `${r.verified} of ${r.total} (${pct(r.verifiedShare)})`],
@@ -1704,8 +1706,8 @@ for (const r of [...stateReports].reverse()) {
 const monthRowHtml = (r, yearCell) => {
   const brief = monthBrief(r);
   return `<tr${r.carried ? ' class="empty"' : ''}>${yearCell}` +
-    `<td class="name"><a href="../state/${r.month}/" aria-label="${monthLabel(r.month)}: ${htmlEsc(brief)}">${monthName(r.month)}</a></td>` +
-    `<td>${r.total}</td><td>${pct(r.verifiedShare)}</td><td>${r.fieldChanges}</td><td>${r.added.length}</td><td class="notes">${htmlEsc(brief)}</td></tr>`;
+    `<td class="name"><a href="../state/${r.month}/" aria-label="${monthLabel(r.month)}: ${escapeAttr(brief)}">${monthName(r.month)}</a></td>` +
+    `<td>${r.total}</td><td>${pct(r.verifiedShare)}</td><td>${r.fieldChanges}</td><td>${r.added.length}</td><td class="notes">${escapeAttr(brief)}</td></tr>`;
 };
 const monthsTable = stateReports.length
   ? `<table class="model-table months-table"><thead><tr><th>Year</th><th>Month</th><th>Providers</th><th>Verified</th><th>Field changes</th><th>Added</th><th>Summary</th></tr></thead><tbody>\n` +
@@ -1744,15 +1746,15 @@ const FUNDS_HTML = {
 };
 const FUNDS_MD = { yes: '✅ LLM API', partial: '◐ via cloud', no: '✖ perks only' };
 const LEGEND = 'Funds LLM API? — ✅ first-party LLM-API credits · ◐ cloud/compute usable for managed LLM APIs (Bedrock, Vertex AI, Azure OpenAI) · ✖ training / perks only.';
-const startupsRowHtml = (r) => `<tr><td class="name"><a href="${htmlEsc(r.url)}" target="_blank" rel="noopener">${htmlEsc(r.name)}</a></td><td>${htmlEsc(r.what)}</td><td>${FUNDS_HTML[r.funds]}</td><td class="notes">${htmlEsc(r.who)}</td></tr>`;
-const researchRowHtml = (r) => `<tr><td class="name"><a href="${htmlEsc(r.url)}" target="_blank" rel="noopener">${htmlEsc(r.name)}</a></td><td><span class="type">${htmlEsc(r.audience)}</span></td><td>${htmlEsc(r.what)}</td><td>${FUNDS_HTML[r.funds]}</td><td class="notes">${htmlEsc(r.who)}</td></tr>`;
+const startupsRowHtml = (r) => `<tr><td class="name"><a href="${escapeAttr(r.url)}" target="_blank" rel="noopener">${escapeAttr(r.name)}</a></td><td>${escapeAttr(r.what)}</td><td>${FUNDS_HTML[r.funds]}</td><td class="notes">${escapeAttr(r.who)}</td></tr>`;
+const researchRowHtml = (r) => `<tr><td class="name"><a href="${escapeAttr(r.url)}" target="_blank" rel="noopener">${escapeAttr(r.name)}</a></td><td><span class="type">${escapeAttr(r.audience)}</span></td><td>${escapeAttr(r.what)}</td><td>${FUNDS_HTML[r.funds]}</td><td class="notes">${escapeAttr(r.who)}</td></tr>`;
 
 const programPage = (slug, h1, lede, tableHead, rowsHtml, extra = '') =>
   htmlPage({
     title: `${h1} · Free LLM API Hub`, desc: stripTags(lede), canonical: `${SITE}/programs/${slug}`,
     jsonld: collectionPageJsonLd({ type: 'WebPage', name: h1, url: `${SITE}/programs/${slug}`, description: stripTags(lede), crumbs: [['Credit programs', `${SITE}/programs/`], [h1, `${SITE}/programs/${slug}`]] }),
     main:
-      pageHero({ crumbs: `<a href="../">Home</a> / <a href="./">Credit programs</a> / ${htmlEsc(h1)}`, h1: `${htmlEsc(h1)}`, lede: `${lede}` }) +
+      pageHero({ crumbs: `<a href="../">Home</a> / <a href="./">Credit programs</a> / ${escapeAttr(h1)}`, h1: `${escapeAttr(h1)}`, lede: `${lede}` }) +
       `<main id="main"><div class="wrap prose"><p class="count"><strong>${LEGEND}</strong></p>` +
       `<div class="table-scroll" role="region" aria-label="Table of programs" tabindex="0"><table><thead>${tableHead}</thead><tbody>\n${rowsHtml}\n</tbody></table></div>` +
       `<p style="margin-top:24px">Looking for a key to use right now with no application? See the <a href="../#explorer">verified self-serve list</a>.</p>${extra}</div></main>`,
@@ -1806,14 +1808,15 @@ for (const p of providers) for (const m of (p.models_free || [])) modelIndex.pus
 modelIndex.sort((a, b) => a.m.toLowerCase().localeCompare(b.m.toLowerCase()) || a.p.name.localeCompare(b.p.name));
 const modelProviderCount = providers.filter((p) => p.models_free && p.models_free.length).length;
 const modelRowHtml = ({ m, p }) =>
-  `<tr data-s="${htmlEsc((m + ' ' + p.name + ' ' + (p.modalities || []).join(' ')).toLowerCase())}">` +
-  `<td class="name">${MODEL_PAGE_KEYS.has(modelKey(m)) ? `<a href="${modelKey(m)}/"><code>${htmlEsc(m)}</code></a>` : `<code>${htmlEsc(m)}</code>`}</td>` +
-  `<td><a href="../p/${p.slug}">${htmlEsc(p.name)}</a></td>` +
-  `<td>${htmlEsc(p.free_type)}</td>` +
+  `<tr data-s="${escapeAttr((m + ' ' + p.name + ' ' + (p.modalities || []).join(' ')).toLowerCase())}">` +
+  `<td class="name">${MODEL_PAGE_KEYS.has(modelKey(m)) ? `<a href="${modelKey(m)}/"><code>${escapeAttr(m)}</code></a>` : `<code>${escapeAttr(m)}</code>`}</td>` +
+  `<td><a href="../p/${p.slug}">${escapeAttr(p.name)}</a></td>` +
+  `<td>${escapeAttr(p.free_type)}</td>` +
   `<td class="notes">${(p.modalities || []).join(', ') || '—'}</td></tr>`;
 const modelsMain =
   pageHero({ crumbs: `<a href="../">Home</a> / Free model index`, h1: `Free model index`, lede: `Every model our verified providers expose on a free tier — <strong>${modelIndex.length}</strong> entries across <strong>${modelProviderCount}</strong> providers, pulled from each provider's own <code>/models</code> endpoint where possible. The same model can appear under more than one provider.` }) +
-  `<main id="main"><div class="wrap"><table class="model-table"><thead><tr><th>Model</th><th>Provider</th><th>Free type</th><th>Modalities</th></tr></thead><tbody>\n` +
+  `<main id="main"><div class="wrap"><h2 class="eyebrow">Free API by model family</h2>${familyNavHtml(FAMILY_GROUPS, '../')}` +
+  `<table class="model-table"><thead><tr><th>Model</th><th>Provider</th><th>Free type</th><th>Modalities</th></tr></thead><tbody>\n` +
   modelIndex.map(modelRowHtml).join('\n') +
   `\n</tbody></table><p class="muted" style="margin-top:18px">Model lists are a live sample and change often — always confirm against the provider. A provider missing here usually needs an API key to list its models; <a href="${REPO}/blob/main/docs/update-playbook.md">see how the list is refreshed</a>.</p></div></main>`;
 writeFileSync(join(ROOT, 'site/models/index.html'), htmlPage({
@@ -1852,14 +1855,38 @@ for (const g of MODEL_GROUPS) {
   }));
 }
 
+// One page per open model family: /free-api/<family>/ ("Where can I use Llama for free via API?"). The verified
+// providers whose free-model sample lists a model of the family, with limits, flags and dates from the data
+// (lib/model-families.mjs). The folder is removed and written again, so a family dropped from the list leaves no page.
+rmSync(join(ROOT, `site/${FAMILY_PATH}`), { recursive: true, force: true });
+for (const g of FAMILY_GROUPS) {
+  const url = familyUrl(SITE, g);
+  mkdirSync(join(ROOT, `site/${FAMILY_PATH}${g.slug}`), { recursive: true });
+  writeFileSync(join(ROOT, `site/${FAMILY_PATH}${g.slug}/index.html`), htmlPage({
+    title: datedTitle(familyPageTitle(g)),
+    desc: familyPageDescription(g),
+    canonical: url,
+    main: familyPageMainHtml(g, { asOf: ASOF, prefix: '../../', modelHref: modelPageHref('../../'), others: FAMILY_GROUPS }),
+    jsonld: pageJsonLd({
+      site: SITE, type: 'WebPage', name: familyH1(g), url, description: familyPageDescription(g),
+      about: datasetRef(SITE, DATASET_FACTS),
+      crumbs: [['Free model index', `${SITE}/models/`], [g.name, url]],
+      items: g.entries.map((e) => ({ name: e.p.name, url: `${SITE}/p/${e.p.slug}` })),
+    }),
+    prefix: '../../',
+    noindex: !isFamilyIndexable(g),
+    ogImage: `${SITE}/og/models.png`,
+  }));
+}
+
 // ---------- SEO guides: intent-matched landing pages, generated from the data ----------
 mkdirSync(join(ROOT, 'site/guides'), { recursive: true });
 // A guide's modality is its `modality` field; a guide without one is about text LLMs (no card, OpenAI-compatible, no signup).
 const guideFits = (g, p) => (g.modality ? (p.modalities || []).includes(g.modality) : p.is_text_llm === true);
 const guideRow = (p) =>
-  `<tr><td class="name"><a href="../p/${p.slug}">${htmlEsc(p.name)}</a><br><small>Verified <time datetime="${htmlEsc(p.last_verified)}">${htmlEsc(p.last_verified)}</time></small></td>` +
-  `<td>${htmlEsc(p.free_tier)}</td>` +
-  `<td class="notes">${htmlEsc(p.rate_limits)}</td>` +
+  `<tr><td class="name"><a href="../p/${p.slug}">${escapeAttr(p.name)}</a><br><small>Verified <time datetime="${escapeAttr(p.last_verified)}">${escapeAttr(p.last_verified)}</time></small></td>` +
+  `<td>${escapeAttr(p.free_tier)}</td>` +
+  `<td class="notes">${escapeAttr(p.rate_limits)}</td>` +
   `<td>${provFlagsHtml(p)}</td></tr>`;
 for (const g of GUIDES) {
   // These pages explicitly promise verified providers; collections still show all tracked rows.
@@ -1871,23 +1898,23 @@ for (const g of GUIDES) {
   // belongs to the guide's modality (guideFits): a text-LLM guide never headlines an OCR or speech API as its top pick.
   const top = [(g.pick && list.find((x) => x.slug === g.pick)) || [...list].sort(recommendedCmp)[0]].find((x) => x && guideFits(g, x));
   const related = ALL_GUIDE_LINKS.filter((x) => x.slug !== g.slug)
-    .map((x) => `<a href="${x.slug}">${htmlEsc(x.card)}</a>`).join('');
+    .map((x) => `<a href="${x.slug}">${escapeAttr(x.card)}</a>`).join('');
   const faqHtml = (g.faq && g.faq.length)
-    ? `<h2>FAQ</h2>` + g.faq.map((f) => `<div class="faq-item"><h3>${htmlEsc(f.q)}</h3><p>${f.a}</p></div>`).join('')
+    ? `<h2>FAQ</h2>` + g.faq.map((f) => `<div class="faq-item"><h3>${escapeAttr(f.q)}</h3><p>${f.a}</p></div>`).join('')
     : '';
   const main =
-    pageHero({ crumbs: `<a href="../">Home</a> / <a href="../guides-and-collections/">Guides &amp; Collections</a> / ${htmlEsc(g.h1)}`, h1: `${htmlEsc(g.h1)}`, lede: `${htmlEsc(g.lede)}` }) +
+    pageHero({ crumbs: `<a href="../">Home</a> / <a href="../guides-and-collections/">Guides &amp; Collections</a> / ${escapeAttr(g.h1)}`, h1: `${escapeAttr(g.h1)}`, lede: `${escapeAttr(g.lede)}` }) +
     `<main id="main"><div class="wrap prose">` +
-    `<p class="answer"><strong>${htmlEsc(fill(g.answer))}</strong></p>` +
+    `<p class="answer"><strong>${escapeAttr(fill(g.answer))}</strong></p>` +
     g.intro +
-    (top ? `<div class="prov-summary"><h2>Top pick — ${htmlEsc(top.name)}</h2><p>${htmlEsc(top.best_for || top.free_tier)} <a href="../p/${top.slug}">Details →</a></p></div>` : '') +
+    (top ? `<div class="prov-summary"><h2>Top pick — ${escapeAttr(top.name)}</h2><p>${escapeAttr(top.best_for || top.free_tier)} <a href="../p/${top.slug}">Details →</a></p></div>` : '') +
     `<p class="count"><strong>${list.length}</strong> verified providers</p>` +
     `<table class="model-table"><thead><tr><th>Provider</th><th>Free tier</th><th>Rate limits</th><th>Gotchas</th></tr></thead><tbody>\n` +
     list.map(guideRow).join('\n') +
     `\n</tbody></table>` +
     `<div class="prov-actions" style="margin-top:22px"><a class="btn primary" href="../${g.query}">Open in the explorer →</a></div>` +
     faqHtml +
-    (twins.length ? `<h2>Related collections</h2><nav class="colls">${twins.map((c) => `<a href="../collections/${c.slug}">${htmlEsc(c.title)}</a>`).join('')}</nav>` : '') +
+    (twins.length ? `<h2>Related collections</h2><nav class="colls">${twins.map((c) => `<a href="../collections/${c.slug}">${escapeAttr(c.title)}</a>`).join('')}</nav>` : '') +
     `<h2>More guides</h2><nav class="colls">${related}</nav>` +
     `<p class="muted">Looking for OpenAI, Anthropic, Mistral or GitHub Models? <a href="../not-free/">Why they are not on this list</a>.</p>` +
     `<p class="prov-back"><a href="../guides-and-collections/">← All guides</a></p>` +
@@ -1921,10 +1948,10 @@ for (const g of GUIDES) {
 
 // ---------- long-form guides: editorial copy, every figure from the data (lib/long-guides.mjs) ----------
 for (const g of LONG_GUIDE_PAGES) {
-  const faqHtml = `<h2 id="faq">FAQ</h2>` + g.faq.map((f) => `<div class="faq-item"><h3>${htmlEsc(f.q)}</h3><p>${f.a}</p></div>`).join('');
-  const related = ALL_GUIDE_LINKS.filter((x) => x.slug !== g.slug).map((x) => `<a href="${x.slug}">${htmlEsc(x.card)}</a>`).join('');
+  const faqHtml = `<h2 id="faq">FAQ</h2>` + g.faq.map((f) => `<div class="faq-item"><h3>${escapeAttr(f.q)}</h3><p>${f.a}</p></div>`).join('');
+  const related = ALL_GUIDE_LINKS.filter((x) => x.slug !== g.slug).map((x) => `<a href="${x.slug}">${escapeAttr(x.card)}</a>`).join('');
   const main =
-    pageHero({ crumbs: `<a href="../">Home</a> / <a href="../guides-and-collections/">Guides &amp; Collections</a> / ${htmlEsc(g.h1)}`, h1: htmlEsc(g.h1), lede: `Data as of <time datetime="${ASOF}">${ASOF}</time>. Every limit is quoted from the provider’s own page and dated.` }) +
+    pageHero({ crumbs: `<a href="../">Home</a> / <a href="../guides-and-collections/">Guides &amp; Collections</a> / ${escapeAttr(g.h1)}`, h1: escapeAttr(g.h1), lede: `Data as of <time datetime="${ASOF}">${ASOF}</time>. Every limit is quoted from the provider’s own page and dated.` }) +
     `<main id="main"><div class="wrap prose">` +
     `<p class="answer"><strong>${g.answer}</strong></p>` +
     g.body +
@@ -2113,7 +2140,7 @@ writeApi('index.json', { ...apiBase, description: 'Static, versioned JSON over t
 // human-facing API docs page
 const apiRow = (label, path, count) => {
   const url = `${SITE}/api/v1/${path}`;
-  return `<tr><td class="name"><a href="v1/${htmlEsc(path)}"><code>/api/v1/${htmlEsc(path)}</code></a> <button type="button" class="api-copy" data-api-url="${htmlEsc(url)}" aria-label="Copy endpoint URL: ${htmlEsc(url)}">Copy</button><span class="api-copy-status" role="status"></span></td><td>${htmlEsc(label)}</td><td>${count != null ? count : ''}</td><td class="api-curl"><code>curl --fail --silent --show-error ${htmlEsc(url)}</code></td></tr>`;
+  return `<tr><td class="name"><a href="v1/${escapeAttr(path)}"><code>/api/v1/${escapeAttr(path)}</code></a> <button type="button" class="api-copy" data-api-url="${escapeAttr(url)}" aria-label="Copy endpoint URL: ${escapeAttr(url)}">Copy</button><span class="api-copy-status" role="status"></span></td><td>${escapeAttr(label)}</td><td>${count != null ? count : ''}</td><td class="api-curl"><code>curl --fail --silent --show-error ${escapeAttr(url)}</code></td></tr>`;
 };
 // Client-config section: the example uses the first client with a sampled model,
 // so it always names a provider and model that are really in the file.
@@ -2134,16 +2161,16 @@ reply = client.chat.completions.create(
 print(reply.choices[0].message.content)`;
 const clientConfigDocs = !exampleClient ? '' :
   `<h2>Client configs</h2>` +
-  `<p>Two generated files turn the dataset into working client configuration for the <strong>${clientList.length} providers</strong> that are verified, OpenAI-compatible and have a known base URL and key variable. Both carry the <em>name</em> of the environment variable for your own key (for example <code>${htmlEsc(exampleClient.env_key)}</code>), never a key. Free-tier terms change without notice: check each provider's <code>docs_url</code> before you depend on it.</p>` +
+  `<p>Two generated files turn the dataset into working client configuration for the <strong>${clientList.length} providers</strong> that are verified, OpenAI-compatible and have a known base URL and key variable. Both carry the <em>name</em> of the environment variable for your own key (for example <code>${escapeAttr(exampleClient.env_key)}</code>), never a key. Free-tier terms change without notice: check each provider's <code>docs_url</code> before you depend on it.</p>` +
   `<h3><code>openai-clients.json</code></h3>` +
   `<p>One record per provider: <code>slug</code>, <code>name</code>, <code>base_url</code>, <code>env_key</code>, <code>models_free</code> (a sample, may be <code>null</code>), <code>docs_url</code>, <code>last_verified</code>. With the OpenAI Python SDK:</p>` +
-  `<pre><code>${codeHtmlEsc(clientConfigPython)}</code></pre>` +
+  `<pre><code>${escapeText(clientConfigPython)}</code></pre>` +
   `<h3><code>litellm.yaml</code></h3>` +
   `<p>A <a href="https://docs.litellm.ai/docs/proxy/configs" rel="noopener">LiteLLM proxy</a> <code>model_list</code> with one entry per provider and sampled model, named <code>&lt;slug&gt;/&lt;model&gt;</code>. Keys are read with LiteLLM's <code>os.environ/&lt;ENV_KEY&gt;</code> syntax; a provider without a model sample gets one entry whose model id is marked <code># set a model id</code>. Delete the providers you have no key for, then:</p>` +
   `<pre><code>curl -sO ${SITE}/api/v1/litellm.yaml
-export ${htmlEsc(exampleClient.env_key)}=...
+export ${escapeAttr(exampleClient.env_key)}=...
 litellm --config litellm.yaml</code></pre>` +
-  `<p>Point any OpenAI client at the proxy (<code>base_url="http://0.0.0.0:4000"</code>) and request a model by its <code>model_name</code>, e.g. <code>${htmlEsc(`${exampleClient.slug}/${exampleModel}`)}</code>.</p>`;
+  `<p>Point any OpenAI client at the proxy (<code>base_url="http://0.0.0.0:4000"</code>) and request a model by its <code>model_name</code>, e.g. <code>${escapeAttr(`${exampleClient.slug}/${exampleModel}`)}</code>.</p>`;
 const apiDocMain =
   pageHero({ crumbs: `<a href="../">Home</a> / API`, h1: `Static JSON API`, lede: `The whole dataset as versioned, machine-readable JSON at stable URLs — no server, no query params, no auth, no rate limits. CORS-open, so you can <code>fetch()</code> it straight from the browser with a plain <code>GET</code>; send no custom headers, because the host answers the <code>OPTIONS</code> preflight they trigger with 405. Regenerated on every dataset change (currently v${data.version}).` }) +
   `<main id="main"><div class="wrap prose">` +
@@ -2219,6 +2246,8 @@ const llmsTxt =
   `## Guides\n` +
   `- [All guides and collections](${SITE}/guides-and-collections/): every guide and filtered list on one page\n` +
   [...GUIDES, ...LONG_GUIDE_PAGES].map((g) => `- [${g.h1}](${SITE}/guides/${g.slug}): ${g.blurb}`).join('\n') + `\n\n` +
+  `## Free API by model family\n` +
+  FAMILY_GROUPS.filter(isFamilyIndexable).map((g) => `- [${familyH1(g)}](${familyUrl(SITE, g)}): ${familyBlurb(g)}`).join('\n') + `\n\n` +
   `## Collections\n` +
   COLLECTIONS.map((c) => `- [${c.title}](${SITE}/collections/${c.slug})`).join('\n') + `\n\n` +
   `## Credit programs\n` +
@@ -2272,7 +2301,7 @@ writeFileSync(join(ROOT, 'site/llms-full.txt'), llmsFull);
 // ---------- /best — the top 10 by score, with a podium of three ----------
 // topList is computed up front (lib/score.mjs) so the README table, this page and the API agree.
 // data/best.json keeps the texts of the page; its picks now only feed the static /compare/ pages.
-const bestIntroHtml = htmlEsc(BEST.intro).replace(/`([^`]+)`/g, '<code>$1</code>').replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+const bestIntroHtml = escapeAttr(BEST.intro).replace(/`([^`]+)`/g, '<code>$1</code>').replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
 const scoreTxt = (x) => x.toFixed(1);
 const bestCard = (e) => {
   const { rank, p, podium } = e;
@@ -2280,10 +2309,10 @@ const bestCard = (e) => {
   // The score has a frame and the position is centred on the card; the third row (verified date, inputs confirmed, one-line
   // description) is replaced by three cards of fields of the record: Free quota, Rate limit and Requirements (lib/best-facts.mjs).
   return '<li class="best-item' + (podium ? ' best-podium best-podium-' + rank : '') + '"><div class="best-rank" aria-hidden="true">' + String(rank).padStart(2, '0') + '</div><div class="best-body">' +
-    '<div class="best-head"><h2><a href="../p/' + p.slug + '">' + htmlEsc(p.name) + '</a></h2>' +
+    '<div class="best-head"><h2><a href="../p/' + p.slug + '">' + escapeAttr(p.name) + '</a></h2>' +
     (e.boundary ? '<span class="best-flag" title="The model tier of this provider sits near a threshold of the score; it is flagged, never penalized">tier near a threshold</span>' : '') +
     '<span class="best-score" title="Out of 100">' + scoreTxt(e.total) + ' / 100</span></div>' +
-    (note ? '<p class="best-editorial">' + htmlEsc(note) + '</p>' : '') +
+    (note ? '<p class="best-editorial">' + escapeAttr(note) + '</p>' : '') +
     bestFactsHtml(p, IC) +
     '</div></li>';
 };
@@ -2309,13 +2338,13 @@ const bestJsonld = JSON.stringify({
   ],
 });
 const bestMain =
-  pageHero({ crumbs: `<a href="../">Home</a> / The best`, h1: `${htmlEsc(BEST.h1)}`, lede: `${htmlEsc(BEST.desc)}` }) +
+  pageHero({ crumbs: `<a href="../">Home</a> / The best`, h1: `${escapeAttr(BEST.h1)}`, lede: `${escapeAttr(BEST.desc)}` }) +
   '<main id="main"><div class="wrap">' +
   '<p class="best-intro">' + bestIntroHtml + '</p>' +
   '<h2 class="best-section">The podium</h2><ol class="best-list best-podium-list">' + podiumHtml + '</ol>' +
   (restHtml ? '<hr class="best-sep" aria-hidden="true"><h2 class="sr-only">Ranks ' + (PODIUM_SIZE + 1) + ' to ' + topList.length + '</h2><ol class="best-list" start="' + (PODIUM_SIZE + 1) + '">' + restHtml + '</ol>' : '') +
   '<p class="count best-note">' + (topList.length < TOP_SIZE ? 'Only ' + topList.length + ' providers meet the minimum evidence today; the list is never padded to ' + TOP_SIZE + '. ' : '') +
-  'Computed from the data on ' + htmlEsc(ASOF) + ' — <a href="methodology/">how the score works</a>. Every provider links to its full verified profile.</p>' +
+  'Computed from the data on ' + escapeAttr(ASOF) + ' — <a href="methodology/">how the score works</a>. Every provider links to its full verified profile.</p>' +
   '</div></main>';
 mkdirSync(join(ROOT, 'site/best'), { recursive: true });
 writeFileSync(
@@ -2330,7 +2359,7 @@ const editorialNeutral = providers.every((p) => editorialRating(EDITORIAL, p.slu
 const methodRows = MATH_INPUTS.map((k) => '<tr><td>' + WEIGHT_LABELS[k] + '</td><td class="num">' + SCORE_WEIGHTS[k] + '</td></tr>').join('') +
   '<tr><td>Editorial rating</td><td class="num">' + EDITORIAL_WEIGHT + '</td></tr>';
 const methodMain =
-  pageHero({ crumbs: `<a href="../../">Home</a> / <a href="../">The best</a> / Methodology`, h1: `How the score works`, lede: `Every provider on /best gets a score from 0 to 100, computed from the data each time the site is built. Data of ${htmlEsc(ASOF)}.` }) +
+  pageHero({ crumbs: `<a href="../../">Home</a> / <a href="../">The best</a> / Methodology`, h1: `How the score works`, lede: `Every provider on /best gets a score from 0 to 100, computed from the data each time the site is built. Data of ${escapeAttr(ASOF)}.` }) +
   '<main id="main"><div class="wrap best-method">' +
   '<h2>The parameters and their weights</h2>' +
   '<table class="best-weights"><thead><tr><th>Part</th><th class="num">Points</th></tr></thead><tbody>' + methodRows + '</tbody></table>' +
@@ -2345,7 +2374,7 @@ const methodMain =
   '<li><strong>The editorial part cannot outweigh the data.</strong> It can move a provider away from ' + EDITORIAL_DEFAULT + ' only by as much as its confirmed inputs allow.</li>' +
   '<li><strong>Stability is not measured yet.</strong> It needs probes over at least ' + STABILITY_MIN_DAYS + ' days (' + STABILITY_MIN_SAMPLES + ' samples); until then it is unmeasured for everyone.</li>' +
   '<li><strong>Deterministic.</strong> The same data gives the same order; ties break by the mathematical score, then by name.</li></ul>' +
-  '<p class="count best-note">Last data update: ' + htmlEsc(ASOF) + '. Full text and every constant: <a href="' + REPO + '/blob/main/docs/methodology.md">docs/methodology.md</a> and <a href="' + REPO + '/blob/main/scripts/lib/score.mjs">scripts/lib/score.mjs</a>.</p>' +
+  '<p class="count best-note">Last data update: ' + escapeAttr(ASOF) + '. Full text and every constant: <a href="' + REPO + '/blob/main/docs/methodology.md">docs/methodology.md</a> and <a href="' + REPO + '/blob/main/scripts/lib/score.mjs">scripts/lib/score.mjs</a>.</p>' +
   '</div></main>';
 mkdirSync(join(ROOT, 'site/best/methodology'), { recursive: true });
 writeFileSync(
@@ -2370,9 +2399,9 @@ for (const d of DOC_PAGES) {
   const body = markdownToHtml(readFileSync(join(ROOT, d.file), 'utf8'), { ...DOC_LINKS, from: d.file }).replace(/^<h1[^>]*>.*?<\/h1>\n?/, '');
   writeFileSync(join(ROOT, `site/${d.slug}/index.html`), htmlPage({
     title: d.title, desc: d.desc, canonical: `${SITE}/${d.slug}/`, prefix: '../',
-    main: pageHero({ crumbs: `<a href="../">Home</a> / ${htmlEsc(d.h1)}`, h1: d.h1, lede: d.lede }) +
+    main: pageHero({ crumbs: `<a href="../">Home</a> / ${escapeAttr(d.h1)}`, h1: d.h1, lede: d.lede }) +
       `<main id="main"><div class="wrap prose doc">${body}` +
-      `<p class="muted">This page is written from <a href="${REPO}/blob/main/${d.file}" target="_blank" rel="noopener">${htmlEsc(d.file)}</a> in the repository. To change it, open a pull request there.</p>` +
+      `<p class="muted">This page is written from <a href="${REPO}/blob/main/${d.file}" target="_blank" rel="noopener">${escapeAttr(d.file)}</a> in the repository. To change it, open a pull request there.</p>` +
       `</div></main>`,
   }));
 }
@@ -2398,7 +2427,7 @@ writeFileSync(
     main:
       pageHero({ crumbs: `<a href="../">Home</a> / Submit`, h1: `Submit`, lede: `Ask us to add, review or correct something. Data requests are public GitHub issues, so anyone can see what was asked and what was decided. Business and partnerships have one address.` }) +
       `<main id="main"><div class="wrap prose">` +
-      submitRequests.map(([h, text, template, cta]) => `<section><h2>${htmlEsc(h)}</h2><p>${text}</p><p><a class="btn primary" href="${issueForm(template)}" target="_blank" rel="noopener">${htmlEsc(cta)}</a></p></section>`).join('\n') +
+      submitRequests.map(([h, text, template, cta]) => `<section><h2>${escapeAttr(h)}</h2><p>${text}</p><p><a class="btn primary" href="${issueForm(template)}" target="_blank" rel="noopener">${escapeAttr(cta)}</a></p></section>`).join('\n') +
       `<section><h2>Business and partnerships</h2><p>For a partnership, an agreement or a question from a company, write to <strong class="business-email">${BUSINESS_EMAIL}</strong>. Money never changes a score. Corrections and new providers do not go there: use the forms above.</p></section>` +
       `<section><h2>Anything else</h2><p>Questions, ideas and open-ended suggestions go to the <a href="${REPO}/discussions" target="_blank" rel="noopener">GitHub discussions</a>.</p></section>` +
       `<p class="muted">Every entry is checked against the provider's own documentation; see how in the <a href="../methodology/">methodology</a>.</p>` +
@@ -2519,7 +2548,7 @@ for (const { e, group } of CODING_TOOL_PAGES) {
       desc: codingToolDescription(e),
       canonical,
       main:
-        pageHero({ crumbs: `<a href="../../">Home</a> / <a href="../">Free AI coding tools</a> / ${htmlEsc(e.name)}`, h1: htmlEsc(e.name), lede: `What the tool's own page says about a free plan, with the sentence and the day it was read.` }) +
+        pageHero({ crumbs: `<a href="../../">Home</a> / <a href="../">Free AI coding tools</a> / ${escapeAttr(e.name)}`, h1: escapeAttr(e.name), lede: `What the tool's own page says about a free plan, with the sentence and the day it was read.` }) +
         codingToolMainHtml(e, { prefix: '../../', group, others: CODING_TOOL_PAGES.map((x) => x.e).filter((o) => o.slug !== e.slug) }),
       jsonld,
       prefix: '../../',
@@ -2556,9 +2585,9 @@ writeFileSync(
     desc: 'Every paid relationship of Free LLM API Hub, with its dates and what each side gets. Paid content is outside the dataset, the API files and the ranking.',
     canonical: SITE + '/agreements/',
     main:
-      pageHero({ crumbs: '<a href="../">Home</a> / Agreements', h1: 'Agreements and sponsorship', lede: htmlEsc(NOT_IN_DATA_SENTENCE) }) +
+      pageHero({ crumbs: '<a href="../">Home</a> / Agreements', h1: 'Agreements and sponsorship', lede: escapeAttr(NOT_IN_DATA_SENTENCE) }) +
       '<main id="main"><div class="wrap prose">' + agreementsTableHtml(AGREEMENTS, ASOF) +
-      '<h2>Where paid items can and cannot appear</h2><p>' + htmlEsc(MACHINE_SENTENCE) + '</p>' +
+      '<h2>Where paid items can and cannot appear</h2><p>' + escapeAttr(MACHINE_SENTENCE) + '</p>' +
       inForce(AGREEMENTS, ASOF).map(sponsoredBlockHtml).join('') +
       '</div></main>',
     prefix: '../',
@@ -2633,13 +2662,13 @@ rmSync(join(ROOT, 'site/compare'), { recursive: true, force: true });
 mkdirSync(join(ROOT, 'site/compare'), { recursive: true });
 const compareLinksHtml = (prefix, except = null) => suggestedPairs
   .filter((cp) => cp.path !== except)
-  .map((cp) => `<a href="${prefix}compare/${cp.path}/">${htmlEsc(cp.a.name)} vs ${htmlEsc(cp.b.name)}</a>`).join('');
+  .map((cp) => `<a href="${prefix}compare/${cp.path}/">${escapeAttr(cp.a.name)} vs ${escapeAttr(cp.b.name)}</a>`).join('');
 for (const cp of comparePairs) {
   const { a, b } = cp;
   const title = `${a.name} vs ${b.name}`;
   const desc = `${a.name} vs ${b.name}: free tier, rate limits, card, phone and commercial-use requirements, OpenAI compatibility and docs, side by side from the verified dataset.`;
   const main =
-    pageHero({ crumbs: `<a href="../../">Home</a> / <a href="../">Compare</a> / ${htmlEsc(title)}`, h1: `${htmlEsc(title)}`, lede: `Both offer ${htmlEsc(cp.shared.join(', '))} on their free plan. Every field below comes from the dataset and is checked against each provider's own docs; <em>not confirmed</em> means nobody has confirmed that field yet — not that the answer is no.` }) +
+    pageHero({ crumbs: `<a href="../../">Home</a> / <a href="../">Compare</a> / ${escapeAttr(title)}`, h1: `${escapeAttr(title)}`, lede: `Both offer ${escapeAttr(cp.shared.join(', '))} on their free plan. Every field below comes from the dataset and is checked against each provider's own docs; <em>not confirmed</em> means nobody has confirmed that field yet — not that the answer is no.` }) +
     `<main id="main"><div class="wrap prose">` +
     tagProviderLinks(compareLib.compareTableHtml([a, b], { prefix: '../../', scores: scoreMap }), [...providerLinkTargets(a), ...providerLinkTargets(b)]) +
     `<div class="prov-actions" style="margin-top:22px"><a class="btn primary" href="../?compare=${a.slug},${b.slug}">Add a provider to this comparison →</a></div>` +
@@ -2656,7 +2685,7 @@ for (const cp of comparePairs) {
 // Interactive view: a picker that also works as a plain GET form without JS
 // (?p=a&p=b — compare.js normalises it to ?compare=a,b), plus the static pages.
 const pickerOptions = [...providers].sort((x, y) => x.name.localeCompare(y.name, 'en'))
-  .map((p) => `<option value="${htmlEsc(p.slug)}">${htmlEsc(p.name)}</option>`).join('');
+  .map((p) => `<option value="${escapeAttr(p.slug)}">${escapeAttr(p.name)}</option>`).join('');
 const pickerSelects = Array.from({ length: compareLib.COMPARE_MAX }, (_, i) =>
   `<label class="cmp-slot"><span>Provider ${i + 1}${i < compareLib.COMPARE_MIN ? '' : ' (optional)'}</span>` +
   `<select class="sel" name="p"><option value="">—</option>${pickerOptions}</select></label>`).join('');
@@ -2669,7 +2698,7 @@ const compareIndexMain =
   `<h2>Popular comparisons</h2><nav class="colls">${compareLinksHtml('../')}</nav>` +
   // Pairs across categories are not suggested from other pages, but each has a page in the sitemap: list them here
   // so every one is reachable by a link.
-  (otherPairs.length ? `<h2>More comparisons</h2><nav class="colls">${otherPairs.map((cp) => `<a href="../compare/${cp.path}/">${htmlEsc(cp.a.name)} vs ${htmlEsc(cp.b.name)}</a>`).join('')}</nav>` : '') +
+  (otherPairs.length ? `<h2>More comparisons</h2><nav class="colls">${otherPairs.map((cp) => `<a href="../compare/${cp.path}/">${escapeAttr(cp.a.name)} vs ${escapeAttr(cp.b.name)}</a>`).join('')}</nav>` : '') +
   `<p class="prov-back"><a href="../#explorer">← All providers</a></p>` +
   `</div></main>`;
 writeFileSync(join(ROOT, 'site/compare/index.html'), htmlPage({
@@ -2725,6 +2754,7 @@ const sitemapEntries = [
   [`${SITE}/`, ASOF],
   [`${SITE}/models/`, ASOF],
   ...MODEL_GROUPS.filter((g) => isIndexable(g)).map((g) => [`${SITE}/models/${g.key}/`, lastVerified(g.entries.map((e) => e.p))]),
+  ...FAMILY_GROUPS.filter(isFamilyIndexable).map((g) => [familyUrl(SITE, g), lastVerified(g.entries.map((e) => e.p))]),
   [`${SITE}/guides-and-collections/`, ASOF],
   [`${SITE}/best/`, ASOF],
   [`${SITE}/best/methodology/`, ASOF],

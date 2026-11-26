@@ -12,7 +12,8 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
-import { OG, OG_FONT_FILES, frameSvg, ogAuraSpec, esc, wrap } from './lib/og-art.mjs';
+import { OG, OG_FONT_FILES, frameSvg, ogAuraSpec, wrap } from './lib/og-art.mjs';
+import { escapeAttr } from './lib/html.mjs';
 import { homeTaglineSvg, homeAurasSvg } from './lib/og.mjs';
 import { auraSvg, HUB_AURA } from './lib/aura.mjs';
 import { wordmarkSvg } from './lib/wordmark.mjs';
@@ -50,7 +51,7 @@ export function bannerSvg(providers, theme) {
     `<rect width="${W}" height="${H}" rx="28" fill="${t.ground}"/>` +
     auraSvg(HUB_AURA, { cx: 108, cy: 120, r: 42, id: 'hub', theme: t.theme }) +
     wordmarkSvg({ x: 168, y: 136, size: 46, fill: t.ink }) +
-    taglineParts().map((l, i) => `<text x="72" y="${236 + i * 64}" fill="${i ? t.accent : t.ink}" font-family="OG Display" font-size="62" letter-spacing="-1">${esc(l)}</text>`).join('') +
+    taglineParts().map((l, i) => `<text x="72" y="${236 + i * 64}" fill="${i ? t.accent : t.ink}" font-family="OG Display" font-size="62" letter-spacing="-1">${escapeAttr(l)}</text>`).join('') +
     `<text x="74" y="360" fill="${t.muted}" font-family="OG Mono" font-size="26">${providers.length} free AI APIs, each dated and sourced</text>` +
     field + `</svg>`;
 }

@@ -15,7 +15,8 @@
 // Provider fields come from providers.json, which community PRs can edit: everything is escaped before it reaches
 // innerHTML, a slug reaches an href only after SLUG_RE, and an outbound URL only when it is https.
 
-import { htmlEsc, ICON, SLUG_RE } from './rows.mjs';
+import { escapeHtml as htmlEsc } from './html.mjs'; // serialised by name into the client bundle below
+import { ICON, SLUG_RE } from './rows.mjs';
 import { recommendedCmp } from './rules.mjs';
 import { pythonStringLiteral, pythonChatQuickstart, pythonEmbeddingsQuickstart } from './quickstart.mjs';
 
