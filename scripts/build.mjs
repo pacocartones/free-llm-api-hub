@@ -30,6 +30,7 @@ import { quality, qualityMainHtml } from './lib/quality.mjs';
 import { fieldCheck, REASON_LABEL } from './lib/field-checks.mjs';
 import { publishedSpeed, speedFigure } from './lib/published-speed.mjs';
 import { apiV1ProviderSchema, projectApiV1Changes, toApiV1Provider } from './lib/api-v1.mjs';
+import { statusPayload } from './lib/status.mjs';
 import { freeGpuMainHtml } from './lib/free-gpu.mjs';
 import { labelTables } from './lib/tables.mjs';
 import { markNewTabLinks } from './lib/links.mjs';
@@ -2047,6 +2048,11 @@ writeApi('coding-tools-own-key.json', {
   notes: codingToolsOwnKey.notes || [],
 });
 writeFileSync(join(ROOT, 'site/api/v1/coding-tools-own-key.schema.json'), readFileSync(join(ROOT, 'data/coding-tools-own-key-api.schema.json')));
+// /api/v1/status.json: one small freshness record per provider, keyed by slug, for routers that poll (lib/status.mjs).
+// Graded at ASOF, never the clock; its last_change comes from the git-mined change list, so it is git-log derived.
+const STATUS_SCHEMA_URL = SITE + '/api/v1/status.schema.json';
+writeApi('status.json', statusPayload({ base: apiBase, asOf: ASOF, providers: publicProviders, changes: projectApiV1Changes(allFieldChanges), schemaUrl: STATUS_SCHEMA_URL }));
+writeFileSync(join(ROOT, 'site/api/v1/status.schema.json'), readFileSync(join(ROOT, 'data/status.schema.json')));
 const API_SLICES = {
   ongoing: (p) => p.category === 'ongoing',
   trial: (p) => p.category === 'trial',
@@ -2088,6 +2094,8 @@ const apiEndpoints = {
   programs: 'v1/programs.json',
   history: 'v1/history.json',
   changes: 'v1/changes.json',
+  status: 'v1/status.json',
+  'status-schema': 'v1/status.schema.json',
   best: 'v1/best.json',
   score: 'v1/score.json',
   'score-schema': 'v1/score.schema.json',
@@ -2155,6 +2163,8 @@ const apiDocMain =
   apiRow('Free AI coding tools you connect your own key to, apart from the ranking (not a count of providers)', 'coding-tools-own-key.json', codingToolsOwnKey.entries.length) +
   apiRow('JSON Schema of coding-tools-own-key.json (contract v1)', 'coding-tools-own-key.schema.json', null) +
   apiRow('Field-level provider changes by ISO week (last 12 weeks)', 'changes.json', null) +
+  apiRow('Freshness per provider, keyed by slug: last verified, SLA state, free now, last change', 'status.json', publicProviders.length) +
+  apiRow('JSON Schema of status.json (contract v1)', 'status.schema.json', null) +
   apiRow('Endpoint manifest', 'index.json', null) +
   apiRow('JSON Schema of API v1 provider-list payloads', 'schema.json', null) +
   apiRow('OpenAI SDK settings per verified OpenAI-compatible provider', 'openai-clients.json', clientList.length) +
@@ -2203,6 +2213,7 @@ const llmsTxt =
   `## Dataset\n` +
   `- [Full dataset, JSON](${SITE}/api/v1/providers.json): every provider, all fields\n` +
   `- [Static JSON API](${SITE}/api/): versioned endpoints + pre-filtered slices (category, modality, no-card, commercial, OpenAI-compatible, …)\n` +
+  `- [Provider status, JSON](${SITE}/api/v1/status.json): per provider, last verified, freshness against the ${DUE_SOON_DAYS}/${SLA_DAYS}-day SLA, free now, and the day of its last change\n` +
   `- [JSON Schema](${REPO}/blob/main/data/schema.json)\n` +
   `- [Full provider list expanded, markdown](${SITE}/llms-full.txt)\n` +
   `- [Data quality](${SITE}/quality/): how much of the dataset is verified, how fresh it is, and which answers are still unknown\n` +
@@ -2784,11 +2795,11 @@ writeFileSync(join(ROOT, `site/${SITEMAP_INDEX}`), sitemapIndexXml(SITE, INDEXNO
 // removes. It lives at the repo root (not under data/) so a fingerprint-only
 // commit never touches a path the updates feed watches.
 const isDateRelative = (rel) => rel === 'site/badge-freshness.json' || rel.startsWith('site/p/') || rel.startsWith('site/badges/');
-// The weekly change feed (changes/, changes.xml, api/v1/changes.json) and the
+// The weekly change feed (changes/, changes.xml, api/v1/changes.json), api/v1/status.json (its last_change) and the
 // monthly state reports (state/) are mined from the same git history, so they
 // are excluded for the same reason.
 const isGitLogDerived = (rel) => rel === 'site/feed.xml' || rel === 'site/api/v1/history.json' || rel === 'site/updates.html' || rel.startsWith('site/updates/') ||
-  rel === 'site/changes.xml' || rel === 'site/api/v1/changes.json' || rel.startsWith('site/changes/') || rel.startsWith('site/state/') || rel === 'site/sitemap-state.xml';
+  rel === 'site/changes.xml' || rel === 'site/api/v1/changes.json' || rel === 'site/api/v1/status.json' || rel.startsWith('site/changes/') || rel.startsWith('site/state/') || rel === 'site/sitemap-state.xml';
 // ---------- /.well-known/security.txt ----------
 // RFC 9116 contact file from SECURITY.md's two channels; its Expires date comes from lib/security-txt.mjs, not the clock.
 mkdirSync(join(ROOT, 'site/.well-known'), { recursive: true });
