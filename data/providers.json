@@ -1072,6 +1072,7 @@
       "best_for": "Best-known TTS voices (free tier is non-commercial)",
       "modalities": ["audio"],
       "models_free": null,
+      "models_url": "https://elevenlabs.io/docs/overview/models",
       "expires": null,
       "docs_url": "https://elevenlabs.io/pricing",
       "phone_required": false,
