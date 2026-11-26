@@ -9,14 +9,15 @@ import { join } from 'node:path';
 import { answerFirst, providerFaq, providerFaqHtml, providerFaqJsonLd, flagWords, NOT_STATED } from './lib/provider-faq.mjs';
 import { shortDate } from './lib/provider-meta.mjs';
 import { privateTree } from './lib/private-tree.mjs';
+import { escapeHtml } from './lib/html.mjs';
 
 const ROOT = privateTree(join(import.meta.dirname, '..'));
 before(() => { execFileSync(process.execPath, [join(ROOT, 'scripts/build.mjs')], { cwd: ROOT, stdio: 'pipe' }); });
 const PROVIDERS = JSON.parse(readFileSync(join(import.meta.dirname, '..', 'data/providers.json'), 'utf8')).providers;
 
 const get = (p, path) => path.split('.').reduce((o, k) => (o == null ? undefined : o[k]), p);
-const unescape = (s) => s.replace(/&#39;/g, "'").replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
-const jsonLd = (html) => JSON.parse(html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1].replace(/\\u003c/g, '<'));
+// The page writes "<" in its JSON-LD as \u003c, which JSON.parse reads back as it is: no unescaping by hand.
+const jsonLd = (html) => JSON.parse(html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1]);
 
 const nulls = {
   slug: 'blank', name: 'Blank', category: 'trial', free_type: 'trial-credit', free_tier: 'Some credit', rate_limits: null,
@@ -101,13 +102,20 @@ test('provider page: the answer is the first thing after the H1, and the visible
     assert.ok(faq.mainEntity.length >= 4 && faq.mainEntity.length <= 6);
     const visible = [...html.matchAll(/<div class="faq-item" id="faq-[a-z]+"><h3>([^<]*)<\/h3><p>([\s\S]*?)<\/p><\/div>/g)];
     assert.equal(visible.length, faq.mainEntity.length, `${slug}: every question is visible`);
+    // The visible markup is compared in its escaped form: the question, then the answer up to its source date, then the
+    // date as a <time> element. Nothing is stripped or unescaped, so the comparison cannot hide a difference.
     faq.mainEntity.forEach((q, i) => {
       assert.equal(q['@type'], 'Question');
       assert.equal(q.acceptedAnswer['@type'], 'Answer');
       assert.ok(q.name && q.acceptedAnswer.text, 'name and answer text');
-      assert.equal(unescape(visible[i][1]), q.name, `${slug}: question ${i + 1} matches`);
-      const shown = unescape(visible[i][2].replace(/<span class="sr-only">[^<]*<\/span>/g, '').replace(/<[^>]*>/g, '')).replace(/: the provider's page\.$/, '.');
-      assert.equal(shown, q.acceptedAnswer.text, `${slug}: answer ${i + 1} matches`);
+      assert.equal(visible[i][1], escapeHtml(q.name), `${slug}: question ${i + 1} matches`);
+      const text = q.acceptedAnswer.text;
+      const cut = text.lastIndexOf(' Source ');
+      const body = escapeHtml(text.slice(0, cut));
+      const item = providerFaq(p)[i];
+      const tail = item.date ? ` <span class="muted">Source read <time datetime="${item.date}">${shortDate(item.date)}</time>` : ' <span class="muted">Source date not recorded';
+      assert.ok(visible[i][2].startsWith(body + tail), `${slug}: answer ${i + 1} matches`);
+      assert.equal(text.slice(cut), item.date ? ` Source read ${shortDate(item.date)}.` : ' Source date not recorded.');
     });
     assert.deepEqual(faq, JSON.parse(JSON.stringify(providerFaqJsonLd(p))));
   }
@@ -122,7 +130,7 @@ test('the FAQ escapes what comes from the data', () => {
 
 test('the home <title> leads with "Free LLM APIs" and stays under 60 characters', () => {
   const html = readFileSync(join(ROOT, 'site/index.html'), 'utf8');
-  const title = unescape(html.match(/<title>([^<]*)<\/title>/)[1]);
+  const title = html.match(/<title>([^<]*)<\/title>/)[1].split('&amp;').join('&');
   assert.ok(title.startsWith('Free LLM APIs'), title);
   assert.ok(title.length < 60, `${title.length} characters: ${title}`);
 });
