@@ -100,6 +100,9 @@ function render(first) {
   syncSortSel();
   syncRoving();
   syncURL();
+  // The coloured dot of the modality filter (decorative, aria-hidden): its colour is the selected modality's --m-* token.
+  const modDot = document.getElementById('modality-dot');
+  if (modDot) modDot.setAttribute('data-mod', modality);
 }
 
 // --- keyboard navigation (#174): roving tabindex over the rows ---
