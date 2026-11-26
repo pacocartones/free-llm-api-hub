@@ -3,7 +3,7 @@
 // data_policy). The consent script's product events read them (outbound_provider_click, only with analytics consent);
 // without analytics they are inert markup.
 
-import { htmlEsc } from './rows.mjs';
+import { escapeHtml } from './html.mjs';
 
 export const LINK_TYPES = ['docs', 'keys', 'website', 'playground', 'models', 'limits_source', 'data_policy'];
 const SLUG = /^[a-z0-9][a-z0-9-]{0,63}$/;
@@ -31,7 +31,7 @@ export function tagProviderLinks(html, targets) {
   const byHref = new Map();
   for (const t of targets) {
     if (!SLUG.test(t.provider) || !LINK_TYPES.includes(t.link)) throw new Error(`bad provider link target ${JSON.stringify(t)}`);
-    for (const form of [t.href, htmlEsc(t.href)]) if (!byHref.has(form)) byHref.set(form, t);
+    for (const form of [t.href, escapeHtml(t.href)]) if (!byHref.has(form)) byHref.set(form, t);
   }
   return html.replace(/<a ([^>]*?)href="([^"]*)"([^>]*)>/g, (m, before, href, after) => {
     const t = byHref.get(href);

@@ -3,13 +3,13 @@ name: Lighthouse
 # Accessibility, SEO and performance budget for the built site.
 #
 # Serves site/ itself on a free local port and measures what it serves with
-# Lighthouse, on twenty-one pages: the home, /best/, /coverage/, /quality/, /free-gpu/, /coding-tools/,
+# Lighthouse, on twenty-two pages: the home, /best/, /coverage/, /quality/, /free-gpu/, /coding-tools/,
 # /compare/, /find/, /data-policy/, /guides-and-collections/, /not-free/, /embed/ and one provider page, plus
 # /collections/no-credit-card.html, /collections/openai-compatible.html,
 # /guides/free-llm-api-no-signup.html, /guides/free-embeddings-apis.html,
 # /guides/free-ocr-document-ai-apis.html, /guides/free-speech-to-text-apis.html
-# and /guides/free-image-generation-apis.html, plus one model page under /models/
-# (the indexable one listed by the most providers). The thresholds are in
+# and /guides/free-image-generation-apis.html, the model-family page /free-api/qwen/,
+# plus one model page under /models/ (the indexable one listed by the most providers). The thresholds are in
 # scripts/lib/lighthouse-gate.mjs: accessibility at least 0.95 with no new or
 # unscored accessibility audit, SEO exactly 1, performance at least 0.80. Every run
 # also checks each page's font budget (FONT_BUDGET_BYTES in scripts/lib/assets.mjs:
@@ -91,7 +91,7 @@ jobs:
         working-directory: tools/lighthouse
         run: npm ci --ignore-scripts
 
-      - name: Measure the twenty-one pages (accessibility and SEO, one run each)
+      - name: Measure the twenty-two pages (accessibility and SEO, one run each)
         if: ${{ steps.scope.outputs.run == 'true' }}
         env:
           CHROME_PATH: /usr/bin/google-chrome
@@ -132,7 +132,7 @@ jobs:
         if: ${{ steps.scope.outputs.run == 'true' }}
         working-directory: tools/lighthouse
         run: npm ci --ignore-scripts
-      - name: Measure the twenty-one pages (performance, median of three runs)
+      - name: Measure the twenty-two pages (performance, median of three runs)
         if: ${{ steps.scope.outputs.run == 'true' }}
         id: measure
         env:

@@ -8,8 +8,7 @@ import { existsSync, readFileSync, statSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { privateTree } from './lib/private-tree.mjs';
-import { htmlEsc } from './lib/rows.mjs';
-import { codeHtmlEsc } from './lib/quickstart.mjs';
+import { escapeHtml, escapeText } from './lib/html.mjs';
 import { notFreeErrors, notFreeReadmeMd, closestAlternatives, entryQuotes } from './lib/not-free.mjs';
 import { citationRecord, bibtex, apa } from './lib/citation.mjs';
 import { Script, createContext } from 'node:vm';
@@ -128,7 +127,7 @@ describe('/not-free/: one source for the README and the page', () => {
     const html = read(PAGES.notFree);
     const readme = read('README.md');
     for (const e of NF.entries) {
-      assert.ok(html.includes(`<section class="gpu-entry" id="${e.id}"><h3>${htmlEsc(e.name)}</h3>`), `${e.id} on the page`);
+      assert.ok(html.includes(`<section class="gpu-entry" id="${e.id}"><h3>${escapeHtml(e.name)}</h3>`), `${e.id} on the page`);
       assert.ok(readme.includes(`- **${e.name}** — `), `${e.id} in the README`);
       if (e.checked) assert.ok(html.includes(e.checked) && readme.includes(`checked ${e.checked}`), `${e.id}: date`);
     }
@@ -146,7 +145,7 @@ describe('/not-free/: one source for the README and the page', () => {
       for (const q of entryQuotes(e, quotes).filter((x) => (e.quote_ids || []).length && !e.quotes.includes(x.text))) {
         assert.ok(quotes.some((r) => r.text === q.text && r.read_on === q.read), `${e.id}: referenced quote`);
       }
-      for (const q of entryQuotes(e, quotes)) assert.ok(read(PAGES.notFree).includes(`“${htmlEsc(q.text)}”`), `${e.id}: quote on the page`);
+      for (const q of entryQuotes(e, quotes)) assert.ok(read(PAGES.notFree).includes(`“${escapeHtml(q.text)}”`), `${e.id}: quote on the page`);
     }
   });
 
@@ -172,7 +171,7 @@ describe('/not-free/: one source for the README and the page', () => {
     const types = jsonLdTypes(html);
     assert.ok(types.includes('FAQPage') && types.includes('WebPage'));
     for (const q of ['Is the OpenAI API free?', 'Does GitHub Models still have a free tier?', 'Is there a free Mistral API?']) {
-      assert.ok(html.includes(`<h3>${htmlEsc(q)}</h3>`), `FAQ: ${q}`);
+      assert.ok(html.includes(`<h3>${escapeHtml(q)}</h3>`), `FAQ: ${q}`);
       assert.ok(html.includes(`"name":"${q}"`), `JSON-LD FAQ: ${q}`);
     }
   });
@@ -186,8 +185,8 @@ describe('/embed/: Use the data', () => {
     assert.equal(r.date, cff.match(/^date-released: "(.+)"$/m)[1]);
     assert.equal(r.author, 'pacocartones');
     assert.equal(r.title, cff.match(/^title: "(.+)"$/m)[1]);
-    assert.ok(html.includes(`<pre data-snippet="citation"><code id="cite-bibtex">${codeHtmlEsc(bibtex(r))}</code></pre>`), 'BibTeX');
-    assert.ok(html.includes(`<pre data-snippet="citation"><code id="cite-apa">${codeHtmlEsc(apa(r))}</code></pre>`), 'APA');
+    assert.ok(html.includes(`<pre data-snippet="citation"><code id="cite-bibtex">${escapeText(bibtex(r))}</code></pre>`), 'BibTeX');
+    assert.ok(html.includes(`<pre data-snippet="citation"><code id="cite-apa">${escapeText(apa(r))}</code></pre>`), 'APA');
     assert.match(bibtex(r), new RegExp(`version = \\{${r.version.replace(/[\\^$.*+?()[\]{}|]/g, '\\$&')}\\}`));
     assert.equal(apa(r), `pacocartones. (${r.year}). ${r.title} (Version ${r.version}) [Data set]. ${r.url}`);
   });
@@ -203,7 +202,7 @@ describe('/embed/: Use the data', () => {
     const html = read(PAGES.embed);
     const snippet = widgetSnippet(WIDGET_DEFAULT, SITE);
     assert.ok(read('README.md').includes(snippet), 'same snippet as the README');
-    assert.ok(html.includes(`<code id="embed-snippet">${codeHtmlEsc(snippet)}</code>`));
+    assert.ok(html.includes(`<code id="embed-snippet">${escapeText(snippet)}</code>`));
     assert.match(html, /<div class="embed-preview" id="embed-preview"><div id="flh-widget" data-count="6" data-modality="text"><\/div><\/div>/);
     assert.match(html, /<script src="\.\.\/widget\.js(\?v=[0-9a-f]{8})?" defer><\/script>\s*<script src="\.\.\/embed\.js(\?v=[0-9a-f]{8})?" defer>/);
   });
@@ -217,7 +216,7 @@ describe('/embed/: Use the data', () => {
       assert.ok(existsSync(join(ROOT, `site/badges/${p.slug}.json`)), `${p.slug}: badge JSON`);
     }
     const groq = providers.find((p) => p.slug === 'groq');
-    assert.ok(html.includes(codeHtmlEsc(providerBadgeMarkdown(groq, SITE))), 'default badge snippet');
+    assert.ok(html.includes(escapeText(providerBadgeMarkdown(groq, SITE))), 'default badge snippet');
     assert.doesNotMatch(html, /<img[^>]+src="https:\/\/img\.shields\.io/, 'no image is loaded from shields.io');
   });
 
@@ -228,8 +227,8 @@ describe('/embed/: Use the data', () => {
     );
     const html = read(PAGES.embed);
     const groq = providers.find((p) => p.slug === 'groq');
-    assert.ok(html.includes(`<p>Markdown:</p><pre data-snippet="badge"><code id="badge-snippet">${codeHtmlEsc(providerBadgeMarkdown(groq, SITE))}</code></pre>`), 'Markdown snippet');
-    assert.ok(html.includes(`<p>HTML:</p><pre data-snippet="badge"><code id="badge-snippet-html">${codeHtmlEsc(providerBadgeHtml(groq, SITE))}</code></pre>`), 'HTML snippet');
+    assert.ok(html.includes(`<p>Markdown:</p><pre data-snippet="badge"><code id="badge-snippet">${escapeText(providerBadgeMarkdown(groq, SITE))}</code></pre>`), 'Markdown snippet');
+    assert.ok(html.includes(`<p>HTML:</p><pre data-snippet="badge"><code id="badge-snippet-html">${escapeText(providerBadgeHtml(groq, SITE))}</code></pre>`), 'HTML snippet');
   });
 
   test('embed.js rewrites both badge snippets for the picked provider, as the build writes them', () => {
@@ -263,8 +262,8 @@ describe('/embed/: Use the data', () => {
 
   test('the Cite block is identical on /api/, /quality/ and /embed/ and matches CITATION.cff', () => {
     const r = citationRecord(cff);
-    const bib = `<pre data-snippet="citation"><code id="cite-bibtex">${codeHtmlEsc(bibtex(r))}</code></pre>`;
-    const apaHtml = `<pre data-snippet="citation"><code id="cite-apa">${codeHtmlEsc(apa(r))}</code></pre>`;
+    const bib = `<pre data-snippet="citation"><code id="cite-bibtex">${escapeText(bibtex(r))}</code></pre>`;
+    const apaHtml = `<pre data-snippet="citation"><code id="cite-apa">${escapeText(apa(r))}</code></pre>`;
 
     for (const [page, heading] of [
       [PAGES.api, 'Cite this dataset'],
