@@ -189,9 +189,17 @@
       "expectation": "It was listed here as a free tier until GitHub retired it.",
       "summary": "Fully retired by GitHub on 2026-07-30: playground, catalog, inference API and BYOK shut down for all customers. Removed from the dataset in 2.7.0.",
       "short": "fully retired by GitHub on 2026-07-30 — playground, catalog and inference API shut down for all customers",
-      "quotes": [],
-      "sources": [],
-      "checked": null,
+      "quotes": [
+        "As of July 30, 2026, GitHub Models is now retired.",
+        "The playground, model catalog, inference API, and bring your own key (BYOK) are no longer available to any customer, including existing customers with active usage."
+      ],
+      "sources": [
+        {
+          "label": "GitHub Models is now retired",
+          "url": "https://github.blog/changelog/2026-07-30-github-models-is-now-retired/"
+        }
+      ],
+      "checked": "2026-11-26",
       "faq": "Does GitHub Models still have a free tier?"
     },
     {
