@@ -185,11 +185,11 @@ describe('the lists are the data', () => {
     assert.equal(F.commercial.true + F.commercial.false + F.commercial.conditional + F.commercial.null, F.verified);
     assert.ok(text.includes(`Only ${F.shortlist.length} of ${F.verified} verified providers`));
     for (const p of F.shortlist) assert.ok(html.includes(`<a href="../p/${p.slug}">`), p.slug);
-    assert.ok(text.includes(`${F.phoneUnknown} of ${F.total} providers don’t state it`));
-    assert.ok(text.includes(`${F.dataPolicy} providers have a quoted data_policy`));
+    assert.ok(text.includes(`${F.phoneUnknown} of ${F.verified} verified providers don’t state it`));
+    assert.ok(text.includes(`${F.dataPolicy} of the ${F.verified} verified providers have a quoted data_policy`));
     assert.ok(text.includes(`${F.trainsFalse.length} say they don’t train`) && text.includes(`${F.trainsTrue.length} say they do`) && text.includes(`${F.trainsNull.length} are unsettled`));
     assert.ok(text.includes(`Ongoing tiers renew (daily or monthly): ${F.ongoing} providers. Trials are one-time: ${F.trial}.`));
-    assert.ok(text.includes(`exist for ${F.freeLimits} providers`));
+    assert.ok(text.includes(`exist for ${F.freeLimits} of the ${F.verified} verified providers`));
   });
 });
 

@@ -13,6 +13,7 @@ import { join, dirname, isAbsolute, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
 import { ORDER, roundTripError, serialize } from './_serialize.mjs';
+import { redirectStubFiles } from './lib/redirects.mjs';
 import { freshnessBadge, freshnessColor, freshnessStatus, recScore, SLA_DAYS, DUE_SOON_DAYS } from './lib/rules.mjs';
 import { esc, stripTags } from './lib/escape.mjs';
 import { mineProviderHistory, assertHistoryPlausible, historyFromRevisions } from './lib/history.mjs';
@@ -40,6 +41,9 @@ const REPO = join(dirname(fileURLToPath(import.meta.url)), '..');
 const ROOT = privateTree(REPO);
 const slash = (value) => value.replaceAll('\\', '/');
 const DATA = join(ROOT, 'data/providers.json');
+// Retired URLs (data/redirects.json) are meta-refresh stubs under site/p/ and site/compare/, not pages.
+const STUBS = redirectStubFiles(JSON.parse(readFileSync(join(ROOT, 'data/redirects.json'), 'utf8')));
+const isPairPage = (d) => d.includes('-vs-') && !STUBS.has(`compare/${d}/index.html`);
 // What the build would touch in the tree of the repository, read before any test runs (see the last test).
 const GENERATED_IN_REPO = ['site/p', 'site/sitemap.xml', 'site/api/v1/index.json', 'site/collections'];
 const mtimes = (root) => GENERATED_IN_REPO.map((rel) => (existsSync(join(root, rel)) ? statSync(join(root, rel)).mtimeMs : null));
@@ -456,7 +460,7 @@ test('every generated page has the same centred header: crumbs, one title and, w
   let checked = 0;
   for (const file of walk(join(ROOT, 'site'))) {
     const rel = slash(relative(join(ROOT, 'site'), file));
-    if (exceptions.has(rel) || rel.startsWith('og') || /^google[0-9a-f]+\.html$/.test(rel)) continue; // the Search Console ownership file is not a page
+    if (exceptions.has(rel) || STUBS.has(rel) || rel.startsWith('og') || /^google[0-9a-f]+\.html$/.test(rel)) continue; // the Search Console ownership file is not a page
     const html = readFileSync(file, 'utf8');
     const heroes = html.match(/<section class="page-hero[^"]*">/g) || [];
     assert.equal(heroes.length, 1, `${rel}: one page header`);
@@ -1640,7 +1644,7 @@ describe('read-only generated output', () => {
     const dataDates = new Set(JSON.stringify(providers).match(/\d{4}-\d{2}-\d{2}/g));
     assert.match(sitemap, /<loc>https:\/\/freellmapihub\.com\/compare\/<\/loc>/);
     assert.ok(pins['site/compare/index.html'] && pins['site/shared-compare.js'], 'the compare view is pinned');
-    const built = readdirSync(join(ROOT, 'site/compare')).filter((d) => d.includes('-vs-')).sort();
+    const built = readdirSync(join(ROOT, 'site/compare')).filter(isPairPage).sort();
     assert.deepEqual(built, pairs.map((p) => p.path).sort(), 'exactly the selected pages are built (stale pages are removed)');
     for (const { a, b, path } of pairs) {
       const rel = `site/compare/${path}/index.html`;
@@ -1671,7 +1675,7 @@ describe('read-only generated output', () => {
     // must say so instead of rendering it as "no".
     const { providers } = JSON.parse(readFileSync(DATA, 'utf8'));
     const page = readdirSync(join(ROOT, 'site/compare')).find((d) => {
-      if (!d.includes('-vs-')) return false;
+      if (!isPairPage(d)) return false;
       // a null with no recorded reason: one with a reason (field_checks) says the reason instead
       return d.split('-vs-').some((s) => { const p = providers.find((x) => x.slug === s); return p && p.commercial_ok === null && !(p.field_checks && p.field_checks.commercial_ok); });
     });
@@ -1811,7 +1815,7 @@ test('provider links carry data-provider and data-link for the opt-in outbound_p
   assert.match(groq, /<a class="btn website" href="[^"]+"[^>]* data-provider="groq" data-link="website">/);
   const tagged = [...groq.matchAll(/data-provider="([^"]*)" data-link="([^"]*)"/g)];
   assert.ok(tagged.every((m) => m[1] === 'groq' && ['docs', 'keys', 'website', 'playground', 'models', 'limits_source', 'data_policy'].includes(m[2])), 'only the page provider and known link types');
-  const compareDir = readdirSync(join(ROOT, 'site/compare')).find((n) => n.includes('-vs-'));
+  const compareDir = readdirSync(join(ROOT, 'site/compare')).find(isPairPage);
   const cmp = readFileSync(join(ROOT, `site/compare/${compareDir}/index.html`), 'utf8');
   assert.equal([...cmp.matchAll(/data-link="docs"/g)].length, 2, "both providers' docs links are tagged on a static comparison");
 });
@@ -1904,7 +1908,7 @@ test('every provider page has the same sections in the same order, unnumbered, w
   run(['scripts/build.mjs']);
   const order = ['whats-free', 'limits'];
   const providersBySlug = new Map(JSON.parse(readFileSync(DATA, 'utf8')).providers.map((q) => [q.slug, q]));
-  for (const f of readdirSync(join(ROOT, 'site/p')).filter((n) => n.endsWith('.html'))) {
+  for (const f of readdirSync(join(ROOT, 'site/p')).filter((n) => n.endsWith('.html') && !STUBS.has(`p/${n}`))) {
     const html = readFileSync(join(ROOT, 'site/p', f), 'utf8');
     const main = html.slice(html.indexOf('<main id="main">'));
     let at = -1;
@@ -2117,6 +2121,7 @@ test('active providers retain models_url from their official catalogues', () => 
     ['fireworks-ai', 'https://fireworks.ai/models'],
     ['baseten', 'https://docs.baseten.co/inference/model-apis/overview'],
     ['alibaba-model-studio', 'https://www.alibabacloud.com/help/en/model-studio/model-pricing'],
+    ['deepgram', 'https://developers.deepgram.com/docs/models-languages-overview'],
     ['nvidia-nim', 'https://build.nvidia.com/models'],
     ['sambanova', 'https://docs.sambanova.ai/docs/en/models/sambacloud-models'],
     ['sarvam-ai', 'https://docs.sarvam.ai/api/token-factory/models'],
@@ -2464,7 +2469,7 @@ test('provider page: the score is visible, no «All providers» link or «Report
   // Mutant: show the old button or link again, drop data-pager, or lose the score line; this test turns red.
   const html = readFileSync(join(ROOT, 'site/p/groq.html'), 'utf8');
   const main = html.slice(html.indexOf('<main id="main">'));
-  assert.match(main, /<div class="prov-score"><p class="score-rank"><strong>#\d+ of \d+<\/strong> by score <span class="muted">\(\d+(\.\d)? \/ 100\)<\/span>/, 'the score of the provider, as a place (Q13)');
+  assert.match(main, /<div class="prov-score"><p class="score-rank"><strong>#\d+ of \d+<\/strong> scored <span class="muted">\(\d+(\.\d)? \/ 100\)<\/span>/, 'the score of the provider, as a place (Q13)');
   assert.match(main, /<a href="\.\.\/best\/methodology\/">how it is computed<\/a>/, 'a link to the method');
   // Mutant: drop the underline and the links in the score line rely on colour alone, which Lighthouse fails (link-in-text-block).
   assert.match(readFileSync(join(ROOT, 'site/styles.css'), 'utf8'), /\.prov-score a \{[^}]*text-decoration: underline/, 'the links of the score line are underlined');
@@ -2627,7 +2632,7 @@ test('long strings in provider notes wrap instead of widening the page on a phon
 test('the /compare/ tables show the score and the model quality tier, in the static pages and the browser bundle', () => {
   run(['scripts/build.mjs']);
   const scores = JSON.parse(readFileSync(join(ROOT, 'site/scores.json'), 'utf8')).scores;
-  const dir = readdirSync(join(ROOT, 'site/compare')).find((d) => d.includes('-vs-'));
+  const dir = readdirSync(join(ROOT, 'site/compare')).find(isPairPage);
   const page = readFileSync(join(ROOT, 'site/compare', dir, 'index.html'), 'utf8');
   assert.match(page, /<th scope="row">Score<\/th>/);
   assert.match(page, /<th scope="row">Model quality tier<\/th>/);
