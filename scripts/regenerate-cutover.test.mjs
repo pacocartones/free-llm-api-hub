@@ -227,6 +227,17 @@ test('verify.yml: push mode regenerates before the checks and blocks through dri
     const mode = stepOf(body, 'id: regen');
     assert.match(mode, /REGEN_MODE: \$\{\{ vars\.REGEN_MODE \}\}/);
     assert.match(mode, /node scripts\/regenerate-guard\.mjs mode/);
+    // Fork pull requests see no repository variables: the mode then comes from .github/regen-mode on the base branch.
+    assert.match(mode, /\n {8}shell: bash\n/, `${id}: one script for Linux and Windows`);
+    assert.match(mode, /EVENT: \$\{\{ github\.event_name \}\}/);
+    assert.match(mode, /BASE_REF: \$\{\{ github\.base_ref \}\}/, 'the base branch arrives through env, not pasted into the script');
+    assert.match(mode, /if \[ -z "\$REGEN_MODE" \] && \[ "\$EVENT" = pull_request \]; then/, 'the variable wins whenever it has a value');
+    assert.match(mode, /git fetch --no-tags origin "refs\/heads\/\$BASE_REF"/);
+    assert.match(mode, /git show FETCH_HEAD:\.github\/regen-mode/, 'read from the fetched base branch');
+    assert.doesNotMatch(noComments(mode), /--depth|--shallow/, 'the clone stays complete: the build mines git log');
+    const reads = noComments(mode).match(/\.github\/regen-mode/g) ?? [];
+    assert.equal(reads.length, 1, `${id}: the pull request's own .github/regen-mode is never read`);
+    assert.ok(mode.indexOf('git show FETCH_HEAD') < mode.indexOf('node scripts/regenerate-guard.mjs mode'), 'resolved before it is parsed');
     const regen = stepOf(body, 'name: Regenerate the derived files first (REGEN_MODE=push)');
     assert.match(regen, /if: \$\{\{ steps\.regen\.outputs\.mode == 'push' \}\}/);
     assert.match(regen, /node scripts\/build\.mjs/);

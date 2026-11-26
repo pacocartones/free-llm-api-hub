@@ -7,12 +7,12 @@ Curated, always-current slices of the [dataset](../data/providers.json) — each
 - **[Free LLM APIs with no credit card](no-credit-card.md)** — LLM APIs you can start calling without entering a payment method — filtered live from a continuously-verified dataset. _(52 providers)_
 - **[Free LLM APIs with no phone verification](no-phone.md)** — LLM APIs whose signup needs no SMS/phone verification — a live slice of a continuously-verified dataset. _(16 providers)_
 - **[Free AI APIs with no account needed](anonymous-access.md)** — APIs whose own pages say they work with no account at all: an anonymous endpoint or a shared public key. Each row quotes the provider. A live slice of a verified dataset. _(4 providers)_
-- **[Free LLM APIs for commercial use](commercial-use.md)** — Free LLM API tiers that permit production/commercial use — not restricted to evaluation. Verified against each provider’s terms. _(24 providers)_
-- **[OpenAI-compatible free LLM APIs](openai-compatible.md)** — Free LLM APIs that expose an OpenAI-compatible endpoint — point the OpenAI SDK at a new base_url and you are done. _(38 providers)_
-- **[Permanently free LLM APIs](always-free.md)** — LLM APIs with models priced at $0 on an ongoing basis — no trial window counting down. Verified from a live dataset. _(5 providers)_
-- **[Free multimodal LLM APIs](multimodal.md)** — Free API tiers that go beyond text: vision, image, audio/speech, embeddings and rerank. A live slice of a verified dataset. _(57 providers)_
-- **[Free LLM APIs that say they do not train on your prompts](no-training.md)** — Free LLM and AI APIs whose own terms or privacy page say they do not use your prompts to train their models; each provider’s page on this site cites the source and the day it was read. A live slice of a verified dataset. _(28 providers)_
+- **[Free LLM APIs for commercial use](commercial-use.md)** — Free LLM API tiers that permit production/commercial use — not restricted to evaluation. Verified against each provider’s terms. _(25 providers)_
+- **[OpenAI-compatible free LLM APIs](openai-compatible.md)** — Free LLM APIs that expose an OpenAI-compatible endpoint — point the OpenAI SDK at a new base_url and you are done. _(41 providers)_
+- **[Permanently free LLM APIs](always-free.md)** — LLM APIs with models priced at $0 on an ongoing basis — no trial window counting down. Verified from a live dataset. _(6 providers)_
+- **[Free multimodal LLM APIs](multimodal.md)** — Free API tiers that go beyond text: vision, image, audio/speech, embeddings and rerank. A live slice of a verified dataset. _(59 providers)_
+- **[Free LLM APIs that say they do not train on your prompts](no-training.md)** — Free LLM and AI APIs whose own terms or privacy page say they do not use your prompts to train their models; each provider’s page on this site cites the source and the day it was read. A live slice of a verified dataset. _(30 providers)_
 - **[Free LLM APIs whose free tier renews](renewing-free-tier.md)** — LLM and AI APIs whose free allowance resets (daily, monthly or per minute) instead of running out once — a live slice of a verified dataset. _(30 providers)_
-- **[Free LLM APIs with a free signup credit](free-signup-credit.md)** — AI APIs that give a one-time free credit or token balance at signup, which runs out instead of renewing — a live slice of a verified dataset. _(38 providers)_
+- **[Free LLM APIs with a free signup credit](free-signup-credit.md)** — AI APIs that give a one-time free credit or token balance at signup, which runs out instead of renewing — a live slice of a verified dataset. _(40 providers)_
 
 [← Back to the main list](../README.md)
