@@ -336,6 +336,9 @@ main:has(> .page-hero:first-child) { padding-top: 0; } /* the page hero sits ins
 table { width: 100%; border-collapse: collapse; font-size: .9rem; }
 thead th { text-align: left; padding: 14px 14px; border-bottom: 1px solid var(--border-strong); color: var(--text); font-weight: 700; white-space: nowrap; font-family: var(--font-mono); font-size: .95rem; text-transform: uppercase; letter-spacing: .03em; }
 main#explorer > .wrap, .controls .controls-inner { max-width: 1480px; }
+/* The explorer's visible section heading (#800): the same width as the bar under it, its type from .fu-h. */
+.explorer-head { max-width: 1480px; padding-top: 14px; }
+.explorer-head .fu-h { margin: 0; }
 .fmini { display: flex; flex-wrap: wrap; gap: 7px 8px; margin-top: 8px; }
 .fmini-i { display: inline-flex; color: var(--muted); }
 .fmini-i svg.i { width: 15px; height: 15px; }

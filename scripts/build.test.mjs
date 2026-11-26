@@ -748,6 +748,17 @@ test('the explorer homepage leaves the table immediately after its controls', ()
   assert.doesNotMatch(index, /Recently re-verified|class="recent"/);
   assert.match(index, /<main id="explorer">\s*<div class="wrap">\s*<table id="table"/);
 });
+
+test('the explorer has a visible "All providers" h2 above its search box, outside the collapsed first-use strip', () => {
+  const index = readFileSync(join(ROOT, 'site/index.html'), 'utf8');
+  const h2 = index.search(/<h2 id="all-providers"[^>]*>All providers<\/h2>/);
+  assert.ok(h2 > -1, 'the home has an "All providers" h2');
+  assert.ok(h2 < index.indexOf('id="q"'), 'the heading comes before the search box');
+  assert.ok(h2 > index.indexOf('<!-- AUTOGEN:firstuse:end -->'), 'it is not inside the "New here?" <details>');
+  assert.equal(index.match(/<h1\b/g).length, 1, 'still exactly one h1');
+  assert.match(index, /<a href="#explorer">All providers<\/a>/, 'the menu link still targets the table');
+  assert.match(index, /<main id="explorer">/);
+});
 test('any provider sampling ASR/audio models declares audio in modalities', () => {
   const { providers } = JSON.parse(readFileSync(DATA, 'utf8'));
   const AUDIO_ID = /(whisper|asr|audio|transcri|stt|tts|voice|speech)/i;
