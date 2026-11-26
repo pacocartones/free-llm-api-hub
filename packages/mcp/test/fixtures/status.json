@@ -1,0 +1,20 @@
+{
+  "dataset": "free-llm-api-hub",
+  "version": "9.9.9",
+  "generated": "2026-10-01",
+  "license": "MIT",
+  "homepage": "https://freellmapihub.com/",
+  "docs": "https://freellmapihub.com/api/",
+  "description": "Fixture: the status.json of the fixture providers.json, graded at 2026-10-01.",
+  "schema": "https://freellmapihub.com/api/v1/status.schema.json",
+  "schema_version": 1,
+  "generated_at": "2026-10-01",
+  "sla": { "due_after_days": 60, "stale_after_days": 90 },
+  "count": 4,
+  "providers": {
+    "alpha-ai": { "last_verified": "2026-09-30", "oldest_field_check": null, "freshness": "fresh", "free_now": true, "last_change": "2026-09-30" },
+    "beta-cloud": { "last_verified": "2026-07-01", "oldest_field_check": null, "freshness": "stale", "free_now": true, "last_change": null },
+    "delta-free": { "last_verified": null, "oldest_field_check": null, "freshness": "unverified", "free_now": null, "last_change": null },
+    "gamma-labs": { "last_verified": "2026-08-15", "oldest_field_check": null, "freshness": "fresh", "free_now": false, "last_change": "2026-08-20", "added_later_in_v1": "ignored" }
+  }
+}
