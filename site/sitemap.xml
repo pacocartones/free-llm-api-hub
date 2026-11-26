@@ -6,13 +6,13 @@
   <url><loc>https://freellmapihub.com/models/bge-reranker-v2-m3/</loc><lastmod>2026-11-25</lastmod></url>
   <url><loc>https://freellmapihub.com/models/deepseek-v4-flash/</loc><lastmod>2026-11-25</lastmod></url>
   <url><loc>https://freellmapihub.com/models/deepseek-v4-flash-0731/</loc><lastmod>2026-11-20</lastmod></url>
-  <url><loc>https://freellmapihub.com/models/deepseek-v4.1-flash/</loc><lastmod>2026-11-25</lastmod></url>
+  <url><loc>https://freellmapihub.com/models/deepseek-v4.1-flash/</loc><lastmod>2026-11-26</lastmod></url>
   <url><loc>https://freellmapihub.com/models/gemini-2.5-flash/</loc><lastmod>2026-11-25</lastmod></url>
   <url><loc>https://freellmapihub.com/models/gemini-2.5-flash-lite/</loc><lastmod>2026-11-25</lastmod></url>
   <url><loc>https://freellmapihub.com/models/gemini-2.5-pro/</loc><lastmod>2026-11-25</lastmod></url>
   <url><loc>https://freellmapihub.com/models/gemma-3-4b-it/</loc><lastmod>2026-11-25</lastmod></url>
   <url><loc>https://freellmapihub.com/models/gemma-4-26b-a4b-it/</loc><lastmod>2026-11-24</lastmod></url>
-  <url><loc>https://freellmapihub.com/models/gemma-4-31b-it/</loc><lastmod>2026-11-25</lastmod></url>
+  <url><loc>https://freellmapihub.com/models/gemma-4-31b-it/</loc><lastmod>2026-11-26</lastmod></url>
   <url><loc>https://freellmapihub.com/models/glm-5.2/</loc><lastmod>2026-11-20</lastmod></url>
   <url><loc>https://freellmapihub.com/models/gpt-oss-120b/</loc><lastmod>2026-11-26</lastmod></url>
   <url><loc>https://freellmapihub.com/models/gpt-oss-20b/</loc><lastmod>2026-11-24</lastmod></url>
@@ -22,6 +22,7 @@
   <url><loc>https://freellmapihub.com/models/llama-3.3-70b-instruct/</loc><lastmod>2026-11-20</lastmod></url>
   <url><loc>https://freellmapihub.com/models/minimax-m3/</loc><lastmod>2026-11-20</lastmod></url>
   <url><loc>https://freellmapihub.com/models/mistral-small-3.2-24b-instruct-2506/</loc><lastmod>2026-11-25</lastmod></url>
+  <url><loc>https://freellmapihub.com/models/nemotron-3-ultra-550b-a55b/</loc><lastmod>2026-11-26</lastmod></url>
   <url><loc>https://freellmapihub.com/models/qwen3.8-27b/</loc><lastmod>2026-11-24</lastmod></url>
   <url><loc>https://freellmapihub.com/models/whisper-large-v3/</loc><lastmod>2026-11-25</lastmod></url>
   <url><loc>https://freellmapihub.com/free-api/qwen/</loc><lastmod>2026-11-26</lastmod></url>
@@ -167,6 +168,9 @@
   <url><loc>https://freellmapihub.com/p/infomaniak</loc><lastmod>2026-11-25</lastmod></url>
   <url><loc>https://freellmapihub.com/p/berget-ai</loc><lastmod>2026-11-26</lastmod></url>
   <url><loc>https://freellmapihub.com/p/netlify-ai-gateway</loc><lastmod>2026-11-26</lastmod></url>
+  <url><loc>https://freellmapihub.com/p/requesty</loc><lastmod>2026-11-26</lastmod></url>
+  <url><loc>https://freellmapihub.com/p/kilo-gateway</loc><lastmod>2026-11-26</lastmod></url>
+  <url><loc>https://freellmapihub.com/p/experiential-labs</loc><lastmod>2026-11-26</lastmod></url>
   <url><loc>https://freellmapihub.com/compare/</loc><lastmod>2026-11-26</lastmod></url>
   <url><loc>https://freellmapihub.com/find/</loc><lastmod>2026-11-26</lastmod></url>
   <url><loc>https://freellmapihub.com/compare/typhoon-vs-cloudflare-workers-ai/</loc><lastmod>2026-11-26</lastmod></url>

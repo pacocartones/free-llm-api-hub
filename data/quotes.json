@@ -1647,6 +1647,123 @@
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "ba012e49c6059f0dc69699e5d3e6d9fa2fb18e82b53ddc46ae7d487ff78b59f7"
+  },
+  {
+   "id": "requesty.sentence",
+   "slug": "requesty",
+   "kind": "sentence",
+   "text": "Requesty's own use of content for training is limited to free plan accounts, and an administrator can exclude those models for a whole organisation using Approved Models.",
+   "source_url": "https://www.requesty.ai/terms",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "20cd31efe459617421cccb6907eef59a3f4f5fd3172651f3afa6ae4511261ff8"
+  },
+  {
+   "id": "requesty.card_required.sentence",
+   "slug": "requesty",
+   "kind": "field_sentence",
+   "field": "card_required",
+   "text": "You can start for free: free models need no credit card.",
+   "source_url": "https://docs.requesty.ai/quickstart",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "a27875bb14a80a9a9a5e99f4e9d340bcf2ac288ddc11885263007b4e0d9a0f6b"
+  },
+  {
+   "id": "requesty.openai_compatible.sentence",
+   "slug": "requesty",
+   "kind": "field_sentence",
+   "field": "openai_compatible",
+   "text": "One API. 600+ models. OpenAI-compatible.",
+   "source_url": "https://docs.requesty.ai/quickstart",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "a27875bb14a80a9a9a5e99f4e9d340bcf2ac288ddc11885263007b4e0d9a0f6b"
+  },
+  {
+   "id": "kilo-gateway.sentence",
+   "slug": "kilo-gateway",
+   "kind": "sentence",
+   "text": "Auto Free may route your requests to providers that log prompts and outputs and use them to improve their services.",
+   "source_url": "https://kilo.ai/docs/gateway/models-and-providers",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "8d8dbcb4e0fed4691af9d4a6cdbee479794323f55583733f50ef69f0f244fe34"
+  },
+  {
+   "id": "kilo-gateway.card_required.sentence",
+   "slug": "kilo-gateway",
+   "kind": "field_sentence",
+   "field": "card_required",
+   "text": "The gateway allows unauthenticated access for free models only.",
+   "source_url": "https://kilo.ai/docs/gateway/authentication",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "97b816c63e10bab90b1298a8498cc54d706a44c969b29d9caa2e6ae50f159ac8"
+  },
+  {
+   "id": "kilo-gateway.openai_compatible.sentence",
+   "slug": "kilo-gateway",
+   "kind": "field_sentence",
+   "field": "openai_compatible",
+   "text": "The Kilo AI Gateway is fully OpenAI-compatible, so you can use the OpenAI SDK by pointing it to the Kilo base URL.",
+   "source_url": "https://kilo.ai/docs/gateway/quickstart",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "732784b2637f78d9ed76040a0ac3ca2d8fd2e012987a91cc6e6669e0b8cc15d8"
+  },
+  {
+   "id": "experiential-labs.sentence",
+   "slug": "experiential-labs",
+   "kind": "sentence",
+   "text": "Our free Subscription Plans are provided in part in exchange for the inclusion of Customer Content in the Data Licensing Program.",
+   "source_url": "https://www.experientiallabs.ai/privacy",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "5ae20df66107fb465a42d171b1c2bfe28d5880675cce720219933b258205e1c1"
+  },
+  {
+   "id": "experiential-labs.card_required.sentence",
+   "slug": "experiential-labs",
+   "kind": "field_sentence",
+   "field": "card_required",
+   "text": "Free and promotional models need a verified card.",
+   "source_url": "https://platform.experientiallabs.ai/docs/billing",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "c562e64a29d0644aec83795f84bcedc004e73434303282dd75b1508c255f230e"
+  },
+  {
+   "id": "experiential-labs.commercial_ok.sentence",
+   "slug": "experiential-labs",
+   "kind": "field_sentence",
+   "field": "commercial_ok",
+   "text": "The Services are primarily intended for business, commercial, and professional use, but we do not prohibit individuals from using the Services for personal, non-commercial purposes.",
+   "source_url": "https://www.experientiallabs.ai/terms",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "d9155c02f1dedaecf56c84a90f3bd8dfe678f27853f3b67702dd2f7a498ad4c7"
+  },
+  {
+   "id": "experiential-labs.openai_compatible.sentence",
+   "slug": "experiential-labs",
+   "kind": "field_sentence",
+   "field": "openai_compatible",
+   "text": "OpenAI-compatible with streaming",
+   "source_url": "https://www.experientiallabs.ai/pricing",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "e31860eb3dc8beaa71cc9b9214e29be3393e367d82df70faafc03fe3b644a9ad"
   }
  ]
 }
