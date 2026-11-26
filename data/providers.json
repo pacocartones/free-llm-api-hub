@@ -2038,7 +2038,9 @@
       "added": "2026-11-25",
       "last_probed": null,
       "probe_status": null,
-      "data_policy": {"trains_on_prompts":true,"retention":null,"source":"https://stability.ai/terms-of-service","checked":"2026-11-25","quote":"As described in our Privacy Policy , we may use Content to improve and develop our Services (but you can opt-out to prevent us from using your Inputs and Outputs to train our models, learn more ), comply with applicable law, enforce our terms and policies, and to keep our Services safe.","note":"Terms effective 2026-09-30; they define the Services to include the API. Stability's opt-out help page explains how Platform API users turn the training toggle off in their account settings. No retention period for prompts is stated.","plan_named":false}
+      "data_policy": {"trains_on_prompts":true,"retention":null,"source":"https://stability.ai/terms-of-service","checked":"2026-11-25","quote":"As described in our Privacy Policy , we may use Content to improve and develop our Services (but you can opt-out to prevent us from using your Inputs and Outputs to train our models, learn more ), comply with applicable law, enforce our terms and policies, and to keep our Services safe.","note":"Terms effective 2026-09-30; they define the Services to include the API. Stability's opt-out help page explains how Platform API users turn the training toggle off in their account settings. No retention period for prompts is stated.","plan_named":false},
+      "keys_url": "https://platform.stability.ai/dashboard/api-keys",
+      "keys_url_source": "https://docs.stability.ai/api-reference"
     },
     {
       "slug": "plamo",
