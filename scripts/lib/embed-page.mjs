@@ -5,8 +5,7 @@
 // Pure: a function of the providers, the citation and a few constants, so the committed page is deterministic.
 // The generator runs in site/embed.js; without JavaScript the page shows the default snippets, which work as they are.
 
-import { htmlEsc } from './rows.mjs';
-import { codeHtmlEsc } from './quickstart.mjs';
+import { escapeHtml, escapeText } from './html.mjs';
 import { citeBlockHtml } from './citation.mjs';
 
 export const EMBED_PATH = '/embed/';
@@ -24,7 +23,7 @@ export const providerBadgeMarkdown = (p, site) =>
   `[![${p.name} on Free LLM API Hub](https://img.shields.io/endpoint?url=${site}/badges/${p.slug}.json)](${site}/p/${p.slug})`;
 
 export const providerBadgeHtml = (p, site) =>
-  `<a href="${site}/p/${p.slug}"><img src="https://img.shields.io/endpoint?url=${site}/badges/${p.slug}.json" alt="${htmlEsc(p.name)} on Free LLM API Hub" height="20"></a>`;
+  `<a href="${site}/p/${p.slug}"><img src="https://img.shields.io/endpoint?url=${site}/badges/${p.slug}.json" alt="${escapeHtml(p.name)} on Free LLM API Hub" height="20"></a>`;
 
 export const verifiedBadgeHtml = (site, width) =>
   `<a href="${site}/"><img src="${site}/badge-verified.svg" alt="Verified providers on Free LLM API Hub" width="${width}" height="20"></a>`;
@@ -32,7 +31,7 @@ export const verifiedBadgeHtml = (site, width) =>
 export const verifiedBadgeMarkdown = (site) =>
   `[![Verified providers](${site}/badge-verified.svg)](${site}/)`;
 
-const pre = (kind, text, id = '') => `<pre data-snippet="${kind}"><code${id ? ` id="${id}"` : ''}>${codeHtmlEsc(text)}</code></pre>`;
+const pre = (kind, text, id = '') => `<pre data-snippet="${kind}"><code${id ? ` id="${id}"` : ''}>${escapeText(text)}</code></pre>`;
 
 export function embedTitle() { return 'Use the data: widget, badges, API and citation · Free LLM API Hub'; }
 export function embedDescription(n) {
@@ -49,7 +48,7 @@ export function embedMainHtml({ pageHero, site, prefix = '../', providers, badge
     `<label class="cmp-slot"><span>Modality</span><select class="sel" name="modality"><option value="">Any</option>${WIDGET_MODALITIES.map((m) => `<option value="${m}"${m === WIDGET_DEFAULT.modality ? ' selected' : ''}>${m}</option>`).join('')}</select></label>` +
     `<label class="cmp-slot"><span>Category</span><select class="sel" name="category"><option value="">Both</option><option value="ongoing">Ongoing free tier</option><option value="trial">Trial credit</option></select></label>` +
     `</form><p class="muted" id="embed-form-note">The snippet and the preview follow your choices. All attributes are optional; <code>data-sort</code> takes an explorer sort key (<code>recommended</code> by default).</p>`;
-  const providerOptions = sorted.map((p) => `<option value="${htmlEsc(p.slug)}"${p === first ? ' selected' : ''}>${htmlEsc(p.name)}</option>`).join('');
+  const providerOptions = sorted.map((p) => `<option value="${escapeHtml(p.slug)}"${p === first ? ' selected' : ''}>${escapeHtml(p.name)}</option>`).join('');
   return pageHero({
     crumbs: `<a href="${prefix}">Home</a> / Use the data`,
     h1: 'Use the data',
@@ -70,7 +69,7 @@ export function embedMainHtml({ pageHero, site, prefix = '../', providers, badge
     pre('embed', verifiedBadgeHtml(site, badgeWidth)) +
     pre('badge', verifiedBadgeMarkdown(site)) +
     `<h3 id="provider-badge">One provider</h3>` +
-    `<p>Every provider has its own badge with the date of its last verification. Its colour follows the age of that check: green while fresh, yellow past 60 days, red past the ${slaDays}-day freshness window, so a badge someone forgot never claims more than the data does. It renders through <a href="https://shields.io/badges/endpoint-badge" target="_blank" rel="noopener">shields.io</a> from <a href="${prefix}badges/${htmlEsc(first.slug)}.json">this site’s JSON</a>; this page loads nothing from shields.io.</p>` +
+    `<p>Every provider has its own badge with the date of its last verification. Its colour follows the age of that check: green while fresh, yellow past 60 days, red past the ${slaDays}-day freshness window, so a badge someone forgot never claims more than the data does. It renders through <a href="https://shields.io/badges/endpoint-badge" target="_blank" rel="noopener">shields.io</a> from <a href="${prefix}badges/${escapeHtml(first.slug)}.json">this site’s JSON</a>; this page loads nothing from shields.io.</p>` +
     `<form class="cmp-form" action="#provider-badge"><label class="cmp-slot"><span>Provider</span><select class="sel" id="badge-provider" name="p">${providerOptions}</select></label></form>` +
     `<p>Markdown:</p>` +
     pre('badge', providerBadgeMarkdown(first, site), 'badge-snippet') +

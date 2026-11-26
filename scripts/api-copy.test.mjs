@@ -3,13 +3,13 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { Script, createContext } from 'node:vm';
+import { escapeAttr } from './lib/html.mjs';
 const source = readFileSync(new URL('../site/site.js', import.meta.url), 'utf8');
 const build = readFileSync(new URL('./build.mjs', import.meta.url), 'utf8');
-// Execute the real apiRow and sanitizer from the pinned build source, without running the build.
-const esc = build.split('\n').find(l => l.startsWith('const htmlEsc ='));
+// Execute the real apiRow from the pinned build source, with the shared escaper it calls, without running the build.
 const rowSource = build.match(/const apiRow =[\s\S]*?(?=\n\/\/ Client-config section)/)[0];
-const ctx = createContext({ SITE: 'https://freellmapihub.com' });
-new Script(esc + '\n' + rowSource + '\nglobalThis.renderRow = apiRow;').runInContext(ctx);
+const ctx = createContext({ SITE: 'https://freellmapihub.com', escapeAttr });
+new Script(rowSource + '\nglobalThis.renderRow = apiRow;').runInContext(ctx);
 
 for (const [path, count] of [['providers.json', 67], ['schema.json', null], ['modality/text.json', 21]]) {
   test('endpoint row supplies accessible copy and curl for ' + path, () => {

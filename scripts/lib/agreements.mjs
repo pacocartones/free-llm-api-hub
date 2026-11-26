@@ -10,7 +10,8 @@
 //    and never in a table of providers.
 //  - Copy that sells (featured, partner, recommended) does not appear in the text of a block or a row.
 
-import { htmlEsc, SLUG_RE } from './rows.mjs';
+import { escapeHtml } from './html.mjs';
+import { SLUG_RE } from './rows.mjs';
 
 export const AGREEMENT_TYPES = { sponsored_block: 'Sponsored block', sponsored_section: 'Sponsored section', paid_link: 'Paid link' };
 export const DISCLOSURE_KINDS = { free_credit: 'free credit', early_access: 'early access', test_account: 'a test account', personal: 'personal' };
@@ -72,14 +73,14 @@ export function agreementsErrors(file, { slugs = [], today } = {}) {
 /** The rows in force on `day`: started, and not ended. */
 export const inForce = (file, day) => (file?.agreements ?? []).filter((a) => a.since <= day && (a.until == null || a.until >= day));
 
-const date = (s) => (s ? htmlEsc(s) : 'no end date');
+const date = (s) => (s ? escapeHtml(s) : 'no end date');
 
 /** "Agreements in force": the table, or the one sentence when it is empty. Computed from the rows. */
 export function agreementsTableHtml(file, day) {
   const rows = inForce(file, day);
-  const head = '<h2 id="agreements">Agreements in force</h2><p>Every paid relationship Free LLM API Hub has today, with its dates and what each side gets. Updated ' + htmlEsc(file.generated) + '.</p>';
-  if (!rows.length) return head + '<p class="agreements-empty"><strong>No agreement is in force.</strong> (as of ' + htmlEsc(day) + ')</p>';
-  const body = rows.map((a) => '<tr><th scope="row"><a href="' + htmlEsc(a.url) + '" rel="sponsored nofollow noopener">' + htmlEsc(a.company) + '</a></th><td>' + htmlEsc(AGREEMENT_TYPES[a.type]) + '</td><td>' + date(a.since) + '</td><td>' + date(a.until) + '</td><td>' + htmlEsc(a.receives) + '</td><td>' + htmlEsc(a.does_not_receive) + '</td><td>' + htmlEsc(a.data_checked_by) + '</td><td>' + htmlEsc(a.last_review) + '</td></tr>').join('');
+  const head = '<h2 id="agreements">Agreements in force</h2><p>Every paid relationship Free LLM API Hub has today, with its dates and what each side gets. Updated ' + escapeHtml(file.generated) + '.</p>';
+  if (!rows.length) return head + '<p class="agreements-empty"><strong>No agreement is in force.</strong> (as of ' + escapeHtml(day) + ')</p>';
+  const body = rows.map((a) => '<tr><th scope="row"><a href="' + escapeHtml(a.url) + '" rel="sponsored nofollow noopener">' + escapeHtml(a.company) + '</a></th><td>' + escapeHtml(AGREEMENT_TYPES[a.type]) + '</td><td>' + date(a.since) + '</td><td>' + date(a.until) + '</td><td>' + escapeHtml(a.receives) + '</td><td>' + escapeHtml(a.does_not_receive) + '</td><td>' + escapeHtml(a.data_checked_by) + '</td><td>' + escapeHtml(a.last_review) + '</td></tr>').join('');
   return head + '<div class="table-scroll"><table class="agreements"><thead><tr><th scope="col">Company</th><th scope="col">Type</th><th scope="col">Since</th><th scope="col">Until</th><th scope="col">What it receives</th><th scope="col">What it does not receive</th><th scope="col">Who checked its data</th><th scope="col">Last review of this row</th></tr></thead><tbody>' + body + '</tbody></table></div>';
 }
 
@@ -87,23 +88,23 @@ export function agreementsTableHtml(file, day) {
 export function sponsoredBlockHtml(a) {
   const label = 'Sponsored. Paid placement. Not part of the ranking and not affected by it.';
   if (a.type === 'sponsored_section') {
-    return '<section class="sponsored" aria-label="' + htmlEsc(label) + '"><p class="sponsored-label"><strong>Sponsored</strong> Paid placement. Not part of the ranking and not affected by it.</p>' +
-      '<p><strong>Sponsored by ' + htmlEsc(a.company) + '.</strong> Written and verified by Free LLM API Hub. ' + htmlEsc(a.company) + ' did not edit the data. ' + htmlEsc(a.company) + (a.company_reviewed_text ? ' did' : ' did not') + ' review this text.</p>' +
-      '<p>' + htmlEsc(a.text) + '</p><p><a href="' + htmlEsc(a.url) + '" target="_blank" rel="sponsored nofollow noopener">Go to ' + htmlEsc(a.company) + '</a> (opens in a new tab)</p></section>';
+    return '<section class="sponsored" aria-label="' + escapeHtml(label) + '"><p class="sponsored-label"><strong>Sponsored</strong> Paid placement. Not part of the ranking and not affected by it.</p>' +
+      '<p><strong>Sponsored by ' + escapeHtml(a.company) + '.</strong> Written and verified by Free LLM API Hub. ' + escapeHtml(a.company) + ' did not edit the data. ' + escapeHtml(a.company) + (a.company_reviewed_text ? ' did' : ' did not') + ' review this text.</p>' +
+      '<p>' + escapeHtml(a.text) + '</p><p><a href="' + escapeHtml(a.url) + '" target="_blank" rel="sponsored nofollow noopener">Go to ' + escapeHtml(a.company) + '</a> (opens in a new tab)</p></section>';
   }
-  return '<aside class="sponsored" aria-label="' + htmlEsc(label) + '"><p class="sponsored-label"><strong>Sponsored</strong> Paid placement. Not part of the ranking and not affected by it.</p>' +
-    '<p>' + htmlEsc(a.text) + (a.company_wrote_text ? ' <em>(Text written by ' + htmlEsc(a.company) + '.)</em>' : '') + '</p>' +
-    '<p><a href="' + htmlEsc(a.url) + '" target="_blank" rel="sponsored nofollow noopener">Go to ' + htmlEsc(a.company) + '</a> (opens in a new tab)</p>' +
-    '<p class="sponsored-foot">' + htmlEsc(a.company) + ' paid for this block. It did not edit any data on this site. <a href="/agreements/#agreements">Agreements and policy</a></p></aside>';
+  return '<aside class="sponsored" aria-label="' + escapeHtml(label) + '"><p class="sponsored-label"><strong>Sponsored</strong> Paid placement. Not part of the ranking and not affected by it.</p>' +
+    '<p>' + escapeHtml(a.text) + (a.company_wrote_text ? ' <em>(Text written by ' + escapeHtml(a.company) + '.)</em>' : '') + '</p>' +
+    '<p><a href="' + escapeHtml(a.url) + '" target="_blank" rel="sponsored nofollow noopener">Go to ' + escapeHtml(a.company) + '</a> (opens in a new tab)</p>' +
+    '<p class="sponsored-foot">' + escapeHtml(a.company) + ' paid for this block. It did not edit any data on this site. <a href="/agreements/#agreements">Agreements and policy</a></p></aside>';
 }
 
 /** The line for a relationship without money, or '' when the provider has none. Next to the provider page, nowhere else. */
 export function disclosureHtml(file, slug) {
   const out = (file?.disclosures ?? []).filter((d) => d.slug === slug).map((d) => {
-    const tail = ' It does not change how ' + htmlEsc(d.company) + ' is scored or described.';
+    const tail = ' It does not change how ' + escapeHtml(d.company) + ' is scored or described.';
     return d.kind === 'personal'
-      ? '<p class="disclosure"><strong>Disclosure:</strong> ' + htmlEsc(d.relation) + tail + '</p>'
-      : '<p class="disclosure"><strong>Disclosure:</strong> ' + htmlEsc(d.company) + ' gave us ' + DISCLOSURE_KINDS[d.kind] + ' to try its service. No money was paid.' + tail + '</p>';
+      ? '<p class="disclosure"><strong>Disclosure:</strong> ' + escapeHtml(d.relation) + tail + '</p>'
+      : '<p class="disclosure"><strong>Disclosure:</strong> ' + escapeHtml(d.company) + ' gave us ' + DISCLOSURE_KINDS[d.kind] + ' to try its service. No money was paid.' + tail + '</p>';
   });
   return out.join('');
 }

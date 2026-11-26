@@ -19,7 +19,7 @@
 // Like flags.mjs, auraSpec, auraRng, auraPaths and auraHtml are shipped to the browser as source text
 // (rows.clientBundle), so keep them self-contained: they may only use htmlEsc, the flag helpers and the constants below.
 
-import { htmlEsc } from './rows.mjs';
+import { escapeHtml as htmlEsc } from './html.mjs'; // the name these functions use when serialised
 import { FLAG_DEFS, flagValue, flagState } from './flags.mjs';
 
 /** The modalities in the order their sectors are drawn, clockwise from the seeded start. Every schema modality is here. */
