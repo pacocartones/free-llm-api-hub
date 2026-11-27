@@ -65,8 +65,9 @@ node --env-file=.env scripts/probe.mjs --write
 less data/probe-report.json
 git status          # data/providers.json + data/probe-report.json changed
 
-# 6. Build and commit, then let CI verify
-npm run build
+# 6. Check, then commit your source changes only (push mode: the bot regenerates
+#    the derived files, data/probe-report.json included, after the merge)
+npm test && npm run check
 ```
 
 To probe a single provider at a time: `node --env-file=.env scripts/probe.mjs --only=groq`.
@@ -103,7 +104,7 @@ Everything on the code side is built, tested and committed (harness, fields, bad
 
 **First real run:**
 - [ ] Dry run to see who's reachable: `infisical run --projectId <id> --env prod --path /free-llm-api-hub -- npm run probe`
-- [ ] Persist it: same command with `node scripts/probe.mjs --write`, then `npm run build`, review the diff, commit.
+- [ ] Persist it: same command with `node scripts/probe.mjs --write`, then `npm test && npm run check`, review the diff, and commit `data/providers.json` only; in push mode the bot regenerates the rest after the merge ([CONTRIBUTING](../CONTRIBUTING.md#for-provider-data-edit-the-source)).
 - [ ] Wire the cron (see `scripts/probe-cron.sh`) once the deploy decision is made.
 
 **Then (phase 2, all in [backlog.md](backlog.md)):** provider-specific adapters for the non-OpenAI APIs; render `data/probe-report.json` as a live-tested badge (N of the providers that declare an `env_key`) + a *measured* "fastest free APIs" collection; auto-flag `tier-ended` results onto the re-verification worklist.
