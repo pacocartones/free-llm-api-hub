@@ -77,6 +77,7 @@ import { compareVerdict, compareFaq, compareFaqHtml } from './lib/compare-faq.mj
 import { homeCounts, homeTitle, homeDescription, llmsCounts } from './lib/home-seo.mjs';
 import { providerDateModified } from './lib/provider-dates.mjs';
 import { isIndexable, modelPageMainHtml, modelPageTitle, modelPageDescription, modelPageJsonLd } from './lib/model-pages.mjs';
+import { modelIndexRows, modelIndexStats, modelIndexAnswerHtml, modelIndexTableHtml, modelIndexDescription } from './lib/model-index.mjs';
 import { FAMILY_PATH, familyGroups, isFamilyIndexable, familyUrl, familyH1, familyPageTitle, familyPageDescription, familyBlurb, familyPageMainHtml, familyNavHtml } from './lib/model-families.mjs';
 import { collectionPageJsonLd as pageJsonLd, comparePageJsonLd } from './lib/page-jsonld.mjs';
 import { notFreeErrors, notFreeReadmeMd, notFreeModel, notFreeMainHtml, notFreeJsonLd, notFreeTitle, notFreeDescription, NOT_FREE_PATH } from './lib/not-free.mjs';
@@ -1892,25 +1893,17 @@ writeFileSync(join(ROOT, 'docs/credit-programs.md'), creditDoc);
 
 // ---------- free model index: model -> provider, searchable ----------
 mkdirSync(join(ROOT, 'site/models'), { recursive: true });
-const modelIndex = [];
-for (const p of providers) for (const m of (p.models_free || [])) modelIndex.push({ m, p });
-modelIndex.sort((a, b) => a.m.toLowerCase().localeCompare(b.m.toLowerCase()) || a.p.name.localeCompare(b.p.name));
+const modelIndex = modelIndexRows(providers);
 const modelProviderCount = providers.filter((p) => p.models_free && p.models_free.length).length;
-const modelRowHtml = ({ m, p }) =>
-  `<tr data-s="${escapeAttr((m + ' ' + p.name + ' ' + (p.modalities || []).join(' ')).toLowerCase())}">` +
-  `<td class="name">${MODEL_PAGE_KEYS.has(modelKey(m)) ? `<a href="${modelKey(m)}/"><code>${escapeAttr(m)}</code></a>` : `<code>${escapeAttr(m)}</code>`}</td>` +
-  `<td><a href="../p/${p.slug}">${escapeAttr(p.name)}</a></td>` +
-  `<td>${escapeAttr(p.free_type)}</td>` +
-  `<td class="notes">${(p.modalities || []).join(', ') || '—'}</td></tr>`;
+const MODEL_INDEX_STATS = modelIndexStats(providers, MODEL_GROUPS);
 const modelsMain =
-  pageHero({ crumbs: `<a href="../">Home</a> / Free model index`, h1: `Free model index`, lede: `Every model our verified providers expose on a free tier — <strong>${modelIndex.length}</strong> entries across <strong>${modelProviderCount}</strong> providers, pulled from each provider's own <code>/models</code> endpoint where possible. The same model can appear under more than one provider.` }) +
-  `<main id="main"><div class="wrap"><h2 class="eyebrow">Free API by model family</h2>${familyNavHtml(FAMILY_GROUPS, '../')}` +
-  `<table class="model-table"><thead><tr><th>Model</th><th>Provider</th><th>Free type</th><th>Modalities</th></tr></thead><tbody>\n` +
-  modelIndex.map(modelRowHtml).join('\n') +
-  `\n</tbody></table><p class="muted" style="margin-top:18px">Model lists are a live sample and change often — always confirm against the provider. A provider missing here usually needs an API key to list its models; <a href="${REPO}/blob/main/docs/update-playbook.md">see how the list is refreshed</a>.</p></div></main>`;
+  pageHero({ crumbs: `<a href="../">Home</a> / Free model index`, h1: `Free AI models API index`, lede: `Every model our verified providers expose on a free tier — <strong>${modelIndex.length}</strong> entries across <strong>${modelProviderCount}</strong> providers, pulled from each provider's own <code>/models</code> endpoint where possible. The same model can appear under more than one provider.` }) +
+  `<main id="main"><div class="wrap">${modelIndexAnswerHtml(MODEL_INDEX_STATS)}<h2 class="eyebrow">Free API by model family</h2>${familyNavHtml(FAMILY_GROUPS, '../')}` +
+  modelIndexTableHtml(modelIndex, { modelHref: (m) => (MODEL_PAGE_KEYS.has(modelKey(m)) ? `${modelKey(m)}/` : ''), familyPrefix: '../', families: FAMILY_GROUPS }) +
+  `<p class="muted" style="margin-top:18px">Model lists are a live sample and change often — always confirm against the provider. A provider missing here usually needs an API key to list its models; <a href="${REPO}/blob/main/docs/update-playbook.md">see how the list is refreshed</a>.</p></div></main>`;
 writeFileSync(join(ROOT, 'site/models/index.html'), htmlPage({
-  title: datedTitle('Free model index — which free API serves which model · Free LLM API Hub'),
-  desc: `Index of ${modelIndex.length} models available on free LLM & AI-model API tiers, and which provider serves each.`,
+  title: datedTitle('Free AI models API index — which free API serves which model · Free LLM API Hub'),
+  desc: modelIndexDescription(MODEL_INDEX_STATS),
   canonical: `${SITE}/models/`,
   main: modelsMain,
   ogImage: `${SITE}/og/models.png`,

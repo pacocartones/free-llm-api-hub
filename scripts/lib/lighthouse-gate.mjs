@@ -12,20 +12,26 @@ export const THRESHOLDS = Object.freeze({ accessibility: 0.95, performance: 0.8 
 // Performance moves between runs on a shared runner, so it keeps the median of three
 // and runs after a merge to main and nightly, where a slow sample costs no contributor a wait.
 // `full` is the old single pass (all three categories, median of three), for local runs.
+// `concurrency` is how many pages are measured at once. Accessibility and SEO audit the DOM, not timings, so three
+// Chromes side by side give the same verdict in a third of the time; anything that scores performance measures one
+// page at a time, so no run competes with another for the CPU.
 export const MODES = Object.freeze({
   'accessibility-seo': Object.freeze({
     categories: Object.freeze(['accessibility', 'seo']),
     runs: 1,
+    concurrency: 3,
     thresholds: Object.freeze({ accessibility: THRESHOLDS.accessibility, seo: 1 }),
   }),
   performance: Object.freeze({
     categories: Object.freeze(['performance']),
     runs: 3,
+    concurrency: 1,
     thresholds: Object.freeze({ performance: THRESHOLDS.performance }),
   }),
   full: Object.freeze({
     categories: Object.freeze(['accessibility', 'performance', 'seo']),
     runs: 3,
+    concurrency: 1,
     thresholds: Object.freeze({ ...THRESHOLDS, seo: 1 }),
   }),
 });
