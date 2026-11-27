@@ -79,6 +79,67 @@ export function fieldCheckErrors(p, { today }) {
 }
 
 /**
+ * The receipts rule: a flag that holds a value (true, false or "conditional") carries the provider's own sentence — a
+ * `stated` check with its `quote` (registered in data/quotes.json, checked by scripts/lib/quotes.mjs). A value that no
+ * official sentence supports goes back to null with the reason (source_silent, needs_account or sources_disagree).
+ *
+ * UNSOURCED_ALLOWLIST holds the few exceptions that could not be fixed yet, each time-boxed: { slug, field, until, reason }.
+ * An entry past its `until` day fails, and so does an entry that is no longer needed, so the list only shrinks.
+ */
+export const UNSOURCED_ALLOWLIST = Object.freeze([
+  // Official pages that state the value but render it only with JavaScript, so quotes:add reads an empty shell.
+  { slug: 'google-gemini', field: 'commercial_ok', until: '2026-12-31', reason: 'ai.google.dev/gemini-api/terms renders only with JavaScript' },
+  { slug: 'google-gemini', field: 'openai_compatible', until: '2026-12-31', reason: 'ai.google.dev/gemini-api/docs/openai renders only with JavaScript' },
+  { slug: 'ai-horde', field: 'commercial_ok', until: '2026-12-31', reason: 'the aihorde.net FAQ answers render only with JavaScript' },
+  { slug: 'pollinations', field: 'commercial_ok', until: '2026-12-31', reason: 'pollinations.ai/terms renders only with JavaScript' },
+  { slug: 'tencent-hunyuan', field: 'phone_required', until: '2026-12-31', reason: 'the cloud.tencent.com sign-up guide renders only with JavaScript' },
+  // Official pages that answer HTTP 403 to clients that are not browsers.
+  { slug: 'nlpcloud', field: 'card_required', until: '2026-12-31', reason: 'nlpcloud.com answers HTTP 403 to non-browser clients' },
+  { slug: 'nlpcloud', field: 'commercial_ok', until: '2026-12-31', reason: 'nlpcloud.com answers HTTP 403 to non-browser clients' },
+  { slug: 'sambanova', field: 'openai_compatible', until: '2026-12-31', reason: 'docs.sambanova.ai answers HTTP 403 to non-browser clients' },
+]);
+
+/** True when the flag holds a value and has a stated check with a quote. */
+export function hasReceipt(p, field) {
+  const c = fieldCheck(p, field);
+  return !!c && c.status === 'stated' && typeof c.quote === 'string' && c.quote.trim() !== '';
+}
+
+/** The receipts rule for one provider. @returns {string[]} */
+export function unsourcedFlagErrors(p, { today, allowlist = UNSOURCED_ALLOWLIST }) {
+  const errors = [];
+  const id = p.slug || p.name || '(unknown)';
+  for (const field of FIELD_CHECK_FIELDS) {
+    const value = p[field];
+    if (value === null || value === undefined || hasReceipt(p, field)) continue;
+    const allowed = allowlist.find((a) => a.slug === p.slug && a.field === field);
+    if (allowed && DATE_RE.test(allowed.until || '') && allowed.until >= today) continue;
+    errors.push(allowed
+      ? `${id}: ${field} is on the unsourced allowlist until ${allowed.until}, which has passed: record the provider's sentence or set it to null with the reason`
+      : `${id}: ${field} is ${JSON.stringify(value)} with no provider sentence: record a stated field_checks.${field} with its quote (npm run quotes:add -- ${id} --field ${field}), or set ${field} to null with the reason (source_silent, needs_account or sources_disagree)`);
+  }
+  return errors;
+}
+
+/** The allowlist itself: well-formed, time-boxed and still needed. @returns {string[]} */
+export function unsourcedAllowlistErrors(providers, { allowlist = UNSOURCED_ALLOWLIST } = {}) {
+  const errors = [];
+  const seen = new Set();
+  for (const a of allowlist) {
+    const where = `UNSOURCED_ALLOWLIST ${a && a.slug}.${a && a.field}`;
+    if (!a || !FIELD_CHECK_FIELDS.includes(a.field) || typeof a.slug !== 'string') { errors.push(`${where}: an entry names a provider slug and one of ${FIELD_CHECK_FIELDS.join(', ')}`); continue; }
+    if (!DATE_RE.test(a.until || '')) errors.push(`${where}: until must be a date (YYYY-MM-DD)`);
+    if (typeof a.reason !== 'string' || !a.reason.trim()) errors.push(`${where}: an entry says why the flag could not be sourced`);
+    if (seen.has(`${a.slug}.${a.field}`)) errors.push(`${where}: listed twice`);
+    seen.add(`${a.slug}.${a.field}`);
+    const p = providers.find((x) => x.slug === a.slug);
+    if (!p) errors.push(`${where}: no provider has that slug`);
+    else if (p[a.field] === null || p[a.field] === undefined || hasReceipt(p, a.field)) errors.push(`${where}: the flag is null or sourced now, so remove the entry`);
+  }
+  return errors;
+}
+
+/**
  * Counts by status of one flag over a population: { stated, source_silent, needs_account, sources_disagree,
  * not_checked, unsourced } where unsourced = a non-null value with no stated check.
  */

@@ -2,7 +2,8 @@
 // Covers: serializer round-trip, validator honesty rules, existing self-tests,
 // build idempotency, one generated README row matching the data, and the
 // generated client configs (LiteLLM + OpenAI SDK) and published JSON Schema.
-import { before, describe, test } from 'node:test';
+// test and describe come from lib/test-part.mjs: node:test's own, unless run-tests.mjs runs this file in parts.
+import { before, describe, test } from './lib/test-part.mjs';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { readFileSync, writeFileSync, existsSync, readdirSync, statSync, rmSync } from 'node:fs';
@@ -911,16 +912,14 @@ test('the shipped badge grades its own stated age by the rule', () => {
 // ---------- a confirmed "yes" must never look like an unknown ----------
 test('a confirmed card requirement is never hidden in the README top-20 or the explorer', () => {
   const { providers } = JSON.parse(readFileSync(DATA, 'utf8'));
-  const best = JSON.parse(readFileSync(join(ROOT, 'data/best.json'), 'utf8'));
   const readme = readFileSync(join(ROOT, 'README.md'), 'utf8');
   const explorer = readFileSync(join(ROOT, 'site/index.html'), 'utf8');
-  const bySlug = new Map(providers.map((p) => [p.slug, p]));
   const walled = providers.filter((p) => p.card_required === true);
   assert.ok(walled.length, 'dataset has at least one card-gated provider to check');
 
-  // README: any top-20 pick that requires a card must say so.
-  for (const e of best.entries) {
-    const p = bySlug.get(e.slug);
+  // README: any pick of the README table (the score top, not data/best.json) that requires a card must say so.
+  for (const e of topOfData()) {
+    const p = e.p;
     if (p && p.card_required === true) {
       const row = readme.split('\n').find((l) => l.includes(`](${p.docs_url})`));
       assert.ok(row, `${p.slug}: no README top-20 row found`);
@@ -1561,8 +1560,17 @@ describe('read-only generated output', () => {
     const months = readdirSync(join(ROOT, 'site/state')).filter((f) => /^\d{4}-\d{2}$/.test(f));
     assert.ok(months.length > 0, 'at least one monthly report');
     assertWellFormedXml(readFileSync(join(ROOT, 'site/changes.xml'), 'utf8'));
+    // The Atom twin reads the same projected weeks as api/v1/changes.json (scripts/changes-feed.test.mjs checks its shape).
+    const atom = readFileSync(join(ROOT, 'site/changes.atom'), 'utf8');
+    assertWellFormedXml(atom);
+    for (const html of ['site/index.html', 'site/changes/index.html']) {
+      assert.equal((readFileSync(join(ROOT, html), 'utf8').match(/<link rel="alternate" type="application\/atom\+xml"[^>]*changes\.atom">/g) || []).length, 1, html + ': one Atom autodiscovery link');
+    }
+    const changesIndex = readFileSync(join(ROOT, 'site/changes/index.html'), 'utf8');
+    assert.match(changesIndex, /<section id="latest" class="week-summary"><h2>(This|Latest) week<\/h2><p><strong>(This week|Latest week with changes|Latest week: not stated)/);
     const api = JSON.parse(readFileSync(join(ROOT, 'site/api/v1/changes.json'), 'utf8'));
     assert.ok(api.weeks.length > 0 && api.weeks.length <= 12);
+    assert.deepEqual((atom.match(/<id>tag:freellmapihub\.com,2026:changes:(\d{4}-W\d{2})<\/id>/g) || []).map((id) => id.slice(-13, -5)), api.weeks.map((w) => w.week), 'one Atom entry per week of changes.json');
     for (let i = 1; i < api.weeks.length; i++) assert.ok(api.weeks[i - 1].start > api.weeks[i].start, 'weeks newest first');
     for (const c of api.weeks[0].changes) assert.deepEqual(Object.keys(c), ['date', 'slug', 'name', 'field', 'from', 'to']);
     assert.equal(JSON.parse(readFileSync(join(ROOT, 'site/api/v1/index.json'), 'utf8')).endpoints.changes, 'v1/changes.json');
@@ -1571,7 +1579,7 @@ describe('read-only generated output', () => {
 
     const pins = Object.keys(JSON.parse(readFileSync(join(ROOT, 'derived-fingerprints.json'), 'utf8')));
     for (const k of pins) {
-      assert.ok(!k.startsWith('site/changes/') && !k.startsWith('site/state/') && k !== 'site/changes.xml' && k !== 'site/api/v1/changes.json',
+      assert.ok(!k.startsWith('site/changes/') && !k.startsWith('site/state/') && k !== 'site/changes.xml' && k !== 'site/changes.atom' && k !== 'site/api/v1/changes.json',
         k + ' is git-log derived and must not be pinned');
     }
     const sitemap = readFileSync(join(ROOT, 'site/sitemap.xml'), 'utf8');
@@ -1675,16 +1683,14 @@ describe('read-only generated output', () => {
     assert.match(index, /<script src="\.\.\/shared-compare\.js\?v=[0-9a-f]{8}" defer><\/script>\n<script src="\.\.\/compare\.js\?v=[0-9a-f]{8}" defer><\/script>\n<\/body>/);
     assert.equal(index.split('<script>').length - 1, 1, 'only the hashed theme guard runs inline');
     assert.equal((index.match(/<select class="sel" name="p">/g) || []).length, COMPARE_MAX_SLOTS);
-    // ai-horde has commercial_ok: null in the dataset; any page with a null flag
-    // must say so instead of rendering it as "no".
+    // Any page with a null flag must say so instead of rendering it as "no".
     const { providers } = JSON.parse(readFileSync(DATA, 'utf8'));
-    const page = readdirSync(join(ROOT, 'site/compare')).find((d) => {
-      if (!isPairPage(d)) return false;
-      // a null with no recorded reason: one with a reason (field_checks) says the reason instead
-      return d.split('-vs-').some((s) => { const p = providers.find((x) => x.slug === s); return p && p.commercial_ok === null && !(p.field_checks && p.field_checks.commercial_ok); });
-    });
+    // A null with no recorded reason reads "not confirmed"; one with a reason (field_checks) says the reason
+    // instead (both pinned on triStateHtml in field-checks.test.mjs). Either way it is never rendered as "no".
+    const page = readdirSync(join(ROOT, 'site/compare')).find((d) => isPairPage(d)
+      && d.split('-vs-').some((s) => { const p = providers.find((x) => x.slug === s); return p && p.commercial_ok === null; }));
     assert.ok(page, 'the real set contains a provider with an unconfirmed flag');
-    assert.match(readFileSync(join(ROOT, `site/compare/${page}/index.html`), 'utf8'), /<span class="tri tri-unk">not confirmed<\/span>/);
+    assert.match(readFileSync(join(ROOT, `site/compare/${page}/index.html`), 'utf8'), /<span class="tri tri-unk( tri-why" title="Not confirmed: [^"]+)?">(not confirmed|[^<]+\(checked \d{4}-\d{2}-\d{2}\))<\/span>/);
   });
 
   test('keyboard navigation is client-only: the server-rendered rows carry no tabindex', () => {
@@ -2144,6 +2150,14 @@ test('active providers retain models_url from their official catalogues', () => 
     ['infomaniak', 'https://www.infomaniak.com/en/hosting/ai-services/open-source-models'],
     ['berget-ai', 'https://berget.ai/en/models'],
     ['netlify-ai-gateway', 'https://docs.netlify.com/build/ai-gateway/overview/#model-availability'],
+    ['requesty', 'https://docs.requesty.ai/features/free-models'],
+    ['kilo-gateway', 'https://kilo.ai/models'],
+    ['experiential-labs', 'https://platform.experientiallabs.ai/models'],
+    ['google-cloud-tts', 'https://docs.cloud.google.com/text-to-speech/docs/list-voices-and-types'],
+    ['google-cloud-vision', 'https://docs.cloud.google.com/vision/docs/features-list'],
+    ['amazon-bedrock', 'https://docs.aws.amazon.com/bedrock/latest/userguide/models-supported.html'],
+    ['oci-generative-ai', 'https://docs.oracle.com/en-us/iaas/Content/generative-ai/pretrained-models.htm'],
+    ['nscale', 'https://docs.nscale.com/docs/ai-services/models'],
   ].sort(bySlug));
 });
 
@@ -2619,8 +2633,9 @@ test('the narrow-screen rules that keep the pages from scrolling sideways stay i
   assert.match(css, /@media \(max-width: 720px\) \{ #table td:nth-child\(1\) \{ width: 100%; \}/);
   assert.match(css, /#table td \{ min-width: 0; overflow-wrap: anywhere; \}/);
   assert.match(css, /@media \(min-width: 721px\) and \(max-width: 1000px\) \{ #table thead th \{ white-space: normal;/);
-  assert.match(css, /\.model-table th, \.model-table td \{ overflow-wrap: anywhere; \}/);
-  assert.match(css, /@media \(max-width: 480px\) \{ \.model-table th, \.model-table td \{ padding-left: 6px;/);
+  // /models/ turns into cards on phones (scripts/model-index.test.mjs pins the markup and the rules).
+  assert.match(css, /\.model-table th, \.model-table td \{ overflow-wrap: break-word; \}/);
+  assert.match(css, /@media \(max-width: 560px\) \{ \.model-table thead \{ position: absolute;/);
 });
 
 test('the home counters are one server-rendered line, in the same words as the client repaint', () => {
@@ -3187,7 +3202,7 @@ test('data_policy lot 4: the 13 providers that say they do not train were read f
   for (const p of data.providers.filter((q) => q.data_policy && q.data_policy.trains_on_prompts !== false)) {
     // rows that say it may train were read for the plan later (lots 2, 3, 5 and the correction of the absence claims): true where the
     // clause names the free users or free usage (AssemblyAI, Voyage AI, Cohere), false where it does not
-    const READ = { assemblyai: true, 'voyage-ai': true, elevenlabs: false, cartesia: false, 'retell-ai': false, deepgram: false, 'arli-ai': false, 'sarvam-ai': false, poolside: false, typhoon: false, openrouter: false, nlpcloud: false, 'nvidia-nim': false, veryfi: false, voicegain: false, cohere: true, inception: false, 'azure-speech': false, lemonfox: false, gladia: true, 'liquid-ai': false, 'stability-ai': false, plamo: true, 'netlify-ai-gateway': false, 'rev-ai': false, 'ocr-space': false };
+    const READ = { assemblyai: true, 'voyage-ai': true, elevenlabs: false, cartesia: false, 'retell-ai': false, deepgram: false, 'arli-ai': false, 'sarvam-ai': false, poolside: false, typhoon: false, openrouter: false, nlpcloud: false, 'nvidia-nim': false, veryfi: false, voicegain: false, cohere: true, inception: false, 'azure-speech': false, lemonfox: false, gladia: true, 'liquid-ai': false, 'stability-ai': false, plamo: true, 'netlify-ai-gateway': false, 'rev-ai': false, 'ocr-space': false, requesty: true, 'kilo-gateway': true, 'experiential-labs': true, 'amazon-bedrock': false, 'oci-generative-ai': false };
     if (p.slug in READ) assert.equal(p.data_policy.plan_named, READ[p.slug], `${p.slug}: plan_named as read`);
     else assert.equal(p.data_policy.plan_named, undefined, `${p.slug}: not read for the plan yet, so no value is written`);
   }
@@ -3230,7 +3245,7 @@ test('data_policy lot 7: Poolside may train on your Content by its Terms of Use 
   assert.equal(dp.trains_on_prompts, true, 'may train, even though you can opt out');
   assert.equal(dp.retention, null, 'the terms state no retention period for Content');
   assert.equal(dp.source, 'https://poolside.ai/legal/eula', 'the Terms of Use, which cover the APIs and Poolside Platform');
-  assert.equal(dp.checked, '2026-10-15'); assert.equal(dp.plan_named, false);
+  assert.equal(dp.checked, '2026-11-26'); assert.equal(dp.plan_named, false);
   assert.equal(dp.quote, 'We may use your Content to provide, maintain, improve, and develop the Products and other Poolside offerings, including training our models, unless you opt-out.', 'section 4, literal');
   assert.match(dp.note, /if you give Feedback or it is flagged for safety review/, 'the exceptions to the opt-out are in the note');
   assert.ok(dp.quote.length <= 400 && dp.note.length <= 300);

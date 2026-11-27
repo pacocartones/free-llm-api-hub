@@ -1,11 +1,17 @@
 {
-  "generated": "2026-11-26",
+  "generated": "2026-11-27",
   "scores": {
-    "groq": {
-      "total": 62.4,
+    "google-gemini": {
+      "total": 68.4,
       "confirmed": 4,
       "of": 6,
       "rank": 1
+    },
+    "groq": {
+      "total": 58.5,
+      "confirmed": 3,
+      "of": 6,
+      "rank": null
     },
     "openrouter": {
       "total": 56.2,
@@ -13,27 +19,15 @@
       "of": 6,
       "rank": null
     },
-    "google-gemini": {
-      "total": 54.9,
-      "confirmed": 4,
-      "of": 6,
-      "rank": 2
-    },
     "cloudflare-workers-ai": {
       "total": 50.4,
       "confirmed": 3,
       "of": 6,
       "rank": null
     },
-    "modelscope": {
-      "total": 48.8,
-      "confirmed": 4,
-      "of": 6,
-      "rank": 3
-    },
     "ocr-space": {
       "total": 47.2,
-      "confirmed": 4,
+      "confirmed": 3,
       "of": 6,
       "rank": null
     },
@@ -43,37 +37,43 @@
       "of": 6,
       "rank": null
     },
-    "twelve-labs": {
-      "total": 44.8,
-      "confirmed": 3,
+    "modelscope": {
+      "total": 44.9,
+      "confirmed": 4,
       "of": 6,
-      "rank": null
+      "rank": 2
     },
     "sambanova": {
       "total": 44.3,
       "confirmed": 4,
       "of": 6,
-      "rank": 4
+      "rank": 3
     },
     "cohere": {
       "total": 43.5,
       "confirmed": 5,
       "of": 6,
+      "rank": 4
+    },
+    "experiential-labs": {
+      "total": 42.6,
+      "confirmed": 4,
+      "of": 6,
       "rank": 5
     },
-    "jina-ai": {
-      "total": 41,
+    "requesty": {
+      "total": 41.7,
       "confirmed": 3,
       "of": 6,
       "rank": null
     },
-    "upstage": {
-      "total": 38.4,
-      "confirmed": 3,
+    "twelve-labs": {
+      "total": 40.9,
+      "confirmed": 1,
       "of": 6,
       "rank": null
     },
-    "wandb-inference": {
+    "runware": {
       "total": 38.4,
       "confirmed": 3,
       "of": 6,
@@ -91,55 +91,13 @@
       "of": 6,
       "rank": 6
     },
-    "assemblyai": {
-      "total": 37,
-      "confirmed": 2,
-      "of": 6,
-      "rank": null
-    },
-    "deepgram": {
-      "total": 37,
-      "confirmed": 3,
-      "of": 6,
-      "rank": null
-    },
-    "llamaparse": {
-      "total": 37,
-      "confirmed": 3,
-      "of": 6,
-      "rank": null
-    },
-    "mixedbread": {
-      "total": 37,
-      "confirmed": 3,
-      "of": 6,
-      "rank": null
-    },
-    "nanonets": {
-      "total": 37,
-      "confirmed": 3,
-      "of": 6,
-      "rank": null
-    },
-    "runware": {
-      "total": 37,
-      "confirmed": 3,
-      "of": 6,
-      "rank": null
-    },
-    "speechify": {
-      "total": 37,
-      "confirmed": 3,
-      "of": 6,
-      "rank": null
-    },
-    "ovhcloud-ai-endpoints": {
+    "ai-horde": {
       "total": 36.5,
       "confirmed": 2,
       "of": 6,
       "rank": null
     },
-    "pollinations": {
+    "ovhcloud-ai-endpoints": {
       "total": 36.5,
       "confirmed": 2,
       "of": 6,
@@ -157,21 +115,21 @@
       "of": 6,
       "rank": null
     },
-    "contextual-ai": {
+    "assemblyai": {
       "total": 34.4,
-      "confirmed": 3,
+      "confirmed": 2,
       "of": 6,
       "rank": null
     },
-    "speechmatics": {
+    "deepgram": {
       "total": 34.4,
-      "confirmed": 3,
+      "confirmed": 2,
       "of": 6,
       "rank": null
     },
-    "unreal-speech": {
+    "speechify": {
       "total": 34.4,
-      "confirmed": 3,
+      "confirmed": 2,
       "of": 6,
       "rank": null
     },
@@ -181,13 +139,13 @@
       "of": 6,
       "rank": null
     },
-    "fireworks-ai": {
+    "amazon-bedrock": {
       "total": 33.9,
       "confirmed": 2,
       "of": 6,
       "rank": null
     },
-    "huggingface": {
+    "fireworks-ai": {
       "total": 33.9,
       "confirmed": 2,
       "of": 6,
@@ -199,7 +157,37 @@
       "of": 6,
       "rank": null
     },
+    "kilo-gateway": {
+      "total": 33.9,
+      "confirmed": 2,
+      "of": 6,
+      "rank": null
+    },
+    "lightning-ai": {
+      "total": 33.9,
+      "confirmed": 2,
+      "of": 6,
+      "rank": null
+    },
+    "mixedbread": {
+      "total": 33.9,
+      "confirmed": 2,
+      "of": 6,
+      "rank": null
+    },
     "moondream": {
+      "total": 33.9,
+      "confirmed": 2,
+      "of": 6,
+      "rank": null
+    },
+    "nscale": {
+      "total": 33.9,
+      "confirmed": 2,
+      "of": 6,
+      "rank": null
+    },
+    "pollinations": {
       "total": 33.9,
       "confirmed": 2,
       "of": 6,
@@ -211,7 +199,7 @@
       "of": 6,
       "rank": null
     },
-    "scaleway": {
+    "upstage": {
       "total": 33.9,
       "confirmed": 2,
       "of": 6,
@@ -219,13 +207,7 @@
     },
     "pinecone-inference": {
       "total": 33.3,
-      "confirmed": 2,
-      "of": 6,
-      "rank": null
-    },
-    "ai-horde": {
-      "total": 32.5,
-      "confirmed": 2,
+      "confirmed": 1,
       "of": 6,
       "rank": null
     },
@@ -235,27 +217,21 @@
       "of": 6,
       "rank": 7
     },
-    "alibaba-model-studio": {
-      "total": 31.3,
-      "confirmed": 2,
-      "of": 6,
-      "rank": null
-    },
-    "siliconflow": {
-      "total": 31.3,
-      "confirmed": 2,
-      "of": 6,
-      "rank": null
-    },
-    "cerebras": {
-      "total": 30.6,
-      "confirmed": 3,
-      "of": 6,
-      "rank": null
-    },
     "infomaniak": {
       "total": 30.6,
       "confirmed": 3,
+      "of": 6,
+      "rank": null
+    },
+    "contextual-ai": {
+      "total": 30.5,
+      "confirmed": 1,
+      "of": 6,
+      "rank": null
+    },
+    "llamaparse": {
+      "total": 30.5,
+      "confirmed": 1,
       "of": 6,
       "rank": null
     },
@@ -272,6 +248,12 @@
       "rank": null
     },
     "bytez": {
+      "total": 30,
+      "confirmed": 1,
+      "of": 6,
+      "rank": null
+    },
+    "jina-ai": {
       "total": 30,
       "confirmed": 1,
       "of": 6,
@@ -307,15 +289,15 @@
       "of": 6,
       "rank": null
     },
-    "datalab": {
-      "total": 29.9,
-      "confirmed": 2,
+    "wandb-inference": {
+      "total": 30,
+      "confirmed": 1,
       "of": 6,
       "rank": null
     },
-    "gladia": {
+    "datalab": {
       "total": 29.9,
-      "confirmed": 2,
+      "confirmed": 1,
       "of": 6,
       "rank": null
     },
@@ -325,68 +307,74 @@
       "of": 6,
       "rank": null
     },
+    "nanonets": {
+      "total": 29.9,
+      "confirmed": 1,
+      "of": 6,
+      "rank": null
+    },
     "nutrient": {
       "total": 29.9,
-      "confirmed": 2,
+      "confirmed": 1,
       "of": 6,
       "rank": null
     },
     "retell-ai": {
       "total": 29.9,
-      "confirmed": 2,
+      "confirmed": 1,
       "of": 6,
       "rank": null
     },
     "rime": {
       "total": 29.9,
-      "confirmed": 2,
+      "confirmed": 1,
+      "of": 6,
+      "rank": null
+    },
+    "speechmatics": {
+      "total": 29.9,
+      "confirmed": 1,
       "of": 6,
       "rank": null
     },
     "unstructured": {
       "total": 29.9,
-      "confirmed": 2,
+      "confirmed": 1,
       "of": 6,
       "rank": null
     },
     "voicegain": {
       "total": 29.9,
-      "confirmed": 2,
+      "confirmed": 1,
       "of": 6,
       "rank": null
     },
-    "voyage-ai": {
-      "total": 29.9,
-      "confirmed": 2,
-      "of": 6,
-      "rank": null
-    },
-    "ai21": {
+    "fish-audio": {
       "total": 29.4,
       "confirmed": 3,
       "of": 6,
       "rank": null
     },
-    "novita": {
-      "total": 29.4,
-      "confirmed": 3,
+    "scaleway": {
+      "total": 28.7,
+      "confirmed": 2,
       "of": 6,
       "rank": null
     },
-    "nlpcloud": {
-      "total": 29.2,
-      "confirmed": 3,
-      "of": 6,
-      "rank": null
-    },
-    "elevenlabs": {
-      "total": 28,
-      "confirmed": 3,
+    "siliconflow": {
+      "total": 27.4,
+      "confirmed": 2,
       "of": 6,
       "rank": null
     },
     "tencent-hunyuan": {
       "total": 27.4,
+      "confirmed": 2,
+      "of": 6,
+      "rank": null
+    },
+    "nlpcloud": {
+      "total": 26.6,
       "confirmed": 2,
       "of": 6,
       "rank": null
@@ -398,6 +386,12 @@
       "rank": null
     },
     "entrim": {
+      "total": 26.1,
+      "confirmed": 2,
+      "of": 6,
+      "rank": null
+    },
+    "modal": {
       "total": 26.1,
       "confirmed": 2,
       "of": 6,
@@ -415,9 +409,51 @@
       "of": 6,
       "rank": null
     },
+    "gladia": {
+      "total": 26,
+      "confirmed": 0,
+      "of": 6,
+      "rank": null
+    },
+    "google-cloud-stt": {
+      "total": 26,
+      "confirmed": 0,
+      "of": 6,
+      "rank": null
+    },
+    "google-cloud-vision": {
+      "total": 26,
+      "confirmed": 0,
+      "of": 6,
+      "rank": null
+    },
+    "huggingface": {
+      "total": 26,
+      "confirmed": 0,
+      "of": 6,
+      "rank": null
+    },
+    "reducto": {
+      "total": 26,
+      "confirmed": 0,
+      "of": 6,
+      "rank": null
+    },
     "rev-ai": {
       "total": 26,
-      "confirmed": 1,
+      "confirmed": 0,
+      "of": 6,
+      "rank": null
+    },
+    "unreal-speech": {
+      "total": 26,
+      "confirmed": 0,
+      "of": 6,
+      "rank": null
+    },
+    "voyage-ai": {
+      "total": 26,
+      "confirmed": 0,
       "of": 6,
       "rank": null
     },
@@ -433,39 +469,75 @@
       "of": 6,
       "rank": null
     },
-    "cartesia": {
+    "ai21": {
       "total": 25.4,
-      "confirmed": 3,
+      "confirmed": 2,
       "of": 6,
       "rank": null
     },
-    "fish-audio": {
+    "novita": {
       "total": 25.4,
-      "confirmed": 3,
-      "of": 6,
-      "rank": null
-    },
-    "modal": {
-      "total": 22.1,
       "confirmed": 2,
       "of": 6,
       "rank": null
     },
     "photoroom": {
-      "total": 21.5,
+      "total": 24.6,
       "confirmed": 2,
+      "of": 6,
+      "rank": null
+    },
+    "alibaba-model-studio": {
+      "total": 23.5,
+      "confirmed": 2,
+      "of": 6,
+      "rank": null
+    },
+    "oci-generative-ai": {
+      "total": 23.5,
+      "confirmed": 2,
+      "of": 6,
+      "rank": null
+    },
+    "google-cloud-tts": {
+      "total": 22.1,
+      "confirmed": 1,
+      "of": 6,
+      "rank": null
+    },
+    "cerebras": {
+      "total": 21.6,
+      "confirmed": 3,
+      "of": 6,
+      "rank": null
+    },
+    "cartesia": {
+      "total": 21.5,
+      "confirmed": 1,
+      "of": 6,
+      "rank": null
+    },
+    "elevenlabs": {
+      "total": 21.5,
+      "confirmed": 1,
       "of": 6,
       "rank": null
     },
     "smallest-ai": {
       "total": 21.5,
-      "confirmed": 2,
+      "confirmed": 1,
+      "of": 6,
+      "rank": null
+    },
+    "azure-document-intelligence": {
+      "total": 19.5,
+      "confirmed": 1,
       "of": 6,
       "rank": null
     },
     "azure-speech": {
       "total": 19.5,
-      "confirmed": 2,
+      "confirmed": 1,
       "of": 6,
       "rank": null
     }

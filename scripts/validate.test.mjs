@@ -1,4 +1,5 @@
-import test from 'node:test';
+// test comes from lib/test-part.mjs: node:test's own, unless run-tests.mjs runs this file in parts.
+import { test } from './lib/test-part.mjs';
 import assert from 'node:assert/strict';
 import { cpSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
@@ -411,6 +412,7 @@ test('validate accepts conditional commercial use only with a non-empty conditio
   assert.match(rejectedMissing.output, /commercial_ok_condition/);
 
   const misplaced = structuredClone(DATA);
+  provider(misplaced).commercial_ok = true;
   provider(misplaced).commercial_ok_condition = 'This must not accompany true.';
   const rejectedMisplaced = runValidate(misplaced);
   assert.notEqual(rejectedMisplaced.status, 0, rejectedMisplaced.output);

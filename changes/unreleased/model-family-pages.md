@@ -12,4 +12,4 @@
   canonical URL, a title and description, `WebPage` + `BreadcrumbList` JSON-LD and the model-sample caveat; they are
   in the sitemap and `llms.txt` and linked from `/models/` while two or more verified providers list the family, and
   carry `noindex` otherwise (`scripts/lib/model-families.mjs`). The Lighthouse gate now also measures
-  `/free-api/qwen/`. Agent-assisted.
+  `/free-api/qwen/`. Agent-assisted (#922).
