@@ -12,7 +12,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
-import { join, relative } from 'node:path';
+import { join, relative, sep } from 'node:path';
 import { runInNewContext } from 'node:vm';
 import { fileURLToPath } from 'node:url';
 
@@ -28,13 +28,57 @@ function htmlFiles(dir) {
 }
 
 // Redirect stubs (a meta refresh to the real page) and third-party verification files are not pages a reader sees.
+// `rel` always uses forward slashes, so `rel.startsWith('guides/')` holds on Windows too.
 const pages = htmlFiles(SITE)
-  .map((file) => ({ rel: relative(SITE, file), html: readFileSync(file, 'utf8') }))
-  .filter((p) => !/<meta http-equiv="refresh"/i.test(p.html) && /<body[\s>]/.test(p.html));
+  .map((file) => ({ rel: relative(SITE, file).split(sep).join('/'), html: readFileSync(file, 'utf8') }))
+  .filter((p) => !/<meta http-equiv="refresh"/i.test(p.html) && /<body[\s>]/i.test(p.html));
 
-/** The page body without comments, scripts and styles, so markup quoted in them is not counted. */
-const body = (html) => html.slice(html.search(/<body[\s>]/))
-  .replace(/<!--[\s\S]*?-->/g, '').replace(/<script\b[\s\S]*?<\/script>/g, '').replace(/<style\b[\s\S]*?<\/style>/g, '');
+/**
+ * The page body without comments, scripts and styles, so markup quoted in them is not counted.
+ * A single left-to-right scan rather than regex replacements: each block is skipped from its opening to its
+ * closing tag as the scan meets it, tag names match in any letter case, and an unclosed comment, script or
+ * style drops the rest of the page instead of leaving its contents in.
+ */
+function stripNonContent(html) {
+  const lower = html.toLowerCase();
+  let out = '';
+  let i = 0;
+  while (i < html.length) {
+    const lt = html.indexOf('<', i);
+    if (lt === -1) { out += html.slice(i); break; }
+    out += html.slice(i, lt);
+    if (lower.startsWith('<!--', lt)) {
+      const end = lower.indexOf('-->', lt + 4);
+      if (end === -1) break;
+      i = end + 3;
+      continue;
+    }
+    const raw = ['script', 'style'].find((t) => lower.startsWith(`<${t}`, lt) && !/[a-z0-9-]/.test(lower[lt + t.length + 1] || ''));
+    if (raw) {
+      const end = lower.indexOf(`</${raw}`, lt);
+      if (end === -1) break;
+      const close = lower.indexOf('>', end);
+      if (close === -1) break;
+      i = close + 1;
+      continue;
+    }
+    out += '<';
+    i = lt + 1;
+  }
+  return out;
+}
+
+const body = (html) => {
+  const at = html.search(/<body[\s>]/i);
+  return stripNonContent(at === -1 ? html : html.slice(at));
+};
+
+test('the body scan drops comments, scripts and styles in any letter case, and keeps tags that only start like them', () => {
+  assert.equal(stripNonContent('a<!-- <main> -->b<SCRIPT type="x"><main></Script >c<style>main{}</STYLE>d'), 'abcd');
+  assert.equal(stripNonContent('<scripts-list>ok</scripts-list><styled>ok</styled>'), '<scripts-list>ok</scripts-list><styled>ok</styled>');
+  assert.equal(stripNonContent('<main><!-- unclosed <h1>'), '<main>');
+  assert.equal(stripNonContent('<main><script>x'), '<main>');
+});
 
 test('the built site is there to check (run npm run build first)', () => {
   assert.ok(existsSync(join(SITE, 'p')), 'site/p/ is missing: run `npm run build` before the tests');
