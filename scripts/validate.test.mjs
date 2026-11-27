@@ -411,6 +411,7 @@ test('validate accepts conditional commercial use only with a non-empty conditio
   assert.match(rejectedMissing.output, /commercial_ok_condition/);
 
   const misplaced = structuredClone(DATA);
+  provider(misplaced).commercial_ok = true;
   provider(misplaced).commercial_ok_condition = 'This must not accompany true.';
   const rejectedMisplaced = runValidate(misplaced);
   assert.notEqual(rejectedMisplaced.status, 0, rejectedMisplaced.output);
