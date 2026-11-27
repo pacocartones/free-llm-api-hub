@@ -23,6 +23,10 @@ publication process (rule 4).
    MCP server) may be published to npm and listed in the MCP registry, only after the owner's explicit
    OK for that release, from CI with provenance (`.github/workflows/release-mcp.yml`: tag
    `mcp-vX.Y.Z`, environment `release-mcp` with a required reviewer, npm trusted publishing, no token).
+   The first version only, because npm trusted publishing needs a package that already exists, goes
+   out from `.github/workflows/publish-mcp.yml`: run by hand from `main`, same environment and
+   provenance, with a short-lived `NPM_TOKEN` secret that is revoked once trusted publishing is set up
+   ([MCP release setup](docs/mcp-release.md#first-publication-bootstrap)).
    The package has its own SemVer, independent of the dataset's; `server.json` carries the same
    version. The package metadata permits public publication; CI publication remains
    disabled unless the owner enables NPM_PUBLISH_ENABLED=true, and still

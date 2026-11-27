@@ -40,6 +40,7 @@
     "mcp",
     "model-context-protocol",
     "llm",
+    "free-llm-api",
     "free-tier",
     "api",
     "openai-compatible"
