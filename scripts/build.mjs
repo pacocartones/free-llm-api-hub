@@ -26,6 +26,8 @@ import { flattenFieldChanges, groupChangesByWeek, changesRss, changesAtom, ATOM_
 import { monthlyReport, reportMonths, pct, monthSummary, monthBrief } from './lib/state.mjs';
 import { monthEndDate, monthName, monthLabel, shortMonthLabel, humanDate, humanDates, timeHtml } from './lib/dates.mjs';
 import { NOT_STATED, NOT_STATED_HTML } from './lib/not-stated.mjs';
+import { monthlyChangesReport, renderReport, renderGenerated, reportFeedItem } from './lib/monthly-report.mjs';
+import { monthChanges } from './monthly-issues.mjs';
 import { resolveBestEntries, topEntries, PODIUM_SIZE } from './lib/best.mjs';
 import { agreementsTableHtml, sponsoredBlockHtml, disclosureHtml, inForce, NOT_IN_DATA_SENTENCE, MACHINE_SENTENCE } from './lib/agreements.mjs';
 import { coverage, coverageMainHtml } from './lib/coverage.mjs';
@@ -72,7 +74,7 @@ import { writeSchemaDocs } from './schema-docs.mjs';
 import { datasetAsOf } from './lib/release-stamp.mjs';
 import { parseCitation, homeJsonLd, datasetJsonLdScript } from './lib/dataset-jsonld.mjs';
 import { websiteRef, datasetRef, authorshipLine } from './lib/site-entity.mjs';
-import { isoDateTime, datasetFacts, licenseUrl, guideArticle } from './lib/structured-data.mjs';
+import { isoDateTime, datasetFacts, licenseUrl, guideArticle, reportArticle } from './lib/structured-data.mjs';
 import { SITEMAP_INDEX, sitemapIndexXml } from './lib/state-sitemap.mjs';
 import { SITEMAPS as INDEXNOW_SITEMAPS } from './lib/indexnow.mjs';
 import { groupModels, modelKey } from './lib/model-keys.mjs';
@@ -1741,13 +1743,9 @@ const changeWeeks = groupChangesByWeek(allFieldChanges, { weeks: 12 }); // the h
 const apiV1ChangeWeeks = groupChangesByWeek(projectApiV1Changes(allFieldChanges), { weeks: 12 });
 const provLink = (slug, name, prefix) => currentSlugs.has(slug) ? `<a href="${prefix}p/${slug}">${escapeAttr(name)}</a>` : escapeAttr(name);
 
-// Both feeds read the projected weeks of api/v1/changes.json, so a subscriber and an API client see the same changes.
-writeFileSync(join(ROOT, 'site/changes.xml'), changesRss(apiV1ChangeWeeks, { site: SITE }));
-writeFileSync(join(ROOT, 'site' + ATOM_PATH), changesAtom(apiV1ChangeWeeks, { site: SITE, updated: ASOF }));
-
 const changeRowHtml = (c, prefix = '../') =>
   `<tr><td class="notes">${timeHtml(c.date, escapeAttr)}</td><td class="name">${provLink(c.slug, c.name, prefix)}</td><td>${escapeAttr(c.label)}</td>` +
-  `<td class="notes">${escapeAttr(formatValue(c.from))}</td><td>${escapeAttr(formatValue(c.to))}</td></tr>`;
+  `<td class="notes">${escapeAttr(summaryValue(c.from))}</td><td>${escapeAttr(summaryValue(c.to))}</td></tr>`;
 
 const addedBySlug = Object.fromEntries(providers.filter((p) => p.added).map((p) => [p.slug, p.added]));
 const stateMonths = reportMonths(monthEndSnapshots);
@@ -1766,6 +1764,24 @@ const movedSection = (r) => {
 };
 const stat = (num, lbl) => `<div class="stat"><div class="num">${num}</div><div class="lbl">${lbl}</div></div>`;
 
+// Monthly reports (lib/monthly-report.mjs): a month with a reviewed content/state/YYYY-MM.md gets the editorial report on
+// top of its /state/ page, every figure filled from the data; the computed sections follow under "The numbers". Months
+// without a file keep the computed page only. Without git there are no months, so nothing is rendered.
+const CHANGELOG_TEXT = readFileSync(join(ROOT, 'CHANGELOG.md'), 'utf8');
+const stateModelOf = (month) => {
+  const beforeKey = Object.keys(monthEndSnapshots).filter((k) => k < month).sort().pop();
+  if (!monthEndSnapshots[month] || !beforeKey) return null;
+  const changes = monthChanges({ month, historyBySlug, monthEnd: monthEndSnapshots, nameBySlug });
+  return monthlyChangesReport({ month, before: monthEndSnapshots[beforeKey], after: monthEndSnapshots[month], changes, notFree: NOT_FREE, changelog: CHANGELOG_TEXT });
+};
+const REPORT_OPTS = { site: SITE, repo: REPO, prefix: '../../', current: currentSlugs };
+const stateReportOf = (month, model) => {
+  const file = join(ROOT, `content/state/${month}.md`);
+  if (!model || !existsSync(file)) return null;
+  return { model, ...renderReport(readFileSync(file, 'utf8'), model, REPORT_OPTS) };
+};
+const reportFeed = [];
+
 rmSync(join(ROOT, 'site/state'), { recursive: true, force: true });
 mkdirSync(join(ROOT, 'site/state'), { recursive: true });
 stateReports.forEach((r, i) => {
@@ -1773,11 +1789,16 @@ stateReports.forEach((r, i) => {
   const prev = stateReports[i - 1];
   const next = stateReports[i + 1];
   const days = (d) => (d === null ? NOT_STATED : `${d}d`);
+  const model = r.carried ? null : stateModelOf(r.month);
+  const report = stateReportOf(r.month, model);
+  if (report) reportFeed.push(reportFeedItem(r.month, report, SITE));
   const main =
-    pageHero({ crumbs: `<a href="../../">Home</a> / <a href="../../changes/#months">What changed</a> / ${label}`, h1: `State of free LLM APIs — ${label}`, lede: r.carried
+    pageHero({ crumbs: `<a href="../../">Home</a> / <a href="../../changes/#months">What changed</a> / ${label}`, h1: report ? escapeText(report.title) : `State of free LLM APIs — ${label}`, lede: r.carried
       ? `No revision of providers.json was committed in ${label}: the figures repeat the last revision, of ${r.snapshotDate}, and ages are measured at the end of ${label}, ${r.asOf}.`
       : `Computed from the last revision of providers.json committed in ${label} (${r.snapshotDate}) and the git-mined change history. Ages are measured as of ${r.asOf}.${r.inProgress ? ' The month is still in progress: the data reach ' + r.asOf + '.' : ''}` }) +
     `<main id="main"><div class="wrap prose">` +
+    (report ? `<article class="month-report">${report.html}</article><h2 id="the-numbers">The numbers</h2>` : '') +
+    (!report && model ? renderGenerated(model, REPORT_OPTS) : '') +
     `<div class="stats stats-month">` +
     statIcon('ic-shield', `${r.verified} of ${r.total}`, `providers verified (${pct(r.verifiedShare)})`) +
     statIcon('ic-clock', days(r.freshness.medianDays), 'median verification age') +
@@ -1808,11 +1829,34 @@ stateReports.forEach((r, i) => {
     `</nav></div></main>`;
   mkdirSync(join(ROOT, `site/state/${r.month}`), { recursive: true });
   writeFileSync(join(ROOT, `site/state/${r.month}/index.html`), htmlPage({
-    title: `State of free LLM APIs — ${label} · Free LLM API Hub`,
-    desc: `${label}: ${r.total} providers tracked, ${pct(r.verifiedShare)} verified, ${r.fieldChanges} field changes. Computed from the dataset and its git history.`,
+    title: report ? `${report.title} · Free LLM API Hub` : `State of free LLM APIs — ${label} · Free LLM API Hub`,
+    desc: report ? report.description : `${label}: ${r.total} providers tracked, ${pct(r.verifiedShare)} verified, ${r.fieldChanges} field changes. Computed from the dataset and its git history.`,
     canonical: `${SITE}/state/${r.month}/`, main, prefix: '../../',
+    jsonld: report ? JSON.stringify({
+      '@context': 'https://schema.org',
+      '@graph': [
+        reportArticle({
+          site: SITE, month: r.month, headline: report.title, description: report.description,
+          published: reportFeedItem(r.month, report, SITE).date, modified: report.model.after.date,
+          extra: { isPartOf: websiteRef(SITE), about: datasetRef(SITE, DATASET_FACTS) },
+        }),
+        {
+          '@type': 'BreadcrumbList',
+          itemListElement: [
+            { '@type': 'ListItem', position: 1, name: 'Free LLM API Hub', item: `${SITE}/` },
+            { '@type': 'ListItem', position: 2, name: 'What changed', item: `${SITE}/changes/` },
+            { '@type': 'ListItem', position: 3, name: report.title, item: `${SITE}/state/${r.month}/` },
+          ],
+        },
+      ],
+    }) : undefined,
   }));
 });
+// Both feeds read the projected weeks of api/v1/changes.json, so a subscriber and an API client see the same changes;
+// each published monthly report is one more item in both.
+writeFileSync(join(ROOT, 'site/changes.xml'), changesRss(apiV1ChangeWeeks, { site: SITE, reports: reportFeed }));
+writeFileSync(join(ROOT, 'site' + ATOM_PATH), changesAtom(apiV1ChangeWeeks, { site: SITE, updated: ASOF, reports: reportFeed }));
+const reportMonthsSet = new Set(reportFeed.map((x) => x.link.match(/state\/(\d{4}-\d{2})\//)[1]));
 // /changes/ is the one page for what changed: one table, by year and month, newest first. Every month between the first
 // and the last revision is listed (a month without a revision says "no changes"); each links to its report, which holds
 // the detail, in order. /state/ redirects to it. The weekly feed (changes.xml) stays for those who subscribe.
@@ -1823,7 +1867,7 @@ for (const r of [...stateReports].reverse()) {
   monthsByYear.get(year).push(r);
 }
 const monthRowHtml = (r, yearCell) => {
-  const brief = monthBrief(r);
+  const brief = monthBrief(r) + (reportMonthsSet.has(r.month) ? ' · monthly report' : '');
   return `<tr${r.carried ? ' class="empty"' : ''}>${yearCell}` +
     `<td class="name"><a href="../state/${r.month}/" aria-label="${monthLabel(r.month)}: ${escapeAttr(brief)}">${monthName(r.month)}</a></td>` +
     `<td>${r.total}</td><td>${pct(r.verifiedShare)}</td><td>${r.fieldChanges}</td><td>${r.added.length}</td><td class="notes">${escapeAttr(brief)}</td></tr>`;

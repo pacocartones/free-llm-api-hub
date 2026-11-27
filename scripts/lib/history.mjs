@@ -74,7 +74,7 @@ export const historyFromRevisions = (revisions) => {
   const historyBySlug = {};
   const monthEnd = {};
   const prevSnap = {};
-  for (const { date, parsed } of revisions) {
+  for (const { date, parsed, hash } of revisions) {
     for (const pp of parsed.providers || []) {
       const prior = prevSnap[pp.slug];
       if (!prior) {
@@ -91,7 +91,10 @@ export const historyFromRevisions = (revisions) => {
       }
       prevSnap[pp.slug] = pp;
     }
-    monthEnd[date.slice(0, 7)] = { date, providers: parsed.providers || [] };
+    // The month's last revision, its commit (when known) and how many revisions the month had (the monthly report
+    // quotes both).
+    const m = date.slice(0, 7);
+    monthEnd[m] = { date, providers: parsed.providers || [], hash: hash || null, revisions: ((monthEnd[m] && monthEnd[m].revisions) || 0) + 1 };
   }
   for (const slug of Object.keys(historyBySlug)) historyBySlug[slug] = collapseSameDay(historyBySlug[slug]);
   return { historyBySlug, monthEnd };

@@ -90,7 +90,10 @@ test('every Dataset node has a name, a description and a licence', () => {
 
 test('every Article has an author, an image that exists, and both dates', () => {
   const arts = all('Article');
-  assert.equal(new Set(arts.map((a) => a.rel)).size, Object.keys(GUIDE_PUBLISHED).length, 'one Article per guide, and every guide has a recorded publication date');
+  // The other Articles are the monthly changes reports (/state/YYYY-MM/, one per content/state/YYYY-MM.md).
+  const guideArts = arts.filter((a) => a.rel.startsWith('guides/'));
+  assert.equal(new Set(guideArts.map((a) => a.rel)).size, Object.keys(GUIDE_PUBLISHED).length, 'one Article per guide, and every guide has a recorded publication date');
+  assert.ok(arts.every((a) => a.rel.startsWith('guides/') || /^state\/\d{4}-\d{2}\/index\.html$/.test(a.rel)), 'an Article is a guide or a monthly report');
   for (const { rel, n } of arts) {
     assert.ok(n.author?.name, `${rel}: author`);
     assert.ok(n.publisher?.name, `${rel}: publisher`);

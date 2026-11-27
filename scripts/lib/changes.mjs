@@ -115,21 +115,44 @@ export const weekTitle = (g) =>
 // no per-week anchor, so a feed entry points at the report that holds its rows.
 export const weekHref = (g, { site }) => `${site}/state/${String(g.lastDate).slice(0, 7)}/`;
 
+// Weekly items keep their order; a report goes before the first week that is not newer than it (both feeds).
+const withReports = (weekly, monthly) => {
+  const items = [...weekly];
+  for (const m of [...monthly].sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0))) {
+    const at = items.findIndex((x) => x.date <= m.date);
+    items.splice(at === -1 ? items.length : at, 0, m);
+  }
+  return items;
+};
+
 // RSS 2.0, one <item> per ISO week. Deterministic: pubDate is the date of the
 // newest change in that week, the guid is the week key.
-export const changesRss = (groups, { site }) => {
-  const items = groups.map((g) =>
-    `    <item><title>${xmlEsc(weekTitle(g))}</title>` +
-    `<link>${xmlEsc(weekHref(g, { site }))}</link>` +
-    `<guid isPermaLink="false">${xmlEsc(`free-llm-api-hub-changes-${g.week}`)}</guid>` +
-    `<pubDate>${new Date(g.lastDate + 'T00:00:00Z').toUTCString()}</pubDate>` +
-    `<description>${xmlEsc(weekSummary(g))}</description></item>`).join('\n');
+// `reports`: the published monthly reports ({ title, description, link, guid, date }, lib/monthly-report.mjs), one
+// item each next to the weekly items, newest first.
+export const changesRss = (groups, { site, reports = [] }) => {
+  const weekly = groups.map((g) => ({
+    date: g.lastDate,
+    xml: `    <item><title>${xmlEsc(weekTitle(g))}</title>` +
+      `<link>${xmlEsc(weekHref(g, { site }))}</link>` +
+      `<guid isPermaLink="false">${xmlEsc(`free-llm-api-hub-changes-${g.week}`)}</guid>` +
+      `<pubDate>${new Date(g.lastDate + 'T00:00:00Z').toUTCString()}</pubDate>` +
+      `<description>${xmlEsc(weekSummary(g))}</description></item>`,
+  }));
+  const monthly = reports.map((r) => ({
+    date: r.date,
+    xml: `    <item><title>${xmlEsc(r.title)}</title>` +
+      `<link>${xmlEsc(r.link)}</link>` +
+      `<guid isPermaLink="false">${xmlEsc(r.guid)}</guid>` +
+      `<pubDate>${new Date(r.date + 'T00:00:00Z').toUTCString()}</pubDate>` +
+      `<description>${xmlEsc(r.description)}</description></item>`,
+  }));
+  const itemsXml = withReports(weekly, monthly).map((x) => x.xml).join('\n');
   return `<?xml version="1.0" encoding="UTF-8"?>\n<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel>\n` +
     `    <title>Free LLM API Hub — what changed, week by week</title>\n    <link>${xmlEsc(`${site}/changes/`)}</link>\n` +
     // The feed's own URL: feed validators ask an RSS 2.0 feed to carry it.
     `    <atom:link href="${xmlEsc(`${site}/changes.xml`)}" rel="self" type="application/rss+xml"/>\n` +
     `    <description>Field-level changes to free LLM API tiers (free tier, rate limits, the catch, flags), grouped by ISO week.</description>\n` +
-    (items ? `${items}\n` : '') + `</channel></rss>\n`;
+    (itemsXml ? `${itemsXml}\n` : '') + `</channel></rss>\n`;
 };
 
 // Atom (RFC 4287), one <entry> per ISO week, from the same grouped weeks as api/v1/changes.json. Deterministic:
@@ -139,16 +162,23 @@ export const changesRss = (groups, { site }) => {
 export const ATOM_PATH = '/changes.atom';
 export const atomId = (site, week) => `tag:${new URL(site).hostname},2026:changes${week ? ':' + week : ''}`;
 const rfc3339 = (ymdDate) => `${ymdDate}T00:00:00Z`;
-export const changesAtom = (groups, { site, updated = '1970-01-01' }) => {
-  const newest = groups.reduce((m, g) => (g.lastDate > m ? g.lastDate : m), '');
-  const entries = groups.map((g) =>
-    `  <entry>\n` +
-    `    <id>${xmlEsc(atomId(site, g.week))}</id>\n` +
-    `    <title>${xmlEsc(weekTitle(g))}</title>\n` +
-    `    <updated>${rfc3339(g.lastDate)}</updated>\n` +
-    `    <link rel="alternate" type="text/html" href="${xmlEsc(weekHref(g, { site }))}"/>\n` +
-    `    <summary type="text">${xmlEsc(weekSummary(g))}</summary>\n` +
-    `  </entry>\n`).join('');
+// `reports` as for changesRss: one entry each, id `…:report:YYYY-MM`.
+export const changesAtom = (groups, { site, updated = '1970-01-01', reports = [] }) => {
+  const entry = ({ id, title, date, href, summary }) => ({
+    date,
+    xml: `  <entry>\n` +
+      `    <id>${xmlEsc(id)}</id>\n` +
+      `    <title>${xmlEsc(title)}</title>\n` +
+      `    <updated>${rfc3339(date)}</updated>\n` +
+      `    <link rel="alternate" type="text/html" href="${xmlEsc(href)}"/>\n` +
+      `    <summary type="text">${xmlEsc(summary)}</summary>\n` +
+      `  </entry>\n`,
+  });
+  const weekly = groups.map((g) => entry({ id: atomId(site, g.week), title: weekTitle(g), date: g.lastDate, href: weekHref(g, { site }), summary: weekSummary(g) }));
+  const monthly = reports.map((r) => entry({ id: atomId(site, `report:${r.link.match(/state\/(\d{4}-\d{2})\//)[1]}`), title: r.title, date: r.date, href: r.link, summary: r.description }));
+  const all = withReports(weekly, monthly);
+  const newest = all.reduce((m, x) => (x.date > m ? x.date : m), '');
+  const entries = all.map((x) => x.xml).join('');
   return `<?xml version="1.0" encoding="UTF-8"?>\n<feed xmlns="http://www.w3.org/2005/Atom">\n` +
     `  <id>${xmlEsc(atomId(site))}</id>\n` +
     `  <title>Free LLM API Hub — what changed, week by week</title>\n` +
