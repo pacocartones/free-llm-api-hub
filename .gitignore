@@ -64,3 +64,7 @@ tools/lighthouse/node_modules/
 # "Find my free API" (/find/): the page and its shared filter bundle, emitted by build.mjs from scripts/lib/find.mjs + find-page.mjs
 site/find/
 site/shared-find.js
+
+# Screenshot runner (docs/screenshots.md): its dependencies (installed from tools/screenshots/package-lock.json) and output
+tools/screenshots/node_modules/
+tools/screenshots/out/
