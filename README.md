@@ -72,7 +72,7 @@ Starting points, not guarantees — read the full profile before you build on it
 
 ## The best free LLM APIs
 
-Our top 10 by score — computed from the [<!-- FIG:verified -->81<!-- /FIG --> verified providers](data/providers.json) every time the site is built, never hand-ordered and never padded to ten. The three best form the podium. Money adds nothing to the score. Every row links to its full verified profile: free tier, rate limits and the catch are checked against the provider's own docs. The podium and the method are on the [**/best page ↗**](https://freellmapihub.com/best/) and in [how the score works ↗](https://freellmapihub.com/best/methodology/).
+Our top 10 by score — computed from the [<!-- FIG:verified -->84<!-- /FIG --> verified providers](data/providers.json) every time the site is built, never hand-ordered and never padded to ten. The three best form the podium. Money adds nothing to the score. Every row links to its full verified profile: free tier, rate limits and the catch are checked against the provider's own docs. The podium and the method are on the [**/best page ↗**](https://freellmapihub.com/best/) and in [how the score works ↗](https://freellmapihub.com/best/methodology/).
 
 <sub>💳 no card · 📵 no phone · 📱 phone required · 🏢 commercial OK · 🔬 eval only · 🔌 OpenAI-compatible</sub>
 
@@ -89,7 +89,7 @@ Our top 10 by score — computed from the [<!-- FIG:verified -->81<!-- /FIG --> 
 | 8 | **[Aion Labs](https://www.aionlabs.ai/docs/rate-limits/)**<br><sub>💳 card required · 🏢 commercial OK · 🔌 OpenAI-compat</sub> | 32.4<br><sub>4 of 6 inputs</sub> | Free tier with a daily allowance usable on the API: 20,000 tokens a day; API keys activate after verifying a payment card that is never charged | EU provider (Deep Forge sp. z o.o., Warsaw). Free-tier API keys return 403 until a payment card is verified through Stripe on the Billing page; the card is never charged and one card can activate one free account. [More ↗](https://freellmapihub.com/p/aion-labs) | ✅ 2026-11-25 |
 <!-- AUTOGEN:best:end -->
 
-That's the shortlist. The full dataset — all <!-- FIG:providers -->82<!-- /FIG --> providers, every ongoing tier and one-time credit, filterable and machine-readable — lives in [**data/providers.json**](data/providers.json) and the [interactive explorer ↗](https://freellmapihub.com/).
+That's the shortlist. The full dataset — all <!-- FIG:providers -->85<!-- /FIG --> providers, every ongoing tier and one-time credit, filterable and machine-readable — lives in [**data/providers.json**](data/providers.json) and the [interactive explorer ↗](https://freellmapihub.com/).
 
 ## Browse by need
 
@@ -102,9 +102,9 @@ Focused, always-current collections — each is generated from the dataset and h
 - **[Free LLM APIs for commercial use](collections/commercial-use.md)** (23) — safe to ship, not eval-only · [live page ↗](https://freellmapihub.com/collections/commercial-use)
 - **[OpenAI-compatible free LLM APIs](collections/openai-compatible.md)** (46) — drop-in OpenAI SDK swap · [live page ↗](https://freellmapihub.com/collections/openai-compatible)
 - **[Permanently free LLM APIs](collections/always-free.md)** (7) — $0 models, no trial clock · [live page ↗](https://freellmapihub.com/collections/always-free)
-- **[Free multimodal LLM APIs](collections/multimodal.md)** (60) — vision, audio, embeddings · [live page ↗](https://freellmapihub.com/collections/multimodal)
+- **[Free multimodal LLM APIs](collections/multimodal.md)** (63) — vision, audio, embeddings · [live page ↗](https://freellmapihub.com/collections/multimodal)
 - **[Free LLM APIs that say they do not train on your prompts](collections/no-training.md)** (31) — says it does not train on your prompts (some only without opt-in) · [live page ↗](https://freellmapihub.com/collections/no-training)
-- **[Free LLM APIs whose free tier renews](collections/renewing-free-tier.md)** (33) — free quotas or credits that reset · [live page ↗](https://freellmapihub.com/collections/renewing-free-tier)
+- **[Free LLM APIs whose free tier renews](collections/renewing-free-tier.md)** (36) — free quotas or credits that reset · [live page ↗](https://freellmapihub.com/collections/renewing-free-tier)
 - **[Free LLM APIs with a free signup credit](collections/free-signup-credit.md)** (41) — one-time signup credits, not renewing allowances · [live page ↗](https://freellmapihub.com/collections/free-signup-credit)
 <!-- AUTOGEN:collections:end -->
 
@@ -120,12 +120,12 @@ Primarily **free LLM (text) APIs** — plus the adjacent model APIs a builder re
 | Category | Providers | Examples |
 |---|---|---|
 | **Text / LLM** | 57 | Google Gemini API, Groq, OpenRouter |
-| **Speech (STT / TTS)** | 31 | Google Gemini API, Groq, Cloudflare Workers AI |
+| **Speech (STT / TTS)** | 33 | Google Gemini API, Groq, Cloudflare Workers AI |
 | **Embeddings** | 17 | Google Gemini API, Cloudflare Workers AI, Cohere |
 | **Image generation** | 16 | Cloudflare Workers AI, HuggingFace, OVHcloud AI Endpoints |
-| **Vision** | 12 | Google Gemini API, OpenRouter, Z.ai |
+| **Vision** | 13 | Google Gemini API, OpenRouter, Z.ai |
+| **OCR / documents** | 9 | OCR.space, LlamaParse, Nanonets |
 | **Rerank** | 8 | Cohere, Jina AI, Mixedbread |
-| **OCR / documents** | 8 | OCR.space, LlamaParse, Nanonets |
 <!-- AUTOGEN:coverage:end -->
 
 Filter any category live in the [interactive explorer](https://freellmapihub.com/).
