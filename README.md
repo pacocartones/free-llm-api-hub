@@ -1,3 +1,5 @@
+# Free LLM API list: 94 providers, checked 27 Nov 2026
+
 <div align="center">
 
 <picture>
@@ -98,7 +100,7 @@ Focused, always-current collections — each is generated from the dataset and h
 - **[Free LLM APIs with no credit card](collections/no-credit-card.md)** (37) — start without a payment method · [live page ↗](https://freellmapihub.com/collections/no-credit-card)
 - **[Free LLM APIs with no phone verification](collections/no-phone.md)** (4) — no SMS/phone verification · [live page ↗](https://freellmapihub.com/collections/no-phone)
 - **[Free AI APIs with no account needed](collections/anonymous-access.md)** (5) — call the API with no account at all · [live page ↗](https://freellmapihub.com/collections/anonymous-access)
-- **[Free LLM APIs for commercial use](collections/commercial-use.md)** (16) — safe to ship, not eval-only · [live page ↗](https://freellmapihub.com/collections/commercial-use)
+- **[Free LLM APIs for commercial use](collections/commercial-use.md)** (15) — safe to ship, not eval-only · [live page ↗](https://freellmapihub.com/collections/commercial-use)
 - **[OpenAI-compatible free LLM APIs](collections/openai-compatible.md)** (54) — drop-in OpenAI SDK swap · [live page ↗](https://freellmapihub.com/collections/openai-compatible)
 - **[Permanently free LLM APIs](collections/always-free.md)** (7) — $0 models, no trial clock · [live page ↗](https://freellmapihub.com/collections/always-free)
 - **[Free multimodal LLM APIs](collections/multimodal.md)** (66) — vision, audio, embeddings · [live page ↗](https://freellmapihub.com/collections/multimodal)

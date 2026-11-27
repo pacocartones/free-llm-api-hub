@@ -67,7 +67,7 @@ test('stdio server lists its tools and answers calls', async (t) => {
   const plain = JSON.parse((await client.callTool({ name: 'get_provider', arguments: { slug: 'alpha-ai' } })).content[0].text);
   assert.equal('freshness' in plain, false);
   const free = JSON.parse((await client.callTool({ name: 'is_free', arguments: { slug: 'beta-cloud' } })).content[0].text);
-  assert.match(free.answer, /^Not permanently\. Beta Cloud gives a one-time trial credit/);
+  assert.match(free.answer, /^No\. Beta Cloud gives a one-time trial credit/);
   assert.equal('freshness' in free, false);
 });
 

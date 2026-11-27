@@ -2984,6 +2984,30 @@
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "0892dad97c845e1dd89a48358486fb4254fa703bd13797d4389013ac342663bb"
+  },
+  {
+   "id": "nlpcloud.card_required.sentence",
+   "slug": "nlpcloud",
+   "kind": "field_sentence",
+   "field": "card_required",
+   "text": "A credit card is needed for this plan, but you automatically get an initial $15 credit for your tests.",
+   "source_url": "https://nlpcloud.com/",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": null
+  },
+  {
+   "id": "nlpcloud.commercial_ok.sentence",
+   "slug": "nlpcloud",
+   "kind": "field_sentence",
+   "field": "commercial_ok",
+   "text": "We grant you a personal, limited, non-exclusive, revocable, non-transferable license, without the right to sublicense, to electronically access and use the Service for your personal or commercial purposes.",
+   "source_url": "https://nlpcloud.com/tos.html",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": null
   }
  ]
 }
