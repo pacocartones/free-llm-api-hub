@@ -23,6 +23,7 @@ How **Free LLM API Hub** works — how entries are verified, what earns a spot, 
 | [Merge manager](maintenance/merge-train.md) | Merge trains in GitHub Actions: approved pull requests are merged after the checks pass on main + all of them |
 | [Provider schema reference](schema.md) | Generated field types, nullability and required keys of `data/schema.json` |
 | [Static JSON API: stability and versioning](api.md) | What `/api/v1/` guarantees, how `version` relates to the path, and pinning a snapshot by tag |
+| [Router data contract (2.17.0 design)](router-contract.md) | Draft of additive fields for API routers: who a limit counts against, resets, auth, availability, and how to treat `null` |
 | [Discovery sources & competitive map](sources.md) | Where new providers are found, which lists to trust, and how we differ from rivals |
 | [Live testing](live-testing.md) | Probing each free tier with a real key — `last_probed`, and the Infisical setup |
 | [Roadmap](roadmap.md) | Where the project is going next |
