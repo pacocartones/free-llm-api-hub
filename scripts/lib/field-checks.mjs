@@ -98,8 +98,6 @@ export const UNSOURCED_ALLOWLIST = Object.freeze([
   { slug: 'pollinations', field: 'commercial_ok', until: '2026-12-31', reason: 'pollinations.ai/terms renders only with JavaScript' },
   { slug: 'tencent-hunyuan', field: 'phone_required', until: '2026-12-31', reason: 'the cloud.tencent.com sign-up guide renders only with JavaScript' },
   // Official pages that answer HTTP 403 to clients that are not browsers.
-  { slug: 'nlpcloud', field: 'card_required', until: '2026-12-31', reason: 'nlpcloud.com answers HTTP 403 to non-browser clients' },
-  { slug: 'nlpcloud', field: 'commercial_ok', until: '2026-12-31', reason: 'nlpcloud.com answers HTTP 403 to non-browser clients' },
   { slug: 'sambanova', field: 'openai_compatible', until: '2026-12-31', reason: 'docs.sambanova.ai answers HTTP 403 to non-browser clients' },
 ]);
 
