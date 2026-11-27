@@ -65,6 +65,9 @@ tools/lighthouse/node_modules/
 site/find/
 site/shared-find.js
 
+# Spanish draft (docs/i18n.md): written only by `npm run build:es` (--locales=es) until it ships in January
+site/es/
+
 # Screenshot runner (docs/screenshots.md): its dependencies (installed from tools/screenshots/package-lock.json) and output
 tools/screenshots/node_modules/
 tools/screenshots/out/

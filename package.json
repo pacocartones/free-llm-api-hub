@@ -11,6 +11,7 @@
     "release:prepare": "node scripts/release-prepare.mjs",
     "changelog:collect": "node scripts/release-prepare.mjs --collect",
     "build": "node scripts/build.mjs",
+    "build:es": "node scripts/build.mjs --locales=es",
     "sync-main": "node scripts/sync-main.mjs",
     "validate": "node scripts/validate.mjs",
     "verify-quotes": "node scripts/verify-quotes.mjs",

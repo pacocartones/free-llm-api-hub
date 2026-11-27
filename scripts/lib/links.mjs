@@ -4,11 +4,13 @@
 // it adds a screen-reader-only "(opens in a new tab)" before the closing tag. Text inside <script> and <style> blocks is
 // not touched, and a link that already carries the note is left as it is.
 
-const NOTE = '<span class="sr-only"> (opens in a new tab)</span>';
+const LABEL = '(opens in a new tab)';
 
-export function markNewTabLinks(html) {
+/** `label` is the note in the page's language (the Spanish pages pass their own, docs/i18n.md). */
+export function markNewTabLinks(html, label = LABEL) {
+  const NOTE = `<span class="sr-only"> ${label}</span>`;
   return html
     .split(/(<script\b[\s\S]*?<\/script\b[^>]*>|<style\b[\s\S]*?<\/style\b[^>]*>)/gi)
-    .map((part, i) => (i % 2 === 1 ? part : part.replace(/<a\b([^>]*\btarget="_blank"[^>]*)>([\s\S]*?)<\/a>/g, (m, attrs, inner) => (inner.includes('(opens in a new tab)') ? m : `<a${attrs}>${inner}${NOTE}</a>`))))
+    .map((part, i) => (i % 2 === 1 ? part : part.replace(/<a\b([^>]*\btarget="_blank"[^>]*)>([\s\S]*?)<\/a>/g, (m, attrs, inner) => (inner.includes(label) ? m : `<a${attrs}>${inner}${NOTE}</a>`))))
     .join('');
 }
