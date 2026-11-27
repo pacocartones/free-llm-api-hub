@@ -203,12 +203,12 @@ describe('the copy follows the data', () => {
     const base = Object.fromEntries(LONG_GUIDES.map((g) => [g.slug, longGuidePage(g, { providers, notFree })]));
     const changed = providers
       .filter((p) => p.slug !== 'ovhcloud-ai-endpoints')
-      .map((p) => (p.slug === 'jina-ai' ? { ...p, phone_required: null, commercial_ok: false } : p));
+      .map((p) => (p.slug === 'mixedbread' ? { ...p, phone_required: null, commercial_ok: false } : p));
     const next = Object.fromEntries(LONG_GUIDES.map((g) => [g.slug, longGuidePage(g, { providers: changed, notFree })]));
     const nc = 'free-llm-api-no-credit-card-no-phone';
     assert.equal(next[nc].count, base[nc].count - 2);
     assert.ok(next[nc].title.includes(`(${base[nc].count - 2}, Checked)`));
-    assert.ok(!next[nc].body.includes('../p/ovhcloud-ai-endpoints"') && !next[nc].body.includes('<td class="name"><a href="../p/jina-ai">'));
+    assert.ok(!next[nc].body.includes('../p/ovhcloud-ai-endpoints"') && !next[nc].body.includes('<td class="name"><a href="../p/mixedbread">'));
     const alt = 'openai-api-alternatives';
     assert.equal(next[alt].count, base[alt].count - 1);
     assert.ok(!next[alt].body.includes('../p/ovhcloud-ai-endpoints"'));

@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-26",
+  "generated": "2026-11-27",
   "scores": {
     "google-gemini": {
       "total": 72.9,
@@ -73,12 +73,6 @@
       "of": 6,
       "rank": null
     },
-    "jina-ai": {
-      "total": 41,
-      "confirmed": 3,
-      "of": 6,
-      "rank": null
-    },
     "meganova": {
       "total": 38.1,
       "confirmed": 3,
@@ -90,18 +84,6 @@
       "confirmed": 4,
       "of": 6,
       "rank": 7
-    },
-    "assemblyai": {
-      "total": 37,
-      "confirmed": 2,
-      "of": 6,
-      "rank": null
-    },
-    "deepgram": {
-      "total": 37,
-      "confirmed": 3,
-      "of": 6,
-      "rank": null
     },
     "llamaparse": {
       "total": 37,
@@ -157,7 +139,19 @@
       "of": 6,
       "rank": null
     },
+    "assemblyai": {
+      "total": 34.4,
+      "confirmed": 2,
+      "of": 6,
+      "rank": null
+    },
     "contextual-ai": {
+      "total": 34.4,
+      "confirmed": 3,
+      "of": 6,
+      "rank": null
+    },
+    "deepgram": {
       "total": 34.4,
       "confirmed": 3,
       "of": 6,
@@ -284,6 +278,12 @@
       "rank": null
     },
     "bytez": {
+      "total": 30,
+      "confirmed": 1,
+      "of": 6,
+      "rank": null
+    },
+    "jina-ai": {
       "total": 30,
       "confirmed": 1,
       "of": 6,
