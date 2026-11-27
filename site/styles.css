@@ -741,6 +741,7 @@ pre code { color: var(--text); }
 .compare-table tbody tr:nth-child(even) { background: color-mix(in srgb, var(--panel) 42%, transparent); }
 .compare-table td code { word-break: break-all; }
 .cmp-sub { margin-top: 4px; font-size: .8rem; }
+.cmp-sub a { text-decoration: underline; text-underline-offset: 2px; } /* WCAG 1.4.1; axe link-in-text-block */
 .tri-yes { color: var(--text); }
 .tri-no { color: var(--text); }
 .tri-cond { color: var(--text); }
