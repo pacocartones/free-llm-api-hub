@@ -8,18 +8,16 @@
 // the day its source was read. The same items feed the visible FAQ and the FAQPage JSON-LD, so the two cannot differ.
 
 import { escapeHtml as htmlEsc } from './html.mjs';
-import { limitFigures, shortDate, trimAtWord } from './provider-meta.mjs';
+import { limitFigures, trimAtWord } from './provider-meta.mjs';
+import { humanDate as shortDate, DATE_RE as ISO } from './dates.mjs';
+import { NOT_STATED, capFirst as cap } from './not-stated.mjs';
 import { fieldCheck } from './field-checks.mjs';
 import { safeHttp as safeUrl } from './text.mjs';
 
-export const NOT_STATED = 'not stated';
-
-const ISO = /^\d{4}-\d{2}-\d{2}$/;
 export const isIso = (d) => ISO.test(String(d || ''));
 export const noFinalStop = (s) => String(s ?? '').trim().replace(/[\s.;:,]+$/, '');
 // A sentence that already ends in the ellipsis of a cut text takes no extra full stop.
 const stop = (s) => (/…$/.test(String(s)) ? '' : '.');
-const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
 // The words for each recorded value of the tri-state flags. null is always NOT_STATED.
 const FLAG_WORDS = {
@@ -90,8 +88,8 @@ export function answerFirst(p) {
   return { parts, text, html: `<p class="answer-first" id="is-it-free">${htmlEsc(text)}</p>` };
 }
 
-/** " (source read 24 Nov 2026)" or " (source date not recorded)": every FAQ answer ends with one. */
-const readOn = (date) => (shortDate(date) ? ` Source read ${shortDate(date)}.` : ' Source date not recorded.');
+/** " (source read 24 Nov 2026)" or " (source date not stated)": every FAQ answer ends with one. */
+const readOn = (date) => (shortDate(date) ? ` Source read ${shortDate(date)}.` : ' Source date not stated.');
 
 /**
  * The FAQ of a provider page: six questions, each { id, q, a, parts, date, source }. `a` is plain text (the JSON-LD
@@ -222,8 +220,8 @@ export function providerFaqHtml(p, items = providerFaq(p)) {
     const body = htmlEsc(it.a.slice(0, it.a.lastIndexOf(' Source ')));
     const when = shortDate(it.date);
     const src = it.source
-      ? ` <span class="muted">Source${when ? ` read <time datetime="${htmlEsc(it.date)}">${htmlEsc(when)}</time>` : ' date not recorded'}: <a href="${htmlEsc(it.source)}" target="_blank" rel="noopener">the provider's page</a>.</span>`
-      : ` <span class="muted">Source${when ? ` read <time datetime="${htmlEsc(it.date)}">${htmlEsc(when)}</time>` : ' date not recorded'}.</span>`;
+      ? ` <span class="muted">Source${when ? ` read <time datetime="${htmlEsc(it.date)}">${htmlEsc(when)}</time>` : ' date not stated'}: <a href="${htmlEsc(it.source)}" target="_blank" rel="noopener">the provider's page</a>.</span>`
+      : ` <span class="muted">Source${when ? ` read <time datetime="${htmlEsc(it.date)}">${htmlEsc(when)}</time>` : ' date not stated'}.</span>`;
     return `<div class="faq-item" id="${it.id}"><h3>${htmlEsc(it.q)}</h3><p>${body}${src}</p></div>`;
   }).join('');
   return `<h2 id="faq">${htmlEsc(p.name)} FAQ</h2>${html}`;

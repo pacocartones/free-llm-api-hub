@@ -13,15 +13,15 @@
 // border (dashed when a re-check is due or overdue) and words for screen readers. The colour follows --ok / --unk / --bad.
 //
 // Every shape value lives in STAMP_SHAPES (and its CSS in styles.css), so another variant is a parameter change.
-// Shipped to the browser as source text (rows.clientBundle) like flags.mjs: keep stampDate, stampState and stampHtml
-// self-contained (htmlEsc, freshnessStatus and the constants below). The quote, its URL and the count travel on the
+// Shipped to the browser as source text (rows.clientBundle) like flags.mjs: keep stampState and stampHtml
+// self-contained (htmlEsc, humanDate from dates.mjs, freshnessStatus and the constants below). The quote, its URL and the count travel on the
 // record as `stamp` ({ q, u, n }), set by the build from data/quotes.json (stampSource), so the server render and the
 // browser repaint print the same receipt.
 
 import { escapeHtml as htmlEsc } from './html.mjs'; // the name these functions use when serialised
 import { freshnessStatus } from './rules.mjs';
+import { humanDate } from './dates.mjs';
 
-export const STAMP_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 export const STAMP_WORDS = { fresh: 'Verified, fresh', due: 'Verified, due for re-check', stale: 'Verified, stale: re-check overdue' };
 
 /**
@@ -33,13 +33,6 @@ export const STAMP_SHAPES = {
   ticket: { notch: 5, cut: 1.5, rotate: -1.5 },
   pill: { dot: 8 },
 };
-
-/** '2026-11-24' → '24 Nov' (or '24 Nov 2026' with the year). Anything else is returned escaped as it is. */
-export function stampDate(iso, withYear) {
-  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(iso || ''));
-  if (!m) return htmlEsc(iso || '');
-  return Number(m[3]) + ' ' + STAMP_MONTHS[Number(m[2]) - 1] + (withYear ? ' ' + m[1] : '');
-}
 
 /** Freshness of a verified record against a reference date: { age (days), st ('fresh' | 'due' | 'stale'), cls }. */
 export function stampState(p, now) {
@@ -62,10 +55,10 @@ export function stampHtml(p, opts) {
   const url = typeof s.u === 'string' && /^https:\/\/[^\s"'<>]+$/.test(s.u) ? s.u : '';
   const n = Number.isInteger(s.n) && s.n > 0 ? s.n : 0;
   const date = htmlEsc(p.last_verified);
-  const title = 'Verified ' + fr.age + 'd ago · ' + date + (s.q ? ' · “' + htmlEsc(s.q) + '”' : ' on the provider’s own docs');
+  const title = 'Verified ' + fr.age + 'd ago · ' + (humanDate(p.last_verified) || date) + (s.q ? ' · “' + htmlEsc(s.q) + '”' : ' on the provider’s own docs');
   const sources = n ? ' · ' + n + (n === 1 ? ' source' : ' sources') : url ? ' · source' : '';
   const sr = '<span class="sr-only">' + STAMP_WORDS[fr.st] + ': </span>';
-  const when = '<time datetime="' + date + '">' + stampDate(p.last_verified, true) + '</time>';
+  const when = '<time datetime="' + date + '">' + (humanDate(p.last_verified) || date) + '</time>';
   const of = url ? '<span class="sr-only"> of the ' + htmlEsc(p.name || 'provider') + ' entry</span>' : '';
   let cls, inner;
   if (o.shape === 'pill') {

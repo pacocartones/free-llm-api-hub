@@ -302,15 +302,15 @@ test('compare: the URL parser keeps 2-4 known, well-formed, unique slugs in orde
   assert.deepEqual(parseCompareSlugs('?compare=groq', null), [], 'nothing is valid without a known list');
 });
 
-test('compare: a null tri-state renders "not confirmed", never "no"', () => {
+test('compare: a null tri-state renders "not stated", never "no"', () => {
   const { compareTableHtml } = clientCompare();
   const out = compareTableHtml([cmpBase, { ...cmpBase, slug: 'b', name: 'B', card_required: null, phone_required: null, commercial_ok: false, openai_compatible: null, openai_base_url: null }]);
   const row = (label) => out.split('\n').find((l) => l.includes(`<th scope="row">${label}</th>`));
-  assert.match(row('Credit card'), /tri-no">not required<\/span><\/td><td><span class="tri tri-unk">not confirmed/);
-  assert.match(row('Phone verification'), /tri-yes">required<\/span><\/td><td><span class="tri tri-unk">not confirmed/);
-  assert.match(row('Commercial use'), /tri-unk">not confirmed<\/span><\/td><td><span class="tri tri-no">not allowed \(eval only\)/);
+  assert.match(row('Credit card'), /tri-no">not required<\/span><\/td><td><span class="tri tri-unk">not stated/);
+  assert.match(row('Phone verification'), /tri-yes">required<\/span><\/td><td><span class="tri tri-unk">not stated/);
+  assert.match(row('Commercial use'), /tri-unk">not stated<\/span><\/td><td><span class="tri tri-no">not allowed \(eval only\)/);
   assert.match(row('OpenAI-compatible'), /tri-yes">yes<\/span><div class="cmp-sub"><code>https:\/\/api\.groq\.com\/openai\/v1<\/code>/);
-  assert.match(row('OpenAI-compatible'), /<td><span class="tri tri-unk">not confirmed<\/span><\/td><\/tr>$/);
+  assert.match(row('OpenAI-compatible'), /<td><span class="tri tri-unk">not stated<\/span><\/td><\/tr>$/);
 });
 
 test('compare: every dataset field the issue lists has a row, one column per provider', () => {
@@ -322,7 +322,7 @@ test('compare: every dataset field the issue lists has a row, one column per pro
   }
   assert.equal((out.match(/<th scope="col">/g) || []).length, 4, 'a label column plus one per provider');
   assert.match(out, /<th scope="col"><a href="\.\.\/p\/groq">Groq<\/a><\/th>/);
-  assert.match(out, /<span class="v ok">2026-08-01<\/span>/);
+  assert.match(out, /<span class="v ok"><time datetime="2026-08-01">1 Aug 2026<\/time><\/span>/);
   assert.match(compareTableHtml([{ ...cmpBase, verified: false, last_verified: null }]), /<span class="v warn">unverified<\/span>/);
 });
 

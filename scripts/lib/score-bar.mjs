@@ -30,7 +30,7 @@ export function scoreBlockHtml({ position, of, total, editorial, editorialWeight
   const segs = rows.map((r) => r.known
     ? `<span class="sb-seg" style="flex-grow:${r.weight}"><span class="sb-fill" style="width:${Math.round((r.points / r.weight) * 100)}%"></span></span>`
     : `<span class="sb-seg sb-unknown" style="flex-grow:${r.weight}"></span>`).join('');
-  const said = rows.map((r) => `${r.label} ${r.known ? `${pts(r.points)} of ${r.weight}` : `not confirmed, ${pts(r.points)} of ${r.weight}`}`).join('; ');
+  const said = rows.map((r) => `${r.label} ${r.known ? `${pts(r.points)} of ${r.weight}` : `not stated, ${pts(r.points)} of ${r.weight}`}`).join('; ');
   const legend = rows.map((r) => `<li${r.known ? '' : ' class="sb-u"'}><span class="sb-key" aria-hidden="true"></span>${esc(r.label)} <span class="sb-pts">${r.known ? `${pts(r.points)}/${r.weight}` : `? · ${pts(r.points)}/${r.weight}`}</span></li>`).join('');
   const note = `Unknowns lower the score on purpose: an input nobody has confirmed (grey) earns nothing, or the neutral middle for card, phone and commercial use. ` +
     `Plus ${pts(editorial)} of ${editorialWeight} editorial points.`;

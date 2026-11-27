@@ -2,6 +2,7 @@
 // Prepare one provider row without weakening the canonical dataset contract.
 // The first run writes an intentionally invalid local draft. A later run
 // appends that draft only after the full production validator accepts it.
+import { utcToday } from './lib/dates.mjs';
 import { spawnSync } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
 import {
@@ -88,7 +89,7 @@ function validationError(path) {
 }
 
 function todayUtc() {
-  const today = process.env.ADD_PROVIDER_TODAY || new Date().toISOString().slice(0, 10);
+  const today = utcToday(process.env.ADD_PROVIDER_TODAY);
   if (!DATE_RE.test(today)) throw new Error('ADD_PROVIDER_TODAY must be YYYY-MM-DD');
   return today;
 }

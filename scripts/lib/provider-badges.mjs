@@ -8,6 +8,7 @@
 // in derived-fingerprints.json and a change in the data shows up in the badge on the next build.
 
 import { escapeAttr, escapeHtml, escapeText } from './html.mjs';
+import { humanDate } from './dates.mjs';
 
 export const BADGES_PATH = '/badges/';
 /** The directory of the SVG files on the site (/badge/<slug>.svg). */
@@ -21,13 +22,8 @@ export const BADGE_THEMES = Object.freeze({
   dark: Object.freeze({ fill: '#2e2119', ink: '#ffb25c', edge: '#352822' }),
 });
 
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 /** '2026-11-25' → '25 Nov 2026'; anything else → ''. */
-export function badgeDate(iso) {
-  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(iso || ''));
-  if (!m || +m[2] < 1 || +m[2] > 12) return '';
-  return `${+m[3]} ${MONTHS[+m[2] - 1]} ${m[1]}`;
-}
+export const badgeDate = (iso) => humanDate(iso) || '';
 
 /** What the badge of a provider states, from the record alone. */
 export function providerBadgeState(p) {

@@ -49,7 +49,7 @@ describe('filters: one per question, null is never yes', () => {
   test('card: "No card" keeps a confirmed no-card provider, sets aside an unconfirmed one, drops a card-required one', () => {
     assert.equal(where({ card_required: false }, { card: 'no' }), 'match');
     assert.equal(where({ card_required: null }, { card: 'no' }), 'possible');
-    assert.equal(where({}, { card: 'no' }), 'possible', 'a missing field is not confirmed either');
+    assert.equal(where({}, { card: 'no' }), 'possible', 'a missing field is not stated either');
     assert.equal(where({ card_required: true }, { card: 'no' }), 'out');
     assert.equal(where({ card_required: true }, { card: 'yes' }), 'match', 'a visitor who can add a card is not filtered');
     assert.equal(where({ card_required: null }, { card: 'yes' }), 'match');
@@ -60,7 +60,7 @@ describe('filters: one per question, null is never yes', () => {
     assert.equal(where({ phone_required: true }, { phone: 'no' }), 'out');
     assert.equal(where({ phone_required: true }, { phone: 'yes' }), 'match');
   });
-  test('commercial: only a confirmed true is a yes; "conditional" and null are not confirmed; false is out', () => {
+  test('commercial: only a confirmed true is a yes; "conditional" and null are not stated; false is out', () => {
     assert.equal(where({ commercial_ok: true }, { commercial: 'yes' }), 'match');
     assert.equal(where({ commercial_ok: 'conditional', commercial_ok_condition: 'under 1M requests' }, { commercial: 'yes' }), 'possible');
     assert.equal(where({ commercial_ok: null }, { commercial: 'yes' }), 'possible');
@@ -86,9 +86,9 @@ describe('filters: one per question, null is never yes', () => {
     assert.equal(where({ modalities: ['audio'] }, { use: 'speech' }), 'match');
     assert.equal(where({ modalities: ['image'] }, { use: 'image' }), 'match');
     assert.equal(where({ modalities: ['ocr'] }, { use: 'ocr' }), 'match');
-    assert.equal(where({ modalities: ['text'] }, { use: 'ocr' }), 'out', 'not confirmed never rescues a provider that lacks the use');
+    assert.equal(where({ modalities: ['text'] }, { use: 'ocr' }), 'out', 'not stated never rescues a provider that lacks the use');
   });
-  test('a contradicted answer drops a provider even when another answer is not confirmed', () => {
+  test('a contradicted answer drops a provider even when another answer is not stated', () => {
     assert.equal(where({ card_required: true, phone_required: null }, { card: 'no', phone: 'no' }), 'out');
   });
   test('the order is the explorer\'s Recommended order (recommendedCmp), for matches and possible alike', () => {
@@ -204,9 +204,9 @@ describe('payload and result markup', () => {
       assert.doesNotMatch(find.resultHtml(find.findProvider({ ...base, keys_url: bad }), {}), /Get a free key/, `keys_url ${JSON.stringify(bad)}`);
     }
   });
-  test('an asked requirement that is not confirmed says so in words, with the warning icon and its own class', () => {
+  test('an asked requirement that is not stated says so in words, with the warning icon and its own class', () => {
     const html = find.resultHtml({ ...base, card_required: null, data_policy: null }, { card: 'no', train: 'yes' });
-    assert.match(html, /class="flag-badge find-flag is-unknown"><svg class="i" aria-hidden="true"><use href="#ic-warn"\/><\/svg>card: not confirmed/);
+    assert.match(html, /class="flag-badge find-flag is-unknown"><svg class="i" aria-hidden="true"><use href="#ic-warn"\/><\/svg>card: not stated/);
     assert.match(html, /is-unknown"><svg[^]*?training: not stated/);
     const yes = find.resultHtml({ ...base, card_required: false }, { card: 'no' });
     assert.match(yes, /find-flag is-yes"><svg class="i" aria-hidden="true"><use href="#ic-nocard"\/><\/svg>no card/);
@@ -308,8 +308,8 @@ describe('the page in the build', () => {
 
   test('countText: the live count wording, before and after the last answer', () => {
     assert.equal(find.countText(1, 0, false), 'So far: 1 provider matches.');
-    assert.equal(find.countText(5, 2, false), 'So far: 5 providers match. 2 more might fit (not confirmed).');
-    assert.equal(find.countText(0, 1, true), '0 providers match your answers. 1 more might fit (not confirmed).');
+    assert.equal(find.countText(5, 2, false), 'So far: 5 providers match. 2 more might fit (not stated).');
+    assert.equal(find.countText(0, 1, true), '0 providers match your answers. 1 more might fit (not stated).');
   });
 
   test('the page body is pure: same inputs, same markup', () => {

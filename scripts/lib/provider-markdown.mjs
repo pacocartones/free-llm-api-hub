@@ -3,9 +3,10 @@
 // Answer engines and agents read Markdown more reliably than a styled HTML page, so every provider page has a plain-text
 // twin built from the same record: the "is it free" answer, the limits, the four flags with the pages read and the day,
 // the quickstart, the anchors of each fact on the HTML page and the links. It opens with the same answer-first sentence as
-// the HTML page (lib/provider-faq.mjs). It states only what data/providers.json holds: an unknown flag reads "not stated"
-// with its recorded reason, never "no", and a number appears only with the page it comes from and the day it was read.
-// It is a pure function of the record, the dataset date and the version: the same data gives the same bytes.
+// the HTML page (lib/provider-faq.mjs). It states only what data/providers.json holds: a null flag reads "not stated" with
+// its recorded reason (not-stated.mjs), never "no", and a number appears only with the page it comes from and the day it
+// was read. It is machine output, so days stay ISO (dates.mjs). It is a pure function of the record, the dataset date and
+// the version: the same data gives the same bytes.
 //
 // The twin is an alternate, not a second canonical page. It lives at /p/<slug>.md next to /p/<slug>.html (GitHub Pages
 // resolves the extensionless /p/<slug> to the .html file only), names the HTML page as canonical in its header, and is
@@ -16,10 +17,11 @@
 
 import { pythonChatQuickstart, pythonEmbeddingsQuickstart, curlChatQuickstart } from './quickstart.mjs';
 import { fieldCheck, REASON_LABEL } from './field-checks.mjs';
+import { NOT_STATED } from './not-stated.mjs';
 import { trainState } from './data-policy-page.mjs';
 import { limitFigures } from './provider-meta.mjs';
 import { shortenProse } from './short-text.mjs';
-import { answerFirst, NOT_STATED } from './provider-faq.mjs';
+import { answerFirst } from './provider-faq.mjs';
 import { FACT_ANCHORS } from './provider-sections.mjs';
 import { authorshipLine } from './site-entity.mjs';
 
@@ -99,9 +101,7 @@ export function flagWords(value, yes, no, check) {
   if (value === true) return yes;
   if (value === false) return no;
   if (value === 'conditional') return 'conditional';
-  const reason = check && REASON_LABEL[check.status] && check.status !== 'stated' ? REASON_LABEL[check.status] : REASON_LABEL.not_checked;
-  // "not stated by the provider" already says it; every other reason follows "not stated".
-  return reason.startsWith(NOT_STATED) ? reason : `${NOT_STATED} (${reason})`;
+  return check && REASON_LABEL[check.status] && check.status !== 'stated' ? REASON_LABEL[check.status] : REASON_LABEL.not_checked;
 }
 
 function flagsMd(p) {
@@ -137,7 +137,7 @@ function limitsMd(p) {
     if (rows.length) out.push(rows.join('\n'));
     out.push(`${fl.scope ? `Scope: ${mdText(fl.scope)}${/[.!?]$/.test(fl.scope) ? '' : '.'} ` : ''}Source: ${link("the provider's page", fl.source)}, read ${fl.checked}.`);
   } else {
-    out.push('Numeric limits are not recorded in structured form for this provider.');
+    out.push('Numeric limits: not stated in structured form for this provider.');
   }
   const docs = link('the official docs', p.docs_url);
   const read = p.verified === true && DATE_RE.test(String(p.last_verified || '')) ? `verified ${p.last_verified}` : '';
@@ -209,8 +209,8 @@ export function providerMarkdown(p, { site, asOf, version, repo }) {
     `## Free limits\n\n${limitsMd(p)}\n\n` +
     `## Flags\n\n${flagsMd(p)}\n\n` +
     `## At a glance\n\n` +
-    `- **Plan:** ${p.category === 'ongoing' ? 'ongoing free tier' : 'trial credit'} (${FREE_TYPE_WORDS[p.free_type] || 'not recorded'})\n` +
-    `- **Modalities:** ${mdText((p.modalities || []).join(', ') || 'not listed')}\n` +
+    `- **Plan:** ${p.category === 'ongoing' ? 'ongoing free tier' : 'trial credit'} (${FREE_TYPE_WORDS[p.free_type] || NOT_STATED})\n` +
+    `- **Modalities:** ${mdText((p.modalities || []).join(', ') || NOT_STATED)}\n` +
     `- **Expires:** ${p.expires ? mdText(p.expires) : p.free_type === 'trial-credit' && !p.no_expiry ? NOT_STATED : 'no expiry'}` +
     models + `\n\n` +
     `## Quickstart\n\n${quickstartMd(p)}\n\n` +
@@ -223,7 +223,7 @@ export function oneLineLimits(p) {
   const figures = p.free_limits && mdUrl(p.free_limits.source) ? limitFigures(p.free_limits) : [];
   if (figures.length) return figures.join(', ');
   if (p.rate_limits) return mdText(shortenProse(String(p.rate_limits).replace(/\s+/g, ' '), 120).text);
-  return 'limits not specified';
+  return `limits ${NOT_STATED}`;
 }
 
 /** One provider line of llms.txt: name, free type, limits, HTML page and Markdown twin. */

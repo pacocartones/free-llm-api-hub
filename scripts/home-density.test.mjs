@@ -1,5 +1,5 @@
 // The home page's density budget (feat/home-density): one primary action in the hero, one control bar above the table, rows
-// of at most 72px, a «Needs / unknown» cell in words (no "Not stated", no tick marks), a compact cookie banner on phones,
+// of at most 72px, a «Needs / not stated» cell in words (one "Not stated:" group, no tick marks), a compact cookie banner on phones,
 // and server and client rows that are the same string. Reads the committed template and the shared modules; the layout
 // measurements also run in a real browser when Playwright is installed (it is not a dependency of this repository, so
 // that part is skipped in CI and the static budget below still holds the line).
@@ -89,20 +89,21 @@ test('rows: server render and browser copy are the same string, for every provid
   for (const tr of tbody.split('\n')) {
     const slug = tr.match(/href="p\/([a-z0-9-]+)"/)[1];
     const p = PROVIDERS.find((x) => x.slug === slug);
-    assert.ok(p && tr.includes(needsCellHtml(p)), `${slug}: the server row carries the shared «Needs / unknown» cell`);
+    assert.ok(p && tr.includes(needsCellHtml(p)), `${slug}: the server row carries the shared «Needs / not stated» cell`);
   }
 });
 
-test('rows: no "Not stated" and no tick marks; the type sits next to the name; four cells', () => {
+test('rows: no "Unknown", one "Not stated:" group at most and no tick marks; the type sits next to the name; four cells', () => {
   for (const p of PROVIDERS) {
     const row = explorerRowHtml(p, { now: '2026-11-25' });
     const visible = row.replace(/<span class="sr-only">[^<]*<\/span>/g, '').replace(/<[^>]+>/g, ' ');
-    assert.doesNotMatch(visible, /Not stated|✓/, p.slug);
+    assert.doesNotMatch(visible, /Unknown|✓/, p.slug);
+    assert.ok((visible.match(/Not stated/g) || []).length <= 1, `${p.slug}: one "Not stated:" group at most`);
     assert.match(row, /<div class="name-line"><a class="name-link"[^>]*>[^<]*<\/a> <span class="badge b-(ongoing|trial)"[^>]*>(Ongoing|Trial)<\/span>/, `${p.slug}: type next to the name`);
     assert.equal((row.match(/<td\b/g) || []).length, 4, `${p.slug}: four cells`);
   }
-  assert.doesNotMatch(read('scripts/lib/rows.mjs'), /'Not stated'/);
-  assert.doesNotMatch(section(/<tbody id="tbody" role="rowgroup">([\s\S]*?)<\/tbody>/), /Not stated|data-flag=|fmini/);
+  assert.doesNotMatch(read('scripts/lib/rows.mjs'), /'Unknown'|Unknown: /);
+  assert.doesNotMatch(section(/<tbody id="tbody" role="rowgroup">([\s\S]*?)<\/tbody>/), /Unknown: |data-flag=|fmini/);
 });
 
 test('rows: the static height budget is at most 72px on a desktop', () => {

@@ -175,7 +175,7 @@ describe('the lists are the data', () => {
     assert.ok(html.match(/<meta name="description" content="The (\d+) /)[1] === String(list.length));
     for (const p of list) assert.ok(html.includes(`<a href="../p/${p.slug}">`) && html.includes(`<time datetime="${p.last_verified}">`), p.slug);
     const unknownPhone = providers.filter((p) => p.verified && p.card_required === false && p.phone_required == null).length;
-    assert.ok(html.includes(`No card, phone not confirmed: ${unknownPhone} more`));
+    assert.ok(html.includes(`No card, phone not stated: ${unknownPhone} more`));
     for (const p of providers.filter((x) => x.anonymous_access)) assert.ok(html.includes(`<a href="../p/${p.slug}">`), `${p.slug}: no-account section`);
   });
 
@@ -282,14 +282,14 @@ describe('the modality guides', () => {
   test('every row’s card, phone, commercial and data-use cells and its check date are the entry’s', () => {
     const tables = [...MODALITY, { slug: 'free-image-generation-apis', label: 'Free image generation APIs compared' }, { slug: 'free-image-generation-apis', label: 'Other free image APIs' }];
     const bySlug = new Map(providers.map((p) => [p.slug, p]));
-    const flag = (v) => (v === false ? 'No' : v === true ? 'Yes' : 'Not confirmed');
+    const flag = (v) => (v === false ? 'No' : v === true ? 'Yes' : 'Not stated');
     for (const t of tables) {
       for (const [slug, cells] of tableRows(page(t.slug), t.label)) {
         const p = bySlug.get(slug);
         const [card, commercial, data, checked] = cells.slice(-4);
         assert.ok(stripTags(card).startsWith(`Card: ${flag(p.card_required)}`), `${slug}: card`);
         assert.ok(stripTags(card).includes(`Phone: ${flag(p.phone_required)}`), `${slug}: phone`);
-        const c = { true: 'Yes', false: 'No', conditional: 'Conditional' }[String(p.commercial_ok)] || 'Not confirmed';
+        const c = { true: 'Yes', false: 'No', conditional: 'Conditional' }[String(p.commercial_ok)] || 'Not stated';
         assert.ok(stripTags(commercial).startsWith(c), `${slug}: commercial use`);
         assert.ok(stripTags(data).replace(/&rsquo;|’/g, '’').startsWith(dataUseWords(p)), `${slug}: data use`);
         assert.ok(checked.includes(`<time datetime="${p.last_verified}">`), `${slug}: checked date`);
@@ -334,8 +334,8 @@ describe('the modality guides', () => {
       const text = textOf(page(slug));
       for (const [field, label] of Object.entries(LABEL)) {
         const n = list.filter((p) => p[field] == null).length;
-        if (n) assert.ok(text.includes(`${label} isn’t confirmed for ${n} of ${list.length}:`), `${slug}: ${field}`);
-        else assert.ok(!text.includes(`${label} isn’t confirmed`), `${slug}: ${field} has no unknowns`);
+        if (n) assert.ok(text.includes(`${label} is not stated for ${n} of ${list.length}:`), `${slug}: ${field}`);
+        else assert.ok(!text.includes(`${label} is not stated`), `${slug}: ${field} has no unknowns`);
       }
       const noPolicy = list.filter((p) => !p.data_policy).length;
       if (noPolicy) assert.ok(text.includes(`No quoted data policy is recorded for ${noPolicy} of ${list.length}:`), `${slug}: data policy`);
@@ -429,7 +429,7 @@ describe('the use-case guides', () => {
     }
   });
 
-  test('every table row shows the entry’s own card, phone, commercial, data-use and date, with unknowns as not confirmed', () => {
+  test('every table row shows the entry’s own card, phone, commercial, data-use and date, with unknowns as not stated', () => {
     const tables = {
       'free-llm-api-for-coding': ['Renewing free LLM APIs for coding', 'Free LLM APIs for coding with one-time credits'],
       'free-api-for-rag': ['Free embedding APIs for RAG', 'Free reranking APIs for RAG', 'Renewing free text LLMs for RAG'],
@@ -437,14 +437,14 @@ describe('the use-case guides', () => {
       'free-ai-api-for-students': ['Renewing free AI APIs with no credit card'],
     };
     const bySlug = new Map(providers.map((p) => [p.slug, p]));
-    const flag = (v) => (v === false ? 'No' : v === true ? 'Yes' : 'Not confirmed');
+    const flag = (v) => (v === false ? 'No' : v === true ? 'Yes' : 'Not stated');
     for (const [slug, labels] of Object.entries(tables)) {
       for (const label of labels) {
         for (const [ps, cells] of tableRows(page(slug), label)) {
           const p = bySlug.get(ps);
           const [card, commercial, data, checked] = cells.slice(-4);
           assert.ok(stripTags(card).startsWith(`Card: ${flag(p.card_required)}`) && stripTags(card).includes(`Phone: ${flag(p.phone_required)}`), `${slug} ${ps}: card and phone`);
-          assert.ok(stripTags(commercial).startsWith({ true: 'Yes', false: 'No', conditional: 'Conditional' }[String(p.commercial_ok)] || 'Not confirmed'), `${slug} ${ps}: commercial use`);
+          assert.ok(stripTags(commercial).startsWith({ true: 'Yes', false: 'No', conditional: 'Conditional' }[String(p.commercial_ok)] || 'Not stated'), `${slug} ${ps}: commercial use`);
           assert.ok(stripTags(data).startsWith(dataUseWords(p)), `${slug} ${ps}: data use`);
           assert.ok(checked.includes(`<time datetime="${p.last_verified}">`), `${slug} ${ps}: date`);
         }
@@ -510,7 +510,7 @@ describe('the use-case guides', () => {
     const rows = tableRows(html, 'Renewing free LLM APIs for AI agents');
     for (const [slug, cells] of rows) {
       const p = providers.find((x) => x.slug === slug);
-      const want = p.openai_compatible === true ? 'Yes' : p.openai_compatible === false ? 'No' : 'Not confirmed';
+      const want = p.openai_compatible === true ? 'Yes' : p.openai_compatible === false ? 'No' : 'Not stated';
       assert.ok(stripTags(cells[1]).startsWith(want), `${slug}: OpenAI-compatible`);
     }
   });

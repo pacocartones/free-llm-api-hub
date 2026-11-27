@@ -188,9 +188,9 @@ describe('provider-markdown helpers', () => {
     assert.equal(flagWords(false, 'required', 'not required'), 'not required');
     assert.equal(flagWords(true, 'required', 'not required'), 'required');
     assert.equal(flagWords('conditional', 'allowed', 'not allowed'), 'conditional');
-    assert.equal(flagWords(null, 'required', 'not required'), 'not stated (not confirmed)');
-    assert.equal(flagWords(null, 'required', 'not required', { status: 'needs_account' }), 'not stated (needs an account to check)');
-    assert.equal(flagWords(null, 'required', 'not required', { status: 'source_silent' }), 'not stated by the provider', 'no "not stated (not stated …)"');
+    assert.equal(flagWords(null, 'required', 'not required'), 'not stated');
+    assert.equal(flagWords(null, 'required', 'not required', { status: 'needs_account' }), 'not stated: needs an account to check');
+    assert.equal(flagWords(null, 'required', 'not required', { status: 'source_silent' }), "not stated in the provider's docs", 'no "not stated (not stated …)"');
   });
 
   test('every free_type in the data has words', () => {

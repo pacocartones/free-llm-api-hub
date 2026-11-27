@@ -6,6 +6,7 @@
 // node scripts/validate.mjs [path-to-providers.json] [path-to-probe-report.json]
 // (the optional paths are used by the test suite to validate fixtures)
 
+import { utcToday } from './lib/dates.mjs';
 import { readFileSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, resolve } from 'node:path';
@@ -87,10 +88,10 @@ if (!DATE_RE.test(data.generated || '')) errors.push('top-level: generated must 
 // with `version` (scripts/check-release-stamp.mjs); the dates a data change writes (last_verified, added, checked, read_on)
 // are compared with today, not with `generated`, so a data pull request never has to touch that shared line.
 // VALIDATE_TODAY fixes the day for the tests of this rule.
-const todayUtc = process.env.VALIDATE_TODAY || new Date().toISOString().slice(0, 10);
+const todayUtc = utcToday(process.env.VALIDATE_TODAY);
 // The time box of UNSOURCED_ALLOWLIST (scripts/lib/field-checks.mjs) follows the real clock, not VALIDATE_TODAY: a test that moves
 // the day far ahead for the date rules must not expire it. VALIDATE_ALLOWLIST_TODAY fixes that day for the tests of the allowlist.
-const allowlistToday = process.env.VALIDATE_ALLOWLIST_TODAY || new Date().toISOString().slice(0, 10);
+const allowlistToday = utcToday(process.env.VALIDATE_ALLOWLIST_TODAY);
 if (DATE_RE.test(data.generated || '') && data.generated > todayUtc) errors.push(`top-level: generated (${data.generated}) is after today in UTC (${todayUtc}); write the dates of the dataset in UTC (date -u +%F)`);
 if (!Array.isArray(data.providers) || data.providers.length === 0)
   errors.push('top-level: providers must be a non-empty array');

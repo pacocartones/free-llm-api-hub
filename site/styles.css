@@ -481,7 +481,7 @@ tbody tr:hover { background: var(--panel); }
 .name-line .name-link { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .name a.name-link:hover, #table tbody tr:hover .name-link, #table tbody tr:focus-within .name-link { color: var(--accent-dim); }
 .name .best { line-height: 1.4; margin-top: 2px; }
-/* «Needs / unknown»: words, at most two lines. What is required reads in the text colour, what is unknown is muted. */
+/* «Needs / not stated»: words, at most two lines. What is required reads in the text colour, what is not stated is muted. */
 #table td.needs { font-size: .84rem; }
 .needs .need-req, .needs .need-unk, .needs .need-none { display: block; }
 .needs .need-req { color: var(--text); }
@@ -907,7 +907,7 @@ pre code { color: var(--text); }
   .name-line { flex-wrap: wrap; }
   .name-line .name-link { white-space: normal; }
   /* "What's free" stacks its label above the text and uses the whole card width: beside a 40% label the text was a
-     narrow column. The short «Needs / unknown» cell keeps its label beside it. */
+     narrow column. The short «Needs / not stated» cell keeps its label beside it. */
   #table td.free { display: block; }
   #table td.free::before { display: block; margin-bottom: 3px; }
 }
@@ -1259,6 +1259,25 @@ a.stamp:hover { text-decoration: none; }
 .btn.base-copy { margin: 0; padding: 11px 18px; border: 1px solid var(--border-strong); border-radius: 9px; background: var(--panel); color: var(--text); font-family: var(--font-mono); font-weight: 700; font-size: .92rem; }
 .btn.base-copy:hover { border-color: var(--accent); color: var(--accent-dim); }
 .btn.base-copy.copied { border-color: var(--ok); color: var(--ok); }
+/* /contributors/ (lib/contributors-page.mjs): one card per person, Cálida panel and accent tokens; initials, never a third-party avatar. */
+.ctb-stats { margin-top: 28px; }
+.ctb-section { margin: 34px 0 0; }
+.ctb-section h2 { font-size: 1.15rem; margin: 0 0 8px; }
+.ctb-section > p { color: var(--muted); max-width: 75ch; }
+.ctb-grid { list-style: none; padding: 0; margin: 16px 0 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px; }
+.ctb-card { display: flex; gap: 12px; align-items: flex-start; background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; min-width: 0; }
+.ctb-card.ctb-new { border-color: color-mix(in srgb, var(--accent) 55%, var(--border)); box-shadow: var(--glow); }
+.ctb-avatar { flex: none; width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; font-family: var(--font-mono); font-weight: 700; font-size: .85rem; color: var(--accent-dim); background: color-mix(in srgb, var(--accent) 14%, transparent); border: 1px solid color-mix(in srgb, var(--accent) 32%, transparent); }
+.ctb-body { min-width: 0; }
+.ctb-login { font-family: var(--font-mono); font-weight: 700; overflow-wrap: anywhere; }
+.ctb-meta { margin: 4px 0 0; color: var(--muted); font-size: .85rem; }
+.ctb-meta strong { color: var(--text); }
+.ctb-kinds { display: flex; flex-wrap: wrap; gap: 5px; margin: 8px 0 0; }
+.ctb-kind { background: var(--panel-2); color: var(--muted); border: 1px solid var(--border); }
+.ctb-flag { display: inline-block; margin-top: 8px; font-size: .74rem; font-weight: 700; color: var(--accent-dim); }
+.ctb-how ol { padding-left: 1.2em; max-width: 75ch; }
+.ctb-how li { margin: 6px 0; }
+.ctb-how .cta { justify-content: flex-start; margin: 18px 0 8px; }
 /* /badges/: each badge is previewed on the light and the dark ground it was drawn for, whatever the page's theme. */
 .badge-previews { display: flex; flex-wrap: wrap; gap: 10px; margin: 6px 0 10px; }
 .badge-swatch { display: inline-flex; align-items: center; padding: 10px 14px; border: 1px solid var(--border); border-radius: 9px; line-height: 0; }
