@@ -1,0 +1,20 @@
+{
+  "$comment": "Shots for the Product Hunt gallery and PR screenshots (docs/screenshots.md). Fields: id, name (file name stem), path (served from site/), viewport {width, height}, theme (light|dark), and optionally waitFor (selector that must be visible), clip (selector: capture only that element), scrollTo (selector: scroll it to the top of the viewport, then capture the viewport) and fullPage (true: capture the whole page).",
+  "shots": [
+    { "id": "S1", "name": "home-hero", "path": "/", "viewport": { "width": 1440, "height": 900 }, "theme": "light", "waitFor": ".hero" },
+    { "id": "S2", "name": "home-hero-dark", "path": "/", "viewport": { "width": 1440, "height": 900 }, "theme": "dark", "waitFor": ".hero" },
+    { "id": "S3", "name": "provider-verified-ticket", "path": "/p/groq.html", "viewport": { "width": 1440, "height": 900 }, "theme": "light", "waitFor": ".stamp-ticket", "clip": ".prov-hero" },
+    { "id": "S4", "name": "provider-faq", "path": "/p/groq.html", "viewport": { "width": 1440, "height": 900 }, "theme": "light", "waitFor": "#faq", "scrollTo": "#faq" },
+    { "id": "S5", "name": "find-wizard", "path": "/find/", "viewport": { "width": 1440, "height": 900 }, "theme": "light", "waitFor": "#find-form" },
+    { "id": "S6", "name": "model-family-qwen", "path": "/free-api/qwen/", "viewport": { "width": 1440, "height": 900 }, "theme": "light", "waitFor": ".page-hero" },
+    { "id": "S7", "name": "compare-verdict", "path": "/compare/cloudflare-workers-ai-vs-google-gemini/", "viewport": { "width": 1440, "height": 900 }, "theme": "light", "waitFor": ".answer-first", "clip": ".page-hero" },
+    { "id": "S8", "name": "compare-table", "path": "/compare/cloudflare-workers-ai-vs-google-gemini/", "viewport": { "width": 1440, "height": 900 }, "theme": "light", "waitFor": ".compare-table", "scrollTo": ".compare-scroll" },
+    { "id": "S9", "name": "api-examples", "path": "/api/", "viewport": { "width": 1440, "height": 900 }, "theme": "light", "waitFor": "#examples", "scrollTo": "#examples" },
+    { "id": "S10", "name": "api-status-json", "path": "/api/v1/status.json", "viewport": { "width": 1280, "height": 800 }, "theme": "light" },
+    { "id": "S11", "name": "badges", "path": "/badges/", "viewport": { "width": 1440, "height": 900 }, "theme": "light", "waitFor": "main" },
+    { "id": "S12", "name": "provider-dark", "path": "/p/groq.html", "viewport": { "width": 1440, "height": 900 }, "theme": "dark", "waitFor": ".stamp-ticket" },
+    { "id": "S13", "name": "home-375", "path": "/", "viewport": { "width": 375, "height": 812 }, "theme": "light", "waitFor": ".hero" },
+    { "id": "S14", "name": "find-375-dark", "path": "/find/", "viewport": { "width": 375, "height": 812 }, "theme": "dark", "waitFor": "#find-form" },
+    { "id": "S15", "name": "provider-375", "path": "/p/groq.html", "viewport": { "width": 375, "height": 812 }, "theme": "light", "waitFor": ".stamp-ticket" }
+  ]
+}
