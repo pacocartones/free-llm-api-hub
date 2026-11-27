@@ -823,10 +823,10 @@
    "kind": "sentence",
    "text": "Your data is not used for training, retraining, or improving the base models.",
    "source_url": "https://www.scaleway.com/en/docs/generative-apis/reference-content/data-privacy/",
-   "read_on": "2026-10-15",
+   "read_on": "2026-11-27",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
-   "page_sha256": "8da85e4dccfaaaea63f791b192f28d209cfb6d5704522d6f4ebe19ffc12aad27"
+   "page_sha256": "5a987a695824e41de2c452d18d48c874a046215fb803945135f8b0a1595f41b4"
   },
   {
    "id": "scaleway.card_required.sentence",
@@ -872,10 +872,10 @@
    "metric": "output_tokens_per_second",
    "text": "Output token generation speed should be above 100 tokens per second for recent small to medium-sized models (such as gpt-oss-120b or mistral-small-3.2-24b-instruct-2506 )",
    "source_url": "https://www.scaleway.com/en/docs/generative-apis/faq/",
-   "read_on": "2026-11-24",
+   "read_on": "2026-11-27",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
-   "page_sha256": "6ec4c179faa295b87aff9d731b08da3d06584b10db637af89e55140390d547e5"
+   "page_sha256": "7b1e9f18c0111dc72432dd5917bac3fdd527226151f616aef02848d6eef3b5af"
   },
   {
    "id": "scaleway.speed.mistral-small-3.2-24b-instruct-2506.output_tokens_per_second",
@@ -885,10 +885,10 @@
    "metric": "output_tokens_per_second",
    "text": "Output token generation speed should be above 100 tokens per second for recent small to medium-sized models (such as gpt-oss-120b or mistral-small-3.2-24b-instruct-2506 )",
    "source_url": "https://www.scaleway.com/en/docs/generative-apis/faq/",
-   "read_on": "2026-11-24",
+   "read_on": "2026-11-27",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
-   "page_sha256": "6ec4c179faa295b87aff9d731b08da3d06584b10db637af89e55140390d547e5"
+   "page_sha256": "7b1e9f18c0111dc72432dd5917bac3fdd527226151f616aef02848d6eef3b5af"
   },
   {
    "id": "nvidia-nim.sentence",
@@ -1211,7 +1211,7 @@
    "field": "phone_required",
    "text": "手机号码：输入您的手机号码，确保号码准确无误，以便接收验证码。",
    "source_url": "https://www.modelscope.cn/docs/accounts/registration.md",
-   "read_on": "2026-11-25",
+   "read_on": "2026-11-27",
    "lang": "zh",
    "method": "html-text-v1: page requested with Accept-Language zh, tags removed, character references decoded, white space collapsed",
    "page_sha256": "5b10efa2a31d278d8f8722551330f5ff8b74e4d8d95b3f210960bf8ffcb9ece6"
@@ -1222,11 +1222,11 @@
    "kind": "field_sentence",
    "field": "card_required",
    "text": "Add to your balance by contributing, without a credit card",
-   "source_url": "https://github.com/pollinations/pollinations",
+   "source_url": "https://raw.githubusercontent.com/pollinations/pollinations/main/README.md",
    "read_on": "2026-11-27",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
-   "page_sha256": "96e36eeed26ef73b3d4cb69c7f9db63cae97656aec7ad0bedb3c821b26d5e05e"
+   "page_sha256": "ca8175c99de855875520885dbbeff08c0a38d83a9a35b1bad6b44aaf0b44e4f0"
   },
   {
    "id": "pollinations.openai_compatible.sentence",
@@ -1234,11 +1234,11 @@
    "kind": "field_sentence",
    "field": "openai_compatible",
    "text": "then call it through the same OpenAI-compatible API as any other model.",
-   "source_url": "https://github.com/pollinations/pollinations",
+   "source_url": "https://raw.githubusercontent.com/pollinations/pollinations/main/README.md",
    "read_on": "2026-11-27",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
-   "page_sha256": "96e36eeed26ef73b3d4cb69c7f9db63cae97656aec7ad0bedb3c821b26d5e05e"
+   "page_sha256": "ca8175c99de855875520885dbbeff08c0a38d83a9a35b1bad6b44aaf0b44e4f0"
   },
   {
    "id": "runware.sentence",
