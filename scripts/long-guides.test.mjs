@@ -506,7 +506,7 @@ describe('the use-case guides', () => {
     const rows = [...html.slice(at, html.indexOf('</tbody>', at)).matchAll(/<tr><td class="name"><a href="\.\.\/p\/([a-z0-9-]+)">[^<]*<\/a><\/td><td><code>([\s\S]*?)<\/code>/g)].map((m) => `${m[1]}:${m[2].replace(/<wbr>/g, '')}`);
     assert.deepEqual(sorted(rows), sorted(speeds), 'one row per published speed');
     assert.ok(answerOf(html).startsWith(`${compat.length} of the ${providers.filter((p) => p.verified).length} verified providers`));
-    assert.ok(partsOf('free-llm-api-for-coding').title.includes(`${compat.length} OpenAI-Compatible`));
+    assert.ok(partsOf('free-llm-api-for-coding').title.includes(`(${compat.length}, Checked)`));
     const py = codeBlocks(html).find((c) => c.lang === 'python').src;
     const qs = compat.find((p) => py.includes(`base_url="${p.openai_base_url}"`));
     assert.ok(qs && qs.category === 'ongoing' && qs.card_required === false, 'a renewing, no-card provider');
