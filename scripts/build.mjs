@@ -2937,10 +2937,10 @@ writeFileSync(join(ROOT, `site/${SITEMAP_INDEX}`), sitemapIndexXml(SITE, INDEXNO
 
 // ---------- fingerprint of the gitignored derived files (drift gate) ----------
 // derived-fingerprints.json pins every build output under site/ that is
-// not tracked by git, so a change to ANY derived file -
+// gitignored, so a change to ANY derived file -
 // models/, api/, legal/, programs/, llms.txt, shared-* - shows up in
 // review and in the CI drift gate, exactly like the tracked regenerated files.
-// The set is derived from `git ls-files site/`, so it stays in sync with
+// The set is derived from the ignored files git lists under site/, so it stays in sync with
 // .gitignore automatically. site/p/ is excluded because provider pages render
 // verified-Xd-ago relative to the current day, and site/badges/ because each
 // per-provider badge colour tracks the age of its verification (both are the
@@ -2974,10 +2974,13 @@ if (derivedFingerprints) {
   writeFileSync(join(ROOT, 'derived-fingerprints.json'), JSON.stringify(derivedFingerprints, null, 2) + String.fromCharCode(10));
 }
 
+// The set is the gitignored files under site/, not "everything git does not track": whether a new, not ignored page
+// (site/contributors/ when it first appeared) is in the index must not change the result, or the regeneration bot's
+// second build (after `git add -A` staged the first one) drops it from the pins and fails the idempotence check.
 function deriveFingerprints() {
-  let tracked;
+  let ignored;
   try {
-    tracked = new Set(execSync('git ls-files site/', { cwd: ROOT, encoding: 'utf8' }).split(String.fromCharCode(10)));
+    ignored = new Set(execSync('git ls-files -z --others --ignored --exclude-standard -- site/', { cwd: ROOT, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 }).split('\0').filter(Boolean));
   } catch (_) {
     return null; // no git (tarball build) - leave the committed fingerprint untouched
   }
@@ -2989,7 +2992,7 @@ function deriveFingerprints() {
       // OG assets have their own manifest, including newly generated, untracked images.
       if (rel === 'site/og') continue;
       if (entry.isDirectory()) walk(abs);
-      else if (!tracked.has(rel) && !isDateRelative(rel) && !isGitLogDerived(rel)) {
+      else if (ignored.has(rel) && !isDateRelative(rel) && !isGitLogDerived(rel)) {
         out[rel] = createHash('sha256').update(readFileSync(abs)).digest('hex');
       }
     }
