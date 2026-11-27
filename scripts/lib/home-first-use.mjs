@@ -2,7 +2,7 @@
 // It is a <details>, closed by default: one line above the explorer, so the search box and filters stay in the first
 // desktop viewport (audit 2026-11-25, Q2), while the text stays in the page for readers who open it and for crawlers.
 //
-// A visitor arriving from a search engine sees the explorer before anything says what the list is, what
+// A visitor arriving from a search engine sees the explorer before anything says what the dataset is, what
 // "verified" means here or how to use the data (live audit 2026-11-24, UX-1). The strip answers those three
 // questions in a few lines and links to the methodology, the JSON API and the change log.
 //
@@ -12,6 +12,7 @@
 
 import { esc } from './escape.mjs';
 import { plural } from './text.mjs';
+import { timeHtml } from './dates.mjs';
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -34,7 +35,7 @@ export function firstUseFacts(providers) {
   };
 }
 
-const time = (d) => `<time datetime="${esc(d)}">${esc(d)}</time>`;
+const time = (d) => timeHtml(d, esc);
 
 /**
  * The strip's markup. `slaDays` is the re-verification limit from lib/rules.mjs (SLA_DAYS).
@@ -56,7 +57,7 @@ export function firstUseHtml(providers, { slaDays }) {
   return `<section class="first-use" aria-labelledby="first-use-h">
   <div class="wrap">
     <details class="fu-details">
-    <summary><h2 id="first-use-h" class="fu-h">New here? How this list works</h2></summary>
+    <summary><h2 id="first-use-h" class="fu-h">New here? How this dataset works</h2></summary>
     <div class="fu-grid">
       <div class="fu-card">
         <h3><svg class="fu-i" aria-hidden="true"><use href="#ic-database"/></svg>What this is</h3>

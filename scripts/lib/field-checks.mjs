@@ -1,10 +1,11 @@
 // field-checks.mjs — why a tri-state flag holds its value (data/schema.json, field_checks).
 //
-// A null flag used to mean only "not confirmed". field_checks records, per flag, the official pages read, the day
+// A null flag reads "not stated" (not-stated.mjs). field_checks records, per flag, the official pages read, the day
 // and what they said: `stated` (the page says it, so the flag is true, false or "conditional"), or one of three
 // reasons a null stays null — `source_silent`, `needs_account`, `sources_disagree`. A flag with no entry is
 // `not_checked`: derived here, never written in the data, and never "no".
 import { hasHiddenChars } from './hidden-chars.mjs';
+import { NOT_STATED } from './not-stated.mjs';
 import { publicHttpsUrlError } from './public-fetch.mjs';
 
 /** The four production flags every provider carries (counted on /coverage/ and /quality/). */
@@ -35,12 +36,23 @@ export function fieldCheckStatus(p, field) {
   return c && STATUSES.includes(c.status) ? c.status : 'not_checked';
 }
 
-/** Plain words for a reason a flag stays null (also used by the site and llms-full.txt). */
+/**
+ * The words for a flag that stays null, by status: always "not stated", with the reason when one is recorded. The one
+ * table for every page, the flags (flags.mjs), the compare table, llms-full.txt and the .md mirrors.
+ */
 export const REASON_LABEL = Object.freeze({
-  source_silent: 'not stated by the provider',
+  source_silent: `${NOT_STATED} in the provider's docs`,
+  needs_account: `${NOT_STATED}: needs an account to check`,
+  sources_disagree: `${NOT_STATED}: the provider's pages disagree`,
+  not_checked: NOT_STATED,
+});
+
+/** The reason alone, for a cell that already says "not stated" ('' when no reason is recorded). */
+export const REASON_WHY = Object.freeze({
+  source_silent: "the provider's docs do not say",
   needs_account: 'needs an account to check',
-  sources_disagree: 'provider pages disagree',
-  not_checked: 'not confirmed',
+  sources_disagree: "the provider's pages disagree",
+  not_checked: '',
 });
 
 /** The validator rules of field_checks for one provider. @returns {string[]} */
@@ -88,14 +100,12 @@ export function fieldCheckErrors(p, { today }) {
  */
 export const UNSOURCED_ALLOWLIST = Object.freeze([
   // Official pages that state the value but render it only with JavaScript, so quotes:add reads an empty shell.
-  { slug: 'google-gemini', field: 'commercial_ok', until: '2026-12-31', reason: 'ai.google.dev/gemini-api/terms renders only with JavaScript' },
-  { slug: 'google-gemini', field: 'openai_compatible', until: '2026-12-31', reason: 'ai.google.dev/gemini-api/docs/openai renders only with JavaScript' },
+  { slug: 'google-gemini', field: 'commercial_ok', until: '2026-12-31', reason: 'ai.google.dev/gemini-api/terms redirects to aistudio.google.com/docs/terms, which renders only with JavaScript' },
+  { slug: 'google-gemini', field: 'openai_compatible', until: '2026-12-31', reason: 'ai.google.dev/gemini-api/docs/openai redirects to aistudio.google.com/docs/openai, which renders only with JavaScript' },
   { slug: 'ai-horde', field: 'commercial_ok', until: '2026-12-31', reason: 'the aihorde.net FAQ answers render only with JavaScript' },
   { slug: 'pollinations', field: 'commercial_ok', until: '2026-12-31', reason: 'pollinations.ai/terms renders only with JavaScript' },
   { slug: 'tencent-hunyuan', field: 'phone_required', until: '2026-12-31', reason: 'the cloud.tencent.com sign-up guide renders only with JavaScript' },
   // Official pages that answer HTTP 403 to clients that are not browsers.
-  { slug: 'nlpcloud', field: 'card_required', until: '2026-12-31', reason: 'nlpcloud.com answers HTTP 403 to non-browser clients' },
-  { slug: 'nlpcloud', field: 'commercial_ok', until: '2026-12-31', reason: 'nlpcloud.com answers HTTP 403 to non-browser clients' },
   { slug: 'sambanova', field: 'openai_compatible', until: '2026-12-31', reason: 'docs.sambanova.ai answers HTTP 403 to non-browser clients' },
 ]);
 

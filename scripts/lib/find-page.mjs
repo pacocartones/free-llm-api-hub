@@ -54,7 +54,7 @@ export function findMainHtml({ pageHero, total, verified, count = '' }) {
   return pageHero({
     crumbs: `<a href="${prefix}">Home</a> / <a href="${prefix}#explorer">Providers</a> / ${FIND_H1}`,
     h1: FIND_H1,
-    lede: `Six quick questions, one ranked shortlist. Every answer filters ${total} tracked providers (${verified} verified against their own docs) exactly as the explorer does, and anything we could not confirm is shown as <em>not confirmed</em>, never as a yes.`,
+    lede: `Six quick questions, one ranked shortlist. Every answer filters ${total} tracked providers (${verified} verified against their own docs) exactly as the explorer does, and anything the provider's pages do not say is shown as <em>not stated</em>, never as a yes.`,
   }) +
     `<main id="main"><div class="wrap find-wrap">` +
     `<noscript><div class="find-noscript"><p><strong>This finder needs JavaScript.</strong> The same filters work in the <a href="${prefix}#explorer">provider explorer</a>. Common starting points:</p>` +
@@ -82,16 +82,18 @@ export function findMainHtml({ pageHero, total, verified, count = '' }) {
     `<p class="find-more"><button type="button" class="btn ghost" id="find-all" hidden></button></p>` +
     `<p class="find-empty" id="find-empty" hidden></p>` +
     `<details class="find-maybe" id="find-maybe" hidden><summary id="find-maybe-sum"></summary>` +
-    `<p class="muted">These match what you build and contradict none of your answers, but at least one answer is <em>not confirmed</em> in the dataset: the provider's pages do not say it, or say it only under a condition. Check the flag marked “not confirmed” on the provider's own page before you rely on it.</p>` +
+    `<p class="muted">These match what you build and contradict none of your answers, but at least one answer is <em>not stated</em> in the dataset: the provider's pages do not say it, or say it only under a condition. Check the flag marked “not stated” on the provider's own page before you rely on it.</p>` +
     `<ol class="find-list" id="find-maybe-list"></ol></details>` +
     `</section>` +
     `<section class="find-how" aria-labelledby="find-how-h"><h2 id="find-how-h">How the shortlist is made</h2>` +
     `<ul>` +
     `<li><strong>Same rules as the explorer.</strong> Each answer turns on one of the explorer's filters, and the order is its <a href="${prefix}#explorer">Recommended</a> sort. “Open in the explorer” shows the same providers.</li>` +
-    `<li><strong>Not confirmed is not yes.</strong> A requirement nobody has confirmed (for example “card: not confirmed”) never counts as meeting your answer; those providers are listed apart.</li>` +
+    `<li><strong>Not stated is not yes.</strong> A requirement the provider does not state (for example “card: not stated”) never counts as meeting your answer; those providers are listed apart.</li>` +
     `<li><strong>Every fact has a source.</strong> Each provider page links the page its facts were read from and the day they were checked. Terms change: confirm on the provider's own docs before you build. See the <a href="${prefix}methodology/">methodology</a>.</li>` +
     `<li><strong>Your answers stay in the address.</strong> They live after the <code>#</code> of the URL, so the link is shareable and nothing is sent to a server.</li>` +
-    `</ul></section>` +
+    `</ul>` +
+    `<p>Moving off the OpenAI API? <a href="${prefix}guides/openai-api-alternatives">Free alternatives to the OpenAI API</a> lists the OpenAI-compatible providers with the <code>base_url</code> to swap in, by use case.</p>` +
+    `</section>` +
     `</div></main>`;
 }
 

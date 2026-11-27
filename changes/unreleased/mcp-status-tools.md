@@ -6,4 +6,4 @@
   when `status.json` is available and comes from the same build. An `is_free` tool answers "Is <provider> API free?"
   with the provider page's own sentence, "not stated" for a null field, and the day each fact's source was read; a
   test keeps its wording identical to the site's. New optional local override `--status` / `FLAH_STATUS`. No existing
-  tool name or output field changes.
+  tool name or output field changes (#940).

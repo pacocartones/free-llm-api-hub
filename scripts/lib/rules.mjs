@@ -18,7 +18,7 @@
 // "Recommended" order: float the most accessible, ship-ready providers to the top.
 //
 // Every flag scores symmetrically: a confirmed `false` earns points, a confirmed
-// `true` loses the same points, and `null` (not confirmed) scores zero and sits
+// `true` loses the same points, and `null` (not stated) scores zero and sits
 // between the two. An unknown must never be worth as much as a confirmed "no
 // card required", nor as little as a confirmed "card required" — the tri-state is
 // the product, so the ranking has to respect all three states.

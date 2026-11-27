@@ -1,5 +1,6 @@
 // field_checks: why a tri-state flag holds its value (data/schema.json, scripts/lib/field-checks.mjs).
 // The validator rules, the quote registry kind, the site wording, the coverage counts and the v1 projection.
+import { escapeHtml } from './lib/html.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, writeFileSync } from 'node:fs';
@@ -162,19 +163,19 @@ test('quotes:add --field writes only that sentence and a data_policy run keeps i
 });
 
 // ---------- site wording ----------
-test('the site says the reason and the day instead of "not confirmed", and never turns null into no', () => {
+test('the site says the reason and the day instead of "not stated", and never turns null into no', () => {
   for (const s of NULL_REASONS) {
     const html = triStateHtml(null, 'required', 'not required', { ...silent, status: s });
-    assert.ok(html.includes(`${REASON_LABEL[s]} (checked 2026-11-24)`), s);
+    assert.ok(html.includes(`${escapeHtml(REASON_LABEL[s])} (checked 24 Nov 2026)`), s);
     assert.ok(!/not required/.test(html), s);
   }
-  assert.equal(triStateHtml(null, 'required', 'not required'), '<span class="tri tri-unk">not confirmed</span>');
-  assert.match(triStateHtml(null, 'a', 'b', { status: 'source_silent', checked: '<script>' }), /not stated by the provider</);
+  assert.equal(triStateHtml(null, 'required', 'not required'), '<span class="tri tri-unk">not stated</span>');
+  assert.match(triStateHtml(null, 'a', 'b', { status: 'source_silent', checked: '<script>' }), /not stated in the provider&#39;s docs</);
   assert.ok(!triStateHtml(null, 'a', 'b', { status: 'source_silent', checked: '<script>' }).includes('<script>'));
   assert.equal(triStateHtml(false, 'required', 'not required', { ...silent, status: 'stated' }), '<span class="tri tri-no">not required</span>');
-  assert.match(triStateHtml(null, 'a', 'b', { status: 'toString' }), /not confirmed/, 'a status that is not a reason reads not confirmed');
+  assert.match(triStateHtml(null, 'a', 'b', { status: 'toString' }), /not stated/, 'a status that is not a reason reads not stated');
   // the browser bundle carries the same function, with the same words
-  assert.ok(clientBundle().includes('not stated by the provider') && clientBundle().includes('provider pages disagree'));
+  for (const words of Object.values(REASON_LABEL)) assert.ok(clientBundle().includes(JSON.stringify(words).slice(1, -1)), words);
 });
 
 test('the provider page lists the pages read and the day under a flag, escaped', () => {
@@ -183,7 +184,7 @@ test('the provider page lists the pages read and the day under a flag, escaped',
     commercial_ok: { status: 'stated', checked: TODAY, sources: ['https://acme.example/terms'], quote: 'You may use it commercially.' },
   } };
   const html = requirementsHtml(p);
-  assert.match(html, /provider pages disagree \(checked 2026-11-24\)/);
+  assert.match(html, /not stated: the provider&#39;s pages disagree \(checked 24 Nov 2026\)/);
   assert.match(html, /href="https:\/\/acme\.example\/a"[^>]*>page 1<\/a>, <a href="https:\/\/acme\.example\/b"[^>]*>page 2<\/a>/);
   assert.ok(html.includes('Docs say no card &lt;b&gt;; plans say add one'));
   assert.match(html, /&ldquo;You may use it commercially\.&rdquo; Per <a href="https:\/\/acme\.example\/terms"/);
@@ -203,8 +204,8 @@ test('coverage: a null with a reason is resolved, not open, and the reasons tabl
   assert.equal(coverage(ps).find((r) => r.key === 'model_tier').byStatus, undefined, 'only the flags have statuses');
   const html = coverageMainHtml(coverage(ps), { repo: 'https://github.com/o/r', generated: TODAY });
   assert.match(html, /<tr id="reasons-card_required"><th scope="row">card_required<\/th><td class="num">0<\/td><td class="num">1<\/td><td class="num">1<\/td><td class="num">1<\/td><td class="num">0<\/td><td class="num">0<\/td><\/tr>/);
-  assert.match(html, /1 not confirmed, resolved without an answer/);
-  assert.match(html, /<li class="cov-resolved"><a href="\.\.\/p\/b">B<\/a> <span class="sep">·<\/span> not stated by the provider <span class="sep">·<\/span> checked 2026-11-24<\/li>/);
+  assert.match(html, /1 not stated, resolved without an answer/);
+  assert.match(html, /<li class="cov-resolved"><a href="\.\.\/p\/b">B<\/a> <span class="sep">·<\/span> not stated in the provider&#39;s docs <span class="sep">·<\/span> checked <time datetime="2026-11-24">24 Nov 2026<\/time><\/li>/);
 });
 
 // ---------- API v1 ----------

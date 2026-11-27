@@ -3,6 +3,11 @@
 // Run after a Pages deploy:
 //   node scripts/smoke-live.mjs            # default: freellmapihub.com
 //   FLLM_SITE=https://example.com node scripts/smoke-live.mjs
+//   node scripts/smoke-live.mjs --origin https://<other host>   # another origin serving the same build
+//
+// --origin reads that origin's sitemap and requests each <loc> on that origin: the <loc>s always carry the canonical
+// https://freellmapihub.com, so without it a staging host's sitemap would be checked against production
+// (web-watch.yml, docs/architecture.md "Hosting cutover"). It takes precedence over FLLM_SITE.
 //
 // Fetches the deployed sitemap.xml, extracts every <loc>, and GETs each URL
 // (bounded parallelism) asserting HTTP 200. Anything else — 404, 5xx, timeout,
@@ -17,8 +22,14 @@
 import { retryConfig, retryFailing } from './lib/live-retry.mjs';
 import { makeLiveFetch } from './lib/live-fetch.mjs';
 
-let SITE = process.env.FLLM_SITE || 'https://freellmapihub.com';
+const CANONICAL = 'https://freellmapihub.com';
+const originArg = process.argv.indexOf('--origin');
+const ORIGIN = originArg > -1 ? process.argv[originArg + 1] : null;
+const USAGE_ERROR = originArg > -1 && !/^https?:\/\/[^/]+\/?$/.test(ORIGIN || '');
+let SITE = ORIGIN || process.env.FLLM_SITE || CANONICAL;
 while (SITE.endsWith('/')) SITE = SITE.slice(0, -1);
+/** With --origin, a canonical <loc> is requested on that origin instead. */
+const onOrigin = (loc) => (ORIGIN && loc.startsWith(`${CANONICAL}/`) ? SITE + loc.slice(CANONICAL.length) : loc);
 const TIMEOUT_MS = 20000;
 const CONCURRENCY = 8;
 const RETRY = { ...retryConfig(process.env), log: (line) => console.log(line) };
@@ -64,6 +75,11 @@ async function checkUrls(urls) {
 }
 
 async function main() {
+  if (USAGE_ERROR) {
+    console.error('usage: node scripts/smoke-live.mjs [--origin https://<host>]');
+    process.exitCode = 2;
+    return;
+  }
   const [sitemap] = await retryFailing([`${SITE}/sitemap.xml`], async () => [await fetchSitemap()], RETRY);
   if (!sitemap.ok) {
     console.error(`✗ could not fetch ${SITE}/sitemap.xml: ${sitemap.error}`);
@@ -74,7 +90,7 @@ async function main() {
   const urls = [];
   for (const part of sitemap.xml.split('<loc>').slice(1)) {
     const end = part.indexOf('</loc>');
-    if (end !== -1) urls.push(part.slice(0, end).trim());
+    if (end !== -1) urls.push(onOrigin(part.slice(0, end).trim()));
   }
   if (!urls.length) {
     console.error(`✗ no <loc> URLs found in ${SITE}/sitemap.xml`);

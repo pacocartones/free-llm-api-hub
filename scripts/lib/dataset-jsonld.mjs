@@ -63,7 +63,7 @@ export const VARIABLES = [
   ['limit_circumvention_forbidden', 'Whether the provider\'s terms forbid getting around rate limits, quotas or usage limits (true, false, or null when not stated).'],
   ['openai_compatible', 'Whether the free offering exposes an OpenAI-compatible endpoint (null when unconfirmed).'],
   ['modalities', 'Modalities reachable on the free tier (text, image, audio, embeddings, rerank, OCR, vision).'],
-  ['data_policy.trains_on_prompts', 'Whether the provider says it trains on prompts sent through the free access (null when not recorded).'],
+  ['data_policy.trains_on_prompts', 'Whether the provider says it trains on prompts sent through the free access (null when not stated).'],
   ['last_verified', 'Date the core facts were last confirmed against the provider\'s own documentation.'],
 ];
 

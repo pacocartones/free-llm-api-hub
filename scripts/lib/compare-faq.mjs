@@ -9,8 +9,10 @@
 // Nothing here reads the current date: the pages are pinned in derived-fingerprints.json.
 
 import { escapeHtml as htmlEsc } from './html.mjs';
-import { shortDate, limitFigures, compactNumber, LIMIT_UNITS } from './provider-meta.mjs';
-import { NOT_STATED, flagWords, headline, isIso, noFinalStop } from './provider-faq.mjs';
+import { limitFigures, compactNumber, LIMIT_UNITS } from './provider-meta.mjs';
+import { humanDate as shortDate } from './dates.mjs';
+import { flagWords, headline, isIso, noFinalStop } from './provider-faq.mjs';
+import { NOT_STATED } from './not-stated.mjs';
 
 const FLAGS = ['card_required', 'phone_required', 'commercial_ok', 'openai_compatible'];
 const get = (p, path) => path.split('.').reduce((o, k) => (o == null ? undefined : o[k]), p);

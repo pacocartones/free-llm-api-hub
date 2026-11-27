@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 // Preview repository metadata by default; only --write can replace issue #4's body.
+import { isoDay } from './lib/dates.mjs';
 import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
@@ -14,7 +15,7 @@ export function worklistIssueBody(providers, now, sourceSha) {
   if (!(now instanceof Date) || !Number.isFinite(+now)) throw new Error('Invalid clock');
   if (typeof sourceSha !== 'string' || !/^[a-f0-9]{40}$/.test(sourceSha)) throw new Error('Invalid source SHA');
   return [
-    `Worklist refreshed: **${now.toISOString().slice(0, 10)} UTC**.`,
+    `Worklist refreshed: **${isoDay(now)} UTC**.`,
     `Dataset: [data/providers.json](https://github.com/pacocartones/free-llm-api-hub/blob/${sourceSha}/data/providers.json).`,
     '',
     '**Worklist refresh only; provider claims were not re-verified.**',

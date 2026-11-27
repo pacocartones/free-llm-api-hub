@@ -102,6 +102,7 @@ test('validate: a recorded value carries its check, a check carries its value, a
 const TERMS_PENDING = new Set([
   'requesty', 'kilo-gateway', 'experiential-labs', 'google-cloud-tts', 'google-cloud-stt', 'google-cloud-vision',
   'amazon-bedrock', 'oci-generative-ai', 'reducto', 'lightning-ai', 'azure-document-intelligence', 'nscale',
+  'gonka-broker', 'moark', 'morph', 'synap',
 ]);
 
 test('the dataset: every researched provider carries both flags with a check; nulls are source_silent; stated quotes are registered', () => {

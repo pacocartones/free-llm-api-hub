@@ -1,10 +1,11 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { formatValue, weekSummary, weekTitle } from './lib/changes.mjs';
+import { NOT_STATED } from './lib/not-stated.mjs';
 
 test('formatValue renders nulls, booleans, arrays, and scalars consistently', () => {
-  assert.equal(formatValue(null), 'unknown');
-  assert.equal(formatValue(undefined), 'unknown');
+  assert.equal(formatValue(null), NOT_STATED);
+  assert.equal(formatValue(undefined), NOT_STATED);
   assert.equal(formatValue(true), 'yes');
   assert.equal(formatValue(false), 'no');
   assert.equal(formatValue('conditional'), 'conditional');

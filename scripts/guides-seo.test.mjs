@@ -1,4 +1,5 @@
 import { test, before } from 'node:test';
+import { humanDate } from './lib/dates.mjs';
 import assert from 'node:assert/strict';
 import { readFileSync, readdirSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
@@ -238,7 +239,7 @@ test('each verified guide row displays its actual source-verification date', () 
     for (const row of table.matchAll(/<tr>([\s\S]*?)<\/tr>/g)) {
       const provider = list.find((p) => row[1].includes(`../p/${p.slug}\"`));
       assert.ok(provider, `${slug}: unknown provider row`);
-      assert.ok(row[1].includes(`<time datetime="${provider.last_verified}">${provider.last_verified}</time>`), `${slug}: missing date for ${provider.name}`);
+      assert.ok(row[1].includes(`<time datetime="${provider.last_verified}">${humanDate(provider.last_verified)}</time>`), `${slug}: missing date for ${provider.name}`);
     }
   }
 });

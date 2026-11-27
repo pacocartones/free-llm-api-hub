@@ -8,18 +8,17 @@
 // the day its source was read. The same items feed the visible FAQ and the FAQPage JSON-LD, so the two cannot differ.
 
 import { escapeHtml as htmlEsc } from './html.mjs';
-import { limitFigures, shortDate, trimAtWord } from './provider-meta.mjs';
+import { limitFigures, trimAtWord } from './provider-meta.mjs';
+import { humanDate as shortDate, DATE_RE as ISO } from './dates.mjs';
+import { NOT_STATED, capFirst as cap } from './not-stated.mjs';
 import { fieldCheck } from './field-checks.mjs';
 import { safeHttp as safeUrl } from './text.mjs';
+import { providerTitle } from './provider-title.mjs';
 
-export const NOT_STATED = 'not stated';
-
-const ISO = /^\d{4}-\d{2}-\d{2}$/;
 export const isIso = (d) => ISO.test(String(d || ''));
 export const noFinalStop = (s) => String(s ?? '').trim().replace(/[\s.;:,]+$/, '');
 // A sentence that already ends in the ellipsis of a cut text takes no extra full stop.
 const stop = (s) => (/…$/.test(String(s)) ? '' : '.');
-const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
 // The words for each recorded value of the tri-state flags. null is always NOT_STATED.
 const FLAG_WORDS = {
@@ -58,7 +57,7 @@ export function flagSource(p, field) {
 
 /**
  * The answer to "Is <Provider> API free?" in one or two sentences, as parts (field, value, text) plus the plain text and
- * the HTML. Sentence 1: ongoing free tier or one-time trial credit, with the headline limits. Sentence 2: card, phone,
+ * the HTML. It opens with the answer word of the page title (lib/provider-title.mjs: "Yes." or "No."). Sentence 1: ongoing free tier or one-time trial credit, with the headline limits. Sentence 2: card, phone,
  * commercial use and the day the record was verified. The paragraph is linkable at the stable anchor #is-it-free.
  */
 export function answerFirst(p) {
@@ -74,7 +73,7 @@ export function answerFirst(p) {
     parts.push({ field: 'category', value: p.category, text: 'one-time trial credit' });
     const exp = p.expires ? `; the credit expires after ${noFinalStop(p.expires)}` : '';
     if (p.expires) parts.push({ field: 'expires', value: p.expires, text: noFinalStop(p.expires) });
-    first = `Not permanently. ${p.name} gives a one-time trial credit, not an ongoing free tier: ${h.value}${exp}${stop(exp || h.value)}`;
+    first = `No. ${p.name} gives a one-time trial credit, not an ongoing free tier: ${h.value}${exp}${stop(exp || h.value)}`;
   } else {
     parts.push({ field: 'category', value: p.category ?? null, text: NOT_STATED });
     first = `Whether ${p.name} has an ongoing free tier is ${NOT_STATED}: ${h.value}${stop(h.value)}`;
@@ -92,8 +91,8 @@ export function answerFirst(p) {
   return { parts, text, html: `<p class="answer-first" id="is-it-free">${htmlEsc(text)}</p>` };
 }
 
-/** " (source read 24 Nov 2026)" or " (source date not recorded)": every FAQ answer ends with one. */
-const readOn = (date) => (shortDate(date) ? ` Source read ${shortDate(date)}.` : ' Source date not recorded.');
+/** " (source read 24 Nov 2026)" or " (source date not stated)": every FAQ answer ends with one. */
+const readOn = (date) => (shortDate(date) ? ` Source read ${shortDate(date)}.` : ' Source date not stated.');
 
 /**
  * The FAQ of a provider page: six questions, each { id, q, a, parts, date, source }. `a` is plain text (the JSON-LD
@@ -108,7 +107,8 @@ export function providerFaq(p) {
     const af = answerFirst(p);
     const first = af.text.slice(0, af.text.indexOf('Credit card:')).trim();
     items.push({
-      id: 'faq-free', q: `Is ${n} API free?`, parts: af.parts.filter((x) => !['card_required', 'phone_required', 'commercial_ok'].includes(x.field)),
+      // The page's own question (lib/provider-title.mjs): the h1, the <title> and this FAQ entry ask it in the same words.
+      id: 'faq-free', q: providerTitle(p).question, parts: af.parts.filter((x) => !['card_required', 'phone_required', 'commercial_ok'].includes(x.field)),
       date: isIso(p.last_verified) ? p.last_verified : null, source: safeUrl(p.docs_url), body: first,
     });
   }
@@ -224,8 +224,8 @@ export function providerFaqHtml(p, items = providerFaq(p)) {
     const body = htmlEsc(it.a.slice(0, it.a.lastIndexOf(' Source ')));
     const when = shortDate(it.date);
     const src = it.source
-      ? ` <span class="muted">Source${when ? ` read <time datetime="${htmlEsc(it.date)}">${htmlEsc(when)}</time>` : ' date not recorded'}: <a href="${htmlEsc(it.source)}" target="_blank" rel="noopener">the provider's page</a>.</span>`
-      : ` <span class="muted">Source${when ? ` read <time datetime="${htmlEsc(it.date)}">${htmlEsc(when)}</time>` : ' date not recorded'}.</span>`;
+      ? ` <span class="muted">Source${when ? ` read <time datetime="${htmlEsc(it.date)}">${htmlEsc(when)}</time>` : ' date not stated'}: <a href="${htmlEsc(it.source)}" target="_blank" rel="noopener">the provider's page</a>.</span>`
+      : ` <span class="muted">Source${when ? ` read <time datetime="${htmlEsc(it.date)}">${htmlEsc(when)}</time>` : ' date not stated'}.</span>`;
     return `<div class="faq-item" id="${it.id}"><h3>${htmlEsc(it.q)}</h3><p>${body}${src}</p></div>`;
   }).join('');
   return `<h2 id="faq">${htmlEsc(p.name)} FAQ</h2>${html}`;

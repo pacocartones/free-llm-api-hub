@@ -6,8 +6,9 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { join } from 'node:path';
-import { answerFirst, providerFaq, providerFaqHtml, providerFaqJsonLd, flagWords, NOT_STATED } from './lib/provider-faq.mjs';
-import { shortDate } from './lib/provider-meta.mjs';
+import { answerFirst, providerFaq, providerFaqHtml, providerFaqJsonLd, flagWords } from './lib/provider-faq.mjs';
+import { NOT_STATED } from './lib/not-stated.mjs';
+import { humanDate as shortDate } from './lib/dates.mjs';
 import { privateTree } from './lib/private-tree.mjs';
 import { escapeHtml } from './lib/html.mjs';
 
@@ -60,13 +61,13 @@ test('the answer-first paragraph: ongoing free tier or trial credit, the headlin
   assert.match(t, /^Yes\. Groq has an ongoing free tier/);
   assert.match(t, /30 RPM, 1,000 RPD, 200K TPD/, 'the published numbers lead');
   const trial = { ...nulls, card_required: true, commercial_ok: 'conditional', expires: '30 days' };
-  assert.match(answerFirst(trial).text, /^Not permanently\. Blank gives a one-time trial credit, not an ongoing free tier: Some credit; the credit expires after 30 days\. Credit card: required; phone verification: not stated; commercial use: allowed with conditions\. Verified 20 Nov 2026\.$/);
+  assert.match(answerFirst(trial).text, /^No\. Blank gives a one-time trial credit, not an ongoing free tier: Some credit; the credit expires after 30 days\. Credit card: required; phone verification: not stated; commercial use: allowed with conditions\. Verified 20 Nov 2026\.$/);
   assert.match(answerFirst({ ...nulls, verified: false }).text, /Not verified yet\.$/);
   // Our own words are two sentences after the verdict word, plus the verification day; the headline is the record's.
   for (const p of PROVIDERS) {
     const af = answerFirst(p);
     const head = af.parts.find((x) => x.field === 'free_limits' || x.field === 'free_tier').text;
-    const ours = af.text.replace(head, 'HEADLINE').replace(/^(Yes|Not permanently)\. /, '');
+    const ours = af.text.replace(head, 'HEADLINE').replace(/^(Yes|No)\. /, '');
     const sentences = ours.split(/(?<=[.…])\s+(?=[A-Z])/);
     assert.ok(sentences.length <= 3, `${p.slug}: ${sentences.length} sentences in ${ours}`);
   }
@@ -83,7 +84,7 @@ test('every FAQ answer cites the day its source was read, and that day is a date
         assert.ok(recordDates.has(it.date), `${p.slug} ${it.id}: ${it.date} is in the record`);
         assert.ok(it.a.endsWith(` Source read ${shortDate(it.date)}.`), `${p.slug} ${it.id}: ends with its source date`);
       } else {
-        assert.ok(it.a.endsWith(' Source date not recorded.'), `${p.slug} ${it.id}: says the date is missing`);
+        assert.ok(it.a.endsWith(' Source date not stated.'), `${p.slug} ${it.id}: says the date is missing`);
       }
     }
   }
@@ -113,9 +114,9 @@ test('provider page: the answer is the first thing after the H1, and the visible
       const cut = text.lastIndexOf(' Source ');
       const body = escapeHtml(text.slice(0, cut));
       const item = providerFaq(p)[i];
-      const tail = item.date ? ` <span class="muted">Source read <time datetime="${item.date}">${shortDate(item.date)}</time>` : ' <span class="muted">Source date not recorded';
+      const tail = item.date ? ` <span class="muted">Source read <time datetime="${item.date}">${shortDate(item.date)}</time>` : ' <span class="muted">Source date not stated';
       assert.ok(visible[i][2].startsWith(body + tail), `${slug}: answer ${i + 1} matches`);
-      assert.equal(text.slice(cut), item.date ? ` Source read ${shortDate(item.date)}.` : ' Source date not recorded.');
+      assert.equal(text.slice(cut), item.date ? ` Source read ${shortDate(item.date)}.` : ' Source date not stated.');
     });
     assert.deepEqual(faq, JSON.parse(JSON.stringify(providerFaqJsonLd(p))));
   }
@@ -129,9 +130,9 @@ test('the FAQ escapes what comes from the data', () => {
   assert.match(html, /Acme &lt;b&gt; FAQ/);
 });
 
-test('the home <title> leads with "Free LLM APIs" and stays under 60 characters', () => {
+test('the home <title> leads with "Free LLM API list" and stays under 60 characters', () => {
   const html = readFileSync(join(ROOT, 'site/index.html'), 'utf8');
   const title = html.match(/<title>([^<]*)<\/title>/)[1].split('&amp;').join('&');
-  assert.ok(title.startsWith('Free LLM APIs'), title);
+  assert.ok(title.startsWith('Free LLM API list'), title);
   assert.ok(title.length < 60, `${title.length} characters: ${title}`);
 });

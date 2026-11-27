@@ -17,16 +17,15 @@
 import { escapeHtml as htmlEsc } from './html.mjs'; // serialised by name into the client bundle below
 import { SLUG_RE } from './rows.mjs';
 import { expiryHtml } from './expiry.mjs';
+import { NOT_STATED_HTML } from './not-stated.mjs';
+import { REASON_LABEL } from './field-checks.mjs';
+import { DATE_MONTHS, humanDate } from './dates.mjs';
+// Which pairs get a static page is a data module of its own (validate.mjs checks data/redirects.json against it).
+import { COMPARE_PAGE_CAP, COMPARE_PER_PROVIDER_CAP, comparePath, sharedModalities, selectComparePairs } from './compare-pairs.mjs';
+export { COMPARE_PAGE_CAP, COMPARE_PER_PROVIDER_CAP, comparePath, sharedModalities, selectComparePairs };
 
 export const COMPARE_MIN = 2;
 export const COMPARE_MAX = 4;
-// Static pages: a small, deterministic set, so the sitemap stays reviewable.
-export const COMPARE_PAGE_CAP = 30;
-// No single pick may take over the set: each provider appears in at most this
-// many static pages, which spreads the pages across more of the ranking.
-export const COMPARE_PER_PROVIDER_CAP = 4;
-
-export const comparePath = (a, b) => `${a}-vs-${b}`;
 
 /**
  * A provider's comparison category is its principal modality: the first one
@@ -48,45 +47,6 @@ export const sameComparisonCategory = (a, b) => {
   return ca !== null && ca === comparisonCategory(b);
 };
 
-/** Modalities both providers offer, in the first provider's order. */
-export function sharedModalities(a, b) {
-  const mb = new Set(b.modalities || []);
-  return (a.modalities || []).filter((m) => mb.has(m));
-}
-
-/**
- * The static compare pages: pairs of editorial picks (data/best.json order)
- * that share at least one modality. `ranked` is the list of providers in rank
- * order. Pairs are ordered by the sum of their ranks (then the higher-ranked
- * member), so the best-known matchups come first; each provider is capped at
- * `perProvider` pages and the whole set at `cap`. Pure and deterministic: the
- * same ranking and dataset always yield the same pages.
- */
-export function selectComparePairs(ranked, opts = {}) {
-  const cap = opts.cap ?? COMPARE_PAGE_CAP;
-  const perProvider = opts.perProvider ?? COMPARE_PER_PROVIDER_CAP;
-  const candidates = [];
-  for (let i = 0; i < ranked.length; i += 1) {
-    for (let j = i + 1; j < ranked.length; j += 1) {
-      const a = ranked[i], b = ranked[j];
-      if (!SLUG_RE.test(String(a.slug || '')) || !SLUG_RE.test(String(b.slug || ''))) continue;
-      const shared = sharedModalities(a, b);
-      if (shared.length) candidates.push({ i, j, a, b, shared });
-    }
-  }
-  candidates.sort((x, y) => (x.i + x.j) - (y.i + y.j) || x.i - y.i);
-  const uses = new Map();
-  const out = [];
-  for (const c of candidates) {
-    if (out.length >= cap) break;
-    const ua = uses.get(c.a.slug) || 0, ub = uses.get(c.b.slug) || 0;
-    if (ua >= perProvider || ub >= perProvider) continue;
-    uses.set(c.a.slug, ua + 1);
-    uses.set(c.b.slug, ub + 1);
-    out.push({ a: c.a, b: c.b, shared: c.shared, path: comparePath(c.a.slug, c.b.slug) });
-  }
-  return out;
-}
 
 /**
  * The comparisons a provider page suggests (Q9): up to `limit` (3) verified providers with the same main modality
@@ -113,24 +73,21 @@ export function comparePeers(p, providers, { staticPaths = new Set(), score = ()
 }
 
 /**
- * A tri-state flag (true / false / null) as escaped HTML. null means nobody
- * has confirmed the field yet — never "no" — so it reads "not confirmed".
- * `check` is the flag's field_checks entry, if any: a recorded reason replaces
- * "not confirmed" with that reason and the day it was checked. The words match
- * REASON_LABEL in field-checks.mjs (a test keeps them equal); they are inlined
- * because this function is also shipped to the browser as source text.
+ * A tri-state flag (true / false / null) as escaped HTML. null means the provider's pages do not say it (or nobody
+ * has recorded it yet) — never "no" — so it reads "not stated". `check` is the flag's field_checks entry, if any: a
+ * recorded reason adds the reason and the day it was checked ("not stated in the provider's docs (checked 24 Nov
+ * 2026)"). The words are REASON_LABEL (field-checks.mjs), serialised with this function into the browser bundle.
  */
 export function triStateHtml(v, yes, no, check) {
   if (v === true) return `<span class="tri tri-yes">${htmlEsc(yes)}</span>`;
   if (v === false) return `<span class="tri tri-no">${htmlEsc(no)}</span>`;
   if (v === 'conditional') return '<span class="tri tri-cond">conditional</span>';
-  const why = { source_silent: 'not stated by the provider', needs_account: 'needs an account to check', sources_disagree: 'provider pages disagree' };
   const status = check && typeof check === 'object' ? String(check.status) : '';
-  if (Object.prototype.hasOwnProperty.call(why, status)) {
-    const day = /^\d{4}-\d{2}-\d{2}$/.test(String(check.checked || '')) ? ` (checked ${check.checked})` : '';
-    return `<span class="tri tri-unk tri-why" title="Not confirmed: ${htmlEsc(why[status])}">${htmlEsc(why[status] + day)}</span>`;
+  if (status !== 'not_checked' && Object.prototype.hasOwnProperty.call(REASON_LABEL, status)) {
+    const day = humanDate(check.checked) ? ` (checked ${humanDate(check.checked)})` : '';
+    return `<span class="tri tri-unk tri-why" title="${htmlEsc(REASON_LABEL[status])}">${htmlEsc(REASON_LABEL[status] + day)}</span>`;
   }
-  return '<span class="tri tri-unk">not confirmed</span>';
+  return NOT_STATED_HTML;
 }
 
 /**
@@ -165,10 +122,10 @@ export function compareTableHtml(list, opts = {}) {
   const safeUrl = (u) => (/^https?:\/\//i.test(String(u || '')) ? String(u) : '');
   const fields = [
     ['Type', (p) => cell((p.category === 'ongoing' ? 'Ongoing free tier' : 'Trial credit') + (p.free_type ? ' · ' + p.free_type : ''))],
-    ["What's free", (p) => cell(p.free_tier || '—')],
-    ['Rate limits', (p) => cell(p.rate_limits || 'not specified')],
+    ["What's free", (p) => (p.free_tier ? cell(p.free_tier) : NOT_STATED_HTML)],
+    ['Rate limits', (p) => (p.rate_limits ? cell(p.rate_limits) : NOT_STATED_HTML)],
     ['Expires', (p) => expiryHtml(p)],
-    ['The catch', (p) => cell(p.notes || '—')],
+    ['The catch', (p) => (p.notes ? cell(p.notes) : NOT_STATED_HTML)],
     ['Credit card', (p) => triStateHtml(p.card_required, 'required', 'not required', p.field_checks && p.field_checks.card_required)],
     ['Phone verification', (p) => triStateHtml(p.phone_required, 'required', 'not required', p.field_checks && p.field_checks.phone_required)],
     ['Commercial use', (p) => p.commercial_ok === 'conditional'
@@ -181,23 +138,23 @@ export function compareTableHtml(list, opts = {}) {
     // browser as source text; the signs and units match speedFigure in published-speed.mjs (a test keeps them equal).
     ['Published speed', (p) => {
       const list = Array.isArray(p.published_speed) ? p.published_speed : [];
-      if (!list.length) return '<span class="tri tri-unk">none recorded</span>';
+      if (!list.length) return NOT_STATED_HTML;
       const sign = { exact: '', approx: '~', at_least: '≥', up_to: '≤' };
       const unit = { output_tokens_per_second: 'tok/s', time_to_first_token_ms: 'ms' };
       return list.map((e) => `<div><code>${cell(e.model)}</code> ${cell((sign[e.qualifier] || '') + Number(e.value).toLocaleString('en-US') + ' ' + (unit[e.metric] || ''))}` +
         (safeUrl(e.source) ? ` <a href="${cell(safeUrl(e.source))}" target="_blank" rel="noopener">source</a>` : '') + '</div>').join('') +
-        `<div class="cmp-sub">The provider's own ${list.length > 1 ? 'figures' : 'figure'}, checked ${cell([...new Set(list.map((e) => e.checked))].join(', '))}; not our measurement and not a like-for-like benchmark</div>`;
+        `<div class="cmp-sub">The provider's own ${list.length > 1 ? 'figures' : 'figure'}, checked ${cell([...new Set(list.map((e) => humanDate(e.checked) || e.checked))].join(', '))}; not our measurement and not a like-for-like benchmark</div>`;
     }],
-    ['Modalities', (p) => cell((p.modalities || []).join(', ') || '—')],
+    ['Modalities', (p) => ((p.modalities || []).length ? cell(p.modalities.join(', ')) : NOT_STATED_HTML)],
     ['Free models (sample)', (p) => ((p.models_free && p.models_free.length)
       ? p.models_free.map((m) => `<code>${cell(m)}</code>`).join(' ')
-      : '<span class="tri tri-unk">no sample</span>') +
+      : NOT_STATED_HTML) +
       (safeUrl(p.models_url) ? `<div class="cmp-sub"><a href="${cell(safeUrl(p.models_url))}" target="_blank" rel="noopener">official catalogue ↗</a></div>` : '')],
     ['Official docs', (p) => safeUrl(p.docs_url)
       ? `<a href="${cell(safeUrl(p.docs_url))}" target="_blank" rel="noopener">${cell(safeUrl(p.docs_url).replace(/^https?:\/\//i, ''))}</a>`
-      : '—'],
+      : NOT_STATED_HTML],
     ['Last verified', (p) => (p.verified && p.last_verified)
-      ? `<span class="v ok">${cell(p.last_verified)}</span>`
+      ? `<span class="v ok">${humanDate(p.last_verified) ? `<time datetime="${cell(p.last_verified)}">${humanDate(p.last_verified)}</time>` : cell(p.last_verified)}</span>`
       : '<span class="v warn">unverified</span>'],
   ];
   // With a scores map ({ slug: { total, confirmed, of, rank } }) the table also shows the score and the model quality
@@ -245,6 +202,10 @@ window.FLLM_COMPARE = (function () {
   const SLUG_RE = ${SLUG_RE.toString()};
   const COMPARE_MIN = ${COMPARE_MIN};
   const COMPARE_MAX = ${COMPARE_MAX};
+  const NOT_STATED_HTML = ${JSON.stringify(NOT_STATED_HTML)};
+  const REASON_LABEL = ${JSON.stringify(REASON_LABEL)};
+  const DATE_MONTHS = ${JSON.stringify(DATE_MONTHS)};
+  const humanDate = ${humanDate.toString()};
   const triStateHtml = ${triStateHtml.toString()};
   const expiryHtml = ${expiryHtml.toString()};
   const parseCompareSlugs = ${parseCompareSlugs.toString()};

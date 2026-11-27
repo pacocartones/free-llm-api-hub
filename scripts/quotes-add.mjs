@@ -9,6 +9,7 @@
 // card_required, commercial_ok, openai_compatible, multi_account_forbidden or limit_circumvention_forbidden), read on its first source. With --speed, it writes the quote of every published_speed
 // entry of the provider, each read on its source. It writes the day, the hash and the method; you never
 // type them. It changes nothing else. If something is not on the page it says what and writes nothing.
+import { utcToday } from './lib/dates.mjs';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
@@ -49,7 +50,7 @@ if (speed) {
   if (!p || !p.field_checks || !p.field_checks[field]) { console.error(`${slug}: no provider with that slug has field_checks.${field} in data/providers.json`); process.exit(2); }
 } else if (!p || !p.data_policy) { console.error(`${slug}: no provider with that slug has a data_policy in data/providers.json`); process.exit(2); }
 
-const today = new Date().toISOString().slice(0, 10);
+const today = utcToday();
 const read = (u) => readText(u, undefined, lang);
 const { entries, problems } = speed
   ? await speedEntriesFor(slug, p.published_speed, read, { today, lang })

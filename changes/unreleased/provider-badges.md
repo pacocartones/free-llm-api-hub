@@ -9,4 +9,4 @@
   HTML per provider, linking to `/p/<slug>`, the rules (a badge reflects only
   our verification and is not an endorsement) and how to request a correction.
   Each provider page links to its badge below the FAQ. `/badges/` is in the
-  sitemap and llms.txt.
+  sitemap and llms.txt (#954).

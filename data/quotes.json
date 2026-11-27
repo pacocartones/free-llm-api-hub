@@ -43,7 +43,7 @@
    "kind": "sentence",
    "text": "By default, Groq does not retain customer data for inference requests.",
    "source_url": "https://console.groq.com/docs/your-data",
-   "read_on": "2026-11-24",
+   "read_on": "2026-11-27",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "544a0f7b12ebfe9831d7f816b6107a73f90b492561a607af7486ecac41be2f37"
@@ -54,7 +54,7 @@
    "kind": "note_passage",
    "text": "Groq is not permitted to use Inputs or Outputs for training or fine-tuning any AI Model Services or other models",
    "source_url": "https://console.groq.com/docs/legal/services-agreement",
-   "read_on": "2026-11-24",
+   "read_on": "2026-11-27",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "645fa99e301839336160d9b0387edad3a965dc30e8bed95efb9e54116c2f2f1e"
@@ -90,7 +90,7 @@
    "field": "openai_compatible",
    "text": "We designed Groq API to be mostly compatible with OpenAI's client libraries, making it easy to configure your existing applications to run on Groq and try our inference speed.",
    "source_url": "https://console.groq.com/docs/openai",
-   "read_on": "2026-11-25",
+   "read_on": "2026-11-27",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "eadb5c138a45b332d56e854038b2b551efb75b87310772cc467ccddcd7f7cc59"
@@ -103,7 +103,7 @@
    "metric": "output_tokens_per_second",
    "text": "TOKEN SPEED ~1000 tps",
    "source_url": "https://console.groq.com/docs/model/openai/gpt-oss-20b",
-   "read_on": "2026-11-24",
+   "read_on": "2026-11-27",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "0a93a0be4d596bb3a2c8ec5fb842f3637599e73b9aff312c8e5ff1c4ce5561c3"
@@ -116,7 +116,7 @@
    "metric": "output_tokens_per_second",
    "text": "TOKEN SPEED ~500 tps",
    "source_url": "https://console.groq.com/docs/model/openai/gpt-oss-120b",
-   "read_on": "2026-11-24",
+   "read_on": "2026-11-27",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "8e227f1b41815703fde5e08abac333233fb0564e0c7ada3299be7c515712a6cc"
@@ -129,7 +129,7 @@
    "metric": "output_tokens_per_second",
    "text": "TOKEN SPEED ~450+ tps",
    "source_url": "https://console.groq.com/docs/model/qwen/qwen3.8-27b",
-   "read_on": "2026-11-24",
+   "read_on": "2026-11-27",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "5f829877de34d861b1453cbd561ef3f0911fcf91d371d6df21e84c8f65002443"
@@ -140,10 +140,10 @@
    "kind": "sentence",
    "text": "OpenRouter retains prompts only when you opt in, or when retention is needed for CSAM review, reporting, and related legal preservation. Requests to Safety Retention endpoints are the exception: OpenRouter or the provider may retain prompts and responses from any request, only to prevent abuse, and not for training.",
    "source_url": "https://openrouter.ai/docs/guides/privacy/data-collection",
-   "read_on": "2026-11-14",
+   "read_on": "2026-11-27",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
-   "page_sha256": "9aa916fe1d3a40940583cd20bb78ee7ee5cb93c52584d199ae39fd26dca4ad58"
+   "page_sha256": "8a302b233e57710f2d21fb6c6cb8204198b9580e4e6de531b90d7c3a6e8f2dac"
   },
   {
    "id": "openrouter.note_passage.1",
@@ -151,10 +151,10 @@
    "kind": "note_passage",
    "text": "There are separate settings for paid and free models.",
    "source_url": "https://openrouter.ai/docs/guides/privacy/provider-logging",
-   "read_on": "2026-11-14",
+   "read_on": "2026-11-27",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
-   "page_sha256": "a4c888930fed39df8249a4c8ce568aecb965f4f55e4c1cbcea975abae2ff248f"
+   "page_sha256": "20df95bbf4c9bd5a0fbc63a59aa5cb37a967cc1b624753e3d1e9f2f597291913"
   },
   {
    "id": "openrouter.limit_circumvention_forbidden.sentence",
@@ -198,10 +198,10 @@
    "kind": "sentence",
    "text": "Cloudflare does not use Customer Content processed by Workers AI to train AI models.",
    "source_url": "https://developers.cloudflare.com/workers-ai/platform/data-usage/",
-   "read_on": "2026-11-14",
+   "read_on": "2026-11-27",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
-   "page_sha256": "f9e4341fc44612c724684a17f89cbc1ad332f90f7874fae875edc058f9da0980"
+   "page_sha256": "1ef258dc6230c2a515705ce38437be6286c815bc1ce8a545c2c50f4e408a532a"
   },
   {
    "id": "cloudflare-workers-ai.card_required.sentence",
@@ -210,7 +210,7 @@
    "field": "card_required",
    "text": "Start building for free — no credit card required.",
    "source_url": "https://www.cloudflare.com/plans/",
-   "read_on": "2026-11-24",
+   "read_on": "2026-11-27",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "eed26388f278a23d6764371732c89b5cfd8fa4f31ed8bd266f1d4c081e4b62b6"
@@ -245,10 +245,10 @@
    "kind": "sentence",
    "text": "Section 2.3 (Research and Model Improvement): Analyzing usage patterns and using Trial or Research User Inputs/Outputs to improve the performance and safety of our AI models.",
    "source_url": "https://cohere.com/privacy",
-   "read_on": "2026-11-24",
+   "read_on": "2026-11-27",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
-   "page_sha256": "2d702f85bb2c046c60aa2fb30ca3f2a2876aaadd00bcf8b5b3eb9d6a70685c54"
+   "page_sha256": "47af8c5bcca782273bb3dc875af509d2e078ef2189f2e4bec24fc4120e112848"
   },
   {
    "id": "cohere.card_required.sentence",
@@ -257,10 +257,10 @@
    "field": "card_required",
    "text": "Individuals who create or access a free trial account to test out our Platform under our standard Terms of Use with no payment method on file.",
    "source_url": "https://cohere.com/privacy",
-   "read_on": "2026-11-24",
+   "read_on": "2026-11-27",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
-   "page_sha256": "2d702f85bb2c046c60aa2fb30ca3f2a2876aaadd00bcf8b5b3eb9d6a70685c54"
+   "page_sha256": "47af8c5bcca782273bb3dc875af509d2e078ef2189f2e4bec24fc4120e112848"
   },
   {
    "id": "cohere.commercial_ok.sentence",
@@ -269,10 +269,10 @@
    "field": "commercial_ok",
    "text": "API calls made from a Trial API key are free. However, trial keys are rate limited and are not permitted to be used for production or commercial purposes.",
    "source_url": "https://cohere.com/pricing",
-   "read_on": "2026-11-24",
+   "read_on": "2026-11-27",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
-   "page_sha256": "c5580a9f57affc391ae077d4ca618039affb2a0a5a90faa92e38478b994409c3"
+   "page_sha256": "98417e32ba8f8685314a648f28fccae34b294a869eb6fcdd58a00cd11b58ff69"
   },
   {
    "id": "cohere.limit_circumvention_forbidden.sentence",
@@ -316,7 +316,7 @@
    "kind": "sentence",
    "text": "For clarity, the foregoing does not grant Cerebras the right to use Service Content for the purpose of training or fine-tuning models.",
    "source_url": "https://www.cerebras.ai/terms-of-service",
-   "read_on": "2026-11-24",
+   "read_on": "2026-11-27",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "c5769f3f283f888f282073f55e8e53e95b8656bcc048326ffcf81a8f3f594d19"
@@ -327,7 +327,7 @@
    "kind": "note_passage",
    "text": "may be provided for free",
    "source_url": "https://www.cerebras.ai/terms-of-service",
-   "read_on": "2026-11-24",
+   "read_on": "2026-11-27",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "c5769f3f283f888f282073f55e8e53e95b8656bcc048326ffcf81a8f3f594d19"
@@ -339,7 +339,7 @@
    "field": "card_required",
    "text": "New accounts receive $5 in free credits after adding a verified payment method.",
    "source_url": "https://inference-docs.cerebras.ai/support/rate-limits",
-   "read_on": "2026-11-24",
+   "read_on": "2026-11-27",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "2aba6287e39902eab9da378b3dbe62debf9c3b99c2d728b141f6d54f87ee7ee7"
@@ -375,7 +375,7 @@
    "field": "openai_compatible",
    "text": "The Cerebras API is compatible with OpenAI client libraries for many common workflows.",
    "source_url": "https://inference-docs.cerebras.ai/resources/openai",
-   "read_on": "2026-11-25",
+   "read_on": "2026-11-27",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "ed338420bd3ed2b5f9306615eea78b26c0806a5d461a689173439c61b9d7e3c1"
@@ -388,7 +388,7 @@
    "metric": "output_tokens_per_second",
    "text": "gpt-oss-120b 120 billion 65k / 131k ~3000",
    "source_url": "https://inference-docs.cerebras.ai/models/overview",
-   "read_on": "2026-11-24",
+   "read_on": "2026-11-27",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "7e6c05b30acac3d6811383043cfa0b3199601d8363f1f963c8b58a36b42644b9"
@@ -401,7 +401,7 @@
    "metric": "output_tokens_per_second",
    "text": "qwen-3.8-27b 27 billion 64k / 128k ~1850",
    "source_url": "https://inference-docs.cerebras.ai/models/overview",
-   "read_on": "2026-11-24",
+   "read_on": "2026-11-27",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "7e6c05b30acac3d6811383043cfa0b3199601d8363f1f963c8b58a36b42644b9"
@@ -899,7 +899,7 @@
    "kind": "sentence",
    "text": "Without your separate consent, we will not use your business data (including inputs, outputs, and files) to train, fine-tune or improve any foundation model.",
    "source_url": "https://www.alibabacloud.com/help/en/model-studio/data-retention-policy",
-   "read_on": "2026-11-20",
+   "read_on": "2026-11-27",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "3ac8f2d9f84dd737d3cf1ea173d485c52be9519c9ea88b2105ee5fd2322be8f0"
@@ -947,7 +947,7 @@
    "field": "phone_required",
    "text": "If you registered your Alibaba Cloud account with an email address, you must complete secure phone number verification.",
    "source_url": "https://www.alibabacloud.com/help/en/account/step-1-register-an-alibaba-cloud-account",
-   "read_on": "2026-11-25",
+   "read_on": "2026-11-27",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "572a96d30bb7ce092abac0eae47a08fbf5fdc8ccc48dffa8eb87362b2a14f301"
@@ -958,7 +958,7 @@
    "kind": "sentence",
    "text": "Modal will not, except with Customer's prior written consent: (i) train any AI model using Customer Data, or (ii) export Customer Data into, or cause Customer Data to be ingested by, large language models.",
    "source_url": "https://modal.com/legal/terms",
-   "read_on": "2026-11-24",
+   "read_on": "2026-11-27",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "9516d0ad565591caf3561402c3cf613c5361b4eec7c2067c1489b5dd52842912"
@@ -969,7 +969,7 @@
    "kind": "note_passage",
    "text": "solely for Customer's internal business",
    "source_url": "https://modal.com/legal/terms",
-   "read_on": "2026-11-24",
+   "read_on": "2026-11-27",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "9516d0ad565591caf3561402c3cf613c5361b4eec7c2067c1489b5dd52842912"
@@ -980,7 +980,7 @@
    "kind": "note_passage",
    "text": "No-Fee Use",
    "source_url": "https://modal.com/legal/terms",
-   "read_on": "2026-11-24",
+   "read_on": "2026-11-27",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "9516d0ad565591caf3561402c3cf613c5361b4eec7c2067c1489b5dd52842912"
@@ -991,7 +991,7 @@
    "kind": "note_passage",
    "text": "may be subject to certain additional restrictions, limitations and differing terms",
    "source_url": "https://modal.com/legal/terms",
-   "read_on": "2026-11-24",
+   "read_on": "2026-11-27",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "9516d0ad565591caf3561402c3cf613c5361b4eec7c2067c1489b5dd52842912"
@@ -1003,10 +1003,10 @@
    "field": "card_required",
    "text": "Note that you must have a payment method on file in order to use Modal.",
    "source_url": "https://modal.com/docs/guide/billing",
-   "read_on": "2026-11-24",
+   "read_on": "2026-11-27",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
-   "page_sha256": "34707fa98d577e107391753a9200238859eeb0aed1aa7c16150ae2fc8b662fc1"
+   "page_sha256": "85a18eaa2c0118436e377be2e12facf8ffa02c8d91c5fdf90b88f2fcf7eb76b8"
   },
   {
    "id": "modal.openai_compatible.sentence",
@@ -1040,7 +1040,7 @@
    "metric": "output_tokens_per_second",
    "text": "SambaCloud is running the model at the full 131K context length and at speeds over 700 tokens/seconds/user powered by the SambaNova RDU.",
    "source_url": "https://sambanova.ai/blog/start-building-with-lightning-fast-gpt-oss-120b-on-sambacloud",
-   "read_on": "2026-11-24",
+   "read_on": "2026-11-27",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "7c937debf47c0be8766266fba294564792ebcb44bb7b8f1926ac00d3f49d8ec2"
@@ -1051,10 +1051,10 @@
    "kind": "sentence",
    "text": "Your data is not used for training, retraining, or improving the base models.",
    "source_url": "https://www.scaleway.com/en/docs/generative-apis/reference-content/data-privacy/",
-   "read_on": "2026-10-15",
+   "read_on": "2026-11-27",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
-   "page_sha256": "8da85e4dccfaaaea63f791b192f28d209cfb6d5704522d6f4ebe19ffc12aad27"
+   "page_sha256": "5a987a695824e41de2c452d18d48c874a046215fb803945135f8b0a1595f41b4"
   },
   {
    "id": "scaleway.card_required.sentence",
@@ -1124,10 +1124,10 @@
    "metric": "output_tokens_per_second",
    "text": "Output token generation speed should be above 100 tokens per second for recent small to medium-sized models (such as gpt-oss-120b or mistral-small-3.2-24b-instruct-2506 )",
    "source_url": "https://www.scaleway.com/en/docs/generative-apis/faq/",
-   "read_on": "2026-11-24",
+   "read_on": "2026-11-27",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
-   "page_sha256": "6ec4c179faa295b87aff9d731b08da3d06584b10db637af89e55140390d547e5"
+   "page_sha256": "7b1e9f18c0111dc72432dd5917bac3fdd527226151f616aef02848d6eef3b5af"
   },
   {
    "id": "scaleway.speed.mistral-small-3.2-24b-instruct-2506.output_tokens_per_second",
@@ -1137,10 +1137,10 @@
    "metric": "output_tokens_per_second",
    "text": "Output token generation speed should be above 100 tokens per second for recent small to medium-sized models (such as gpt-oss-120b or mistral-small-3.2-24b-instruct-2506 )",
    "source_url": "https://www.scaleway.com/en/docs/generative-apis/faq/",
-   "read_on": "2026-11-24",
+   "read_on": "2026-11-27",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
-   "page_sha256": "6ec4c179faa295b87aff9d731b08da3d06584b10db637af89e55140390d547e5"
+   "page_sha256": "7b1e9f18c0111dc72432dd5917bac3fdd527226151f616aef02848d6eef3b5af"
   },
   {
    "id": "nvidia-nim.sentence",
@@ -1523,7 +1523,7 @@
    "field": "phone_required",
    "text": "手机号码：输入您的手机号码，确保号码准确无误，以便接收验证码。",
    "source_url": "https://www.modelscope.cn/docs/accounts/registration.md",
-   "read_on": "2026-11-25",
+   "read_on": "2026-11-27",
    "lang": "zh",
    "method": "html-text-v1: page requested with Accept-Language zh, tags removed, character references decoded, white space collapsed",
    "page_sha256": "5b10efa2a31d278d8f8722551330f5ff8b74e4d8d95b3f210960bf8ffcb9ece6"
@@ -1534,11 +1534,11 @@
    "kind": "field_sentence",
    "field": "card_required",
    "text": "Add to your balance by contributing, without a credit card",
-   "source_url": "https://github.com/pollinations/pollinations",
+   "source_url": "https://raw.githubusercontent.com/pollinations/pollinations/main/README.md",
    "read_on": "2026-11-27",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
-   "page_sha256": "96e36eeed26ef73b3d4cb69c7f9db63cae97656aec7ad0bedb3c821b26d5e05e"
+   "page_sha256": "ca8175c99de855875520885dbbeff08c0a38d83a9a35b1bad6b44aaf0b44e4f0"
   },
   {
    "id": "pollinations.limit_circumvention_forbidden.sentence",
@@ -1558,11 +1558,11 @@
    "kind": "field_sentence",
    "field": "openai_compatible",
    "text": "then call it through the same OpenAI-compatible API as any other model.",
-   "source_url": "https://github.com/pollinations/pollinations",
+   "source_url": "https://raw.githubusercontent.com/pollinations/pollinations/main/README.md",
    "read_on": "2026-11-27",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
-   "page_sha256": "96e36eeed26ef73b3d4cb69c7f9db63cae97656aec7ad0bedb3c821b26d5e05e"
+   "page_sha256": "ca8175c99de855875520885dbbeff08c0a38d83a9a35b1bad6b44aaf0b44e4f0"
   },
   {
    "id": "runware.sentence",
@@ -1651,10 +1651,10 @@
    "kind": "sentence",
    "text": "in order to: (i) provide, maintain, enhance, train, and improve the Twelve Labs Services (including the training, re-training, fine-tuning, and improving the Twelve Labs Services)",
    "source_url": "https://www.twelvelabs.io/legal/terms-of-use-2026.15.05",
-   "read_on": "2026-11-26",
+   "read_on": "2026-11-27",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
-   "page_sha256": "9475d45a093aa5672aad753cb419141790404454f78d04c9a7b7d7da75cddc8a"
+   "page_sha256": "4a3ee7dc52306b08e2a82ccb4756dd3454188bd01478d07a0c84e2fe520d8d43"
   },
   {
    "id": "twelve-labs.multi_account_forbidden.sentence",
@@ -1803,7 +1803,7 @@
    "kind": "sentence",
    "text": "M87 Labs will not use Customer Content or Outputs to Train any model or adapter that is made generally available by M87 Labs (including the base Moondream models), or to Train any model or adapter for the benefit of any third party, except where you explicitly opt in under a separate written agreement.",
    "source_url": "https://moondream.ai/terms",
-   "read_on": "2026-11-24",
+   "read_on": "2026-11-27",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "a7c151d622c571676ef6225174ff69e6e77e071a79c55c9c88dfec0f76f1976a"
@@ -1814,7 +1814,7 @@
    "kind": "note_passage",
    "text": "your internal business or personal purposes",
    "source_url": "https://moondream.ai/terms",
-   "read_on": "2026-11-24",
+   "read_on": "2026-11-27",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "a7c151d622c571676ef6225174ff69e6e77e071a79c55c9c88dfec0f76f1976a"
@@ -1825,7 +1825,7 @@
    "kind": "note_passage",
    "text": "commercially exploit the Service or any portion of the Service",
    "source_url": "https://moondream.ai/terms",
-   "read_on": "2026-11-24",
+   "read_on": "2026-11-27",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "a7c151d622c571676ef6225174ff69e6e77e071a79c55c9c88dfec0f76f1976a"
@@ -1837,7 +1837,7 @@
    "field": "card_required",
    "text": "No credit card required.",
    "source_url": "https://moondream.ai/",
-   "read_on": "2026-11-24",
+   "read_on": "2026-11-27",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "f881da5f601fdbf94595fcb3b37cdb89ebe5c96f5abe24d8b8029dcd90ee40b8"
@@ -2194,7 +2194,7 @@
    "read_on": "2026-11-27",
    "lang": "zh",
    "method": "html-text-v1: page requested with Accept-Language zh, tags removed, character references decoded, white space collapsed",
-   "page_sha256": "52854fc6e2f1c7b81a0a7d25f749bc60341d87c1e7dc66b1c07e2025f64865e0"
+   "page_sha256": "2cfb735a1d4be3d445b282d1fc0bfb1d6de3c717516fedd998afbae927c48222"
   },
   {
    "id": "voyage-ai.sentence",
@@ -2704,10 +2704,10 @@
    "kind": "sentence",
    "text": "Conversion results are automatically deleted from Datalab servers about one day after processing completes.",
    "source_url": "https://documentation.datalab.to/platform/security",
-   "read_on": "2026-11-24",
+   "read_on": "2026-11-27",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
-   "page_sha256": "4757267bf081c58e08343c40f7ad633ef2bbbceba8bc8b54f1d8eb4367d75cee"
+   "page_sha256": "0b9a3dbede386b85159b61c95ae774c93c51db76072d1af75f148fc88726ad08"
   },
   {
    "id": "datalab.card_required.sentence",
@@ -2716,7 +2716,7 @@
    "field": "card_required",
    "text": "New accounts get a one-time credit to try the API, with no credit card required:",
    "source_url": "https://documentation.datalab.to/platform/billing",
-   "read_on": "2026-11-24",
+   "read_on": "2026-11-27",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "05c59c29514985cc6a5cc263a238194ff28d1501475fe34919bc51b94ec3f703"
@@ -2831,10 +2831,10 @@
    "kind": "sentence",
    "text": "We do not retain, log, or reuse any input or output data processed through our models.",
    "source_url": "https://regolo.ai/zero-data-retention/",
-   "read_on": "2026-11-24",
+   "read_on": "2026-11-27",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
-   "page_sha256": "9b36459d8ebb20b4bb889f0ebfde6e0b4638189fbc14e876da11d3ea660aa08c"
+   "page_sha256": "04ada92fe7acd48a90b7e0cf151add8c29a07a9aa65d2120fca103cdfaae917b"
   },
   {
    "id": "regolo.card_required.sentence",
@@ -2878,7 +2878,7 @@
    "kind": "sentence",
    "text": "Google won't use your data to train or fine-tune any AI/ML models without your prior permission or instruction.",
    "source_url": "https://docs.cloud.google.com/gemini-enterprise-agent-platform/resources/zero-data-retention",
-   "read_on": "2026-11-24",
+   "read_on": "2026-11-27",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "2dd683f357d3dfdc36626bec354a421fc02ec2ec1977bf8da66de798d2be30a5"
@@ -3777,6 +3777,101 @@
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "ac845708e00735faade9e2d64afa3e5e3ce95e1f66d9f66601b26c714bdfeb20"
+  },
+  {
+   "id": "gonka-broker.card_required.sentence",
+   "slug": "gonka-broker",
+   "kind": "field_sentence",
+   "field": "card_required",
+   "text": "No credit card, no expiring trial credit.",
+   "source_url": "https://gonkabroker.com/free-llm-api/",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "d2d3ec68076f81eb0cc1086cdb286c9c0a6dc625a016d7dfc7f38695a5d49313"
+  },
+  {
+   "id": "gonka-broker.openai_compatible.sentence",
+   "slug": "gonka-broker",
+   "kind": "field_sentence",
+   "field": "openai_compatible",
+   "text": "Point any OpenAI SDK or tool at https://proxy.gonkabroker.com/v1 with your Gonka Broker key.",
+   "source_url": "https://gonkabroker.com/",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "3cde927bb14d8213f3b687e56974fd264b167a682bddb4e219c5ee8dd0b17227"
+  },
+  {
+   "id": "moark.openai_compatible.sentence",
+   "slug": "moark",
+   "kind": "field_sentence",
+   "field": "openai_compatible",
+   "text": "模力方舟提供了 OpenAI 兼容的接口，您可以在自己的应用中集成模型能力。",
+   "source_url": "https://moark.com/docs/getting-started",
+   "read_on": "2026-11-27",
+   "lang": "zh-CN",
+   "method": "html-text-v1: page requested with Accept-Language zh-CN, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "de93a7bd03708e7d8ad2ba7bcd2f2ab510cf29c70cb129c4ef4fcbda4ca167a9"
+  },
+  {
+   "id": "synap.sentence",
+   "slug": "synap",
+   "kind": "sentence",
+   "text": "We do not retain prompt or completion text for API requests, and we do not use it to train anything.",
+   "source_url": "https://synap402.com/privacy.html",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "03771f8ad710c8993a1a3378fed67e2113d2e44dba7eeab7774277c7014694ca"
+  },
+  {
+   "id": "synap.card_required.sentence",
+   "slug": "synap",
+   "kind": "field_sentence",
+   "field": "card_required",
+   "text": "Free tier · no card",
+   "source_url": "https://synap402.com/free.html",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "047d7793192c066aae574b837c7f1a613b7be19aa330f89d80c7730f1570ba8b"
+  },
+  {
+   "id": "synap.openai_compatible.sentence",
+   "slug": "synap",
+   "kind": "field_sentence",
+   "field": "openai_compatible",
+   "text": "Any OpenAI SDK works: change base_url to https://synap402.com/v1",
+   "source_url": "https://synap402.com/qwen3-coder-api.html",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "0892dad97c845e1dd89a48358486fb4254fa703bd13797d4389013ac342663bb"
+  },
+  {
+   "id": "nlpcloud.card_required.sentence",
+   "slug": "nlpcloud",
+   "kind": "field_sentence",
+   "field": "card_required",
+   "text": "A credit card is needed for this plan, but you automatically get an initial $15 credit for your tests.",
+   "source_url": "https://nlpcloud.com/",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": null
+  },
+  {
+   "id": "nlpcloud.commercial_ok.sentence",
+   "slug": "nlpcloud",
+   "kind": "field_sentence",
+   "field": "commercial_ok",
+   "text": "We grant you a personal, limited, non-exclusive, revocable, non-transferable license, without the right to sublicense, to electronically access and use the Service for your personal or commercial purposes.",
+   "source_url": "https://nlpcloud.com/tos.html",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": null
   }
  ]
 }

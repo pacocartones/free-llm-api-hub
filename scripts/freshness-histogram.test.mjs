@@ -136,7 +136,7 @@ test('coverage page section: one row per week, clusters marked, nothing without 
   assert.match(html, /<h2 id="freshness">/);
   assert.equal((html.match(/<tr[ >]/g) || []).length, HISTOGRAM_WEEKS + 1);
   assert.equal((html.match(/class="cov-cluster"/g) || []).length, 1);
-  assert.match(html, /<th scope="row">2027-01-18<\/th><td class="num">9 <span class="muted">\(cluster\)<\/span>/);
+  assert.match(html, /<th scope="row"><time datetime="2027-01-18">18 Jan 2027<\/time><\/th><td class="num">9 <span class="muted">\(cluster\)<\/span>/);
   assert.match(html, /href="https:\/\/example\.test\/r\/issues\/4"/);
   assert.match(html, /href="\.\.\/quality\/#freshness-weeks"/, 'links the backward-looking view on /quality/');
   assert.match(html, /href="\.\.\/quality\/#freshness-weeks"/);

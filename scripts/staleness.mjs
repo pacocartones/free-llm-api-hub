@@ -4,6 +4,7 @@
 // freshness policy into an actionable checklist. Report-only (never fails).
 // Run with: node scripts/staleness.mjs
 
+import { isoDay } from './lib/dates.mjs';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
@@ -48,7 +49,7 @@ export function stalenessWorklist(providers, now = new Date()) {
   for (const [d, n] of Object.entries(byDate)) {
     if (n < CLIFF_MIN) continue;
     const crossIn = OVERDUE - ageDays(d); // days until this cluster crosses the SLA
-    const crossOn = new Date(new Date(d + 'T00:00:00Z').getTime() + OVERDUE * 86400000).toISOString().slice(0, 10);
+    const crossOn = isoDay(new Date(d + 'T00:00:00Z').getTime() + OVERDUE * 86400000);
     if (!cliff || n > cliff.n) cliff = { d, n, crossIn, crossOn };
   }
 

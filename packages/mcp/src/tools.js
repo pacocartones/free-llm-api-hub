@@ -500,7 +500,7 @@ export function isFree(data, { slug }, status = null) {
   } else if (p.category === 'trial') {
     verdict = 'trial_credit';
     const exp = p.expires ? `; the credit expires after ${noFinalStop(p.expires)}` : '';
-    first = `Not permanently. ${p.name} gives a one-time trial credit, not an ongoing free tier: ${headline.text}${exp}${stop(exp || headline.text)}`;
+    first = `No. ${p.name} gives a one-time trial credit, not an ongoing free tier: ${headline.text}${exp}${stop(exp || headline.text)}`;
   } else {
     verdict = NOT_STATED;
     first = `Whether ${p.name} has an ongoing free tier is ${NOT_STATED}: ${headline.text}${stop(headline.text)}`;

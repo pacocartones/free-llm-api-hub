@@ -1,0 +1,50 @@
+{
+  "note": "Differences scripts/parity-crawl.mjs accepts between origin A (the live site) and origin B (the Cloudflare Worker). Each entry in `allow` names a path (exact, a prefix ending in `*`, or `*` for every path), a field (one of the crawler's FIELDS, `loc`/`lastmod` for the sitemap comparison, or `*`) and a non-empty `reason`; optional `a` and `b` make it match only those exact values. `body_ignore` lists extra regular expressions removed from every body before it is hashed, each with a `reason`. Keep both lists empty unless a parity run shows a difference that is intended; see docs/architecture.md, Hosting cutover.",
+  "allow": [
+    {
+      "path": "*",
+      "field": "content_type",
+      "a": "text/html; charset=utf-8",
+      "b": "text/html",
+      "reason": "Workers static assets send text/html without a charset; every page declares <meta charset=\"UTF-8\"> in its first bytes, so browsers and crawlers decode it the same (first parity run, 2026-11-27)."
+    },
+    {
+      "path": "*",
+      "field": "content_type",
+      "a": "application/javascript; charset=utf-8",
+      "b": "text/javascript; charset=utf-8",
+      "reason": "text/javascript is the standard JavaScript type (RFC 9239); the charset is set by the Worker's _headers (E-W7)."
+    },
+    {
+      "path": "/p/groq.html",
+      "field": "chain",
+      "reason": "Production serves /<page>.html as a 200 duplicate of the canonical extension-less URL; the Worker redirects it to the canonical URL. No internal link uses .html (checked in E-W2), and the canonical tag already points to the extension-less URL."
+    },
+    {
+      "path": "/p/groq.html",
+      "field": "final_url",
+      "reason": "Same as the chain entry: /<page>.html ends at its canonical extension-less URL on the Worker."
+    },
+    {
+      "path": "/guides/*",
+      "field": "chain",
+      "reason": "The 301 for a trailing slash on /guides/*/ comes from a Cloudflare zone Redirect Rule bound to the freellmapihub.com host, which does not apply to next.freellmapihub.com; the Worker's own 307 is what remains there. After the cutover the zone rule applies again on the apex (checked in C3.6)."
+    },
+    {
+      "path": "/no-such-page-*",
+      "field": "cache_control",
+      "reason": "Workers static assets apply the site-wide Cache-Control: max-age=600 to the 404 page too; production's 404 sends none. A cached 404 for 10 minutes is harmless."
+    },
+    {
+      "path": "/guides/index.html",
+      "field": "chain",
+      "reason": "Production serves /<dir>/index.html as a 200 duplicate of its canonical directory URL; the Worker sends it there with a 301 (generated _redirects rule, E-W7). No internal link uses index.html, and the page's canonical tag is the directory URL."
+    },
+    {
+      "path": "/guides/index.html",
+      "field": "final_url",
+      "reason": "Production serves /<dir>/index.html as a 200 duplicate of its canonical directory URL; the Worker sends it there with a 301 (generated _redirects rule, E-W7). No internal link uses index.html, and the page's canonical tag is the directory URL."
+    }
+  ],
+  "body_ignore": []
+}
