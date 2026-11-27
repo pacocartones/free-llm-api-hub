@@ -73,6 +73,7 @@ import { SITEMAPS as INDEXNOW_SITEMAPS } from './lib/indexnow.mjs';
 import { groupModels, modelKey } from './lib/model-keys.mjs';
 import { providerMetaDescription } from './lib/provider-meta.mjs';
 import { answerFirst, providerFaq, providerFaqHtml, providerFaqJsonLd } from './lib/provider-faq.mjs';
+import { compareVerdict, compareFaq, compareFaqHtml } from './lib/compare-faq.mjs';
 import { isIndexable, modelPageMainHtml, modelPageTitle, modelPageDescription, modelPageJsonLd } from './lib/model-pages.mjs';
 import { FAMILY_PATH, familyGroups, isFamilyIndexable, familyUrl, familyH1, familyPageTitle, familyPageDescription, familyBlurb, familyPageMainHtml, familyNavHtml } from './lib/model-families.mjs';
 import { collectionPageJsonLd as pageJsonLd, comparePageJsonLd } from './lib/page-jsonld.mjs';
@@ -2689,16 +2690,21 @@ for (const cp of comparePairs) {
   const { a, b } = cp;
   const title = `${a.name} vs ${b.name}`;
   const desc = `${a.name} vs ${b.name}: free tier, rate limits, card, phone and commercial-use requirements, OpenAI compatibility and docs, side by side from the verified dataset.`;
+  // Right under the H1, the verdict for "<A> vs <B> free tier" from the data alone, and after the table a short FAQ that
+  // is also the FAQPage node of the JSON-LD (lib/compare-faq.mjs). Neither appears when both records lack free-tier data.
+  const verdict = compareVerdict(a, b);
+  const faq = compareFaq(a, b);
   const main =
-    pageHero({ crumbs: `<a href="../../">Home</a> / <a href="../">Compare</a> / ${escapeAttr(title)}`, h1: `${escapeAttr(title)}`, lede: `Both offer ${escapeAttr(cp.shared.join(', '))} on their free plan. Every field below comes from the dataset and is checked against each provider's own docs; <em>not confirmed</em> means nobody has confirmed that field yet — not that the answer is no.` }) +
+    pageHero({ crumbs: `<a href="../../">Home</a> / <a href="../">Compare</a> / ${escapeAttr(title)}`, h1: `${escapeAttr(title)}`, afterTitle: verdict ? verdict.html : '', lede: `Both offer ${escapeAttr(cp.shared.join(', '))} on their free plan. Every field below comes from the dataset and is checked against each provider's own docs; <em>not confirmed</em> means nobody has confirmed that field yet — not that the answer is no.` }) +
     `<main id="main"><div class="wrap prose">` +
     tagProviderLinks(compareLib.compareTableHtml([a, b], { prefix: '../../', scores: scoreMap }), [...providerLinkTargets(a), ...providerLinkTargets(b)]) +
     `<div class="prov-actions" style="margin-top:22px"><a class="btn primary" href="../?compare=${a.slug},${b.slug}">Add a provider to this comparison →</a></div>` +
+    compareFaqHtml(a, b, faq) +
     `<h2>Other comparisons</h2><nav class="colls">${compareLinksHtml('../../', cp.path)}</nav>` +
     `<p class="muted">Expected OpenAI, Anthropic or Mistral here? <a href="../../not-free/">APIs that are not free, and why</a>.</p>` +
     `<p class="prov-back"><a href="../../#explorer">← All providers</a></p>` +
     `</div></main>`;
-  const jsonld = comparePageJsonLd({ site: SITE, path: cp.path, a, b });
+  const jsonld = comparePageJsonLd({ site: SITE, path: cp.path, a, b, faq });
   mkdirSync(join(ROOT, `site/compare/${cp.path}`), { recursive: true });
   writeFileSync(join(ROOT, `site/compare/${cp.path}/index.html`), htmlPage({
     title: `${title} — free tiers compared · Free LLM API Hub`, desc, canonical: `${SITE}/compare/${cp.path}/`, main, jsonld, prefix: '../../', ogImage: `${SITE}/og/compare.png`,

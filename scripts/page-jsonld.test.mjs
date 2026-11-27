@@ -52,7 +52,8 @@ test('the index pages that had no structured data now carry a page type and a br
     assert.ok(types.includes(type) && types.includes('BreadcrumbList'), `${rel}: ${types}`);
   }
   for (const d of pairDirs()) {
-    assert.deepEqual(graphTypes(jsonld(read(`compare/${d.name}/index.html`))), ['ItemList', 'BreadcrumbList'], d.name);
+    // A comparison also carries the FAQPage of its visible FAQ (lib/compare-faq.mjs).
+    assert.deepEqual(graphTypes(jsonld(read(`compare/${d.name}/index.html`))), ['ItemList', 'BreadcrumbList', 'FAQPage'], d.name);
   }
 });
 
