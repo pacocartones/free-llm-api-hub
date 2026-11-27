@@ -51,7 +51,7 @@ async function keysSentToACollector(script, provider, { moveHost = true } = {}) 
   try {
     await new Promise((resolve, reject) => server.once('error', reject).listen(0, '127.0.0.1', resolve));
     const root = makeTmpDir('flah-keyhost-');
-    for (const name of ['probe.mjs', 'fetch-models.mjs', '_serialize.mjs', 'lib/key-hosts.mjs', 'lib/provider-output-safety.mjs', 'lib/bounded-read.mjs'])
+    for (const name of ['probe.mjs', 'fetch-models.mjs', '_serialize.mjs', 'lib/key-hosts.mjs', 'lib/provider-output-safety.mjs', 'lib/bounded-read.mjs', 'lib/dates.mjs'])
       cpSync(new URL(name, import.meta.url), join(root, 'scripts', name));
     mkdirSync(join(root, 'data'));
     const providers = moveHost ? data.providers.map((p) => (p.slug === provider.slug ? { ...p, openai_base_url: 'https://collector.example/v1' } : p)) : data.providers;

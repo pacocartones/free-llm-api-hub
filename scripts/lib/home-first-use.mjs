@@ -12,6 +12,7 @@
 
 import { esc } from './escape.mjs';
 import { plural } from './text.mjs';
+import { timeHtml } from './dates.mjs';
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -34,7 +35,7 @@ export function firstUseFacts(providers) {
   };
 }
 
-const time = (d) => `<time datetime="${esc(d)}">${esc(d)}</time>`;
+const time = (d) => timeHtml(d, esc);
 
 /**
  * The strip's markup. `slaDays` is the re-verification limit from lib/rules.mjs (SLA_DAYS).

@@ -22,7 +22,7 @@ test('no_expiry with an https:// source links per the provider with the reading 
   const html = expiryHtml(p);
   assert.equal(
     html,
-    'no expiry <span class="muted">(<a href="https://example.com/terms" target="_blank" rel="noopener">per the provider</a>, read 2026-10-14)</span>'
+    'no expiry <span class="muted">(<a href="https://example.com/terms" target="_blank" rel="noopener">per the provider</a>, read 14 Oct 2026)</span>'
   );
 });
 
@@ -34,7 +34,7 @@ test('no_expiry with missing source renders no link', () => {
     },
   };
   const html = expiryHtml(p);
-  assert.equal(html, 'no expiry <span class="muted">(per the provider, read 2026-10-14)</span>');
+  assert.equal(html, 'no expiry <span class="muted">(per the provider, read 14 Oct 2026)</span>');
 });
 
 test('no_expiry with non-http source (e.g. javascript:) renders no link', () => {
@@ -45,13 +45,13 @@ test('no_expiry with non-http source (e.g. javascript:) renders no link', () => 
     },
   };
   const html = expiryHtml(p);
-  assert.equal(html, 'no expiry <span class="muted">(per the provider, read 2026-10-14)</span>');
+  assert.equal(html, 'no expiry <span class="muted">(per the provider, read 14 Oct 2026)</span>');
 });
 
-test('trial-credit with neither field returns not confirmed', () => {
+test('trial-credit with neither field returns not stated', () => {
   const p = { free_type: 'trial-credit' };
   const html = expiryHtml(p);
-  assert.equal(html, '<span class="tri tri-unk">not confirmed</span>');
+  assert.equal(html, '<span class="tri tri-unk">not stated</span>');
 });
 
 test('any other free_type with expires null returns no expiry', () => {

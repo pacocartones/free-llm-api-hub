@@ -5,7 +5,8 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
 import { AURA_ORDER, AURA_HUES, AURA_GEOMETRY, auraRng, auraSpec, auraPaths, auraHtml, auraSvg, HUB_AURA, FAVICON_AURA } from './lib/aura.mjs';
-import { stampHtml, stampSource, stampSources, stampDate } from './lib/stamp.mjs';
+import { stampHtml, stampSource, stampSources } from './lib/stamp.mjs';
+import { humanDate } from './lib/dates.mjs';
 import { clientBundle } from './lib/rows.mjs';
 import { faviconSvg, logoSymbol, logoSvg, logoFullSvg } from './icons.mjs';
 
@@ -125,7 +126,7 @@ test('stamp: the perforated ticket "✓ | Verified 24 Nov 2026 · N sources" lin
   // Mutant: drop the quote, link a non-https URL, lose the cut line between the mark and the text, or stamp an unverified record.
   const p = { ...base, last_verified: '2026-11-24', stamp: { q: 'Free: 30 "RPM"', u: 'https://acme.example/limits', n: 7 } };
   const html = stampHtml(p, { now: '2026-11-25' });
-  assert.match(html, /^<a class="stamp stamp-ticket b-ok" title="Verified 1d ago · 2026-11-24 · “Free: 30 &quot;RPM&quot;”" href="https:\/\/acme\.example\/limits" rel="noopener">/);
+  assert.match(html, /^<a class="stamp stamp-ticket b-ok" title="Verified 1d ago · 24 Nov 2026 · “Free: 30 &quot;RPM&quot;”" href="https:\/\/acme\.example\/limits" rel="noopener">/);
   assert.match(html, /<b class="stamp-mark" aria-hidden="true">✓<\/b><span class="stamp-text"><span class="sr-only">Verified, fresh: <\/span>Verified <time datetime="2026-11-24">24 Nov 2026<\/time> · 7 sources/);
   assert.match(stampHtml(p, { now: '2026-11-25', long: true }), /class="stamp stamp-ticket b-ok stamp-lg"/);
   assert.match(stampHtml({ ...p, stamp: { ...p.stamp, n: 1 } }, { now: '2026-11-25' }), / · 1 source</, 'singular');
@@ -135,15 +136,15 @@ test('stamp: the perforated ticket "✓ | Verified 24 Nov 2026 · N sources" lin
   const css = read('site/styles.css');
   assert.match(css, /\.stamp-ticket \{[^}]*background: var\(--seal-bg\);[^}]*transform: rotate\(-1\.5deg\);[^}]*mask: radial-gradient\(circle at 0 50%, transparent 5px/, 'apricot fill, turned, notched');
   assert.match(css, /\.stamp-ticket \.stamp-mark \{[^}]*border-right: 1\.5px dashed currentColor;/, 'the cut line');
-  assert.equal(stampDate('2026-01-05'), '5 Jan');
-  assert.equal(stampDate('2026-01-05', true), '5 Jan 2026');
+  assert.equal(humanDate('2026-01-05', false), '5 Jan');
+  assert.equal(humanDate('2026-01-05'), '5 Jan 2026');
 });
 
 test('stamp: the compact pill is flat, a status dot then "Verified · 24 Nov 2026 · N sources", and dashed when due', () => {
   // Mutant: rotate the pill, drop the dot or say freshness by colour alone.
   const p = { ...base, last_verified: '2026-11-24', stamp: { u: 'https://acme.example/limits', n: 3 } };
   const html = stampHtml(p, { now: '2026-11-25', shape: 'pill' });
-  assert.match(html, /^<a class="stamp stamp-pill b-ok" title="Verified 1d ago · 2026-11-24 on the provider’s own docs" href="https:\/\/acme\.example\/limits" rel="noopener"><span class="stamp-dot" aria-hidden="true"><\/span><span class="sr-only">Verified, fresh: <\/span><b>Verified<\/b><span aria-hidden="true"> · <\/span><time datetime="2026-11-24">24 Nov 2026<\/time><span class="stamp-n"> · 3 sources<\/span>/);
+  assert.match(html, /^<a class="stamp stamp-pill b-ok" title="Verified 1d ago · 24 Nov 2026 on the provider’s own docs" href="https:\/\/acme\.example\/limits" rel="noopener"><span class="stamp-dot" aria-hidden="true"><\/span><span class="sr-only">Verified, fresh: <\/span><b>Verified<\/b><span aria-hidden="true"> · <\/span><time datetime="2026-11-24">24 Nov 2026<\/time><span class="stamp-n"> · 3 sources<\/span>/);
   assert.match(stampHtml(p, { now: '2027-02-01', shape: 'pill' }), /class="stamp stamp-pill b-warn"[^>]*>.*Verified, due for re-check/);
   const css = read('site/styles.css');
   const rule = css.match(/\.stamp-pill \{[^}]*\}/)[0];
@@ -184,7 +185,7 @@ test('the committed home gives every verified row the pill and every row its aur
   const providers = JSON.parse(read('data/providers.json')).providers;
   assert.equal((rows.match(/class="stamp stamp-pill /g) || []).length, providers.filter((p) => p.verified && p.last_verified).length, 'one pill per verified row');
   assert.equal((rows.match(/stamp-ticket/g) || []).length, 0, 'the ticket is for the provider page, not the table');
-  assert.ok((rows.match(/<a class="stamp stamp-pill [^"]+" title="Verified \d+d ago · [0-9-]+ · “/g) || []).length > 20, 'most stamps carry a quote');
+  assert.ok((rows.match(/<a class="stamp stamp-pill [^"]+" title="Verified \d+d ago · \d{1,2} [A-Z][a-z]{2} \d{4} · “/g) || []).length > 20, 'most stamps carry a quote');
   assert.ok((rows.match(/ · \d+ sources?</g) || []).length > 30, 'the pills count their sources');
 });
 

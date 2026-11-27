@@ -9,6 +9,8 @@
 
 import { escapeHtml } from './html.mjs';
 import { SLUG_RE } from './rows.mjs';
+import { timeHtml, humanDate } from './dates.mjs';
+import { NOT_STATED } from './not-stated.mjs';
 import { inlineHtml } from './markdown.mjs';
 import { breadcrumbList } from './page-jsonld.mjs';
 import { websiteRef, datasetRef } from './site-entity.mjs';
@@ -91,7 +93,7 @@ export function notFreeReadmeMd(doc, { site }) {
   for (const g of doc.groups) {
     out.push('', `**${g.title}.** ${g.intro}`, '');
     for (const e of doc.entries.filter((x) => x.group === g.id)) {
-      const tail = [e.checked ? `checked ${e.checked}` : 'date not recorded'];
+      const tail = [e.checked ? `checked ${humanDate(e.checked) || e.checked}` : 'date not stated'];
       if (e.sources.length) tail.push(sourceLinksMd(e.sources));
       out.push(`- **${e.name}** — ${e.short} (${tail.join(' · ')})`);
     }
@@ -102,7 +104,7 @@ export function notFreeReadmeMd(doc, { site }) {
 
 const mdInline = (s, site) => inlineHtml(s, { repo: '', site });
 const sourcesHtml = (sources) => sources.map((s) => `<a href="${escapeHtml(s.url)}" target="_blank" rel="noopener">${escapeHtml(s.label)}</a>`).join(' · ');
-const checkedHtml = (c) => (c ? (/^\d{4}-\d{2}-\d{2}$/.test(c) ? `<time datetime="${c}">${c}</time>` : escapeHtml(c)) : '<span class="gpu-unstated">not recorded</span>');
+const checkedHtml = (c) => (c ? timeHtml(c, escapeHtml) : `<span class="gpu-unstated">${NOT_STATED}</span>`);
 const altLinks = (alts, prefix) => alts.map((p) => `<a href="${prefix}p/${escapeHtml(p.slug)}">${escapeHtml(p.name)}</a>`).join(', ');
 
 // Quotes read from the same pages on the same day share one block and one source line.
@@ -115,7 +117,7 @@ function quotesHtml(quotes) {
   }
   return groups.map((g) => {
     const src = sourcesHtml(g.sources);
-    return `<blockquote class="gpu-quote">${g.texts.map((t) => `<p>“${escapeHtml(t)}”</p>`).join('')}<footer class="muted">${src}${src && g.read ? ' · ' : ''}${g.read ? `read ${escapeHtml(g.read)}` : ''}</footer></blockquote>`;
+    return `<blockquote class="gpu-quote">${g.texts.map((t) => `<p>“${escapeHtml(t)}”</p>`).join('')}<footer class="muted">${src}${src && g.read ? ' · ' : ''}${g.read ? `read ${timeHtml(g.read, escapeHtml)}` : ''}</footer></blockquote>`;
   }).join('');
 }
 
@@ -126,7 +128,7 @@ function faqAnswerText(e, alts) {
   return `${e.summary}${when}${alt}`;
 }
 function faqAnswerHtml(e, alts, prefix) {
-  const when = e.checked ? ` Checked ${escapeHtml(e.checked)} against the provider's own page.` : '';
+  const when = e.checked ? ` Checked ${timeHtml(e.checked, escapeHtml)} against the provider's own page.` : '';
   const alt = alts.length ? ` Closest free alternatives in the dataset: ${altLinks(alts, prefix)}.` : '';
   return `${escapeHtml(e.summary)}${when}${alt}`;
 }

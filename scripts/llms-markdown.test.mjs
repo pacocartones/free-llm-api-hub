@@ -132,7 +132,7 @@ describe('/p/<slug>.md', () => {
       for (const [field, label] of [['card_required', 'Credit card'], ['phone_required', 'Phone verification'], ['commercial_ok', 'Commercial use']]) {
         const line = md.split('\n').find((l) => l.startsWith(`- **${label}:** `));
         assert.ok(line, `${p.slug}: ${label} line`);
-        if (p[field] == null) assert.match(line, /^- \*\*[^*]+:\*\* unknown \(/, `${p.slug}: a null ${field} reads unknown, never no`);
+        if (p[field] == null) assert.match(line, /^- \*\*[^*]+:\*\* not stated/, `${p.slug}: a null ${field} reads not stated, never no`);
       }
       if (p.openai_base_url) {
         assert.ok(md.includes('```python\n'), `${p.slug}: python quickstart`);
@@ -183,12 +183,12 @@ describe('provider-markdown helpers', () => {
     assert.equal(mdFence('bash', 'echo ```\n'), '````bash\necho ```\n````');
   });
 
-  test('a null flag reads unknown with its reason, never no', () => {
+  test('a null flag reads not stated with its reason, never no', () => {
     assert.equal(flagWords(false, 'required', 'not required'), 'not required');
     assert.equal(flagWords(true, 'required', 'not required'), 'required');
     assert.equal(flagWords('conditional', 'allowed', 'not allowed'), 'conditional');
-    assert.equal(flagWords(null, 'required', 'not required'), 'unknown (not confirmed)');
-    assert.equal(flagWords(null, 'required', 'not required', { status: 'needs_account' }), 'unknown (needs an account to check)');
+    assert.equal(flagWords(null, 'required', 'not required'), 'not stated');
+    assert.equal(flagWords(null, 'required', 'not required', { status: 'needs_account' }), 'not stated: needs an account to check');
   });
 
   test('every free_type in the data has words', () => {

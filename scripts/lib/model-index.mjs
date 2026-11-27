@@ -17,6 +17,7 @@ import { familyOf, FAMILY_PATH } from './model-families.mjs';
 import { FREE_TYPE_LABEL } from './model-pages.mjs';
 import { andList } from './long-guides.mjs';
 import { plural } from './text.mjs';
+import { NOT_STATED } from './not-stated.mjs';
 
 /** The four columns, in order. `data-label` on each cell repeats them for the phone card layout. */
 export const MODEL_INDEX_COLUMNS = Object.freeze(['Model', 'Provider', 'Free type', 'Modalities']);
@@ -75,13 +76,13 @@ export function modelIndexRowHtml({ m, p }, { modelHref = () => '', familyPrefix
     ? `<a class="model-fam" href="${familyPrefix}${FAMILY_PATH}${f.slug}/">${htmlEsc(f.name)} family</a>`
     : '';
   const mods = (p.modalities || []).join(', ');
-  const freeType = FREE_TYPE_LABEL[p.free_type] || p.free_type || '—';
+  const freeType = FREE_TYPE_LABEL[p.free_type] || p.free_type || NOT_STATED;
   const search = `${m} ${p.name} ${(p.modalities || []).join(' ')}${f ? ` ${f.name}` : ''}`.toLowerCase();
   return `<tr role="row" data-s="${htmlEsc(search)}">` +
     `<th scope="row" role="rowheader" class="name" data-label="${MODEL_INDEX_COLUMNS[0]}">${href ? `<a href="${htmlEsc(href)}">${code}</a>` : code}${famPage}</th>` +
     cell(MODEL_INDEX_COLUMNS[1], `<a href="../p/${htmlEsc(p.slug)}">${htmlEsc(p.name)}</a>`) +
     cell(MODEL_INDEX_COLUMNS[2], htmlEsc(freeType), 'free-type') +
-    cell(MODEL_INDEX_COLUMNS[3], htmlEsc(mods || '—'), 'model-mods') +
+    cell(MODEL_INDEX_COLUMNS[3], htmlEsc(mods || NOT_STATED), 'model-mods') +
     `</tr>`;
 }
 

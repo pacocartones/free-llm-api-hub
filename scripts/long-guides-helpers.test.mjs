@@ -2,6 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { andList, cardWords, commercialWords, exampleChatModel, escProse } from './lib/long-guides.mjs';
 import { REASON_LABEL } from './lib/field-checks.mjs';
+import { NOT_STATED, capFirst } from './lib/not-stated.mjs';
 
 test('andList formats zero, one, two, and three parts', () => {
   assert.equal(andList([]), '');
@@ -16,16 +17,16 @@ test('cardWords formats false, true, phone-required, and field_checks reasons', 
   assert.equal(cardWords({ card_required: true, phone_required: true }), 'Yes (phone required)');
 
   const withoutCheck = cardWords({ card_required: null });
-  assert.ok(withoutCheck.startsWith('Unknown ('));
-  assert.ok(withoutCheck.includes(REASON_LABEL.not_checked));
+  assert.ok(withoutCheck.startsWith(capFirst(NOT_STATED)));
+  assert.ok(withoutCheck.includes(capFirst(REASON_LABEL.not_checked)));
 
   for (const status of ['source_silent', 'needs_account', 'sources_disagree']) {
     const label = cardWords({
       card_required: null,
       field_checks: { card_required: { status } },
     });
-    assert.ok(label.startsWith('Unknown ('));
-    assert.ok(label.includes(REASON_LABEL[status]), `expected ${REASON_LABEL[status]} in ${label}`);
+    assert.ok(label.startsWith(capFirst(NOT_STATED)));
+    assert.ok(label.includes(capFirst(REASON_LABEL[status])), `expected ${REASON_LABEL[status]} in ${label}`);
   }
 });
 
@@ -33,7 +34,7 @@ test('commercialWords renders true, false, conditional, and null states', () => 
   assert.equal(commercialWords({ commercial_ok: true }), 'Yes');
   assert.equal(commercialWords({ commercial_ok: false }), '<strong>No</strong>');
   assert.equal(commercialWords({ commercial_ok: 'conditional' }), 'Conditional');
-  assert.equal(commercialWords({ commercial_ok: null }), 'Not confirmed');
+  assert.equal(commercialWords({ commercial_ok: null }), capFirst(NOT_STATED));
 });
 
 test('exampleChatModel skips non-chat models and handles missing lists', () => {

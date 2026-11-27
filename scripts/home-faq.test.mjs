@@ -9,7 +9,7 @@ import { join } from 'node:path';
 import { homeFaq, homeFaqHtml, homeFaqJsonLd, answerText, NOT_STATED } from './lib/home-faq.mjs';
 import { providerFigures, figureErrors } from './lib/figures.mjs';
 import { recommendedCmp, SLA_DAYS } from './lib/rules.mjs';
-import { shortDate } from './lib/provider-meta.mjs';
+import { humanDate as shortDate } from './lib/dates.mjs';
 import { privateTree } from './lib/private-tree.mjs';
 
 const ROOT = privateTree(join(import.meta.dirname, '..'));

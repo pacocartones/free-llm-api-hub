@@ -182,13 +182,13 @@ test('provider page: the figure, the provider\'s words, the page, the day, and t
   assert.doesNotMatch(html, /fastest|faster/i);
 });
 
-test('compare table: a Published speed row, the same in the browser bundle, with "none recorded" when absent', () => {
+test('compare table: a Published speed row, the same in the browser bundle, with "not stated" when absent', () => {
   const a = { ...base(), slug: 'acme', published_speed: [entry()] };
   const b = { ...base(), slug: 'other', name: 'Other' };
   const html = compareTableHtml([a, b]);
   assert.match(html, /<th scope="row">Published speed<\/th>/);
   assert.match(html, /<code>org\/fast-8b<\/code> ~3,000 tok\/s/);
-  assert.match(html, /none recorded/);
+  assert.match(html, /not stated/);
   assert.match(html, /not our measurement/);
   assert.equal(speedFigure(entry()), '~3,000 tok/s', 'the table and speedFigure write the figure the same way');
   for (const q of SPEED_QUALIFIERS) assert.ok(html.includes('tok/s') && speedFigure(entry({ qualifier: q })).endsWith('3,000 tok/s'));

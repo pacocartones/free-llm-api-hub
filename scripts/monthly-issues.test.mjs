@@ -57,7 +57,7 @@ test('cells are one line, bounded, and cannot break the table or mention anyone'
   assert.equal(cell('a | b'), 'a \\| b');
   assert.equal(cell('ping @someone'), 'ping &#64;someone');
   assert.equal(cell('two\nlines'), 'two lines');
-  assert.equal(cell(null), 'unknown');
+  assert.equal(cell(null), 'not stated');
   assert.equal(cell(true), 'yes');
   assert.equal(cell('<img src=x>'), '&lt;img src=x>');
   const long = cell('x'.repeat(500));
@@ -72,7 +72,7 @@ test('the changes issue lists additions, removals and field changes, with labels
   assert.match(issue.body, /1 provider added, 1 provider removed, 4 field changes across 3 providers/);
   assert.match(issue.body, /- \[Delta\]\(https:\/\/freellmapihub\.com\/p\/delta\) \(`delta`\)/);
   assert.match(issue.body, /## Removed\n\n- Beta \(`beta`\)/);
-  assert.match(issue.body, /\| 2026-11-15 \| \[Alpha\]\(https:\/\/freellmapihub\.com\/p\/alpha\) \| card requirement \| unknown \| yes \|/);
+  assert.match(issue.body, /\| 2026-11-15 \| \[Alpha\]\(https:\/\/freellmapihub\.com\/p\/alpha\) \| card requirement \| not stated \| yes \|/);
   assert.match(issue.body, /\| 2026-11-01 \| Beta \| the catch \| old \| new \|/, 'a removed provider is not linked');
   assert.ok(!issue.body.includes('@user'));
   assert.match(issue.body, /state\/2026-11\//);

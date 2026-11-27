@@ -46,7 +46,7 @@ test('each row carries its column name in data-label for the phone card layout, 
   assert.equal((html.match(/role="cell"/g) || []).length, 3);
   assert.ok(html.includes('Beta &lt;b&gt;'), 'provider name escaped');
   assert.ok(html.includes('>One-time trial credit<'), 'free type in words, not the raw enum');
-  assert.ok(html.includes('data-label="Modalities">—<'), 'no modalities reads as a dash');
+  assert.ok(html.includes('data-label="Modalities">not stated<'), 'no modalities reads "not stated"');
 });
 
 test('a model of an open family links to /free-api/<family>/; others do not', () => {
