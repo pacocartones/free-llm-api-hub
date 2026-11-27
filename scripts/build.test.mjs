@@ -2167,6 +2167,7 @@ test('active providers retain models_url from their official catalogues', () => 
     ['nscale', 'https://docs.nscale.com/docs/ai-services/models'],
     ['gonka-broker', 'https://gonkabroker.com/models/'],
     ['moark', 'https://moark.com/serverless-api'],
+    ['synap', 'https://synap402.com/models.html'],
   ].sort(bySlug));
 });
 
