@@ -123,7 +123,9 @@ test('the dataset: every recorded check pairs with its flag value and the counts
 });
 
 test('serialize writes field_checks on one line, and a provider without it is unchanged', () => {
-  const p = structuredClone(DATA.providers.find((x) => !x.field_checks));
+  // Every provider has field_checks now, so take one and drop them.
+  const p = structuredClone(DATA.providers[0]);
+  delete p.field_checks;
   const plain = serialize({ ...DATA, providers: [p] });
   const checked = serialize({ ...DATA, providers: [{ ...p, card_required: null, field_checks: { card_required: silent } }] });
   assert.ok(!plain.includes('field_checks'));
