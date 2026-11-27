@@ -163,7 +163,7 @@ test('contributors: CONTRIBUTORS.md lists every person with links to their pull 
     { login: 'alice', contributions: 8, prs: [1, 2, 3, 4, 5, 6, 7, 8], first: '2026-01-01', last: '2026-02-01', kinds: ['data', 'docs'] },
   ] }, { repo: REPO, site: 'https://example.org' });
   assert.match(md, /\| \[@alice\]\(https:\/\/github\.com\/alice\) \| 8: \[#1\]\(https:\/\/github\.com\/owner\/repo\/pull\/1\), .*, and 2 more \| 2026-01-01 \| data, docs \|/);
-  assert.ok(md.includes('https://example.org/contributors/'));
+  assert.match(md, /\[example\.org\/contributors\/\]\(https:\/\/example\.org\/contributors\/\)/);
 });
 
 // ---------- the page ----------
