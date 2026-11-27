@@ -49,9 +49,12 @@ or repository secrets. CodeQL requests `security-events: write` only for code-sc
 fork pull-request tokens remain subject to GitHub permission restrictions. The `pull_request_target` comment workflows run trusted base-branch logic
 with narrowly scoped write tokens and never check out or execute the fork's code.
 
-Derived files are regenerated locally and committed by the author in the same PR. Write-capable
-automation is limited to site and package publication, security-result upload, release tagging,
-and issue metadata or pull-request comments/assignment. The comment and assignment workflows never check
+Derived files are not committed by contributors: in push mode the regeneration bot (a GitHub App)
+commits them to `main` after a merge ([regeneration bot](docs/regeneration-bot.md)), and the merge
+manager merges approved pull requests with the same App
+([merge train](docs/maintenance/merge-train.md)); that App is the only bypass actor of the `main`
+ruleset. Other write-capable automation is limited to site and package publication, security-result
+upload, release tagging, and issue metadata or pull-request comments/assignment. The comment and assignment workflows never check
 out or execute pull-request code.
 All checkouts disable persisted credentials. Release tagging supplies the token only to
 its explicit tag push; no credential is stored in the workspace Git configuration.
