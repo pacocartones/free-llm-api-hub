@@ -18,6 +18,9 @@ import { CONSTRAINTS, constraintState, toHash, explorerHref } from './find.mjs';
 import { plural } from './text.mjs';
 import { escapeAttr, escapeText } from './html.mjs';
 import { MODEL_TIER_THRESHOLDS, MODEL_TIER_MIN_VOTES } from './model-tier.mjs';
+// The free-limit metrics are a data module of their own (stale-claims-data.mjs reads them without this renderer).
+import { LIMIT_METRICS, limitOf } from './free-limits.mjs';
+export { LIMIT_METRICS, limitOf };
 // model-families.mjs imports two helpers from this module; the cycle is safe because neither side calls the other at load.
 import { FAMILY_PATH, familyGroups, familyOf } from './model-families.mjs';
 import { MODEL_SAMPLE_CAVEAT } from './model-pages.mjs';
@@ -1627,16 +1630,6 @@ function studentsGuide({ providers, prefix, programs }) {
 // ---------- guide 13: free LLM APIs with the highest rate limits ----------
 // One ranking per unit: a per-second, per-minute, per-day and per-month figure are never converted into one another,
 // because each provider words its own window and scope.
-export const LIMIT_METRICS = [
-  { key: 'requests_per_day', label: 'requests per day', head: 'Requests per day' },
-  { key: 'requests_per_minute', label: 'requests per minute', head: 'Requests per minute' },
-  { key: 'requests_per_second', label: 'requests per second', head: 'Requests per second' },
-  { key: 'tokens_per_day', label: 'tokens per day', head: 'Tokens per day' },
-  { key: 'tokens_per_minute', label: 'tokens per minute', head: 'Tokens per minute' },
-  { key: 'requests_per_month', label: 'requests per month', head: 'Requests per month' },
-  { key: 'tokens_per_month', label: 'tokens per month', head: 'Tokens per month' },
-];
-export const limitOf = (x, key) => (x.free_limits && Number.isFinite(x.free_limits[key]) ? x.free_limits[key] : null);
 export function limitSets(providers) {
   const text = textLlms(providers);
   const numbered = text.filter((x) => LIMIT_METRICS.some((m) => limitOf(x, m.key) != null));
