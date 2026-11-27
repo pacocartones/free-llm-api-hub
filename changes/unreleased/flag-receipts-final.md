@@ -1,0 +1,3 @@
+### Changed and fixed
+
+- Re-read on 2026-11-27 the official pages behind the nine flag values that still have no registered quote (NLP Cloud card and commercial use, Tencent Hunyuan phone, Gemini commercial use and OpenAI compatibility, AI Horde and Pollinations commercial use, SambaNova OpenAI compatibility): every value still holds. None could be registered, because each page is script-only or refuses non-browser clients; each note now says why, and the Gemini sources point to aistudio.google.com, where ai.google.dev now redirects. Poolside stays unverified: its platform page still says hosted inference shut down on 31 October 2026, while its docs still offer a free key.
