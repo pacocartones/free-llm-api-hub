@@ -1,13 +1,13 @@
 // assets.mjs — how pages load the site's own fonts, styles and scripts.
 //
-// Fonts. Both JetBrains Mono weights are used above the fold (the brand, the nav, the hero title, the stat tiles), so
-// every page preloads both and declares them in its <head> (fontHead) instead of in styles.css: the browser finds them
-// while it parses the head, not after it has downloaded and parsed the stylesheet. `font-display: optional` lets a
-// font that is not there within the first ~100 ms be skipped for that page view (it is cached for the next one), so
-// the text never re-flows when the font arrives. (PageSpeed blamed the 0.188 layout shift of the home on a phone partly
-// on the non-preloaded 500 weight; measured locally the shift was the mobile menu, see styles.css, but a font that
-// arrives after the first paint can still re-flow the hero on a slow network.)
-//
+// Fonts. Brand direction H1: Roboto Flex (one variable file, the wght and wdth axes, display and text) and DM Mono 400/500
+// (data, code, badges). All three are used above the fold (the hero, the nav, the stats line, the table), so every page
+// preloads them and declares them in its <head> (fontHead) instead of in styles.css: the browser finds them while it
+// parses the head, not after it has downloaded and parsed the stylesheet. `font-display: optional` lets a font that is not
+// there within the first ~100 ms be skipped for that page view (it is cached for the next one), so the text never
+// re-flows when the font arrives. The files are Latin subsets made from the Google Fonts sources (SIL OFL 1.1, licence
+// next to them in site/fonts/); the recipe is in docs/brand.md. FONT_BUDGET_BYTES caps what a page may load, and the
+// Lighthouse gate (scripts/lighthouse-gate.mjs) fails a page that declares more.
 // Fingerprints. fingerprintSite() runs at the end of the build and adds `?v=<first 8 hex of the SHA-256 of the file>`
 // to every reference to a local .css, .js or .woff2 file in the HTML under site/ (src, href and CSS url()). The
 // query changes only when the file's bytes change, so the CDN can keep these files for a year (`immutable`) and a
@@ -16,23 +16,28 @@ import { createHash } from 'node:crypto';
 import { readFileSync, writeFileSync, readdirSync, existsSync } from 'node:fs';
 import { join, posix } from 'node:path';
 
+// `weight` and `stretch` are the ranges each file covers (a variable font declares its axis ranges).
 export const FONTS = [
-  { weight: 500, file: 'fonts/jetbrains-mono-500.woff2' },
-  { weight: 700, file: 'fonts/jetbrains-mono-700.woff2' },
+  { family: 'Roboto Flex', weight: '300 900', stretch: '75% 130%', file: 'fonts/roboto-flex.woff2' },
+  { family: 'DM Mono', weight: '400', stretch: '100%', file: 'fonts/dm-mono-400.woff2' },
+  { family: 'DM Mono', weight: '500', stretch: '100%', file: 'fonts/dm-mono-500.woff2' },
 ];
+
+// The most font bytes one page may load (all of FONTS together): the brand plan's budget for the new families.
+export const FONT_BUDGET_BYTES = 90 * 1024;
 
 // The font block of every page's <head>. `prefix` is the path to the site root ('', '../', '/').
 export const fontHead = (prefix) =>
   FONTS.map((f) => `<link rel="preload" href="${prefix}${f.file}" as="font" type="font/woff2" crossorigin>`).join('\n') +
   '\n<style>' +
-  FONTS.map((f) => `@font-face{font-family:'JetBrains Mono';font-style:normal;font-weight:${f.weight};font-display:optional;src:url('${prefix}${f.file}') format('woff2')}`).join('') +
+  FONTS.map((f) => `@font-face{font-family:'${f.family}';font-style:normal;font-weight:${f.weight};font-stretch:${f.stretch};font-display:optional;src:url('${prefix}${f.file}') format('woff2')}`).join('') +
   '</style>';
 
 export const hash8 = (buf) => createHash('sha256').update(buf).digest('hex').slice(0, 8);
 
 const ASSET_RE = /\.(?:css|js|woff2)$/;
 
-// { 'styles.css': 'a1b2c3d4', 'fonts/jetbrains-mono-500.woff2': '…', … } for the files at the top of site/ and in site/fonts/.
+// { 'styles.css': 'a1b2c3d4', 'fonts/roboto-flex.woff2': '…', … } for the files at the top of site/ and in site/fonts/.
 export function assetHashes(siteDir) {
   const out = {};
   for (const dir of ['', 'fonts']) {

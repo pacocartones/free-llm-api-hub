@@ -15,12 +15,8 @@
 // treat every field as untrusted: htmlEsc before it reaches innerHTML, and the
 // slug goes into an href only after SLUG_RE confirms it is kebab-case.
 
-export const htmlEsc = (s) => String(s ?? '')
-  .replace(/&/g, '&amp;')
-  .replace(/</g, '&lt;')
-  .replace(/>/g, '&gt;')
-  .replace(/"/g, '&quot;')
-  .replace(/'/g, '&#39;');
+// The local name stays htmlEsc: clientBundle() serialises rowHtml & co. with toString(), and their bodies call it by that name.
+import { escapeHtml as htmlEsc } from './html.mjs';
 
 export const ICON = (id) => `<svg class="i" aria-hidden="true"><use href="#${id}"/></svg>`;
 
@@ -28,36 +24,39 @@ export const ICON = (id) => `<svg class="i" aria-hidden="true"><use href="#${id}
 // here because the client fetch path bypasses that guarantee.
 export const SLUG_RE = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 
-// «The catch» column: a closed vocabulary of short tags derived from fields the record already has (the three requirements, the
-// expiry and a published daily cap). The free text of the record (`notes`) stays on the provider page, reachable by the link of the
-// cell and by the title of the cell. The list below is the whole vocabulary; a test fails if a tag outside it appears.
-export const CATCH_LABELS = ['Card required', 'Phone required', 'Evaluation only', 'Conditional', 'Expires', 'Daily cap', 'Not stated'];
+// «Needs / unknown» column: in words, only what a provider requires (or restricts) and which of the four production flags are
+// unknown. Nothing else: the free text of the record (`notes`) stays on the provider page, reachable by the name link and by the
+// title of the cell. A provider with nothing required and nothing unknown says so ("Nothing required"). The two vocabularies
+// below are the whole set of phrases; a test fails if another one appears.
+export const NEED_LABELS = ['Card required', 'Phone required', 'Non-commercial only', 'Commercial use conditional', 'Trains on prompts'];
+export const UNKNOWN_LABELS = ['card', 'phone', 'commercial use', 'training'];
 
-/** @returns {{label: string, title: string}[]} */
-export function catchTags(p) {
-  const tags = [];
-  if (p.card_required === true) tags.push({ label: 'Card required', title: 'A credit card is required to sign up' });
-  if (p.phone_required === true) tags.push({ label: 'Phone required', title: 'Phone verification is required' });
-  if (p.commercial_ok === false) tags.push({ label: 'Evaluation only', title: 'Commercial use is not allowed' });
-  if (p.commercial_ok === 'conditional') tags.push({
-    label: 'Conditional',
-    title: `Commercial use is conditional${p.commercial_ok_condition ? ': ' + p.commercial_ok_condition : ''}`,
-  });
-  if (p.expires) tags.push({ label: 'Expires', title: 'Expires: ' + p.expires });
-  const fl = p.free_limits || {};
-  const caps = [];
-  if (Number.isInteger(fl.requests_per_day)) caps.push(fl.requests_per_day.toLocaleString('en-US') + ' requests per day');
-  if (Number.isInteger(fl.tokens_per_day)) caps.push(fl.tokens_per_day.toLocaleString('en-US') + ' tokens per day');
-  if (caps.length) tags.push({ label: 'Daily cap', title: 'Published daily cap: ' + caps.join(' and ') });
-  if (p.card_required == null || p.phone_required == null || p.commercial_ok == null) tags.push({ label: 'Not stated', title: 'At least one requirement is not stated' });
-  return tags;
+/** @returns {{needs: string[], unknown: string[]}} */
+export function needsOf(p) {
+  const needs = [], unknown = [];
+  const dp = p && p.data_policy && typeof p.data_policy === 'object' ? p.data_policy : {};
+  if (p.card_required === true) needs.push('Card required');
+  else if (p.card_required !== false) unknown.push('card');
+  if (p.phone_required === true) needs.push('Phone required');
+  else if (p.phone_required !== false) unknown.push('phone');
+  if (p.commercial_ok === false) needs.push('Non-commercial only');
+  else if (p.commercial_ok === 'conditional') needs.push('Commercial use conditional');
+  else if (p.commercial_ok !== true) unknown.push('commercial use');
+  if (dp.trains_on_prompts === true) needs.push('Trains on prompts');
+  else if (dp.trains_on_prompts !== false) unknown.push('training');
+  return { needs, unknown };
 }
 
-/** The whole «The catch» cell. */
-export function catchCellHtml(p) {
-  const chips = catchTags(p).map((t) => `<span class="catch-tag" title="${htmlEsc(t.title)}">${htmlEsc(t.label)}</span>`).join('');
-  const more = SLUG_RE.test(String(p.slug || '')) ? `<a class="catch-more" href="p/${p.slug}#limits">Details<span class="sr-only"> of ${htmlEsc(p.name)}</span></a>` : '';
-  return `<td class="notes" role="cell" data-label="The catch"${p.notes ? ` title="${htmlEsc(p.notes)}"` : ''}>${chips}${more}</td>`;
+/** The whole «Needs / unknown» cell. */
+export function needsCellHtml(p) {
+  const { needs, unknown } = needsOf(p);
+  const cond = p.commercial_ok === 'conditional' && p.commercial_ok_condition ? 'Commercial use conditional: ' + p.commercial_ok_condition : '';
+  const tip = [cond, p.notes].filter(Boolean).join(' — ');
+  let inner = '';
+  if (needs.length) inner += `<span class="need-req">${htmlEsc(needs.join(', '))}</span>`;
+  if (unknown.length) inner += `<span class="need-unk">Unknown: ${htmlEsc(unknown.join(', '))}</span>`;
+  if (!inner) inner = '<span class="need-none">Nothing required</span>';
+  return `<td class="needs" role="cell" data-label="Needs / unknown"${tip ? ` title="${htmlEsc(tip)}"` : ''}><div class="clamp2">${inner}</div></td>`;
 }
 
 /**
@@ -75,41 +74,27 @@ export function explorerRowHtml(p, opts = {}) {
     : Date.now();
   const isNew = p.added && (nowMs - Date.parse(p.added + 'T00:00:00Z')) / 86400000 <= 45;
 
+  const type = p.category === 'ongoing'
+    ? '<span class="badge b-ongoing" title="An ongoing free tier: no end date">Ongoing</span>'
+    : '<span class="badge b-trial" title="A trial credit: a one-time amount or a limited period">Trial</span>';
   let name = SLUG_RE.test(String(p.slug || ''))
-    ? `<a class="name-link" href="p/${p.slug}">${htmlEsc(p.name)}<span class="name-go" aria-hidden="true"> ↗</span></a>`
+    ? `<a class="name-link" href="p/${p.slug}" title="${htmlEsc(p.name)}">${htmlEsc(p.name)}</a>`
     : htmlEsc(p.name);
-  if (isNew) name += ` <span class="badge b-new" title="Recently added to the hub">NEW</span>`;
+  name = `<div class="name-line">${name} ${type}${isNew ? ' <span class="badge b-new" title="Recently added to the hub">NEW</span>' : ''}</div>`;
   if (p.best_for) name += `<div class="best" title="${htmlEsc(p.best_for)}">${htmlEsc(p.best_for)}</div>`;
 
-  const typeCell =
-    `<span class="badge ${p.category === 'ongoing' ? 'b-ongoing' : 'b-trial'}">${p.category === 'ongoing' ? 'Ongoing' : 'Trial'}</span>` +
-    // The four production flags (lib/flags.mjs) in their fixed order, each with its shape; then the other
-    // icons of FLAG_PAIRS that are not one of those four (today: OpenAI-compatible).
-    `<div class="fmini">${flagsHtml(p, { mini: true })}${FLAG_PAIRS.filter(([k, v]) => p[k] === v && !FLAG_DEFS.some((d) => d.field === k))
-      .map(([, , ic, t]) => `<span class="fmini-i" role="img" title="${t}" aria-label="${t}">${ICON(ic)}</span>`)
-      .join('')}</div>`;
-
-  let v;
-  if (p.verified) {
-    const date = htmlEsc(p.last_verified || '');
-    const age = p.last_verified ? Math.floor((nowMs - Date.parse(p.last_verified + 'T00:00:00Z')) / 86400000) : null;
-    const st = freshnessStatus(age);
-    const cls = st === 'stale' ? 'b-stale' : st === 'due' ? 'b-warn' : 'b-ok';
-    const tip = age != null ? ` title="Verified ${age}d ago · ${date}"` : '';
-    // The state is said in words (and by the icon shape), not only by colour and a title.
-    const word = st === 'stale' ? 'Verified, stale: re-check overdue' : st === 'due' ? 'Verified, due for re-check' : 'Verified, fresh';
-    v = `<span class="ver-cell"><span class="badge ${cls}"${tip}>${ICON(st === 'fresh' ? 'ic-check' : 'ic-warn')}<span class="sr-only">${word}</span></span><span class="ver-date">${date}</span></span>`;
-  } else {
-    v = `<span class="badge b-warn">${ICON('ic-warn')} unverified</span>`;
-  }
+  // Verified: the compact receipt, the pill (lib/stamp.mjs), dated, linked to the page the entry was checked on, the quote in its title.
+  const v = p.verified && p.last_verified
+    ? `<span class="ver-cell">${stampHtml(p, { now: nowMs, shape: 'pill' })}</span>`
+    : `<span class="badge b-warn">${ICON('ic-warn')} unverified</span>`;
 
   // Explicit row/cell roles: on a phone the stylesheet turns the table into cards (display: block), which makes some
   // screen readers (VoiceOver on iOS, some Chromium versions) drop the implicit table semantics. See styles.css.
+  // The provider's aura (lib/aura.mjs) leads the name: decorative here (its meaning is in the title and on the provider page).
   return `<tr role="row">` +
-    `<td class="name" role="cell" data-label="API">${name}</td>` +
-    `<td role="cell" data-label="Type">${typeCell}</td>` +
-    `<td role="cell" data-label="What's free"><div class="clamp2" title="${htmlEsc(p.free_tier)}">${htmlEsc(p.free_tier)}</div></td>` +
-    catchCellHtml(p) +
+    `<td class="name" role="cell" data-label="API"><div class="name-row">${auraHtml(p, { now: nowMs, cls: 'aura-sm' })}<div class="name-main">${name}</div></div></td>` +
+    `<td class="free" role="cell" data-label="What's free"><div class="clamp2" title="${htmlEsc(p.free_tier)}">${htmlEsc(p.free_tier)}</div></td>` +
+    needsCellHtml(p) +
     `<td class="pver" role="cell" data-label="Verified">${v}</td></tr>`;
 }
 
@@ -131,11 +116,13 @@ export function rowKeyTarget(key, index, count) {
   return null;
 }
 
-// FLAG_PAIRS + freshnessStatus are referenced by name inside explorerRowHtml so
-// the serialised copy (shared-rows.js) can pick them up from window.FLLM_RULES;
-// importing them here keeps the same names in scope for the server render.
-import { FLAG_PAIRS, freshnessStatus } from './rules.mjs';
+// freshnessStatus is referenced by name inside the stamp helpers so the serialised
+// copy (shared-rows.js) can pick it up from window.FLLM_RULES; importing it here
+// keeps the same name in scope for the server render.
+import { freshnessStatus } from './rules.mjs';
 import { FLAG_DEFS, FLAG_MARKS, FLAG_UNKNOWN_WHY, flagValue, flagState, flagText, flagHtml, flagsHtml } from './flags.mjs';
+import { AURA_ORDER, AURA_OLD_DAYS, AURA_NAMES, AURA_GEOMETRY, auraRng, auraSpec, auraPaths, auraHtml } from './aura.mjs';
+import { STAMP_MONTHS, STAMP_WORDS, stampDate, stampState, stampHtml } from './stamp.mjs';
 
 /**
  * The exact client bundle the browser runs (written to site/shared-rows.js by
@@ -147,7 +134,7 @@ import { FLAG_DEFS, FLAG_MARKS, FLAG_UNKNOWN_WHY, flagValue, flagState, flagText
 export function clientBundle() {
   return `// AUTO-GENERATED by scripts/build.mjs from scripts/lib/rows.mjs — do not edit.
 window.FLLM_ROWS = (function () {
-  const { FLAG_PAIRS, freshnessStatus } = window.FLLM_RULES;
+  const { freshnessStatus } = window.FLLM_RULES;
   const htmlEsc = ${htmlEsc.toString()};
   const ICON = ${ICON.toString()};
   const SLUG_RE = ${SLUG_RE.toString()};
@@ -159,11 +146,24 @@ window.FLLM_ROWS = (function () {
   const flagText = ${flagText.toString()};
   const flagHtml = ${flagHtml.toString()};
   const flagsHtml = ${flagsHtml.toString()};
+  const AURA_ORDER = ${JSON.stringify(AURA_ORDER)};
+  const AURA_OLD_DAYS = ${AURA_OLD_DAYS};
+  const AURA_NAMES = ${JSON.stringify(AURA_NAMES)};
+  const AURA_GEOMETRY = ${JSON.stringify(AURA_GEOMETRY)};
+  const auraRng = ${auraRng.toString()};
+  const auraSpec = ${auraSpec.toString()};
+  const auraPaths = ${auraPaths.toString()};
+  const auraHtml = ${auraHtml.toString()};
+  const STAMP_MONTHS = ${JSON.stringify(STAMP_MONTHS)};
+  const STAMP_WORDS = ${JSON.stringify(STAMP_WORDS)};
+  const stampDate = ${stampDate.toString()};
+  const stampState = ${stampState.toString()};
+  const stampHtml = ${stampHtml.toString()};
   const rowHtml = ${explorerRowHtml.toString()};
-  const catchTags = ${catchTags.toString()};
-  const catchCellHtml = ${catchCellHtml.toString()};
+  const needsOf = ${needsOf.toString()};
+  const needsCellHtml = ${needsCellHtml.toString()};
   const rowKeyTarget = ${rowKeyTarget.toString()};
-  return { rowHtml, rowKeyTarget, flagHtml, flagsHtml };
+  return { rowHtml, rowKeyTarget, needsOf, flagHtml, flagsHtml, auraHtml, stampHtml };
 })();
 `;
 }

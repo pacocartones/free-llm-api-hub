@@ -29,6 +29,7 @@ How **Free LLM API Hub** works — how entries are verified, what earns a spot, 
 | [Preparing dataset releases](release-preparation.md) | Stable local preparation procedure for dataset tags, GitHub Releases and snapshot assets |
 | [MCP product boundaries and release checklist](mcp-productization.md) | Product limits and pre-release checks for public distribution of the MCP server |
 | [MCP release setup](mcp-release.md) | Maintainer procedure for external setup and release of the MCP package |
+| [Screenshots](screenshots.md) | Regenerating the gallery and pull-request screenshots on demand, with live numbers |
 
 ## Adjacent references
 
@@ -42,5 +43,7 @@ How **Free LLM API Hub** works — how entries are verified, what earns a spot, 
 [Release runbook](../RELEASING.md) · [Contributing](../CONTRIBUTING.md) · [Governance](../GOVERNANCE.md) · [Security](../SECURITY.md) · [Code of Conduct](../CODE_OF_CONDUCT.md) · [Changelog](../CHANGELOG.md)
 
 ---
+
+Not sure where to start? [Find my free API](https://freellmapihub.com/find/) asks six questions and gives you a shortlist.
 
 ← [Back to the main README](../README.md) &nbsp;·&nbsp; [Interactive explorer ↗](https://freellmapihub.com/)

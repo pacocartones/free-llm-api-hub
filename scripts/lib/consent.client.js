@@ -65,7 +65,9 @@
     window.gtag('set', 'ads_data_redaction', f.ads_data_redaction);
     window.gtag('set', 'url_passthrough', f.url_passthrough);
     window.gtag('js', new Date());
-    window.gtag('config', ID, { allow_google_signals: f.allow_google_signals, allow_ad_personalization_signals: f.allow_ad_personalization_signals });
+    // cookie_flags: the _ga/_gcl cookies gtag writes are Secure and SameSite=Lax (gtag's default sets neither); a cookie
+    // written from JavaScript cannot be HttpOnly.
+    window.gtag('config', ID, { allow_google_signals: f.allow_google_signals, allow_ad_personalization_signals: f.allow_ad_personalization_signals, cookie_flags: 'SameSite=Lax;Secure' });
     var el = document.createElement('script');
     el.async = true;
     el.src = 'https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(ID);
@@ -112,7 +114,15 @@
     '.consent-switch .state{min-width:2.2em;text-align:left}' +
     '@media (prefers-reduced-motion: reduce){.consent-switch .track,.consent-switch .knob{transition:none}}' +
     '.consent-link{background:none;border:0;padding:0;font:inherit;color:var(--accent,#3fce8f);cursor:pointer}' +
-    '.consent-link:hover{text-decoration:underline}';
+    '.consent-link:hover{text-decoration:underline}' +
+    // Phones: a compact bar (at most 120px tall at 390px wide). Same texts and the same three answers: the title runs into
+    // the explanation, which keeps three lines and scrolls (it is focusable, so it scrolls from the keyboard too), and the
+    // three buttons share one row.
+    '@media (max-width:600px){.consent-banner{left:8px;right:8px;bottom:8px;padding:8px 10px;border-radius:10px;font-size:.75rem;line-height:1.35}' +
+    '.consent-text{max-height:4.05em;overflow:auto;margin:0 0 7px}.consent-text p{display:inline;margin:0}' +
+    '.consent-banner .consent-title{margin:0 .35em 0 0}' +
+    '.consent-actions{gap:6px;flex-wrap:nowrap}.consent-actions .btn{flex:1 1 0;min-width:0;padding:6px 4px;min-height:32px;font-size:.74rem;border-radius:7px}' +
+    '.consent-cats{gap:6px;margin-bottom:8px}.consent-cat{padding:6px 8px}.consent-cat .consent-cat-desc{font-size:.72rem}}';
 
   // One category: its name and description label the switch (role="switch", aria-checked). The visible "On"/"Off" text
   // means the state never rests on colour alone; it is hidden from assistive technology, which reads aria-checked.
@@ -136,8 +146,8 @@
     banner.setAttribute('aria-describedby', 'consent-desc');
     banner.hidden = true;
     banner.innerHTML =
-      '<p class="consent-title" id="consent-title">Cookies</p>' +
-      '<p id="consent-desc">May we use Google cookies for analytics and, separately, for advertising and personalised measurement (Google signals)? Nothing is sent to Google unless you allow at least one of them. You can change your choice any time under “Cookie settings” at the bottom of every page. <a href="/legal/privacy">Privacy policy</a></p>' +
+      '<div class="consent-text" tabindex="0"><p class="consent-title" id="consent-title">Cookies</p>' +
+      '<p id="consent-desc">May we use Google cookies for analytics and, separately, for advertising and personalised measurement (Google signals)? Nothing is sent to Google unless you allow at least one of them. You can change your choice any time under “Cookie settings” at the bottom of every page. <a href="/legal/privacy">Privacy policy</a></p></div>' +
       '<div class="consent-custom" data-view="custom" hidden><ul class="consent-cats">' +
       cat('analytics', 'Analytics', 'Google Analytics counts visits and shows which pages are useful (cookies _ga, _ga_*).') +
       cat('ads', 'Advertising &amp; personalised measurement', 'Lets Google link visits to signed-in Google accounts that allow ad personalisation (Google signals): aggregated demographics, interests and cross-device reports. No ads are shown on this site.') +

@@ -3,24 +3,33 @@ name: Lighthouse
 # Accessibility, SEO and performance budget for the built site.
 #
 # Serves site/ itself on a free local port and measures what it serves with
-# Lighthouse, on twenty-one pages: the home, /best/, /coverage/, /quality/, /free-gpu/, /coding-tools/,
+# Lighthouse, on twenty-two pages: the home, /best/, /coverage/, /quality/, /free-gpu/, /coding-tools/,
 # /compare/, /find/, /data-policy/, /guides-and-collections/, /not-free/, /embed/ and one provider page, plus
 # /collections/no-credit-card.html, /collections/openai-compatible.html,
 # /guides/free-llm-api-no-signup.html, /guides/free-embeddings-apis.html,
 # /guides/free-ocr-document-ai-apis.html, /guides/free-speech-to-text-apis.html
-# and /guides/free-image-generation-apis.html, plus one model page under /models/
-# (the indexable one listed by the most providers). The thresholds are in
+# and /guides/free-image-generation-apis.html, the model-family page /free-api/qwen/,
+# plus one model page under /models/ (the indexable one listed by the most providers). The thresholds are in
 # scripts/lib/lighthouse-gate.mjs: accessibility at least 0.95 with no new or
-# unscored accessibility audit, SEO exactly 1, performance at least 0.80.
+# unscored accessibility audit, SEO exactly 1, performance at least 0.80. Every run
+# also checks each page's font budget (FONT_BUDGET_BYTES in scripts/lib/assets.mjs:
+# 90 KB for the Roboto Flex and DM Mono files a page declares).
 #
 # The work is split by how stable each category is on a shared runner:
-#   - Pull requests: accessibility and SEO, one run per page. Both are
-#     deterministic, so one run is the same verdict as three, in about a third
-#     of the time. The job keeps the name of the required check.
+#   - Pull requests: accessibility and SEO, one run per page, three pages at a
+#     time. Both are deterministic, so one run is the same verdict as three,
+#     and pages measured side by side get the same verdict as one at a time.
+#     The job keeps the name of the required check.
 #   - Push to main, nightly and manual runs: performance, median of three runs
 #     per page (one run moves too much: 0.78 and 0.91 on the same commit). A
 #     failure on main opens or updates one issue; a later clean run closes it.
 #     Pushes by the regeneration bot (free-llm-api-hub-regen[bot]) are skipped.
+#
+# A change that cannot reach the built site (docs other than the methodology, workflows other than this one, root
+# Markdown other than README and CONTRIBUTING, the MCP package, the scripts/*.test.mjs test files) is not measured: scripts/lighthouse-scope.mjs decides
+# at the start of each measuring job and the rest of the job is skipped. The job itself still runs, so the required
+# check reports success on such a pull request (a workflow-level `paths:` filter would leave it pending forever). The
+# nightly and manual runs always measure.
 #
 # No secret is used. The measuring jobs can only read the repository; only the
 # report job, which checks nothing out and runs on main only, can write issues.
@@ -57,20 +66,34 @@ jobs:
         with:
           persist-credentials: false
           fetch-depth: 0 # full history: build.mjs mines per-provider history from git log
+      # The scope script uses only Node built-ins, so it runs on the runner's preinstalled Node, before setup-node:
+      # a skipped run then sets up nothing (and setup-node's cache step never tries to save a cache that was never
+      # filled, which fails the job). HEAD is the pull request's merge commit; its first parent is the base branch.
+      - id: scope
+        name: Does this change reach the built site?
+        env:
+          EVENT: ${{ github.event_name }}
+        run: BASE="$(git rev-parse HEAD^1)" node scripts/lighthouse-scope.mjs
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        if: ${{ steps.scope.outputs.run == 'true' }}
         with:
           node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: tools/lighthouse/package-lock.json
 
       # /best/ and the provider pages are generated into site/ and are not
       # committed, so the site has to be built before it can be served.
       - name: Build the site
+        if: ${{ steps.scope.outputs.run == 'true' }}
         run: node scripts/build.mjs
 
       - name: Install Lighthouse (locked, no lifecycle scripts)
+        if: ${{ steps.scope.outputs.run == 'true' }}
         working-directory: tools/lighthouse
         run: npm ci --ignore-scripts
 
-      - name: Measure the twenty-one pages (accessibility and SEO, one run each)
+      - name: Measure the twenty-two pages (accessibility and SEO, one run each, three at a time)
+        if: ${{ steps.scope.outputs.run == 'true' }}
         env:
           CHROME_PATH: /usr/bin/google-chrome
         run: node scripts/lighthouse-gate.mjs --mode=accessibility-seo
@@ -84,20 +107,34 @@ jobs:
     timeout-minutes: 30
     outputs:
       failures: ${{ steps.measure.outputs.failures }}
+      measured: ${{ steps.scope.outputs.run }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
           fetch-depth: 0 # full history: build.mjs mines per-provider history from git log
+      # As above. A push compares the commit it replaced with the pushed one; the nightly and manual runs always measure.
+      - id: scope
+        name: Does this change reach the built site?
+        env:
+          EVENT: ${{ github.event_name }}
+          BASE: ${{ github.event.before }}
+        run: node scripts/lighthouse-scope.mjs
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        if: ${{ steps.scope.outputs.run == 'true' }}
         with:
           node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: tools/lighthouse/package-lock.json
       - name: Build the site
+        if: ${{ steps.scope.outputs.run == 'true' }}
         run: node scripts/build.mjs
       - name: Install Lighthouse (locked, no lifecycle scripts)
+        if: ${{ steps.scope.outputs.run == 'true' }}
         working-directory: tools/lighthouse
         run: npm ci --ignore-scripts
-      - name: Measure the twenty-one pages (performance, median of three runs)
+      - name: Measure the twenty-two pages (performance, median of three runs)
+        if: ${{ steps.scope.outputs.run == 'true' }}
         id: measure
         env:
           CHROME_PATH: /usr/bin/google-chrome
@@ -106,8 +143,10 @@ jobs:
   report:
     name: Report performance on main
     needs: performance
-    # Main only (push, nightly or a manual run on main), and only when the measurement finished either way.
-    if: ${{ always() && github.repository == 'pacocartones/free-llm-api-hub' && github.ref == 'refs/heads/main' && (needs.performance.result == 'success' || needs.performance.result == 'failure') }}
+    # Main only (push, nightly or a manual run on main), and only when the measurement finished either way. A push
+    # the scope step did not measure says nothing about performance, so it neither opens nor closes the issue. A job
+    # that failed before the scope step has no `measured` output and still reports.
+    if: ${{ always() && github.repository == 'pacocartones/free-llm-api-hub' && github.ref == 'refs/heads/main' && (needs.performance.result == 'success' || needs.performance.result == 'failure') && (needs.performance.outputs.measured == 'true' || needs.performance.result == 'failure') }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:

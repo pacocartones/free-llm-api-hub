@@ -37,7 +37,7 @@ In a separate clean full checkout of that exact data commit:
 ```bash
 git switch --detach <full-data-commit>
 npm ci --ignore-scripts
-npm test && npm run check
+npm run check -- --strict && npm test
 ```
 
 See [release preparation](https://github.com/pacocartones/free-llm-api-hub/blob/main/docs/release-preparation.md) for reproduction from

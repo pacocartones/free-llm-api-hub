@@ -6,8 +6,8 @@
 // raw-HTML and no image syntax, and a link is only written when its target is http(s), a page of this site, or a path of
 // the repository (which becomes a GitHub URL); anything else (javascript:, data:, ...) is left as plain text.
 
-const ESC = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
-export const escHtml = (s) => String(s).replace(/[&<>"']/g, (c) => ESC[c]);
+import { stripTags } from './escape.mjs';
+import { escapeHtml } from './html.mjs';
 
 /** GitHub's heading id: lowercase, drop what is not a letter, digit, space, hyphen or underscore, spaces become hyphens. */
 export const headingId = (text) => text.toLowerCase().replace(/[^\p{L}\p{N}\s_-]/gu, '').trim().replace(/\s/g, '-');
@@ -65,15 +65,15 @@ export const inlineHtml = (s, ctx) => {
     const c = s[i];
     if (c === '`') {
       const j = s.indexOf('`', i + 1);
-      if (j > i) { out += `<code>${escHtml(s.slice(i + 1, j))}</code>`; i = j + 1; continue; }
+      if (j > i) { out += `<code>${escapeHtml(s.slice(i + 1, j))}</code>`; i = j + 1; continue; }
     }
-    if (c === '\\' && i + 1 < s.length && /[\\`*_{}[\]()#+\-.!|<>]/.test(s[i + 1])) { out += escHtml(s[i + 1]); i += 2; continue; }
+    if (c === '\\' && i + 1 < s.length && /[\\`*_{}[\]()#+\-.!|<>]/.test(s[i + 1])) { out += escapeHtml(s[i + 1]); i += 2; continue; }
     if (c === '[') {
       const m = matchLink(s, i);
       if (m) {
         const inner = inlineHtml(m.text, ctx);
         const r = resolveLink(m.url, ctx);
-        out += r ? `<a href="${escHtml(r.href)}"${r.external ? ' target="_blank" rel="noopener"' : ''}>${inner}</a>` : inner;
+        out += r ? `<a href="${escapeHtml(r.href)}"${r.external ? ' target="_blank" rel="noopener"' : ''}>${inner}</a>` : inner;
         i = m.end; continue;
       }
     }
@@ -86,7 +86,7 @@ export const inlineHtml = (s, ctx) => {
       while (j < s.length && !(s[j] === '*' && s[j - 1] !== ' ' && s[j + 1] !== '*')) j++;
       if (j < s.length && j > i + 1) { out += `<em>${inlineHtml(s.slice(i + 1, j), ctx)}</em>`; i = j + 1; continue; }
     }
-    out += escHtml(c); i++;
+    out += escapeHtml(c); i++;
   }
   return out;
 };
@@ -129,6 +129,7 @@ export const markdownToHtml = (md, ctx) => {
   const lines = md.replace(/\r\n?/g, '\n').split('\n');
   const used = new Map();
   const blocks = [];
+  let tableLabel = 'Table';
   const render = (ls) => {
     const out = [];
     for (let i = 0; i < ls.length;) {
@@ -138,14 +139,17 @@ export const markdownToHtml = (md, ctx) => {
         const body = []; i++;
         while (i < ls.length && !isFence(ls[i])) body.push(ls[i++]);
         i++;
-        out.push(`<pre><code>${escHtml(body.join('\n'))}</code></pre>`); continue;
+        out.push(`<pre><code>${escapeHtml(body.join('\n'))}</code></pre>`); continue;
       }
       if (isHeading(l)) {
         const [, hashes, text] = l.match(/^(#{1,6})\s+(.*?)\s*#*\s*$/);
         let id = headingId(text.replace(/[`*]/g, ''));
         const n = used.get(id) || 0; used.set(id, n + 1);
         if (n) id += `-${n}`;
-        out.push(`<h${hashes.length} id="${escHtml(id)}">${inlineHtml(text, ctx)}</h${hashes.length}>`); i++; continue;
+        const heading = inlineHtml(text, ctx);
+        // The heading text is already escaped. Strip the generated tags for the label.
+        tableLabel = stripTags(heading).trim() || 'Table';
+        out.push(`<h${hashes.length} id="${escapeHtml(id)}">${heading}</h${hashes.length}>`); i++; continue;
       }
       if (isRule(l)) { out.push('<hr>'); i++; continue; }
       if (isQuote(l)) {
@@ -157,7 +161,7 @@ export const markdownToHtml = (md, ctx) => {
         const head = splitRow(l); i += 2;
         const rows = [];
         while (i < ls.length && isTableRow(ls[i])) rows.push(splitRow(ls[i++]));
-        out.push(`<div class="table-wrap"><table class="model-table"><thead><tr>${head.map((c) => `<th>${inlineHtml(c, ctx)}</th>`).join('')}</tr></thead><tbody>` +
+        out.push(`<div class="table-wrap" role="region" aria-label="${tableLabel}" tabindex="0"><table class="model-table"><thead><tr>${head.map((c) => `<th>${inlineHtml(c, ctx)}</th>`).join('')}</tr></thead><tbody>` +
           rows.map((r) => `<tr>${r.map((c) => `<td>${inlineHtml(c, ctx)}</td>`).join('')}</tr>`).join('') + `</tbody></table></div>`); continue;
       }
       if (bullet(l)) {

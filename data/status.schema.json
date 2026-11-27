@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://freellmapihub.com/api/v1/status.schema.json",
+  "title": "Free LLM API Hub provider status (/api/v1/status.json)",
+  "description": "The freshness of every provider, keyed by slug. Contract v1: fields are only added within v1, so consumers must ignore fields they do not know; a field named here is never renamed, removed or retyped in v1.",
+  "type": "object",
+  "required": ["dataset", "version", "generated", "schema", "schema_version", "generated_at", "sla", "count", "providers"],
+  "properties": {
+    "dataset": { "const": "free-llm-api-hub" },
+    "version": { "type": "string", "description": "The dataset release version (SemVer), the same as in every other file of /api/v1/." },
+    "generated": { "type": "string", "format": "date", "description": "The date of the last dataset change, the same as in every other file of /api/v1/." },
+    "license": { "type": "string" },
+    "homepage": { "type": "string", "format": "uri" },
+    "docs": { "type": "string", "format": "uri" },
+    "description": { "type": "string" },
+    "schema": { "type": "string", "format": "uri", "description": "The URL of this schema." },
+    "schema_version": { "const": 1, "description": "The contract version of this file. It stays 1 for as long as /api/v1/ is served." },
+    "generated_at": { "type": "string", "format": "date", "description": "The day every freshness state is graded at: the date of the last dataset change, never the build clock, so the file is byte-stable for a given dataset. Regrade last_verified against sla for your own today." },
+    "sla": {
+      "type": "object",
+      "description": "The freshness SLA the states are graded by.",
+      "required": ["due_after_days", "stale_after_days"],
+      "properties": {
+        "due_after_days": { "type": "integer", "minimum": 1, "description": "An entry verified more than this many days before generated_at is due for a re-check." },
+        "stale_after_days": { "type": "integer", "minimum": 1, "description": "An entry verified more than this many days before generated_at is stale: it has breached the SLA." }
+      }
+    },
+    "count": { "type": "integer", "minimum": 0, "description": "The number of providers; equals the number of keys of providers." },
+    "providers": {
+      "type": "object",
+      "description": "One entry per provider of the dataset, keyed by its slug, in slug order.",
+      "propertyNames": { "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$" },
+      "additionalProperties": { "$ref": "#/$defs/status" }
+    }
+  },
+  "$defs": {
+    "date_or_null": {
+      "anyOf": [{ "type": "string", "format": "date" }, { "type": "null" }]
+    },
+    "status": {
+      "type": "object",
+      "required": ["last_verified", "oldest_field_check", "freshness", "free_now", "last_change"],
+      "properties": {
+        "last_verified": { "$ref": "#/$defs/date_or_null", "description": "The day the entry was last verified against the provider's own docs, or null if never." },
+        "oldest_field_check": { "$ref": "#/$defs/date_or_null", "description": "The oldest checked day among the entry's field_checks, or null when it has none." },
+        "freshness": { "enum": ["fresh", "due", "stale", "unverified"], "description": "fresh: verified at most sla.due_after_days before generated_at; due: up to sla.stale_after_days; stale: older; unverified: never verified." },
+        "free_now": { "type": ["boolean", "null"], "description": "true: verified, and the last probe did not report the free tier gone; false: the last probe reported tier-ended; null: not verified, so not confirmed." },
+        "last_change": { "$ref": "#/$defs/date_or_null", "description": "The day of the entry's newest field-level change in the git history (the changes of changes.json, over the whole history, not only its last 12 weeks), or null when none is recorded." }
+      }
+    }
+  }
+}

@@ -6,7 +6,7 @@ A living, maintainer-facing checklist of concrete follow-ups. Direction and prin
 
 - [ ] **Wire the self-hosted Infisical → run the first real probe.** User creates the `/free-llm-api-hub` folder + read-only Machine Identity on the VPS; then `infisical run -- node scripts/probe.mjs --write`. Harness is built and tested (generic OpenAI-compatible path); waiting only on secrets.
 - [ ] **Provider-specific probe adapters** for the non-OpenAI APIs: Gemini native, Cohere, Deepgram/AssemblyAI (speech), ElevenLabs, Pinecone, etc. (Phase-1 covers the generic OpenAI `/models` + chat/embeddings path only.)
-- [ ] **Decide the zero-Actions deploy** (VPS → gh-pages branch, VPS nginx, or keep light pages.yml) and finish `scripts/probe-cron.sh` (uncomment the publish step). The weekly maintenance is already fully local ([update-playbook.md](update-playbook.md)); only the deploy decision remains.
+- [ ] **Decide the zero-Actions deploy** (VPS → gh-pages branch, VPS nginx, or keep light pages.yml). `scripts/probe-cron.sh` only probes and never publishes, so it needs nothing for either choice. The weekly maintenance is already fully local ([update-playbook.md](update-playbook.md)); only the deploy decision remains.
 - [ ] Render `data/probe-report.json` on the site: a live-tested badge (N of the providers that declare an `env_key`, refreshed within 30d) + a **measured** "fastest free APIs" collection from tokens/sec.
 - [ ] Auto-flag `tier-ended` probe results onto the re-verification worklist / "Notably NOT free".
 
@@ -86,6 +86,15 @@ only what confirms.
   model, big catalog), ByteDance Volcengine/Doubao, StepFun, SenseNova — real free
   tiers but mainland phone/ID gates make them poor fits for an international
   builder audience. Revisit if any drops the ID wall for overseas devs.
+
+- [ ] **Rejected by maintainer decision (do not add):** GigaChat API (Sber /
+  SaluteDevices), proposed in #903 and dropped on 2026-11-26. It is operated by
+  Sber (SaluteDevices), a Russian bank under EU and US sanctions; its free
+  Freemium mode bars commercial use and is effectively unusable for most users
+  outside Russia. Its free offer was real when checked (365M yearly tokens,
+  [individual tariffs](https://developers.sber.ru/docs/ru/gigachat/tariffs/individual-tariffs)),
+  so the reason is the operator, not the offer. Revisit only if the sanctions
+  situation changes.
 
 - [ ] **Explicitly NOT free (do not add; leave in "Notably NOT free" thinking):**
 

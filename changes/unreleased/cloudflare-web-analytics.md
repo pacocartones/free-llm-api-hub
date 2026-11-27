@@ -7,4 +7,4 @@
   it. The privacy page no longer says the site does not use Cloudflare's
   analytics: it describes what Cloudflare Web Analytics collects (aggregated
   page views, referring site, Core Web Vitals, country, browser and device
-  type), and that it sets no cookies and stores nothing on the device.
+  type), and that it sets no cookies and stores nothing on the device (#806).

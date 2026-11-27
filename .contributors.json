@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "standard": "dasousa-contributors/v1",
+  "repository": "pacocartones/free-llm-api-hub",
+  "maintainers": ["pacocartones"],
+  "response": {"target_business_days": 3, "best_effort": true},
+  "labels": {
+    "required": ["bug", "feature", "docs", "data", "chore", "good first issue", "help wanted", "needs info"],
+    "additional": ["blocked", "tracker", "priority:high", "priority:low", "area:site", "area:ci", "area:mcp", "dependencies"]
+  },
+  "checks": [
+    "npm run validate",
+    "npm test"
+  ],
+  "paths": {"contributing": "CONTRIBUTING.md", "security": "SECURITY.md", "ai_policy": "AI_POLICY.md"},
+  "claim_policy": "self-service"
+}

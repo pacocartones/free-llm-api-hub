@@ -1,0 +1,29 @@
+name: 🧭 Proposal (before you implement)
+description: Agree the scope of a change before writing code.
+title: "[proposal] "
+labels: ["feature"]
+type: Feature
+body:
+  - type: markdown
+    attributes:
+      value: A maintainer replies with "go", a narrower scope, or a reason. Please wait for that before opening a pull request. To ask a question or suggest an idea you don't plan to build, use [Questions & ideas](https://github.com/pacocartones/free-llm-api-hub/discussions).
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem and who has it
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Proposed change and what is out of scope
+      description: The files you expect to touch.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: How we will know it works
+      description: The check or example that proves it.
+    validations:
+      required: true
