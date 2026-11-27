@@ -12,6 +12,7 @@ import { fieldCheck } from './field-checks.mjs';
 import { publishedSpeed, speedFigure, SPEED_METRICS } from './published-speed.mjs';
 import { LIMIT_UNITS, limitNumbers, limitsForModel, perModelLimits } from './free-limits.mjs';
 import { FLAG_DEFS, flagHtml } from './flags.mjs';
+import { NOT_STATED } from './provider-faq.mjs';
 
 // The shared flag component (lib/flags.mjs) around the page's own words: the shape, then the words, with the
 // whole sentence as the accessible text.
@@ -85,7 +86,7 @@ export function freeLimitsTableHtml(p, { model } = {}) {
     return `<table class="limits-table limits-per-model"><caption>Limits the provider publishes per model</caption>` +
       `<thead><tr><th scope="col">Model ID</th>${units.map(([, unit]) => `<th scope="col">${unit}</th>`).join('')}</tr></thead><tbody>` +
       perModel.map((e) => `<tr><th scope="row"><code>${escapeHtml(e.model)}</code>${e.scope ? `<br><small>${escapeHtml(e.scope)}</small>` : ''}</th>` +
-        units.map(([k]) => `<td>${Number.isInteger(e[k]) ? e[k].toLocaleString('en-US') : '<span class="muted">not published</span>'}</td>`).join('') + `</tr>`).join('') +
+        units.map(([k]) => `<td>${Number.isInteger(e[k]) ? e[k].toLocaleString('en-US') : `<span class="muted">${NOT_STATED}</span>`}</td>`).join('') + `</tr>`).join('') +
       `</tbody></table>`;
   })();
   const label = model !== undefined && wide && perModelLimits(p).length ? 'Provider-wide limits: none are recorded for this model ID on its own. ' : '';
