@@ -2951,6 +2951,41 @@
    "page_sha256": "de93a7bd03708e7d8ad2ba7bcd2f2ab510cf29c70cb129c4ef4fcbda4ca167a9"
   },
   {
+   "id": "synap.sentence",
+   "slug": "synap",
+   "kind": "sentence",
+   "text": "We do not retain prompt or completion text for API requests, and we do not use it to train anything.",
+   "source_url": "https://synap402.com/privacy.html",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "03771f8ad710c8993a1a3378fed67e2113d2e44dba7eeab7774277c7014694ca"
+  },
+  {
+   "id": "synap.card_required.sentence",
+   "slug": "synap",
+   "kind": "field_sentence",
+   "field": "card_required",
+   "text": "Free tier · no card",
+   "source_url": "https://synap402.com/free.html",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "047d7793192c066aae574b837c7f1a613b7be19aa330f89d80c7730f1570ba8b"
+  },
+  {
+   "id": "synap.openai_compatible.sentence",
+   "slug": "synap",
+   "kind": "field_sentence",
+   "field": "openai_compatible",
+   "text": "Any OpenAI SDK works: change base_url to https://synap402.com/v1",
+   "source_url": "https://synap402.com/qwen3-coder-api.html",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "0892dad97c845e1dd89a48358486fb4254fa703bd13797d4389013ac342663bb"
+  },
+  {
    "id": "nlpcloud.card_required.sentence",
    "slug": "nlpcloud",
    "kind": "field_sentence",
