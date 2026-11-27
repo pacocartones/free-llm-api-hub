@@ -19,6 +19,7 @@ import {
 } from './lib/long-guides.mjs';
 import { familyGroups } from './lib/model-families.mjs';
 import { parseHash, constraintState } from './lib/find.mjs';
+import { recommendedCmp } from './lib/rules.mjs';
 
 const REPO = join(dirname(fileURLToPath(import.meta.url)), '..');
 const ROOT = privateTree(REPO);
@@ -164,6 +165,43 @@ describe('the lists are the data', () => {
     assert.ok(py.src.includes(p.env_key), 'its key variable');
     assert.ok((p.models_free || []).some((m) => py.src.includes(`"${m}"`)), 'one of its free models');
     assert.ok(p.verified && p.card_required === false && p.category === 'ongoing');
+  });
+
+  test('OpenAI alternatives: rows follow the Recommended order and carry the card, phone and commercial-use flags', () => {
+    const html = page('openai-api-alternatives');
+    const verified = providers.filter((p) => p.verified === true && p.openai_compatible === true && !NO_FREE_MODEL_CALLS.includes(p.slug));
+    const chat = verified.filter((p) => p.is_text_llm === true);
+    const has = (m) => (p) => (p.modalities || []).includes(m);
+    const tables = [
+      ['Ongoing free chat APIs that are OpenAI-compatible', chat.filter((p) => p.category === 'ongoing')],
+      ['OpenAI-compatible chat APIs with one-time trial credits', chat.filter((p) => p.category === 'trial')],
+      ['OpenAI-compatible free embeddings APIs', verified.filter(has('embeddings'))],
+      ['OpenAI-compatible free speech APIs', verified.filter(has('audio'))],
+      ['OpenAI-compatible free vision APIs', verified.filter(has('vision'))],
+    ];
+    const bySlug = new Map(providers.map((p) => [p.slug, p]));
+    const words = (v) => (v === false ? 'No' : v === true ? 'Yes' : 'Not stated');
+    const commercial = (v) => (v === true ? 'Yes' : v === false ? '<strong>No</strong>' : v === 'conditional' ? 'Conditional' : 'Not stated');
+    for (const [label, list] of tables) {
+      // The order on the page is the explorer's: the same comparator, not a copy of it.
+      assert.deepEqual(tableSlugs(html, label), [...list].sort(recommendedCmp).map((p) => p.slug), label);
+      for (const [slug, cells] of tableRows(html, label)) {
+        const p = bySlug.get(slug);
+        const [signup, comm] = cells.slice(-3, -1);
+        assert.ok(signup.startsWith(`Card: ${words(p.card_required)}`) && signup.includes(`<br>Phone: ${words(p.phone_required)}`), `${label}: ${slug} card and phone`);
+        assert.ok(comm.startsWith(commercial(p.commercial_ok)), `${label}: ${slug} commercial use`);
+      }
+    }
+    assert.ok(/<th[^>]*>Card and phone<\/th><th[^>]*>Commercial use<\/th><th[^>]*>Checked<\/th>/.test(html));
+    assert.ok(stripTags(html).includes('Recommended order'));
+  });
+
+  test('OpenAI alternatives: linked from /find/, the OpenAI-compatible guide and the collection', () => {
+    for (const [rel, href] of [
+      ['site/find/index.html', '../guides/openai-api-alternatives'],
+      ['site/guides/openai-compatible-free-apis.html', 'openai-api-alternatives'],
+      ['site/collections/openai-compatible.html', '../guides/openai-api-alternatives'],
+    ]) assert.ok(read(rel).includes(`href="${href}"`), `${rel} links to the guide`);
   });
 
   test('No card, no phone: the table, the count in the title and the catches are the data', () => {

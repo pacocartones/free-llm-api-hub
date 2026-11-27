@@ -91,7 +91,9 @@ export function findMainHtml({ pageHero, total, verified, count = '' }) {
     `<li><strong>Not stated is not yes.</strong> A requirement the provider does not state (for example “card: not stated”) never counts as meeting your answer; those providers are listed apart.</li>` +
     `<li><strong>Every fact has a source.</strong> Each provider page links the page its facts were read from and the day they were checked. Terms change: confirm on the provider's own docs before you build. See the <a href="${prefix}methodology/">methodology</a>.</li>` +
     `<li><strong>Your answers stay in the address.</strong> They live after the <code>#</code> of the URL, so the link is shareable and nothing is sent to a server.</li>` +
-    `</ul></section>` +
+    `</ul>` +
+    `<p>Moving off the OpenAI API? <a href="${prefix}guides/openai-api-alternatives">Free alternatives to the OpenAI API</a> lists the OpenAI-compatible providers with the <code>base_url</code> to swap in, by use case.</p>` +
+    `</section>` +
     `</div></main>`;
 }
 
