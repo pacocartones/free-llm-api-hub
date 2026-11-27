@@ -8,4 +8,4 @@
   to good first issues and the contributing guide. `npm run contributors` now
   writes `data/contributors.json` and `CONTRIBUTORS.md` from the git history;
   the page builds from the committed file, without network. Linked from the
-  footer, the sitemap, `llms.txt` and the README.
+  footer, the sitemap, `llms.txt` and the README (#953).
