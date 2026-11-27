@@ -11,6 +11,7 @@ import { fileURLToPath } from 'node:url';
 import { privateTree } from './lib/private-tree.mjs';
 import { datasetAsOf } from './lib/release-stamp.mjs';
 import { COLLECTIONS } from './lib/collections.mjs';
+import { providerTitle } from './lib/provider-title.mjs';
 import {
   FREE_TYPE_WORDS, mdText, mdUrl, mdCode, mdFence, flagWords, providerMarkdown, llmsProviderLine, oneLineLimits, quickstartModel,
 } from './lib/provider-markdown.mjs';
@@ -18,6 +19,7 @@ import {
 const REPO = join(dirname(fileURLToPath(import.meta.url)), '..');
 const ROOT = privateTree(REPO);
 const SITE = 'https://freellmapihub.com';
+const REPO_URL = 'https://github.com/pacocartones/free-llm-api-hub';
 const read = (rel) => readFileSync(join(ROOT, rel), 'utf8');
 
 let data, providers, asOf, llms;
@@ -76,7 +78,7 @@ describe('llms.txt', () => {
     providers.forEach((p, i) => {
       const line = section[i];
       assert.equal(line, llmsProviderLine(p, { site: SITE }));
-      assert.ok(line.startsWith(`- [${mdText(p.name)}](${SITE}/p/${p.slug}): ${FREE_TYPE_WORDS[p.free_type]}; `), line);
+      assert.ok(line.startsWith(`- [${mdText(providerTitle(p).title)}](${SITE}/p/${p.slug}): ${FREE_TYPE_WORDS[p.free_type]}; `), line);
       assert.ok(line.includes(`(${SITE}/p/${p.slug}.md)`), `${p.slug}: links its Markdown version`);
       assert.ok(!oneLineLimits(p).includes('\n'));
     });
@@ -109,11 +111,11 @@ describe('/p/<slug>.md', () => {
   test('is the record: the title, the "is it free" answer, the limits, the flags with sources and dates, the quickstart and the links', () => {
     for (const p of providers) {
       const md = read(`site/p/${p.slug}.md`);
-      assert.equal(md, providerMarkdown(p, { site: SITE, asOf, version: data.version }), `${p.slug}: built from the record`);
-      assert.ok(md.startsWith(`# ${mdText(p.name)}: free tier and limits\n\n> `), `${p.slug}: title`);
+      assert.equal(md, providerMarkdown(p, { site: SITE, asOf, version: data.version, repo: REPO_URL }), `${p.slug}: built from the record`);
+      assert.ok(md.startsWith(`# ${mdText(providerTitle(p).title)}\n\n> `), `${p.slug}: title`);
       assert.ok(md.includes(`Data of ${asOf}`), `${p.slug}: dataset date`);
       assert.ok(md.includes(`Canonical page: ${SITE}/p/${p.slug}\n`), `${p.slug}: names the HTML page as canonical`);
-      assert.ok(md.includes(`## Is ${mdText(p.name)} free?\n\n`), `${p.slug}: the question`);
+      assert.ok(md.includes(`## ${mdText(providerTitle(p).question)}\n\n`), `${p.slug}: the question`);
       assert.ok(md.includes(mdText(p.free_tier)), `${p.slug}: what is free`);
       if (p.verified === true) assert.ok(md.includes(`on ${p.last_verified}.`), `${p.slug}: verified date`);
       else assert.ok(md.includes('Not verified yet'), `${p.slug}: says it is not verified`);
@@ -132,7 +134,7 @@ describe('/p/<slug>.md', () => {
       for (const [field, label] of [['card_required', 'Credit card'], ['phone_required', 'Phone verification'], ['commercial_ok', 'Commercial use']]) {
         const line = md.split('\n').find((l) => l.startsWith(`- **${label}:** `));
         assert.ok(line, `${p.slug}: ${label} line`);
-        if (p[field] == null) assert.match(line, /^- \*\*[^*]+:\*\* unknown \(/, `${p.slug}: a null ${field} reads unknown, never no`);
+        if (p[field] == null) assert.match(line, /^- \*\*[^*]+:\*\* not stated\b/, `${p.slug}: a null ${field} reads not stated, never no`);
       }
       if (p.openai_base_url) {
         assert.ok(md.includes('```python\n'), `${p.slug}: python quickstart`);
@@ -183,12 +185,13 @@ describe('provider-markdown helpers', () => {
     assert.equal(mdFence('bash', 'echo ```\n'), '````bash\necho ```\n````');
   });
 
-  test('a null flag reads unknown with its reason, never no', () => {
+  test('a null flag reads not stated with its reason, never no', () => {
     assert.equal(flagWords(false, 'required', 'not required'), 'not required');
     assert.equal(flagWords(true, 'required', 'not required'), 'required');
     assert.equal(flagWords('conditional', 'allowed', 'not allowed'), 'conditional');
-    assert.equal(flagWords(null, 'required', 'not required'), 'unknown (not confirmed)');
-    assert.equal(flagWords(null, 'required', 'not required', { status: 'needs_account' }), 'unknown (needs an account to check)');
+    assert.equal(flagWords(null, 'required', 'not required'), 'not stated');
+    assert.equal(flagWords(null, 'required', 'not required', { status: 'needs_account' }), 'not stated: needs an account to check');
+    assert.equal(flagWords(null, 'required', 'not required', { status: 'source_silent' }), "not stated in the provider's docs", 'no "not stated (not stated …)"');
   });
 
   test('every free_type in the data has words', () => {

@@ -17,6 +17,7 @@
 // inclusion criteria and cited to the PROVIDER'S OWN docs before anything is
 // added. See docs/sources.md.
 
+import { utcToday } from './lib/dates.mjs';
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { discardBody, readBoundedJson } from './lib/bounded-read.mjs';
 
@@ -137,7 +138,7 @@ async function main() {
   if (write) {
     const out = {
       note: 'Snapshot of OpenRouter :free model IDs and publishers, written by scripts/discover.mjs. Used only to diff what is NEW between runs; not part of the build. Safe to delete (re-baselines on next run).',
-      generated: new Date().toISOString().slice(0, 10),
+      generated: utcToday(),
       free_model_count: freeIds.length,
       publishers,
       free_model_ids: freeIds,

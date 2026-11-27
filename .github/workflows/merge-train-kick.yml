@@ -1,0 +1,67 @@
+name: Merge train kick
+
+# Wakes the merge manager (merge-train.yml, docs/maintenance/merge-train.md) when something it waits for happens: a
+# maintainer adds the `merge-train` label, an approved pull request gets new commits, or a CI run completes. It only
+# dispatches the manager on main (GITHUB_TOKEN may start workflow_dispatch runs), so the manager itself never runs in
+# a pull-request context. It checks nothing out and runs no repository code, which is why the two privileged
+# triggers are safe here.
+#
+# `revoke`: new commits on an approved pull request from a fork void the approval. The label is removed at once,
+# outside the manager's queue, so a fork author cannot slip a commit into a train after the maintainer read the code.
+on:
+  pull_request_target: # zizmor: ignore[dangerous-triggers] no checkout, no PR code; dispatches a workflow on main or removes a label
+    types: [labeled, synchronize, ready_for_review]
+  workflow_run: # zizmor: ignore[dangerous-triggers] no checkout, no PR code; only dispatches a workflow on main
+    workflows: ['Verify', 'Commit policy', 'Lighthouse', 'CodeQL']
+    types: [completed]
+
+permissions: {}
+
+jobs:
+  kick:
+    name: Dispatch the merge manager
+    if: >-
+      ${{ github.repository == 'pacocartones/free-llm-api-hub'
+      && (vars.MERGE_TRAIN_MODE == 'shadow' || vars.MERGE_TRAIN_MODE == 'on')
+      && ((github.event_name == 'workflow_run'
+           && (github.event.workflow_run.event == 'pull_request' || github.event.workflow_run.head_branch == 'main'))
+        || (github.event_name == 'pull_request_target'
+           && (github.event.label.name == 'merge-train'
+               || (github.event.action != 'labeled' && contains(github.event.pull_request.labels.*.name, 'merge-train'))))) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    # A burst of completed runs needs one dispatch, not twenty: a newer kick replaces a waiting one.
+    concurrency:
+      group: merge-train-kick
+      cancel-in-progress: true
+    permissions:
+      actions: write # workflow_dispatch of merge-train.yml
+    steps:
+      - name: Dispatch merge-train.yml on main
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: gh workflow run merge-train.yml --ref main
+
+  revoke:
+    name: Void the approval of a fork pull request with new commits
+    if: >-
+      ${{ github.repository == 'pacocartones/free-llm-api-hub'
+      && github.event_name == 'pull_request_target' && github.event.action == 'synchronize'
+      && github.event.pull_request.head.repo.full_name != github.repository
+      && contains(github.event.pull_request.labels.*.name, 'merge-train') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    permissions:
+      issues: write
+      pull-requests: write
+    steps:
+      - name: Remove the merge-train label
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          gh api -X DELETE "repos/${GH_REPO}/issues/${NUMBER}/labels/merge-train" --silent
+          gh api "repos/${GH_REPO}/issues/${NUMBER}/comments" --silent \
+            -f body='New commits arrived after this fork pull request was approved for the merge train, so the merge manager removed `merge-train`. A maintainer can add it again after reading the new commits.'

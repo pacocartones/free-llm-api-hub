@@ -130,15 +130,15 @@ Field types, nullability and required keys are generated from the schema in **[d
 
 Slugs are permanent identifiers — never rename or reuse a `slug`.
 
-### Confirming a single unknown field
+### Confirming a single field that is not stated
 
-The smallest useful contribution: many entries carry `null` in `card_required`, `phone_required`, `commercial_ok` or `openai_compatible`, which means *nobody has confirmed it yet* — not that the answer is "no". Turning one `null` into a sourced `true`/`false` is a genuine improvement and takes minutes. Open a PR with the corrected field, primary source and date read, and record the provider's sentence in a `stated` `field_checks` entry (below) so the next reader sees why the flag holds its value. Leave `verified` and `last_verified` unchanged unless a human reviewer also completes the [core-fact verification pass](docs/update-playbook.md#layer-2--the-weekly-pass).
+The smallest useful contribution: many entries carry `null` in `card_required`, `phone_required`, `commercial_ok` or `openai_compatible`, which the site shows as *not stated*: nobody has confirmed it yet — not that the answer is "no". Turning one `null` into a sourced `true`/`false` is a genuine improvement and takes minutes. Open a PR with the corrected field, primary source and date read, and record the provider's sentence in a `stated` `field_checks` entry (below) so the next reader sees why the flag holds its value. Leave `verified` and `last_verified` unchanged unless a human reviewer also completes the [core-fact verification pass](docs/update-playbook.md#layer-2--the-weekly-pass).
 
 If you read the provider's official pages and they do not settle a flag, record that too, so nobody repeats the search: add a `field_checks` entry with `status` `source_silent` (the pages that should say it, such as pricing, terms and sign-up docs, do not), `needs_account` (only an account would tell) or `sources_disagree` (two official pages contradict each other: list both and say what each says in `note`), the day you read them in `checked`, and the pages in `sources`. When a page does state the value, use `status: "stated"` with the provider's sentence in `quote`, then run `npm run quotes:add -- <slug> --field <flag>`. The field is defined in [docs/comparison-dimensions.md](docs/comparison-dimensions.md#why-a-flag-holds-its-value-field_checks).
 
 Speed is recorded only as the provider publishes it: if the provider's own page gives a speed for a model of its `models_free`, add a `published_speed` entry with the figure exactly as written, the qualifier its words give (`~` is `approx`, "more than" is `at_least`, "up to" is `up_to`), the page, the day and the provider's words in `quote`, then run `npm run quotes:add -- <slug> --speed`. Never cite a benchmark, an aggregator or a figure the page attributes to someone else, and never estimate. See [docs/comparison-dimensions.md](docs/comparison-dimensions.md#speed-the-provider-publishes-published_speed).
 
-The same applies to `data_policy`, which records what a provider says about your prompts (`trains_on_prompts`, `retention`, `source`, `checked`). An absent `data_policy` object means "not recorded", never "no". Sourced values come exclusively from the provider's own pages, alongside the day they were read. A policy-only review updates `data_policy.checked`, not `last_verified`, under the [playbook's policy-check rules](docs/update-playbook.md#layer-2--the-weekly-pass). If a provider's official pages do not settle the question, that is a completely valid result too: leave the entry as it is and report your findings with the link and date in your PR. See the full field definition in [docs/comparison-dimensions.md](docs/comparison-dimensions.md). A `data_policy` row needs at least one of `trains_on_prompts` or `retention` stated: a row with both `null` records nothing, and `npm test` rejects it.
+The same applies to `data_policy`, which records what a provider says about your prompts (`trains_on_prompts`, `retention`, `source`, `checked`). An absent `data_policy` object means "not stated", never "no". Sourced values come exclusively from the provider's own pages, alongside the day they were read. A policy-only review updates `data_policy.checked`, not `last_verified`, under the [playbook's policy-check rules](docs/update-playbook.md#layer-2--the-weekly-pass). If a provider's official pages do not settle the question, that is a completely valid result too: leave the entry as it is and report your findings with the link and date in your PR. See the full field definition in [docs/comparison-dimensions.md](docs/comparison-dimensions.md). A `data_policy` row needs at least one of `trains_on_prompts` or `retention` stated: a row with both `null` records nothing, and `npm test` rejects it.
 
 A `data_policy` row also needs its entries in `data/quotes.json` (the sentence, each phrase of the note between « », and a check behind any claim about a whole page). You do not write them: after editing the row, run `npm run quotes:add -- <slug>` and then `npm test`. `docs/quotes.md` says what the command does and what to do when a page cannot be read.
 
@@ -155,6 +155,8 @@ A `data_policy` row also needs its entries in `data/quotes.json` (the sentence, 
 - Keep table cells scannable — short phrases, not paragraphs.
 - Prefer the primary number over the marketing framing.
 - Match the tone of the existing entries: precise, plain, no hype.
+- A value the provider's pages do not give is *not stated* in every page, the README and the docs: never "unknown", "n/a", "—" or "?". The data keeps `null`, and `field_checks` keeps its machine reasons (`source_silent`, `needs_account`, `sources_disagree`). The words come from `scripts/lib/not-stated.mjs`.
+- Dates people read are written "24 Nov 2026"; JSON, the API, CSV, JSON-LD, sitemaps, feeds, `llms.txt` and the `.md` mirrors keep ISO `2026-11-24`. The helpers are in `scripts/lib/dates.mjs`.
 
 ## Contributing code
 
@@ -249,6 +251,8 @@ pending. Security policy and token permissions are in [SECURITY.md](SECURITY.md)
 ## Programs (Social Winter of Code and similar)
 
 This repository takes part in contribution programs that score merged pull requests, such as [Social Winter of Code](https://www.swoc.in/) (SWoC). This section is for program participants; everything else in this guide applies to you too. Contributions are welcome all year, inside or outside a program.
+
+Taking part in SWoC Season 7? Start with the [SWoC 2027 participant guide](docs/swoc-2027.md).
 
 **Social Winter of Code Season 7 runs from 1 January to 30 March 2027.** The program and level labels it uses are listed here, and only here, so this table is the one place to check (SWoC publishes the exact names before the season starts, and we update the table then):
 

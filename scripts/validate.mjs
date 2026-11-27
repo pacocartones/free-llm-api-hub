@@ -6,12 +6,13 @@
 // node scripts/validate.mjs [path-to-providers.json] [path-to-probe-report.json]
 // (the optional paths are used by the test suite to validate fixtures)
 
+import { utcToday } from './lib/dates.mjs';
 import { readFileSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, resolve } from 'node:path';
 import Ajv2020 from 'ajv/dist/2020.js';
 import addFormats from 'ajv-formats';
-import { bestPickErrors } from './lib/best.mjs';
+import { bestPickErrors, resolveBestEntries } from './lib/best.mjs';
 import { agreementsErrors } from './lib/agreements.mjs';
 import { providerFigures, figureErrors } from './lib/figures.mjs';
 import { tierForRating, nearBoundary, MODEL_TIER_MIN_VOTES } from './lib/model-tier.mjs';
@@ -28,6 +29,11 @@ import { publicHttpsUrlError } from './lib/public-fetch.mjs';
 import { fieldCheckErrors, unsourcedFlagErrors, unsourcedAllowlistErrors } from './lib/field-checks.mjs';
 import { publishedSpeedErrors } from './lib/published-speed.mjs';
 import { perModelLimitErrors } from './lib/free-limits.mjs';
+import { notFreeErrors } from './lib/not-free-data.mjs';
+import { staleClaimErrors } from './lib/stale-claims-data.mjs';
+import { redirectErrors } from './lib/redirects.mjs';
+import { selectComparePairs } from './lib/compare-pairs.mjs';
+import { publishableClientConfigs } from './lib/client-config.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const FILE = process.argv[2] ? resolve(process.argv[2]) : join(ROOT, 'data/providers.json');
@@ -88,10 +94,10 @@ if (!DATE_RE.test(data.generated || '')) errors.push('top-level: generated must 
 // with `version` (scripts/check-release-stamp.mjs); the dates a data change writes (last_verified, added, checked, read_on)
 // are compared with today, not with `generated`, so a data pull request never has to touch that shared line.
 // VALIDATE_TODAY fixes the day for the tests of this rule.
-const todayUtc = process.env.VALIDATE_TODAY || new Date().toISOString().slice(0, 10);
+const todayUtc = utcToday(process.env.VALIDATE_TODAY);
 // The time box of UNSOURCED_ALLOWLIST (scripts/lib/field-checks.mjs) follows the real clock, not VALIDATE_TODAY: a test that moves
 // the day far ahead for the date rules must not expire it. VALIDATE_ALLOWLIST_TODAY fixes that day for the tests of the allowlist.
-const allowlistToday = process.env.VALIDATE_ALLOWLIST_TODAY || new Date().toISOString().slice(0, 10);
+const allowlistToday = utcToday(process.env.VALIDATE_ALLOWLIST_TODAY);
 if (DATE_RE.test(data.generated || '') && data.generated > todayUtc) errors.push(`top-level: generated (${data.generated}) is after today in UTC (${todayUtc}); write the dates of the dataset in UTC (date -u +%F)`);
 if (!Array.isArray(data.providers) || data.providers.length === 0)
   errors.push('top-level: providers must be a non-empty array');
@@ -385,7 +391,8 @@ try {
 // A count written another way is not caught, so prefer a token over a typed number everywhere.
 {
   const figs = providerFigures(data.providers);
-  const sources = ['README.md', 'CONTRIBUTING.md', 'GOVERNANCE.md', 'data/best.json', 'site/index.html',
+  // site/index.html is checked by scripts/site-figures.test.mjs: validate.mjs reads data and prose, never site/.
+  const sources = ['README.md', 'CONTRIBUTING.md', 'GOVERNANCE.md', 'data/best.json',
     ...readdirSync(join(ROOT, 'docs')).filter((f) => f.endsWith('.md')).map((f) => 'docs/' + f)];
   for (const rel of sources) errors.push(...figureErrors(readFileSync(join(ROOT, rel), 'utf8'), figs, rel));
 }
@@ -407,6 +414,37 @@ try {
 try {
   errors.push(...agreementsErrors(JSON.parse(readFileSync(join(ROOT, 'data/sponsorships.json'), 'utf8')), { slugs: (data.providers ?? []).map((p) => p.slug), today: todayUtc }));
 } catch (e) { errors.push('sponsorships.json: ' + e.message); }
+
+// ---------- the data checks the build also runs (not-free, stale claims, redirects, client configs) ----------
+// build.mjs refuses to build when one of these fails; running the same functions here makes `npm run validate` report them
+// first. They read the other files of data/, so fixture runs (argv[2]) skip them like best.json. A check whose input file is
+// unreadable (quotes.json, best.json, not-free.json) waits: that file is reported once, by its own check.
+if (!FIXTURE_MODE) {
+  const providers = data.providers ?? [];
+  const readData = (file) => JSON.parse(readFileSync(join(ROOT, 'data', file), 'utf8'));
+  const readOrNull = (file) => { try { return readData(file); } catch { return null; } };
+  const quotes = readOrNull('quotes.json')?.entries ?? null;
+  // "Notably NOT free" (data/not-free.json): the README section and the /not-free/ page.
+  let notFree = null;
+  try { notFree = readData('not-free.json'); } catch (e) { errors.push('data/not-free.json: ' + e.message); }
+  if (notFree && quotes) for (const e of notFreeErrors(notFree, { providers, quotes })) errors.push('data/not-free.json: ' + e);
+  // "What other sources get wrong" (data/stale-claims.json): its messages already name the file.
+  let staleClaims = null;
+  try { staleClaims = readData('stale-claims.json'); } catch (e) { errors.push('data/stale-claims.json: ' + e.message); }
+  if (staleClaims && quotes) errors.push(...staleClaimErrors(staleClaims, { providers, quotes, today: todayUtc }));
+  // Retired URLs (data/redirects.json) against the pages the build makes; the static compare pairs come from data/best.json
+  // the way build.mjs picks them.
+  let redirects = null;
+  try { redirects = readData('redirects.json'); } catch (e) { errors.push('data/redirects.json: ' + e.message); }
+  let comparePaths = null;
+  try { comparePaths = selectComparePairs(resolveBestEntries(readData('best.json'), providers).map((e) => e.p)).map((cp) => cp.path); } catch { /* reported by the best.json check above */ }
+  if (redirects && comparePaths && notFree) {
+    for (const e of redirectErrors(redirects, { providerSlugs: providers.map((p) => p.slug), comparePaths, notFree })) errors.push('data/redirects.json: ' + e);
+  }
+  // ADVISORY-007: the deploy builds without running validate.mjs, so build.mjs refuses a client config whose key points at a host
+  // that is not pinned for it (publishableClientConfigs throws); the same guard runs here.
+  try { publishableClientConfigs({ version: data.version, generated: data.generated, providers }); } catch (e) { errors.push(e.message); }
+}
 
 if (errors.length) {
   console.error(`✗ validation failed (${errors.length} issue${errors.length > 1 ? 's' : ''}):`);

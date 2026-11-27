@@ -9,6 +9,7 @@ import { COLLECTIONS } from './lib/collections.mjs';
 import { tmpFile } from './lib/tmp.mjs';
 import { privateTree } from './lib/private-tree.mjs';
 import { esc } from './lib/escape.mjs';
+import { humanDate } from './lib/dates.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const DATA = join(ROOT, 'data/providers.json');
@@ -59,8 +60,10 @@ test('the generated anonymous-access pages quote each provider and keep the shar
   assert.match(md, new RegExp(`\\*\\*${rows.length} of \\d+ tracked providers\\*\\* match`));
   for (const p of rows) {
     assert.ok(md.includes(esc(p.anonymous_access.quote)), `${p.slug}: quote in markdown`);
-    assert.ok(md.includes(`(read ${p.anonymous_access.checked})`), `${p.slug}: reading date in markdown`);
-    assert.ok(html.includes(`(read ${p.anonymous_access.checked})`), `${p.slug}: reading date in HTML`);
+    // The reading date is written the human way ("read 24 Nov 2026"), as on every page people read.
+    const read = `(read ${humanDate(p.anonymous_access.checked)})`;
+    assert.ok(md.includes(read), `${p.slug}: reading date in markdown`);
+    assert.ok(html.includes(read), `${p.slug}: reading date in HTML`);
   }
   assert.match(html, /<h1[^>]*>Free AI APIs you can call with no account<\/h1>/);
   assert.match(html, /<a href="anonymous-access" class="active" aria-current="page">/, 'the collection nav marks the current page');

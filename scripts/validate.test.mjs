@@ -26,7 +26,7 @@ const VALIDATE = join(ROOT, 'scripts/validate.mjs');
 //   SCHEMA_GATED_CASES row proves the schema gate names the field; that is not
 //   evidence for the hand-written line itself.
 // - "redundant": the same input always also fails another line, so it cannot be isolated.
-// 97 sites total: 74 direct cases; 22 schema-gated; 1 redundant;
+// 104 sites total: 81 direct cases; 22 schema-gated; 1 redundant;
 // 0 without a dedicated direct case.
 // | validate.mjs line | Diagnostic or delegated protection | Evidence |
 // | --- | --- | --- |
@@ -129,6 +129,15 @@ const VALIDATE = join(ROOT, 'scripts/validate.mjs');
 // | 381 | provider-summaries.json read/parse failure | direct case |
 // | 387 | agreementsErrors: sponsorship disclosure consistency | direct case |
 // | 388 | sponsorships.json read/parse failure | direct case |
+// Added after 1ec1562 (the data checks build.mjs also runs; line numbers of this branch). site/index.html left the
+// figureErrors sources (line 369 above): its counts are checked by scripts/site-figures.test.mjs.
+// | 426 | not-free.json read/parse failure | direct case |
+// | 427 | notFreeErrors: the not-free list is well formed and cites known providers and quotes | direct case |
+// | 430 | stale-claims.json read/parse failure | direct case |
+// | 431 | staleClaimErrors: every stale claim names a verified provider and resolvable evidence | direct case |
+// | 435 | redirects.json read/parse failure | direct case |
+// | 439 | redirectErrors: a retired URL is not built again and lands on a page the build makes | direct case |
+// | 443 | publishableClientConfigs: ADVISORY-007, client configs send a key only to its pinned host | direct case |
 
 // Each row names the rule in validate.mjs and the bad claim or inconsistent
 // state it protects. The runner below mutates only that part of a fixture and
@@ -546,6 +555,10 @@ const REPOSITORY_CASES = [
   ['editorialErrors', 'ratings only for listed providers', ({ editJson }) => editJson('editorial.json', (f) => { f.ratings['no-such-provider'] = { score: 15, note: '' }; }), ['data/editorial.json rates unknown provider "no-such-provider"']],
   ['summaryErrors', 'a versioned summaries file', ({ editJson }) => editJson('provider-summaries.json', (f) => { f.version = ''; }), ['provider-summaries.json: version must be a non-empty string']],
   ['agreementsErrors', 'a sponsorships file in a known format', ({ editJson }) => editJson('sponsorships.json', (f) => { f.version = 2; }), ['version must be 1']],
+  // The data checks build.mjs also runs (it refuses to build on them); validate.mjs reports them first.
+  ['notFreeErrors', 'a not-free page that explains its alternatives', ({ editJson }) => editJson('not-free.json', (f) => { f.alternatives_note = ''; }), ['data/not-free.json: alternatives_note: a sentence']],
+  ['staleClaimErrors', 'a stale claim dated the day it was noted', ({ editJson }) => editJson('stale-claims.json', (f) => { f.claims[0].noted = 'soon'; }), (f) => [`stale-claims.json: claims[0] (${f.claims[0].slug}): noted must be YYYY-MM-DD`]],
+  ['redirectErrors', 'a retired URL that lands on a page the build makes', ({ editJson }) => editJson('redirects.json', (f) => { f.redirects['/p/zz-retired'] = '/nowhere/'; }), ['data/redirects.json: /p/zz-retired → /nowhere/: the target is not a page the build makes']],
 ];
 
 for (const [rule, protects, edit, expected] of REPOSITORY_CASES) {
@@ -556,6 +569,21 @@ for (const [rule, protects, edit, expected] of REPOSITORY_CASES) {
     assert.deepEqual(outputLines(result.output), [`✗ validation failed (${issues.length} issue${issues.length > 1 ? 's' : ''}):`, ...issues.map((issue) => `- ${issue}`)]);
   });
 }
+
+// ADVISORY-007: the key-host pin (keyHostErrors) reports the provider, and the guard build.mjs runs before it writes the client
+// configs (publishableClientConfigs) reports that the build would refuse them. Its message spans two lines, so it is a test of its own.
+test('validate repository: publishableClientConfigs (ADVISORY-007: client configs send a key only to its pinned host)', () => {
+  const p = clientConfigProvider(DATA);
+  const result = runRepositoryCopy(({ editJson }) => editJson('providers.json', (f) => { clientConfigProvider(f).openai_base_url = 'https://untrusted.example/v1'; }));
+  assert.equal(result.status, 1, result.output);
+  const pin = `${p.slug}: ${p.env_key} may only be sent to ${new URL(p.openai_base_url).hostname}, not untrusted.example`;
+  assert.deepEqual(outputLines(result.output), [
+    '✗ validation failed (2 issues):',
+    `- ${pin}`,
+    '- refusing to publish client configs, a key points at a host that is not pinned:',
+    pin,
+  ]);
+});
 
 // An unreadable file is one reported issue, not a crash. quotes-report.json is
 // checked against quotes.json, so a broken register is reported twice.
@@ -569,6 +597,9 @@ const UNREADABLE_CASES = [
   ['editorial.json', ['editorial.json']],
   ['provider-summaries.json', ['provider-summaries.json']],
   ['sponsorships.json', ['sponsorships.json']],
+  ['not-free.json', ['data/not-free.json']],
+  ['stale-claims.json', ['data/stale-claims.json']],
+  ['redirects.json', ['data/redirects.json']],
 ];
 
 for (const [file, labels] of UNREADABLE_CASES) {
@@ -584,8 +615,14 @@ function originalFileFor(rule) {
   const file = {
     'programs name, what and who': 'programs.json', 'programs url http(s)': 'programs.json', 'programs funds value': 'programs.json', 'research programs audience': 'programs.json',
     gpuComputeErrors: 'gpu-compute.json', codingToolsErrors: 'coding-tools.json', 'coding-tools slug in one file': 'coding-tools.json', bestPickErrors: 'best.json',
+    staleClaimErrors: 'stale-claims.json',
   }[rule];
   return file ? JSON.parse(readFileSync(join(ROOT, 'data', file), 'utf8')) : null;
+}
+
+// The first provider that gets a client config (lib/client-config.mjs): verified, OpenAI-compatible, with a base URL and an env_key.
+function clientConfigProvider(data) {
+  return data.providers.find((p) => p.verified === true && p.openai_compatible === true && p.openai_base_url && p.env_key);
 }
 
 // The first provider whose data_policy quote has a sentence entry in the register.

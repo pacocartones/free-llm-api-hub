@@ -131,9 +131,13 @@ jobs:
       - id: deployment
         uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
 
+  # Once the repository variable WEB_HOST is `cloudflare`, freellmapihub.com is served by a Cloudflare Worker, not by
+  # this Pages deploy: checking or announcing the Pages copy would then test the wrong site, so this job and the
+  # IndexNow one stand down and web-watch.yml takes over (docs/architecture.md, Hosting cutover). Unset: as before.
   verify-live:
     name: Verify live deploy
     needs: deploy
+    if: vars.WEB_HOST != 'cloudflare'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -163,7 +167,7 @@ jobs:
   indexnow:
     name: IndexNow (best effort)
     needs: [build, verify-live]
-    if: needs.build.outputs.indexnow_urls != '' && needs.build.outputs.indexnow_urls != '[]'
+    if: vars.WEB_HOST != 'cloudflare' && needs.build.outputs.indexnow_urls != '' && needs.build.outputs.indexnow_urls != '[]'
     runs-on: ubuntu-latest
     continue-on-error: true
     timeout-minutes: 5

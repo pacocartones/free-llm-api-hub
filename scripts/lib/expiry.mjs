@@ -3,22 +3,25 @@
 // so they cannot disagree again:
 //   a window or date in `expires`            -> shown as is
 //   `no_expiry` (trial credit, provider says) -> "no expiry", with the source and the reading date
-//   a trial credit with neither               -> "not confirmed" (nobody has said)
+//   a trial credit with neither               -> "not stated" (not-stated.mjs: nobody has said)
 //   anything else with a null `expires`       -> "no expiry" (a continuous free tier has no end date)
 
 import { escapeHtml as htmlEsc } from './html.mjs'; // expiryHtml is serialised by name into lib/compare.mjs's client bundle
+import { NOT_STATED_HTML } from './not-stated.mjs';
+import { humanDate } from './dates.mjs';
 
 /**
  * HTML for the provider page and the comparison. Self-contained on purpose: compare.mjs serialises
- * this function into the browser bundle (site/shared-compare.js), where only `htmlEsc` is in scope.
+ * this function into the browser bundle (site/shared-compare.js), where only `htmlEsc`, `NOT_STATED_HTML` and
+ * `humanDate` are in scope.
  */
 export function expiryHtml(p) {
   if (p.expires) return htmlEsc(String(p.expires));
   if (p.no_expiry) {
     const src = /^https?:\/\//i.test(String(p.no_expiry.source || '')) ? htmlEsc(p.no_expiry.source) : '';
     const who = src ? `<a href="${src}" target="_blank" rel="noopener">per the provider</a>` : 'per the provider';
-    return `no expiry <span class="muted">(${who}, read ${htmlEsc(p.no_expiry.checked)})</span>`;
+    return `no expiry <span class="muted">(${who}, read ${humanDate(p.no_expiry.checked) || htmlEsc(p.no_expiry.checked)})</span>`;
   }
-  if (p.free_type === 'trial-credit') return '<span class="tri tri-unk">not confirmed</span>';
+  if (p.free_type === 'trial-credit') return NOT_STATED_HTML;
   return 'no expiry';
 }

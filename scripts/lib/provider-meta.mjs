@@ -6,15 +6,9 @@
 // Otherwise it keeps the previous text ("<name>: <free_tier>"), now cut at a word boundary instead of mid-word.
 // Only recorded values are used: an unknown card requirement says nothing rather than "no card".
 
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-export const META_MAX = 160;
+import { humanDate } from './dates.mjs';
 
-/** "2026-11-24" → "24 Nov 2026"; anything else → null. */
-export function shortDate(iso) {
-  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(iso || ''));
-  if (!m || Number(m[2]) < 1 || Number(m[2]) > 12) return null;
-  return `${Number(m[3])} ${MONTHS[Number(m[2]) - 1]} ${m[1]}`;
-}
+export const META_MAX = 160;
 
 /** 1000 → "1,000", 14400 → "14.4K", 200000 → "200K", 1500000 → "1.5M": exact below 10,000, compact above. */
 export function compactNumber(n) {
@@ -50,13 +44,16 @@ export function trimAtWord(text, max = META_MAX) {
   return `${(space > max * 0.6 ? cut.slice(0, space) : cut).replace(/[\s,;:.–—-]+$/, '')}…`;
 }
 
-/** The meta description of a provider page. */
-export function providerMetaDescription(p) {
+/**
+ * The meta description of a provider page. With `lead` (the page's question and its answer word, lib/provider-title.mjs:
+ * "Is the Groq API free? Yes") the description opens with it, so its first clause is the title's.
+ */
+export function providerMetaDescription(p, { lead } = {}) {
   const figures = limitFigures(p.free_limits);
-  if (!figures.length) return trimAtWord(`${p.name}: ${p.free_tier}`);
+  if (!figures.length) return trimAtWord(`${lead ?? p.name}: ${p.free_tier}`);
   const card = p.card_required === false ? ['no card'] : p.card_required === true ? ['card required'] : [];
-  const when = p.verified === true && shortDate(p.last_verified)
-    ? `Verified ${shortDate(p.last_verified)} with source.`
-    : shortDate(p.free_limits.checked) ? `Limits read ${shortDate(p.free_limits.checked)} at the source.` : '';
-  return trimAtWord(`${p.name} free tier: ${[...figures, ...card].join(', ')}.${when ? ` ${when}` : ''}`);
+  const when = p.verified === true && humanDate(p.last_verified)
+    ? `Verified ${humanDate(p.last_verified)} with source.`
+    : humanDate(p.free_limits.checked) ? `Limits read ${humanDate(p.free_limits.checked)} at the source.` : '';
+  return trimAtWord(`${lead ?? `${p.name} free tier`}: ${[...figures, ...card].join(', ')}.${when ? ` ${when}` : ''}`);
 }

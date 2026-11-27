@@ -1,0 +1,99 @@
+# One-time bootstrap: the first npm publication of packages/mcp, run by hand.
+# npm trusted publishing (used by release-mcp.yml) can only be configured on a package that
+# already exists, so the very first version goes out from here with a token and provenance.
+# After it succeeds: add the trusted publisher on npm (docs/mcp-release.md), revoke the
+# NPM_TOKEN secret and the npm token behind it, and release later versions with release-mcp.yml.
+# Gates: the repository variable NPM_PUBLISH_ENABLED=true, a run from main, a version that is
+# not on npm yet, and the required reviewer on the environment release-mcp.
+name: Publish MCP package (first npm version)
+
+on:
+  workflow_dispatch:
+
+permissions: {}
+
+# Shares release-mcp.yml's group: the two never publish at the same time, and a run is never cancelled half way.
+concurrency:
+  group: release-mcp
+  cancel-in-progress: false
+
+jobs:
+  test:
+    # Tests run in a job WITHOUT id-token or the npm token, so installing dependencies can never touch either.
+    if: ${{ vars.NPM_PUBLISH_ENABLED == 'true' && github.ref == 'refs/heads/main' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: packages/mcp
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+      - name: The version must be new on npm and match server.json
+        env:
+          NPM_PUBLISH_ENABLED: ${{ vars.NPM_PUBLISH_ENABLED }}
+        run: bash ../../scripts/check-mcp-bootstrap.sh
+      - run: npm ci --ignore-scripts
+      - run: npm test
+      - run: npm run validate:server-json
+      - name: Test the archive that will be published
+        run: npm run test:pack
+        env:
+          MCP_PACK_DIR: ${{ runner.temp }}/mcp-package
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: mcp-npm-package
+          path: ${{ runner.temp }}/mcp-package/*.tgz
+          if-no-files-found: error
+          retention-days: 7
+
+  publish:
+    needs: test
+    # Human gate: required reviewer on the environment "release-mcp".
+    environment: release-mcp
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      id-token: write # npm provenance
+    defaults:
+      run:
+        working-directory: packages/mcp
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org/
+      - name: Check again that the version is new on npm
+        env:
+          NPM_PUBLISH_ENABLED: ${{ vars.NPM_PUBLISH_ENABLED }}
+        run: bash ../../scripts/check-mcp-bootstrap.sh
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: mcp-npm-package
+          path: ${{ runner.temp }}/mcp-package
+      - name: Publish the tested archive with provenance
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          [ -n "$NODE_AUTH_TOKEN" ] || { echo "::error::the NPM_TOKEN secret is not set"; exit 1; }
+          npm publish "$RUNNER_TEMP"/mcp-package/*.tgz --ignore-scripts --provenance --access public
+      - name: Verify what was published
+        run: |
+          # Keep dependency lifecycle scripts disabled in the identity-bearing job.
+          sleep 20
+          spec="$(node -p "require('./package.json').name")@$(node -p "require('./package.json').version")"
+          verification_dir=$(mktemp -d)
+          cd "$verification_dir"
+          npm init -y >/dev/null
+          npm install --ignore-scripts "$spec"
+          npm audit signatures

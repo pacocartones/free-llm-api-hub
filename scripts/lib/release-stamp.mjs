@@ -9,10 +9,9 @@
 // the last dataset change". The build derives it with `datasetAsOf`: the newest of the release stamp and every date
 // recorded on a provider. It is computed from the committed data only, never from the clock.
 
-export const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
-
-/** Today's day in UTC, YYYY-MM-DD. `override` (VALIDATE_TODAY in the tests) fixes it. */
-export const utcToday = (override) => override || new Date().toISOString().slice(0, 10);
+import { DATE_RE, utcToday } from './dates.mjs';
+// The day helpers live in dates.mjs; re-exported for the release scripts that import them from here.
+export { DATE_RE, utcToday };
 
 /** Every date a data change writes on a provider: verification, addition, the checked days of its sourced facts, probes. */
 const providerDates = (p) => [
