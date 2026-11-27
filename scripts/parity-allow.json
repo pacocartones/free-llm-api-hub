@@ -34,6 +34,16 @@
       "path": "/no-such-page-*",
       "field": "cache_control",
       "reason": "Workers static assets apply the site-wide Cache-Control: max-age=600 to the 404 page too; production's 404 sends none. A cached 404 for 10 minutes is harmless."
+    },
+    {
+      "path": "/guides/index.html",
+      "field": "chain",
+      "reason": "Production serves /<dir>/index.html as a 200 duplicate of its canonical directory URL; the Worker sends it there with a 301 (generated _redirects rule, E-W7). No internal link uses index.html, and the page's canonical tag is the directory URL."
+    },
+    {
+      "path": "/guides/index.html",
+      "field": "final_url",
+      "reason": "Production serves /<dir>/index.html as a 200 duplicate of its canonical directory URL; the Worker sends it there with a 301 (generated _redirects rule, E-W7). No internal link uses index.html, and the page's canonical tag is the directory URL."
     }
   ],
   "body_ignore": []
