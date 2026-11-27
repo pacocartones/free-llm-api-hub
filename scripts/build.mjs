@@ -92,8 +92,15 @@ import { BADGES_PATH, BADGE_DIR, LISTED_SLUG, providerBadgeSvg, listedBadgeSvg, 
 import { citationRecord, citeBlockHtml } from './lib/citation.mjs';
 import { LONG_GUIDES, longGuidePage } from './lib/long-guides.mjs';
 import { apiExamplesHtml, apiExamplesMarkdown } from './lib/api-examples.mjs';
+import { createI18n, buildLocales, localeDir, hreflangLinks, localizedSitemapXml } from './lib/i18n.mjs';
+import { homeEsMain, providerEsMain, homeEsTitle, homeEsDescription, answerFirstL } from './lib/i18n-pages.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
+// Locales (docs/i18n.md): English is always built, at the root. `--locales=es` (or BUILD_LOCALES=es, `npm run build:es`)
+// also writes the Spanish pages under site/es/ and adds the hreflang alternates to the English pages that have a
+// translation. Without it nothing under site/es/ is written and every English file is what it was before i18n.
+const EN = createI18n('en');
+const EXTRA_LOCALES = buildLocales();
 const FRESH_DAYS = SLA_DAYS; // the freshness SLA, defined once in lib/rules.mjs
 
 const data = JSON.parse(readFileSync(join(ROOT, 'data/providers.json'), 'utf8'));
@@ -623,37 +630,44 @@ function provReceiptHtml(p) {
 // extra markup, centred by the model-hero class. The provider page passes cls 'prov-hero' and puts its badges after
 // the title and its buttons in extra. The home page (hand-written) has its own hero.
 const pageHero = ({ crumbs, h1, lede = '', afterTitle = '', extra = '', cls = 'model-hero' }) =>
-  `<section class="page-hero ${cls}"><div class="wrap"><nav class="crumbs" aria-label="Breadcrumb">${crumbs}</nav><h1>${h1}</h1>${afterTitle}${lede ? `<p class="lede">${lede}</p>` : ''}${extra}</div></section>`;
+  `<section class="page-hero ${cls}"><div class="wrap"><nav class="crumbs" aria-label="${EN.t('nav.breadcrumb')}">${crumbs}</nav><h1>${h1}</h1>${afterTitle}${lede ? `<p class="lede">${lede}</p>` : ''}${extra}</div></section>`;
 
 // The primary menu, shared by every generated page; site/index.html carries the same markup by hand (the test
 // "header menu" in build.test.mjs keeps the two equal). Providers is a disclosure (<details>) holding the explorer and
 // The Best, so the six entries fit one desktop row; Submit is the secondary Contribute button next to the menu. The first
 // link, "Find my free API", shows only in the phone menu (styles.css), where it heads the list.
-const primaryNav = (p) => `<nav class="nav" id="primary-nav" aria-label="Primary">` +
-  `<a class="nav-find" href="${p}find/">Find my free API</a>` +
-  `<details class="nav-group"><summary>Providers</summary><div class="nav-sub"><a href="${p}#explorer">All providers</a>` +
-  `<a href="${p}find/">Find my free API</a>` +
-  `<a class="nav-best" href="${p}best/" title="The top 10 by score, recomputed from the data at every build">${IC('ic-spark')}The Best</a></div></details>` +
-  `<a href="${p}models/">Models</a><a href="${p}compare/">Compare</a><a href="${p}changes/">Changes</a><a href="${p}api/">API</a>` +
-  `<a href="${p}guides-and-collections/">Guides</a></nav>`;
-const contributeBtn = (p) => `<a class="icon-btn nav-contribute" href="${p}submit/">${IC('ic-rocket')}<span class="nc-label">Contribute</span></a>`;
+// Every word of the shell (header, menu, footer, skip link) comes from the catalogue (lib/i18n.mjs, i18n/<locale>.json).
+// `p` is the prefix to the site root, where the English pages live; `h` is the prefix to the home of the page's locale
+// (the same as `p` in English; '../' from /es/p/<slug>.html). A page that is not translated yet is linked in English.
+const primaryNav = (p, L = EN, h = p) => `<nav class="nav" id="primary-nav" aria-label="${L.t('nav.primary')}">` +
+  `<a class="nav-find" href="${p}find/">${L.t('nav.find')}</a>` +
+  `<details class="nav-group"><summary>${L.t('nav.providers')}</summary><div class="nav-sub"><a href="${h}#explorer">${L.t('nav.all_providers')}</a>` +
+  `<a href="${p}find/">${L.t('nav.find')}</a>` +
+  `<a class="nav-best" href="${p}best/" title="${L.t('nav.best_title')}">${IC('ic-spark')}${L.t('nav.best')}</a></div></details>` +
+  `<a href="${p}models/">${L.t('nav.models')}</a><a href="${p}compare/">${L.t('nav.compare')}</a><a href="${p}changes/">${L.t('nav.changes')}</a><a href="${p}api/">${L.t('nav.api')}</a>` +
+  `<a href="${p}guides-and-collections/">${L.t('nav.guides')}</a></nav>`;
+const contributeBtn = (p, L = EN) => `<a class="icon-btn nav-contribute" href="${p}submit/">${IC('ic-rocket')}<span class="nc-label">${L.t('shell.contribute')}</span></a>`;
 
-const siteHeader = (p) => `<header class="site-header"><div class="wrap header-inner">
-<a class="brand" href="${p}" aria-label="Free LLM API Hub — home"><svg class="logo-mark"><use href="#logo"/></svg><span class="brand-name">Free LLM API <span class="grad">Hub</span></span></a>
-${primaryNav(p)}
+const siteHeader = (p, L = EN, h = p) => `<header class="site-header"><div class="wrap header-inner">
+<a class="brand" href="${h}" aria-label="${L.t('shell.home_label')}"><svg class="logo-mark"><use href="#logo"/></svg><span class="brand-name">${L.t('shell.brand_html')}</span></a>
+${primaryNav(p, L, h)}
 <div class="header-actions">
-${contributeBtn(p)}
-<button class="icon-btn nav-toggle" id="navToggle" aria-label="Open menu" aria-expanded="false" aria-controls="primary-nav"><svg class="i menu" aria-hidden="true"><use href="#ic-menu"/></svg><svg class="i close" aria-hidden="true"><use href="#ic-close"/></svg></button>
-<a class="icon-btn" href="${REPO}" target="_blank" rel="noopener"><span class="sr-only">Star on GitHub</span>${GH_ICON}<span class="star-count" data-stars>★</span></a>
-<button class="icon-btn theme-toggle" id="themeToggle" aria-label="Light theme" title="Toggle theme"><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><svg class="moon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/></svg></button>
+${contributeBtn(p, L)}
+<button class="icon-btn nav-toggle" id="navToggle" aria-label="${L.t('shell.open_menu')}" aria-expanded="false" aria-controls="primary-nav"><svg class="i menu" aria-hidden="true"><use href="#ic-menu"/></svg><svg class="i close" aria-hidden="true"><use href="#ic-close"/></svg></button>
+<a class="icon-btn" href="${REPO}" target="_blank" rel="noopener"><span class="sr-only">${L.t('shell.star_github')}</span>${GH_ICON}<span class="star-count" data-stars>★</span></a>
+<button class="icon-btn theme-toggle" id="themeToggle" aria-label="${L.t('shell.theme_label')}" title="${L.t('shell.theme_title')}"><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><svg class="moon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/></svg></button>
 </div></div></header>`;
 
-const siteFooter = (p) => `<footer class="site-footer"><div class="wrap footer-top">
-<div class="footer-brand"><a class="foot-brand-link" href="${p}" aria-label="Free LLM API Hub — home"><svg class="logo-mark"><use href="#logo"/></svg><span class="brand-name">Free LLM API <span class="grad">Hub</span></span></a><p>The <strong>continuously-verified</strong>, <strong>machine-readable</strong> dataset of <strong>free LLM &amp; AI-model APIs</strong> and <strong>trial credits</strong> — every entry <strong>dated</strong>, <strong>sourced</strong>, and <strong>free of dead links</strong>.</p><img class="trust-badge" src="${p}badge-verified.svg" alt="Verified providers" width="${BADGE_W}" height="20" loading="lazy"><a class="star-btn" href="${REPO}" target="_blank" rel="noopener"><span class="sb-label">${GH_ICON} Star on GitHub</span><span class="sb-count" data-stars>★</span></a></div>
-<div class="footer-col"><h2 class="footer-h">Explore</h2><a href="${p}models/">Free model index</a><a href="${p}guides-and-collections/">Guides &amp; collections</a><a href="${p}programs/startups">Startup credits</a><a href="${p}programs/research">Student &amp; research credits</a><a href="${p}free-gpu/">Free GPU compute</a><a href="${p}coding-tools/">Free AI coding tools</a><a href="${p}not-free/">Not free (and why)</a></div>
-<div class="footer-col"><h2 class="footer-h">Data</h2><a href="${p}providers.json">providers.json</a><a href="${p}api/">JSON API</a><a href="${p}llms.txt">llms.txt</a><a href="${p}data-policy/">Who trains on your data</a><a href="${p}coverage/">Data coverage</a><a href="${p}quality/">Data quality</a><a href="${p}embed/">Use the data</a></div>
-<div class="footer-col"><h2 class="footer-h">Project</h2><a href="${p}updates">Updates</a><a href="${p}changes/">What changed</a><a href="${p}submit/">Submit</a><a href="${p}methodology/">Methodology</a><a href="${p}contributing/">Contributing</a><a href="${p}contributors/">Contributors</a><a href="${p}agreements/">Agreements</a></div>
-</div><div class="wrap footer-bottom"><p>Terms change without notice; always confirm against each provider's own docs. MIT licensed.</p><p class="foot-legal"><a href="${p}legal/privacy">Privacy</a> · <a href="${p}legal/terms">Terms</a></p><p class="foot-email"><a href="mailto:admin@freellmapihub.com">admin@freellmapihub.com</a></p></div></footer>`;
+// The link to the same page in another language, written in that language ("Español", title "Leer en español").
+const langSwitchHtml = ({ href, locale }) => { const T = createI18n(locale); return `<p class="foot-lang"><a href="${escapeAttr(href)}" hreflang="${locale}" lang="${T.htmlLang}" title="${T.t('shell.lang_switch_label')}">${T.t('shell.lang_name')}</a></p>`; };
+// `langSwitch` ({ href, locale }) adds the link to the same page in the other language; it is set only when the page has
+// a translation (BUILD_LOCALES), so the English footer is unchanged when no other locale is built.
+const siteFooter = (p, L = EN, h = p, langSwitch = null) => `<footer class="site-footer"><div class="wrap footer-top">
+<div class="footer-brand"><a class="foot-brand-link" href="${h}" aria-label="${L.t('shell.home_label')}"><svg class="logo-mark"><use href="#logo"/></svg><span class="brand-name">${L.t('shell.brand_html')}</span></a><p>${L.t('footer.blurb_html')}</p><img class="trust-badge" src="${p}badge-verified.svg" alt="${L.t('footer.badge_alt')}" width="${BADGE_W}" height="20" loading="lazy"><a class="star-btn" href="${REPO}" target="_blank" rel="noopener"><span class="sb-label">${GH_ICON} ${L.t('shell.star_github')}</span><span class="sb-count" data-stars>★</span></a></div>
+<div class="footer-col"><h2 class="footer-h">${L.t('footer.explore')}</h2><a href="${p}models/">${L.t('footer.model_index')}</a><a href="${p}guides-and-collections/">${L.t('footer.guides')}</a><a href="${p}programs/startups">${L.t('footer.startup_credits')}</a><a href="${p}programs/research">${L.t('footer.research_credits')}</a><a href="${p}free-gpu/">${L.t('footer.free_gpu')}</a><a href="${p}coding-tools/">${L.t('footer.coding_tools')}</a><a href="${p}not-free/">${L.t('footer.not_free')}</a></div>
+<div class="footer-col"><h2 class="footer-h">${L.t('footer.data')}</h2><a href="${p}providers.json">providers.json</a><a href="${p}api/">${L.t('footer.json_api')}</a><a href="${p}llms.txt">llms.txt</a><a href="${p}data-policy/">${L.t('footer.data_policy')}</a><a href="${p}coverage/">${L.t('footer.coverage')}</a><a href="${p}quality/">${L.t('footer.quality')}</a><a href="${p}embed/">${L.t('footer.embed')}</a></div>
+<div class="footer-col"><h2 class="footer-h">${L.t('footer.project')}</h2><a href="${p}updates">${L.t('footer.updates')}</a><a href="${p}changes/">${L.t('footer.changes')}</a><a href="${p}submit/">${L.t('footer.submit')}</a><a href="${p}methodology/">${L.t('footer.methodology')}</a><a href="${p}contributing/">${L.t('footer.contributing')}</a><a href="${p}contributors/">${L.t('footer.contributors')}</a><a href="${p}agreements/">${L.t('footer.agreements')}</a></div>
+</div><div class="wrap footer-bottom"><p>${L.t('footer.disclaimer')}</p>${langSwitch ? langSwitchHtml(langSwitch) : ''}<p class="foot-legal"><a href="${p}legal/privacy">${L.t('footer.privacy')}</a> · <a href="${p}legal/terms">${L.t('footer.terms')}</a></p><p class="foot-email"><a href="mailto:admin@freellmapihub.com">admin@freellmapihub.com</a></p></div></footer>`;
 
 // Full page wrapper for generated (collection) pages. `p` is the path prefix to the site root.
 // Theme guard — runs before first paint to avoid the white flash. ONE source, shared by
@@ -698,7 +712,7 @@ try {
 } catch { /* no stats file: the placeholder stays */ }
 const withStars = (html) => (STARS ? html.replace(/(data-stars>)[^<]*(<)/g, `$1${STARS}$2`) : html);
 
-function htmlPage(args) { return withAnalytics(markNewTabLinks(labelTables(withStars(htmlPageRaw(args)))), GA_ID, args.prefix ?? '../'); }
+function htmlPage(args) { return withAnalytics(markNewTabLinks(labelTables(withStars(htmlPageRaw(args))), (args.i18n || EN).text('shell.new_tab')), GA_ID, args.prefix ?? '../'); }
 
 // Landmarks. A page hero emitted right before <main> moves inside it, so the skip link lands on the page's h1 and the
 // main landmark carries the page title (styles.css drops main's top padding when the hero leads it). Every nav.colls gets
@@ -712,12 +726,18 @@ function landmarkFixes(main) {
 // The weekly change feed is the one a reader subscribes to (field-level changes, not commit titles), so every page
 // advertises it: a feed reader looking for <link rel="alternate"> finds it wherever the visitor is.
 const CHANGES_FEED_TITLE = 'Free LLM API Hub — what changed, week by week';
-function htmlPageRaw({ title, desc, canonical, main, jsonld, prefix = '../', noindex = false, ogImage = `${SITE}/og.png`, feeds = [], scripts = [], styles = [] }) {
+// i18n (lib/i18n.mjs): `i18n` is the translator of the page's locale (English by default), `home` the prefix to that
+// locale's home, `alternates` the absolute URL of this page in each locale it exists in (hreflang), `langSwitch` the
+// footer link to the other language. All four are unset for an English page with no translation, which is then
+// written byte for byte as before (scripts/i18n-build.test.mjs).
+function htmlPageRaw({ title, desc, canonical, main, jsonld, prefix = '../', noindex = false, ogImage = `${SITE}/og.png`, feeds = [], scripts = [], styles = [], i18n = EN, home = prefix, alternates = null, langSwitch = null }) {
+  const L = i18n;
+  const ogLocale = alternates ? `<meta property="og:locale" content="${L.ogLocale}">\n` : '';
   // jsonld carries provider names straight from the dataset; writing "<" as
   // the JSON unicode escape (backslash-u-003c) keeps a "</script>" in the
   // data from ever closing the block.
   return `<!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="${L.htmlLang}" data-theme="light">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -726,7 +746,7 @@ function htmlPageRaw({ title, desc, canonical, main, jsonld, prefix = '../', noi
 ${CSP}
 ${THEME_GUARD}
 ${canonical ? `<link rel="canonical" href="${escapeAttr(canonical)}">
-` : ''}<link rel="icon" href="${prefix}favicon.ico" sizes="32x32">
+` : ''}${alternates ? hreflangLinks(alternates) : ''}<link rel="icon" href="${prefix}favicon.ico" sizes="32x32">
 <link rel="icon" href="${prefix}favicon.svg" type="image/svg+xml">
 <link rel="icon" href="${prefix}favicon-32.png" type="image/png" sizes="32x32">
 <link rel="apple-touch-icon" href="${prefix}apple-touch-icon.png">
@@ -738,8 +758,8 @@ ${fontHead(prefix)}
 <meta property="og:title" content="${escapeAttr(title)}">
 <meta property="og:description" content="${escapeAttr(fitDescription(desc))}">
 <meta property="og:type" content="website">
-<meta property="og:site_name" content="Free LLM API Hub">
-${canonical ? `<meta property="og:url" content="${escapeAttr(canonical)}">
+<meta property="og:site_name" content="${L.t('shell.site_name')}">
+${ogLocale}${canonical ? `<meta property="og:url" content="${escapeAttr(canonical)}">
 ` : ''}<meta property="og:image" content="${ogImage}">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -754,11 +774,11 @@ ${feeds.map((f) => `<link rel="alternate" type="application/rss+xml" title="${es
 ${styles.map((s) => `<link rel="stylesheet" href="${prefix}${s}">\n`).join('')}${jsonld ? `<script type="application/ld+json">${jsonld.replace(/</g, '\\u003c')}</script>` : ''}
 </head>
 <body>
-<a class="skip-link" href="#main">Skip to content</a>
+<a class="skip-link" href="#main">${L.t('shell.skip')}</a>
 ${SPRITE}
-${siteHeader(prefix)}
+${siteHeader(prefix, L, home)}
 ${landmarkFixes(main)}
-${siteFooter(prefix)}
+${siteFooter(prefix, L, home, langSwitch)}
 <script src="${prefix}site.js"></script>
 ${scripts.map((src) => `<script src="${prefix}${src}" defer></script>\n`).join('')}</body>
 </html>
@@ -1080,6 +1100,18 @@ indexHtml = inject(indexHtml, 'homefaq', homeFaqHtml(HOME_FAQ));
   indexHtml = inject(indexHtml, 'dataset', datasetJsonLdScript(homeLd));
 }
 indexHtml = withStars(indexHtml).replace(/(<img class="trust-badge"[^>]*? width=")\d+(")/, `$1${BADGE_W}$2`);
+// Translations of the home page (docs/i18n.md): hreflang alternates after the canonical link, og:locale and the footer's
+// language link. The build reads this file back on every run, so whatever an earlier `--locales` build added is removed
+// first: a default build leaves the page exactly as it was before i18n.
+indexHtml = indexHtml.replace(/<link rel="alternate" hreflang="[^"]*" href="[^"]*">\n/g, '')
+  .replace(/<meta property="og:locale(?::alternate)?" content="[^"]*">\n/g, '')
+  .replace(/<p class="foot-lang">[\s\S]*?<\/p>/g, '');
+if (EXTRA_LOCALES.length) {
+  const homeUrls = { en: `${SITE}/`, ...Object.fromEntries(EXTRA_LOCALES.map((l) => [l, `${SITE}/${localeDir(l)}`])) };
+  indexHtml = indexHtml.replace(/(<link rel="canonical" href="[^"]*">\n)/, `$1${hreflangLinks(homeUrls)}`)
+    .replace(/(<meta property="og:type" content="website">\n)/, `<meta property="og:locale" content="${EN.ogLocale}">\n$1`)
+    .replace(/(<p class="foot-legal">)/, `${langSwitchHtml({ href: localeDir(EXTRA_LOCALES[0]), locale: EXTRA_LOCALES[0] })}$1`);
+}
 writeFileSync(join(ROOT, 'site/index.html'), withAnalytics(indexHtml, GA_ID, ''));
 // The consent banner exists only when analytics is configured; without an ID a stale copy is removed.
 {
@@ -1329,6 +1361,8 @@ const FAMILY_GROUPS = familyGroups(providers);
 
 // The last block of every provider page: its badge on /embed/ and, for a provider on /not-free/, why. One function,
 // appended after the change history, so a change to the section order elsewhere does not touch it.
+// The absolute URL of a provider page in every locale the build writes (hreflang, the localized sitemap).
+const providerUrls = (slug) => ({ en: `${SITE}/p/${slug}`, ...Object.fromEntries(EXTRA_LOCALES.map((l) => [l, `${SITE}/${localeDir(l)}p/${slug}`])) });
 const notFreeBySlug = new Map(NOT_FREE.entries.filter((e) => e.slug).map((e) => [e.slug, e]));
 const useDataHtml = (p) => {
   const nf = notFreeBySlug.get(p.slug);
@@ -1490,7 +1524,11 @@ for (const p of providers) {
   });
   writeFileSync(
     join(ROOT, `site/p/${p.slug}.html`),
-    htmlPage({ title: `${p.name} — free tier & limits · Free LLM API Hub`, desc: providerMetaDescription(p), canonical: `${SITE}/p/${p.slug}`, main: tagProviderLinks(main, providerLinkTargets(p, { website: websiteHref })), jsonld, ogImage: `${SITE}/og/p/${p.slug}.png`, scripts: ['pager.js'] })
+    htmlPage({
+      title: `${p.name} — free tier & limits · Free LLM API Hub`, desc: providerMetaDescription(p), canonical: `${SITE}/p/${p.slug}`, main: tagProviderLinks(main, providerLinkTargets(p, { website: websiteHref })), jsonld, ogImage: `${SITE}/og/p/${p.slug}.png`, scripts: ['pager.js'],
+      // Only with --locales: the Spanish twin under /es/p/ (written in the i18n section below).
+      ...(EXTRA_LOCALES.length ? { alternates: providerUrls(p.slug), langSwitch: { href: `../${localeDir(EXTRA_LOCALES[0])}p/${p.slug}`, locale: EXTRA_LOCALES[0] } } : {}),
+    })
   );
   // The Markdown twin of the page (/p/<slug>.md, lib/provider-markdown.mjs), for answer engines and agents. Linked from
   // llms.txt; not in sitemap.xml (an alternate of the canonical HTML page, not a page of its own).
@@ -2866,6 +2904,47 @@ writeFileSync(join(ROOT, 'site/find/index.html'), htmlPage({
   jsonld: findJsonLd({ site: SITE, asof: ASOF }),
 }));
 
+// ---------- translated pages (docs/i18n.md) ----------
+// The Spanish vertical slice: the home page and every provider page, under site/es/, from the same data. Written only
+// with --locales=es; otherwise site/es/ is removed, so a stale copy never ships and never reaches the fingerprints.
+rmSync(join(ROOT, 'site/es'), { recursive: true, force: true });
+const localeSitemaps = [];
+for (const locale of EXTRA_LOCALES) {
+  const L = createI18n(locale);
+  const dir = localeDir(locale);
+  mkdirSync(join(ROOT, `site/${dir}p`), { recursive: true });
+  const homeUrls = { en: `${SITE}/`, [locale]: `${SITE}/${dir}` };
+  const month = L.shortMonth(ASOF.slice(0, 7));
+  const ordered = [...providers].sort((a, b) => sortLib.comparator('recommended', 1, a, b));
+  writeFileSync(join(ROOT, `site/${dir}index.html`), htmlPage({
+    title: homeEsTitle(HOME_COUNTS, month, L), desc: homeEsDescription(HOME_COUNTS, month, L), canonical: homeUrls[locale],
+    main: homeEsMain({ providers, ordered, asOf: ASOF, L, slaDays: SLA_DAYS, prefixes: { root: '../', home: '' } }),
+    prefix: '../', i18n: L, home: '', alternates: homeUrls, langSwitch: { href: '../', locale: 'en' },
+  }));
+  for (const p of providers) {
+    const r = stampSource(p, QUOTE_REGISTRY);
+    const entry = QUOTE_REGISTRY.entries.find((e) => e.slug === p.slug && e.kind === 'sentence');
+    const readOn = entry ? entry.read_on : (p.data_policy && p.data_policy.checked) || '';
+    const model = (p.models_free && p.models_free[0]) || ({ groq: 'llama-3.1-8b-instant' })[p.slug] || '<a-free-model>';
+    writeFileSync(join(ROOT, `site/${dir}p/${p.slug}.html`), htmlPage({
+      title: L.text('provider.title', { name: p.name }),
+      // The meta description is the answer-first sentence: built from the record, in Spanish.
+      desc: stripTags(answerFirstL(p, L)),
+      canonical: providerUrls(p.slug)[locale],
+      main: providerEsMain(p, { L, prefixes: { root: '../../', home: '../' }, receipt: r.q ? { q: r.q, u: r.u, readOn } : null, model, enHref: `../../p/${p.slug}` }),
+      prefix: '../../', i18n: L, home: '../', alternates: providerUrls(p.slug), langSwitch: { href: `../../p/${p.slug}`, locale: 'en' },
+      ogImage: `${SITE}/og/p/${p.slug}.png`,
+    }));
+  }
+  // The localized sitemap: every translated page with its alternates (xhtml:link), dated like sitemap.xml.
+  writeFileSync(join(ROOT, `site/${dir}sitemap.xml`), localizedSitemapXml([
+    { urls: homeUrls, lastmod: ASOF },
+    ...providers.map((p) => ({ urls: providerUrls(p.slug), lastmod: p.last_verified || ASOF })),
+  ], locale));
+  localeSitemaps.push(`${dir}sitemap.xml`);
+  if (L.missing.size) console.warn(`i18n: ${L.missing.size} key(s) missing from i18n/${locale}.json, shown in English: ${[...L.missing].sort().join(', ')}`);
+}
+
 // ---------- sitemap.xml (site SEO) ----------
 // lastmod is the date the page's content last changed in the DATA, not the build
 // date: a provider page moves with its last_verified, a collection or compare page with
@@ -2933,7 +3012,7 @@ writeFileSync(join(ROOT, 'site/sitemap-state.xml'),
   `\n</urlset>\n`);
 // Both sitemaps behind one index (lib/state-sitemap.mjs): the URL to submit in Search Console. robots.txt keeps
 // naming the two sitemaps directly.
-writeFileSync(join(ROOT, `site/${SITEMAP_INDEX}`), sitemapIndexXml(SITE, INDEXNOW_SITEMAPS));
+writeFileSync(join(ROOT, `site/${SITEMAP_INDEX}`), sitemapIndexXml(SITE, [...INDEXNOW_SITEMAPS, ...localeSitemaps]));
 
 // ---------- fingerprint of the gitignored derived files (drift gate) ----------
 // derived-fingerprints.json pins every build output under site/ that is
@@ -2988,6 +3067,8 @@ function deriveFingerprints() {
       const rel = relative(ROOT, abs).split(String.fromCharCode(92)).join('/');
       // OG assets have their own manifest, including newly generated, untracked images.
       if (rel === 'site/og') continue;
+      // The Spanish draft (--locales=es) is not pinned until it ships in January (docs/i18n.md).
+      if (rel === 'site/es') continue;
       if (entry.isDirectory()) walk(abs);
       else if (!tracked.has(rel) && !isDateRelative(rel) && !isGitLogDerived(rel)) {
         out[rel] = createHash('sha256').update(readFileSync(abs)).digest('hex');
