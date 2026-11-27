@@ -243,6 +243,10 @@ Found an outdated limit, a dead link, or a provider that belongs here? You'll ke
 
 Full guidelines, including what counts as an acceptable source: **[CONTRIBUTING.md](CONTRIBUTING.md)**.
 
+### Contributors
+
+Everyone whose work was merged here is credited on the **[contributors page](https://freellmapihub.com/contributors/)** (also [CONTRIBUTORS.md](CONTRIBUTORS.md)), generated from the git history: GitHub handle, merged contributions, first contribution and the kinds of work. First-time contributors of the current release cycle are listed first. Your first merged pull request puts you there too.
+
 ### AI-assisted contributions are welcome
 
 Use AI tools if they help you — we do too. We ask for good judgement: understand and test what you send, and check every fact at its source. See [AI_POLICY.md](AI_POLICY.md).
