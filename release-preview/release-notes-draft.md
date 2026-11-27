@@ -108,7 +108,7 @@ checks were agent-assisted and every merge was approved by a maintainer.
   providers' own pages, agent-assisted (#723, #725, #726, #734, #791, #818, #875,
   #925, #939, #946); trial credits re-checked for all 42 trial providers (#965);
   numeric `free_limits` for more providers (#941, #1038, #1039); on 27
-  November the 23 oldest entries were re-read (#1017, #1019, #1043, #1044) and
+  November 22 of the oldest entries were re-read (#1017, #1019, #1043, #1044) and
   the last flags without a quote were re-checked (#1036). Notable changes: SambaNova and
   Photoroom `commercial_ok: false` (#697, #730), Vercel AI Gateway
   `card_required: true` (#925), Jina AI commercial use `conditional`, Alibaba
