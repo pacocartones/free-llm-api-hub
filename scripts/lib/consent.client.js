@@ -93,7 +93,7 @@
 
   var CSS = '.consent-banner{position:fixed;left:16px;right:16px;bottom:16px;z-index:1000;max-width:660px;margin:0 auto;' +
     'max-height:calc(100vh - 32px);overflow:auto;' +
-    'background:var(--panel-2,#131b17);color:var(--text,#d8e2dc);border:1px solid var(--border,#1d2a22);border-radius:12px;' +
+    'background:var(--panel-2,#251c18);color:var(--text,#fbf1ec);border:1px solid var(--border,#352822);border-radius:12px;' +
     'padding:16px 18px;box-shadow:0 8px 30px rgba(0,0,0,.35);font-size:.9rem;line-height:1.5}' +
     '.consent-banner p{margin:0 0 12px}.consent-banner p a{text-decoration:underline;text-underline-offset:2px}' +
     '.consent-banner .consent-title{font-weight:700;margin-bottom:4px}' +
@@ -101,19 +101,19 @@
     '.consent-banner [hidden],.consent-banner[hidden]{display:none}' +
     '.consent-cats{list-style:none;margin:0 0 14px;padding:0;display:grid;gap:10px}' +
     '.consent-cat{display:flex;gap:14px;align-items:flex-start;justify-content:space-between;padding:10px 12px;' +
-    'border:1px solid var(--border,#1d2a22);border-radius:9px;background:var(--panel,#0f1512)}' +
-    '.consent-cat .consent-cat-name{margin:0;color:var(--text,#d8e2dc);font-weight:700;font-size:.9rem}' +
-    '.consent-cat .consent-cat-desc{margin:2px 0 0;color:var(--muted,#96a49b);font-size:.84rem}' +
+    'border:1px solid var(--border,#352822);border-radius:9px;background:var(--panel,#211915)}' +
+    '.consent-cat .consent-cat-name{margin:0;color:var(--text,#fbf1ec);font-weight:700;font-size:.9rem}' +
+    '.consent-cat .consent-cat-desc{margin:2px 0 0;color:var(--muted,#c2a89e);font-size:.84rem}' +
     '.consent-switch{flex:0 0 auto;display:inline-flex;align-items:center;gap:8px;background:none;border:0;padding:4px;font:inherit;' +
-    'font-size:.8rem;color:var(--text,#d8e2dc);cursor:pointer}' +
-    '.consent-switch .track{position:relative;width:40px;height:22px;border-radius:11px;border:1px solid var(--control-border,#76887e);' +
-    'background:var(--panel-2,#131b17);transition:background .15s}' +
-    '.consent-switch .knob{position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:var(--muted,#96a49b);transition:left .15s}' +
-    '.consent-switch[aria-checked="true"] .track{background:var(--accent,#3fce8f);border-color:var(--accent,#3fce8f)}' +
-    '.consent-switch[aria-checked="true"] .knob{left:20px;background:var(--accent-ink,#05140c)}' +
+    'font-size:.8rem;color:var(--text,#fbf1ec);cursor:pointer}' +
+    '.consent-switch .track{position:relative;width:40px;height:22px;border-radius:11px;border:1px solid var(--control-border,#7a645b);' +
+    'background:var(--panel-2,#251c18);transition:background .15s}' +
+    '.consent-switch .knob{position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:var(--muted,#c2a89e);transition:left .15s}' +
+    '.consent-switch[aria-checked="true"] .track{background:var(--accent,#ffb25c);border-color:var(--accent,#ffb25c)}' +
+    '.consent-switch[aria-checked="true"] .knob{left:20px;background:var(--accent-ink,#17110f)}' +
     '.consent-switch .state{min-width:2.2em;text-align:left}' +
     '@media (prefers-reduced-motion: reduce){.consent-switch .track,.consent-switch .knob{transition:none}}' +
-    '.consent-link{background:none;border:0;padding:0;font:inherit;color:var(--accent,#3fce8f);cursor:pointer}' +
+    '.consent-link{background:none;border:0;padding:0;font:inherit;color:var(--accent,#ffb25c);cursor:pointer}' +
     '.consent-link:hover{text-decoration:underline}' +
     // Phones: a compact bar (at most 120px tall at 390px wide). Same texts and the same three answers: the title runs into
     // the explanation, which keeps three lines and scrolls (it is focusable, so it scrolls from the keyboard too), and the
