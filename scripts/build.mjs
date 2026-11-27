@@ -91,6 +91,7 @@ import { embedMainHtml, embedTitle, embedDescription, EMBED_PATH } from './lib/e
 import { BADGES_PATH, BADGE_DIR, LISTED_SLUG, providerBadgeSvg, listedBadgeSvg, badgesMainHtml, badgesTitle, badgesDescription } from './lib/provider-badges.mjs';
 import { citationRecord, citeBlockHtml } from './lib/citation.mjs';
 import { LONG_GUIDES, longGuidePage } from './lib/long-guides.mjs';
+import { staleClaimErrors, staleClaimsFor, staleClaimsHtml } from './lib/stale-claims.mjs';
 import { apiExamplesHtml, apiExamplesMarkdown } from './lib/api-examples.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -239,7 +240,9 @@ const COLLECTION_COPY = [
     answer: '{n} of {total} tracked free tiers say commercial or production use is allowed, according to each provider’s own terms. Evaluation-only tiers are left out, and so is any tier whose terms do not say. Confirm with the provider before you launch.',
     metaDesc: '{n} free LLM API tiers that allow production use, checked against each provider’s terms. Dataset of {date}.',
     title: 'Free LLM APIs for commercial use',
-    h1: 'Free LLM APIs you can use commercially',
+    // The question as it is asked and the count (AEO baseline, 27 Nov 2026). `title` stays the short name of the chips.
+    pageTitle: 'Free LLM API for commercial use: what each provider’s terms allow ({n} checked)',
+    h1: 'Free LLM API for commercial use: what each provider’s terms allow ({n} checked)',
     desc: 'Free LLM API tiers that permit production/commercial use — not restricted to evaluation. Verified against each provider’s terms.',
     intro: 'Free tiers that **allow commercial/production use** (`commercial_ok: true`). Evaluation-only tiers (`commercial_ok: false`) and tiers whose terms do not say are deliberately left out — read their rows in the main list for the restriction.',
     guides: ['openai-compatible-free-apis', 'free-llm-api-without-credit-card', 'choose-free-llm-api-for-production'],
@@ -383,12 +386,15 @@ const GUIDES = [
   },
   {
     slug: 'openai-compatible-free-apis',
-    answer: '{n} verified free APIs expose an OpenAI-compatible endpoint. With the official OpenAI SDK you change the base_url and the API key and keep the rest of your code. Compatibility can be partial, so check which endpoints and features, such as tools or streaming, each provider supports.',
+    answer: '{n} verified free APIs expose an OpenAI-compatible endpoint; the table lists the base URL of {base}. With the OpenAI SDK you change base_url and the API key and keep the rest of your code. Compatibility can be partial, so check which endpoints and features, such as tools or streaming, each provider supports.',
     metaDesc: "{n} free LLM APIs with an OpenAI-compatible endpoint: change base_url and your key, keep your SDK. Dataset of {date}; every row carries its own verification date.",
     card: 'OpenAI-compatible',
     blurb: 'Keep your code — just swap base_url and key.',
-    h1: 'Free OpenAI-compatible APIs (drop-in base_url)',
-    title: 'Free OpenAI-compatible APIs — drop-in base_url · Free LLM API Hub',
+    // The question as it is asked, the count and the check date (AEO baseline, 27 Nov 2026); filled below the list.
+    h1: 'OpenAI-compatible free LLM APIs ({n}, checked {date}): base URLs',
+    title: 'OpenAI-compatible free LLM APIs ({n}, checked {date}): base URLs',
+    titleDated: true,
+    baseUrl: true,
     desc: 'Free LLM APIs that expose an OpenAI-compatible endpoint, so you only change base_url and the API key. Confirmed against each provider’s docs.',
     lede: 'Point the OpenAI SDK at a different base_url and keep all of your existing code.',
     intro: `<p>An OpenAI-compatible API exposes the same <code>/chat/completions</code> shape, so switching is usually a one-line change: swap <code>base_url</code> and the key. That makes these the lowest-friction way to move side projects off paid OpenAI usage, or to add a free fallback behind the same SDK.</p><p>Each provider's exact base URL is on its page, and the free models you can pass as <code>model</code> are in the <a href="../models/">model index</a>.</p>`,
@@ -461,6 +467,14 @@ const GUIDES = [
     ],
   },
 ];
+// A guide whose title and h1 carry the count and the check date ("(54, checked 27 Nov 2026)") gets them here, once, so
+// the page, the breadcrumbs, the JSON-LD headline and llms.txt all say the same; datedTitle() is not applied to it.
+const guideList = (g) => providers.filter((p) => p.verified === true && g.filter(p));
+for (const g of GUIDES.filter((x) => x.titleDated)) {
+  const fillDated = (t) => t.replaceAll('{n}', String(guideList(g).length)).replaceAll('{date}', humanDate(ASOF));
+  g.title = fillDated(g.title);
+  g.h1 = fillDated(g.h1);
+}
 
 const collRows = (c) => providers.filter(c.filter);
 const typeLabel = (p) => (p.category === 'ongoing' ? 'Ongoing' : 'Trial');
@@ -850,6 +864,13 @@ const QUOTES = QUOTE_REGISTRY.entries;
   const errs = notFreeErrors(NOT_FREE, { providers, quotes: QUOTES });
   if (errs.length) throw new Error('data/not-free.json:\n' + errs.join('\n'));
 }
+// "What other sources get wrong" on provider pages (data/stale-claims.json, lib/stale-claims.mjs): every claim names a
+// verified provider and evidence that resolves to a register quote or a field of its record.
+const STALE_CLAIMS = JSON.parse(readFileSync(join(ROOT, 'data/stale-claims.json'), 'utf8'));
+{
+  const errs = staleClaimErrors(STALE_CLAIMS, { providers, quotes: QUOTES, today: new Date().toISOString().slice(0, 10) });
+  if (errs.length) throw new Error('data/stale-claims.json:\n' + errs.join('\n'));
+}
 // Retired URLs search engines still know (data/redirects.json): checked here, written as stubs after the compare pages.
 const REDIRECTS = JSON.parse(readFileSync(join(ROOT, 'data/redirects.json'), 'utf8'));
 // /contributors/: data/contributors.json is written by `npm run contributors` from the git history and committed, so the
@@ -919,6 +940,7 @@ writeFileSync(citationPath, citation);
 const LONG_GUIDE_EXTRAS = {
   programs: JSON.parse(readFileSync(join(ROOT, 'data/programs.json'), 'utf8')),
   codingToolsOwnKey: JSON.parse(readFileSync(join(ROOT, 'data/coding-tools-own-key.json'), 'utf8')),
+  month: TITLE_MONTH,
 };
 const LONG_GUIDE_PAGES = LONG_GUIDES.map((g) => ({ ...g, ...longGuidePage(g, { providers, notFree: NOT_FREE, ...LONG_GUIDE_EXTRAS }) }));
 // Every guide by slug, for the cross-links of collections and the "More guides" lists.
@@ -1135,6 +1157,7 @@ for (const c of COLLECTIONS) {
   const rows = collRows(c);
   const fill = (t) => t.replaceAll('{n}', String(rows.length)).replaceAll('{total}', String(total)).replaceAll('{date}', humanDate(ASOF));
   const metaDesc = fill(c.metaDesc);
+  const h1 = fill(c.h1);
   const nav = COLLECTIONS.map(
     (o) => `<a href="${o.slug}"${o.slug === c.slug ? ' class="active" aria-current="page"' : ''}>${escapeAttr(o.title)}</a>`
   ).join('');
@@ -1147,7 +1170,7 @@ for (const c of COLLECTIONS) {
 
   // --- repo markdown ---
   const md =
-    `${GEN_NOTE}\n\n# ${c.h1}\n\n${c.desc}\n\n` +
+    `${GEN_NOTE}\n\n# ${h1}\n\n${c.desc}\n\n` +
     `[← All collections](README.md) · [Interactive explorer ↗](${SITE}/) · [Main list](../README.md)\n\n` +
     `${c.intro}\n\n**${rows.length} of ${total} tracked providers** match.\n\n` +
     `${c.header ? `${c.header}\n\n` : ''}${collectionTableMd(rows, { baseUrl: c.quickstart, rowMark: c.rowMark })}\n\n` +
@@ -1162,7 +1185,7 @@ for (const c of COLLECTIONS) {
     '@graph': [
       {
         '@type': 'ItemList',
-        name: c.h1,
+        name: h1,
         description: metaDesc,
         numberOfItems: rows.length,
         // Same-domain URLs: Google drops list items that point to another site, and each provider has its own page here.
@@ -1187,7 +1210,7 @@ for (const c of COLLECTIONS) {
   });
   const introHtml = escapeAttr(c.intro).replace(/`([^`]+)`/g, '<code>$1</code>').replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
   const main =
-    pageHero({ crumbs: `<a href="../">Home</a> / <a href="../guides-and-collections/">Guides &amp; Collections</a> / ${escapeAttr(c.title)}`, h1: `${escapeAttr(c.h1)}`, lede: `${escapeAttr(c.desc)}`, extra: `<nav class="colls">${nav}</nav>` }) +
+    pageHero({ crumbs: `<a href="../">Home</a> / <a href="../guides-and-collections/">Guides &amp; Collections</a> / ${escapeAttr(c.title)}`, h1: `${escapeAttr(h1)}`, lede: `${escapeAttr(c.desc)}`, extra: `<nav class="colls">${nav}</nav>` }) +
     `<main id="main"><div class="wrap prose">` +
     `<p class="answer"><strong>${escapeAttr(fill(c.answer))}</strong></p>` +
     `<p>${introHtml}</p>` +
@@ -1201,7 +1224,7 @@ for (const c of COLLECTIONS) {
     `</div></main>`;
   writeFileSync(
     join(ROOT, `site/collections/${c.slug}.html`),
-    htmlPage({ title: `${c.title} · Free LLM API Hub`, desc: metaDesc, canonical: `${SITE}/collections/${c.slug}`, main, jsonld, ogImage: `${SITE}/og/collections/${c.slug}.png` })
+    htmlPage({ title: c.pageTitle ? fill(c.pageTitle) : `${c.title} · Free LLM API Hub`, desc: metaDesc, canonical: `${SITE}/collections/${c.slug}`, main, jsonld, ogImage: `${SITE}/og/collections/${c.slug}.png` })
   );
 }
 
@@ -1452,6 +1475,7 @@ for (const p of providers) {
     keysHtml +
     quick +
     limitsHtml(p) +
+    staleClaimsHtml(p, staleClaimsFor(STALE_CLAIMS, p.slug), { quotes: QUOTES }) +
     reqsHtml +
     scoreHtml +
     glanceHtml(p, typeLabel(p)) +
@@ -1985,15 +2009,16 @@ for (const g of FAMILY_GROUPS) {
 mkdirSync(join(ROOT, 'site/guides'), { recursive: true });
 // A guide's modality is its `modality` field; a guide without one is about text LLMs (no card, OpenAI-compatible, no signup).
 const guideFits = (g, p) => (g.modality ? (p.modalities || []).includes(g.modality) : p.is_text_llm === true);
-const guideRow = (p) =>
+const guideRow = (p, baseUrl = false) =>
   `<tr><td class="name"><a href="../p/${p.slug}">${escapeAttr(p.name)}</a><br><small>Verified ${timeHtml(p.last_verified, escapeAttr)}</small></td>` +
+  (baseUrl ? `<td>${p.openai_base_url ? `<code>${escapeAttr(p.openai_base_url)}</code>` : NOT_STATED_HTML}</td>` : '') +
   `<td>${escapeAttr(p.free_tier)}</td>` +
   `<td class="notes">${escapeAttr(p.rate_limits)}</td>` +
   `<td>${provFlagsHtml(p)}</td></tr>`;
 for (const g of GUIDES) {
   // These pages explicitly promise verified providers; collections still show all tracked rows.
-  const list = providers.filter((p) => p.verified === true && g.filter(p));
-  const fill = (t) => t.replaceAll('{n}', String(list.length)).replaceAll('{date}', humanDate(ASOF));
+  const list = guideList(g);
+  const fill = (t) => t.replaceAll('{n}', String(list.length)).replaceAll('{base}', String(list.filter((p) => p.openai_base_url).length)).replaceAll('{date}', humanDate(ASOF));
   const metaDesc = fill(g.metaDesc);
   const twins = COLLECTIONS.filter((c) => (c.guides || []).includes(g.slug));
   // The pick is the guide's own (g.pick) or the first row of the shared "Recommended" order. It is shown only when it
@@ -2011,8 +2036,8 @@ for (const g of GUIDES) {
     g.intro +
     (top ? `<div class="prov-summary"><h2>Top pick — ${escapeAttr(top.name)}</h2><p>${escapeAttr(top.best_for || top.free_tier)} <a href="../p/${top.slug}">Details →</a></p></div>` : '') +
     `<p class="count"><strong>${list.length}</strong> verified providers</p>` +
-    `<table class="model-table"><thead><tr><th>Provider</th><th>Free tier</th><th>Rate limits</th><th>Gotchas</th></tr></thead><tbody>\n` +
-    list.map(guideRow).join('\n') +
+    `<table class="model-table"><thead><tr><th>Provider</th>${g.baseUrl ? '<th>Base URL (<code>openai_base_url</code>)</th>' : ''}<th>Free tier</th><th>Rate limits</th><th>Gotchas</th></tr></thead><tbody>\n` +
+    list.map((p) => guideRow(p, g.baseUrl)).join('\n') +
     `\n</tbody></table>` +
     `<div class="prov-actions" style="margin-top:22px"><a class="btn primary" href="../${g.query}">Open in the explorer →</a></div>` +
     faqHtml +
@@ -2043,7 +2068,7 @@ for (const g of GUIDES) {
     ],
   });
   writeFileSync(join(ROOT, `site/guides/${g.slug}.html`), htmlPage({
-    title: datedTitle(g.title), desc: metaDesc, canonical: `${SITE}/guides/${g.slug}`, main, jsonld,
+    title: g.titleDated ? g.title : datedTitle(g.title), desc: metaDesc, canonical: `${SITE}/guides/${g.slug}`, main, jsonld,
     ogImage: `${SITE}/og/guides/${g.slug}.png`,
   }));
 }

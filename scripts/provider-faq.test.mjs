@@ -130,9 +130,9 @@ test('the FAQ escapes what comes from the data', () => {
   assert.match(html, /Acme &lt;b&gt; FAQ/);
 });
 
-test('the home <title> leads with "Free LLM APIs" and stays under 60 characters', () => {
+test('the home <title> leads with "Free LLM API list" and stays under 60 characters', () => {
   const html = readFileSync(join(ROOT, 'site/index.html'), 'utf8');
   const title = html.match(/<title>([^<]*)<\/title>/)[1].split('&amp;').join('&');
-  assert.ok(title.startsWith('Free LLM APIs'), title);
+  assert.ok(title.startsWith('Free LLM API list'), title);
   assert.ok(title.length < 60, `${title.length} characters: ${title}`);
 });
