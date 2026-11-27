@@ -40,15 +40,52 @@ node src/index.js --data ../../data/providers.json --clients ../../site/api/v1/o
 
 The server speaks MCP over stdio, so on its own it just waits for a client. Requires Node 22.14 or later.
 
-### With npx (after verifying a published version)
+### With npx
 
-Replace `VERSION` with an announced version shown by `npm view free-llm-api-hub-mcp versions`.
-Pin that version in client configurations too:
+Once a version is on npm (check with `npm view free-llm-api-hub-mcp versions`), no checkout is needed:
+`npx` downloads the package and starts the server. Pin the version in client configurations, so an
+update never changes the tools under you; the examples pin `0.2.0`.
 
 ```bash
-npx -y free-llm-api-hub-mcp@VERSION
-npx -y free-llm-api-hub-mcp@VERSION --data ./providers.json --clients ./openai-clients.json
+npx -y free-llm-api-hub-mcp@0.2.0
+npx -y free-llm-api-hub-mcp@0.2.0 --data ./providers.json --clients ./openai-clients.json --status ./status.json
 ```
+
+**Claude Desktop** (`claude_desktop_config.json`):
+
+```json
+{
+  "mcpServers": {
+    "free-llm-api-hub": {
+      "command": "npx",
+      "args": ["-y", "free-llm-api-hub-mcp@0.2.0"]
+    }
+  }
+}
+```
+
+**Claude Code**:
+
+```bash
+claude mcp add --transport stdio free-llm-api-hub -- npx -y free-llm-api-hub-mcp@0.2.0
+```
+
+**Cursor** (`~/.cursor/mcp.json` for every project, or `.cursor/mcp.json` in one project):
+
+```json
+{
+  "mcpServers": {
+    "free-llm-api-hub": {
+      "command": "npx",
+      "args": ["-y", "free-llm-api-hub-mcp@0.2.0"]
+    }
+  }
+}
+```
+
+To read local files instead of the published API, add
+`"env": { "FLAH_DATA": "/absolute/path/to/providers.json", "FLAH_CLIENTS": "/absolute/path/to/openai-clients.json", "FLAH_STATUS": "/absolute/path/to/status.json" }`
+next to `args`. The server needs no API key.
 
 ## Client configuration
 
@@ -68,7 +105,7 @@ Claude Desktop (`claude_desktop_config.json`), from a local checkout:
 }
 ```
 
-Once published, replace `command`/`args` with `"command": "npx", "args": ["-y", "free-llm-api-hub-mcp@VERSION"]`. To pin local files, add `"env": { "FLAH_DATA": "/absolute/path/to/providers.json", "FLAH_CLIENTS": "/absolute/path/to/openai-clients.json", "FLAH_STATUS": "/absolute/path/to/status.json" }`.
+Once published, replace `command`/`args` with `"command": "npx", "args": ["-y", "free-llm-api-hub-mcp@0.2.0"]` (see [With npx](#with-npx)). To pin local files, add `"env": { "FLAH_DATA": "/absolute/path/to/providers.json", "FLAH_CLIENTS": "/absolute/path/to/openai-clients.json", "FLAH_STATUS": "/absolute/path/to/status.json" }`.
 
 Any other MCP host that launches stdio servers takes the same three things: the command (`node`), the arguments (the path to `src/index.js`, optionally `--data <path>`, `--clients <path>` and `--status <path>`), and optionally the `FLAH_DATA` / `FLAH_CLIENTS` / `FLAH_STATUS` environment variables.
 
