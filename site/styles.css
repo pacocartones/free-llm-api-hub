@@ -963,6 +963,10 @@ p.muted a, .prose p a, .prov-summary p a { text-decoration: underline; text-unde
 /* Links inside table cells sit next to plain text (the guides' "source" column, the compare pages' published-speed
    lines): not colour alone (WCAG 1.4.1; axe link-in-text-block). Plain links only: buttons, stamps and pills keep their look. */
 .table-scroll td > a:not([class]), .compare-table td > div:not([class]) > a:not([class]) { text-decoration: underline; text-underline-offset: 2px; }
+/* Guides: a table cell is body text, and some links sit one level down, inside a note or a line of their own (the
+   "Published speed" and "Rated free model" notes, the model-family lines), so the rule above misses them. Every plain
+   link in a guide's table cells is underlined; the colour stays as it is (WCAG 1.4.1; axe link-in-text-block). */
+.guide-prose .table-scroll td a:not([class]) { text-decoration: underline; text-underline-offset: 2px; }
 /* The change history is paged by site/pager.js (the whole list without JavaScript). */
 .pager { display: flex; align-items: center; justify-content: center; gap: 12px; margin: 8px 0 18px; font-family: var(--font-mono); font-size: .85rem; }
 .pager-btn { height: 32px; padding: 0 12px; border-radius: 8px; border: 1px solid var(--border-strong); background: var(--panel); color: var(--text); font: inherit; cursor: pointer; }
