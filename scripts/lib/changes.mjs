@@ -111,12 +111,16 @@ const plural = (n, one, many) => `${n} ${n === 1 ? one : many}`;
 export const weekTitle = (g) =>
   `${g.week} (${g.start} to ${g.end}): ${plural(g.count, 'field change', 'field changes')} across ${plural(g.providers.length, 'provider', 'providers')}`;
 
+// The page that lists a week's changes: the monthly report of the week's newest change. /changes/ is by month and has
+// no per-week anchor, so a feed entry points at the report that holds its rows.
+export const weekHref = (g, { site }) => `${site}/state/${String(g.lastDate).slice(0, 7)}/`;
+
 // RSS 2.0, one <item> per ISO week. Deterministic: pubDate is the date of the
 // newest change in that week, the guid is the week key.
 export const changesRss = (groups, { site }) => {
   const items = groups.map((g) =>
     `    <item><title>${xmlEsc(weekTitle(g))}</title>` +
-    `<link>${xmlEsc(`${site}/changes/#${g.week}`)}</link>` +
+    `<link>${xmlEsc(weekHref(g, { site }))}</link>` +
     `<guid isPermaLink="false">${xmlEsc(`free-llm-api-hub-changes-${g.week}`)}</guid>` +
     `<pubDate>${new Date(g.lastDate + 'T00:00:00Z').toUTCString()}</pubDate>` +
     `<description>${xmlEsc(weekSummary(g))}</description></item>`).join('\n');
@@ -127,6 +131,61 @@ export const changesRss = (groups, { site }) => {
     `    <description>Field-level changes to free LLM API tiers (free tier, rate limits, the catch, flags), grouped by ISO week.</description>\n` +
     (items ? `${items}\n` : '') + `</channel></rss>\n`;
 };
+
+// Atom (RFC 4287), one <entry> per ISO week, from the same grouped weeks as api/v1/changes.json. Deterministic:
+// every date comes from the data (an entry's <updated> is its week's newest change; the feed's is the newest entry,
+// or `updated` when there is none), and the ids are tag URIs (RFC 4151) built from the week key, so an entry keeps
+// its id across rebuilds and a reader never sees a week twice.
+export const ATOM_PATH = '/changes.atom';
+export const atomId = (site, week) => `tag:${new URL(site).hostname},2026:changes${week ? ':' + week : ''}`;
+const rfc3339 = (ymdDate) => `${ymdDate}T00:00:00Z`;
+export const changesAtom = (groups, { site, updated = '1970-01-01' }) => {
+  const newest = groups.reduce((m, g) => (g.lastDate > m ? g.lastDate : m), '');
+  const entries = groups.map((g) =>
+    `  <entry>\n` +
+    `    <id>${xmlEsc(atomId(site, g.week))}</id>\n` +
+    `    <title>${xmlEsc(weekTitle(g))}</title>\n` +
+    `    <updated>${rfc3339(g.lastDate)}</updated>\n` +
+    `    <link rel="alternate" type="text/html" href="${xmlEsc(weekHref(g, { site }))}"/>\n` +
+    `    <summary type="text">${xmlEsc(weekSummary(g))}</summary>\n` +
+    `  </entry>\n`).join('');
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<feed xmlns="http://www.w3.org/2005/Atom">\n` +
+    `  <id>${xmlEsc(atomId(site))}</id>\n` +
+    `  <title>Free LLM API Hub — what changed, week by week</title>\n` +
+    `  <subtitle>Field-level changes to free LLM API tiers (free tier, rate limits, the catch, flags), one entry per ISO week.</subtitle>\n` +
+    `  <updated>${rfc3339(newest || updated)}</updated>\n` +
+    `  <author><name>Free LLM API Hub</name><uri>${xmlEsc(`${site}/`)}</uri></author>\n` +
+    `  <link rel="self" type="application/atom+xml" href="${xmlEsc(site + ATOM_PATH)}"/>\n` +
+    `  <link rel="alternate" type="text/html" href="${xmlEsc(`${site}/changes/`)}"/>\n` +
+    entries + `</feed>\n`;
+};
+
+// The answer-first summary of the latest week with a change, from the data: the providers whose tracked fields changed,
+// the ongoing free tiers that ended (free_type went from an ongoing shape to trial-credit) and the providers added.
+// `changes` are flattened (projected) field changes; `added` is [{ date, slug, name }]. The week is the ISO week of the
+// newest of those dates, never the clock; it reads "This week" only when it is the week of `asOf` (the dataset's date).
+const ONGOING_TYPES = new Set(['perpetual', 'renewing-quota', 'recurring-credit']);
+export const latestWeek = (changes, added = [], { asOf } = {}) => {
+  const newest = [...changes, ...added].reduce((m, c) => (c.date > m ? c.date : m), '');
+  if (!newest) return null;
+  const w = isoWeek(newest);
+  const inWeek = (c) => c.date >= w.start && c.date <= w.end;
+  const weekChanges = changes.filter(inWeek);
+  const weekAdded = added.filter(inWeek);
+  const changed = new Set(weekChanges.map((c) => c.slug));
+  const ended = new Set(weekChanges.filter((c) => c.field === 'free_type' && ONGOING_TYPES.has(c.from) && c.to === 'trial-credit').map((c) => c.slug));
+  return { week: w.key, start: w.start, end: w.end, current: Boolean(asOf) && isoWeek(asOf).key === w.key,
+    changed: changed.size, ended: ended.size, added: weekAdded.length, changes: weekChanges, addedList: weekAdded };
+};
+
+/** "This week (2026-W48, 2026-11-23 to 2026-11-29): 3 providers changed, 1 free tier ended, 2 new." */
+export const latestWeekSentence = (lw) => lw
+  ? `${lw.current ? 'This week' : 'Latest week with changes'} (${lw.week}, ${lw.start} to ${lw.end}): ` +
+    `${plural(lw.changed, 'provider changed', 'providers changed')}, ${plural(lw.ended, 'free tier ended', 'free tiers ended')}, ${lw.added} new.`
+  : `Latest week: ${NOT_STATED} (no change history is available in this build).`;
+
+/** A tracked value for the summary: like formatValue, but a null reads "not stated" (the shared wording). */
+export const summaryValue = (v) => (v === null || v === undefined || v === '' ? NOT_STATED : formatValue(v));
 
 // "Report a change" link for a provider page: GitHub issue forms prefill an
 // input from a query parameter named after the field id (`provider` in

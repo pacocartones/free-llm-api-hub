@@ -1,6 +1,7 @@
 // long-guides.mjs — the long-form guides under /guides/: OpenAI alternatives, production checklist, no card and no
 // phone, one per modality (embeddings, speech, OCR, image generation) and one per use case (coding assistants, RAG,
-// AI agents, a chatbot side project, students). The copy is editorial; every number, limit, flag, date and provider list in it is computed here from
+// AI agents, a chatbot side project, students), and three that rank one structured field (the highest published rate
+// limits, the strongest models by Arena rating, the providers listing each open model family). The copy is editorial; every number, limit, flag, date and provider list in it is computed here from
 // data/providers.json and data/not-free.json at build time, so the pages cannot drift from the data. A provider the
 // copy names by hand (an example, a quote) is looked up in the data and dropped when it no longer qualifies.
 //
@@ -15,6 +16,10 @@ import { capFirst } from './not-stated.mjs';
 import { CONSTRAINTS, constraintState, toHash, explorerHref } from './find.mjs';
 import { plural } from './text.mjs';
 import { escapeAttr, escapeText } from './html.mjs';
+import { MODEL_TIER_THRESHOLDS, MODEL_TIER_MIN_VOTES } from './model-tier.mjs';
+// model-families.mjs imports two helpers from this module; the cycle is safe because neither side calls the other at load.
+import { FAMILY_PATH, familyGroups, familyOf } from './model-families.mjs';
+import { MODEL_SAMPLE_CAVEAT } from './model-pages.mjs';
 
 export const NOT_FREE_HREF = 'not-free/';
 
@@ -148,6 +153,37 @@ export const LONG_GUIDES = [
     blurb: 'No card, no account, renewing quotas, student programs.',
     ogTitle: 'Free AI APIs for students',
     ogSubtitle: 'no card · no account · renewing quotas',
+  },
+  // Rankings and model families: each orders one structured field, so they sit with the "how to choose" guides.
+  {
+    slug: 'free-llm-api-highest-limits',
+    title: 'Free LLM API With the Highest Rate Limits ({n} With Published Numbers)',
+    metaDesc: 'Free LLM APIs ranked by published free limits: requests per day, per minute, tokens. {n} publish numbers; the rest are marked not stated. Checked at source.',
+    h1: 'Free LLM APIs with the highest rate limits',
+    card: 'Highest rate limits',
+    blurb: 'Ranked by published requests and tokens, unit by unit.',
+    ogTitle: 'Free LLM APIs: highest limits',
+    ogSubtitle: 'requests per day · per minute · tokens',
+  },
+  {
+    slug: 'strongest-free-llm-api',
+    title: 'The Strongest Free LLM APIs, Ranked by Arena Rating ({n} Rated)',
+    metaDesc: 'The most powerful free LLM APIs: {n} free models ranked by public LMArena rating, with tier, votes, snapshot date, free limits and the catch for each.',
+    h1: 'The strongest free LLM APIs, by Arena rating',
+    card: 'Strongest free models',
+    blurb: 'Free models ranked by public human-preference rating.',
+    ogTitle: 'The strongest free LLM APIs',
+    ogSubtitle: 'Arena rating · tier · snapshot date',
+  },
+  {
+    slug: 'free-open-source-llm-api',
+    title: 'Free API for Open Models: Qwen, Gemma, DeepSeek, Llama ({n} Providers)',
+    metaDesc: '{n} free APIs listing open model families (Qwen, Gemma, DeepSeek, Llama, GPT-OSS, GLM): the exact model IDs, limits, card and commercial use for each.',
+    h1: 'Free APIs for open models: Qwen, Gemma, DeepSeek, Llama, GPT-OSS and GLM',
+    card: 'Open models (Qwen, Llama…)',
+    blurb: 'Who lists each open model family on a free tier.',
+    ogTitle: 'Free APIs for open models',
+    ogSubtitle: 'Qwen · Gemma · DeepSeek · Llama · GPT-OSS · GLM',
   },
 ];
 
@@ -1577,6 +1613,308 @@ function studentsGuide({ providers, prefix, programs }) {
   return { count: S.noCard.length, answer, body, faq, featured: S.noCard };
 }
 
+// ---------- guides 13 to 15: rankings and model families, read from the structured fields ----------
+// Every rank on these pages is a sort of one structured field (`free_limits`, `model_tier_source`, `models_free`), never
+// an editorial order; an entry without the field is listed as "not stated", never guessed.
+
+// ---------- guide 13: free LLM APIs with the highest rate limits ----------
+// One ranking per unit: a per-second, per-minute, per-day and per-month figure are never converted into one another,
+// because each provider words its own window and scope.
+export const LIMIT_METRICS = [
+  { key: 'requests_per_day', label: 'requests per day', head: 'Requests per day' },
+  { key: 'requests_per_minute', label: 'requests per minute', head: 'Requests per minute' },
+  { key: 'requests_per_second', label: 'requests per second', head: 'Requests per second' },
+  { key: 'tokens_per_day', label: 'tokens per day', head: 'Tokens per day' },
+  { key: 'tokens_per_minute', label: 'tokens per minute', head: 'Tokens per minute' },
+  { key: 'requests_per_month', label: 'requests per month', head: 'Requests per month' },
+  { key: 'tokens_per_month', label: 'tokens per month', head: 'Tokens per month' },
+];
+export const limitOf = (x, key) => (x.free_limits && Number.isFinite(x.free_limits[key]) ? x.free_limits[key] : null);
+export function limitSets(providers) {
+  const text = textLlms(providers);
+  const numbered = text.filter((x) => LIMIT_METRICS.some((m) => limitOf(x, m.key) != null));
+  const ranked = Object.fromEntries(LIMIT_METRICS.map((m) => [m.key,
+    numbered.filter((x) => limitOf(x, m.key) != null).sort((a, b) => limitOf(b, m.key) - limitOf(a, m.key) || byScore(a, b))]));
+  return {
+    verified: providers.filter((x) => x.verified === true).length,
+    text,
+    numbered,
+    unstated: text.filter((x) => !numbered.includes(x)),
+    ranked,
+    metrics: LIMIT_METRICS.filter((m) => ranked[m.key].length),
+  };
+}
+const allLimitsWords = (x) => LIMIT_METRICS.filter((m) => limitOf(x, m.key) != null).map((m) => `${num(limitOf(x, m.key))} ${m.label}`);
+const limitCheckedCell = (x) => {
+  const d = x.free_limits && /^\d{4}-\d{2}-\d{2}$/.test(x.free_limits.checked || '') ? x.free_limits.checked : x.last_verified;
+  return `${time(d)}${limitSource(x) ? ` (${ext(limitSource(x), 'source')})` : ''}`;
+};
+
+function highestLimitsGuide({ providers, prefix }) {
+  const S = limitSets(providers);
+  const L = (x) => provLink(x, prefix);
+  const R = S.ranked;
+  const top = (key) => R[key][0] || null;
+  const noCard = (list) => list.find((x) => x.card_required === false) || null;
+  const commercial = (list) => list.find((x) => x.commercial_ok === true) || null;
+  const scopeOf = (x) => escapeAttr((x.free_limits && x.free_limits.scope) || 'free plan');
+  const figure = (key) => (x) => `${num(limitOf(x, key))} ${LIMIT_METRICS.find((m) => m.key === key).label} (${scopeOf(x)})`;
+  const firstMetric = S.metrics[0];
+  const lead = S.metrics.slice(0, 2).map((m, i) => `${i ? 'by' : 'By'} ${m.label}, ${escapeAttr(top(m.key).name)} is highest at ${num(limitOf(top(m.key), m.key))}`);
+  const trialUnstated = S.unstated.filter((x) => !isOngoing(x));
+  const shared = quoteList(S.numbered, /organi[sz]ation level|not per (api )?key|per account|across all|combined|shared/i, L);
+  const unpublished = S.unstated.filter((x) => UNPUBLISHED_LIMITS.test(x.rate_limits || ''));
+  const c = commercialSplit(S.numbered);
+
+  const answer = `${S.numbered.length} of the ${S.text.length} free text LLMs from the ${S.verified} verified providers in our dataset publish a numeric free limit we record; for the other ${S.unstated.length} it is not stated. ${lead.length ? `${lead.join('; ')}.` : ''} Units and scopes differ, so each metric is ranked on its own and never converted.`;
+
+  const metricTable = (m) => tableHtml(`Free LLM APIs ranked by ${m.label}`, ['Provider', `${m.head}, most first`, 'Scope, in the provider’s words', 'Card and phone', 'Commercial use', 'Checked'],
+    R[m.key].map((x) => [
+      `${L(x)}<br><small>${typeLine(x)}</small>`, `<strong>${num(limitOf(x, m.key))}</strong>`, `<span class="notes">${scopeOf(x)}</span>`,
+      `Card: ${escapeAttr(flagWords(x, 'card_required'))}<br>Phone: ${escapeAttr(flagWords(x, 'phone_required'))}`, commercialWords(x), limitCheckedCell(x),
+    ]));
+  const body =
+    h2('Who this guide is for', 'who-its-for') +
+    p('Developers who need volume from a free tier: a batch job, an evaluation run, a demo that many people try at once, or an agent that makes many calls per task. The headline of a free tier rarely says how much you can send; the structured limits below do, where the provider publishes them.') +
+    p(`Several constraints at once? <a href="${findHref(prefix, { use: 'chat' })}">Find my free API</a> ranks every free text LLM against your answers.`) +
+    h2('The shortlist', 'shortlist') +
+    pickTable('Pick a free LLM API by its published limits', [
+      ...S.metrics.slice(0, 3).map((m) => ({ need: `The most ${m.label}`, x: top(m.key), why: figure(m.key) })),
+      ...(firstMetric ? [
+        { need: `The most ${firstMetric.label}, no card`, x: noCard(R[firstMetric.key]), why: figure(firstMetric.key) },
+        { need: `The most ${firstMetric.label}, commercial use confirmed`, x: commercial(R[firstMetric.key]), why: figure(firstMetric.key) },
+      ] : []),
+    ], L) +
+    related([compareLink(firstMetric ? R[firstMetric.key] : S.numbered, prefix), `<a href="${prefix}collections/renewing-free-tier">Renewing free tier collection</a>`].filter(Boolean)) +
+    h2('The highest limits, metric by metric', 'rankings') +
+    p(`${S.numbered.length} free text LLMs have at least one structured free limit. A provider appears in every table for which it publishes a figure; ${S.numbered.length - S.numbered.filter((x) => allLimitsWords(x).length === 1).length} of them publish more than one.`) +
+    S.metrics.map((m) => `<h3>${escapeAttr(m.head)}</h3>` + metricTable(m)).join('') +
+    h2('Not stated: no numeric free limit recorded', 'not-stated') +
+    p(`For ${S.unstated.length} of the ${S.text.length} free text LLMs the dataset records no structured figure. That is not the same as unlimited: their published limits are below in the provider’s own words, which can be a credit balance, a fair-use policy, a concurrency cap or a figure that only appears in a signed-in console.${trialUnstated.length ? ` ${trialUnstated.length} of them are one-time credits, which the dataset does not give structured limits: a credit is spent, not reset.` : ''}${unpublished.length ? ` ${andList(unpublished.map(L))} publish no numeric free limit at all.` : ''}`) +
+    tableHtml('Free text LLMs with no structured free limit', ['Provider', 'Published limits, in the provider’s words', 'Checked'], S.unstated.map((x) => [
+      `${L(x)}<br><small>${typeLine(x)}</small>`, `${escapeAttr(x.rate_limits)}`, checkedCell(x),
+    ])) +
+    h2('Why the numbers don’t compare directly', 'caveats') +
+    `<ul>` +
+    `<li><strong>Different windows.</strong> A per-second limit, a per-minute limit and a daily quota bind at different moments; a high per-minute figure with a small daily quota runs out by mid-morning. That is why this page ranks each unit separately.</li>` +
+    `<li><strong>Different scopes.</strong> A figure can apply per model, per key, per account or per IP address, and some apply to one named model only. The scope column quotes each one.</li>` +
+    (shared.length ? `<li><strong>Limits shared across keys or models,</strong> in the entries’ own words: ${shared.join('; ')}.</li>` : '') +
+    `<li><strong>A figure is the provider’s, not our measurement.</strong> Each was read on the linked page on the date shown; providers change limits without notice, so a 429 error can come sooner than the table says.</li>` +
+    `<li><strong>Commercial use.</strong> ${c.yes.length} of the ${S.numbered.length} with a structured figure allow commercial use on the free tier, per their terms${c.no.length ? `; ${andList(c.no.map(L))} ${agree(c.no, 'doesn’t', 'don’t')}` : ''}${c.unk.length ? `; for ${c.unk.length} it isn’t confirmed` : ''}.</li>` +
+    `</ul>` +
+    modalityGotchas(S.numbered, L, { what: 'text', catches: false }) +
+    p(`Looking for a provider that isn’t here? <a href="${prefix}${NOT_FREE_HREF}">Which LLM APIs are not free, and why</a> has each provider’s own words and the date we read them.`) +
+    related([`<a href="${prefix}guides/free-llm-api-for-coding">Free LLM APIs for coding assistants</a>`, `<a href="${prefix}guides/free-llm-api-for-ai-agents">Free LLM APIs for AI agents</a>`, `<a href="${prefix}guides/choose-free-llm-api-for-production">Can you use a free API in production?</a>`]);
+
+  const rpdTop = R.requests_per_day.slice(0, 3);
+  const faq = [
+    {
+      q: 'Which free LLM API has the highest rate limits?',
+      a: S.metrics.length
+        ? `It depends on the unit. ${S.metrics.slice(0, 3).map((m) => `By ${m.label}: ${escapeAttr(top(m.key).name)} (${num(limitOf(top(m.key), m.key))})`).join('. ')}. Each figure has its own scope, shown in the tables.`
+        : 'No free text LLM in the dataset has a structured free limit today.',
+    },
+    {
+      q: 'Which free LLM API gives the most requests per day?',
+      a: rpdTop.length
+        ? `Among the ${R.requests_per_day.length} free text LLMs that publish a daily request figure: ${rpdTop.map((x) => `${escapeAttr(x.name)} (${num(limitOf(x, 'requests_per_day'))})`).join(', ')}.`
+        : 'No free text LLM in the dataset publishes a daily request figure today.',
+    },
+    {
+      q: 'Is there a free LLM API with no rate limits?',
+      a: `Our dataset records a numeric free limit for ${S.numbered.length} of the ${S.text.length} free text LLMs. For the other ${S.unstated.length} no figure is stated, which is not the same as unlimited: their own words, in the not-stated table, often bound use by a credit balance, a fair-use policy or a concurrency cap.`,
+    },
+    {
+      q: 'Do the limits apply to every model of a provider?',
+      a: `Not always. Each figure carries the scope the provider gives, shown next to it${top(firstMetric ? firstMetric.key : '') ? `; for example ${escapeAttr(top(firstMetric.key).name)}: “${scopeOf(top(firstMetric.key))}”` : ''}.`,
+    },
+  ];
+  return { count: S.numbered.length, answer, body, faq, featured: S.numbered };
+}
+
+// ---------- guide 14: the strongest free LLM APIs by Arena rating ----------
+// The rating is the one `model_tier` is derived from (lib/model-tier.mjs, docs/methodology.md#model-tier): a public
+// human-preference rating of one model in the provider's free sample, never a benchmark and never estimated.
+export const ratingOf = (x) => (x.model_tier_source && Number.isFinite(x.model_tier_source.rating) ? x.model_tier_source.rating : null);
+export function strongestSets(providers) {
+  const text = textLlms(providers);
+  const rated = text.filter((x) => ratingOf(x) != null && Number.isInteger(x.model_tier))
+    .sort((a, b) => ratingOf(b) - ratingOf(a) || byScore(a, b));
+  return { verified: providers.filter((x) => x.verified === true).length, text, rated, unrated: text.filter((x) => !rated.includes(x)) };
+}
+const familyLink = (id, prefix) => { const f = familyOf(id); return f ? `<a href="${prefix}${FAMILY_PATH}${f.slug}/">${escapeAttr(f.name)} family</a>` : ''; };
+
+function strongestGuide({ providers, prefix }) {
+  const S = strongestSets(providers);
+  const L = (x) => provLink(x, prefix);
+  const src = (x) => x.model_tier_source;
+  const rating = (x) => num(Math.round(ratingOf(x) * 10) / 10);
+  const tierWords = (x) => `tier ${x.model_tier} of 4`;
+  const top = S.rated[0] || null;
+  const tier4 = S.rated.filter((x) => x.model_tier === 4);
+  const pick = (f) => S.rated.find(f) || null;
+  const snapshots = [...new Set(S.rated.map((x) => src(x).snapshot).filter((d) => /^\d{4}-\d{2}-\d{2}$/.test(d || '')))].sort();
+  const near = S.rated.filter((x) => src(x).boundary === true);
+  const families = S.rated.filter((x) => familyOf(src(x).model));
+  const why = (x) => `${code(src(x).model)} rated ${rating(x)} (${tierWords(x)})`;
+  const thresholds = MODEL_TIER_THRESHOLDS.map(([t, r]) => `${t} from ${num(r)}`).join(', ');
+
+  const answer = top
+    ? `${S.rated.length} of the ${S.text.length} free text LLMs from the ${S.verified} verified providers in our dataset have a free model with a public Arena rating. ${escapeAttr(top.name)} rates highest: ${code(src(top).model)} at ${rating(top)}, ${tierWords(top)}. The rating comes from human preference votes, not a benchmark; the other ${S.unrated.length} are not rated, which says nothing either way about their models.`
+    : `None of the ${S.text.length} free text LLMs from the ${S.verified} verified providers in our dataset has a free model with a public Arena rating today.`;
+
+  const ratedCell = (x) => `${wrapCode(src(x).model)}` +
+    (src(x).arena_model && src(x).arena_model !== src(x).model ? `<br><span class="notes">rated as ${wrapCode(src(x).arena_model)} (${src(x).match === 'exact' ? 'same ID' : 'same model, a serving variant'})</span>` : '') +
+    (familyOf(src(x).model) ? `<br><span class="notes">${familyLink(src(x).model, prefix)}</span>` : '');
+  const ratingCell = (x) => `<strong>${rating(x)}</strong>` +
+    (Array.isArray(src(x).ci) && src(x).ci.every(Number.isFinite) ? `<br><span class="notes">95% interval ${num(src(x).ci[0])}–${num(src(x).ci[1])}</span>` : '') +
+    (Number.isFinite(src(x).votes) ? `<br><span class="notes">${num(src(x).votes)} votes</span>` : '');
+  const tierCell = (x) => `${escapeAttr(tierWords(x))}${src(x).boundary === true ? '<br><span class="notes">Near a threshold: could change at the next snapshot</span>' : ''}`;
+  const snapCell = (x) => `${time(src(x).snapshot)}${httpsOnly(src(x).url) ? ` (${ext(src(x).url, 'dataset')})` : ''}`;
+
+  const body =
+    h2('Who this guide is for', 'who-its-for') +
+    p('Developers who want the strongest model they can call for free: for hard reasoning, writing or evaluation, where a small fast model is not enough. If speed or volume matters more, see the coding guide’s published speeds and the rate-limit ranking.') +
+    p(`Several constraints at once? <a href="${findHref(prefix, { use: 'chat' })}">Find my free API</a> ranks every free text LLM against your answers; its score already counts this rating.`) +
+    h2('How the rating works', 'rating') +
+    p(`Each rated provider has one model of its free sample matched by hand to the LMArena Arena leaderboard dataset (text, style control, overall): an Elo-style rating from human preference votes, with the effect of answer length and formatting discounted. A row counts only with at least ${num(MODEL_TIER_MIN_VOTES)} votes, and no similar model is ever substituted. The tier is the site’s own, from public thresholds: ${thresholds}, 0 below. One-time trial credits are not rated. Details are in the <a href="${prefix}methodology/">methodology</a>.`) +
+    h2('The shortlist', 'shortlist') +
+    pickTable('Pick a free LLM API by Arena rating', [
+      { need: 'The highest-rated free model', x: top, why },
+      { need: 'The highest rated, no card', x: pick((x) => x.card_required === false), why },
+      { need: 'The highest rated, commercial use confirmed', x: pick((x) => x.commercial_ok === true), why },
+      { need: 'The highest rated, says it doesn’t train on your inputs', x: pick((x) => x.data_policy && x.data_policy.trains_on_prompts === false), why },
+      { need: 'The highest rated with a structured daily limit', x: pick((x) => rpd(x) != null), why: (x) => `${why(x)}; ${num(rpd(x))} requests per day (${escapeAttr(x.free_limits.scope || 'free plan')})` },
+    ], L) +
+    related([compareLink(S.rated, prefix), `<a href="${prefix}best/">The best free LLM APIs by score</a>`, `<a href="${prefix}collections/renewing-free-tier">Renewing free tier collection</a>`].filter(Boolean)) +
+    h2('Every rated free LLM, strongest first', 'ranking') +
+    (S.rated.length
+      ? tableHtml('Free LLM APIs ranked by Arena rating', ['Provider', 'Rated free model', 'Rating', 'Tier', 'Structured free limits', 'Card and phone', 'Commercial use', 'Snapshot'], S.rated.map((x) => [
+        `${L(x)}<br><small>${typeLine(x)}</small>`, ratedCell(x), ratingCell(x), tierCell(x), limitsCell(x),
+        `Card: ${escapeAttr(flagWords(x, 'card_required'))}<br>Phone: ${escapeAttr(flagWords(x, 'phone_required'))}`, commercialWords(x), snapCell(x),
+      ]))
+      : p('No free text LLM in the dataset has a rated free model today.')) +
+    (families.length ? p(`${families.length} of the ${S.rated.length} rated models belong to an open model family with its own page: ${andList(families.map((x) => `${L(x)} (${wrapCode(src(x).model)}, ${familyLink(src(x).model, prefix)})`))}.`) : '') +
+    h2('Not rated', 'not-rated') +
+    p(`${S.unrated.length} free text LLMs have no rated free model: no model in their free sample has an exact or variant match on the leaderboard with enough votes, or the offer is a one-time credit. Not rated is not a verdict: ${andList(S.unrated.map(L))}.`) +
+    h2('What the rating doesn’t tell you', 'caveats') +
+    `<ul>` +
+    `<li><strong>Preference, not capability.</strong> People vote for the answer they prefer. A rating says nothing about a model’s coding accuracy, context length or tool calling.</li>` +
+    `<li><strong>One model per provider.</strong> The rating is of the strongest rated model in the free sample, not of every model the provider serves, and the free limits on that model can be tighter than the provider’s headline.</li>` +
+    `<li><strong>Snapshots move.</strong> ${snapshots.length ? `The ratings here are from the snapshot${snapshots.length > 1 ? 's' : ''} of ${andList(snapshots.map(time))}. ` : ''}${near.length ? `${andList(near.map(L))} ${agree(near, 'sits', 'sit')} near a tier threshold, so ${agree(near, 'its', 'their')} tier could change at the next one.` : 'None sits near a tier threshold today.'}</li>` +
+    `<li><strong>The model list is a sample.</strong> ${escapeAttr(MODEL_SAMPLE_CAVEAT)}</li>` +
+    `</ul>` +
+    modalityGotchas(S.rated, L, { what: 'text', catches: false }) +
+    p(`Looking for a provider that isn’t here? <a href="${prefix}${NOT_FREE_HREF}">Which LLM APIs are not free, and why</a> has each provider’s own words and the date we read them.`) +
+    related([`<a href="${prefix}guides/free-llm-api-highest-limits">Free LLM APIs with the highest rate limits</a>`, `<a href="${prefix}guides/free-open-source-llm-api">Free APIs for open models</a>`, `<a href="${prefix}models/">Free model index</a>`]);
+
+  const faq = [
+    {
+      q: 'What is the most powerful free LLM API?',
+      a: top
+        ? `By public human-preference rating: ${S.rated.slice(0, 3).map((x) => `${escapeAttr(x.name)} (${escapeAttr(src(x).model)}, ${rating(x)})`).join(', ')}. ${S.unrated.length} of the ${S.text.length} free text LLMs are not rated, so a strong model may simply be missing from the ranking.`
+        : 'No free text LLM in the dataset has a rated free model today.',
+    },
+    {
+      q: 'Which free LLM APIs have a tier-4 model?',
+      a: tier4.length ? `${names(tier4)}: ${agree(tier4, 'its', 'their')} rated free model scores ${num(MODEL_TIER_THRESHOLDS[0][1])} or more.` : `None today: no rated free model scores ${num(MODEL_TIER_THRESHOLDS[0][1])} or more.`,
+    },
+    {
+      q: 'How is the rating measured?',
+      a: `It is the LMArena Arena rating of one model in the provider’s free sample, from human preference votes with style control, counted only with at least ${num(MODEL_TIER_MIN_VOTES)} votes. It measures preference, not capability.`,
+    },
+    {
+      q: 'Why is a provider not rated?',
+      a: 'Either no model in its free sample matches a leaderboard row exactly or as a serving variant with enough votes, or its free access is a one-time credit, which is not rated. A similar model is never used instead.',
+    },
+  ];
+  return { count: S.rated.length, answer, body, faq, featured: S.rated };
+}
+
+// ---------- guide 15: free APIs for open models (the six model families) ----------
+// The families and the rule that puts an ID in one are lib/model-families.mjs's, so the counts here are the family
+// pages' counts. Like those pages, a provider "lists" a model in its free sample; it is never said to "offer" it.
+export function openModelSets(providers) {
+  const groups = familyGroups(providers);
+  const seen = new Set(groups.flatMap((g) => g.entries.map((e) => e.p.slug)));
+  const all = providers.filter((x) => seen.has(x.slug)).sort(byScore);
+  const familiesOf = (x) => groups.map((g) => ({ g, e: g.entries.find((e) => e.p.slug === x.slug) })).filter(({ e }) => e).map(({ g, e }) => ({ family: g, ids: e.ids }));
+  return { verified: providers.filter((x) => x.verified === true).length, groups, all, familiesOf };
+}
+
+function openModelsGuide({ providers, prefix }) {
+  const S = openModelSets(providers);
+  const L = (x) => provLink(x, prefix);
+  const fHref = (g) => `${prefix}${FAMILY_PATH}${g.slug}/`;
+  const fLink = (g) => `<a href="${fHref(g)}">${escapeAttr(g.name)}</a>`;
+  const byCount = [...S.groups].sort((a, b) => b.entries.length - a.entries.length);
+  const multi = S.all.filter((x) => S.familiesOf(x).length >= 3).sort((a, b) => S.familiesOf(b).length - S.familiesOf(a).length || byScore(a, b));
+  const easyOf = (g) => (g.entries.find((e) => isOngoing(e.p) && e.p.card_required === false) || null);
+  const idsOf = (ids) => andList(ids.map(wrapCode));
+  const allNames = andList(S.groups.map((g) => escapeAttr(g.name)));
+
+  const answer = `${S.all.length} of the ${S.verified} verified providers in our dataset list a model from at least one of ${S.groups.length} open model families (${allNames}) in their free-model sample. ${byCount[0] ? `${escapeAttr(byCount[0].name)} is listed most widely, by ${byCount[0].entries.length}. ` : ''}${multi.length} list three families or more. The dataset records the model IDs, not their licences, so check each model card.`;
+
+  const familyRow = (g) => {
+    const ongoing = g.entries.filter((e) => isOngoing(e.p)).length;
+    const easy = easyOf(g);
+    return [fLink(g), String(g.entries.length), `${ongoing} ongoing, ${g.entries.length - ongoing} one-time credit`,
+      easy ? `${L(easy.p)}<br><span class="notes">${idsOf(easy.ids)}</span>` : '<span class="notes">None in the data today</span>'];
+  };
+  // Each family link in its own block, so it never sits in running text (the links in a table cell carry no underline).
+  const familiesCell = (x) => S.familiesOf(x).map(({ family, ids }) => `<div>${fLink(family)}</div><div class="notes">${idsOf(ids)}</div>`).join('');
+
+  const body =
+    h2('Who this guide is for', 'who-its-for') +
+    p('Developers who want an open model family (to compare a hosted call with a model they may later run themselves, to avoid lock-in to one vendor’s proprietary model, or simply because they prefer it) and want to know who lists it on a free tier. Each family has its own page with every provider and the exact model IDs.') +
+    p(`Several constraints at once? <a href="${findHref(prefix, { use: 'chat' })}">Find my free API</a> ranks every free text LLM against your answers.`) +
+    h2('The families at a glance', 'families') +
+    tableHtml('Free API providers per open model family', ['Family', 'Providers', 'Ongoing or credit', 'First renewing, no-card provider'], byCount.map(familyRow)) +
+    h2('The shortlist', 'shortlist') +
+    p('One provider per family: a renewing free tier with no card, in the family pages’ own order.') +
+    pickTable('Pick a free API for an open model', S.groups.map((g) => {
+      const e = easyOf(g);
+      return { need: `${g.name}, renewing, no card`, x: e ? e.p : null, why: () => `Lists ${idsOf(e.ids)} in its free-model sample` };
+    }), L) +
+    related([compareLink(S.all, prefix), `<a href="${prefix}models/">Free model index</a>`, `<a href="${prefix}collections/renewing-free-tier">Renewing free tier collection</a>`].filter(Boolean)) +
+    h2('Every provider, with the families it lists', 'providers') +
+    p(`${S.all.length} providers, by our score. The IDs are the ones in each provider’s free-model sample, exactly as written.${multi.length ? ` ${andList(multi.map((x) => `${L(x)} (${S.familiesOf(x).length})`))} list the most families.` : ''}`) +
+    tableHtml('Free API providers listing open model families', ['Provider', 'Families and model IDs listed', 'Card and phone', 'Commercial use', 'Structured free limits', 'Checked'], S.all.map((x) => [
+      `${L(x)}<br><small>${typeLine(x)}</small>`, familiesCell(x),
+      `Card: ${escapeAttr(flagWords(x, 'card_required'))}<br>Phone: ${escapeAttr(flagWords(x, 'phone_required'))}`, commercialWords(x), limitsCell(x), checkedCell(x),
+    ])) +
+    h2('What “listed” means here', 'caveats') +
+    `<ul>` +
+    `<li><strong>The model list is a sample.</strong> ${escapeAttr(MODEL_SAMPLE_CAVEAT)}</li>` +
+    `<li><strong>Licences aren’t recorded.</strong> A family name in an ID says which family the model belongs to, not its licence or whether that exact version’s weights are published. Read the model card before you rely on either.</li>` +
+    `<li><strong>An ID counts by its name.</strong> Any ID that names a family counts, embedding and vision models included; the IDs are shown so you can tell a chat model from the rest.</li>` +
+    `<li><strong>${S.groups.length} families, fixed.</strong> These are the families with their own pages. Models from other open families are in the <a href="${prefix}models/">free model index</a>.</li>` +
+    `</ul>` +
+    modalityGotchas(S.all, L, { what: 'models', catches: false }) +
+    p(`Looking for a provider that isn’t here? <a href="${prefix}${NOT_FREE_HREF}">Which LLM APIs are not free, and why</a> has each provider’s own words and the date we read them.`) +
+    related([`<a href="${prefix}guides/strongest-free-llm-api">The strongest free LLM APIs by Arena rating</a>`, `<a href="${prefix}guides/free-llm-api-highest-limits">Free LLM APIs with the highest rate limits</a>`, `<a href="${prefix}guides/openai-api-alternatives">Free OpenAI API alternatives</a>`]);
+
+  const faq = [
+    {
+      q: 'Where can I use open-source LLMs for free via API?',
+      a: `${S.all.length} of the ${S.verified} verified providers in our dataset list a model from ${allNames} in their free-model sample. By family: ${byCount.map((g) => `${escapeAttr(g.name)} ${g.entries.length}`).join(', ')}.`,
+    },
+    {
+      q: 'Which free API lists the most open model families?',
+      a: multi.length ? `${names(multi.slice(0, 4))} ${agree(multi.slice(0, 4), 'lists', 'list')} three or more of the ${S.groups.length} families in ${agree(multi.slice(0, 4), 'its', 'their')} free-model sample.` : `None lists three or more of the ${S.groups.length} families today.`,
+    },
+    {
+      q: 'Are these models open source?',
+      a: 'The dataset records which model IDs a provider lists, not their licences or whether that exact version’s weights are published. Check the model card before you rely on either.',
+    },
+    {
+      q: 'Which open model family is easiest to use for free with no card?',
+      a: `Per family, the first renewing, no-card provider in the family pages’ order: ${S.groups.map((g) => { const e = easyOf(g); return `${escapeAttr(g.name)}: ${e ? escapeAttr(e.p.name) : 'none today'}`; }).join('; ')}.`,
+    },
+  ];
+  return { count: S.all.length, answer, body, faq, featured: S.all };
+}
+
 const RENDER = {
   'openai-api-alternatives': alternativesGuide,
   'choose-free-llm-api-for-production': productionGuide,
@@ -1590,6 +1928,9 @@ const RENDER = {
   'free-llm-api-for-ai-agents': agentsGuide,
   'free-chatbot-api': chatbotGuide,
   'free-ai-api-for-students': studentsGuide,
+  'free-llm-api-highest-limits': highestLimitsGuide,
+  'strongest-free-llm-api': strongestGuide,
+  'free-open-source-llm-api': openModelsGuide,
 };
 
 /** The page parts of one long guide: { count, answer, body, faq, featured, title, metaDesc }. `programs`

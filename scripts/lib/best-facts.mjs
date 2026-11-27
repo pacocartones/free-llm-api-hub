@@ -5,7 +5,7 @@ import { escapeHtml } from './html.mjs';
 import { timeHtml } from './dates.mjs';
 import { safeUrl } from './text.mjs';
 
-const NOT_STATED = 'not stated';
+import { NOT_STATED } from './not-stated.mjs';
 const text = (v) => (typeof v === 'string' && v.trim() ? v.trim() : '');
 
 const source = (p) => {

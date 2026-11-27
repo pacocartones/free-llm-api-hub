@@ -14,10 +14,8 @@ import { NOT_STATED, capFirst as cap } from './not-stated.mjs';
 import { fieldCheck } from './field-checks.mjs';
 import { safeHttp as safeUrl } from './text.mjs';
 
-export { NOT_STATED };
-
-const isIso = (d) => ISO.test(String(d || ''));
-const noFinalStop = (s) => String(s ?? '').trim().replace(/[\s.;:,]+$/, '');
+export const isIso = (d) => ISO.test(String(d || ''));
+export const noFinalStop = (s) => String(s ?? '').trim().replace(/[\s.;:,]+$/, '');
 // A sentence that already ends in the ellipsis of a cut text takes no extra full stop.
 const stop = (s) => (/…$/.test(String(s)) ? '' : '.');
 
@@ -40,15 +38,15 @@ export function flagWords(field, value) {
 const RENEWS = { 'renewing-quota': 'a quota that renews', 'recurring-credit': 'a credit that renews', perpetual: 'no end date' };
 
 /** The headline of the free offer: the published numeric limits when there are any, else the free_tier text, cut. */
-function headline(p) {
+export function headline(p, max = 140) {
   const figures = limitFigures(p.free_limits);
   if (figures.length) return { field: 'free_limits', value: figures.join(', ') };
-  if (p.free_tier) return { field: 'free_tier', value: noFinalStop(trimAtWord(p.free_tier, 140)) };
+  if (p.free_tier) return { field: 'free_tier', value: noFinalStop(trimAtWord(p.free_tier, max)) };
   return { field: 'free_tier', value: NOT_STATED };
 }
 
 /** The date (and page) behind a flag: its field check when there is one, else the record's last verification. */
-function flagSource(p, field) {
+export function flagSource(p, field) {
   const check = fieldCheck(p, field);
   if (check && isIso(check.checked)) return { date: check.checked, source: safeUrl((check.sources || [])[0]) || safeUrl(p.docs_url) };
   return { date: isIso(p.last_verified) ? p.last_verified : null, source: safeUrl(p.docs_url) };
@@ -229,10 +227,15 @@ export function providerFaqHtml(p, items = providerFaq(p)) {
   return `<h2 id="faq">${htmlEsc(p.name)} FAQ</h2>${html}`;
 }
 
-/** The FAQPage node for the page's JSON-LD @graph: the same questions and answers, in plain text. */
-export function providerFaqJsonLd(p, items = providerFaq(p)) {
+/** A FAQPage node for a JSON-LD @graph from FAQ items ({ q, a } in plain text); compare pages use it too. */
+export function faqPageJsonLd(items) {
   return {
     '@type': 'FAQPage',
     mainEntity: items.map((it) => ({ '@type': 'Question', name: it.q, acceptedAnswer: { '@type': 'Answer', text: it.a } })),
   };
+}
+
+/** The FAQPage node for the page's JSON-LD @graph: the same questions and answers, in plain text. */
+export function providerFaqJsonLd(p, items = providerFaq(p)) {
+  return faqPageJsonLd(items);
 }
