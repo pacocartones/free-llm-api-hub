@@ -73,6 +73,8 @@ export const SECTION_OGS = [
   { file: 'find.png', label: 'FIND MY FREE API', title: 'A shortlist of free APIs that fit you', subtitle: 'six questions · ranked · not stated is never yes' },
   // The long-form guides carry fixed text too (no count), so a dataset change never stales their image.
   ...LONG_GUIDES.map((g) => ({ file: `guides/${g.slug}.png`, label: 'GUIDE', title: g.ogTitle, subtitle: g.ogSubtitle })),
+  { file: 'limits.png', label: 'FREE TIER LIMITS', title: 'Free tier limits, with sources', subtitle: 'requests · tokens · card · phone · data policy' },
+  { file: 'alternatives.png', label: 'ALTERNATIVES', title: 'Free alternatives, from the data', subtitle: 'same modality · card · phone · limits' },
 ];
 
 // The manifest every data-dependent OG must match: file name -> fingerprint of

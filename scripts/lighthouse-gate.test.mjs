@@ -82,7 +82,7 @@ test('a failing audit in any raw run survives the median score envelope', () => 
 
 // The pages the gate measures are written in two places, the script and the comment of the workflow. They must agree,
 // and the pages that carry the tables and the comparison have to be among them.
-test('the gate measures all twenty-two routes, and the workflow says which pages it measures', () => {
+test('the gate measures all twenty-four routes, and the workflow says which pages it measures', () => {
   const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
   const script = readFileSync(join(ROOT, 'scripts/lighthouse-gate.mjs'), 'utf8');
   const workflow = readFileSync(join(ROOT, '.github/workflows/lighthouse.yml'), 'utf8');
@@ -91,11 +91,13 @@ test('the gate measures all twenty-two routes, and the workflow says which pages
   const fixed = [...list[1].matchAll(/'(\/[^']*)'/g)].map((m) => m[1]);
   for (const page of ['/quality/', '/free-gpu/', '/coding-tools/', '/compare/', '/find/', '/data-policy/', '/guides-and-collections/', '/not-free/', '/embed/', '/free-api/qwen/']) assert.ok(fixed.includes(page), `the gate measures ${page}`);
   for (const page of fixed.filter((p) => p !== '/')) assert.ok(workflow.includes(page), `the workflow names ${page}`);
-  // two more pages than the fixed ones: the provider page and the model page come from the dataset
+  // four more pages than the fixed ones: the provider page, the model page, one limits page and one alternatives page come from the dataset
   assert.match(script, /pages\.push\(`\/models\/\$\{modelSample\.key\}\/`\)/, 'the gate measures one model page');
   assert.ok(workflow.includes('/models/'), 'the workflow names the model page');
-  const count = fixed.length + 2;
-  const words = { 4: 'four', 5: 'five', 6: 'six', 7: 'seven', 8: 'eight', 9: 'nine', 16: 'sixteen', 17: 'seventeen', 18: 'eighteen', 19: 'nineteen', 20: 'twenty', 21: 'twenty-one', 22: 'twenty-two' };
+  assert.match(script, /for \(const dir of \['limits', 'alternatives'\]\)/, 'the gate measures one limits and one alternatives page');
+  assert.ok(workflow.includes('/limits/') && workflow.includes('/alternatives/'), 'the workflow names them');
+  const count = fixed.length + 4;
+  const words = { 4: 'four', 5: 'five', 6: 'six', 7: 'seven', 8: 'eight', 9: 'nine', 16: 'sixteen', 17: 'seventeen', 18: 'eighteen', 19: 'nineteen', 20: 'twenty', 21: 'twenty-one', 22: 'twenty-two', 23: 'twenty-three', 24: 'twenty-four' };
   assert.ok(workflow.includes(`on ${words[count]} pages`) && workflow.includes(`Measure the ${words[count]} pages`), `the workflow says ${words[count]} pages`);
   assert.ok(script.includes(`on ${words[count]} pages`), `the script header says ${words[count]} pages`);
 });

@@ -184,12 +184,22 @@ function shortlistHtml(group, prefix) {
     `</ul>`;
 }
 
+// The providers of the family that have a free tier limits page (/limits/<slug>/), which carries their limits, flags and
+// data policy with every source: linked, not repeated here. Nothing when none has one.
+function limitPagesHtml(group, prefix, limitPages) {
+  const ps = group.entries.map((e) => e.p).filter((p) => limitPages.has(p.slug));
+  if (!ps.length) return '';
+  return `<p>Free tier limits in full, with sources: ` +
+    andList(ps.map((p) => `<a href="${prefix}limits/${escapeHtml(p.slug)}/">${escapeHtml(p.name)}</a>`)) + `.</p>`;
+}
+
 /**
  * The <main> of a family page, hero included. `asOf` is the dataset date; `prefix` reaches the site root;
  * `modelHref(id)` is the per-model page of an ID ('' when it has none); `others` are the other family groups; `repo` and
- * `pageUrl` build each row's "Report a mistake" link (without `repo`, it points to /contributing/).
+ * `pageUrl` build each row's "Report a mistake" link (without `repo`, it points to /contributing/); `limitPages` the
+ * slugs that have a /limits/<slug>/ page, linked under the shortlist (none when empty).
  */
-export function familyPageMainHtml(group, { asOf, prefix = '../../', modelHref = () => '', others = [], repo = '', pageUrl = '' } = {}) {
+export function familyPageMainHtml(group, { asOf, prefix = '../../', modelHref = () => '', others = [], repo = '', pageUrl = '', limitPages = new Set() } = {}) {
   const related = others.filter((o) => o.slug !== group.slug)
     .map((o) => `<a href="${prefix}${FAMILY_PATH}${o.slug}/">${escapeHtml(o.name)}</a>`).join('');
   return `<section class="page-hero model-hero"><div class="wrap"><nav class="crumbs" aria-label="Breadcrumb"><a href="${prefix}">Home</a> / <a href="${prefix}models/">Free model index</a> / ${escapeHtml(group.name)}</nav>` +
@@ -198,7 +208,8 @@ export function familyPageMainHtml(group, { asOf, prefix = '../../', modelHref =
     `<p class="answer"><strong>${escapeHtml(familyAnswer(group, asOf))}</strong></p>` +
     `<p class="muted">${escapeHtml(MODEL_SAMPLE_CAVEAT)} Model samples are not part of the dataset's verified core claim; the limits, flags and dates are.</p>` +
     (group.entries.length
-      ? `<h2 id="providers">Providers listing ${escapeHtml(group.name)} for free</h2>` + tableHtml(group, { prefix, modelHref, repo, pageUrl }) + shortlistHtml(group, prefix)
+      ? `<h2 id="providers">Providers listing ${escapeHtml(group.name)} for free</h2>` + tableHtml(group, { prefix, modelHref, repo, pageUrl }) + shortlistHtml(group, prefix) +
+        limitPagesHtml(group, prefix, limitPages)
       : `<p>See the <a href="${prefix}models/">free model index</a> for the models that are listed.</p>`) +
     `<p>Need a specific setup? <a href="${prefix}find/">Find my free API</a> filters every provider by card, phone and commercial use, and <a href="${prefix}compare/">Compare</a> puts two to four side by side.</p>` +
     (related ? `<h2>Other model families</h2><nav class="colls">${related}</nav>` : '') +

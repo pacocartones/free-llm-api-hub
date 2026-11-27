@@ -4,7 +4,7 @@
 // appear only with the provider page they come from and the day they were read, and a section with nothing
 // to show is left out (or reduced to one line) instead of repeating filler on every page.
 
-import { escapeHtml } from './html.mjs';
+import { escapeAttr, escapeHtml } from './html.mjs';
 import { ICON } from './rows.mjs';
 import { timeHtml } from './dates.mjs';
 import { NOT_STATED, NOT_STATED_HTML } from './not-stated.mjs';
@@ -75,6 +75,25 @@ export function checkSourceHtml(check) {
   const quote = check.status === 'stated' && check.quote ? `&ldquo;${escapeHtml(check.quote)}&rdquo; ` : '';
   const lead = check.status === 'stated' ? 'Per' : 'Read';
   return `<div class="req-source muted">${quote}${pages ? `${lead} ${pages}, ` : ''}checked ${timeHtml(check.checked, escapeHtml)}.${check.note ? ` ${escapeHtml(check.note)}` : ''}</div>`;
+}
+
+/**
+ * "Get a free key": the provider's own key page, exactly as its docs link it (keys_url), or '' without one. Shared by the
+ * provider page and its /limits/ page. Tagged data-link="keys" by tagProviderLinks, so a click is an
+ * outbound_provider_click (consent-gated).
+ */
+export function keysButtonHtml(p, { providerPage = false } = {}) {
+  // "Copy base URL" and "Compare with…" only on the provider page: the copy status line and #compare live there.
+  const baseCopy = providerPage && p.openai_base_url
+    ? `<button type="button" class="btn api-copy base-copy" data-api-url="${escapeAttr(p.openai_base_url)}" data-label="Copy base URL" data-copy-fail="Copy failed. Select the base URL in the quickstart and copy it by hand.">Copy base URL</button>`
+    : '';
+  if (!p.keys_url && !baseCopy) return '';
+  return `<div class="prov-actions prov-key">` +
+    (p.keys_url ? `<a class="btn primary" href="${escapeAttr(p.keys_url)}" target="_blank" rel="noopener">Get a free key ↗</a>` : '') +
+    baseCopy + (providerPage ? `<a class="prov-compare" href="#compare">Compare with…</a>` : '') +
+    (baseCopy ? `<span class="api-copy-status" role="status"></span>` : '') +
+    (p.keys_url ? `<p class="muted prov-key-hint">Sign up or sign in on ${escapeAttr(p.name)}'s own site, then create an API key there.</p>` : '') +
+    `</div>`;
 }
 
 /**

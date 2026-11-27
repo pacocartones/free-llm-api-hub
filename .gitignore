@@ -7,6 +7,8 @@ _internal-docs/
 site/providers.json
 site/collections/
 site/models/
+site/limits/
+site/alternatives/
 site/free-api/
 site/guides/
 site/guides-and-collections/

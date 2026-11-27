@@ -18,7 +18,7 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join, relative } from 'node:path';
 import { recScore, intentRank, recommendedCmp, FREE_TYPE_RANK, freeTypeRank, FLAG_PAIRS, SLA_DAYS, DUE_SOON_DAYS, ageInDays, freshnessColor, freshnessBadge, freshnessStatus } from './lib/rules.mjs';
 import * as rows from './lib/rows.mjs';
-import { escapeAttr, escapeText } from './lib/html.mjs';
+import { escapeAttr, escapeHtml, escapeText } from './lib/html.mjs';
 import * as sortLib from './lib/sort.mjs';
 import { esc, stripTags } from './lib/escape.mjs';
 import { mineHistoryAndSnapshots, HISTORY_FIELDS } from './lib/history.mjs';
@@ -51,7 +51,7 @@ import * as compareLib from './lib/compare.mjs';
 import { redirectErrors, redirectEntries, redirectFile } from './lib/redirects.mjs';
 import * as findLib from './lib/find.mjs';
 import { FIND_PATH, FIND_TITLE, FIND_DESC, findMainHtml, findJsonLd } from './lib/find-page.mjs';
-import { requirementsHtml, limitsHtml, glanceHtml, modelsHtml, dataPolicyHtml, speedHtml } from './lib/provider-sections.mjs';
+import { requirementsHtml, limitsHtml, glanceHtml, modelsHtml, dataPolicyHtml, speedHtml, keysButtonHtml } from './lib/provider-sections.mjs';
 import { aboutHtml } from './lib/provider-summaries.mjs';
 import { fontHead, fingerprintSite } from './lib/assets.mjs';
 import { auraHtml, auraSpec } from './lib/aura.mjs';
@@ -95,6 +95,10 @@ import { LONG_GUIDES, longGuidePage } from './lib/long-guides.mjs';
 import { staleClaimErrors, staleClaimsFor, staleClaimsHtml } from './lib/stale-claims.mjs';
 import { readmeHeadline, withReadmeHeadline } from './lib/readme-headline.mjs';
 import { apiExamplesHtml, apiExamplesMarkdown } from './lib/api-examples.mjs';
+import {
+  hasLimitsPage, limitsPageTitle, limitsPageDescription, limitsPageMainHtml, limitsPageJsonLd,
+  alternativesPages, notFreeOriginals, alternativesPageTitle, alternativesPageDescription, alternativesPageMainHtml, alternativesPageJsonLd, providerLongtailHtml,
+} from './lib/longtail-pages.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const FRESH_DAYS = SLA_DAYS; // the freshness SLA, defined once in lib/rules.mjs
@@ -666,7 +670,7 @@ ${contributeBtn(p)}
 
 const siteFooter = (p) => `<footer class="site-footer"><div class="wrap footer-top">
 <div class="footer-brand"><a class="foot-brand-link" href="${p}" aria-label="Free LLM API Hub — home"><svg class="logo-mark"><use href="#logo"/></svg><span class="brand-name">Free LLM API <span class="grad">Hub</span></span></a><p>The <strong>continuously-verified</strong>, <strong>machine-readable</strong> dataset of <strong>free LLM &amp; AI-model APIs</strong> and <strong>trial credits</strong> — every entry <strong>dated</strong>, <strong>sourced</strong>, and <strong>free of dead links</strong>.</p><img class="trust-badge" src="${p}badge-verified.svg" alt="Verified providers" width="${BADGE_W}" height="20" loading="lazy"><a class="star-btn" href="${REPO}" target="_blank" rel="noopener"><span class="sb-label">${GH_ICON} Star on GitHub</span><span class="sb-count" data-stars>★</span></a></div>
-<div class="footer-col"><h2 class="footer-h">Explore</h2><a href="${p}models/">Free model index</a><a href="${p}guides-and-collections/">Guides &amp; collections</a><a href="${p}programs/startups">Startup credits</a><a href="${p}programs/research">Student &amp; research credits</a><a href="${p}free-gpu/">Free GPU compute</a><a href="${p}coding-tools/">Free AI coding tools</a><a href="${p}not-free/">Not free (and why)</a></div>
+<div class="footer-col"><h2 class="footer-h">Explore</h2><a href="${p}models/">Free model index</a><a href="${p}limits/">Free tier limits</a><a href="${p}alternatives/">Free alternatives</a><a href="${p}guides-and-collections/">Guides &amp; collections</a><a href="${p}programs/startups">Startup credits</a><a href="${p}programs/research">Student &amp; research credits</a><a href="${p}free-gpu/">Free GPU compute</a><a href="${p}coding-tools/">Free AI coding tools</a><a href="${p}not-free/">Not free (and why)</a></div>
 <div class="footer-col"><h2 class="footer-h">Data</h2><a href="${p}providers.json">providers.json</a><a href="${p}api/">JSON API</a><a href="${p}llms.txt">llms.txt</a><a href="${p}data-policy/">Who trains on your data</a><a href="${p}coverage/">Data coverage</a><a href="${p}quality/">Data quality</a><a href="${p}embed/">Use the data</a></div>
 <div class="footer-col"><h2 class="footer-h">Project</h2><a href="${p}updates">Updates</a><a href="${p}changes/">What changed</a><a href="${p}submit/">Submit</a><a href="${p}methodology/">Methodology</a><a href="${p}contributing/">Contributing</a><a href="${p}contributors/">Contributors</a><a href="${p}agreements/">Agreements</a></div>
 </div><div class="wrap footer-bottom"><p>Terms change without notice; always confirm against each provider's own docs. MIT licensed.</p><p class="foot-legal"><a href="${p}legal/privacy">Privacy</a> · <a href="${p}legal/terms">Terms</a></p><p class="foot-email"><a href="mailto:admin@freellmapihub.com">admin@freellmapihub.com</a></p></div></footer>`;
@@ -1354,6 +1358,15 @@ const modelPageHref = (prefix) => (id) => { const k = modelKey(id); return k && 
 // The model-family pages behind /free-api/<family>/ (lib/model-families.mjs), built after the model pages.
 const FAMILY_GROUPS = familyGroups(providers);
 
+// Long-tail pages (lib/longtail-pages.mjs): /limits/<slug>/ and /alternatives/<slug>/, built only for the entries that pass
+// their template's threshold. Provider pages link to the ones that exist; the pages are written after the model pages.
+const LIMIT_PROVIDERS = providers.filter((p) => hasLimitsPage(p, ASOF));
+const LIMIT_SLUGS = new Set(LIMIT_PROVIDERS.map((p) => p.slug));
+const ALT_PAGES = alternativesPages(providers, ASOF, { notFree: NOT_FREE });
+const ALT_SLUGS = new Set(ALT_PAGES.map(({ p }) => p.slug));
+// The long-tail pages and the model-family pages (/free-api/<family>/) link each other instead of repeating each other.
+const INDEXABLE_FAMILIES = FAMILY_GROUPS.filter(isFamilyIndexable);
+const NOT_FREE_ORIGINALS = notFreeOriginals(NOT_FREE);
 // The last block of every provider page: its badge on /embed/ and, for a provider on /not-free/, why. One function,
 // appended after the change history, so a change to the section order elsewhere does not touch it.
 const notFreeBySlug = new Map(NOT_FREE.entries.filter((e) => e.slug).map((e) => [e.slug, e]));
@@ -1418,21 +1431,10 @@ for (const p of providers) {
         ? ` <span class="v warn" title="The key authenticated but the free tier appears gone">${IC('ic-warn')} free tier unconfirmed live</span>`
         : ''));
   const docsBtn = docsHref(p.docs_url) ? `<a class="btn primary" href="${escapeAttr(docsHref(p.docs_url))}" target="_blank" rel="noopener">Official docs ↗</a>` : '';
-  // "Get a free key": the provider's own key page, exactly as its docs link it (keys_url), next to the limits and the
-  // quickstart. Tagged data-link="keys" by tagProviderLinks, so a click is an outbound_provider_click (consent-gated).
-  // "Copy base URL": the OpenAI-compatible base URL to the clipboard (site.js, the .api-copy handler: the result is
-  // announced in the status line next to it). Both sit right under What's free, before the quickstart.
-  const baseCopy = p.openai_base_url
-    ? `<button type="button" class="btn api-copy base-copy" data-api-url="${escapeAttr(p.openai_base_url)}" data-label="Copy base URL" data-copy-fail="Copy failed. Select the base URL in the quickstart and copy it by hand.">Copy base URL</button>`
-    : '';
-  const keysHtml = p.keys_url || baseCopy
-    ? `<div class="prov-actions prov-key">` +
-      (p.keys_url ? `<a class="btn primary" href="${escapeAttr(p.keys_url)}" target="_blank" rel="noopener">Get a free key ↗</a>` : '') +
-      baseCopy + `<a class="prov-compare" href="#compare">Compare with…</a>` +
-      (baseCopy ? `<span class="api-copy-status" role="status"></span>` : '') +
-      (p.keys_url ? `<p class="muted prov-key-hint">Sign up or sign in on ${escapeAttr(p.name)}'s own site, then create an API key there.</p>` : '') +
-      `</div>`
-    : '';
+  // "Get a free key" and "Copy base URL" (lib/provider-sections.mjs keysButtonHtml), right under What's free, before the
+  // quickstart. The /limits/ page shows the same key button. Tagged data-link="keys" by tagProviderLinks, so a click is an
+  // outbound_provider_click (consent-gated); the copy button is handled by site.js (.api-copy).
+  const keysHtml = keysButtonHtml(p, { providerPage: true });
   const playgroundBtn = p.playground_url ? `<a class="btn" href="${escapeAttr(p.playground_url)}" target="_blank" rel="noopener">Try it ↗</a>` : '';
   // "Visit website": the provider's main site, derived from the docs URL by stripping
   // common docs/console/api subdomains so it points at the marketing homepage.
@@ -1492,6 +1494,7 @@ for (const p of providers) {
     aboutHtml(summaryBySlug.get(p.slug), p.name) +
     disclosureHtml(AGREEMENTS_FILE, p.slug) +
     (crossChips ? `<h2>Appears in</h2><div class="colls">${crossChips}</div>` : '') +
+    providerLongtailHtml(p, providers, { asOf: ASOF, prefix: '../', limitPages: LIMIT_SLUGS, altPages: ALT_SLUGS }) +
     compareHtml +
     providerFaqHtml(p, faq) +
     // At the end of the FAQ, the way to flag a wrong value: the data-correction form, prefilled (lib/report-mistake.mjs).
@@ -1990,6 +1993,76 @@ for (const g of MODEL_GROUPS) {
   }));
 }
 
+// ---------- long-tail pages: /limits/<slug>/ and /alternatives/<slug>/ (lib/longtail-pages.mjs) ----------
+// Only the entries over their template's threshold get a page; the rest get none (no noindex page, no sitemap entry). Both
+// depend on the dataset only, so they are pinned in derived-fingerprints.json like the model pages. Stale folders go first.
+for (const dir of ['limits', 'alternatives']) {
+  rmSync(join(ROOT, `site/${dir}`), { recursive: true, force: true });
+  mkdirSync(join(ROOT, `site/${dir}`), { recursive: true });
+}
+const limitsCaps = (p) => [['requests_per_minute', 'RPM'], ['requests_per_day', 'RPD'], ['tokens_per_day', 'TPD']]
+  .filter(([k]) => Number.isInteger(p.free_limits[k])).map(([k, u]) => `${p.free_limits[k].toLocaleString('en-US')} ${u}`).join(' · ');
+writeFileSync(join(ROOT, 'site/limits/index.html'), htmlPage({
+  title: 'Free tier limits of LLM APIs, with sources · Free LLM API Hub',
+  desc: `Free tier limits of ${LIMIT_PROVIDERS.length} LLM and AI-model APIs: requests and tokens per minute and day, card, phone and data policy, each with its source.`,
+  canonical: `${SITE}/limits/`,
+  ogImage: `${SITE}/og/limits.png`,
+  jsonld: collectionPageJsonLd({
+    name: 'Free tier limits', url: `${SITE}/limits/`, crumbs: [['Free tier limits', `${SITE}/limits/`]],
+    description: 'Free tier limits of LLM and AI-model APIs, each with its source and the day it was read.',
+    items: LIMIT_PROVIDERS.map((p) => ({ name: `${p.name} free tier limits`, url: `${SITE}/limits/${p.slug}/` })),
+  }),
+  main:
+    pageHero({ crumbs: `<a href="../">Home</a> / Free tier limits`, h1: 'Free tier limits', lede: `The providers whose free limits the dataset records in numbers, with a source and a reading date, plus sourced card, phone, commercial use and data policy checks: ${LIMIT_PROVIDERS.length} of ${providers.length} today. The others keep their limits in the provider's own words on their <a href="../#explorer">provider page</a>.` }) +
+    `<main id="main"><div class="wrap prose"><table><caption>Providers with a free tier limits page</caption><thead><tr><th scope="col">Provider</th><th scope="col">Published free limits</th><th scope="col">Limits read</th></tr></thead><tbody>` +
+    LIMIT_PROVIDERS.map((p) => `<tr><th scope="row" class="name"><a href="${p.slug}/">${escapeHtml(p.name)} free tier limits</a></th><td>${escapeHtml(limitsCaps(p) || 'see the page')}</td><td><time datetime="${escapeHtml(p.free_limits.checked)}">${escapeHtml(p.free_limits.checked)}</time></td></tr>`).join('') +
+    `</tbody></table><p class="muted">A page exists only when the entry is verified within the freshness window, its free limits are recorded in numbers with a source, and at least four of its five free-tier facts carry a recorded source. Limits change without notice: confirm on the provider's page.</p></div></main>`,
+}));
+for (const p of LIMIT_PROVIDERS) {
+  mkdirSync(join(ROOT, `site/limits/${p.slug}`), { recursive: true });
+  writeFileSync(join(ROOT, `site/limits/${p.slug}/index.html`), htmlPage({
+    title: limitsPageTitle(p, ASOF),
+    desc: limitsPageDescription(p),
+    canonical: `${SITE}/limits/${p.slug}/`,
+    // The provider's own links (docs, limits source, "Get a free key") carry data-provider/data-link as on its provider page.
+    main: tagProviderLinks(limitsPageMainHtml(p, { asOf: ASOF, pageHero, prefix: '../../', alternatives: ALT_SLUGS.has(p.slug), families: INDEXABLE_FAMILIES }), providerLinkTargets(p)),
+    jsonld: limitsPageJsonLd(p, { site: SITE, facts: DATASET_FACTS }),
+    prefix: '../../',
+    ogImage: `${SITE}/og/limits.png`,
+  }));
+}
+writeFileSync(join(ROOT, 'site/alternatives/index.html'), htmlPage({
+  title: 'Free alternatives to popular LLM APIs · Free LLM API Hub',
+  desc: `Free alternatives to ${ALT_PAGES.map(({ p }) => p.name).join(', ')}: verified providers with the same primary modality, compared on card, phone and limits.`,
+  canonical: `${SITE}/alternatives/`,
+  ogImage: `${SITE}/og/alternatives.png`,
+  jsonld: collectionPageJsonLd({
+    name: 'Free alternatives', url: `${SITE}/alternatives/`, crumbs: [['Free alternatives', `${SITE}/alternatives/`]],
+    description: 'Free alternatives to popular LLM APIs, chosen from recorded fields of the dataset.',
+    items: ALT_PAGES.map(({ p }) => ({ name: `Free ${p.name} alternatives`, url: `${SITE}/alternatives/${p.slug}/` })),
+  }),
+  main:
+    pageHero({ crumbs: `<a href="../">Home</a> / Free alternatives`, h1: 'Free alternatives', lede: 'For each provider below: verified providers with the same primary modality, OpenAI-compatible when the original is, and a comparable free offer, with how each one differs on recorded fields.' }) +
+    `<main id="main"><div class="wrap prose"><ul>` +
+    ALT_PAGES.map(({ p, alts }) => `<li><a href="${p.slug}/">Free ${escapeHtml(p.name)} alternatives</a> — ${alts.length} providers</li>`).join('') +
+    `</ul>` +
+    // No second list of the same alternatives: an original that is not free (any more) is on /not-free/, with its closest free ones.
+    (NOT_FREE_ORIGINALS.length ? `<h2 id="not-free">Not free, or not any more</h2><p>${NOT_FREE_ORIGINALS.map((e) => `<a href="../not-free/#${escapeHtml(e.id)}">${escapeHtml(e.name)}</a>`).join(' · ')}: each is on the <a href="../not-free/">Not free</a> list, with the provider's own words and the closest free alternatives.</p>` : '') +
+    `<p class="muted">A page exists only when at least five verified providers qualify. OpenAI has no free API tier: see <a href="../not-free/#openai">Not free</a> and the <a href="../guides/openai-api-alternatives">free OpenAI API alternatives</a> guide.</p></div></main>`,
+}));
+for (const { p, alts } of ALT_PAGES) {
+  mkdirSync(join(ROOT, `site/alternatives/${p.slug}`), { recursive: true });
+  writeFileSync(join(ROOT, `site/alternatives/${p.slug}/index.html`), htmlPage({
+    title: alternativesPageTitle(p, alts),
+    desc: alternativesPageDescription(p, alts),
+    canonical: `${SITE}/alternatives/${p.slug}/`,
+    main: alternativesPageMainHtml(p, alts, { pageHero, prefix: '../../', limitPages: LIMIT_SLUGS, families: INDEXABLE_FAMILIES }),
+    jsonld: alternativesPageJsonLd(p, alts, { site: SITE }),
+    prefix: '../../',
+    ogImage: `${SITE}/og/alternatives.png`,
+  }));
+}
+
 // One page per open model family: /free-api/<family>/ ("Where can I use Llama for free via API?"). The verified
 // providers whose free-model sample lists a model of the family, with limits, flags and dates from the data
 // (lib/model-families.mjs). The folder is removed and written again, so a family dropped from the list leaves no page.
@@ -2001,7 +2074,7 @@ for (const g of FAMILY_GROUPS) {
     title: datedTitle(familyPageTitle(g)),
     desc: familyPageDescription(g),
     canonical: url,
-    main: familyPageMainHtml(g, { asOf: ASOF, prefix: '../../', modelHref: modelPageHref('../../'), others: FAMILY_GROUPS, repo: REPO, pageUrl: url }),
+    main: familyPageMainHtml(g, { asOf: ASOF, prefix: '../../', modelHref: modelPageHref('../../'), others: FAMILY_GROUPS, repo: REPO, pageUrl: url, limitPages: LIMIT_SLUGS }),
     jsonld: pageJsonLd({
       site: SITE, type: 'WebPage', name: familyH1(g), url, description: familyPageDescription(g),
       about: datasetRef(SITE, DATASET_FACTS),
@@ -2936,6 +3009,10 @@ const sitemapEntries = [
   [`${SITE}/`, ASOF],
   [`${SITE}/models/`, ASOF],
   ...MODEL_GROUPS.filter((g) => isIndexable(g)).map((g) => [`${SITE}/models/${g.key}/`, lastVerified(g.entries.map((e) => e.p))]),
+  [`${SITE}/limits/`, ASOF],
+  ...LIMIT_PROVIDERS.map((p) => [`${SITE}/limits/${p.slug}/`, p.last_verified]),
+  [`${SITE}/alternatives/`, ASOF],
+  ...ALT_PAGES.map(({ p, alts }) => [`${SITE}/alternatives/${p.slug}/`, lastVerified([p, ...alts])]),
   ...FAMILY_GROUPS.filter(isFamilyIndexable).map((g) => [familyUrl(SITE, g), lastVerified(g.entries.map((e) => e.p))]),
   [`${SITE}/guides-and-collections/`, ASOF],
   [`${SITE}/best/`, ASOF],
