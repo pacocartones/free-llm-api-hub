@@ -284,3 +284,5 @@ For a provider fact, cite the provider's own page and the day you read it (UTC);
 
 [MIT](LICENSE) — free to reuse, fork, and adapt, including the dataset. A link back is appreciated but not required.
 
+**Third-party data.** The `model_tier_source` fields (the LMArena rating, interval, votes and snapshot behind each `model_tier`) come from the LMArena [Arena Leaderboard Dataset](https://huggingface.co/datasets/lmarena-ai/leaderboard-dataset), licensed [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). If you redistribute those fields, keep the attribution: *Model quality data: LMArena Arena Leaderboard Dataset (CC BY 4.0)*. This project maps Arena rows to providers' free models and derives the 0–4 tiers from the ratings ([methodology](docs/methodology.md#model-tier)).
+
