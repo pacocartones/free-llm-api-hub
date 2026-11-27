@@ -22,7 +22,7 @@ Assisted-by: <tool>/<model>
 
 for example `Assisted-by: GitHub Copilot/gpt-4.1`. It never counts against you: it tells reviewers where to look more carefully, and we review every pull request on its merits, by the same standard.
 
-Don't list a tool as a co-author (`Co-authored-by:`). Authorship stays with the people who made and checked the change; when we squash-merge, AI `Co-authored-by` lines are dropped from the final message.
+Don't list a tool as a co-author (`Co-authored-by:`). Authorship stays with the people who made and checked the change. Pull requests are merged with their commits as they are, so remove such a line before you push.
 
 ## How we work
 

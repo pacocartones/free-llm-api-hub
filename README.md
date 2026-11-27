@@ -183,7 +183,7 @@ What "verified" covers and where its limits are: [docs/methodology.md](docs/meth
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/pacocartones/free-llm-api-hub/badge)](https://scorecard.dev/viewer/?uri=github.com/pacocartones/free-llm-api-hub)
 [![Dataset: JSON](https://img.shields.io/badge/dataset-JSON%20%2B%20schema-7A2E8C.svg)](data/providers.json)
 
-The maintainers are [@pacocartones](https://github.com/pacocartones) and [@LeonMAG](https://github.com/LeonMAG). AI agents assist under human oversight with repository checks, human-authored data updates and code. Re-verification is done by a maintainer or, at the owner's request, with AI assistance: official pages are read by isolated read-only fetchers that return verbatim quotes, and the pull request says which method was used ([playbook](docs/update-playbook.md)). Every change still goes through a pull request, a human maintainer reviews it and is responsible for every merge, and every data change carries a link to the provider's own page and the date it was checked. Commit messages carry no AI signature or trailer; this section is where we say it.
+The maintainers are [@pacocartones](https://github.com/pacocartones) and [@LeonMAG](https://github.com/LeonMAG). AI agents assist under human oversight with repository checks, human-authored data updates and code. Re-verification is done by a maintainer or, at the owner's request, with AI assistance: official pages are read by isolated read-only fetchers that return verbatim quotes, and the pull request says which method was used ([playbook](docs/update-playbook.md)). Every change still goes through a pull request, a human maintainer reviews it and is responsible for every merge, and every data change carries a link to the provider's own page and the date it was checked. Maintainer commits carry no AI signature or trailer; this section is where we say it. Contributors may add an `Assisted-by:` line, see [AI_POLICY.md](AI_POLICY.md#say-when-you-used-ai).
 
 ## Use the data
 
@@ -241,7 +241,7 @@ Found an outdated limit, a dead link, or a provider that belongs here? You'll ke
 - **Your first PR:** [choose a task, coordinate and run its checks](CONTRIBUTING.md#your-first-contribution-step-by-step).
 - **Fastest report:** the [structured issue form](../../issues/new?template=inaccuracy.yml) — provider, what changed, a source link.
 - **Social Winter of Code 2027:** read the [participant guide](docs/swoc-2027.md).
-- **For a provider-data correction:** edit [`data/providers.json`](data/providers.json), run `npm run build && npm test`, and commit only the data change: the regeneration bot commits the generated files after the merge ([details](CONTRIBUTING.md#for-provider-data-edit-the-source)). Never hand-edit the tables — they're generated.
+- **For a provider-data correction:** edit [`data/providers.json`](data/providers.json), run `npm run build && npm test`, and commit only your source changes (the data and its changelog fragment): the regeneration bot commits the generated files after the merge ([details](CONTRIBUTING.md#for-provider-data-edit-the-source)). Never hand-edit the tables — they're generated.
 
 Full guidelines, including what counts as an acceptable source: **[CONTRIBUTING.md](CONTRIBUTING.md)**.
 

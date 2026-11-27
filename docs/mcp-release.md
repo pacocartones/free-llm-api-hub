@@ -72,8 +72,8 @@ add publisher accounts or change repository permissions as part of this procedur
    guidance. The workflow uses a release-pinned, checksum-verified publisher and
    `login github-oidc`; local schema validation does not test namespace rights.
 5. **Explicit enablement.** Only after the above controls are checked, set the
-   repository Actions variable `NPM_PUBLISH_ENABLED` to exactly `true`. Keep it
-   absent/false while preparing or reviewing this PR. The guard checks it again in
+   repository Actions variable `NPM_PUBLISH_ENABLED` to exactly `true` (it is `true`
+   today; set it to `false` to stop releases). The guard checks it again in
    the protected publishing job, including failed-job reruns.
 
 ## First publication bootstrap

@@ -47,7 +47,7 @@ grep -i "ai21" data/providers.json
 
 If AI21 appears in the results, that's expected because it is already tracked. For your contribution, replace `ai21` in the search command with the slug of the provider you want to add. If that provider is already tracked, the more valuable contribution is fixing a `null` flag or a stale number — see [the "confirming a single unknown field" note in CONTRIBUTING](../CONTRIBUTING.md).
 
-Not ready to do the work yet? File the one-minute [new-provider issue form](../../issues/new?template=new-provider.yml) instead and someone else can pick it up.
+Not ready to do the work yet? File the one-minute [new-provider issue form](https://github.com/pacocartones/free-llm-api-hub/issues/new?template=new-provider.yml) instead and someone else can pick it up.
 
 ## Step 2 — Set up your fork and branch
 

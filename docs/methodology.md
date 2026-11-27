@@ -46,7 +46,7 @@ When a claim can't be confirmed against an accessible official source — the co
 
 ## Corrections
 
-Found something wrong or stale? The [inaccuracy form](../../issues/new?template=inaccuracy.yml) is the fastest path, and PRs editing `data/providers.json` are welcome. See [CONTRIBUTING.md](../CONTRIBUTING.md).
+Found something wrong or stale? The [inaccuracy form](https://github.com/pacocartones/free-llm-api-hub/issues/new?template=inaccuracy.yml) is the fastest path, and PRs editing `data/providers.json` are welcome. See [CONTRIBUTING.md](../CONTRIBUTING.md).
 
 ---
 
