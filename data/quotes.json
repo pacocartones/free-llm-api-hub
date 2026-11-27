@@ -220,7 +220,7 @@
    "kind": "sentence",
    "text": "For clarity, the foregoing does not grant Cerebras the right to use Service Content for the purpose of training or fine-tuning models.",
    "source_url": "https://www.cerebras.ai/terms-of-service",
-   "read_on": "2026-11-24",
+   "read_on": "2026-11-27",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "c5769f3f283f888f282073f55e8e53e95b8656bcc048326ffcf81a8f3f594d19"
@@ -231,7 +231,7 @@
    "kind": "note_passage",
    "text": "may be provided for free",
    "source_url": "https://www.cerebras.ai/terms-of-service",
-   "read_on": "2026-11-24",
+   "read_on": "2026-11-27",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "c5769f3f283f888f282073f55e8e53e95b8656bcc048326ffcf81a8f3f594d19"
@@ -243,7 +243,7 @@
    "field": "card_required",
    "text": "New accounts receive $5 in free credits after adding a verified payment method.",
    "source_url": "https://inference-docs.cerebras.ai/support/rate-limits",
-   "read_on": "2026-11-24",
+   "read_on": "2026-11-27",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "2aba6287e39902eab9da378b3dbe62debf9c3b99c2d728b141f6d54f87ee7ee7"
@@ -267,7 +267,7 @@
    "field": "openai_compatible",
    "text": "The Cerebras API is compatible with OpenAI client libraries for many common workflows.",
    "source_url": "https://inference-docs.cerebras.ai/resources/openai",
-   "read_on": "2026-11-25",
+   "read_on": "2026-11-27",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "ed338420bd3ed2b5f9306615eea78b26c0806a5d461a689173439c61b9d7e3c1"
@@ -280,7 +280,7 @@
    "metric": "output_tokens_per_second",
    "text": "gpt-oss-120b 120 billion 65k / 131k ~3000",
    "source_url": "https://inference-docs.cerebras.ai/models/overview",
-   "read_on": "2026-11-24",
+   "read_on": "2026-11-27",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "7e6c05b30acac3d6811383043cfa0b3199601d8363f1f963c8b58a36b42644b9"
@@ -293,7 +293,7 @@
    "metric": "output_tokens_per_second",
    "text": "qwen-3.8-27b 27 billion 64k / 128k ~1850",
    "source_url": "https://inference-docs.cerebras.ai/models/overview",
-   "read_on": "2026-11-24",
+   "read_on": "2026-11-27",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "7e6c05b30acac3d6811383043cfa0b3199601d8363f1f963c8b58a36b42644b9"
@@ -683,7 +683,7 @@
    "kind": "sentence",
    "text": "Without your separate consent, we will not use your business data (including inputs, outputs, and files) to train, fine-tune or improve any foundation model.",
    "source_url": "https://www.alibabacloud.com/help/en/model-studio/data-retention-policy",
-   "read_on": "2026-11-20",
+   "read_on": "2026-11-27",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "3ac8f2d9f84dd737d3cf1ea173d485c52be9519c9ea88b2105ee5fd2322be8f0"
@@ -719,7 +719,7 @@
    "field": "phone_required",
    "text": "If you registered your Alibaba Cloud account with an email address, you must complete secure phone number verification.",
    "source_url": "https://www.alibabacloud.com/help/en/account/step-1-register-an-alibaba-cloud-account",
-   "read_on": "2026-11-25",
+   "read_on": "2026-11-27",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "572a96d30bb7ce092abac0eae47a08fbf5fdc8ccc48dffa8eb87362b2a14f301"
@@ -1315,10 +1315,10 @@
    "kind": "sentence",
    "text": "in order to: (i) provide, maintain, enhance, train, and improve the Twelve Labs Services (including the training, re-training, fine-tuning, and improving the Twelve Labs Services)",
    "source_url": "https://www.twelvelabs.io/legal/terms-of-use-2026.15.05",
-   "read_on": "2026-11-26",
+   "read_on": "2026-11-27",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
-   "page_sha256": "9475d45a093aa5672aad753cb419141790404454f78d04c9a7b7d7da75cddc8a"
+   "page_sha256": "4a3ee7dc52306b08e2a82ccb4756dd3454188bd01478d07a0c84e2fe520d8d43"
   },
   {
    "id": "ocr-space.sentence",
