@@ -521,6 +521,8 @@ table.sortable thead th:not(.sorted)::after { content: " ⇅"; opacity: .28; fon
 .page-hero .crumbs, .page-hero h1 { text-align: center; }
 .page-hero h1 { margin: 0 0 10px; font-size: clamp(1.6rem, 3.4vw, 2.2rem); max-width: none; }
 .page-hero .lede { text-align: center; margin: 10px auto 0; max-width: 62ch; }
+/* The answer-first verdict of a compare page (lib/compare-faq.mjs): under the title, in body text, left-aligned to read. */
+.page-hero .answer-first { text-align: left; margin: 6px auto 4px; max-width: 68ch; font-size: 1.02rem; line-height: 1.55; color: var(--text); }
 .colls { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
 .page-hero .colls { justify-content: center; }
 .page-hero .prov-actions { justify-content: center; }
@@ -693,7 +695,7 @@ pre code { color: var(--text); }
 .prov-hero .crumbs { order: 0; } .prov-hero .prov-badges { order: 1; } .prov-hero h1 { order: 2; } .prov-hero .answer-first { order: 3; } .prov-hero .lede { order: 4; }
 .prov-hero .prov-nums { order: 5; } .prov-hero .prov-nums-scope { order: 6; } .prov-hero .prov-receipt { order: 7; } .prov-hero .prov-actions { order: 8; }
 /* The answer-first paragraph (lib/provider-faq.mjs): right under the name, in body text, so it reads as the answer. */
-.prov-hero .answer-first { text-align: left; margin: 6px 0 4px; max-width: 62ch; font-size: 1.04rem; line-height: 1.55; color: var(--text); }
+.prov-hero .answer-first { text-align: left; margin: 6px 0 4px; max-width: 62ch; font-size: 1.04rem; line-height: 1.55; color: var(--text); scroll-margin-top: 90px; }
 .prov-nums { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 18px 0 4px; max-width: 520px; }
 .prov-nums div { display: flex; flex-direction: column-reverse; }
 .prov-nums dd { margin: 0; font-family: var(--font-display); font-weight: 800; font-stretch: 72%; font-size: 2.25rem; line-height: 1; font-variant-numeric: tabular-nums; }
@@ -739,6 +741,7 @@ pre code { color: var(--text); }
 .compare-table tbody tr:nth-child(even) { background: color-mix(in srgb, var(--panel) 42%, transparent); }
 .compare-table td code { word-break: break-all; }
 .cmp-sub { margin-top: 4px; font-size: .8rem; }
+.cmp-sub a { text-decoration: underline; text-underline-offset: 2px; } /* WCAG 1.4.1; axe link-in-text-block */
 .tri-yes { color: var(--text); }
 .tri-no { color: var(--text); }
 .tri-cond { color: var(--text); }
@@ -762,7 +765,11 @@ pre code { color: var(--text); }
 .model-table { width: 100%; border-collapse: collapse; font-size: .9rem; }
 .model-table th, .model-table td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
 .model-table thead th { position: sticky; top: var(--header-h); background: var(--bg); font-family: var(--font-mono); font-size: .88rem; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; color: var(--text); z-index: 1; padding-top: 12px; padding-bottom: 12px; }
-.model-table td.name code { color: var(--accent); word-break: break-all; }
+.model-table .name code { color: var(--accent); word-break: break-all; }
+.model-table td.model-mods { color: var(--muted); font-size: .85rem; }
+.model-scroll { margin-top: 20px; }
+.model-table th.name { font-weight: 400; text-transform: none; letter-spacing: 0; }
+.model-table .model-fam { display: block; margin-top: 3px; font-size: .8rem; color: var(--muted); text-decoration: underline; text-underline-offset: 2px; }
 .model-table tbody tr:hover { background: var(--panel); }
 .faq-item { margin: 14px 0; }
 .faq-item h3 { margin: 0 0 4px; font-size: 1rem; }
@@ -975,10 +982,21 @@ p.muted a, .prose p a, .prov-summary p a { text-decoration: underline; text-unde
   #table td { padding-left: 6px; padding-right: 6px; }
 
 }
-.model-table th, .model-table td { overflow-wrap: anywhere; }
-@media (max-width: 480px) {
-  .model-table th, .model-table td { padding-left: 6px; padding-right: 6px; }
-  .model-table thead th { white-space: normal; letter-spacing: 0; font-size: .75rem; }
+/* /models/: words wrap only at spaces (a single word longer than its cell still breaks, as overflow-wrap: break-word
+   does); "anywhere" let the table squeeze "Free type" and "Modalities" until words broke in the middle at 375px. */
+.model-table th, .model-table td { overflow-wrap: break-word; }
+/* Wide screens: the table fits its column, so the region does not clip and the column headers stay sticky. */
+@media (min-width: 561px) { .model-scroll { overflow: visible; } }
+/* Phones: one card per row, as the home explorer. The column headers leave the screen but stay in the accessibility
+   tree (explicit table roles in lib/model-index.mjs); each cell shows its column name from data-label, visual only. */
+@media (max-width: 560px) {
+  .model-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .model-table, .model-table tbody, .model-table tr, .model-table th.name, .model-table td { display: block; width: 100%; }
+  .model-table tr { border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 10px; padding: 4px 0 8px; background: var(--panel); }
+  .model-table tbody tr:hover { background: var(--panel); }
+  .model-table th.name { padding: 10px 14px 8px; border-bottom: 1px solid var(--border); margin-bottom: 4px; }
+  .model-table td { border: 0; padding: 4px 14px; display: flex; gap: 12px; align-items: baseline; min-width: 0; }
+  .model-table td::before { content: attr(data-label); content: attr(data-label) / ""; flex: 0 0 34%; color: var(--faint); font-weight: 600; font-size: .7rem; text-transform: uppercase; letter-spacing: .04em; font-family: var(--font-mono); }
 }
 
 /* The home counters are one line of text rendered by the build (explorer.js only repaints it when the visitor's day
@@ -1158,6 +1176,9 @@ a.stamp:hover { text-decoration: none; }
 .find-wrap { max-width: 860px; }
 .find-form { margin: 8px 0 0; }
 .find-form[hidden], .find-results[hidden], .find-q[hidden] { display: none; }
+/* The questions need find.js: without scripts the page shows the noscript links instead (find-page.mjs). The count line
+   keeps its place, as it did when it was empty, but its first-paint text is not shown or read out. */
+@media (scripting: none) { .find-form { display: none; } .find-count { visibility: hidden; height: 1.3em; overflow: hidden; } }
 .find-q { border: 1px solid var(--border); border-radius: var(--radius); background: var(--panel); padding: 18px 18px 14px; margin: 0; min-width: 0; }
 .find-q:focus { outline: none; }
 .find-q legend { float: left; width: 100%; font-size: 1.08rem; font-weight: 700; color: var(--text); padding: 0; }
@@ -1220,3 +1241,10 @@ a.stamp:hover { text-decoration: none; }
 .btn.base-copy { margin: 0; padding: 11px 18px; border: 1px solid var(--border-strong); border-radius: 9px; background: var(--panel); color: var(--text); font-family: var(--font-mono); font-weight: 700; font-size: .92rem; }
 .btn.base-copy:hover { border-color: var(--accent); color: var(--accent-dim); }
 .btn.base-copy.copied { border-color: var(--ok); color: var(--ok); }
+/* /badges/: each badge is previewed on the light and the dark ground it was drawn for, whatever the page's theme. */
+.badge-previews { display: flex; flex-wrap: wrap; gap: 10px; margin: 6px 0 10px; }
+.badge-swatch { display: inline-flex; align-items: center; padding: 10px 14px; border: 1px solid var(--border); border-radius: 9px; line-height: 0; }
+.badge-swatch-light { background: #fff9f6; }
+.badge-swatch-dark { background: #17110f; }
+.badge-kit { margin-top: 28px; }
+.badge-kit h3 { margin-bottom: 4px; }

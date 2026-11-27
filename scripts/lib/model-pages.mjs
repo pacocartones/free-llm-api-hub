@@ -28,7 +28,7 @@ export const MODEL_SAMPLE_CAVEAT = "Model lists are a sample and change often; c
 export const MODEL_PAGE_INDEX_RULES = Object.freeze(['multi-provider', 'quickstart']);
 export const MODEL_PAGE_INDEX_RULE = 'multi-provider';
 
-const FREE_TYPE_LABEL = {
+export const FREE_TYPE_LABEL = {
   'renewing-quota': 'Free quota that renews',
   perpetual: 'Free with no end date',
   'recurring-credit': 'Credit that renews',

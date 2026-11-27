@@ -6,7 +6,7 @@
 <title>404 — Free LLM API Hub</title>
 <meta name="description" content="That page isn't part of the dataset. It may have moved, or never existed. The data, though, is very much alive.">
 <meta name="robots" content="noindex">
-<meta http-equiv="Content-Security-Policy" content="script-src 'self' 'sha256-ByZJaawcxAiK85qnD6nIc7iBFGzp/nf/DTzzA7Dl5Qs=' 'sha256-YzEhxvq2BwovGsg/RCjKkQdwf+LZmTjIkiQcjXCZMHc=' https://static.cloudflareinsights.com; connect-src 'self' https://raw.githubusercontent.com https://cloudflareinsights.com; object-src 'none'; base-uri 'self'">
+<meta http-equiv="Content-Security-Policy" content="script-src 'self' 'sha256-ByZJaawcxAiK85qnD6nIc7iBFGzp/nf/DTzzA7Dl5Qs=' 'sha256-YzEhxvq2BwovGsg/RCjKkQdwf+LZmTjIkiQcjXCZMHc=' https://static.cloudflareinsights.com; script-src-attr 'none'; connect-src 'self' https://raw.githubusercontent.com https://cloudflareinsights.com; font-src 'self'; manifest-src 'self'; worker-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
 <script>(function(){try{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
 <link rel="icon" href="/favicon.ico" sizes="32x32">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -33,7 +33,8 @@
 <meta name="twitter:image" content="https://freellmapihub.com/og.png">
 <link rel="alternate" type="application/rss+xml" title="Free LLM API Hub — updates" href="/feed.xml">
 <link rel="alternate" type="application/rss+xml" title="Free LLM API Hub — what changed, week by week" href="/changes.xml">
-<link rel="stylesheet" href="/styles.css?v=d530fbb4">
+<link rel="alternate" type="application/atom+xml" title="Free LLM API Hub — what changed, week by week (Atom)" href="/changes.atom">
+<link rel="stylesheet" href="/styles.css?v=bc018002">
 
 </head>
 <body>
@@ -83,7 +84,7 @@
 <p class="msg">&gt; command not found: <span class="path" id="path">/…</span><span class="caret" aria-hidden="true"></span></p>
 <p>That page isn't part of the dataset. It may have moved, or never existed. The data, though, is very much alive.</p>
 <form class="nf-search" action="/" method="get" role="search"><label for="nf-q">Search the providers</label><input type="search" id="nf-q" name="q" class="sel search-input" placeholder="e.g. groq, embeddings, llama" autocomplete="off" spellcheck="false"><button type="submit" class="btn primary">Search</button></form>
-<h2 class="nf-h">Popular providers</h2><nav class="colls" aria-label="Popular providers"><a href="/p/groq">Groq</a><a href="/p/google-gemini">Google Gemini API (AI Studio)</a><a href="/p/modelscope">ModelScope (API-Inference)</a><a href="/p/sambanova">SambaNova Cloud</a><a href="/p/cohere">Cohere</a><a href="/p/ibm-watsonx">IBM watsonx.ai (Lite plan)</a></nav>
+<h2 class="nf-h">Popular providers</h2><nav class="colls" aria-label="Popular providers"><a href="/p/google-gemini">Google Gemini API (AI Studio)</a><a href="/p/modelscope">ModelScope (API-Inference)</a><a href="/p/sambanova">SambaNova Cloud</a><a href="/p/cohere">Cohere</a><a href="/p/experiential-labs">Experiential Labs</a><a href="/p/ibm-watsonx">IBM watsonx.ai (Lite plan)</a></nav>
 <div class="cta"><a class="btn ghost" href="/">← Back home</a><a class="btn ghost" href="/#explorer">Browse providers</a><a class="btn ghost" href="/guides-and-collections/">Guides &amp; collections</a></div>
 <script>try{document.getElementById('path').textContent=location.pathname.replace('/free-llm-api-hub','')||'/';}catch(e){}</script>
 </main>

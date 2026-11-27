@@ -26,7 +26,7 @@ export function compactNumber(n) {
 }
 
 // The free_limits fields, in the order a description lists them, with their unit.
-const LIMIT_UNITS = [
+export const LIMIT_UNITS = [
   ['requests_per_second', (v) => `${v} RPS`],
   ['requests_per_minute', (v) => `${v} RPM`],
   ['requests_per_day', (v) => `${v} RPD`],

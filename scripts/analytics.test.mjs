@@ -174,7 +174,7 @@ describe('consent banner behaviour', () => {
       assert.ok(iDefault === 0 && iDefault < iUpdate && iUpdate < iConfig, 'default denied, then update, then config');
       assert.deepEqual(plain(calls[iDefault][2]), consentOf(false, false));
       assert.deepEqual(plain(calls[iUpdate][2]), consentOf(a, ads));
-      assert.deepEqual(plain(calls[iConfig][2]), { allow_google_signals: ads, allow_ad_personalization_signals: ads });
+      assert.deepEqual(plain(calls[iConfig][2]), { allow_google_signals: ads, allow_ad_personalization_signals: ads, cookie_flags: 'SameSite=Lax;Secure' });
       assert.equal(calls.find((c) => c[0] === 'set' && c[1] === 'ads_data_redaction')[2], !ads);
       assert.equal(calls.find((c) => c[0] === 'set' && c[1] === 'url_passthrough')[2], false);
       assert.equal(d.window[`ga-disable-${ID}`], false);

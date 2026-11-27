@@ -1,7 +1,7 @@
 {
   "name": "free-llm-api-hub-mcp",
-  "version": "0.1.0",
-  "description": "MCP server over the free-llm-api-hub dataset: search free-tier LLM API providers, read an entry, and get an OpenAI-client config.",
+  "version": "0.2.0",
+  "description": "MCP server over the free-llm-api-hub dataset: search free-tier LLM API providers, read an entry, check its freshness, ask whether it is free, and get an OpenAI-client config.",
   "license": "MIT",
   "type": "module",
   "bin": {
@@ -15,7 +15,7 @@
   ],
   "scripts": {
     "start": "node src/index.js",
-    "test": "node --test test/tools.test.js test/stdio.test.js test/forward-compat.test.js",
+    "test": "node --test test/tools.test.js test/status.test.js test/stdio.test.js test/forward-compat.test.js",
     "validate:server-json": "node scripts/validate-server-json.mjs",
     "test:pack": "node --test test/pack.test.js"
   },

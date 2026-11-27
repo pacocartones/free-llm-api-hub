@@ -204,6 +204,8 @@ const VERIFY = read('.github/workflows/verify.yml');
 test('verify.yml: the required check names do not change', () => {
   assert.match(jobOf(VERIFY, 'validate'), /^ {4}name: Dataset integrity\n/);
   assert.match(jobOf(VERIFY, 'windows-tests'), /^ {4}name: Windows tests\n/);
+  // The work runs in the windows-shards matrix; windows-tests is the aggregator that carries the required name (test-part.test.mjs).
+  assert.match(jobOf(VERIFY, 'windows-tests'), /needs: windows-shards/);
   // Still on every pull request, with no paths filter, and never pull_request_target.
   assert.match(VERIFY, /^ {2}pull_request:\n {2}push:\n/m);
   assert.doesNotMatch(noComments(VERIFY), /pull_request_target|workflow_run/);
@@ -221,7 +223,7 @@ test('verify.yml: outside push mode the drift gate is exactly the old one', () =
 });
 
 test('verify.yml: push mode regenerates before the checks and blocks through driftGate', () => {
-  for (const id of ['validate', 'windows-tests']) {
+  for (const id of ['validate', 'windows-shards']) {
     const body = jobOf(VERIFY, id);
     const mode = stepOf(body, 'id: regen');
     assert.match(mode, /REGEN_MODE: \$\{\{ vars\.REGEN_MODE \}\}/);
@@ -247,7 +249,7 @@ test('verify.yml: push mode regenerates before the checks and blocks through dri
   const validate = jobOf(VERIFY, 'validate');
   assert.match(stepOf(validate, 'Regenerate the derived files first'), /node scripts\/check-og\.mjs \|\| node scripts\/og\.mjs/);
   // Windows too: without the images, a pull request that changes how they are drawn fails the OG manifest test there.
-  assert.match(stepOf(jobOf(VERIFY, 'windows-tests'), 'Regenerate the derived files first'), /node scripts\/check-og\.mjs \|\| node scripts\/og\.mjs/);
+  assert.match(stepOf(jobOf(VERIFY, 'windows-shards'), 'Regenerate the derived files first'), /node scripts\/check-og\.mjs \|\| node scripts\/og\.mjs/);
   assert.ok(validate.indexOf('Regenerate the derived files first') > validate.indexOf('node scripts/validate.mjs'), 'the data is validated before it is built');
   assert.ok(validate.indexOf('Regenerate the derived files first') < validate.indexOf('node scripts/check-og.mjs\n'), 'the OG check sees the rendered images');
   const gate = stepOf(validate, 'regenerate-guard.mjs drift-gate');
