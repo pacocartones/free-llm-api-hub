@@ -1932,6 +1932,18 @@
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "e31860eb3dc8beaa71cc9b9214e29be3393e367d82df70faafc03fe3b644a9ad"
+  },
+  {
+   "id": "google-cloud-tts.card_required.sentence",
+   "slug": "google-cloud-tts",
+   "kind": "field_sentence",
+   "field": "card_required",
+   "text": "You must enable billing to use Text-to-Speech, and will be automatically charged if your usage exceeds the number of free characters allowed per month.",
+   "source_url": "https://cloud.google.com/text-to-speech/pricing",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "8a48287227723817e6b821456539394abfb12a1fe1a6caa267828acec7c01737"
   }
  ]
 }
