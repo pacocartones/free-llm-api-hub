@@ -18,6 +18,7 @@ import {
 const REPO = join(dirname(fileURLToPath(import.meta.url)), '..');
 const ROOT = privateTree(REPO);
 const SITE = 'https://freellmapihub.com';
+const REPO_URL = 'https://github.com/pacocartones/free-llm-api-hub';
 const read = (rel) => readFileSync(join(ROOT, rel), 'utf8');
 
 let data, providers, asOf, llms;
@@ -109,7 +110,7 @@ describe('/p/<slug>.md', () => {
   test('is the record: the title, the "is it free" answer, the limits, the flags with sources and dates, the quickstart and the links', () => {
     for (const p of providers) {
       const md = read(`site/p/${p.slug}.md`);
-      assert.equal(md, providerMarkdown(p, { site: SITE, asOf, version: data.version }), `${p.slug}: built from the record`);
+      assert.equal(md, providerMarkdown(p, { site: SITE, asOf, version: data.version, repo: REPO_URL }), `${p.slug}: built from the record`);
       assert.ok(md.startsWith(`# ${mdText(p.name)}: free tier and limits\n\n> `), `${p.slug}: title`);
       assert.ok(md.includes(`Data of ${asOf}`), `${p.slug}: dataset date`);
       assert.ok(md.includes(`Canonical page: ${SITE}/p/${p.slug}\n`), `${p.slug}: names the HTML page as canonical`);
@@ -132,7 +133,7 @@ describe('/p/<slug>.md', () => {
       for (const [field, label] of [['card_required', 'Credit card'], ['phone_required', 'Phone verification'], ['commercial_ok', 'Commercial use']]) {
         const line = md.split('\n').find((l) => l.startsWith(`- **${label}:** `));
         assert.ok(line, `${p.slug}: ${label} line`);
-        if (p[field] == null) assert.match(line, /^- \*\*[^*]+:\*\* unknown \(/, `${p.slug}: a null ${field} reads unknown, never no`);
+        if (p[field] == null) assert.match(line, /^- \*\*[^*]+:\*\* not stated\b/, `${p.slug}: a null ${field} reads not stated, never no`);
       }
       if (p.openai_base_url) {
         assert.ok(md.includes('```python\n'), `${p.slug}: python quickstart`);
@@ -183,12 +184,13 @@ describe('provider-markdown helpers', () => {
     assert.equal(mdFence('bash', 'echo ```\n'), '````bash\necho ```\n````');
   });
 
-  test('a null flag reads unknown with its reason, never no', () => {
+  test('a null flag reads not stated with its reason, never no', () => {
     assert.equal(flagWords(false, 'required', 'not required'), 'not required');
     assert.equal(flagWords(true, 'required', 'not required'), 'required');
     assert.equal(flagWords('conditional', 'allowed', 'not allowed'), 'conditional');
-    assert.equal(flagWords(null, 'required', 'not required'), 'unknown (not confirmed)');
-    assert.equal(flagWords(null, 'required', 'not required', { status: 'needs_account' }), 'unknown (needs an account to check)');
+    assert.equal(flagWords(null, 'required', 'not required'), 'not stated (not confirmed)');
+    assert.equal(flagWords(null, 'required', 'not required', { status: 'needs_account' }), 'not stated (needs an account to check)');
+    assert.equal(flagWords(null, 'required', 'not required', { status: 'source_silent' }), 'not stated by the provider', 'no "not stated (not stated …)"');
   });
 
   test('every free_type in the data has words', () => {

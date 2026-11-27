@@ -163,6 +163,19 @@
     });
   }
 
+  // --- a link to one fact (/p/<slug>#card, #phone, #commercial) inside a closed <details> opens it, so the cited fact is
+  // on screen. Browsers that open <details> on fragment navigation do it already; this covers the others. ---
+  if (document.querySelector('details.prov-reqs-box')) {
+    var openTarget = function () {
+      var id = window.location.hash.slice(1);
+      var el = id && /^[a-z0-9-]+$/.test(id) ? document.getElementById(id) : null;
+      var d = el && el.closest ? el.closest('details') : null;
+      if (d && !d.open) { d.open = true; el.scrollIntoView(); }
+    };
+    openTarget();
+    window.addEventListener('hashchange', openTarget);
+  }
+
   // --- dated banner: leaves the page after its data-until day (UTC, inclusive) ---
   var banner = document.getElementById('event-banner');
   if (banner) {
