@@ -44,6 +44,16 @@
       "path": "/guides/index.html",
       "field": "final_url",
       "reason": "Production serves /<dir>/index.html as a 200 duplicate of its canonical directory URL; the Worker sends it there with a 301 (generated _redirects rule, E-W7). No internal link uses index.html, and the page's canonical tag is the directory URL."
+    },
+    {
+      "path": "/guides/index.html",
+      "field": "meta_robots",
+      "reason": "On freellmapihub.com a Cloudflare zone Redirect Rule sends /guides/ to /guides-and-collections/ with a 301; the rule is bound to the production host, so next.freellmapihub.com serves the build's noindex meta-refresh stub for /guides/ instead (same target). Both are correct; only the comparison against next. differs (first post-cutover run, 2026-11-27)."
+    },
+    {
+      "path": "/guides/index.html",
+      "field": "body_sha256",
+      "reason": "On freellmapihub.com a Cloudflare zone Redirect Rule sends /guides/ to /guides-and-collections/ with a 301; the rule is bound to the production host, so next.freellmapihub.com serves the build's noindex meta-refresh stub for /guides/ instead (same target). Both are correct; only the comparison against next. differs (first post-cutover run, 2026-11-27)."
     }
   ],
   "body_ignore": []
