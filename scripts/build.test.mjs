@@ -2165,6 +2165,8 @@ test('active providers retain models_url from their official catalogues', () => 
     ['amazon-bedrock', 'https://docs.aws.amazon.com/bedrock/latest/userguide/models-supported.html'],
     ['oci-generative-ai', 'https://docs.oracle.com/en-us/iaas/Content/generative-ai/pretrained-models.htm'],
     ['nscale', 'https://docs.nscale.com/docs/ai-services/models'],
+    ['gonka-broker', 'https://gonkabroker.com/models/'],
+    ['moark', 'https://moark.com/serverless-api'],
   ].sort(bySlug));
 });
 
