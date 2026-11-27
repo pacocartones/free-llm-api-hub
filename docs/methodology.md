@@ -1,6 +1,6 @@
 # Methodology
 
-How entries get on this list, what "verified" means, and — just as important — what it *doesn't*.
+How entries get into this dataset, what "verified" means, and — just as important — what it *doesn't*.
 
 ## The problem this solves
 
@@ -35,7 +35,7 @@ When a claim can't be confirmed against an accessible official source — the co
 2. **Links are re-checked on the re-verification pass.** Each pass opens the provider's own `docs_url` anyway ([update playbook](update-playbook.md)); a dead or changed source is an early machine-detectable signal that a provider changed something. ([`verify.yml`](../.github/workflows/verify.yml) is the per-change integrity gate; provider verification is local and on-demand; scheduled Actions publish the weekly issue worklist, deploy the site and run security scans without verifying provider claims.)
 3. **The freshness badge is computed, not written.** It reports the age of the **oldest** verification in the list, straight from the data, and is graded on the same three buckets as the re-verification worklist: green while every entry is under 60 days old (and at least 70% of rows are verified at all — see [freshness-sla.md](freshness-sla.md) for the coverage override), 🟡 amber once any entry is due soon (>60d), 🔴 red once any entry is overdue (>90d, the SLA). It cannot lie about how current the list is. The public [data quality page](https://freellmapihub.com/quality/) shows the same freshness by week, the verified share and how many answers are known, unknown with a recorded reason or not checked, all computed from the data on each build.
 
-   It used to report the *share* of entries inside the 90-day SLA, which sounds equivalent and is not. Because the list is re-verified in sweeps rather than one row at a time, that number could not leave bright green until roughly a third of the dataset had gone overdue — about four months of complete silence. It measured whether the project was still alive, not whether the data was fresh. The worst entry moves the day maintenance stops, and it is also the number a reader actually needs: the staleness of the row they are about to trust.
+   It used to report the *share* of entries inside the 90-day SLA, which sounds equivalent and is not. Because the dataset is re-verified in sweeps rather than one row at a time, that number could not leave bright green until roughly a third of the dataset had gone overdue — about four months of complete silence. It measured whether the project was still alive, not whether the data was fresh. The worst entry moves the day maintenance stops, and it is also the number a reader actually needs: the staleness of the row they are about to trust.
 4. **Re-verification is continuous.** Reported changes and link-check issues drive re-checks; each updates the entry's `last_verified`.
 
 ## Sourcing rules

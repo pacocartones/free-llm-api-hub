@@ -11,7 +11,7 @@ How **Free LLM API Hub** works — how entries are verified, what earns a spot, 
 | [Inclusion criteria](inclusion-criteria.md) | What earns a spot, and what gets rejected |
 | [Comparison dimensions](comparison-dimensions.md) | Every field and flag in the dataset, defined |
 
-## Maintaining the list
+## Maintaining the dataset
 
 | Doc | What it covers |
 |---|---|

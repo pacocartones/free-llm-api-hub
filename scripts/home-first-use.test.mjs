@@ -31,7 +31,7 @@ test('firstUseFacts: counts and the verification date range come from the record
 test('firstUseHtml: quotes the figures, dates the oldest verification and links the three references', () => {
   const html = firstUseHtml(P, { slaDays: 90 });
   assert.match(html, /<section class="first-use" aria-labelledby="first-use-h">/);
-  assert.match(html, /<h2 id="first-use-h"[^>]*>New here\? How this list works<\/h2>/);
+  assert.match(html, /<h2 id="first-use-h"[^>]*>New here\? How this dataset works<\/h2>/);
   for (const h of ['What this is', 'How we verify', 'How to use it']) assert.match(html, new RegExp(`<h3>.*${h}</h3>`));
   assert.match(html, /dataset of 4 free LLM/);
   assert.match(html, /2 ongoing free tiers and 2 trial credits/);
