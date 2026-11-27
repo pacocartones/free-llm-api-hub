@@ -21,7 +21,7 @@ import { NOT_STATED } from './not-stated.mjs';
 import { trainState } from './data-policy-page.mjs';
 import { limitFigures } from './provider-meta.mjs';
 import { shortenProse } from './short-text.mjs';
-import { answerFirst } from './provider-faq.mjs';
+import { answerFirst, flagWords as faqFlagWords } from './provider-faq.mjs';
 import { FACT_ANCHORS } from './provider-sections.mjs';
 import { authorshipLine } from './site-entity.mjs';
 import { providerTitle } from './provider-title.mjs';
@@ -119,6 +119,16 @@ function flagsMd(p) {
     line('Commercial use', 'commercial_ok', 'allowed', 'not allowed (evaluation only)', condition),
     line('OpenAI-compatible', 'openai_compatible', 'yes', 'no', base),
   ];
+  // The two terms flags (dataset 2.16.0): "not stated" when the terms are silent or nothing is recorded, never "allowed".
+  const terms = (label, field, extra = '') => {
+    const check = fieldCheck(p, field);
+    const src = checkSourceMd(check);
+    const words = faqFlagWords(field, p[field]);
+    return `- **${label}:** ${words}${extra}${src ? `. ${src}` : ''}`;
+  };
+  const maCondition = p.multi_account_forbidden === 'conditional' && p.multi_account_condition ? ` (${mdText(p.multi_account_condition)})` : '';
+  rows.push(terms('Several accounts per person', 'multi_account_forbidden', maCondition));
+  rows.push(terms('Getting around rate limits', 'limit_circumvention_forbidden'));
   const dp = p.data_policy && typeof p.data_policy === 'object' ? p.data_policy : null;
   if (dp) {
     const trains = { yes: 'yes', no: 'no' }[trainState(p)] || NOT_STATED;

@@ -6,7 +6,7 @@
 // After you write the data_policy row of a provider (its quote, source and note), this reads the source page in its language and writes the
 // entries of that provider in data/quotes.json: the sentence, each phrase of the note between « », and the absence check if the note says
 // something about the whole page. With --field, it writes instead the sentence of a stated field_checks entry (phone_required,
-// card_required, commercial_ok or openai_compatible), read on its first source. With --speed, it writes the quote of every published_speed
+// card_required, commercial_ok, openai_compatible, multi_account_forbidden or limit_circumvention_forbidden), read on its first source. With --speed, it writes the quote of every published_speed
 // entry of the provider, each read on its source. It writes the day, the hash and the method; you never
 // type them. It changes nothing else. If something is not on the page it says what and writes nothing.
 import { utcToday } from './lib/dates.mjs';

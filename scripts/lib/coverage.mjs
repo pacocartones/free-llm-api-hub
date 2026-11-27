@@ -14,7 +14,7 @@
 import { escapeHtml } from './html.mjs';
 import { SLUG_RE } from './rows.mjs';
 import { timeHtml } from './dates.mjs';
-import { FIELD_CHECK_FIELDS, NULL_REASONS, REASON_LABEL, fieldCheck, fieldCheckStatus, fieldCheckCounts } from './field-checks.mjs';
+import { PRODUCTION_FLAG_FIELDS, NULL_REASONS, REASON_LABEL, fieldCheck, fieldCheckStatus, fieldCheckCounts } from './field-checks.mjs';
 import { safeHttp } from './text.mjs';
 
 const verifiedTextLlm = (p) => p.verified === true && p.is_text_llm === true;
@@ -38,7 +38,7 @@ export function coverage(providers) {
   return COVERAGE_FIELDS.map((f) => {
     const pop = providers.filter(f.inPop);
     const missing = pop.filter((p) => !f.has(p));
-    const isFlag = FIELD_CHECK_FIELDS.includes(f.key);
+    const isFlag = PRODUCTION_FLAG_FIELDS.includes(f.key);
     const resolved = isFlag ? missing.filter((p) => p[f.key] === null && NULL_REASONS.includes(fieldCheckStatus(p, f.key))) : [];
     const open = missing.filter((p) => !resolved.includes(p));
     const row = { key: f.key, label: f.label, population: f.population, total: pop.length, confirmed: pop.length - missing.length, open, resolved };

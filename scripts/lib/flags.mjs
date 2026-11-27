@@ -29,6 +29,16 @@ export const FLAG_DEFS = [
   { id: 'training', field: 'data_policy.trains_on_prompts', name: 'Trains on prompts', short: 'No training', icon: 'ic-shield', good: false },
 ];
 
+/**
+ * The two terms flags (dataset 2.16.0), shown on provider pages only, after the production flags. `good` is false:
+ * ✓ when an official page allows it, ✕ when it is forbidden, ~ when the ban is conditional, ? when the terms are silent.
+ * They are not part of FLAG_DEFS, so the explorer keeps its four flags.
+ */
+export const TERMS_FLAG_DEFS = [
+  { id: 'multi-account', field: 'multi_account_forbidden', name: 'Several accounts per person forbidden', short: 'One account', icon: 'ic-grid', good: false },
+  { id: 'limit-circumvention', field: 'limit_circumvention_forbidden', name: 'Getting around limits forbidden', short: 'Limits', icon: 'ic-gauge', good: false },
+];
+
 /** The shape of each state; the CSS colours it (.pflag-ok, .pflag-bad, .pflag-cond, .pflag-unk). */
 export const FLAG_MARKS = { ok: '✓', bad: '✕', cond: '~', unk: '?' };
 

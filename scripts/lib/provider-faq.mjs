@@ -27,6 +27,8 @@ const FLAG_WORDS = {
   commercial_ok: { true: 'allowed', false: 'not allowed (evaluation only)', conditional: 'allowed with conditions' },
   openai_compatible: { true: 'yes', false: 'no' },
   trains_on_prompts: { true: 'yes', false: 'no' },
+  multi_account_forbidden: { true: 'forbidden', false: 'allowed', conditional: 'conditional' },
+  limit_circumvention_forbidden: { true: 'forbidden', false: 'allowed' },
 };
 
 /** The words of a flag value: the recorded value in words, or "not stated" for null/undefined. */

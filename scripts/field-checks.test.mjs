@@ -8,7 +8,7 @@ import { spawnSync } from 'node:child_process';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { makeTmpDir } from './lib/tmp.mjs';
-import { FIELD_CHECK_FIELDS, NULL_REASONS, REASON_LABEL, fieldCheckErrors, fieldCheckStatus, fieldCheckCounts, UNSOURCED_ALLOWLIST, hasReceipt, unsourcedFlagErrors, unsourcedAllowlistErrors } from './lib/field-checks.mjs';
+import { FIELD_CHECK_FIELDS, TERMS_FLAG_FIELDS, NULL_REASONS, REASON_LABEL, fieldCheckErrors, fieldCheckStatus, fieldCheckCounts, UNSOURCED_ALLOWLIST, hasReceipt, unsourcedFlagErrors, unsourcedAllowlistErrors } from './lib/field-checks.mjs';
 import { quoteErrors } from './lib/quotes.mjs';
 import { mergeRegistry, fieldEntriesFor } from './lib/quotes-add.mjs';
 import { triStateHtml, clientBundle } from './lib/compare.mjs';
@@ -125,9 +125,10 @@ test('the dataset: every recorded check pairs with its flag value and the counts
 });
 
 test('serialize writes field_checks on one line, and a provider without it is unchanged', () => {
-  // Every provider has field_checks now, so take one and drop them.
+  // Every provider has field_checks now (and the terms flags with their checks), so take one and drop them.
   const p = structuredClone(DATA.providers[0]);
   delete p.field_checks;
+  for (const f of TERMS_FLAG_FIELDS) delete p[f];
   const plain = serialize({ ...DATA, providers: [p] });
   const checked = serialize({ ...DATA, providers: [{ ...p, card_required: null, field_checks: { card_required: silent } }] });
   assert.ok(!plain.includes('field_checks'));

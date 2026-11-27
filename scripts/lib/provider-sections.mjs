@@ -12,7 +12,8 @@ import { triStateHtml } from './compare.mjs';
 import { expiryHtml } from './expiry.mjs';
 import { fieldCheck } from './field-checks.mjs';
 import { publishedSpeed, speedFigure, SPEED_METRICS } from './published-speed.mjs';
-import { FLAG_DEFS, flagHtml } from './flags.mjs';
+import { FLAG_DEFS, TERMS_FLAG_DEFS, flagHtml } from './flags.mjs';
+import { flagWords } from './provider-faq.mjs';
 
 // The shared flag component (lib/flags.mjs) around the page's own words: the shape, then the words, with the
 // whole sentence as the accessible text.
@@ -36,6 +37,30 @@ const LIMIT_UNITS = [
 
 const safeUrl = (u) => (/^https?:\/\//i.test(String(u || '')) ? escapeHtml(u) : '');
 
+/** The visible words of a terms flag: forbidden / allowed / conditional, and "Not stated" (NOT_STATED) for null or absent. */
+export function termsValueHtml(v, field = 'multi_account_forbidden') {
+  const cls = { true: 'tri-yes', false: 'tri-no', conditional: 'tri-cond' }[String(v)];
+  const words = flagWords(field, v);
+  if (!cls || words === NOT_STATED) return `<span class="tri tri-unk">${NOT_STATED.charAt(0).toUpperCase()}${NOT_STATED.slice(1)}</span>`;
+  return `<span class="tri ${cls}">${escapeHtml(words)}</span>`;
+}
+
+/**
+ * The two terms flags as rows of the requirements list: several accounts per person, and getting around limits.
+ * "Not stated" when the provider's terms are silent (or nothing is recorded yet), never "allowed".
+ */
+export function termsRowsHtml(p) {
+  return TERMS_FLAG_DEFS.map((def) => {
+    const check = fieldCheck(p, def.field);
+    const v = p[def.field];
+    const condition = v === 'conditional' && def.field === 'multi_account_forbidden' && p.multi_account_condition
+      ? `<div class="req-condition">${escapeHtml(p.multi_account_condition)}</div>`
+      : '';
+    const label = def.field === 'multi_account_forbidden' ? 'Several accounts per person' : 'Getting around rate limits';
+    return `<div class="req"><dt>${ICON(def.icon)}${label}</dt><dd>${flagHtml(def, p, { check, visible: termsValueHtml(v, def.field) })}${condition}${checkSourceHtml(check)}</dd></div>`;
+  }).join('');
+}
+
 /**
  * The stable anchors of the facts of a provider page (/p/<slug>#card …), so an answer engine or a reader can cite one
  * fact and not only the page. The other facts already have theirs: #is-it-free (the answer under the H1), #whats-free,
@@ -49,8 +74,11 @@ export const FACT_ANCHORS = Object.freeze({
   openai_compatible: 'openai',
 });
 
-/** What a visitor must give to start: three flags, each yes / no / "not stated" written out. */
-export function requirementsHtml(p, { anchors = false } = {}) {
+/**
+ * What a visitor must give to start: three flags, each yes / no / "not stated" written out. With
+ * `{ terms: true }` (the provider page), the two terms flags follow in the same list.
+ */
+export function requirementsHtml(p, { anchors = false, terms = false } = {}) {
   const row = (icon, label, field, yes, no, extra = '') => {
     const check = fieldCheck(p, field);
     const def = FLAG_DEFS.find((d) => d.field === field);
@@ -64,6 +92,7 @@ export function requirementsHtml(p, { anchors = false } = {}) {
     row('ic-card', 'Credit card', 'card_required', 'required', 'not required') +
     row('ic-phone', 'Phone verification', 'phone_required', 'required', 'not required') +
     row('ic-building', 'Commercial use', 'commercial_ok', 'allowed', 'evaluation only', commercialCondition) +
+    (terms ? termsRowsHtml(p) : '') +
     `</dl>`;
 }
 

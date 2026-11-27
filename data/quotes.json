@@ -26,6 +26,18 @@
    "page_sha256": "c2e65f691948a01f9abdf12423ecb72703e9066255fa8da5335d9f83ba347bf9"
   },
   {
+   "id": "google-gemini.limit_circumvention_forbidden.sentence",
+   "slug": "google-gemini",
+   "kind": "field_sentence",
+   "field": "limit_circumvention_forbidden",
+   "text": "Google sets and enforces limits on your use of the APIs (e.g. limiting the number of API requests that you may make or the number of users you may serve), in our sole discretion. You agree to, and will not attempt to circumvent, such limitations documented with each API.",
+   "source_url": "https://developers.google.com/terms",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": null
+  },
+  {
    "id": "groq.sentence",
    "slug": "groq",
    "kind": "sentence",
@@ -46,6 +58,30 @@
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "645fa99e301839336160d9b0387edad3a965dc30e8bed95efb9e54116c2f2f1e"
+  },
+  {
+   "id": "groq.limit_circumvention_forbidden.sentence",
+   "slug": "groq",
+   "kind": "field_sentence",
+   "field": "limit_circumvention_forbidden",
+   "text": "beyond published parameters, rate limits, or use limitations, including by registering multiple accounts or orchestrating usage between multiple organizations;",
+   "source_url": "https://console.groq.com/docs/legal/ai-policy",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": null
+  },
+  {
+   "id": "groq.multi_account_forbidden.sentence",
+   "slug": "groq",
+   "kind": "field_sentence",
+   "field": "multi_account_forbidden",
+   "text": "beyond published parameters, rate limits, or use limitations, including by registering multiple accounts or orchestrating usage between multiple organizations;",
+   "source_url": "https://console.groq.com/docs/legal/ai-policy",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": null
   },
   {
    "id": "groq.openai_compatible.sentence",
@@ -121,6 +157,30 @@
    "page_sha256": "20df95bbf4c9bd5a0fbc63a59aa5cb37a967cc1b624753e3d1e9f2f597291913"
   },
   {
+   "id": "openrouter.limit_circumvention_forbidden.sentence",
+   "slug": "openrouter",
+   "kind": "field_sentence",
+   "field": "limit_circumvention_forbidden",
+   "text": "create a false identity, misrepresent your identity, or create multiple accounts as a single user, for purposes of bypassing or circumventing use limits on the Site or Service or for any other reason;",
+   "source_url": "https://openrouter.ai/terms",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": null
+  },
+  {
+   "id": "openrouter.multi_account_forbidden.sentence",
+   "slug": "openrouter",
+   "kind": "field_sentence",
+   "field": "multi_account_forbidden",
+   "text": "create a false identity, misrepresent your identity, or create multiple accounts as a single user, for purposes of bypassing or circumventing use limits on the Site or Service or for any other reason;",
+   "source_url": "https://openrouter.ai/terms",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": null
+  },
+  {
    "id": "openrouter.openai_compatible.sentence",
    "slug": "openrouter",
    "kind": "field_sentence",
@@ -154,6 +214,18 @@
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "eed26388f278a23d6764371732c89b5cfd8fa4f31ed8bd266f1d4c081e4b62b6"
+  },
+  {
+   "id": "cloudflare-workers-ai.limit_circumvention_forbidden.sentence",
+   "slug": "cloudflare-workers-ai",
+   "kind": "field_sentence",
+   "field": "limit_circumvention_forbidden",
+   "text": "(c) access or use the Services in a manner that violates or is intended to circumvent Service-specific usage limits, quotas, or other restrictions set forth in the Agreement;",
+   "source_url": "https://www.cloudflare.com/terms/",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": null
   },
   {
    "id": "cloudflare-workers-ai.openai_compatible.sentence",
@@ -201,6 +273,30 @@
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "98417e32ba8f8685314a648f28fccae34b294a869eb6fcdd58a00cd11b58ff69"
+  },
+  {
+   "id": "cohere.limit_circumvention_forbidden.sentence",
+   "slug": "cohere",
+   "kind": "field_sentence",
+   "field": "limit_circumvention_forbidden",
+   "text": "(3) otherwise intentionally bypass restrictions of the Cohere Services, including through jailbreaking, prompt injection attacks, or automation to circumvent bans or usage limitations.",
+   "source_url": "https://docs.cohere.com/docs/usage-policy",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": null
+  },
+  {
+   "id": "cohere.multi_account_forbidden.sentence",
+   "slug": "cohere",
+   "kind": "field_sentence",
+   "field": "multi_account_forbidden",
+   "text": "not register for more than one account, register for an account on behalf of an individual other than yourself without such individual’s authorization, or register for an account on behalf of any group or entity;",
+   "source_url": "https://cohere.com/terms-of-use",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": null
   },
   {
    "id": "cohere.openai_compatible.sentence",
@@ -261,6 +357,18 @@
    "page_sha256": "e08883db62c8dd5facb23cec54bb82b640691d7acd0212ae843d4562c52d7671"
   },
   {
+   "id": "cerebras.limit_circumvention_forbidden.sentence",
+   "slug": "cerebras",
+   "kind": "field_sentence",
+   "field": "limit_circumvention_forbidden",
+   "text": "Bypass the measures we may use to prevent or restrict access to the Service, including, without limitation, features that prevent or restrict use or copying of any content or that enforce limitations on use of the Service or any portion thereof;",
+   "source_url": "https://www.cerebras.ai/terms-of-service",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": null
+  },
+  {
    "id": "cerebras.openai_compatible.sentence",
    "slug": "cerebras",
    "kind": "field_sentence",
@@ -319,6 +427,30 @@
    "lang": "cn",
    "method": "html-text-v1: page requested with Accept-Language cn, tags removed, character references decoded, white space collapsed",
    "page_sha256": "2b1f6094bc6b9be389829567109f290c41ed0f0504bbc3a385e4ff9e908486e1"
+  },
+  {
+   "id": "siliconflow.limit_circumvention_forbidden.sentence",
+   "slug": "siliconflow",
+   "kind": "field_sentence",
+   "field": "limit_circumvention_forbidden",
+   "text": "绕开我们可能用于阻止或限制访问服务的措施，包括但不限于阻止或限制使用或复制任何内容或限制使用服务或其任何部分的功能；",
+   "source_url": "https://docs.siliconflow.cn/docs/legals/terms-of-service",
+   "read_on": "2026-11-26",
+   "lang": "zh",
+   "method": "html-text-v1: page requested with Accept-Language zh, tags removed, character references decoded, white space collapsed",
+   "page_sha256": null
+  },
+  {
+   "id": "siliconflow.multi_account_forbidden.sentence",
+   "slug": "siliconflow",
+   "kind": "field_sentence",
+   "field": "multi_account_forbidden",
+   "text": "同一用户（“同一用户“认定以手机号为准，下同）仅能创建一个个人账户。",
+   "source_url": "https://docs.siliconflow.cn/docs/legals/terms-of-service",
+   "read_on": "2026-11-26",
+   "lang": "zh",
+   "method": "html-text-v1: page requested with Accept-Language zh, tags removed, character references decoded, white space collapsed",
+   "page_sha256": null
   },
   {
    "id": "siliconflow.openai_compatible.sentence",
@@ -403,6 +535,18 @@
    "page_sha256": "9eecd62bfab3b0182375bf1e106b3d504d4848f3f72b984b4b601b9dcf6b29d9"
   },
   {
+   "id": "ibm-watsonx.multi_account_forbidden.sentence",
+   "slug": "ibm-watsonx",
+   "kind": "field_sentence",
+   "field": "multi_account_forbidden",
+   "text": "Note: Only Pay-As-You-Go and Subscription accounts can create multiple accounts by using one email. Lite accounts can create only one account per email.",
+   "source_url": "https://cloud.ibm.com/docs/account?topic=account-create-mult-accounts",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": null
+  },
+  {
    "id": "ibm-watsonx.openai_compatible.sentence",
    "slug": "ibm-watsonx",
    "kind": "field_sentence",
@@ -436,6 +580,18 @@
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "40082db6cf5bd6443849b98e2409f5c411bd557dcdca51a7f906bb23d5f38db6"
+  },
+  {
+   "id": "ovhcloud-ai-endpoints.limit_circumvention_forbidden.sentence",
+   "slug": "ovhcloud-ai-endpoints",
+   "kind": "field_sentence",
+   "field": "limit_circumvention_forbidden",
+   "text": "The Client undertakes to use the Services in compliance with the technical limitations established by OVHcloud in order to prevent misuse.",
+   "source_url": "https://contract.eu.ovhapis.com/1.0/pdf/contrat_genServices-gb.pdf",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "pdf-text-v1: PDF parsed with unpdf (pdf.js), text of all pages joined, white space collapsed",
+   "page_sha256": null
   },
   {
    "id": "ovhcloud-ai-endpoints.openai_compatible.sentence",
@@ -507,6 +663,18 @@
    "page_sha256": "304d36025e9bd9210f82b0fa2956a045c6ec8001916e0d32afcc1e9c94aeac77"
   },
   {
+   "id": "fireworks-ai.limit_circumvention_forbidden.sentence",
+   "slug": "fireworks-ai",
+   "kind": "field_sentence",
+   "field": "limit_circumvention_forbidden",
+   "text": "bypass any measures we may use to prevent or restrict access to the Service (including, without limitation, features that prevent or restrict use or copying of any content or that enforce limitations on use of the Service or any portion thereof)",
+   "source_url": "https://fireworks.ai/terms-of-service",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "pdf-text-v1: PDF parsed with unpdf (pdf.js), text of all pages joined, white space collapsed",
+   "page_sha256": null
+  },
+  {
    "id": "fireworks-ai.openai_compatible.sentence",
    "slug": "fireworks-ai",
    "kind": "field_sentence",
@@ -575,6 +743,30 @@
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "98414c14ebd7b5778d66cf24485c1aa8acce396b597f7ac067e893c041e02ab4"
+  },
+  {
+   "id": "novita.limit_circumvention_forbidden.sentence",
+   "slug": "novita",
+   "kind": "field_sentence",
+   "field": "limit_circumvention_forbidden",
+   "text": "We strictly prohibit users from obtaining multiple free quotas through mass email registration or any other methods.",
+   "source_url": "https://novita.ai/legal/terms-of-service",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": null
+  },
+  {
+   "id": "novita.multi_account_forbidden.sentence",
+   "slug": "novita",
+   "kind": "field_sentence",
+   "field": "multi_account_forbidden",
+   "text": "We strictly prohibit users from obtaining multiple free quotas through mass email registration or any other methods.",
+   "source_url": "https://novita.ai/legal/terms-of-service",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": null
   },
   {
    "id": "ai21.sentence",
@@ -667,6 +859,18 @@
    "page_sha256": "60b28d1b6c511e254b3d8082da71e3f707ebdfb7c3a263e66182b5cb137a161c"
   },
   {
+   "id": "ai21.limit_circumvention_forbidden.sentence",
+   "slug": "ai21",
+   "kind": "field_sentence",
+   "field": "limit_circumvention_forbidden",
+   "text": "Your access may be subject to usage parameters, entitlements, quotas, rate limits, or other scope limitations communicated by AI21 or set out in your Account, Documentation, or any applicable Separate Agreement, and you will not exceed or circumvent such limitations.",
+   "source_url": "https://www.ai21.com/terms-policies/terms-of-use/",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": null
+  },
+  {
    "id": "nlpcloud.sentence",
    "slug": "nlpcloud",
    "kind": "sentence",
@@ -676,6 +880,18 @@
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "f1171ac6eebcc2d603b61a68252db7717397255318c726cfe2b3d3f34ac6a85c"
+  },
+  {
+   "id": "nlpcloud.multi_account_forbidden.sentence",
+   "slug": "nlpcloud",
+   "kind": "field_sentence",
+   "field": "multi_account_forbidden",
+   "text": "Only one free plan is permitted per one application or website, and per one IP address.",
+   "source_url": "https://nlpcloud.com/tos.html",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": null
   },
   {
    "id": "alibaba-model-studio.sentence",
@@ -699,6 +915,18 @@
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "572a96d30bb7ce092abac0eae47a08fbf5fdc8ccc48dffa8eb87362b2a14f301"
+  },
+  {
+   "id": "alibaba-model-studio.multi_account_forbidden.sentence",
+   "slug": "alibaba-model-studio",
+   "kind": "field_sentence",
+   "field": "multi_account_forbidden",
+   "text": "Re-registering a new account does not grant an additional new user free quota.",
+   "source_url": "https://www.alibabacloud.com/help/en/model-studio/new-free-quota",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": null
   },
   {
    "id": "alibaba-model-studio.openai_compatible.sentence",
@@ -841,6 +1069,30 @@
    "page_sha256": "4eb7c01f16ccc5f1261adc61112804050b000048109699b8434f4488f406fc9b"
   },
   {
+   "id": "scaleway.limit_circumvention_forbidden.sentence",
+   "slug": "scaleway",
+   "kind": "field_sentence",
+   "field": "limit_circumvention_forbidden",
+   "text": "The Client undertakes not to create multiple Client Accounts for the purpose of (i) obtaining promotions, discount offers, and/or other commercial benefits granted by Scaleway upon the creation of a Client Account or (ii) circumventing the limitations and/or quotas of the Services.",
+   "source_url": "https://www-uploads.scaleway.com/Conditions_Generales_de_Services_v2026_a0028de41c.pdf",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "pdf-text-v1: PDF parsed with unpdf (pdf.js), text of all pages joined, white space collapsed",
+   "page_sha256": null
+  },
+  {
+   "id": "scaleway.multi_account_forbidden.sentence",
+   "slug": "scaleway",
+   "kind": "field_sentence",
+   "field": "multi_account_forbidden",
+   "text": "The Client undertakes not to create multiple Client Accounts for the purpose of (i) obtaining promotions, discount offers, and/or other commercial benefits granted by Scaleway upon the creation of a Client Account or (ii) circumventing the limitations and/or quotas of the Services.",
+   "source_url": "https://www-uploads.scaleway.com/Conditions_Generales_de_Services_v2026_a0028de41c.pdf",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "pdf-text-v1: PDF parsed with unpdf (pdf.js), text of all pages joined, white space collapsed",
+   "page_sha256": null
+  },
+  {
    "id": "scaleway.openai_compatible.sentence",
    "slug": "scaleway",
    "kind": "field_sentence",
@@ -971,6 +1223,30 @@
    "page_sha256": "e0360a9bc57ad575f439d176a04f6bc05c6123a05a581751538690e512fd27f7"
   },
   {
+   "id": "vercel-ai-gateway.limit_circumvention_forbidden.sentence",
+   "slug": "vercel-ai-gateway",
+   "kind": "field_sentence",
+   "field": "limit_circumvention_forbidden",
+   "text": "Circumvent Vercel’s Fair Use Guidelines, rate limits, or security measures, including by using automation to interact with Vercel’s website, create multiple accounts, extract data, submit requests or queries, or search requests;",
+   "source_url": "https://vercel.com/legal/acceptable-use-policy",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": null
+  },
+  {
+   "id": "vercel-ai-gateway.multi_account_forbidden.sentence",
+   "slug": "vercel-ai-gateway",
+   "kind": "field_sentence",
+   "field": "multi_account_forbidden",
+   "text": "Circumvent Vercel’s Fair Use Guidelines, rate limits, or security measures, including by using automation to interact with Vercel’s website, create multiple accounts, extract data, submit requests or queries, or search requests;",
+   "source_url": "https://vercel.com/legal/acceptable-use-policy",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": null
+  },
+  {
    "id": "vercel-ai-gateway.openai_compatible.sentence",
    "slug": "vercel-ai-gateway",
    "kind": "field_sentence",
@@ -1064,6 +1340,18 @@
    "page_sha256": "588fe455baa6086eba219bbca3077ae5e9f03409452a424dc5e0f5fcd0b39aff"
   },
   {
+   "id": "deepgram.limit_circumvention_forbidden.sentence",
+   "slug": "deepgram",
+   "kind": "field_sentence",
+   "field": "limit_circumvention_forbidden",
+   "text": "share passwords or authentication credentials for our Services, or otherwise circumvent the measures we may use to restrict access to our Services or enforce limitations on use of our Services; or",
+   "source_url": "https://deepgram.com/terms",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": null
+  },
+  {
    "id": "assemblyai.sentence",
    "slug": "assemblyai",
    "kind": "sentence",
@@ -1108,6 +1396,18 @@
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "eab8ec47640829ac8d707658a51e5b88f13413ce21003350d61aae7507296a94"
+  },
+  {
+   "id": "assemblyai.limit_circumvention_forbidden.sentence",
+   "slug": "assemblyai",
+   "kind": "field_sentence",
+   "field": "limit_circumvention_forbidden",
+   "text": "Customer may not: (a) use any automated or programmatic method to extract data or Output or to circumvent limits on Output, including scraping, web harvesting, or web data extraction",
+   "source_url": "https://www.assemblyai.com/legal/terms-of-service",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": null
   },
   {
    "id": "mixedbread.sentence",
@@ -1193,6 +1493,18 @@
    "page_sha256": "889718791c8385655afce18eaee97e15159bbdfe55f4ef0a99da0c317301fcb1"
   },
   {
+   "id": "modelscope.multi_account_forbidden.sentence",
+   "slug": "modelscope",
+   "kind": "field_sentence",
+   "field": "multi_account_forbidden",
+   "text": "2.2.5. 同一用户只能注册并绑定一个账号。",
+   "source_url": "https://www.modelscope.cn/docs/agreements/terms.md",
+   "read_on": "2026-11-26",
+   "lang": "zh",
+   "method": "html-text-v1: page requested with Accept-Language zh, tags removed, character references decoded, white space collapsed",
+   "page_sha256": null
+  },
+  {
    "id": "modelscope.openai_compatible.sentence",
    "slug": "modelscope",
    "kind": "field_sentence",
@@ -1227,6 +1539,18 @@
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "ca8175c99de855875520885dbbeff08c0a38d83a9a35b1bad6b44aaf0b44e4f0"
+  },
+  {
+   "id": "pollinations.limit_circumvention_forbidden.sentence",
+   "slug": "pollinations",
+   "kind": "field_sentence",
+   "field": "limit_circumvention_forbidden",
+   "text": "Do not violate law; infringe IP/likeness/privacy; attack the Service; evade rate limits or spending controls; abuse credit grants, app attribution, or developer earnings; or replicate non-public features to build a competing hosted service.",
+   "source_url": "https://pollinations.ai/terms",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": null
   },
   {
    "id": "pollinations.openai_compatible.sentence",
@@ -1298,6 +1622,18 @@
    "page_sha256": "4c5ee4c48cb741d9ef1025b4ce33fa7d94023992d68fcd842d2157d973da730e"
   },
   {
+   "id": "runware.limit_circumvention_forbidden.sentence",
+   "slug": "runware",
+   "kind": "field_sentence",
+   "field": "limit_circumvention_forbidden",
+   "text": "Consume resources in a way designed to evade metering, billing, scaling limits or Runware's security controls.",
+   "source_url": "https://runware.ai/terms",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": null
+  },
+  {
    "id": "runware.openai_compatible.sentence",
    "slug": "runware",
    "kind": "field_sentence",
@@ -1319,6 +1655,18 @@
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "4a3ee7dc52306b08e2a82ccb4756dd3454188bd01478d07a0c84e2fe520d8d43"
+  },
+  {
+   "id": "twelve-labs.multi_account_forbidden.sentence",
+   "slug": "twelve-labs",
+   "kind": "field_sentence",
+   "field": "multi_account_forbidden",
+   "text": "(c) not register for more than one account, register for an account on behalf of an individual other than yourself without such individual’s authorization, or register for an account on behalf of any group or entity;",
+   "source_url": "https://www.twelvelabs.io/legal/terms-of-use",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": null
   },
   {
    "id": "ocr-space.sentence",
@@ -1367,6 +1715,30 @@
    "page_sha256": "e5e292454d3e076412f8a25b1b664a1f5888e050b95b662cf94141e2d06deaa8"
   },
   {
+   "id": "ocr-space.limit_circumvention_forbidden.sentence",
+   "slug": "ocr-space",
+   "kind": "field_sentence",
+   "field": "limit_circumvention_forbidden",
+   "text": "It is ok to use more than one free OCR API key - as long as you do not overdo it.",
+   "source_url": "https://forum.ocr.space/t/using-multiple-free-api-keys-from-the-same-ip-allowed-or-blocked/27794",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": null
+  },
+  {
+   "id": "ocr-space.multi_account_forbidden.sentence",
+   "slug": "ocr-space",
+   "kind": "field_sentence",
+   "field": "multi_account_forbidden",
+   "text": "It is ok to use more than one free OCR API key - as long as you do not overdo it. If you use this approach too often/with too many keys, then our anti-spam detection will catch it.",
+   "source_url": "https://forum.ocr.space/t/using-multiple-free-api-keys-from-the-same-ip-allowed-or-blocked/27794",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": null
+  },
+  {
    "id": "ocr-space.phone_required.sentence",
    "slug": "ocr-space",
    "kind": "field_sentence",
@@ -1400,6 +1772,18 @@
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "3c674d4e6d02067574329369421db907036c0a95d1e1da0256969dbc58651672"
+  },
+  {
+   "id": "llamaparse.limit_circumvention_forbidden.sentence",
+   "slug": "llamaparse",
+   "kind": "field_sentence",
+   "field": "limit_circumvention_forbidden",
+   "text": "bypass any usage limit, access control or security measure, or interfere with the integrity or security of the Service;",
+   "source_url": "https://www.llamaindex.ai/terms-of-service",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": null
   },
   {
    "id": "nanonets.card_required.sentence",
@@ -1457,6 +1841,18 @@
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "f881da5f601fdbf94595fcb3b37cdb89ebe5c96f5abe24d8b8029dcd90ee40b8"
+  },
+  {
+   "id": "moondream.limit_circumvention_forbidden.sentence",
+   "slug": "moondream",
+   "kind": "field_sentence",
+   "field": "limit_circumvention_forbidden",
+   "text": "Use the Service in a manner that exceeds rate limits or constitutes excessive or abusive usage;",
+   "source_url": "https://moondream.ai/terms",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": null
   },
   {
    "id": "moondream.openai_compatible.sentence",
@@ -1541,6 +1937,18 @@
    "page_sha256": "174e2100b4c1c533f4ff99d5cc7b327bae483ef1a13c3f720cb4af9d20953aa1"
   },
   {
+   "id": "unreal-speech.limit_circumvention_forbidden.sentence",
+   "slug": "unreal-speech",
+   "kind": "field_sentence",
+   "field": "limit_circumvention_forbidden",
+   "text": "You will comply with any documentation, code samples, usage limits, rate limits, and other requirements we provide for accessing our APIs.",
+   "source_url": "https://unrealspeech.com/terms",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": null
+  },
+  {
    "id": "elevenlabs.sentence",
    "slug": "elevenlabs",
    "kind": "sentence",
@@ -1562,6 +1970,30 @@
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "246f1a884b2c6ed919de8d621d595b5b082bcfaee38dd3a88ddcdf3da0d9c151"
+  },
+  {
+   "id": "elevenlabs.limit_circumvention_forbidden.sentence",
+   "slug": "elevenlabs",
+   "kind": "field_sentence",
+   "field": "limit_circumvention_forbidden",
+   "text": "Engaging in or facilitating coordinated, automated, or large-scale activity intended to evade limits or controls we apply to individual accounts",
+   "source_url": "https://elevenlabs.io/use-policy",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": null
+  },
+  {
+   "id": "elevenlabs.multi_account_forbidden.sentence",
+   "slug": "elevenlabs",
+   "kind": "field_sentence",
+   "field": "multi_account_forbidden",
+   "text": "Manipulating credits or tokens, creating multiple accounts to abuse free plans or evade enforcement, or artificially inflating Voice Library rewards",
+   "source_url": "https://elevenlabs.io/use-policy",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": null
   },
   {
    "id": "sarvam-ai.sentence",
@@ -1609,6 +2041,30 @@
    "page_sha256": "bd7a4a3ef99f9d8826647b5027f0b7adda9ee72b46470fda5388250c311a2416"
   },
   {
+   "id": "sarvam-ai.limit_circumvention_forbidden.sentence",
+   "slug": "sarvam-ai",
+   "kind": "field_sentence",
+   "field": "limit_circumvention_forbidden",
+   "text": "exceed, circumvent or manipulate any rate limits, quotas, credits or usage-based metering, or create multiple accounts to exploit free plans or evade enforcement of these Terms;",
+   "source_url": "https://www.sarvam.ai/terms-of-service",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": null
+  },
+  {
+   "id": "sarvam-ai.multi_account_forbidden.sentence",
+   "slug": "sarvam-ai",
+   "kind": "field_sentence",
+   "field": "multi_account_forbidden",
+   "text": "exceed, circumvent or manipulate any rate limits, quotas, credits or usage-based metering, or create multiple accounts to exploit free plans or evade enforcement of these Terms;",
+   "source_url": "https://www.sarvam.ai/terms-of-service",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": null
+  },
+  {
    "id": "sarvam-ai.openai_compatible.sentence",
    "slug": "sarvam-ai",
    "kind": "field_sentence",
@@ -1645,6 +2101,30 @@
    "page_sha256": "8199a79cf4890054e316b11bd184337978d71b68d2d76a322f0bbb012aac377e"
   },
   {
+   "id": "gladia.limit_circumvention_forbidden.sentence",
+   "slug": "gladia",
+   "kind": "field_sentence",
+   "field": "limit_circumvention_forbidden",
+   "text": "(c) circumvent any user limits, applicable usage allowances, or timing, use, or functionality restrictions set forth in the applicable Order or built into the Services or the API;",
+   "source_url": "https://www.gladia.io/terms-conditions-gladia-inc",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": null
+  },
+  {
+   "id": "gladia.multi_account_forbidden.sentence",
+   "slug": "gladia",
+   "kind": "field_sentence",
+   "field": "multi_account_forbidden",
+   "text": "You may establish only one (1) Account per person to participate in the Services, and should Gladia discover that you have opened more than one (1) Account per person, in addition to any other rights that Gladia may have, Gladia reserves the right to suspend or terminate any or all of your Accounts.",
+   "source_url": "https://www.gladia.io/general-terms-of-use-gladia-inc",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": null
+  },
+  {
    "id": "rime.card_required.sentence",
    "slug": "rime",
    "kind": "field_sentence",
@@ -1655,6 +2135,54 @@
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "316133d3bd5d13f90b870d332e64c3ce887c7b963b6fb7e4a3b5547da7875db6"
+  },
+  {
+   "id": "rime.limit_circumvention_forbidden.sentence",
+   "slug": "rime",
+   "kind": "field_sentence",
+   "field": "limit_circumvention_forbidden",
+   "text": "bypass the measures Rime uses to prevent or restrict access to the Services, including features that enforce usage limits or Plan entitlements, or create multiple Accounts to obtain additional free usage",
+   "source_url": "https://www.rime.ai/terms",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": null
+  },
+  {
+   "id": "rime.multi_account_forbidden.sentence",
+   "slug": "rime",
+   "kind": "field_sentence",
+   "field": "multi_account_forbidden",
+   "text": "bypass the measures Rime uses to prevent or restrict access to the Services, including features that enforce usage limits or Plan entitlements, or create multiple Accounts to obtain additional free usage",
+   "source_url": "https://www.rime.ai/terms",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": null
+  },
+  {
+   "id": "tencent-hunyuan.limit_circumvention_forbidden.sentence",
+   "slug": "tencent-hunyuan",
+   "kind": "field_sentence",
+   "field": "limit_circumvention_forbidden",
+   "text": "（1）伪造点击、制造虚假请求、异常并发、绕过限流、拆分请求、利用漏洞或其他技术手段。",
+   "source_url": "https://cloud.tencent.com/document/product/301/129852",
+   "read_on": "2026-11-26",
+   "lang": "zh",
+   "method": "html-text-v1: page requested with Accept-Language zh, tags removed, character references decoded, white space collapsed",
+   "page_sha256": null
+  },
+  {
+   "id": "tencent-hunyuan.multi_account_forbidden.sentence",
+   "slug": "tencent-hunyuan",
+   "kind": "field_sentence",
+   "field": "multi_account_forbidden",
+   "text": "（2）注册大量账号、使用虚假主体身份证明注册账号或其他账号滥用手段。",
+   "source_url": "https://cloud.tencent.com/document/product/301/129852",
+   "read_on": "2026-11-26",
+   "lang": "zh",
+   "method": "html-text-v1: page requested with Accept-Language zh, tags removed, character references decoded, white space collapsed",
+   "page_sha256": null
   },
   {
    "id": "tencent-hunyuan.openai_compatible.sentence",
@@ -1691,6 +2219,18 @@
    "page_sha256": "b2c68787c0c9d72ef8a21301f2e6ace4a4d8286cb5dc8faee4125dbebb685553"
   },
   {
+   "id": "voyage-ai.limit_circumvention_forbidden.sentence",
+   "slug": "voyage-ai",
+   "kind": "field_sentence",
+   "field": "limit_circumvention_forbidden",
+   "text": "You shall not access or use the Service in a way intended to avoid incurring fees or exceeding usage limits or quotas.",
+   "source_url": "https://www.voyageai.com/tos",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": null
+  },
+  {
    "id": "contextual-ai.commercial_ok.sentence",
    "slug": "contextual-ai",
    "kind": "field_sentence",
@@ -1701,6 +2241,18 @@
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "4f33748b080fa756c6de4dbeac4019d8d635eccf8914e3bfe863a0b5476f737b"
+  },
+  {
+   "id": "contextual-ai.limit_circumvention_forbidden.sentence",
+   "slug": "contextual-ai",
+   "kind": "field_sentence",
+   "field": "limit_circumvention_forbidden",
+   "text": "Without limiting any other restrictions in our commercial agreements, you must not seek to circumvent any restrictions or limitations that are part of the Services and you must not use the Services in an unauthorized manner (e.g. scraping of content or data to train another model).",
+   "source_url": "https://contextual.ai/legal/usage-policy",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": null
   },
   {
    "id": "cartesia.sentence",
@@ -1819,6 +2371,18 @@
    "page_sha256": "6a50abd4bfb910849a5bb04f5093b656884d4c4cb22c017826c1c7f603d0ad83"
   },
   {
+   "id": "unstructured.limit_circumvention_forbidden.sentence",
+   "slug": "unstructured",
+   "kind": "field_sentence",
+   "field": "limit_circumvention_forbidden",
+   "text": "(c) circumvent or disable usage limits, security features, or access controls;",
+   "source_url": "https://unstructured.io/platform-terms-of-service",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": null
+  },
+  {
    "id": "nutrient.card_required.sentence",
    "slug": "nutrient",
    "kind": "field_sentence",
@@ -1841,6 +2405,30 @@
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "8c1ac676abc7caced8261473e249eea09002813b4dc2d01087f13b32d9aed6e4"
+  },
+  {
+   "id": "nutrient.limit_circumvention_forbidden.sentence",
+   "slug": "nutrient",
+   "kind": "field_sentence",
+   "field": "limit_circumvention_forbidden",
+   "text": "attempt to or act to bypass or otherwise circumvent any limitations placed on your license of the API, including but not limited to limits with respect to the maximum number of actions you can perform using the API pursuant to your purchased subscription;",
+   "source_url": "https://www.nutrient.io/legal/cloud-terms/",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": null
+  },
+  {
+   "id": "nutrient.multi_account_forbidden.sentence",
+   "slug": "nutrient",
+   "kind": "field_sentence",
+   "field": "multi_account_forbidden",
+   "text": "An Enterprise (as defined in Section 1.1) may use the free tier only for Evaluation (as defined in Section 1.1), within the free tier’s quotas, and may not use multiple accounts or other means to exceed them.",
+   "source_url": "https://www.nutrient.io/legal/cloud-terms/",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": null
   },
   {
    "id": "photoroom.sentence",
@@ -1866,6 +2454,18 @@
    "page_sha256": "517a925b6ad82034f7cc7e4c32aa980f5c3a3a124d0ed0c691ce2aa5f2786808"
   },
   {
+   "id": "photoroom.limit_circumvention_forbidden.sentence",
+   "slug": "photoroom",
+   "kind": "field_sentence",
+   "field": "limit_circumvention_forbidden",
+   "text": "(xi) bypassing the measures we may use to prevent or restrict access to the Services, including without limitation features that prevent or restrict use or copying of any content or enforce limitations on use of the Services or the content therein;",
+   "source_url": "https://www.photoroom.com/legal/terms-and-conditions",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": null
+  },
+  {
    "id": "poolside.sentence",
    "slug": "poolside",
    "kind": "sentence",
@@ -1875,6 +2475,18 @@
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "e61bfb4ed61a5d4ffb954d7f42d9b8a30322dae299ad4fd317dd9ed0b1fe1aea"
+  },
+  {
+   "id": "poolside.limit_circumvention_forbidden.sentence",
+   "slug": "poolside",
+   "kind": "field_sentence",
+   "field": "limit_circumvention_forbidden",
+   "text": "access or use any Product in a way intended to circumvent applicable fees or usage limits;",
+   "source_url": "https://poolside.ai/legal/eula",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": null
   },
   {
    "id": "poolside.openai_compatible.sentence",
@@ -1959,6 +2571,30 @@
    "page_sha256": "8ac7a3d3f094b2470b39c6b8c6571ef8ca632c9aea601f0ca7bf677b121bbd72"
   },
   {
+   "id": "veryfi.limit_circumvention_forbidden.sentence",
+   "slug": "veryfi",
+   "kind": "field_sentence",
+   "field": "limit_circumvention_forbidden",
+   "text": "Exceed rate limits without upgrading",
+   "source_url": "https://www.veryfi.com/terms-api-starter/",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": null
+  },
+  {
+   "id": "veryfi.multi_account_forbidden.sentence",
+   "slug": "veryfi",
+   "kind": "field_sentence",
+   "field": "multi_account_forbidden",
+   "text": "Use multiple accounts to obtain free or discounted services",
+   "source_url": "https://www.veryfi.com/terms-api-starter/",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": null
+  },
+  {
    "id": "voicegain.sentence",
    "slug": "voicegain",
    "kind": "sentence",
@@ -1980,6 +2616,18 @@
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "a69970fe4a15fffb6ee9df565a449aa58a0d128721141239897a9af126a2afe8"
+  },
+  {
+   "id": "voicegain.limit_circumvention_forbidden.sentence",
+   "slug": "voicegain",
+   "kind": "field_sentence",
+   "field": "limit_circumvention_forbidden",
+   "text": "You may not disable, tamper with, or otherwise attempt to circumvent any billing mechanism that meters use of the SaaS Service.",
+   "source_url": "https://github.com/voicegain/platform/blob/master/TERMS-OF-SERVICE.md",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": null
   },
   {
    "id": "smallest-ai.sentence",
@@ -2039,6 +2687,18 @@
    "page_sha256": "bf56c16475842677e1cfe66598a8cfc5c089df15c4c8a92e709782a4b7c3fce8"
   },
   {
+   "id": "retell-ai.limit_circumvention_forbidden.sentence",
+   "slug": "retell-ai",
+   "kind": "field_sentence",
+   "field": "limit_circumvention_forbidden",
+   "text": "You may not reverse engineer the Product, bypass safeguards or service limits, attempt to evade detection or enforcement mechanisms, interfere with platform integrity, conduct vulnerability testing without authorization, or use the Product to develop competing services.",
+   "source_url": "https://www.retellai.com/legal/prohibited-use-policy",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": null
+  },
+  {
    "id": "datalab.sentence",
    "slug": "datalab",
    "kind": "sentence",
@@ -2062,6 +2722,18 @@
    "page_sha256": "05c59c29514985cc6a5cc263a238194ff28d1501475fe34919bc51b94ec3f703"
   },
   {
+   "id": "datalab.limit_circumvention_forbidden.sentence",
+   "slug": "datalab",
+   "kind": "field_sentence",
+   "field": "limit_circumvention_forbidden",
+   "text": "(ix) access or use the Service in excess of the scope of the subscription, usage, seat, feature, or other limitations applicable to Customer’s selected Subscription Plan or applicable Order Form.",
+   "source_url": "https://www.datalab.to/terms/end-user-terms",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": null
+  },
+  {
    "id": "wandb-inference.sentence",
    "slug": "wandb-inference",
    "kind": "sentence",
@@ -2071,6 +2743,18 @@
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "1548ca23c669294dff7b31bd3f63b42702d769f7b49a22ee01993d8329a834f1"
+  },
+  {
+   "id": "wandb-inference.limit_circumvention_forbidden.sentence",
+   "slug": "wandb-inference",
+   "kind": "field_sentence",
+   "field": "limit_circumvention_forbidden",
+   "text": "Using manual or electronic means to avoid any use limitations placed on a System, such as access limits and storage restrictions;",
+   "source_url": "https://docs.coreweave.com/policies/terms-of-service/acceptable-use-policy",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": null
   },
   {
    "id": "wandb-inference.openai_compatible.sentence",
@@ -2118,6 +2802,18 @@
    "page_sha256": "6c6f959b0156ecf8549b8846d173a7d43be68908a894c2cc5df061b541f6be4a"
   },
   {
+   "id": "typhoon.limit_circumvention_forbidden.sentence",
+   "slug": "typhoon",
+   "kind": "field_sentence",
+   "field": "limit_circumvention_forbidden",
+   "text": "interfere with or disrupt the Services including circumvent any rate limits or restrictions or bypass any protective measures or safety mitigations the Company puts on the Services;",
+   "source_url": "https://opentyphoon.ai/tac",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": null
+  },
+  {
    "id": "typhoon.openai_compatible.sentence",
    "slug": "typhoon",
    "kind": "field_sentence",
@@ -2153,6 +2849,18 @@
    "page_sha256": "9b16d7bf15f6efe621813b887414dde5766ec872039ba723ff7ced0f9fc657e1"
   },
   {
+   "id": "regolo.multi_account_forbidden.sentence",
+   "slug": "regolo",
+   "kind": "field_sentence",
+   "field": "multi_account_forbidden",
+   "text": "It can only be enjoyed one time by each Subscriber, any infringement will be claimed and the user banned from the Service.",
+   "source_url": "https://regolo.ai/terms-and-conditions/",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": null
+  },
+  {
    "id": "regolo.openai_compatible.sentence",
    "slug": "regolo",
    "kind": "field_sentence",
@@ -2186,6 +2894,30 @@
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "aa908a0b7c927a6c430149226d9a973e731ea1b824b6141c566658e4ffb54afa"
+  },
+  {
+   "id": "google-agent-platform-express.limit_circumvention_forbidden.sentence",
+   "slug": "google-agent-platform-express",
+   "kind": "field_sentence",
+   "field": "limit_circumvention_forbidden",
+   "text": "in a manner intended to avoid incurring Fees (including creating multiple Customer Applications, Accounts, or Projects to simulate or act as a single Customer Application, Account, or Project (respectively)) or to circumvent Service-specific usage limits or quotas;",
+   "source_url": "https://cloud.google.com/terms",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": null
+  },
+  {
+   "id": "google-agent-platform-express.multi_account_forbidden.sentence",
+   "slug": "google-agent-platform-express",
+   "kind": "field_sentence",
+   "field": "multi_account_forbidden",
+   "text": "in a manner intended to avoid incurring Fees (including creating multiple Customer Applications, Accounts, or Projects to simulate or act as a single Customer Application, Account, or Project (respectively)) or to circumvent Service-specific usage limits or quotas;",
+   "source_url": "https://cloud.google.com/terms",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": null
   },
   {
    "id": "inception.sentence",
@@ -2258,6 +2990,18 @@
    "page_sha256": "1947fa93108fe60af1381216110156c93d996ac6516ec21c7e70deedbbe736a0"
   },
   {
+   "id": "aion-labs.multi_account_forbidden.sentence",
+   "slug": "aion-labs",
+   "kind": "field_sentence",
+   "field": "multi_account_forbidden",
+   "text": "You may hold one Account; if your organisation needs shared access, contact us.",
+   "source_url": "https://www.aionlabs.ai/terms/",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": null
+  },
+  {
    "id": "aion-labs.openai_compatible.sentence",
    "slug": "aion-labs",
    "kind": "field_sentence",
@@ -2282,6 +3026,30 @@
    "page_sha256": "c7245a89e713743024aec41a3538d844d49d57667aa422dcb4d72d7607efd588"
   },
   {
+   "id": "meganova.limit_circumvention_forbidden.sentence",
+   "slug": "meganova",
+   "kind": "field_sentence",
+   "field": "limit_circumvention_forbidden",
+   "text": "This includes but is not limited to: abuse of rate limits, creating multiple accounts to circumvent restrictions, or using our services for prohibited activities.",
+   "source_url": "https://docs.meganova.ai/faq/getting-started",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": null
+  },
+  {
+   "id": "meganova.multi_account_forbidden.sentence",
+   "slug": "meganova",
+   "kind": "field_sentence",
+   "field": "multi_account_forbidden",
+   "text": "This includes but is not limited to: abuse of rate limits, creating multiple accounts to circumvent restrictions, or using our services for prohibited activities.",
+   "source_url": "https://docs.meganova.ai/faq/getting-started",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": null
+  },
+  {
    "id": "meganova.openai_compatible.sentence",
    "slug": "meganova",
    "kind": "field_sentence",
@@ -2304,6 +3072,18 @@
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "993d45e41dd1e3e07feff0c6db63c5acbe99fdc80e8e93650e90daba68999ae7"
+  },
+  {
+   "id": "sea-lion.limit_circumvention_forbidden.sentence",
+   "slug": "sea-lion",
+   "kind": "field_sentence",
+   "field": "limit_circumvention_forbidden",
+   "text": "Only 1 API key is allowed to be created per user.",
+   "source_url": "https://docs.sea-lion.ai/guides/inferencing/api",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": null
   },
   {
    "id": "sea-lion.openai_compatible.sentence",
@@ -2339,6 +3119,18 @@
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "b2386342568a64b6b38afa2273d150eaa2eb09ab5d77e0560c7d6c09fc3a5823"
+  },
+  {
+   "id": "azure-speech.limit_circumvention_forbidden.sentence",
+   "slug": "azure-speech",
+   "kind": "field_sentence",
+   "field": "limit_circumvention_forbidden",
+   "text": "Customer must comply with, and may not work around, any technical limitations in an Online Service that only allow Customer to use it in certain ways.",
+   "source_url": "https://www.microsoft.com/licensing/terms/product/ForOnlineServices/all",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": null
   },
   {
    "id": "azure-speech.phone_required.sentence",
@@ -2411,6 +3203,18 @@
    "page_sha256": "014c19a7a35d979e41a99390e8d0d0939f434742fd1396fcedfb7295e229aa14"
   },
   {
+   "id": "liquid-ai.limit_circumvention_forbidden.sentence",
+   "slug": "liquid-ai",
+   "kind": "field_sentence",
+   "field": "limit_circumvention_forbidden",
+   "text": "circumvent rate limits, quotas, metering, billing, spending controls, or access restrictions;",
+   "source_url": "https://www.liquid.ai/terms-conditions",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": null
+  },
+  {
    "id": "liquid-ai.openai_compatible.sentence",
    "slug": "liquid-ai",
    "kind": "field_sentence",
@@ -2469,6 +3273,30 @@
    "page_sha256": "ca7a4d50a6eb144d0a0e125b0d7791ba7ff755b7365d0d5047b78b9d017a850f"
   },
   {
+   "id": "plamo.limit_circumvention_forbidden.sentence",
+   "slug": "plamo",
+   "kind": "field_sentence",
+   "field": "limit_circumvention_forbidden",
+   "text": "利用者は利用量上限を超えて本サービスを利用することはできません。",
+   "source_url": "https://plamo.preferredai.jp/info/terms",
+   "read_on": "2026-11-26",
+   "lang": "ja",
+   "method": "html-text-v1: page requested with Accept-Language ja, tags removed, character references decoded, white space collapsed",
+   "page_sha256": null
+  },
+  {
+   "id": "plamo.multi_account_forbidden.sentence",
+   "slug": "plamo",
+   "kind": "field_sentence",
+   "field": "multi_account_forbidden",
+   "text": "一人の利用者にて複数人分の利用登録を行う行為",
+   "source_url": "https://plamo.preferredai.jp/info/terms",
+   "read_on": "2026-11-26",
+   "lang": "ja",
+   "method": "html-text-v1: page requested with Accept-Language ja, tags removed, character references decoded, white space collapsed",
+   "page_sha256": null
+  },
+  {
    "id": "plamo.openai_compatible.sentence",
    "slug": "plamo",
    "kind": "field_sentence",
@@ -2502,6 +3330,30 @@
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "84f0efb489e7c1e870915cc60fdba2f842777e752f9359f04361add30f7a6ca2"
+  },
+  {
+   "id": "entrim.limit_circumvention_forbidden.sentence",
+   "slug": "entrim",
+   "kind": "field_sentence",
+   "field": "limit_circumvention_forbidden",
+   "text": "bypass rate limits or service safeguards",
+   "source_url": "https://entrim.ai/terms-of-service/",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": null
+  },
+  {
+   "id": "entrim.multi_account_forbidden.sentence",
+   "slug": "entrim",
+   "kind": "field_sentence",
+   "field": "multi_account_forbidden",
+   "text": "use only one account per person or organization. Creating additional accounts to obtain complimentary credits or other promotional benefits is not permitted. Accounts using this practice will be blocked.",
+   "source_url": "https://entrim.ai/terms-of-service/",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": null
   },
   {
    "id": "entrim.openai_compatible.sentence",
@@ -2584,6 +3436,18 @@
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "6fdce1bd991263af58b5808cf8a0cf3811ec09fd218c80ebe7304cc6e8e3e8ef"
+  },
+  {
+   "id": "berget-ai.limit_circumvention_forbidden.sentence",
+   "slug": "berget-ai",
+   "kind": "field_sentence",
+   "field": "limit_circumvention_forbidden",
+   "text": "circumvent or try to circumvent any usage control, anti-copy functionalities, geographical restrictions or other similar limitations of the Service;",
+   "source_url": "https://berget.ai/en/terms",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": null
   },
   {
    "id": "berget-ai.openai_compatible.sentence",
@@ -2748,6 +3612,78 @@
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "8a48287227723817e6b821456539394abfb12a1fe1a6caa267828acec7c01737"
+  },
+  {
+   "id": "google-cloud-tts.limit_circumvention_forbidden.sentence",
+   "slug": "google-cloud-tts",
+   "kind": "field_sentence",
+   "field": "limit_circumvention_forbidden",
+   "text": "(iii) in a manner intended to avoid incurring Fees (including creating multiple Customer Applications, Accounts, or Projects to simulate or act as a single Customer Application, Account, or Project (respectively)) or to circumvent Service-specific usage limits or quotas;",
+   "source_url": "https://cloud.google.com/terms",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": null
+  },
+  {
+   "id": "google-cloud-tts.multi_account_forbidden.sentence",
+   "slug": "google-cloud-tts",
+   "kind": "field_sentence",
+   "field": "multi_account_forbidden",
+   "text": "(iii) in a manner intended to avoid incurring Fees (including creating multiple Customer Applications, Accounts, or Projects to simulate or act as a single Customer Application, Account, or Project (respectively)) or to circumvent Service-specific usage limits or quotas;",
+   "source_url": "https://cloud.google.com/terms",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": null
+  },
+  {
+   "id": "google-cloud-stt.limit_circumvention_forbidden.sentence",
+   "slug": "google-cloud-stt",
+   "kind": "field_sentence",
+   "field": "limit_circumvention_forbidden",
+   "text": "(iii) in a manner intended to avoid incurring Fees (including creating multiple Customer Applications, Accounts, or Projects to simulate or act as a single Customer Application, Account, or Project (respectively)) or to circumvent Service-specific usage limits or quotas;",
+   "source_url": "https://cloud.google.com/terms",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": null
+  },
+  {
+   "id": "google-cloud-stt.multi_account_forbidden.sentence",
+   "slug": "google-cloud-stt",
+   "kind": "field_sentence",
+   "field": "multi_account_forbidden",
+   "text": "(iii) in a manner intended to avoid incurring Fees (including creating multiple Customer Applications, Accounts, or Projects to simulate or act as a single Customer Application, Account, or Project (respectively)) or to circumvent Service-specific usage limits or quotas;",
+   "source_url": "https://cloud.google.com/terms",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": null
+  },
+  {
+   "id": "google-cloud-vision.limit_circumvention_forbidden.sentence",
+   "slug": "google-cloud-vision",
+   "kind": "field_sentence",
+   "field": "limit_circumvention_forbidden",
+   "text": "(iii) in a manner intended to avoid incurring Fees (including creating multiple Customer Applications, Accounts, or Projects to simulate or act as a single Customer Application, Account, or Project (respectively)) or to circumvent Service-specific usage limits or quotas;",
+   "source_url": "https://cloud.google.com/terms",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": null
+  },
+  {
+   "id": "google-cloud-vision.multi_account_forbidden.sentence",
+   "slug": "google-cloud-vision",
+   "kind": "field_sentence",
+   "field": "multi_account_forbidden",
+   "text": "(iii) in a manner intended to avoid incurring Fees (including creating multiple Customer Applications, Accounts, or Projects to simulate or act as a single Customer Application, Account, or Project (respectively)) or to circumvent Service-specific usage limits or quotas;",
+   "source_url": "https://cloud.google.com/terms",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": null
   },
   {
    "id": "amazon-bedrock.sentence",
