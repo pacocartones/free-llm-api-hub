@@ -10,7 +10,7 @@
   campaign terms require enterprise information, allow one redemption per
   account and say the quota may have a validity period. Card, phone,
   commercial use and the prompt data policy are not stated on the pages that
-  could be read. Checked 2026-11-27, agent-assisted.
+  could be read. Checked 2026-11-27, agent-assisted (#1072).
 
 With this addition, 30 of 96 providers (31.3%) list no `text` modality, under
 the 35% non-text guardrail.
