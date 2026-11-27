@@ -69,7 +69,7 @@ import { writeSchemaDocs } from './schema-docs.mjs';
 import { datasetAsOf } from './lib/release-stamp.mjs';
 import { parseCitation, homeJsonLd, datasetJsonLdScript } from './lib/dataset-jsonld.mjs';
 import { websiteRef, datasetRef } from './lib/site-entity.mjs';
-import { isoDateTime, datasetFacts, licenseUrl, guideArticle } from './lib/structured-data.mjs';
+import { isoDateTime, datasetFacts, licenseUrl, guideArticle, reportArticle } from './lib/structured-data.mjs';
 import { SITEMAP_INDEX, sitemapIndexXml } from './lib/state-sitemap.mjs';
 import { SITEMAPS as INDEXNOW_SITEMAPS } from './lib/indexnow.mjs';
 import { groupModels, modelKey } from './lib/model-keys.mjs';
@@ -1783,11 +1783,11 @@ stateReports.forEach((r, i) => {
     jsonld: report ? JSON.stringify({
       '@context': 'https://schema.org',
       '@graph': [
-        {
-          '@type': 'Article', headline: report.title, description: report.description,
-          datePublished: reportFeedItem(r.month, report, SITE).date, dateModified: report.model.after.date,
-          url: `${SITE}/state/${r.month}/`, isPartOf: websiteRef(SITE), about: datasetRef(SITE, DATASET_FACTS),
-        },
+        reportArticle({
+          site: SITE, month: r.month, headline: report.title, description: report.description,
+          published: reportFeedItem(r.month, report, SITE).date, modified: report.model.after.date,
+          extra: { isPartOf: websiteRef(SITE), about: datasetRef(SITE, DATASET_FACTS) },
+        }),
         {
           '@type': 'BreadcrumbList',
           itemListElement: [

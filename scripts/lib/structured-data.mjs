@@ -84,6 +84,27 @@ export function guideArticle({ site, slug, headline, description, asOf, extra = 
   };
 }
 
+/**
+ * The Article node of a monthly changes report (/state/YYYY-MM/, lib/monthly-report.mjs). `published` is the day after
+ * the month ends; `modified` is the date of the month's last data revision, never before `published`. The image is the
+ * page's og:image.
+ */
+export function reportArticle({ site, month, headline, description, published, modified, extra = {} }) {
+  const ids = entityIds(site);
+  return {
+    '@type': 'Article',
+    headline,
+    description,
+    url: `${site}/state/${month}/`,
+    image: `${site}/og.png`,
+    datePublished: isoDateTime(published),
+    dateModified: isoDateTime(modified > published ? modified : published),
+    author: { '@type': 'Person', '@id': ids.creator, name: CREATOR.name, url: CREATOR.url },
+    publisher: { '@type': 'Organization', '@id': ids.publisher, name: PUBLISHER_NAME },
+    ...extra,
+  };
+}
+
 // ---------- checks ----------
 
 const types = (n) => [].concat(n?.['@type'] ?? []);
