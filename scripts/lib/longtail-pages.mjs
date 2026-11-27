@@ -21,7 +21,7 @@ import { ageInDays, SLA_DAYS } from './rules.mjs';
 import { fieldCheck, REASON_LABEL } from './field-checks.mjs';
 import { requirementsHtml, freeLimitsTableHtml, keysButtonHtml } from './provider-sections.mjs';
 import { andList } from './long-guides.mjs';
-import { NOT_STATED } from './provider-faq.mjs';
+import { NOT_STATED } from './not-stated.mjs';
 import { FAMILY_PATH } from './model-families.mjs';
 import { triStateHtml } from './compare.mjs';
 import { datasetRef, websiteRef } from './site-entity.mjs';
