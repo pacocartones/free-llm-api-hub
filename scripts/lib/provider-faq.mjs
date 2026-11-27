@@ -13,6 +13,7 @@ import { humanDate as shortDate, DATE_RE as ISO } from './dates.mjs';
 import { NOT_STATED, capFirst as cap } from './not-stated.mjs';
 import { fieldCheck } from './field-checks.mjs';
 import { safeHttp as safeUrl } from './text.mjs';
+import { providerTitle } from './provider-title.mjs';
 
 export const isIso = (d) => ISO.test(String(d || ''));
 export const noFinalStop = (s) => String(s ?? '').trim().replace(/[\s.;:,]+$/, '');
@@ -54,7 +55,7 @@ export function flagSource(p, field) {
 
 /**
  * The answer to "Is <Provider> API free?" in one or two sentences, as parts (field, value, text) plus the plain text and
- * the HTML. Sentence 1: ongoing free tier or one-time trial credit, with the headline limits. Sentence 2: card, phone,
+ * the HTML. It opens with the answer word of the page title (lib/provider-title.mjs: "Yes." or "No."). Sentence 1: ongoing free tier or one-time trial credit, with the headline limits. Sentence 2: card, phone,
  * commercial use and the day the record was verified. The paragraph is linkable at the stable anchor #is-it-free.
  */
 export function answerFirst(p) {
@@ -70,7 +71,7 @@ export function answerFirst(p) {
     parts.push({ field: 'category', value: p.category, text: 'one-time trial credit' });
     const exp = p.expires ? `; the credit expires after ${noFinalStop(p.expires)}` : '';
     if (p.expires) parts.push({ field: 'expires', value: p.expires, text: noFinalStop(p.expires) });
-    first = `Not permanently. ${p.name} gives a one-time trial credit, not an ongoing free tier: ${h.value}${exp}${stop(exp || h.value)}`;
+    first = `No. ${p.name} gives a one-time trial credit, not an ongoing free tier: ${h.value}${exp}${stop(exp || h.value)}`;
   } else {
     parts.push({ field: 'category', value: p.category ?? null, text: NOT_STATED });
     first = `Whether ${p.name} has an ongoing free tier is ${NOT_STATED}: ${h.value}${stop(h.value)}`;
@@ -104,7 +105,8 @@ export function providerFaq(p) {
     const af = answerFirst(p);
     const first = af.text.slice(0, af.text.indexOf('Credit card:')).trim();
     items.push({
-      id: 'faq-free', q: `Is ${n} API free?`, parts: af.parts.filter((x) => !['card_required', 'phone_required', 'commercial_ok'].includes(x.field)),
+      // The page's own question (lib/provider-title.mjs): the h1, the <title> and this FAQ entry ask it in the same words.
+      id: 'faq-free', q: providerTitle(p).question, parts: af.parts.filter((x) => !['card_required', 'phone_required', 'commercial_ok'].includes(x.field)),
       date: isIso(p.last_verified) ? p.last_verified : null, source: safeUrl(p.docs_url), body: first,
     });
   }

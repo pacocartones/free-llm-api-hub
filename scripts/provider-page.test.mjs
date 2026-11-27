@@ -128,7 +128,8 @@ test('Q11: the meta description leads with the published limits, else trims the 
   assert.ok(out.length <= 160 && out.endsWith('…') && !/ wor…$/.test(out) && /word…$/.test(out), 'cut at a word boundary');
   assert.equal(trimAtWord('short text'), 'short text');
   const html = readFileSync(join(ROOT, 'site/p/groq.html'), 'utf8');
-  assert.match(html, /<meta name="description" content="Groq free tier: [^"]*RPM[^"]*\. Verified \d{1,2} [A-Z][a-z]{2} \d{4} with source\.">/);
+  assert.equal(providerMetaDescription(groq, { lead: 'Is the Groq API free? Yes' }), 'Is the Groq API free? Yes: 30 RPM, 1,000 RPD, 200K TPD, no card. Verified 24 Nov 2026 with source.', 'the page passes its question and answer as the first clause');
+  assert.match(html, /<meta name="description" content="Is the Groq API free\? Yes: [^"]*RPM[^"]*\. Verified \d{1,2} [A-Z][a-z]{2} \d{4} with source\.">/);
 });
 
 test('Q13: the score reads as a place with a bar of its six inputs, unknowns in grey', () => {

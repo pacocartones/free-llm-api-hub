@@ -110,7 +110,7 @@ test('is_free: an ongoing free tier answers yes, with the page wording and sourc
 test('is_free: a trial credit is "not permanently", with its expiry, and null flags read "not stated"', () => {
   const r = isFree(data, { slug: 'beta-cloud' });
   assert.equal(r.answer,
-    'Not permanently. Beta Cloud gives a one-time trial credit, not an ongoing free tier: $10 credit; the credit expires after 30 days. ' +
+    'No. Beta Cloud gives a one-time trial credit, not an ongoing free tier: $10 credit; the credit expires after 30 days. ' +
     `Credit card: required; phone verification: ${NOT_STATED}; commercial use: ${NOT_STATED}. Verified 1 Jul 2026.`);
   assert.equal(r.verdict, 'trial_credit');
   assert.ok(r.facts.some((f) => f.field === 'expires' && f.words === '30 days'));

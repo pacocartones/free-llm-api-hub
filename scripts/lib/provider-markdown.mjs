@@ -24,6 +24,7 @@ import { shortenProse } from './short-text.mjs';
 import { answerFirst } from './provider-faq.mjs';
 import { FACT_ANCHORS } from './provider-sections.mjs';
 import { authorshipLine } from './site-entity.mjs';
+import { providerTitle } from './provider-title.mjs';
 
 export const FREE_TYPE_WORDS = Object.freeze({
   'renewing-quota': 'free quota that renews',
@@ -201,11 +202,13 @@ export function providerMarkdown(p, { site, asOf, version, repo }) {
   const models = (p.models_free || []).length
     ? `\n\n**Free models (sample):** ${p.models_free.map(mdCode).join(', ')}`
     : '';
-  return `# ${mdText(p.name)}: free tier and limits\n\n` +
+  // The same question, answer and date as the HTML page's title and h1 (lib/provider-title.mjs).
+  const pt = providerTitle(p);
+  return `# ${mdText(pt.title)}\n\n` +
     `> ${mdText(p.best_for || p.free_tier)}\n\n` +
     `Data of ${asOf} (dataset v${version}) from the Free LLM API Hub, MIT-licensed. Canonical page: ${site}/p/${p.slug}\n\n` +
     `${authorshipLine(repo)}\n\n` +
-    `## Is ${mdText(p.name)} free?\n\n${isItFreeMd(p)}\n\n` +
+    `## ${mdText(pt.question)}\n\n${isItFreeMd(p)}\n\n` +
     `## Free limits\n\n${limitsMd(p)}\n\n` +
     `## Flags\n\n${flagsMd(p)}\n\n` +
     `## At a glance\n\n` +
@@ -226,7 +229,7 @@ export function oneLineLimits(p) {
   return `limits ${NOT_STATED}`;
 }
 
-/** One provider line of llms.txt: name, free type, limits, HTML page and Markdown twin. */
+/** One provider line of llms.txt: the page's title (question, answer, date), free type, limits, HTML page and Markdown twin. */
 export function llmsProviderLine(p, { site }) {
-  return `- [${mdText(p.name)}](${site}/p/${p.slug}): ${FREE_TYPE_WORDS[p.free_type] || p.category}; ${oneLineLimits(p)} ([Markdown](${site}/p/${p.slug}.md))`;
+  return `- [${mdText(providerTitle(p).title)}](${site}/p/${p.slug}): ${FREE_TYPE_WORDS[p.free_type] || p.category}; ${oneLineLimits(p)} ([Markdown](${site}/p/${p.slug}.md))`;
 }

@@ -61,13 +61,13 @@ test('the answer-first paragraph: ongoing free tier or trial credit, the headlin
   assert.match(t, /^Yes\. Groq has an ongoing free tier/);
   assert.match(t, /30 RPM, 1,000 RPD, 200K TPD/, 'the published numbers lead');
   const trial = { ...nulls, card_required: true, commercial_ok: 'conditional', expires: '30 days' };
-  assert.match(answerFirst(trial).text, /^Not permanently\. Blank gives a one-time trial credit, not an ongoing free tier: Some credit; the credit expires after 30 days\. Credit card: required; phone verification: not stated; commercial use: allowed with conditions\. Verified 20 Nov 2026\.$/);
+  assert.match(answerFirst(trial).text, /^No\. Blank gives a one-time trial credit, not an ongoing free tier: Some credit; the credit expires after 30 days\. Credit card: required; phone verification: not stated; commercial use: allowed with conditions\. Verified 20 Nov 2026\.$/);
   assert.match(answerFirst({ ...nulls, verified: false }).text, /Not verified yet\.$/);
   // Our own words are two sentences after the verdict word, plus the verification day; the headline is the record's.
   for (const p of PROVIDERS) {
     const af = answerFirst(p);
     const head = af.parts.find((x) => x.field === 'free_limits' || x.field === 'free_tier').text;
-    const ours = af.text.replace(head, 'HEADLINE').replace(/^(Yes|Not permanently)\. /, '');
+    const ours = af.text.replace(head, 'HEADLINE').replace(/^(Yes|No)\. /, '');
     const sentences = ours.split(/(?<=[.…])\s+(?=[A-Z])/);
     assert.ok(sentences.length <= 3, `${p.slug}: ${sentences.length} sentences in ${ours}`);
   }

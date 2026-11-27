@@ -77,6 +77,7 @@ import { SITEMAP_INDEX, sitemapIndexXml } from './lib/state-sitemap.mjs';
 import { SITEMAPS as INDEXNOW_SITEMAPS } from './lib/indexnow.mjs';
 import { groupModels, modelKey } from './lib/model-keys.mjs';
 import { providerMetaDescription } from './lib/provider-meta.mjs';
+import { providerTitle } from './lib/provider-title.mjs';
 import { answerFirst, providerFaq, providerFaqHtml, providerFaqJsonLd } from './lib/provider-faq.mjs';
 import { reportMistakeHtml } from './lib/report-mistake.mjs';
 import { compareVerdict, compareFaq, compareFaqHtml } from './lib/compare-faq.mjs';
@@ -1455,12 +1456,15 @@ for (const p of providers) {
   ].join('');
   // The FAQ (lib/provider-faq.mjs): the same items render visibly and as the FAQPage node of the JSON-LD.
   const faq = providerFaq(p);
+  // The page's title is the question a developer asks, answered and dated (lib/provider-title.mjs): the same words are
+  // the <title>, the h1, the meta description's first clause, the JSON-LD name and the first FAQ question.
+  const pt = providerTitle(p);
   const main =
     pageHero({
       cls: 'prov-hero',
       crumbs: `<a href="../">Home</a> / <a href="../#explorer">Providers</a> / ${escapeAttr(p.name)}`,
-      h1: escapeAttr(p.name),
-      // Right under the H1, the answer to "Is <Provider> API free?" from the data alone (lib/provider-faq.mjs), then the
+      h1: escapeAttr(pt.title),
+      // Right under the H1, the answer to its question (lib/provider-title.mjs) from the data alone (lib/provider-faq.mjs), then the
       // provider's aura (lib/aura.mjs) with its reading in words, so the picture never has to be decoded alone.
       afterTitle: answerFirst(p).html + `<div class="prov-aura">${auraHtml(p, { now: ASOF, cls: 'aura-lg', digits: 1 })}<p class="aura-read"><span class="aura-read-h">Aura:</span> ${escapeAttr(auraSpec(p, { now: ASOF }).label)} · <a href="../methodology/#how-to-read-an-aura">how to read it</a></p></div>` +
         `<div class="prov-badges"><span class="type">${typeLabel(p)}</span> ${verifiedLine}${probedLine} ${provFlagsHtml(p)}</div>` +
@@ -1496,7 +1500,7 @@ for (const p of providers) {
     '@context': 'https://schema.org',
     '@graph': [
       {
-        '@type': 'WebPage', name: `${p.name} — free LLM API`, description: p.free_tier, url: `${SITE}/p/${p.slug}`,
+        '@type': 'WebPage', name: pt.title, description: p.free_tier, url: `${SITE}/p/${p.slug}`,
         // The newest day a fact of this provider was read: last_verified or a later field check (lib/provider-dates.mjs).
         ...(providerDateModified(p) ? { dateModified: isoDateTime(providerDateModified(p)) } : {}),
         isPartOf: websiteRef(SITE), about: datasetRef(SITE, DATASET_FACTS),
@@ -1514,9 +1518,9 @@ for (const p of providers) {
   });
   writeFileSync(
     join(ROOT, `site/p/${p.slug}.html`),
-    htmlPage({ title: `${p.name} — free tier & limits · Free LLM API Hub`, desc: providerMetaDescription(p), canonical: `${SITE}/p/${p.slug}`, main: tagProviderLinks(main, providerLinkTargets(p, { website: websiteHref })), jsonld, ogImage: `${SITE}/og/p/${p.slug}.png`, scripts: ['pager.js'],
+    htmlPage({ title: `${pt.title} · Free LLM API Hub`, desc: providerMetaDescription(p, { lead: `${pt.question} ${pt.verdict}` }), canonical: `${SITE}/p/${p.slug}`, main: tagProviderLinks(main, providerLinkTargets(p, { website: websiteHref })), jsonld, ogImage: `${SITE}/og/p/${p.slug}.png`, scripts: ['pager.js'],
       // The Markdown twin (below), advertised the way a feed is, so an agent on the HTML page finds the clean text.
-      alternates: [{ type: 'text/markdown', title: `${p.name} — free tier and limits (Markdown)`, href: `${SITE}/p/${p.slug}.md` }] })
+      alternates: [{ type: 'text/markdown', title: `${pt.title} (Markdown)`, href: `${SITE}/p/${p.slug}.md` }] })
   );
   // The Markdown twin of the page (/p/<slug>.md, lib/provider-markdown.mjs), for answer engines and agents. Linked from
   // llms.txt; not in sitemap.xml (an alternate of the canonical HTML page, not a page of its own).
