@@ -14,4 +14,4 @@
   model-family pages' own rule and linking each family page. Each has a shortlist table, a FAQ whose `FAQPage`
   JSON-LD is the visible text, a gotchas section and links to the provider pages, a collection, `/compare/`,
   `/find/` and `/not-free/`. Every number, list and pick is computed from `data/providers.json` at build time
-  (`scripts/lib/long-guides.mjs`). Agent-assisted.
+  (`scripts/lib/long-guides.mjs`). Agent-assisted (#947).

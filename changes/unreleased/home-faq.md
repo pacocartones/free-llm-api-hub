@@ -7,4 +7,4 @@
   recommended order, the table's order); an unrecorded value is counted as
   "not stated". The same answers feed a FAQPage node in the home page's JSON-LD
   `@graph`, so the visible text and the structured data are the same string
-  (`scripts/lib/home-faq.mjs`, `scripts/home-faq.test.mjs`).
+  (`scripts/lib/home-faq.mjs`, `scripts/home-faq.test.mjs`) (#998).

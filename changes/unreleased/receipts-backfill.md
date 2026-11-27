@@ -17,4 +17,4 @@
   users in the EEA, Switzerland or the UK (`commercial_ok: "conditional"`),
   and Mixedbread, Fish Audio, AI Horde, Runware and Modal now document an
   OpenAI-compatible API (`openai_compatible: true`). Checked 2026-11-26 and
-  2026-11-27, agent-assisted.
+  2026-11-27, agent-assisted (#949).

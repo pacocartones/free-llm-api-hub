@@ -5,4 +5,4 @@
   FAQs say "this collection", the methodology page says how a provider "gets
   into the dataset", and the llms.txt summary says each entry is checked against
   the provider's own docs and dated, quoted where the docs say it and "not
-  stated" where they don't. No data, URLs or anchors changed.
+  stated" where they don't. No data, URLs or anchors changed (#1000).

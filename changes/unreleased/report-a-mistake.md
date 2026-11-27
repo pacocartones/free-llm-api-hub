@@ -7,4 +7,4 @@
   hero is unchanged, and nothing is loaded from GitHub until the link is
   clicked. Each provider row of a model-family page (`/free-api/<family>/`) has
   the same link under its verification date. `scripts/report-mistake.test.mjs`
-  checks every page, every row and the form's field ids.
+  checks every page, every row and the form's field ids (#999).

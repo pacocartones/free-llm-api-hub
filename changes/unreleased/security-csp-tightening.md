@@ -8,7 +8,7 @@
   `default-src 'none'`. A new test (`scripts/csp.test.mjs`) pins the exact
   policy, checks every inline script is hashed, and rejects inline event
   handlers, mixed content, unpinned third-party subresources and
-  `target="_blank"` links without `rel=noopener`.
+  `target="_blank"` links without `rel=noopener` (#945).
 - Site: with Google Analytics on, the `_ga` and `_gcl` cookies gtag writes
   after consent are now `Secure; SameSite=Lax` (`cookie_flags` in the gtag
-  config); gtag's default set neither.
+  config); gtag's default set neither (#945).
