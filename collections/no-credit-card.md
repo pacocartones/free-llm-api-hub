@@ -8,7 +8,7 @@ LLM APIs you can start calling without entering a payment method — filtered li
 
 Every provider below offers free API access with **no card required** to get started (`card_required: false`, confirmed against their own docs). Rows where the requirement is not stated are excluded rather than assumed.
 
-**38 of 95 tracked providers** match.
+**38 of 96 tracked providers** match.
 
 | Provider | Type | What's free | The catch | Verified |
 |---|---|---|---|---|
