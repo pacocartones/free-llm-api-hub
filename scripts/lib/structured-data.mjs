@@ -56,6 +56,9 @@ export const GUIDE_PUBLISHED = {
   'free-llm-api-for-ai-agents': '2026-11-26',
   'free-chatbot-api': '2026-11-26',
   'free-ai-api-for-students': '2026-11-26',
+  'free-llm-api-highest-limits': '2026-11-27',
+  'strongest-free-llm-api': '2026-11-27',
+  'free-open-source-llm-api': '2026-11-27',
 };
 
 /** datePublished and dateModified of a guide: its data moves with the dataset, never before it was published. */
