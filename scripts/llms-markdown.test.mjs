@@ -11,6 +11,7 @@ import { fileURLToPath } from 'node:url';
 import { privateTree } from './lib/private-tree.mjs';
 import { datasetAsOf } from './lib/release-stamp.mjs';
 import { COLLECTIONS } from './lib/collections.mjs';
+import { providerTitle } from './lib/provider-title.mjs';
 import {
   FREE_TYPE_WORDS, mdText, mdUrl, mdCode, mdFence, flagWords, providerMarkdown, llmsProviderLine, oneLineLimits, quickstartModel,
 } from './lib/provider-markdown.mjs';
@@ -77,7 +78,7 @@ describe('llms.txt', () => {
     providers.forEach((p, i) => {
       const line = section[i];
       assert.equal(line, llmsProviderLine(p, { site: SITE }));
-      assert.ok(line.startsWith(`- [${mdText(p.name)}](${SITE}/p/${p.slug}): ${FREE_TYPE_WORDS[p.free_type]}; `), line);
+      assert.ok(line.startsWith(`- [${mdText(providerTitle(p).title)}](${SITE}/p/${p.slug}): ${FREE_TYPE_WORDS[p.free_type]}; `), line);
       assert.ok(line.includes(`(${SITE}/p/${p.slug}.md)`), `${p.slug}: links its Markdown version`);
       assert.ok(!oneLineLimits(p).includes('\n'));
     });
@@ -111,10 +112,10 @@ describe('/p/<slug>.md', () => {
     for (const p of providers) {
       const md = read(`site/p/${p.slug}.md`);
       assert.equal(md, providerMarkdown(p, { site: SITE, asOf, version: data.version, repo: REPO_URL }), `${p.slug}: built from the record`);
-      assert.ok(md.startsWith(`# ${mdText(p.name)}: free tier and limits\n\n> `), `${p.slug}: title`);
+      assert.ok(md.startsWith(`# ${mdText(providerTitle(p).title)}\n\n> `), `${p.slug}: title`);
       assert.ok(md.includes(`Data of ${asOf}`), `${p.slug}: dataset date`);
       assert.ok(md.includes(`Canonical page: ${SITE}/p/${p.slug}\n`), `${p.slug}: names the HTML page as canonical`);
-      assert.ok(md.includes(`## Is ${mdText(p.name)} free?\n\n`), `${p.slug}: the question`);
+      assert.ok(md.includes(`## ${mdText(providerTitle(p).question)}\n\n`), `${p.slug}: the question`);
       assert.ok(md.includes(mdText(p.free_tier)), `${p.slug}: what is free`);
       if (p.verified === true) assert.ok(md.includes(`on ${p.last_verified}.`), `${p.slug}: verified date`);
       else assert.ok(md.includes('Not verified yet'), `${p.slug}: says it is not verified`);

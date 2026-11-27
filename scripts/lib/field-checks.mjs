@@ -92,14 +92,12 @@ export function fieldCheckErrors(p, { today }) {
  */
 export const UNSOURCED_ALLOWLIST = Object.freeze([
   // Official pages that state the value but render it only with JavaScript, so quotes:add reads an empty shell.
-  { slug: 'google-gemini', field: 'commercial_ok', until: '2026-12-31', reason: 'ai.google.dev/gemini-api/terms renders only with JavaScript' },
-  { slug: 'google-gemini', field: 'openai_compatible', until: '2026-12-31', reason: 'ai.google.dev/gemini-api/docs/openai renders only with JavaScript' },
+  { slug: 'google-gemini', field: 'commercial_ok', until: '2026-12-31', reason: 'ai.google.dev/gemini-api/terms redirects to aistudio.google.com/docs/terms, which renders only with JavaScript' },
+  { slug: 'google-gemini', field: 'openai_compatible', until: '2026-12-31', reason: 'ai.google.dev/gemini-api/docs/openai redirects to aistudio.google.com/docs/openai, which renders only with JavaScript' },
   { slug: 'ai-horde', field: 'commercial_ok', until: '2026-12-31', reason: 'the aihorde.net FAQ answers render only with JavaScript' },
   { slug: 'pollinations', field: 'commercial_ok', until: '2026-12-31', reason: 'pollinations.ai/terms renders only with JavaScript' },
   { slug: 'tencent-hunyuan', field: 'phone_required', until: '2026-12-31', reason: 'the cloud.tencent.com sign-up guide renders only with JavaScript' },
   // Official pages that answer HTTP 403 to clients that are not browsers.
-  { slug: 'nlpcloud', field: 'card_required', until: '2026-12-31', reason: 'nlpcloud.com answers HTTP 403 to non-browser clients' },
-  { slug: 'nlpcloud', field: 'commercial_ok', until: '2026-12-31', reason: 'nlpcloud.com answers HTTP 403 to non-browser clients' },
   { slug: 'sambanova', field: 'openai_compatible', until: '2026-12-31', reason: 'docs.sambanova.ai answers HTTP 403 to non-browser clients' },
 ]);
 

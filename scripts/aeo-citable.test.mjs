@@ -16,6 +16,7 @@ import { privateTree } from './lib/private-tree.mjs';
 import { datasetAsOf } from './lib/release-stamp.mjs';
 import { providerMarkdown, factAnchors, mdText } from './lib/provider-markdown.mjs';
 import { answerFirst } from './lib/provider-faq.mjs';
+import { providerTitle } from './lib/provider-title.mjs';
 import { FACT_ANCHORS, requirementsHtml, glanceHtml } from './lib/provider-sections.mjs';
 import { authorshipLine, websiteRef, datasetRef, CREATOR, PUBLISHER_NAME } from './lib/site-entity.mjs';
 
@@ -98,7 +99,7 @@ describe('/p/<slug>.md: answer first, "not stated", the anchors, the same bytes'
   test('opens its answer with the answer-first sentence of the HTML page', () => {
     for (const p of providers) {
       const md = read(`site/p/${p.slug}.md`);
-      const section = md.slice(md.indexOf(`## Is ${mdText(p.name)} free?\n\n`));
+      const section = md.slice(md.indexOf(`## ${mdText(providerTitle(p).question)}\n\n`));
       assert.ok(section.split('\n')[2] === mdText(answerFirst(p).text), `${p.slug}: the first line of the answer is the answer-first sentence`);
     }
   });

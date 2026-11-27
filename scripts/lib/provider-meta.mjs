@@ -44,13 +44,16 @@ export function trimAtWord(text, max = META_MAX) {
   return `${(space > max * 0.6 ? cut.slice(0, space) : cut).replace(/[\s,;:.–—-]+$/, '')}…`;
 }
 
-/** The meta description of a provider page. */
-export function providerMetaDescription(p) {
+/**
+ * The meta description of a provider page. With `lead` (the page's question and its answer word, lib/provider-title.mjs:
+ * "Is the Groq API free? Yes") the description opens with it, so its first clause is the title's.
+ */
+export function providerMetaDescription(p, { lead } = {}) {
   const figures = limitFigures(p.free_limits);
-  if (!figures.length) return trimAtWord(`${p.name}: ${p.free_tier}`);
+  if (!figures.length) return trimAtWord(`${lead ?? p.name}: ${p.free_tier}`);
   const card = p.card_required === false ? ['no card'] : p.card_required === true ? ['card required'] : [];
   const when = p.verified === true && humanDate(p.last_verified)
     ? `Verified ${humanDate(p.last_verified)} with source.`
     : humanDate(p.free_limits.checked) ? `Limits read ${humanDate(p.free_limits.checked)} at the source.` : '';
-  return trimAtWord(`${p.name} free tier: ${[...figures, ...card].join(', ')}.${when ? ` ${when}` : ''}`);
+  return trimAtWord(`${lead ?? `${p.name} free tier`}: ${[...figures, ...card].join(', ')}.${when ? ` ${when}` : ''}`);
 }
