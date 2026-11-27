@@ -230,6 +230,18 @@ test('empty dataset renders placeholder text for all sections and zero summary',
   assert.match(md, /### 📅 This week's batch — 0\n[^\n]+\n_None\._/);
 });
 
+test('footer tells contributors to commit only source files and leave derived files to the regeneration bot', () => {
+  const md = stalenessWorklist([], NOW);
+  const footer = md.split('\n').find((line) => line.startsWith('**To clear an item:**'));
+
+  assert.ok(footer, 'footer line is present');
+  assert.match(footer, /regeneration bot/);
+  assert.match(footer, /commit only `data\/providers\.json`/);
+  assert.match(footer, /`npm run validate`/);
+  assert.match(footer, /\[docs\/update-playbook\.md\]\(\.\.\/blob\/main\/docs\/update-playbook\.md\)/);
+  assert.doesNotMatch(md, /commit the regenerated/);
+});
+
 test('top-level CLI execution matches stalenessWorklist on data/providers.json and exits 0', () => {
   const cliOutput = execFileSync('node', [join(ROOT, 'scripts/staleness.mjs')], { encoding: 'utf8' });
   const data = JSON.parse(readFileSync(join(ROOT, 'data/providers.json'), 'utf8'));

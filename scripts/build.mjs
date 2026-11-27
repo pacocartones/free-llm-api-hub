@@ -9,6 +9,7 @@
 
 import { shortenProse } from './lib/short-text.mjs';
 import { measurementId, analyticsCspSources, consentScript, withAnalytics, CLOUDFLARE_WEB_ANALYTICS_CSP as CF_WA_CSP } from './lib/analytics.mjs';
+import { contentSecurityPolicy, cspMeta, REDIRECT_CSP } from './lib/csp.mjs';
 import { providerLinkTargets, tagProviderLinks } from './lib/provider-links.mjs';
 import { readFileSync, writeFileSync, mkdirSync, readdirSync, rmSync, existsSync } from 'node:fs';
 import { execSync } from 'node:child_process';
@@ -79,6 +80,7 @@ import { notFreeErrors, notFreeReadmeMd, notFreeModel, notFreeMainHtml, notFreeJ
 import { embedMainHtml, embedTitle, embedDescription, EMBED_PATH } from './lib/embed-page.mjs';
 import { citationRecord, citeBlockHtml } from './lib/citation.mjs';
 import { LONG_GUIDES, longGuidePage } from './lib/long-guides.mjs';
+import { apiExamplesHtml, apiExamplesMarkdown } from './lib/api-examples.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const FRESH_DAYS = SLA_DAYS; // the freshness SLA, defined once in lib/rules.mjs
@@ -647,18 +649,22 @@ const siteFooter = (p) => `<footer class="site-footer"><div class="wrap footer-t
 // htmlPage() (every generated page) and site/index.html (injected via AUTOGEN:themeguard).
 const THEME_GUARD = `<script>(function(){try{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>`;
 
-// Content-Security-Policy (all pages, injected into index.html via AUTOGEN:csp and hard-copied
-// in 404.html). script-src pins our two inline scripts by hash — the theme guard (every page)
-// and the path read-out (404.html only) — so no other inline or injected script can run;
-// everything else is 'self' (site.js, explorer.js, shared-rules.js, widget.js). connect-src
-// allows explorer.js's data fallback (raw.githubusercontent).
-// No default-src/style-src on purpose: inline style="" attributes and the 404 <style> stay valid.
-// If you edit THEME_GUARD or 404.html's inline scripts, recompute these hashes or the page breaks silently.
+// Content-Security-Policy (all pages: generated pages, index.html via AUTOGEN:csp, and 404.html). lib/csp.mjs builds the
+// policy and documents each directive. script-src pins our two inline scripts by hash — the theme guard (every page) and
+// the path read-out (404.html only) — computed here from the exact strings the build writes, so editing either one
+// re-pins it instead of breaking the page; everything else is 'self' (site.js, explorer.js, shared-rules.js, widget.js).
 // Google Analytics (lib/analytics.mjs) adds its hosts here ONLY when GA_MEASUREMENT_ID is set at build time; its banner is
-// the first-party file consent.js ('self'), so no inline hash changes.
+// the first-party file consent.js ('self'), so no inline hash changes. Headers a meta tag cannot carry (frame-ancestors,
+// HSTS, X-Frame-Options, ...) are set in Cloudflare.
+const NOT_FOUND_PATH_SCRIPT = `<script>try{document.getElementById('path').textContent=location.pathname.replace('/free-llm-api-hub','')||'/';}catch(e){}</script>`;
 const GA_ID = measurementId();
 const GA_CSP = analyticsCspSources(GA_ID);
-const CSP = `<meta http-equiv="Content-Security-Policy" content="script-src 'self' 'sha256-ByZJaawcxAiK85qnD6nIc7iBFGzp/nf/DTzzA7Dl5Qs=' 'sha256-YzEhxvq2BwovGsg/RCjKkQdwf+LZmTjIkiQcjXCZMHc='${CF_WA_CSP.script}${GA_CSP.script}; connect-src 'self' https://raw.githubusercontent.com${CF_WA_CSP.connect}${GA_CSP.connect}; object-src 'none'; base-uri 'self'">`;
+const CSP_POLICY = contentSecurityPolicy({
+  inlineScripts: [THEME_GUARD, NOT_FOUND_PATH_SCRIPT],
+  script: `${CF_WA_CSP.script}${GA_CSP.script}`,
+  connect: `${CF_WA_CSP.connect}${GA_CSP.connect}`,
+});
+const CSP = cspMeta(CSP_POLICY);
 
 // Search engines cut a snippet around 155 characters. Every page's description goes through
 // here, so no page can ship a longer one: cut at a word boundary and end with an ellipsis.
@@ -855,6 +861,17 @@ writeFileSync(join(ROOT, 'README.md'), readme);
 
 // The field reference follows the schema, without hand-maintained descriptions.
 writeSchemaDocs();
+
+// The copy-paste examples of docs/api.md come from the same list as the /api/ page (scripts/lib/api-examples.mjs).
+const apiDocPath = join(ROOT, 'docs/api.md');
+const apiDoc = readFileSync(apiDocPath, 'utf8');
+if (!apiDoc.includes('<!-- AUTOGEN:api-examples:start -->') || !apiDoc.includes('<!-- AUTOGEN:api-examples:end -->')) {
+  throw new Error('Missing api-examples markers in docs/api.md');
+}
+writeFileSync(apiDocPath, apiDoc.replace(
+  /(<!-- AUTOGEN:api-examples:start -->)[\s\S]*?(<!-- AUTOGEN:api-examples:end -->)/,
+  (_m, start, end) => `${start}\n${apiExamplesMarkdown()}\n${end}`,
+));
 
 // Counts in the field reference follow the data, just like README tables.
 const dimensionsPath = join(ROOT, 'docs/comparison-dimensions.md');
@@ -1222,7 +1239,7 @@ writeFileSync(
   htmlPage({ title: 'Free LLM API guides and collections · Free LLM API Hub', desc: HUB_META, canonical: `${SITE}/guides-and-collections/`, main: hubMain, jsonld: hubJsonLd })
 );
 // The old hubs redirect here so existing links and bookmarks keep working.
-const redirectPage = (to) => `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="robots" content="noindex"><meta http-equiv="refresh" content="0; url=${to}"><link rel="canonical" href="${new URL(to, SITE + '/x/').href.replace(/#.*$/, '')}"><title>Redirecting…</title></head><body><p>Moved to <a href="${to}">${to}</a>.</p></body></html>`;
+const redirectPage = (to) => `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">${cspMeta(REDIRECT_CSP)}<meta name="robots" content="noindex"><meta http-equiv="refresh" content="0; url=${to}"><link rel="canonical" href="${new URL(to, SITE + '/x/').href.replace(/#.*$/, '')}"><title>Redirecting…</title></head><body><p>Moved to <a href="${to}">${to}</a>.</p></body></html>`;
 // Clear generated guides before writing their redirect and current pages.
 rmSync(join(ROOT, 'site/guides'), { recursive: true, force: true });
 mkdirSync(join(ROOT, 'site/guides'), { recursive: true });
@@ -1474,11 +1491,10 @@ const legalPage = (slug, title, bodyHtml) => {
 // ---------- 404 ----------
 // GitHub Pages serves this one file for ANY missing path (/contributing/, /a/b/c), so a relative prefix would resolve against the
 // missing URL and lose the styles, the menu and the footer. It is built with the same header and footer as every page and the
-// root-absolute prefix '/'. The path read-out below is pinned by hash in the CSP: change its text and recompute the hash.
+// root-absolute prefix '/'. The path read-out (NOT_FOUND_PATH_SCRIPT, defined next to the CSP) is pinned there by hash.
 // Q16: a search box that lands on the explorer (/?q=, which explorer.js reads on load) and six popular providers: the
 // first six of The Best, the score top (lib/score.mjs), so the list follows the data. Root-absolute links like the rest.
 const NOT_FOUND_POPULAR = topList.slice(0, 6).map((e) => `<a href="/p/${e.p.slug}">${escapeAttr(e.p.name)}</a>`).join('');
-const NOT_FOUND_PATH_SCRIPT = `<script>try{document.getElementById('path').textContent=location.pathname.replace('/free-llm-api-hub','')||'/';}catch(e){}</script>`;
 writeFileSync(
   join(ROOT, 'site/404.html'),
   htmlPage({
@@ -2206,7 +2222,7 @@ const apiDocMain =
   `<h2>Slices (by modality)</h2><table class="model-table api-endpoints"><thead><tr><th>Endpoint</th><th>Contents</th><th>Count</th><th>curl example</th></tr></thead><tbody>` +
   API_MODS.map((m) => apiRow(`Providers with a free ${m} modality`, `modality/${m}.json`, publicProviders.filter((p) => (p.modalities || []).includes(m)).length)).join('') +
   `</tbody></table>` +
-  `<h2>Example</h2><pre><code>curl -s ${SITE}/api/v1/no-card.json | jq '.providers[].name'</code></pre>` +
+  apiExamplesHtml(escapeText, { repo: REPO }) +
   clientConfigDocs +
   `<h2>Stability</h2><p>Paths under <code>/api/v1/</code> stay put and fields are only ever added within v1; a breaking change ships as <code>/api/v2/</code>. The full policy, and how the dataset <code>version</code> relates to the path, is in <a href="${REPO}/blob/main/docs/api.md">docs/api.md</a>. The JSON Schema is published at <a href="v1/schema.json"><code>/api/v1/schema.json</code></a>.</p>` +
   `<p class="muted">Every object carries the dataset <code>version</code> and <code>generated</code> date. Prefer a stable snapshot? Pin a Git tag of <a href="${REPO}">the repo</a>. For AI agents, see <a href="../llms.txt">llms.txt</a>.</p>` +
@@ -2734,10 +2750,13 @@ for (const [from, to] of redirectEntries(REDIRECTS)) {
 writeFileSync(join(ROOT, 'site/shared-find.js'), findLib.clientBundle());
 rmSync(join(ROOT, 'site/find'), { recursive: true, force: true });
 mkdirSync(join(ROOT, 'site/find'), { recursive: true });
-const findData = `<script type="application/json" id="find-data">${JSON.stringify(findLib.findPayload(publicProviders, ASOF)).replace(/</g, '\\u003c')}</script>`;
+const findPayload = findLib.findPayload(publicProviders, ASOF);
+const findData = `<script type="application/json" id="find-data">${JSON.stringify(findPayload).replace(/</g, '\\u003c')}</script>`;
+// The count the page opens with (no answers yet), the same text site/find.js writes, so the live line is filled at first paint.
+const findStart = findLib.shortlist(findPayload.providers, {});
 writeFileSync(join(ROOT, 'site/find/index.html'), htmlPage({
   title: FIND_TITLE, desc: FIND_DESC, canonical: `${SITE}${FIND_PATH}`, prefix: '../',
-  main: findMainHtml({ pageHero, total: providers.length, verified: verifiedCount }) + findData,
+  main: findMainHtml({ pageHero, total: providers.length, verified: verifiedCount, count: findLib.countText(findStart.matches.length, findStart.possible.length, false) }) + findData,
   scripts: ['shared-rules.js', 'shared-find.js', 'find.js'], ogImage: `${SITE}/og/find.png`,
   jsonld: findJsonLd({ site: SITE, asof: ASOF }),
 }));
