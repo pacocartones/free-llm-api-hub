@@ -22,6 +22,7 @@ site/updates/
 site/feed.xml
 site/changes/
 site/changes.xml
+site/changes.atom
 site/state/
 site/sitemap-state.xml
 site/api/
