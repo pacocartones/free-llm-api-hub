@@ -1,6 +1,6 @@
 // "What other sources get wrong" (data/stale-claims.json, lib/stale-claims.mjs): the stale claims are data, not prose;
 // the build refuses an entry it cannot back with the provider's current value; the provider pages of Cerebras, Google
-// Gemini and Groq show each claim next to the current value, with its quote or field, source and date.
+// Gemini, Groq and the providers whose stale figures third-party lists repeat show each claim next to the current value, with its quote or field, source and date.
 import { test, before } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, writeFileSync } from 'node:fs';
@@ -23,9 +23,15 @@ const clone = (o) => JSON.parse(JSON.stringify(o));
 const text = (html) => stripTags(html).replace(/\s+/g, ' ').replace(/&amp;/g, '&');
 const pageOf = (slug) => readFileSync(join(ROOT, `site/p/${slug}.html`), 'utf8');
 
-test('the file covers the three providers the AEO baseline found stale figures for, and passes its own guard', () => {
+// The AEO baseline (assistant answers) and the third-party lists read on 27 Nov 2026.
+const COVERED = ['cerebras', 'google-gemini', 'groq', 'openrouter', 'huggingface', 'nvidia-nim', 'jina-ai', 'cloudflare-workers-ai', 'fireworks-ai', 'assemblyai', 'deepgram'];
+
+test('the file covers every provider a stale figure was found for, and passes its own guard', () => {
   assert.deepEqual(staleClaimErrors(FILE, ctx), []);
-  for (const slug of ['cerebras', 'google-gemini', 'groq']) assert.ok(staleClaimsFor(FILE, slug).length >= 1, `${slug}: a claim`);
+  for (const slug of COVERED) assert.ok(staleClaimsFor(FILE, slug).length >= 1, `${slug}: a claim`);
+  assert.deepEqual([...new Set(FILE.claims.map((c) => c.slug))].sort(), [...COVERED].sort(), 'no provider without a claim found');
+  // A claim taken from a third-party page cites that page; the assistant-answer claims cite the baseline instead.
+  for (const c of FILE.claims.filter((x) => !/AEO baseline/.test(x.seen_in))) assert.match(c.seen_url || '', /^https:\/\//, `${c.slug}: the page it was seen on`);
   for (const c of FILE.claims) {
     assert.match(c.noted, /^\d{4}-\d{2}-\d{2}$/);
     assert.ok(c.claim && c.seen_in, `${c.slug}: claim and where it was seen`);
@@ -85,7 +91,7 @@ test('resolveEvidence reads the value from the data, never from the claims file'
 });
 
 test('provider pages: a dated block with each stale claim next to the current value, its quote or field, source and date', () => {
-  for (const slug of ['cerebras', 'google-gemini', 'groq']) {
+  for (const slug of COVERED) {
     const p = PROVIDERS.find((x) => x.slug === slug);
     const claims = staleClaimsFor(FILE, slug);
     const html = pageOf(slug);
@@ -96,6 +102,10 @@ test('provider pages: a dated block with each stale claim next to the current va
     for (const c of claims) {
       assert.ok(text(block).includes(`“${c.claim}”`), `${slug}: the claim from the file`);
       assert.ok(text(block).includes(`noted ${humanDate(c.noted)}`), `${slug}: the day it was noted`);
+      if (c.seen_url) {
+        assert.ok(block.includes(`href="${c.seen_url.replace(/&/g, '&amp;')}"`), `${slug}: the page the claim was seen on`);
+        assert.ok(text(block).includes(c.seen_date ? `page dated ${humanDate(c.seen_date)}` : 'page date not stated'), `${slug}: that page's date`);
+      }
       for (const ev of c.evidence) {
         const e = resolveEvidence(ev, p, QUOTES);
         assert.ok(text(block).includes(e.quoted ? `“${e.text}”` : e.text), `${slug}: the current value (${ev.quote || ev.field})`);

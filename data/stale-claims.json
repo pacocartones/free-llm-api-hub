@@ -1,5 +1,5 @@
 {
-  "note": "Figures that other sources (AI-assistant answers, third-party lists) still repeat about a provider's free tier, next to what the provider's own page says now. One entry per stale claim: the claim as it is repeated, where it was seen and the day we noted it (UTC), and the evidence the provider page shows beside it: a sentence from data/quotes.json (`quote`, same provider) or a field of the provider's record (`field`: free_tier, rate_limits or free_limits). The block 'What other sources get wrong' on /p/<slug> is built from this file (scripts/lib/stale-claims.mjs); the build fails on an entry that names an unknown provider or quote, a missing field, or a date after today.",
+  "note": "Figures that other sources (AI-assistant answers, third-party lists) still repeat about a provider's free tier, next to what the provider's own page says now. One entry per stale claim: the claim as it is repeated, where it was seen (for a public page, `seen_url` and the page's own date `seen_date`, left out when the page states none) and the day we noted it (UTC), and the evidence the provider page shows beside it: a sentence from data/quotes.json (`quote`, same provider) or a field of the provider's record (`field`: free_tier, rate_limits or free_limits). The block 'What other sources get wrong' on /p/<slug> is built from this file (scripts/lib/stale-claims.mjs); the build fails on an entry that names an unknown provider or quote, a missing field, or a date after today.",
   "claims": [
     {
       "slug": "cerebras",
@@ -21,6 +21,72 @@
       "seen_in": "AI-assistant answers in our AEO baseline of 27 Nov 2026",
       "noted": "2026-11-27",
       "evidence": [{ "field": "free_limits" }, { "field": "rate_limits" }]
+    },
+    {
+      "slug": "openrouter",
+      "claim": "20 requests per minute and 200 requests per day on the free models",
+      "seen_in": "amardeeplakshkar/awesome-free-llm-apis on GitHub (“Entries verified as of March 2026”)",
+      "seen_url": "https://github.com/amardeeplakshkar/awesome-free-llm-apis/blob/main/README.md",
+      "noted": "2026-11-27",
+      "evidence": [{ "field": "free_limits" }, { "field": "rate_limits" }]
+    },
+    {
+      "slug": "huggingface",
+      "claim": "$0.10 a month of free credits, auto-replenished",
+      "seen_in": "amardeeplakshkar/awesome-free-llm-apis on GitHub (“Entries verified as of March 2026”)",
+      "seen_url": "https://github.com/amardeeplakshkar/awesome-free-llm-apis/blob/main/README.md",
+      "noted": "2026-11-27",
+      "evidence": [{ "field": "free_tier" }]
+    },
+    {
+      "slug": "nvidia-nim",
+      "claim": "40 requests per minute on the free tier",
+      "seen_in": "ShaikhWarsi/free-ai-tools on GitHub",
+      "seen_url": "https://github.com/ShaikhWarsi/free-ai-tools/blob/main/README.md",
+      "seen_date": "2026-10-05",
+      "noted": "2026-11-27",
+      "evidence": [{ "field": "free_tier" }, { "field": "rate_limits" }]
+    },
+    {
+      "slug": "jina-ai",
+      "claim": "1M free tokens",
+      "seen_in": "OuterSpacee/free-ai-apis on GitHub (badge “updated October 2026”)",
+      "seen_url": "https://github.com/OuterSpacee/free-ai-apis/blob/main/README.md",
+      "noted": "2026-11-27",
+      "evidence": [{ "field": "free_tier" }]
+    },
+    {
+      "slug": "cloudflare-workers-ai",
+      "claim": "10K tokens per day on the free tier",
+      "seen_in": "khushalmistry/Ai-Basic-2026 on GitHub (“as of March 2026”)",
+      "seen_url": "https://github.com/khushalmistry/Ai-Basic-2026/blob/main/course-files/07-free-ai-apis.md",
+      "noted": "2026-11-27",
+      "evidence": [{ "field": "free_tier" }, { "field": "free_limits" }]
+    },
+    {
+      "slug": "fireworks-ai",
+      "claim": "600 requests per minute with the $1 free credit",
+      "seen_in": "4pixeltechBR/awesome-ai-free-tiers on GitHub",
+      "seen_url": "https://github.com/4pixeltechBR/awesome-ai-free-tiers/blob/main/docs/how-to-get-api-keys/fireworks-ai.md",
+      "noted": "2026-11-27",
+      "evidence": [{ "field": "free_tier" }, { "field": "rate_limits" }]
+    },
+    {
+      "slug": "assemblyai",
+      "claim": "50 hours a month of free streaming transcription",
+      "seen_in": "ShaikhWarsi/free-ai-tools on GitHub",
+      "seen_url": "https://github.com/ShaikhWarsi/free-ai-tools/blob/main/README.md",
+      "seen_date": "2026-10-05",
+      "noted": "2026-11-27",
+      "evidence": [{ "field": "free_tier" }]
+    },
+    {
+      "slug": "deepgram",
+      "claim": "$150 in free credits on signup",
+      "seen_in": "FilipGrebowski/Deepgram-Starter on GitHub",
+      "seen_url": "https://github.com/FilipGrebowski/Deepgram-Starter/blob/master/readme.md",
+      "noted": "2026-11-27",
+      "evidence": [{ "field": "free_tier" }]
     }
   ]
 }
