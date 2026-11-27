@@ -22,7 +22,7 @@ import { escapeAttr, escapeText } from './lib/html.mjs';
 import * as sortLib from './lib/sort.mjs';
 import { esc, stripTags } from './lib/escape.mjs';
 import { mineHistoryAndSnapshots, HISTORY_FIELDS } from './lib/history.mjs';
-import { flattenFieldChanges, groupChangesByWeek, changesRss, weekTitle, formatValue, beforeAfter } from './lib/changes.mjs';
+import { flattenFieldChanges, groupChangesByWeek, changesRss, changesAtom, ATOM_PATH, latestWeek, latestWeekSentence, summaryValue, BEFORE_AFTER_FIELDS, NOT_STATED as CHANGES_NOT_STATED, weekTitle, formatValue, beforeAfter } from './lib/changes.mjs';
 import { monthlyReport, reportMonths, monthEndDate, monthName, monthLabel, pct, monthSummary, monthBrief } from './lib/state.mjs';
 import { resolveBestEntries, topEntries, PODIUM_SIZE } from './lib/best.mjs';
 import { agreementsTableHtml, sponsoredBlockHtml, disclosureHtml, inForce, NOT_IN_DATA_SENTENCE, MACHINE_SENTENCE } from './lib/agreements.mjs';
@@ -738,6 +738,7 @@ ${canonical ? `<meta property="og:url" content="${escapeAttr(canonical)}">
 <meta name="twitter:image" content="${ogImage}">
 <link rel="alternate" type="application/rss+xml" title="Free LLM API Hub — updates" href="${prefix}feed.xml">
 <link rel="alternate" type="application/rss+xml" title="${escapeAttr(CHANGES_FEED_TITLE)}" href="${prefix}changes.xml">
+<link rel="alternate" type="application/atom+xml" title="${escapeAttr(CHANGES_FEED_TITLE)} (Atom)" href="${prefix}${ATOM_PATH.slice(1)}">
 ${feeds.map((f) => `<link rel="alternate" type="application/rss+xml" title="${escapeAttr(f.title)}" href="${prefix}${f.href}">\n`).join('')}<link rel="stylesheet" href="${prefix}styles.css">
 ${styles.map((s) => `<link rel="stylesheet" href="${prefix}${s}">\n`).join('')}${jsonld ? `<script type="application/ld+json">${jsonld.replace(/</g, '\\u003c')}</script>` : ''}
 </head>
@@ -1037,6 +1038,11 @@ const auraFieldHtml = `<div class="aura-field" aria-hidden="true">` +
   `<ul class="aura-key-shapes">${AURA_KEY.map(([t, s, p]) => `<li>${auraHtml(p, { now: ASOF })}<span><b>${t}</b>${s}</span></li>`).join('')}</ul>` +
   `<ul class="aura-key-hues">${AURA_HUE_NAMES.map(([m, n]) => `<li><span class="hue-dot hue-${m}" aria-hidden="true"></span>${n}</li>`).join('')}</ul></div>`;
 indexHtml = inject(indexHtml, 'aurafield', auraFieldHtml);
+// The Atom twin of the change feed (lib/changes.mjs changesAtom), advertised next to its RSS link. Idempotent: the build
+// reads back its own output, so an existing Atom link is replaced, never doubled.
+indexHtml = indexHtml.replace(/<link rel="alternate" type="application\/atom\+xml"[^>]*changes\.atom">\n/g, '')
+  .replace(/(<link rel="alternate" type="application\/rss\+xml"[^>]*href="changes\.xml">\n)/,
+    `$1<link rel="alternate" type="application/atom+xml" title="${escapeAttr(CHANGES_FEED_TITLE)} (Atom)" href="${ATOM_PATH.slice(1)}">\n`);
 
 indexHtml = inject(indexHtml, 'stats', homeStatsHtml);
 // The "New here?" strip above the explorer: what the list is, what verified means, how to use it (lib/home-first-use.mjs).
@@ -1646,7 +1652,9 @@ const changeWeeks = groupChangesByWeek(allFieldChanges, { weeks: 12 }); // the h
 const apiV1ChangeWeeks = groupChangesByWeek(projectApiV1Changes(allFieldChanges), { weeks: 12 });
 const provLink = (slug, name, prefix) => currentSlugs.has(slug) ? `<a href="${prefix}p/${slug}">${escapeAttr(name)}</a>` : escapeAttr(name);
 
-writeFileSync(join(ROOT, 'site/changes.xml'), changesRss(changeWeeks, { site: SITE }));
+// Both feeds read the projected weeks of api/v1/changes.json, so a subscriber and an API client see the same changes.
+writeFileSync(join(ROOT, 'site/changes.xml'), changesRss(apiV1ChangeWeeks, { site: SITE }));
+writeFileSync(join(ROOT, 'site' + ATOM_PATH), changesAtom(apiV1ChangeWeeks, { site: SITE, updated: ASOF }));
 
 const changeRowHtml = (c, prefix = '../') =>
   `<tr><td class="notes">${c.date}</td><td class="name">${provLink(c.slug, c.name, prefix)}</td><td>${escapeAttr(c.label)}</td>` +
@@ -1736,9 +1744,33 @@ const monthsTable = stateReports.length
     [...monthsByYear].map(([year, list]) => list.map((r, i) => monthRowHtml(r, i === 0 ? `<th scope="rowgroup" rowspan="${list.length}">${year}</th>` : '')).join('\n')).join('\n') +
     `\n</tbody></table>`
   : `<p class="muted">No history available.</p>`;
+// The answer-first summary of the latest week (lib/changes.mjs latestWeek), from the same projected changes as the
+// feeds and api/v1/changes.json, plus the providers added that week. A null value reads "not stated".
+// The oldest revision in the history marks every provider it holds as added: that is the start of the record (or of a
+// shallow clone), not news, so its added events are left out.
+const historyStart = Object.values(historyBySlug).flat().reduce((m, e) => (!m || e.date < m ? e.date : m), '');
+const addedEvents = Object.entries(historyBySlug).flatMap(([slug, events]) => (events || [])
+  .filter((e) => e.kind === 'added' && e.date !== historyStart).map((e) => ({ date: e.date, slug, name: nameBySlug[slug] || slug })));
+const latest = latestWeek(projectApiV1Changes(allFieldChanges), addedEvents, { asOf: ASOF });
+const latestRows = latest ? [...new Map(latest.changes.map((c) => [c.slug, c])).keys()].map((slug) => {
+  const rows = latest.changes.filter((c) => c.slug === slug);
+  const parts = rows.map((c) => BEFORE_AFTER_FIELDS.includes(c.field)
+    ? `${escapeAttr(c.label)} (${escapeAttr(summaryValue(c.from))} → ${escapeAttr(summaryValue(c.to))})`
+    : escapeAttr(c.label));
+  return `<li>${provLink(slug, rows[0].name, '../')}: ${[...new Set(parts)].join(', ')}</li>`;
+}).concat(latest.addedList.map((a) => `<li>${provLink(a.slug, a.name, '../')}: added to the hub</li>`)) : [];
+const latestSection =
+  `<section id="latest" class="week-summary"><h2>${latest && latest.current ? 'This week' : 'Latest week'}</h2>` +
+  `<p><strong>${escapeAttr(latestWeekSentence(latest))}</strong></p>` +
+  // A long week folds into a disclosure, so the month table stays near the top.
+  (latestRows.length > 12 ? `<details><summary>The ${latestRows.length} changes, provider by provider</summary><ul>\n${latestRows.join('\n')}\n</ul></details>`
+    : latestRows.length ? `<ul>\n${latestRows.join('\n')}\n</ul>` : '') +
+  `<p class="muted">A free tier counts as ended when its free type moves from an ongoing shape to trial credit. A provider removed from the dataset is not counted: its removal date is ${CHANGES_NOT_STATED} in the data.</p>` +
+  `</section>`;
 const changesMain =
-  pageHero({ crumbs: `<a href="../">Home</a> / <a href="../updates">Updates</a> / What changed`, h1: `What changed`, lede: `Field-level changes to the free tiers we track (what's free, rate limits, the catch and the card, phone, commercial-use and OpenAI-compatibility flags), month by month. Mined from the git history of <a href="${REPO}/commits/main/data/providers.json">providers.json</a>. Subscribe via <a href="../changes.xml">RSS</a> or read the <a href="../api/v1/changes.json">JSON</a>.`, extra: `<div class="prov-actions subscribe"><a class="btn primary" href="../changes.xml" type="application/rss+xml">Subscribe via RSS</a><a class="btn ghost" href="../api/v1/changes.json" type="application/json">Changes as JSON</a></div>` }) +
+  pageHero({ crumbs: `<a href="../">Home</a> / <a href="../updates">Updates</a> / What changed`, h1: `What changed`, lede: `Field-level changes to the free tiers we track (what's free, rate limits, the catch and the card, phone, commercial-use and OpenAI-compatibility flags), month by month. Mined from the git history of <a href="${REPO}/commits/main/data/providers.json">providers.json</a>. Subscribe via <a href="../changes.xml">RSS</a> or <a href="..${ATOM_PATH}">Atom</a>, or read the <a href="../api/v1/changes.json">JSON</a>.`, extra: `<div class="prov-actions subscribe"><a class="btn primary" href="../changes.xml" type="application/rss+xml">Subscribe via RSS</a><a class="btn ghost" href="..${ATOM_PATH}" type="application/atom+xml">Atom feed</a><a class="btn ghost" href="../api/v1/changes.json" type="application/json">Changes as JSON</a></div>` }) +
   `<main id="main"><div class="wrap prose">` +
+  latestSection +
   `<section id="months"><h2>Month by month</h2>` +
   `<p>One report per month, from the first to the latest: provider counts by category and modality, verified share, verification age, and every field change and provider added, in the order they happened. A month with no committed revision of providers.json says so. Every figure is computed from the data and its git history.</p>` +
   monthsTable + `</section>` +
@@ -2851,7 +2883,7 @@ const isDateRelative = (rel) => rel === 'site/badge-freshness.json' || rel.start
 // monthly state reports (state/) are mined from the same git history, so they
 // are excluded for the same reason.
 const isGitLogDerived = (rel) => rel === 'site/feed.xml' || rel === 'site/api/v1/history.json' || rel === 'site/updates.html' || rel.startsWith('site/updates/') ||
-  rel === 'site/changes.xml' || rel === 'site/api/v1/changes.json' || rel === 'site/api/v1/status.json' || rel.startsWith('site/changes/') || rel.startsWith('site/state/') || rel === 'site/sitemap-state.xml';
+  rel === 'site/changes.xml' || rel === 'site' + ATOM_PATH || rel === 'site/api/v1/changes.json' || rel === 'site/api/v1/status.json' || rel.startsWith('site/changes/') || rel.startsWith('site/state/') || rel === 'site/sitemap-state.xml';
 // ---------- /.well-known/security.txt ----------
 // RFC 9116 contact file from SECURITY.md's two channels; its Expires date comes from lib/security-txt.mjs, not the clock.
 mkdirSync(join(ROOT, 'site/.well-known'), { recursive: true });
