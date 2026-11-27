@@ -20,9 +20,9 @@ import { escapeHtml as htmlEsc } from './html.mjs';
 
 export const ICON = (id) => `<svg class="i" aria-hidden="true"><use href="#${id}"/></svg>`;
 
-// slugs are kebab-case identifiers, enforced by data/schema.json in CI; re-check
-// here because the client fetch path bypasses that guarantee.
-export const SLUG_RE = /^[a-z0-9]+(-[a-z0-9]+)*$/;
+// slugs are kebab-case identifiers (the rule lives in the data module slug.mjs, re-exported here for the renderers).
+import { SLUG_RE } from './slug.mjs';
+export { SLUG_RE };
 
 // «Needs / not stated» column: in words, only what a provider requires (or restricts) and which of the four production flags are
 // not stated (not-stated.mjs). Nothing else: the free text of the record (`notes`) stays on the provider page, reachable by the
