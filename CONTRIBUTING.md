@@ -252,6 +252,8 @@ pending. Security policy and token permissions are in [SECURITY.md](SECURITY.md)
 
 This repository takes part in contribution programs that score merged pull requests, such as [Social Winter of Code](https://www.swoc.in/) (SWoC). This section is for program participants; everything else in this guide applies to you too. Contributions are welcome all year, inside or outside a program.
 
+Taking part in SWoC Season 7? Start with the [SWoC 2027 participant guide](docs/swoc-2027.md).
+
 **Social Winter of Code Season 7 runs from 1 January to 30 March 2027.** The program and level labels it uses are listed here, and only here, so this table is the one place to check (SWoC publishes the exact names before the season starts, and we update the table then):
 
 | Purpose | Label |
