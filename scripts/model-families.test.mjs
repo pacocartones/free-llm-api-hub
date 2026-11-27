@@ -27,8 +27,8 @@ const ghost = { ...base, slug: 'ghost', name: 'Ghost', verified: false, models_f
 const fam = (slug) => MODEL_FAMILIES.find((f) => f.slug === slug);
 const page = (g, others = []) => familyPageMainHtml(g, { asOf: '2026-11-26', others });
 
-test('six fixed families with stable, URL-safe slugs', () => {
-  assert.deepEqual(MODEL_FAMILIES.map((f) => f.slug), ['qwen', 'gemma', 'deepseek', 'llama', 'gpt-oss', 'glm']);
+test('eleven fixed families with stable, URL-safe slugs', () => {
+  assert.deepEqual(MODEL_FAMILIES.map((f) => f.slug), ['qwen', 'gemma', 'deepseek', 'llama', 'gpt-oss', 'glm', 'mistral', 'kimi', 'minimax', 'nemotron', 'command']);
   for (const f of MODEL_FAMILIES) assert.match(f.slug, /^[a-z0-9]+(-[a-z0-9]+)*$/);
   assert.equal(FAMILY_PATH, 'free-api/');
 });
@@ -40,9 +40,28 @@ test('an ID belongs to the family it names first; the organisation prefix never 
   assert.equal(familyOf('accounts/fireworks/models/glm-5p3').slug, 'glm');
   assert.equal(familyOf('openai/gpt-oss-120b').slug, 'gpt-oss');
   assert.equal(familyOf('google/gemma-4-26b-a4b-it:free').slug, 'gemma');
-  assert.equal(familyOf('meta-llama/mistral-small'), null, 'an org called meta-llama does not make a model Llama');
+  assert.equal(familyOf('meta-llama/mistral-small').slug, 'mistral', 'an org called meta-llama does not make a model Llama');
   assert.equal(familyOf('ollama-like-model'), null, 'the token must start the ID or follow a non-letter');
-  assert.equal(familyOf('mistral-small-3.1-24b'), null);
+  assert.equal(familyOf('phi-4-mini'), null, 'a family without a page has no family');
+});
+
+test('the five families added second: Mistral (all its lines), Kimi, MiniMax, Nemotron, Cohere Command', () => {
+  const slug = (id) => familyOf(id)?.slug ?? null;
+  assert.equal(slug('@cf/mistralai/mistral-small-3.1-24b-instruct'), 'mistral');
+  assert.equal(slug('mistralai/Mixtral-8x7B-Instruct-v0.1'), 'mistral');
+  assert.equal(slug('codestral-2501'), 'mistral');
+  assert.equal(slug('devstral-small-2505'), 'mistral');
+  assert.equal(slug('magistral-medium'), 'mistral');
+  assert.equal(slug('moonshotai/Kimi-K2.6'), 'kimi');
+  assert.equal(slug('accounts/fireworks/models/kimi-k3'), 'kimi');
+  assert.equal(slug('MiniMax/MiniMax-M3'), 'minimax');
+  assert.equal(slug('nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free'), 'nemotron');
+  assert.equal(slug('nvidia/Llama-3.1-Nemotron-70B-Instruct'), 'llama', 'a Nemotron fine-tune of Llama names Llama first');
+  assert.equal(slug('cohere.command-a-03-2025'), 'command');
+  assert.equal(slug('command-r7b-12-2024'), 'command');
+  assert.equal(slug('cohere/command-a'), 'command');
+  assert.equal(slug('my-command-line-model'), null, 'only Command A and Command R, not the word');
+  assert.equal(fam('command').name, 'Cohere Command');
 });
 
 test('only verified providers, each once with all its IDs of the family, in the recommended order', () => {

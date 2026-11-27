@@ -2056,7 +2056,7 @@ for (const g of LONG_GUIDE_PAGES) {
   const related = ALL_GUIDE_LINKS.filter((x) => x.slug !== g.slug).map((x) => `<a href="${x.slug}">${escapeAttr(x.card)}</a>`).join('');
   const main =
     pageHero({ crumbs: `<a href="../">Home</a> / <a href="../guides-and-collections/">Guides &amp; Collections</a> / ${escapeAttr(g.h1)}`, h1: escapeAttr(g.h1), lede: `Data as of ${timeHtml(ASOF)}. Every limit is quoted from the provider’s own page and dated.` }) +
-    `<main id="main"><div class="wrap prose">` +
+    `<main id="main"><div class="wrap prose guide-prose">` +
     `<p class="answer"><strong>${g.answer}</strong></p>` +
     g.body +
     faqHtml +
