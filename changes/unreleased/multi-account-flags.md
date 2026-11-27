@@ -10,7 +10,9 @@
   `/api/v1/` and new CSV columns. Each recorded value has a `field_checks` entry
   with the provider's sentence (registered in `data/quotes.json`) or, for
   `null`, the reason `source_silent`: the terms were read and say nothing.
-  `null` is never permission. First values for all 79 providers: 26 with a
+  `null` is never permission. First values for the 79 providers of the research
+  (the 12 providers added since have neither flag yet, so their pages read Not
+  stated): 26 with a
   stated multi-account answer (19 `true`, 6 `"conditional"`, 1 `false`) and 46
   with a stated limit answer (45 `true`, 1 `false`). Provider pages show both
   under "What you need to start", reading forbidden, allowed, conditional or

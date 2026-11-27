@@ -34,7 +34,7 @@ function runValidate(data) {
 }
 
 const silent = { status: 'source_silent', checked: '2026-11-26', sources: ['https://example.com/terms'], note: 'Terms read in full; nothing on multiple accounts.' };
-const stated = { status: 'stated', checked: '2026-11-26', sources: ['https://example.com/terms'], quote: null, note: 'Terms forbid it.' };
+const stated = { status: 'stated', checked: '2026-11-26', sources: ['https://example.com/terms'], quote: 'You may not create multiple accounts to get around the limits.', note: 'Terms forbid it.' };
 
 /** A copy of the dataset with Groq's terms flags replaced. */
 function withTerms(patch) {
@@ -97,9 +97,22 @@ test('validate: a recorded value carries its check, a check carries its value, a
   assert.equal(r.status, 0, r.output);
 });
 
-test('the dataset: all 79 providers carry both flags with a check; nulls are source_silent; stated quotes are registered', () => {
-  assert.equal(DATA.providers.length, 79);
+// The providers added to main after the terms research (2026-11-26) whose terms have not been read for these two flags yet.
+// They carry neither flag, so their pages read "Not stated"; the list only shrinks: recording a provider's flags means removing it here.
+const TERMS_PENDING = new Set([
+  'requesty', 'kilo-gateway', 'experiential-labs', 'google-cloud-tts', 'google-cloud-stt', 'google-cloud-vision',
+  'amazon-bedrock', 'oci-generative-ai', 'reducto', 'lightning-ai', 'azure-document-intelligence', 'nscale',
+]);
+
+test('the dataset: every researched provider carries both flags with a check; nulls are source_silent; stated quotes are registered', () => {
+  const slugs = new Set(DATA.providers.map((p) => p.slug));
+  for (const s of TERMS_PENDING) assert.ok(slugs.has(s), `TERMS_PENDING ${s}: no provider has that slug, so remove it`);
+  assert.equal(DATA.providers.filter((p) => !TERMS_PENDING.has(p.slug)).length, 79, 'the 79 providers of the research');
   for (const p of DATA.providers) {
+    if (TERMS_PENDING.has(p.slug)) {
+      for (const f of TERMS_FLAG_FIELDS) assert.ok(!(f in p) && !p.field_checks?.[f], `${p.slug}: ${f} is recorded now, so remove it from TERMS_PENDING`);
+      continue;
+    }
     for (const f of TERMS_FLAG_FIELDS) {
       assert.ok(f in p, `${p.slug}: ${f}`);
       const c = p.field_checks?.[f];
