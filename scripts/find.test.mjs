@@ -281,7 +281,14 @@ describe('the page in the build', () => {
       assert.ok([...q.matchAll(/<input type="radio"/g)].length === [...q.matchAll(/<label class="find-opt"><input/g)].length, 'every radio sits in its label');
     }
     assert.equal([...html.matchAll(/aria-live="polite"/g)].length, 1);
-    assert.match(html, /<p id="find-count" class="find-count" role="status" aria-live="polite" aria-atomic="true"><\/p>/);
+    // The count and the questions are in the page from the first paint (no layout shift when find.js runs).
+    const payload = JSON.parse(html.match(/<script type="application\/json" id="find-data">([^]*?)<\/script>/)[1]);
+    const start = find.shortlist(payload.providers, {});
+    const count = find.countText(start.matches.length, start.possible.length, false);
+    assert.match(count, /^So far: \d+ providers? match\./);
+    assert.ok(html.includes(`<p id="find-count" class="find-count" role="status" aria-live="polite" aria-atomic="true">${count}</p>`), 'the count is filled at first paint');
+    assert.match(html, /<form id="find-form" class="find-form" novalidate aria-describedby="find-count">/, 'the form is not hidden in the markup');
+    assert.match(read('site/styles.css'), /@media \(scripting: none\) \{ \.find-form \{ display: none; \} \.find-count \{ visibility: hidden; height: 1\.3em; overflow: hidden; \} \}/, 'without scripts the form is hidden by CSS');
     assert.match(html, /<h2 id="find-results-h" tabindex="-1">/);
     const nos = html.match(/<noscript>([^]*?)<\/noscript>/)[1];
     assert.match(nos, /href="\.\.\/\?text=1&amp;nocard=1#explorer"|href="\.\.\/\?nocard=1&amp;text=1#explorer"/);
@@ -297,6 +304,12 @@ describe('the page in the build', () => {
       const ok = path.endsWith('/') ? existsSync(join(file, 'index.html')) : existsSync(file) || existsSync(file + '.html');
       assert.ok(ok, `${u} → ${path}`);
     }
+  });
+
+  test('countText: the live count wording, before and after the last answer', () => {
+    assert.equal(find.countText(1, 0, false), 'So far: 1 provider matches.');
+    assert.equal(find.countText(5, 2, false), 'So far: 5 providers match. 2 more might fit (not stated).');
+    assert.equal(find.countText(0, 1, true), '0 providers match your answers. 1 more might fit (not stated).');
   });
 
   test('the page body is pure: same inputs, same markup', () => {

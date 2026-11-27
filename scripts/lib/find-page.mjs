@@ -49,7 +49,7 @@ const NOSCRIPT_PRESETS = [
 ];
 
 /** The page body: hero, form, live count, results and the "how it ranks" notes. `heroHtml` is the build's pageHero(). */
-export function findMainHtml({ pageHero, total, verified }) {
+export function findMainHtml({ pageHero, total, verified, count = '' }) {
   const prefix = '../';
   return pageHero({
     crumbs: `<a href="${prefix}">Home</a> / <a href="${prefix}#explorer">Providers</a> / ${FIND_H1}`,
@@ -59,7 +59,10 @@ export function findMainHtml({ pageHero, total, verified }) {
     `<main id="main"><div class="wrap find-wrap">` +
     `<noscript><div class="find-noscript"><p><strong>This finder needs JavaScript.</strong> The same filters work in the <a href="${prefix}#explorer">provider explorer</a>. Common starting points:</p>` +
     `<ul>${NOSCRIPT_PRESETS.map(([label, a]) => `<li><a href="${escapeAttr(explorerHref(a, prefix))}">${escapeAttr(label)}</a></li>`).join('')}</ul></div></noscript>` +
-    `<form id="find-form" class="find-form" novalidate hidden aria-describedby="find-count">` +
+    // The form is in the page from the first paint, as site/find.js shows it: it used to be `hidden` until the deferred
+    // script revealed it, and the questions then pushed everything below them down (layout shift 0.49 on a phone, the
+    // one page under the Lighthouse budget). Without scripts, styles.css hides it (@media (scripting: none)).
+    `<form id="find-form" class="find-form" novalidate aria-describedby="find-count">` +
     questionsHtml() +
     `<p id="find-error" class="find-error" role="alert"></p>` +
     `<div class="find-nav"><button type="button" class="btn ghost" id="find-back" hidden>← Back</button>` +
@@ -67,7 +70,7 @@ export function findMainHtml({ pageHero, total, verified }) {
     `<button type="button" class="btn ghost" id="find-skip">Skip to results</button></div>` +
     `</form>` +
     // One permanent live region: the number of matching providers, rewritten on every answer.
-    `<p id="find-count" class="find-count" role="status" aria-live="polite" aria-atomic="true"></p>` +
+    `<p id="find-count" class="find-count" role="status" aria-live="polite" aria-atomic="true">${escapeAttr(count)}</p>` +
     `<section id="find-results" class="find-results" aria-labelledby="find-results-h" hidden>` +
     `<h2 id="find-results-h" tabindex="-1">Your shortlist</h2>` +
     `<p class="find-summary"><span id="find-summary"></span></p>` +

@@ -60,10 +60,7 @@
 
   // The one live region: how many providers confirm every answer, and how many more might.
   function announce(r) {
-    var text = (done ? '' : 'So far: ') + plural(r.matches.length, 'provider matches', 'providers match') +
-      (done ? ' your answers' : '') + '.';
-    if (r.possible.length) text += ' ' + plural(r.possible.length, 'more might fit', 'more might fit') + ' (not stated).';
-    count.textContent = text;
+    count.textContent = F.countText(r.matches.length, r.possible.length, done);
   }
 
   function showStep(i) {
