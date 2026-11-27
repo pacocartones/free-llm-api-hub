@@ -14,7 +14,7 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 
 const base = { free_type: 'renewing-quota', modalities: ['text', 'embeddings'], verified: true };
 const alpha = { ...base, slug: 'alpha', name: 'Alpha', models_free: ['meta-llama/Llama-3.3-70B-Instruct', 'Qwen/Qwen3-4B'] };
-const beta = { ...base, slug: 'beta', name: 'Beta <b>', free_type: 'trial-credit', modalities: [], models_free: ['llama-3.3-70b-instruct', 'mistral-small'] };
+const beta = { ...base, slug: 'beta', name: 'Beta <b>', free_type: 'trial-credit', modalities: [], models_free: ['llama-3.3-70b-instruct', 'phi-4-mini'] };
 const gamma = { ...base, slug: 'gamma', name: 'Gamma', models_free: ['Qwen/Qwen3-4B'] };
 const providers = [alpha, beta, gamma, { ...base, slug: 'none', name: 'None', models_free: [] }];
 const groups = groupModels(providers);
@@ -40,7 +40,7 @@ test('the description targets "free AI models API" and fits a search snippet', (
 test('each row carries its column name in data-label for the phone card layout, with explicit roles', () => {
   const rows = modelIndexRows(providers);
   assert.equal(rows.length, 5);
-  const html = modelIndexRowHtml(rows.find((r) => r.p.slug === 'beta' && r.m === 'mistral-small'), { families });
+  const html = modelIndexRowHtml(rows.find((r) => r.p.slug === 'beta' && r.m === 'phi-4-mini'), { families });
   for (const label of MODEL_INDEX_COLUMNS) assert.ok(html.includes(`data-label="${label}"`), label);
   assert.match(html, /^<tr role="row"[^>]*><th scope="row" role="rowheader" class="name"/);
   assert.equal((html.match(/role="cell"/g) || []).length, 3);
@@ -56,8 +56,8 @@ test('a model of an open family links to /free-api/<family>/; others do not', ()
   assert.ok(llama.includes('<a class="model-fam" href="../free-api/llama/">Llama family</a>'));
   const qwen = modelIndexRowHtml(rows.find((r) => r.m === 'Qwen/Qwen3-4B'), opts);
   assert.ok(qwen.includes('href="../free-api/qwen/"'));
-  const mistral = modelIndexRowHtml(rows.find((r) => r.m === 'mistral-small'), opts);
-  assert.ok(!mistral.includes('model-fam'), 'no family page, no link');
+  const phi = modelIndexRowHtml(rows.find((r) => r.m === 'phi-4-mini'), opts);
+  assert.ok(!phi.includes('model-fam'), 'no family page, no link');
   const noPage = modelIndexRowHtml(rows.find((r) => r.m === 'llama-3.3-70b-instruct'), { families: families.filter((f) => f.slug !== 'llama') });
   assert.ok(!noPage.includes('model-fam'), 'only where the family page exists');
 });
