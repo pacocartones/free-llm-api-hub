@@ -400,7 +400,9 @@ function describe(r) {
   return r.hops.length > 1 ? `${r.hops.map((h) => h.status).join(' -> ')} ending at ${r.final.url}` : `HTTP ${r.final.status}`;
 }
 
-const cell = (v) => (v == null ? '—' : `\`${String(v).replace(/`/g, "'").replace(/\|/g, '\\|').slice(0, 160)}\``);
+// Markdown table cell: backslashes first, then pipes, so an input backslash can never escape our own escaping.
+const mdEscape = (v) => String(v).replace(/\\/g, '\\\\').replace(/\|/g, '\\|');
+const cell = (v) => (v == null ? '—' : `\`${mdEscape(String(v).replace(/`/g, "'")).slice(0, 160)}\``);
 
 export function renderMarkdown(report) {
   const lines = [];
@@ -426,7 +428,7 @@ export function renderMarkdown(report) {
     const groups = new Map();
     for (const d of report.allowed) { const k = `${d.field}\u0000${d.reason}`; groups.set(k, (groups.get(k) || 0) + 1); }
     lines.push('| Field | URLs | Reason |', '| --- | --- | --- |');
-    for (const [k, n] of groups) { const [field, reason] = k.split('\u0000'); lines.push(`| ${field} | ${n} | ${reason.replace(/\|/g, '\\|')} |`); }
+    for (const [k, n] of groups) { const [field, reason] = k.split('\u0000'); lines.push(`| ${field} | ${n} | ${mdEscape(reason)} |`); }
     lines.push('');
   }
   return lines.join('\n');
