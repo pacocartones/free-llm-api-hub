@@ -71,7 +71,7 @@ import { providersCsv } from './lib/provider-csv.mjs';
 import { writeSchemaDocs } from './schema-docs.mjs';
 import { datasetAsOf } from './lib/release-stamp.mjs';
 import { parseCitation, homeJsonLd, datasetJsonLdScript } from './lib/dataset-jsonld.mjs';
-import { websiteRef, datasetRef } from './lib/site-entity.mjs';
+import { websiteRef, datasetRef, authorshipLine } from './lib/site-entity.mjs';
 import { isoDateTime, datasetFacts, licenseUrl, guideArticle } from './lib/structured-data.mjs';
 import { SITEMAP_INDEX, sitemapIndexXml } from './lib/state-sitemap.mjs';
 import { SITEMAPS as INDEXNOW_SITEMAPS } from './lib/indexnow.mjs';
@@ -712,7 +712,7 @@ function landmarkFixes(main) {
 // The weekly change feed is the one a reader subscribes to (field-level changes, not commit titles), so every page
 // advertises it: a feed reader looking for <link rel="alternate"> finds it wherever the visitor is.
 const CHANGES_FEED_TITLE = 'Free LLM API Hub — what changed, week by week';
-function htmlPageRaw({ title, desc, canonical, main, jsonld, prefix = '../', noindex = false, ogImage = `${SITE}/og.png`, feeds = [], scripts = [], styles = [] }) {
+function htmlPageRaw({ title, desc, canonical, main, jsonld, prefix = '../', noindex = false, ogImage = `${SITE}/og.png`, feeds = [], alternates = [], scripts = [], styles = [] }) {
   // jsonld carries provider names straight from the dataset; writing "<" as
   // the JSON unicode escape (backslash-u-003c) keeps a "</script>" in the
   // data from ever closing the block.
@@ -750,7 +750,7 @@ ${canonical ? `<meta property="og:url" content="${escapeAttr(canonical)}">
 <link rel="alternate" type="application/rss+xml" title="Free LLM API Hub — updates" href="${prefix}feed.xml">
 <link rel="alternate" type="application/rss+xml" title="${escapeAttr(CHANGES_FEED_TITLE)}" href="${prefix}changes.xml">
 <link rel="alternate" type="application/atom+xml" title="${escapeAttr(CHANGES_FEED_TITLE)} (Atom)" href="${prefix}${ATOM_PATH.slice(1)}">
-${feeds.map((f) => `<link rel="alternate" type="application/rss+xml" title="${escapeAttr(f.title)}" href="${prefix}${f.href}">\n`).join('')}<link rel="stylesheet" href="${prefix}styles.css">
+${feeds.map((f) => `<link rel="alternate" type="application/rss+xml" title="${escapeAttr(f.title)}" href="${prefix}${f.href}">\n`).join('')}${alternates.map((a) => `<link rel="alternate" type="${escapeAttr(a.type)}" title="${escapeAttr(a.title)}" href="${escapeAttr(a.href)}">\n`).join('')}<link rel="stylesheet" href="${prefix}styles.css">
 ${styles.map((s) => `<link rel="stylesheet" href="${prefix}${s}">\n`).join('')}${jsonld ? `<script type="application/ld+json">${jsonld.replace(/</g, '\\u003c')}</script>` : ''}
 </head>
 <body>
@@ -1374,7 +1374,7 @@ for (const p of providers) {
   // What's free (only when the record says it: no empty box), then, further down, the requirement cards behind one
   // summary line and the score on one line.
   const summary = p.free_tier ? `<div class="prov-summary"><h2 id="whats-free">What's free</h2><p>${escapeAttr(p.free_tier)}</p></div>` : '';
-  const reqsHtml = `<details class="prov-reqs-box"><summary>What you need to start: card, phone, commercial use</summary>${requirementsHtml(p)}</details>`;
+  const reqsHtml = `<details class="prov-reqs-box"><summary>What you need to start: card, phone, commercial use</summary>${requirementsHtml(p, { anchors: true })}</details>`;
   // Freshness relative to the current day (provider pages are regenerated on deploy, not diff-gated).
   const daysAgo = p.verified && p.last_verified ? ageInDays(p.last_verified, today) : null;
   // The receipt stamp (lib/stamp.mjs), the perforated ticket: "✓ | Verified 24 Nov 2026 · 7 sources", the quoted sentence in its title.
@@ -1454,7 +1454,7 @@ for (const p of providers) {
     limitsHtml(p) +
     reqsHtml +
     scoreHtml +
-    glanceHtml(p, typeLabel(p)) +
+    glanceHtml(p, typeLabel(p), { anchors: true }) +
     modelsHtml(p, { modelHref: modelPageHref('../') }) +
     speedHtml(p) +
     dataPolicyHtml(p) +
@@ -1490,11 +1490,13 @@ for (const p of providers) {
   });
   writeFileSync(
     join(ROOT, `site/p/${p.slug}.html`),
-    htmlPage({ title: `${p.name} — free tier & limits · Free LLM API Hub`, desc: providerMetaDescription(p), canonical: `${SITE}/p/${p.slug}`, main: tagProviderLinks(main, providerLinkTargets(p, { website: websiteHref })), jsonld, ogImage: `${SITE}/og/p/${p.slug}.png`, scripts: ['pager.js'] })
+    htmlPage({ title: `${p.name} — free tier & limits · Free LLM API Hub`, desc: providerMetaDescription(p), canonical: `${SITE}/p/${p.slug}`, main: tagProviderLinks(main, providerLinkTargets(p, { website: websiteHref })), jsonld, ogImage: `${SITE}/og/p/${p.slug}.png`, scripts: ['pager.js'],
+      // The Markdown twin (below), advertised the way a feed is, so an agent on the HTML page finds the clean text.
+      alternates: [{ type: 'text/markdown', title: `${p.name} — free tier and limits (Markdown)`, href: `${SITE}/p/${p.slug}.md` }] })
   );
   // The Markdown twin of the page (/p/<slug>.md, lib/provider-markdown.mjs), for answer engines and agents. Linked from
   // llms.txt; not in sitemap.xml (an alternate of the canonical HTML page, not a page of its own).
-  writeFileSync(join(ROOT, `site/p/${p.slug}.md`), providerMarkdown(p, { site: SITE, asOf: ASOF, version: data.version }));
+  writeFileSync(join(ROOT, `site/p/${p.slug}.md`), providerMarkdown(p, { site: SITE, asOf: ASOF, version: data.version, repo: REPO }));
 
   // Embeddable per-provider badge. Same rule as the repo badge: the colour tracks
   // the age of the verification, so an entry someone embedded and forgot goes amber
@@ -2326,11 +2328,27 @@ writeFileSync(join(ROOT, 'site/api/index.html'), htmlPage({
 // llms.txt (concise index) + llms-full.txt (every provider expanded) — llmstxt.org
 const programCount = programs.startups.length + programs.research.length;
 const llmsSummary = `A continuously-verified, machine-readable dataset of free-tier and trial-credit LLM (and adjacent AI-model) APIs for developers. Every entry is checked against the provider's own docs and dated; quoted where the docs say it; "not stated" where they don't.`;
+// The static API files an agent can fetch directly, each with what it holds (all regenerated on every dataset change).
+const LLMS_API_FILES = [
+  ['/api/v1/index.json', 'every endpoint, the counts and the dataset version'],
+  ['/api/v1/providers.json', 'every provider, all fields'],
+  ['/api/v1/status.json', 'per provider: last verified, freshness, free now'],
+  ['/api/v1/changes.json', 'field-level changes, week by week'],
+  ['/api/v1/history.json', 'the change history of each provider'],
+  ['/api/v1/score.json', 'the score of each provider and its inputs'],
+  ['/api/v1/programs.json', 'startup and research credit programs'],
+  ['/api/v1/schema.json', 'the JSON Schema of a provider record'],
+  ['/api/v1/no-card.json', 'slice: no credit card required'],
+  ['/api/v1/commercial.json', 'slice: commercial use allowed'],
+  ['/api/v1/openai-compatible.json', 'slice: OpenAI-compatible base URL'],
+  ['/providers.csv', 'the scalar fields as CSV'],
+];
 // llmstxt.org layout: H1, a blockquote summary, the dataset date and counts first, then H2 sections of links.
 // Each provider has one line (name, free type, one-line limits, its page and the Markdown twin at /p/<slug>.md).
 const llmsTxt =
   `# Free LLM API Hub\n\n> ${llmsSummary}\n\n` +
-  `Data of ${ASOF} · dataset v${data.version} · ${llmsCounts(HOME_COUNTS)}, and ${programCount} apply-to-get credit programs. MIT-licensed. Terms change often: confirm against each provider's own docs, linked from every entry. Every provider page has a Markdown version at the same URL plus \`.md\`.\n\n` +
+  `Data of ${ASOF} · dataset v${data.version} · ${llmsCounts(HOME_COUNTS)}, and ${programCount} apply-to-get credit programs. MIT-licensed. Terms change often: confirm against each provider's own docs, linked from every entry. Every provider page has a Markdown version at the same URL plus \`.md\`, and each fact on it a stable anchor (\`#is-it-free\`, \`#limits\`, \`#card\`, \`#phone\`, \`#commercial\`, \`#openai\`, \`#faq\`).\n\n` +
+  `${authorshipLine(REPO)}\n\n` +
   `## Start here\n` +
   `- [Find my free API](${SITE}/find/): answer a few questions (modality, card, commercial use) and get the matching providers\n` +
   `- [Top 10 by score](${SITE}/best/): the ranking and [how the score is computed](${SITE}/best/methodology/)\n` +
@@ -2346,6 +2364,8 @@ const llmsTxt =
   `- [Use the data](${SITE}/embed/): the widget, verified badges, JSON and CSV downloads, and how to cite the dataset\n` +
   `- [Provider badges](${SITE}${BADGES_PATH}): an SVG badge per provider (free tier or trial credit, and the date last verified) with copy-paste Markdown and HTML\n` +
   `- [Methodology](${SITE}/methodology/): how entries are verified, sourced and dated\n\n` +
+  `## API files\n` +
+  LLMS_API_FILES.map(([path, what]) => `- [${path}](${SITE}${path}): ${what}`).join('\n') + `\n\n` +
   `## Guides\n` +
   `- [All guides and collections](${SITE}/guides-and-collections/): every guide and filtered collection on one page\n` +
   [...GUIDES, ...LONG_GUIDE_PAGES].map((g) => `- [${g.h1}](${SITE}/guides/${g.slug}): ${g.blurb}`).join('\n') + `\n\n` +
