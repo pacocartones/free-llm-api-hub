@@ -1,24 +1,37 @@
 # CHANGELOG preview — v2.15.0
 
-> Preview from the release rehearsal: `VALIDATE_TODAY=2026-12-04 npm run release:prepare -- 2.15.0` on `main` plus the fragment fixes of `chore/release-2-15-0-fragments`. The summary paragraph is a draft for the maintainer; the entries are exactly what `release:prepare` writes.
+> Preview, regenerated on 2026-11-27 from all 116 fragments in `changes/unreleased/` on `main` at `00e6cb2` with `npm run changelog:collect` (the same move `release:prepare` makes, without the version bump). `release:prepare` refuses a date after today in UTC, so the real heading is written on 2026-12-04 by `npm run release:prepare -- 2.15.0`. The summary paragraph is a draft for the maintainer; the entries below are exactly what the fragments hold today.
+>
+> Fragment fixes to make on `main` before the release pull request (found while regenerating; not changed here):
+>
+> - `add-requesty-kilo-experiential.md` ends with a loose paragraph ("With these additions, 25 of 82 providers …") that breaks the `### Added` list. Fold it into the Experiential Labs entry or drop it.
+> - 17 fragments carry no PR number. Their PRs, from `git log`: Amazon Bedrock and OCI (#956), Google Cloud TTS, STT and Vision (#942), Nscale, Lightning AI, Azure Document Intelligence and Reducto (#966), answer-first SEO (#952), API examples (#944), Atom feed (#957), compare answer-first (#955), guides batch 3 (#947), MCP status tools (#940), `/models/` on phones (#964), numeric free limits (#941), provider badges (#954), receipts backfill (#949), receipts guard (#950), re-verification batch 4 (#946), CSP tightening (#945), trial credits re-check (#965).
+> - Some entries quote counts from the day they merged ("85 tiers & credits", "69 verified", "#N of 76 scored", "25 of 82 providers"). They are examples, not the release's numbers; the summary above gives 91.
 
 ## [2.15.0] — 2026-12-04
 
-Fifteen providers join the dataset (62 → 77; all verified except Poolside,
-which is `verified: false` until its hosted free access is confirmed), and every
-yes/no flag can now say why it holds its value: a new optional `field_checks`
-object records the provider's sentence, or why the flag stays `null` (not stated,
-needs an account, or two official pages disagree). Several flags seeded without a
-source are now `null` with that reason, so filters that treated them as known
+Twenty-nine providers join the dataset (62 → 91), among them Amazon Bedrock,
+OCI Generative AI, three Google Cloud APIs, Azure Speech and Document
+Intelligence, Stability AI and several OpenAI-compatible gateways. All are
+verified; Poolside, already listed, becomes `verified: false` until its hosted
+free access is confirmed. Every yes/no flag that holds a value now has a
+receipt: a new optional `field_checks` object records the provider's own
+sentence, or why the flag stays `null` (not stated, needs an account, or two
+official pages disagree), and `npm run validate` enforces it. Several flags
+seeded without a source are now `null`, so filters that treated them as known
 may return fewer rows. Other additive fields in `/api/v1/`: `published_speed`,
-`anonymous_access`, `keys_url` and `keys_url_source`. The published API schema
-now accepts fields added within v1, so clients that validate against an older
-copy of `/api/v1/schema.json` should refresh it. The site adds "Find my free
-API", one page per model, `/not-free/`, `/embed/`, `/quality/` and long-form
-guides.
+`anonymous_access`, `keys_url` and `keys_url_source`, plus a new
+`/api/v1/status.json` with freshness per provider. The published API schema now
+accepts fields added within v1, so clients that validate against an older copy
+of `/api/v1/schema.json` should refresh it. The site moves to the warm "Cálida"
+brand and adds "Find my free API", one page per model and model family,
+answer-first provider and compare pages, provider badges, an Atom feed,
+`/not-free/`, `/embed/`, `/quality/` and long-form guides.
 
 ### Added
 
+- Amazon Bedrock: AWS Free Tier credit for new customers ($100 at sign-up plus up to $100 more, up to 6 months), usable on Bedrock's OpenAI-compatible Chat Completions API; a payment method is not required for most new customers.
+- OCI Generative AI: Oracle Cloud Free Trial credit ($300 for up to 30 days), usable on Grok, Gemini, Llama, Cohere and gpt-oss models through an OpenAI-compatible endpoint; most users need a phone number and a credit card.
 - Azure Speech in Foundry Tools, Free F0 tier (`azure-speech`): a permanent
   monthly allowance of 5 audio hours of real-time speech to text, 0.5 million
   neural text-to-speech characters and 5 audio hours of speech translation.
@@ -33,6 +46,17 @@ guides.
   generation. Whether the trial needs a payment method is not public, so
   `card_required` stays unknown (`needs_account`). The homepage says data is
   deleted right after processing. Checked 2026-11-25, agent-assisted (#755).
+- Berget AI (`berget-ai`): a one-time €5 starting credit on the Trial plan of a
+  Swedish, OpenAI-compatible open-model API. A card is required at sign-up but
+  nothing is charged, and continued access needs a plan from €25 a month.
+  Berget says it keeps no prompt data and does not train on it. Checked
+  2026-11-26, agent-assisted (#903).
+- Netlify AI Gateway (`netlify-ai-gateway`): the Free plan's 300 monthly
+  Netlify credits can pay for model calls through the gateway at 180 credits
+  per $1 of usage (at most about $1.67 a month), with a 90-credit-per-minute
+  limit. Keys and base URLs are injected into Netlify Functions, and a
+  production deploy is needed first. The gateway does not store prompts or
+  outputs. Checked 2026-11-26, agent-assisted (#903).
 - Bytez (`bytez`): an ongoing Free plan with $1 in credits refreshed every 4
   weeks, usable on open models up to 7B parameters (one concurrent request) and
   on closed models from OpenAI, Anthropic, Google, Mistral and Cohere at the
@@ -51,6 +75,16 @@ guides.
   every new account on a nonprofit, OpenAI-compatible gateway to public and
   sovereign open models (Apertus, SEA-LION, Olmo, Bielik), at 100 requests per
   minute per key on the Free tier. Checked 2026-11-25, agent-assisted (#790).
+- Google Cloud Text-to-Speech (`google-cloud-tts`): a permanent monthly free
+  usage limit of 4 million characters each of Standard and WaveNet voices and 1
+  million characters each of Chirp 3: HD, Neural2, Polyglot and Studio voices.
+  Gemini-TTS has no free usage. The pricing page says billing must be enabled,
+  so `card_required` is true (stated). Checked 2026-11-26, agent-assisted.
+- Google Cloud Speech-to-Text (`google-cloud-stt`): 60 free minutes of audio a
+  month on the V1 API; the V2 API has no free minutes. Checked 2026-11-26,
+  agent-assisted.
+- Google Cloud Vision API (`google-cloud-vision`): the first 1,000 units a month
+  free for each feature, OCR included. Checked 2026-11-26, agent-assisted.
 - Inception (`inception`): a one-time grant of 100 million free tokens for
   every new account, shared across the Mercury diffusion LLMs (Mercury 3, 2.5,
   2 and Edit 2), with no payment details. The API is OpenAI-compatible and the
@@ -80,6 +114,10 @@ guides.
   OpenAI-compatible API. Its FAQ says the free API is not designed for
   production workloads, so `commercial_ok` is `false`. Checked 2026-11-25,
   agent-assisted (#750).
+- Nscale: $5 of free credit for every new account on its OpenAI-compatible serverless inference API; a payment card is asked for only to buy more credit, and Nscale says it does not log or train on request or response content.
+- Lightning AI Model APIs: up to 40 million free tokens to start (the Free plan lists up to 30 credits) across open and closed models under one OpenAI-compatible key; no credit card to start.
+- Azure Document Intelligence (Free F0): 500 pages free every month for OCR, layout and prebuilt document models, 1 analyze transaction per second and the first two pages of each request; an Azure account needs a phone number and a card.
+- Reducto: $150 in free usage on the pay-as-you-go Standard plan for its document parsing and extraction APIs.
 - PLaMo API (`plamo`): an ongoing Free plan from Preferred Networks at 0 yen
   per token for PLaMo 3.0 / 3.1 Prime and PLaMo 3.0 Fin Beta, with usage and
   rate limits (100 requests per minute per key for the Prime family; Fin Beta
@@ -97,9 +135,6 @@ guides.
   A payment card must be registered. Infomaniak says queries are neither
   recorded nor used for training, and that apps built on the service can be
   monetised. Checked 2026-11-25, agent-assisted (#816).
-
-With every provider added in this release, the dataset stays under the 35%
-non-text guardrail: 25 of 77 providers (32.5%) list no `text` modality.
 - Regolo.ai (`regolo`): a 30-day free trial for new subscribers with access
   to all Core chat models, capped at 1M tokens per day, with no credit card.
   It is an EU provider with an OpenAI-compatible API, and it states that it
@@ -115,6 +150,27 @@ non-text guardrail: 25 of 77 providers (32.5%) list no `text` modality.
   listed as "Dynamic". The data policy comes from the platform-wide
   zero-data-retention page, which does not say whether it covers
   express-mode free-tier accounts. Agent-assisted check (#714).
+- Requesty (`requesty`): a UK AI gateway whose free plan gives the models it
+  lists as free at $0 per token, 200 requests a day and 20 a minute per
+  organization, with no credit card, through the OpenAI-compatible
+  `https://router.requesty.ai/v1`. On the free plan Requesty may train its own
+  routing models on requests to models it labels Training Permitted Models,
+  whose providers train on them too. Checked 2026-11-26, agent-assisted (#936).
+- Kilo Gateway (`kilo-gateway`): the API gateway behind Kilo Code serves its
+  `:free` models at no cost, even without an account (200 requests an hour per
+  IP address), through the OpenAI-compatible
+  `https://ai-gateway.kilo.ai/api/v1`. Kilo warns that its Auto Free router may
+  send prompts to providers that log them and use them to improve their
+  services. Checked 2026-11-26, agent-assisted (#936).
+- Experiential Labs (`experiential-labs`): the Free plan of a US AI gateway
+  gives 1M tokens a day shared across GPT-6 Luna, DeepSeek V4.1 Flash and the
+  Clef decision endpoint (10 requests a minute), after a refunded $1 card
+  verification. Free-plan prompts and outputs go into its Data Licensing
+  Program: after de-identification they can be used to train AI models and
+  sold to third parties. Checked 2026-11-26, agent-assisted (#936).
+
+With these additions, 25 of 82 providers (30.5%) list no `text` modality, under
+the 35% non-text guardrail.
 - Stability AI Platform API (`stability-ai`): a one-time grant of 25 free
   credits for a new account created with Google sign-in (1 credit = $0.01,
   about $0.25), enough for 8 Stable Image Core images. The credits work across
@@ -125,6 +181,16 @@ non-text guardrail: 25 of 77 providers (32.5%) list no `text` modality.
   unused service credits expire one year after issuance. Whether the credits
   need a card or a phone is not stated (`source_silent`). Checked 2026-11-25,
   agent-assisted (#805).
+- `llms.txt` now opens with the dataset date and provider count and follows the
+  llms.txt layout more closely: a "Start here" section (`/find/`, `/best/`,
+  `/not-free/`, `/compare/`), the dataset pages (`/api/`, `/quality/`,
+  `/embed/`, methodology), the guides, the collections, the credit programs
+  and one line per provider with its free type, its limits in one line, its
+  page and its Markdown version (#901).
+- Every provider page has a Markdown version at `/p/<slug>.md`, built from the
+  same record: the "is it free" answer, the limits, the flags with the pages
+  read and the date, the quickstart and the links. It names `/p/<slug>` as its
+  canonical page and is not listed in `sitemap.xml` (#901).
 - A "no account needed" collection (`collections/anonymous-access.md` and
   `/collections/anonymous-access`): providers whose own page says the API can
   be called with no account, each row quoting that sentence and the day it was
@@ -133,6 +199,45 @@ non-text guardrail: 25 of 77 providers (32.5%) list no `text` modality.
   entries: AI Horde (shared anonymous key `0000000000`) and OVHcloud AI
   Endpoints, whose note records that the same page also says a key is needed
   in each request (#731, issue #182).
+- Copy-paste examples on the [API page](https://freellmapihub.com/api/#examples)
+  and in `docs/api.md`, for `providers.json`, `status.json`, `providers.csv`
+  and `llms.txt`, in curl, JavaScript (fetch, no dependencies) and Python
+  (standard library only): ongoing free tiers with no card, providers that are
+  fresh and free now, OpenAI-compatible base URLs, the provider with the
+  highest daily request limit for a model, no-card commercial providers from
+  the CSV, and every provider's Markdown page from `llms.txt`. Both places are
+  generated from `scripts/lib/api-examples.mjs`, and
+  `scripts/api-examples.test.mjs` runs every snippet against the built files
+  with no network, checking that the languages print the same lines. The API
+  page also points to the MCP server in `packages/mcp`, which runs from a
+  checkout and is not published on npm.
+- Every provider now has an *aura*: a fan of radial bars drawn from its own record at build time. Each colour sector is
+  a modality it serves, bars that grow from the centre mean an ongoing free tier and an outer crown only a trial, a
+  dashed circle means its docs leave a production flag unsaid, and it fades when the last check is over 30 days old.
+  The fan's rotation and bar lengths come from the provider's slug, so each aura is its own. It leads each row of the
+  explorer and sits at the top of each provider page with its reading in words; the methodology explains how to read it (#845).
+- The verified date is now a *receipt*: a perforated ticket on the provider page ("✓ | Verified 24 Nov 2026 · 7
+  sources") and a flat pill in the explorer ("Verified · 24 Nov 2026 · 7 sources"). Both link to the page the entry was
+  checked on and show the quoted sentence on hover; "N sources" counts the distinct pages behind the entry. Due and
+  stale entries keep their own mark and a dashed border (#845).
+- New brand mark: the hub's own aura, in the header, the favicon, the app icons and `assets/logo-*.svg` (#845).
+- An Atom feed of provider changes at `/changes.atom`: one entry per ISO week,
+  built from the same projected weeks as `api/v1/changes.json`, with tag-URI
+  ids that never move and every date taken from the data. Every page, the home
+  page and `/changes/` included, advertises it with a
+  `<link rel="alternate" type="application/atom+xml">` next to the RSS feed.
+  `scripts/changes-feed.test.mjs` checks it against the essentials of RFC 4287.
+- `/changes/` opens with an answer-first summary of the latest week with a
+  change: how many providers changed, how many ongoing free tiers ended and how
+  many providers were added, then the changes provider by provider, with "not
+  stated" for an unknown value.
+- Every static comparison page (/compare/<a>-vs-<b>/) answers "<A> vs <B> free tier" right under its title, built only
+  from the data: what each side gives for free (published limits or the free-tier wording), when to pick which (only
+  where both records hold different values: ongoing tier or trial, higher limits in the same unit, card, phone,
+  commercial use, training on prompts, OpenAI compatibility), the flags side by side and the day each record was
+  verified. A field the dataset leaves null reads "not stated" and never decides the pick.
+- Every static comparison page has a four-question FAQ (which free tier, card and phone, commercial use, training on
+  prompts), each answer citing the days its sources were read, mirrored word for word as FAQPage JSON-LD.
 - Compare pages link the provider's official model catalogue under the free-model sample when one is recorded (#869, issue #705). Thanks @mananbharti.
 - Published releases can be mirrored to a Hugging Face dataset and to Kaggle (a new
   version per release) by `mirror-dataset.yml`, with a generated dataset card that links
@@ -188,6 +293,21 @@ non-text guardrail: 25 of 77 providers (32.5%) list no `text` modality.
   `data/gpu-compute.json`. DigitalOcean's docs state a free GPU plan for
   Notebooks, with six-hour sessions and one running notebook at a time on the
   free tier; credit amount, expiry and card requirement are not stated. Agent-assisted check (#706, issue #317).
+- Three long-form guides that each rank one structured field, in the "how to choose" section of the
+  [guides hub](https://freellmapihub.com/guides-and-collections/):
+  [Free LLM APIs with the highest rate limits](https://freellmapihub.com/guides/free-llm-api-highest-limits)
+  ranks the free text LLMs by their structured `free_limits`, one table per unit (requests per day, per minute and
+  per second, tokens per day, per month), never converting one unit into another, and lists every free text LLM
+  with no structured figure as "not stated" with its published limits in the provider's words;
+  [The strongest free LLM APIs, by Arena rating](https://freellmapihub.com/guides/strongest-free-llm-api) ranks the
+  free text LLMs with a rated free model by the public LMArena rating behind `model_tier` (rating, 95% interval,
+  votes, tier and snapshot date), names the unrated ones and says the rating measures preference, not capability;
+  [Free APIs for open models](https://freellmapihub.com/guides/free-open-source-llm-api) lists the providers whose
+  free-model sample names a Qwen, Gemma, DeepSeek, Llama, GPT-OSS or GLM model, with the exact IDs, using the
+  model-family pages' own rule and linking each family page. Each has a shortlist table, a FAQ whose `FAQPage`
+  JSON-LD is the visible text, a gotchas section and links to the provider pages, a collection, `/compare/`,
+  `/find/` and `/not-free/`. Every number, list and pick is computed from `data/providers.json` at build time
+  (`scripts/lib/long-guides.mjs`). Agent-assisted.
 - IndexNow: after each verified deploy, `pages.yml` sends the URLs whose
   sitemap entry is new or has a new `lastmod` to `api.indexnow.org`, which
   shares them with Bing, Yandex and the other participating engines. The list is
@@ -208,6 +328,26 @@ non-text guardrail: 25 of 77 providers (32.5%) list no `text` modality.
   so the pages follow the data. Each has a FAQ (`FAQPage` JSON-LD), its own social image, and is on the Guides &
   Collections hub, in the sitemap and in `llms.txt`; related collections and provider pages link to them.
   Agent-assisted (#808).
+- **MCP server 0.2.0 (`packages/mcp`, not published by this change): provider status and "Is it free?".** A
+  `get_provider_status` tool reads `/api/v1/status.json` for one provider or all of them (last verified, freshness
+  against the 60/90-day SLA, `free_now`, last change). `search_providers` and `get_provider` add a `freshness` field
+  when `status.json` is available and comes from the same build. An `is_free` tool answers "Is <provider> API free?"
+  with the provider page's own sentence, "not stated" for a null field, and the day each fact's source was read; a
+  test keeps its wording identical to the site's. New optional local override `--status` / `FLAH_STATUS`. No existing
+  tool name or output field changes.
+- One page per open model family at `/free-api/<family>/`, answering "Where can I use Qwen / Gemma / DeepSeek /
+  Llama / GPT-OSS / GLM for free via API?": the six families listed by the most verified providers in the
+  free-model samples when the pages were added (Qwen 14, Gemma 12, DeepSeek 10, Llama 8, GPT-OSS 8, GLM 8). Each
+  page opens with a one-sentence answer that gives the count, the ongoing/trial split and the first three providers
+  in the recommended order, then a table of the verified providers whose sample lists a model of the family: the
+  exact model IDs (linked to their model page when one exists), the free limits, card, phone, commercial use and the
+  last verification date, all from `data/providers.json`, with "Not stated" where a field is null. A short computed
+  shortlist (no card and no phone, commercial use allowed, ongoing tier, OpenAI-compatible) follows. An ID that names
+  two families belongs to the one it names first (`deepseek-r1-distill-qwen-32b` is DeepSeek). Pages carry a
+  canonical URL, a title and description, `WebPage` + `BreadcrumbList` JSON-LD and the model-sample caveat; they are
+  in the sitemap and `llms.txt` and linked from `/models/` while two or more verified providers list the family, and
+  carry `noindex` otherwise (`scripts/lib/model-families.mjs`). The Lighthouse gate now also measures
+  `/free-api/qwen/`. Agent-assisted (#922).
 - One page per model, `/models/<model>/`, for every model in the providers'
   free-model samples. Each is titled "Free API for" and the model name. The same model listed under
   different deployment names (`openai/gpt-oss-120b`, `gpt-oss-120b`,
@@ -234,9 +374,25 @@ non-text guardrail: 25 of 77 providers (32.5%) list no `text` modality.
   badge") (#787). Agent-assisted.
 - The same "Cite this dataset" block (BibTeX and APA from `CITATION.cff`) is also on
   `/api/` and `/quality/` (#868, issue #801). Thanks @playlikeboy.
+- Every provider page answers "Is <Provider> API free?" right under its name, in one or two sentences built only from
+  the data: ongoing free tier or one-time trial credit, the published limits (or the free-tier wording), credit card,
+  phone verification and commercial use, and the day the record was verified. A field the dataset leaves null reads
+  "not stated" (#927).
+- Every provider page ends with a six-question FAQ (is it free, limits, credit card, commercial use, training on
+  prompts, OpenAI-compatible base URL), each answer citing the day its source was read, mirrored as FAQPage JSON-LD (#927).
 - `/embed/` now offers the per-provider badge as HTML as well as Markdown, like
   the "Verified providers" badge. Both snippets follow the provider picker and
   `?p=<slug>`; the provider name is escaped in the HTML `alt` text (#849, issue #828). Thanks @bardrop.
+- Provider badge kit: every provider now has a small SVG badge served by the
+  site at `/badge/<slug>.svg` (and `/badge/<slug>-dark.svg`), in the Cálida
+  colours, that reads "Free tier" or "Trial credit" and the date of our last
+  verification, e.g. "Free tier · verified 24 Nov 2026". The text comes from
+  the dataset on every build. A generic "Listed on Free LLM API Hub" badge sits
+  at `/badge/listed.svg`. The new `/badges/` page gives copy-paste Markdown and
+  HTML per provider, linking to `/p/<slug>`, the rules (a badge reflects only
+  our verification and is not an endorsement) and how to request a correction.
+  Each provider page links to its badge below the FAQ. `/badges/` is in the
+  sitemap and llms.txt.
 - More published speeds (agent-assisted, official pages read 2026-11-24),
   each the provider's own claim for a model of its free sample: Groq
   `qwen/qwen3.8-27b` ~450 tok/s (preview model, the page writes "~450+");
@@ -294,6 +450,33 @@ non-text guardrail: 25 of 77 providers (32.5%) list no `text` modality.
   weeks marked. It is in the weekly worklist (issue #4) and on the
   [data coverage](https://freellmapihub.com/coverage/#freshness)
   page. Agent-assisted (#766).
+- **`/api/v1/status.json`: freshness per provider, keyed by slug.** A small
+  generated file for clients that poll the dataset, such as API routers: for
+  every provider, `last_verified`, the oldest day among its `field_checks`,
+  its state against the 60/90-day freshness SLA (`fresh`, `due`, `stale` or
+  `unverified`), whether its free access is in effect (`free_now`) and the
+  day of its newest field change. States are graded at `generated_at`, the
+  dataset day, and the thresholds are in the file, so a client can regrade.
+  Contract v1 with a JSON Schema at `/api/v1/status.schema.json`, listed in
+  `index.json`, on `/api/` and in `llms.txt`, and documented in
+  `docs/api.md`. Purely additive: no existing file changes shape (#918).
+- Five long-form guides organised by what you build, in a new "by what you're building" section of the
+  [guides hub](https://freellmapihub.com/guides-and-collections/):
+  [Free LLM APIs for coding assistants](https://freellmapihub.com/guides/free-llm-api-for-coding),
+  [Free APIs to build a RAG app](https://freellmapihub.com/guides/free-api-for-rag),
+  [Free LLM APIs for AI agents](https://freellmapihub.com/guides/free-llm-api-for-ai-agents),
+  [Free LLM APIs for a chatbot side project](https://freellmapihub.com/guides/free-chatbot-api) and
+  [Free AI APIs for students and learning](https://freellmapihub.com/guides/free-ai-api-for-students). Each has a
+  "pick a stack" table, a comparison table, a quickstart filled from the data where the repository has one (chat,
+  and for RAG an embeddings-plus-chat script with the picked providers' base URLs and free models), a FAQ whose
+  `FAQPage` JSON-LD is the visible text, and links to `/find/` with its answers preset in the hash, the provider
+  pages, the collections, `/compare/` and `/not-free/`. The coding guide shows the providers' published output
+  speeds and structured rate limits; the agents guide says plainly that the dataset does not record tool calling and
+  shows OpenAI compatibility, per-minute limits and commercial use instead; the chatbot guide checks every free text
+  LLM against the `/find/` wizard's own card, phone, commercial-use and training rules, with unconfirmed checks
+  shown as not confirmed; the students guide adds the no-account providers and the student programs from
+  `data/programs.json`. Every number, list and pick is computed from the data at build time
+  (`scripts/lib/long-guides.mjs`). Agent-assisted (#898).
 
 ### Changed and fixed
 
@@ -354,6 +537,13 @@ non-text guardrail: 25 of 77 providers (32.5%) list no `text` modality.
     `@cf/google/gemma-4-26b-a4b-it`, a free-access model on the pricing page,
     joins it. `model_tier` moves from 2 to 3 (LMArena snapshot 2026-10-02,
     gemma-4-26b-a4b, 1437.5).
+- `robots.txt`: `Google-Extended` may now crawl the HTML pages as well as the
+  data files. That token also decides whether Gemini may ground its answers on
+  these pages and cite them. Every other AI training crawler still gets the
+  data files only. The comments at the top of the file explain the policy, and
+  `scripts/robots.test.mjs` checks it (#901).
+- The header of `llms-full.txt` reads "Data of <date>", like the rest of the
+  site (#901).
 - AI Horde: `free_limits` records the published ordinary HTTP submit rate limits
   (2 requests/second and 90 requests/minute per IP on text, chat and image submit
   routes) from the official `Haidra-Org/AI-Horde` `service_limits.md` reference (#722, issue #557). Thanks @Abhishekkumar071.
@@ -366,6 +556,41 @@ non-text guardrail: 25 of 77 providers (32.5%) list no `text` modality.
   run without any further edits". Pollinations was checked and does not
   qualify: its docs require a secret key for generation requests and leave
   only model listing open (#737).
+- The home title and meta description start with "Free LLM APIs", then the dataset month and the counts, built from
+  the data: "Free LLM APIs (Nov 2026): 85 tiers & credits, 84 verified" and "… 43 ongoing free tiers + 42 trial
+  credits, 84 of 85 verified …". og:/twitter: copies repeat them. The verified count is no longer stated alone next to
+  a larger provider total, and `llms.txt` states it the same way ("84 of 85 verified").
+- The answer-first paragraph of every provider page has a stable anchor, `#is-it-free`.
+- A provider page's `dateModified` is the newest day one of its facts was read (`last_verified` or a later field
+  check, free-limits or data-policy reading), not only `last_verified`.
+- The tagline is the owner's choice, "We read the docs. You ship the code.", kept in one constant
+  (`scripts/lib/brand.mjs`) that the home title, the README, the home social image, the README banner and the GitHub
+  social preview all read (#847).
+- Social images in the Cálida palette: warm off-white cards with the hub's mark, the title in Roboto Flex and the
+  radial-bar auras. Provider cards show up to three published limits, their own aura and the perforated-ticket receipt
+  "Verified · N sources"; collections and guides show their first members' auras. They are rendered with bundled
+  fonts only, so every machine draws the same image (#847).
+- The README opens with a banner of every provider's aura (light and dark), and its static badges use the Cálida
+  colours. The site's own footer badge is now the perforated ticket (#847).
+- The home hero takes the owner's tagline, "We read the docs. You ship the code.", aligned left, with its two actions
+  (Find my free API, Browse all) and the field of every provider's aura beside it with the key to read it (hidden on
+  phones, so the explorer stays in the first viewport). The field is a picture, not links. The tagline's second sentence
+  "breathes" once on load when motion is welcome; the blinking cursor is gone (#846).
+- Provider pages put the aura and its reading beside the name, the perforated ticket above it, up to three published
+  limits as large numbers and the sentence quoted from the provider's page with where and when it was read. Right under
+  "What's free" come "Get a free key", a new "Copy base URL" button and a "Compare with…" link, then the quickstart; the
+  limits, the requirement cards (behind one summary line) and the score, now one line with a small bar, follow (#846).
+- On phones the explorer's sort takes its own row, so Requirements and the modality picker are no longer crushed (#846).
+- Generated pages keep a side gutter on phones: the hero's breadcrumb, title and lede no longer touch the screen edge (#846).
+- New look, part 1 of the "Fingerprint + Receipts" brand, in its warm "Cálida" palette: a warm off-white (or warm
+  near-black) ground instead of terminal green, a toasted-saffron accent, one warm colour per modality (text, vision,
+  image, speech, embeddings, rerank, OCR) and Roboto Flex with DM Mono for data. The site opens in the light theme
+  unless the system asks for dark; the toggle still remembers the visitor's choice. Every colour keeps WCAG AA contrast
+  in both themes (checked in CI), and a page's fonts stay under a 90 KB budget that the Lighthouse gate now enforces (#844).
+- `changes.xml` now reads the same projected weeks as `api/v1/changes.json`,
+  so RSS, Atom and the API list the same changes, and each item links to the
+  monthly report that holds the week instead of a `/changes/` anchor that no
+  longer exists.
 - Site: Cloudflare Web Analytics is now on for freellmapihub.com. Cloudflare
   injects its cookieless beacon at the edge, so the Content-Security-Policy of
   every page now allows `https://static.cloudflareinsights.com` (script) and
@@ -383,6 +608,10 @@ non-text guardrail: 25 of 77 providers (32.5%) list no `text` modality.
   The first-merge thanks comment now suggests two open, unassigned good first issues, of the other
   kind when it can (data or code and docs), and CodeRabbit asks less of first-time contributors:
   scoped test reviews and no automatic replies in its threads. Agent-assisted (#763).
+- On the compare pages (`/compare/<a>-vs-<b>/`) the links under a cell — "official catalogue ↗" under the
+  free-model sample and "#N in the top 10" under the score — are now underlined, so they no longer rely on
+  colour alone. Their colour differed from the text around them by 2.88:1 in the light theme and 1.6:1 in the
+  dark one, below the 3:1 that WCAG 1.4.1 asks for; axe reported it as `link-in-text-block` (#951).
 - `data_policy` recorded for five more providers from their own pages:
   Hugging Face (Inference Providers stores no user data for training and keeps
   no request bodies; debug logs up to 30 days), W&B Inference (CoreWeave does
@@ -412,6 +641,12 @@ non-text guardrail: 25 of 77 providers (32.5%) list no `text` modality.
   the build (#717).
 - The change history is easier to find: the home page links to /changes/ and
   advertises its RSS feed (`changes.xml`), and /changes/ has a Subscribe button (#717).
+- The embeddable widget (`/widget.js`, previewed on `/embed/`) uses the Cálida
+  dark palette. The rebrand had left the old crimson accent on the old green
+  panel, so the heading and the "see all" link read at 3.3:1 (WCAG AA asks for
+  4.5:1). Every text colour is now at least 7.7:1, and
+  `scripts/widget.test.mjs` ties the widget's colours to the dark tokens in
+  `site/styles.css` (#932).
 - The "Recommended" order opens with what most visitors look for: text LLMs with an ongoing free tier and no card
   (Z.ai, Typhoon, Google Gemini, AI Horde, Cloudflare Workers AI, Groq, ...), then the rest by the same flag score,
   with text LLMs before other modalities and the rated model tier as tie-breaks. Gemini moves from 9th to 3rd and
@@ -446,6 +681,12 @@ non-text guardrail: 25 of 77 providers (32.5%) list no `text` modality.
   them Modal and Alibaba Cloud Model Studio commercial use (not stated),
   Hugging Face phone (needs an account, issue #12) and SambaNova card (pages
   disagree) (#719).
+- Site: `/find/` no longer jumps when its script starts. The questions and the
+  live count used to appear only after `find.js` ran, pushing the rest of the
+  page down (layout shift 0.49 on a phone, performance 0.79 against the 0.80
+  budget, the only page under it). They are now in the page from the first
+  paint; without JavaScript the form is hidden by CSS and the no-script links
+  show as before (#874).
 - Google Gemini now records why no card is required for the Free Tier: new accounts begin on it, and a billing account is only set up to reach the Paid Tiers (billing docs, checked 2026-11-25) (#776, issue #758). Thanks @BloosomNet.
 - `data_policy` recorded for Gladia from its official data-retention documentation (checked 2026-11-25): Free accounts retain audio input, transcription output, API metadata and logs for 1 year by default (paid accounts keep audio and transcripts 3 weeks; only Enterprise offers custom or zero retention), while `trains_on_prompts` remains `null` because Gladia's Pricing/Security pages and Compliance Hub conflict on default training (#783, related to issue #744). Thanks @Abhishek882772.
 - The site serves Google Search Console's ownership file
@@ -461,6 +702,33 @@ non-text guardrail: 25 of 77 providers (32.5%) list no `text` modality.
   `changes.xml`, `api/v1/changes.json`, `api/v1/history.json`, the monthly reports and the provider pages'
   history repeated the same flips (`/p/groq` listed "Updated the catch" ten times on 2026-11-24; it now lists it
   once).
+- Home page density: the first desktop screen is back to a few clear choices. The hero
+  keeps one primary action, "Find my free API" (to `/find/`), and a quiet "Browse all ↓"
+  link to the table; the "Get started" and "Popular" rows and the hero's Star button are
+  gone (the GitHub link stays in the header), and the counters sit on one quiet line (#892).
+- The explorer has one control bar: a search box, a "Requirements (n)" dropdown that
+  groups the boolean filters (no card, no phone, commercial use, no training,
+  OpenAI-compatible, text LLMs only, verified only) and the type, the modality menu and
+  "Sort by". Active filters show under the bar as removable chips with ✕. The collections
+  are plain text links. The filter ids, URL parameters and GA4 events
+  (`explorer_filter`, `explorer_sort`, `site_search`) are unchanged (#892).
+- A visible "All providers" heading now sits above the table. This supersedes #850;
+  thanks to @alvaroalonsoparrondo-a11y for proposing it.
+- The table has four columns. The type (Ongoing / Trial) sits next to the provider name,
+  and the "Type" column with its flag icons and "The catch" are replaced by a short
+  "Needs / unknown" cell that says in words only what a provider requires and which of
+  the four production flags are unknown ("Card required", "Unknown: phone, training",
+  "Nothing required"). "Not stated" and the ✓ marks are gone from the table. Sorting
+  that column orders by fewest requirements. Rows are at most 72 px tall on a desktop
+  (they were 82 to 129 px). The server render and the browser repaint still run the same
+  function (`scripts/lib/rows.mjs`) (#892).
+- Phones: the cookie banner is a compact bar (about 106 px tall at 390 px wide, it was
+  319 px) with the same texts, the same three answers and the same consent behaviour;
+  the menu panel is opaque and starts with "Find my free API" (#892).
+- New `scripts/home-density.test.mjs` holds the budget: two controls in the hero, one
+  control bar, no "Not stated", rows of at most 72 px, the banner height, the GA4 hooks
+  and server/client row parity (measured in a real browser when Playwright is installed).
+  Agent-assisted (#892).
 - The home page no longer rebuilds the whole provider table when its script
   loads. It keeps the server-rendered rows and replaces only the cells your
   clock changes (how many days ago a provider was verified, an expired "NEW"
@@ -514,6 +782,13 @@ non-text guardrail: 25 of 77 providers (32.5%) list no `text` modality.
   maps to an exact Arena row. NLP Cloud, Contextual AI, Upstage and Novita stay `null`:
   no official page read ties their free credits to model IDs, or the docs
   were unreachable (#712, issue #455).
+- `/models/` no longer breaks words in the middle on a phone: under 560px each row is a card with its column names as
+  labels, and on wider screens words wrap only at spaces. The table keeps its column headers (with `scope`), a caption
+  and explicit table roles, inside a labelled scroll region you can reach with the keyboard.
+- `/models/` opens with an answer line built from the data ("161 models free across 40 providers; most widely
+  available: …"), links each model of an open family to its `/free-api/<family>/` page, shows the free type in words,
+  and its title and description lead with "Free AI models API".
+- ElevenLabs: provider page links the official model catalogue (`models_url`, https://elevenlabs.io/docs/overview/models, checked 2026-11-26; #867). Thanks @alvaroalonsoparrondo-a11y.
 - Provider pages link the official model catalogue (`models_url`) of 12 more
   providers, checked 2026-11-25 and 2026-11-26: OpenRouter
   (`https://openrouter.ai/models`; #773, issue #747), Voyage AI (its embeddings
@@ -543,12 +818,30 @@ non-text guardrail: 25 of 77 providers (32.5%) list no `text` modality.
   subscription; Pay-As-You-Go is a prepaid credit balance, and API calls are
   blocked at zero) (#843); issue #803. Thanks @AyhamJo7 (Replicate) and
   @alvaroalonsoparrondo-a11y (GitHub Models, Featherless AI).
+- Numeric `free_limits` for four more providers, each read on the provider's
+  own limits or pricing page on 2026-11-26 (agent-assisted):
+  - Google Gemini (`google-gemini`): 200 RPM and 10,000 RPD on the Free tier,
+    for Gemini Decision 1 on the Decisions API only. That is the one Free-tier
+    table the page publishes; it says other models' limits are shown in AI
+    Studio.
+  - Bytez (`bytez`): 10 requests per second on closed models on the Free plan.
+  - Photoroom (`photoroom`): 1,000 sandbox calls a month on the Image Editing
+    API.
+  - Azure Speech (`azure-speech`): 20 requests per minute for F0 real-time
+    text to speech, which the page words as "20 transactions per 60 seconds".
 - Groq and Cerebras: `field_checks` now record the sentence behind
   `openai_compatible: true`. Groq's OpenAI compatibility page says the API was
   designed to be mostly compatible with OpenAI's client libraries; Cerebras's
   says it is compatible with OpenAI client libraries for many common workflows.
   Both give the same base URL as `openai_base_url`. The flags and the base URLs
   are unchanged (#785, #797, issue #777). Thanks @AyhamJo7.
+- Issue forms and the contribution guide follow the maintainers' shared standard: the
+  maintainer "Prepared task" form (formerly "Program task") tells contributors to commit only the
+  files they edited and never regenerated files; a new "Proposal" form agrees the scope before
+  code; the issue chooser links the security policy; and `CONTRIBUTING.md` states a best-effort
+  reply goal of 3 business days, a cap of about 30 open good first issues and the new `tracker`
+  label, which the monthly issues now carry. A `.contributors.json` profile records these rules (#917).
+- On a 390px phone, the 30 compare pages, the coverage page and the Goose coding-tool page no longer scroll the whole page sideways: the compare and coverage tables scroll inside their own labelled region, as the other wide tables do, and a source listed by its full URL wraps (#902).
 - **Poolside, now `verified: false`:** Poolside Platform's own page says its
   hosted inference "will shut down on 31 October 2026" and points to
   self-hosting the open weights, while the docs still offer a free Platform
@@ -566,11 +859,12 @@ non-text guardrail: 25 of 77 providers (32.5%) list no `text` modality.
   Easy merges per person, the three difficulty levels, that a maintainer adds the level label at
   merge and only to pull requests that close a labelled issue, review times, the first-fork
   approval wait, and the AI policy and quote rules. The program's label names appear in one table,
-  to update when SWoC publishes them. A maintainer issue form, "Program task", writes tasks in the
+  to update when SWoC publishes them. A maintainer issue form, "Prepared task", writes tasks in the
   good first issue shape (context, task, how to check, done when, files, size) with level guidance.
   The `/take` bot reads its per-person limit from one `MAX_OPEN` setting, says the limit when it
   refuses and links the inactivity rules; `scripts/issue-assign.test.mjs` runs the workflow's shell
   against a local `gh` double and checks the limit matches `CONTRIBUTING.md`. Agent-assisted (#772).
+- The home page title is "Free LLM APIs (<month>): <N> verified free tiers & credits", under 60 characters (#927).
 - Provider pages put the quickstart snippet right after the free limits, before the speed figures, the data policy
   and the provider's own description: on `/p/groq` it moves from 4,540px to 2,349px down the page on a phone and
   from 2,769px to 1,431px on a desktop. Agent-assisted (#789).
@@ -589,6 +883,32 @@ non-text guardrail: 25 of 77 providers (32.5%) list no `text` modality.
   as a claim that neither says applies to the free tier. The unsourced
   "fastest" wording also leaves the /best/ picks of Groq and SambaNova and
   Cerebras's `best_for` (#728).
+- Receipts backfill for the four yes/no flags (`card_required`,
+  `phone_required`, `commercial_ok`, `openai_compatible`): every flag that
+  holds a value now has a `field_checks` entry, and all but eight carry the
+  provider's own sentence, registered in `data/quotes.json` with its page and
+  date. The eight are official pages that render only with JavaScript or
+  refuse non-browser clients; they stay `stated` without a quote. The 13
+  providers that had no `field_checks` now have them. Where no official
+  sentence supports a value, the flag is now unknown with its reason
+  (`source_silent`) instead of an unsupported answer: most `openai_compatible:
+  false` values, and several `card_required: false` and `phone_required: false`
+  values, including Groq's `card_required`. Corrections from the providers'
+  own pages: Alibaba Model Studio and Scaleway need a payment method
+  (`card_required: true`), Cerebras' free Developer credit is not for
+  production (`commercial_ok: false`), Gemini's unpaid quota may not serve
+  users in the EEA, Switzerland or the UK (`commercial_ok: "conditional"`),
+  and Mixedbread, Fish Audio, AI Horde, Runware and Modal now document an
+  OpenAI-compatible API (`openai_compatible: true`). Checked 2026-11-26 and
+  2026-11-27, agent-assisted.
+- `npm run validate` now enforces the receipts rule: a `card_required`,
+  `phone_required`, `commercial_ok` or `openai_compatible` value (true, false
+  or `"conditional"`) needs a `stated` `field_checks` entry with the
+  provider's own sentence, registered in `data/quotes.json`. Otherwise the
+  flag must be `null` with its reason. Eight official pages that
+  `quotes:add` cannot read are listed in a time-boxed allowlist (until
+  2026-12-31) in `scripts/lib/field-checks.mjs`. An entry fails once its day
+  has passed or once it is no longer needed. See `docs/quotes.md`.
 - Regeneration bot cut-over, ready for `REGEN_MODE=push` and inert until then:
   in push mode a data pull request no longer regenerates or commits derived
   files. The required "Dataset integrity" check regenerates before its checks
@@ -606,15 +926,14 @@ non-text guardrail: 25 of 77 providers (32.5%) list no `text` modality.
   the diff while no App is configured. Pull requests still ship their
   regenerated files until the switch to direct push; see
   `docs/regeneration-bot.md` (#715).
-- Maintenance: a pull-request preview for the regeneration bot,
-  `regenerate-preview.yml`. It rebuilds the derived files on each pull
-  request that touches data, scripts, docs or derived files, lists what a
-  fresh build changes in the run summary, uploads the patch as the
-  `regen-preview-patch` artifact, and reports what the drift gate planned
-  for the switch to direct push would decide. It needs no GitHub App or
-  secret, has a read-only token, never fails on drift, and is not a
-  required check; the blocking gate in `verify.yml` is unchanged. See
-  `docs/regeneration-bot.md` (#742).
+- Maintenance: the derived files of a pull request, as a patch. When a
+  pull request's derived files differ from a fresh build, the "Dataset
+  integrity" check lists them in its run summary and uploads them as the
+  `regen-preview-patch` artifact, so they can be applied with
+  `git apply --binary` without a local build. It started as a separate
+  `regenerate-preview.yml` workflow while the regeneration bot was in
+  shadow mode (#742), and now runs inside `verify.yml` instead of a
+  second full build of every pull request. See `docs/regeneration-bot.md`.
 - **Nothing changes for API and dataset consumers:** `generated` in
   `/api/v1/*`, the site's `providers.json`, the CSV column
   `dataset_generated`, `llms.txt` and the sitemap still means the date of
@@ -718,6 +1037,63 @@ non-text guardrail: 25 of 77 providers (32.5%) list no `text` modality.
   SambaCloud models are Preview models, for evaluation and developer
   experimentation only). Its card requirement still has two official pages that
   disagree. The free limits, models and notes are unchanged (#726).
+- Re-verified Deepgram, AssemblyAI and Jina AI (agent-assisted, official pages
+  only, read 2026-11-27): `last_verified` moves to 2026-11-27, and their
+  data-policy sentences were re-read.
+- Deepgram: the no-expiry passage now quotes the current pricing FAQ; the no-card
+  and commercial-use flags carry the providers' sentences; `phone_required` is
+  `null` (`source_silent`).
+- AssemblyAI: the free tier adds the pricing FAQ's 185 hours of pre-recorded or
+  333 hours of streaming transcription; the no-card and commercial-use flags carry
+  the providers' sentences; `phone_required` is `null` (`source_silent`).
+- Jina AI: `commercial_ok` is now `conditional`: the hosted API is covered by the
+  service terms, but jina-embeddings-v4 has no commercial option, through the API
+  either. `card_required` and `phone_required` are `null` (`source_silent`).
+- Re-verified the next ten oldest verifications (agent-assisted, official pages
+  only, read 2026-11-26): Upstage, Fireworks AI, Smallest.ai, Veryfi, Voyage AI,
+  NVIDIA NIM, W&B Inference, AI21 Labs and Novita AI move `last_verified` to
+  2026-11-26. Poolside was re-checked but stays unverified (#939).
+- Veryfi: numeric `free_limits` added (100 requests a month: the pricing FAQ
+  counts one API request per document); the no-card and commercial-use flags now
+  carry the providers' sentences (#939).
+- Upstage: the FAQ no longer mentions sign-up free credits, so the free tier now
+  says what the pages state (keyless testing from the docs and Playground, 10
+  free runs per Studio agent) and records it as anonymous access;
+  `commercial_ok` is `null` (`source_silent`) (#939).
+- Voyage AI: the pricing page now agrees that rerank-3 and rerank-3-lite get
+  200M free tokens and no longer lists voyage-code-2; `card_required` is `null`
+  (`source_silent`) (#939).
+- W&B Inference: `card_required` and `commercial_ok` are `null`
+  (`source_silent`); the pricing page describes the Free plan as for personal
+  development (#939).
+- Poolside: `card_required` is `null` (`source_silent`); the Platform page no
+  longer renders without scripts, so the October 31 shutdown notice could not be
+  re-read (#939).
+- Fireworks AI, AI21 Labs, Smallest.ai and Novita AI: card and commercial-use
+  flags now carry the providers' sentences (#939).
+- Re-verified the eight oldest verifications (agent-assisted, official pages
+  only, read 2026-11-26): Z.ai, OCR.space, Typhoon, Rime, Rev AI, Vercel AI
+  Gateway, Sarvam AI and Photoroom move `last_verified` to 2026-11-26 (#925).
+- Vercel AI Gateway: the free tier is now stated as a $5/month credit, and the
+  getting-started page says free credits need a valid payment method on the
+  team, so `card_required` is `true` (#925).
+- Photoroom: `card_required` is `null` (`sources_disagree`): the API pricing
+  FAQ says no card is needed, the terms say a Free Account must provide a
+  payment method (#925).
+- Typhoon: the API models page now lists four models (adds
+  typhoon-v2.1-12b-instruct, drops five ids it no longer lists), and its
+  rate-limit table adds typhoon-v2.1-12b-instruct. `commercial_ok`,
+  `card_required` and `phone_required` are `null` (`source_silent`) (#925).
+- Z.ai: `card_required` and `phone_required` are `null` (`source_silent`);
+  `commercial_ok` keeps `true` with the terms' sentence recorded (#925).
+- Rev AI: `card_required` is `null` (`source_silent`); a data policy is
+  recorded (the terms allow training on speech-to-text Customer Content); the
+  key page is linked (#925).
+- OCR.space: card, phone and commercial-use flags now carry the providers'
+  sentences, and a data policy is recorded (uploads deleted after processing) (#925).
+- Sarvam AI: `commercial_ok` is now backed by the commercial licensing page;
+  the unsupported "commercial production rights for Output" wording is replaced (#925).
+- Rime and Photoroom: the API key pages are linked (#925).
 - `robots.txt` now holds the whole crawler policy, reviewed in pull requests,
   instead of a block managed in Cloudflare.
   - Search engines and AI search or user agents may crawl every page: Googlebot,
@@ -741,6 +1117,18 @@ non-text guardrail: 25 of 77 providers (32.5%) list no `text` modality.
   still rejects a misspelt or undeclared field in the dataset. Clients holding
   an older copy of the schema should refresh it (`docs/api.md`).
   Agent-assisted (#760).
+- Site: the Content-Security-Policy of every page is tighter. It adds
+  `script-src-attr 'none'`, `font-src 'self'`, `manifest-src 'self'`,
+  `worker-src 'none'`, `form-action 'self'` and `upgrade-insecure-requests`,
+  and the two inline-script hashes are now computed by the build from the
+  scripts it writes instead of being typed in by hand. Redirect stubs get
+  `default-src 'none'`. A new test (`scripts/csp.test.mjs`) pins the exact
+  policy, checks every inline script is hashed, and rejects inline event
+  handlers, mixed content, unpinned third-party subresources and
+  `target="_blank"` links without `rel=noopener`.
+- Site: with Google Analytics on, the `_ga` and `_gcl` cookies gtag writes
+  after consent are now `Secure; SameSite=Lax` (`cookie_flags` in the gtag
+  config); gtag's default set neither.
 - The embeddable widget renders with its styles again: the quoted `Segoe UI` font name
   closed the inline `style` attribute early, so the box lost its colours and border (#891).
 - `/changes/`: the "no revision" months use the table's text font instead of the
@@ -767,8 +1155,25 @@ non-text guardrail: 25 of 77 providers (32.5%) list no `text` modality.
   the batch does not depend on file order. This staggers the 45 entries
   verified on 2026-11-19 and 2026-11-20, which would otherwise all become due
   in the week of 2027-01-18 and overdue in mid-February. Agent-assisted (#766).
+- Structured data: fixed the errors and warnings Google's Rich Results Test
+  reported. Every `Dataset` node (on provider pages, `/not-free/`, `/api/`,
+  `/quality/`, `/embed/` and the long guides) now carries a `description` (one
+  sentence from the data: what is free, the verified-provider count and the
+  data date) and the dataset's MIT `license`. Guide `Article`s name the
+  maintainer as `author`, Tweakeo as `publisher`, the guide's OG image as
+  `image`, and a `datePublished`. Every `datePublished` and `dateModified` is
+  now a full ISO 8601 datetime with a timezone (`2026-11-24T00:00:00Z`). The
+  home `Dataset` no longer has an `isPartOf` pointing at the `WebSite`, and
+  provider pages are now `isPartOf` the `WebSite` and `about` the `Dataset`.
+  `scripts/structured-data.test.mjs` walks every built page's JSON-LD and
+  checks these rules (#904).
 - The explorer and the provider pages show card, phone, commercial use and training on prompts through one flag, in that order, drawn with a shape as well as a colour: ✓ when it holds, ✕ when it does not, ~ when commercial use is conditional and a dashed ? when the provider's docs do not confirm it. Screen readers hear the whole answer, for example "Card required: unknown — not stated in the provider's docs" (#813). Agent-assisted.
 - The modality filter of the explorer drops the emoji from its options, which screen readers announced ("speech balloon, Text / LLM"), and shows a small dot in the colour of the selected modality instead (#813, issue #792). Agent-assisted.
+- Trial credits re-checked against each provider's own pages for all 42 trial providers (2026-11-27); no trial has ended.
+- Speechmatics: the $100 sign-up credit now lasts 12 months (`expires` was unset); the pricing FAQ says "Sign-up bonus, credit-pack credits and annual subscription credits last 12 months."
+- Mixedbread: when the $5 Starter credit is used up, the pricing page says to upgrade to the Scale plan ($20/month); the standalone embedding and reranking APIs are no longer in the current docs, so the free tier now describes the managed search stores.
+- AssemblyAI: the notes now say the $50 credit does not expire and quote the billing FAQ's current wording.
+- Voicegain: the free tier now says the console signup page gives $50 with a business email and $5 otherwise.
 - `field_checks` recorded for fourteen more providers whose official pages
   were read on 2026-11-25 (UTC) and do not settle the flag (`source_silent`):
   `phone_required` for Speechmatics, Unreal Speech, Gladia, Rime, Cartesia,
@@ -847,4 +1252,3 @@ non-text guardrail: 25 of 77 providers (32.5%) list no `text` modality.
   check. The report job checks nothing out and can only write issues; pull
   requests never reach it. This is the alert the roadmap asks for before the
   strict up-to-date rule can be relaxed (#749).
-
