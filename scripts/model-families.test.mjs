@@ -79,7 +79,8 @@ test('the table shows data only: limits, flags, date; a null reads "Not stated"'
   assert.match(cells[3], /^Not stated<br><span class="notes">needs an account to check<\/span>$/, 'card, with its recorded reason');
   assert.equal(cells[4], 'Not stated', 'phone');
   assert.equal(cells[5], 'Not stated', 'commercial use');
-  assert.equal(cells[6], 'Not stated', 'last verified');
+  // The date, then the row's "Report a mistake" link (lib/report-mistake.mjs; without a repo it points to /contributing/).
+  assert.equal(cells[6], 'Not stated<br><small><a class="report-link" href="../../contributing/" aria-label="Report a mistake about Beta &lt;b&gt;">Report a mistake</a></small>', 'last verified');
   assert.match(html, /<time datetime="2026-11-01">1 Nov 2026<\/time>/);
   assert.doesNotMatch(html, /available on|free forever|best|fastest/i);
   const cond = page(familyGroup(fam('qwen'), [gamma]));

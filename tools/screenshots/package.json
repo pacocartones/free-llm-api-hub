@@ -1,0 +1,9 @@
+{
+  "name": "flah-screenshots",
+  "private": true,
+  "description": "Dev-only screenshot runner for gallery images and PR screenshots. Kept apart from the root package.json so the dataset pipeline installs nothing heavy. Uses the same puppeteer-core version Lighthouse already locks in tools/lighthouse, driving the system Chrome (CHROME_PATH); no browser is downloaded.",
+  "type": "module",
+  "devDependencies": {
+    "puppeteer-core": "25.17.0"
+  }
+}

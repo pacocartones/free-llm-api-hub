@@ -123,7 +123,7 @@ function ownKeyHtml(ownKey, prefix) {
     `See also: <a href="${prefix}collections/openai-compatible">OpenAI-compatible free APIs</a>; <a href="${prefix}#explorer">the interactive explorer</a>. ` +
     'The same rule holds: a value is written only where the tool\'s own page says it, and <strong>Not stated</strong> is never <em>no</em>.</p>' +
     `<p class="muted">${c.tools} tools listed; ${c.stated} of ${c.total} values rest on a sentence from the tool's own page.</p>` +
-    claimsTableHtml({ id: 'own', entries: ownKey.entries, labels: LABELS, kindLabel: (k) => KIND_LABEL[k] || k, subject: 'tool' }) +
+    claimsTableHtml({ id: 'own', entries: ownKey.entries, labels: LABELS, kindLabel: (k) => KIND_LABEL[k] || k, subject: 'tool', label: 'Comparison of the tools you connect your own key to' }) +
     entriesHtml(ownKey, prefix) + notesHtml(ownKey);
 }
 
