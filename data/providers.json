@@ -1326,7 +1326,7 @@
       "free_type": "renewing-quota",
       "free_tier": "App Free plan: 8,000 credits/month (~7 min, up to 500 characters per generation). API: the s2.1-pro-free TTS model is priced at $0 (pay-as-you-go API, no subscription); the docs no longer state an end date or fair-use limits",
       "rate_limits": "API: 5 concurrent requests (Starter tier, <$100 paid). App Free plan: 500 characters per generation, 8,000 credits/month",
-      "notes": "Free app plan is personal, non-commercial only (commercial use requires Premium). The $0 API model s2.1-pro-free is pitched for testing, prototyping and smaller businesses but has no TTFA/DPA guarantees. No credit card required for the Free plan. On 2026-11-27 the pricing docs listed s2.1-pro-free at $0.00 per million UTF-8 bytes and stated no end date or fair-use limits.",
+      "notes": "Free app plan is personal, non-commercial only (commercial use requires Premium). The $0 API model s2.1-pro-free is described as built for experimentation and prototyping, with no SLA, uptime or TTFA guarantees; requests may be used to improve model quality, and products with more than $1M ARR should contact Fish Audio first. No credit card required for the Free plan. On 2026-11-27 the pricing docs listed s2.1-pro-free at $0.00 per million UTF-8 bytes and stated no end date or fair-use limits.",
       "best_for": "Free multilingual TTS with voice cloning for personal projects",
       "modalities": ["audio"],
       "models_free": null,

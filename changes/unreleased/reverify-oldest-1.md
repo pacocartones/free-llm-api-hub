@@ -12,6 +12,10 @@
 - Contextual AI: the billing guide cited for `card_required` now answers 404,
   so the check cites the pricing page and FAQ. The card requirement is still
   not stated.
+- Fish Audio: the note on the free API model s2.1-pro-free now follows its
+  launch post. It is built for experimentation and prototyping, with no SLA,
+  uptime or TTFA guarantees, and requests may be used to improve model quality.
+  The post does not support the earlier "smaller businesses" and "DPA" wording.
 - Scaleway: the data policy was re-read (`data_policy.checked` 2026-11-27), and
   the flag checks now list only the pages read for them.
 - NLP Cloud was re-checked but could not be read: nlpcloud.com answers HTTP 403
