@@ -2830,6 +2830,89 @@
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "b7c466b38d6c7a7d348263af202d683e3e8739abd2421670c2a680c036c2e1f3"
+  },
+  {
+   "id": "lightning-ai.card_required.sentence",
+   "slug": "lightning-ai",
+   "kind": "field_sentence",
+   "field": "card_required",
+   "text": "Start free. No credit card. Instant on-demand GPUs.",
+   "source_url": "https://lightning.ai/pricing",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "a5259f23ee5e9d918d9296a5d578c3bf2faba249f1495e83f27859d34a7d424d"
+  },
+  {
+   "id": "lightning-ai.openai_compatible.sentence",
+   "slug": "lightning-ai",
+   "kind": "field_sentence",
+   "field": "openai_compatible",
+   "text": "First, install litAI (or use the OpenAI Python SDK if you prefer).",
+   "source_url": "https://lightning.ai/docs/platform/inference/model-apis",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "c55a485f5d76617a31bbb2d0ccc4d62b2a1f2acd57facb5089f38d638766b58e"
+  },
+  {
+   "id": "azure-document-intelligence.card_required.sentence",
+   "slug": "azure-document-intelligence",
+   "kind": "field_sentence",
+   "field": "card_required",
+   "text": "All you need is a phone number, a credit card or a debit card (non-prepaid), and a Microsoft account or a GitHub account.",
+   "source_url": "https://azure.microsoft.com/en-us/pricing/purchase-options/azure-account",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "18081b994b77116902dea18ed3d9717fa1462c11631e878e033cba0df78e7f59"
+  },
+  {
+   "id": "azure-document-intelligence.phone_required.sentence",
+   "slug": "azure-document-intelligence",
+   "kind": "field_sentence",
+   "field": "phone_required",
+   "text": "All you need is a phone number, a credit card or a debit card (non-prepaid), and a Microsoft account or a GitHub account.",
+   "source_url": "https://azure.microsoft.com/en-us/pricing/purchase-options/azure-account",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "836accd1dc3dc5888f7da3cd4defc79a4687dfa98990499df7e1accf4d979149"
+  },
+  {
+   "id": "nscale.sentence",
+   "slug": "nscale",
+   "kind": "sentence",
+   "text": "The Nscale Serverless Inference platform does not log or train on request or response content, ensuring the privacy and security of your data.",
+   "source_url": "https://www.nscale.com/blog/introducing-nscale-serverless-inference-scalable-ai-without-infrastructure-hassles",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "ac845708e00735faade9e2d64afa3e5e3ce95e1f66d9f66601b26c714bdfeb20"
+  },
+  {
+   "id": "nscale.card_required.sentence",
+   "slug": "nscale",
+   "kind": "field_sentence",
+   "field": "card_required",
+   "text": "When you’re ready to scale, simply add a payment card to purchase additional credit.",
+   "source_url": "https://www.nscale.com/blog/introducing-nscale-serverless-inference-scalable-ai-without-infrastructure-hassles",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "ac845708e00735faade9e2d64afa3e5e3ce95e1f66d9f66601b26c714bdfeb20"
+  },
+  {
+   "id": "nscale.openai_compatible.sentence",
+   "slug": "nscale",
+   "kind": "field_sentence",
+   "field": "openai_compatible",
+   "text": "Begin making inference requests via the OpenAI-compatible API",
+   "source_url": "https://www.nscale.com/blog/introducing-nscale-serverless-inference-scalable-ai-without-infrastructure-hassles",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "ac845708e00735faade9e2d64afa3e5e3ce95e1f66d9f66601b26c714bdfeb20"
   }
  ]
 }

@@ -767,7 +767,11 @@ pre code { color: var(--text); }
 .model-table { width: 100%; border-collapse: collapse; font-size: .9rem; }
 .model-table th, .model-table td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
 .model-table thead th { position: sticky; top: var(--header-h); background: var(--bg); font-family: var(--font-mono); font-size: .88rem; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; color: var(--text); z-index: 1; padding-top: 12px; padding-bottom: 12px; }
-.model-table td.name code { color: var(--accent); word-break: break-all; }
+.model-table .name code { color: var(--accent); word-break: break-all; }
+.model-table td.model-mods { color: var(--muted); font-size: .85rem; }
+.model-scroll { margin-top: 20px; }
+.model-table th.name { font-weight: 400; text-transform: none; letter-spacing: 0; }
+.model-table .model-fam { display: block; margin-top: 3px; font-size: .8rem; color: var(--muted); text-decoration: underline; text-underline-offset: 2px; }
 .model-table tbody tr:hover { background: var(--panel); }
 .faq-item { margin: 14px 0; }
 .faq-item h3 { margin: 0 0 4px; font-size: 1rem; }
@@ -983,10 +987,21 @@ p.muted a, .prose p a, .prov-summary p a { text-decoration: underline; text-unde
   #table td { padding-left: 6px; padding-right: 6px; }
 
 }
-.model-table th, .model-table td { overflow-wrap: anywhere; }
-@media (max-width: 480px) {
-  .model-table th, .model-table td { padding-left: 6px; padding-right: 6px; }
-  .model-table thead th { white-space: normal; letter-spacing: 0; font-size: .75rem; }
+/* /models/: words wrap only at spaces (a single word longer than its cell still breaks, as overflow-wrap: break-word
+   does); "anywhere" let the table squeeze "Free type" and "Modalities" until words broke in the middle at 375px. */
+.model-table th, .model-table td { overflow-wrap: break-word; }
+/* Wide screens: the table fits its column, so the region does not clip and the column headers stay sticky. */
+@media (min-width: 561px) { .model-scroll { overflow: visible; } }
+/* Phones: one card per row, as the home explorer. The column headers leave the screen but stay in the accessibility
+   tree (explicit table roles in lib/model-index.mjs); each cell shows its column name from data-label, visual only. */
+@media (max-width: 560px) {
+  .model-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .model-table, .model-table tbody, .model-table tr, .model-table th.name, .model-table td { display: block; width: 100%; }
+  .model-table tr { border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 10px; padding: 4px 0 8px; background: var(--panel); }
+  .model-table tbody tr:hover { background: var(--panel); }
+  .model-table th.name { padding: 10px 14px 8px; border-bottom: 1px solid var(--border); margin-bottom: 4px; }
+  .model-table td { border: 0; padding: 4px 14px; display: flex; gap: 12px; align-items: baseline; min-width: 0; }
+  .model-table td::before { content: attr(data-label); content: attr(data-label) / ""; flex: 0 0 34%; color: var(--faint); font-weight: 600; font-size: .7rem; text-transform: uppercase; letter-spacing: .04em; font-family: var(--font-mono); }
 }
 
 /* The home counters are one line of text rendered by the build (explorer.js only repaints it when the visitor's day
