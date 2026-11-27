@@ -1,7 +1,7 @@
 // home-seo.mjs — the home page's title and description and the counts line of llms.txt, from the data.
 //
 // "free llm api" is the site's top search query (Search Console, Nov 2026: 639 impressions, 1.3% CTR), so the title
-// and the description both start with it, then give the dataset month and the counts. The counts are stated one way
+// and the description both start with it (the title as "Free LLM API list", the phrase AI assistants are asked for), then give the dataset month and the counts. The counts are stated one way
 // everywhere: N providers, "V of N verified" (or "all N verified"). A bare "84 verified" in a title, next to 85
 // providers on the page, read as a contradiction. The build fills every value; nothing here is typed by hand.
 
@@ -22,13 +22,16 @@ export const verifiedPhrase = ({ total, verified }) => (verified === total ? `al
 export const HOME_TITLE_MAX = 59;
 
 /**
- * "Free LLM APIs (Nov 2026): 85 tiers & credits, 84 verified". Both counts, so the verified figure never stands alone
- * next to a larger total. With counts too long for the budget, the shorter "Free LLM APIs (Nov 2026): 84 of 85 verified".
+ * "Free LLM API list (Nov 2026): 85 tiers & credits, 84 verified". The title holds the literal phrase "free LLM API
+ * list", the query assistants and searchers type (AEO baseline, 27 Nov 2026), then the dataset month and both counts,
+ * so the verified figure never stands alone next to a larger total. With counts too long for the budget, the shorter
+ * "Free LLM API list (Nov 2026): 84 of 85 verified".
  */
+export const HOME_TITLE_PHRASE = 'Free LLM API list';
 export function homeTitle(counts, month) {
   const verified = counts.verified === counts.total ? 'all verified' : `${counts.verified} verified`;
-  const full = `Free LLM APIs (${month}): ${counts.total} tiers & credits, ${verified}`;
-  return full.length <= HOME_TITLE_MAX ? full : `Free LLM APIs (${month}): ${verifiedPhrase(counts)}`;
+  const full = `${HOME_TITLE_PHRASE} (${month}): ${counts.total} tiers & credits, ${verified}`;
+  return full.length <= HOME_TITLE_MAX ? full : `${HOME_TITLE_PHRASE} (${month}): ${verifiedPhrase(counts)}`;
 }
 
 /** The meta description (also og:description and twitter:description): the query, the month, the split, the proof.

@@ -8,11 +8,12 @@
 // Pure: each renderer takes the dataset and returns the page parts ({ answer, body, faq, count, featured }); build.mjs
 // adds the page shell, JSON-LD, sitemap entry and hub card. scripts/long-guides.test.mjs pins the lists to the data.
 
-import { timeHtml } from './dates.mjs';
+import { timeHtml, shortMonthLabel } from './dates.mjs';
+import { newestProviderDate } from './release-stamp.mjs';
 import { recScore, recommendedCmp, SLA_DAYS, DUE_SOON_DAYS } from './rules.mjs';
 import { pythonEmbeddingsQuickstart, pythonStringLiteral, pythonChatQuickstart, curlChatQuickstart } from './quickstart.mjs';
 import { fieldCheck, REASON_LABEL, REASON_WHY } from './field-checks.mjs';
-import { NOT_STATED, capFirst } from './not-stated.mjs';
+import { NOT_STATED, NOT_STATED_HTML, capFirst } from './not-stated.mjs';
 import { CONSTRAINTS, constraintState, toHash, explorerHref } from './find.mjs';
 import { plural } from './text.mjs';
 import { escapeAttr, escapeText } from './html.mjs';
@@ -24,7 +25,7 @@ import { MODEL_SAMPLE_CAVEAT } from './model-pages.mjs';
 export const NOT_FREE_HREF = 'not-free/';
 
 // Card and listing copy. `title` is the draft's own and `metaDesc` the draft's, trimmed to the site's 155-character
-// snippet limit; any count is filled from the data ({n}).
+// snippet limit; any count is filled from the data ({n}), and the dataset month ({month}, "Nov 2026") in title and h1.
 export const LONG_GUIDES = [
   {
     slug: 'openai-api-alternatives',
@@ -157,9 +158,10 @@ export const LONG_GUIDES = [
   // Rankings and model families: each orders one structured field, so they sit with the "how to choose" guides.
   {
     slug: 'free-llm-api-highest-limits',
-    title: 'Free LLM API With the Highest Rate Limits ({n} With Published Numbers)',
+    // The question as it is asked, the dataset month and the count (AEO baseline, 27 Nov 2026): {month} and {n} are filled.
+    title: 'Free LLM API with the highest limits ({month}): {n} tiers ranked',
     metaDesc: 'Free LLM APIs ranked by published free limits: requests per day, per minute, tokens. {n} publish numbers; the rest are marked not stated. Checked at source.',
-    h1: 'Free LLM APIs with the highest rate limits',
+    h1: 'Free LLM API with the highest limits ({month}): {n} tiers ranked',
     card: 'Highest rate limits',
     blurb: 'Ranked by published requests and tokens, unit by unit.',
     ogTitle: 'Free LLM APIs: highest limits',
@@ -1649,6 +1651,17 @@ export function limitSets(providers) {
     metrics: LIMIT_METRICS.filter((m) => ranked[m.key].length),
   };
 }
+// The daily ranking at the top of the guide: every tier with a structured figure, by published requests per day, then
+// tokens per day (most first); a tier without a daily figure follows, its cell "not stated". Only `free_limits` numbers.
+const dailyKey = (x) => [limitOf(x, 'requests_per_day'), limitOf(x, 'tokens_per_day')];
+export function dailyRanking(numbered) {
+  const desc = (a, b) => (a == null ? (b == null ? 0 : 1) : b == null ? -1 : b - a);
+  return [...numbered].sort((a, b) => {
+    const [ra, ta] = dailyKey(a);
+    const [rb, tb] = dailyKey(b);
+    return desc(ra, rb) || desc(ta, tb) || byScore(a, b);
+  });
+}
 const allLimitsWords = (x) => LIMIT_METRICS.filter((m) => limitOf(x, m.key) != null).map((m) => `${num(limitOf(x, m.key))} ${m.label}`);
 const limitCheckedCell = (x) => {
   const d = x.free_limits && /^\d{4}-\d{2}-\d{2}$/.test(x.free_limits.checked || '') ? x.free_limits.checked : x.last_verified;
@@ -1678,7 +1691,14 @@ function highestLimitsGuide({ providers, prefix }) {
       `${L(x)}<br><small>${typeLine(x)}</small>`, `<strong>${num(limitOf(x, m.key))}</strong>`, `<span class="notes">${scopeOf(x)}</span>`,
       `Card: ${escapeAttr(flagWords(x, 'card_required'))}<br>Phone: ${escapeAttr(flagWords(x, 'phone_required'))}`, commercialWords(x), limitCheckedCell(x),
     ]));
+  const daily = dailyRanking(S.numbered);
+  const dailyCell = (x, key) => (limitOf(x, key) != null ? `<strong>${num(limitOf(x, key))}</strong>` : NOT_STATED_HTML);
+  const dailyTable = tableHtml('Free LLM API tiers ranked by published daily requests and tokens', ['Provider', 'Rank', 'Requests per day', 'Tokens per day', 'Scope, in the provider’s words', 'Checked'],
+    daily.map((x, i) => [`${L(x)}<br><small>${typeLine(x)}</small>`, String(i + 1), dailyCell(x, 'requests_per_day'), dailyCell(x, 'tokens_per_day'), `<span class="notes">${scopeOf(x)}</span>`, limitCheckedCell(x)]));
   const body =
+    h2(`All ${daily.length} tiers ranked by daily limits`, 'daily-ranking') +
+    p(`The ${daily.length} free text LLMs with a structured free limit, sorted by the requests per day the provider publishes, then by tokens per day. A tier that publishes no daily figure comes last and its cell says ${NOT_STATED}: it may still publish a per-minute or monthly figure, ranked in the tables further down. Every number is the provider’s own, read on the date shown.`) +
+    dailyTable +
     h2('Who this guide is for', 'who-its-for') +
     p('Developers who need volume from a free tier: a batch job, an evaluation run, a demo that many people try at once, or an agent that makes many calls per task. The headline of a free tier rarely says how much you can send; the structured limits below do, where the provider publishes them.') +
     p(`Several constraints at once? <a href="${findHref(prefix, { use: 'chat' })}">Find my free API</a> ranks every free text LLM against your answers.`) +
@@ -1941,10 +1961,13 @@ const RENDER = {
 /** The page parts of one long guide: { count, answer, body, faq, featured, title, metaDesc }. `programs`
  * (data/programs.json) and `codingToolsOwnKey` (data/coding-tools-own-key.json) are optional: without them the
  * students and coding guides leave their lists out. */
-export function longGuidePage(guide, { providers, notFree, prefix = '../', programs = null, codingToolsOwnKey = null }) {
+export function longGuidePage(guide, { providers, notFree, prefix = '../', programs = null, codingToolsOwnKey = null, month = null }) {
   const render = RENDER[guide.slug];
   if (!render) throw new Error(`long-guides: no renderer for ${guide.slug}`);
   const out = render({ providers, notFree, prefix, programs, codingToolsOwnKey });
-  const fill = (t) => t.replaceAll('{n}', String(out.count));
-  return { ...out, title: fill(guide.title), metaDesc: fill(guide.metaDesc) };
+  // The build passes the dataset month (TITLE_MONTH); without it, the month of the newest provider date.
+  const newest = newestProviderDate({ providers });
+  const m = month || (newest ? shortMonthLabel(newest.slice(0, 7)) : '');
+  const fill = (t) => t.replaceAll('{n}', String(out.count)).replaceAll('{month}', m);
+  return { ...out, title: fill(guide.title), metaDesc: fill(guide.metaDesc), h1: fill(guide.h1) };
 }

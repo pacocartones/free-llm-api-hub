@@ -18,6 +18,8 @@ import {
   LIMIT_METRICS, limitSets, strongestSets,
 } from './lib/long-guides.mjs';
 import { familyGroups } from './lib/model-families.mjs';
+import { shortMonthLabel } from './lib/dates.mjs';
+import { datasetAsOf } from './lib/release-stamp.mjs';
 import { parseHash, constraintState } from './lib/find.mjs';
 import { recommendedCmp } from './lib/rules.mjs';
 
@@ -44,6 +46,8 @@ const withoutScripts = (html) => {
   }
 };
 const SLUGS = LONG_GUIDES.map((g) => g.slug);
+// The dataset month the build puts in titles ("Nov 2026"), as build.mjs computes it.
+const titleMonth = () => shortMonthLabel(datasetAsOf(JSON.parse(read('data/providers.json'))).slice(0, 7));
 
 let providers, notFree;
 before(() => {
@@ -71,7 +75,7 @@ describe('every long guide', () => {
     for (const g of LONG_GUIDES) {
       const url = `${SITE}/guides/${g.slug}`;
       const html = page(g.slug);
-      const parts = longGuidePage(g, { providers, notFree });
+      const parts = longGuidePage(g, { providers, notFree, month: titleMonth() });
       assert.ok(html.includes(`<link rel="canonical" href="${url}">`), `${g.slug}: canonical`);
       assert.equal(html.match(/<title>([^<]*)<\/title>/)[1], parts.title.replace(/&/g, '&amp;'));
       const desc = html.match(/<meta name="description" content="([^"]*)"/)[1];
@@ -654,7 +658,27 @@ describe('the ranking and model-family guides', () => {
     }
     assert.deepEqual(sorted(tableSlugs(html, 'Free text LLMs with no structured free limit')), slugsOf(text.filter((p) => !numbered.includes(p))));
     assert.ok(answerOf(html).startsWith(`${numbered.length} of the ${text.length} free text LLMs from the ${verifiedCount()} verified providers`));
-    assert.ok(partsOf('free-llm-api-highest-limits').title.includes(`(${numbered.length} With Published Numbers)`));
+    // The title and h1 repeat the question with the dataset month and the count of tiers in the daily ranking.
+    const want = `Free LLM API with the highest limits (${titleMonth()}): ${numbered.length} tiers ranked`;
+    assert.equal(longGuidePage(LONG_GUIDES.find((g) => g.slug === 'free-llm-api-highest-limits'), { providers, notFree, month: titleMonth() }).title, want);
+    assert.equal(html.match(/<title>([^<]*)<\/title>/)[1], want);
+    assert.equal(stripTags(html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/)[1]).trim(), want);
+    assert.equal(graphOf(html).find((n) => n['@type'] === 'Article' || n.headline).headline, want, 'the JSON-LD headline is the h1');
+    // The daily table: every tier with a structured figure, by requests per day, then tokens per day; no daily figure → not stated, last.
+    const label = 'Free LLM API tiers ranked by published daily requests and tokens';
+    const daily = tableSlugs(html, label);
+    assert.deepEqual(sorted(daily), slugsOf(numbered), 'the daily table holds the N tiers of the title');
+    const key = (s) => { const p = providers.find((x) => x.slug === s); return [lim(p, 'requests_per_day'), lim(p, 'tokens_per_day')]; };
+    const cmp = (a, b) => (a == null ? (b == null ? 0 : 1) : b == null ? -1 : b - a);
+    for (let i = 1; i < daily.length; i++) {
+      const [ra, ta] = key(daily[i - 1]); const [rb, tb] = key(daily[i]);
+      assert.ok(cmp(ra, rb) < 0 || (cmp(ra, rb) === 0 && cmp(ta, tb) <= 0), `daily order: ${daily[i - 1]} before ${daily[i]}`);
+    }
+    for (const [slug, cells] of tableRows(html, label)) {
+      const [rpd, tpd] = key(slug);
+      assert.equal(stripTags(cells[2]), rpd == null ? 'not stated' : rpd.toLocaleString('en-US'), `${slug}: requests per day from free_limits`);
+      assert.equal(stripTags(cells[3]), tpd == null ? 'not stated' : tpd.toLocaleString('en-US'), `${slug}: tokens per day from free_limits`);
+    }
     // A figure is never converted into another unit: no per-second figure shows up as a per-minute one.
     const rps = numbered.filter((p) => lim(p, 'requests_per_second') != null && lim(p, 'requests_per_minute') == null);
     for (const p of rps) assert.ok(!tableSlugs(html, 'Free LLM APIs ranked by requests per minute').includes(p.slug), `${p.slug}: not converted`);
