@@ -742,7 +742,7 @@ test('the homepage hero has one primary action (the finder), a quiet link down t
   assert.match(cta, /<a class="btn primary hero-find" href="find\/">Find my free API<\/a>/);
   assert.match(cta, /<a class="hero-browse" href="#all-providers">Browse all/);
   assert.match(index, /<h2 id="all-providers" class="explorer-h">All providers<\/h2>/, 'the browse link reaches the heading above the table');
-  assert.match(index, /<main id="explorer">/);
+  assert.match(index, /<div id="explorer" class="explorer-body">/);
   assert.match(index.slice(index.indexOf('<footer')), /<a href="api\/">JSON API<\/a>/, 'the JSON API is linked from the footer');
   const docs = readFileSync(join(ROOT, 'site/api/index.html'), 'utf8');
   assert.match(docs, /href="v1\/no-card\.json"/, 'API docs link to a ready-to-use dataset slice');
@@ -754,7 +754,7 @@ test('the explorer homepage leaves the table immediately after its controls', ()
   const p = join(ROOT, 'site/index.html');
   const index = readFileSync(p, 'utf8');
   assert.doesNotMatch(index, /Recently re-verified|class="recent"/);
-  assert.match(index, /<main id="explorer">\s*<div class="wrap">\s*<table id="table"/);
+  assert.match(index, /<div id="explorer" class="explorer-body">\s*<div class="wrap">\s*<table id="table"/);
 });
 test('any provider sampling ASR/audio models declares audio in modalities', () => {
   const { providers } = JSON.parse(readFileSync(DATA, 'utf8'));
@@ -2478,7 +2478,7 @@ test('home: no good-first-issues button in the hero, a fixed table layout, a lin
   assert.equal(widths.reduce((n, m) => n + Number(m[2]), 0), 100, 'the widths add up to 100%');
   assert.match(css, /#table thead th \{ position: sticky; top: var\(--header-h\);/, 'the header row is pinned under the header');
   assert.match(css, /#table thead th \{ top: calc\(var\(--header-h\) \+ var\(--controls-h, 120px\)\); \}/, 'and under the filter bar where that is pinned');
-  assert.match(css, /main#explorer > \.wrap, \.controls \.controls-inner \{ max-width: 1480px; \}/, 'a wider table');
+  assert.match(css, /#explorer > \.wrap, \.controls \.controls-inner \{ max-width: 1480px; \}/, 'a wider table');
   assert.match(css, /\.hero \.lede \{ margin: 0 0 14px; max-width: 54ch;/, 'the lede fills the left column of the brand H1 hero');
   const row = explorerRowHtml({ slug: 'acme', name: 'Acme', category: 'ongoing', free_tier: 'Free', notes: 'n', best_for: 'b' });
   assert.match(row, /<div class="name-line"><a class="name-link" href="p\/acme" title="Acme">Acme<\/a> <span class="badge b-ongoing"[^>]*>Ongoing<\/span><\/div>/, 'the name is a link, with its type right after it');

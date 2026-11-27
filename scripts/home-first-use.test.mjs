@@ -73,7 +73,7 @@ test('the built home page carries the strip from the real data, above the explor
   const at = (s) => home.indexOf(s);
   assert.ok(at('<section class="hero">') < at('<section class="first-use"'), 'the strip follows the hero');
   assert.ok(at('<section class="first-use"') < at('<div class="controls">'), 'the strip comes before the explorer controls');
-  assert.ok(at('<div class="controls">') < at('<main id="explorer">'));
+  assert.ok(at('<div class="controls">') < at('<div id="explorer"'));
 });
 
 test('every link in the strip resolves in the build', () => {
