@@ -65,7 +65,9 @@
     window.gtag('set', 'ads_data_redaction', f.ads_data_redaction);
     window.gtag('set', 'url_passthrough', f.url_passthrough);
     window.gtag('js', new Date());
-    window.gtag('config', ID, { allow_google_signals: f.allow_google_signals, allow_ad_personalization_signals: f.allow_ad_personalization_signals });
+    // cookie_flags: the _ga/_gcl cookies gtag writes are Secure and SameSite=Lax (gtag's default sets neither); a cookie
+    // written from JavaScript cannot be HttpOnly.
+    window.gtag('config', ID, { allow_google_signals: f.allow_google_signals, allow_ad_personalization_signals: f.allow_ad_personalization_signals, cookie_flags: 'SameSite=Lax;Secure' });
     var el = document.createElement('script');
     el.async = true;
     el.src = 'https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(ID);
