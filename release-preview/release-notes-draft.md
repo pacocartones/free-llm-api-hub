@@ -156,6 +156,7 @@ Thanks also to everyone whose work was merged since v2.14.2:
 | @BloosomNet | 8: #688, #690, #691, #692, #697, #698, #773, #776 |
 | @AyhamJo7 | 7: #782, #785, #797, #807, #819, #821, #822 |
 | @mananbharti | 3: #770, #869, #870 |
+| @Prakash-codeMaker | 2: #1052 (one Lighthouse issue per failure episode, refreshed in place and closed on the first clean run), #1053 (tests for the official dataset tag helpers) |
 | @playlikeboy | 3: #868, #992, #994 |
 | @Abhishekkumar071 | 2: #689, #722 |
 | @aaas72 | 2: #768, #769 |
