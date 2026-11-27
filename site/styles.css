@@ -763,7 +763,8 @@ pre code { color: var(--text); }
 .model-table th, .model-table td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
 .model-table thead th { position: sticky; top: var(--header-h); background: var(--bg); font-family: var(--font-mono); font-size: .88rem; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; color: var(--text); z-index: 1; padding-top: 12px; padding-bottom: 12px; }
 .model-table .name code { color: var(--accent); word-break: break-all; }
-.model-table td.mods { color: var(--muted); font-size: .85rem; }
+.model-table td.model-mods { color: var(--muted); font-size: .85rem; }
+.model-scroll { margin-top: 20px; }
 .model-table th.name { font-weight: 400; text-transform: none; letter-spacing: 0; }
 .model-table .model-fam { display: block; margin-top: 3px; font-size: .8rem; color: var(--muted); text-decoration: underline; text-underline-offset: 2px; }
 .model-table tbody tr:hover { background: var(--panel); }

@@ -81,7 +81,7 @@ export function modelIndexRowHtml({ m, p }, { modelHref = () => '', familyPrefix
     `<th scope="row" role="rowheader" class="name" data-label="${MODEL_INDEX_COLUMNS[0]}">${href ? `<a href="${htmlEsc(href)}">${code}</a>` : code}${famPage}</th>` +
     cell(MODEL_INDEX_COLUMNS[1], `<a href="../p/${htmlEsc(p.slug)}">${htmlEsc(p.name)}</a>`) +
     cell(MODEL_INDEX_COLUMNS[2], htmlEsc(freeType), 'free-type') +
-    cell(MODEL_INDEX_COLUMNS[3], htmlEsc(mods || '—'), 'mods') +
+    cell(MODEL_INDEX_COLUMNS[3], htmlEsc(mods || '—'), 'model-mods') +
     `</tr>`;
 }
 
