@@ -11,7 +11,7 @@
 //  - Copy that sells (featured, partner, recommended) does not appear in the text of a block or a row.
 
 import { escapeHtml } from './html.mjs';
-import { SLUG_RE } from './rows.mjs';
+import { SLUG_RE } from './slug.mjs';
 import { timeHtml } from './dates.mjs';
 
 export const AGREEMENT_TYPES = { sponsored_block: 'Sponsored block', sponsored_section: 'Sponsored section', paid_link: 'Paid link' };
