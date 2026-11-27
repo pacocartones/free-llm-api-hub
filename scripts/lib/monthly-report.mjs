@@ -14,9 +14,9 @@
 //
 // Pure functions of their arguments; build.mjs reads the files and git.
 
-import { fieldCheck, REASON_LABEL, FIELD_CHECK_FIELDS } from './field-checks.mjs';
+import { fieldCheck, REASON_LABEL, REASON_WHY, FIELD_CHECK_FIELDS } from './field-checks.mjs';
 import { markdownToHtml } from './markdown.mjs';
-import { NOT_STATED } from './not-stated.mjs';
+import { NOT_STATED, capFirst } from './not-stated.mjs';
 import { monthLabel, monthName, monthEndDate } from './dates.mjs';
 
 const ESC = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' };
@@ -33,11 +33,12 @@ const table = (label, head, rows) =>
 const FLAG_WORDS = { card_required: 'card required', phone_required: 'phone required', commercial_ok: 'commercial use allowed', openai_compatible: 'OpenAI-compatible' };
 // A null flag reads "not stated", the site's one wording for an unknown value (lib/not-stated.mjs NOT_STATED).
 const flagValue = (v) => (v === true ? 'yes' : v === false ? 'no' : v === 'conditional' ? 'conditional' : NOT_STATED);
-// "Not stated by the provider" / "Not stated (needs an account to check)": the reason recorded in field_checks.
+// "Not stated (needs an account to check)": the shared wording, with the reason recorded in field_checks when there is
+// one (lib/field-checks.mjs REASON_WHY), alone when the flag was never checked.
 const notStatedCell = (p, field) => {
   const c = fieldCheck(p, field);
-  const status = (c && c.status) || 'not_checked';
-  return status === 'source_silent' ? 'Not stated by the provider' : `Not stated (${REASON_LABEL[status] || REASON_LABEL.not_checked})`;
+  const why = REASON_WHY[(c && c.status) || 'not_checked'] || '';
+  return why ? `${capFirst(NOT_STATED)} (${why})` : capFirst(NOT_STATED);
 };
 
 /** "14 Nov 2026" style day, for prose. */
@@ -209,13 +210,13 @@ const commercialCell = (p) => {
 
 export function reportBlocks(r, { prefix = '../../', current = new Set(), siteChanges = `${prefix}api/v1/changes.json` } = {}) {
   const { fb, fa } = r;
-  const span = (f) => (f.oldest ? `${dayLabel(f.oldest)} → ${dayLabel(f.newest)}` : '—');
+  const span = (f) => (f.oldest ? `${dayLabel(f.oldest)} → ${dayLabel(f.newest)}` : NOT_STATED);
   const numbers = table(`${r.figures.month_label} in numbers`, ['', esc(r.figures.before_day || 'Before'), esc(r.figures.data_as_of_day || 'After')], [
     ['Providers in the dataset', fb.providers, fa.providers],
     ['Verified', fb.verified, fa.verified],
     ['Ongoing free tiers / trial credits', `${fb.ongoing} / ${fb.trial}`, `${fa.ongoing} / ${fa.trial}`],
     ['Last verification, oldest → newest', span(fb), span(fa)],
-    ['Median last verification', esc(dayLabel(fb.median) || '—'), esc(dayLabel(fa.median) || '—')],
+    ['Median last verification', esc(dayLabel(fb.median) || NOT_STATED), esc(dayLabel(fa.median) || NOT_STATED)],
     ['Providers with a quoted data policy (<code>data_policy</code>)', fb.data_policy, fa.data_policy],
     ['… that say they <strong>do not</strong> train on free-tier prompts', fb.no_train, fa.no_train],
     ['… that say they <strong>do</strong> train on them', fb.trains, fa.trains],
@@ -224,7 +225,7 @@ export function reportBlocks(r, { prefix = '../../', current = new Set(), siteCh
     ['Providers with structured free limits (<code>free_limits</code>)', fb.free_limits, fa.free_limits],
     ['Providers with a free-model sample (<code>models_free</code>)', fb.models_free, fa.models_free],
     ['Distinct model IDs in the samples', fb.model_ids, fa.model_ids],
-    ['Flags with a recorded reason (<code>field_checks</code>)', fb.field_checks ? `${fb.field_checks} on ${fb.field_checks_providers} providers` : '—', fa.field_checks ? `${fa.field_checks} on ${fa.field_checks_providers} providers` : '—'],
+    ['Flags with a recorded reason (<code>field_checks</code>)', fb.field_checks ? `${fb.field_checks} on ${fb.field_checks_providers} providers` : 'none', fa.field_checks ? `${fa.field_checks} on ${fa.field_checks_providers} providers` : 'none'],
   ].map((row) => row.map(String)));
 
   const newProviders = r.added.length
@@ -246,7 +247,7 @@ export function reportBlocks(r, { prefix = '../../', current = new Set(), siteCh
     const e = removalReason(p, r.notFree);
     const why = e ? esc(e.short.charAt(0).toUpperCase() + e.short.slice(1)) : 'See the changelog.';
     const src = e && e.sources && e.sources[0] ? e.sources[0].url : p.docs_url;
-    return [e ? `<a href="${prefix}not-free/#${esc(e.id)}">${esc(p.name)}</a>` : esc(p.name), why, e ? time(e.checked) : '—', ext(src, e ? 'source' : 'last source')];
+    return [e ? `<a href="${prefix}not-free/#${esc(e.id)}">${esc(p.name)}</a>` : esc(p.name), why, e ? time(e.checked) : NOT_STATED, ext(src, e ? 'source' : 'last source')];
   });
   const removed = r.removed.length
     ? table(`Providers removed in ${r.figures.month_label}`, ['Provider', 'Why it left', 'Checked', 'Source'], removedRows)
@@ -271,7 +272,7 @@ export function reportBlocks(r, { prefix = '../../', current = new Set(), siteCh
     : `<p class="muted">No data policy was added or changed in ${esc(r.figures.month_label)}.</p>`;
 
   const unknownList = r.toUnknown.length
-    ? `<ul>${r.toUnknown.map(({ p, field, from, check }) => `<li>${provLink(p, prefix, current)}, ${FLAG_WORDS[field]}: ${flagValue(from)} → ${NOT_STATED}${check ? ` (${esc(REASON_LABEL[check.status] || check.status)}${check.note ? `: “${esc(check.note)}”` : ''}, read ${time(check.checked)})` : ''}.</li>`).join('')}</ul>`
+    ? `<ul>${r.toUnknown.map(({ p, field, from, check }) => `<li>${provLink(p, prefix, current)}, ${FLAG_WORDS[field]}: ${flagValue(from)} → ${NOT_STATED}${check ? ` (${esc(REASON_WHY[check.status] || check.status)}${check.note ? `: “${esc(check.note)}”` : ''}, read ${time(check.checked)})` : ''}.</li>`).join('')}</ul>`
     : `<p class="muted">No flag moved to “not stated” in ${esc(r.figures.month_label)}.</p>`;
   const openChecks = r.openChecks.length
     ? `<ul>${r.openChecks.map(({ p, field, c }) => `<li>${provLink(p, prefix, current)}, ${FLAG_WORDS[field]}: ${esc(REASON_LABEL[c.status])}${c.note ? ` — “${esc(c.note)}”` : ''} (read ${time(c.checked)}).</li>`).join('')}</ul>`
