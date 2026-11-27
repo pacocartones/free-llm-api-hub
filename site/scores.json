@@ -1,23 +1,23 @@
 {
   "generated": "2026-11-26",
   "scores": {
+    "google-gemini": {
+      "total": 72.9,
+      "confirmed": 5,
+      "of": 6,
+      "rank": 1
+    },
     "groq": {
       "total": 62.4,
       "confirmed": 4,
       "of": 6,
-      "rank": 1
+      "rank": 2
     },
     "openrouter": {
       "total": 56.2,
       "confirmed": 3,
       "of": 6,
       "rank": null
-    },
-    "google-gemini": {
-      "total": 54.9,
-      "confirmed": 4,
-      "of": 6,
-      "rank": 2
     },
     "cloudflare-workers-ai": {
       "total": 50.4,
@@ -463,14 +463,14 @@
       "of": 6,
       "rank": null
     },
-    "modal": {
-      "total": 22.1,
-      "confirmed": 2,
+    "photoroom": {
+      "total": 24.6,
+      "confirmed": 3,
       "of": 6,
       "rank": null
     },
-    "photoroom": {
-      "total": 21.5,
+    "modal": {
+      "total": 22.1,
       "confirmed": 2,
       "of": 6,
       "rank": null
