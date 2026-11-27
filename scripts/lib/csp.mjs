@@ -19,9 +19,13 @@ import { createHash } from 'node:crypto';
 
 /** The CSP hash source of one inline <script>…</script> element (the hash covers the text between the tags). */
 export function inlineScriptHash(scriptElement) {
-  const m = /^<script>([\s\S]*)<\/script>$/.exec(String(scriptElement));
-  if (!m) throw new Error('inlineScriptHash expects a bare <script>…</script> element');
-  return `'sha256-${createHash('sha256').update(m[1], 'utf8').digest('base64')}'`;
+  const el = String(scriptElement);
+  const open = '<script>', close = '</script>';
+  if (!el.startsWith(open) || !el.endsWith(close) || el.length < open.length + close.length) {
+    throw new Error('inlineScriptHash expects a bare <script>…</script> element');
+  }
+  const body = el.slice(open.length, el.length - close.length);
+  return `'sha256-${createHash('sha256').update(body, 'utf8').digest('base64')}'`;
 }
 
 /**

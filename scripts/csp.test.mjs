@@ -25,9 +25,25 @@ const htmlFiles = (dir) => readdirSync(dir).flatMap((name) => {
 });
 const metaPolicies = (html) => [...html.matchAll(/<meta http-equiv="Content-Security-Policy" content="([^"]*)">/g)].map((m) => m[1]);
 const directives = (policy) => Object.fromEntries(policy.split(';').map((d) => d.trim().split(/\s+/)).map(([k, ...v]) => [k, v]));
-const inlineScripts = (html) => [...html.matchAll(/<script(\s[^>]*)?>([\s\S]*?)<\/script>/g)]
-  .filter((m) => !/\bsrc=/.test(m[1] || '') && !/type="application\/(ld\+)?json"/.test(m[1] || ''))
-  .map((m) => m[2]);
+// The built pages are our own output, so a plain scan is enough: find each opening <script …> tag, then the next
+// closing tag (case-insensitive, any whitespace before ">"). Not a sanitizer; nothing here filters untrusted HTML.
+const inlineScripts = (html) => {
+  const out = [];
+  const lower = html.toLowerCase();
+  let i = 0;
+  while ((i = lower.indexOf('<script', i)) !== -1) {
+    const tagEnd = lower.indexOf('>', i);
+    const close = lower.indexOf('</script', tagEnd);
+    if (tagEnd === -1 || close === -1) break;
+    const attrs = html.slice(i + 7, tagEnd);
+    if (!/\bsrc=/i.test(attrs) && !/type="application\/(ld\+)?json"/i.test(attrs)) out.push(html.slice(tagEnd + 1, close));
+    i = lower.indexOf('>', close) + 1;
+    if (i === 0) break;
+  }
+  return out;
+};
+// Every opening tag with its attributes (text inside <code> is HTML-escaped, so it holds no tags).
+const openTags = (html) => [...html.matchAll(/<([a-z][a-z0-9-]*)(\s[^>]*)?>/gi)].map((m) => ({ name: m[1].toLowerCase(), attrs: m[2] || '', tag: m[0] }));
 
 describe('lib/csp.mjs', () => {
   test('the hash of an inline script is the base64 sha256 of the text between its tags', () => {
@@ -37,7 +53,9 @@ describe('lib/csp.mjs', () => {
   });
 
   test('without a GA ID the policy is exactly the pinned one, with GA it only adds the Google hosts', () => {
-    const guard = readFileSync(join(SITE, 'index.html'), 'utf8').match(/<!-- AUTOGEN:themeguard:start -->\s*(<script>[\s\S]*?<\/script>)/)?.[1];
+    const index = readFileSync(join(SITE, 'index.html'), 'utf8');
+    const from = index.indexOf('<!-- AUTOGEN:themeguard:start -->'), to = index.indexOf('<!-- AUTOGEN:themeguard:end -->');
+    const guard = from !== -1 && to > from ? index.slice(from + '<!-- AUTOGEN:themeguard:start -->'.length, to).trim() : '';
     assert.ok(guard, 'the theme guard is injected into index.html');
     const notFound = `<script>${inlineScripts(readFileSync(join(SITE, '404.html'), 'utf8')).find((s) => s.includes("getElementById('path')"))}</script>`;
     const base = { inlineScripts: [guard, notFound], script: CLOUDFLARE_WEB_ANALYTICS_CSP.script, connect: CLOUDFLARE_WEB_ANALYTICS_CSP.connect };
@@ -92,7 +110,7 @@ describe('every built page', () => {
         const hash = `'sha256-${createHash('sha256').update(body).digest('base64')}'`;
         assert.ok(scriptSrc.includes(hash), `${rel}: inline script ${body.slice(0, 40)}… is pinned (${hash})`);
       }
-      assert.doesNotMatch(html.replace(/<script[\s\S]*?<\/script>/g, '').replace(/<code[\s\S]*?<\/code>/g, ''), /<[a-z][^>]*\son[a-z]+\s*=/i, `${rel}: no inline event handler`);
+      for (const { tag, attrs } of openTags(html)) assert.doesNotMatch(attrs, /\son[a-z]+\s*=/i, `${rel}: no inline event handler in ${tag}`);
       assert.doesNotMatch(html, /(href|src|action)="javascript:/i, `${rel}: no javascript: URL`);
     }
   });
@@ -102,12 +120,13 @@ describe('every built page', () => {
       const rel = relative(ROOT, f);
       const html = readFileSync(f, 'utf8');
       assert.doesNotMatch(html, /\s(src|srcset|action|poster|data)="http:\/\//i, `${rel}: no http:// subresource`);
-      for (const [tag] of html.matchAll(/<(script|link|img|iframe)\s[^>]*>/g)) {
+      for (const { name, tag } of openTags(html)) {
+        if (!['script', 'link', 'img', 'iframe'].includes(name)) continue;
         const url = /\s(?:src|href)="((?:https?:)?\/\/[^"]+)"/.exec(tag)?.[1];
         if (!url || /\brel="(canonical|alternate|me)"/.test(tag)) continue;
         assert.ok(new URL(url, 'https://freellmapihub.com/').host === 'freellmapihub.com', `${rel}: third-party subresource needs SRI or self-hosting: ${tag}`);
       }
-      for (const [a] of html.matchAll(/<a\s[^>]*target="_blank"[^>]*>/g)) assert.match(a, /\brel="[^"]*\bnoopener\b/, `${rel}: ${a}`);
+      for (const { name, attrs, tag } of openTags(html)) if (name === 'a' && /target="_blank"/i.test(attrs)) assert.match(attrs, /\brel="[^"]*\bnoopener\b/, `${rel}: ${tag}`);
     }
   });
 });
