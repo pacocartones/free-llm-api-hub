@@ -59,6 +59,7 @@ import { markdownToHtml } from './lib/markdown.mjs';
 import { bestFactsHtml } from './lib/best-facts.mjs';
 import { providerFigures, expandFigures, injectInlineFigures, figureErrors } from './lib/figures.mjs';
 import { firstUseHtml } from './lib/home-first-use.mjs';
+import { homeFaq, homeFaqHtml, homeFaqJsonLd } from './lib/home-faq.mjs';
 import { ticketBadgeSvg } from './lib/badge-svg.mjs';
 import { providerMarkdown, llmsProviderLine } from './lib/provider-markdown.mjs';
 import { curlChatQuickstart, pythonChatQuickstart, pythonEmbeddingsQuickstart, pythonStringLiteral } from './lib/quickstart.mjs';
@@ -1061,7 +1062,15 @@ indexHtml = inject(indexHtml, 'stats', homeStatsHtml);
 indexHtml = inject(indexHtml, 'firstuse', firstUseHtml(providers, { slaDays: SLA_DAYS }));
 indexHtml = inject(indexHtml, 'data', inlineData);
 // The schema.org Dataset block (Google Dataset Search), from CITATION.cff and the data: lib/dataset-jsonld.mjs.
-indexHtml = inject(indexHtml, 'dataset', datasetJsonLdScript(homeJsonLd({ data, citation: parseCitation(readFileSync(join(ROOT, 'CITATION.cff'), 'utf8')), site: SITE, asOf: ASOF })));
+// The FAQ below the table (lib/home-faq.mjs): every answer built from the data. The same items give the visible
+// section and the FAQPage node, which joins the home page's one JSON-LD block (its @graph), so the two cannot differ.
+const HOME_FAQ = homeFaq(providers);
+indexHtml = inject(indexHtml, 'homefaq', homeFaqHtml(HOME_FAQ));
+{
+  const homeLd = homeJsonLd({ data, citation: parseCitation(readFileSync(join(ROOT, 'CITATION.cff'), 'utf8')), site: SITE, asOf: ASOF });
+  homeLd['@graph'].push(homeFaqJsonLd(HOME_FAQ));
+  indexHtml = inject(indexHtml, 'dataset', datasetJsonLdScript(homeLd));
+}
 indexHtml = withStars(indexHtml).replace(/(<img class="trust-badge"[^>]*? width=")\d+(")/, `$1${BADGE_W}$2`);
 writeFileSync(join(ROOT, 'site/index.html'), withAnalytics(indexHtml, GA_ID, ''));
 // The consent banner exists only when analytics is configured; without an ID a stale copy is removed.
