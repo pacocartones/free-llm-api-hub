@@ -2168,6 +2168,7 @@ test('active providers retain models_url from their official catalogues', () => 
     ['gonka-broker', 'https://gonkabroker.com/models/'],
     ['moark', 'https://moark.com/serverless-api'],
     ['synap', 'https://synap402.com/models.html'],
+    ['byteplus-modelark', 'https://ai.byteplus.com/ark/region:ap-southeast-1/docs/model-list'],
   ].sort(bySlug));
 });
 

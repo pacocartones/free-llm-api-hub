@@ -678,6 +678,30 @@
    "page_sha256": "f1171ac6eebcc2d603b61a68252db7717397255318c726cfe2b3d3f34ac6a85c"
   },
   {
+   "id": "nlpcloud.card_required.sentence",
+   "slug": "nlpcloud",
+   "kind": "field_sentence",
+   "field": "card_required",
+   "text": "A credit card is needed for this plan, but you automatically get an initial $15 credit for your tests.",
+   "source_url": "https://nlpcloud.com/",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": null
+  },
+  {
+   "id": "nlpcloud.commercial_ok.sentence",
+   "slug": "nlpcloud",
+   "kind": "field_sentence",
+   "field": "commercial_ok",
+   "text": "We grant you a personal, limited, non-exclusive, revocable, non-transferable license, without the right to sublicense, to electronically access and use the Service for your personal or commercial purposes.",
+   "source_url": "https://nlpcloud.com/tos.html",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": null
+  },
+  {
    "id": "alibaba-model-studio.sentence",
    "slug": "alibaba-model-studio",
    "kind": "sentence",
@@ -2986,28 +3010,16 @@
    "page_sha256": "0892dad97c845e1dd89a48358486fb4254fa703bd13797d4389013ac342663bb"
   },
   {
-   "id": "nlpcloud.card_required.sentence",
-   "slug": "nlpcloud",
+   "id": "byteplus-modelark.openai_compatible.sentence",
+   "slug": "byteplus-modelark",
    "kind": "field_sentence",
-   "field": "card_required",
-   "text": "A credit card is needed for this plan, but you automatically get an initial $15 credit for your tests.",
-   "source_url": "https://nlpcloud.com/",
+   "field": "openai_compatible",
+   "text": "ModelArk model APIs are largely compatible with the OpenAI SDK.",
+   "source_url": "https://ai.byteplus.com/ark/region:ap-southeast-1/docs/compatible-with-openai-sdk",
    "read_on": "2026-11-27",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
-   "page_sha256": null
-  },
-  {
-   "id": "nlpcloud.commercial_ok.sentence",
-   "slug": "nlpcloud",
-   "kind": "field_sentence",
-   "field": "commercial_ok",
-   "text": "We grant you a personal, limited, non-exclusive, revocable, non-transferable license, without the right to sublicense, to electronically access and use the Service for your personal or commercial purposes.",
-   "source_url": "https://nlpcloud.com/tos.html",
-   "read_on": "2026-11-27",
-   "lang": "en",
-   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
-   "page_sha256": null
+   "page_sha256": "a55ce6f244889ab6e1e8c2ce457906f5416118078b5604bd817affb9afd4e087"
   }
  ]
 }
