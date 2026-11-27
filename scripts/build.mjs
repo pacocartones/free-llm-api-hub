@@ -40,6 +40,8 @@ import { labelTables } from './lib/tables.mjs';
 import { markNewTabLinks } from './lib/links.mjs';
 import { codingToolsMainHtml, codingToolMainHtml, codingToolTitle, codingToolDescription } from './lib/free-coding-tools.mjs';
 import { dataPolicyRows, dataPolicyMainHtml, trainState } from './lib/data-policy-page.mjs';
+import { contributorsMainHtml } from './lib/contributors-page.mjs';
+import { latestRelease } from './lib/contributors.mjs';
 import { quotesReportHtml } from './lib/quotes-report.mjs';
 import { SCORE_WEIGHTS, EDITORIAL_WEIGHT, EDITORIAL_DEFAULT, MATH_INPUTS, MIN_CONFIRMED, TOP_SIZE, EDITORIAL_NOTE_THRESHOLD, STABILITY_MIN_DAYS, STABILITY_MIN_SAMPLES, rankProviders, editorialRating, inputFractions, stabilityFromProbe } from './lib/score.mjs';
 import { scoreBlockHtml } from './lib/score-bar.mjs';
@@ -650,7 +652,7 @@ const siteFooter = (p) => `<footer class="site-footer"><div class="wrap footer-t
 <div class="footer-brand"><a class="foot-brand-link" href="${p}" aria-label="Free LLM API Hub — home"><svg class="logo-mark"><use href="#logo"/></svg><span class="brand-name">Free LLM API <span class="grad">Hub</span></span></a><p>The <strong>continuously-verified</strong>, <strong>machine-readable</strong> dataset of <strong>free LLM &amp; AI-model APIs</strong> and <strong>trial credits</strong> — every entry <strong>dated</strong>, <strong>sourced</strong>, and <strong>free of dead links</strong>.</p><img class="trust-badge" src="${p}badge-verified.svg" alt="Verified providers" width="${BADGE_W}" height="20" loading="lazy"><a class="star-btn" href="${REPO}" target="_blank" rel="noopener"><span class="sb-label">${GH_ICON} Star on GitHub</span><span class="sb-count" data-stars>★</span></a></div>
 <div class="footer-col"><h2 class="footer-h">Explore</h2><a href="${p}models/">Free model index</a><a href="${p}guides-and-collections/">Guides &amp; collections</a><a href="${p}programs/startups">Startup credits</a><a href="${p}programs/research">Student &amp; research credits</a><a href="${p}free-gpu/">Free GPU compute</a><a href="${p}coding-tools/">Free AI coding tools</a><a href="${p}not-free/">Not free (and why)</a></div>
 <div class="footer-col"><h2 class="footer-h">Data</h2><a href="${p}providers.json">providers.json</a><a href="${p}api/">JSON API</a><a href="${p}llms.txt">llms.txt</a><a href="${p}data-policy/">Who trains on your data</a><a href="${p}coverage/">Data coverage</a><a href="${p}quality/">Data quality</a><a href="${p}embed/">Use the data</a></div>
-<div class="footer-col"><h2 class="footer-h">Project</h2><a href="${p}updates">Updates</a><a href="${p}changes/">What changed</a><a href="${p}submit/">Submit</a><a href="${p}methodology/">Methodology</a><a href="${p}contributing/">Contributing</a><a href="${p}agreements/">Agreements</a></div>
+<div class="footer-col"><h2 class="footer-h">Project</h2><a href="${p}updates">Updates</a><a href="${p}changes/">What changed</a><a href="${p}submit/">Submit</a><a href="${p}methodology/">Methodology</a><a href="${p}contributing/">Contributing</a><a href="${p}contributors/">Contributors</a><a href="${p}agreements/">Agreements</a></div>
 </div><div class="wrap footer-bottom"><p>Terms change without notice; always confirm against each provider's own docs. MIT licensed.</p><p class="foot-legal"><a href="${p}legal/privacy">Privacy</a> · <a href="${p}legal/terms">Terms</a></p><p class="foot-email"><a href="mailto:admin@freellmapihub.com">admin@freellmapihub.com</a></p></div></footer>`;
 
 // Full page wrapper for generated (collection) pages. `p` is the path prefix to the site root.
@@ -850,6 +852,10 @@ const QUOTES = QUOTE_REGISTRY.entries;
 }
 // Retired URLs search engines still know (data/redirects.json): checked here, written as stubs after the compare pages.
 const REDIRECTS = JSON.parse(readFileSync(join(ROOT, 'data/redirects.json'), 'utf8'));
+// /contributors/: data/contributors.json is written by `npm run contributors` from the git history and committed, so the
+// page builds from the file alone. The current cycle starts after the latest release in CHANGELOG.md.
+const CONTRIBUTORS = JSON.parse(readFileSync(join(ROOT, 'data/contributors.json'), 'utf8'));
+const LATEST_RELEASE = latestRelease(readFileSync(join(ROOT, 'CHANGELOG.md'), 'utf8'));
 {
   const errs = redirectErrors(REDIRECTS, { providerSlugs: providers.map((p) => p.slug), comparePaths: [...COMPARE_PATHS], notFree: NOT_FREE });
   if (errs.length) throw new Error('data/redirects.json:\n' + errs.join('\n'));
@@ -2347,6 +2353,9 @@ const llmsTxt =
   FAMILY_GROUPS.filter(isFamilyIndexable).map((g) => `- [${familyH1(g)}](${familyUrl(SITE, g)}): ${familyBlurb(g)}`).join('\n') + `\n\n` +
   `## Collections\n` +
   COLLECTIONS.map((c) => `- [${c.title}](${SITE}/collections/${c.slug})`).join('\n') + `\n\n` +
+  `## Project\n` +
+  `- [Contributors](${SITE}/contributors/): everyone whose work was merged, from the git history, and how to join them\n` +
+  `- [Contributing](${SITE}/contributing/): how to propose a change, with good first issues to start\n\n` +
   `## Credit programs\n` +
   `- [Startup credits](${SITE}/programs/startups)\n- [Student & research credits](${SITE}/programs/research)\n\n` +
   `## Providers\n` +
@@ -2672,6 +2681,21 @@ writeFileSync(
   })
 );
 
+// ---------- /contributors/ — everyone credited in data/contributors.json, first-timers of the current cycle first ----------
+mkdirSync(join(ROOT, 'site/contributors'), { recursive: true });
+writeFileSync(
+  join(ROOT, 'site/contributors/index.html'),
+  htmlPage({
+    title: 'Contributors · Free LLM API Hub',
+    desc: `The ${CONTRIBUTORS.contributors.length} people who have contributed to the Free LLM API Hub dataset and site, from the git history: merged contributions, first contribution and kinds of work. Start with a good first issue to join them.`,
+    canonical: SITE + '/contributors/',
+    main:
+      pageHero({ crumbs: `<a href="../">Home</a> / Contributors`, h1: 'Contributors', lede: 'Everyone whose work was merged here, credited from the git history. Thank you.' }) +
+      contributorsMainHtml(CONTRIBUTORS, { repo: REPO, release: LATEST_RELEASE, prefix: '../' }),
+    prefix: '../',
+  })
+);
+
 // ---------- /agreements/ — every paid relationship, with the labelled blocks (data/sponsorships.json) ----------
 // The file is read here and in the provider-page disclosure; never by the score, the API files, llms.txt or the structured data.
 const AGREEMENTS = AGREEMENTS_FILE;
@@ -2869,6 +2893,7 @@ const sitemapEntries = [
   [`${SITE}/submit/`, ASOF],
   ...DOC_PAGES.map((d) => [`${SITE}/${d.slug}/`, ASOF]),
   [`${SITE}/data-policy/`, ASOF],
+  [`${SITE}/contributors/`, CONTRIBUTORS.generated],
   [`${SITE}/agreements/`, AGREEMENTS.generated],
   [`${SITE}/free-gpu/`, freeGpu.generated],
   [`${SITE}/coding-tools/`, codingTools.generated],
