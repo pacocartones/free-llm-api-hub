@@ -1,0 +1,5 @@
+{
+  "note": "Differences scripts/parity-crawl.mjs accepts between origin A (the live site) and origin B (the Cloudflare Worker). Each entry in `allow` names a path (exact, a prefix ending in `*`, or `*` for every path), a field (one of the crawler's FIELDS, `loc`/`lastmod` for the sitemap comparison, or `*`) and a non-empty `reason`; optional `a` and `b` make it match only those exact values. `body_ignore` lists extra regular expressions removed from every body before it is hashed, each with a `reason`. Keep both lists empty unless a parity run shows a difference that is intended; see docs/architecture.md, Hosting cutover.",
+  "allow": [],
+  "body_ignore": []
+}
