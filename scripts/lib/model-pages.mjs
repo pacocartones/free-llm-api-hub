@@ -3,12 +3,14 @@
 // Every line comes from a field of data/providers.json. `models_free` is a sample, not part of the verified
 // core claim, so a page never says a provider "offers" or "has" a model: it says the model is listed in that
 // provider's free-model sample, shows the exact ID the provider lists, and repeats that the list changes.
-// A flag nobody has confirmed reads "not confirmed", numbers appear only with their source and reading day,
+// A flag nobody has confirmed reads "not stated", numbers appear only with their source and reading day,
 // and a quality tier appears only when it was measured for this exact ID.
 //
 // Pure: build.mjs passes the groups from model-keys.mjs and the dataset date; the tests call the same code.
 
 import { escapeHtml, escapeText } from './html.mjs';
+import { timeHtml } from './dates.mjs';
+import { NOT_STATED } from './not-stated.mjs';
 import { comparator } from './sort.mjs';
 import { expiryHtml } from './expiry.mjs';
 import { requirementsHtml, freeLimitsTableHtml } from './provider-sections.mjs';
@@ -71,7 +73,7 @@ function tierHtml(p, id) {
   const link = safeUrl(src.url);
   return `<p class="muted">Quality tier for this ID: <strong>${p.model_tier}/4</strong>` +
     (typeof src.rating === 'number' ? ` (LMArena rating ${escapeHtml(src.rating)}` + (Number.isInteger(src.votes) ? `, ${src.votes.toLocaleString('en-US')} votes` : '') + `)` : '') +
-    (src.snapshot ? `, snapshot ${escapeHtml(src.snapshot)}` : '') +
+    (src.snapshot ? `, snapshot ${timeHtml(src.snapshot, escapeHtml)}` : '') +
     (link ? `. <a href="${link}" target="_blank" rel="noopener">Source</a>` : '') + `.</p>`;
 }
 
@@ -94,12 +96,12 @@ function catalogueHtml(p) {
 
 function entryHtml({ id, p }, prefix) {
   const verified = p.verified === true
-    ? (p.last_verified ? `Verified <time datetime="${escapeHtml(p.last_verified)}">${escapeHtml(p.last_verified)}</time>` : 'Verified')
+    ? (p.last_verified ? `Verified ${timeHtml(p.last_verified, escapeHtml)}` : 'Verified')
     : `<span class="tri tri-unk">unverified</span>`;
   const plan = p.category === 'ongoing' ? 'Ongoing free tier' : 'Trial credit';
   const facts = [
     ['Model ID', `<code>${escapeHtml(id)}</code>`],
-    ['Plan', `${plan} · ${escapeHtml(FREE_TYPE_LABEL[p.free_type] || p.free_type || 'not recorded')}`],
+    ['Plan', `${plan} · ${escapeHtml(FREE_TYPE_LABEL[p.free_type] || p.free_type || NOT_STATED)}`],
     ['Expires', expiryHtml(p)],
     ['Status', verified],
   ];
@@ -123,7 +125,7 @@ function entryHtml({ id, p }, prefix) {
 export function modelPageMainHtml(group, { asOf, prefix = '../../' } = {}) {
   const entries = sortedEntries(group);
   const n = entries.length;
-  const lede = `Listed in the free-model sample of <strong>${plural(n, 'provider')}</strong> in the dataset of <time datetime="${escapeHtml(asOf)}">${escapeHtml(asOf)}</time>. Each provider below lists it under the exact ID shown, which is the one to pass as <code>model</code>.`;
+  const lede = `Listed in the free-model sample of <strong>${plural(n, 'provider')}</strong> in the dataset of ${timeHtml(asOf, escapeHtml)}. Each provider below lists it under the exact ID shown, which is the one to pass as <code>model</code>.`;
   return `<section class="page-hero model-hero"><div class="wrap"><nav class="crumbs" aria-label="Breadcrumb"><a href="${prefix}">Home</a> / <a href="${prefix}models/">Free model index</a> / ${escapeHtml(group.name)}</nav>` +
     `<h1>Free API for ${escapeHtml(group.name)}</h1><p class="lede">${lede}</p></div></section>` +
     `<main id="main"><div class="wrap prose prov-prose">` +

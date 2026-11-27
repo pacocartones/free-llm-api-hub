@@ -9,6 +9,7 @@
 // whose age is 61 days is `due`, 91 days is `stale`.
 
 import { DUE_SOON_DAYS, SLA_DAYS } from './rules.mjs';
+import { isoDay } from './dates.mjs';
 
 /** More entries than this reaching `due` in one week is a cluster worth spreading. */
 export const CLUSTER_LIMIT = 8;
@@ -19,7 +20,7 @@ const parse = (iso) => {
   const d = new Date(String(iso) + 'T00:00:00Z');
   return Number.isNaN(+d) ? null : d;
 };
-const iso = (d) => d.toISOString().slice(0, 10);
+const iso = isoDay;
 
 /** The Monday (UTC) of the ISO week that holds `date`. */
 export function weekStart(date) {

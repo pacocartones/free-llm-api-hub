@@ -39,11 +39,21 @@ export const websiteNode = ({ site, repo }) => ({
 });
 
 // What another page says about the site or the dataset it belongs to: the same @id, with the publisher and the
-// creator inline (a page's JSON-LD cannot refer to nodes defined only on the home page).
+// creator inline (a page's JSON-LD cannot refer to nodes defined only on the home page). The Person carries its
+// sameAs (the GitHub account) on every page, so any page alone identifies the creator. The Organization carries no
+// sameAs: Tweakeo has no public profile in this repository to point at, and none is invented.
 const authorship = (site) => ({
   publisher: { '@type': 'Organization', '@id': entityIds(site).publisher, name: PUBLISHER_NAME },
-  creator: { '@type': 'Person', '@id': entityIds(site).creator, name: CREATOR.name, url: CREATOR.url },
+  creator: { '@type': 'Person', '@id': entityIds(site).creator, name: CREATOR.name, alternateName: CREATOR.alternateName, url: CREATOR.url, sameAs: [CREATOR.url] },
 });
+
+/**
+ * The same authorship in one line of plain text, for the Markdown files an answer engine reads (llms.txt, the
+ * /p/<slug>.md twins): who publishes, who creates and where the source lives. Only profiles that exist: the GitHub
+ * account and the repository. `repo` is the GitHub repository URL.
+ */
+export const authorshipLine = (repo) =>
+  `Published by ${PUBLISHER_NAME}; created and maintained by ${CREATOR.name} (${CREATOR.url}). Source and history: ${repo}`;
 
 export const websiteRef = (site) => ({ '@type': 'WebSite', '@id': entityIds(site).website, name: SITE_NAME, url: `${site}/`, ...authorship(site) });
 

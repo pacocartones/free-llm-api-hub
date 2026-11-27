@@ -2,8 +2,11 @@
 //
 // Answer engines and agents read Markdown more reliably than a styled HTML page, so every provider page has a plain-text
 // twin built from the same record: the "is it free" answer, the limits, the four flags with the pages read and the day,
-// the quickstart and the links. It states only what data/providers.json holds: an unknown flag reads "unknown" with its
-// recorded reason, never "no", and a number appears only with the page it comes from and the day it was read.
+// the quickstart, the anchors of each fact on the HTML page and the links. It opens with the same answer-first sentence as
+// the HTML page (lib/provider-faq.mjs). It states only what data/providers.json holds: a null flag reads "not stated" with
+// its recorded reason (not-stated.mjs), never "no", and a number appears only with the page it comes from and the day it
+// was read. It is machine output, so days stay ISO (dates.mjs). It is a pure function of the record, the dataset date and
+// the version: the same data gives the same bytes.
 //
 // The twin is an alternate, not a second canonical page. It lives at /p/<slug>.md next to /p/<slug>.html (GitHub Pages
 // resolves the extensionless /p/<slug> to the .html file only), names the HTML page as canonical in its header, and is
@@ -14,9 +17,14 @@
 
 import { pythonChatQuickstart, pythonEmbeddingsQuickstart, curlChatQuickstart } from './quickstart.mjs';
 import { fieldCheck, REASON_LABEL } from './field-checks.mjs';
+import { NOT_STATED } from './not-stated.mjs';
 import { trainState } from './data-policy-page.mjs';
 import { limitFigures } from './provider-meta.mjs';
 import { shortenProse } from './short-text.mjs';
+import { answerFirst } from './provider-faq.mjs';
+import { FACT_ANCHORS } from './provider-sections.mjs';
+import { authorshipLine } from './site-entity.mjs';
+import { providerTitle } from './provider-title.mjs';
 
 export const FREE_TYPE_WORDS = Object.freeze({
   'renewing-quota': 'free quota that renews',
@@ -65,21 +73,18 @@ export function quickstartModel(p) {
   return (p.models_free && p.models_free[0]) || DEFAULT_MODEL[p.slug] || '<a-free-model>';
 }
 
-/** "Is <name> free?" answered in one paragraph from category, free_type and free_tier. */
+/**
+ * "Is <name> free?" answered from the record: first the answer-first sentence of the HTML page (#is-it-free, the same
+ * words), then what is free in the provider's terms, the expiry and the verification day.
+ */
 export function isItFreeMd(p) {
-  const kind = FREE_TYPE_WORDS[p.free_type];
-  const what = mdText(p.free_tier);
-  let lead;
-  if (p.free_type === 'trial-credit') lead = `Partly. ${mdText(p.name)} gives a one-time trial credit, not a free tier that renews.`;
-  else if (p.free_type === 'recurring-credit') lead = `Yes, as a credit that renews. ${mdText(p.name)} gives a free credit on a schedule.`;
-  else if (p.free_type === 'perpetual') lead = `Yes. ${mdText(p.name)} lists models as free with no end date.`;
-  else if (p.free_type === 'renewing-quota') lead = `Yes. ${mdText(p.name)} has an ongoing free tier: a free quota that renews.`;
-  else lead = `${mdText(p.name)} has a ${p.category === 'ongoing' ? 'free tier' : 'trial credit'}${kind ? ` (${kind})` : ''}.`;
+  const what = p.free_tier ? mdText(p.free_tier) : NOT_STATED;
+  const lead = mdText(answerFirst(p).text);
   const expiry = p.expires ? ` Expires: ${mdText(p.expires)}.` : '';
   const verified = p.verified === true && DATE_RE.test(String(p.last_verified || ''))
     ? `Verified against the provider's own docs on ${p.last_verified}.`
     : 'Not verified yet: confirm every figure against the provider\'s docs.';
-  return `${lead} What is free: ${what}${/[.!?]$/.test(what) ? '' : '.'}${expiry}\n\n${verified}`;
+  return `${lead}\n\nWhat is free, in the provider's terms: ${what}${/[.!?]$/.test(what) ? '' : '.'}${expiry}\n\n${verified}`;
 }
 
 /** The pages read for a check and the day, as one Markdown sentence ('' when there is no dated check). */
@@ -92,13 +97,12 @@ export function checkSourceMd(check) {
   return `${quote}${pages ? `${lead} ${pages}, ` : ''}checked ${check.checked}.${check.note ? ` ${mdText(check.note)}` : ''}`;
 }
 
-/** A tri-state flag in words; null says its recorded reason, never "no". */
+/** A tri-state flag in words; null reads "not stated" with its recorded reason, never "no". */
 export function flagWords(value, yes, no, check) {
   if (value === true) return yes;
   if (value === false) return no;
   if (value === 'conditional') return 'conditional';
-  const reason = check && REASON_LABEL[check.status] && check.status !== 'stated' ? REASON_LABEL[check.status] : REASON_LABEL.not_checked;
-  return `unknown (${reason})`;
+  return check && REASON_LABEL[check.status] && check.status !== 'stated' ? REASON_LABEL[check.status] : REASON_LABEL.not_checked;
 }
 
 function flagsMd(p) {
@@ -117,11 +121,11 @@ function flagsMd(p) {
   ];
   const dp = p.data_policy && typeof p.data_policy === 'object' ? p.data_policy : null;
   if (dp) {
-    const trains = { yes: 'yes', no: 'no' }[trainState(p)] || 'not confirmed';
+    const trains = { yes: 'yes', no: 'no' }[trainState(p)] || NOT_STATED;
     const quote = dp.quote ? ` "${mdText(dp.quote)}"` : '';
     const src = link("the provider's page", dp.source);
     rows.push(`- **Trains on your prompts:** ${trains}.${quote}${src ? ` Per ${src}` : ''}${DATE_RE.test(String(dp.checked || '')) ? `${src ? ',' : ''} checked ${dp.checked}` : ''}${src || dp.checked ? '.' : ''}`);
-    rows.push(`- **Prompt retention:** ${dp.retention ? mdText(dp.retention) : 'not confirmed'}`);
+    rows.push(`- **Prompt retention:** ${dp.retention ? mdText(dp.retention) : NOT_STATED}`);
   }
   return rows.join('\n');
 }
@@ -134,9 +138,12 @@ function limitsMd(p) {
     if (rows.length) out.push(rows.join('\n'));
     out.push(`${fl.scope ? `Scope: ${mdText(fl.scope)}${/[.!?]$/.test(fl.scope) ? '' : '.'} ` : ''}Source: ${link("the provider's page", fl.source)}, read ${fl.checked}.`);
   } else {
-    out.push('Numeric limits are not recorded in structured form for this provider.');
+    out.push('Numeric limits: not stated in structured form for this provider.');
   }
-  out.push(`**In the provider's words:** ${p.rate_limits ? mdText(p.rate_limits) : 'not specified'}`);
+  const docs = link('the official docs', p.docs_url);
+  const read = p.verified === true && DATE_RE.test(String(p.last_verified || '')) ? `verified ${p.last_verified}` : '';
+  const per = p.rate_limits && (docs || read) ? ` (${[docs && `per ${docs}`, read].filter(Boolean).join(', ')})` : '';
+  out.push(`**In the provider's words:** ${p.rate_limits ? `${mdText(p.rate_limits)}${per}` : NOT_STATED}`);
   if (p.notes) out.push(`**The catch:** ${mdText(p.notes)}`);
   return out.join('\n\n');
 }
@@ -168,23 +175,49 @@ function linksMd(p, { site }) {
   ].filter(Boolean).join('\n');
 }
 
-/** The whole /p/<slug>.md document. */
-export function providerMarkdown(p, { site, asOf, version }) {
+/**
+ * The stable anchors of the HTML page, one per fact, so a citation can point at the fact and not only the page. Only
+ * anchors the page carries for this record are listed (#data-policy exists only with a data_policy).
+ */
+export function factAnchors(p, { site }) {
+  const page = `${site}/p/${p.slug}`;
+  const rows = [
+    ['Is it free', 'is-it-free'],
+    ...(p.free_tier ? [["What's free", 'whats-free']] : []),
+    ['Free limits', 'limits'],
+    ['Credit card', FACT_ANCHORS.card_required],
+    ['Phone verification', FACT_ANCHORS.phone_required],
+    ['Commercial use', FACT_ANCHORS.commercial_ok],
+    ['OpenAI-compatible base URL', FACT_ANCHORS.openai_compatible],
+    ['Quickstart', 'quickstart'],
+    ...(p.data_policy && typeof p.data_policy === 'object' ? [['Data policy', 'data-policy']] : []),
+    ['FAQ', 'faq'],
+  ];
+  return rows.map(([label, id]) => ({ label, id, url: `${page}#${id}` }));
+}
+
+/** The whole /p/<slug>.md document. `repo` is the GitHub repository URL, named with the publisher and the creator. */
+export function providerMarkdown(p, { site, asOf, version, repo }) {
+  if (!mdUrl(repo)) throw new Error('providerMarkdown needs the repository URL (repo)');
   const models = (p.models_free || []).length
     ? `\n\n**Free models (sample):** ${p.models_free.map(mdCode).join(', ')}`
     : '';
-  return `# ${mdText(p.name)}: free tier and limits\n\n` +
+  // The same question, answer and date as the HTML page's title and h1 (lib/provider-title.mjs).
+  const pt = providerTitle(p);
+  return `# ${mdText(pt.title)}\n\n` +
     `> ${mdText(p.best_for || p.free_tier)}\n\n` +
     `Data of ${asOf} (dataset v${version}) from the Free LLM API Hub, MIT-licensed. Canonical page: ${site}/p/${p.slug}\n\n` +
-    `## Is ${mdText(p.name)} free?\n\n${isItFreeMd(p)}\n\n` +
+    `${authorshipLine(repo)}\n\n` +
+    `## ${mdText(pt.question)}\n\n${isItFreeMd(p)}\n\n` +
     `## Free limits\n\n${limitsMd(p)}\n\n` +
     `## Flags\n\n${flagsMd(p)}\n\n` +
     `## At a glance\n\n` +
-    `- **Plan:** ${p.category === 'ongoing' ? 'ongoing free tier' : 'trial credit'} (${FREE_TYPE_WORDS[p.free_type] || 'not recorded'})\n` +
-    `- **Modalities:** ${mdText((p.modalities || []).join(', ') || 'not listed')}\n` +
-    `- **Expires:** ${p.expires ? mdText(p.expires) : p.free_type === 'trial-credit' && !p.no_expiry ? 'not confirmed' : 'no expiry'}` +
+    `- **Plan:** ${p.category === 'ongoing' ? 'ongoing free tier' : 'trial credit'} (${FREE_TYPE_WORDS[p.free_type] || NOT_STATED})\n` +
+    `- **Modalities:** ${mdText((p.modalities || []).join(', ') || NOT_STATED)}\n` +
+    `- **Expires:** ${p.expires ? mdText(p.expires) : p.free_type === 'trial-credit' && !p.no_expiry ? NOT_STATED : 'no expiry'}` +
     models + `\n\n` +
     `## Quickstart\n\n${quickstartMd(p)}\n\n` +
+    `## Cite a fact\n\nEach fact has a stable anchor on the HTML page:\n\n${factAnchors(p, { site }).map((a) => `- ${a.label}: ${a.url}`).join('\n')}\n\n` +
     `## Links\n\n${linksMd(p, { site })}\n`;
 }
 
@@ -193,10 +226,10 @@ export function oneLineLimits(p) {
   const figures = p.free_limits && mdUrl(p.free_limits.source) ? limitFigures(p.free_limits) : [];
   if (figures.length) return figures.join(', ');
   if (p.rate_limits) return mdText(shortenProse(String(p.rate_limits).replace(/\s+/g, ' '), 120).text);
-  return 'limits not specified';
+  return `limits ${NOT_STATED}`;
 }
 
-/** One provider line of llms.txt: name, free type, limits, HTML page and Markdown twin. */
+/** One provider line of llms.txt: the page's title (question, answer, date), free type, limits, HTML page and Markdown twin. */
 export function llmsProviderLine(p, { site }) {
-  return `- [${mdText(p.name)}](${site}/p/${p.slug}): ${FREE_TYPE_WORDS[p.free_type] || p.category}; ${oneLineLimits(p)} ([Markdown](${site}/p/${p.slug}.md))`;
+  return `- [${mdText(providerTitle(p).title)}](${site}/p/${p.slug}): ${FREE_TYPE_WORDS[p.free_type] || p.category}; ${oneLineLimits(p)} ([Markdown](${site}/p/${p.slug}.md))`;
 }

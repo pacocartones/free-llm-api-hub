@@ -27,8 +27,8 @@ const ghost = { ...base, slug: 'ghost', name: 'Ghost', verified: false, models_f
 const fam = (slug) => MODEL_FAMILIES.find((f) => f.slug === slug);
 const page = (g, others = []) => familyPageMainHtml(g, { asOf: '2026-11-26', others });
 
-test('six fixed families with stable, URL-safe slugs', () => {
-  assert.deepEqual(MODEL_FAMILIES.map((f) => f.slug), ['qwen', 'gemma', 'deepseek', 'llama', 'gpt-oss', 'glm']);
+test('eleven fixed families with stable, URL-safe slugs', () => {
+  assert.deepEqual(MODEL_FAMILIES.map((f) => f.slug), ['qwen', 'gemma', 'deepseek', 'llama', 'gpt-oss', 'glm', 'mistral', 'kimi', 'minimax', 'nemotron', 'command']);
   for (const f of MODEL_FAMILIES) assert.match(f.slug, /^[a-z0-9]+(-[a-z0-9]+)*$/);
   assert.equal(FAMILY_PATH, 'free-api/');
 });
@@ -40,9 +40,28 @@ test('an ID belongs to the family it names first; the organisation prefix never 
   assert.equal(familyOf('accounts/fireworks/models/glm-5p3').slug, 'glm');
   assert.equal(familyOf('openai/gpt-oss-120b').slug, 'gpt-oss');
   assert.equal(familyOf('google/gemma-4-26b-a4b-it:free').slug, 'gemma');
-  assert.equal(familyOf('meta-llama/mistral-small'), null, 'an org called meta-llama does not make a model Llama');
+  assert.equal(familyOf('meta-llama/mistral-small').slug, 'mistral', 'an org called meta-llama does not make a model Llama');
   assert.equal(familyOf('ollama-like-model'), null, 'the token must start the ID or follow a non-letter');
-  assert.equal(familyOf('mistral-small-3.1-24b'), null);
+  assert.equal(familyOf('phi-4-mini'), null, 'a family without a page has no family');
+});
+
+test('the five families added second: Mistral (all its lines), Kimi, MiniMax, Nemotron, Cohere Command', () => {
+  const slug = (id) => familyOf(id)?.slug ?? null;
+  assert.equal(slug('@cf/mistralai/mistral-small-3.1-24b-instruct'), 'mistral');
+  assert.equal(slug('mistralai/Mixtral-8x7B-Instruct-v0.1'), 'mistral');
+  assert.equal(slug('codestral-2501'), 'mistral');
+  assert.equal(slug('devstral-small-2505'), 'mistral');
+  assert.equal(slug('magistral-medium'), 'mistral');
+  assert.equal(slug('moonshotai/Kimi-K2.6'), 'kimi');
+  assert.equal(slug('accounts/fireworks/models/kimi-k3'), 'kimi');
+  assert.equal(slug('MiniMax/MiniMax-M3'), 'minimax');
+  assert.equal(slug('nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free'), 'nemotron');
+  assert.equal(slug('nvidia/Llama-3.1-Nemotron-70B-Instruct'), 'llama', 'a Nemotron fine-tune of Llama names Llama first');
+  assert.equal(slug('cohere.command-a-03-2025'), 'command');
+  assert.equal(slug('command-r7b-12-2024'), 'command');
+  assert.equal(slug('cohere/command-a'), 'command');
+  assert.equal(slug('my-command-line-model'), null, 'only Command A and Command R, not the word');
+  assert.equal(fam('command').name, 'Cohere Command');
 });
 
 test('only verified providers, each once with all its IDs of the family, in the recommended order', () => {
@@ -58,13 +77,13 @@ test('only verified providers, each once with all its IDs of the family, in the 
 test('the answer comes first and carries the count, the split and the top options', () => {
   const g = familyGroup(fam('llama'), [alpha, beta]);
   const a = familyAnswer(g, '2026-11-26');
-  assert.match(a, /^As of 2026-11-26, 2 providers in the dataset, all verified, list a Llama model in their free-model sample: 1 with an ongoing free tier and 1 with one-time trial credit\./);
+  assert.match(a, /^As of 26 Nov 2026, 2 providers in the dataset, all verified, list a Llama model in their free-model sample: 1 with an ongoing free tier and 1 with one-time trial credit\./);
   assert.match(a, /top options, in the hub's recommended order, are (Alpha and Beta <b>|Beta <b> and Alpha)\.$/);
   const html = page(g);
   assert.ok(html.indexOf('<p class="answer">') < html.indexOf('<table'), 'the answer is above the table');
   assert.ok(html.includes(htmlEsc(a)), 'the answer is escaped');
   assert.doesNotMatch(html, /<b>/, 'provider names are escaped');
-  assert.equal(familyAnswer(familyGroup(fam('glm'), [alpha]), '2026-11-26'), 'As of 2026-11-26, no verified provider in the dataset lists a GLM model in its free-model sample.');
+  assert.equal(familyAnswer(familyGroup(fam('glm'), [alpha]), '2026-11-26'), 'As of 26 Nov 2026, no verified provider in the dataset lists a GLM model in its free-model sample.');
 });
 
 test('the table shows data only: limits, flags, date; a null reads "Not stated"', () => {
@@ -79,8 +98,9 @@ test('the table shows data only: limits, flags, date; a null reads "Not stated"'
   assert.match(cells[3], /^Not stated<br><span class="notes">needs an account to check<\/span>$/, 'card, with its recorded reason');
   assert.equal(cells[4], 'Not stated', 'phone');
   assert.equal(cells[5], 'Not stated', 'commercial use');
-  assert.equal(cells[6], 'Not stated', 'last verified');
-  assert.match(html, /<time datetime="2026-11-01">2026-11-01<\/time>/);
+  // The date, then the row's "Report a mistake" link (lib/report-mistake.mjs; without a repo it points to /contributing/).
+  assert.equal(cells[6], 'Not stated<br><small><a class="report-link" href="../../contributing/" aria-label="Report a mistake about Beta &lt;b&gt;">Report a mistake</a></small>', 'last verified');
+  assert.match(html, /<time datetime="2026-11-01">1 Nov 2026<\/time>/);
   assert.doesNotMatch(html, /available on|free forever|best|fastest/i);
   const cond = page(familyGroup(fam('qwen'), [gamma]));
   assert.match(cond, /Conditional<br><span class="notes">Per-model licence<\/span>/);

@@ -1,0 +1,97 @@
+name: Web deploy trigger
+
+# Asks the Cloudflare Worker that serves freellmapihub.com (static assets, built from a private repository) to rebuild
+# when main has changed since the build it serves (docs/architecture.md, "Hosting cutover"). Inert until the owner sets
+# the repository variable WEB_WATCH_ORIGIN and the `web-deploy` environment secret WEB_DEPLOY_HOOK: without the
+# variable the decide job only prints a notice, and the trigger job never starts.
+#
+# Decision (decide job): read ${WEB_WATCH_ORIGIN}/build.json. Trigger when it is missing or unreadable, when `force`
+# is set, at the daily 05:17 UTC run (the star count and the date-relative badge then refresh, as pages.yml's daily
+# deploy does), or when its public_sha is not on main or differs from main's tip in one of WATCHED, the inputs of
+# pages.yml's push trigger. The comparison uses anonymous git on a tree-only clone: no token, and no pull-request
+# code is ever checked out (this workflow has no pull-request trigger and no checkout step).
+on:
+  schedule:
+    - cron: '0 */2 * * *'
+    - cron: '17 5 * * *'
+  workflow_dispatch:
+    inputs:
+      force:
+        description: 'Trigger the deploy even when the live build is current'
+        type: boolean
+        default: false
+
+concurrency:
+  group: web-deploy-trigger
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  decide:
+    name: Decide whether to rebuild the Worker
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    outputs:
+      trigger: ${{ steps.decide.outputs.trigger }}
+    steps:
+      - id: decide
+        name: Compare the live build with main
+        env:
+          ORIGIN: ${{ vars.WEB_WATCH_ORIGIN }}
+          FORCE: ${{ inputs.force }}
+          SCHEDULE: ${{ github.event.schedule }}
+          REPO_URL: ${{ github.server_url }}/${{ github.repository }}.git
+        run: |
+          set -euo pipefail
+          out() { echo "trigger=$1" >> "$GITHUB_OUTPUT"; echo "$2"; }
+          if [ -z "$ORIGIN" ]; then
+            echo "::notice::WEB_WATCH_ORIGIN is not set, so nothing is checked or triggered (docs/architecture.md, Hosting cutover)."
+            out false 'skipped'
+            exit 0
+          fi
+          if [ "$FORCE" = true ]; then out true 'force is set'; exit 0; fi
+          if [ "$SCHEDULE" = '17 5 * * *' ]; then out true 'the daily 05:17 UTC rebuild'; exit 0; fi
+          build=$(mktemp)
+          if ! curl -fsS --max-time 20 -H 'cache-control: no-cache' -o "$build" "${ORIGIN%/}/build.json?trigger=${GITHUB_RUN_ID}"; then
+            out true "${ORIGIN%/}/build.json is missing or unreadable"; exit 0
+          fi
+          sha=$(node -e 'const b=JSON.parse(require("fs").readFileSync(process.argv[1],"utf8"));const s=String(b.public_sha||"");if(/^[0-9a-f]{40}$/.test(s))console.log(s)' "$build" 2>/dev/null || true)
+          if [ -z "$sha" ]; then out true 'build.json has no valid public_sha'; exit 0; fi
+          git init -q repo && cd repo
+          git remote add origin "$REPO_URL"
+          git fetch -q --filter=blob:none --no-tags origin main
+          if ! git cat-file -e "${sha}^{commit}" 2>/dev/null; then out true "public_sha $sha is not on main"; exit 0; fi
+          WATCHED=(data site scripts CONTRIBUTING.md docs/methodology.md derived-fingerprints.json)
+          changed=$(git diff --name-only --no-renames "$sha" FETCH_HEAD -- "${WATCHED[@]}")
+          if [ -n "$changed" ]; then
+            echo "Changed on main since $sha ($(echo "$changed" | wc -l) file(s)):"; echo "$changed" | sed -n '1,20p'
+            out true "main ($(git rev-parse FETCH_HEAD)) changed since the live build"
+          else
+            out false "the live build ($sha) is current"
+          fi
+
+  trigger:
+    name: Trigger the Worker build
+    needs: decide
+    if: ${{ needs.decide.outputs.trigger == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    environment: web-deploy
+    permissions:
+      contents: read
+    steps:
+      - name: POST the deploy hook
+        env:
+          # An environment secret of `web-deploy`; it is a URL that starts a build, so it is never printed.
+          WEB_DEPLOY_HOOK: ${{ secrets.WEB_DEPLOY_HOOK }}
+        run: |
+          if [ -z "$WEB_DEPLOY_HOOK" ]; then
+            echo "::notice::The web-deploy environment has no WEB_DEPLOY_HOOK secret, so no build was triggered."
+            exit 0
+          fi
+          curl -fsS -X POST -o /dev/null --max-time 30 "$WEB_DEPLOY_HOOK"
+          echo 'Deploy hook accepted.'

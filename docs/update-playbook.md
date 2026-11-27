@@ -1,6 +1,6 @@
 # Update playbook
 
-How this list stays current — the routine that keeps the freshness badge green. Provider verification and dataset regeneration run locally, on demand, on a machine you control. Two maintenance jobs run in Actions: [weekly issue publication](../.github/workflows/weekly-worklist.yml) replaces issue #4's generated worklist from repository metadata without visiting provider sources, and the report-only [source watch](#source-watch) re-reads the pages cited in `data/quotes.json` and lists quotes to re-check. Neither verifies a provider claim or edits data.
+How this dataset stays current — the routine that keeps the freshness badge green. Provider verification and dataset regeneration run locally, on demand, on a machine you control. Two maintenance jobs run in Actions: [weekly issue publication](../.github/workflows/weekly-worklist.yml) replaces issue #4's generated worklist from repository metadata without visiting provider sources, and the report-only [source watch](#source-watch) re-reads the pages cited in `data/quotes.json` and lists quotes to re-check. Neither verifies a provider claim or edits data.
 
 Before the first pass in a clone, install the locked local development tools without running package lifecycle scripts:
 

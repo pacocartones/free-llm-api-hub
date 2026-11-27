@@ -9,6 +9,7 @@ import { escapeHtml } from './html.mjs';
 import { SLUG_RE } from './rows.mjs';
 import { claimsTableHtml } from './claims-table.mjs';
 import { safeHttp } from './text.mjs';
+import { timeHtml } from './dates.mjs';
 
 const LABELS = Object.freeze({
   free_access: 'Free access',
@@ -25,7 +26,7 @@ const KIND_LABEL = Object.freeze({ 'ide-extension': 'IDE extension', editor: 'ed
 const quoteHtml = (q) => {
   const src = safeHttp(q.source);
   const link = src ? `<a href="${escapeHtml(src)}" target="_blank" rel="noopener">${escapeHtml(new URL(src).hostname)}</a>` : '';
-  return `<blockquote class="gpu-quote"><p>&ldquo;${escapeHtml(q.text)}&rdquo;</p><footer class="muted">${link}${link ? ' · ' : ''}read ${escapeHtml(q.read)}</footer></blockquote>`;
+  return `<blockquote class="gpu-quote"><p>&ldquo;${escapeHtml(q.text)}&rdquo;</p><footer class="muted">${link}${link ? ' · ' : ''}read ${timeHtml(q.read, escapeHtml)}</footer></blockquote>`;
 };
 
 function claimHtml(slug, field, claim) {
@@ -102,7 +103,7 @@ export function codingToolMainHtml(entry, { prefix = '../../', group = 'free', o
     (unstated.length ? claims(unstated) : '<p class="muted">Everything is stated.</p>') +
     '<h2 id="sources">Sources</h2>' +
     (sources.length
-      ? `<ul class="plain tool-sources">${sources.map((x) => `<li><a href="${escapeHtml(x.src)}" target="_blank" rel="noopener">${escapeHtml(x.src)}</a> · read ${x.days.map(escapeHtml).join(', ')}</li>`).join('')}</ul>`
+      ? `<ul class="plain tool-sources">${sources.map((x) => `<li><a href="${escapeHtml(x.src)}" target="_blank" rel="noopener">${escapeHtml(x.src)}</a> · read ${x.days.map((d) => timeHtml(d, escapeHtml)).join(', ')}</li>`).join('')}</ul>`
       : '<p class="muted">No source page is quoted.</p>') +
     (others.length
       ? `<h2 id="others">Other free AI coding tools</h2><div class="colls">${others.filter((o) => SLUG_RE.test(o.slug)).map((o) => `<a href="${prefix}coding-tools/${o.slug}/">${escapeHtml(o.name)}</a>`).join('')}</div>`
@@ -122,7 +123,7 @@ function ownKeyHtml(ownKey, prefix) {
     `See also: <a href="${prefix}collections/openai-compatible">OpenAI-compatible free APIs</a>; <a href="${prefix}#explorer">the interactive explorer</a>. ` +
     'The same rule holds: a value is written only where the tool\'s own page says it, and <strong>Not stated</strong> is never <em>no</em>.</p>' +
     `<p class="muted">${c.tools} tools listed; ${c.stated} of ${c.total} values rest on a sentence from the tool's own page.</p>` +
-    claimsTableHtml({ id: 'own', entries: ownKey.entries, labels: LABELS, kindLabel: (k) => KIND_LABEL[k] || k, subject: 'tool' }) +
+    claimsTableHtml({ id: 'own', entries: ownKey.entries, labels: LABELS, kindLabel: (k) => KIND_LABEL[k] || k, subject: 'tool', label: 'Comparison of the tools you connect your own key to' }) +
     entriesHtml(ownKey, prefix) + notesHtml(ownKey);
 }
 

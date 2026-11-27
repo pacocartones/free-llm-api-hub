@@ -73,6 +73,12 @@
       "of": 6,
       "rank": null
     },
+    "synap": {
+      "total": 39.9,
+      "confirmed": 3,
+      "of": 6,
+      "rank": null
+    },
     "runware": {
       "total": 38.4,
       "confirmed": 3,
@@ -91,6 +97,12 @@
       "of": 6,
       "rank": 6
     },
+    "gonka-broker": {
+      "total": 37,
+      "confirmed": 3,
+      "of": 6,
+      "rank": null
+    },
     "ai-horde": {
       "total": 36.5,
       "confirmed": 2,
@@ -99,6 +111,12 @@
     },
     "ovhcloud-ai-endpoints": {
       "total": 36.5,
+      "confirmed": 2,
+      "of": 6,
+      "rank": null
+    },
+    "moark": {
+      "total": 36,
       "confirmed": 2,
       "of": 6,
       "rank": null
@@ -373,12 +391,6 @@
       "of": 6,
       "rank": null
     },
-    "nlpcloud": {
-      "total": 26.6,
-      "confirmed": 2,
-      "of": 6,
-      "rank": null
-    },
     "berget-ai": {
       "total": 26.1,
       "confirmed": 2,
@@ -430,6 +442,12 @@
     "huggingface": {
       "total": 26,
       "confirmed": 0,
+      "of": 6,
+      "rank": null
+    },
+    "morph": {
+      "total": 26,
+      "confirmed": 1,
       "of": 6,
       "rank": null
     },
@@ -500,6 +518,12 @@
       "rank": null
     },
     "google-cloud-tts": {
+      "total": 22.1,
+      "confirmed": 1,
+      "of": 6,
+      "rank": null
+    },
+    "nlpcloud": {
       "total": 22.1,
       "confirmed": 1,
       "of": 6,

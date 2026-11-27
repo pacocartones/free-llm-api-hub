@@ -17,12 +17,15 @@ const DATA = JSON.parse(readFileSync(join(import.meta.dirname, '..', 'data/provi
 const unescape = (s) => s.split('&amp;').join('&');
 const meta = (html, re) => unescape((html.match(re) || [])[1] || '');
 
-test('homeTitle: the query first, both counts, under the title budget; a shorter form when the counts are long', () => {
-  assert.equal(homeTitle({ total: 85, verified: 84, ongoing: 43, trial: 42 }, 'Nov 2026'), 'Free LLM APIs (Nov 2026): 85 tiers & credits, 84 verified');
-  assert.equal(homeTitle({ total: 85, verified: 85, ongoing: 43, trial: 42 }, 'Nov 2026'), 'Free LLM APIs (Nov 2026): 85 tiers & credits, all verified');
+test('homeTitle: the literal phrase "free LLM API list" first, both counts, under the title budget', () => {
+  // The long form fits only with short counts; with today's two-digit counts the shorter "V of N verified" form is used.
+  assert.equal(homeTitle({ total: 9, verified: 8, ongoing: 5, trial: 4 }, 'Nov 2026'), 'Free LLM API list (Nov 2026): 9 tiers & credits, 8 verified');
+  assert.equal(homeTitle({ total: 85, verified: 84, ongoing: 43, trial: 42 }, 'Nov 2026'), 'Free LLM API list (Nov 2026): 84 of 85 verified');
+  assert.equal(homeTitle({ total: 85, verified: 85, ongoing: 43, trial: 42 }, 'Nov 2026'), 'Free LLM API list (Nov 2026): all 85 verified');
   const long = homeTitle({ total: 1234, verified: 1200, ongoing: 600, trial: 634 }, 'Sept 2026');
   assert.ok(long.length <= HOME_TITLE_MAX, long);
   assert.ok(long.includes('1200 of 1234 verified'), long);
+  for (const t of [long, homeTitle({ total: 9, verified: 9 }, 'May 2026')]) assert.match(t, /free LLM API list/i);
   assert.equal(verifiedPhrase({ total: 85, verified: 84 }), '84 of 85 verified');
   assert.equal(verifiedPhrase({ total: 85, verified: 85 }), 'all 85 verified');
 });
@@ -39,9 +42,10 @@ test('built home page: title, description and their og:/twitter: copies come fro
   const html = readFileSync(join(ROOT, 'site/index.html'), 'utf8');
   const c = homeCounts(DATA.providers);
   const title = meta(html, /<title>([^<]*)<\/title>/);
-  assert.ok(title.startsWith('Free LLM APIs'), title);
+  assert.ok(title.startsWith('Free LLM API list ('), title);
+  assert.match(title, /free LLM API list/i);
   assert.ok(title.length < 60, `${title.length}: ${title}`);
-  assert.ok(title.includes(String(c.total)) && (title.includes(`${c.verified} verified`) || title.includes('all verified')), `counts from the data: ${title}`);
+  assert.ok(title.includes(String(c.total)) && (title.includes(`${c.verified} verified`) || title.includes('all verified') || title.includes(verifiedPhrase(c))), `counts from the data: ${title}`);
   assert.equal(meta(html, /<meta property="og:title" content="([^"]*)">/), title);
   assert.equal(meta(html, /<meta name="twitter:title" content="([^"]*)">/), title);
   const desc = meta(html, /<meta name="description" content="([^"]*)">/);

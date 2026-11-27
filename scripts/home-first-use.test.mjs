@@ -31,14 +31,14 @@ test('firstUseFacts: counts and the verification date range come from the record
 test('firstUseHtml: quotes the figures, dates the oldest verification and links the three references', () => {
   const html = firstUseHtml(P, { slaDays: 90 });
   assert.match(html, /<section class="first-use" aria-labelledby="first-use-h">/);
-  assert.match(html, /<h2 id="first-use-h"[^>]*>New here\? How this list works<\/h2>/);
+  assert.match(html, /<h2 id="first-use-h"[^>]*>New here\? How this dataset works<\/h2>/);
   for (const h of ['What this is', 'How we verify', 'How to use it']) assert.match(html, new RegExp(`<h3>.*${h}</h3>`));
   assert.match(html, /dataset of 4 free LLM/);
   assert.match(html, /2 ongoing free tiers and 2 trial credits/);
   assert.match(html, /3 of 4 entries are verified/);
-  assert.match(html, /The dates run from <time datetime="2026-01-02">2026-01-02<\/time> to <time datetime="2026-03-10">2026-03-10<\/time>/);
+  assert.match(html, /The dates run from <time datetime="2026-01-02">2 Jan 2026<\/time> to <time datetime="2026-03-10">10 Mar 2026<\/time>/);
   assert.match(html, /1 entry could not be confirmed from an official source and is marked/);
-  assert.match(html, /Oldest verification: <time datetime="2026-01-02">2026-01-02<\/time>\. Each entry is due for a re-check 90 days after its date\./);
+  assert.match(html, /Oldest verification: <time datetime="2026-01-02">2 Jan 2026<\/time>\. Each entry is due for a re-check 90 days after its date\./);
   for (const href of ['#explorer', 'methodology/', 'api/', 'changes/']) assert.ok(html.includes(`href="${href}"`), `links ${href}`);
 });
 
@@ -73,7 +73,7 @@ test('the built home page carries the strip from the real data, above the explor
   const at = (s) => home.indexOf(s);
   assert.ok(at('<section class="hero">') < at('<section class="first-use"'), 'the strip follows the hero');
   assert.ok(at('<section class="first-use"') < at('<div class="controls">'), 'the strip comes before the explorer controls');
-  assert.ok(at('<div class="controls">') < at('<main id="explorer">'));
+  assert.ok(at('<div class="controls">') < at('<div id="explorer"'));
 });
 
 test('every link in the strip resolves in the build', () => {

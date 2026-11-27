@@ -20,7 +20,9 @@ export function claimsFilters(entries, labels) {
   return { fields, kinds: kinds.length > 1 ? kinds : [] };
 }
 
-export function claimsTableHtml({ id, entries, labels, kindLabel, subject }) {
+// `label` names the scrolling region; a page with two tables of the same subject passes its own, so the two landmarks
+// do not share one name (axe landmark-unique).
+export function claimsTableHtml({ id, entries, labels, kindLabel, subject, label = '' }) {
   if (!entries || entries.length < 2) return '';
   const allFields = Object.keys(labels);
   const stateCount = (f) => entries.filter((e) => e.claims[f] && e.claims[f].state === 'stated').length;
@@ -56,7 +58,7 @@ export function claimsTableHtml({ id, entries, labels, kindLabel, subject }) {
     `<p class="muted">One row per ${escapeHtml(subject)}. <strong>Stated</strong> means the page's own sentence says it, and the cell links to that sentence in the entry below; ` +
     `<strong>Not stated</strong> is never <em>no</em>. ${filterFields.length > 1 ? `If the filters leave no row, no ${escapeHtml(subject)} states all of the points you chose.` : ''}</p>` +
     filters +
-    `<div class="table-scroll" role="region" aria-label="Comparison of the ${escapeHtml(subject)}s" tabindex="0">` +
+    `<div class="table-scroll" role="region" aria-label="${escapeHtml(label || `Comparison of the ${subject}s`)}" tabindex="0">` +
     `<table class="cmp-table"><caption class="sr-only">What each ${escapeHtml(subject)} says about each point</caption>` +
     `<thead><tr><th scope="col">${escapeHtml(subject[0].toUpperCase() + subject.slice(1))}</th><th scope="col">Kind</th>` +
     fields.map((f) => `<th scope="col">${escapeHtml(labels[f])}</th>`).join('') + `</tr></thead><tbody>${rows}</tbody></table></div>` +

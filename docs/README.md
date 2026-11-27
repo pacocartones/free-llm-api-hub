@@ -11,7 +11,7 @@ How **Free LLM API Hub** works — how entries are verified, what earns a spot, 
 | [Inclusion criteria](inclusion-criteria.md) | What earns a spot, and what gets rejected |
 | [Comparison dimensions](comparison-dimensions.md) | Every field and flag in the dataset, defined |
 
-## Maintaining the list
+## Maintaining the dataset
 
 | Doc | What it covers |
 |---|---|
@@ -20,6 +20,7 @@ How **Free LLM API Hub** works — how entries are verified, what earns a spot, 
 | [Quoted passages](quotes.md) | Evidence register, quote updates and offline versus live checks |
 | [Architecture](architecture.md) | The data-first pipeline: what each script does, the data model, the two-places rule |
 | [Regeneration bot](regeneration-bot.md) | The post-merge rebuild of derived files (off, then shadow mode, then direct push) and its pull-request preview |
+| [Merge manager](maintenance/merge-train.md) | Merge trains in GitHub Actions: approved pull requests are merged after the checks pass on main + all of them |
 | [Provider schema reference](schema.md) | Generated field types, nullability and required keys of `data/schema.json` |
 | [Static JSON API: stability and versioning](api.md) | What `/api/v1/` guarantees, how `version` relates to the path, and pinning a snapshot by tag |
 | [Discovery sources & competitive map](sources.md) | Where new providers are found, which lists to trust, and how we differ from rivals |
@@ -29,6 +30,7 @@ How **Free LLM API Hub** works — how entries are verified, what earns a spot, 
 | [Preparing dataset releases](release-preparation.md) | Stable local preparation procedure for dataset tags, GitHub Releases and snapshot assets |
 | [MCP product boundaries and release checklist](mcp-productization.md) | Product limits and pre-release checks for public distribution of the MCP server |
 | [MCP release setup](mcp-release.md) | Maintainer procedure for external setup and release of the MCP package |
+| [Screenshots](screenshots.md) | Regenerating the gallery and pull-request screenshots on demand, with live numbers |
 
 ## Adjacent references
 

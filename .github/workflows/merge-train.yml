@@ -1,0 +1,116 @@
+name: Merge train
+
+# The merge manager: merges the pull requests a maintainer approved with the `merge-train` label, in "trains" that
+# run the required checks once on main + every approved pull request before anything is merged. It replaces the
+# local queue.sh/train.sh/heal.sh loop and spends no personal API quota. Design, failure modes, how to add or remove a
+# pull request and how to stop it: docs/maintenance/merge-train.md.
+#
+#   MERGE_TRAIN_MODE=shadow  plan only: the run summary lists what it would do; nothing is changed
+#   MERGE_TRAIN_MODE=on      plan, then act
+#   anything else            disabled (the default: the variable is unset)
+#
+# Triggers: merge-train-kick.yml dispatches this workflow when a labelled pull request changes or a CI run completes
+# (it is the only part that listens to pull-request events, and it runs no code). The schedule is a fallback for a
+# missed event. Only workflow_dispatch and schedule start it, so it always runs on main's code.
+#
+# Security model:
+# - It never runs pull-request code. Pull-request commits are fetched anonymously as git objects and merged; no
+#   dependency is installed and only scripts/merge-train.mjs (from main) runs. `.git/info/attributes` overrides any
+#   merge driver or filter a branch's .gitattributes asks for.
+# - `plan` reads with a read-only GITHUB_TOKEN. `act` runs only in mode `on` with something to do, in the `regenerate`
+#   environment (deployment branch main only), where it mints a one-hour token of the regeneration App: its pushes and
+#   merges trigger CI and the post-merge workflows, which GITHUB_TOKEN's would not.
+# - The App is in the bypass list of the "main merge gate" ruleset, so GitHub does not re-check the required checks
+#   when it merges: the script does (the five checks on each member and on the train, no unresolved review thread).
+on:
+  workflow_dispatch: {}
+  schedule:
+    - cron: '7,37 * * * *' # every 30 min: a fallback for a dropped kick; UTC, best effort
+
+# One run at a time and never cancelled: a run may be in the middle of merging a train. GitHub keeps one pending run;
+# each run reads the state afresh, so the pending one covers every kick in between.
+concurrency:
+  group: merge-train
+  cancel-in-progress: false
+
+permissions: {}
+
+jobs:
+  plan:
+    name: Read the state and decide
+    if: ${{ github.repository == 'pacocartones/free-llm-api-hub' && (vars.MERGE_TRAIN_MODE == 'shadow' || vars.MERGE_TRAIN_MODE == 'on') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: read
+      issues: read
+      checks: read
+      statuses: read
+      actions: read
+    outputs:
+      act: ${{ steps.plan.outputs.act }}
+      plan: ${{ steps.plan.outputs.plan }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+          persist-credentials: false
+          fetch-depth: 0 # merge bases need the history
+          filter: blob:none # but not every blob: those a merge needs are fetched on demand
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+      - id: plan
+        name: Plan (one GraphQL query, anonymous git fetches)
+        env:
+          GH_TOKEN: ${{ github.token }}
+          MERGE_TRAIN_MODE: ${{ vars.MERGE_TRAIN_MODE }}
+          MERGE_TRAIN_LABELERS: ${{ vars.MERGE_TRAIN_LABELERS }}
+          MERGE_TRAIN_MAX: ${{ vars.MERGE_TRAIN_MAX }}
+          MERGE_TRAIN_REQUIRED_CHECKS: ${{ vars.MERGE_TRAIN_REQUIRED_CHECKS }}
+          REGEN_APP_SLUG: ${{ vars.REGEN_APP_SLUG }}
+        run: node scripts/merge-train.mjs plan
+
+  act:
+    name: Act on the plan
+    needs: plan
+    if: ${{ needs.plan.outputs.act == 'true' && vars.MERGE_TRAIN_MODE == 'on' && vars.REGEN_APP_CLIENT_ID != '' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: regenerate # holds REGEN_APP_PRIVATE_KEY; deployment branches: main only
+    permissions:
+      contents: read # git writes go through the App token
+      pull-requests: write # labels, comments, closing a train
+      issues: write # creating the labels on the first run
+      actions: write # approving waiting runs of an approved fork pull request
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+          persist-credentials: false
+          fetch-depth: 0
+          filter: blob:none
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+      - name: Mint a one-hour App token
+        id: app
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          client-id: ${{ vars.REGEN_APP_CLIENT_ID }}
+          private-key: ${{ secrets.REGEN_APP_PRIVATE_KEY }}
+          permission-contents: write
+          permission-pull-requests: write
+      - name: Act (git plumbing and merges only)
+        env:
+          PLAN: ${{ needs.plan.outputs.plan }}
+          GH_TOKEN: ${{ github.token }}
+          APP_TOKEN: ${{ steps.app.outputs.token }}
+          APP_SLUG: ${{ steps.app.outputs.app-slug }}
+          MERGE_TRAIN_MODE: ${{ vars.MERGE_TRAIN_MODE }}
+          MERGE_TRAIN_LABELERS: ${{ vars.MERGE_TRAIN_LABELERS }}
+          MERGE_TRAIN_MAX: ${{ vars.MERGE_TRAIN_MAX }}
+          MERGE_TRAIN_REQUIRED_CHECKS: ${{ vars.MERGE_TRAIN_REQUIRED_CHECKS }}
+          REGEN_APP_SLUG: ${{ vars.REGEN_APP_SLUG }}
+        run: node scripts/merge-train.mjs act
