@@ -55,10 +55,12 @@ test('on the dataset: the intent group opens the list and the general-purpose LL
   assert.ok(firstOutside > 0, 'the list opens with the intent group');
   assert.ok(order.slice(firstOutside).every((p) => intentRank(p) === 1), 'no intent-group row after the first row outside it');
   assert.equal(order[0].is_text_llm, true);
+  // Only while the data confirms "no card": a flag with no provider sentence is unknown, which takes it out of the intent group.
   for (const slug of ['google-gemini', 'groq']) {
     const i = order.findIndex((p) => p.slug === slug);
-    if (i >= 0) assert.ok(i < 10, `${slug} is in the top 10 (got #${i + 1})`);
+    if (i >= 0 && intentRank(order[i]) === 0) assert.ok(i < 10, `${slug} is in the top 10 (got #${i + 1})`);
   }
+  assert.ok(order.slice(0, 10).filter((p) => intentRank(p) === 0).length > 0, 'the top 10 holds general-purpose LLMs with no card');
 });
 
 test('the browser copy (shared-rules.js + shared-sort.js) sorts the dataset exactly like the module', () => {

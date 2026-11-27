@@ -1,4 +1,4 @@
-// MCP wiring: registers the four tools on an McpServer.
+// MCP wiring: registers the six tools on an McpServer.
 
 import { readFileSync } from 'node:fs';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
@@ -8,9 +8,11 @@ import {
   MODALITIES,
   ToolError,
   datasetInfo,
-  getProvider,
+  getProviderStatus,
+  getProviderWithStatus,
+  isFree,
   openaiClientConfig,
-  searchProviders,
+  searchProvidersWithStatus,
 } from './tools.js';
 
 const pkg = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
@@ -31,12 +33,28 @@ function fail(err) {
   return { isError: true, content: [{ type: 'text', text: message }] };
 }
 
-export function createServer(load, loadClients) {
+/**
+ * `loadStatus` reads status.json. `freshness: false` keeps provider results free of the status.json freshness grade
+ * (used when providers.json is a local file and status.json is not, so the two never mix builds);
+ * get_provider_status still reads status.json.
+ */
+export function createServer(load, loadClients, loadStatus = null, { freshness = true } = {}) {
   const server = new McpServer({ name: pkg.name, version: pkg.version });
+
+  // The freshness grade is optional enrichment: a missing or failing status.json never fails a provider tool.
+  const optionalStatus = async () => {
+    if (!freshness || !loadStatus) return null;
+    try {
+      return await loadStatus();
+    } catch {
+      return null;
+    }
+  };
 
   const run = (fn) => async (args) => {
     try {
-      return ok(fn(await load(), args ?? {}));
+      const [data, status] = await Promise.all([load(), optionalStatus()]);
+      return ok(fn(data, args ?? {}, status));
     } catch (err) {
       return fail(err);
     }
@@ -49,7 +67,8 @@ export function createServer(load, loadClients) {
       description:
         'Search the free-llm-api-hub dataset of free-tier and trial-credit LLM API providers. ' +
         'All filters are optional and combine with AND. Returns a compact list ' +
-        '(slug, name, category, free_tier, rate_limits, docs_url, last_verified, verified). ' +
+        '(slug, name, category, free_tier, rate_limits, docs_url, last_verified, verified and, when status.json is available, ' +
+        'freshness: fresh / due / stale / unverified against the 60/90-day SLA). ' +
         'The flag filters match only explicitly confirmed values: providers whose value is null ' +
         '(not confirmed) are left out and counted in excluded_unconfirmed, and in excluded_unconfirmed_by_reason by why the value is unknown. ' +
         TERMS,
@@ -64,7 +83,7 @@ export function createServer(load, loadClients) {
       },
       annotations: READ_ONLY,
     },
-    run((data, args) => searchProviders(data, args)),
+    run((data, args, status) => searchProvidersWithStatus(data, args, status)),
   );
 
   server.registerTool(
@@ -73,14 +92,15 @@ export function createServer(load, loadClients) {
       title: 'Get one provider entry',
       description:
         'Return the full dataset entry for one provider by slug, with its tri-state flags spelled out ' +
-        '(yes / no / not confirmed), the list of unconfirmed fields and, in unconfirmed_reasons, why each is unknown. An unknown slug is an error. ' +
+        '(yes / no / not confirmed), the list of unconfirmed fields and, in unconfirmed_reasons, why each is unknown, ' +
+        'plus its freshness grade from status.json when available. An unknown slug is an error. ' +
         TERMS,
       inputSchema: {
         slug: z.string().max(100).describe('Provider slug, e.g. "groq" (see search_providers).'),
       },
       annotations: READ_ONLY,
     },
-    run((data, args) => getProvider(data, args)),
+    run((data, args, status) => getProviderWithStatus(data, args, status)),
   );
 
   server.registerTool(
@@ -121,6 +141,49 @@ export function createServer(load, loadClients) {
       annotations: READ_ONLY,
     },
     run((data) => datasetInfo(data)),
+  );
+
+  server.registerTool(
+    'get_provider_status',
+    {
+      title: 'Provider freshness status',
+      description:
+        'Freshness of one provider (by slug) or of every provider (no slug), from the published status.json: ' +
+        'last_verified, oldest_field_check, freshness (fresh / due / stale / unverified against the 60/90-day SLA, graded at generated_at), ' +
+        'free_now (true / false / null, where null means not confirmed; not a live check) and last_change. ' +
+        'Without a slug it also counts providers per state. An unknown slug is an error. ' +
+        TERMS,
+      inputSchema: {
+        slug: z.string().max(100).optional().describe('Provider slug, e.g. "groq". Omit for every provider.'),
+      },
+      annotations: READ_ONLY,
+    },
+    async (args) => {
+      try {
+        if (!loadStatus) throw new ToolError('status.json is not configured for this server.');
+        return ok(getProviderStatus(await loadStatus(), args ?? {}));
+      } catch (err) {
+        return fail(err);
+      }
+    },
+  );
+
+  server.registerTool(
+    'is_free',
+    {
+      title: 'Is <provider> free?',
+      description:
+        'Answer "Is <provider> API free?" with the same sentence as the provider page on the site: ongoing free tier or one-time trial credit, ' +
+        'the published limits (or the free-tier wording), credit card, phone verification, commercial use and the day the entry was verified. ' +
+        'A field the dataset leaves null reads "not stated", never a guess. Each fact comes with source_date (the day its source was read) and source_url; ' +
+        'freshness and free_now from status.json are added when available. An unknown slug is an error. ' +
+        TERMS,
+      inputSchema: {
+        slug: z.string().max(100).describe('Provider slug, e.g. "groq" (see search_providers).'),
+      },
+      annotations: READ_ONLY,
+    },
+    run((data, args, status) => isFree(data, args, status)),
   );
 
   return server;

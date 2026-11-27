@@ -95,14 +95,22 @@ function resolveFile(urlPath) {
   return file.startsWith(SITE) && existsSync(file) ? file : null;
 }
 
+const compressed = new Map();
 const server = createServer((req, res) => {
   const file = resolveFile(req.url);
   if (!file) { res.writeHead(404); res.end('not found'); return; }
   const type = TYPES[extname(file)] || 'application/octet-stream';
   // Compressed like the production edge serves it (see negotiateEncoding), so Lighthouse measures the site, not this server.
   const encoding = negotiateEncoding(type, req.headers['accept-encoding']);
-  const raw = readFileSync(file);
-  const body = encoding === 'br' ? brotliCompressSync(raw) : encoding === 'gzip' ? gzipSync(raw) : raw;
+  // Compressed once per file and encoding: the site does not change during the run, and the pages measured side by
+  // side ask for the same CSS, fonts and scripts.
+  const key = `${encoding}:${file}`;
+  let body = compressed.get(key);
+  if (!body) {
+    const raw = readFileSync(file);
+    body = encoding === 'br' ? brotliCompressSync(raw) : encoding === 'gzip' ? gzipSync(raw) : raw;
+    compressed.set(key, body);
+  }
   res.writeHead(200, { 'content-type': type, ...(encoding ? { 'content-encoding': encoding, vary: 'Accept-Encoding' } : {}) });
   res.end(body);
 });
@@ -133,42 +141,64 @@ for (const dir of ['limits', 'alternatives']) {
 const lighthouse = join(ROOT, 'tools/lighthouse/node_modules/.bin/lighthouse');
 const RUNS = mode.runs;
 const failures = [];
-const summary = [`### Lighthouse (${mode.name}, ${RUNS === 1 ? 'one run' : `median of ${RUNS} runs`} per page)`, '',
+const summary = [`### Lighthouse (${mode.name}, ${RUNS === 1 ? 'one run' : `median of ${RUNS} runs`} per page, ${mode.concurrency} at a time)`, '',
   `| Page | ${mode.categories.join(' | ')} |`, `|---|${mode.categories.map(() => '---|').join('')}`];
+// Measures one page; returns its failures, its log line and its summary row, so the output keeps the page order
+// whatever order the pages finish in. Each concurrent worker has its own Chrome profile under PROFILE.
+async function measure(page, profile) {
+  const failed = [];
+  // The font budget does not depend on the runner: checked once per page, from the HTML that is served.
+  const htmlFile = resolveFile(page);
+  if (htmlFile) {
+    const pageDir = dirname(htmlFile.slice(SITE.length)) || '/';
+    const sizeOf = (ref) => { const f = resolveFile(ref.startsWith('/') ? ref : join(pageDir, ref)); return f ? statSync(f).size : null; };
+    failed.push(...fontBudgetFailures(page, readFileSync(htmlFile, 'utf8'), sizeOf, FONT_BUDGET_BYTES));
+  }
+  // Asynchronous on purpose: a synchronous child process would block this process's event loop, and the server below could never answer Lighthouse.
+  const reports = [];
+  for (let i = 0; i < RUNS; i++) {
+    try {
+      const out = await runLighthouse(lighthouse, [
+        base + page, '--output=json', '--quiet',
+        `--only-categories=${mode.categories.join(',')}`,
+        `--chrome-flags=--headless --no-sandbox --user-data-dir=${profile}`,
+      ]);
+      reports.push(JSON.parse(out));
+    } catch (err) {
+      // Lighthouse exits non-zero when it cannot load the page; keep the log readable.
+      failed.push(`${page}: Lighthouse could not measure it: ${String(err.stderr || err.message).trim().slice(0, 300)}`);
+      break;
+    }
+  }
+  if (reports.length < RUNS) return { failed };
+  const report = medianReport(reports);
+  const scores = mode.categories.map((name) => {
+    const runs = RUNS > 1 ? ` (runs ${reports.map((r) => r.categories?.[name]?.score).join('/')})` : '';
+    return `${name} ${report.categories[name]?.score}${runs}`;
+  });
+  failed.push(...evaluate(page, report, mode.thresholds, baseline));
+  return {
+    failed,
+    line: `${page}: ${RUNS === 1 ? 'one run' : `median of ${RUNS} runs`}: ${scores.join(', ')}`,
+    row: `| \`${page}\` | ${mode.categories.map((name) => String(report.categories[name]?.score ?? 'no score')).join(' | ')} |`,
+  };
+}
+
 try {
-  for (const page of pages) {
-    // The font budget does not depend on the runner: checked once per page, from the HTML that is served.
-    const htmlFile = resolveFile(page);
-    if (htmlFile) {
-      const pageDir = dirname(htmlFile.slice(SITE.length)) || '/';
-      const sizeOf = (ref) => { const f = resolveFile(ref.startsWith('/') ? ref : join(pageDir, ref)); return f ? statSync(f).size : null; };
-      failures.push(...fontBudgetFailures(page, readFileSync(htmlFile, 'utf8'), sizeOf, FONT_BUDGET_BYTES));
+  const results = new Array(pages.length);
+  let next = 0;
+  const workers = Array.from({ length: Math.min(mode.concurrency, pages.length) }, (_, w) => (async () => {
+    const profile = join(PROFILE, `worker-${w}`);
+    while (next < pages.length) {
+      const at = next++;
+      results[at] = await measure(pages[at], profile);
+      if (results[at].line) console.log(results[at].line);
     }
-    // Asynchronous on purpose: a synchronous child process would block this process's event loop, and the server below could never answer Lighthouse.
-    const reports = [];
-    for (let i = 0; i < RUNS; i++) {
-      try {
-        const out = await runLighthouse(lighthouse, [
-          base + page, '--output=json', '--quiet',
-          `--only-categories=${mode.categories.join(',')}`,
-          `--chrome-flags=--headless --no-sandbox --user-data-dir=${PROFILE}`,
-        ]);
-        reports.push(JSON.parse(out));
-      } catch (err) {
-        // Lighthouse exits non-zero when it cannot load the page; keep the log readable.
-        failures.push(`${page}: Lighthouse could not measure it: ${String(err.stderr || err.message).trim().slice(0, 300)}`);
-        break;
-      }
-    }
-    if (reports.length < RUNS) continue;
-    const report = medianReport(reports);
-    const scores = mode.categories.map((name) => {
-      const runs = RUNS > 1 ? ` (runs ${reports.map((r) => r.categories?.[name]?.score).join('/')})` : '';
-      return `${name} ${report.categories[name]?.score}${runs}`;
-    });
-    console.log(`${page}: ${RUNS === 1 ? 'one run' : `median of ${RUNS} runs`}: ${scores.join(', ')}`);
-    summary.push(`| \`${page}\` | ${mode.categories.map((name) => String(report.categories[name]?.score ?? 'no score')).join(' | ')} |`);
-    failures.push(...evaluate(page, report, mode.thresholds, baseline));
+  })());
+  await Promise.all(workers);
+  for (const { failed, row } of results) {
+    if (row) summary.push(row);
+    failures.push(...failed);
   }
 } finally {
   server.close();

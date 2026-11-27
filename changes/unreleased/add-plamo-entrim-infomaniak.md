@@ -17,6 +17,3 @@
   A payment card must be registered. Infomaniak says queries are neither
   recorded nor used for training, and that apps built on the service can be
   monetised. Checked 2026-11-25, agent-assisted (#816).
-
-With every provider added in this release, the dataset stays under the 35%
-non-text guardrail: 25 of 77 providers (32.5%) list no `text` modality.

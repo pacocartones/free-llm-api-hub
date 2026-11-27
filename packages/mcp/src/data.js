@@ -6,6 +6,7 @@ import { readFile } from 'node:fs/promises';
 export const API_BASE = 'https://freellmapihub.com/api/v1';
 export const DEFAULT_URL = `${API_BASE}/providers.json`;
 export const DEFAULT_CLIENTS_URL = `${API_BASE}/openai-clients.json`;
+export const DEFAULT_STATUS_URL = `${API_BASE}/status.json`;
 const LOCAL_SOURCE = 'local_override';
 const DEFAULT_TIMEOUT_MS = 20_000;
 // The published providers.json is a few hundred kilobytes; a body far beyond
@@ -89,6 +90,44 @@ export function normalizeClients(raw, origin) {
   };
 }
 
+const ISO_DAY = /^\d{4}-\d{2}-\d{2}$/;
+const STATUS_FRESHNESS = ['fresh', 'due', 'stale', 'unverified'];
+const isoOrNull = (v) => (typeof v === 'string' && ISO_DAY.test(v) ? v : null);
+
+/**
+ * Shape check for status.json (contract v1): { generated_at, sla, providers: { <slug>: {...} } }.
+ * Only the documented fields are kept; fields added later within v1 are ignored, and an unknown
+ * freshness value reads as null rather than being guessed.
+ */
+export function normalizeStatus(raw, origin) {
+  if (!raw || typeof raw !== 'object' || !raw.providers || typeof raw.providers !== 'object' || Array.isArray(raw.providers)) {
+    throw new Error(`${origin}: not a free-llm-api-hub status.json (no "providers" object)`);
+  }
+  const providers = {};
+  for (const [slug, e] of Object.entries(raw.providers)) {
+    if (!e || typeof e !== 'object') throw new Error(`${origin}: status entry "${slug}" is not an object`);
+    providers[slug] = {
+      last_verified: isoOrNull(e.last_verified),
+      oldest_field_check: isoOrNull(e.oldest_field_check),
+      freshness: STATUS_FRESHNESS.includes(e.freshness) ? e.freshness : null,
+      free_now: typeof e.free_now === 'boolean' ? e.free_now : null,
+      last_change: isoOrNull(e.last_change),
+    };
+  }
+  const sla = raw.sla && typeof raw.sla === 'object' ? raw.sla : {};
+  return {
+    version: raw.version ?? null,
+    generated_at: isoOrNull(raw.generated_at) ?? isoOrNull(raw.generated),
+    schema_version: raw.schema_version ?? null,
+    sla: {
+      due_after_days: Number.isInteger(sla.due_after_days) ? sla.due_after_days : null,
+      stale_after_days: Number.isInteger(sla.stale_after_days) ? sla.stale_after_days : null,
+    },
+    source: origin,
+    providers,
+  };
+}
+
 /**
  * Returns a loader that resolves one JSON file once and caches it, from a
  * local path when given, otherwise from the URL. A failed load is not
@@ -143,4 +182,9 @@ export function createLoader({ dataPath, url = DEFAULT_URL, fetchImpl, timeoutMs
 /** openai-clients.json loader (--clients / FLAH_CLIENTS). */
 export function createClientsLoader({ clientsPath, url = DEFAULT_CLIENTS_URL, fetchImpl, timeoutMs } = {}) {
   return createJsonLoader({ path: clientsPath, url, normalize: normalizeClients, fetchImpl, timeoutMs });
+}
+
+/** status.json loader (--status / FLAH_STATUS). */
+export function createStatusLoader({ statusPath, url = DEFAULT_STATUS_URL, fetchImpl, timeoutMs } = {}) {
+  return createJsonLoader({ path: statusPath, url, normalize: normalizeStatus, fetchImpl, timeoutMs });
 }

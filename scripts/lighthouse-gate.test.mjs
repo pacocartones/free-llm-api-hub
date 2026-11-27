@@ -127,6 +127,16 @@ test('the pull-request mode keeps the accessibility and SEO budgets with one run
   assert.match(evaluate('/', medianReport([one]), m.thresholds)[0], /new accessibility audit label failed/);
 });
 
+// Accessibility and SEO audit the DOM, so pages are measured side by side; performance never shares the CPU.
+test('only the accessibility and SEO mode measures several pages at once', () => {
+  assert.ok(MODES['accessibility-seo'].concurrency > 1);
+  assert.ok(!MODES['accessibility-seo'].categories.includes('performance'));
+  for (const [name, m] of Object.entries(MODES)) {
+    assert.ok(Number.isInteger(m.concurrency) && m.concurrency >= 1, name);
+    if (m.categories.includes('performance')) assert.equal(m.concurrency, 1, `${name} scores performance one page at a time`);
+  }
+});
+
 test('the performance mode keeps the median of three and the 0.80 threshold', () => {
   const m = parseMode(['--mode=performance']);
   assert.equal(m.runs, 3);

@@ -17,16 +17,17 @@ name: Lighthouse
 # 90 KB for the Roboto Flex and DM Mono files a page declares).
 #
 # The work is split by how stable each category is on a shared runner:
-#   - Pull requests: accessibility and SEO, one run per page. Both are
-#     deterministic, so one run is the same verdict as three, in about a third
-#     of the time. The job keeps the name of the required check.
+#   - Pull requests: accessibility and SEO, one run per page, three pages at a
+#     time. Both are deterministic, so one run is the same verdict as three,
+#     and pages measured side by side get the same verdict as one at a time.
+#     The job keeps the name of the required check.
 #   - Push to main, nightly and manual runs: performance, median of three runs
 #     per page (one run moves too much: 0.78 and 0.91 on the same commit). A
 #     failure on main opens or updates one issue; a later clean run closes it.
 #     Pushes by the regeneration bot (free-llm-api-hub-regen[bot]) are skipped.
 #
 # A change that cannot reach the built site (docs other than the methodology, workflows other than this one, root
-# Markdown other than README and CONTRIBUTING, the MCP package) is not measured: scripts/lighthouse-scope.mjs decides
+# Markdown other than README and CONTRIBUTING, the MCP package, the scripts/*.test.mjs test files) is not measured: scripts/lighthouse-scope.mjs decides
 # at the start of each measuring job and the rest of the job is skipped. The job itself still runs, so the required
 # check reports success on such a pull request (a workflow-level `paths:` filter would leave it pending forever). The
 # nightly and manual runs always measure.
@@ -92,7 +93,7 @@ jobs:
         working-directory: tools/lighthouse
         run: npm ci --ignore-scripts
 
-      - name: Measure the twenty-four pages (accessibility and SEO, one run each)
+      - name: Measure the twenty-four pages (accessibility and SEO, one run each, three at a time)
         if: ${{ steps.scope.outputs.run == 'true' }}
         env:
           CHROME_PATH: /usr/bin/google-chrome
