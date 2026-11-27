@@ -28,8 +28,8 @@
   <url><loc>https://freellmapihub.com/free-api/qwen/</loc><lastmod>2026-11-26</lastmod></url>
   <url><loc>https://freellmapihub.com/free-api/gemma/</loc><lastmod>2026-11-26</lastmod></url>
   <url><loc>https://freellmapihub.com/free-api/deepseek/</loc><lastmod>2026-11-26</lastmod></url>
-  <url><loc>https://freellmapihub.com/free-api/llama/</loc><lastmod>2026-11-26</lastmod></url>
-  <url><loc>https://freellmapihub.com/free-api/gpt-oss/</loc><lastmod>2026-11-26</lastmod></url>
+  <url><loc>https://freellmapihub.com/free-api/llama/</loc><lastmod>2026-11-27</lastmod></url>
+  <url><loc>https://freellmapihub.com/free-api/gpt-oss/</loc><lastmod>2026-11-27</lastmod></url>
   <url><loc>https://freellmapihub.com/free-api/glm/</loc><lastmod>2026-11-26</lastmod></url>
   <url><loc>https://freellmapihub.com/guides-and-collections/</loc><lastmod>2026-11-27</lastmod></url>
   <url><loc>https://freellmapihub.com/best/</loc><lastmod>2026-11-27</lastmod></url>
@@ -56,6 +56,7 @@
   <url><loc>https://freellmapihub.com/coding-tools/goose-own-key/</loc><lastmod>2026-10-15</lastmod></url>
   <url><loc>https://freellmapihub.com/api/</loc><lastmod>2026-11-27</lastmod></url>
   <url><loc>https://freellmapihub.com/embed/</loc><lastmod>2026-11-27</lastmod></url>
+  <url><loc>https://freellmapihub.com/badges/</loc><lastmod>2026-11-27</lastmod></url>
   <url><loc>https://freellmapihub.com/not-free/</loc><lastmod>2026-11-27</lastmod></url>
   <url><loc>https://freellmapihub.com/changes/</loc><lastmod>2026-11-27</lastmod></url>
   <url><loc>https://freellmapihub.com/programs/</loc><lastmod>2026-11-14</lastmod></url>
@@ -174,6 +175,8 @@
   <url><loc>https://freellmapihub.com/p/google-cloud-tts</loc><lastmod>2026-11-26</lastmod></url>
   <url><loc>https://freellmapihub.com/p/google-cloud-stt</loc><lastmod>2026-11-26</lastmod></url>
   <url><loc>https://freellmapihub.com/p/google-cloud-vision</loc><lastmod>2026-11-26</lastmod></url>
+  <url><loc>https://freellmapihub.com/p/amazon-bedrock</loc><lastmod>2026-11-27</lastmod></url>
+  <url><loc>https://freellmapihub.com/p/oci-generative-ai</loc><lastmod>2026-11-27</lastmod></url>
   <url><loc>https://freellmapihub.com/compare/</loc><lastmod>2026-11-27</lastmod></url>
   <url><loc>https://freellmapihub.com/find/</loc><lastmod>2026-11-27</lastmod></url>
   <url><loc>https://freellmapihub.com/compare/typhoon-vs-cloudflare-workers-ai/</loc><lastmod>2026-11-26</lastmod></url>
