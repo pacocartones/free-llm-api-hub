@@ -66,7 +66,7 @@ export const readProviderRevisions = (cwd) => {
 };
 
 // Pure: turns an ordered list of parsed revisions ([{ date, parsed }], oldest
-// first) into the per-provider history plus one snapshot per calendar month
+// first; `hash` optional) into the per-provider history plus one snapshot per calendar month
 // (the last revision committed in that month). A 'changed' event carries the
 // field-level before/after values in `changes`, which feed the weekly change
 // feed; api/v1/history.json strips them to keep its published shape.
@@ -74,7 +74,7 @@ export const historyFromRevisions = (revisions) => {
   const historyBySlug = {};
   const monthEnd = {};
   const prevSnap = {};
-  for (const { date, parsed } of revisions) {
+  for (const { hash, date, parsed } of revisions) {
     for (const pp of parsed.providers || []) {
       const prior = prevSnap[pp.slug];
       if (!prior) {
@@ -84,6 +84,9 @@ export const historyFromRevisions = (revisions) => {
         if (changed.length) {
           (historyBySlug[pp.slug] ||= []).push({
             date, kind: 'changed', fields: changed,
+            // The commit that changed data/providers.json, when the revision carries one (api/v1/changes.json
+            // publishes it; history.json strips it to keep its published shape).
+            ...(typeof hash === 'string' && /^[0-9a-f]{40}$/.test(hash) ? { commit: hash } : {}),
             text: `Updated ${changed.map((k) => HISTORY_FIELDS[k]).join(', ')}`,
             changes: changed.map((k) => ({ field: k, from: prior[k] ?? null, to: pp[k] ?? null })),
           });
@@ -114,14 +117,17 @@ export const collapseSameDay = (events) => {
     const changes = e.changes || (e.fields || []).map((field) => ({ field, from: null, to: null }));
     let day = byDate.get(e.date);
     if (!day) {
-      day = { date: e.date, kind: 'changed', changes: [] };
+      day = { date: e.date, kind: 'changed', changes: [], order: [] };
       byDate.set(e.date, day);
       out.push(day);
     }
+    // The commit that set a field's final value of the day travels with that field (api/v1/changes.json).
+    const commit = typeof e.commit === 'string' ? { commit: e.commit } : {};
+    if (commit.commit) day.order.push(commit.commit);
     for (const c of changes) {
       const seen = day.changes.find((x) => x.field === c.field);
-      if (seen) seen.to = c.to ?? null;
-      else day.changes.push({ field: c.field, from: c.from ?? null, to: c.to ?? null });
+      if (seen) Object.assign(seen, { to: c.to ?? null }, commit);
+      else day.changes.push({ field: c.field, from: c.from ?? null, to: c.to ?? null, ...commit });
     }
   }
   return out.flatMap((e) => {
@@ -130,7 +136,10 @@ export const collapseSameDay = (events) => {
       .sort((a, b) => fieldOrder.indexOf(a.field) - fieldOrder.indexOf(b.field));
     if (!changes.length) return [];
     const fields = changes.map((c) => c.field);
-    return [{ date: e.date, kind: 'changed', fields, text: `Updated ${fields.map((k) => HISTORY_FIELDS[k] || k).join(', ')}`, changes }];
+    // The day's event carries the last commit among its kept changes (in commit order), when any is known.
+    const commits = changes.map((c) => c.commit).filter(Boolean);
+    const last = commits.length ? e.order.filter((h) => commits.includes(h)).pop() : undefined;
+    return [{ date: e.date, kind: 'changed', fields, ...(last ? { commit: last } : {}), text: `Updated ${fields.map((k) => HISTORY_FIELDS[k] || k).join(', ')}`, changes }];
   });
 };
 

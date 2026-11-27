@@ -57,11 +57,14 @@ test('the history follows main\'s first-parent line: two overlapping merged bran
   assert.deepEqual(revisions.map((r) => r.date), ['2026-10-30', '2026-11-05', '2026-11-06'],
     'one revision per merge, none from inside the branches');
   const { historyBySlug, monthEnd } = historyFromRevisions(revisions);
-  const changes = (slug) => historyBySlug[slug].filter((e) => e.kind === 'changed').map((e) => ({ date: e.date, changes: e.changes }));
+  // Each change also carries the main commit that made it (api/v1/changes.json); the values are compared without it.
+  const changes = (slug) => historyBySlug[slug].filter((e) => e.kind === 'changed').map((e) => ({ date: e.date, changes: e.changes.map(({ commit, ...c }) => c) }));
   assert.deepEqual(changes('alpha'), [{ date: '2026-11-05', changes: [
     { field: 'rate_limits', from: '10 rpm', to: '20 rpm' },
     { field: 'notes', from: 'none', to: 'card needed' },
   ] }], 'no flip back to 10 rpm from branch B\'s revision');
+  assert.deepEqual(historyBySlug.alpha.filter((e) => e.kind === 'changed').flatMap((e) => [e.commit, ...e.changes.map((c) => c.commit)]),
+    Array(3).fill(revisions[1].hash), 'the commit is the merge on main, not a commit inside the branch');
   assert.deepEqual(changes('beta'), [{ date: '2026-11-06', changes: [{ field: 'notes', from: 'none', to: 'phone needed' }] }]);
   assert.deepEqual(changes('filler'), []);
   for (const slug of ['alpha', 'beta', 'filler']) {

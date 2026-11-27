@@ -12,6 +12,7 @@ import { triStateHtml } from './compare.mjs';
 import { expiryHtml } from './expiry.mjs';
 import { fieldCheck } from './field-checks.mjs';
 import { publishedSpeed, speedFigure, SPEED_METRICS } from './published-speed.mjs';
+import { LIMIT_UNITS, limitNumbers, limitsForModel, perModelLimits } from './free-limits.mjs';
 import { FLAG_DEFS, flagHtml } from './flags.mjs';
 
 // The shared flag component (lib/flags.mjs) around the page's own words: the shape, then the words, with the
@@ -25,14 +26,6 @@ const FREE_TYPE_LABEL = {
   'trial-credit': 'One-time trial credit',
 };
 
-const LIMIT_UNITS = [
-  ['requests_per_second', 'requests per second'],
-  ['requests_per_minute', 'requests per minute'],
-  ['requests_per_day', 'requests per day'],
-  ['requests_per_month', 'requests per month'],
-  ['tokens_per_day', 'tokens per day'],
-  ['tokens_per_month', 'tokens per month'],
-];
 
 const safeUrl = (u) => (/^https?:\/\//i.test(String(u || '')) ? escapeHtml(u) : '');
 
@@ -80,16 +73,42 @@ export function checkSourceHtml(check) {
 /**
  * The structured free limits with their source and reading date, or '' when they are missing or
  * unsourced. Numbers appear only with the provider page they come from and the day they were read.
+ * With `model` (a model page), numbers the provider publishes for that exact ID replace the provider-wide
+ * ones and say so; otherwise the provider-wide numbers show. Without `model` (the provider page), the
+ * per-model numbers follow in a table of their own.
  */
-export function freeLimitsTableHtml(p) {
+export function freeLimitsTableHtml(p, { model } = {}) {
   const fl = p.free_limits && safeUrl(p.free_limits.source) && /^\d{4}-\d{2}-\d{2}$/.test(String(p.free_limits.checked || '')) ? p.free_limits : null;
   if (!fl) return '';
-  const rows = LIMIT_UNITS.filter(([k]) => Number.isInteger(fl[k]))
-    .map(([k, unit]) => `<tr><th scope="row">${unit}</th><td>${fl[k].toLocaleString('en-US')}</td></tr>`).join('');
   const src = safeUrl(fl.source);
-  return `<table class="limits-table"><caption class="sr-only">Free limits as the provider publishes them</caption><tbody>${rows}</tbody></table>` +
-    `<p class="muted limits-src">${escapeHtml(fl.scope || '')}${/[.!?]$/.test(fl.scope || '') || !fl.scope ? '' : '.'}` +
-    (src ? ` Source: <a href="${src}" target="_blank" rel="noopener">the provider's page</a>, read ${timeHtml(fl.checked, escapeHtml)}.` : '') + `</p>`;
+  const sourceLine = src ? ` Source: <a href="${src}" target="_blank" rel="noopener">the provider's page</a>, read ${timeHtml(fl.checked, escapeHtml)}.` : '';
+  const sentence = (text) => `${escapeHtml(text || '')}${/[.!?]$/.test(text || '') || !text ? '' : '.'}`;
+  const unitRows = (obj) => LIMIT_UNITS.filter(([k]) => Number.isInteger(obj[k]))
+    .map(([k, unit]) => `<tr><th scope="row">${unit}</th><td>${obj[k].toLocaleString('en-US')}</td></tr>`).join('');
+  if (model !== undefined) {
+    const m = limitsForModel(p, model);
+    if (m.applies_to === 'model') {
+      return `<table class="limits-table"><caption class="sr-only">Free limits the provider publishes for this model</caption><tbody>${unitRows(m.limits)}</tbody></table>` +
+        `<p class="muted limits-src">Published for <code>${escapeHtml(model)}</code>.${m.scope ? ` ${sentence(m.scope)}` : ''}${sourceLine}</p>`;
+    }
+  }
+  const wide = unitRows(fl);
+  // A model page whose provider publishes numbers only for other models shows none rather than theirs.
+  if (model !== undefined && !wide && perModelLimits(p).length) return '';
+  const perModel = model === undefined ? perModelLimits(p).filter((e) => typeof e.model === 'string' && Object.keys(limitNumbers(e)).length) : [];
+  const perModelHtml = !perModel.length ? '' : (() => {
+    const units = LIMIT_UNITS.filter(([k]) => perModel.some((e) => Number.isInteger(e[k])));
+    return `<table class="limits-table limits-per-model"><caption>Limits the provider publishes per model</caption>` +
+      `<thead><tr><th scope="col">Model ID</th>${units.map(([, unit]) => `<th scope="col">${unit}</th>`).join('')}</tr></thead><tbody>` +
+      perModel.map((e) => `<tr><th scope="row"><code>${escapeHtml(e.model)}</code>${e.scope ? `<br><small>${escapeHtml(e.scope)}</small>` : ''}</th>` +
+        units.map(([k]) => `<td>${Number.isInteger(e[k]) ? e[k].toLocaleString('en-US') : `<span class="muted">${NOT_STATED}</span>`}</td>`).join('') + `</tr>`).join('') +
+      `</tbody></table>`;
+  })();
+  const label = model !== undefined && wide && perModelLimits(p).length ? 'Provider-wide limits: none are recorded for this model ID on its own. ' : '';
+  // The provider-wide table keeps its place (empty or not) unless per-model numbers are all there is.
+  return (wide || !perModel.length ? `<table class="limits-table"><caption class="sr-only">Free limits as the provider publishes them</caption><tbody>${wide}</tbody></table>` : '') +
+    perModelHtml +
+    `<p class="muted limits-src">${label}${sentence(fl.scope)}${sourceLine}</p>`;
 }
 
 /** Free limits: the structured numbers with their source and reading date, then the provider's wording. */

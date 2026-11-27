@@ -22,7 +22,7 @@ import { escapeAttr, escapeText } from './lib/html.mjs';
 import * as sortLib from './lib/sort.mjs';
 import { esc, stripTags } from './lib/escape.mjs';
 import { mineHistoryAndSnapshots, HISTORY_FIELDS } from './lib/history.mjs';
-import { flattenFieldChanges, groupChangesByWeek, changesRss, changesAtom, ATOM_PATH, latestWeek, latestWeekSentence, summaryValue, BEFORE_AFTER_FIELDS, weekTitle, formatValue, beforeAfter } from './lib/changes.mjs';
+import { flattenFieldChanges, groupChangesByWeek, changesRss, changesAtom, ATOM_PATH, latestWeek, latestWeekSentence, summaryValue, BEFORE_AFTER_FIELDS, weekTitle, formatValue, beforeAfter, changesApiBody, CHANGES_WINDOW_WEEKS } from './lib/changes.mjs';
 import { monthlyReport, reportMonths, pct, monthSummary, monthBrief } from './lib/state.mjs';
 import { monthEndDate, monthName, monthLabel, shortMonthLabel, humanDate, humanDates, timeHtml } from './lib/dates.mjs';
 import { NOT_STATED, NOT_STATED_HTML } from './lib/not-stated.mjs';
@@ -76,6 +76,7 @@ import { isoDateTime, datasetFacts, licenseUrl, guideArticle } from './lib/struc
 import { SITEMAP_INDEX, sitemapIndexXml } from './lib/state-sitemap.mjs';
 import { SITEMAPS as INDEXNOW_SITEMAPS } from './lib/indexnow.mjs';
 import { groupModels, modelKey } from './lib/model-keys.mjs';
+import { modelsApiBody } from './lib/models-api.mjs';
 import { providerMetaDescription } from './lib/provider-meta.mjs';
 import { providerTitle } from './lib/provider-title.mjs';
 import { answerFirst, providerFaq, providerFaqHtml, providerFaqJsonLd } from './lib/provider-faq.mjs';
@@ -1737,8 +1738,8 @@ if (commits.length) {
 const nameBySlug = Object.fromEntries(providers.map((p) => [p.slug, p.name]));
 const currentSlugs = new Set(providers.map((p) => p.slug));
 const allFieldChanges = flattenFieldChanges(historyBySlug, nameBySlug);
-const changeWeeks = groupChangesByWeek(allFieldChanges, { weeks: 12 }); // the human feed: the page is by month
-const apiV1ChangeWeeks = groupChangesByWeek(projectApiV1Changes(allFieldChanges), { weeks: 12 });
+const changeWeeks = groupChangesByWeek(allFieldChanges, { weeks: CHANGES_WINDOW_WEEKS }); // the human feed: the page is by month
+const apiV1ChangeWeeks = groupChangesByWeek(projectApiV1Changes(allFieldChanges), { weeks: CHANGES_WINDOW_WEEKS });
 const provLink = (slug, name, prefix) => currentSlugs.has(slug) ? `<a href="${prefix}p/${slug}">${escapeAttr(name)}</a>` : escapeAttr(name);
 
 // Both feeds read the projected weeks of api/v1/changes.json, so a subscriber and an API client see the same changes.
@@ -1953,7 +1954,7 @@ const modelsMain =
   pageHero({ crumbs: `<a href="../">Home</a> / Free model index`, h1: `Free AI models API index`, lede: `Every model our verified providers expose on a free tier — <strong>${modelIndex.length}</strong> entries across <strong>${modelProviderCount}</strong> providers, pulled from each provider's own <code>/models</code> endpoint where possible. The same model can appear under more than one provider.` }) +
   `<main id="main"><div class="wrap">${modelIndexAnswerHtml(MODEL_INDEX_STATS)}<h2 class="eyebrow">Free API by model family</h2>${familyNavHtml(FAMILY_GROUPS, '../')}` +
   modelIndexTableHtml(modelIndex, { modelHref: (m) => (MODEL_PAGE_KEYS.has(modelKey(m)) ? `${modelKey(m)}/` : ''), familyPrefix: '../', families: FAMILY_GROUPS }) +
-  `<p class="muted" style="margin-top:18px">Model lists are a live sample and change often — always confirm against the provider. A provider missing here usually needs an API key to list its models; <a href="${REPO}/blob/main/docs/update-playbook.md">see how the list is refreshed</a>.</p></div></main>`;
+  `<p class="muted" style="margin-top:18px">Model lists are a live sample and change often — always confirm against the provider. The same models as data, one record per model with the limits that apply to it: <a href="../api/v1/models.json"><code>/api/v1/models.json</code></a>. A provider missing here usually needs an API key to list its models; <a href="${REPO}/blob/main/docs/update-playbook.md">see how the list is refreshed</a>.</p></div></main>`;
 writeFileSync(join(ROOT, 'site/models/index.html'), htmlPage({
   title: datedTitle('Free AI models API index — which free API serves which model · Free LLM API Hub'),
   desc: modelIndexDescription(MODEL_INDEX_STATS),
@@ -2135,9 +2136,17 @@ writeApi('providers.json', { ...apiBase, count: apiProviders.length, providers: 
 writeApi('programs.json', { ...apiBase, startups: programs.startups, research: programs.research });
 // The field-level before/after values live in changes.json; history.json keeps
 // its published shape (date, kind, fields, text).
-const historyPublic = Object.fromEntries(Object.entries(historyBySlug).map(([slug, events]) => [slug, events.map(({ changes, ...e }) => e)]));
+const historyPublic = Object.fromEntries(Object.entries(historyBySlug).map(([slug, events]) => [slug, events.map(({ changes, commit, ...e }) => e)]));
 writeApi('history.json', { ...apiBase, description: 'Per-provider change history mined from the git log of providers.json.', history: historyPublic });
-writeApi('changes.json', { ...apiBase, description: 'Field-level provider changes (from/to), grouped by ISO week, newest first: the last 12 weeks ending at the newest change. Mined from the git log of providers.json.', weeks: apiV1ChangeWeeks.map(({ week, start, end, count, changes }) => ({ week, start, end, count, changes: changes.map(({ date, slug, name, field, from, to }) => ({ date, slug, name, field, from, to })) })) });
+// changes.json: the same weeks as changes.xml, with every field change in full (lib/changes.mjs, changesApiBody).
+// Contract v1, described by changes.schema.json (source: data/changes.schema.json).
+writeApi('changes.json', { ...apiBase, description: `Field-level provider changes (from/to), grouped by ISO week, newest first: the last ${CHANGES_WINDOW_WEEKS} weeks ending at the newest change. Mined from the git log of providers.json. Each week matches the item of the same guid in changes.xml.`, ...changesApiBody(apiV1ChangeWeeks, { site: SITE }) });
+writeFileSync(join(ROOT, 'site/api/v1/changes.schema.json'), readFileSync(join(ROOT, 'data/changes.schema.json')));
+// models.json: the free-model matrix (model x provider), from the same groups as the model pages (lib/models-api.mjs).
+// Contract v1, described by models.schema.json (source: data/models.schema.json). Depends only on the dataset.
+const modelsApi = modelsApiBody(MODEL_GROUPS, { site: SITE });
+writeApi('models.json', { ...apiBase, description: 'The free-model matrix: one record per model, with every provider that lists it in its free-model sample, the exact model ID, the limits that apply to it (published for that ID or provider-wide, marked) and where each row can be checked. Model lists are a sample and change often.', ...modelsApi });
+writeFileSync(join(ROOT, 'site/api/v1/models.schema.json'), readFileSync(join(ROOT, 'data/models.schema.json')));
 writeApi('best.json', { ...apiBase, description: 'The top 10 free LLM APIs by the FLLMAPIHUB score, in rank order, with the score and its parts. Never padded to ten. Every pick carries its full verified profile. Method: ' + SITE + '/best/methodology/', updated: ASOF, count: topList.length, picks: topList.map((e) => ({ rank: e.rank, podium: e.podium, score: Math.round(e.total * 10) / 10, math: Math.round(e.math * 10) / 10, editorial: Math.round(e.editorial * 10) / 10, confirmed: e.confirmed, of: e.of, parts: Object.fromEntries(Object.entries(e.parts).map(([k, v]) => [k, Math.round(v * 10) / 10])), tier_near_threshold: e.boundary, ...toApiV1Provider(e.p) })) });
 // /api/v1/score.json: the whole score, not only the top 10. Same numbers as best.json (one rounding rule, one source).
 const r1 = (x) => Math.round(x * 10) / 10;
@@ -2254,6 +2263,9 @@ const apiEndpoints = {
   programs: 'v1/programs.json',
   history: 'v1/history.json',
   changes: 'v1/changes.json',
+  'changes-schema': 'v1/changes.schema.json',
+  models: 'v1/models.json',
+  'models-schema': 'v1/models.schema.json',
   status: 'v1/status.json',
   'status-schema': 'v1/status.schema.json',
   best: 'v1/best.json',
@@ -2323,6 +2335,9 @@ const apiDocMain =
   apiRow('Free AI coding tools you connect your own key to, apart from the ranking (not a count of providers)', 'coding-tools-own-key.json', codingToolsOwnKey.entries.length) +
   apiRow('JSON Schema of coding-tools-own-key.json (contract v1)', 'coding-tools-own-key.schema.json', null) +
   apiRow('Field-level provider changes by ISO week (last 12 weeks)', 'changes.json', null) +
+  apiRow('JSON Schema of changes.json (contract v1)', 'changes.schema.json', null) +
+  apiRow('Free-model matrix: each model with the providers that list it (model keys)', 'models.json', modelsApi.count) +
+  apiRow('JSON Schema of models.json (contract v1)', 'models.schema.json', null) +
   apiRow('Freshness per provider, keyed by slug: last verified, SLA state, free now, last change', 'status.json', publicProviders.length) +
   apiRow('JSON Schema of status.json (contract v1)', 'status.schema.json', null) +
   apiRow('Endpoint manifest', 'index.json', null) +

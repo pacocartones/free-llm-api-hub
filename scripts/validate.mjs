@@ -28,6 +28,7 @@ import { summaryErrors } from './lib/provider-summaries.mjs';
 import { publicHttpsUrlError } from './lib/public-fetch.mjs';
 import { fieldCheckErrors, unsourcedFlagErrors, unsourcedAllowlistErrors } from './lib/field-checks.mjs';
 import { publishedSpeedErrors } from './lib/published-speed.mjs';
+import { perModelLimitErrors } from './lib/free-limits.mjs';
 import { notFreeErrors } from './lib/not-free-data.mjs';
 import { staleClaimErrors } from './lib/stale-claims-data.mjs';
 import { redirectErrors } from './lib/redirects.mjs';
@@ -211,6 +212,8 @@ for (const p of data.providers ?? []) {
     check(p.free_type !== 'trial-credit', `${id}: a one-time trial credit is not continuous free access, so it carries no free_limits`);
     check(DATE_RE.test(p.free_limits.checked || '') && p.free_limits.checked <= todayUtc, `${id}: free_limits.checked must be a date not after today in UTC`);
     check(URL_RE.test(p.free_limits.source || ''), `${id}: free_limits.source must be the provider's page (http/https)`);
+    // free_limits.per_model: numbers for one exact ID of models_free, once per ID, never empty (lib/free-limits.mjs).
+    errors.push(...perModelLimitErrors(p));
   }
 
   // data_policy: what the provider itself says about prompts (see docs/comparison-dimensions.md).

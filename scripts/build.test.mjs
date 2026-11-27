@@ -1578,10 +1578,10 @@ describe('read-only generated output', () => {
     assert.ok(api.weeks.length > 0 && api.weeks.length <= 12);
     assert.deepEqual((atom.match(/<id>tag:freellmapihub\.com,2026:changes:(\d{4}-W\d{2})<\/id>/g) || []).map((id) => id.slice(-13, -5)), api.weeks.map((w) => w.week), 'one Atom entry per week of changes.json');
     for (let i = 1; i < api.weeks.length; i++) assert.ok(api.weeks[i - 1].start > api.weeks[i].start, 'weeks newest first');
-    for (const c of api.weeks[0].changes) assert.deepEqual(Object.keys(c), ['date', 'slug', 'name', 'field', 'from', 'to']);
+    for (const c of api.weeks[0].changes) assert.deepEqual(Object.keys(c).slice(0, 6), ['date', 'slug', 'name', 'field', 'from', 'to'], 'the original keys first; later ones are additive (label, commit)');
     assert.equal(JSON.parse(readFileSync(join(ROOT, 'site/api/v1/index.json'), 'utf8')).endpoints.changes, 'v1/changes.json');
     const history = JSON.parse(readFileSync(join(ROOT, 'site/api/v1/history.json'), 'utf8')).history;
-    assert.equal(Object.values(history).flat().some((e) => 'changes' in e), false, 'history.json keeps its published shape');
+    assert.equal(Object.values(history).flat().some((e) => 'changes' in e || 'commit' in e), false, 'history.json keeps its published shape');
 
     const pins = Object.keys(JSON.parse(readFileSync(join(ROOT, 'derived-fingerprints.json'), 'utf8')));
     for (const k of pins) {

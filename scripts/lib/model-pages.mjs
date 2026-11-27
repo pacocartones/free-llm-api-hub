@@ -113,7 +113,7 @@ function entryHtml({ id, p }, prefix) {
     (p.rate_limits ? `<div class="prov-card"><h3>In the provider's words</h3><p>${escapeHtml(p.rate_limits)}</p></div>` : '') +
     (p.notes ? `<div class="prov-card"><h3>The catch</h3><p>${escapeHtml(p.notes)}</p></div>` : '') +
     `</div>` +
-    freeLimitsTableHtml(p) +
+    freeLimitsTableHtml(p, { model: id }) +
     requirementsHtml(p) +
     tierHtml(p, id) +
     quickstartHtml(p, id) +

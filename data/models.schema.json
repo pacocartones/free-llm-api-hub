@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://freellmapihub.com/api/v1/models.schema.json",
+  "title": "Free LLM API Hub, free-model matrix (/api/v1/models.json)",
+  "description": "One record per model key (the same groups as the model pages /models/<key>/), each with every provider that lists the model in its free-model sample (models_free). Every value is a recorded field of data/providers.json; null means not recorded and is never estimated. Model lists are a sample and change often: they are not part of the dataset's verified core claim. Contract v1: fields are only added within v1, so consumers must ignore fields they do not know; a field named here is never renamed, removed or retyped in v1. Added in dataset 2.16.0.",
+  "type": "object",
+  "required": ["dataset", "version", "generated", "schema", "page", "caveat", "count", "pairs", "models"],
+  "$defs": {
+    "tristate": { "type": ["boolean", "null"], "description": "true or false as an official page states it; null means not confirmed (never false)." },
+    "date": { "type": "string", "format": "date" },
+    "limit": { "type": "integer", "minimum": 1 }
+  },
+  "properties": {
+    "dataset": { "const": "free-llm-api-hub" },
+    "version": { "type": "string", "description": "The dataset release version (SemVer), the same as in every other file of /api/v1/." },
+    "generated": { "type": "string", "format": "date", "description": "The date of the last dataset change. The file depends only on the dataset, so it is byte-stable for a given dataset." },
+    "license": { "type": "string" },
+    "homepage": { "type": "string", "format": "uri" },
+    "docs": { "type": "string", "format": "uri" },
+    "description": { "type": "string" },
+    "schema": { "type": "string", "format": "uri", "description": "The URL of this schema." },
+    "page": { "type": "string", "format": "uri", "description": "The public free model index." },
+    "caveat": { "type": "string", "minLength": 1, "description": "The sentence every model page carries: model lists are a sample and change often." },
+    "count": { "type": "integer", "minimum": 0, "description": "The number of models; equals the length of models." },
+    "pairs": { "type": "integer", "minimum": 0, "description": "The number of (model, provider) rows across all models." },
+    "models": {
+      "type": "array",
+      "description": "Sorted by key (plain code-point order).",
+      "items": {
+        "type": "object",
+        "required": ["key", "name", "page", "indexable", "provider_count", "providers"],
+        "properties": {
+          "key": { "type": "string", "pattern": "^[a-z0-9]+(?:[.-][a-z0-9]+)*$", "description": "The model key: the ID without deployment prefix, organisation prefix or OpenRouter's :free suffix, lower-cased, merged only with reviewed aliases. A different size, version or date is a different key." },
+          "name": { "type": "string", "minLength": 1, "description": "The display name: the most frequent bare ID among the providers." },
+          "page": { "type": "string", "format": "uri", "description": "The model page /models/<key>/." },
+          "indexable": { "type": "boolean", "description": "Whether the model page may be indexed by search engines (two or more verified providers list the model)." },
+          "provider_count": { "type": "integer", "minimum": 1, "description": "The number of providers; equals the length of providers." },
+          "providers": {
+            "type": "array",
+            "description": "One row per provider listing the model, in the explorer's recommended order (the order of the model page).",
+            "items": {
+              "type": "object",
+              "required": ["slug", "name", "model_id", "verified", "last_verified", "category", "free_type", "expires", "card_required", "phone_required", "commercial_ok", "commercial_ok_condition", "openai_compatible", "openai_base_url", "data_policy", "limits_scope", "free_limits", "provenance"],
+              "properties": {
+                "slug": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
+                "name": { "type": "string", "minLength": 1 },
+                "model_id": { "type": "string", "minLength": 1, "description": "The exact ID the provider lists in models_free: the one to pass as model." },
+                "verified": { "type": "boolean", "description": "Whether the provider entry is verified." },
+                "last_verified": { "type": ["string", "null"], "format": "date", "description": "The day the provider entry was last verified, or null for an unverified entry." },
+                "category": { "type": ["string", "null"], "description": "ongoing or trial, as in providers.json." },
+                "free_type": { "type": ["string", "null"], "description": "renewing-quota, perpetual, recurring-credit or trial-credit, as in providers.json." },
+                "expires": { "type": ["string", "null"], "description": "The expiry window as recorded (for example \"30 days\"), or null." },
+                "card_required": { "$ref": "#/$defs/tristate" },
+                "phone_required": { "$ref": "#/$defs/tristate" },
+                "commercial_ok": { "$ref": "#/$defs/tristate", "description": "Projected as in every v1 provider object: a conditional answer is null with commercial_ok_condition set." },
+                "commercial_ok_condition": { "type": ["string", "null"], "description": "The documented condition on commercial use, or null." },
+                "openai_compatible": { "$ref": "#/$defs/tristate" },
+                "openai_base_url": { "type": ["string", "null"], "description": "The OpenAI-compatible base URL (HTTPS), or null when none is recorded." },
+                "data_policy": {
+                  "type": ["object", "null"],
+                  "description": "What the provider says about prompts, or null when nothing is recorded.",
+                  "required": ["trains_on_prompts", "retention", "source", "checked"],
+                  "properties": {
+                    "trains_on_prompts": { "$ref": "#/$defs/tristate" },
+                    "retention": { "type": ["string", "null"] },
+                    "source": { "type": ["string", "null"], "format": "uri" },
+                    "checked": { "type": ["string", "null"], "format": "date" }
+                  }
+                },
+                "limits_scope": {
+                  "enum": ["model", "provider", "none_published", "not_recorded"],
+                  "description": "Which limits free_limits holds: model = numbers the provider publishes for this exact ID (free_limits.per_model in providers.json); provider = the provider-wide numbers, not specific to this model; none_published = the provider publishes no numeric free limits; not_recorded = nothing is recorded for this model."
+                },
+                "free_limits": {
+                  "type": ["object", "null"],
+                  "description": "The numbers limits_scope names, with the page they come from and the day it was read; null for none_published and not_recorded. Numbers are never converted between units; an absent unit means no value is recorded for it.",
+                  "required": ["scope", "source", "checked"],
+                  "properties": {
+                    "requests_per_second": { "$ref": "#/$defs/limit" },
+                    "requests_per_minute": { "$ref": "#/$defs/limit" },
+                    "requests_per_day": { "$ref": "#/$defs/limit" },
+                    "requests_per_month": { "$ref": "#/$defs/limit" },
+                    "tokens_per_day": { "$ref": "#/$defs/limit" },
+                    "tokens_per_month": { "$ref": "#/$defs/limit" },
+                    "scope": { "type": ["string", "null"], "description": "The models, plan or condition the provider ties the numbers to, in its own terms, or null." },
+                    "source": { "type": "string", "format": "uri" },
+                    "checked": { "$ref": "#/$defs/date" }
+                  }
+                },
+                "provenance": {
+                  "type": "object",
+                  "description": "Where the row can be checked.",
+                  "required": ["source", "source_kind", "checked"],
+                  "properties": {
+                    "source": { "type": ["string", "null"], "format": "uri", "description": "The provider's model catalogue (models_url) when one is recorded, else its docs (docs_url); null when neither is an HTTPS URL." },
+                    "source_kind": { "enum": ["models_url", "docs_url", null] },
+                    "checked": { "type": ["string", "null"], "format": "date", "description": "The day the provider entry was last verified; null for an unverified entry. The model sample itself is not part of the verified core claim." }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
