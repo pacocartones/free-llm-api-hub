@@ -2738,10 +2738,13 @@ for (const [from, to] of redirectEntries(REDIRECTS)) {
 writeFileSync(join(ROOT, 'site/shared-find.js'), findLib.clientBundle());
 rmSync(join(ROOT, 'site/find'), { recursive: true, force: true });
 mkdirSync(join(ROOT, 'site/find'), { recursive: true });
-const findData = `<script type="application/json" id="find-data">${JSON.stringify(findLib.findPayload(publicProviders, ASOF)).replace(/</g, '\\u003c')}</script>`;
+const findPayload = findLib.findPayload(publicProviders, ASOF);
+const findData = `<script type="application/json" id="find-data">${JSON.stringify(findPayload).replace(/</g, '\\u003c')}</script>`;
+// The count the page opens with (no answers yet), the same text site/find.js writes, so the live line is filled at first paint.
+const findStart = findLib.shortlist(findPayload.providers, {});
 writeFileSync(join(ROOT, 'site/find/index.html'), htmlPage({
   title: FIND_TITLE, desc: FIND_DESC, canonical: `${SITE}${FIND_PATH}`, prefix: '../',
-  main: findMainHtml({ pageHero, total: providers.length, verified: verifiedCount }) + findData,
+  main: findMainHtml({ pageHero, total: providers.length, verified: verifiedCount, count: findLib.countText(findStart.matches.length, findStart.possible.length, false) }) + findData,
   scripts: ['shared-rules.js', 'shared-find.js', 'find.js'], ogImage: `${SITE}/og/find.png`,
   jsonld: findJsonLd({ site: SITE, asof: ASOF }),
 }));
