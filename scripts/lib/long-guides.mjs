@@ -1857,7 +1857,8 @@ function openModelsGuide({ providers, prefix }) {
     return [fLink(g), String(g.entries.length), `${ongoing} ongoing, ${g.entries.length - ongoing} one-time credit`,
       easy ? `${L(easy.p)}<br><span class="notes">${idsOf(easy.ids)}</span>` : '<span class="notes">None in the data today</span>'];
   };
-  const familiesCell = (x) => S.familiesOf(x).map(({ family, ids }) => `${fLink(family)}: ${idsOf(ids)}`).join('<br>');
+  // Each family link in its own block, so it never sits in running text (the links in a table cell carry no underline).
+  const familiesCell = (x) => S.familiesOf(x).map(({ family, ids }) => `<div>${fLink(family)}</div><div class="notes">${idsOf(ids)}</div>`).join('');
 
   const body =
     h2('Who this guide is for', 'who-its-for') +
