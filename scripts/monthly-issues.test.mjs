@@ -68,7 +68,7 @@ test('the changes issue lists additions, removals and field changes, with labels
   const c = monthChanges({ month: '2026-11', historyBySlug, monthEnd });
   const issue = changesIssue(c, { current: new Set(['alpha', 'gamma', 'delta']), sourceSha: SHA });
   assert.equal(issue.title, 'Free tier changes — November 2026');
-  assert.deepEqual(issue.labels, ['data', 'help wanted']);
+  assert.deepEqual(issue.labels, ['data', 'help wanted', 'tracker']);
   assert.match(issue.body, /1 provider added, 1 provider removed, 4 field changes across 3 providers/);
   assert.match(issue.body, /- \[Delta\]\(https:\/\/freellmapihub\.com\/p\/delta\) \(`delta`\)/);
   assert.match(issue.body, /## Removed\n\n- Beta \(`beta`\)/);
@@ -104,7 +104,7 @@ test('non-text share and the room left under the 35% guardrail', () => {
 test('the candidates issue links the criteria and form, states the cap, and is not a good first issue', () => {
   const full = candidatesIssue('2026-12', [...Array.from({ length: 46 }, (_, i) => prov(`t${i}`, 'T')), ...Array.from({ length: 24 }, (_, i) => prov(`n${i}`, 'N', ['ocr']))]);
   assert.equal(full.title, 'New provider candidates — December 2026');
-  assert.deepEqual(full.labels, ['help wanted']);
+  assert.deepEqual(full.labels, ['data', 'help wanted', 'tracker']);
   assert.ok(!full.labels.includes('good first issue'));
   assert.match(full.body, /docs\/inclusion-criteria\.md/);
   assert.match(full.body, /template=new-provider\.yml/);

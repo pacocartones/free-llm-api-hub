@@ -22,10 +22,10 @@ Use the same claim, source and validation rules. Keep one task in progress while
 
 ### Recurring issues: where to find work each month
 
-Some work comes back on a schedule, so there is always something open:
+Some work comes back on a schedule, so there is always something open. These lists carry the `tracker` label: you don't `/take` a tracker, you comment on it or take the task it links to.
 
-- **Free tier changes — *Month YYYY*** (labels `data`, `help wanted`), opened on the 1st by [`monthly-issues.yml`](.github/workflows/monthly-issues.yml). It lists what changed in the dataset the month before (providers added and removed, limit and flag changes, from the same history as the [What changed](https://freellmapihub.com/changes/) page). Comment with a change we missed: the provider, what changed, a link to the provider's own page and the UTC day you read it. A comment is enough.
-- **New provider candidates — *Month YYYY*** (label `help wanted`), opened the same day. Propose one provider per comment under [docs/inclusion-criteria.md](docs/inclusion-criteria.md); the issue states the current non-text share against the 35% guardrail. It is not a `good first issue`: adding a provider touches more than two files.
+- **Free tier changes — *Month YYYY*** (labels `data`, `help wanted`, `tracker`), opened on the 1st by [`monthly-issues.yml`](.github/workflows/monthly-issues.yml). It lists what changed in the dataset the month before (providers added and removed, limit and flag changes, from the same history as the [What changed](https://freellmapihub.com/changes/) page). Comment with a change we missed: the provider, what changed, a link to the provider's own page and the UTC day you read it. A comment is enough.
+- **New provider candidates — *Month YYYY*** (labels `data`, `help wanted`, `tracker`), opened the same day. Propose one provider per comment under [docs/inclusion-criteria.md](docs/inclusion-criteria.md); the issue states the current non-text share against the 35% guardrail. It is not a `good first issue`: adding a provider touches more than two files.
 - **[#4](https://github.com/pacocartones/free-llm-api-hub/issues/4) weekly re-verification worklist**, refreshed every Monday: the entries whose verification is oldest.
 - **Monthly source check** and **Source watch** issues, opened only when a cited link or quote stops matching its page: each line is a lead to re-check from a normal connection.
 - **"Pick one provider" good first issues**: each lists several providers; one provider is a complete pull request, and the list is refreshed as entries are done.
@@ -34,12 +34,12 @@ Some work comes back on a schedule, so there is always something open:
 
 For a **provider data correction**, edit [`data/providers.json`](data/providers.json), not a generated page. The README tables, the freshness badge, the `collections/` markdown, and the whole interactive site (explorer, per-provider pages, collection pages, badges, sitemap) are generated from it. A docs or code issue names its own source files.
 
-**Who regenerates the derived files depends on the regeneration bot's mode** ([docs/regeneration-bot.md](docs/regeneration-bot.md)); the *Regeneration mode* step of the "Dataset integrity" check prints it.
+**Who regenerates the derived files depends on the regeneration bot's mode** ([docs/regeneration-bot.md](docs/regeneration-bot.md)); the *Regeneration mode* step of the "Dataset integrity" check prints it. Pull requests from forks get the same mode as everyone else: the step reads it from `.github/regen-mode` on the base branch when the repository variable is not visible to the run. Maintainers change the mode by setting the `REGEN_MODE` variable and that file together; rolling back means setting both to `off`.
 
 - **Push mode (`mode=push`): do not regenerate.** Your data pull request changes `data/` plus a changelog fragment, and nothing generated: no `npm run build` or `npm run og` output in the commit. After the merge the bot commits the derived files to `main`. "Dataset integrity" fails only if your pull request edits a derived file that does not match the build (undo it with `git checkout origin/main -- <file>`) or is a release pull request that is not fully regenerated.
 - **Any other mode: your pull request ships its own regenerated files.** After editing `data/providers.json`, run `npm run build` (and `npm run og` if the OG check flags drift) and commit the regenerated files together with the data change. The required "Dataset integrity" check fails until the derived files are in sync.
 
-In both cases the non-blocking *Regeneration preview* run on your pull request lists the stale derived files, says what the push-mode gate decides, and offers the files as a patch (`regen-preview-patch`) if you cannot build locally.
+In both cases, when your pull request's derived files differ from a fresh build, "Dataset integrity" lists them in its run summary and offers them as a patch, the `regen-preview-patch` artifact, if you cannot build locally.
 
 Fixing a rate limit means editing one field (plus, outside push mode, the files regenerated from it) — a small, reviewable diff.
 
@@ -78,7 +78,7 @@ Run these commands from the repository root after installing dependencies. Follo
 | Change | Local validation before opening a PR |
 | --- | --- |
 | Hand-written docs or issue/PR template text | `npm run links`, then preview the changed Markdown or form and open its links. The link checker checks local paths in tracked and non-ignored new Markdown files, including nested docs and package READMEs. Absolute paths and paths escaping the repository are rejected; it does not validate GitHub forms, external issue searches or heading anchors. |
-| Provider data or build inputs (including `CONTRIBUTING.md`, which generates the site's contributing page) | `npm run build && npm test`; commit your changes and regenerated files, then run `npm run check` (it compares generated output with the committed version). Run `npm run og` too if the OG check flags drift. In push mode, run the same checks but commit only your source changes, not the regenerated files (see [For provider data, edit the source](#for-provider-data-edit-the-source)). |
+| Provider data or build inputs (including `CONTRIBUTING.md`, which generates the site's contributing page) | `npm run build && npm test`. **In push mode** commit only your source changes, not the files the build rewrote (once your changes are committed, `git restore .` discards them). `npm run check` runs CI's push-mode gate there, against the merge base with `origin/main` (fetch it first): it passes when the only stale derived files are ones the bot regenerates, and fails on a derived file your branch edited that does not match the build. **In any other mode** commit your changes and the regenerated files, then run `npm run check` (it must find no drift), and run `npm run og` too if the OG check flags drift. See [For provider data, edit the source](#for-provider-data-edit-the-source). |
 | Code | `npm test`, plus the focused check named in the issue. If the change affects generated output, also follow the build-input row above. |
 
 CI runs the full integrity suite on every PR, including docs-only changes. Paste your local commands and their results in the PR; a focused check is useful evidence, and a check you could not run needs an explanation. See [the first-fork checks note](#your-first-pr-from-a-fork-the-checks-may-wait) if CI is waiting for approval.
@@ -87,7 +87,7 @@ CI runs the full integrity suite on every PR, including docs-only changes. Paste
 
 Commit all your work first, including new files, and check that `origin` names the repository whose `main` you intend to merge. Run `npm run sync-main` from your full clone on an attached branch. It fetches `origin/main` and merges it; conflicts confined to the shared generated-file list are rebuilt and committed locally. Any source or OG conflict aborts the merge with the conflicting files listed and restores your original local state. Already-current branches, fast-forwards and clean merges need no automatic rebuild. The helper never pushes.
 
-OG files are left for you to check: run `node scripts/check-og.mjs`; if it reports drift, run `npm run og` and commit the resulting OG files yourself. Run `npm test` and the normal generated drift check, `npm run check`, before submitting. If a commit fails, inspect `git status`, fix the identity or hook error and retry `git commit`. After an interruption or cleanup failure, inspect `git status` and the reported files; use `git merge --abort` if a merge remains and you want to abandon it. New build outputs are retained for inspection. This local helper runs repository build code and your normal Git hooks; use it only in a repository you trust, not as a privileged workflow for untrusted PRs.
+OG files are left for you to check: run `node scripts/check-og.mjs`; if it reports drift, run `npm run og` and commit the resulting OG files yourself. Run `npm test` and `npm run check` before submitting. If a commit fails, inspect `git status`, fix the identity or hook error and retry `git commit`. After an interruption or cleanup failure, inspect `git status` and the reported files; use `git merge --abort` if a merge remains and you want to abandon it. New build outputs are retained for inspection. This local helper runs repository build code and your normal Git hooks; use it only in a repository you trust, not as a privileged workflow for untrusted PRs.
 
 > **You need the full git history.** `npm test` and `npm run build` mine the per-provider change history from `git log` (see [docs/architecture.md](docs/architecture.md)), so they require a **full clone** — not a shallow clone (`git clone --depth 1`), not a tarball download, and `git` must be on your `PATH`. Without full history the suite fails with a message like:
 >
@@ -107,7 +107,7 @@ OG files are left for you to check: run `node scripts/check-og.mjs`; if it repor
 - **Windows:** Developer Mode is not needed. The test copies link `node_modules` with a junction, which needs no privileges, and copy it where a junction is impossible. Tests of Bash scripts are skipped on Windows, and the Linux job runs them.
 - **Line endings:** `.gitattributes` checks text files out with LF whatever `core.autocrlf` says. If `npm test` stops with "tracked text file(s) have CRLF line endings", an editor saved those files with CRLF: save them with LF (or `git checkout -- <file>` for a file you have not edited).
 - **Commit signing:** if your git config signs commits (`commit.gpgsign`), `npm test` turns signing off for the throwaway repositories the tests create. Your own commits are not affected.
-- **A data-only change:** `npm run validate` checks `data/` in seconds while you edit; before the pull request, run `npm run build && npm test`, commit, then `npm run check`, as in [Which checks to run](#which-checks-to-run).
+- **A data-only change:** `npm run validate` checks `data/` in seconds while you edit; before the pull request, run `npm run build && npm test` and commit as [Which checks to run](#which-checks-to-run) says for the current mode.
 
 If you want to preview how your entry renders on the site before opening the PR:
 
@@ -115,7 +115,7 @@ If you want to preview how your entry renders on the site before opening the PR:
 npm run build     # regenerates README tables, badge, site payload, and other derived artifacts
 ```
 
-Commit regenerated tracked artifacts when your data or generator change requires them. Do not commit a no-op preview.
+In push mode, commit none of the regenerated files: the bot does it after the merge. In any other mode, commit regenerated tracked artifacts when your data or generator change requires them. Never commit a no-op preview.
 
 ## Adding or updating a provider
 
@@ -193,7 +193,7 @@ There are two kinds of issue:
 - **Labelled both `good first issue` and `data`** (a data question answered from the provider's own page): don't claim it, open a pull request when it's ready. The first correct, sourced PR is merged. If you found something useful but won't open a PR, post it in the issue with the link and the date; the PR that uses it credits you.
 - **Everything else:** comment `/take` on its own as the first line of an issue comment. A bot assigns it to you if nobody has it and you have fewer than two open issues assigned. Check the assignee and bot reply; if there is no reply, ask in the issue before starting duplicate work. If you can't continue, comment `/release` on its own as the first line; that's completely fine. Check that your assignment was removed so someone else can take it. Share any useful findings or draft PR link when handing it back. An assigned issue with no activity for two weeks may be offered to another contributor, after a ping (7 days during a program, see [Programs](#programs-social-winter-of-code-and-similar)). A pull request for an issue assigned to someone else waits for them.
 
-We read every pull request and reply as soon as we can. A reply is a real answer (a review, a question or an assignment), not an acknowledgement.
+We aim to give issues, pull requests and `/take` requests a real reply within **3 business days**. This is a best-effort goal, not a guarantee (security reports follow [SECURITY.md](SECURITY.md)). A reply is a real answer (a review, a question or an assignment), not an acknowledgement. During a program, the faster times in [Reviews and response times](#reviews-and-response-times) apply.
 
 ## Good first issues
 
@@ -201,10 +201,12 @@ An issue carries the `good first issue` label only if all of these hold:
 
 1. **No third-party account or payment.** Provider facts can be checked on public official pages; docs and code tasks can be done from the public repository and site. (This is why `phone_required` questions are not good first issues: most providers don't document it, and answering needs a sign-up. They live in the [#7](https://github.com/pacocartones/free-llm-api-hub/issues/7) checklist instead.)
 2. **One or two files**, named in the issue.
-3. **A named check** that must pass, for example `npm run build && npm test`, or `npm run check` for `data/` changes.
+3. **A named check** that must pass, for example `npm run validate` for `data/` changes, or `npm run build && npm test`.
 4. **Under about two hours** for someone new to the repository.
 5. **Unclaimed:** no assignee and no open pull request linked to it.
 6. **Reviewed by a maintainer in the last 30 days.**
+
+We keep at most about 30 good first issues open, so each one stays current and gets a quick review. Trackers (label `tracker`) are never good first issues.
 
 Maintainers can draw new tasks from the [#7](https://github.com/pacocartones/free-llm-api-hub/issues/7) and [#8](https://github.com/pacocartones/free-llm-api-hub/issues/8) checklists or from the weekly re-verification batch. If the provider's docs don't answer the question, that is a useful result too: say so in the issue with the link and the date, and the field stays `null`.
 
@@ -237,7 +239,7 @@ The five required checks on `main` (branch protection, updated 2026-11-19) are:
 All five report on every PR without path filters. CodeQL also runs weekly and
 manually. It scans JavaScript/TypeScript code, not Actions
 workflow YAML. There is no push trigger, avoiding a second scan when a PR merges.
-`mcp tests (node 22)` and `mcp tests (node 24)` run only when the MCP package or its
+`mcp tests (node 22)`, `mcp tests (node 24)` and `mcp tests (node 26)` run only when the MCP package or its
 workflow changes, so they must not be unconditional required checks.
 
 Live GitHub settings remain authoritative. Preserve existing controls when reconciling their check

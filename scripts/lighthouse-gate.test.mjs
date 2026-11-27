@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
-import { evaluate, medianReport, parseMode, MODES, THRESHOLDS } from './lib/lighthouse-gate.mjs';
+import { evaluate, fontBudgetFailures, medianReport, pageFontUrls, parseMode, MODES, THRESHOLDS } from './lib/lighthouse-gate.mjs';
 
 const report = (accessibility, performance) => ({ categories: { accessibility: { score: accessibility }, performance: { score: performance } } });
 
@@ -82,21 +82,22 @@ test('a failing audit in any raw run survives the median score envelope', () => 
 
 // The pages the gate measures are written in two places, the script and the comment of the workflow. They must agree,
 // and the pages that carry the tables and the comparison have to be among them.
-test('the gate measures all eighteen routes, and the workflow says which pages it measures', () => {
+test('the gate measures all twenty-two routes, and the workflow says which pages it measures', () => {
   const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
   const script = readFileSync(join(ROOT, 'scripts/lighthouse-gate.mjs'), 'utf8');
   const workflow = readFileSync(join(ROOT, '.github/workflows/lighthouse.yml'), 'utf8');
   const list = script.match(/const pages = \[([^\]]*)\];/);
   assert.ok(list, 'the page list is found in the script');
   const fixed = [...list[1].matchAll(/'(\/[^']*)'/g)].map((m) => m[1]);
-  for (const page of ['/quality/', '/free-gpu/', '/coding-tools/', '/compare/', '/data-policy/', '/guides-and-collections/']) assert.ok(fixed.includes(page), `the gate measures ${page}`);
+  for (const page of ['/quality/', '/free-gpu/', '/coding-tools/', '/compare/', '/find/', '/data-policy/', '/guides-and-collections/', '/not-free/', '/embed/', '/free-api/qwen/']) assert.ok(fixed.includes(page), `the gate measures ${page}`);
   for (const page of fixed.filter((p) => p !== '/')) assert.ok(workflow.includes(page), `the workflow names ${page}`);
   // two more pages than the fixed ones: the provider page and the model page come from the dataset
   assert.match(script, /pages\.push\(`\/models\/\$\{modelSample\.key\}\/`\)/, 'the gate measures one model page');
   assert.ok(workflow.includes('/models/'), 'the workflow names the model page');
   const count = fixed.length + 2;
-  const words = { 4: 'four', 5: 'five', 6: 'six', 7: 'seven', 8: 'eight', 9: 'nine', 16: 'sixteen', 17: 'seventeen', 18: 'eighteen' };
+  const words = { 4: 'four', 5: 'five', 6: 'six', 7: 'seven', 8: 'eight', 9: 'nine', 16: 'sixteen', 17: 'seventeen', 18: 'eighteen', 19: 'nineteen', 20: 'twenty', 21: 'twenty-one', 22: 'twenty-two' };
   assert.ok(workflow.includes(`on ${words[count]} pages`) && workflow.includes(`Measure the ${words[count]} pages`), `the workflow says ${words[count]} pages`);
+  assert.ok(script.includes(`on ${words[count]} pages`), `the script header says ${words[count]} pages`);
 });
 
 // The runner passes this stricter category budget alongside the existing budgets.
@@ -122,6 +123,16 @@ test('the pull-request mode keeps the accessibility and SEO budgets with one run
   const one = auditReport();
   one.categories.seo = { score: 1 };
   assert.match(evaluate('/', medianReport([one]), m.thresholds)[0], /new accessibility audit label failed/);
+});
+
+// Accessibility and SEO audit the DOM, so pages are measured side by side; performance never shares the CPU.
+test('only the accessibility and SEO mode measures several pages at once', () => {
+  assert.ok(MODES['accessibility-seo'].concurrency > 1);
+  assert.ok(!MODES['accessibility-seo'].categories.includes('performance'));
+  for (const [name, m] of Object.entries(MODES)) {
+    assert.ok(Number.isInteger(m.concurrency) && m.concurrency >= 1, name);
+    if (m.categories.includes('performance')) assert.equal(m.concurrency, 1, `${name} scores performance one page at a time`);
+  }
 });
 
 test('the performance mode keeps the median of three and the 0.80 threshold', () => {
@@ -196,4 +207,27 @@ test('the gate server compresses what the production edge compresses, with the e
   assert.equal(negotiateEncoding('image/png', chrome), null, 'PNG is already compressed');
   const server = readFileSync(join(dirname(fileURLToPath(import.meta.url)), 'lighthouse-gate.mjs'), 'utf8');
   assert.match(server, /negotiateEncoding\(type, req\.headers\['accept-encoding'\]\)/, 'the local server uses it');
+});
+
+test('font budget: the local woff2 files a page preloads or declares are summed against the budget', () => {
+  // Mutant: count a font twice (preload + @font-face), skip url() references or let an external font through; this test turns red.
+  const html = '<link rel="preload" href="../fonts/a.woff2?v=12345678" as="font"><style>@font-face{src:url(\'../fonts/a.woff2?v=12345678\')}'
+    + "@font-face{src:url('../fonts/b.woff2')}</style><link rel=\"preload\" href=\"https://cdn.example/x.woff2\" as=\"font\">";
+  assert.deepEqual(pageFontUrls(html), ['../fonts/a.woff2', '../fonts/b.woff2'], 'each local file once, without the fingerprint; off-site URLs are not ours');
+  const sizes = { '../fonts/a.woff2': 50 * 1024, '../fonts/b.woff2': 30 * 1024 };
+  assert.deepEqual(fontBudgetFailures('/p/x.html', html, (f) => sizes[f], 90 * 1024), [], '80 KB fits 90 KB');
+  const over = fontBudgetFailures('/p/x.html', html, (f) => sizes[f], 70 * 1024);
+  assert.equal(over.length, 1);
+  assert.match(over[0], /^\/p\/x\.html: fonts weigh 80\.0 KB, over the 70 KB budget/);
+  assert.match(fontBudgetFailures('/', html, (f) => (f.endsWith('a.woff2') ? 1 : null), 90 * 1024)[0], /font \.\.\/fonts\/b\.woff2 is declared but not found/);
+});
+
+test('font budget: the committed home page fits the budget with the brand fonts', async () => {
+  const { FONT_BUDGET_BYTES } = await import('./lib/assets.mjs');
+  const { statSync, existsSync } = await import('node:fs');
+  const root = join(dirname(fileURLToPath(import.meta.url)), '..');
+  const html = readFileSync(join(root, 'site/index.html'), 'utf8');
+  const sizeOf = (f) => (existsSync(join(root, 'site', f)) ? statSync(join(root, 'site', f)).size : null);
+  assert.ok(pageFontUrls(html).length >= 3, 'the home declares the brand fonts');
+  assert.deepEqual(fontBudgetFailures('/', html, sizeOf, FONT_BUDGET_BYTES), []);
 });

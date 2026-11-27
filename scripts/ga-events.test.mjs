@@ -64,6 +64,7 @@ describe('consent gate', () => {
       const p = page({ consent, path: '/compare/groq-vs-openrouter/' });
       p.fire('click', link('https://groq.com', { 'data-provider': 'groq', 'data-link': 'website' }));
       p.fire('click', link('/providers.json'));
+      p.fire('click', link('https://github.com/pacocartones/free-llm-api-hub'));
       p.fire('change', el({ id: 'f-nocard', checked: true }));
       p.q.value = 'llama';
       p.fire('keydown', p.q, { key: 'Enter' });
@@ -89,6 +90,33 @@ describe('event payloads (analytics granted)', () => {
     p.fire('click', link('https://example.com/x'));
     p.fire('auxclick', link('https://example.com/x', { 'data-provider': 'groq', 'data-link': 'docs' }), { button: 1 });
     assert.deepEqual(p.events(), [...LINK_TYPES.map((t) => ['outbound_provider_click', { provider: 'groq', link_type: t }]), ['outbound_provider_click', { provider: 'groq', link_type: 'docs' }]]);
+  });
+
+  test('repo_click: links to this repository only, with the location from the fixed list', () => {
+    const p = on({ path: '/p/groq' });
+    const REPO = 'https://github.com/pacocartones/free-llm-api-hub';
+    const inside = (sel, href) => el({ sels: ['a[href]'], attrs: { href }, parent: el({ sels: [sel] }) });
+    p.fire('click', inside('.site-header', REPO));
+    p.fire('click', inside('.site-footer', REPO));
+    p.fire('auxclick', inside('.site-footer', REPO), { button: 1 });
+    p.fire('click', link(`${REPO}/issues/new?template=add-provider.yml`));
+    p.fire('click', link(`${REPO}/discussions`));
+    p.fire('click', link(`${REPO}/blob/main/CONTRIBUTING.md`));
+    p.fire('click', link(`${REPO}/blob/main/docs/api.md`));
+    p.fire('click', link(REPO, { 'data-repo-location': 'contribute' }));
+    p.fire('click', link(REPO, { 'data-repo-location': 'someone@example.com' }));
+    // not this repository: no event
+    for (const href of ['https://github.com/pacocartones', 'https://github.com/someone/free-llm-api-hub', 'https://github.com/pacocartones/free-llm-api-hub-fork', 'https://example.com/pacocartones/free-llm-api-hub']) p.fire('click', link(href));
+    assert.deepEqual(p.events(), ['header', 'footer', 'footer', 'contribute', 'contribute', 'contribute', 'content', 'contribute', 'content'].map((location) => ['repo_click', { location }]));
+  });
+
+  test('repo_click: any repository link on /contributing/ or /submit/ counts as contribute', () => {
+    for (const path of ['/contributing/', '/submit/']) {
+      const p = on({ path });
+      p.fire('click', link('https://github.com/pacocartones/free-llm-api-hub/blob/main/README.md'));
+      p.fire('click', el({ sels: ['a[href]'], attrs: { href: 'https://github.com/pacocartones/free-llm-api-hub' }, parent: el({ sels: ['.site-header'] }) }));
+      assert.deepEqual(p.events(), [['repo_click', { location: 'contribute' }], ['repo_click', { location: 'header' }]]);
+    }
   });
 
   test('copy_snippet: kind from the code block, never its text', () => {
@@ -210,16 +238,16 @@ describe('event payloads (analytics granted)', () => {
   test('no event carries more than the documented parameters', () => {
     const src = consentScript(ID);
     const names = [...src.matchAll(/track\('([a-z_]+)'/g)].map((m) => m[1]);
-    assert.deepEqual([...new Set(names)].sort(), ['api_download', 'collection_view', 'compare_view', 'copy_snippet', 'explorer_filter', 'explorer_sort', 'outbound_provider_click', 'site_search']);
+    assert.deepEqual([...new Set(names)].sort(), ['api_download', 'collection_view', 'compare_view', 'copy_snippet', 'explorer_filter', 'explorer_sort', 'outbound_provider_click', 'repo_click', 'site_search', 'wizard_complete']);
   });
 });
 
 describe('provider link attributes', () => {
-  const p = { slug: 'acme', docs_url: 'https://docs.acme.ai/limits?a=1&b=2', models_url: 'https://docs.acme.ai/models', playground_url: 'https://play.acme.ai', free_limits: { source: 'https://docs.acme.ai/limits?a=1&b=2' }, data_policy: { source: 'https://acme.ai/privacy' } };
+  const p = { slug: 'acme', docs_url: 'https://docs.acme.ai/limits?a=1&b=2', keys_url: 'https://console.acme.ai/keys', models_url: 'https://docs.acme.ai/models', playground_url: 'https://play.acme.ai', free_limits: { source: 'https://docs.acme.ai/limits?a=1&b=2' }, data_policy: { source: 'https://acme.ai/privacy' } };
 
   test('targets in priority order; a URL shared by two fields keeps the first label', () => {
     assert.deepEqual(providerLinkTargets(p, { website: 'https://acme.ai' }).map((t) => [t.link, t.href]), [
-      ['docs', p.docs_url], ['playground', p.playground_url], ['website', 'https://acme.ai'], ['models', p.models_url], ['data_policy', 'https://acme.ai/privacy'],
+      ['docs', p.docs_url], ['keys', p.keys_url], ['playground', p.playground_url], ['website', 'https://acme.ai'], ['models', p.models_url], ['data_policy', 'https://acme.ai/privacy'],
     ]);
   });
 
@@ -236,5 +264,40 @@ describe('provider link attributes', () => {
   test('rejects a bad slug or link type', () => {
     assert.throws(() => tagProviderLinks('', [{ href: 'https://x', provider: 'Bad Slug', link: 'docs' }]));
     assert.throws(() => tagProviderLinks('', [{ href: 'https://x', provider: 'ok', link: 'pricing' }]));
+  });
+});
+
+// /find/ reports a finished wizard as a DOM event (site/find.js); consent.js sends it as wizard_complete, only with
+// analytics consent, and only when every parameter is from its fixed list (lib/find.mjs completeEvent).
+describe('wizard_complete', () => {
+  const done = (detail) => ({ detail });
+  test('sent with analytics consent, with exactly the validated parameters', () => {
+    const p = page({ consent: saved(true, false), path: '/find/' });
+    p.fire('fllm:wizard-complete', null, done({ use: 'chat', filters: 'card,commercial', results: 6 }));
+    p.fire('fllm:wizard-complete', null, done({ use: 'any', filters: 'none', results: 0 }));
+    assert.deepEqual(p.events(), [
+      ['wizard_complete', { use: 'chat', filters: 'card,commercial', result_count: 6 }],
+      ['wizard_complete', { use: 'any', filters: 'none', result_count: 0 }],
+    ]);
+  });
+  for (const [label, consent] of [['no choice', null], ['everything rejected', saved(false, false)], ['advertising only', saved(false, true)]]) {
+    test(`${label}: nothing is sent`, () => {
+      const p = page({ consent, path: '/find/' });
+      p.fire('fllm:wizard-complete', null, done({ use: 'chat', filters: 'none', results: 3 }));
+      assert.deepEqual(p.events(), []);
+    });
+  }
+  test('anything outside the fixed lists drops the event', () => {
+    const p = page({ consent: saved(true, false), path: '/find/' });
+    for (const d of [
+      { use: 'me@example.com', filters: 'none', results: 1 },
+      { use: 'chat', filters: 'card,evil', results: 1 },
+      { use: 'chat', filters: 'card,card', results: 1 },
+      { use: 'chat', filters: 'none', results: 1.5 },
+      { use: 'chat', filters: 'none', results: 1000 },
+      { use: 'chat', filters: 'none', results: '3' },
+      null,
+    ]) p.fire('fllm:wizard-complete', null, done(d));
+    assert.deepEqual(p.events(), []);
   });
 });

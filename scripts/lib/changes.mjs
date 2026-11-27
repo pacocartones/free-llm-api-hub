@@ -7,6 +7,9 @@
 // a squash merge), so build.mjs keeps them out of derived-fingerprints.json.
 
 import { HISTORY_FIELDS } from './history.mjs';
+import { NOT_STATED } from './provider-faq.mjs';
+
+export { NOT_STATED };
 
 const DAY = 86400000;
 const ymd = (d) => d.toISOString().slice(0, 10);
@@ -109,6 +112,20 @@ const plural = (n, one, many) => `${n} ${n === 1 ? one : many}`;
 export const weekTitle = (g) =>
   `${g.week} (${g.start} to ${g.end}): ${plural(g.count, 'field change', 'field changes')} across ${plural(g.providers.length, 'provider', 'providers')}`;
 
+// The page that lists a week's changes: the monthly report of the week's newest change. /changes/ is by month and has
+// no per-week anchor, so a feed entry points at the report that holds its rows.
+export const weekHref = (g, { site }) => `${site}/state/${String(g.lastDate).slice(0, 7)}/`;
+
+// Weekly items keep their order; a report goes before the first week that is not newer than it (both feeds).
+const withReports = (weekly, monthly) => {
+  const items = [...weekly];
+  for (const m of [...monthly].sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0))) {
+    const at = items.findIndex((x) => x.date <= m.date);
+    items.splice(at === -1 ? items.length : at, 0, m);
+  }
+  return items;
+};
+
 // RSS 2.0, one <item> per ISO week. Deterministic: pubDate is the date of the
 // newest change in that week, the guid is the week key.
 // `reports`: the published monthly reports ({ title, description, link, guid, date }, lib/monthly-report.mjs), one
@@ -117,7 +134,7 @@ export const changesRss = (groups, { site, reports = [] }) => {
   const weekly = groups.map((g) => ({
     date: g.lastDate,
     xml: `    <item><title>${xmlEsc(weekTitle(g))}</title>` +
-      `<link>${xmlEsc(`${site}/changes/#${g.week}`)}</link>` +
+      `<link>${xmlEsc(weekHref(g, { site }))}</link>` +
       `<guid isPermaLink="false">${xmlEsc(`free-llm-api-hub-changes-${g.week}`)}</guid>` +
       `<pubDate>${new Date(g.lastDate + 'T00:00:00Z').toUTCString()}</pubDate>` +
       `<description>${xmlEsc(weekSummary(g))}</description></item>`,
@@ -130,13 +147,7 @@ export const changesRss = (groups, { site, reports = [] }) => {
       `<pubDate>${new Date(r.date + 'T00:00:00Z').toUTCString()}</pubDate>` +
       `<description>${xmlEsc(r.description)}</description></item>`,
   }));
-  // Weekly items keep their order; a report goes before the first week that is not newer than it.
-  const items = [...weekly];
-  for (const m of [...monthly].sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0))) {
-    const at = items.findIndex((x) => x.date <= m.date);
-    items.splice(at === -1 ? items.length : at, 0, m);
-  }
-  const itemsXml = items.map((x) => x.xml).join('\n');
+  const itemsXml = withReports(weekly, monthly).map((x) => x.xml).join('\n');
   return `<?xml version="1.0" encoding="UTF-8"?>\n<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel>\n` +
     `    <title>Free LLM API Hub — what changed, week by week</title>\n    <link>${xmlEsc(`${site}/changes/`)}</link>\n` +
     // The feed's own URL: feed validators ask an RSS 2.0 feed to carry it.
@@ -144,6 +155,68 @@ export const changesRss = (groups, { site, reports = [] }) => {
     `    <description>Field-level changes to free LLM API tiers (free tier, rate limits, the catch, flags), grouped by ISO week.</description>\n` +
     (itemsXml ? `${itemsXml}\n` : '') + `</channel></rss>\n`;
 };
+
+// Atom (RFC 4287), one <entry> per ISO week, from the same grouped weeks as api/v1/changes.json. Deterministic:
+// every date comes from the data (an entry's <updated> is its week's newest change; the feed's is the newest entry,
+// or `updated` when there is none), and the ids are tag URIs (RFC 4151) built from the week key, so an entry keeps
+// its id across rebuilds and a reader never sees a week twice.
+export const ATOM_PATH = '/changes.atom';
+export const atomId = (site, week) => `tag:${new URL(site).hostname},2026:changes${week ? ':' + week : ''}`;
+const rfc3339 = (ymdDate) => `${ymdDate}T00:00:00Z`;
+// `reports` as for changesRss: one entry each, id `…:report:YYYY-MM`.
+export const changesAtom = (groups, { site, updated = '1970-01-01', reports = [] }) => {
+  const entry = ({ id, title, date, href, summary }) => ({
+    date,
+    xml: `  <entry>\n` +
+      `    <id>${xmlEsc(id)}</id>\n` +
+      `    <title>${xmlEsc(title)}</title>\n` +
+      `    <updated>${rfc3339(date)}</updated>\n` +
+      `    <link rel="alternate" type="text/html" href="${xmlEsc(href)}"/>\n` +
+      `    <summary type="text">${xmlEsc(summary)}</summary>\n` +
+      `  </entry>\n`,
+  });
+  const weekly = groups.map((g) => entry({ id: atomId(site, g.week), title: weekTitle(g), date: g.lastDate, href: weekHref(g, { site }), summary: weekSummary(g) }));
+  const monthly = reports.map((r) => entry({ id: atomId(site, `report:${r.link.match(/state\/(\d{4}-\d{2})\//)[1]}`), title: r.title, date: r.date, href: r.link, summary: r.description }));
+  const all = withReports(weekly, monthly);
+  const newest = all.reduce((m, x) => (x.date > m ? x.date : m), '');
+  const entries = all.map((x) => x.xml).join('');
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<feed xmlns="http://www.w3.org/2005/Atom">\n` +
+    `  <id>${xmlEsc(atomId(site))}</id>\n` +
+    `  <title>Free LLM API Hub — what changed, week by week</title>\n` +
+    `  <subtitle>Field-level changes to free LLM API tiers (free tier, rate limits, the catch, flags), one entry per ISO week.</subtitle>\n` +
+    `  <updated>${rfc3339(newest || updated)}</updated>\n` +
+    `  <author><name>Free LLM API Hub</name><uri>${xmlEsc(`${site}/`)}</uri></author>\n` +
+    `  <link rel="self" type="application/atom+xml" href="${xmlEsc(site + ATOM_PATH)}"/>\n` +
+    `  <link rel="alternate" type="text/html" href="${xmlEsc(`${site}/changes/`)}"/>\n` +
+    entries + `</feed>\n`;
+};
+
+// The answer-first summary of the latest week with a change, from the data: the providers whose tracked fields changed,
+// the ongoing free tiers that ended (free_type went from an ongoing shape to trial-credit) and the providers added.
+// `changes` are flattened (projected) field changes; `added` is [{ date, slug, name }]. The week is the ISO week of the
+// newest of those dates, never the clock; it reads "This week" only when it is the week of `asOf` (the dataset's date).
+const ONGOING_TYPES = new Set(['perpetual', 'renewing-quota', 'recurring-credit']);
+export const latestWeek = (changes, added = [], { asOf } = {}) => {
+  const newest = [...changes, ...added].reduce((m, c) => (c.date > m ? c.date : m), '');
+  if (!newest) return null;
+  const w = isoWeek(newest);
+  const inWeek = (c) => c.date >= w.start && c.date <= w.end;
+  const weekChanges = changes.filter(inWeek);
+  const weekAdded = added.filter(inWeek);
+  const changed = new Set(weekChanges.map((c) => c.slug));
+  const ended = new Set(weekChanges.filter((c) => c.field === 'free_type' && ONGOING_TYPES.has(c.from) && c.to === 'trial-credit').map((c) => c.slug));
+  return { week: w.key, start: w.start, end: w.end, current: Boolean(asOf) && isoWeek(asOf).key === w.key,
+    changed: changed.size, ended: ended.size, added: weekAdded.length, changes: weekChanges, addedList: weekAdded };
+};
+
+/** "This week (2026-W48, 2026-11-23 to 2026-11-29): 3 providers changed, 1 free tier ended, 2 new." */
+export const latestWeekSentence = (lw) => lw
+  ? `${lw.current ? 'This week' : 'Latest week with changes'} (${lw.week}, ${lw.start} to ${lw.end}): ` +
+    `${plural(lw.changed, 'provider changed', 'providers changed')}, ${plural(lw.ended, 'free tier ended', 'free tiers ended')}, ${lw.added} new.`
+  : `Latest week: ${NOT_STATED} (no change history is available in this build).`;
+
+/** A tracked value for the summary: like formatValue, but a null reads "not stated" (the shared wording). */
+export const summaryValue = (v) => (v === null || v === undefined || v === '' ? NOT_STATED : formatValue(v));
 
 // "Report a change" link for a provider page: GitHub issue forms prefill an
 // input from a query parameter named after the field id (`provider` in

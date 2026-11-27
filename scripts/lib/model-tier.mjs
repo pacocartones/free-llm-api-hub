@@ -12,7 +12,6 @@
 
 export const MODEL_TIER_THRESHOLDS = [[4, 1450], [3, 1400], [2, 1330], [1, 1250]];
 export const MODEL_TIER_MIN_VOTES = 1000;
-export const MODEL_TIER_ATTRIBUTION = 'Model quality data: LMArena Arena Leaderboard Dataset (CC-BY-4.0)';
 
 // A tier is "near a boundary" when the rating's 95% interval crosses a threshold or comes within
 // this many rating points of one: the tier could change at the next snapshot. Declared, public.

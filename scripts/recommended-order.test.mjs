@@ -55,10 +55,12 @@ test('on the dataset: the intent group opens the list and the general-purpose LL
   assert.ok(firstOutside > 0, 'the list opens with the intent group');
   assert.ok(order.slice(firstOutside).every((p) => intentRank(p) === 1), 'no intent-group row after the first row outside it');
   assert.equal(order[0].is_text_llm, true);
+  // Only while the data confirms "no card": a flag with no provider sentence is unknown, which takes it out of the intent group.
   for (const slug of ['google-gemini', 'groq']) {
     const i = order.findIndex((p) => p.slug === slug);
-    if (i >= 0) assert.ok(i < 10, `${slug} is in the top 10 (got #${i + 1})`);
+    if (i >= 0 && intentRank(order[i]) === 0) assert.ok(i < 10, `${slug} is in the top 10 (got #${i + 1})`);
   }
+  assert.ok(order.slice(0, 10).filter((p) => intentRank(p) === 0).length > 0, 'the top 10 holds general-purpose LLMs with no card');
 });
 
 test('the browser copy (shared-rules.js + shared-sort.js) sorts the dataset exactly like the module', () => {
@@ -77,17 +79,15 @@ test('the browser copy (shared-rules.js + shared-sort.js) sorts the dataset exac
 test('the server-rendered home rows follow the shared order', () => {
   const html = readFileSync(join(ROOT, 'site/index.html'), 'utf8');
   const rows = html.slice(html.indexOf('<!-- AUTOGEN:rows:start -->'), html.indexOf('<!-- AUTOGEN:rows:end -->'));
-  const shown = [...rows.matchAll(/<tr role="row"><td class="name"[^>]*><a class="name-link" href="p\/([a-z0-9-]+)"/g)].map((m) => m[1]);
+  const shown = [...rows.matchAll(/<tr role="row"><td class="name"[^>]*><div class="name-row">(?:<span class="aura[^>]*>.*?<\/svg><\/span>)?<div class="name-main"><div class="name-line"><a class="name-link" href="p\/([a-z0-9-]+)"/g)].map((m) => m[1]);
   assert.deepEqual(shown, [...providers].sort(recommendedCmp).map((p) => p.slug));
 });
 
 test('guides: a "Top pick" is always of the guide\'s modality, and the text-LLM guides pick a text LLM', () => {
   const bySlug = new Map(providers.map((p) => [p.slug, p]));
   const byName = new Map(providers.map((p) => [p.name, p]));
-  const modalityOf = {
-    'free-embeddings-apis': 'embeddings', 'free-speech-to-text-apis': 'audio', 'free-image-generation-apis': 'image',
-    'free-ocr-document-ai-apis': 'ocr', 'free-reranking-apis': 'rerank', 'free-vision-apis': 'vision',
-  };
+  // The embeddings, speech, OCR and image guides are long-form guides with no top pick (long-guides.test.mjs).
+  const modalityOf = { 'free-reranking-apis': 'rerank', 'free-vision-apis': 'vision' };
   const dir = join(ROOT, 'site/guides');
   let checked = 0;
   for (const f of readdirSync(dir).filter((n) => n.endsWith('.html'))) {

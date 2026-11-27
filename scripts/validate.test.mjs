@@ -1,4 +1,5 @@
-import test from 'node:test';
+// test comes from lib/test-part.mjs: node:test's own, unless run-tests.mjs runs this file in parts.
+import { test } from './lib/test-part.mjs';
 import assert from 'node:assert/strict';
 import { cpSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
@@ -40,6 +41,7 @@ const VALIDATE = join(ROOT, 'scripts/validate.mjs');
 // | 103 | ${id}: duplicate name | direct case |
 // | 106 | ${id}: name required | schema-gated |
 // | 108 | ${id}: playground_url requires a non-empty docs_url | direct case |
+// | 110 (added after 1ec1562; later rows shift by one) | ${id}: keys_url and keys_url_source go together and require a non-empty docs_url | direct case |
 // | 112 | ${id}: ${field} must not contain control, bidirectional or zero-width characters | direct case |
 // | 114 | ${id}: category must be one of ${CATEGORIES.join('/')} | schema-gated |
 // | 115 | ${id}: free_type must be one of ${FREE_TYPES.join('/')} | schema-gated |
@@ -181,7 +183,7 @@ const INTEGRITY_CASES = [
   // The schema's minLength accepts whitespace; only the trimmed-length rule rejects it.
   ['data_policy.quote text', 'a recorded policy sentence that says something', (p) => { p.data_policy.quote = '   '; }, 'data_policy.quote must be text of 1 to 400 characters'],
   ['data_policy.note text', 'a recorded policy condition that says something', (p) => { p.data_policy.note = '   '; }, 'data_policy.note must be text of 1 to 300 characters'],
-  ['field_checks via fieldCheckErrors', 'a stated check on a flag that holds no value', (p) => { p.phone_required = null; p.field_checks = { phone_required: { status: 'stated', checked: '2026-11-24', sources: ['https://example.com/terms'], quote: null, note: 'The terms say nothing either way.' } }; }, 'field_checks.phone_required: phone_required is null, so its check cannot be stated (use source_silent, needs_account or sources_disagree)'],
+  ['field_checks via fieldCheckErrors', 'a stated check on a flag that holds no value', (p) => { p.phone_required = null; p.field_checks = { ...p.field_checks, phone_required: { status: 'stated', checked: '2026-11-24', sources: ['https://example.com/terms'], quote: null, note: 'The terms say nothing either way.' } }; }, 'field_checks.phone_required: phone_required is null, so its check cannot be stated (use source_silent, needs_account or sources_disagree)'],
   ['published_speed via publishedSpeedErrors', 'a speed figure the cited passage does not contain', (p) => { p.published_speed[0].value = 123456; }, 'published_speed[0].quote must contain the figure 123456 as the page writes it (no rounding, no conversion)', (d) => d.providers.find((row) => row.published_speed?.length)],
   ['free_limits.source http(s)', "numbers traceable to the provider's page", (p) => { p.free_limits.source = 'ftp://example.com/limits'; }, "free_limits.source must be the provider's page (http/https)", (d) => d.providers.find((row) => row.free_limits)],
   ['no_expiry.source http(s)', "a no-expiry statement traceable to the provider's page", (p) => { p.expires = null; p.no_expiry = { source: 'ftp://example.com/terms', checked: '2026-10-01', quote: 'Credits do not expire.' }; }, "no_expiry.source must be the provider's page (http/https)", trialProvider],
@@ -310,6 +312,9 @@ test('playground_url requires non-empty docs_url on unverified rows', () => {
   const p = data.providers.find((row) => row.slug === 'groq');
   p.verified = false;
   p.last_verified = null;
+  // keys_url has its own docs_url rule (tested below); keep this case about playground_url alone
+  delete p.keys_url;
+  delete p.keys_url_source;
   p.playground_url = 'https://example.com/playground';
   const accepted = runValidate(data);
   assert.equal(accepted.status, 0, accepted.output);
@@ -334,6 +339,58 @@ test('playground_url requires non-empty docs_url on unverified rows', () => {
   assert.equal(noPlayground.status, 0, noPlayground.output);
 });
 
+test('keys_url accepts HTTPS with its source and remains optional', () => {
+  const data = structuredClone(DATA);
+  const p = provider(data);
+  p.keys_url = 'https://example.com/keys?tab=api&new=1';
+  p.keys_url_source = 'https://example.com/docs/quickstart';
+  const present = runValidate(data);
+  assert.equal(present.status, 0, present.output);
+  delete p.keys_url;
+  delete p.keys_url_source;
+  const absent = runValidate(data);
+  assert.equal(absent.status, 0, absent.output);
+});
+
+test('keys_url and keys_url_source reject invalid present values', () => {
+  for (const field of ['keys_url', 'keys_url_source']) {
+    for (const value of ['http://example.com/keys', 'javascript:alert(1)', '/keys', '', null, 7]) {
+      const data = structuredClone(DATA);
+      const p = provider(data);
+      p.keys_url = 'https://example.com/keys';
+      p.keys_url_source = 'https://example.com/docs';
+      p[field] = value;
+      const result = runValidate(data);
+      assert.notEqual(result.status, 0, `${field}=${JSON.stringify(value)}: ${result.output}`);
+      assert.ok(result.output.includes(`/providers/${data.providers.indexOf(p)}/${field}`), result.output);
+    }
+  }
+});
+
+test('keys_url needs its source, the source needs keys_url, and both need a non-empty docs_url', () => {
+  const message = (p) => `${p.slug}: keys_url and keys_url_source go together and require a non-empty docs_url`;
+  for (const only of ['keys_url', 'keys_url_source']) {
+    const data = structuredClone(DATA);
+    const p = provider(data);
+    delete p.keys_url;
+    delete p.keys_url_source;
+    p[only] = 'https://example.com/keys';
+    const rejected = runValidate(data);
+    assert.notEqual(rejected.status, 0, rejected.output);
+    assert.ok(rejected.output.includes(message(p)), rejected.output);
+  }
+  const data = structuredClone(DATA);
+  const p = data.providers.find((row) => row.slug === 'groq');
+  p.verified = false;
+  p.last_verified = null;
+  p.keys_url = 'https://example.com/keys';
+  p.keys_url_source = 'https://example.com/docs';
+  p.docs_url = '  ';
+  const rejected = runValidate(data);
+  assert.notEqual(rejected.status, 0, rejected.output);
+  assert.ok(rejected.output.includes(message(p)), rejected.output);
+});
+
 test('the fixture harness leaves a valid fixture valid', () => {
   const data = structuredClone(DATA);
   const result = runValidate(data);
@@ -355,6 +412,7 @@ test('validate accepts conditional commercial use only with a non-empty conditio
   assert.match(rejectedMissing.output, /commercial_ok_condition/);
 
   const misplaced = structuredClone(DATA);
+  provider(misplaced).commercial_ok = true;
   provider(misplaced).commercial_ok_condition = 'This must not accompany true.';
   const rejectedMisplaced = runValidate(misplaced);
   assert.notEqual(rejectedMisplaced.status, 0, rejectedMisplaced.output);

@@ -50,6 +50,20 @@ export function comparator(sortKey, sortDir, a, b) {
     const d = freeTypeRank(a) - freeTypeRank(b) || nameCmp(a, b);
     return sortDir === 1 ? d : -d;
   }
+  if (sortKey === 'notes') {
+    // The «Needs / unknown» column (key kept as 'notes' so shared URLs and the GA4 sort key stay valid): fewest
+    // requirements first, then fewest unknowns, with the name as a stable tiebreak. A requirement weighs more than an
+    // unknown. Self-contained, because it is serialised into shared-sort.js.
+    const rank = (p) => {
+      const tr = p.data_policy && typeof p.data_policy === 'object' ? p.data_policy.trains_on_prompts : undefined;
+      const req = (p.card_required === true) + (p.phone_required === true) + (p.commercial_ok === false || p.commercial_ok === 'conditional') + (tr === true);
+      const unk = (p.card_required !== true && p.card_required !== false) + (p.phone_required !== true && p.phone_required !== false) +
+        (p.commercial_ok !== true && p.commercial_ok !== false && p.commercial_ok !== 'conditional') + (tr !== true && tr !== false);
+      return req * 10 + unk;
+    };
+    const d = rank(a) - rank(b) || nameCmp(a, b);
+    return sortDir === 1 ? d : -d;
+  }
   let av = a[sortKey], bv = b[sortKey];
   if (typeof av === 'boolean') { av = av ? 1 : 0; bv = bv ? 1 : 0; }
   av = (av ?? ''); bv = (bv ?? '');

@@ -12,20 +12,26 @@ export const THRESHOLDS = Object.freeze({ accessibility: 0.95, performance: 0.8 
 // Performance moves between runs on a shared runner, so it keeps the median of three
 // and runs after a merge to main and nightly, where a slow sample costs no contributor a wait.
 // `full` is the old single pass (all three categories, median of three), for local runs.
+// `concurrency` is how many pages are measured at once. Accessibility and SEO audit the DOM, not timings, so three
+// Chromes side by side give the same verdict in a third of the time; anything that scores performance measures one
+// page at a time, so no run competes with another for the CPU.
 export const MODES = Object.freeze({
   'accessibility-seo': Object.freeze({
     categories: Object.freeze(['accessibility', 'seo']),
     runs: 1,
+    concurrency: 3,
     thresholds: Object.freeze({ accessibility: THRESHOLDS.accessibility, seo: 1 }),
   }),
   performance: Object.freeze({
     categories: Object.freeze(['performance']),
     runs: 3,
+    concurrency: 1,
     thresholds: Object.freeze({ performance: THRESHOLDS.performance }),
   }),
   full: Object.freeze({
     categories: Object.freeze(['accessibility', 'performance', 'seo']),
     runs: 3,
+    concurrency: 1,
     thresholds: Object.freeze({ ...THRESHOLDS, seo: 1 }),
   }),
 });
@@ -112,4 +118,23 @@ export function negotiateEncoding(contentType, acceptEncoding = '') {
   if (offered.includes('br')) return 'br';
   if (offered.includes('gzip')) return 'gzip';
   return null;
+}
+
+// The font budget. Lighthouse's own byte counts live in the performance category, which pull requests do not run, so the
+// gate checks fonts statically and on every page it measures: the local .woff2 files a page's HTML preloads or declares
+// with @font-face, summed by their size on disk (woff2 is already compressed: what is on disk is what is sent). Pure: the
+// caller passes the HTML and a size lookup, so the rule is unit-tested without files.
+export function pageFontUrls(html) {
+  const urls = new Set();
+  for (const m of String(html).matchAll(/(?:href="|url\(['"]?)([^"')]+?\.woff2)(?:\?[^"')]*)?/g)) if (!/^(?:[a-z]+:)?\/\//i.test(m[1])) urls.add(m[1]);
+  return [...urls];
+}
+
+export function fontBudgetFailures(url, html, sizeOf, budget) {
+  const files = pageFontUrls(html);
+  const total = files.reduce((n, f) => n + (sizeOf(f) ?? 0), 0);
+  const missing = files.filter((f) => sizeOf(f) == null);
+  const failures = missing.map((f) => `${url}: font ${f} is declared but not found`);
+  if (total > budget) failures.push(`${url}: fonts weigh ${(total / 1024).toFixed(1)} KB, over the ${(budget / 1024).toFixed(0)} KB budget (${files.join(', ')})`);
+  return failures;
 }

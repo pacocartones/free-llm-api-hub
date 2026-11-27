@@ -5,6 +5,7 @@
 // renders site/state/YYYY-MM/; the fixture tests in build.test.mjs pin the math.
 
 import { ageInDays } from './rules.mjs';
+import { plural } from './text.mjs';
 
 export const STATE_MODALITIES = ['text', 'vision', 'image', 'audio', 'embeddings', 'rerank', 'ocr'];
 
@@ -107,8 +108,6 @@ const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'Ju
 export const monthName = (month) => MONTH_NAMES[Number(month.slice(5, 7)) - 1];
 export const monthLabel = (month) => `${monthName(month)} ${month.slice(0, 4)}`;
 export const pct = (x) => `${Math.round(x * 1000) / 10}%`;
-
-const plural = (n, one, many) => `${n} ${n === 1 ? one : many}`;
 
 // The sentence under the title of a month, from the same figures the page shows and nothing else.
 export const monthSummary = (r, previous = null) => {

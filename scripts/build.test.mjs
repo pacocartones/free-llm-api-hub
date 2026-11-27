@@ -2,24 +2,27 @@
 // Covers: serializer round-trip, validator honesty rules, existing self-tests,
 // build idempotency, one generated README row matching the data, and the
 // generated client configs (LiteLLM + OpenAI SDK) and published JSON Schema.
-import { before, describe, test } from 'node:test';
+// test and describe come from lib/test-part.mjs: node:test's own, unless run-tests.mjs runs this file in parts.
+import { before, describe, test } from './lib/test-part.mjs';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { readFileSync, writeFileSync, existsSync, readdirSync, statSync, rmSync } from 'node:fs';
 import { tmpFile } from './lib/tmp.mjs';
 import { privateTree } from './lib/private-tree.mjs';
-import { htmlEsc } from './lib/rows.mjs';
+import { escapeHtml, escapeText } from './lib/html.mjs';
 import { join, dirname, isAbsolute, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
 import { ORDER, roundTripError, serialize } from './_serialize.mjs';
+import { redirectStubFiles } from './lib/redirects.mjs';
+import { trackedFilesOnDisk } from './lib/tracked-files.mjs';
 import { freshnessBadge, freshnessColor, freshnessStatus, recScore, SLA_DAYS, DUE_SOON_DAYS } from './lib/rules.mjs';
 import { esc, stripTags } from './lib/escape.mjs';
 import { mineProviderHistory, assertHistoryPlausible, historyFromRevisions } from './lib/history.mjs';
 import { isoWeek, flattenFieldChanges, groupChangesByWeek, changesRss, xmlEsc, reportChangeUrl } from './lib/changes.mjs';
 import { monthlyReport, reportMonths, monthEndDate, fillMonths, monthSummary, monthBrief } from './lib/state.mjs';
 import { buildOgManifest } from './lib/og.mjs';
-import { explorerRowHtml, catchTags, catchCellHtml, CATCH_LABELS } from './lib/rows.mjs';
+import { explorerRowHtml, needsOf, needsCellHtml, NEED_LABELS, UNKNOWN_LABELS } from './lib/rows.mjs';
 import { labelTables } from './lib/tables.mjs';
 import { markNewTabLinks } from './lib/links.mjs';
 import { bestFactsHtml } from './lib/best-facts.mjs';
@@ -28,7 +31,7 @@ import { clientConfigProviders, openaiClients, litellmYaml, MODEL_PLACEHOLDER } 
 import { hasHiddenChars } from './lib/hidden-chars.mjs';
 import { requirementsHtml, limitsHtml, glanceHtml, modelsHtml, dataPolicyHtml } from './lib/provider-sections.mjs';
 import { compareTableHtml, comparisonCategory, sameComparisonCategory, selectComparePairs, COMPARE_PAGE_CAP, COMPARE_PER_PROVIDER_CAP, COMPARE_MAX as COMPARE_MAX_SLOTS } from './lib/compare.mjs';
-import { codeHtmlEsc, curlChatQuickstart, posixShellQuote, pythonChatQuickstart, pythonEmbeddingsQuickstart, pythonStringLiteral } from './lib/quickstart.mjs';
+import { curlChatQuickstart, posixShellQuote, pythonChatQuickstart, pythonEmbeddingsQuickstart, pythonStringLiteral } from './lib/quickstart.mjs';
 import { providersCsv } from './lib/provider-csv.mjs';
 import { projectApiV1Changes, toApiV1ChangeValue, toApiV1Provider } from './lib/api-v1.mjs';
 import Ajv2020 from 'ajv/dist/2020.js';
@@ -40,6 +43,9 @@ const REPO = join(dirname(fileURLToPath(import.meta.url)), '..');
 const ROOT = privateTree(REPO);
 const slash = (value) => value.replaceAll('\\', '/');
 const DATA = join(ROOT, 'data/providers.json');
+// Retired URLs (data/redirects.json) are meta-refresh stubs under site/p/ and site/compare/, not pages.
+const STUBS = redirectStubFiles(JSON.parse(readFileSync(join(ROOT, 'data/redirects.json'), 'utf8')));
+const isPairPage = (d) => d.includes('-vs-') && !STUBS.has(`compare/${d}/index.html`);
 // What the build would touch in the tree of the repository, read before any test runs (see the last test).
 const GENERATED_IN_REPO = ['site/p', 'site/sitemap.xml', 'site/api/v1/index.json', 'site/collections'];
 const mtimes = (root) => GENERATED_IN_REPO.map((rel) => (existsSync(join(root, rel)) ? statSync(join(root, rel)).mtimeMs : null));
@@ -67,6 +73,58 @@ test('playground_url survives canonical serialization', () => {
   assert.equal(Object.hasOwn(saved.providers[1], 'playground_url'), false);
 });
 
+test('keys_url and keys_url_source survive canonical serialization', () => {
+  const data = JSON.parse(readFileSync(DATA, 'utf8'));
+  data.providers[0].keys_url = 'https://example.com/keys?tab=api&new=1';
+  data.providers[0].keys_url_source = 'https://example.com/docs';
+  delete data.providers[1].keys_url;
+  delete data.providers[1].keys_url_source;
+  const saved = JSON.parse(serialize(data));
+  assert.equal(saved.providers[0].keys_url, 'https://example.com/keys?tab=api&new=1');
+  assert.equal(saved.providers[0].keys_url_source, 'https://example.com/docs');
+  assert.equal(Object.hasOwn(saved.providers[1], 'keys_url'), false);
+});
+
+test('provider "Get a free key" button is conditional, tracked as data-link="keys", and kept in public JSON', () => {
+  const raw = readFileSync(DATA, 'utf8');
+  const data = JSON.parse(raw);
+  const [first, second] = data.providers;
+  first.keys_url = 'https://example.com/keys?tab=api&new=1';
+  first.keys_url_source = 'https://example.com/docs';
+  delete second.keys_url;
+  delete second.keys_url_source;
+  try {
+    writeFileSync(DATA, serialize(data));
+    run(['scripts/build.mjs']);
+    const present = readFileSync(join(ROOT, 'site/p', `${first.slug}.html`), 'utf8');
+    assert.equal((present.match(/>Get a free key ↗/g) || []).length, 1);
+    assert.ok(present.includes(`<a class="btn primary" href="https://example.com/keys?tab=api&amp;new=1" target="_blank" rel="noopener" data-provider="${first.slug}" data-link="keys">Get a free key ↗<span class="sr-only"> (opens in a new tab)</span></a>`));
+    // right after What's free, before the quickstart and the limits (the owner's order)
+    const at = (s) => present.indexOf(s);
+    assert.ok(at('id="whats-free"') < at('>Get a free key ↗') && at('>Get a free key ↗') < at('id="quickstart"') && at('id="quickstart"') < at('id="limits"'));
+    const absent = readFileSync(join(ROOT, 'site/p', `${second.slug}.html`), 'utf8');
+    assert.doesNotMatch(absent, /Get a free key/);
+    for (const file of ['site/providers.json', 'site/api/v1/providers.json']) {
+      const published = JSON.parse(readFileSync(join(ROOT, file), 'utf8'));
+      const row = published.providers.find((p) => p.slug === first.slug);
+      assert.equal(row.keys_url, 'https://example.com/keys?tab=api&new=1');
+      assert.equal(row.keys_url_source, 'https://example.com/docs');
+      assert.equal(Object.hasOwn(published.providers.find((p) => p.slug === second.slug), 'keys_url'), false);
+    }
+    const schema = JSON.parse(readFileSync(join(ROOT, 'site/api/v1/schema.json'), 'utf8'));
+    for (const name of ['keys_url', 'keys_url_source']) {
+      const field = schema.$defs.provider.properties[name];
+      assert.deepEqual([field.type, field.format, field.pattern], ['string', 'uri', '^https://']);
+    }
+    assert.notEqual(schema.$defs.provider.additionalProperties, false, 'v1 stays open to additive fields');
+    const csvHeader = readFileSync(join(ROOT, 'site/providers.csv'), 'utf8').split('\n')[0];
+    assert.doesNotMatch(csvHeader, /keys_url/, 'the CSV column list is unchanged');
+  } finally {
+    writeFileSync(DATA, raw);
+    run(['scripts/build.mjs']);
+  }
+});
+
 test('serializer ORDER matches the JSON Schema provider properties', () => {
   const schema = JSON.parse(readFileSync(join(ROOT, 'data/schema.json'), 'utf8'));
   const providerKeys = Object.keys(schema.$defs.provider.properties);
@@ -91,7 +149,7 @@ test('provider playground action is conditional and preserved in public JSON', (
     assert.equal((present.match(/>Try it ↗/g) || []).length, 1);
     // the provider links carry data-provider / data-link for the opt-in outbound_provider_click event
     assert.ok(present.includes(`<a class="btn" href="https://example.com/playground?model=a&amp;mode=b" target="_blank" rel="noopener" data-provider="${first.slug}" data-link="playground">Try it ↗<span class="sr-only"> (opens in a new tab)</span></a>`));
-    assert.ok(present.includes(`href="${htmlEsc(first.docs_url)}" target="_blank" rel="noopener" data-provider="${first.slug}" data-link="docs">Official docs ↗`));
+    assert.ok(present.includes(`href="${escapeHtml(first.docs_url)}" target="_blank" rel="noopener" data-provider="${first.slug}" data-link="docs">Official docs ↗`));
     assert.match(present, /class="btn website"[^>]*>Visit website ↗/);
     const absent = readFileSync(join(ROOT, 'site/p', `${second.slug}.html`), 'utf8');
     assert.doesNotMatch(absent, />Try it ↗/);
@@ -404,7 +462,7 @@ test('every generated page has the same centred header: crumbs, one title and, w
   let checked = 0;
   for (const file of walk(join(ROOT, 'site'))) {
     const rel = slash(relative(join(ROOT, 'site'), file));
-    if (exceptions.has(rel) || rel.startsWith('og') || /^google[0-9a-f]+\.html$/.test(rel)) continue; // the Search Console ownership file is not a page
+    if (exceptions.has(rel) || STUBS.has(rel) || rel.startsWith('og') || /^google[0-9a-f]+\.html$/.test(rel)) continue; // the Search Console ownership file is not a page
     const html = readFileSync(file, 'utf8');
     const heroes = html.match(/<section class="page-hero[^"]*">/g) || [];
     assert.equal(heroes.length, 1, `${rel}: one page header`);
@@ -481,7 +539,7 @@ test('sitemap.xml lists no paginated updates pages (their count follows the comm
   assert.doesNotMatch(sitemap, /\/updates\/page\//, 'a page count tied to git history would make the drift-gated sitemap change on every merge');
 });
 
-test('derived-fingerprints.json pins gitignored outputs, skips site/p/, site/badges/, tracked and git-log files', () => {
+test('derived-fingerprints.json pins gitignored outputs, skips site/p/, site/badges/, the freshness badge, tracked and git-log files', () => {
   const fp = join(ROOT, 'derived-fingerprints.json');
   if (!existsSync(fp)) run(['scripts/build.mjs']);
   const pins = JSON.parse(readFileSync(fp, 'utf8'));
@@ -496,6 +554,8 @@ test('derived-fingerprints.json pins gitignored outputs, skips site/p/, site/bad
     'site/p/ must not be pinned (date-relative)');
   assert.equal(Object.keys(pins).some((k) => k.startsWith('site/badges/')), false,
     'site/badges/ must not be pinned (colour tracks verification age)');
+  assert.equal(pins['site/badge-freshness.json'], undefined,
+    'site/badge-freshness.json must not be pinned (its oldest age moves every day)');
   assert.equal(Object.keys(pins).some((k) => k.startsWith('site/og/')), false,
     'site/og/ is tracked and diff-gated directly');
   assert.equal(pins['site/index.html'], undefined,
@@ -572,7 +632,8 @@ test('tracked files reject personal mailboxes except the verified maintainer pol
   assert.equal(unexpected('CONTRIBUTORS.md', historicalEmail), true, 'no contributor-list exception');
   assert.equal(unexpected('CONTRIBUTING.md', historicalEmail.replace('leonaniagomez', 'someone')), true, 'other addresses still fail inside policy files');
   assert.equal(unexpected('CONTRIBUTING.md', 'prefix' + historicalEmail), true, 'partial address matches are not exempt');
-  const files = execFileSync('git', ['ls-files', '-z'], { cwd: ROOT, encoding: 'utf8' }).split('\0').filter(Boolean);
+  // Skips tracked files deleted but not yet staged, such as the fragments right after release:prepare.
+  const files = trackedFilesOnDisk(ROOT);
   const hits = [];
   for (const rel of files) {
     if (/\.(png|jpe?g|webp|gif|woff2?|ico)$/i.test(rel)) continue;
@@ -672,16 +733,18 @@ test('the explorer does not claim a column sort before the user chooses one', ()
   assert.match(explorer, /<th data-key="name" scope="col" aria-sort="none" role="columnheader"><button type="button" class="th-sort">API<\/button><\/th>/);
 });
 
-test('the homepage hero gives first-time visitors working explorer and JSON API entry points', () => {
+test('the homepage hero has one primary action (the finder), a quiet link down to the table, and the JSON API stays one click away', () => {
   run(['scripts/build.mjs']);
   const index = readFileSync(join(ROOT, 'site/index.html'), 'utf8');
   const hero = index.match(/<section class="hero">([\s\S]*?)<\/section>/)?.[1];
   assert.ok(hero, 'the homepage has a hero');
-  const start = hero.match(/<nav\b[^>]*aria-label="Get started"[^>]*>([\s\S]*?)<\/nav>/)?.[1];
-  assert.ok(start, 'first-use navigation is available in the hero without JavaScript');
-  assert.match(start, /<a href="#explorer">Browse providers<\/a>/);
-  assert.match(index, /<main id="explorer">/, 'the browse link reaches the existing explorer');
-  assert.match(start, /<a href="api\/">Use the JSON API<\/a>/);
+  const cta = hero.match(/<div class="hero-cta">([\s\S]*?)<\/div>/)?.[1];
+  assert.ok(cta, 'the hero actions are in the page without JavaScript');
+  assert.match(cta, /<a class="btn primary hero-find" href="find\/">Find my free API<\/a>/);
+  assert.match(cta, /<a class="hero-browse" href="#all-providers">Browse all/);
+  assert.match(index, /<h2 id="all-providers" class="explorer-h">All providers<\/h2>/, 'the browse link reaches the heading above the table');
+  assert.match(index, /<main id="explorer">/);
+  assert.match(index.slice(index.indexOf('<footer')), /<a href="api\/">JSON API<\/a>/, 'the JSON API is linked from the footer');
   const docs = readFileSync(join(ROOT, 'site/api/index.html'), 'utf8');
   assert.match(docs, /href="v1\/no-card\.json"/, 'API docs link to a ready-to-use dataset slice');
   const slice = JSON.parse(readFileSync(join(ROOT, 'site/api/v1/no-card.json'), 'utf8'));
@@ -754,7 +817,7 @@ test('stripTags removes nested fragments with fixed-point iteration', () => {
 test('stripTags passes clean text through unchanged', () => {
   // stripTags is aggressive on purpose: bare < and > ARE treated as tag
   // boundaries. In the build pipeline text reaches stripTags already escaped
-  // by htmlEsc/esc, so this is only reached with clean payloads or
+  // by escapeHtml/esc, so this is only reached with clean payloads or
   // pre-stripped fragments.
   assert.equal(stripTags('no tags here'), 'no tags here');
   assert.equal(stripTags('&lt; &amp; &gt;'), '&lt; &amp; &gt;');
@@ -849,16 +912,14 @@ test('the shipped badge grades its own stated age by the rule', () => {
 // ---------- a confirmed "yes" must never look like an unknown ----------
 test('a confirmed card requirement is never hidden in the README top-20 or the explorer', () => {
   const { providers } = JSON.parse(readFileSync(DATA, 'utf8'));
-  const best = JSON.parse(readFileSync(join(ROOT, 'data/best.json'), 'utf8'));
   const readme = readFileSync(join(ROOT, 'README.md'), 'utf8');
   const explorer = readFileSync(join(ROOT, 'site/index.html'), 'utf8');
-  const bySlug = new Map(providers.map((p) => [p.slug, p]));
   const walled = providers.filter((p) => p.card_required === true);
   assert.ok(walled.length, 'dataset has at least one card-gated provider to check');
 
-  // README: any top-20 pick that requires a card must say so.
-  for (const e of best.entries) {
-    const p = bySlug.get(e.slug);
+  // README: any pick of the README table (the score top, not data/best.json) that requires a card must say so.
+  for (const e of topOfData()) {
+    const p = e.p;
     if (p && p.card_required === true) {
       const row = readme.split('\n').find((l) => l.includes(`](${p.docs_url})`));
       assert.ok(row, `${p.slug}: no README top-20 row found`);
@@ -868,9 +929,9 @@ test('a confirmed card requirement is never hidden in the README top-20 or the e
 
   // Explorer: the full-list surface must show the card flag for every gated provider.
   for (const p of walled) {
-    const row = explorer.split('\n').find((l) => l.includes(`href="p/${p.slug}"`));
+    const row = explorer.split('\n').find((l) => l.includes(`class="name-link" href="p/${p.slug}"`));
     assert.ok(row, `${p.slug}: no explorer row found`);
-    assert.match(row, /aria-label="card"/, `${p.slug}: explorer row hides the card requirement`);
+    assert.match(row, /<span class="need-req">Card required[,<]/, `${p.slug}: explorer row hides the card requirement`);
   }
 });
 
@@ -923,9 +984,9 @@ test('the verified badge colours by freshness — fresh / due / stale', () => {
     return { slug: 'demo', name: 'Demo', category: 'ongoing', verified: true, last_verified: d.toISOString().slice(0, 10) };
   };
   const row = (p) => explorerRowHtml(p, { now: '2026-08-13' });
-  assert.match(row(mk(10)), /badge b-ok/, 'fresh entry must stay green');
-  assert.match(row(mk(75)), /badge b-warn/, 'due entry must turn yellow');
-  assert.match(row(mk(95)), /badge b-stale/, 'stale entry must turn red');
+  assert.match(row(mk(10)), /stamp-pill b-ok/, 'fresh entry must stay green');
+  assert.match(row(mk(75)), /stamp-pill b-warn/, 'due entry must turn yellow');
+  assert.match(row(mk(95)), /stamp-pill b-stale/, 'stale entry must turn red');
   assert.match(row(mk(75)), /title="Verified 75d ago/, 'due badge explains its age');
 });
 
@@ -1124,8 +1185,8 @@ test('quickstarts preserve ordinary chat, embeddings and copied HTML output', ()
   const curl = curlChatQuickstart(base, model, { apiKeyVariable: 'YOUR_FREE_API_KEY', spacedJson: true });
   assert.match(curl, /^curl https:\/\/api\.example\/v1\/chat\/completions \\/);
   assert.match(curl, /Bearer \$YOUR_FREE_API_KEY/);
-  assert.equal(codeHtmlEsc('<tag>&'), '&lt;tag&gt;&amp;', 'HTML encoding preserves decoded clipboard text without creating markup');
-  assert.equal(decodeCodeHtml(codeHtmlEsc(curl)), curl, 'browser-decoded code remains the safely quoted shell program');
+  assert.equal(escapeText('<tag>&'), '&lt;tag&gt;&amp;', 'HTML encoding preserves decoded clipboard text without creating markup');
+  assert.equal(decodeCodeHtml(escapeText(curl)), curl, 'browser-decoded code remains the safely quoted shell program');
 });
 
 test('the built client configs match the dataset, are registered, and publish the v1 schema', () => {
@@ -1451,7 +1512,7 @@ describe('read-only generated output', () => {
     const index = readFileSync(join(ROOT, 'site/models/index.html'), 'utf8');
     const listed = [...sitemap.matchAll(/<loc>https:\/\/freellmapihub\.com\/models\/([^<]+)\/<\/loc>/g)].map((m) => m[1]);
     assert.deepEqual(listed.sort(), groups.filter((g) => isIndexable(g)).map((g) => g.key).sort(), 'sitemap parity: only the indexable model pages');
-    const caveat = htmlEsc(MODEL_SAMPLE_CAVEAT);
+    const caveat = escapeHtml(MODEL_SAMPLE_CAVEAT);
     for (const g of groups) {
       const rel = `site/models/${g.key}/index.html`;
       const html = readFileSync(join(ROOT, rel), 'utf8');
@@ -1460,7 +1521,7 @@ describe('read-only generated output', () => {
       assert.equal(/<meta name="robots" content="noindex">/.test(html), !isIndexable(g), `${rel}: noindex follows the index rule`);
       assert.match(pins[rel] || '', /^[0-9a-f]{64}$/, `${rel}: pinned`);
       assert.equal(createHash('sha256').update(readFileSync(join(ROOT, rel))).digest('hex'), pins[rel], `${rel}: pin matches the bytes`);
-      for (const { id, p } of g.entries) assert.ok(html.includes(`<code>${htmlEsc(id)}</code>`) && html.includes(`href="../../p/${p.slug}"`), `${rel}: ${p.slug} row`);
+      for (const { id, p } of g.entries) assert.ok(html.includes(`<code>${escapeHtml(id)}</code>`) && html.includes(`href="../../p/${p.slug}"`), `${rel}: ${p.slug} row`);
       assert.ok(index.includes(`href="${g.key}/"`), `/models/ links ${g.key}`);
       const p = g.entries[0].p;
       if (existsSync(join(ROOT, `site/p/${p.slug}.html`))) assert.ok(readFileSync(join(ROOT, `site/p/${p.slug}.html`), 'utf8').includes(`href="../models/${g.key}/"`), `/p/${p.slug} links ${g.key}`);
@@ -1499,8 +1560,17 @@ describe('read-only generated output', () => {
     const months = readdirSync(join(ROOT, 'site/state')).filter((f) => /^\d{4}-\d{2}$/.test(f));
     assert.ok(months.length > 0, 'at least one monthly report');
     assertWellFormedXml(readFileSync(join(ROOT, 'site/changes.xml'), 'utf8'));
+    // The Atom twin reads the same projected weeks as api/v1/changes.json (scripts/changes-feed.test.mjs checks its shape).
+    const atom = readFileSync(join(ROOT, 'site/changes.atom'), 'utf8');
+    assertWellFormedXml(atom);
+    for (const html of ['site/index.html', 'site/changes/index.html']) {
+      assert.equal((readFileSync(join(ROOT, html), 'utf8').match(/<link rel="alternate" type="application\/atom\+xml"[^>]*changes\.atom">/g) || []).length, 1, html + ': one Atom autodiscovery link');
+    }
+    const changesIndex = readFileSync(join(ROOT, 'site/changes/index.html'), 'utf8');
+    assert.match(changesIndex, /<section id="latest" class="week-summary"><h2>(This|Latest) week<\/h2><p><strong>(This week|Latest week with changes|Latest week: not stated)/);
     const api = JSON.parse(readFileSync(join(ROOT, 'site/api/v1/changes.json'), 'utf8'));
     assert.ok(api.weeks.length > 0 && api.weeks.length <= 12);
+    assert.deepEqual((atom.match(/<id>tag:freellmapihub\.com,2026:changes:(\d{4}-W\d{2})<\/id>/g) || []).map((id) => id.slice(-13, -5)), api.weeks.map((w) => w.week), 'one Atom entry per week of changes.json');
     for (let i = 1; i < api.weeks.length; i++) assert.ok(api.weeks[i - 1].start > api.weeks[i].start, 'weeks newest first');
     for (const c of api.weeks[0].changes) assert.deepEqual(Object.keys(c), ['date', 'slug', 'name', 'field', 'from', 'to']);
     assert.equal(JSON.parse(readFileSync(join(ROOT, 'site/api/v1/index.json'), 'utf8')).endpoints.changes, 'v1/changes.json');
@@ -1509,7 +1579,7 @@ describe('read-only generated output', () => {
 
     const pins = Object.keys(JSON.parse(readFileSync(join(ROOT, 'derived-fingerprints.json'), 'utf8')));
     for (const k of pins) {
-      assert.ok(!k.startsWith('site/changes/') && !k.startsWith('site/state/') && k !== 'site/changes.xml' && k !== 'site/api/v1/changes.json',
+      assert.ok(!k.startsWith('site/changes/') && !k.startsWith('site/state/') && k !== 'site/changes.xml' && k !== 'site/changes.atom' && k !== 'site/api/v1/changes.json',
         k + ' is git-log derived and must not be pinned');
     }
     const sitemap = readFileSync(join(ROOT, 'site/sitemap.xml'), 'utf8');
@@ -1586,7 +1656,7 @@ describe('read-only generated output', () => {
     const dataDates = new Set(JSON.stringify(providers).match(/\d{4}-\d{2}-\d{2}/g));
     assert.match(sitemap, /<loc>https:\/\/freellmapihub\.com\/compare\/<\/loc>/);
     assert.ok(pins['site/compare/index.html'] && pins['site/shared-compare.js'], 'the compare view is pinned');
-    const built = readdirSync(join(ROOT, 'site/compare')).filter((d) => d.includes('-vs-')).sort();
+    const built = readdirSync(join(ROOT, 'site/compare')).filter(isPairPage).sort();
     assert.deepEqual(built, pairs.map((p) => p.path).sort(), 'exactly the selected pages are built (stale pages are removed)');
     for (const { a, b, path } of pairs) {
       const rel = `site/compare/${path}/index.html`;
@@ -1613,16 +1683,14 @@ describe('read-only generated output', () => {
     assert.match(index, /<script src="\.\.\/shared-compare\.js\?v=[0-9a-f]{8}" defer><\/script>\n<script src="\.\.\/compare\.js\?v=[0-9a-f]{8}" defer><\/script>\n<\/body>/);
     assert.equal(index.split('<script>').length - 1, 1, 'only the hashed theme guard runs inline');
     assert.equal((index.match(/<select class="sel" name="p">/g) || []).length, COMPARE_MAX_SLOTS);
-    // ai-horde has commercial_ok: null in the dataset; any page with a null flag
-    // must say so instead of rendering it as "no".
+    // Any page with a null flag must say so instead of rendering it as "no".
     const { providers } = JSON.parse(readFileSync(DATA, 'utf8'));
-    const page = readdirSync(join(ROOT, 'site/compare')).find((d) => {
-      if (!d.includes('-vs-')) return false;
-      // a null with no recorded reason: one with a reason (field_checks) says the reason instead
-      return d.split('-vs-').some((s) => { const p = providers.find((x) => x.slug === s); return p && p.commercial_ok === null && !(p.field_checks && p.field_checks.commercial_ok); });
-    });
+    // A null with no recorded reason reads "not confirmed"; one with a reason (field_checks) says the reason
+    // instead (both pinned on triStateHtml in field-checks.test.mjs). Either way it is never rendered as "no".
+    const page = readdirSync(join(ROOT, 'site/compare')).find((d) => isPairPage(d)
+      && d.split('-vs-').some((s) => { const p = providers.find((x) => x.slug === s); return p && p.commercial_ok === null; }));
     assert.ok(page, 'the real set contains a provider with an unconfirmed flag');
-    assert.match(readFileSync(join(ROOT, `site/compare/${page}/index.html`), 'utf8'), /<span class="tri tri-unk">not confirmed<\/span>/);
+    assert.match(readFileSync(join(ROOT, `site/compare/${page}/index.html`), 'utf8'), /<span class="tri tri-unk( tri-why" title="Not confirmed: [^"]+)?">(not confirmed|[^<]+\(checked \d{4}-\d{2}-\d{2}\))<\/span>/);
   });
 
   test('keyboard navigation is client-only: the server-rendered rows carry no tabindex', () => {
@@ -1709,7 +1777,7 @@ test('the client makes no GitHub API call and the home search covers model names
   assert.ok(searchText(groq).includes(groq.models_free[0].toLowerCase()), 'a real provider is found by one of its models');
 });
 
-test('header menu: Providers (with The Best inside), Models, Compare, Changes, API, Guides; the same on the home and the generated pages', () => {
+test('header menu: Providers (with Find my free API and The Best inside), Models, Compare, Changes, API, Guides; the same on the home and the generated pages', () => {
   // Q8: the menu names the site's main sections. Providers is a <details> holding the explorer and The Best (still the
   // one highlighted entry); Submit moved out of the menu to the secondary Contribute button. The home's header is
   // hand-written, so this also keeps it equal to siteHeader() in build.mjs.
@@ -1719,8 +1787,9 @@ test('header menu: Providers (with The Best inside), Models, Compare, Changes, A
     const html = readFileSync(join(ROOT, rel), 'utf8');
     const nav = html.slice(html.indexOf('id="primary-nav"'), html.indexOf('</nav>', html.indexOf('id="primary-nav"')));
     const hrefs = [...nav.matchAll(/<a [^>]*href="([^"]+)"/g)].map((m) => m[1].replace(/^(\.\.\/)+|^\.\//, ''));
-    assert.deepEqual(hrefs, ['#explorer', 'best/', 'models/', 'compare/', 'changes/', 'api/', 'guides-and-collections/'], `${rel}: the header menu entries, in order`);
-    assert.match(nav, /<details class="nav-group"><summary>Providers<\/summary><div class="nav-sub"><a href="[^"]*#explorer">All providers<\/a><a class="nav-best" href="[^"]*best\/"[^>]*>.*The Best<\/a><\/div><\/details>/s, `${rel}: The Best sits inside Providers`);
+    assert.deepEqual(hrefs, ['find/', '#explorer', 'find/', 'best/', 'models/', 'compare/', 'changes/', 'api/', 'guides-and-collections/'], `${rel}: the header menu entries, in order (the first one shows on phones only)`);
+    assert.match(nav, /^id="primary-nav" aria-label="Primary">\s*<a class="nav-find" href="[^"]*find\/">Find my free API<\/a>/, `${rel}: Find my free API heads the phone menu`);
+    assert.match(nav, /<details class="nav-group"><summary>Providers<\/summary><div class="nav-sub"><a href="[^"]*#explorer">All providers<\/a><a href="[^"]*find\/">Find my free API<\/a><a class="nav-best" href="[^"]*best\/"[^>]*>.*The Best<\/a><\/div><\/details>/s, `${rel}: The Best sits inside Providers`);
     assert.equal((nav.match(/class="nav-best"/g) || []).length, 1, `${rel}: only one highlighted entry`);
     assert.doesNotMatch(nav, /submit\//, `${rel}: Submit is not a menu entry`);
     const footer = html.slice(html.indexOf('<footer'));
@@ -1756,8 +1825,8 @@ test('provider links carry data-provider and data-link for the opt-in outbound_p
   assert.match(groq, /<a class="btn primary" href="[^"]+"[^>]* data-provider="groq" data-link="docs">Official docs/);
   assert.match(groq, /<a class="btn website" href="[^"]+"[^>]* data-provider="groq" data-link="website">/);
   const tagged = [...groq.matchAll(/data-provider="([^"]*)" data-link="([^"]*)"/g)];
-  assert.ok(tagged.every((m) => m[1] === 'groq' && ['docs', 'website', 'playground', 'models', 'limits_source', 'data_policy'].includes(m[2])), 'only the page provider and known link types');
-  const compareDir = readdirSync(join(ROOT, 'site/compare')).find((n) => n.includes('-vs-'));
+  assert.ok(tagged.every((m) => m[1] === 'groq' && ['docs', 'keys', 'website', 'playground', 'models', 'limits_source', 'data_policy'].includes(m[2])), 'only the page provider and known link types');
+  const compareDir = readdirSync(join(ROOT, 'site/compare')).find(isPairPage);
   const cmp = readFileSync(join(ROOT, `site/compare/${compareDir}/index.html`), 'utf8');
   assert.equal([...cmp.matchAll(/data-link="docs"/g)].length, 2, "both providers' docs links are tagged on a static comparison");
 });
@@ -1805,9 +1874,10 @@ test('provider sections: honest empty states, numbers only with source and date,
   const base = { slug: 'x', name: 'X', modalities: ['text'], free_type: 'perpetual', category: 'ongoing' };
   // flags read in words, and "not confirmed" is its own text, not a colour
   const reqs = requirementsHtml({ ...base, card_required: null, phone_required: false, commercial_ok: true });
-  assert.match(reqs, /Credit card<\/dt><dd><span class="tri tri-unk">not confirmed<\/span>/);
-  assert.match(reqs, /Phone verification<\/dt><dd><span class="tri tri-no">not required<\/span>/);
-  assert.match(reqs, /Commercial use<\/dt><dd><span class="tri tri-yes">allowed<\/span>/);
+  // Each value sits in the shared flag component (lib/flags.mjs): its shape, then the page's own words.
+  assert.match(reqs, /Credit card<\/dt><dd><span class="pflag pflag-unk" data-flag="card"[^>]*><span class="pflag-mark" aria-hidden="true">\?<\/span><span class="pflag-vis" aria-hidden="true"><span class="tri tri-unk">not confirmed<\/span>/);
+  assert.match(reqs, /Phone verification<\/dt><dd><span class="pflag pflag-ok" data-flag="phone"[^>]*><span class="pflag-mark" aria-hidden="true">✓<\/span><span class="pflag-vis" aria-hidden="true"><span class="tri tri-no">not required<\/span>/);
+  assert.match(reqs, /Commercial use<\/dt><dd><span class="pflag pflag-ok" data-flag="commercial"[^>]*><span class="pflag-mark" aria-hidden="true">✓<\/span><span class="pflag-vis" aria-hidden="true"><span class="tri tri-yes">allowed<\/span>/);
   // limits: numbers appear with their source and reading date; without them one honest line
   const withNumbers = limitsHtml({ ...base, rate_limits: '30 RPM', free_limits: { requests_per_minute: 30, requests_per_day: 14400, scope: 'free plan', source: 'https://example.com/limits', checked: '2026-10-08' } });
   assert.match(withNumbers, /<th scope="row">requests per minute<\/th><td>30<\/td>/);
@@ -1841,7 +1911,7 @@ test('provider sections: honest empty states, numbers only with source and date,
   assert.equal(dataPolicyHtml(base), '');
   const dp = dataPolicyHtml({ ...base, data_policy: { trains_on_prompts: false, retention: '30 days', source: 'https://example.com/p' } });
   assert.match(dp, /<h2 id="data-policy">Data policy<\/h2>/);
-  assert.match(dp, /Trains on your prompts<\/dt><dd><span class="tri tri-no">no<\/span>/);
+  assert.match(dp, /Trains on your prompts<\/dt><dd><span class="pflag pflag-ok" data-flag="training"[^>]*><span class="pflag-mark" aria-hidden="true">✓<\/span><span class="pflag-vis" aria-hidden="true"><span class="tri tri-no">no<\/span>/);
   assert.match(dp, /30 days/);
 });
 
@@ -1849,7 +1919,7 @@ test('every provider page has the same sections in the same order, unnumbered, w
   run(['scripts/build.mjs']);
   const order = ['whats-free', 'limits'];
   const providersBySlug = new Map(JSON.parse(readFileSync(DATA, 'utf8')).providers.map((q) => [q.slug, q]));
-  for (const f of readdirSync(join(ROOT, 'site/p')).filter((n) => n.endsWith('.html'))) {
+  for (const f of readdirSync(join(ROOT, 'site/p')).filter((n) => n.endsWith('.html') && !STUBS.has(`p/${n}`))) {
     const html = readFileSync(join(ROOT, 'site/p', f), 'utf8');
     const main = html.slice(html.indexOf('<main id="main">'));
     let at = -1;
@@ -1914,7 +1984,7 @@ test('data_policy: a provider that has it shows the section on its page, and the
   assert.equal(roundTripError(serialize(data)), null, 'the serializer round-trips the field');
   assert.ok(serialize(data).includes('"data_policy"'), 'the serializer writes it');
   const html = dataPolicyHtml(data.providers[0]);
-  assert.match(html, /Trains on your prompts<\/dt><dd><span class="tri tri-yes">yes<\/span>/);
+  assert.match(html, /Trains on your prompts<\/dt><dd><span class="pflag pflag-bad" data-flag="training" title="Trains on prompts: yes"><span class="pflag-mark" aria-hidden="true">✕<\/span><span class="pflag-vis" aria-hidden="true"><span class="tri tri-yes">yes<\/span>/);
   assert.match(html, /30 days/);
   assert.match(html, /href="https:\/\/example\.com\/privacy"/);
 });
@@ -1936,6 +2006,29 @@ test('expiry reads the same on the provider page, the comparison and the API', (
   assert.match(compareCell(unknown, ongoing), /not confirmed/, 'a trial credit with no data is no longer "no expiry" in comparisons');
   assert.equal(api.find((p) => p.slug === 'scaleway').no_expiry, undefined);
   assert.match(pageCell('groq'), /^no expiry<\/span>$/);
+});
+
+test('compare links the official model catalogue under the free-model sample (#705)', () => {
+  const row = (p) => compareTableHtml([p, p]).match(/Free models \(sample\)[\s\S]*?<\/tr>/)[0];
+  const base = { name: 'Fixture', category: 'ongoing' };
+  // a provider with a sample and one with "no sample" both get the link
+  assert.match(row({ ...base, slug: 'fx-sample', models_free: ['a/b'], models_url: 'https://example.com/models' }),
+    /<code>a\/b<\/code><div class="cmp-sub"><a href="https:\/\/example\.com\/models" target="_blank" rel="noopener">official catalogue ↗<\/a><\/div>/);
+  assert.match(row({ ...base, slug: 'fx-nosample', models_url: 'https://example.com/models' }),
+    /no sample<\/span><div class="cmp-sub"><a href="https:\/\/example\.com\/models" target="_blank" rel="noopener">official catalogue ↗<\/a><\/div>/);
+  // without models_url the cell renders exactly as before: no link, no cmp-sub line
+  assert.doesNotMatch(row({ ...base, slug: 'fx-plain', models_free: ['a/b'] }), /cmp-sub|official catalogue/);
+  // an unsafe models_url never becomes a link
+  assert.doesNotMatch(row({ ...base, slug: 'fx-unsafe', models_free: ['a/b'], models_url: 'javascript:alert(1)' }),
+    /javascript:|official catalogue/);
+  // the browser bundle ships the same function
+  run(['scripts/build.mjs']);
+  const bundle = readFileSync(join(ROOT, 'site/shared-compare.js'), 'utf8');
+  assert.match(bundle, /official catalogue/, 'the browser bundle carries the catalogue link');
+  const { compareTableHtml: bundledCompare } = (new Function('window', bundle + '; return window.FLLM_COMPARE;'))({});
+  assert.match(bundledCompare([{ ...base, slug: 'fx-bundle', models_url: 'https://example.com/models' }, base2()]),
+    /official catalogue ↗/, 'the bundled function renders the link');
+  function base2() { return { name: 'Other', category: 'ongoing', slug: 'fx-other' }; }
 });
 
 // ---------- weekly re-verification pacing (lib/pacing.mjs) ----------
@@ -2026,18 +2119,46 @@ test('models_url is an optional public HTTPS URL', () => {
 
 test('active providers retain models_url from their official catalogues', () => {
   const { providers } = JSON.parse(readFileSync(DATA, 'utf8'));
-  const seeded = providers.filter((p) => Object.hasOwn(p, 'models_url')).map((p) => [p.slug, p.models_url]);
+  // Compared by slug, not by file order: each contributor PR appends one row, and merged rows land in any order.
+  const bySlug = (x, y) => x[0].localeCompare(y[0]);
+  const seeded = providers.filter((p) => Object.hasOwn(p, 'models_url')).map((p) => [p.slug, p.models_url]).sort(bySlug);
   assert.deepEqual(seeded, [
     ['google-gemini', 'https://ai.google.dev/gemini-api/docs/models'],
     ['groq', 'https://console.groq.com/docs/models'],
     ['openrouter', 'https://openrouter.ai/models'],
+    ['cohere', 'https://docs.cohere.com/docs/models'],
+    ['cerebras', 'https://inference-docs.cerebras.ai/models/overview'],
+    ['cloudflare-workers-ai', 'https://developers.cloudflare.com/workers-ai/models/'],
     ['ibm-watsonx', 'https://www.ibm.com/docs/en/watsonx/saas?topic=solutions-supported-foundation-models'],
     ['fireworks-ai', 'https://fireworks.ai/models'],
     ['baseten', 'https://docs.baseten.co/inference/model-apis/overview'],
     ['alibaba-model-studio', 'https://www.alibabacloud.com/help/en/model-studio/model-pricing'],
+    ['elevenlabs', 'https://elevenlabs.io/docs/overview/models'],
+    ['assemblyai', 'https://www.assemblyai.com/docs/getting-started/models'],
+    ['deepgram', 'https://developers.deepgram.com/docs/models-languages-overview'],
+    ['nvidia-nim', 'https://build.nvidia.com/models'],
+    ['sambanova', 'https://docs.sambanova.ai/docs/en/models/sambacloud-models'],
     ['sarvam-ai', 'https://docs.sarvam.ai/api/token-factory/models'],
     ['tencent-hunyuan', 'https://cloud.tencent.com/document/product/1823/130051'],
-  ]);
+    ['bytez', 'https://bytez.com/models'],
+    ['public-ai', 'https://platform.publicai.co/models'],
+    ['liquid-ai', 'https://docs.liquid.ai/api/models'],
+    ['voyage-ai', 'https://docs.voyageai.com/docs/embeddings'],
+    ['stability-ai', 'https://docs.stability.ai/api-reference'],
+    ['plamo', 'https://docs.plamo.preferredai.jp/en/api'],
+    ['entrim', 'https://entrim.ai/ai-models/'],
+    ['infomaniak', 'https://www.infomaniak.com/en/hosting/ai-services/open-source-models'],
+    ['berget-ai', 'https://berget.ai/en/models'],
+    ['netlify-ai-gateway', 'https://docs.netlify.com/build/ai-gateway/overview/#model-availability'],
+    ['requesty', 'https://docs.requesty.ai/features/free-models'],
+    ['kilo-gateway', 'https://kilo.ai/models'],
+    ['experiential-labs', 'https://platform.experientiallabs.ai/models'],
+    ['google-cloud-tts', 'https://docs.cloud.google.com/text-to-speech/docs/list-voices-and-types'],
+    ['google-cloud-vision', 'https://docs.cloud.google.com/vision/docs/features-list'],
+    ['amazon-bedrock', 'https://docs.aws.amazon.com/bedrock/latest/userguide/models-supported.html'],
+    ['oci-generative-ai', 'https://docs.oracle.com/en-us/iaas/Content/generative-ai/pretrained-models.htm'],
+    ['nscale', 'https://docs.nscale.com/docs/ai-services/models'],
+  ].sort(bySlug));
 });
 
 // A `generated` after today in UTC is what a contributor in a time zone ahead of UTC writes at the end of their day (2026-10-16 when it is still
@@ -2221,7 +2342,7 @@ test('the 404 page is built with the shared header, menu and footer and root-abs
   assert.ok(html.includes(hash), 'the path read-out is pinned by hash in the CSP: ' + hash);
 });
 
-test('the menu has Providers (All providers, The Best), Models, Compare, Changes, API and Guides, and the footer no longer carries the removed entries', () => {
+test('the menu has Providers (All providers, Find my free API, The Best), Models, Compare, Changes, API and Guides, and the footer no longer carries the removed entries', () => {
   // Mutant: put Submit back in the menu, or the «Interactive explorer» link or the «Independent, community-maintained» line back in
   // the footer; this test turns red.
   const home = readFileSync(join(ROOT, 'site/index.html'), 'utf8');
@@ -2230,7 +2351,7 @@ test('the menu has Providers (All providers, The Best), Models, Compare, Changes
     const nav = html.match(/<nav class="nav" id="primary-nav"[\s\S]*?<\/nav>/);
     assert.ok(nav, name + ': the menu');
     const labels = [...nav[0].matchAll(/<(?:a [^>]*|summary)>(?:<svg[\s\S]*?<\/svg>)?([^<]+)<\/(?:a|summary)>/g)].map((m) => m[1].replace(/&amp;/g, '&').trim());
-    assert.deepEqual(labels, ['Providers', 'All providers', 'The Best', 'Models', 'Compare', 'Changes', 'API', 'Guides'], name + ': the menu entries');
+    assert.deepEqual(labels, ['Find my free API', 'Providers', 'All providers', 'Find my free API', 'The Best', 'Models', 'Compare', 'Changes', 'API', 'Guides'], name + ': the menu entries (the first one shows on phones only)');
     assert.ok(!/Interactive explorer/.test(html), name + ': no «Interactive explorer» link');
     assert.ok(!/Independent, community-maintained/.test(html), name + ': no «Independent, community-maintained» line');
     assert.ok(/<a href="[^"]*submit\/">Submit<\/a>/.test(html), name + ': Submit in the footer');
@@ -2257,16 +2378,23 @@ test('/submit/ links to the GitHub issue forms, has no form, and publishes one a
   assert.ok(readFileSync(join(ROOT, 'site/sitemap.xml'), 'utf8').includes('/submit/'), 'in the sitemap');
 });
 
-test('the green header keeps AA contrast: white 7:1 and the muted text 4.5:1 on the bar', () => {
+test('the header keeps AA contrast in both themes: ink 7:1, the muted menu text and the brand accent 4.5:1 on its ground', () => {
+  // Brand H1: the header is the page ground (white or near-black) with a hairline, not a coloured bar. Mutant: a header token
+  // that drops below its ratio in either theme, or a hover that paints a fixed white over the light ground; this test turns red.
   const css = readFileSync(join(ROOT, 'site/styles.css'), 'utf8');
-  const token = (n) => { const m = css.match(new RegExp('--' + n + ':\\s*(#[0-9a-fA-F]{6})')); assert.ok(m, 'the token --' + n); return m[1]; };
   const lum = (hex) => { const c = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255).map((v) => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4)); return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]; };
   const ratio = (a, b) => { const [x, y] = [lum(a), lum(b)].sort((p, q) => q - p); return (x + 0.05) / (y + 0.05); };
-  const bar = token('header-bar');
-  assert.ok(ratio(token('on-header'), bar) >= 7, 'white on the bar');
-  assert.ok(ratio(token('on-header-muted'), bar) >= 4.5, 'muted text on the bar');
-  assert.ok(ratio(token('on-header-accent'), bar) >= 4.5, 'the accent word of the brand on the bar');
+  const block = (selector) => css.slice(css.indexOf(selector + ' {'), css.indexOf('\n}', css.indexOf(selector + ' {')));
+  for (const [theme, b] of [['dark', block(':root')], ['light', block('[data-theme="light"]')]]) {
+    const token = (n) => { const m = b.match(new RegExp('--' + n + ':\\s*(#[0-9a-fA-F]{6})')); assert.ok(m, theme + ': the token --' + n); return m[1]; };
+    const bar = token('header-bar');
+    assert.equal(bar.toLowerCase(), token('bg').toLowerCase(), theme + ': the header sits on the page ground');
+    assert.ok(ratio(token('on-header'), bar) >= 7, theme + ': ink on the header');
+    assert.ok(ratio(token('on-header-muted'), bar) >= 4.5, theme + ': muted menu text on the header');
+    assert.ok(ratio(token('on-header-accent'), bar) >= 4.5, theme + ': the accent word of the brand on the header');
+  }
   assert.match(css, /\.site-header \.icon-btn \.star-count, \.site-header \.icon-btn:hover \.star-count \{ color: var\(--on-header\); \}/, 'the small star count stays AA over the translucent button backgrounds');
+  assert.doesNotMatch(css, /\.site-header \.icon-btn:hover \{[^}]*rgba\(255, 255, 255/, 'no fixed white hover over the light header');
 });
 
 test('best-facts: the three cards show fields of the record as they are, and a missing field reads «not stated»', () => {
@@ -2295,7 +2423,7 @@ test('explorer rows and best facts show conditional commercial use with its esca
     verified: true, last_verified: '2026-10-08', docs_url: 'https://example.com/terms',
   };
   const row = explorerRowHtml(p, { now: '2026-10-08' });
-  assert.match(row, /aria-label="commercial conditional"/);
+  assert.match(row, /<span class="need-req">Commercial use conditional<\/span>/);
   assert.match(row, /Conditional/);
   assert.ok(row.includes('Per-model &lt;licence&gt; applies.'));
   assert.doesNotMatch(row, /Not stated/);
@@ -2325,29 +2453,32 @@ test('/best/ layout: three cards per entry, a separator instead of the «Ranks 4
   assert.match(css, /\.best-intro \{[^}]*text-align: center/, 'the introduction is centred');
 });
 
-test('home table: «The catch» is a closed vocabulary of short tags, the free text is only in the title and on the provider page', () => {
-  // Mutant: put the free text of the record (notes) back in the cell, or add a tag outside the list; this test turns red.
+test('home table: «Needs / unknown» says in words only what is required or unknown, from a closed vocabulary; the free text stays in the title', () => {
+  // Mutant: put the free text of the record (notes) back in the cell, add a phrase outside the lists, or bring back
+  // "Not stated"; this test turns red.
   const providers = JSON.parse(readFileSync(join(ROOT, 'data/providers.json'), 'utf8')).providers;
   const seen = new Set();
   for (const p of providers) {
-    const tags = catchTags(p);
-    for (const t of tags) { assert.ok(CATCH_LABELS.includes(t.label), p.slug + ': tag outside the vocabulary: ' + t.label); seen.add(t.label); }
-    // Two lines at the reference desktop width (a 26% column of a 1480px table is about 380px, 40 characters of the monospace face a
-    // line): the tags and the link must fit in about 80 characters.
-    assert.ok(tags.length <= 4, p.slug + ': at most four tags');
-    assert.ok(tags.reduce((n, t) => n + t.label.length + 2, 0) + 'Details'.length <= 60, p.slug + ': the cell fits in two lines');
-    const cell = catchCellHtml(p);
-    const inner = cell.replace(/^<td[^>]*>/, '').replace(/<\/td>$/, '').replace(/<span class="sr-only">[^<]*<\/span>/g, '');
-    const visible = inner.replace(/<[^>]+>/g, '');
+    const { needs, unknown } = needsOf(p);
+    for (const n of needs) { assert.ok(NEED_LABELS.includes(n), p.slug + ': phrase outside the vocabulary: ' + n); seen.add(n); }
+    for (const u of unknown) assert.ok(UNKNOWN_LABELS.includes(u), p.slug + ': unknown outside the vocabulary: ' + u);
+    const cell = needsCellHtml(p);
+    // Strip tags until nothing changes, so no partial tag can survive one pass.
+    let visible = cell;
+    for (let prev = ''; prev !== visible; ) { prev = visible; visible = visible.replace(/<[^>]*>/g, ''); }
+    assert.doesNotMatch(visible, /Not stated|✓/, p.slug + ': no "Not stated" and no tick marks');
+    // Two lines at the reference desktop width (a 22% column of a 1480px table, about 45 characters of the body face a line).
+    assert.ok(needs.join(', ').length <= 90 && ('Unknown: ' + unknown.join(', ')).length <= 90, p.slug + ': each part fits in two lines');
     if (p.notes) {
       assert.ok(!visible.includes(p.notes.slice(0, 25)), p.slug + ': the free text is not in the cell');
-      assert.ok(cell.includes(' title="' + htmlEsc(p.notes) + '"'), p.slug + ': the free text is in the title');
+      assert.ok(cell.includes(escapeHtml(p.notes) + '"'), p.slug + ': the free text is in the title');
     }
-    assert.match(cell, new RegExp('<a class="catch-more" href="p/' + p.slug + '#limits">Details'), p.slug + ': the link to the provider page');
+    if (!needs.length && !unknown.length) assert.match(visible, /^Nothing required$/, p.slug + ': says there is nothing to worry about');
   }
-  assert.ok(seen.size >= 3, 'the dataset exercises at least three of the tags');
-  assert.deepEqual(catchTags({ card_required: false, phone_required: false, commercial_ok: true }), [], 'a provider with nothing to warn about has no tag');
-  assert.deepEqual(catchTags({ card_required: true, phone_required: null, commercial_ok: false, expires: '30 days' }).map((t) => t.label), ['Card required', 'Evaluation only', 'Expires', 'Not stated']);
+  assert.ok(seen.size >= 2, 'the dataset exercises at least two of the phrases');
+  assert.deepEqual(needsOf({ card_required: false, phone_required: false, commercial_ok: true, data_policy: { trains_on_prompts: false } }), { needs: [], unknown: [] });
+  assert.deepEqual(needsOf({ card_required: true, phone_required: null, commercial_ok: false }), { needs: ['Card required', 'Non-commercial only'], unknown: ['phone', 'training'] });
+  assert.match(needsCellHtml({ card_required: true, phone_required: null, commercial_ok: false }), /<span class="need-req">Card required, Non-commercial only<\/span><span class="need-unk">Unknown: phone, training<\/span>/);
 });
 
 test('home: no good-first-issues button in the hero, a fixed table layout, a link-button name and a pinned header row', () => {
@@ -2356,14 +2487,14 @@ test('home: no good-first-issues button in the hero, a fixed table layout, a lin
   assert.ok(!/Contribute: good first issues|contrib-btn/.test(index + css), 'the hero button is gone');
   assert.match(css, /#table \{ table-layout: fixed; \}/, 'a fixed layout');
   const widths = [...css.matchAll(/#table th:nth-child\((\d)\) \{ width: (\d+)%; \}/g)];
-  assert.equal(widths.length, 5, 'a width for each of the five columns');
+  assert.equal(widths.length, 4, 'a width for each of the four columns');
   assert.equal(widths.reduce((n, m) => n + Number(m[2]), 0), 100, 'the widths add up to 100%');
   assert.match(css, /#table thead th \{ position: sticky; top: var\(--header-h\);/, 'the header row is pinned under the header');
   assert.match(css, /#table thead th \{ top: calc\(var\(--header-h\) \+ var\(--controls-h, 120px\)\); \}/, 'and under the filter bar where that is pinned');
   assert.match(css, /main#explorer > \.wrap, \.controls \.controls-inner \{ max-width: 1480px; \}/, 'a wider table');
-  assert.match(css, /\.hero \.lede \{ max-width: 86ch; \}/, 'a wider lede');
+  assert.match(css, /\.hero \.lede \{ margin: 0 0 14px; max-width: 54ch;/, 'the lede fills the left column of the brand H1 hero');
   const row = explorerRowHtml({ slug: 'acme', name: 'Acme', category: 'ongoing', free_tier: 'Free', notes: 'n', best_for: 'b' });
-  assert.match(row, /<a class="name-link" href="p\/acme">Acme<span class="name-go" aria-hidden="true"> ↗<\/span><\/a>/, 'the name is a link-button');
+  assert.match(row, /<div class="name-line"><a class="name-link" href="p\/acme" title="Acme">Acme<\/a> <span class="badge b-ongoing"[^>]*>Ongoing<\/span><\/div>/, 'the name is a link, with its type right after it');
   assert.match(row, /<div class="clamp2" title="Free">Free<\/div>/, 'the free text is clamped and complete in the title');
   assert.ok(!/<img|logo/i.test(row), 'no logo in a row');
   assert.match(css, /#table tbody tr:focus-within \{ background: var\(--panel\); \}/, 'the row is highlighted on keyboard focus');
@@ -2373,7 +2504,7 @@ test('provider page: the score is visible, no «All providers» link or «Report
   // Mutant: show the old button or link again, drop data-pager, or lose the score line; this test turns red.
   const html = readFileSync(join(ROOT, 'site/p/groq.html'), 'utf8');
   const main = html.slice(html.indexOf('<main id="main">'));
-  assert.match(main, /<div class="prov-score"><p class="score-rank"><strong>#\d+ of \d+<\/strong> by score <span class="muted">\(\d+(\.\d)? \/ 100\)<\/span>/, 'the score of the provider, as a place (Q13)');
+  assert.match(main, /<div class="prov-score prov-score-line"><p class="score-rank"><strong>#\d+ of \d+<\/strong> scored <span class="muted">\(\d+(\.\d)? \/ 100\)<\/span>/, 'the score of the provider, as a place (Q13)');
   assert.match(main, /<a href="\.\.\/best\/methodology\/">how it is computed<\/a>/, 'a link to the method');
   // Mutant: drop the underline and the links in the score line rely on colour alone, which Lighthouse fails (link-in-text-block).
   assert.match(readFileSync(join(ROOT, 'site/styles.css'), 'utf8'), /\.prov-score a \{[^}]*text-decoration: underline/, 'the links of the score line are underlined');
@@ -2389,7 +2520,7 @@ test('provider page: the score is visible, no «All providers» link or «Report
   assert.match(dp, /<dt><svg class="i" aria-hidden="true"><use href="#ic-clock"\/><\/svg>Retention<\/dt>/);
   const css = readFileSync(join(ROOT, 'site/styles.css'), 'utf8');
   assert.match(css, /\.prov-reqs \.req \{[^}]*text-align: center/, 'the cards are centred');
-  assert.match(css, /\.prov-summary h2 \{[^}]*font-size: 1\.45rem/, '«What\'s free» is larger');
+  assert.match(css, /\.prov-summary h2 \{[^}]*font-size: 1\.6rem/, '«What\'s free» is larger');
 });
 
 test('pager.js: pages of 5 rows, the window is clamped, and the script never touches the URL', async () => {
@@ -2502,8 +2633,9 @@ test('the narrow-screen rules that keep the pages from scrolling sideways stay i
   assert.match(css, /@media \(max-width: 720px\) \{ #table td:nth-child\(1\) \{ width: 100%; \}/);
   assert.match(css, /#table td \{ min-width: 0; overflow-wrap: anywhere; \}/);
   assert.match(css, /@media \(min-width: 721px\) and \(max-width: 1000px\) \{ #table thead th \{ white-space: normal;/);
-  assert.match(css, /\.model-table th, \.model-table td \{ overflow-wrap: anywhere; \}/);
-  assert.match(css, /@media \(max-width: 480px\) \{ \.model-table th, \.model-table td \{ padding-left: 6px;/);
+  // /models/ turns into cards on phones (scripts/model-index.test.mjs pins the markup and the rules).
+  assert.match(css, /\.model-table th, \.model-table td \{ overflow-wrap: break-word; \}/);
+  assert.match(css, /@media \(max-width: 560px\) \{ \.model-table thead \{ position: absolute;/);
 });
 
 test('the home counters are one server-rendered line, in the same words as the client repaint', () => {
@@ -2536,7 +2668,7 @@ test('long strings in provider notes wrap instead of widening the page on a phon
 test('the /compare/ tables show the score and the model quality tier, in the static pages and the browser bundle', () => {
   run(['scripts/build.mjs']);
   const scores = JSON.parse(readFileSync(join(ROOT, 'site/scores.json'), 'utf8')).scores;
-  const dir = readdirSync(join(ROOT, 'site/compare')).find((d) => d.includes('-vs-'));
+  const dir = readdirSync(join(ROOT, 'site/compare')).find(isPairPage);
   const page = readFileSync(join(ROOT, 'site/compare', dir, 'index.html'), 'utf8');
   assert.match(page, /<th scope="row">Score<\/th>/);
   assert.match(page, /<th scope="row">Model quality tier<\/th>/);
@@ -2732,10 +2864,10 @@ test('conditional commercial use is visible in UI, excluded from commercial coll
 
   const providerPage = readFileSync(join(ROOT, 'site/p', `${conditional.slug}.html`), 'utf8');
   assert.match(providerPage, /conditional/);
-  assert.ok(providerPage.includes(htmlEsc(conditional.commercial_ok_condition)), 'provider page shows the escaped condition');
+  assert.ok(providerPage.includes(escapeHtml(conditional.commercial_ok_condition)), 'provider page shows the escaped condition');
   const compare = compareTableHtml([conditional, raw.providers.find((p) => p.slug !== conditional.slug)]);
   assert.match(compare, /tri-cond">conditional/);
-  assert.ok(compare.includes(htmlEsc(conditional.commercial_ok_condition)), 'compare view shows the escaped condition');
+  assert.ok(compare.includes(escapeHtml(conditional.commercial_ok_condition)), 'compare view shows the escaped condition');
 
   const commercialMd = readFileSync(join(ROOT, 'collections/commercial-use.md'), 'utf8');
   const commercialHtml = readFileSync(join(ROOT, 'site/collections/commercial-use.html'), 'utf8');
@@ -2815,22 +2947,26 @@ test('/coverage/ says how to propose one value, is in the sitemap with an absolu
   assert.match(readFileSync(join(ROOT, 'site/p/groq.html'), 'utf8'), /<a href="\.\.\/coverage\/">Data coverage<\/a>/, 'the shared footer of a generated page');
 });
 
-test('a11y: the filter chips stay reachable by keyboard and screen reader, with a visible focus', () => {
+test('a11y: the requirement filters stay reachable by keyboard and screen reader, inside one labelled dropdown', () => {
   const css = readFileSync(join(ROOT, 'site/styles.css'), 'utf8');
-  assert.doesNotMatch(css, /\.chip input\s*\{[^}]*display\s*:\s*none/, 'a display:none checkbox leaves the chip out of the tab order and the accessibility tree');
-  assert.match(css, /\.chip:has\(input:focus-visible\)/, 'the focused chip shows an outline');
-  assert.match(css, /--control-border:\s*#[0-9a-f]{6}/i, 'a control border token exists for the 3:1 non-text contrast');
+  assert.doesNotMatch(css, /\.req-opt input\s*\{[^}]*display\s*:\s*none/, 'a display:none checkbox leaves the option out of the tab order and the accessibility tree');
+  assert.match(css, /\.req-btn:focus-visible \{ outline: 2px solid var\(--accent\)/, 'the dropdown button shows an outline');
+  assert.match(css, /--control:\s*#[0-9a-f]{6}/i, 'a control border token exists for the 3:1 non-text contrast');
 
   const index = readFileSync(join(ROOT, 'site/index.html'), 'utf8');
-  const chips = index.match(/<label class="chip">[\s\S]*?<\/label>/g) || [];
-  assert.ok(chips.length >= 6, 'the six filter chips are in the template');
-  for (const chip of chips) assert.match(chip, /<input type="checkbox" id="f-[a-z]+">/, 'each chip label contains its checkbox, so the label stays the click target');
+  assert.match(index, /<details class="req" id="req">\s*<summary class="sel req-btn">Requirements<span class="req-n" id="reqCount"><\/span><\/summary>/);
+  const opts = index.match(/<label class="req-opt">[\s\S]*?<\/label>/g) || [];
+  assert.equal(opts.length, 7, 'the seven boolean filters are in the dropdown');
+  for (const o of opts) assert.match(o, /<input type="checkbox" id="f-[a-z]+">/, 'each label contains its checkbox, so the label stays the click target');
+  assert.match(index, /<legend>Must have<\/legend>/);
 });
 
-test('a11y: small fixes stay in place (finite caret, placeholder colour, no 320px minimum, focus kept after Clear and Escape)', () => {
+test('a11y: small fixes stay in place (no endless animation, placeholder colour, no 320px minimum, focus kept after Clear and Escape)', () => {
   const css = readFileSync(join(ROOT, 'site/styles.css'), 'utf8');
-  const caret = css.split('\n').find((l) => l.startsWith('.caret {'));
-  assert.ok(caret && !/infinite/.test(caret), 'the caret blink stops by itself (WCAG 2.2.2)');
+  // Brand H1 dropped the blinking caret; the title's "breathing" runs once, and nothing on the site loops forever (WCAG 2.2.2).
+  assert.doesNotMatch(css, /animation:[^;}]*infinite/, 'no animation loops forever');
+  assert.match(css, /\.h1-key \{ display: inline-block; animation: breathe 5s ease-in-out 1; \}/, 'the title breathes once');
+  assert.match(css, /@media \(prefers-reduced-motion: no-preference\) \{\n  \.h1-key \{ display: inline-block; animation/, 'and only when motion is welcome');
   assert.match(css, /::placeholder\s*\{[^}]*color:\s*var\(--muted\)/, 'placeholder text uses the muted colour');
   assert.doesNotMatch(css, /\.limits-table\s*\{[^}]*min-width:\s*320px/, 'the limits table has no 320px minimum (reflow at 320px)');
   assert.match(css, /minmax\(min\(280px, 100%\), 1fr\)/, 'collection tracks never exceed the container');
@@ -2978,6 +3114,35 @@ test('a11y: wide data tables sit in a keyboard-reachable scroll region and the h
   assert.match(readFileSync(join(ROOT, 'site/programs/startups.html'), 'utf8'), region, 'the programs table too');
 });
 
+// ---- no page scrolls sideways on a 390px phone (measured with Playwright on the Nov 2026 build: 30 compare pages up to
+// 868px wide, /coverage/ 986px, /coding-tools/goose-own-key/ 546px). The compare table sat in a scroll box that was not
+// positioned, so its screen-reader-only text escaped the box; the coverage tables had no scroll box; a source URL had no
+// break point. ----
+test('reflow: compare and coverage tables scroll inside a positioned region, and a source URL wraps', () => {
+  const region = /<div class="table-scroll(?: [\w-]+)*" role="region" aria-label="[^"]+" tabindex="0"><table/g;
+  const tablesInRegions = (html) => [(html.match(/<table/g) || []).length, (html.match(region) || []).length];
+  // The table function itself, which the static compare pages and the interactive /compare/ view both use.
+  const one = compareTableHtml([{ slug: 'a', name: 'A' }, { slug: 'b', name: 'B' }]);
+  assert.match(one, /^<div class="table-scroll compare-scroll" role="region" aria-label="Comparison of A, B" tabindex="0"><table class="compare-table">/);
+  // Every generated compare page, and /coverage/.
+  const comparePages = readdirSync(join(ROOT, 'site/compare'), { withFileTypes: true }).filter((d) => d.isDirectory())
+    .map((d) => `site/compare/${d.name}/index.html`)
+    .filter((f) => !/<meta http-equiv="refresh"/.test(readFileSync(join(ROOT, f), 'utf8'))); // retired pairs are redirect stubs
+  assert.ok(comparePages.length > 10, `expected the static compare pages, found ${comparePages.length}`);
+  for (const f of [...comparePages, 'site/coverage/index.html']) {
+    const [tables, inRegion] = tablesInRegions(readFileSync(join(ROOT, f), 'utf8'));
+    assert.ok(tables > 0, `${f}: has a table`);
+    assert.equal(inRegion, tables, `${f}: every table is in a labelled, focusable scroll region`);
+  }
+  // .table-scroll is what clips the sr-only text (pinned in the test above); .compare-scroll must not undo it.
+  const css = readFileSync(join(ROOT, 'site/styles.css'), 'utf8');
+  assert.doesNotMatch(css.match(/^\.compare-scroll \{[^}]*\}/m)[0], /position:|overflow-x: visible|max-width: none/);
+  // A source listed by its full URL breaks anywhere instead of widening the page.
+  assert.match(css, /^\.tool-sources a \{ overflow-wrap: anywhere; \}/m);
+  const goose = readFileSync(join(ROOT, 'site/coding-tools/goose-own-key/index.html'), 'utf8');
+  assert.match(goose, /<h2 id="sources">Sources<\/h2><ul class="plain tool-sources"><li><a href="https:\/\//);
+});
+
 // ---- the data-policy table fits a laptop screen (measured: 1114px at 1100px before, 1052px after) ----
 test('data_policy lot 2: at least 21 of 68, the four new rows carry a quote and a source', () => {
   const data = JSON.parse(readFileSync(join(ROOT, 'data/providers.json'), 'utf8'));
@@ -2988,7 +3153,7 @@ test('data_policy lot 2: at least 21 of 68, the four new rows carry a quote and 
     assert.ok(dp, `${slug} has a data_policy`);
     assert.equal(dp.trains_on_prompts, true, `${slug}: the provider's own sentence says it trains`);
     assert.match(dp.source, /^https:\/\//, `${slug}: https source`);
-    assert.equal(dp.checked, '2026-10-15', `${slug}: read date`);
+    assert.ok(dp.checked >= '2026-10-15', `${slug}: read on or after the lot 2 day (a later re-read of a row is fine)`);
     assert.ok(dp.quote && dp.quote.length <= 400, `${slug}: literal quote within the limit`);
   }
   const assembly = data.providers.find((p) => p.slug === 'assemblyai').data_policy;
@@ -3012,7 +3177,7 @@ test('data_policy lot 3: at least 23 of 68, LlamaParse says it does not train, R
   assert.match(retell.note, /Only if you do not opt out of recording/, 'the condition is in the note');
   for (const dp of [llama, retell]) {
     assert.match(dp.source, /^https:\/\//);
-    assert.equal(dp.checked, dp === llama ? '2026-11-17' : '2026-10-15');
+    assert.ok(dp.checked >= (dp === llama ? '2026-11-17' : '2026-10-15'), 'read on or after the lot 3 day (a later re-read of a row is fine)');
   }
 });
 
@@ -3036,7 +3201,7 @@ test('data_policy lot 4: the 13 providers that say they do not train were read f
   for (const p of data.providers.filter((q) => q.data_policy && q.data_policy.trains_on_prompts !== false)) {
     // rows that say it may train were read for the plan later (lots 2, 3, 5 and the correction of the absence claims): true where the
     // clause names the free users or free usage (AssemblyAI, Voyage AI, Cohere), false where it does not
-    const READ = { assemblyai: true, 'voyage-ai': true, elevenlabs: false, cartesia: false, 'retell-ai': false, deepgram: false, 'arli-ai': false, 'sarvam-ai': false, poolside: false, typhoon: false, openrouter: false, nlpcloud: false, 'nvidia-nim': false, veryfi: false, voicegain: false, cohere: true, inception: false, 'azure-speech': false, lemonfox: false, gladia: true, 'liquid-ai': false };
+    const READ = { assemblyai: true, 'voyage-ai': true, elevenlabs: false, cartesia: false, 'retell-ai': false, deepgram: false, 'arli-ai': false, 'sarvam-ai': false, poolside: false, typhoon: false, openrouter: false, nlpcloud: false, 'nvidia-nim': false, veryfi: false, voicegain: false, cohere: true, inception: false, 'azure-speech': false, lemonfox: false, gladia: true, 'liquid-ai': false, 'stability-ai': false, plamo: true, 'netlify-ai-gateway': false, 'rev-ai': false, 'ocr-space': false, requesty: true, 'kilo-gateway': true, 'experiential-labs': true, 'amazon-bedrock': false, 'oci-generative-ai': false };
     if (p.slug in READ) assert.equal(p.data_policy.plan_named, READ[p.slug], `${p.slug}: plan_named as read`);
     else assert.equal(p.data_policy.plan_named, undefined, `${p.slug}: not read for the plan yet, so no value is written`);
   }
@@ -3057,14 +3222,14 @@ test('data_policy lot 5: at least 25 of 68, Deepgram trains by its terms with an
   const rw = data.providers.find((p) => p.slug === 'runware').data_policy;
   assert.equal(rw.trains_on_prompts, false); assert.equal(rw.source, 'https://runware.ai/terms'); assert.equal(rw.plan_named, false);
   assert.match(rw.note, /aggregated or de-identified operational data/);
-  for (const dp of [dg, rw]) { assert.equal(dp.checked, '2026-10-15'); assert.ok(dp.quote.length <= 400 && dp.note.length <= 300); }
+  for (const dp of [dg, rw]) { assert.ok(dp.checked >= '2026-10-15', 'read on or after the lot 5 day (a later re-read of a row is fine)'); assert.ok(dp.quote.length <= 400 && dp.note.length <= 300); }
 });
 
 test('data_policy lot 6: at least 27 of 68, AI21 says it does not train, with the conditions of its own sentence', () => {
   const data = JSON.parse(readFileSync(DATA, 'utf8'));
   assert.ok(data.providers.filter((p) => p.data_policy).length >= 27, 'at least 27 providers have a data_policy');
   const dp = data.providers.find((p) => p.slug === 'ai21').data_policy;
-  assert.equal(dp.trains_on_prompts, false); assert.equal(dp.plan_named, false); assert.equal(dp.checked, '2026-10-15');
+  assert.equal(dp.trains_on_prompts, false); assert.equal(dp.plan_named, false); assert.ok(dp.checked >= '2026-10-15', 'read on or after the lot 6 day (a later re-read of a row is fine)');
   assert.equal(dp.source, 'https://www.ai21.com/terms-policies/privacy-policy/', 'the final address, not the one that redirects');
   assert.match(dp.quote, /unless otherwise agreed in writing or required to provide the Services/, 'the condition is in the quote');
   assert.match(dp.note, /for example, for individual-developer accounts/); assert.match(dp.note, /has no mention of a free, trial, paid or other plan/);
@@ -3079,7 +3244,7 @@ test('data_policy lot 7: Poolside may train on your Content by its Terms of Use 
   assert.equal(dp.trains_on_prompts, true, 'may train, even though you can opt out');
   assert.equal(dp.retention, null, 'the terms state no retention period for Content');
   assert.equal(dp.source, 'https://poolside.ai/legal/eula', 'the Terms of Use, which cover the APIs and Poolside Platform');
-  assert.equal(dp.checked, '2026-10-15'); assert.equal(dp.plan_named, false);
+  assert.equal(dp.checked, '2026-11-26'); assert.equal(dp.plan_named, false);
   assert.equal(dp.quote, 'We may use your Content to provide, maintain, improve, and develop the Products and other Poolside offerings, including training our models, unless you opt-out.', 'section 4, literal');
   assert.match(dp.note, /if you give Feedback or it is flagged for safety review/, 'the exceptions to the opt-out are in the note');
   assert.ok(dp.quote.length <= 400 && dp.note.length <= 300);
@@ -3101,7 +3266,7 @@ test('data_policy coverage: a floor that only rises, and every recorded row is o
   assert.ok(covered.length >= 29, `${covered.length} providers have a data_policy; it must not fall below the 29 of lot 7`);
   const page = readFileSync(join(ROOT, 'site/data-policy/index.html'), 'utf8');
   // The page lists verified providers only (dataPolicyRows), so that is the set the page must show.
-  for (const p of covered.filter((x) => x.verified === true)) assert.ok(page.includes(htmlEsc(p.name)), `${p.slug}: its data_policy row is on the data-policy page`);
+  for (const p of covered.filter((x) => x.verified === true)) assert.ok(page.includes(escapeHtml(p.name)), `${p.slug}: its data_policy row is on the data-policy page`);
 });
 
 test('correction of the absence claims: no note says the page names no plan unless the page has none of the four words, and Voyage AI names free usage', () => {
@@ -3113,10 +3278,10 @@ test('correction of the absence claims: no note says the page names no plan unle
   assert.match(readFileSync(join(ROOT, 'CHANGELOG.md'), 'utf8'), /^- \*\*Corrección:\*\*/m, 'the correction is visible in the changelog');
 });
 
-test('mobile: the two long text cells stack their label above the text at 720px', () => {
+test('mobile: the long «What\'s free» cell stacks its label above the text at 720px', () => {
   const css = readFileSync(join(ROOT, 'site/styles.css'), 'utf8').replace(/\s+/g, ' ');
-  assert.match(css, /#table td\.notes, #table td:nth-child\(3\) \{ display: block; \}/, 'the notes and the catch cells are blocks, not a 40% label beside a narrow column');
-  assert.match(css, /#table td\.notes::before, #table td:nth-child\(3\)::before \{ display: block;/, 'the label sits above the text');
+  assert.match(css, /#table td\.free \{ display: block; \}/, 'the free-tier cell is a block, not a 40% label beside a narrow column');
+  assert.match(css, /#table td\.free::before \{ display: block;/, 'the label sits above the text');
 });
 
 test('data-policy page: five columns, the help link inside the source cell, and the header labels may wrap', () => {
@@ -3224,6 +3389,130 @@ test('a11y: the global focus ring is at least 2px, uses the accent and reaches 3
   // The ring must not be removed from a control that takes the keyboard: the only outline:none rules are the ones that draw their own focus.
   const removed = [...css.matchAll(/([^{}]+)\{[^}]*outline:\s*none[^}]*\}/g)].map((m) => m[1].trim());
   assert.deepEqual(removed.filter((s) => /th-sort|chip|\.sel\b|button|a:focus/.test(s)), [], 'no outline:none on the sort buttons, chips, selects, buttons or links');
+});
+
+// ---- semantic colour tokens: every text-bearing token stays AA (4.5:1) and the control border 3:1, on every surface, in both themes ----
+// A token may alias another with var(--x); the light theme inherits what it does not redefine, as the cascade does on <html>.
+const SEMANTIC_TEXT_TOKENS = ['ok', 'unk', 'bad', 'chg', 'trial', 'm-text', 'm-vision', 'm-image', 'm-audio', 'm-embeddings', 'm-rerank', 'm-ocr'];
+test('a11y: the semantic colour tokens (ok, unk, bad, chg, trial, m-*, control) keep their contrast on bg, panel and panel-2 in both themes', () => {
+  const css = readFileSync(join(ROOT, 'site/styles.css'), 'utf8');
+  const block = (selector) => css.slice(css.indexOf(selector + ' {'), css.indexOf('\n}', css.indexOf(selector + ' {')));
+  const dark = block(':root'), light = block('[data-theme="light"]');
+  const raw = (b, name) => { const m = b.match(new RegExp('^\\s*--' + name + ':\\s*([^;]+);', 'm')); return m ? m[1].trim() : null; };
+  const resolve = (theme, name, seen = new Set()) => {
+    assert.ok(!seen.has(name), `--${name} aliases itself`); seen.add(name);
+    const v = (theme === 'light' && raw(light, name)) || raw(dark, name);
+    assert.ok(v, `token --${name} is missing`);
+    const alias = /^var\(--([a-z0-9-]+)\)$/.exec(v);
+    if (alias) return resolve(theme, alias[1], seen);
+    assert.match(v, /^#[0-9a-fA-F]{6}$/, `--${name} resolves to a 6-digit hex (${v})`);
+    return v;
+  };
+  // Every modality the schema allows has its token, so a new modality cannot ship without a colour.
+  const schema = JSON.parse(readFileSync(join(ROOT, 'data/schema.json'), 'utf8'));
+  const findEnum = (o) => { if (!o || typeof o !== 'object') return null; if (o.modalities?.items?.enum) return o.modalities.items.enum; for (const v of Object.values(o)) { const r = findEnum(v); if (r) return r; } return null; };
+  const modalities = findEnum(schema);
+  assert.ok(modalities && modalities.length >= 7, 'the schema lists the modalities');
+  for (const m of modalities) assert.ok(SEMANTIC_TEXT_TOKENS.includes('m-' + m), `--m-${m} is checked`);
+  for (const theme of ['dark', 'light']) {
+    for (const surface of ['bg', 'panel', 'panel-2']) {
+      const bg = resolve(theme, surface);
+      for (const t of SEMANTIC_TEXT_TOKENS) {
+        const r = contrast(resolve(theme, t), bg);
+        assert.ok(r >= 4.5, `${theme}: --${t} on --${surface} is ${r.toFixed(2)}:1, below 4.5:1`);
+      }
+      const c = contrast(resolve(theme, 'control'), bg);
+      assert.ok(c >= 3, `${theme}: --control on --${surface} is ${c.toFixed(2)}:1, below 3:1 (WCAG 1.4.11)`);
+    }
+  }
+  // The legacy names stay as aliases (lib/consent.client.js reads --control-border), and component rules use the semantic names.
+  for (const [legacy, semantic] of [['green', 'ok'], ['warn', 'unk'], ['red', 'bad'], ['control-border', 'control']]) {
+    assert.equal(raw(dark, legacy), `var(--${semantic})`, `--${legacy} aliases --${semantic}`);
+    const outsideTokens = css.slice(css.indexOf('\n}', css.indexOf('[data-theme="light"] {')));
+    assert.ok(!outsideTokens.includes(`var(--${legacy})`), `no component rule reads var(--${legacy}); use var(--${semantic})`);
+  }
+});
+
+// ---- brand H1: one graphic hue per modality, light by default ----
+test('brand: every schema modality has a graphic hue (--h-*), and no rule paints text with one', () => {
+  // The hues are fills for the auras and dots; text uses the darkened --m-* tokens checked above. Mutant: drop a hue, or set
+  // color: var(--h-text) on a label; this test turns red.
+  const css = readFileSync(join(ROOT, 'site/styles.css'), 'utf8');
+  const schema = JSON.parse(readFileSync(join(ROOT, 'data/schema.json'), 'utf8'));
+  const findEnum = (o) => { if (!o || typeof o !== 'object') return null; if (o.modalities?.items?.enum) return o.modalities.items.enum; for (const v of Object.values(o)) { const r = findEnum(v); if (r) return r; } return null; };
+  for (const m of findEnum(schema)) assert.match(css, new RegExp('--h-' + m + ':\\s*#[0-9a-f]{6};', 'i'), '--h-' + m);
+  assert.doesNotMatch(css, /(?:^|[;{\s])color:\s*var\(--h-/m, 'no text colour from a graphic hue');
+});
+
+test('brand: accent text on an accent tint (chips, badges, the active filter) uses --accent-dim and stays AA in both themes', () => {
+  // The accent itself reaches only 4.34:1 on its own 12 % tint in the light theme (Lighthouse color-contrast on .type).
+  // Mutant: a tinted chip back on color: var(--accent); this test turns red.
+  const css = readFileSync(join(ROOT, 'site/styles.css'), 'utf8');
+  for (const rule of css.match(/[^{}]+\{[^}]*background: color-mix\(in srgb, var\(--accent\) \d+%, transparent\)[^}]*\}/g) || []) {
+    assert.doesNotMatch(rule, /(?<![-\w])color: var\(--accent\);/, 'tinted rule with accent text: ' + rule.trim().slice(0, 80));
+  }
+  const block = (selector) => css.slice(css.indexOf(selector + ' {'), css.indexOf('\n}', css.indexOf(selector + ' {')));
+  const hex = (b, n) => b.match(new RegExp('--' + n + ':\\s*(#[0-9a-fA-F]{6})'))[1];
+  const mix = (a, b, t) => '#' + [1, 3, 5].map((i) => Math.round(parseInt(a.slice(i, i + 2), 16) * t + parseInt(b.slice(i, i + 2), 16) * (1 - t)).toString(16).padStart(2, '0')).join('');
+  for (const b of [block(':root'), block('[data-theme="light"]')]) {
+    for (const surface of ['bg', 'panel', 'panel-2']) {
+      const tint = mix(hex(b, 'accent'), hex(b, surface), 0.16);
+      assert.ok(contrast(hex(b, 'accent-dim'), tint) >= 4.5, `--accent-dim on a 16 % accent tint over --${surface}: ${contrast(hex(b, 'accent-dim'), tint).toFixed(2)}`);
+    }
+  }
+});
+
+test('brand: light is the default theme; dark comes from the system preference or the toggle', () => {
+  // Mutant: default back to dark when the system states no preference; this test turns red.
+  for (const rel of ['site/index.html', 'site/404.html', 'site/best/index.html']) {
+    const html = readFileSync(join(ROOT, rel), 'utf8');
+    assert.match(html, /<html lang="en" data-theme="light">/, rel + ': light before the guard runs');
+    assert.ok(html.includes("matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'"), rel + ': the guard picks dark only on request');
+    const guard = html.match(/<script>(\(function\(\)\{try\{var t=localStorage[^<]*)<\/script>/);
+    assert.ok(guard, rel + ': the theme guard');
+    assert.ok(html.includes("'sha256-" + createHash('sha256').update(guard[1]).digest('base64') + "'"), rel + ': the guard is pinned by hash in the CSP');
+  }
+});
+
+test('brand Cálida: the palette is the owner\'s final variant, value for value, in both themes', () => {
+  // The values of brand-drafts/08-variantes-h1.md, section "H1-e · Cálida" (docs/brand.md has the same table). Mutant:
+  // retune one token (say the accent back to the provisional magenta); this test turns red and names it.
+  const css = readFileSync(join(ROOT, 'site/styles.css'), 'utf8');
+  const block = (selector) => css.slice(css.indexOf(selector + ' {'), css.indexOf('\n}', css.indexOf(selector + ' {')));
+  const hex = (b, n) => { const m = b.match(new RegExp('^\\s*--' + n + ':\\s*(#[0-9a-fA-F]{6})', 'm')); assert.ok(m, '--' + n); return m[1].toLowerCase(); };
+  const SPEC = {
+    light: { bg: '#fff9f6', panel: '#ffffff', text: '#22140f', muted: '#6a5048', border: '#f0e2db', control: '#9a8179', accent: '#9c4a00',
+      'accent-ink': '#ffffff', ok: '#2f6b1f', unk: '#7f5a00', bad: '#b3261e', chg: '#7a2e8c', 'seal-bg': '#ffebd9',
+      'h-text': '#d9502a', 'h-vision': '#c48200', 'h-audio': '#c2185b', 'h-embeddings': '#8e7a00', 'h-image': '#d85a85', 'h-ocr': '#8b3a2e', 'h-rerank': '#7b2d6b' },
+    dark: { bg: '#17110f', panel: '#211915', text: '#fbf1ec', muted: '#c2a89e', border: '#352822', control: '#7a645b', accent: '#ffb25c',
+      'accent-ink': '#17110f', ok: '#9ad27f', unk: '#f2c14e', bad: '#ff8a7a', chg: '#e0a3f0', 'seal-bg': '#2e2119',
+      'h-text': '#ff7a4d', 'h-vision': '#f5b21f', 'h-audio': '#ff5c93', 'h-embeddings': '#c9b02e', 'h-image': '#ff9cbc', 'h-ocr': '#d97a62', 'h-rerank': '#c77ab8' },
+  };
+  for (const [theme, b] of [['dark', block(':root')], ['light', block('[data-theme="light"]')]]) {
+    for (const [name, value] of Object.entries(SPEC[theme])) assert.equal(hex(b, name), value, `${theme}: --${name}`);
+  }
+  assert.match(block(':root'), /--radius: 18px;/, 'the Cálida radius');
+});
+
+test('brand Cálida: graphic hues reach 3:1, the accent reads on the stamp, and buttons keep their text', () => {
+  // WCAG 1.4.11 for the aura bars and dots; 1.4.3 for the accent on --seal-bg (the ticket and the pill) and the button
+  // text on the accent. Mutant: a paler --h-vision in light, or a --seal-bg too close to the accent; this test turns red.
+  const css = readFileSync(join(ROOT, 'site/styles.css'), 'utf8');
+  const block = (selector) => css.slice(css.indexOf(selector + ' {'), css.indexOf('\n}', css.indexOf(selector + ' {')));
+  const hex = (b, n) => b.match(new RegExp('^\\s*--' + n + ':\\s*(#[0-9a-fA-F]{6})', 'm'))[1];
+  const schema = JSON.parse(readFileSync(join(ROOT, 'data/schema.json'), 'utf8'));
+  const findEnum = (o) => { if (!o || typeof o !== 'object') return null; if (o.modalities?.items?.enum) return o.modalities.items.enum; for (const v of Object.values(o)) { const r = findEnum(v); if (r) return r; } return null; };
+  for (const [theme, b] of [['dark', block(':root')], ['light', block('[data-theme="light"]')]]) {
+    for (const m of findEnum(schema)) {
+      for (const surface of ['bg', 'panel']) {
+        const r = contrast(hex(b, 'h-' + m), hex(b, surface));
+        assert.ok(r >= 3, `${theme}: --h-${m} on --${surface} is ${r.toFixed(2)}:1, below 3:1`);
+      }
+    }
+    assert.ok(contrast(hex(b, 'accent'), hex(b, 'seal-bg')) >= 4.5, `${theme}: the accent on --seal-bg`);
+    assert.ok(contrast(hex(b, 'text'), hex(b, 'seal-bg')) >= 4.5, `${theme}: ink on --seal-bg`);
+    assert.ok(contrast(hex(b, 'accent-ink'), hex(b, 'accent')) >= 4.5, `${theme}: button text on the accent`);
+  }
 });
 
 // ---- Dated banner mechanism (site/site.js) ---------------------------------

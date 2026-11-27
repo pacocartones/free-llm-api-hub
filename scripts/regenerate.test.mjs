@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
@@ -8,7 +8,6 @@ import {
   BOT_COMMIT_PREFIX, PREVIEW_VERDICTS, SHADOW_BRANCH, datasetVersion, isRegenerationTarget, loopGuard,
   outsideAllowlist, parseMode, previewVerdict,
 } from './lib/regenerate.mjs';
-import { makeTmpDir } from './lib/tmp.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const WORKFLOW = readFileSync(join(ROOT, '.github/workflows/regenerate.yml'), 'utf8').replace(/\r\n/g, '\n');
@@ -207,7 +206,7 @@ test('report opens an issue with issues: write only and runs no repository code'
   assert.doesNotMatch(report, /actions\/checkout|node scripts/);
 });
 
-// --- pull-request preview ----------------------------------------------------------------------------------------
+// --- the drift verdict (previewVerdict, the core of driftGate) ----------------------------------------------------
 
 test('preview verdict: in sync, informative, hand edit and release', () => {
   assert.deepEqual(previewVerdict({ drift: [] }), { verdict: 'in-sync', handEdited: [], outside: [] });
@@ -240,89 +239,3 @@ test('datasetVersion reads the version or returns null', () => {
   assert.equal(datasetVersion(''), null);
 });
 
-test('the preview CLI reads release, drift and hand edits from git, and never fails on drift', () => {
-  const dir = makeTmpDir('regen-preview-');
-  try {
-    const git = (...args) => {
-      const r = spawnSync('git', args, { cwd: dir, encoding: 'utf8' });
-      assert.equal(r.status, 0, r.stderr);
-      return r.stdout.trim();
-    };
-    const write = (path, text) => {
-      mkdirSync(dirname(join(dir, path)), { recursive: true });
-      writeFileSync(join(dir, path), text);
-    };
-    const commit = (message) => { git('add', '-A'); git('commit', '-q', '--no-gpg-sign', '-m', message); };
-    git('init', '-q');
-    git('config', 'user.name', 'Test');
-    git('config', 'user.email', 'test@example.invalid');
-    write('data/providers.json', '{"version":"1.0.0"}');
-    write('README.md', 'old\n');
-    commit('base');
-    const base = git('rev-parse', 'HEAD');
-    // The pull request bumps the version and hand-edits README.md.
-    write('data/providers.json', '{"version":"1.1.0"}');
-    write('README.md', 'hand edit\n');
-    commit('pr');
-    const run = (env) => spawnSync(process.execPath, [join(ROOT, 'scripts/regenerate-guard.mjs'), 'preview'], {
-      cwd: dir, encoding: 'utf8', env: { ...process.env, GITHUB_OUTPUT: '', GITHUB_STEP_SUMMARY: '', ...env },
-    });
-    // Nothing built yet: in sync.
-    assert.match(run({ BASE: base }).stdout, /^verdict=in-sync\nchanged=false\n/);
-    // The "build" rewrites README.md and writes a new page.
-    write('README.md', 'built\n');
-    write('site/new.html', '<p>new</p>');
-    const r = run({ BASE: base });
-    assert.equal(r.status, 0, r.stderr);
-    assert.match(r.stdout, /^verdict=would-block-release\nchanged=true\n/);
-    assert.match(r.stdout, /README\.md/);
-    assert.match(r.stdout, /site\/new\.html/);
-    assert.match(r.stdout, /1\.0\.0 → 1\.1\.0/);
-    // Same drift without the version bump: the README hand edit decides.
-    git('checkout', '-q', 'HEAD~1', '--', 'data/providers.json');
-    const h = run({ BASE: base });
-    assert.equal(h.status, 0, h.stderr);
-    assert.match(h.stdout, /^verdict=would-block-hand-edit\n/);
-    // A missing or malformed BASE is a usage error, not a silent pass.
-    assert.equal(run({ BASE: 'main' }).status, 2);
-  } finally {
-    rmSync(dir, { recursive: true, force: true });
-  }
-});
-
-const PREVIEW = readFileSync(join(ROOT, '.github/workflows/regenerate-preview.yml'), 'utf8').replace(/\r\n/g, '\n');
-// Without comment lines: the header names what the workflow must not use, and that must not count.
-const PREVIEW_CODE = PREVIEW.split('\n').filter((l) => !/^\s*#/.test(l)).join('\n');
-
-test('preview workflow: pull_request only, read-only, no secrets, no App, nothing written back', () => {
-  assert.match(PREVIEW, /^on:\n {2}pull_request:\n {4}paths:\n/m);
-  assert.doesNotMatch(PREVIEW_CODE, /pull_request_target|workflow_run|schedule:|^ {2}push:/m);
-  assert.match(PREVIEW, /^permissions: \{\}$/m);
-  assert.match(PREVIEW, /permissions:\n {6}contents: read\n/);
-  assert.doesNotMatch(PREVIEW_CODE, /: write\b/);
-  assert.doesNotMatch(PREVIEW_CODE, /secrets\.|vars\.|create-github-app-token|environment:|GH_TOKEN|github\.token/);
-  assert.doesNotMatch(PREVIEW_CODE, /git push|gh (pr|issue|api)|--force/);
-  assert.match(PREVIEW, /persist-credentials: false/);
-  assert.match(PREVIEW, /npm ci --ignore-scripts/);
-  assert.match(PREVIEW, /regenerate-guard\.mjs preview/);
-  assert.match(PREVIEW, /check-og\.mjs \|\| node scripts\/og\.mjs/);
-  // It reports; it does not repeat the blocking gate.
-  assert.doesNotMatch(PREVIEW_CODE, /check-generated|git diff --exit-code/);
-});
-
-test('preview workflow: pinned actions and no expressions inside run: blocks', () => {
-  const uses = [...PREVIEW.matchAll(/uses: (\S+)/g)].map((m) => m[1]);
-  assert.ok(uses.length >= 3);
-  for (const u of uses) assert.match(u, /^actions\/[a-z-]+@[0-9a-f]{40}$/, u);
-  for (const block of PREVIEW.split(/\n {8}run: /).slice(1)) {
-    const body = block.split(/\n\s+- (?:name|uses|id|if):|\n {2}[a-z]+:\n/)[0];
-    assert.doesNotMatch(body, /\$\{\{/, body.slice(0, 80));
-  }
-});
-
-test('preview workflow: its job name is not one of the required check names', () => {
-  const name = PREVIEW.match(/^ {4}name: (.+)$/m)[1];
-  for (const required of ['Dataset integrity', 'Windows tests', 'commit policy', 'Lighthouse accessibility and performance', 'Analyze (javascript-typescript)']) {
-    assert.notEqual(name, required);
-  }
-});

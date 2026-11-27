@@ -40,6 +40,8 @@ export const PROVIDER_CSV_OMITTED = [
   'data_policy',
   'env_key',
   'playground_url',
+  'keys_url',
+  'keys_url_source',
   'field_checks',
   'published_speed',
 ];

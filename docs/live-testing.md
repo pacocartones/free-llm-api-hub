@@ -40,7 +40,7 @@ The probe reads keys from `process.env[env_key]` (each provider declares its `en
 
 ## Worked walkthrough (local, first run)
 
-Step by step from an empty checkout — no VPS, no Infisical needed for the basic path. The `--env-file` flag needs Node.js 20.6 or later:
+Step by step from an empty checkout — no VPS, no Infisical needed for the basic path. It needs Node.js 24, like the rest of the repository (`.nvmrc`):
 
 ```bash
 # 1. Start from the repo root and install dependencies once
@@ -89,7 +89,7 @@ Everything on the code side is built, tested and committed (harness, fields, bad
 
 **Two decisions for the VPS path** (both were deliberately left open; the code is agnostic to either):
 - [ ] **Infisical reachability** — localhost-only on the VPS (everything runs there) *or* a public HTTPS domain (lets probes also be piloted from a laptop session).
-- [ ] **Zero-Actions deploy** — VPS builds and pushes to a `gh-pages` branch (GitHub serves it, 0 Actions minutes) *or* the VPS serves the site via nginx *or* keep the light `pages.yml`. This unblocks the commented publish step in `scripts/probe-cron.sh`.
+- [ ] **Zero-Actions deploy** — VPS builds and pushes to a `gh-pages` branch (GitHub serves it, 0 Actions minutes) *or* the VPS serves the site via nginx *or* keep the light `pages.yml`.
 
 **Infisical setup (on the VPS):**
 - [ ] Create a project folder, e.g. `/free-llm-api-hub`, environment `prod`.

@@ -16,6 +16,7 @@
 
 import { fieldCheck, REASON_LABEL, FIELD_CHECK_FIELDS } from './field-checks.mjs';
 import { markdownToHtml } from './markdown.mjs';
+import { NOT_STATED } from './provider-faq.mjs';
 import { monthLabel, monthName, monthEndDate } from './state.mjs';
 
 const ESC = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' };
@@ -30,7 +31,14 @@ const table = (label, head, rows) =>
   rows.map((r) => `<tr>${r.map((v, i) => `<td${i === 0 ? ' class="name"' : ''}>${v}</td>`).join('')}</tr>`).join('\n') + `\n</tbody></table></div>`;
 
 const FLAG_WORDS = { card_required: 'card required', phone_required: 'phone required', commercial_ok: 'commercial use allowed', openai_compatible: 'OpenAI-compatible' };
-const flagValue = (v) => (v === true ? 'yes' : v === false ? 'no' : v === 'conditional' ? 'conditional' : 'unknown');
+// A null flag reads "not stated", the site's one wording for an unknown value (lib/provider-faq.mjs NOT_STATED).
+const flagValue = (v) => (v === true ? 'yes' : v === false ? 'no' : v === 'conditional' ? 'conditional' : NOT_STATED);
+// "Not stated by the provider" / "Not stated (needs an account to check)": the reason recorded in field_checks.
+const notStatedCell = (p, field) => {
+  const c = fieldCheck(p, field);
+  const status = (c && c.status) || 'not_checked';
+  return status === 'source_silent' ? 'Not stated by the provider' : `Not stated (${REASON_LABEL[status] || REASON_LABEL.not_checked})`;
+};
 
 /** "14 Nov 2026" style day, for prose. */
 export const dayLabel = (iso) => {
@@ -110,7 +118,7 @@ export function monthlyChangesReport({ month, before, after, changes, notFree, c
   const providersChanged = new Set(changes.fieldChanges.map((c) => c.slug));
   const underReview = A.filter((p) => p.verified !== true && bySlugB.get(p.slug) && bySlugB.get(p.slug).verified === true).sort(byName);
 
-  // Flags that moved from a value to unknown this month (between the two snapshots), with the recorded reason.
+  // Flags that moved from a value to null ("not stated") this month (between the two snapshots), with the recorded reason.
   const toUnknown = [];
   for (const p of A) {
     const prior = bySlugB.get(p.slug);
@@ -181,15 +189,13 @@ const provLink = (p, prefix, current) => (current.has(p.slug) ? `<a href="${pref
 const cardCell = (p) => {
   if (p.card_required === false) return 'No';
   if (p.card_required === true) return 'Yes';
-  const c = fieldCheck(p, 'card_required');
-  return `Unknown (${REASON_LABEL[c && c.status] || REASON_LABEL.not_checked})`;
+  return notStatedCell(p, 'card_required');
 };
 const commercialCell = (p) => {
   if (p.commercial_ok === true) return 'Allowed';
   if (p.commercial_ok === false) return 'Not allowed';
   if (p.commercial_ok === 'conditional') return `Conditional${p.commercial_ok_condition ? `: ${esc(p.commercial_ok_condition)}` : ''}`;
-  const c = fieldCheck(p, 'commercial_ok');
-  return `Unknown (${REASON_LABEL[c && c.status] || REASON_LABEL.not_checked})`;
+  return notStatedCell(p, 'commercial_ok');
 };
 
 export function reportBlocks(r, { prefix = '../../', current = new Set(), siteChanges = `${prefix}api/v1/changes.json` } = {}) {
@@ -205,7 +211,7 @@ export function reportBlocks(r, { prefix = '../../', current = new Set(), siteCh
     ['… that say they <strong>do not</strong> train on free-tier prompts', fb.no_train, fa.no_train],
     ['… that say they <strong>do</strong> train on them', fb.trains, fa.trains],
     ['… with training not settled by their own pages', fb.unsettled, fa.unsettled],
-    ['Commercial use allowed / not allowed / conditional / unknown', `${fb.commercial_true} / ${fb.commercial_false} / ${fb.commercial_conditional} / ${fb.commercial_unknown}`, `${fa.commercial_true} / ${fa.commercial_false} / ${fa.commercial_conditional} / ${fa.commercial_unknown}`],
+    ['Commercial use allowed / not allowed / conditional / not stated', `${fb.commercial_true} / ${fb.commercial_false} / ${fb.commercial_conditional} / ${fb.commercial_unknown}`, `${fa.commercial_true} / ${fa.commercial_false} / ${fa.commercial_conditional} / ${fa.commercial_unknown}`],
     ['Providers with structured free limits (<code>free_limits</code>)', fb.free_limits, fa.free_limits],
     ['Providers with a free-model sample (<code>models_free</code>)', fb.models_free, fa.models_free],
     ['Distinct model IDs in the samples', fb.model_ids, fa.model_ids],
@@ -256,8 +262,8 @@ export function reportBlocks(r, { prefix = '../../', current = new Set(), siteCh
     : `<p class="muted">No data policy was added or changed in ${esc(r.figures.month_label)}.</p>`;
 
   const unknownList = r.toUnknown.length
-    ? `<ul>${r.toUnknown.map(({ p, field, from, check }) => `<li>${provLink(p, prefix, current)}, ${FLAG_WORDS[field]}: ${flagValue(from)} → unknown${check ? ` (${esc(REASON_LABEL[check.status] || check.status)}${check.note ? `: “${esc(check.note)}”` : ''}, read ${time(check.checked)})` : ''}.</li>`).join('')}</ul>`
-    : `<p class="muted">No flag moved to unknown in ${esc(r.figures.month_label)}.</p>`;
+    ? `<ul>${r.toUnknown.map(({ p, field, from, check }) => `<li>${provLink(p, prefix, current)}, ${FLAG_WORDS[field]}: ${flagValue(from)} → ${NOT_STATED}${check ? ` (${esc(REASON_LABEL[check.status] || check.status)}${check.note ? `: “${esc(check.note)}”` : ''}, read ${time(check.checked)})` : ''}.</li>`).join('')}</ul>`
+    : `<p class="muted">No flag moved to “not stated” in ${esc(r.figures.month_label)}.</p>`;
   const openChecks = r.openChecks.length
     ? `<ul>${r.openChecks.map(({ p, field, c }) => `<li>${provLink(p, prefix, current)}, ${FLAG_WORDS[field]}: ${esc(REASON_LABEL[c.status])}${c.note ? ` — “${esc(c.note)}”` : ''} (read ${time(c.checked)}).</li>`).join('')}</ul>`
     : '';
@@ -292,7 +298,7 @@ export const GENERATED_BODY = `## {{month_label}} against {{before_month_label}}
 
 {{block:data-policy}}
 
-## Flags that moved to unknown
+## Flags that moved to “not stated”
 
 {{block:to-unknown}}
 `;

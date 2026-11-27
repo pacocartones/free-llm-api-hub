@@ -65,7 +65,9 @@
     window.gtag('set', 'ads_data_redaction', f.ads_data_redaction);
     window.gtag('set', 'url_passthrough', f.url_passthrough);
     window.gtag('js', new Date());
-    window.gtag('config', ID, { allow_google_signals: f.allow_google_signals, allow_ad_personalization_signals: f.allow_ad_personalization_signals });
+    // cookie_flags: the _ga/_gcl cookies gtag writes are Secure and SameSite=Lax (gtag's default sets neither); a cookie
+    // written from JavaScript cannot be HttpOnly.
+    window.gtag('config', ID, { allow_google_signals: f.allow_google_signals, allow_ad_personalization_signals: f.allow_ad_personalization_signals, cookie_flags: 'SameSite=Lax;Secure' });
     var el = document.createElement('script');
     el.async = true;
     el.src = 'https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(ID);
@@ -112,7 +114,15 @@
     '.consent-switch .state{min-width:2.2em;text-align:left}' +
     '@media (prefers-reduced-motion: reduce){.consent-switch .track,.consent-switch .knob{transition:none}}' +
     '.consent-link{background:none;border:0;padding:0;font:inherit;color:var(--accent,#3fce8f);cursor:pointer}' +
-    '.consent-link:hover{text-decoration:underline}';
+    '.consent-link:hover{text-decoration:underline}' +
+    // Phones: a compact bar (at most 120px tall at 390px wide). Same texts and the same three answers: the title runs into
+    // the explanation, which keeps three lines and scrolls (it is focusable, so it scrolls from the keyboard too), and the
+    // three buttons share one row.
+    '@media (max-width:600px){.consent-banner{left:8px;right:8px;bottom:8px;padding:8px 10px;border-radius:10px;font-size:.75rem;line-height:1.35}' +
+    '.consent-text{max-height:4.05em;overflow:auto;margin:0 0 7px}.consent-text p{display:inline;margin:0}' +
+    '.consent-banner .consent-title{margin:0 .35em 0 0}' +
+    '.consent-actions{gap:6px;flex-wrap:nowrap}.consent-actions .btn{flex:1 1 0;min-width:0;padding:6px 4px;min-height:32px;font-size:.74rem;border-radius:7px}' +
+    '.consent-cats{gap:6px;margin-bottom:8px}.consent-cat{padding:6px 8px}.consent-cat .consent-cat-desc{font-size:.72rem}}';
 
   // One category: its name and description label the switch (role="switch", aria-checked). The visible "On"/"Off" text
   // means the state never rests on colour alone; it is hidden from assistive technology, which reads aria-checked.
@@ -136,8 +146,8 @@
     banner.setAttribute('aria-describedby', 'consent-desc');
     banner.hidden = true;
     banner.innerHTML =
-      '<p class="consent-title" id="consent-title">Cookies</p>' +
-      '<p id="consent-desc">May we use Google cookies for analytics and, separately, for advertising and personalised measurement (Google signals)? Nothing is sent to Google unless you allow at least one of them. You can change your choice any time under “Cookie settings” at the bottom of every page. <a href="/legal/privacy">Privacy policy</a></p>' +
+      '<div class="consent-text" tabindex="0"><p class="consent-title" id="consent-title">Cookies</p>' +
+      '<p id="consent-desc">May we use Google cookies for analytics and, separately, for advertising and personalised measurement (Google signals)? Nothing is sent to Google unless you allow at least one of them. You can change your choice any time under “Cookie settings” at the bottom of every page. <a href="/legal/privacy">Privacy policy</a></p></div>' +
       '<div class="consent-custom" data-view="custom" hidden><ul class="consent-cats">' +
       cat('analytics', 'Analytics', 'Google Analytics counts visits and shows which pages are useful (cookies _ga, _ga_*).') +
       cat('ads', 'Advertising &amp; personalised measurement', 'Lets Google link visits to signed-in Google accounts that allow ad personalisation (Google signals): aggregated demographics, interests and cross-device reports. No ads are shown on this site.') +
@@ -220,13 +230,23 @@
   // their own names. History changes (the explorer rewrites its URL on every keystroke) never send a page_view: that
   // enhanced-measurement option is off in the GA4 stream.
   var SLUG = /^[a-z0-9][a-z0-9-]{0,63}$/;
-  var LINK_TYPES = ['docs', 'website', 'playground', 'models', 'limits_source', 'data_policy'];
+  var LINK_TYPES = ['docs', 'keys', 'website', 'playground', 'models', 'limits_source', 'data_policy'];
   var CHIPS = { 'f-nocard': 'no_card', 'f-nophone': 'no_phone', 'f-commercial': 'commercial', 'f-text': 'text_only', 'f-notrain': 'no_training', 'f-openai': 'openai_compatible', 'f-verified': 'verified' };
   var CATEGORIES = ['all', 'ongoing', 'trial'];
   var SORT_KEYS = ['recommended', 'name', 'category', 'free_tier', 'notes', 'verified'];
   var DOWNLOAD = /^\/((providers\.(json|csv))|(api\/v1\/[a-z0-9._-]+\.(json|yaml))|(llms(-full)?\.txt)|(badge-[a-z]+\.json))$/;
   var SNIPPET_KINDS = ['embed', 'badge', 'citation'];
+  // Links to this project's GitHub repository (stars, issues, contributing): repo_click with where the link sits. A link can
+  // name its place (data-repo-location, from the fixed list); otherwise the site header or footer it sits in, or a
+  // contribution link (the /contributing/ and /submit/ pages, issue forms, discussions, pull requests, forks), else content.
+  var REPO_PATH = /^\/pacocartones\/free-llm-api-hub(\/|$)/i;
+  var REPO_LOCATIONS = ['header', 'footer', 'contribute', 'content'];
+  var CONTRIBUTE_PAGE = /^\/(contributing|submit)(\/|\.html|$)/;
+  var CONTRIBUTE_TARGET = /^\/[^/]+\/[^/]+\/((issues\/new|discussions|pulls?|fork|compare)(\/|$)|blob\/[^/]+\/CONTRIBUTING\.md$)/i;
   var SEARCH_IDLE_MS = 1500;
+  // /find/ (site/find.js) reports a finished wizard as a DOM event; only these values pass (lib/find.mjs USES, CONSTRAINTS).
+  var WIZARD_USES = ['any', 'chat', 'code', 'embeddings', 'speech', 'image', 'ocr'];
+  var WIZARD_FILTERS = ['card', 'phone', 'commercial', 'train', 'openai'];
   var pageSent = false;
   var lastSearch = '';
   var searchTimer = null;
@@ -266,6 +286,15 @@
     if (track('site_search', { search_term: term })) lastSearch = term;
   }
 
+  function repoLocation(a, url) {
+    var declared = a.getAttribute('data-repo-location');
+    if (declared && REPO_LOCATIONS.indexOf(declared) !== -1) return declared;
+    if (a.closest('.site-header')) return 'header';
+    if (a.closest('.site-footer')) return 'footer';
+    if (CONTRIBUTE_PAGE.test(String(location.pathname || '/')) || CONTRIBUTE_TARGET.test(url.pathname)) return 'contribute';
+    return 'content';
+  }
+
   function onClick(e) {
     var t = e.target;
     if (!t || !t.closest) return;
@@ -280,6 +309,9 @@
       try { url = new URL(a.getAttribute('href'), location.href); } catch (err) { url = null; }
       if (url && url.hostname === location.hostname && DOWNLOAD.test(url.pathname)) {
         track('api_download', { file: url.pathname.slice(1) });
+      }
+      if (url && (url.hostname === 'github.com' || url.hostname === 'www.github.com') && REPO_PATH.test(url.pathname)) {
+        track('repo_click', { location: repoLocation(a, url) });
       }
       return;
     }
@@ -331,7 +363,23 @@
     }
   }
 
+  // wizard_complete: what the visitor builds, which constraints they set (a sorted list from a fixed set, or "none")
+  // and how many providers matched. Nothing typed by the visitor; anything outside the lists drops the event.
+  function onWizardComplete(e) {
+    var d = e && e.detail;
+    if (!d || WIZARD_USES.indexOf(d.use) === -1) return;
+    var filters = String(d.filters || 'none');
+    if (filters !== 'none') {
+      var parts = filters.split(',');
+      for (var i = 0; i < parts.length; i++) if (WIZARD_FILTERS.indexOf(parts[i]) === -1 || parts.indexOf(parts[i]) !== i) return;
+    }
+    var n = d.results;
+    if (typeof n !== 'number' || n !== Math.floor(n) || n < 0 || n > 999) return;
+    track('wizard_complete', { use: d.use, filters: filters, result_count: n });
+  }
+
   function listen() {
+    document.addEventListener('fllm:wizard-complete', onWizardComplete);
     document.addEventListener('click', onClick);
     // Middle-click opens a provider link in a new tab without a click event.
     document.addEventListener('auxclick', function (e) { if (e.button === 1) onClick(e); });

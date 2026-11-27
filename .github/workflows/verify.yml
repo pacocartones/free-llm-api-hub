@@ -4,7 +4,9 @@ name: Verify
 #
 # What blocks: the dataset must satisfy the integrity rules, internal doc links
 # must resolve, and the derived files must agree with the data. How strictly
-# depends on the repository variable REGEN_MODE (docs/regeneration-bot.md):
+# depends on the repository variable REGEN_MODE (docs/regeneration-bot.md; on a
+# pull request from a fork, which sees no repository variables, the committed
+# .github/regen-mode file on the base branch):
 #   - push: the regeneration bot (regenerate.yml) commits the derived files to
 #     main after the merge, so a data PR does not regenerate them. The checks
 #     run on a freshly regenerated tree, and only derived files the PR edits by
@@ -28,8 +30,11 @@ on:
   pull_request:
   push:
     branches: [main]
+    # Not the bot's data/probe-report.json: its commit only rewrites derived files after a merge Verify already checked
+    # (regenerate.yml's own filter excludes it the same way).
     paths:
       - 'data/**'
+      - '!data/probe-report.json'
       - 'scripts/**'
   workflow_dispatch: {}
 
@@ -53,6 +58,7 @@ jobs:
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: .nvmrc
+          cache: npm
 
       # JSON Schema validation uses locked development dependencies. Disable
       # lifecycle scripts so CI only installs the declared tooling.
@@ -60,11 +66,26 @@ jobs:
         run: npm ci --ignore-scripts
 
       # One parser for REGEN_MODE (scripts/lib/regenerate.mjs): only `push` relaxes the drift gate below.
+      # A pull request from a fork gets no repository variables, so vars.REGEN_MODE is empty there. It then reads the
+      # mode from .github/regen-mode on the base branch, never from the pull request's own tree, so a pull request
+      # cannot relax its own gate. When the variable is set it always wins. No --depth on the fetch: the clone is
+      # complete and a shallow fetch would truncate the history the build mines from git log. A base branch without
+      # the file reads as off, the strict gate.
       - id: regen
         name: Regeneration mode
+        shell: bash
         env:
           REGEN_MODE: ${{ vars.REGEN_MODE }}
-        run: node scripts/regenerate-guard.mjs mode
+          EVENT: ${{ github.event_name }}
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          if [ -z "$REGEN_MODE" ] && [ "$EVENT" = pull_request ]; then
+            git fetch --no-tags origin "refs/heads/$BASE_REF"
+            REGEN_MODE="$(git show FETCH_HEAD:.github/regen-mode 2>/dev/null || true)"
+            echo "vars.REGEN_MODE is not visible to this run; the mode file on $BASE_REF says: ${REGEN_MODE:-<missing>}"
+            export REGEN_MODE
+          fi
+          node scripts/regenerate-guard.mjs mode
 
       - name: Validate dataset against integrity rules
         run: node scripts/validate.mjs
@@ -123,37 +144,15 @@ jobs:
       # The freshness badge is date-relative (the oldest age in days moves
       # daily), so it is not committed at all: the build writes
       # site/badge-freshness.json and every deploy publishes it.
-      # The list of files is derived from git (scripts/generated-targets.mjs); the `check` script in package.json uses the same.
-      - name: Generated files must be in sync with the data
+      # The gate is scripts/check-generated.mjs --strict, the same one `npm run check` runs outside push mode: the
+      # files come from git (scripts/generated-targets.mjs, NUL-separated), so a new page is covered the day it is
+      # committed, and a page the build writes that was never `git add`ed is reported too.
+      - id: strict
+        name: Generated files must be in sync with the data
         if: ${{ steps.regen.outputs.mode != 'push' }}
         run: |
           node scripts/build.mjs
-          # The list comes from git (scripts/generated-targets.mjs): every committed page under site/ that the
-          # build writes, so a new page is covered the day it is committed. A page the build writes that was never
-          # `git add`ed is reported too: the deploy would publish it, and no pull request would show it.
-          targets="$(node scripts/generated-targets.mjs)"
-          untracked="$(node scripts/generated-targets.mjs --untracked)"
-          if git diff --quiet -- $targets && [ -z "$untracked" ]; then
-            echo "Generated files are in sync with the data."
-            echo "Generated files are in sync." >> "$GITHUB_STEP_SUMMARY"
-          else
-            {
-              echo "### Regenerate the derived files and commit them in this PR"
-              echo ""
-              echo "Run \`npm run build\` (and \`npm run og\` if the OG check flagged"
-              echo "drift), commit the regenerated files together with the data"
-              echo "change, then push again."
-              echo ""
-              echo '```'
-              git --no-pager diff --stat -- $targets
-              if [ -n "$untracked" ]; then
-                echo "Written by the build and not committed:"
-                echo "$untracked" | tr ' ' '\n'
-              fi
-              echo '```'
-            } >> "$GITHUB_STEP_SUMMARY"
-            exit 1
-          fi
+          node scripts/check-generated.mjs --strict
 
       # Push mode: stale derived files this PR did not touch pass (the bot
       # regenerates them after the merge). Still blocking: derived files the PR
@@ -162,17 +161,43 @@ jobs:
       # its merge), and drift outside the bot's allowlist. HEAD^1 is the base
       # branch in the PR's merge commit and the previous main on a push. The
       # decision is driftGate() in scripts/lib/regenerate.mjs, tested.
-      - name: Derived files must not be hand-edited, and a release ships them regenerated (REGEN_MODE=push)
+      # It compares the tree "Regenerate the derived files first" wrote. Nothing in between writes to the working
+      # tree (the checks only read, and the test suite builds into temporary copies), and a second build of the
+      # same tree is byte-identical (regenerate.yml asserts that on main), so the job builds once.
+      - id: drift
+        name: Derived files must not be hand-edited, and a release ships them regenerated (REGEN_MODE=push)
         if: ${{ steps.regen.outputs.mode == 'push' }}
         env:
           REGEN_MODE: ${{ steps.regen.outputs.mode }}
-        run: |
-          node scripts/build.mjs
-          BASE="$(git rev-parse HEAD^1)" node scripts/regenerate-guard.mjs drift-gate
+        run: BASE="$(git rev-parse HEAD^1)" node scripts/regenerate-guard.mjs drift-gate
 
-  windows-tests:
-    name: Windows tests
+      # On a pull request whose derived files differ from a fresh build (in any mode, blocking or not), the files
+      # the build wrote become the `regen-preview-patch` artifact: a contributor without Node, or the maintainer, can
+      # `git apply --binary regen-preview.patch` on the branch. It is cut against the merge commit, so it applies
+      # cleanly while the branch is up to date with main. Read-only: nothing is pushed or commented.
+      - name: Write the derived files a fresh build changed as a patch
+        if: ${{ !cancelled() && github.event_name == 'pull_request' && (steps.drift.outputs.changed == 'true' || steps.strict.outcome == 'failure') }}
+        run: |
+          git add -A
+          git diff --cached --binary > "$RUNNER_TEMP/regen-preview.patch"
+      - if: ${{ !cancelled() && github.event_name == 'pull_request' && (steps.drift.outputs.changed == 'true' || steps.strict.outcome == 'failure') }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: regen-preview-patch
+          path: ${{ runner.temp }}/regen-preview.patch
+          retention-days: 7
+          if-no-files-found: error
+
+  # The Windows suite is the longest required check, so it runs as parallel shards (scripts/run-tests.mjs, TEST_SHARD):
+  # the shards together run every test of `npm test` exactly once (scripts/test-part.test.mjs). The required check is
+  # the `windows-tests` job below, which keeps the name "Windows tests" and passes only when every shard passed.
+  windows-shards:
+    name: Windows tests (shard ${{ matrix.shard }}/3)
     runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3]
     steps:
       # Set up git as a contributor's Windows machine often is: CRLF conversion on, and every commit and tag signed by
       # a program that fails (a key behind a passphrase, or no gpg). The checkout must still be LF (.gitattributes) and
@@ -191,30 +216,69 @@ jobs:
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: .nvmrc
+          cache: npm
 
       - name: Install locked development dependencies
         run: npm ci --ignore-scripts
 
+      # A pull request from a fork gets no repository variables, so vars.REGEN_MODE is empty there. It then reads the
+      # mode from .github/regen-mode on the base branch, never from the pull request's own tree, so a pull request
+      # cannot relax its own gate. When the variable is set it always wins. No --depth on the fetch: the clone is
+      # complete and a shallow fetch would truncate the history the build mines from git log. A base branch without
+      # the file reads as off, the strict gate.
       - id: regen
         name: Regeneration mode
+        shell: bash
         env:
           REGEN_MODE: ${{ vars.REGEN_MODE }}
-        run: node scripts/regenerate-guard.mjs mode
+          EVENT: ${{ github.event_name }}
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          if [ -z "$REGEN_MODE" ] && [ "$EVENT" = pull_request ]; then
+            git fetch --no-tags origin "refs/heads/$BASE_REF"
+            REGEN_MODE="$(git show FETCH_HEAD:.github/regen-mode 2>/dev/null || true)"
+            echo "vars.REGEN_MODE is not visible to this run; the mode file on $BASE_REF says: ${REGEN_MODE:-<missing>}"
+            export REGEN_MODE
+          fi
+          node scripts/regenerate-guard.mjs mode
 
-      # As in Dataset integrity: in push mode the suite runs on the tree main will hold after the bot's run.
+      # As in Dataset integrity: in push mode the suite runs on the tree main will hold after the bot's run, social
+      # images included (a pull request that changes how they are drawn does not ship them either).
       - name: Regenerate the derived files first (REGEN_MODE=push)
         if: ${{ steps.regen.outputs.mode == 'push' }}
-        run: node scripts/build.mjs
+        shell: bash
+        run: |
+          node scripts/build.mjs
+          node scripts/check-og.mjs || node scripts/og.mjs
 
       # The runner may create symlinks; a contributor without Developer Mode may not (#783). The preload refuses them
       # as Windows does there, junctions still work. A file URL, so the test processes in other folders find it too.
-      - name: Run the full test suite without symlink privileges
+      # Every shard runs the checks npm test runs before the suite (seconds), then its share of the suite.
+      - name: Run this shard of the full test suite without symlink privileges
         shell: pwsh
+        env:
+          TEST_SHARD: ${{ matrix.shard }}/3
         run: |
           $preload = ([System.Uri](Join-Path $PWD 'scripts/lib/deny-symlinks.mjs')).AbsoluteUri
           $env:NODE_OPTIONS = "--import=$preload"
           npm test
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+  # The required check "Windows tests" (ruleset): green only when every shard above succeeded. A failed, cancelled or
+  # skipped shard fails it. It checks nothing out and runs no repository code.
+  windows-tests:
+    name: Windows tests
+    needs: windows-shards
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Every Windows shard passed
+        env:
+          RESULT: ${{ needs.windows-shards.result }}
+        run: |
+          echo "Windows shards: $RESULT"
+          [ "$RESULT" = success ]
 
   # A push to main is checked again after the merge (two pull requests that pass
   # alone can fail together, e.g. a duplicate slug). A failure there used to be

@@ -17,7 +17,7 @@ test('what is generated: the pages, feeds, badges and data under site/; not the 
   for (const f of ['site/index.html', 'site/404.html', 'site/sitemap.xml', 'site/robots.txt', 'site/scores.json', 'site/badge-verified.svg',
     'site/coding-tools/index.html', 'site/coding-tools/zed-own-key/index.html', 'site/free-gpu/index.html', 'site/data-policy/index.html',
     'site/agreements/index.html', 'site/coverage/index.html', 'site/submit/index.html', 'site/.well-known/security.txt']) assert.ok(isGenerated(f), `${f} is compared`);
-  for (const f of ['site/og/p/groq.png', 'site/og/guides/x.png', 'site/fonts/jetbrains-mono.woff2', 'site/CNAME', 'site/96087c6012c181da7cf7f9dcc88f9996.txt', 'site/og.png', 'site/og.svg',
+  for (const f of ['site/og/p/groq.png', 'site/og/guides/x.png', 'site/fonts/roboto-flex.woff2', 'site/CNAME', 'site/96087c6012c181da7cf7f9dcc88f9996.txt', 'site/og.png', 'site/og.svg',
     'site/favicon.svg', 'site/favicon.ico', 'site/styles.css', 'site/tables.css', 'site/site.js', 'site/explorer.js', 'site/pager.js', 'site/widget.js', 'site/compare.js',
     'README.md', 'data/providers.json']) assert.ok(!isGenerated(f), `${f} is not compared as site output`);
 });
@@ -76,7 +76,7 @@ test('parseNul splits on NUL, keeps spaces and quotes inside a path, and drops t
 test('the portable drift command exits clean only while generated outputs match', () => {
   const dir = makeTmpDir('flah-check-generated-');
   const git = (...a) => execFileSync('git', a, { cwd: dir, encoding: 'utf8' });
-  const run = () => spawnSync(process.execPath, [CHECK], { cwd: dir, encoding: 'utf8' });
+  const run = () => spawnSync(process.execPath, [CHECK], { cwd: dir, encoding: 'utf8', env: { ...process.env, REGEN_MODE: '' } });
   const write = (rel, text) => { mkdirSync(join(dir, dirname(rel)), { recursive: true }); writeFileSync(join(dir, rel), text); };
   try {
     git('init', '-q');
@@ -99,6 +99,46 @@ test('the portable drift command exits clean only while generated outputs match'
 
     write('site/p/ignored.html', '<p>ignored</p>');
     assert.equal(run().status, 0, 'ignored generated output does not fail the gate');
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test('in push mode the drift command is CI\'s push-mode gate: stale pages the branch did not touch pass, its own hand edits fail', () => {
+  const dir = makeTmpDir('flah-check-push-');
+  const git = (...a) => execFileSync('git', a, { cwd: dir, encoding: 'utf8' }).trim();
+  const run = (env = {}, ...args) => spawnSync(process.execPath, [CHECK, ...args], {
+    cwd: dir, encoding: 'utf8', env: { ...process.env, REGEN_MODE: '', BASE: '', GITHUB_OUTPUT: '', GITHUB_STEP_SUMMARY: '', ...env },
+  });
+  const write = (rel, text) => { mkdirSync(join(dir, dirname(rel)), { recursive: true }); writeFileSync(join(dir, rel), text); };
+  try {
+    git('init', '-q');
+    git('config', 'user.email', 'test@example.invalid'); git('config', 'user.name', 'test');
+    write('.github/regen-mode', 'push\n');
+    write('data/providers.json', '{"version":"1.0.0"}');
+    write('site/a/index.html', '<p>a</p>');
+    write('site/b/index.html', '<p>b</p>');
+    git('add', '-A'); git('commit', '-q', '--no-gpg-sign', '-m', 'base');
+    const base = git('rev-parse', 'HEAD');
+    // The branch changes the data; the "build" then rewrites a page the branch did not touch.
+    write('data/providers.json', '{"version":"1.0.0","x":1}');
+    git('add', '-A'); git('commit', '-q', '--no-gpg-sign', '-m', 'data');
+    write('site/a/index.html', '<p>a, rebuilt</p>');
+    const stale = run({ BASE: base });
+    assert.equal(stale.status, 0, stale.stdout + stale.stderr);
+    assert.match(stale.stdout, /bot-would-regenerate/);
+    assert.equal(run({ BASE: base }, '--strict').status, 1, '--strict is the full gate in any mode');
+    assert.equal(run({ BASE: base, REGEN_MODE: 'off' }).status, 1, 'REGEN_MODE wins over the file, as in CI');
+    // Without BASE and without origin/main there is nothing to compare with: a usage error, not a pass.
+    assert.equal(run().status, 2);
+    // The branch edits a derived page by hand, and the build disagrees: blocked.
+    git('checkout', '-q', '--', 'site/a/index.html');
+    write('site/b/index.html', '<p>b, by hand</p>');
+    git('add', '-A'); git('commit', '-q', '--no-gpg-sign', '-m', 'hand edit');
+    write('site/b/index.html', '<p>b</p>');
+    const hand = run({ BASE: base });
+    assert.equal(hand.status, 1, hand.stdout + hand.stderr);
+    assert.match(hand.stdout, /would-block-hand-edit/);
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }

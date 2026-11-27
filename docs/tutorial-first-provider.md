@@ -129,7 +129,7 @@ A few rules trip people up:
 3. **`checked` is the day you read that source, not today by default** — the example above carries the day `https://www.ai21.com/terms-policies/privacy-policy/` was read (`2026-10-15`). Replace it with your own reading day, and never with a date after today in UTC.
 4. **At least one of the two must be stated.** A `data_policy` whose `trains_on_prompts` and `retention` are both `null` records nothing, so the validator refuses it (`data_policy must state trains_on_prompts or retention (an all-null policy records nothing)`). If the page says neither, leave `data_policy` out of the entry — or set it to `null` — rather than writing an all-`null` object.
 5. **If your `data_policy` has a `quote` or a `note` with passages in «...», register them in `data/quotes.json`.** After editing the row, run `npm run quotes:add -- <slug>`; the command writes the `sentence` entry for a `quote`, and a `note_passage` entry for each passage in «...». Commit the resulting `data/quotes.json`. See [`docs/quotes.md`](quotes.md).
-6. **Commit the regenerated files with the data change**: run `npm run build`, and `npm run check` must leave no diff.
+6. **Build, but commit only the data**: run `npm run build && npm test` to check the entry renders, then commit the data change without the regenerated files (see [Step 6](#step-6--commit-and-open-the-pr)).
 
 The full definition — `source`, `checked`, `quote`, `note` and `plan_named` included — is the `data_policy` entry in [`data/schema.json`](../data/schema.json).
 
@@ -162,30 +162,29 @@ This rewrites the README tables, the collection pages, and the whole site payloa
 npm run og
 ```
 
-**Never hand-edit the generated files** — edit the data and let the build rewrite them. For fixed inputs, Git history and reference day, the build is idempotent. The freshness badge changes with the calendar, so it is written to `site/` and never committed; see [Architecture](architecture.md) for date-relative and history-derived exceptions. Commit both together.
+**Never hand-edit the generated files** — edit the data and let the build rewrite them. For fixed inputs, Git history and reference day, the build is idempotent. The freshness badge changes with the calendar, so it is written to `site/` and never committed; see [Architecture](architecture.md) for date-relative and history-derived exceptions. You look at what the build wrote, but you do not commit it (Step 6).
 
 ## Step 6 — Commit and open the PR
 
-Commit the data change **and** the regenerated files in the same commit — a data PR without its derived files fails CI by design, because no bot regenerates them for you yet (the [regeneration bot](regeneration-bot.md) is not live):
+The repository runs the [regeneration bot](regeneration-bot.md) in push mode (`.github/regen-mode` says `push`): after your pull request is merged, the bot commits the regenerated files to `main`. So commit **only the source files you edited** — the data, your changelog fragment and, if you registered a quote, `data/quotes.json` — and none of the files the build rewrote:
 
 ```bash
 git status --short
-git diff
-# Stage the reviewed data and generated outputs, including fingerprints and evidence:
-git add -- data changes README.md badge-verified.json CITATION.cff \
-  derived-fingerprints.json docs/credit-programs.md docs/comparison-dimensions.md site collections
+git diff -- data changes
+# Stage only what you wrote by hand:
+git add -- data changes
 git commit -m "feat: add your provider"
-npm run check
+git restore .   # discard what the build rewrote (README tables, site/, collections/, fingerprints)
 git push -u fork add-your-provider
 ```
 
 If you chose a different branch name, use that name in the push command too.
 
-`CITATION.cff` carries the dataset version and release date (unchanged by a data pull request); `derived-fingerprints.json` pins ignored build outputs; `data/quotes.json` carries policy evidence. Include every reviewed regenerated artifact. After committing, run `npm run check` to confirm no generated drift before pushing.
+`npm run check` follows the mode too. In push mode it runs CI's push-mode gate against the merge base with `origin/main`: the derived files your pull request leaves stale on purpose pass, because the bot regenerates them after the merge. If the *Regeneration mode* step of the "Dataset integrity" check ever prints a mode other than `push` (a rollback), commit the regenerated files with the data instead and run `npm run check` until it finds no drift, as [CONTRIBUTING.md](../CONTRIBUTING.md#for-provider-data-edit-the-source) describes.
 
 Open the pull request. Give it a title that says what changed and a body with the source link and what you confirmed.
 
-The required **"Dataset integrity"** check validates the data, the internal links, the OG images, and — via the drift gate — that the regenerated files match the data. When it's green, a maintainer re-checks your source link and the claim, then merges.
+The required **"Dataset integrity"** check validates the data, the internal links and the OG images, runs the test suite on a freshly regenerated tree, and checks — via the drift gate — that you did not hand-edit a generated file. When it's green, a maintainer re-checks your source link and the claim, then merges.
 
 > **Your first PR from a fork may sit grey for a bit.** GitHub holds workflow runs from first-time contributors until a maintainer approves them. If the check shows *Expected — Waiting for approval*, that's normal and says nothing about your change. Leave a comment ("Could you approve the checks?") and it'll run.
 
@@ -201,7 +200,7 @@ On merge, the entry goes live: the explorer and provider page appear, the badge 
 | `verified: false` with a date | Validator rejects (`unverified entry must have last_verified: null`) | Set `last_verified: null`, explain in `notes` |
 | Shallow clone | Test suite fails on history integrity | `git fetch --unshallow` |
 | Bumped `generated` | "Dataset integrity" check fails at its "Release stamp moves only with the version" step | Put it back as it is on `main`: it changes only in a release |
-| Committed only `data/providers.json` | "Dataset integrity" check fails | Regenerate with `npm run build` and commit the derived files |
+| Committed regenerated files (README tables, `site/`, `collections/`) by hand | "Dataset integrity" fails if one does not match the build | Undo it with `git checkout origin/main -- <file>`: the bot regenerates them after the merge |
 | Marketing language in `free_tier`/`rate_limits` | Reviewer sends it back | Use the exact published numbers, or say "not published" |
 | Renaming or reusing a `slug` | Breaks external references | Slugs are permanent |
 | PR falls behind `main` | Generated files conflict with newer commits | Run `npm run sync-main` — see [Updating your branch from main](../CONTRIBUTING.md#updating-your-branch-from-main) |
