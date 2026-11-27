@@ -46,7 +46,7 @@ const UA = 'free-llm-api-hub-parity-crawl';
 export const GUIDE = '/guides/free-llm-api-without-credit-card';
 export const GOOGLE_VERIFICATION = '/googlee1498fc573a3811d.html';
 export const FIXED_PATHS = Object.freeze([
-  '/', '/p/groq', '/p/groq.html', '/p/groq.md', GUIDE, `${GUIDE}/`,
+  '/', '/p/groq', '/p/groq.html', '/p/groq.md', '/guides/index.html', GUIDE, `${GUIDE}/`,
   '/api/v1/providers.json', '/providers.csv', '/llms.txt', '/llms-full.txt', '/robots.txt', '/sitemap.xml',
   '/feed.xml', '/changes.atom', '/changes.xml', '/96087c6012c181da7cf7f9dcc88f9996.txt', GOOGLE_VERIFICATION,
   '/widget.js', '/embed.js', '/site.webmanifest', '/.well-known/security.txt', '/badge-verified.json',
