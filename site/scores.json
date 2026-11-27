@@ -139,6 +139,12 @@
       "of": 6,
       "rank": null
     },
+    "amazon-bedrock": {
+      "total": 33.9,
+      "confirmed": 2,
+      "of": 6,
+      "rank": null
+    },
     "fireworks-ai": {
       "total": 33.9,
       "confirmed": 2,
@@ -464,6 +470,12 @@
       "rank": null
     },
     "alibaba-model-studio": {
+      "total": 23.5,
+      "confirmed": 2,
+      "of": 6,
+      "rank": null
+    },
+    "oci-generative-ai": {
       "total": 23.5,
       "confirmed": 2,
       "of": 6,
