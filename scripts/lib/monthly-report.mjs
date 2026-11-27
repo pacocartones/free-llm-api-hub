@@ -129,6 +129,9 @@ export function monthlyChangesReport({ month, before, after, changes, notFree, c
   }
   toUnknown.sort((a, b) => byName(a.p, b.p) || FIELD_CHECK_FIELDS.indexOf(a.field) - FIELD_CHECK_FIELDS.indexOf(b.field));
   const commercialTrueToUnknown = toUnknown.filter((x) => x.field === 'commercial_ok' && x.from === true).map((x) => x.p);
+  // Where every "commercial use allowed" of the month before went: to false, to conditional, or out of the dataset.
+  const commercialTrueTo = (want) => A.filter((p) => p.commercial_ok === want && bySlugB.get(p.slug) && bySlugB.get(p.slug).commercial_ok === true).sort(byName);
+  const commercialTrueRemoved = removed.filter((p) => p.commercial_ok === true);
 
   // Checks dated in the month whose reason is that two pages disagree or that only an account would tell.
   const openChecks = A.flatMap((p) => FIELD_CHECK_FIELDS.map((f) => ({ p, field: f, c: fieldCheck(p, f) })))
@@ -166,6 +169,12 @@ export function monthlyChangesReport({ month, before, after, changes, notFree, c
     releases: andList(releases.map((r) => `${r.version} (${dayLabel(r.date)})`)),
     commercial_true_to_unknown: names(commercialTrueToUnknown),
     commercial_true_to_unknown_count: commercialTrueToUnknown.length,
+    commercial_true_to_false: names(commercialTrueTo(false)),
+    commercial_true_to_false_count: commercialTrueTo(false).length,
+    commercial_true_to_conditional: names(commercialTrueTo('conditional')),
+    commercial_true_to_conditional_count: commercialTrueTo('conditional').length,
+    commercial_true_removed: names(commercialTrueRemoved),
+    commercial_true_removed_count: commercialTrueRemoved.length,
     anonymous_names: names(fa.anonymous),
     speed_names: names(fa.speed),
     playground_names: names(fa.playground),

@@ -10,7 +10,7 @@ import { fileURLToPath } from 'node:url';
 import { privateTree } from './lib/private-tree.mjs';
 import { stripTags } from './lib/escape.mjs';
 import { mineHistoryAndSnapshots } from './lib/history.mjs';
-import { changesRss } from './lib/changes.mjs';
+import { changesRss, changesAtom } from './lib/changes.mjs';
 import { monthChanges } from './monthly-issues.mjs';
 import {
   monthlyChangesReport, renderReport, renderGenerated, fillTokens, parseReportFile, releasesInMonth, removalReason,
@@ -115,13 +115,33 @@ describe('the editorial file can only quote the data', () => {
     assert.ok(!out.html.toLowerCase().includes('<script'), 'no script element in the output');
   });
 
+  test('where each "commercial use allowed" of the month before went', () => {
+    const before = { ...BEFORE, providers: [...BEFORE.providers, prov('eval', { commercial_ok: true }), prov('cond', { commercial_ok: true }), prov('left', { commercial_ok: true })] };
+    const after = { ...AFTER, providers: [...AFTER.providers, prov('eval', { commercial_ok: false }), prov('cond', { commercial_ok: 'conditional' })] };
+    const changes = { ...CHANGES, removed: [...CHANGES.removed, { slug: 'left', name: 'LEFT' }] };
+    const f = monthlyChangesReport({ month: '2026-11', before, after, changes, notFree: NOT_FREE, changelog: CHANGELOG }).figures;
+    assert.equal(f.commercial_true_to_unknown, 'KEEP');
+    assert.equal(f.commercial_true_to_false, 'EVAL');
+    assert.equal(f.commercial_true_to_conditional, 'COND');
+    assert.equal(f.commercial_true_removed, 'LEFT');
+    assert.deepEqual([f.commercial_true_to_false_count, f.commercial_true_to_conditional_count, f.commercial_true_removed_count], [1, 1, 1]);
+  });
+
+  test('a null card or commercial-use flag of a new provider reads "not stated", with its reason', () => {
+    const after = { ...AFTER, providers: AFTER.providers.map((p) => (p.slug === 'new' ? { ...p, card_required: null, field_checks: { card_required: { status: 'needs_account', checked: '2026-11-21', sources: ['https://new.example'] } } } : p)) };
+    const html = renderGenerated(monthlyChangesReport({ month: '2026-11', before: BEFORE, after, changes: CHANGES, notFree: NOT_FREE, changelog: CHANGELOG }), { site: SITE });
+    assert.ok(html.includes('<td>Not stated (needs an account to check)</td>'));
+    assert.ok(html.includes('<td>Not stated (not confirmed)</td>'), 'commercial use with no recorded check');
+  });
+
   test('every month with a month before it gets the generated sections without a file', () => {
     const html = renderGenerated(model(), { site: SITE, current: new Set(['new', 'keep']) });
     assert.match(html, /November 2026 against October 2026/);
     assert.match(html, /aria-label="November 2026 in numbers"/);
     assert.match(html, /Paid plans only/);
     assert.match(html, /<strong>Under review:<\/strong> FLIP is now unverified/);
-    assert.match(html, /<a href="\.\.\/\.\.\/p\/keep">KEEP<\/a>, commercial use allowed: yes → unknown \(not stated by the provider: “Terms say nothing”/);
+    assert.match(html, /<a href="\.\.\/\.\.\/p\/keep">KEEP<\/a>, commercial use allowed: yes → not stated \(not stated by the provider: “Terms say nothing”/);
+    assert.doesNotMatch(html, /unknown/i, 'a null value reads "not stated", the site\'s one wording');
   });
 });
 
@@ -139,6 +159,14 @@ describe('the feed', () => {
     assert.equal(titles[1], 'Changes — November 2026');
     assert.ok(xml.includes('<guid isPermaLink="false">free-llm-api-hub-report-2026-11</guid>'));
     assert.equal(changesRss(weeks, { site: SITE }).match(/<item>/g).length, 2, 'no report, no extra item');
+    // The Atom twin carries the same report entry, in the same place, with a stable tag id.
+    const atom = changesAtom(weeks, { site: SITE, reports: [item] });
+    const atomTitles = [...atom.matchAll(/<entry>\n {4}<id>[^<]*<\/id>\n {4}<title>([^<]*)<\/title>/g)].map((m) => m[1]);
+    assert.equal(atomTitles.length, 3);
+    assert.equal(atomTitles[1], 'Changes — November 2026');
+    assert.ok(atom.includes('<id>tag:freellmapihub.com,2026:changes:report:2026-11</id>'));
+    assert.ok(atom.includes(`<link rel="alternate" type="text/html" href="${SITE}/state/2026-11/"/>`));
+    assert.equal(changesAtom(weeks, { site: SITE }).match(/<entry>/g).length, 2, 'no report, no extra entry');
   });
 });
 
@@ -173,7 +201,11 @@ describe('the built /state/ pages', () => {
       const graph = JSON.parse(html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1])['@graph'];
       const article = graph.find((n) => n['@type'] === 'Article');
       assert.equal(article.headline, title);
-      assert.equal(article.dateModified, mined.monthEnd[month].date);
+      const published = reportFeedItem(month, { title, description: '' }, SITE).date;
+      assert.equal(article.datePublished, `${published}T00:00:00Z`, `${month}: published the day after the month`);
+      const lastRevision = mined.monthEnd[month].date;
+      assert.equal(article.dateModified, `${lastRevision > published ? lastRevision : published}T00:00:00Z`, `${month}: modified at the last revision, never before publication`);
+      assert.ok(article.author && article.publisher && article.image, `${month}: author, publisher and image`);
       assert.ok(graph.some((n) => n['@type'] === 'BreadcrumbList'));
       assert.ok(html.indexOf('id="the-numbers"') > html.indexOf('class="month-report"'), `${month}: the computed numbers follow the report`);
       // The numbers in the prose are the data's.
@@ -208,6 +240,7 @@ describe('the built /state/ pages', () => {
     for (const month of reportMonths) {
       assert.equal(xml.split(`<guid isPermaLink="false">free-llm-api-hub-report-${month}</guid>`).length - 1, 1, `${month}: one feed item`);
       assert.ok(xml.includes(`<link>${SITE}/state/${month}/</link>`));
+      assert.equal(read('site/changes.atom').split(`<id>tag:freellmapihub.com,2026:changes:report:${month}</id>`).length - 1, 1, `${month}: one Atom entry`);
       assert.match(changes, new RegExp(`href="\\.\\./state/${month}/"[^>]*aria-label="[^"]*monthly report`));
     }
   });
