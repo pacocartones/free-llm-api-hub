@@ -9,7 +9,7 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
   DEFAULT_REQUIRED_CHECKS, LABEL, NEEDS_COORDINATOR, SOLO, TRAIN_PREFIX, TRAIN_TIMEOUT_MS, blameFailedTrain,
-  checksState, classifyPr, conflictStrategy, evaluateTrain, formatTrainState, infoAttributes, lastLabeler,
+  checksState, classifyPr, closedByMergeComment, conflictStrategy, evaluateTrain, issuesToClose, formatTrainState, infoAttributes, lastLabeler,
   movedOnlyByBot, normalizeContexts, parseConfig, parseMode, parseTrainState, pickTrain, planRun,
   resolveStampConflicts, safeBranch, trainBranch,
 } from './lib/merge-train.mjs';
@@ -346,6 +346,36 @@ test('merge-train-kick.yml: no checkout, no repository code, and the revoke job 
   const names = wf.match(/workflows: \[([^\]]+)\]/)[1].split(',').map((s) => s.trim().replace(/'/g, ''));
   const all = ['verify.yml', 'commit-policy.yml', 'lighthouse.yml', 'codeql.yml'].map((f) => workflow(f).match(/^name: (.+)$/m)[1].trim());
   assert.deepEqual(names, all);
+});
+
+// --- linked issues closed after a merge --------------------------------------------------------------------------
+
+test('issuesToClose: open issues of this repository once each; closed, other repositories and pull requests skipped', () => {
+  const REPO = 'pacocartones/free-llm-api-hub';
+  const issue = (number, state = 'OPEN', repo = REPO, typename = 'Issue') => ({ __typename: typename, number, state, repository: { nameWithOwner: repo } });
+  assert.deepEqual(issuesToClose([issue(926)], REPO), [926], 'open, same repository: closed');
+  assert.deepEqual(issuesToClose([issue(880, 'CLOSED')], REPO), [], 'already closed: skipped, never reopened');
+  assert.deepEqual(issuesToClose([issue(5, 'OPEN', 'someone/else')], REPO), [], 'another repository: skipped');
+  assert.deepEqual(issuesToClose([issue(7, 'OPEN', REPO, 'PullRequest')], REPO), [], 'not an issue: skipped');
+  assert.deepEqual(issuesToClose([], REPO), [], 'no linked issues: nothing');
+  assert.deepEqual(issuesToClose(undefined, REPO), []);
+  assert.deepEqual(issuesToClose([issue(926), issue(926), issue(951)], REPO), [926, 951], 'duplicates: once');
+  assert.deepEqual(issuesToClose([issue(1, 'OPEN', 'PacoCartones/Free-LLM-API-Hub')], REPO), [1], 'owner/name compared without case');
+  assert.equal(closedByMergeComment(1032), 'Closed by #1032, merged by the merge queue.');
+});
+
+test('every merge the manager makes closes the linked issues with GITHUB_TOKEN, without failing the merge', () => {
+  const src = readFileSync(join(ROOT, 'scripts/merge-train.mjs'), 'utf8');
+  const mergePr = src.split('async function mergePr(')[1].split('\n}\n')[0];
+  assert.match(mergePr, /if \(res\.ok\) \{[\s\S]*await closeLinkedIssues\(number\);[\s\S]*return \{ ok: true/);
+  const close = src.split('async function closeLinkedIssues(')[1].split('\n}\n')[0];
+  assert.match(close, /api\(env\.GH_TOKEN, 'POST', '\/graphql'/);
+  assert.match(close, /closingIssuesReferences|CLOSING_QUERY/);
+  assert.match(close, /state: 'closed', state_reason: 'completed'/);
+  assert.doesNotMatch(close, /\bapp\(|APP_TOKEN|park\(/, 'the App token is not used and a failure parks nothing');
+  assert.match(close, /catch \(err\) \{\s*closeFailures\+\+;/);
+  assert.match(src, /closingIssuesReferences\(first: 25\)/);
+  assert.doesNotMatch(workflow('merge-train.yml'), /permission-issues/, 'the App token is not asked for Issues');
 });
 
 // --- the regeneration bot follows the manager's merges -----------------------------------------------------------
