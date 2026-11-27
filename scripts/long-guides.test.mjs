@@ -15,7 +15,9 @@ import {
   LONG_GUIDES, longGuidePage, alternativesSets, noCardNoPhone, productionFigures, NO_FREE_MODEL_CALLS,
   modalitySets, speechMentions, dataUseWords, embeddingModel, embeddingsQuickstartProvider, watermarkSentences, MENTIONS_IMAGE_GENERATION,
   textLlms, codingSets, topSpeed, ragSets, ragStack, agentSets, AGENT_WORDS, chatbotSets, chatbotPasses, CHATBOT_CHECKS, studentSets,
+  LIMIT_METRICS, limitSets, strongestSets,
 } from './lib/long-guides.mjs';
+import { familyGroups } from './lib/model-families.mjs';
 import { parseHash, constraintState } from './lib/find.mjs';
 
 const REPO = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -570,5 +572,103 @@ describe('the use-case guides', () => {
     assert.equal(next['free-ai-api-for-students'].count, base['free-ai-api-for-students'].count - 2, 'Groq removed, LlamaParse’s card unconfirmed');
     assert.notEqual(next['free-api-for-rag'].body, base['free-api-for-rag'].body);
     assert.ok(topSpeed(providers.find((p) => p.slug === 'groq')), 'Groq publishes a speed, so removing it changes the speed table');
+  });
+});
+
+describe('the ranking and model-family guides', () => {
+  const RANKING = ['free-llm-api-highest-limits', 'strongest-free-llm-api', 'free-open-source-llm-api'];
+  const verifiedCount = () => providers.filter((p) => p.verified === true).length;
+
+  test('sit with the "how to choose" guides on the hub and link to provider pages, a collection, /compare/, /find/ and /not-free/', () => {
+    const hub = read('site/guides-and-collections/index.html');
+    const at = hub.indexOf('Guides: how to choose');
+    const section = hub.slice(at, hub.indexOf('<h2', at + 1));
+    for (const slug of RANKING) {
+      assert.ok(LONG_GUIDES.find((g) => g.slug === slug).group === undefined, `${slug}: no group`);
+      assert.ok(section.includes(`href="../guides/${slug}"`), `${slug}: in the how-to-choose section`);
+      const html = page(slug);
+      assert.match(html, /href="\.\.\/p\/[a-z0-9-]+"/, `${slug}: provider pages`);
+      assert.match(html, /href="\.\.\/collections\/[a-z-]+"/, `${slug}: a collection`);
+      assert.match(html, /href="\.\.\/compare\/\?compare=[a-z0-9-]+(,[a-z0-9-]+)+"/, `${slug}: a comparison`);
+      assert.match(html, /href="\.\.\/find\/#[^"]+"/, `${slug}: /find/`);
+      assert.ok(html.includes('aria-label="Pick a '), `${slug}: a shortlist table`);
+    }
+  });
+
+  test('highest limits: one table per unit, each every free text LLM with that structured figure, most first; the rest are not stated', () => {
+    const html = page('free-llm-api-highest-limits');
+    const text = textLlms(providers);
+    const lim = (p, k) => (p.free_limits && Number.isFinite(p.free_limits[k]) ? p.free_limits[k] : null);
+    const numbered = text.filter((p) => LIMIT_METRICS.some((m) => lim(p, m.key) != null));
+    assert.deepEqual(slugsOf(limitSets(providers).numbered), slugsOf(numbered));
+    assert.ok(numbered.length > 0, 'some free text LLM publishes a structured limit today');
+    for (const m of LIMIT_METRICS) {
+      const want = numbered.filter((p) => lim(p, m.key) != null);
+      if (!want.length) { assert.ok(!html.includes(`aria-label="Free LLM APIs ranked by ${m.label}"`), `${m.key}: no empty table`); continue; }
+      const got = tableSlugs(html, `Free LLM APIs ranked by ${m.label}`);
+      assert.deepEqual(sorted(got), slugsOf(want), `${m.key}: the rows`);
+      const values = got.map((s) => lim(providers.find((p) => p.slug === s), m.key));
+      assert.deepEqual(values, [...values].sort((a, b) => b - a), `${m.key}: most first`);
+      for (const [slug, cells] of tableRows(html, `Free LLM APIs ranked by ${m.label}`)) {
+        assert.equal(stripTags(cells[1]), lim(providers.find((p) => p.slug === slug), m.key).toLocaleString('en-US'), `${m.key} ${slug}: the figure is the entry's`);
+      }
+    }
+    assert.deepEqual(sorted(tableSlugs(html, 'Free text LLMs with no structured free limit')), slugsOf(text.filter((p) => !numbered.includes(p))));
+    assert.ok(answerOf(html).startsWith(`${numbered.length} of the ${text.length} free text LLMs from the ${verifiedCount()} verified providers`));
+    assert.ok(partsOf('free-llm-api-highest-limits').title.includes(`(${numbered.length} With Published Numbers)`));
+    // A figure is never converted into another unit: no per-second figure shows up as a per-minute one.
+    const rps = numbered.filter((p) => lim(p, 'requests_per_second') != null && lim(p, 'requests_per_minute') == null);
+    for (const p of rps) assert.ok(!tableSlugs(html, 'Free LLM APIs ranked by requests per minute').includes(p.slug), `${p.slug}: not converted`);
+  });
+
+  test('strongest: the table is every free text LLM with a rated free model, highest rating first, with the rating, tier and snapshot of its entry', () => {
+    const html = page('strongest-free-llm-api');
+    const text = textLlms(providers);
+    const rated = text.filter((p) => p.model_tier_source && Number.isFinite(p.model_tier_source.rating) && Number.isInteger(p.model_tier));
+    assert.deepEqual(slugsOf(strongestSets(providers).rated), slugsOf(rated));
+    const got = tableSlugs(html, 'Free LLM APIs ranked by Arena rating');
+    assert.deepEqual(sorted(got), slugsOf(rated));
+    const ratings = got.map((s) => providers.find((p) => p.slug === s).model_tier_source.rating);
+    assert.deepEqual(ratings, [...ratings].sort((a, b) => b - a), 'highest first');
+    for (const [slug, cells] of tableRows(html, 'Free LLM APIs ranked by Arena rating')) {
+      const p = providers.find((x) => x.slug === slug);
+      assert.ok(cells[1].replace(/<wbr>/g, '').includes(`<code>${p.model_tier_source.model}</code>`), `${slug}: the rated model`);
+      assert.ok(stripTags(cells[3]).startsWith(`tier ${p.model_tier} of 4`), `${slug}: the tier`);
+      assert.ok(cells[7].includes(`<time datetime="${p.model_tier_source.snapshot}">`), `${slug}: the snapshot`);
+    }
+    if (rated.length) assert.ok(answerOf(html).includes(rated.sort((a, b) => b.model_tier_source.rating - a.model_tier_source.rating)[0].name.replace(/&/g, '&')));
+    assert.ok(answerOf(html).includes('not a benchmark'), 'says what the rating is');
+    assert.ok(partsOf('strongest-free-llm-api').title.includes(`(${rated.length} Rated)`));
+  });
+
+  test('open models: the counts and IDs are the family pages’ own, every family page is linked, and nothing is said to be offered', () => {
+    const html = page('free-open-source-llm-api');
+    const groups = familyGroups(providers);
+    const all = new Set(groups.flatMap((g) => g.entries.map((e) => e.p.slug)));
+    assert.deepEqual(sorted(tableSlugs(html, 'Free API providers listing open model families')), sorted([...all]));
+    assert.equal(partsOf('free-open-source-llm-api').count, all.size);
+    for (const g of groups) {
+      assert.ok(html.includes(`href="../free-api/${g.slug}/"`), `${g.slug}: family page linked`);
+      for (const e of g.entries) for (const id of e.ids) assert.ok(html.replace(/<wbr>/g, '').includes(`<code>${id.replace(/&/g, '&amp;')}</code>`), `${g.slug} ${e.p.slug}: ${id}`);
+    }
+    const at = html.indexOf('aria-label="Free API providers per open model family"');
+    const rows = [...html.slice(at, html.indexOf('</tbody>', at)).matchAll(/<tr><td class="name"><a href="\.\.\/free-api\/([a-z-]+)\/">[^<]*<\/a><\/td><td>(\d+)<\/td>/g)];
+    assert.deepEqual(Object.fromEntries(rows.map((m) => [m[1], Number(m[2])])), Object.fromEntries(groups.map((g) => [g.slug, g.entries.length])));
+    assert.doesNotMatch(textOf(html), /\boffers? (a |the )?(Qwen|Gemma|DeepSeek|Llama|GPT-OSS|GLM)\b/i);
+    assert.ok(textOf(html).includes('not their licences'), 'says licences are not recorded');
+  });
+
+  test('the copy follows the data: removing a provider and dropping a figure changes the rankings', () => {
+    const base = Object.fromEntries(RANKING.map((slug) => [slug, partsOf(slug)]));
+    const topRpd = limitSets(providers).ranked.requests_per_day[0];
+    const topRated = strongestSets(providers).rated[0];
+    assert.ok(topRpd && topRated, 'both rankings have a leader today');
+    const changed = providers.map((p) => (p.slug === topRpd.slug ? { ...p, free_limits: null } : p)).filter((p) => p.slug !== topRated.slug);
+    const next = Object.fromEntries(RANKING.map((slug) => [slug, partsOf(slug, changed)]));
+    assert.ok(!limitSets(changed).ranked.requests_per_day.some((p) => p.slug === topRpd.slug), 'a dropped figure leaves the ranking');
+    assert.notEqual(next['free-llm-api-highest-limits'].answer, base['free-llm-api-highest-limits'].answer);
+    assert.equal(next['strongest-free-llm-api'].count, base['strongest-free-llm-api'].count - 1);
+    assert.ok(!next['strongest-free-llm-api'].body.includes(`../p/${topRated.slug}"`));
+    assert.notEqual(next['free-open-source-llm-api'].body, base['free-open-source-llm-api'].body);
   });
 });
