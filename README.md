@@ -50,7 +50,7 @@ Each pick links to its full verified profile on the live site.
 | **Free embeddings & rerank** | [Jina AI](https://freellmapihub.com/p/jina-ai) or [Cohere](https://freellmapihub.com/p/cohere) | 10M free tokens (Jina, OpenAI-compatible) or 1,000 calls/mo (Cohere) |
 | **Free speech-to-text / TTS** | [Deepgram](https://freellmapihub.com/p/deepgram) or [AssemblyAI](https://freellmapihub.com/p/assemblyai) | $200 (STT and TTS) / $50 (STT) in no-card signup credit |
 | **A bigger one-time credit** | [Deepgram](https://freellmapihub.com/p/deepgram) ($200, speech) or [AI21 Labs](https://freellmapihub.com/p/ai21) ($10 trial, LLMs) | Large one-time credits that start without a card |
-| **Something safe to ship commercially** | [Google Gemini](https://freellmapihub.com/p/google-gemini) or [Z.ai (GLM)](https://freellmapihub.com/p/zai-glm) | Don't restrict the free tier to personal/eval use, the way Cohere and NVIDIA do |
+| **Something safe to ship commercially** | [Infomaniak AI Services](https://freellmapihub.com/p/infomaniak) or [Sarvam AI](https://freellmapihub.com/p/sarvam-ai) | Don't restrict the free tier to personal/eval use, the way Cohere and NVIDIA do |
 
 Starting points, not guarantees — read the full profile before you build on it.
 
