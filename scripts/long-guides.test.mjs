@@ -637,7 +637,7 @@ describe('the ranking and model-family guides', () => {
       assert.ok(stripTags(cells[3]).startsWith(`tier ${p.model_tier} of 4`), `${slug}: the tier`);
       assert.ok(cells[7].includes(`<time datetime="${p.model_tier_source.snapshot}">`), `${slug}: the snapshot`);
     }
-    if (rated.length) assert.ok(answerOf(html).includes(rated.sort((a, b) => b.model_tier_source.rating - a.model_tier_source.rating)[0].name.replace(/&/g, '&')));
+    if (rated.length) assert.ok(answerOf(html).includes(rated.sort((a, b) => b.model_tier_source.rating - a.model_tier_source.rating)[0].name.replace(/&/g, '&amp;')));
     assert.ok(answerOf(html).includes('not a benchmark'), 'says what the rating is');
     assert.ok(partsOf('strongest-free-llm-api').title.includes(`(${rated.length} Rated)`));
   });
