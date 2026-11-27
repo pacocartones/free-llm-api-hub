@@ -108,6 +108,7 @@ if (command === 'allowlist') {
   const { deploy, reason } = pagesDeploy({
     mode: process.env.REGEN_MODE, event, actor: process.env.ACTOR, botLogin: process.env.BOT_LOGIN, changed,
     conclusion: process.env.CONCLUSION, headBranch: process.env.HEAD_BRANCH,
+    headMessage: event === 'push' ? git(['log', '-1', '--format=%B', 'HEAD']) : '',
   });
   output(`deploy=${deploy}\n`);
   console.log(`reason: ${reason}`);
