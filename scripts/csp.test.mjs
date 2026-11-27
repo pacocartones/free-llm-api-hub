@@ -62,8 +62,12 @@ describe('lib/csp.mjs', () => {
 describe('every built page', () => {
   const files = htmlFiles(SITE);
   const GA = !!process.env.GA_MEASUREMENT_ID;
+  // In push mode a branch does not commit site/: CI rebuilds it before the suite (verify.yml), so there a stale page is a
+  // real failure. Locally, a checkout whose site/ predates a policy change is only told to rebuild.
+  const stale = !process.env.CI && !GA && metaPolicies(readFileSync(join(SITE, 'index.html'), 'utf8'))[0] !== PINNED;
+  const opts = stale ? { skip: 'site/ was built before the current policy: run `npm run build` first' } : {};
 
-  test('carries exactly one CSP meta tag, in <head> before any script: the site policy or, on a redirect stub, the strict one', () => {
+  test('carries exactly one CSP meta tag, in <head> before any script: the site policy or, on a redirect stub, the strict one', opts, () => {
     assert.ok(files.length > 100, 'the site is built');
     for (const f of files) {
       const rel = relative(ROOT, f);
@@ -79,7 +83,7 @@ describe('every built page', () => {
     }
   });
 
-  test('every inline script is pinned by hash, and no element carries an inline event handler or javascript: URL', () => {
+  test('every inline script is pinned by hash, and no element carries an inline event handler or javascript: URL', opts, () => {
     for (const f of files) {
       const rel = relative(ROOT, f);
       const html = readFileSync(f, 'utf8');
