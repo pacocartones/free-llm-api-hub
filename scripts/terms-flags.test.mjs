@@ -157,8 +157,8 @@ test('provider page: a row per flag, "Not stated" for null or absent, the condit
   assert.match(html, /pflag pflag-unk/);
   assert.match(html, /Free plan only: &lt;one&gt; per IP\./, 'the condition is shown, escaped');
   assert.match(html, /&ldquo;Only one free plan per IP\.&rdquo;/);
-  assert.match(html, /Read <a href="https:\/\/example.com\/tos"[^>]*>the provider's page<\/a>, checked 2026-11-20\. Terms read in full\./);
-  assert.match(html, /<span class="sr-only">Getting around limits forbidden: unknown — not stated in the provider&#39;s docs<\/span>/);
+  assert.match(html, /Read <a href="https:\/\/example.com\/tos"[^>]*>the provider's page<\/a>, checked <time datetime="2026-11-20">20 Nov 2026<\/time>\. Terms read in full\./);
+  assert.match(html, /<span class="sr-only">Getting around limits forbidden: not stated in the provider&#39;s docs<\/span>/);
   assert.doesNotMatch(html, /allowed/, 'null is never shown as allowed');
 
   const forbidden = termsRowsHtml({ multi_account_forbidden: true, limit_circumvention_forbidden: false });
@@ -171,19 +171,19 @@ test('provider page: a row per flag, "Not stated" for null or absent, the condit
 
 test('the built provider page shows both rows for every provider', () => {
   const build = readFileSync(join(ROOT, 'scripts/build.mjs'), 'utf8');
-  assert.match(build, /requirementsHtml\(p, \{ terms: true \}\)/);
+  assert.match(build, /requirementsHtml\(p, \{ (anchors: true, )?terms: true \}\)/);
   assert.match(build, /What you need to start: card, phone, commercial use, account rules/);
 });
 
 test('provider Markdown: both flags in words, "not stated" for null', () => {
   const groq = DATA.providers.find((x) => x.slug === 'groq');
-  const md = providerMarkdown(groq, { site: 'https://freellmapihub.com' });
+  const md = providerMarkdown(groq, { site: 'https://freellmapihub.com', repo: 'https://github.com/pacocartones/free-llm-api-hub' });
   assert.match(md, /- \*\*Several accounts per person:\*\* forbidden/);
   assert.match(md, /- \*\*Getting around rate limits:\*\* forbidden/);
   const silentOne = DATA.providers.find((x) => x.multi_account_forbidden === null);
-  assert.match(providerMarkdown(silentOne, { site: 'https://freellmapihub.com' }), /- \*\*Several accounts per person:\*\* not stated/);
+  assert.match(providerMarkdown(silentOne, { site: 'https://freellmapihub.com', repo: 'https://github.com/pacocartones/free-llm-api-hub' }), /- \*\*Several accounts per person:\*\* not stated/);
   const cond = DATA.providers.find((x) => x.multi_account_forbidden === 'conditional');
-  assert.ok(providerMarkdown(cond, { site: 'https://freellmapihub.com' }).includes(`conditional (${cond.multi_account_condition}`));
+  assert.ok(providerMarkdown(cond, { site: 'https://freellmapihub.com', repo: 'https://github.com/pacocartones/free-llm-api-hub' }).includes(`conditional (${cond.multi_account_condition}`));
 });
 
 test('CSV: three new columns after commercial_ok_condition, null stays empty', () => {
