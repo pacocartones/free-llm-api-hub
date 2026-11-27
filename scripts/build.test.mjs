@@ -2147,6 +2147,7 @@ test('active providers retain models_url from their official catalogues', () => 
     ['google-cloud-vision', 'https://docs.cloud.google.com/vision/docs/features-list'],
     ['amazon-bedrock', 'https://docs.aws.amazon.com/bedrock/latest/userguide/models-supported.html'],
     ['oci-generative-ai', 'https://docs.oracle.com/en-us/iaas/Content/generative-ai/pretrained-models.htm'],
+    ['nscale', 'https://docs.nscale.com/docs/ai-services/models'],
   ].sort(bySlug));
 });
 
