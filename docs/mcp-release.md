@@ -27,7 +27,7 @@ npm run check
 
 The pack test installs a real archive in a temporary consumer directory and speaks
 MCP to its installed CLI using public fixtures. It needs npm registry access for
-dependencies, but no keys or provider account. All four tools remain read-only.
+dependencies, but no keys or provider account. All six tools remain read-only.
 The package README has current checkout and version-pinned npm configuration for
 Codex, Claude and VS Code; do not claim host certification from SDK-only tests.
 
