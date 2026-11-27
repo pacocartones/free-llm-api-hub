@@ -55,14 +55,14 @@ Each pick links to its full verified profile on the live site.
 Starting points, not guarantees — read the full profile before you build on it.
 
 > [!WARNING]
-> Independent, community-maintained list — **not affiliated with, endorsed by, or sponsored by any provider below.** Free-tier terms change without notice. Always confirm against the provider's own docs (linked in every row) before you rely on anything here. Entries marked ⚠️ are sourced from community tracking and not yet independently re-confirmed — treat them as indicative.
+> Independent, community-maintained dataset — **not affiliated with, endorsed by, or sponsored by any provider below.** Free-tier terms change without notice. Always confirm against the provider's own docs (linked in every row) before you rely on anything here. Entries marked ⚠️ are sourced from community tracking and not yet independently re-confirmed — treat them as indicative.
 
 ## Contents
 
 - [The best free LLM APIs](#the-best-free-llm-apis) — the top picks by score
 - [Browse by need](#browse-by-need) — collections and guides by constraint
 - [What's covered](#whats-covered) — the categories, by the numbers
-- [Notably NOT free](#notably-not-free) — so this list doesn't waste your time
+- [Notably NOT free](#notably-not-free) — so this dataset doesn't waste your time
 - [How verification works](#how-verification-works) — why you can trust a row, and its limits
 - [How this project is maintained](#how-this-project-is-maintained) — agents under human oversight
 - [Use the data](#use-the-data) — dataset, JSON API, badge, widget
@@ -174,7 +174,7 @@ Most "free LLM API" lists are a snapshot someone took once and never touched aga
 4. **The dataset is schema-validated in CI.** A verified entry that's missing its date or source link fails the build — the honesty rule is enforced by machine, not by good intentions. The marked README sections, the badge and the site are generated from the data and checked for drift ([input map](docs/architecture.md)).
 5. **Reporting a stale entry takes under a minute** via a [structured form](../../issues/new?template=inaccuracy.yml) that asks for the provider, what changed and a source link.
 
-What "verified" covers and where its limits are: [docs/methodology.md](docs/methodology.md) · what earns a spot on the list: [docs/inclusion-criteria.md](docs/inclusion-criteria.md).
+What "verified" covers and where its limits are: [docs/methodology.md](docs/methodology.md) · what earns a spot in the dataset: [docs/inclusion-criteria.md](docs/inclusion-criteria.md).
 
 ## How this project is maintained
 

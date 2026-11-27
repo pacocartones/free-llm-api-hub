@@ -6,6 +6,8 @@
   // --- theme toggle (initial value already applied inline in <head>) ---
   var toggle = document.getElementById('themeToggle');
   if (toggle) {
+    // The button is named "Light theme" and aria-pressed says whether it is on, so a screen reader hears the state
+    // ("Light theme, toggle button, not pressed"), not a name that fits both states (WCAG 4.1.2).
     var syncPressed = function () { toggle.setAttribute('aria-pressed', root.getAttribute('data-theme') === 'light' ? 'true' : 'false'); };
     syncPressed();
     toggle.addEventListener('click', function () {
@@ -121,7 +123,11 @@
     };
     navToggle.addEventListener('click', function (e) {
       e.stopPropagation();
-      setNav(!header.classList.contains('nav-open'));
+      var open = !header.classList.contains('nav-open');
+      setNav(open);
+      // The menu comes before the toggle in the page, but opens below it: without this, Tab from the toggle would
+      // skip the links that just appeared (WCAG 2.4.3). Escape (below) brings focus back to the toggle.
+      if (open) { var first = primaryNav.querySelector('a, summary'); if (first) first.focus(); }
     });
     primaryNav.addEventListener('click', function (e) {
       if (e.target.closest('a')) setNav(false);
@@ -142,7 +148,19 @@
       for (var i = 0; i < navGroups.length; i++) if (navGroups[i] !== keep) navGroups[i].removeAttribute('open');
     };
     document.addEventListener('click', function (e) { closeGroups(e.target && e.target.closest ? e.target.closest('.nav-group') : null); });
-    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeGroups(null); });
+    document.addEventListener('keydown', function (e) {
+      if (e.key !== 'Escape') return;
+      // Focus on a link inside the group would be left on a hidden element: return it to the group's summary (WCAG 2.4.3).
+      for (var i = 0; i < navGroups.length; i++) {
+        var g = navGroups[i];
+        if (g.open && g.contains(document.activeElement) && document.activeElement.tagName !== 'SUMMARY') {
+          var s = g.querySelector('summary');
+          g.removeAttribute('open');
+          if (s) s.focus();
+        }
+      }
+      closeGroups(null);
+    });
   }
 
   // --- dated banner: leaves the page after its data-until day (UTC, inclusive) ---

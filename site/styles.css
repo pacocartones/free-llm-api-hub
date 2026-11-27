@@ -436,12 +436,14 @@ h1 { font-size: clamp(1.9rem, 4.4vw, 3rem); line-height: 1.1; margin: 0 auto 18p
 /* ---------- table ---------- */
 main { padding: 24px 0 80px; }
 main:has(> .page-hero:first-child) { padding-top: 0; } /* the page hero sits inside main (build.mjs landmarkFixes) */
+main.home-main { padding: 0; } /* the home page: <main> runs from the hero to the table; the table block keeps the spacing */
+.explorer-body { padding: 24px 0 80px; }
 .footer-brand .trust-badge { margin-top: 14px; }
 #count, .count { color: var(--muted); font-size: .82rem; font-family: var(--font-mono); }
 .filter-count { margin: 8px 0 0; }
 table { width: 100%; border-collapse: collapse; font-size: .9rem; }
 thead th { text-align: left; padding: 14px 14px; border-bottom: 1px solid var(--border-strong); color: var(--text); font-weight: 700; white-space: nowrap; font-family: var(--font-mono); font-size: .95rem; text-transform: uppercase; letter-spacing: .03em; }
-main#explorer > .wrap, .controls .controls-inner { max-width: 1480px; }
+#explorer > .wrap, .controls .controls-inner { max-width: 1480px; }
 table.sortable thead th { cursor: pointer; }
 table.sortable thead th:hover { color: var(--text); }
 thead th.sorted { color: var(--accent); }
@@ -705,6 +707,7 @@ pre code { color: var(--text); }
 .prov-receipt { margin: 16px 0 0; padding-left: 14px; border-left: 3px solid var(--h-text); max-width: 62ch; }
 .prov-receipt p { margin: 0; font-size: 1.125rem; font-weight: 450; line-height: 1.45; }
 .prov-receipt cite { display: block; margin-top: 6px; font-style: normal; font-family: var(--font-mono); font-size: .74rem; color: var(--muted); overflow-wrap: anywhere; }
+.prov-receipt cite a { text-decoration: underline; text-underline-offset: 2px; } /* the source sits in running text: not colour alone (WCAG 1.4.1; axe link-in-text-block) */
 .prov-hero .aura-read { text-align: left; }
 .prov-hero .prov-aura { align-items: flex-start; }
 @media (width <= 760px) {
@@ -945,6 +948,9 @@ p.muted a, .prose p a, .prov-summary p a { text-decoration: underline; text-unde
 .prov-reqs .req-condition { font-size: .8rem; color: var(--muted); margin-top: 4px; line-height: 1.35; }
 .prov-reqs .req-source { font-size: .75rem; color: var(--muted); margin-top: 4px; line-height: 1.35; overflow-wrap: anywhere; }
 .req-source a { text-decoration: underline; text-underline-offset: 2px; } /* the pages read for a flag sit inside running text: not colour alone (WCAG 1.4.1; Lighthouse link-in-text-block) */
+/* Links inside table cells sit next to plain text (the guides' "source" column, the compare pages' published-speed
+   lines): not colour alone (WCAG 1.4.1; axe link-in-text-block). Plain links only: buttons, stamps and pills keep their look. */
+.table-scroll td > a:not([class]), .compare-table td > div:not([class]) > a:not([class]) { text-decoration: underline; text-underline-offset: 2px; }
 /* The change history is paged by site/pager.js (the whole list without JavaScript). */
 .pager { display: flex; align-items: center; justify-content: center; gap: 12px; margin: 8px 0 18px; font-family: var(--font-mono); font-size: .85rem; }
 .pager-btn { height: 32px; padding: 0 12px; border-radius: 8px; border: 1px solid var(--border-strong); background: var(--panel); color: var(--text); font: inherit; cursor: pointer; }

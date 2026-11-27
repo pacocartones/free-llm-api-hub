@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-16",
+  "generated": "2026-11-27",
   "note": "Free GPU compute: a section apart from the provider ranking. Nothing here is a provider of the LLM dataset and none of it enters a provider count, a score or a collection. A value is written only when the provider's own page states it, with the sentence and the day it was read; otherwise it is not_stated.",
   "entries": [
     {
@@ -17,7 +17,8 @@
         "quota": {
           "state": "not_stated",
           "quotes": [
-            { "text": "Colab resources are not guaranteed and not unlimited, and usage limits sometimes fluctuate.", "source": "https://research.google.com/colaboratory/faq.html", "read": "2026-10-13" }
+            { "text": "Colab resources are not guaranteed and not unlimited, and usage limits sometimes fluctuate.", "source": "https://research.google.com/colaboratory/faq.html", "read": "2026-10-13" },
+            { "text": "In the version of Colab that is free of charge notebooks can run for at most 12 hours, depending on availability and your usage patterns.", "source": "https://research.google.com/colaboratory/faq.html", "read": "2026-11-27" }
           ]
         },
         "credit_amount": { "state": "not_stated", "quotes": [] },
@@ -40,7 +41,8 @@
         "quota": {
           "state": "stated",
           "quotes": [
-            { "text": "Included daily quota resets exactly 24 hours after your first GPU usage.", "source": "https://huggingface.co/docs/hub/en/spaces-zerogpu", "read": "2026-10-16" }
+            { "text": "Included daily quota resets exactly 24 hours after your first GPU usage.", "source": "https://huggingface.co/docs/hub/en/spaces-zerogpu", "read": "2026-10-16" },
+            { "text": "GPU usage is subject to daily quotas, per account tier: Account type Included daily GPU quota Queue priority Unauthenticated 2 minutes Low Free account 5 minutes Medium PRO account 40 minutes (extensible) Highest", "source": "https://huggingface.co/docs/hub/en/spaces-zerogpu", "read": "2026-11-27" }
           ]
         },
         "credit_amount": { "state": "not_stated", "quotes": [] },
@@ -64,6 +66,32 @@
             { "text": "Free credits and coupons have variable expiration depending on the specific grant, ranging from 1 week to 1 year.", "source": "https://fal.ai/docs/faq", "read": "2026-10-13" }
           ]
         },
+        "card_required": { "state": "not_stated", "quotes": [] }
+      }
+    },
+    {
+      "slug": "kaggle-notebooks",
+      "name": "Kaggle Notebooks",
+      "url": "https://www.kaggle.com/docs/notebooks",
+      "kind": "notebook",
+      "claims": {
+        "gpu_access": {
+          "state": "stated",
+          "quotes": [
+            { "text": "You can add a single NVIDIA Tesla P100 to your Notebook for free.", "source": "https://www.kaggle.com/docs/notebooks", "read": "2026-11-26" },
+            { "text": "You can add a TPU v3-8 to your Notebook for free.", "source": "https://www.kaggle.com/docs/notebooks", "read": "2026-11-26" }
+          ]
+        },
+        "quota": {
+          "state": "stated",
+          "quotes": [
+            { "text": "12 hours execution time for CPU and GPU notebook sessions and 9 hours for TPU notebook sessions", "source": "https://www.kaggle.com/docs/notebooks", "read": "2026-11-26" },
+            { "text": "While editing a Notebook, you are provided with 20 minutes of idle time for your interactive session.", "source": "https://www.kaggle.com/docs/notebooks", "read": "2026-11-26" },
+            { "text": "Free GPU availability is limited: in busy times, you might be placed in a queue.", "source": "https://www.kaggle.com/docs/notebooks", "read": "2026-11-26" }
+          ]
+        },
+        "credit_amount": { "state": "not_stated", "quotes": [] },
+        "expires": { "state": "not_stated", "quotes": [] },
         "card_required": { "state": "not_stated", "quotes": [] }
       }
     },
@@ -101,6 +129,36 @@
       "quotes": [
         { "text": "The Free Trial gets you a $300 Welcome credit to spend over 90 days on various Google Cloud products and you won't be billed.", "source": "https://docs.cloud.google.com/free/docs/free-cloud-features", "read": "2026-10-13" },
         { "text": "While your billing account is a non-billable Free trial account, you can't do any of the following: Add GPUs to your VM instances.", "source": "https://docs.cloud.google.com/free/docs/free-cloud-features", "read": "2026-10-13" }
+      ]
+    },
+    {
+      "subject": "Microsoft Azure free account",
+      "text": "The free account gives a $200 credit to use within 30 days, but free trial subscriptions are not eligible for limit or quota increases, so a GPU virtual machine family cannot be raised above the subscription's default quota without first moving to pay-as-you-go. Microsoft does not state that default for GPU families on the pages read.",
+      "quotes": [
+        { "text": "Get free services and a $200 credit to explore Azure for up to 30 days.", "source": "https://azure.microsoft.com/en-us/pricing/purchase-options/azure-account", "read": "2026-11-25" },
+        { "text": "Free Azure trial subscriptions aren't eligible for limit or quota increases.", "source": "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/azure-subscription-service-limits", "read": "2026-11-21" }
+      ]
+    },
+    {
+      "subject": "Amazon SageMaker Studio Lab",
+      "text": "Studio Lab offered free GPU notebook sessions (up to 4 hours at a time, 4 hours per 24-hour period), but it no longer accepts new customers, so it is not listed as an entry.",
+      "quotes": [
+        { "text": "Amazon SageMaker Studio Lab is no longer open to new customers.", "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/studio-lab-overview.html", "read": "2026-11-15" },
+        { "text": "The GPU compute type has up to 4 hours at a time with a limit of 4 hours in a 24-hour period.", "source": "https://docs.aws.amazon.com/sagemaker/latest/dg/studio-lab-overview.html", "read": "2026-11-15" }
+      ]
+    },
+    {
+      "subject": "SaladCloud",
+      "text": "SaladCloud's pricing FAQ answers that there is no free trial; GPU use is pay-as-you-go.",
+      "quotes": [
+        { "text": "Is there a free trial? No. SaladCloud and the Transcription API are pay-as-you-go with no minimum commitment, so you can start with a small, low-cost test before scaling.", "source": "https://salad.com/pricing", "read": "2026-11-21" }
+      ]
+    },
+    {
+      "subject": "Oracle Cloud Free Tier",
+      "text": "The list of Always Free services names AMD-based and Arm-based Ampere A1 compute and no GPU compute, so Always Free is not a free GPU offer.",
+      "quotes": [
+        { "text": "The following services are available as Always Free: HeatWave AMD-based Compute Arm-based Ampere A1 Compute Block Volume Object Storage Archive Storage Flexible Load Balancer Flexible Network Load Balancer Site-to-Site VPN Autonomous Data Warehouse Autonomous Transaction Processing Autonomous JSON Database NoSQL Database (Phoenix Region only) APEX Application Development Resource Manager (Terraform) Monitoring Notifications Logging Application Performance Monitoring Service Connector Hub Vault Bastions Security Advisor Virtual Cloud Networks Site-to-Site VPN Content Management Starter Edition Email Delivery", "source": "https://www.oracle.com/cloud/free/", "read": "2026-11-27" }
       ]
     }
   ]

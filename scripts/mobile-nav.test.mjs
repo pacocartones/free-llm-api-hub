@@ -18,7 +18,9 @@ function fixture({ missingToggle = false, missingNav = false, failListener = fal
     addEventListener: (_type, fn) => { clicks.toggle = fn; },
     focus: () => { focused = true; },
   };
-  const nav = { addEventListener: (_type, fn) => { clicks.nav = fn; } };
+  let firstLinkFocused = false;
+  const firstLink = { focus: () => { firstLinkFocused = true; } };
+  const nav = { addEventListener: (_type, fn) => { clicks.nav = fn; }, querySelector: () => firstLink };
   const document = {
     documentElement: {},
     getElementById: (id) => id === 'navToggle' ? (missingToggle ? null : toggle) : id === 'primary-nav' ? (missingNav ? null : nav) : null,
@@ -30,7 +32,7 @@ function fixture({ missingToggle = false, missingNav = false, failListener = fal
     },
   };
   const start = () => runInNewContext(source, { document });
-  return { start, classes, attrs, clicks, events, focused: () => focused };
+  return { start, classes, attrs, clicks, events, focused: () => focused, firstLinkFocused: () => firstLinkFocused };
 }
 
 test('mobile navigation: collapsed behind its toggle from the first paint with scripts, in the page flow without them', () => {
@@ -64,6 +66,7 @@ test('enhanced navigation keeps toggle state, Escape focus and link/outside dism
   assert.equal(f.classes.has('nav-open'), true);
   assert.equal(f.attrs.get('aria-expanded'), 'true');
   assert.equal(f.attrs.get('aria-label'), 'Close menu');
+  assert.equal(f.firstLinkFocused(), true, 'opening the menu moves focus to its first link');
   click();
   assert.equal(f.classes.has('nav-open'), false);
   click();
