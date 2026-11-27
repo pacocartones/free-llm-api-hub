@@ -48,6 +48,26 @@ test('staleClaimErrors: unknown provider, missing text, bad or future date, and 
   const unverified = PROVIDERS.find((p) => p.verified !== true);
   if (unverified) assert.ok(one({ slug: unverified.slug, evidence: [{ field: 'rate_limits' }] }).some((e) => /not verified/.test(e)));
   assert.deepEqual(staleClaimErrors({}, ctx), ['stale-claims.json: claims must be an array']);
+  // A claim seen on a public page: an https URL, and the page's own date only with it, never after the day it was noted.
+  assert.deepEqual(one({ seen_url: 'https://example.com/list', seen_date: '2026-05-01' }), []);
+  assert.deepEqual(one({ seen_url: 'https://example.com/list' }), [], 'a page that states no date');
+  assert.match(one({ seen_url: 'http://example.com/list' })[0], /seen_url must be an https URL/);
+  assert.match(one({ seen_url: 'javascript:alert(1)' })[0], /seen_url must be an https URL/);
+  assert.match(one({ seen_date: '2026-05-01' })[0], /needs seen_url/);
+  assert.match(one({ seen_url: 'https://example.com/list', seen_date: 'May 2026' })[0], /seen_date must be YYYY-MM-DD/);
+  assert.match(one({ seen_url: 'https://example.com/list', seen_date: '2026-11-28', noted: '2026-11-27' })[0], /after noted/);
+});
+
+test('staleClaimsHtml links the page a claim was seen on, with its date or "not stated"', () => {
+  const groq = PROVIDERS.find((p) => p.slug === 'groq');
+  const base = { slug: 'groq', claim: 'x', seen_in: 'A third-party list', noted: '2026-11-27', evidence: [{ field: 'free_limits' }] };
+  const dated = staleClaimsHtml(groq, [{ ...base, seen_url: 'https://example.com/a?b=1&c=2', seen_date: '2026-05-01' }], { quotes: QUOTES });
+  assert.ok(dated.includes('<a href="https://example.com/a?b=1&amp;c=2" target="_blank" rel="noopener nofollow">A third-party list</a>'));
+  assert.ok(text(dated).includes('(page dated 1 May 2026); noted 27 Nov 2026'));
+  const undated = staleClaimsHtml(groq, [{ ...base, seen_url: 'https://example.com/a' }], { quotes: QUOTES });
+  assert.ok(text(undated).includes('(page date not stated)'));
+  const plain = staleClaimsHtml(groq, [base], { quotes: QUOTES });
+  assert.ok(!plain.includes('nofollow') && text(plain).includes('A third-party list; noted 27 Nov 2026'));
 });
 
 test('resolveEvidence reads the value from the data, never from the claims file', () => {

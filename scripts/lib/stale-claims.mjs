@@ -2,13 +2,14 @@
 //
 // AI assistants and third-party lists keep repeating free-tier figures a provider has since changed (our AEO baseline
 // of 27 Nov 2026: Cerebras "1M tokens/day free", Gemini "1,500 RPD", Groq "14,400 RPD / Llama 4"). The file records
-// each stale claim, where it was seen and the day it was noted; the evidence shown beside it is never typed here: it is
+// each stale claim, where it was seen (and, for a public page, its URL and the page's own date) and the day it was noted; the evidence shown beside it is never typed here: it is
 // a sentence of the quote register (data/quotes.json) or a field of the provider's record, with its own source and date.
 // staleClaimErrors() is the guard build.mjs runs; staleClaimsHtml() renders the block. Pure: no file access.
 
 import { escapeAttr } from './html.mjs';
 import { timeHtml } from './dates.mjs';
 import { LIMIT_METRICS, limitOf } from './long-guides.mjs';
+import { NOT_STATED } from './not-stated.mjs';
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 const FIELDS = ['free_tier', 'rate_limits', 'free_limits'];
@@ -57,6 +58,12 @@ export function staleClaimErrors(file, { providers, quotes, today }) {
     if (p.verified !== true) errors.push(`${where}: the provider is not verified, so there is no current value to show`);
     if (!nonEmpty(c.claim)) errors.push(`${where}: claim must be the stale figure as it is repeated`);
     if (!nonEmpty(c.seen_in)) errors.push(`${where}: seen_in must say where the claim was seen`);
+    if (c.seen_url != null && !httpsOnly(c.seen_url)) errors.push(`${where}: seen_url must be an https URL of the page that repeats the claim`);
+    if (c.seen_date != null) {
+      if (!c.seen_url) errors.push(`${where}: seen_date is the date of the page at seen_url, so it needs seen_url`);
+      if (!DATE_RE.test(c.seen_date)) errors.push(`${where}: seen_date must be YYYY-MM-DD (leave it out when the page states no date)`);
+      else if (DATE_RE.test(c.noted || '') && c.seen_date > c.noted) errors.push(`${where}: seen_date (${c.seen_date}) is after noted (${c.noted})`);
+    }
     if (!DATE_RE.test(c.noted || '')) errors.push(`${where}: noted must be YYYY-MM-DD`);
     else if (today && c.noted > today) errors.push(`${where}: noted (${c.noted}) is after today in UTC (${today})`);
     if (!Array.isArray(c.evidence) || !c.evidence.length) { errors.push(`${where}: evidence must list at least one quote or field`); return; }
@@ -80,8 +87,12 @@ export function staleClaimsHtml(p, claims, { quotes }) {
   const evidenceHtml = (e) =>
     `<li><strong>${escapeAttr(e.label)}:</strong> ${e.quoted ? `“${escapeAttr(e.text)}”` : escapeAttr(e.text)}` +
     `<br><small>Read ${t(e.date)}${srcLink(e.source)}</small></li>`;
+  // A claim seen on a public page links it, with the page's own date ("not stated" when the page gives none).
+  const seenHtml = (c) => (httpsOnly(c.seen_url)
+    ? `<a href="${escapeAttr(c.seen_url)}" target="_blank" rel="noopener nofollow">${escapeAttr(c.seen_in)}</a> (${c.seen_date ? `page dated ${t(c.seen_date)}` : `page date ${NOT_STATED}`})`
+    : escapeAttr(c.seen_in));
   const rows = claims.map((c) =>
-    `<tr><td>“${escapeAttr(c.claim)}”<br><small>${escapeAttr(c.seen_in)}; noted ${t(c.noted)}</small></td>` +
+    `<tr><td>“${escapeAttr(c.claim)}”<br><small>${seenHtml(c)}; noted ${t(c.noted)}</small></td>` +
     `<td><ul class="stale-evidence">${c.evidence.map((ev) => resolveEvidence(ev, p, quotes)).filter(Boolean).map(evidenceHtml).join('')}</ul></td></tr>`).join('');
   return `<h2 id="other-sources">What other sources get wrong</h2>` +
     `<p>Noted ${t(staleClaimsNoted(claims))}. Figures that AI assistants and other lists still repeat about the free tier of ${name}, next to what the provider’s own pages say now, with the day we read them. The provider’s page is the authority: follow the source before relying on either.</p>` +
