@@ -201,12 +201,12 @@ describe('the copy follows the data', () => {
     const base = Object.fromEntries(LONG_GUIDES.map((g) => [g.slug, longGuidePage(g, { providers, notFree })]));
     const changed = providers
       .filter((p) => p.slug !== 'ovhcloud-ai-endpoints')
-      .map((p) => (p.slug === 'jina-ai' ? { ...p, phone_required: null, commercial_ok: false } : p));
+      .map((p) => (p.slug === 'ai-horde' ? { ...p, phone_required: null, commercial_ok: false } : p));
     const next = Object.fromEntries(LONG_GUIDES.map((g) => [g.slug, longGuidePage(g, { providers: changed, notFree })]));
     const nc = 'free-llm-api-no-credit-card-no-phone';
     assert.equal(next[nc].count, base[nc].count - 2);
     assert.ok(next[nc].title.includes(`(${base[nc].count - 2}, Checked)`));
-    assert.ok(!next[nc].body.includes('../p/ovhcloud-ai-endpoints"') && !next[nc].body.includes('<td class="name"><a href="../p/jina-ai">'));
+    assert.ok(!next[nc].body.includes('../p/ovhcloud-ai-endpoints"') && !next[nc].body.includes('<td class="name"><a href="../p/ai-horde">'));
     const alt = 'openai-api-alternatives';
     assert.equal(next[alt].count, base[alt].count - 1);
     assert.ok(!next[alt].body.includes('../p/ovhcloud-ai-endpoints"'));
@@ -560,14 +560,15 @@ describe('the use-case guides', () => {
     assert.ok(all4, 'a provider passes all four chatbot checks, or all but one, today');
     const changed = providers
       .filter((p) => p.slug !== 'groq')
-      .map((p) => (p.slug === all4.slug ? { ...p, phone_required: null } : p.slug === 'llamaparse' ? { ...p, card_required: null } : p));
+      .map((p) => (p.slug === all4.slug ? { ...p, phone_required: null } : p.slug === 'cohere' ? { ...p, card_required: null } : p));
     const next = Object.fromEntries(USE_CASE.map((slug) => [slug, partsOf(slug, changed)]));
     assert.equal(next['free-llm-api-for-coding'].count, base['free-llm-api-for-coding'].count - 1);
     assert.ok(!next['free-llm-api-for-coding'].body.includes('../p/groq"'));
     assert.equal(next['free-llm-api-for-ai-agents'].count, base['free-llm-api-for-ai-agents'].count - 1);
     assert.ok(!chatbotSets(changed).all.some((p) => p.slug === all4.slug), 'an unconfirmed phone keeps it out of "all four"');
     assert.notEqual(next['free-chatbot-api'].answer, base['free-chatbot-api'].answer);
-    assert.equal(next['free-ai-api-for-students'].count, base['free-ai-api-for-students'].count - 2, 'Groq removed, LlamaParse’s card unconfirmed');
+    // Groq's card is unconfirmed, so it is not on the students list; Cohere's card made unconfirmed takes it off.
+    assert.equal(next['free-ai-api-for-students'].count, base['free-ai-api-for-students'].count - 1, 'Cohere’s card unconfirmed');
     assert.notEqual(next['free-api-for-rag'].body, base['free-api-for-rag'].body);
     assert.ok(topSpeed(providers.find((p) => p.slug === 'groq')), 'Groq publishes a speed, so removing it changes the speed table');
   });

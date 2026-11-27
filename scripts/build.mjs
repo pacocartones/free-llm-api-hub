@@ -363,7 +363,7 @@ const GUIDES = [
     filter: (p) => p.card_required === false && p.category === 'ongoing',
     query: '?cat=ongoing&nocard=1#explorer',
     faq: [
-      { q: 'Can I use an LLM API for free without a credit card?', a: 'Yes. Providers such as Google Gemini, Groq and Cloudflare Workers AI give a free tier with no card required — you are limited by rate, not billing, so you cannot be charged by surprise.' },
+      { q: 'Can I use an LLM API for free without a credit card?', a: 'Yes. Providers such as Google Gemini, Cohere and Cloudflare Workers AI give a free tier with no card required — you are limited by rate, not billing, so you cannot be charged by surprise.' },
       { q: 'Will I be charged if I exceed the free limits?', a: 'No. On a no-card free tier you get rate-limited (HTTP 429) rather than billed. You would have to explicitly add a payment method before any spend is possible.' },
       { q: 'Are these free tiers okay for commercial use?', a: 'Some are, some are not — each row shows a commercial-use flag, confirmed against the provider’s own terms.' },
     ],

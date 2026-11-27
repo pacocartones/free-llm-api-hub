@@ -121,6 +121,18 @@
    "page_sha256": "a4c888930fed39df8249a4c8ce568aecb965f4f55e4c1cbcea975abae2ff248f"
   },
   {
+   "id": "openrouter.openai_compatible.sentence",
+   "slug": "openrouter",
+   "kind": "field_sentence",
+   "field": "openai_compatible",
+   "text": "You can also use the OpenAI SDK pointed at OpenRouter as a drop-in replacement.",
+   "source_url": "https://openrouter.ai/docs/quickstart",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "d2d6521fd24cf4a8e19c87d8dc51f3ca1892b9d011db4e460a5dda3013f9eb04"
+  },
+  {
    "id": "cloudflare-workers-ai.sentence",
    "slug": "cloudflare-workers-ai",
    "kind": "sentence",
@@ -142,6 +154,18 @@
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "eed26388f278a23d6764371732c89b5cfd8fa4f31ed8bd266f1d4c081e4b62b6"
+  },
+  {
+   "id": "cloudflare-workers-ai.openai_compatible.sentence",
+   "slug": "cloudflare-workers-ai",
+   "kind": "field_sentence",
+   "field": "openai_compatible",
+   "text": "Most Workers AI text generation models support the OpenAI Chat Completions API.",
+   "source_url": "https://developers.cloudflare.com/workers-ai/configuration/open-ai-compatibility/",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "f54e9b2a824cd299c9b8d78990e6e3cbf2b15e0d7c3e0a8a950c2d0dc504f80f"
   },
   {
    "id": "cohere.sentence",
@@ -179,6 +203,18 @@
    "page_sha256": "c5580a9f57affc391ae077d4ca618039affb2a0a5a90faa92e38478b994409c3"
   },
   {
+   "id": "cohere.openai_compatible.sentence",
+   "slug": "cohere",
+   "kind": "field_sentence",
+   "field": "openai_compatible",
+   "text": "The Compatibility API allows developers to use Cohere’s models through OpenAI’s SDK.",
+   "source_url": "https://docs.cohere.com/docs/compatibility-api",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "b462c075164ff16e1486522ce13c2665253219ec84bbf82a68ce23ac9c3fe896"
+  },
+  {
    "id": "cerebras.sentence",
    "slug": "cerebras",
    "kind": "sentence",
@@ -211,6 +247,18 @@
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "2aba6287e39902eab9da378b3dbe62debf9c3b99c2d728b141f6d54f87ee7ee7"
+  },
+  {
+   "id": "cerebras.commercial_ok.sentence",
+   "slug": "cerebras",
+   "kind": "field_sentence",
+   "field": "commercial_ok",
+   "text": "For development, evaluation, and experimentation; not intended for production use.",
+   "source_url": "https://www.cerebras.ai/pricing",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "e08883db62c8dd5facb23cec54bb82b640691d7acd0212ae843d4562c52d7671"
   },
   {
    "id": "cerebras.openai_compatible.sentence",
@@ -273,6 +321,18 @@
    "page_sha256": "2b1f6094bc6b9be389829567109f290c41ed0f0504bbc3a385e4ff9e908486e1"
   },
   {
+   "id": "siliconflow.openai_compatible.sentence",
+   "slug": "siliconflow",
+   "kind": "field_sentence",
+   "field": "openai_compatible",
+   "text": "兼容 OpenAI、Anthropic 对话协议，无缝接入各类工具",
+   "source_url": "https://docs.siliconflow.cn/docs/userguide/introduction",
+   "read_on": "2026-11-27",
+   "lang": "cn",
+   "method": "html-text-v1: page requested with Accept-Language cn, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "7ca0139dc1985204ba477e22fe5a70161b502ddfd192545edcfc5b5cf8ada4bb"
+  },
+  {
    "id": "siliconflow.phone_required.sentence",
    "slug": "siliconflow",
    "kind": "field_sentence",
@@ -308,6 +368,18 @@
    "page_sha256": "f5d2dd21f39c0eb00e91089dca2c2d3a5b1f6cb8635a8189bfbb3e422fe8327a"
   },
   {
+   "id": "zai-glm.openai_compatible.sentence",
+   "slug": "zai-glm",
+   "kind": "field_sentence",
+   "field": "openai_compatible",
+   "text": "Z.AI provides interfaces compatible with OpenAI API, which means you can use existing OpenAI SDK code and seamlessly switch to Z.AI’s model services by simply modifying the API key and base URL.",
+   "source_url": "https://docs.z.ai/guides/develop/openai/python",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "498f0f62ee908a7784ae7e1b09d815a05b7065342b91f6c6837d55ac6d6e0ff2"
+  },
+  {
    "id": "ibm-watsonx.sentence",
    "slug": "ibm-watsonx",
    "kind": "sentence",
@@ -319,6 +391,30 @@
    "page_sha256": "83939bccecc53e431a377e284232e07f435afe374a2dd98974bc85fbe8ac57f7"
   },
   {
+   "id": "ibm-watsonx.card_required.sentence",
+   "slug": "ibm-watsonx",
+   "kind": "field_sentence",
+   "field": "card_required",
+   "text": "You are prompted for your credit card information to verify your identity and secure your account.",
+   "source_url": "https://cloud.ibm.com/docs/account?topic=account-account-getting-started",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "9eecd62bfab3b0182375bf1e106b3d504d4848f3f72b984b4b601b9dcf6b29d9"
+  },
+  {
+   "id": "ibm-watsonx.openai_compatible.sentence",
+   "slug": "ibm-watsonx",
+   "kind": "field_sentence",
+   "field": "openai_compatible",
+   "text": "The model gateway provides an OpenAI-compatible API that routes requests to foundation models from various model providers.",
+   "source_url": "https://www.ibm.com/docs/en/watsonx/saas?topic=models-model-gateway",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "ecac08ac49c5501be011ca765a39d655a71f83e994542c975d339b30c1346e4d"
+  },
+  {
    "id": "ovhcloud-ai-endpoints.sentence",
    "slug": "ovhcloud-ai-endpoints",
    "kind": "sentence",
@@ -328,6 +424,42 @@
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "49999e4300e58dfb54cb27525609e53154c5cba77fe3c03cdbcdfe74ec087e50"
+  },
+  {
+   "id": "ovhcloud-ai-endpoints.card_required.sentence",
+   "slug": "ovhcloud-ai-endpoints",
+   "kind": "field_sentence",
+   "field": "card_required",
+   "text": "Compare and test open-weight models for text, code, voice and vision, no sign-up required.",
+   "source_url": "https://www.ovhcloud.com/en/public-cloud/ai-endpoints/catalog/",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "40082db6cf5bd6443849b98e2409f5c411bd557dcdca51a7f906bb23d5f38db6"
+  },
+  {
+   "id": "ovhcloud-ai-endpoints.openai_compatible.sentence",
+   "slug": "ovhcloud-ai-endpoints",
+   "kind": "field_sentence",
+   "field": "openai_compatible",
+   "text": "AI Endpoints is designed to be compatible with the OpenAI API, making it easy to integrate with existing applications and workflows.",
+   "source_url": "https://docs.ovhcloud.com/en/guides/public-cloud/ai-machine-learning/ai-endpoints-capabilities",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "14f4e25ab3a3003e75330a35e7ad49c18e4efcddf93df577c55063ff93cba6d7"
+  },
+  {
+   "id": "ovhcloud-ai-endpoints.phone_required.sentence",
+   "slug": "ovhcloud-ai-endpoints",
+   "kind": "field_sentence",
+   "field": "phone_required",
+   "text": "Compare and test open-weight models for text, code, voice and vision, no sign-up required.",
+   "source_url": "https://www.ovhcloud.com/en/public-cloud/ai-endpoints/catalog/",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "40082db6cf5bd6443849b98e2409f5c411bd557dcdca51a7f906bb23d5f38db6"
   },
   {
    "id": "fireworks-ai.sentence",
@@ -375,6 +507,18 @@
    "page_sha256": "304d36025e9bd9210f82b0fa2956a045c6ec8001916e0d32afcc1e9c94aeac77"
   },
   {
+   "id": "fireworks-ai.openai_compatible.sentence",
+   "slug": "fireworks-ai",
+   "kind": "field_sentence",
+   "field": "openai_compatible",
+   "text": "Fireworks provides an OpenAI compatible endpoint.",
+   "source_url": "https://docs.fireworks.ai/getting-started/quickstart",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "cbfdbf2ddedc594965e6bf41d5c4775c06efce0d6e35cc0176844c226782f889"
+  },
+  {
    "id": "baseten.sentence",
    "slug": "baseten",
    "kind": "sentence",
@@ -384,6 +528,18 @@
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "73dac62814320997cebc0cf22e65d868e8050142b07d7398a1aa0172962df95b"
+  },
+  {
+   "id": "baseten.openai_compatible.sentence",
+   "slug": "baseten",
+   "kind": "field_sentence",
+   "field": "openai_compatible",
+   "text": "Set the OpenAI client’s base URL to https://inference.baseten.co/v1 and pass your Baseten API key.",
+   "source_url": "https://docs.baseten.co/inference/model-apis/overview",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "47389a80d1eecb5ef11d0d11c89520a0752d2ecc2de72a065cda39d4dffcee58"
   },
   {
    "id": "novita.sentence",
@@ -533,6 +689,30 @@
    "page_sha256": "3ac8f2d9f84dd737d3cf1ea173d485c52be9519c9ea88b2105ee5fd2322be8f0"
   },
   {
+   "id": "alibaba-model-studio.card_required.sentence",
+   "slug": "alibaba-model-studio",
+   "kind": "field_sentence",
+   "field": "card_required",
+   "text": "After you create an account, you must also complete security authentication and add payment information before you can buy paid cloud services in regions outside the Chinese mainland or activate the free trial of most paid services.",
+   "source_url": "https://www.alibabacloud.com/help/en/account/step-1-register-an-alibaba-cloud-account",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "572a96d30bb7ce092abac0eae47a08fbf5fdc8ccc48dffa8eb87362b2a14f301"
+  },
+  {
+   "id": "alibaba-model-studio.openai_compatible.sentence",
+   "slug": "alibaba-model-studio",
+   "kind": "field_sentence",
+   "field": "openai_compatible",
+   "text": "The Qwen models on Model Studio support OpenAI compatible interfaces.",
+   "source_url": "https://www.alibabacloud.com/help/en/model-studio/compatibility-of-openai-with-dashscope",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "6db2b2fa6ea15482574037a02f234ab69bd2df359a597e1209bd5a377fb96b15"
+  },
+  {
    "id": "alibaba-model-studio.phone_required.sentence",
    "slug": "alibaba-model-studio",
    "kind": "field_sentence",
@@ -601,6 +781,18 @@
    "page_sha256": "34707fa98d577e107391753a9200238859eeb0aed1aa7c16150ae2fc8b662fc1"
   },
   {
+   "id": "modal.openai_compatible.sentence",
+   "slug": "modal",
+   "kind": "field_sentence",
+   "field": "openai_compatible",
+   "text": "Text-generation models on Endpoints can be called through the OpenAI-compatible Chat Completions",
+   "source_url": "https://modal.com/docs/guide/endpoints",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "276878f7ae603451f58b0b2b595bb6cee43ac47f0f84ff32d86e8f4d8fb1c80b"
+  },
+  {
    "id": "sambanova.commercial_ok.sentence",
    "slug": "sambanova",
    "kind": "field_sentence",
@@ -635,6 +827,42 @@
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "8da85e4dccfaaaea63f791b192f28d209cfb6d5704522d6f4ebe19ffc12aad27"
+  },
+  {
+   "id": "scaleway.card_required.sentence",
+   "slug": "scaleway",
+   "kind": "field_sentence",
+   "field": "card_required",
+   "text": "Ordering Scaleway resources requires a valid credit card.",
+   "source_url": "https://www.scaleway.com/en/docs/account/setup-lifecycle/create-an-account/",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "4eb7c01f16ccc5f1261adc61112804050b000048109699b8434f4488f406fc9b"
+  },
+  {
+   "id": "scaleway.openai_compatible.sentence",
+   "slug": "scaleway",
+   "kind": "field_sentence",
+   "field": "openai_compatible",
+   "text": "Yes, Scaleway's Generative APIs is designed to be compatible with OpenAI libraries and SDKs, including the OpenAI Python client library and LangChain SDKs.",
+   "source_url": "https://www.scaleway.com/en/docs/generative-apis/faq/",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "7b1e9f18c0111dc72432dd5917bac3fdd527226151f616aef02848d6eef3b5af"
+  },
+  {
+   "id": "scaleway.phone_required.sentence",
+   "slug": "scaleway",
+   "kind": "field_sentence",
+   "field": "phone_required",
+   "text": "This step is optional unless you are using Dedibox.",
+   "source_url": "https://www.scaleway.com/en/docs/account/setup-lifecycle/create-an-account/",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "4eb7c01f16ccc5f1261adc61112804050b000048109699b8434f4488f406fc9b"
   },
   {
    "id": "scaleway.speed.gpt-oss-120b.output_tokens_per_second",
@@ -696,6 +924,30 @@
    "page_sha256": "3a6dc711bca9e4736db07906481daa0407faf4a11ed216701691e32dfb4459a4"
   },
   {
+   "id": "nvidia-nim.commercial_ok.sentence",
+   "slug": "nvidia-nim",
+   "kind": "field_sentence",
+   "field": "commercial_ok",
+   "text": "Unless you purchase a Subscription from NVIDIA or a Service Provider (as applicable), you may only use the API Service for internal testing and evaluation purposes, not in production.",
+   "source_url": "https://assets.ngc.nvidia.com/products/api-catalog/legal/NVIDIA%20API%20Trial%20Terms%20of%20Service.pdf",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "pdf-text-v1: PDF parsed with unpdf (pdf.js), text of all pages joined, white space collapsed",
+   "page_sha256": "3a6dc711bca9e4736db07906481daa0407faf4a11ed216701691e32dfb4459a4"
+  },
+  {
+   "id": "nvidia-nim.openai_compatible.sentence",
+   "slug": "nvidia-nim",
+   "kind": "field_sentence",
+   "field": "openai_compatible",
+   "text": "All NIM model endpoints at `integrate.api.nvidia.com/v1` implement the OpenAI Chat Completions API.",
+   "source_url": "https://build.nvidia.com/llms.txt",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "3f4acbb0f52427f0c10fa52545cd6de2fb0e76ccfce0e703901f86d19cc599fc"
+  },
+  {
    "id": "vercel-ai-gateway.sentence",
    "slug": "vercel-ai-gateway",
    "kind": "sentence",
@@ -719,12 +971,48 @@
    "page_sha256": "e0360a9bc57ad575f439d176a04f6bc05c6123a05a581751538690e512fd27f7"
   },
   {
+   "id": "vercel-ai-gateway.openai_compatible.sentence",
+   "slug": "vercel-ai-gateway",
+   "kind": "field_sentence",
+   "field": "openai_compatible",
+   "text": "AI Gateway provides OpenAI Chat Completions API endpoints, letting you use multiple AI providers through a familiar interface.",
+   "source_url": "https://vercel.com/docs/ai-gateway/openai-compat",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "ecd3c892152998a7b42351f0573f00202c5a7cc2e668aede2add7450926bcb5f"
+  },
+  {
    "id": "jina-ai.sentence",
    "slug": "jina-ai",
    "kind": "sentence",
    "text": "We never use your API requests, inputs, or outputs to train our embedding, reranker, or any other models.",
    "source_url": "https://jina.ai/embeddings/",
    "read_on": "2026-11-25",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "67212db1af451ce105cce2a95d7c3fc3b1562ad96c21b9debcee6d53e085ff22"
+  },
+  {
+   "id": "jina-ai.commercial_ok.sentence",
+   "slug": "jina-ai",
+   "kind": "field_sentence",
+   "field": "commercial_ok",
+   "text": "Commercial use is covered by the service terms: sign up and pay through this site or the cloud marketplace.",
+   "source_url": "https://jina.ai/embeddings/",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "67212db1af451ce105cce2a95d7c3fc3b1562ad96c21b9debcee6d53e085ff22"
+  },
+  {
+   "id": "jina-ai.openai_compatible.sentence",
+   "slug": "jina-ai",
+   "kind": "field_sentence",
+   "field": "openai_compatible",
+   "text": "The transition is straightforward: our API endpoint matches the input and output JSON schemas of OpenAI's text-embedding-3-large",
+   "source_url": "https://jina.ai/embeddings/",
+   "read_on": "2026-11-27",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "67212db1af451ce105cce2a95d7c3fc3b1562ad96c21b9debcee6d53e085ff22"
@@ -752,6 +1040,30 @@
    "page_sha256": "588fe455baa6086eba219bbca3077ae5e9f03409452a424dc5e0f5fcd0b39aff"
   },
   {
+   "id": "deepgram.card_required.sentence",
+   "slug": "deepgram",
+   "kind": "field_sentence",
+   "field": "card_required",
+   "text": "No credit card is required to start.",
+   "source_url": "https://deepgram.com/pricing",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "eb6b1686ea85547c3a90b7ebc4928d05463b275f8412c6c30fcbb88be7f5f473"
+  },
+  {
+   "id": "deepgram.commercial_ok.sentence",
+   "slug": "deepgram",
+   "kind": "field_sentence",
+   "field": "commercial_ok",
+   "text": "For clarity, you may integrate our Services into your own platform, website, application, or other product or service",
+   "source_url": "https://deepgram.com/terms",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "588fe455baa6086eba219bbca3077ae5e9f03409452a424dc5e0f5fcd0b39aff"
+  },
+  {
    "id": "assemblyai.sentence",
    "slug": "assemblyai",
    "kind": "sentence",
@@ -774,6 +1086,18 @@
    "page_sha256": "3b92cf904bf2e93a25f5ec0b16023f3d88cd1a4edfb7696e49cfc4855e2f238e"
   },
   {
+   "id": "assemblyai.card_required.sentence",
+   "slug": "assemblyai",
+   "kind": "field_sentence",
+   "field": "card_required",
+   "text": "You can create an account and start transcribing immediately with no credit card required.",
+   "source_url": "https://www.assemblyai.com/pricing",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "d25cbcd31b5425855d11c83f831a95252fa08a538b46a6b76c190e622eaba0c2"
+  },
+  {
    "id": "mixedbread.sentence",
    "slug": "mixedbread",
    "kind": "sentence",
@@ -783,6 +1107,90 @@
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "f3208efd912fef615ceee1886d289d9c82dcbd1078cf55814ec7fa4104438dac"
+  },
+  {
+   "id": "mixedbread.card_required.sentence",
+   "slug": "mixedbread",
+   "kind": "field_sentence",
+   "field": "card_required",
+   "text": "Try Mixedbread with $5 in one-time credits. No card required.",
+   "source_url": "https://www.mixedbread.com/pricing",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "9641dfbe9ab513f8594dd664e4b8296473c9410c610c5a51f318bcb3a92ee935"
+  },
+  {
+   "id": "mixedbread.openai_compatible.sentence",
+   "slug": "mixedbread",
+   "kind": "field_sentence",
+   "field": "openai_compatible",
+   "text": "The Mixedbread Chat Completions API is an OpenAI Chat Completions-compatible endpoint for Mixedbread specialized models and agentic workflows.",
+   "source_url": "https://www.mixedbread.com/docs/agent/chat-completions",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "a7d792dfd00a58725d5ff813e34c393b2369e2a40df31b464752d4605b2c5d84"
+  },
+  {
+   "id": "ai-horde.card_required.sentence",
+   "slug": "ai-horde",
+   "kind": "field_sentence",
+   "field": "card_required",
+   "text": "You can make images and text with open models for free, without an expensive computer, and no account or setup is needed.",
+   "source_url": "https://github.com/Haidra-Org/AI-Horde",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "4bcd0f15d268bd1cff7848da9f2cfc167bd296a263fc38ed8f44bd953b479d41"
+  },
+  {
+   "id": "ai-horde.openai_compatible.sentence",
+   "slug": "ai-horde",
+   "kind": "field_sentence",
+   "field": "openai_compatible",
+   "text": "The Horde has an OpenAI-compatible endpoint at https://oai.aihorde.net/v1",
+   "source_url": "https://github.com/Haidra-Org/AI-Horde",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "4bcd0f15d268bd1cff7848da9f2cfc167bd296a263fc38ed8f44bd953b479d41"
+  },
+  {
+   "id": "ai-horde.phone_required.sentence",
+   "slug": "ai-horde",
+   "kind": "field_sentence",
+   "field": "phone_required",
+   "text": "You can make images and text with open models for free, without an expensive computer, and no account or setup is needed.",
+   "source_url": "https://github.com/Haidra-Org/AI-Horde",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "4bcd0f15d268bd1cff7848da9f2cfc167bd296a263fc38ed8f44bd953b479d41"
+  },
+  {
+   "id": "modelscope.commercial_ok.sentence",
+   "slug": "modelscope",
+   "kind": "field_sentence",
+   "field": "commercial_ok",
+   "text": "如有商业化使用的需求，建议使用各商业化平台的API。",
+   "source_url": "https://www.modelscope.cn/docs/model-service/API-Inference/limits.md",
+   "read_on": "2026-11-27",
+   "lang": "zh",
+   "method": "html-text-v1: page requested with Accept-Language zh, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "889718791c8385655afce18eaee97e15159bbdfe55f4ef0a99da0c317301fcb1"
+  },
+  {
+   "id": "modelscope.openai_compatible.sentence",
+   "slug": "modelscope",
+   "kind": "field_sentence",
+   "field": "openai_compatible",
+   "text": "当前魔搭平台的API-Inference，针对大语言模型提供OpenAI API兼容的接口。",
+   "source_url": "https://www.modelscope.cn/docs/model-service/API-Inference/intro.md",
+   "read_on": "2026-11-27",
+   "lang": "zh",
+   "method": "html-text-v1: page requested with Accept-Language zh, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "1977bb6add63816812695f9a247f187a437d8558e70d0f720f82d537f7e6de36"
   },
   {
    "id": "modelscope.phone_required.sentence",
@@ -795,6 +1203,30 @@
    "lang": "zh",
    "method": "html-text-v1: page requested with Accept-Language zh, tags removed, character references decoded, white space collapsed",
    "page_sha256": "5b10efa2a31d278d8f8722551330f5ff8b74e4d8d95b3f210960bf8ffcb9ece6"
+  },
+  {
+   "id": "pollinations.card_required.sentence",
+   "slug": "pollinations",
+   "kind": "field_sentence",
+   "field": "card_required",
+   "text": "Add to your balance by contributing, without a credit card",
+   "source_url": "https://github.com/pollinations/pollinations",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "96e36eeed26ef73b3d4cb69c7f9db63cae97656aec7ad0bedb3c821b26d5e05e"
+  },
+  {
+   "id": "pollinations.openai_compatible.sentence",
+   "slug": "pollinations",
+   "kind": "field_sentence",
+   "field": "openai_compatible",
+   "text": "then call it through the same OpenAI-compatible API as any other model.",
+   "source_url": "https://github.com/pollinations/pollinations",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "96e36eeed26ef73b3d4cb69c7f9db63cae97656aec7ad0bedb3c821b26d5e05e"
   },
   {
    "id": "runware.sentence",
@@ -828,6 +1260,42 @@
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "4c5ee4c48cb741d9ef1025b4ce33fa7d94023992d68fcd842d2157d973da730e"
+  },
+  {
+   "id": "runware.card_required.sentence",
+   "slug": "runware",
+   "kind": "field_sentence",
+   "field": "card_required",
+   "text": "Pricing is usage-based with free test credits ($2 with a business email signup, no credit card required).",
+   "source_url": "https://runware.ai/llms.txt",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "ee0f4f09a9b0c526c992e98a0adea954672a034aef19ef7bc5edde396842cb3d"
+  },
+  {
+   "id": "runware.commercial_ok.sentence",
+   "slug": "runware",
+   "kind": "field_sentence",
+   "field": "commercial_ok",
+   "text": "You may use the Services for lawful commercial purposes, including generating Outputs for commercial use, except you may not: (i) resell or provide the Services on a standalone basis (e.g. as a competing API/service) without Runware’s written permission, (ii) use the Services to violate any Model Licence,",
+   "source_url": "https://runware.ai/terms",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "4c5ee4c48cb741d9ef1025b4ce33fa7d94023992d68fcd842d2157d973da730e"
+  },
+  {
+   "id": "runware.openai_compatible.sentence",
+   "slug": "runware",
+   "kind": "field_sentence",
+   "field": "openai_compatible",
+   "text": "The API speaks the OpenAI Chat Completions format and, for Claude models, the Anthropic Messages format.",
+   "source_url": "https://runware.ai/llm-api",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "458bbfb6814a4c0918549a72df3e4a1be0142a2ee7e27980ff03106c44eefb3d"
   },
   {
    "id": "twelve-labs.sentence",
@@ -910,6 +1378,30 @@
    "page_sha256": "3c674d4e6d02067574329369421db907036c0a95d1e1da0256969dbc58651672"
   },
   {
+   "id": "llamaparse.commercial_ok.sentence",
+   "slug": "llamaparse",
+   "kind": "field_sentence",
+   "field": "commercial_ok",
+   "text": "Subject to these Terms, we grant you a non-exclusive, non-transferable, revocable right to access and use the Service for your internal business purposes and to build functionality powered by the Service into your own applications, in each case as permitted by the Service's features and documentation.",
+   "source_url": "https://www.llamaindex.ai/terms-of-service",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "3c674d4e6d02067574329369421db907036c0a95d1e1da0256969dbc58651672"
+  },
+  {
+   "id": "nanonets.card_required.sentence",
+   "slug": "nanonets",
+   "kind": "field_sentence",
+   "field": "card_required",
+   "text": "Yes, every account starts with $50 in free credits, no card required, so you can process documents before you spend a dollar.",
+   "source_url": "https://nanonets.com/pricing",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "ab2586c8b4bebbf891fe70047306a9da09e80b5d094dca2f49f1c6eae522054c"
+  },
+  {
    "id": "moondream.sentence",
    "slug": "moondream",
    "kind": "sentence",
@@ -955,6 +1447,18 @@
    "page_sha256": "f881da5f601fdbf94595fcb3b37cdb89ebe5c96f5abe24d8b8029dcd90ee40b8"
   },
   {
+   "id": "moondream.openai_compatible.sentence",
+   "slug": "moondream",
+   "kind": "field_sentence",
+   "field": "openai_compatible",
+   "text": "Point any OpenAI client or SDK at Moondream and you get multi-turn conversations, image inputs, streaming, and reasoning — no Moondream-specific client required.",
+   "source_url": "https://docs.moondream.ai/openai",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "12d69b18e07044a4c91045f55a4f9454572e18e5d97f0df393b884afbfd8c4d9"
+  },
+  {
    "id": "speechmatics.sentence",
    "slug": "speechmatics",
    "kind": "sentence",
@@ -977,6 +1481,54 @@
    "page_sha256": "6a5ac7574639ad10941f34dbafcec23350835b571b56a5df6642e3b1a2c7f15c"
   },
   {
+   "id": "speechmatics.card_required.sentence",
+   "slug": "speechmatics",
+   "kind": "field_sentence",
+   "field": "card_required",
+   "text": "New accounts get $100 in credit with no card required, so you can test transcription quality and language support before moving to a paid plan.",
+   "source_url": "https://www.speechmatics.com/",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "7e607e4e941a680dc9543da84ff960744005e212d35741afc72d3c9c9f8185d3"
+  },
+  {
+   "id": "speechify.card_required.sentence",
+   "slug": "speechify",
+   "kind": "field_sentence",
+   "field": "card_required",
+   "text": "Free needs no card and stops when its monthly balance runs out: requests are refused until the next month, and Free cannot top up.",
+   "source_url": "https://speechify.ai/pricing",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "57c61435b1c54211d6cb9582a3fac7b58e57f14dd044c8f43029df56151dc448"
+  },
+  {
+   "id": "speechify.commercial_ok.sentence",
+   "slug": "speechify",
+   "kind": "field_sentence",
+   "field": "commercial_ok",
+   "text": "The Free plan includes 500K characters a month with commercial use.",
+   "source_url": "https://speechify.ai/text-to-speech-api",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "a2b790e8e4e05d2c7a14066f144f5d3a6abac4ca5d7bd6544a67115246d9f21f"
+  },
+  {
+   "id": "unreal-speech.commercial_ok.sentence",
+   "slug": "unreal-speech",
+   "kind": "field_sentence",
+   "field": "commercial_ok",
+   "text": "Yes, audio generated with Unreal Speech can be used commercially.",
+   "source_url": "https://unrealspeech.com/",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "174e2100b4c1c533f4ff99d5cc7b327bae483ef1a13c3f720cb4af9d20953aa1"
+  },
+  {
    "id": "elevenlabs.sentence",
    "slug": "elevenlabs",
    "kind": "sentence",
@@ -986,6 +1538,18 @@
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "634017d1f25f9a00f354ead32a5432051ca135086d6e9d61b88b52e3b0549d3f"
+  },
+  {
+   "id": "elevenlabs.commercial_ok.sentence",
+   "slug": "elevenlabs",
+   "kind": "field_sentence",
+   "field": "commercial_ok",
+   "text": "if you access or use our Services free of charge (such a user, a “ Free User ”), you may only use the Services for non-commercial purposes",
+   "source_url": "https://elevenlabs.io/terms-of-use",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "246f1a884b2c6ed919de8d621d595b5b082bcfaee38dd3a88ddcdf3da0d9c151"
   },
   {
    "id": "sarvam-ai.sentence",
@@ -1033,6 +1597,18 @@
    "page_sha256": "bd7a4a3ef99f9d8826647b5027f0b7adda9ee72b46470fda5388250c311a2416"
   },
   {
+   "id": "sarvam-ai.openai_compatible.sentence",
+   "slug": "sarvam-ai",
+   "kind": "field_sentence",
+   "field": "openai_compatible",
+   "text": "Run leading open-weight models on Sarvam infrastructure through the same OpenAI-compatible /v2 API, with your existing Sarvam API key and credits.",
+   "source_url": "https://docs.sarvam.ai/api/token-factory/models",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "f920302b19d8a09fd45ea4144b4139234876f8123ae6c8ae3cc4846f5ad84c48"
+  },
+  {
    "id": "sarvam-ai.speed.deepseekv4.1-flash-1017.output_tokens_per_second",
    "slug": "sarvam-ai",
    "kind": "speed_quote",
@@ -1069,6 +1645,18 @@
    "page_sha256": "316133d3bd5d13f90b870d332e64c3ce887c7b963b6fb7e4a3b5547da7875db6"
   },
   {
+   "id": "tencent-hunyuan.openai_compatible.sentence",
+   "slug": "tencent-hunyuan",
+   "kind": "field_sentence",
+   "field": "openai_compatible",
+   "text": "可直接使用 OpenAI SDK 快速接入",
+   "source_url": "https://cloud.tencent.com/document/product/1823/130078",
+   "read_on": "2026-11-27",
+   "lang": "zh",
+   "method": "html-text-v1: page requested with Accept-Language zh, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "52854fc6e2f1c7b81a0a7d25f749bc60341d87c1e7dc66b1c07e2025f64865e0"
+  },
+  {
    "id": "voyage-ai.sentence",
    "slug": "voyage-ai",
    "kind": "sentence",
@@ -1089,6 +1677,18 @@
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "b2c68787c0c9d72ef8a21301f2e6ace4a4d8286cb5dc8faee4125dbebb685553"
+  },
+  {
+   "id": "contextual-ai.commercial_ok.sentence",
+   "slug": "contextual-ai",
+   "kind": "field_sentence",
+   "field": "commercial_ok",
+   "text": "and to make Customer Applications available to third parties, and other functionality",
+   "source_url": "https://contextual.ai/legal/terms-of-use",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "4f33748b080fa756c6de4dbeac4019d8d635eccf8914e3bfe863a0b5476f737b"
   },
   {
    "id": "cartesia.sentence",
@@ -1113,6 +1713,66 @@
    "page_sha256": "0c51c8696a9f516079d1332bcee43aa520d8df7160ceef16b61254b01b82f258"
   },
   {
+   "id": "cartesia.commercial_ok.sentence",
+   "slug": "cartesia",
+   "kind": "field_sentence",
+   "field": "commercial_ok",
+   "text": "Free: for evaluation and personal use, includes 20K credits and access to Sonic, the API, voices, and Instant Voice Cloning.",
+   "source_url": "https://www.cartesia.ai/sonic",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "34498884396fb8054828a30bf30c39b5e7ce26214decf3ef1770b4e3095f5c3a"
+  },
+  {
+   "id": "fish-audio.card_required.sentence",
+   "slug": "fish-audio",
+   "kind": "field_sentence",
+   "field": "card_required",
+   "text": "No credit card needed",
+   "source_url": "https://fish.audio/plan/",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "3154348b748edf59b066d464e9d9e529fb351e72c417643a0524d902e7beae61"
+  },
+  {
+   "id": "fish-audio.commercial_ok.sentence",
+   "slug": "fish-audio",
+   "kind": "field_sentence",
+   "field": "commercial_ok",
+   "text": "Free plan users can only use generated content for personal, non-commercial projects.",
+   "source_url": "https://fish.audio/plan/",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "3154348b748edf59b066d464e9d9e529fb351e72c417643a0524d902e7beae61"
+  },
+  {
+   "id": "fish-audio.openai_compatible.sentence",
+   "slug": "fish-audio",
+   "kind": "field_sentence",
+   "field": "openai_compatible",
+   "text": "The same change works in any framework that takes an OpenAI-compatible base URL.",
+   "source_url": "https://docs.fish.audio/developer-guide/compat/migrate-from-openai",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "7161c2e04054ff46bdcc506eac051e9cdcdef96cd2cae5f2b29621553f93616c"
+  },
+  {
+   "id": "camb-ai.openai_compatible.sentence",
+   "slug": "camb-ai",
+   "kind": "field_sentence",
+   "field": "openai_compatible",
+   "text": "Is the CAMB.AI API a drop-in replacement? No. CAMB.AI has its own endpoints, request format and voices.",
+   "source_url": "https://www.camb.ai/solutions/text-to-speech/open-ai-tts-api",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "b98fa3ea0a9a9cdc1a1b4336cfac3332abdf6478f4918b9724efca812645e4bb"
+  },
+  {
    "id": "rev-ai.sentence",
    "slug": "rev-ai",
    "kind": "sentence",
@@ -1133,6 +1793,42 @@
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "6190c213053e17b7ef6165ea85dbc13089102985bb0328e69743661d4b9150aa"
+  },
+  {
+   "id": "unstructured.card_required.sentence",
+   "slug": "unstructured",
+   "kind": "field_sentence",
+   "field": "card_required",
+   "text": "No card required.",
+   "source_url": "https://unstructured.io/pricing",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "6a50abd4bfb910849a5bb04f5093b656884d4c4cb22c017826c1c7f603d0ad83"
+  },
+  {
+   "id": "nutrient.card_required.sentence",
+   "slug": "nutrient",
+   "kind": "field_sentence",
+   "field": "card_required",
+   "text": "The free plan includes $5 of usage every month without a card.",
+   "source_url": "https://www.nutrient.io/api/pricing/data-extraction-api/",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "8c1ac676abc7caced8261473e249eea09002813b4dc2d01087f13b32d9aed6e4"
+  },
+  {
+   "id": "nutrient.commercial_ok.sentence",
+   "slug": "nutrient",
+   "kind": "field_sentence",
+   "field": "commercial_ok",
+   "text": "Limited commercial use without a wallet",
+   "source_url": "https://www.nutrient.io/api/pricing/data-extraction-api/",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "8c1ac676abc7caced8261473e249eea09002813b4dc2d01087f13b32d9aed6e4"
   },
   {
    "id": "photoroom.sentence",
@@ -1169,6 +1865,18 @@
    "page_sha256": "e61bfb4ed61a5d4ffb954d7f42d9b8a30322dae299ad4fd317dd9ed0b1fe1aea"
   },
   {
+   "id": "poolside.openai_compatible.sentence",
+   "slug": "poolside",
+   "kind": "field_sentence",
+   "field": "openai_compatible",
+   "text": "Call Poolside models through an OpenAI-compatible API.",
+   "source_url": "https://docs.poolside.ai/api/overview",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "fadb8e94f2a189bd015279c327ca489baa5e0fd1c2a072703f15943e0a502cb3"
+  },
+  {
    "id": "upstage.sentence",
    "slug": "upstage",
    "kind": "sentence",
@@ -1190,6 +1898,18 @@
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "30ef1e01fbb425bf47e64c0c4823bc99ed3a0502b0350b330aa0bb365b5d8641"
+  },
+  {
+   "id": "upstage.openai_compatible.sentence",
+   "slug": "upstage",
+   "kind": "field_sentence",
+   "field": "openai_compatible",
+   "text": "Solar is compatible with the OpenAI API.",
+   "source_url": "https://console.upstage.ai/docs/capabilities/chat",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "84075631ebc785813041b7dd2f200fa8c8e13bd0635a61917044943f662b25d9"
   },
   {
    "id": "veryfi.sentence",
@@ -1238,6 +1958,18 @@
    "page_sha256": "ba5e7c271e1b2febf0a612ca0e0dc3d69a918245c66fd52961338f22025a3365"
   },
   {
+   "id": "voicegain.card_required.sentence",
+   "slug": "voicegain",
+   "kind": "field_sentence",
+   "field": "card_required",
+   "text": "No credit card required. You get $50 of platform credit on signup.",
+   "source_url": "https://www.voicegain.ai/developers",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "a69970fe4a15fffb6ee9df565a449aa58a0d128721141239897a9af126a2afe8"
+  },
+  {
    "id": "smallest-ai.sentence",
    "slug": "smallest-ai",
    "kind": "sentence",
@@ -1283,6 +2015,18 @@
    "page_sha256": "995e5ceb6cd99abda073901f9a35ca4f13ed10577189aecc093250b46d1a06af"
   },
   {
+   "id": "retell-ai.card_required.sentence",
+   "slug": "retell-ai",
+   "kind": "field_sentence",
+   "field": "card_required",
+   "text": "New accounts start with $10 in free trial credits, no payment method required.",
+   "source_url": "https://docs.retellai.com/get-started/quick-start",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "bf56c16475842677e1cfe66598a8cfc5c089df15c4c8a92e709782a4b7c3fce8"
+  },
+  {
    "id": "datalab.sentence",
    "slug": "datalab",
    "kind": "sentence",
@@ -1315,6 +2059,18 @@
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "1548ca23c669294dff7b31bd3f63b42702d769f7b49a22ee01993d8329a834f1"
+  },
+  {
+   "id": "wandb-inference.openai_compatible.sentence",
+   "slug": "wandb-inference",
+   "kind": "field_sentence",
+   "field": "openai_compatible",
+   "text": "Serverless Inference gives you access to leading open-source foundation models through an OpenAI-compatible API.",
+   "source_url": "https://docs.coreweave.com/products/inference/serverless",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "4da73ad90978af8a6eec047dd3edf7fd59ac91befcda7319135c4036882c5053"
   },
   {
    "id": "typhoon.sentence",
@@ -1350,6 +2106,18 @@
    "page_sha256": "6c6f959b0156ecf8549b8846d173a7d43be68908a894c2cc5df061b541f6be4a"
   },
   {
+   "id": "typhoon.openai_compatible.sentence",
+   "slug": "typhoon",
+   "kind": "field_sentence",
+   "field": "openai_compatible",
+   "text": "The API is compatible with OpenAI’s API format, making it easy to integrate if you’re already familiar with OpenAI.",
+   "source_url": "https://docs.opentyphoon.ai/en/quickstart/",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "9a397ea3530b0ac8a78c49f21a4cedae6a32110c4b80dd7742eba3a354d8f059"
+  },
+  {
    "id": "regolo.sentence",
    "slug": "regolo",
    "kind": "sentence",
@@ -1361,6 +2129,30 @@
    "page_sha256": "9b36459d8ebb20b4bb889f0ebfde6e0b4638189fbc14e876da11d3ea660aa08c"
   },
   {
+   "id": "regolo.card_required.sentence",
+   "slug": "regolo",
+   "kind": "field_sentence",
+   "field": "card_required",
+   "text": "No credit card required, no commitment.",
+   "source_url": "https://regolo.ai/pricing/",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "9b16d7bf15f6efe621813b887414dde5766ec872039ba723ff7ced0f9fc657e1"
+  },
+  {
+   "id": "regolo.openai_compatible.sentence",
+   "slug": "regolo",
+   "kind": "field_sentence",
+   "field": "openai_compatible",
+   "text": "Regolo AI is fully compatible with the OpenAI API, so you can use any OpenAI-compatible client library.",
+   "source_url": "https://docs.regolo.ai/getting-started/choose-language",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "98733a3551c667a9d1b7f8c05fbe5cc5ad2c44ab6a911bedc24cb7bd84796072"
+  },
+  {
    "id": "google-agent-platform-express.sentence",
    "slug": "google-agent-platform-express",
    "kind": "sentence",
@@ -1370,6 +2162,18 @@
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "2dd683f357d3dfdc36626bec354a421fc02ec2ec1977bf8da66de798d2be30a5"
+  },
+  {
+   "id": "google-agent-platform-express.card_required.sentence",
+   "slug": "google-agent-platform-express",
+   "kind": "field_sentence",
+   "field": "card_required",
+   "text": "You don't need to provide billing information to sign up in the free tier.",
+   "source_url": "https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/start/express-mode/overview",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "aa908a0b7c927a6c430149226d9a973e731ea1b824b6141c566658e4ffb54afa"
   },
   {
    "id": "inception.sentence",
@@ -1393,6 +2197,18 @@
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "2601d939c7a894e11385498a6d254fb0438d8ef62b6bfa4f19cc1a9ed356459d"
+  },
+  {
+   "id": "inception.openai_compatible.sentence",
+   "slug": "inception",
+   "kind": "field_sentence",
+   "field": "openai_compatible",
+   "text": "The API is OpenAI-compatible, so you can be up and running in minutes with the tools you already use.",
+   "source_url": "https://docs.inceptionlabs.ai/",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "f1c357c9bd4aa64c089ce837fd875dea6d9fd5db74bbe2d59d24437f17181703"
   },
   {
    "id": "aion-labs.sentence",
@@ -1430,6 +2246,18 @@
    "page_sha256": "1947fa93108fe60af1381216110156c93d996ac6516ec21c7e70deedbbe736a0"
   },
   {
+   "id": "aion-labs.openai_compatible.sentence",
+   "slug": "aion-labs",
+   "kind": "field_sentence",
+   "field": "openai_compatible",
+   "text": "Aion Labs provides AI models through an OpenAI-compatible REST API.",
+   "source_url": "https://www.aionlabs.ai/docs/",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "d83e31e0ce037dfc837fc61d517fc39af8b619a95de4d14f74f9ef49c7e6a4ee"
+  },
+  {
    "id": "meganova.card_required.sentence",
    "slug": "meganova",
    "kind": "field_sentence",
@@ -1442,6 +2270,18 @@
    "page_sha256": "c7245a89e713743024aec41a3538d844d49d57667aa422dcb4d72d7607efd588"
   },
   {
+   "id": "meganova.openai_compatible.sentence",
+   "slug": "meganova",
+   "kind": "field_sentence",
+   "field": "openai_compatible",
+   "text": "Yes. MegaNova is OpenAI-compatible, so you can use it with Chub AI, Pygmalion WebUI, or any frontend that supports custom API endpoints.",
+   "source_url": "https://docs.meganova.ai/faq/api-technical-specifications",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "299ed5589cac99cedd36ebdc5cbc6ee357403c76ec0cee93c1ce811792bc469e"
+  },
+  {
    "id": "sea-lion.commercial_ok.sentence",
    "slug": "sea-lion",
    "kind": "field_sentence",
@@ -1452,6 +2292,18 @@
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "993d45e41dd1e3e07feff0c6db63c5acbe99fdc80e8e93650e90daba68999ae7"
+  },
+  {
+   "id": "sea-lion.openai_compatible.sentence",
+   "slug": "sea-lion",
+   "kind": "field_sentence",
+   "field": "openai_compatible",
+   "text": "SEA-LION's API endpoints for chat are compatible with OpenAI's API and libraries.",
+   "source_url": "https://raw.githubusercontent.com/aisingapore/sealion/main/guides/inferencing/api.md",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "589fcda4f905b18389f1d9200ed3dc197bab6bbe8c3bd616c69774f434e4bce5"
   },
   {
    "id": "azure-speech.sentence",

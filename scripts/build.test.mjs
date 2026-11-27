@@ -911,16 +911,14 @@ test('the shipped badge grades its own stated age by the rule', () => {
 // ---------- a confirmed "yes" must never look like an unknown ----------
 test('a confirmed card requirement is never hidden in the README top-20 or the explorer', () => {
   const { providers } = JSON.parse(readFileSync(DATA, 'utf8'));
-  const best = JSON.parse(readFileSync(join(ROOT, 'data/best.json'), 'utf8'));
   const readme = readFileSync(join(ROOT, 'README.md'), 'utf8');
   const explorer = readFileSync(join(ROOT, 'site/index.html'), 'utf8');
-  const bySlug = new Map(providers.map((p) => [p.slug, p]));
   const walled = providers.filter((p) => p.card_required === true);
   assert.ok(walled.length, 'dataset has at least one card-gated provider to check');
 
-  // README: any top-20 pick that requires a card must say so.
-  for (const e of best.entries) {
-    const p = bySlug.get(e.slug);
+  // README: any pick of the README table (the score top, not data/best.json) that requires a card must say so.
+  for (const e of topOfData()) {
+    const p = e.p;
     if (p && p.card_required === true) {
       const row = readme.split('\n').find((l) => l.includes(`](${p.docs_url})`));
       assert.ok(row, `${p.slug}: no README top-20 row found`);
@@ -1675,16 +1673,14 @@ describe('read-only generated output', () => {
     assert.match(index, /<script src="\.\.\/shared-compare\.js\?v=[0-9a-f]{8}" defer><\/script>\n<script src="\.\.\/compare\.js\?v=[0-9a-f]{8}" defer><\/script>\n<\/body>/);
     assert.equal(index.split('<script>').length - 1, 1, 'only the hashed theme guard runs inline');
     assert.equal((index.match(/<select class="sel" name="p">/g) || []).length, COMPARE_MAX_SLOTS);
-    // ai-horde has commercial_ok: null in the dataset; any page with a null flag
-    // must say so instead of rendering it as "no".
+    // Any page with a null flag must say so instead of rendering it as "no".
     const { providers } = JSON.parse(readFileSync(DATA, 'utf8'));
-    const page = readdirSync(join(ROOT, 'site/compare')).find((d) => {
-      if (!isPairPage(d)) return false;
-      // a null with no recorded reason: one with a reason (field_checks) says the reason instead
-      return d.split('-vs-').some((s) => { const p = providers.find((x) => x.slug === s); return p && p.commercial_ok === null && !(p.field_checks && p.field_checks.commercial_ok); });
-    });
+    // A null with no recorded reason reads "not confirmed"; one with a reason (field_checks) says the reason
+    // instead (both pinned on triStateHtml in field-checks.test.mjs). Either way it is never rendered as "no".
+    const page = readdirSync(join(ROOT, 'site/compare')).find((d) => isPairPage(d)
+      && d.split('-vs-').some((s) => { const p = providers.find((x) => x.slug === s); return p && p.commercial_ok === null; }));
     assert.ok(page, 'the real set contains a provider with an unconfirmed flag');
-    assert.match(readFileSync(join(ROOT, `site/compare/${page}/index.html`), 'utf8'), /<span class="tri tri-unk">not confirmed<\/span>/);
+    assert.match(readFileSync(join(ROOT, `site/compare/${page}/index.html`), 'utf8'), /<span class="tri tri-unk( tri-why" title="Not confirmed: [^"]+)?">(not confirmed|[^<]+\(checked \d{4}-\d{2}-\d{2}\))<\/span>/);
   });
 
   test('keyboard navigation is client-only: the server-rendered rows carry no tabindex', () => {
