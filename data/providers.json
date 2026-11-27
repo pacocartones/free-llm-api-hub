@@ -2773,6 +2773,38 @@
       "data_policy": {"trains_on_prompts":false,"retention":"not retained for API requests","source":"https://synap402.com/privacy.html","checked":"2026-11-27","quote":"We do not retain prompt or completion text for API requests, and we do not use it to train anything.","note":"The same policy says the serving machines are contributed by independent operators that it requires not to retain request content but cannot audit.","plan_named":false},
       "keys_url": "https://synap402.com/account.html#keys",
       "keys_url_source": "https://synap402.com/free.html"
+    },
+    {
+      "slug": "byteplus-modelark",
+      "name": "BytePlus ModelArk",
+      "category": "trial",
+      "free_type": "trial-credit",
+      "free_tier": "One-time free inference quota for new BytePlus users: 500,000 tokens per model, counted separately for each model and shared across the primary account, for online pay-as-you-go inference on ModelArk's Seed, DeepSeek, GLM and other models",
+      "rate_limits": "Not stated for the free quota; the model list gives each model's general limits (for example 500 requests/min and 1,000K tokens/min for dola-seed-2-1-turbo-260628, 30K requests/min and 1,500K tokens/min for seed-2-0-lite-260428)",
+      "notes": "International model API of BytePlus (its pages are signed BytePlus Pte Ltd); its model list names ByteDance as the provider of the Seed models.The free quota offsets only online inference billed per token: not batch inference, plugins, knowledge bases or context-cache storage. It is shared between a base model and the models fine-tuned from it, and once it is used up calls fail until you activate that model's paid service. An account that has not yet activated model services can turn on Free Tokens Only mode, which pauses the service when the free tokens are nearly gone (HTTP 429) instead of billing; once turned off it cannot be turned back on, and the mode covers identity-verified personal and enterprise accounts. The campaign terms (last updated 2025-02-05) require BytePlus registration and enterprise information, allow one redemption per account, count free-token usage as Trial Services under the Customer Agreement, and say the package may have a validity period shown in the Billing Center and that BytePlus may change or end the campaign without notice. The Customer Agreement and AI service terms only render with scripts, so commercial use and prompt data handling were not read. Free inference quota, Free Tokens Only mode, OpenAI SDK compatibility, base URL and model list pages and the free-token campaign terms read 2026-11-27.",
+      "best_for": "Trying ByteDance's Seed models and other hosted open models through an OpenAI-compatible API without being billed",
+      "modalities": ["text", "vision"],
+      "models_free": ["dola-seed-2-1-turbo-260628", "seed-2-0-lite-260428", "seed-2-0-mini-260428"],
+      "models_url": "https://ai.byteplus.com/ark/region:ap-southeast-1/docs/model-list",
+      "expires": null,
+      "docs_url": "https://ai.byteplus.com/ark/region:ap-southeast-1/docs/free-inference-quota",
+      "phone_required": null,
+      "card_required": null,
+      "commercial_ok": null,
+      "openai_compatible": true,
+      "openai_base_url": "https://ark.ap-southeast.bytepluses.com/api/v3",
+      "is_text_llm": true,
+      "model_tier": null,
+      "model_tier_source": null,
+      "free_limits": null,
+      "no_expiry": null,
+      "field_checks": {"phone_required":{"status":"source_silent","checked":"2026-11-27","sources":["https://ai.byteplus.com/ark/region:ap-southeast-1/docs/free-inference-quota","https://docs.byteplus.com/en/docs/legal/termsandconditions_modelark_free-token_campaign"],"note":"The campaign terms list mobile numbers among the data used to tell unique users apart but do not say sign-up needs phone verification; the free quota page asks only for BytePlus registration and authentication"},"card_required":{"status":"source_silent","checked":"2026-11-27","sources":["https://ai.byteplus.com/ark/region:ap-southeast-1/docs/free-inference-quota","https://ai.byteplus.com/ark/region:ap-southeast-1/docs/free-tokens-only-mode","https://docs.byteplus.com/en/docs/legal/termsandconditions_modelark_free-token_campaign"],"note":"The pages describe the free quota and the Free Tokens Only mode but do not say whether a payment method is needed before the first call"},"openai_compatible":{"status":"stated","checked":"2026-11-27","sources":["https://ai.byteplus.com/ark/region:ap-southeast-1/docs/compatible-with-openai-sdk"],"quote":"ModelArk model APIs are largely compatible with the OpenAI SDK."}},
+      "verified": true,
+      "last_verified": "2026-11-27",
+      "added": "2026-11-27",
+      "last_probed": null,
+      "probe_status": null,
+      "data_policy": null
     }
   ]
 }
