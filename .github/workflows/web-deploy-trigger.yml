@@ -11,6 +11,15 @@ name: Web deploy trigger
 # pages.yml's push trigger. The comparison uses anonymous git on a tree-only clone: no token, and no pull-request
 # code is ever checked out (this workflow has no pull-request trigger and no checkout step).
 on:
+  # Right after each GitHub Pages deploy of main, so the Worker follows main within minutes instead of the next
+  # two-hourly run. pages.yml already waits for the regeneration bot (its gate job), so this fires once per settled
+  # main, not once per push; the decide job still skips the build when the live build.json is current. Safe as a
+  # workflow_run: "Deploy site" runs on main only and never on pull-request code, and this workflow checks out
+  # nothing. When pages.yml is removed (E-W6), point this at 'Regenerate derived files' instead.
+  workflow_run:
+    workflows: ['Deploy site']
+    types: [completed]
+    branches: [main]
   schedule:
     - cron: '0 */2 * * *'
     - cron: '17 5 * * *'
