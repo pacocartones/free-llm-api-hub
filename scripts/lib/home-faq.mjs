@@ -13,7 +13,7 @@
 
 import { escapeHtml as esc } from './html.mjs';
 import { recommendedCmp, SLA_DAYS } from './rules.mjs';
-import { shortDate } from './provider-meta.mjs';
+import { humanDate as shortDate } from './dates.mjs';
 import { verifiedPhrase } from './home-seo.mjs';
 
 export const NOT_STATED = 'not stated';

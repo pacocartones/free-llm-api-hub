@@ -8,7 +8,7 @@ import { execFileSync } from 'node:child_process';
 import { join } from 'node:path';
 import { compareVerdict, compareFaq, compareFaqHtml, hasFreeTierData, pickReasons, limitsEdge } from './lib/compare-faq.mjs';
 import { comparePageJsonLd } from './lib/page-jsonld.mjs';
-import { NOT_STATED } from './lib/provider-faq.mjs';
+import { NOT_STATED } from './lib/not-stated.mjs';
 import { privateTree } from './lib/private-tree.mjs';
 import { escapeHtml } from './lib/html.mjs';
 

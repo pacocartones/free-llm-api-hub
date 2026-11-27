@@ -1,10 +1,11 @@
 // field-checks.mjs — why a tri-state flag holds its value (data/schema.json, field_checks).
 //
-// A null flag used to mean only "not confirmed". field_checks records, per flag, the official pages read, the day
+// A null flag reads "not stated" (not-stated.mjs). field_checks records, per flag, the official pages read, the day
 // and what they said: `stated` (the page says it, so the flag is true, false or "conditional"), or one of three
 // reasons a null stays null — `source_silent`, `needs_account`, `sources_disagree`. A flag with no entry is
 // `not_checked`: derived here, never written in the data, and never "no".
 import { hasHiddenChars } from './hidden-chars.mjs';
+import { NOT_STATED } from './not-stated.mjs';
 import { publicHttpsUrlError } from './public-fetch.mjs';
 
 export const FIELD_CHECK_FIELDS = Object.freeze(['phone_required', 'card_required', 'commercial_ok', 'openai_compatible']);
@@ -27,12 +28,23 @@ export function fieldCheckStatus(p, field) {
   return c && STATUSES.includes(c.status) ? c.status : 'not_checked';
 }
 
-/** Plain words for a reason a flag stays null (also used by the site and llms-full.txt). */
+/**
+ * The words for a flag that stays null, by status: always "not stated", with the reason when one is recorded. The one
+ * table for every page, the flags (flags.mjs), the compare table, llms-full.txt and the .md mirrors.
+ */
 export const REASON_LABEL = Object.freeze({
-  source_silent: 'not stated by the provider',
+  source_silent: `${NOT_STATED} in the provider's docs`,
+  needs_account: `${NOT_STATED}: needs an account to check`,
+  sources_disagree: `${NOT_STATED}: the provider's pages disagree`,
+  not_checked: NOT_STATED,
+});
+
+/** The reason alone, for a cell that already says "not stated" ('' when no reason is recorded). */
+export const REASON_WHY = Object.freeze({
+  source_silent: "the provider's docs do not say",
   needs_account: 'needs an account to check',
-  sources_disagree: 'provider pages disagree',
-  not_checked: 'not confirmed',
+  sources_disagree: "the provider's pages disagree",
+  not_checked: '',
 });
 
 /** The validator rules of field_checks for one provider. @returns {string[]} */

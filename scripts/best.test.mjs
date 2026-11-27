@@ -180,14 +180,14 @@ test('missing data scores zero, or neutral for the two yes/no requirements, and 
   assert.equal(full.confirmed, 4, 'quality, friction, commercial and openai are confirmed; limits and stability are not');
   assert.equal(inputFractions(blank({ model_tier: 0 })).quality.known, true, 'tier 0 is sourced, unlike null');
   assert.equal(scoreProvider(blank({ model_tier: 0 })).parts.quality, 0);
-  // friction is confirmed as soon as one of its two parts is known (the Owner's reading); none known is not confirmed
+  // friction is confirmed as soon as one of its two parts is known (the Owner's reading); none known is not stated
   const half = scoreProvider(blank({ card_required: false }));
   assert.equal(half.confirmed, 1, 'one known flag already informs: friction is confirmed');
   assert.ok(half.parts.friction > 0, 'and it scores');
   assert.equal(scoreProvider(blank({ phone_required: true })).confirmed, 1);
   assert.ok(scoreProvider(blank({ phone_required: true })).parts.friction > 0, 'even a confirmed requirement keeps part of the points');
   assert.equal(scoreProvider(blank({ card_required: false, phone_required: true })).confirmed, 1, 'two known flags are still one input');
-  assert.equal(scoreProvider(blank({ card_required: null, phone_required: null })).confirmed, 0, 'neither known: not confirmed');
+  assert.equal(scoreProvider(blank({ card_required: null, phone_required: null })).confirmed, 0, 'neither known: not stated');
   // a confirmed requirement subtracts what a confirmed absence adds
   const yes = scoreProvider(blank({ card_required: true })).parts.friction;
   const no = scoreProvider(blank({ card_required: false })).parts.friction;
@@ -195,7 +195,7 @@ test('missing data scores zero, or neutral for the two yes/no requirements, and 
   assert.ok(Math.abs((no - empty.parts.friction) - (empty.parts.friction - yes)) < 1e-9, 'symmetric around unknown');
 });
 
-test('conditional commercial use scores exactly like unknown and is not confirmed', () => {
+test('conditional commercial use scores exactly like unknown and is not stated', () => {
   const unknown = scoreProvider(blank({ commercial_ok: null }));
   const conditional = scoreProvider(blank({ commercial_ok: 'conditional', commercial_ok_condition: 'Per-model licence.' }));
   assert.equal(conditional.parts.commercial, unknown.parts.commercial);

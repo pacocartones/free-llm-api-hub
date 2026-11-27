@@ -1,4 +1,5 @@
 import { test } from 'node:test';
+import { humanDate } from './lib/dates.mjs';
 import assert from 'node:assert/strict';
 import { readFileSync, existsSync, readdirSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
@@ -78,7 +79,7 @@ test('the page shows every sentence escaped, with its page and day; not stated n
   assert.match(html, /Free for &quot;individuals&quot; &lt;now&gt;\./);
   assert.doesNotMatch(html, /Tool <b>/, 'a name from the data is escaped');
   assert.doesNotMatch(html, /href="javascript:/, 'only http(s) links are made');
-  assert.match(html, /read 2026-10-15/);
+  assert.match(html, /read <time datetime="2026-10-15">15 Oct 2026<\/time>/);
   assert.match(html, /Stated by the tool's page/);
   assert.match(html, /Not stated<\/span> <span class="muted">Context quoted from the page:<\/span>/, 'a sentence under a not-stated value is context, not the value');
   assert.match(html, /<span class="gpu-unstated">Not stated<\/span>/);
@@ -99,7 +100,7 @@ test('the page of the real data shows its quotations and stays out of every prov
     assert.ok(html.includes(escapeHtml(e.name)), `${e.name} is missing from the page`);
     for (const c of Object.values(e.claims)) for (const q of c.quotes) {
       assert.ok(html.includes(escapeHtml(q.text)), `a sentence of ${e.name} is missing from the page`);
-      assert.ok(html.includes(`read ${q.read}`), `the read date of a sentence of ${e.name} is missing`);
+      assert.ok(html.includes(`read <time datetime="${q.read}">${humanDate(q.read)}</time>`), `the read date of a sentence of ${e.name} is missing`);
     }
   }
   const sitemap = readFileSync(join(out(), 'site/sitemap.xml'), 'utf8');
@@ -203,7 +204,7 @@ test('own-key page: the subsection shows every sentence and links the free APIs,
     assert.ok(html.includes(escapeHtml(e.name)), `${e.name} is missing from the page`);
     for (const c of Object.values(e.claims)) for (const q of c.quotes) {
       assert.ok(html.includes(escapeHtml(q.text)), `a sentence of ${e.name} is missing from the page`);
-      assert.ok(html.includes(`read ${q.read}`));
+      assert.ok(html.includes(`read <time datetime="${q.read}">${humanDate(q.read)}</time>`));
     }
     assert.ok(!existsSync(join(out(), `site/p/${e.slug}.html`)), `${e.slug} got a provider page`);
   }
@@ -317,7 +318,7 @@ test('each tool has its own page, with its sentences, sources and days, and what
     for (const [field, c] of Object.entries(t.claims)) {
       for (const q of c.quotes) {
         assert.ok(main.includes(escapeHtml(q.text)), `${t.slug}: the sentence of ${field} is on the page`);
-        assert.ok(main.includes(`read ${q.read}`), `${t.slug}: the day it was read`);
+        assert.ok(main.includes(`read <time datetime="${q.read}">${humanDate(q.read)}</time>`), `${t.slug}: the day it was read`);
         assert.ok(main.includes(new URL(q.source).hostname), `${t.slug}: the page it comes from`);
       }
       const at = main.indexOf(`id="${t.slug}-${field}"`);
