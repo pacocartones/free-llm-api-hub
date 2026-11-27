@@ -93,7 +93,7 @@ test('provider page: the answer is the first thing after the H1, and the visible
   for (const slug of ['groq', 'cerebras', 'google-gemini', 'poolside']) {
     const p = PROVIDERS.find((x) => x.slug === slug);
     const html = readFileSync(join(ROOT, `site/p/${slug}.html`), 'utf8');
-    assert.match(html, /<h1>[^<]*<\/h1><p class="answer-first">/, `${slug}: answer right under the H1`);
+    assert.match(html, /<h1>[^<]*<\/h1><p class="answer-first" id="is-it-free">/, `${slug}: answer right under the H1`);
     assert.ok(html.includes(answerFirst(p).html), `${slug}: the paragraph is the one built from the data`);
     const graph = jsonLd(html)['@graph'];
     const faqs = graph.filter((n) => n['@type'] === 'FAQPage');

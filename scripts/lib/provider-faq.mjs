@@ -57,7 +57,7 @@ function flagSource(p, field) {
 /**
  * The answer to "Is <Provider> API free?" in one or two sentences, as parts (field, value, text) plus the plain text and
  * the HTML. Sentence 1: ongoing free tier or one-time trial credit, with the headline limits. Sentence 2: card, phone,
- * commercial use and the day the record was verified.
+ * commercial use and the day the record was verified. The paragraph is linkable at the stable anchor #is-it-free.
  */
 export function answerFirst(p) {
   const parts = [];
@@ -87,7 +87,7 @@ export function answerFirst(p) {
   const verified = p.verified === true && shortDate(p.last_verified) ? ` Verified ${shortDate(p.last_verified)}.` : ' Not verified yet.';
   const second = `Credit card: ${card}; phone verification: ${phone}; commercial use: ${comm}.${verified}`;
   const text = `${first} ${second}`;
-  return { parts, text, html: `<p class="answer-first">${htmlEsc(text)}</p>` };
+  return { parts, text, html: `<p class="answer-first" id="is-it-free">${htmlEsc(text)}</p>` };
 }
 
 /** " (source read 24 Nov 2026)" or " (source date not stated)": every FAQ answer ends with one. */
