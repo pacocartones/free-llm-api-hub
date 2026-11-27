@@ -12,7 +12,7 @@ import { timeHtml } from './dates.mjs';
 import { recScore, SLA_DAYS, DUE_SOON_DAYS } from './rules.mjs';
 import { pythonEmbeddingsQuickstart, pythonStringLiteral, pythonChatQuickstart, curlChatQuickstart } from './quickstart.mjs';
 import { fieldCheck, REASON_LABEL, REASON_WHY } from './field-checks.mjs';
-import { capFirst } from './not-stated.mjs';
+import { NOT_STATED, capFirst } from './not-stated.mjs';
 import { CONSTRAINTS, constraintState, toHash, explorerHref } from './find.mjs';
 import { plural } from './text.mjs';
 import { escapeAttr, escapeText } from './html.mjs';
@@ -226,7 +226,7 @@ export function commercialWords(x) {
   if (x.commercial_ok === true) return 'Yes';
   if (x.commercial_ok === false) return '<strong>No</strong>';
   if (x.commercial_ok === 'conditional') return 'Conditional';
-  return 'Not stated';
+  return capFirst(NOT_STATED);
 }
 
 // The source a limit was read on: the structured limits' own source, else the entry's docs page.
