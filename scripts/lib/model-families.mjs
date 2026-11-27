@@ -18,6 +18,7 @@ import { escapeHtml as htmlEsc } from './html.mjs';
 import { comparator } from './sort.mjs';
 import { bareModelId } from './model-keys.mjs';
 import { fieldCheck, REASON_LABEL } from './field-checks.mjs';
+import { reportMistakeRowHtml } from './report-mistake.mjs';
 import { MODEL_SAMPLE_CAVEAT } from './model-pages.mjs';
 import { freeLimitBits, andList } from './long-guides.mjs';
 import { plural } from './text.mjs';
@@ -139,7 +140,7 @@ const planLine = (p) => (p.category === 'ongoing' ? 'Ongoing free tier' : 'One-t
 // A long ID gets break points after its slashes, so it never widens a phone screen.
 const idCode = (id) => `<code>${htmlEsc(id).replace(/\//g, '/<wbr>')}</code>`;
 
-function tableHtml(group, { prefix, modelHref }) {
+function tableHtml(group, { prefix, modelHref, repo, pageUrl }) {
   const head = ['Provider', 'Model IDs in the free sample', 'Free limits', 'Card', 'Phone', 'Commercial use', 'Last verified'];
   const rows = group.entries.map(({ p, ids }) => [
     `<a href="${prefix}p/${htmlEsc(p.slug)}">${htmlEsc(p.name)}</a><br><small>${planLine(p)}</small>`,
@@ -148,7 +149,8 @@ function tableHtml(group, { prefix, modelHref }) {
     requiredCell(p, 'card_required'),
     requiredCell(p, 'phone_required'),
     commercialCell(p),
-    time(p.last_verified),
+    // Under the date, the prefilled data-correction form for this provider (lib/report-mistake.mjs).
+    time(p.last_verified) + `<br><small>${reportMistakeRowHtml(p, { repo, pageUrl, prefix })}</small>`,
   ]);
   return `<div class="table-scroll" role="region" aria-label="Providers listing ${htmlEsc(group.name)} for free" tabindex="0"><table><thead><tr>` +
     head.map((h) => `<th>${h}</th>`).join('') + `</tr></thead><tbody>\n` +
@@ -172,9 +174,10 @@ function shortlistHtml(group, prefix) {
 
 /**
  * The <main> of a family page, hero included. `asOf` is the dataset date; `prefix` reaches the site root;
- * `modelHref(id)` is the per-model page of an ID ('' when it has none); `others` are the other family groups.
+ * `modelHref(id)` is the per-model page of an ID ('' when it has none); `others` are the other family groups; `repo` and
+ * `pageUrl` build each row's "Report a mistake" link (without `repo`, it points to /contributing/).
  */
-export function familyPageMainHtml(group, { asOf, prefix = '../../', modelHref = () => '', others = [] } = {}) {
+export function familyPageMainHtml(group, { asOf, prefix = '../../', modelHref = () => '', others = [], repo = '', pageUrl = '' } = {}) {
   const related = others.filter((o) => o.slug !== group.slug)
     .map((o) => `<a href="${prefix}${FAMILY_PATH}${o.slug}/">${htmlEsc(o.name)}</a>`).join('');
   return `<section class="page-hero model-hero"><div class="wrap"><nav class="crumbs" aria-label="Breadcrumb"><a href="${prefix}">Home</a> / <a href="${prefix}models/">Free model index</a> / ${htmlEsc(group.name)}</nav>` +
@@ -183,7 +186,7 @@ export function familyPageMainHtml(group, { asOf, prefix = '../../', modelHref =
     `<p class="answer"><strong>${htmlEsc(familyAnswer(group, asOf))}</strong></p>` +
     `<p class="muted">${htmlEsc(MODEL_SAMPLE_CAVEAT)} Model samples are not part of the dataset's verified core claim; the limits, flags and dates are.</p>` +
     (group.entries.length
-      ? `<h2 id="providers">Providers listing ${htmlEsc(group.name)} for free</h2>` + tableHtml(group, { prefix, modelHref }) + shortlistHtml(group, prefix)
+      ? `<h2 id="providers">Providers listing ${htmlEsc(group.name)} for free</h2>` + tableHtml(group, { prefix, modelHref, repo, pageUrl }) + shortlistHtml(group, prefix)
       : `<p>See the <a href="${prefix}models/">free model index</a> for the models that are listed.</p>`) +
     `<p>Need a specific setup? <a href="${prefix}find/">Find my free API</a> filters every provider by card, phone and commercial use, and <a href="${prefix}compare/">Compare</a> puts two to four side by side.</p>` +
     (related ? `<h2>Other model families</h2><nav class="colls">${related}</nav>` : '') +

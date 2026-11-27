@@ -1479,7 +1479,7 @@ test('/changes/ is one table by year and month with every month in a row; each m
   assert.match(css, /\.stats\.stats-month \{[^}]*align-items: start/);
 });
 
-test('the "Report a change" URL helper prefills the inaccuracy form and is escaped; the provider page no longer shows the button', () => {
+test('the "Report a change" URL helper prefills the inaccuracy form and is escaped; the provider hero shows no button', () => {
   const repo = 'https://github.com/pacocartones/free-llm-api-hub';
   const url = reportChangeUrl({ slug: 'a-b', name: 'A&B "Labs" / 100% #1' }, repo);
   assert.equal(url, `${repo}/issues/new?template=inaccuracy.yml&provider=a-b&title=%5Boutdated%5D%20A%26B%20%22Labs%22%20%2F%20100%25%20%231`);
@@ -1492,7 +1492,10 @@ test('the "Report a change" URL helper prefills the inaccuracy form and is escap
 
   const page = join(ROOT, 'site/p/groq.html');
   if (!existsSync(page)) run(['scripts/build.mjs']);
-  assert.doesNotMatch(readFileSync(page, 'utf8'), /Report a change|template=inaccuracy\.yml&amp;provider=groq/, 'the button was removed from the provider page');
+  // The old hero button stays gone; the one link to the form is the quiet line at the end of the FAQ (report-mistake.test.mjs).
+  const html = readFileSync(page, 'utf8');
+  assert.doesNotMatch(html, /Report a change/, 'the button was removed from the provider page');
+  assert.doesNotMatch(html.slice(0, html.indexOf('<main id="main">')), /template=inaccuracy\.yml/, 'nothing in the hero');
 });
 
 // These output checks share unchanged inputs; mutation and idempotency tests build separately.
