@@ -7,4 +7,4 @@
   manager reads the pull request's linked issues with the workflow token,
   closes each open one of this repository with a short comment, and never
   reopens anything; a failure is logged without blocking the queue. The rule is
-  in Part 1 of `docs/maintenance/merge-train.md` (#PR).
+  in Part 1 of `docs/maintenance/merge-train.md` (#1040).
