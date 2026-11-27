@@ -11,15 +11,17 @@ import { makeTmpDir } from './lib/tmp.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 
-test('docs, workflows, root Markdown and the MCP package do not reach the site', () => {
+test('docs, workflows, root Markdown, the MCP package and the test files do not reach the site', () => {
   for (const p of ['docs/backlog.md', 'docs/maintenance/hygiene-audit-2026-11.md', '.github/workflows/verify.yml',
-    '.github/ISSUE_TEMPLATE/bug.yml', 'CHANGELOG.md', 'SECURITY.md', 'packages/mcp/src/index.js']) {
+    '.github/ISSUE_TEMPLATE/bug.yml', 'CHANGELOG.md', 'SECURITY.md', 'packages/mcp/src/index.js', 'scripts/build.test.mjs',
+    'scripts/lighthouse-scope.test.mjs']) {
     assert.equal(outsideSite(p), true, p);
   }
 });
 
 test('the site, its inputs and the gate tooling are measured, and so is anything unknown', () => {
   for (const p of ['site/styles.css', 'data/providers.json', 'scripts/build.mjs', 'scripts/lib/lighthouse-scope.mjs',
+    'scripts/lighthouse-gate.mjs', 'scripts/lib/test-part.mjs', 'scripts/lib/a.test.mjs', 'scripts/test.mjs', 'scripts/x.test.mjs.bak',
     'tools/lighthouse/package-lock.json', 'package-lock.json', '.nvmrc', 'CITATION.cff', 'changes/unreleased/x.md',
     'collections/README.md', 'assets/logo.svg', 'docs/methodology.md', 'CONTRIBUTING.md', 'README.md',
     '.github/workflows/lighthouse.yml', 'a-new-top-level-dir/file.json']) {
