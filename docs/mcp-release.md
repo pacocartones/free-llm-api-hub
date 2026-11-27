@@ -100,6 +100,13 @@ provenance (the job's GitHub OIDC identity signs it) and a token for npm authent
    the version in the MCP registry, push the matching `mcp-vX.Y.Z` tag: `release-mcp.yml`
    skips the npm version that already exists and publishes only the registry entry.
 
+### What the first publication taught us (2026-11-27)
+
+- **Environment branch policy.** `release-mcp` normally allows only the `mcp-v*` tag pattern, because that is what `release-mcp.yml` runs on. `publish-mcp.yml` runs on `main`, so for the bootstrap the environment has to allow `main` too. Add it for that run with the owner's OK and remove it afterwards.
+- **Self-review.** With *Prevent self-review* on, the account that started the run cannot approve it. If the owner starts the run, either the second reviewer (LeonMAG) approves it, or *Prevent self-review* is switched off for that run with the owner's OK and switched back on right after. The same applies to the `mcp-vX.Y.Z` tag runs of `release-mcp.yml` when the owner pushes the tag.
+- **Staged publishing.** A granular token created with "publish and stage" sends the version to npm's **staged publishing**: npm shows a provisional `0.0.0-stage` and holds the real version until the package owner approves it on npmjs.com. Until then, the workflow's "Verify what was published" step fails. That is expected: after the owner approves, verify by hand (`npm view free-llm-api-hub-mcp versions`, the provenance attestation and `npm audit signatures`) and re-run the verification if needed.
+- Then follow step 5 above: add the trusted publisher, disallow tokens, revoke the token and delete the `NPM_TOKEN` secret.
+
 The guard ([`check-mcp-bootstrap.sh`](../scripts/check-mcp-bootstrap.sh)) refuses a version
 that npm already has, so the workflow cannot republish or replace later versions.
 
