@@ -185,7 +185,8 @@ test('a workflow_run is exempt only when its upstream never runs on a pull reque
   assert.equal(workflowRunPrivileged(sample(['  workflow_run:', "    workflows: ['Regenerate derived files']", '    types: [completed]'])), true, 'no branch filter');
   assert.equal(workflowRunPrivileged(sample(['  workflow_run:', "    workflows: ['Verify']", '    branches: [main]'])), true, 'Verify runs on pull requests');
   assert.equal(workflowRunPrivileged(sample(['  workflow_run:', "    workflows: ['No such workflow']", '    branches: [main]'])), true, 'an unknown upstream');
-  // Every workflow_run in the repository today: only pages.yml, after the regeneration bot.
+  // Every workflow_run in the repository today: pages.yml after the regeneration bot, and web-deploy-trigger.yml after
+  // "Deploy site" (it checks out nothing and only calls the Worker's deploy hook).
   const exempt = WORKFLOWS.filter(({ lines }) => triggers(lines).includes('workflow_run') && !workflowRunPrivileged(lines)).map((w) => w.name);
-  assert.deepEqual(exempt, ['pages.yml']);
+  assert.deepEqual(exempt.sort(), ['pages.yml', 'web-deploy-trigger.yml']);
 });
