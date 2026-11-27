@@ -182,7 +182,7 @@ const INTEGRITY_CASES = [
   // The schema's minLength accepts whitespace; only the trimmed-length rule rejects it.
   ['data_policy.quote text', 'a recorded policy sentence that says something', (p) => { p.data_policy.quote = '   '; }, 'data_policy.quote must be text of 1 to 400 characters'],
   ['data_policy.note text', 'a recorded policy condition that says something', (p) => { p.data_policy.note = '   '; }, 'data_policy.note must be text of 1 to 300 characters'],
-  ['field_checks via fieldCheckErrors', 'a stated check on a flag that holds no value', (p) => { p.phone_required = null; p.field_checks = { phone_required: { status: 'stated', checked: '2026-11-24', sources: ['https://example.com/terms'], quote: null, note: 'The terms say nothing either way.' } }; }, 'field_checks.phone_required: phone_required is null, so its check cannot be stated (use source_silent, needs_account or sources_disagree)'],
+  ['field_checks via fieldCheckErrors', 'a stated check on a flag that holds no value', (p) => { p.phone_required = null; p.field_checks = { ...p.field_checks, phone_required: { status: 'stated', checked: '2026-11-24', sources: ['https://example.com/terms'], quote: null, note: 'The terms say nothing either way.' } }; }, 'field_checks.phone_required: phone_required is null, so its check cannot be stated (use source_silent, needs_account or sources_disagree)'],
   ['published_speed via publishedSpeedErrors', 'a speed figure the cited passage does not contain', (p) => { p.published_speed[0].value = 123456; }, 'published_speed[0].quote must contain the figure 123456 as the page writes it (no rounding, no conversion)', (d) => d.providers.find((row) => row.published_speed?.length)],
   ['free_limits.source http(s)', "numbers traceable to the provider's page", (p) => { p.free_limits.source = 'ftp://example.com/limits'; }, "free_limits.source must be the provider's page (http/https)", (d) => d.providers.find((row) => row.free_limits)],
   ['no_expiry.source http(s)', "a no-expiry statement traceable to the provider's page", (p) => { p.expires = null; p.no_expiry = { source: 'ftp://example.com/terms', checked: '2026-10-01', quote: 'Credits do not expire.' }; }, "no_expiry.source must be the provider's page (http/https)", trialProvider],
@@ -411,6 +411,7 @@ test('validate accepts conditional commercial use only with a non-empty conditio
   assert.match(rejectedMissing.output, /commercial_ok_condition/);
 
   const misplaced = structuredClone(DATA);
+  provider(misplaced).commercial_ok = true;
   provider(misplaced).commercial_ok_condition = 'This must not accompany true.';
   const rejectedMisplaced = runValidate(misplaced);
   assert.notEqual(rejectedMisplaced.status, 0, rejectedMisplaced.output);
