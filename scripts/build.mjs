@@ -79,6 +79,7 @@ import { notFreeErrors, notFreeReadmeMd, notFreeModel, notFreeMainHtml, notFreeJ
 import { embedMainHtml, embedTitle, embedDescription, EMBED_PATH } from './lib/embed-page.mjs';
 import { citationRecord, citeBlockHtml } from './lib/citation.mjs';
 import { LONG_GUIDES, longGuidePage } from './lib/long-guides.mjs';
+import { apiExamplesHtml, apiExamplesMarkdown } from './lib/api-examples.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const FRESH_DAYS = SLA_DAYS; // the freshness SLA, defined once in lib/rules.mjs
@@ -855,6 +856,17 @@ writeFileSync(join(ROOT, 'README.md'), readme);
 
 // The field reference follows the schema, without hand-maintained descriptions.
 writeSchemaDocs();
+
+// The copy-paste examples of docs/api.md come from the same list as the /api/ page (scripts/lib/api-examples.mjs).
+const apiDocPath = join(ROOT, 'docs/api.md');
+const apiDoc = readFileSync(apiDocPath, 'utf8');
+if (!apiDoc.includes('<!-- AUTOGEN:api-examples:start -->') || !apiDoc.includes('<!-- AUTOGEN:api-examples:end -->')) {
+  throw new Error('Missing api-examples markers in docs/api.md');
+}
+writeFileSync(apiDocPath, apiDoc.replace(
+  /(<!-- AUTOGEN:api-examples:start -->)[\s\S]*?(<!-- AUTOGEN:api-examples:end -->)/,
+  (_m, start, end) => `${start}\n${apiExamplesMarkdown()}\n${end}`,
+));
 
 // Counts in the field reference follow the data, just like README tables.
 const dimensionsPath = join(ROOT, 'docs/comparison-dimensions.md');
@@ -2206,7 +2218,7 @@ const apiDocMain =
   `<h2>Slices (by modality)</h2><table class="model-table api-endpoints"><thead><tr><th>Endpoint</th><th>Contents</th><th>Count</th><th>curl example</th></tr></thead><tbody>` +
   API_MODS.map((m) => apiRow(`Providers with a free ${m} modality`, `modality/${m}.json`, publicProviders.filter((p) => (p.modalities || []).includes(m)).length)).join('') +
   `</tbody></table>` +
-  `<h2>Example</h2><pre><code>curl -s ${SITE}/api/v1/no-card.json | jq '.providers[].name'</code></pre>` +
+  apiExamplesHtml(escapeText, { repo: REPO }) +
   clientConfigDocs +
   `<h2>Stability</h2><p>Paths under <code>/api/v1/</code> stay put and fields are only ever added within v1; a breaking change ships as <code>/api/v2/</code>. The full policy, and how the dataset <code>version</code> relates to the path, is in <a href="${REPO}/blob/main/docs/api.md">docs/api.md</a>. The JSON Schema is published at <a href="v1/schema.json"><code>/api/v1/schema.json</code></a>.</p>` +
   `<p class="muted">Every object carries the dataset <code>version</code> and <code>generated</code> date. Prefer a stable snapshot? Pin a Git tag of <a href="${REPO}">the repo</a>. For AI agents, see <a href="../llms.txt">llms.txt</a>.</p>` +
@@ -2734,10 +2746,13 @@ for (const [from, to] of redirectEntries(REDIRECTS)) {
 writeFileSync(join(ROOT, 'site/shared-find.js'), findLib.clientBundle());
 rmSync(join(ROOT, 'site/find'), { recursive: true, force: true });
 mkdirSync(join(ROOT, 'site/find'), { recursive: true });
-const findData = `<script type="application/json" id="find-data">${JSON.stringify(findLib.findPayload(publicProviders, ASOF)).replace(/</g, '\\u003c')}</script>`;
+const findPayload = findLib.findPayload(publicProviders, ASOF);
+const findData = `<script type="application/json" id="find-data">${JSON.stringify(findPayload).replace(/</g, '\\u003c')}</script>`;
+// The count the page opens with (no answers yet), the same text site/find.js writes, so the live line is filled at first paint.
+const findStart = findLib.shortlist(findPayload.providers, {});
 writeFileSync(join(ROOT, 'site/find/index.html'), htmlPage({
   title: FIND_TITLE, desc: FIND_DESC, canonical: `${SITE}${FIND_PATH}`, prefix: '../',
-  main: findMainHtml({ pageHero, total: providers.length, verified: verifiedCount }) + findData,
+  main: findMainHtml({ pageHero, total: providers.length, verified: verifiedCount, count: findLib.countText(findStart.matches.length, findStart.possible.length, false) }) + findData,
   scripts: ['shared-rules.js', 'shared-find.js', 'find.js'], ogImage: `${SITE}/og/find.png`,
   jsonld: findJsonLd({ site: SITE, asof: ASOF }),
 }));

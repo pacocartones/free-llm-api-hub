@@ -1158,6 +1158,9 @@ a.stamp:hover { text-decoration: none; }
 .find-wrap { max-width: 860px; }
 .find-form { margin: 8px 0 0; }
 .find-form[hidden], .find-results[hidden], .find-q[hidden] { display: none; }
+/* The questions need find.js: without scripts the page shows the noscript links instead (find-page.mjs). The count line
+   keeps its place, as it did when it was empty, but its first-paint text is not shown or read out. */
+@media (scripting: none) { .find-form { display: none; } .find-count { visibility: hidden; height: 1.3em; overflow: hidden; } }
 .find-q { border: 1px solid var(--border); border-radius: var(--radius); background: var(--panel); padding: 18px 18px 14px; margin: 0; min-width: 0; }
 .find-q:focus { outline: none; }
 .find-q legend { float: left; width: 100%; font-size: 1.08rem; font-weight: 700; color: var(--text); padding: 0; }
