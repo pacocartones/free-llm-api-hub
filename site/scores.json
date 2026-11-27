@@ -385,12 +385,6 @@
       "of": 6,
       "rank": null
     },
-    "nlpcloud": {
-      "total": 26.6,
-      "confirmed": 2,
-      "of": 6,
-      "rank": null
-    },
     "berget-ai": {
       "total": 26.1,
       "confirmed": 2,
@@ -518,6 +512,12 @@
       "rank": null
     },
     "google-cloud-tts": {
+      "total": 22.1,
+      "confirmed": 1,
+      "of": 6,
+      "rank": null
+    },
+    "nlpcloud": {
       "total": 22.1,
       "confirmed": 1,
       "of": 6,
