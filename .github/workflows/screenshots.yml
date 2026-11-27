@@ -1,0 +1,62 @@
+name: Screenshots
+
+# Manual only: regenerates the gallery and pull-request screenshots (tools/screenshots/shots.json) from the current
+# data and uploads them as a workflow artifact. Nothing is committed, published or deployed. See docs/screenshots.md.
+#
+# The site is built with the clock pinned to one date (input `date`, default: the dataset's as-of date), so two runs
+# on the same commit and date give the same PNGs. puppeteer-core comes from tools/screenshots (its own lockfile, the
+# same version Lighthouse already uses) and drives the runner's preinstalled Chrome; no browser is downloaded.
+on:
+  workflow_dispatch:
+    inputs:
+      only:
+        description: 'Shot ids to take, comma separated (e.g. S1,S7); empty for all'
+        required: false
+        default: ''
+      date:
+        description: 'Pinned date, YYYY-MM-DD; empty for the dataset as-of date'
+        required: false
+        default: ''
+      scale:
+        description: 'Device scale factor'
+        required: false
+        default: '2'
+
+permissions:
+  contents: read
+
+jobs:
+  screenshots:
+    name: Take screenshots
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0 # full history: build.mjs mines per-provider history from git log
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: tools/screenshots/package-lock.json
+      - name: Install puppeteer-core (locked, no lifecycle scripts)
+        working-directory: tools/screenshots
+        run: npm ci --ignore-scripts
+      - name: Build the site and take the screenshots
+        env:
+          CHROME_PATH: /usr/bin/google-chrome
+          SCREENSHOT_DATE: ${{ inputs.date }}
+          ONLY: ${{ inputs.only }}
+          SCALE: ${{ inputs.scale }}
+        run: |
+          set -- --out=screenshots "--scale=${SCALE:-2}"
+          if [ -n "$ONLY" ]; then set -- "$@" "--only=$ONLY"; fi
+          [ -n "$SCREENSHOT_DATE" ] || unset SCREENSHOT_DATE
+          node tools/screenshots/run.mjs "$@"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: screenshots-${{ github.sha }}
+          path: screenshots/
+          if-no-files-found: error
+          retention-days: 30
