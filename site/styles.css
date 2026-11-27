@@ -777,6 +777,12 @@ pre code { color: var(--text); }
 .faq-item { margin: 14px 0; }
 .faq-item h3 { margin: 0 0 4px; font-size: 1rem; }
 .faq-item p { margin: 0; color: var(--muted); }
+/* The home FAQ (lib/home-faq.mjs), below the provider table: a readable measure, set apart from the table by a rule. */
+.home-faq { margin-top: 48px; border-top: 1px solid var(--border); }
+.home-faq .wrap { max-width: 860px; padding-top: 32px; }
+.home-faq h2 { margin: 0 0 8px; font-size: 1.3rem; }
+.home-faq .faq-item { margin: 18px 0; }
+.home-faq .faq-item p { line-height: 1.6; }
 /* "Something wrong? Report a mistake" at the end of a provider page's FAQ (lib/report-mistake.mjs): one quiet line on a
    dashed rule, the link in the accent with a pencil before it. Tokens only; nothing in the hero. */
 .report-mistake { margin: 22px 0 0; padding-top: 12px; border-top: 1px dashed var(--border-strong); font-size: .9rem; }

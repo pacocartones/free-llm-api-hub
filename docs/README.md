@@ -20,6 +20,7 @@ How **Free LLM API Hub** works — how entries are verified, what earns a spot, 
 | [Quoted passages](quotes.md) | Evidence register, quote updates and offline versus live checks |
 | [Architecture](architecture.md) | The data-first pipeline: what each script does, the data model, the two-places rule |
 | [Regeneration bot](regeneration-bot.md) | The post-merge rebuild of derived files (off, then shadow mode, then direct push) and its pull-request preview |
+| [Merge manager](maintenance/merge-train.md) | Merge trains in GitHub Actions: approved pull requests are merged after the checks pass on main + all of them |
 | [Provider schema reference](schema.md) | Generated field types, nullability and required keys of `data/schema.json` |
 | [Static JSON API: stability and versioning](api.md) | What `/api/v1/` guarantees, how `version` relates to the path, and pinning a snapshot by tag |
 | [Discovery sources & competitive map](sources.md) | Where new providers are found, which lists to trust, and how we differ from rivals |

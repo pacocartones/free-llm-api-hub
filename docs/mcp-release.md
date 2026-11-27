@@ -45,7 +45,9 @@ add publisher accounts or change repository permissions as part of this procedur
    CI. A separately approved manual first publish would require maintainer login/2FA
    and cannot claim GitHub OIDC provenance; if provenance is required for the very
    first version, establish a supported bootstrap with npm rather than silently
-   falling back to a token. No bootstrap publication is authorized by this guide.
+   falling back to a token. The supported bootstrap is
+   [First publication bootstrap](#first-publication-bootstrap) below; it runs only with the
+   owner's explicit OK for that version.
 2. **GitHub environment.** Configure the `release-mcp` environment with **LeonMAG as
    a required reviewer** and prevent self-review. Restrict deployments to the intended
    `mcp-v*` tags and protect tag creation using repository rulesets. Maintain the
@@ -73,6 +75,33 @@ add publisher accounts or change repository permissions as part of this procedur
    repository Actions variable `NPM_PUBLISH_ENABLED` to exactly `true`. Keep it
    absent/false while preparing or reviewing this PR. The guard checks it again in
    the protected publishing job, including failed-job reruns.
+
+## First publication bootstrap
+
+npm configures a trusted publisher only in the settings of a package that exists, so the
+first version cannot come from `release-mcp.yml`.
+[`publish-mcp.yml`](../.github/workflows/publish-mcp.yml) publishes it once, with
+provenance (the job's GitHub OIDC identity signs it) and a token for npm authentication:
+
+1. The owner's npm account has two-factor authentication enabled.
+2. The owner creates an npm granular access token with read and write permission for
+   packages (all packages: the name does not exist yet), "bypass two-factor
+   authentication" enabled so CI can publish, and the shortest expiry that covers the run.
+   It is stored as the repository secret `NPM_TOKEN`, never anywhere else.
+3. The `release-mcp` environment and `NPM_PUBLISH_ENABLED=true` are set as in steps 2 and
+   5 above.
+4. A maintainer runs **Actions → Publish MCP package (first npm version) → Run workflow**
+   on `main`. The test job (no token, no OIDC) checks that the version is absent from npm
+   and matches `server.json`, runs the tests and packs the archive; after the environment
+   reviewer approves, the publish job publishes that exact archive with
+   `npm publish --provenance --access public` and checks its signatures.
+5. Afterwards: add the trusted publisher (step 3 above), delete the `NPM_TOKEN` secret,
+   revoke the token on npm, and disallow token publishing in the package settings. To list
+   the version in the MCP registry, push the matching `mcp-vX.Y.Z` tag: `release-mcp.yml`
+   skips the npm version that already exists and publishes only the registry entry.
+
+The guard ([`check-mcp-bootstrap.sh`](../scripts/check-mcp-bootstrap.sh)) refuses a version
+that npm already has, so the workflow cannot republish or replace later versions.
 
 ## Release and recovery
 
