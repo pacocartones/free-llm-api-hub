@@ -11,6 +11,8 @@
 //   - Markdown files at the repository root, except README.md (the build checks its figures) and CONTRIBUTING.md
 //     (rendered at /contributing/)
 //   - packages/** (the MCP package, tested by mcp-ci.yml)
+//   - the test files, scripts/<name>.test.mjs: the build imports no test (the pipeline's modules live beside them, and
+//     those stay measured)
 
 const MEASURED_EXCEPTIONS = new Set([
   'docs/methodology.md',
@@ -24,6 +26,7 @@ export function outsideSite(path) {
   const p = String(path).replace(/\\/g, '/').replace(/^\.\//, '');
   if (!p || MEASURED_EXCEPTIONS.has(p)) return false;
   if (p.startsWith('docs/') || p.startsWith('.github/') || p.startsWith('packages/')) return true;
+  if (/^scripts\/[^/]+\.test\.mjs$/.test(p)) return true;
   return !p.includes('/') && p.toLowerCase().endsWith('.md');
 }
 

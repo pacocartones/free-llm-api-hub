@@ -163,6 +163,12 @@
       "of": 6,
       "rank": null
     },
+    "lightning-ai": {
+      "total": 33.9,
+      "confirmed": 2,
+      "of": 6,
+      "rank": null
+    },
     "mixedbread": {
       "total": 33.9,
       "confirmed": 2,
@@ -170,6 +176,12 @@
       "rank": null
     },
     "moondream": {
+      "total": 33.9,
+      "confirmed": 2,
+      "of": 6,
+      "rank": null
+    },
+    "nscale": {
       "total": 33.9,
       "confirmed": 2,
       "of": 6,
@@ -421,6 +433,12 @@
       "of": 6,
       "rank": null
     },
+    "reducto": {
+      "total": 26,
+      "confirmed": 0,
+      "of": 6,
+      "rank": null
+    },
     "rev-ai": {
       "total": 26,
       "confirmed": 0,
@@ -507,6 +525,12 @@
     },
     "smallest-ai": {
       "total": 21.5,
+      "confirmed": 1,
+      "of": 6,
+      "rank": null
+    },
+    "azure-document-intelligence": {
+      "total": 19.5,
       "confirmed": 1,
       "of": 6,
       "rank": null
