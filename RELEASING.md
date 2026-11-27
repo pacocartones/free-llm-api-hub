@@ -97,6 +97,9 @@ requests (rule 5, `npm run changelog-draft`). Refresh the contributor list with 
 `data/contributors.json`, which the build renders as `/contributors/`; `-- --gh` also asks `gh`, read only,
 who opened each squash-merged pull request; maintainers and bots are left out and no email is listed), so
 nobody waits more than one release to be credited. Commit both files in the release pull request.
+Point the pinned-snapshot example in `README.md` (the `raw.githubusercontent.com/.../vX.Y.Z/` line
+and its "was the latest on" date) at the new tag: `release:prepare` does not touch it, and the tag exists
+as soon as the release pull request merges.
 Then `npm run build` (`npm run og` if the OG check asks),
 `npm test`, commit and open the pull request. When it merges, `Tag release` tags that commit
 (rule 2). `npm run changelog:collect` moves the fragments under `## [Unreleased]` without a
