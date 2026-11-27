@@ -14,6 +14,7 @@
 import { escapeHtml as esc } from './html.mjs';
 import { recommendedCmp, SLA_DAYS } from './rules.mjs';
 import { shortDate } from './provider-meta.mjs';
+import { verifiedPhrase } from './home-seo.mjs';
 
 export const NOT_STATED = 'not stated';
 const ISO = /^\d{4}-\d{2}-\d{2}$/;
@@ -75,7 +76,7 @@ export function homeFaq(providers) {
   items.push({
     id: 'faq-is-there', q: 'Is there a free LLM API?',
     segments: [
-      t(`Yes. This list tracks ${num(f.total)} free LLM and AI-model APIs: ${num(f.ongoing)} ongoing free tiers and ${num(f.trial)} one-time trial credits, and ${num(f.verified)} of them are verified against the provider's own docs. The first three in our recommended order are `),
+      t(`Yes. This dataset records ${num(f.total)} free LLM and AI-model APIs: ${num(f.ongoing)} ongoing free tiers and ${num(f.trial)} one-time trial credits, ${verifiedPhrase(f)} against the provider's own docs. The first three in our recommended order are `),
       ...namesList(f.topAll),
       t('. To match one to your needs (no card, commercial use, a model family), use the '),
       a('free API finder', 'find/'), t('.'),
@@ -93,7 +94,7 @@ export function homeFaq(providers) {
       });
       segs.push(t(`. For the other ${num(L.ongoingText - L.withDailyCap)}, a daily cap is ${NOT_STATED}; each provider page quotes the limits in the provider's words. Compare them in the `));
     } else {
-      segs.push(t(`A published daily request cap is ${NOT_STATED} for the ongoing free tiers in this list; each provider page quotes the limits in the provider's words. Compare them in the `));
+      segs.push(t(`A published daily request cap is ${NOT_STATED} for the ongoing free tiers in this dataset; each provider page quotes the limits in the provider's words. Compare them in the `));
     }
     segs.push(a('renewing free tiers collection', 'collections/renewing-free-tier'), t('.'));
     items.push({ id: 'faq-highest-limits', q: 'Which free LLM API has the highest limits?', segments: segs });
@@ -139,7 +140,7 @@ export function homeFaq(providers) {
     items.push({
       id: 'faq-fresh', q: 'How fresh is this data?',
       segments: [
-        t(`${num(f.verified)} of ${num(f.total)} entries are verified: the free tier, its limits and its catch were read on the provider's own docs on a recorded date.${range} Every entry is due for a re-check ${SLA_DAYS} days after its date.${flagged} See `),
+        t(`${f.verified === f.total ? `All ${num(f.total)}` : `${num(f.verified)} of ${num(f.total)}`} entries are verified: the free tier, its limits and its catch were read on the provider's own docs on a recorded date.${range} Every entry is due for a re-check ${SLA_DAYS} days after its date.${flagged} See `),
         a('what “verified” means', 'methodology/'), t(' and '), a('what changed', 'changes/'), t('.'),
       ],
     });
@@ -170,20 +171,4 @@ export function homeFaqJsonLd(items) {
     '@type': 'FAQPage',
     mainEntity: items.map((it) => ({ '@type': 'Question', name: it.q, acceptedAnswer: { '@type': 'Answer', text: answerText(it) } })),
   };
-}
-
-export const HOME_TITLE_MAX = 60;
-export const HOME_DESC_MAX = 155;
-
-/**
- * The home <title> and meta description, for the search "free llm api": both lead with the query and carry the live
- * provider count and the verified count. `month` is the dataset month ("Nov 2026", from the data, not the clock).
- * The description drops its last clause when a larger count would push it past 155 characters.
- */
-export function homeMeta(providers, { month }) {
-  const f = homeFaqFacts(providers);
-  const title = `Free LLM APIs (${month}): ${num(f.total)} providers, ${num(f.verified)} verified`;
-  const lead = `Free LLM API list: ${num(f.total)} providers (${num(f.ongoing)} free tiers, ${num(f.trial)} trial credits), ${num(f.verified)} verified on the provider's own docs.`;
-  const full = `${lead} Filter by no card, no phone, commercial use.`;
-  return { title, description: full.length <= HOME_DESC_MAX ? full : lead };
 }

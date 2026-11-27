@@ -1,5 +1,4 @@
-// The home FAQ, below the provider table (lib/home-faq.mjs), and the home <title> and meta description for the search
-// "free llm api". Every number in an answer is recounted here from data/providers.json, independently of the module; a
+// The home FAQ, below the provider table (lib/home-faq.mjs). Every number in an answer is recounted here from data/providers.json, independently of the module; a
 // field the dataset does not record is counted as "not stated"; the visible FAQ and the FAQPage JSON-LD on the built
 // page are the same text; the section sits below the table, never in the hero.
 import { test, before } from 'node:test';
@@ -7,7 +6,8 @@ import assert from 'node:assert/strict';
 import { readFileSync, existsSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { join } from 'node:path';
-import { homeFaq, homeFaqHtml, homeFaqJsonLd, homeMeta, answerText, NOT_STATED, HOME_TITLE_MAX, HOME_DESC_MAX } from './lib/home-faq.mjs';
+import { homeFaq, homeFaqHtml, homeFaqJsonLd, answerText, NOT_STATED } from './lib/home-faq.mjs';
+import { providerFigures, figureErrors } from './lib/figures.mjs';
 import { recommendedCmp, SLA_DAYS } from './lib/rules.mjs';
 import { shortDate } from './lib/provider-meta.mjs';
 import { privateTree } from './lib/private-tree.mjs';
@@ -16,7 +16,20 @@ const ROOT = privateTree(join(import.meta.dirname, '..'));
 before(() => { execFileSync(process.execPath, [join(ROOT, 'scripts/build.mjs')], { cwd: ROOT, stdio: 'pipe' }); });
 const PROVIDERS = JSON.parse(readFileSync(join(import.meta.dirname, '..', 'data/providers.json'), 'utf8')).providers;
 const built = () => readFileSync(join(ROOT, 'site/index.html'), 'utf8');
-const decode = (s) => s.replace(/<[^>]+>/g, '').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&amp;/g, '&');
+// The text of a fragment: tags dropped by a left-to-right scan (each `<` up to its `>`), then character references
+// decoded with &amp; last, so "&amp;lt;" reads "&lt;" and not "<" (no double unescaping).
+function decode(s) {
+  let out = '';
+  for (let i = 0; i < s.length;) {
+    const lt = s.indexOf('<', i);
+    if (lt === -1) { out += s.slice(i); break; }
+    out += s.slice(i, lt);
+    const gt = s.indexOf('>', lt);
+    if (gt === -1) break;
+    i = gt + 1;
+  }
+  return out.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&amp;/g, '&');
+}
 const n = (x) => x.toLocaleString('en-US');
 const count = (pred) => PROVIDERS.filter(pred).length;
 const unknown = (k) => count((p) => p[k] === null || p[k] === undefined);
@@ -41,7 +54,7 @@ test('every number in every answer is recounted from data/providers.json, and no
   const verified = count((p) => p.verified === true);
   const items = Object.fromEntries(homeFaq(PROVIDERS).map((it) => [it.id, answerText(it)]));
 
-  assert.deepEqual(numbers(items['faq-is-there']), [total, count((p) => p.category === 'ongoing'), count((p) => p.category === 'trial'), verified]);
+  assert.deepEqual(numbers(items['faq-is-there']), [total, count((p) => p.category === 'ongoing'), count((p) => p.category === 'trial'), ...(verified === total ? [total] : [verified, total])]);
 
   const text = ranked.filter((p) => p.category === 'ongoing' && p.verified === true && p.is_text_llm === true);
   const cap = (p) => (p.free_limits && Number.isInteger(p.free_limits.requests_per_day) ? p.free_limits.requests_per_day : null);
@@ -58,7 +71,7 @@ test('every number in every answer is recounted from data/providers.json, and no
   const dates = PROVIDERS.filter((p) => p.verified === true && p.last_verified).map((p) => p.last_verified).sort();
   const dayYear = (d) => numbers(shortDate(d));
   const unverified = total - verified;
-  assert.deepEqual(numbers(items['faq-fresh']), [verified, total, ...dayYear(dates[0]), ...dayYear(dates.at(-1)), SLA_DAYS, ...(unverified ? [unverified] : [])]);
+  assert.deepEqual(numbers(items['faq-fresh']), [...(verified === total ? [total] : [verified, total]), ...dayYear(dates[0]), ...dayYear(dates.at(-1)), SLA_DAYS, ...(unverified ? [unverified] : [])]);
   assert.ok(items['faq-fresh'].includes(`from ${shortDate(dates[0])} to ${shortDate(dates.at(-1))}`));
 });
 
@@ -127,30 +140,16 @@ test('built home: the FAQ sits below the table, inside main, not in the hero; ev
   }
 });
 
-test('home <title> and description lead with "free llm api" and carry the live provider count and "verified"', () => {
-  const html = built();
-  const title = decode(html.match(/<title>([^<]*)<\/title>/)[1]);
-  const desc = decode(html.match(/<meta name="description" content="([^"]*)">/)[1]);
-  const total = PROVIDERS.length;
-  const verified = count((p) => p.verified === true);
-  assert.match(title, /^Free LLM API/i);
-  assert.match(desc, /^Free LLM API/i);
-  assert.ok(title.length <= HOME_TITLE_MAX, `${title.length} characters: ${title}`);
-  assert.ok(desc.length <= HOME_DESC_MAX, `${desc.length} characters: ${desc}`);
-  for (const s of [title, desc]) {
-    assert.ok(s.includes(`${total} providers`), `the live provider count: ${s}`);
-    assert.ok(s.includes(`${verified} verified`), `the verified count: ${s}`);
+test('the answers follow the dataset\'s wording: a dataset (not a list), "not stated", the counts lib/figures.mjs guards', () => {
+  const figs = providerFigures(PROVIDERS);
+  for (const it of homeFaq(PROVIDERS)) {
+    const a = answerText(it);
+    assert.deepEqual(figureErrors(a, figs, it.id), [], `${it.id}: a dataset-wide count that disagrees with the data`);
+    assert.doesNotMatch(a, /\b(this|the|our) list\b/i, `${it.id}: the hub is a dataset, not a list`);
+    assert.doesNotMatch(a, /\b(unknown|n\/a)\b/i, `${it.id}: an unrecorded value is "${NOT_STATED}"`);
   }
-  assert.equal(decode(html.match(/<meta property="og:title" content="([^"]*)">/)[1]), title);
-  assert.equal(decode(html.match(/<meta property="og:description" content="([^"]*)">/)[1]), desc);
-  assert.equal(decode(html.match(/<meta name="twitter:title" content="([^"]*)">/)[1]), title);
-  assert.equal(decode(html.match(/<meta name="twitter:description" content="([^"]*)">/)[1]), desc);
-});
-
-test('homeMeta stays inside the limits when the counts grow', () => {
-  const many = Array.from({ length: 1234 }, (_, i) => ({ slug: `p${i}`, name: `P${i}`, category: i % 2 ? 'trial' : 'ongoing', verified: true }));
-  const { title, description } = homeMeta(many, { month: 'Sep 2027' });
-  assert.ok(title.length <= HOME_TITLE_MAX, title);
-  assert.ok(description.length <= HOME_DESC_MAX, description);
-  assert.match(description, /1,234 providers/);
+  const all = PROVIDERS.map((p) => ({ ...p, verified: true, last_verified: '2026-11-20' }));
+  const items = Object.fromEntries(homeFaq(all).map((it) => [it.id, answerText(it)]));
+  assert.match(items['faq-is-there'], new RegExp(`all ${all.length} verified against`));
+  assert.match(items['faq-fresh'], new RegExp(`^All ${all.length} entries are verified`));
 });

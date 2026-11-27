@@ -1021,7 +1021,6 @@ const HOME_COUNTS = homeCounts(providers);
 const HOME_TITLE = homeTitle(HOME_COUNTS, TITLE_MONTH);
 const HOME_DESC = homeDescription(HOME_COUNTS, TITLE_MONTH);
 indexHtml = indexHtml.replace(/<title>[^<]*<\/title>/, `<title>${escapeAttr(HOME_TITLE)}</title>`)
-  .replace(/<meta name="description" content="[^"]*">/, `<meta name="description" content="${escapeAttr(HOME_DESC)}">`)
   .replace(/<meta property="og:title" content="[^"]*">/, `<meta property="og:title" content="${escapeAttr(HOME_TITLE)}">`)
   .replace(/<meta name="twitter:title" content="[^"]*">/, `<meta name="twitter:title" content="${escapeAttr(HOME_TITLE)}">`)
   .replace(/<meta name="description" content="[^"]*">/, `<meta name="description" content="${escapeAttr(HOME_DESC)}">`)
