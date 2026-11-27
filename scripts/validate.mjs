@@ -25,7 +25,7 @@ import { reportErrors } from './lib/quotes-report.mjs';
 import { keyHostErrors } from './lib/key-hosts.mjs';
 import { summaryErrors } from './lib/provider-summaries.mjs';
 import { publicHttpsUrlError } from './lib/public-fetch.mjs';
-import { fieldCheckErrors } from './lib/field-checks.mjs';
+import { fieldCheckErrors, unsourcedFlagErrors, unsourcedAllowlistErrors } from './lib/field-checks.mjs';
 import { publishedSpeedErrors } from './lib/published-speed.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -88,6 +88,9 @@ if (!DATE_RE.test(data.generated || '')) errors.push('top-level: generated must 
 // are compared with today, not with `generated`, so a data pull request never has to touch that shared line.
 // VALIDATE_TODAY fixes the day for the tests of this rule.
 const todayUtc = process.env.VALIDATE_TODAY || new Date().toISOString().slice(0, 10);
+// The time box of UNSOURCED_ALLOWLIST (scripts/lib/field-checks.mjs) follows the real clock, not VALIDATE_TODAY: a test that moves
+// the day far ahead for the date rules must not expire it. VALIDATE_ALLOWLIST_TODAY fixes that day for the tests of the allowlist.
+const allowlistToday = process.env.VALIDATE_ALLOWLIST_TODAY || new Date().toISOString().slice(0, 10);
 if (DATE_RE.test(data.generated || '') && data.generated > todayUtc) errors.push(`top-level: generated (${data.generated}) is after today in UTC (${todayUtc}); write the dates of the dataset in UTC (date -u +%F)`);
 if (!Array.isArray(data.providers) || data.providers.length === 0)
   errors.push('top-level: providers must be a non-empty array');
@@ -223,6 +226,8 @@ for (const p of data.providers ?? []) {
 
   // field_checks: why a tri-state flag holds its value (stated, or the reason a null stays null). See docs/comparison-dimensions.md.
   errors.push(...fieldCheckErrors(p, { today: todayUtc }));
+  // The receipts rule: a flag with a value carries the provider's own sentence (a stated check with its quote).
+  errors.push(...unsourcedFlagErrors(p, { today: allowlistToday }));
 
   // published_speed: the provider's own speed figure for a model of its free sample, quoted from its own page (issue #606; see docs/comparison-dimensions.md).
   errors.push(...publishedSpeedErrors(p, { today: todayUtc }));
@@ -316,6 +321,9 @@ if (!FIXTURE_MODE) {
     }
   } catch (e) { errors.push('coding-tools.json: ' + e.message); }
 }
+
+// The time-boxed exceptions to the receipts rule: well-formed and still needed (scripts/lib/field-checks.mjs).
+errors.push(...unsourcedAllowlistErrors(data.providers ?? []));
 
 // ---------- quotes.json (the register of the passages the data_policy rows quote) ----------
 // Consistency only, offline: the sentence of each row, each phrase of a note between guillemets and each claim about a whole page
