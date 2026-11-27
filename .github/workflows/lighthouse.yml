@@ -21,8 +21,13 @@ name: Lighthouse
 #     and pages measured side by side get the same verdict as one at a time.
 #     The job keeps the name of the required check.
 #   - Push to main, nightly and manual runs: performance, median of three runs
-#     per page (one run moves too much: 0.78 and 0.91 on the same commit). A
-#     failure on main opens or updates one issue; a later clean run closes it.
+#     per page (one run moves too much: 0.78 and 0.91 on the same commit). Every
+#     failure on main refreshes the one open issue body with the latest UTC time,
+#     commit, run URL, and failing pages and scores. A comment is added only when
+#     the failing pages or scores differ from the previous failure; an identical
+#     repeated failure adds no comment. The first later clean run replaces the
+#     body with the recovery result and closes the issue. A failure after closure
+#     opens a new issue labelled `bug` and `area:site`.
 #     Pushes by the regeneration bot (free-llm-api-hub-regen[bot]) are skipped.
 #
 # A change that cannot reach the built site (docs other than the methodology, workflows other than this one, root
@@ -145,7 +150,7 @@ jobs:
     needs: performance
     # Main only (push, nightly or a manual run on main), and only when the measurement finished either way. A push
     # the scope step did not measure says nothing about performance, so it neither opens nor closes the issue. A job
-    # that failed before the scope step has no `measured` output and still reports.
+    # that failed before the scope step still reports its failure.
     if: ${{ always() && github.repository == 'pacocartones/free-llm-api-hub' && github.ref == 'refs/heads/main' && (needs.performance.result == 'success' || needs.performance.result == 'failure') && (needs.performance.outputs.measured == 'true' || needs.performance.result == 'failure') }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -161,31 +166,60 @@ jobs:
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           COMMIT: ${{ github.sha }}
         run: |
+          set -euo pipefail
           title='Lighthouse performance below budget'
           number=$(gh issue list --state open --search "in:title \"$title\"" --json number,title \
             --jq "map(select(.title == \"$title\")) | .[0].number // empty")
           body=$(mktemp)
+
           if [ "$RESULT" = failure ]; then
-            {
-              echo "The nightly/main Lighthouse performance check (median of three runs per page, threshold 0.80) failed on \`$COMMIT\`."
-              echo
-              if [ -n "$FAILURES" ]; then
-                echo '```text'
-                printf '%s\n' "$FAILURES" | sed 's/```/` ` `/g'
-                echo '```'
-              else
-                echo 'No budget failure was recorded: the job stopped before measuring (build or install error).'
-              fi
-              echo
-              echo "Run: $RUN_URL"
-            } > "$body"
-            if [ -n "$number" ]; then
-              gh issue comment "$number" --body-file "$body"
+            if [ -n "$FAILURES" ]; then
+              report=$(printf '%s\n' "$FAILURES" | sed 's/```/` ` `/g' | sort -u)
             else
-              gh issue create --title "$title" --label chore --body-file "$body"
+              report='No budget failure was recorded: the job stopped before measuring (for example, during build or install).'
+            fi
+            signature=$(printf '%s\n' "$report" | sha256sum | cut -d' ' -f1)
+            timestamp=$(date -u '+%Y-%m-%d %H:%M:%S UTC')
+            {
+              echo 'Latest result: FAILURE'
+              echo
+              echo "UTC: $timestamp"
+              printf 'Commit: `%s`\n' "$COMMIT"
+              echo "Run: $RUN_URL"
+              echo
+              echo '### Failing pages and scores'
+              echo
+              echo '```text'
+              printf '%s\n' "$report"
+              echo '```'
+              echo
+              echo "<!-- lighthouse-failure-signature: $signature -->"
+            } > "$body"
+
+            if [ -n "$number" ]; then
+              previous_signature=$(gh issue view "$number" --json body --jq '.body' |
+                sed -n 's/.*<!-- lighthouse-failure-signature: \([0-9a-f]*\) -->.*/\1/p' | head -n 1)
+              # Always refresh commit, run URL, UTC time and the current failure details.
+              gh issue edit "$number" --body-file "$body"
+              # Keep the issue timeline quiet unless the failure set or a score actually changed.
+              if [ -n "$previous_signature" ] && [ "$signature" != "$previous_signature" ]; then
+                gh issue comment "$number" --body-file "$body"
+              fi
+            else
+              # A closed issue is not reused: this creates the next failure episode.
+              gh issue create --title "$title" --label bug --label area:site --body-file "$body"
             fi
           elif [ -n "$number" ]; then
-            printf 'Performance is back within budget on `%s`.\n\nRun: %s\n' "$COMMIT" "$RUN_URL" > "$body"
-            gh issue comment "$number" --body-file "$body"
+            timestamp=$(date -u '+%Y-%m-%d %H:%M:%S UTC')
+            {
+              echo 'Latest result: CLEAN — performance is back within budget.'
+              echo
+              echo "UTC: $timestamp"
+              printf 'Commit: `%s`\n' "$COMMIT"
+              echo "Run: $RUN_URL"
+              echo
+              echo 'This is the first clean run after the reported performance failure; the issue is now closed.'
+            } > "$body"
+            gh issue edit "$number" --body-file "$body"
             gh issue close "$number" --reason completed
           fi
