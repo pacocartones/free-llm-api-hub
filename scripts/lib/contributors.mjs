@@ -29,12 +29,22 @@ export function noreplyLogin(email) {
   return m ? m[1] : null;
 }
 
-/** Co-authors of a commit message: [{ name, email }], from its Co-authored-by trailers. */
+/**
+ * Co-authors of a commit message: [{ name, email }], from its Co-authored-by trailers. Parsed with string operations,
+ * not a backtracking regular expression: commit messages are untrusted text.
+ */
 export function coAuthors(message) {
   const out = [];
-  for (const line of String(message || '').split('\n')) {
-    const m = /^\s*co-authored-by:\s*(.*?)\s*<([^>]+)>\s*$/i.exec(line);
-    if (m) out.push({ name: m[1], email: m[2].trim() });
+  const KEY = 'co-authored-by:';
+  for (const raw of String(message || '').split('\n')) {
+    const line = raw.trim();
+    if (line.slice(0, KEY.length).toLowerCase() !== KEY) continue;
+    const rest = line.slice(KEY.length);
+    const open = rest.lastIndexOf('<');
+    if (open < 0 || !rest.endsWith('>')) continue;
+    const email = rest.slice(open + 1, -1).trim();
+    if (!email || email.includes('<') || email.includes('>')) continue;
+    out.push({ name: rest.slice(0, open).trim(), email });
   }
   return out;
 }
@@ -47,8 +57,11 @@ export function parseMergeSubject(subject) {
 
 /** "fix: something (#12)" → 12 (a squash merge); null otherwise. */
 export function squashPr(subject) {
-  const m = /\(#(\d+)\)\s*$/.exec(String(subject || ''));
-  return m ? Number(m[1]) : null;
+  const t = String(subject || '').trimEnd();
+  if (!t.endsWith(')')) return null;
+  const open = t.lastIndexOf('(#');
+  const digits = open < 0 ? '' : t.slice(open + 2, -1);
+  return /^\d{1,9}$/.test(digits) ? Number(digits) : null;
 }
 
 /**
@@ -199,8 +212,13 @@ export function initials(login) {
 
 /** The latest released version in CHANGELOG.md: { version, date } or null. The current cycle starts the day after. */
 export function latestRelease(changelog) {
-  const m = /^## \[(\d+\.\d+\.\d+)\][^\n]*?(\d{4}-\d{2}-\d{2})/m.exec(String(changelog || ''));
-  return m ? { version: m[1], date: m[2] } : null;
+  for (const line of String(changelog || '').split('\n')) {
+    const head = /^## \[(\d+\.\d+\.\d+)\]/.exec(line);
+    if (!head) continue;
+    const date = /\d{4}-\d{2}-\d{2}/.exec(line.slice(head[0].length));
+    if (date) return { version: head[1], date: date[0] };
+  }
+  return null;
 }
 
 /** Contributors whose first contribution landed after the release date (the current cycle). */

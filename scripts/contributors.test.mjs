@@ -35,6 +35,18 @@ test('contributors: Co-authored-by trailers and pull request subjects are read',
   assert.equal(squashPr('docs: see #193 later'), null);
 });
 
+test('contributors: malformed and adversarial trailer and subject lines are ignored quickly', () => {
+  assert.deepEqual(coAuthors('Co-authored-by: no address\nCo-authored-by: <>\nCo-authored-by: A <a@x.org> trailing'), []);
+  const long = 'Co-authored-by:' + ' '.repeat(50000) + 'x';
+  const t0 = Date.now();
+  assert.deepEqual(coAuthors(long), []);
+  assert.equal(squashPr('(#' + '1'.repeat(50000)), null);
+  assert.equal(latestRelease('## [1.0.0]' + ' '.repeat(50000)), null);
+  assert.ok(Date.now() - t0 < 500, 'linear time on long lines');
+  assert.equal(squashPr('fix: x (#12)  '), 12);
+  assert.equal(squashPr('fix: x (#12a)'), null);
+});
+
 test('contributors: bots, apps and coding assistants are not people', () => {
   for (const l of ['dependabot[bot]', 'app/renovate', 'Copilot', 'github-actions', 'claude']) assert.ok(isBotLogin(l), l);
   assert.ok(!isBotLogin('alice'));
