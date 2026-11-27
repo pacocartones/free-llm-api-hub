@@ -1,6 +1,7 @@
 // model-families.mjs — the pages /free-api/<family>/ ("Where can I use <family> for free via API?").
 //
-// One page per open model family (Qwen, Gemma, DeepSeek, Llama, GPT-OSS, GLM): the verified providers whose
+// One page per open model family (Qwen, Gemma, DeepSeek, Llama, GPT-OSS, GLM, Mistral, Kimi, MiniMax, Nemotron,
+// Cohere Command): the verified providers whose
 // free-model sample (`models_free`) lists a model of that family, with the limits, the card/phone/commercial flags and
 // the verification date of each, all read from data/providers.json. Like the per-model pages (model-pages.mjs), a
 // page never says a provider "offers" a model: `models_free` is a sample, not part of the verified core claim, so the
@@ -8,7 +9,9 @@
 // null field reads "Not stated", never "no".
 //
 // Which families: the six with the most verified providers in `models_free` when the pages were added (2026-11-26:
-// Qwen 14, Gemma 12, DeepSeek 10, Llama 8, GPT-OSS 8, GLM 8; Mistral was seventh with 7). The list is fixed so the
+// Qwen 14, Gemma 12, DeepSeek 10, Llama 8, GPT-OSS 8, GLM 8; Mistral was seventh with 7), then the next five with
+// three or more when they were added (2026-11-27: Mistral 7, Kimi 5, MiniMax 5, Nemotron 4, Cohere Command 3; Phi had
+// none and Granite one, so they have no page). The list is fixed so the
 // URLs stay stable when the samples rotate; a family whose count drops below two verified providers keeps its page,
 // with noindex, and leaves the sitemap and llms.txt (the same rule as the model pages).
 //
@@ -39,6 +42,13 @@ export const MODEL_FAMILIES = Object.freeze([
   { slug: 'llama', name: 'Llama', token: /(?:^|[^a-z])llama/i },
   { slug: 'gpt-oss', name: 'GPT-OSS', token: /(?:^|[^a-z])gpt-oss/i },
   { slug: 'glm', name: 'GLM', token: /(?:^|[^a-z])glm/i },
+  // Mistral AI's open model lines all carry their own name (Mixtral, Ministral, Magistral, Codestral, Devstral…).
+  { slug: 'mistral', name: 'Mistral', token: /(?:^|[^a-z])(?:mistral|mixtral|ministral|magistral|codestral|devstral|pixtral|voxtral)/i },
+  { slug: 'kimi', name: 'Kimi', token: /(?:^|[^a-z])kimi/i },
+  { slug: 'minimax', name: 'MiniMax', token: /(?:^|[^a-z])minimax/i },
+  { slug: 'nemotron', name: 'Nemotron', token: /(?:^|[^a-z])nemotron/i },
+  // `command` alone is too common a word: only Cohere's Command A and Command R lines (command-r7b included).
+  { slug: 'command', name: 'Cohere Command', token: /(?:^|[^a-z])command-[ar]/i },
 ].map(Object.freeze));
 
 /**
