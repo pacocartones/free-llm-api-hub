@@ -1,4 +1,5 @@
-import test from 'node:test';
+// test comes from lib/test-part.mjs: node:test's own, unless run-tests.mjs runs this file in parts.
+import { test } from './lib/test-part.mjs';
 import assert from 'node:assert/strict';
 import { cpSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
