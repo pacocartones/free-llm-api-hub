@@ -73,6 +73,8 @@ import { SITEMAPS as INDEXNOW_SITEMAPS } from './lib/indexnow.mjs';
 import { groupModels, modelKey } from './lib/model-keys.mjs';
 import { providerMetaDescription } from './lib/provider-meta.mjs';
 import { answerFirst, providerFaq, providerFaqHtml, providerFaqJsonLd } from './lib/provider-faq.mjs';
+import { homeCounts, homeTitle, homeDescription, llmsCounts } from './lib/home-seo.mjs';
+import { providerDateModified } from './lib/provider-dates.mjs';
 import { isIndexable, modelPageMainHtml, modelPageTitle, modelPageDescription, modelPageJsonLd } from './lib/model-pages.mjs';
 import { FAMILY_PATH, familyGroups, isFamilyIndexable, familyUrl, familyH1, familyPageTitle, familyPageDescription, familyBlurb, familyPageMainHtml, familyNavHtml } from './lib/model-families.mjs';
 import { collectionPageJsonLd as pageJsonLd, comparePageJsonLd } from './lib/page-jsonld.mjs';
@@ -1005,14 +1007,20 @@ const homeStatsHtml = (() => {
   ].join('<span class="st-sep" aria-hidden="true"> · </span>');
 })();
 let indexHtml = readFileSync(join(ROOT, 'site/index.html'), 'utf8');
-// The home title carries the dataset month and the verified count (Q10); og:title and twitter:title repeat it. The
-// build rewrites it on every run, so the number follows the data. It is worded "free tiers & credits" (ongoing tiers
-// and trial credits are both counted), which is also not the "N verified providers" phrasing that lib/figures.mjs
-// guards in hand-written sources: validate.mjs reads site/index.html before the build has rewritten it.
-const HOME_TITLE = `Free LLM APIs (${TITLE_MONTH}): ${providers.filter((p) => p.verified === true).length} verified free tiers & credits`;
+// The home title and description (lib/home-seo.mjs): "Free LLM APIs" first (the site's top query), then the dataset
+// month and the counts, stated the one way the site states them ("84 of 85 verified"). og:/twitter: title and
+// description repeat them. The build rewrites them on every run, so the numbers follow the data. The wording is not the
+// "N verified providers" phrasing that lib/figures.mjs guards in hand-written sources: validate.mjs reads
+// site/index.html before the build has rewritten it.
+const HOME_COUNTS = homeCounts(providers);
+const HOME_TITLE = homeTitle(HOME_COUNTS, TITLE_MONTH);
+const HOME_DESC = homeDescription(HOME_COUNTS, TITLE_MONTH);
 indexHtml = indexHtml.replace(/<title>[^<]*<\/title>/, `<title>${escapeAttr(HOME_TITLE)}</title>`)
   .replace(/<meta property="og:title" content="[^"]*">/, `<meta property="og:title" content="${escapeAttr(HOME_TITLE)}">`)
-  .replace(/<meta name="twitter:title" content="[^"]*">/, `<meta name="twitter:title" content="${escapeAttr(HOME_TITLE)}">`);
+  .replace(/<meta name="twitter:title" content="[^"]*">/, `<meta name="twitter:title" content="${escapeAttr(HOME_TITLE)}">`)
+  .replace(/<meta name="description" content="[^"]*">/, `<meta name="description" content="${escapeAttr(HOME_DESC)}">`)
+  .replace(/<meta property="og:description" content="[^"]*">/, `<meta property="og:description" content="${escapeAttr(HOME_DESC)}">`)
+  .replace(/<meta name="twitter:description" content="[^"]*">/, `<meta name="twitter:description" content="${escapeAttr(HOME_DESC)}">`);
 indexHtml = inject(indexHtml, 'csp', CSP);
 indexHtml = inject(indexHtml, 'themeguard', THEME_GUARD);
 indexHtml = inject(indexHtml, 'fonts', fontHead(''));
@@ -1437,7 +1445,8 @@ for (const p of providers) {
     '@graph': [
       {
         '@type': 'WebPage', name: `${p.name} — free LLM API`, description: p.free_tier, url: `${SITE}/p/${p.slug}`,
-        ...(p.last_verified ? { dateModified: isoDateTime(p.last_verified) } : {}),
+        // The newest day a fact of this provider was read: last_verified or a later field check (lib/provider-dates.mjs).
+        ...(providerDateModified(p) ? { dateModified: isoDateTime(providerDateModified(p)) } : {}),
         isPartOf: websiteRef(SITE), about: datasetRef(SITE, DATASET_FACTS),
       },
       {
@@ -2275,7 +2284,7 @@ const llmsSummary = `A continuously-verified, machine-readable dataset of free-t
 // Each provider has one line (name, free type, one-line limits, its page and the Markdown twin at /p/<slug>.md).
 const llmsTxt =
   `# Free LLM API Hub\n\n> ${llmsSummary}\n\n` +
-  `Data of ${ASOF} · dataset v${data.version} · ${total} providers (${ongoing.length} ongoing free tiers, ${trial.length} trial credits) and ${programCount} apply-to-get credit programs. MIT-licensed. Terms change often: confirm against each provider's own docs, linked from every entry. Every provider page has a Markdown version at the same URL plus \`.md\`.\n\n` +
+  `Data of ${ASOF} · dataset v${data.version} · ${llmsCounts(HOME_COUNTS)}, and ${programCount} apply-to-get credit programs. MIT-licensed. Terms change often: confirm against each provider's own docs, linked from every entry. Every provider page has a Markdown version at the same URL plus \`.md\`.\n\n` +
   `## Start here\n` +
   `- [Find my free API](${SITE}/find/): answer a few questions (modality, card, commercial use) and get the matching providers\n` +
   `- [Top 10 by score](${SITE}/best/): the ranking and [how the score is computed](${SITE}/best/methodology/)\n` +
