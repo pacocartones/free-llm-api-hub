@@ -32,7 +32,7 @@ export const NOT_FREE_HREF = 'not-free/';
 export const LONG_GUIDES = [
   {
     slug: 'openai-api-alternatives',
-    title: 'Free OpenAI API Alternatives (2026): Swap base_url, Keep Your Code',
+    title: 'Free OpenAI API Alternatives ({n}, Checked): Swap base_url',
     metaDesc: "Free alternatives to the OpenAI API for chat, embeddings, speech, vision and OCR: each one's base_url, published free limits and the date we checked them.",
     h1: 'Free alternatives to the OpenAI API',
     card: 'OpenAI API alternatives',
@@ -106,7 +106,7 @@ export const LONG_GUIDES = [
   {
     slug: 'free-llm-api-for-coding',
     group: 'use-case',
-    title: 'Free LLM API for Coding: {n} OpenAI-Compatible Models, Speed and Limits',
+    title: 'Free LLM API for Coding ({n}, Checked): Speed and Limits',
     metaDesc: 'Free LLM APIs for coding assistants and IDE tools: {n} OpenAI-compatible providers with base_url, a free model, published speed and rate limits.',
     h1: 'Free LLM APIs for coding assistants',
     card: 'For coding assistants',
@@ -117,7 +117,7 @@ export const LONG_GUIDES = [
   {
     slug: 'free-api-for-rag',
     group: 'use-case',
-    title: 'Free API for RAG: Embeddings, Reranking and an LLM ({n} Providers)',
+    title: 'Free API for RAG ({n}, Checked): Embeddings, Reranking, LLM',
     metaDesc: 'Build a RAG app on free APIs: {n} providers for embeddings, reranking and a text LLM, a worked stack with code, and each one’s limits and terms.',
     h1: 'Free APIs to build a RAG app',
     card: 'For a RAG app',
@@ -128,7 +128,7 @@ export const LONG_GUIDES = [
   {
     slug: 'free-llm-api-for-ai-agents',
     group: 'use-case',
-    title: 'Free LLM API for AI Agents: Compatibility, Rate Limits, Terms ({n})',
+    title: 'Free LLM API for AI Agents ({n}, Checked): Limits and Terms',
     metaDesc: 'Free LLM APIs for AI agents: {n} free text LLMs with OpenAI compatibility, per-minute limits, commercial use and what the data says on tool calling.',
     h1: 'Free LLM APIs for AI agents',
     card: 'For AI agents',
@@ -139,7 +139,7 @@ export const LONG_GUIDES = [
   {
     slug: 'free-chatbot-api',
     group: 'use-case',
-    title: 'Free Chatbot API for a Side Project: No Card, No Phone ({n} Checked)',
+    title: 'Free Chatbot API for a Side Project: No Card ({n}, Checked)',
     metaDesc: 'Free chatbot APIs for a side project: {n} free text LLMs checked for no card, no phone, commercial use and training on prompts, in the providers’ words.',
     h1: 'Free LLM APIs for a chatbot side project',
     card: 'For a chatbot side project',
