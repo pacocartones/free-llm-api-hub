@@ -93,6 +93,7 @@ import { BADGES_PATH, BADGE_DIR, LISTED_SLUG, providerBadgeSvg, listedBadgeSvg, 
 import { citationRecord, citeBlockHtml } from './lib/citation.mjs';
 import { LONG_GUIDES, longGuidePage } from './lib/long-guides.mjs';
 import { staleClaimErrors, staleClaimsFor, staleClaimsHtml } from './lib/stale-claims.mjs';
+import { readmeHeadline, withReadmeHeadline } from './lib/readme-headline.mjs';
 import { apiExamplesHtml, apiExamplesMarkdown } from './lib/api-examples.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -884,6 +885,8 @@ const LATEST_RELEASE = latestRelease(readFileSync(join(ROOT, 'CHANGELOG.md'), 'u
 }
 
 let readme = readFileSync(join(ROOT, 'README.md'), 'utf8');
+// Line 1 is generated: "# Free LLM API list: N providers, checked <as-of day>" (lib/readme-headline.mjs).
+readme = withReadmeHeadline(readme, readmeHeadline({ providers, asOf: ASOF }));
 readme = inject(readme, 'tagline', `**${TAGLINE}**`);
 readme = inject(readme, 'not-free', notFreeReadmeMd(NOT_FREE, { site: SITE }));
 readme = inject(readme, 'coverage', coverageTable);
