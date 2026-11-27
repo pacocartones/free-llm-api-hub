@@ -427,6 +427,18 @@
       "of": 6,
       "rank": null
     },
+    "google-cloud-stt": {
+      "total": 26,
+      "confirmed": 1,
+      "of": 6,
+      "rank": null
+    },
+    "google-cloud-vision": {
+      "total": 26,
+      "confirmed": 1,
+      "of": 6,
+      "rank": null
+    },
     "rev-ai": {
       "total": 26,
       "confirmed": 1,
@@ -466,6 +478,12 @@
     "photoroom": {
       "total": 24.6,
       "confirmed": 3,
+      "of": 6,
+      "rank": null
+    },
+    "google-cloud-tts": {
+      "total": 22.1,
+      "confirmed": 2,
       "of": 6,
       "rank": null
     },
