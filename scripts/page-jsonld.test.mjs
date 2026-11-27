@@ -7,6 +7,7 @@ import { dirname, join, extname } from 'node:path';
 import { privateTree } from './lib/private-tree.mjs';
 import { breadcrumbList, collectionPageJsonLd, comparePageJsonLd } from './lib/page-jsonld.mjs';
 import { SECTION_OGS } from './lib/og.mjs';
+import { providerDateModified } from './lib/provider-dates.mjs';
 import { redirectStubFiles } from './lib/redirects.mjs';
 
 // Structured data on the index pages, sitemap pages reachable by a link, noindex on the updates pagination, the
@@ -154,13 +155,15 @@ test('pages that name the site or the dataset refer to the home nodes and carry 
   }
 });
 
-test('provider pages: dateModified is the last_verified date the page shows', () => {
+test('provider pages: dateModified is the newest day a fact was read (last_verified or a later check), shown on the page', () => {
   const data = JSON.parse(readFileSync(join(ROOT, 'data/providers.json'), 'utf8'));
-  for (const p of data.providers.filter((x) => x.last_verified).slice(0, 10)) {
+  for (const p of data.providers.filter((x) => x.last_verified)) {
     const html = read(`p/${p.slug}.html`);
     const page = jsonld(html)['@graph'].find((n) => n['@type'] === 'WebPage');
-    assert.equal(page.dateModified, `${p.last_verified}T00:00:00Z`, p.slug);
-    assert.ok(html.includes(p.last_verified), `${p.slug}: the date is visible on the page`);
+    const day = providerDateModified(p);
+    assert.equal(page.dateModified, `${day}T00:00:00Z`, p.slug);
+    assert.ok(day >= p.last_verified, `${p.slug}: never before last_verified`);
+    assert.ok(html.includes(day), `${p.slug}: the date is visible on the page`);
   }
 });
 
