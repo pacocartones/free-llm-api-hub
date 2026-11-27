@@ -65,6 +65,7 @@ test('validate: a reason on a null flag and a stated check on a known flag pass'
 
 const BAD = [
   ['a reason on a known value', () => withCheck('phone_required', true, silent).data, 'so its check must be stated'],
+  ['needs_account on a known value', () => withCheck('phone_required', true, { ...silent, status: 'needs_account' }).data, 'needs_account goes with null'],
   ['stated on a null flag', () => withCheck('phone_required', null, { ...silent, status: 'stated' }).data, 'cannot be stated'],
   ['sources_disagree with one source', () => withCheck('card_required', null, { ...silent, status: 'sources_disagree', note: 'x' }).data, 'needs the two pages that disagree'],
   ['sources_disagree without a note', () => withCheck('card_required', null, { ...silent, status: 'sources_disagree', sources: ['https://example.com/a', 'https://example.com/b'] }).data, 'needs a note'],
