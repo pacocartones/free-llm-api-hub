@@ -54,11 +54,11 @@ test('limits gate: verified, inside the freshness window, sourced free_limits an
 
 test('limits answer: only dataset numbers, and the recorded reason for a null flag', () => {
   const a = limitsAnswer(full);
-  assert.equal(a, 'As of 20 Nov 2026, Alpha publishes these free limits: 30 requests per minute, 1,000 requests per day and 200,000 tokens per day (free plan, each model). Credit card: not required. Phone verification: not stated by the provider. Source: alpha.test.');
+  assert.equal(a, "As of 20 Nov 2026, Alpha publishes these free limits: 30 requests per minute, 1,000 requests per day and 200,000 tokens per day (free plan, each model). Credit card: not required. Phone verification: not stated in the provider's docs. Source: alpha.test.");
   const nums = (a.match(/\d[\d,]*/g) || []).map((n) => Number(n.replace(/,/g, '')));
   const allowed = new Set([30, 1000, 200000, 20, 2026]);
   assert.deepEqual(nums.filter((n) => !allowed.has(n)), [], 'no number that is not in the entry');
-  assert.match(limitsAnswer(without(full, 'phone_required')), /Phone verification: not confirmed\./, 'no check recorded: "not confirmed", never "no"');
+  assert.match(limitsAnswer(without(full, 'phone_required')), /Phone verification: not stated\./, 'no check recorded: "not stated", never "no"');
 });
 
 test('limits title: the verified date only while it is at most 30 days old, with a notice after', () => {
@@ -77,7 +77,7 @@ test('limits page: each fact with its source, quotes where the dataset has them,
   assert.ok(html.includes('href="https://alpha.test/data"'), 'data policy source');
   assert.ok(html.includes('&ldquo;We do not retain inference data.&rdquo;'), 'data policy quote');
   assert.ok(html.includes('&ldquo;No credit card required.&rdquo;'), 'stated field check quote');
-  assert.match(html, /not stated by the provider \(checked 2026-11-20\)/, 'source_silent reason');
+  assert.match(html, /not stated in the provider&#39;s docs \(checked 20 Nov 2026\)/, 'source_silent reason');
   assert.match(html, /needs an account to check/, 'needs_account reason');
   assert.match(html, /does not name the free plan/);
   assert.ok(html.includes('href="../../alternatives/alpha/"') && html.includes('href="../../p/alpha"') && html.includes('href="../../limits/"'));

@@ -7,8 +7,8 @@
 //
 // Thin-content safeguards (§3.3): a page is built only when its template's threshold holds; otherwise there is no page,
 // no sitemap entry and no link to it. Every sentence is a template filled with dataset fields: no free prose, no number
-// that is not in data/providers.json, and a null flag is written as the reason recorded in field_checks ("not stated by
-// the provider", "needs an account to check", ...), never as "no".
+// that is not in data/providers.json, and a null flag is written as the reason recorded in field_checks (REASON_LABEL:
+// "not stated in the provider's docs", "not stated: needs an account to check", ...), never as "no".
 //
 // Pure: build.mjs passes the providers, the dataset date (ASOF), data/not-free.json and its pageHero (the shared hero of
 // every generated page, as for /not-free/); the tests call the same functions. An original that /not-free/ already

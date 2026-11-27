@@ -6,14 +6,15 @@
   and commercial-use flags, the data policy and the verification date. Each
   fact links to its source page and shows its reading date, plus the
   provider's own sentence where the dataset records one. A flag nobody has
-  confirmed is shown with the reason recorded in `field_checks` ("not stated
-  by the provider", "needs an account to check", "provider pages disagree").
+  confirmed reads "not stated", with the reason recorded in `field_checks`
+  when there is one ("not stated in the provider's docs", "not stated: needs
+  an account to check", "not stated: the provider's pages disagree").
   The verified date appears in the title only while it is at most 30 days
   old. A page is built only for a verified entry inside the freshness window
   that has sourced `free_limits` and at least four of five sourced facts.
   Otherwise there is no page and no sitemap entry. A provider with a
   `keys_url` gets the same "Get a free key" button as on its provider page.
-  10 pages today.
+  31 pages today.
 - Free alternatives pages, `/alternatives/<provider>/`, with an index at
   `/alternatives/`, for a fixed list of providers that people look for
   alternatives to. The alternatives are verified providers with the same
