@@ -196,6 +196,22 @@ test('image guide lists the image APIs that don’t generate images in their own
   assert.match(html, /their entries don’t name image generation/);
 });
 
+// Answer engines cite titles with a count and a date (#911): every list-type long guide states "({n}, Checked)". The
+// production checklist is not a list of providers, and the rankings and model families sit with it among the "how to
+// choose" guides, each with its own count wording ("tiers ranked", "Rated", "Providers").
+const HOW_TO_CHOOSE = new Set(['choose-free-llm-api-for-production', 'free-llm-api-highest-limits', 'strongest-free-llm-api', 'free-open-source-llm-api']);
+test('every list-type long guide has its count and ", Checked)" in its title', () => {
+  // The titles #911 rewrote, held to 60 characters at the counts the data gives.
+  const SHORT = new Set(['openai-api-alternatives', 'free-llm-api-for-coding', 'free-api-for-rag', 'free-llm-api-for-ai-agents', 'free-chatbot-api']);
+  for (const g of LONG_GUIDES) {
+    if (HOW_TO_CHOOSE.has(g.slug)) continue;
+    assert.ok(g.title.includes('({n}, Checked)'), `${g.slug}: ${g.title}`);
+    const title = read(g.slug).match(/<title>([^<]*)<\/title>/)[1];
+    assert.match(title, /\(\d+, Checked\)/, `${g.slug}: ${title}`);
+    if (SHORT.has(g.slug)) assert.ok(title.length <= 60, `${g.slug}: title ${title.length} characters`);
+  }
+});
+
 test('discovery pages have unique metadata, self canonicals and exactly one sitemap entry', () => {
   const sitemap = readFileSync(join(ROOT, 'site/sitemap.xml'), 'utf8');
   const titles = new Set(), descriptions = new Set();
