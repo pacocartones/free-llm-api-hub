@@ -36,7 +36,9 @@ If a relevant check could not run, include the error and why it is blocked. -->
 - [ ] **Data changes:** anything I couldn't confirm against the provider's own docs stays `null` or `verified: false`, with a note saying what's unconfirmed.
 - [ ] **`data_policy` changes:** I ran `npm run quotes:add -- <slug>` when required by `docs/quotes.md`.
 - [ ] **`field_checks` or `published_speed` changes:** I ran `npm run quotes:add -- <slug> --field <flag>` for each `stated` entry with a `quote`, or `npm run quotes:add -- <slug> --speed`.
-- [ ] (Optional) I used AI tools for part of this change, and I have read and tested it myself.
+- [ ] **If I used AI tools:** I added an `Assisted-by: <tool>/<model>` line below, listed no tool as a co-author, and I have read and tested the change myself.
+
+Assisted-by: <!-- tool/model, or leave empty if you used none -->
 
 <!-- Taking part in a program such as Social Winter of Code? Link the program issue with `Closes #123`. A maintainer adds the level label when merging. -->
 
