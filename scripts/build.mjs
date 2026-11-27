@@ -386,7 +386,7 @@ const GUIDES = [
     title: 'Free OpenAI-compatible APIs — drop-in base_url · Free LLM API Hub',
     desc: 'Free LLM APIs that expose an OpenAI-compatible endpoint, so you only change base_url and the API key. Confirmed against each provider’s docs.',
     lede: 'Point the OpenAI SDK at a different base_url and keep all of your existing code.',
-    intro: `<p>An OpenAI-compatible API exposes the same <code>/chat/completions</code> shape, so switching is usually a one-line change: swap <code>base_url</code> and the key. That makes these the lowest-friction way to move side projects off paid OpenAI usage, or to add a free fallback behind the same SDK.</p><p>Each provider's exact base URL is on its page, and the free models you can pass as <code>model</code> are in the <a href="../models/">model index</a>.</p>`,
+    intro: `<p>An OpenAI-compatible API exposes the same <code>/chat/completions</code> shape, so switching is usually a one-line change: swap <code>base_url</code> and the key. That makes these the lowest-friction way to move side projects off paid OpenAI usage, or to add a free fallback behind the same SDK.</p><p>Each provider's exact base URL is on its page, and the free models you can pass as <code>model</code> are in the <a href="../models/">model index</a>.</p><p>Switching off the paid OpenAI API? <a href="openai-api-alternatives">Free alternatives to the OpenAI API</a> sorts these providers by use case (chat, embeddings, speech, vision, OCR), with a code sample for the switch.</p>`,
     filter: (p) => p.openai_compatible === true,
     query: '#explorer',
     faq: [

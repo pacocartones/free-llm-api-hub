@@ -8,7 +8,7 @@
 // Pure: each renderer takes the dataset and returns the page parts ({ answer, body, faq, count, featured }); build.mjs
 // adds the page shell, JSON-LD, sitemap entry and hub card. scripts/long-guides.test.mjs pins the lists to the data.
 
-import { recScore, SLA_DAYS, DUE_SOON_DAYS } from './rules.mjs';
+import { recScore, recommendedCmp, SLA_DAYS, DUE_SOON_DAYS } from './rules.mjs';
 import { fieldCheck, REASON_LABEL } from './field-checks.mjs';
 import { pythonEmbeddingsQuickstart, pythonStringLiteral, pythonChatQuickstart, curlChatQuickstart } from './quickstart.mjs';
 import { CONSTRAINTS, constraintState, toHash, explorerHref } from './find.mjs';
@@ -248,15 +248,17 @@ export function alternativesSets(providers) {
   const chat = usable.filter((x) => x.is_text_llm === true);
   const has = (m) => (x) => (x.modalities || []).includes(m);
   const native = (m) => providers.filter((x) => x.verified === true && x.openai_compatible !== true && has(m)(x)).sort(byScore);
+  // The tables follow the site's "Recommended" order (rules.mjs recommendedCmp), the default of the explorer and of
+  // /find/, so the first rows of each table are the ones the explorer would put first.
   return {
     compat,
     noCalls,
-    chatOngoing: chat.filter((x) => x.category === 'ongoing').sort(byScore),
-    chatTrial: chat.filter((x) => x.category === 'trial').sort(byScore),
-    embeddings: usable.filter(has('embeddings')).sort(byScore),
-    speech: usable.filter(has('audio')).sort(byScore),
-    vision: usable.filter(has('vision')).sort(byScore),
-    ocr: usable.filter(has('ocr')).sort(byScore),
+    chatOngoing: chat.filter((x) => x.category === 'ongoing').sort(recommendedCmp),
+    chatTrial: chat.filter((x) => x.category === 'trial').sort(recommendedCmp),
+    embeddings: usable.filter(has('embeddings')).sort(recommendedCmp),
+    speech: usable.filter(has('audio')).sort(recommendedCmp),
+    vision: usable.filter(has('vision')).sort(recommendedCmp),
+    ocr: usable.filter(has('ocr')).sort(recommendedCmp),
     nativeEmbeddings: native('embeddings'),
     nativeSpeech: native('audio'),
     nativeOcr: native('ocr'),
@@ -342,11 +344,11 @@ console.log(resp.choices[0].message.content);`;
   const chatRows = (list) => list.map((x) => [
     providerCell(x, true),
     `${escapeAttr(x.free_tier)}<br><span class="notes">${escapeAttr(x.rate_limits)}</span>${evalMark(x)}`,
-    escapeAttr(cardWords(x)), checkedCell(x),
+    signupCell(x), commercialCell(x), checkedCell(x),
   ]);
-  const freeRows = (list) => list.map((x) => [providerCell(x, false), `${escapeAttr(x.free_tier)}${evalMark(x)}`, escapeAttr(cardWords(x)), checkedCell(x)]);
-  const HEAD_CHAT = ['Provider, base_url and a free model', 'What’s free and the published limits', 'Card', 'Checked'];
-  const HEAD_FREE = ['Provider and base_url', 'What’s free', 'Card', 'Checked'];
+  const freeRows = (list) => list.map((x) => [providerCell(x, false), `${escapeAttr(x.free_tier)}${evalMark(x)}`, signupCell(x), commercialCell(x), checkedCell(x)]);
+  const HEAD_CHAT = ['Provider, base_url and a free model', 'What’s free and the published limits', 'Card and phone', 'Commercial use', 'Checked'];
+  const HEAD_FREE = ['Provider and base_url', 'What’s free', 'Card and phone', 'Commercial use', 'Checked'];
   const nativeLine = (list, what, guideHref) => {
     if (!list.length) return '';
     const shown = list.slice(0, NATIVE_MAX).map((x) => `${L(x)} (${x.category === 'ongoing' ? 'ongoing' : 'one-time credit'})`);
@@ -372,6 +374,7 @@ console.log(resp.choices[0].message.content);`;
     p('Base URLs, key variable names and model IDs are taken from each provider’s entry. Compatibility is often partial: tools, streaming, JSON mode or some endpoints may not be supported. Check the provider page before you depend on a feature.') +
     p(`Every provider page has a ready-made quickstart, and the <a href="${prefix}models/">free model index</a> lists the model IDs each provider serves for free.`) +
     h2('Chat and text generation', 'chat') +
+    p(`The tables on this page list providers in the explorer’s <a href="${prefix}#explorer">Recommended</a> order: renewing text LLMs that need no card first, then by the card, phone and commercial-use answers each provider confirms. An ongoing free tier renews; a trial credit is a one-time amount that runs out. A requirement the provider’s pages do not state is shown as not confirmed, with the reason: it is not a no.`) +
     `<h3>Ongoing free tiers (renewing, no end date)</h3>` + tableHtml('Ongoing free chat APIs that are OpenAI-compatible', HEAD_CHAT, chatRows(s.chatOngoing)) +
     `<h3>One-time trial credits</h3>` + tableHtml('OpenAI-compatible chat APIs with one-time trial credits', HEAD_CHAT, chatRows(s.chatTrial)) +
     (s.noCalls.length ? p(`${s.noCalls.length === 1 ? 'One OpenAI-compatible entry does' : `${s.noCalls.length} OpenAI-compatible entries do`} <strong>not give free model calls</strong> despite the compatible endpoint. Per ${s.noCalls.length === 1 ? 'its entry' : 'their entries'}: ${s.noCalls.map((x) => `${L(x)}: “${escProse(x.free_tier)}”`).join('; ')}. Don’t switch to ${s.noCalls.length === 1 ? 'it' : 'them'} expecting free chat.`) : '') +
@@ -725,6 +728,12 @@ export const speechMentions = (x) => ({ stt: MENTIONS_STT.test(entryText(x)), tt
 const wrapCode = (t) => `<code>${escapeAttr(t).replace(/\//g, '/<wbr>')}</code>`;
 const reasonOf = (x, field) => { const c = fieldCheck(x, field); return REASON_LABEL[c && c.status] || REASON_LABEL.not_checked; };
 const flagWords = (x, field) => (x[field] === false ? 'No' : x[field] === true ? 'Yes' : `Not confirmed (${reasonOf(x, field)})`);
+// The card and phone cell, and the commercial-use cell (the flag in words, then the recorded condition, or the reason
+// it is not stated), shared by the modality tables and the OpenAI alternatives tables.
+const signupCell = (x) => `Card: ${escapeAttr(flagWords(x, 'card_required'))}<br>Phone: ${escapeAttr(flagWords(x, 'phone_required'))}`;
+const commercialCell = (x) => commercialWords(x) +
+  (x.commercial_ok === 'conditional' && x.commercial_ok_condition ? `<br><span class="notes">${escapeAttr(x.commercial_ok_condition)}</span>` : '') +
+  (x.commercial_ok == null ? `<br><span class="notes">${escapeAttr(reasonOf(x, 'commercial_ok'))}</span>` : '');
 const typeLine = (x) => (x.category === 'ongoing' ? 'Ongoing free tier' : 'One-time credit');
 const names = (list) => andList(list.map((x) => escapeAttr(x.name)));
 // The verb that agrees with a list of providers: "Groq allows", "Groq and Gemini allow".
@@ -757,16 +766,12 @@ function modalityTable(label, list, L, { baseUrl = false, model = false, extra =
   const providerCell = (x) => `${L(x)}<br><small>${typeLine(x)}</small>` +
     (baseUrl && x.openai_compatible === true && httpsOnly(x.openai_base_url) ? `<br><small>base_url</small> ${wrapCode(x.openai_base_url)}` : '') +
     (model ? `<br><small>model</small> ${exampleChatModel(x) ? wrapCode(exampleChatModel(x)) : '<span class="notes">see the provider page</span>'}` : '');
-  const commercialCell = (x) => commercialWords(x) +
-    (x.commercial_ok === 'conditional' && x.commercial_ok_condition ? `<br><span class="notes">${escapeAttr(x.commercial_ok_condition)}</span>` : '') +
-    (x.commercial_ok == null ? `<br><span class="notes">${escapeAttr(reasonOf(x, 'commercial_ok'))}</span>` : '');
   const dataCell = (x) => `${escapeAttr(dataUseWords(x))}${x.data_policy && httpsOnly(x.data_policy.source) ? ` (${ext(x.data_policy.source, 'source')})` : ''}`;
   const head = ['Provider', ...extras.map((e) => e.head), 'What’s free and the published limits', 'Card and phone', 'Commercial use', 'Data use', 'Checked'];
   return tableHtml(label, head, list.map((x) => [
     providerCell(x), ...extras.map((e) => e.cell(x)),
     `${escapeAttr(x.free_tier)}<br><span class="notes">${escapeAttr(x.rate_limits)}</span>`,
-    `Card: ${escapeAttr(flagWords(x, 'card_required'))}<br>Phone: ${escapeAttr(flagWords(x, 'phone_required'))}`,
-    commercialCell(x), dataCell(x), checkedCell(x),
+    signupCell(x), commercialCell(x), dataCell(x), checkedCell(x),
   ]));
 }
 
