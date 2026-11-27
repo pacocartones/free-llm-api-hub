@@ -1,10 +1,11 @@
 // Structured data for the index pages that had none: /models/, /changes/, /api/, /updates, /programs/ and the
 // static comparisons. Pure functions of their arguments, so the drift-gated pages stay deterministic.
 //
-// Only types that describe what the page is (CollectionPage, WebPage, ItemList, BreadcrumbList). No Product, Offer
-// or rating: the dataset does not verify prices or reviews, and the model-page spec (#711) rules them out.
+// Only types that describe what the page is (CollectionPage, WebPage, ItemList, BreadcrumbList, and FAQPage for the
+// visible FAQ of a comparison). No Product, Offer or rating: the dataset does not verify prices or reviews, and the model-page spec (#711) rules them out.
 
 import { SITE_NAME, websiteRef } from './site-entity.mjs';
+import { faqPageJsonLd } from './provider-faq.mjs';
 
 export { SITE_NAME };
 
@@ -36,13 +37,15 @@ export function collectionPageJsonLd({ site, name, url, description, crumbs, ite
 }
 
 // A static comparison: the two provider pages as an ItemList, and the trail Home / Compare / A vs B.
-export function comparePageJsonLd({ site, path, a, b }) {
+export function comparePageJsonLd({ site, path, a, b, faq = [] }) {
   const title = `${a.name} vs ${b.name}`;
   return JSON.stringify({
     '@context': 'https://schema.org',
     '@graph': [
       itemList(title, [a, b].map((p) => ({ name: p.name, url: `${site}/p/${p.slug}` }))),
       breadcrumbList(site, [['Compare', `${site}/compare/`], [title, `${site}/compare/${path}/`]]),
+      // The page's FAQ (lib/compare-faq.mjs), the same plain text as the visible answers; absent when there is none.
+      ...(faq.length ? [faqPageJsonLd(faq)] : []),
     ],
   });
 }

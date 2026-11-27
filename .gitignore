@@ -13,6 +13,8 @@ site/guides-and-collections/
 site/best/
 site/p/
 site/badges/
+# Provider badge kit SVGs (/badge/<slug>.svg), emitted by build.mjs from scripts/lib/provider-badges.mjs
+site/badge/
 site/legal/
 site/programs/
 site/updates.html
@@ -20,6 +22,7 @@ site/updates/
 site/feed.xml
 site/changes/
 site/changes.xml
+site/changes.atom
 site/state/
 site/sitemap-state.xml
 site/api/
@@ -61,3 +64,7 @@ tools/lighthouse/node_modules/
 # "Find my free API" (/find/): the page and its shared filter bundle, emitted by build.mjs from scripts/lib/find.mjs + find-page.mjs
 site/find/
 site/shared-find.js
+
+# Screenshot runner (docs/screenshots.md): its dependencies (installed from tools/screenshots/package-lock.json) and output
+tools/screenshots/node_modules/
+tools/screenshots/out/

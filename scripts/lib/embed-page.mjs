@@ -76,6 +76,7 @@ export function embedMainHtml({ pageHero, site, prefix = '../', providers, badge
     `<p>HTML:</p>` +
     pre('badge', providerBadgeHtml(first, site), 'badge-snippet-html') +
     `<p class="muted">Each provider page links here with its badge selected.</p>` +
+    `<p>Prefer a badge served by this site, with the offer and the date in the Cálida style and a dark variant? See <a href="${prefix}badges/">Provider badges</a>.</p>` +
     `<h2 id="data">Data files</h2>` +
     `<ul>` +
     `<li><a href="${prefix}providers.json">providers.json</a>: every provider, every field, validated against the <a href="${prefix}api/v1/schema.json">published schema</a>.</li>` +

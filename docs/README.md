@@ -11,7 +11,7 @@ How **Free LLM API Hub** works — how entries are verified, what earns a spot, 
 | [Inclusion criteria](inclusion-criteria.md) | What earns a spot, and what gets rejected |
 | [Comparison dimensions](comparison-dimensions.md) | Every field and flag in the dataset, defined |
 
-## Maintaining the list
+## Maintaining the dataset
 
 | Doc | What it covers |
 |---|---|
@@ -29,6 +29,7 @@ How **Free LLM API Hub** works — how entries are verified, what earns a spot, 
 | [Preparing dataset releases](release-preparation.md) | Stable local preparation procedure for dataset tags, GitHub Releases and snapshot assets |
 | [MCP product boundaries and release checklist](mcp-productization.md) | Product limits and pre-release checks for public distribution of the MCP server |
 | [MCP release setup](mcp-release.md) | Maintainer procedure for external setup and release of the MCP package |
+| [Screenshots](screenshots.md) | Regenerating the gallery and pull-request screenshots on demand, with live numbers |
 
 ## Adjacent references
 
