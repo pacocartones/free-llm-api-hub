@@ -11,7 +11,8 @@
   is "Free LLM API for commercial use: what each provider’s terms allow (N
   checked)". The home `<title>` reads "Free LLM API list (<month>): …". Every
   count and date is filled from the data; the h1, the JSON-LD names and
-  llms.txt say the same as the `<title>` (`scripts/aeo-titles.test.mjs`).
+  llms.txt say the same as the `<title>` (`scripts/aeo-titles.test.mjs`)
+  (#1030).
 
 ### Added
 
@@ -23,4 +24,4 @@
   `data/stale-claims.json` (claim, where it was seen, the day it was noted,
   the evidence); the build refuses an entry whose provider, quote or field it
   cannot resolve (`scripts/lib/stale-claims.mjs`,
-  `scripts/stale-claims.test.mjs`).
+  `scripts/stale-claims.test.mjs`) (#1030).
