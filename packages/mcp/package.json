@@ -1,6 +1,6 @@
 {
   "name": "free-llm-api-hub-mcp",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "MCP server over the free-llm-api-hub dataset: search free-tier LLM API providers, read an entry, check its freshness, ask whether it is free, and get an OpenAI-client config.",
   "license": "MIT",
   "type": "module",
