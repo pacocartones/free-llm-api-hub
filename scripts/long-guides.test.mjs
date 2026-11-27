@@ -693,7 +693,7 @@ describe('the ranking and model-family guides', () => {
     const at = html.indexOf('aria-label="Free API providers per open model family"');
     const rows = [...html.slice(at, html.indexOf('</tbody>', at)).matchAll(/<tr><td class="name"><a href="\.\.\/free-api\/([a-z-]+)\/">[^<]*<\/a><\/td><td>(\d+)<\/td>/g)];
     assert.deepEqual(Object.fromEntries(rows.map((m) => [m[1], Number(m[2])])), Object.fromEntries(groups.map((g) => [g.slug, g.entries.length])));
-    assert.doesNotMatch(textOf(html), /\boffers? (a |the )?(Qwen|Gemma|DeepSeek|Llama|GPT-OSS|GLM)\b/i);
+    assert.doesNotMatch(textOf(html), /\boffers? (a |the )?(Qwen|Gemma|DeepSeek|Llama|GPT-OSS|GLM|Mistral|Kimi|MiniMax|Nemotron|Cohere Command)\b/i);
     assert.ok(textOf(html).includes('not their licences'), 'says licences are not recorded');
   });
 

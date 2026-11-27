@@ -178,8 +178,8 @@ export const LONG_GUIDES = [
   {
     slug: 'free-open-source-llm-api',
     title: 'Free API for Open Models: Qwen, Gemma, DeepSeek, Llama ({n} Providers)',
-    metaDesc: '{n} free APIs listing open model families (Qwen, Gemma, DeepSeek, Llama, GPT-OSS, GLM): the exact model IDs, limits, card and commercial use for each.',
-    h1: 'Free APIs for open models: Qwen, Gemma, DeepSeek, Llama, GPT-OSS and GLM',
+    metaDesc: '{n} free APIs listing open model families (Qwen, Gemma, DeepSeek, Llama, Mistral, Kimi and more): the exact model IDs, limits, card and commercial use.',
+    h1: 'Free APIs for open models: Qwen, Gemma, DeepSeek, Llama, Mistral and more',
     card: 'Open models (Qwen, Llama…)',
     blurb: 'Who lists each open model family on a free tier.',
     ogTitle: 'Free APIs for open models',
@@ -1836,7 +1836,7 @@ function strongestGuide({ providers, prefix }) {
   return { count: S.rated.length, answer, body, faq, featured: S.rated };
 }
 
-// ---------- guide 15: free APIs for open models (the six model families) ----------
+// ---------- guide 15: free APIs for open models (the model families) ----------
 // The families and the rule that puts an ID in one are lib/model-families.mjs's, so the counts here are the family
 // pages' counts. Like those pages, a provider "lists" a model in its free sample; it is never said to "offer" it.
 export function openModelSets(providers) {
