@@ -97,18 +97,18 @@ test('validate: a recorded value carries its check, a check carries its value, a
   assert.equal(r.status, 0, r.output);
 });
 
-// The providers added to main after the terms research (2026-11-26) whose terms have not been read for these two flags yet.
-// They carry neither flag, so their pages read "Not stated"; the list only shrinks: recording a provider's flags means removing it here.
+// The providers added to main after the terms research (2026-11-26) whose terms have not been read for these two flags yet
+// (their terms pages could not be reached in the 2026-11-27 sync). They carry neither flag, so their pages read "Not stated";
+// the list only shrinks: recording a provider's flags means removing it here.
 const TERMS_PENDING = new Set([
-  'requesty', 'kilo-gateway', 'experiential-labs', 'google-cloud-tts', 'google-cloud-stt', 'google-cloud-vision',
-  'amazon-bedrock', 'oci-generative-ai', 'reducto', 'lightning-ai', 'azure-document-intelligence', 'nscale',
-  'gonka-broker', 'moark', 'morph', 'synap',
+  'requesty', 'kilo-gateway', 'experiential-labs', 'amazon-bedrock', 'oci-generative-ai', 'reducto', 'lightning-ai',
+  'azure-document-intelligence', 'nscale', 'gonka-broker', 'moark', 'morph', 'synap',
 ]);
 
 test('the dataset: every researched provider carries both flags with a check; nulls are source_silent; stated quotes are registered', () => {
   const slugs = new Set(DATA.providers.map((p) => p.slug));
   for (const s of TERMS_PENDING) assert.ok(slugs.has(s), `TERMS_PENDING ${s}: no provider has that slug, so remove it`);
-  assert.equal(DATA.providers.filter((p) => !TERMS_PENDING.has(p.slug)).length, 79, 'the 79 providers of the research');
+  assert.equal(DATA.providers.filter((p) => !TERMS_PENDING.has(p.slug)).length, 82, 'the 79 providers of the research and the three Google Cloud APIs read on 2026-11-27');
   for (const p of DATA.providers) {
     if (TERMS_PENDING.has(p.slug)) {
       for (const f of TERMS_FLAG_FIELDS) assert.ok(!(f in p) && !p.field_checks?.[f], `${p.slug}: ${f} is recorded now, so remove it from TERMS_PENDING`);

@@ -888,7 +888,7 @@
    "field": "multi_account_forbidden",
    "text": "Only one free plan is permitted per one application or website, and per one IP address.",
    "source_url": "https://nlpcloud.com/tos.html",
-   "read_on": "2026-11-26",
+   "read_on": "2026-11-27",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": null
@@ -3612,6 +3612,78 @@
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "8a48287227723817e6b821456539394abfb12a1fe1a6caa267828acec7c01737"
+  },
+  {
+   "id": "google-cloud-tts.limit_circumvention_forbidden.sentence",
+   "slug": "google-cloud-tts",
+   "kind": "field_sentence",
+   "field": "limit_circumvention_forbidden",
+   "text": "(iii) in a manner intended to avoid incurring Fees (including creating multiple Customer Applications, Accounts, or Projects to simulate or act as a single Customer Application, Account, or Project (respectively)) or to circumvent Service-specific usage limits or quotas;",
+   "source_url": "https://cloud.google.com/terms",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": null
+  },
+  {
+   "id": "google-cloud-tts.multi_account_forbidden.sentence",
+   "slug": "google-cloud-tts",
+   "kind": "field_sentence",
+   "field": "multi_account_forbidden",
+   "text": "(iii) in a manner intended to avoid incurring Fees (including creating multiple Customer Applications, Accounts, or Projects to simulate or act as a single Customer Application, Account, or Project (respectively)) or to circumvent Service-specific usage limits or quotas;",
+   "source_url": "https://cloud.google.com/terms",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": null
+  },
+  {
+   "id": "google-cloud-stt.limit_circumvention_forbidden.sentence",
+   "slug": "google-cloud-stt",
+   "kind": "field_sentence",
+   "field": "limit_circumvention_forbidden",
+   "text": "(iii) in a manner intended to avoid incurring Fees (including creating multiple Customer Applications, Accounts, or Projects to simulate or act as a single Customer Application, Account, or Project (respectively)) or to circumvent Service-specific usage limits or quotas;",
+   "source_url": "https://cloud.google.com/terms",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": null
+  },
+  {
+   "id": "google-cloud-stt.multi_account_forbidden.sentence",
+   "slug": "google-cloud-stt",
+   "kind": "field_sentence",
+   "field": "multi_account_forbidden",
+   "text": "(iii) in a manner intended to avoid incurring Fees (including creating multiple Customer Applications, Accounts, or Projects to simulate or act as a single Customer Application, Account, or Project (respectively)) or to circumvent Service-specific usage limits or quotas;",
+   "source_url": "https://cloud.google.com/terms",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": null
+  },
+  {
+   "id": "google-cloud-vision.limit_circumvention_forbidden.sentence",
+   "slug": "google-cloud-vision",
+   "kind": "field_sentence",
+   "field": "limit_circumvention_forbidden",
+   "text": "(iii) in a manner intended to avoid incurring Fees (including creating multiple Customer Applications, Accounts, or Projects to simulate or act as a single Customer Application, Account, or Project (respectively)) or to circumvent Service-specific usage limits or quotas;",
+   "source_url": "https://cloud.google.com/terms",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": null
+  },
+  {
+   "id": "google-cloud-vision.multi_account_forbidden.sentence",
+   "slug": "google-cloud-vision",
+   "kind": "field_sentence",
+   "field": "multi_account_forbidden",
+   "text": "(iii) in a manner intended to avoid incurring Fees (including creating multiple Customer Applications, Accounts, or Projects to simulate or act as a single Customer Application, Account, or Project (respectively)) or to circumvent Service-specific usage limits or quotas;",
+   "source_url": "https://cloud.google.com/terms",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": null
   },
   {
    "id": "amazon-bedrock.sentence",
