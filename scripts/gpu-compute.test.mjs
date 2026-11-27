@@ -1,4 +1,5 @@
 import { test } from 'node:test';
+import { humanDate } from './lib/dates.mjs';
 import assert from 'node:assert/strict';
 import { readFileSync, existsSync, readdirSync } from 'node:fs';
 import { privateTree } from './lib/private-tree.mjs';
@@ -120,7 +121,7 @@ test('the section has a page that shows its quotations and stays out of every pr
     for (const c of Object.values(e.claims)) {
       for (const q of c.quotes) {
         assert.ok(html.includes(escapeHtml(q.text)), `a quotation of ${e.name} is missing from the page`);
-        assert.ok(html.includes(`read ${q.read}`), `the read date of a quotation of ${e.name} is missing`);
+        assert.ok(html.includes(`read <time datetime="${q.read}">${humanDate(q.read)}</time>`), `the read date of a quotation of ${e.name} is missing`);
       }
     }
   }

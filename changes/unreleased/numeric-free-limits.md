@@ -10,4 +10,4 @@
   - Photoroom (`photoroom`): 1,000 sandbox calls a month on the Image Editing
     API.
   - Azure Speech (`azure-speech`): 20 requests per minute for F0 real-time
-    text to speech, which the page words as "20 transactions per 60 seconds".
+    text to speech, which the page words as "20 transactions per 60 seconds" (#941).

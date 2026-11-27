@@ -63,10 +63,10 @@ test('TL;DR flag claims match the dataset', () => {
     assert.equal(p.card_required, false, `${p.slug} is listed as no card`);
     assert.equal(p.phone_required, false, `${p.slug} is listed as no phone`);
   }
-  for (const p of named(...row("No card; phone not confirmed").slugs)) {
+  for (const p of named(...row("No card; phone not stated").slugs)) {
     assert.equal(p.card_required, false, `${p.slug} is listed as no card`);
-    assert.equal(p.phone_required, null, `${p.slug} is listed as phone not confirmed`);
-    assert.ok(p.field_checks?.phone_required, `${p.slug} records why its phone flag is unknown`);
+    assert.equal(p.phone_required, null, `${p.slug} is listed as phone not stated`);
+    assert.ok(p.field_checks?.phone_required, `${p.slug} records why its phone flag is not stated`);
   }
   // "SiliconFlow and Tencent Hunyuan gate signup behind phone verification"
   for (const p of named('siliconflow', 'tencent-hunyuan')) assert.equal(p.phone_required, true, `${p.slug} is named as phone-gated`);

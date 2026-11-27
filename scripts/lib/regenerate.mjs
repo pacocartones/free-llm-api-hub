@@ -34,11 +34,16 @@ export const outsideAllowlist = (paths) => paths.filter((p) => !isRegenerationTa
 // Whether this run should rebuild at all. `event` is github.event_name, `actor` github.actor, `botLogin` the App's
 // login (`<slug>[bot]`, may be empty while no App is configured), `headMessage` the full message of main's tip.
 // The actor and message rules apply to pushes only: a scheduled or manual run is idempotent and always welcome.
+// The merge manager (docs/maintenance/merge-train.md) merges approved pull requests with the same App, so a push by
+// the App whose tip is a pull-request merge is a merge like any other: it is regenerated and deployed. Only the App's
+// own `chore(generated):` commits (and any other direct push by it) are skipped.
+export const isPullRequestMerge = (headMessage = '') => /^Merge pull request #\d+ /.test(String(headMessage).trimStart());
+
 export const loopGuard = ({ mode, event, actor = '', botLogin = '', headMessage = '' }) => {
   const m = parseMode(mode);
   if (m === 'off') return { run: false, reason: 'REGEN_MODE is not shadow or push: the workflow is disabled' };
   if (event === 'push') {
-    if (botLogin && actor === botLogin) return { run: false, reason: `the push was made by the bot (${actor})` };
+    if (botLogin && actor === botLogin && !isPullRequestMerge(headMessage)) return { run: false, reason: `the push was made by the bot (${actor})` };
     if (actor === 'github-actions[bot]') return { run: false, reason: 'the push was made by GITHUB_TOKEN' };
     if (headMessage.trimStart().startsWith(BOT_COMMIT_PREFIX)) {
       return { run: false, reason: `main's tip is a bot commit (${BOT_COMMIT_PREFIX})` };
@@ -127,7 +132,7 @@ export const startsRegeneration = (path) => typeof path === 'string' && !REGENER
 //   conclusion  headBranch  of the finished "Regenerate derived files" run (workflow_run only)
 // Outside push mode it deploys as before on push, schedule and manual runs, and ignores workflow_run (the push
 // already deployed). In push mode a push the bot will follow is skipped, and the finished bot run deploys.
-export const pagesDeploy = ({ mode, event, actor = '', botLogin = '', changed = null, conclusion = '', headBranch = '' }) => {
+export const pagesDeploy = ({ mode, event, actor = '', botLogin = '', changed = null, conclusion = '', headBranch = '', headMessage = '' }) => {
   const m = parseMode(mode);
   if (event === 'workflow_run') {
     if (m !== 'push') return { deploy: false, reason: `REGEN_MODE is ${m}: the push itself deployed` };
@@ -136,7 +141,7 @@ export const pagesDeploy = ({ mode, event, actor = '', botLogin = '', changed = 
     return { deploy: true, reason: 'the regeneration run on main finished' };
   }
   if (event !== 'push' || m !== 'push') return { deploy: true, reason: `${event}, mode ${m}` };
-  if (botLogin && actor === botLogin) return { deploy: false, reason: 'a push by the bot: its finished run deploys (workflow_run)' };
+  if (botLogin && actor === botLogin && !isPullRequestMerge(headMessage)) return { deploy: false, reason: 'a push by the bot: its finished run deploys (workflow_run)' };
   if (!Array.isArray(changed)) return { deploy: true, reason: 'the pushed paths could not be listed' };
   const inputs = changed.filter(startsRegeneration);
   if (inputs.length) return { deploy: false, reason: `the push changes regeneration inputs (${inputs.slice(0, 5).join(', ')}): the bot's run deploys` };

@@ -1,0 +1,757 @@
+{
+  "generated": "2026-11-27",
+  "source": "The git history of main: commit authors and Co-authored-by trailers, credited by public GitHub handle. Written by `npm run contributors`; never edit by hand.",
+  "contributors": [
+    {
+      "login": "JhansiOruganti-43",
+      "contributions": 1,
+      "prs": [
+        27
+      ],
+      "first": "2026-08-11",
+      "last": "2026-08-11",
+      "kinds": [
+        "data"
+      ]
+    },
+    {
+      "login": "OdaloV",
+      "contributions": 1,
+      "prs": [
+        112
+      ],
+      "first": "2026-08-12",
+      "last": "2026-08-12",
+      "kinds": [
+        "data"
+      ]
+    },
+    {
+      "login": "MikeGatsby",
+      "contributions": 1,
+      "prs": [
+        117
+      ],
+      "first": "2026-08-13",
+      "last": "2026-08-13",
+      "kinds": [
+        "data"
+      ]
+    },
+    {
+      "login": "bcabreraike-cmyk",
+      "contributions": 1,
+      "prs": [
+        169
+      ],
+      "first": "2026-08-14",
+      "last": "2026-08-14",
+      "kinds": [
+        "docs"
+      ]
+    },
+    {
+      "login": "Swarnabha753",
+      "contributions": 1,
+      "prs": [
+        183
+      ],
+      "first": "2026-08-14",
+      "last": "2026-08-14",
+      "kinds": [
+        "site"
+      ]
+    },
+    {
+      "login": "mananbharti",
+      "contributions": 10,
+      "prs": [
+        201,
+        242,
+        506,
+        515,
+        516,
+        517,
+        518,
+        770,
+        869,
+        870
+      ],
+      "first": "2026-10-08",
+      "last": "2026-11-26",
+      "kinds": [
+        "data",
+        "site",
+        "docs",
+        "tests"
+      ]
+    },
+    {
+      "login": "piyusshhjangid",
+      "contributions": 1,
+      "prs": [
+        198
+      ],
+      "first": "2026-10-08",
+      "last": "2026-10-08",
+      "kinds": [
+        "data",
+        "site",
+        "docs"
+      ]
+    },
+    {
+      "login": "devilking7x",
+      "contributions": 1,
+      "prs": [
+        270
+      ],
+      "first": "2026-10-13",
+      "last": "2026-10-13",
+      "kinds": [
+        "data",
+        "site"
+      ]
+    },
+    {
+      "login": "rajpreetcodes",
+      "contributions": 10,
+      "prs": [
+        290,
+        293,
+        302,
+        375,
+        400,
+        401,
+        402,
+        403,
+        406,
+        412
+      ],
+      "first": "2026-10-13",
+      "last": "2026-10-17",
+      "kinds": [
+        "data",
+        "site",
+        "docs",
+        "tests"
+      ]
+    },
+    {
+      "login": "TrueFurina",
+      "contributions": 1,
+      "prs": [
+        193
+      ],
+      "first": "2026-10-13",
+      "last": "2026-10-13",
+      "kinds": [
+        "docs"
+      ]
+    },
+    {
+      "login": "Muthulakshmikumar",
+      "contributions": 1,
+      "prs": [
+        269
+      ],
+      "first": "2026-10-14",
+      "last": "2026-10-14",
+      "kinds": [
+        "data",
+        "site",
+        "docs"
+      ]
+    },
+    {
+      "login": "snehassneha4578-collab",
+      "contributions": 3,
+      "prs": [
+        295,
+        377,
+        459
+      ],
+      "first": "2026-10-14",
+      "last": "2026-10-17",
+      "kinds": [
+        "data",
+        "site",
+        "tests"
+      ]
+    },
+    {
+      "login": "adityamukesh",
+      "contributions": 3,
+      "prs": [
+        354,
+        386,
+        398
+      ],
+      "first": "2026-10-15",
+      "last": "2026-10-16",
+      "kinds": [
+        "data",
+        "site",
+        "docs",
+        "tests"
+      ]
+    },
+    {
+      "login": "Enard52",
+      "contributions": 2,
+      "prs": [
+        321,
+        327
+      ],
+      "first": "2026-10-15",
+      "last": "2026-11-14",
+      "kinds": [
+        "data",
+        "site",
+        "docs",
+        "tests"
+      ]
+    },
+    {
+      "login": "hari45wavin",
+      "contributions": 4,
+      "prs": [
+        349,
+        350,
+        351,
+        352
+      ],
+      "first": "2026-10-15",
+      "last": "2026-10-16",
+      "kinds": [
+        "site",
+        "docs",
+        "tests",
+        "ci"
+      ]
+    },
+    {
+      "login": "GarvSaxena",
+      "contributions": 1,
+      "prs": [
+        394
+      ],
+      "first": "2026-10-16",
+      "last": "2026-10-16",
+      "kinds": [
+        "data",
+        "site",
+        "tests"
+      ]
+    },
+    {
+      "login": "mohitjoshi-hey",
+      "contributions": 2,
+      "prs": [
+        395,
+        396
+      ],
+      "first": "2026-10-16",
+      "last": "2026-10-16",
+      "kinds": [
+        "docs"
+      ]
+    },
+    {
+      "login": "Utkarsh-rwt",
+      "contributions": 1,
+      "prs": [
+        393
+      ],
+      "first": "2026-10-16",
+      "last": "2026-10-16",
+      "kinds": [
+        "site",
+        "tests"
+      ]
+    },
+    {
+      "login": "xsupremeyx",
+      "contributions": 2,
+      "prs": [
+        385,
+        411
+      ],
+      "first": "2026-10-16",
+      "last": "2026-10-16",
+      "kinds": [
+        "data",
+        "site",
+        "docs",
+        "tests"
+      ]
+    },
+    {
+      "login": "Aaqibhafeezkhan",
+      "contributions": 4,
+      "prs": [
+        389,
+        391,
+        505,
+        637
+      ],
+      "first": "2026-10-17",
+      "last": "2026-11-16",
+      "kinds": [
+        "data",
+        "site",
+        "docs",
+        "tests"
+      ]
+    },
+    {
+      "login": "SwatiManjari",
+      "contributions": 1,
+      "prs": [
+        397
+      ],
+      "first": "2026-10-17",
+      "last": "2026-10-17",
+      "kinds": [
+        "data",
+        "site"
+      ]
+    },
+    {
+      "login": "montionugera",
+      "contributions": 1,
+      "prs": [
+        478
+      ],
+      "first": "2026-10-18",
+      "last": "2026-10-18",
+      "kinds": [
+        "site",
+        "tests"
+      ]
+    },
+    {
+      "login": "omisha123",
+      "contributions": 1,
+      "prs": [
+        473
+      ],
+      "first": "2026-10-18",
+      "last": "2026-10-18",
+      "kinds": [
+        "docs"
+      ]
+    },
+    {
+      "login": "purnimaraj864-star",
+      "contributions": 3,
+      "prs": [
+        399,
+        484,
+        488
+      ],
+      "first": "2026-10-18",
+      "last": "2026-11-14",
+      "kinds": [
+        "data",
+        "site",
+        "docs",
+        "tests"
+      ]
+    },
+    {
+      "login": "abhi478jeetur-rgb",
+      "contributions": 3,
+      "prs": [
+        594,
+        598,
+        624
+      ],
+      "first": "2026-11-14",
+      "last": "2026-11-14",
+      "kinds": [
+        "data",
+        "docs"
+      ]
+    },
+    {
+      "login": "dannyward630",
+      "contributions": 1,
+      "prs": [
+        511
+      ],
+      "first": "2026-11-14",
+      "last": "2026-11-14",
+      "kinds": [
+        "data",
+        "site",
+        "docs"
+      ]
+    },
+    {
+      "login": "duy-dev-26",
+      "contributions": 1,
+      "prs": [
+        592
+      ],
+      "first": "2026-11-14",
+      "last": "2026-11-14",
+      "kinds": [
+        "site"
+      ]
+    },
+    {
+      "login": "harshkanhat",
+      "contributions": 4,
+      "prs": [
+        623,
+        624,
+        625,
+        626
+      ],
+      "first": "2026-11-14",
+      "last": "2026-11-14",
+      "kinds": [
+        "data",
+        "site",
+        "docs"
+      ]
+    },
+    {
+      "login": "Logic769",
+      "contributions": 1,
+      "prs": [
+        507
+      ],
+      "first": "2026-11-14",
+      "last": "2026-11-14",
+      "kinds": [
+        "docs"
+      ]
+    },
+    {
+      "login": "Rishankgupta08",
+      "contributions": 1,
+      "prs": [
+        622
+      ],
+      "first": "2026-11-14",
+      "last": "2026-11-14",
+      "kinds": [
+        "docs"
+      ]
+    },
+    {
+      "login": "teotiabhumik-ship-it",
+      "contributions": 1,
+      "prs": [
+        610
+      ],
+      "first": "2026-11-14",
+      "last": "2026-11-14",
+      "kinds": [
+        "docs"
+      ]
+    },
+    {
+      "login": "wangyusheng1985",
+      "contributions": 1,
+      "prs": [
+        429
+      ],
+      "first": "2026-11-14",
+      "last": "2026-11-14",
+      "kinds": [
+        "data",
+        "site",
+        "docs",
+        "tests"
+      ]
+    },
+    {
+      "login": "BloosomNet",
+      "contributions": 11,
+      "prs": [
+        647,
+        675,
+        678,
+        688,
+        690,
+        691,
+        692,
+        697,
+        698,
+        773,
+        776
+      ],
+      "first": "2026-11-19",
+      "last": "2026-11-25",
+      "kinds": [
+        "data",
+        "site",
+        "docs",
+        "tests"
+      ]
+    },
+    {
+      "login": "aryankalantri",
+      "contributions": 2,
+      "prs": [
+        680,
+        681
+      ],
+      "first": "2026-11-20",
+      "last": "2026-11-20",
+      "kinds": [
+        "data",
+        "site"
+      ]
+    },
+    {
+      "login": "Abhishekkumar071",
+      "contributions": 2,
+      "prs": [
+        689,
+        722
+      ],
+      "first": "2026-11-24",
+      "last": "2026-11-24",
+      "kinds": [
+        "data",
+        "site",
+        "docs"
+      ]
+    },
+    {
+      "login": "Sumit-sourabh45",
+      "contributions": 1,
+      "prs": [
+        685
+      ],
+      "first": "2026-11-24",
+      "last": "2026-11-24",
+      "kinds": [
+        "data"
+      ]
+    },
+    {
+      "login": "aaas72",
+      "contributions": 2,
+      "prs": [
+        768,
+        769
+      ],
+      "first": "2026-11-25",
+      "last": "2026-11-25",
+      "kinds": [
+        "docs"
+      ]
+    },
+    {
+      "login": "Abhishek882772",
+      "contributions": 1,
+      "prs": [
+        783
+      ],
+      "first": "2026-11-25",
+      "last": "2026-11-25",
+      "kinds": [
+        "data",
+        "site",
+        "docs"
+      ]
+    },
+    {
+      "login": "AyhamJo7",
+      "contributions": 7,
+      "prs": [
+        782,
+        785,
+        797,
+        807,
+        819,
+        821,
+        822
+      ],
+      "first": "2026-11-25",
+      "last": "2026-11-26",
+      "kinds": [
+        "data",
+        "site",
+        "docs",
+        "tests",
+        "ci"
+      ]
+    },
+    {
+      "login": "duan-n2d",
+      "contributions": 1,
+      "prs": [
+        780
+      ],
+      "first": "2026-11-25",
+      "last": "2026-11-25",
+      "kinds": [
+        "data"
+      ]
+    },
+    {
+      "login": "Lil-Clanky",
+      "contributions": 1,
+      "prs": [
+        736
+      ],
+      "first": "2026-11-25",
+      "last": "2026-11-25",
+      "kinds": [
+        "site",
+        "docs",
+        "tests"
+      ]
+    },
+    {
+      "login": "MikeFTV",
+      "contributions": 1,
+      "prs": [
+        752
+      ],
+      "first": "2026-11-25",
+      "last": "2026-11-25",
+      "kinds": [
+        "site",
+        "tests"
+      ]
+    },
+    {
+      "login": "vivek-ambariya",
+      "contributions": 1,
+      "prs": [
+        781
+      ],
+      "first": "2026-11-25",
+      "last": "2026-11-25",
+      "kinds": [
+        "docs"
+      ]
+    },
+    {
+      "login": "alvaroalonsoparrondo-a11y",
+      "contributions": 28,
+      "prs": [
+        833,
+        834,
+        835,
+        836,
+        837,
+        838,
+        839,
+        840,
+        841,
+        842,
+        843,
+        851,
+        852,
+        853,
+        854,
+        855,
+        856,
+        857,
+        858,
+        859,
+        860,
+        861,
+        862,
+        863,
+        864,
+        865,
+        866,
+        867
+      ],
+      "first": "2026-11-26",
+      "last": "2026-11-26",
+      "kinds": [
+        "data",
+        "site",
+        "docs",
+        "tests"
+      ]
+    },
+    {
+      "login": "bardrop-oss",
+      "contributions": 1,
+      "prs": [
+        849
+      ],
+      "first": "2026-11-26",
+      "last": "2026-11-26",
+      "kinds": [
+        "site",
+        "docs",
+        "tests"
+      ]
+    },
+    {
+      "login": "daocuong11",
+      "contributions": 1,
+      "prs": [
+        848
+      ],
+      "first": "2026-11-26",
+      "last": "2026-11-26",
+      "kinds": [
+        "docs"
+      ]
+    },
+    {
+      "login": "KingEmma7",
+      "contributions": 1,
+      "prs": [
+        934
+      ],
+      "first": "2026-11-26",
+      "last": "2026-11-26",
+      "kinds": [
+        "site",
+        "tests"
+      ]
+    },
+    {
+      "login": "playlikeboy",
+      "contributions": 1,
+      "prs": [
+        868
+      ],
+      "first": "2026-11-26",
+      "last": "2026-11-26",
+      "kinds": [
+        "site",
+        "tests"
+      ]
+    },
+    {
+      "login": "Satwik0607",
+      "contributions": 1,
+      "prs": [
+        900
+      ],
+      "first": "2026-11-26",
+      "last": "2026-11-26",
+      "kinds": [
+        "docs"
+      ]
+    },
+    {
+      "login": "Aadithya-kl",
+      "contributions": 1,
+      "prs": [
+        948
+      ],
+      "first": "2026-11-27",
+      "last": "2026-11-27",
+      "kinds": [
+        "site",
+        "tests"
+      ]
+    }
+  ]
+}

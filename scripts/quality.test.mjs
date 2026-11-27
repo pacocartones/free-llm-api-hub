@@ -118,7 +118,7 @@ test('/quality/ shows the numbers of a separate recount of the committed data', 
   const data = JSON.parse(read('data/providers.json'));
   const P = data.providers;
   const html = read('site/quality/index.html');
-  const asOf = html.match(/Data of (\d{4}-\d{2}-\d{2})/)[1];
+  const asOf = html.match(/Data of <time datetime="(\d{4}-\d{2}-\d{2})">/)[1];
   const verified = P.filter((p) => p.verified === true && p.last_verified);
   assert.ok(html.includes(`Verified against the provider's own docs</th><td class="num">${verified.length} of ${P.length}</td>`), 'verified share');
   const age = (p) => Math.floor((Date.parse(asOf + 'T00:00:00Z') - Date.parse(p.last_verified + 'T00:00:00Z')) / 86400000);
@@ -138,7 +138,7 @@ test('/quality/ shows the numbers of a separate recount of the committed data', 
   const text = verified.filter((p) => p.is_text_llm === true);
   const dp = text.filter((p) => p.data_policy && typeof p.data_policy === 'object').length;
   assert.ok(html.includes(`Recorded from the provider's own terms</th><td class="num">${dp} of ${text.length}</td>`), 'data_policy');
-  const weekTotal = [...html.matchAll(/<tr><th scope="row">\d{4}-\d{2}-\d{2}<\/th><td class="num">(\d+)<\/td>/g)].reduce((n, m) => n + +m[1], 0);
+  const weekTotal = [...html.matchAll(/<tr><th scope="row"><time datetime="\d{4}-\d{2}-\d{2}">[^<]+<\/time><\/th><td class="num">(\d+)<\/td>/g)].reduce((n, m) => n + +m[1], 0);
   const earlier = +(html.match(/(\d+) verified entr(?:y was|ies were) last verified before/)?.[1] || 0);
   assert.equal(weekTotal + earlier, verified.length, 'the histogram holds every verified entry');
 });

@@ -18,7 +18,10 @@ import {
   LIMIT_METRICS, limitSets, strongestSets,
 } from './lib/long-guides.mjs';
 import { familyGroups } from './lib/model-families.mjs';
+import { shortMonthLabel } from './lib/dates.mjs';
+import { datasetAsOf } from './lib/release-stamp.mjs';
 import { parseHash, constraintState } from './lib/find.mjs';
+import { recommendedCmp } from './lib/rules.mjs';
 
 const REPO = join(dirname(fileURLToPath(import.meta.url)), '..');
 const ROOT = privateTree(REPO);
@@ -43,6 +46,8 @@ const withoutScripts = (html) => {
   }
 };
 const SLUGS = LONG_GUIDES.map((g) => g.slug);
+// The dataset month the build puts in titles ("Nov 2026"), as build.mjs computes it.
+const titleMonth = () => shortMonthLabel(datasetAsOf(JSON.parse(read('data/providers.json'))).slice(0, 7));
 
 let providers, notFree;
 before(() => {
@@ -70,7 +75,7 @@ describe('every long guide', () => {
     for (const g of LONG_GUIDES) {
       const url = `${SITE}/guides/${g.slug}`;
       const html = page(g.slug);
-      const parts = longGuidePage(g, { providers, notFree });
+      const parts = longGuidePage(g, { providers, notFree, month: titleMonth() });
       assert.ok(html.includes(`<link rel="canonical" href="${url}">`), `${g.slug}: canonical`);
       assert.equal(html.match(/<title>([^<]*)<\/title>/)[1], parts.title.replace(/&/g, '&amp;'));
       const desc = html.match(/<meta name="description" content="([^"]*)"/)[1];
@@ -166,6 +171,43 @@ describe('the lists are the data', () => {
     assert.ok(p.verified && p.card_required === false && p.category === 'ongoing');
   });
 
+  test('OpenAI alternatives: rows follow the Recommended order and carry the card, phone and commercial-use flags', () => {
+    const html = page('openai-api-alternatives');
+    const verified = providers.filter((p) => p.verified === true && p.openai_compatible === true && !NO_FREE_MODEL_CALLS.includes(p.slug));
+    const chat = verified.filter((p) => p.is_text_llm === true);
+    const has = (m) => (p) => (p.modalities || []).includes(m);
+    const tables = [
+      ['Ongoing free chat APIs that are OpenAI-compatible', chat.filter((p) => p.category === 'ongoing')],
+      ['OpenAI-compatible chat APIs with one-time trial credits', chat.filter((p) => p.category === 'trial')],
+      ['OpenAI-compatible free embeddings APIs', verified.filter(has('embeddings'))],
+      ['OpenAI-compatible free speech APIs', verified.filter(has('audio'))],
+      ['OpenAI-compatible free vision APIs', verified.filter(has('vision'))],
+    ];
+    const bySlug = new Map(providers.map((p) => [p.slug, p]));
+    const words = (v) => (v === false ? 'No' : v === true ? 'Yes' : 'Not stated');
+    const commercial = (v) => (v === true ? 'Yes' : v === false ? '<strong>No</strong>' : v === 'conditional' ? 'Conditional' : 'Not stated');
+    for (const [label, list] of tables) {
+      // The order on the page is the explorer's: the same comparator, not a copy of it.
+      assert.deepEqual(tableSlugs(html, label), [...list].sort(recommendedCmp).map((p) => p.slug), label);
+      for (const [slug, cells] of tableRows(html, label)) {
+        const p = bySlug.get(slug);
+        const [signup, comm] = cells.slice(-3, -1);
+        assert.ok(signup.startsWith(`Card: ${words(p.card_required)}`) && signup.includes(`<br>Phone: ${words(p.phone_required)}`), `${label}: ${slug} card and phone`);
+        assert.ok(comm.startsWith(commercial(p.commercial_ok)), `${label}: ${slug} commercial use`);
+      }
+    }
+    assert.ok(/<th[^>]*>Card and phone<\/th><th[^>]*>Commercial use<\/th><th[^>]*>Checked<\/th>/.test(html));
+    assert.ok(stripTags(html).includes('Recommended order'));
+  });
+
+  test('OpenAI alternatives: linked from /find/, the OpenAI-compatible guide and the collection', () => {
+    for (const [rel, href] of [
+      ['site/find/index.html', '../guides/openai-api-alternatives'],
+      ['site/guides/openai-compatible-free-apis.html', 'openai-api-alternatives'],
+      ['site/collections/openai-compatible.html', '../guides/openai-api-alternatives'],
+    ]) assert.ok(read(rel).includes(`href="${href}"`), `${rel} links to the guide`);
+  });
+
   test('No card, no phone: the table, the count in the title and the catches are the data', () => {
     const html = page('free-llm-api-no-credit-card-no-phone');
     const list = providers.filter((p) => p.verified === true && p.card_required === false && p.phone_required === false);
@@ -175,7 +217,7 @@ describe('the lists are the data', () => {
     assert.ok(html.match(/<meta name="description" content="The (\d+) /)[1] === String(list.length));
     for (const p of list) assert.ok(html.includes(`<a href="../p/${p.slug}">`) && html.includes(`<time datetime="${p.last_verified}">`), p.slug);
     const unknownPhone = providers.filter((p) => p.verified && p.card_required === false && p.phone_required == null).length;
-    assert.ok(html.includes(`No card, phone not confirmed: ${unknownPhone} more`));
+    assert.ok(html.includes(`No card, phone not stated: ${unknownPhone} more`));
     for (const p of providers.filter((x) => x.anonymous_access)) assert.ok(html.includes(`<a href="../p/${p.slug}">`), `${p.slug}: no-account section`);
   });
 
@@ -282,14 +324,14 @@ describe('the modality guides', () => {
   test('every row’s card, phone, commercial and data-use cells and its check date are the entry’s', () => {
     const tables = [...MODALITY, { slug: 'free-image-generation-apis', label: 'Free image generation APIs compared' }, { slug: 'free-image-generation-apis', label: 'Other free image APIs' }];
     const bySlug = new Map(providers.map((p) => [p.slug, p]));
-    const flag = (v) => (v === false ? 'No' : v === true ? 'Yes' : 'Not confirmed');
+    const flag = (v) => (v === false ? 'No' : v === true ? 'Yes' : 'Not stated');
     for (const t of tables) {
       for (const [slug, cells] of tableRows(page(t.slug), t.label)) {
         const p = bySlug.get(slug);
         const [card, commercial, data, checked] = cells.slice(-4);
         assert.ok(stripTags(card).startsWith(`Card: ${flag(p.card_required)}`), `${slug}: card`);
         assert.ok(stripTags(card).includes(`Phone: ${flag(p.phone_required)}`), `${slug}: phone`);
-        const c = { true: 'Yes', false: 'No', conditional: 'Conditional' }[String(p.commercial_ok)] || 'Not confirmed';
+        const c = { true: 'Yes', false: 'No', conditional: 'Conditional' }[String(p.commercial_ok)] || 'Not stated';
         assert.ok(stripTags(commercial).startsWith(c), `${slug}: commercial use`);
         assert.ok(stripTags(data).replace(/&rsquo;|’/g, '’').startsWith(dataUseWords(p)), `${slug}: data use`);
         assert.ok(checked.includes(`<time datetime="${p.last_verified}">`), `${slug}: checked date`);
@@ -334,8 +376,8 @@ describe('the modality guides', () => {
       const text = textOf(page(slug));
       for (const [field, label] of Object.entries(LABEL)) {
         const n = list.filter((p) => p[field] == null).length;
-        if (n) assert.ok(text.includes(`${label} isn’t confirmed for ${n} of ${list.length}:`), `${slug}: ${field}`);
-        else assert.ok(!text.includes(`${label} isn’t confirmed`), `${slug}: ${field} has no unknowns`);
+        if (n) assert.ok(text.includes(`${label} is not stated for ${n} of ${list.length}:`), `${slug}: ${field}`);
+        else assert.ok(!text.includes(`${label} is not stated`), `${slug}: ${field} has no unknowns`);
       }
       const noPolicy = list.filter((p) => !p.data_policy).length;
       if (noPolicy) assert.ok(text.includes(`No quoted data policy is recorded for ${noPolicy} of ${list.length}:`), `${slug}: data policy`);
@@ -429,7 +471,7 @@ describe('the use-case guides', () => {
     }
   });
 
-  test('every table row shows the entry’s own card, phone, commercial, data-use and date, with unknowns as not confirmed', () => {
+  test('every table row shows the entry’s own card, phone, commercial, data-use and date, with unknowns as not stated', () => {
     const tables = {
       'free-llm-api-for-coding': ['Renewing free LLM APIs for coding', 'Free LLM APIs for coding with one-time credits'],
       'free-api-for-rag': ['Free embedding APIs for RAG', 'Free reranking APIs for RAG', 'Renewing free text LLMs for RAG'],
@@ -437,14 +479,14 @@ describe('the use-case guides', () => {
       'free-ai-api-for-students': ['Renewing free AI APIs with no credit card'],
     };
     const bySlug = new Map(providers.map((p) => [p.slug, p]));
-    const flag = (v) => (v === false ? 'No' : v === true ? 'Yes' : 'Not confirmed');
+    const flag = (v) => (v === false ? 'No' : v === true ? 'Yes' : 'Not stated');
     for (const [slug, labels] of Object.entries(tables)) {
       for (const label of labels) {
         for (const [ps, cells] of tableRows(page(slug), label)) {
           const p = bySlug.get(ps);
           const [card, commercial, data, checked] = cells.slice(-4);
           assert.ok(stripTags(card).startsWith(`Card: ${flag(p.card_required)}`) && stripTags(card).includes(`Phone: ${flag(p.phone_required)}`), `${slug} ${ps}: card and phone`);
-          assert.ok(stripTags(commercial).startsWith({ true: 'Yes', false: 'No', conditional: 'Conditional' }[String(p.commercial_ok)] || 'Not confirmed'), `${slug} ${ps}: commercial use`);
+          assert.ok(stripTags(commercial).startsWith({ true: 'Yes', false: 'No', conditional: 'Conditional' }[String(p.commercial_ok)] || 'Not stated'), `${slug} ${ps}: commercial use`);
           assert.ok(stripTags(data).startsWith(dataUseWords(p)), `${slug} ${ps}: data use`);
           assert.ok(checked.includes(`<time datetime="${p.last_verified}">`), `${slug} ${ps}: date`);
         }
@@ -510,7 +552,7 @@ describe('the use-case guides', () => {
     const rows = tableRows(html, 'Renewing free LLM APIs for AI agents');
     for (const [slug, cells] of rows) {
       const p = providers.find((x) => x.slug === slug);
-      const want = p.openai_compatible === true ? 'Yes' : p.openai_compatible === false ? 'No' : 'Not confirmed';
+      const want = p.openai_compatible === true ? 'Yes' : p.openai_compatible === false ? 'No' : 'Not stated';
       assert.ok(stripTags(cells[1]).startsWith(want), `${slug}: OpenAI-compatible`);
     }
   });
@@ -616,7 +658,27 @@ describe('the ranking and model-family guides', () => {
     }
     assert.deepEqual(sorted(tableSlugs(html, 'Free text LLMs with no structured free limit')), slugsOf(text.filter((p) => !numbered.includes(p))));
     assert.ok(answerOf(html).startsWith(`${numbered.length} of the ${text.length} free text LLMs from the ${verifiedCount()} verified providers`));
-    assert.ok(partsOf('free-llm-api-highest-limits').title.includes(`(${numbered.length} With Published Numbers)`));
+    // The title and h1 repeat the question with the dataset month and the count of tiers in the daily ranking.
+    const want = `Free LLM API with the highest limits (${titleMonth()}): ${numbered.length} tiers ranked`;
+    assert.equal(longGuidePage(LONG_GUIDES.find((g) => g.slug === 'free-llm-api-highest-limits'), { providers, notFree, month: titleMonth() }).title, want);
+    assert.equal(html.match(/<title>([^<]*)<\/title>/)[1], want);
+    assert.equal(stripTags(html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/)[1]).trim(), want);
+    assert.equal(graphOf(html).find((n) => n['@type'] === 'Article' || n.headline).headline, want, 'the JSON-LD headline is the h1');
+    // The daily table: every tier with a structured figure, by requests per day, then tokens per day; no daily figure → not stated, last.
+    const label = 'Free LLM API tiers ranked by published daily requests and tokens';
+    const daily = tableSlugs(html, label);
+    assert.deepEqual(sorted(daily), slugsOf(numbered), 'the daily table holds the N tiers of the title');
+    const key = (s) => { const p = providers.find((x) => x.slug === s); return [lim(p, 'requests_per_day'), lim(p, 'tokens_per_day')]; };
+    const cmp = (a, b) => (a == null ? (b == null ? 0 : 1) : b == null ? -1 : b - a);
+    for (let i = 1; i < daily.length; i++) {
+      const [ra, ta] = key(daily[i - 1]); const [rb, tb] = key(daily[i]);
+      assert.ok(cmp(ra, rb) < 0 || (cmp(ra, rb) === 0 && cmp(ta, tb) <= 0), `daily order: ${daily[i - 1]} before ${daily[i]}`);
+    }
+    for (const [slug, cells] of tableRows(html, label)) {
+      const [rpd, tpd] = key(slug);
+      assert.equal(stripTags(cells[2]), rpd == null ? 'not stated' : rpd.toLocaleString('en-US'), `${slug}: requests per day from free_limits`);
+      assert.equal(stripTags(cells[3]), tpd == null ? 'not stated' : tpd.toLocaleString('en-US'), `${slug}: tokens per day from free_limits`);
+    }
     // A figure is never converted into another unit: no per-second figure shows up as a per-minute one.
     const rps = numbered.filter((p) => lim(p, 'requests_per_second') != null && lim(p, 'requests_per_minute') == null);
     for (const p of rps) assert.ok(!tableSlugs(html, 'Free LLM APIs ranked by requests per minute').includes(p.slug), `${p.slug}: not converted`);
@@ -655,7 +717,7 @@ describe('the ranking and model-family guides', () => {
     const at = html.indexOf('aria-label="Free API providers per open model family"');
     const rows = [...html.slice(at, html.indexOf('</tbody>', at)).matchAll(/<tr><td class="name"><a href="\.\.\/free-api\/([a-z-]+)\/">[^<]*<\/a><\/td><td>(\d+)<\/td>/g)];
     assert.deepEqual(Object.fromEntries(rows.map((m) => [m[1], Number(m[2])])), Object.fromEntries(groups.map((g) => [g.slug, g.entries.length])));
-    assert.doesNotMatch(textOf(html), /\boffers? (a |the )?(Qwen|Gemma|DeepSeek|Llama|GPT-OSS|GLM)\b/i);
+    assert.doesNotMatch(textOf(html), /\boffers? (a |the )?(Qwen|Gemma|DeepSeek|Llama|GPT-OSS|GLM|Mistral|Kimi|MiniMax|Nemotron|Cohere Command)\b/i);
     assert.ok(textOf(html).includes('not their licences'), 'says licences are not recorded');
   });
 

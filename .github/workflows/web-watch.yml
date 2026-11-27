@@ -1,0 +1,266 @@
+name: Web watch
+
+# Watches the site served by the Cloudflare Worker (docs/architecture.md, "Hosting cutover"). Inert until the owner
+# sets the repository variable WEB_WATCH_ORIGIN (an origin such as https://freellmapihub.com): without it every job
+# prints a notice and stops.
+#
+#   watch (every 6 h, or by hand): read ${WEB_WATCH_ORIGIN}/build.json; the live sitemap must equal site/sitemap.xml
+#     at its public_sha (fetched with anonymous git), every URL of that origin's sitemap must answer 200
+#     (smoke-live.mjs --origin), /api/v1/providers.json must send `access-control-allow-origin: *`, and on
+#     https://freellmapihub.com the home page must send HSTS and a CSP. Once vars.WEB_HOST is `cloudflare` (pages.yml
+#     then no longer announces deploys) and the origin is production, the URLs whose <lastmod> changed since the
+#     previous run (its sitemaps kept in actions/cache) go to IndexNow with scripts/indexnow.mjs --submit. A failed
+#     run opens or updates one issue, "web-watch failing", labelled needs-coordinator.
+#   parity (by hand): scripts/parity-crawl.mjs --a <a> --b <b> --host-map, with a defaulting to
+#     https://freellmapihub.com and b to WEB_WATCH_ORIGIN; the report is uploaded and written to the run summary.
+#
+# Only scheduled and manual runs: no pull-request code is ever checked out, and the inputs reach the scripts through
+# env:, never pasted into a run line.
+on:
+  schedule:
+    - cron: '23 */6 * * *'
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'watch: check the live site; parity: compare origin a with origin b'
+        type: choice
+        options: [watch, parity]
+        default: watch
+      a:
+        description: 'parity: origin A (default https://freellmapihub.com)'
+        type: string
+        default: ''
+      b:
+        description: 'parity: origin B (default WEB_WATCH_ORIGIN)'
+        type: string
+        default: ''
+
+concurrency:
+  group: web-watch
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  watch:
+    name: Watch the live site
+    if: ${{ inputs.mode != 'parity' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    permissions:
+      contents: read
+    steps:
+      - id: config
+        name: Configuration
+        env:
+          ORIGIN: ${{ vars.WEB_WATCH_ORIGIN }}
+        run: |
+          if [ -z "$ORIGIN" ]; then
+            echo "::notice::WEB_WATCH_ORIGIN is not set, so the live site is not watched (docs/architecture.md, Hosting cutover)."
+            echo "run=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          origin="${ORIGIN%/}"
+          echo "run=true" >> "$GITHUB_OUTPUT"
+          echo "origin=$origin" >> "$GITHUB_OUTPUT"
+          if [ "$origin" = 'https://freellmapihub.com' ]; then echo "production=true" >> "$GITHUB_OUTPUT"; else echo "production=false" >> "$GITHUB_OUTPUT"; fi
+      - if: steps.config.outputs.run == 'true'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+      - if: steps.config.outputs.run == 'true'
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+      - id: build
+        name: Read build.json
+        if: steps.config.outputs.run == 'true'
+        env:
+          ORIGIN: ${{ steps.config.outputs.origin }}
+        run: |
+          set -euo pipefail
+          curl -fsS --max-time 20 -H 'cache-control: no-cache' -o build.json "$ORIGIN/build.json?watch=$GITHUB_RUN_ID"
+          sha=$(node -e 'const b=JSON.parse(require("fs").readFileSync("build.json","utf8"));const s=String(b.public_sha||"");if(!/^[0-9a-f]{40}$/.test(s)){console.error("build.json has no valid public_sha");process.exitCode=1}else console.log(s)')
+          echo "Live build: public_sha $sha"
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+      - name: Sitemap parity — the live sitemap equals site/sitemap.xml at public_sha
+        if: steps.config.outputs.run == 'true'
+        env:
+          SHA: ${{ steps.build.outputs.sha }}
+          REPO_URL: ${{ github.server_url }}/${{ github.repository }}.git
+          FLLM_SITE: ${{ steps.config.outputs.origin }}
+          FLLM_LIVE_ATTEMPTS: 3
+          FLLM_LIVE_RETRY_DELAY: 20
+        run: |
+          set -euo pipefail
+          # Anonymous: the checkout above keeps no credentials, and the URL carries none.
+          git fetch -q --depth=1 --no-tags "$REPO_URL" "$SHA"
+          git show FETCH_HEAD:site/sitemap.xml > site/sitemap.xml
+          node scripts/check-sitemap-live.mjs
+      - name: Smoke test — every URL of the origin's live sitemap answers 200
+        if: steps.config.outputs.run == 'true'
+        env:
+          ORIGIN: ${{ steps.config.outputs.origin }}
+          FLLM_LIVE_ATTEMPTS: 3
+          FLLM_LIVE_RETRY_DELAY: 10
+        run: node scripts/smoke-live.mjs --origin "$ORIGIN"
+      - name: Response headers
+        if: steps.config.outputs.run == 'true'
+        env:
+          ORIGIN: ${{ steps.config.outputs.origin }}
+          PRODUCTION: ${{ steps.config.outputs.production }}
+        run: |
+          node --input-type=module -e '
+          const origin = process.env.ORIGIN;
+          const get = async (path) => {
+            const res = await fetch(`${origin}${path}?watch=${process.env.GITHUB_RUN_ID}`, { headers: { "cache-control": "no-cache" }, signal: AbortSignal.timeout(20000) });
+            await res.arrayBuffer();
+            return res;
+          };
+          const bad = [];
+          const api = await get("/api/v1/providers.json");
+          if (api.status !== 200 || api.headers.get("access-control-allow-origin") !== "*") bad.push(`/api/v1/providers.json: HTTP ${api.status}, access-control-allow-origin ${api.headers.get("access-control-allow-origin")}`);
+          if (process.env.PRODUCTION === "true") {
+            const home = await get("/");
+            if (!/max-age=\d+/.test(home.headers.get("strict-transport-security") || "")) bad.push(`/: strict-transport-security is ${home.headers.get("strict-transport-security")}`);
+            if (!home.headers.get("content-security-policy")) bad.push("/: no content-security-policy header");
+          }
+          for (const line of bad) console.error(`✗ ${line}`);
+          if (bad.length) process.exitCode = 1; else console.log(`✓ headers on ${origin}`);
+          '
+      - name: IndexNow — restore the previous run's sitemaps
+        if: steps.config.outputs.run == 'true' && vars.WEB_HOST == 'cloudflare' && steps.config.outputs.production == 'true'
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .web-watch/sitemaps
+          key: web-watch-sitemaps-${{ github.run_id }}
+          restore-keys: web-watch-sitemaps-
+      - id: indexnow
+        name: IndexNow — the URLs whose lastmod changed since the previous run (best effort)
+        if: steps.config.outputs.run == 'true' && vars.WEB_HOST == 'cloudflare' && steps.config.outputs.production == 'true'
+        continue-on-error: true
+        timeout-minutes: 3
+        env:
+          ORIGIN: ${{ steps.config.outputs.origin }}
+        run: |
+          set -euo pipefail
+          mkdir -p .web-watch/live
+          for name in sitemap.xml sitemap-state.xml; do
+            curl -fsS --max-time 20 -H 'cache-control: no-cache' -o ".web-watch/live/$name" "$ORIGIN/$name?watch=$GITHUB_RUN_ID"
+          done
+          # The same logic as scripts/indexnow.mjs --plan (lib/indexnow.mjs), with the previous run's copy as "before".
+          node --input-type=module -e '
+          import { existsSync, readFileSync, appendFileSync } from "node:fs";
+          import { SITEMAPS, changedUrls, parseSitemap } from "./scripts/lib/indexnow.mjs";
+          const prev = new Map();
+          const next = new Map();
+          let seeded = true;
+          for (const name of SITEMAPS) {
+            const before = `.web-watch/sitemaps/${name}`;
+            if (existsSync(before)) for (const [k, v] of parseSitemap(readFileSync(before, "utf8"))) prev.set(k, v);
+            else seeded = false;
+            for (const [k, v] of parseSitemap(readFileSync(`.web-watch/live/${name}`, "utf8"))) next.set(k, v);
+          }
+          const urls = seeded ? changedUrls(prev, next).urls : [];
+          console.log(seeded ? `indexnow: ${urls.length} URL(s) changed since the previous run` : "indexnow: no previous sitemaps in the cache; this run only stores them");
+          for (const u of urls) console.log(`  ${u}`);
+          appendFileSync(process.env.GITHUB_OUTPUT, `urls=${JSON.stringify(urls)}\n`);
+          '
+          rm -rf .web-watch/sitemaps && mv .web-watch/live .web-watch/sitemaps
+      - name: IndexNow — submit
+        if: steps.indexnow.outcome == 'success' && steps.indexnow.outputs.urls != '[]'
+        continue-on-error: true
+        timeout-minutes: 2
+        env:
+          INDEXNOW_URLS: ${{ steps.indexnow.outputs.urls }}
+        run: node scripts/indexnow.mjs --submit
+      - name: IndexNow — keep this run's sitemaps for the next one
+        if: steps.indexnow.outcome == 'success'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .web-watch/sitemaps
+          key: web-watch-sitemaps-${{ github.run_id }}
+
+  report:
+    name: Report a failing watch
+    needs: watch
+    if: ${{ always() && needs.watch.result == 'failure' && github.repository == 'pacocartones/free-llm-api-hub' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      issues: write
+    steps:
+      - name: Open or update the web-watch issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          ORIGIN: ${{ vars.WEB_WATCH_ORIGIN }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          title='web-watch failing'
+          number=$(gh issue list --state open --search "in:title \"$title\"" --json number,title \
+            --jq "map(select(.title == \"$title\")) | .[0].number // empty")
+          body=$(mktemp)
+          {
+            echo "The web watch of \`$ORIGIN\` failed."
+            echo
+            echo "Open the run and read the failed step (build.json, sitemap parity, smoke test or headers); see docs/architecture.md, Hosting cutover. Run: $RUN_URL"
+          } > "$body"
+          if [ -n "$number" ]; then
+            gh issue comment "$number" --body-file "$body"
+          else
+            gh issue create --title "$title" --label needs-coordinator --body-file "$body"
+          fi
+
+  parity:
+    name: Parity crawl
+    if: ${{ inputs.mode == 'parity' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: read
+    steps:
+      - id: config
+        name: Configuration
+        env:
+          ORIGIN: ${{ vars.WEB_WATCH_ORIGIN }}
+          A: ${{ inputs.a }}
+          B: ${{ inputs.b }}
+        run: |
+          if [ -z "$ORIGIN" ]; then
+            echo "::notice::WEB_WATCH_ORIGIN is not set, so no parity crawl runs (docs/architecture.md, Hosting cutover)."
+            echo "run=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          a="${A:-https://freellmapihub.com}"
+          b="${B:-$ORIGIN}"
+          { echo "run=true"; echo "a=${a%/}"; echo "b=${b%/}"; } >> "$GITHUB_OUTPUT"
+      - if: steps.config.outputs.run == 'true'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+      - if: steps.config.outputs.run == 'true'
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+      - name: Crawl A and B
+        if: steps.config.outputs.run == 'true'
+        env:
+          A: ${{ steps.config.outputs.a }}
+          B: ${{ steps.config.outputs.b }}
+        run: node scripts/parity-crawl.mjs --a "$A" --b "$B" --host-map --allow scripts/parity-allow.json --out parity-report
+      - name: Write the report to the run summary
+        if: always() && steps.config.outputs.run == 'true'
+        run: |
+          if [ -f parity-report/report.md ]; then head -c 900000 parity-report/report.md >> "$GITHUB_STEP_SUMMARY"; fi
+      - name: Upload the report
+        if: always() && steps.config.outputs.run == 'true'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: parity-report
+          path: parity-report/
+          if-no-files-found: ignore
+          retention-days: 30

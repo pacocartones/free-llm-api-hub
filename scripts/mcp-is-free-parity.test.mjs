@@ -9,7 +9,8 @@ import { answerFirst } from './lib/provider-faq.mjs';
 import { toApiV1Provider } from './lib/api-v1.mjs';
 import { normalizeDataset } from '../packages/mcp/src/data.js';
 import { isFree, limitFigures as mcpLimitFigures, shortDate as mcpShortDate } from '../packages/mcp/src/tools.js';
-import { limitFigures, shortDate } from './lib/provider-meta.mjs';
+import { limitFigures } from './lib/provider-meta.mjs';
+import { humanDate as shortDate } from './lib/dates.mjs';
 
 const raw = JSON.parse(readFileSync(new URL('../data/providers.json', import.meta.url), 'utf8'));
 const published = normalizeDataset({ ...raw, providers: raw.providers.map(toApiV1Provider) }, 'parity');

@@ -23,6 +23,7 @@
 // Footprint is one /models call + one 1-token inference per provider (skip the
 // latter with --auth-only).
 
+import { utcToday } from './lib/dates.mjs';
 import { readFileSync, writeFileSync } from 'node:fs';
 import assert from 'node:assert/strict';
 import { serialize, roundTripError } from './_serialize.mjs';
@@ -36,7 +37,7 @@ import {
 const FILE = new URL('../data/providers.json', import.meta.url);
 const REPORT = new URL('../data/probe-report.json', import.meta.url);
 const TIMEOUT = 25000;
-const TODAY = new Date().toISOString().slice(0, 10);
+const TODAY = utcToday();
 
 const args = process.argv.slice(2);
 const WRITE = args.includes('--write');

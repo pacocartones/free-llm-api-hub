@@ -27,19 +27,19 @@ test('flags: each state has its own shape — ✓ ok, ✕ bad, ~ conditional, ? 
   const cases = [
     ['card', { card_required: false }, 'ok', 'Card required: no'],
     ['card', { card_required: true }, 'bad', 'Card required: yes'],
-    ['card', { card_required: null }, 'unk', "Card required: unknown — not confirmed in the provider's docs yet"],
-    ['card', {}, 'unk', "Card required: unknown — not confirmed in the provider's docs yet"],
+    ['card', { card_required: null }, 'unk', "Card required: not stated"],
+    ['card', {}, 'unk', "Card required: not stated"],
     ['phone', { phone_required: false }, 'ok', 'Phone required: no'],
     ['phone', { phone_required: true }, 'bad', 'Phone required: yes'],
-    ['phone', { phone_required: null }, 'unk', "Phone required: unknown — not confirmed in the provider's docs yet"],
+    ['phone', { phone_required: null }, 'unk', "Phone required: not stated"],
     ['commercial', { commercial_ok: true }, 'ok', 'Commercial use allowed: yes'],
     ['commercial', { commercial_ok: false }, 'bad', 'Commercial use allowed: no'],
     ['commercial', { commercial_ok: 'conditional' }, 'cond', 'Commercial use allowed: conditional'],
-    ['commercial', { commercial_ok: null }, 'unk', "Commercial use allowed: unknown — not confirmed in the provider's docs yet"],
+    ['commercial', { commercial_ok: null }, 'unk', "Commercial use allowed: not stated"],
     ['training', { data_policy: { trains_on_prompts: false } }, 'ok', 'Trains on prompts: no'],
     ['training', { data_policy: { trains_on_prompts: true } }, 'bad', 'Trains on prompts: yes'],
-    ['training', { data_policy: { trains_on_prompts: null } }, 'unk', "Trains on prompts: unknown — not confirmed in the provider's docs yet"],
-    ['training', {}, 'unk', "Trains on prompts: unknown — not confirmed in the provider's docs yet"],
+    ['training', { data_policy: { trains_on_prompts: null } }, 'unk', "Trains on prompts: not stated"],
+    ['training', {}, 'unk', "Trains on prompts: not stated"],
   ];
   for (const [id, p, state, sentence] of cases) {
     for (const opts of [{}, { mini: true }]) {
@@ -54,17 +54,17 @@ test('flags: each state has its own shape — ✓ ok, ✕ bad, ~ conditional, ? 
 
 test('flags: an unknown names its reason from field_checks, as the spec example says', () => {
   const d = def('card');
-  assert.equal(flagText(d, null, { status: 'source_silent' }), "Card required: unknown — not stated in the provider's docs");
-  assert.equal(flagText(d, null, { status: 'needs_account' }), 'Card required: unknown — needs an account to check');
-  assert.equal(flagText(d, null, { status: 'sources_disagree' }), "Card required: unknown — the provider's pages disagree");
-  assert.equal(flagText(d, null, { status: 'toString' }), "Card required: unknown — not confirmed in the provider's docs yet", 'an unknown status never reads a prototype key');
+  assert.equal(flagText(d, null, { status: 'source_silent' }), "Card required: not stated in the provider's docs");
+  assert.equal(flagText(d, null, { status: 'needs_account' }), 'Card required: not stated: needs an account to check');
+  assert.equal(flagText(d, null, { status: 'sources_disagree' }), "Card required: not stated: the provider's pages disagree");
+  assert.equal(flagText(d, null, { status: 'toString' }), "Card required: not stated", 'an unknown status never reads a prototype key');
   assert.equal(flagText(d, false, { status: 'source_silent' }), 'Card required: no', 'a confirmed value ignores the check');
   assert.equal(flagState(d, 'yes'), 'unk', 'a value outside the tri-state is unknown, never a guess');
 });
 
 test('flags: the visible part and the mark are aria-hidden, so the sentence is read once', () => {
-  const html = flagHtml(def('phone'), { phone_required: null }, { visible: '<span class="tri tri-unk">not confirmed</span>' });
-  assert.match(html, /<span class="pflag-vis" aria-hidden="true"><span class="tri tri-unk">not confirmed<\/span><\/span>/);
+  const html = flagHtml(def('phone'), { phone_required: null }, { visible: '<span class="tri tri-unk">not stated</span>' });
+  assert.match(html, /<span class="pflag-vis" aria-hidden="true"><span class="tri tri-unk">not stated<\/span><\/span>/);
   const mini = flagHtml(def('phone'), { phone_required: null }, { mini: true });
   assert.match(mini, /^<span class="pflag pflag-unk pflag-mini" data-flag="phone" title="[^"]+"><svg class="i" aria-hidden="true"><use href="#ic-phone"\/><\/svg><span class="pflag-mark" aria-hidden="true">\?<\/span><span class="sr-only">/);
   assert.doesNotMatch(html + mini, /role="img"/, 'no role=img: the sr-only sentence is the name');
@@ -83,7 +83,7 @@ test('flags: the explorer row says the four flags in words, with no icon marks',
   const p = { slug: 'acme', name: 'Acme', category: 'ongoing', free_tier: 'f', card_required: false, phone_required: null, commercial_ok: true, openai_compatible: true, data_policy: { trains_on_prompts: true } };
   const html = explorerRowHtml(p, { now: '2026-11-25' });
   assert.doesNotMatch(html, /data-flag=|pflag|fmini|✓/, 'no flag icons and no tick marks in the row');
-  assert.match(html, /<span class="need-req">Trains on prompts<\/span><span class="need-unk">Unknown: phone<\/span>/);
+  assert.match(html, /<span class="need-req">Trains on prompts<\/span><span class="need-unk">Not stated: phone<\/span>/);
 });
 
 test('flags: the provider page uses the same component around its own words, with the field_checks reason', () => {
@@ -93,7 +93,7 @@ test('flags: the provider page uses the same component around its own words, wit
     data_policy: { trains_on_prompts: false, source: 'https://acme.example/privacy', checked: '2026-11-20' },
   };
   const req = requirementsHtml(p);
-  assert.match(flagOf(req, 'card'), /^<span class="pflag pflag-unk" data-flag="card" title="Card required: unknown — not stated in the provider&#39;s docs">/);
+  assert.match(flagOf(req, 'card'), /^<span class="pflag pflag-unk" data-flag="card" title="Card required: not stated in the provider&#39;s docs">/);
   assert.match(flagOf(req, 'card'), /<span class="pflag-vis" aria-hidden="true"><span class="tri tri-unk tri-why"/, 'the words the page already used stay');
   assert.match(flagOf(req, 'phone'), /pflag-ok[\s\S]*>✓<[\s\S]*not required/);
   assert.match(flagOf(req, 'commercial'), /pflag-cond[\s\S]*>~</);
@@ -107,7 +107,7 @@ test('flags: the built provider pages carry the component and the styles draw ea
   for (const id of ['card', 'phone', 'commercial', 'training']) {
     assert.ok(groq.includes(`data-flag="${id}"`), `the Groq page shows the ${id} flag`);
   }
-  assert.ok(!home.includes('data-flag='), 'the explorer says the flags in words instead (Needs / unknown)');
+  assert.ok(!home.includes('data-flag='), 'the explorer says the flags in words instead (Needs / not stated)');
   const css = read('site/styles.css');
   assert.match(css, /\.pflag-ok \.pflag-mark \{ color: var\(--ok\); \}/);
   assert.match(css, /\.pflag-bad \.pflag-mark \{ color: var\(--bad\); \}/);

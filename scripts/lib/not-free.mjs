@@ -8,55 +8,17 @@
 // Pure functions of their arguments (the data, the providers and the scores): the page is drift-gated and deterministic.
 
 import { escapeHtml } from './html.mjs';
-import { SLUG_RE } from './rows.mjs';
+import { timeHtml, humanDate } from './dates.mjs';
+import { NOT_STATED } from './not-stated.mjs';
 import { inlineHtml } from './markdown.mjs';
 import { breadcrumbList } from './page-jsonld.mjs';
 import { websiteRef, datasetRef } from './site-entity.mjs';
 import { isoDateTime } from './structured-data.mjs';
+// The guard on data/not-free.json is a data module of its own, so validate.mjs runs it without the renderers below.
+export { notFreeErrors } from './not-free-data.mjs';
 
 export const NOT_FREE_PATH = '/not-free/';
-const MODALITIES = new Set(['text', 'vision', 'image', 'audio', 'embeddings', 'rerank', 'ocr']);
-const CHECKED_RE = /^\d{4}-\d{2}-\d{2}(\/\d{2})?$/;
 export const ALTERNATIVES_MAX = 3;
-
-/** Every problem with the file, as messages; an empty array means it is valid. */
-export function notFreeErrors(doc, { providers = [], quotes = [] } = {}) {
-  const errs = [];
-  const groups = Array.isArray(doc?.groups) ? doc.groups : [];
-  const entries = Array.isArray(doc?.entries) ? doc.entries : [];
-  if (!groups.length) errs.push('groups: at least one group');
-  if (!entries.length) errs.push('entries: at least one entry');
-  if (typeof doc?.alternatives_note !== 'string' || !doc.alternatives_note.trim()) errs.push('alternatives_note: a sentence');
-  const groupIds = new Set();
-  for (const g of groups) {
-    if (!SLUG_RE.test(g.id || '')) errs.push(`group ${g.id}: id must be kebab-case`);
-    if (groupIds.has(g.id)) errs.push(`group ${g.id}: duplicate id`);
-    groupIds.add(g.id);
-    for (const k of ['title', 'intro']) if (typeof g[k] !== 'string' || !g[k].trim()) errs.push(`group ${g.id}: ${k} is required`);
-  }
-  const slugs = new Set(providers.map((p) => p.slug));
-  const quoteIds = new Set(quotes.map((q) => q.id));
-  const ids = new Set();
-  for (const e of entries) {
-    const at = `entry ${e.id}`;
-    if (!SLUG_RE.test(e.id || '')) errs.push(`${at}: id must be kebab-case`);
-    if (ids.has(e.id)) errs.push(`${at}: duplicate id`);
-    ids.add(e.id);
-    if (!groupIds.has(e.group)) errs.push(`${at}: unknown group ${e.group}`);
-    for (const k of ['name', 'expectation', 'summary', 'short']) if (typeof e[k] !== 'string' || !e[k].trim()) errs.push(`${at}: ${k} is required`);
-    if (!Array.isArray(e.modalities) || !e.modalities.length || e.modalities.some((m) => !MODALITIES.has(m))) errs.push(`${at}: modalities must be known modalities`);
-    if (e.slug !== null && !slugs.has(e.slug)) errs.push(`${at}: slug ${e.slug} is not in data/providers.json`);
-    if (e.checked !== null && !CHECKED_RE.test(String(e.checked))) errs.push(`${at}: checked must be YYYY-MM-DD (or YYYY-MM-DD/DD) or null`);
-    if (!Array.isArray(e.quotes) || e.quotes.some((q) => typeof q !== 'string' || !q.trim())) errs.push(`${at}: quotes must be an array of sentences`);
-    for (const id of e.quote_ids || []) if (!quoteIds.has(id)) errs.push(`${at}: quote id ${id} is not in data/quotes.json`);
-    if (!Array.isArray(e.sources) || e.sources.some((s) => !s || typeof s.label !== 'string' || !/^https:\/\//.test(s.url || ''))) errs.push(`${at}: sources must be {label, https url}`);
-    if (e.quotes?.length && !e.sources?.length) errs.push(`${at}: a quote needs its source`);
-    if (e.quotes?.length && !e.checked) errs.push(`${at}: a quote needs the day it was read`);
-    if (e.faq !== null && (typeof e.faq !== 'string' || !e.faq.endsWith('?'))) errs.push(`${at}: faq is a question or null`);
-  }
-  for (const g of groups) if (!entries.some((e) => e.group === g.id)) errs.push(`group ${g.id}: has no entry`);
-  return errs;
-}
 
 /** The quotes of an entry with where they come from: its own (docs/sources.md) and those referenced in data/quotes.json. */
 export function entryQuotes(e, quotes = []) {
@@ -91,7 +53,7 @@ export function notFreeReadmeMd(doc, { site }) {
   for (const g of doc.groups) {
     out.push('', `**${g.title}.** ${g.intro}`, '');
     for (const e of doc.entries.filter((x) => x.group === g.id)) {
-      const tail = [e.checked ? `checked ${e.checked}` : 'date not recorded'];
+      const tail = [e.checked ? `checked ${humanDate(e.checked) || e.checked}` : 'date not stated'];
       if (e.sources.length) tail.push(sourceLinksMd(e.sources));
       out.push(`- **${e.name}** — ${e.short} (${tail.join(' · ')})`);
     }
@@ -102,7 +64,7 @@ export function notFreeReadmeMd(doc, { site }) {
 
 const mdInline = (s, site) => inlineHtml(s, { repo: '', site });
 const sourcesHtml = (sources) => sources.map((s) => `<a href="${escapeHtml(s.url)}" target="_blank" rel="noopener">${escapeHtml(s.label)}</a>`).join(' · ');
-const checkedHtml = (c) => (c ? (/^\d{4}-\d{2}-\d{2}$/.test(c) ? `<time datetime="${c}">${c}</time>` : escapeHtml(c)) : '<span class="gpu-unstated">not recorded</span>');
+const checkedHtml = (c) => (c ? timeHtml(c, escapeHtml) : `<span class="gpu-unstated">${NOT_STATED}</span>`);
 const altLinks = (alts, prefix) => alts.map((p) => `<a href="${prefix}p/${escapeHtml(p.slug)}">${escapeHtml(p.name)}</a>`).join(', ');
 
 // Quotes read from the same pages on the same day share one block and one source line.
@@ -115,7 +77,7 @@ function quotesHtml(quotes) {
   }
   return groups.map((g) => {
     const src = sourcesHtml(g.sources);
-    return `<blockquote class="gpu-quote">${g.texts.map((t) => `<p>“${escapeHtml(t)}”</p>`).join('')}<footer class="muted">${src}${src && g.read ? ' · ' : ''}${g.read ? `read ${escapeHtml(g.read)}` : ''}</footer></blockquote>`;
+    return `<blockquote class="gpu-quote">${g.texts.map((t) => `<p>“${escapeHtml(t)}”</p>`).join('')}<footer class="muted">${src}${src && g.read ? ' · ' : ''}${g.read ? `read ${timeHtml(g.read, escapeHtml)}` : ''}</footer></blockquote>`;
   }).join('');
 }
 
@@ -126,7 +88,7 @@ function faqAnswerText(e, alts) {
   return `${e.summary}${when}${alt}`;
 }
 function faqAnswerHtml(e, alts, prefix) {
-  const when = e.checked ? ` Checked ${escapeHtml(e.checked)} against the provider's own page.` : '';
+  const when = e.checked ? ` Checked ${timeHtml(e.checked, escapeHtml)} against the provider's own page.` : '';
   const alt = alts.length ? ` Closest free alternatives in the dataset: ${altLinks(alts, prefix)}.` : '';
   return `${escapeHtml(e.summary)}${when}${alt}`;
 }

@@ -11,4 +11,4 @@
   `scripts/api-examples.test.mjs` runs every snippet against the built files
   with no network, checking that the languages print the same lines. The API
   page also points to the MCP server in `packages/mcp`, which runs from a
-  checkout and is not published on npm.
+  checkout and is not published on npm (#944).

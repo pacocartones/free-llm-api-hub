@@ -8,6 +8,7 @@
 //
 // With GITHUB_TOKEN set (the deploy workflow passes its own) the call is authenticated; without it the call
 // shares the 60-an-hour limit of its IP address, which the runners of a hosted workflow share with others.
+import { utcToday } from './lib/dates.mjs';
 import { writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
@@ -40,6 +41,6 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
     console.error(`${problem}; data/repo-stats.json not changed.`);
     process.exit(1);
   }
-  writeFileSync(join(ROOT, 'data/repo-stats.json'), statsText(stars, new Date().toISOString().slice(0, 10)));
+  writeFileSync(join(ROOT, 'data/repo-stats.json'), statsText(stars, utcToday()));
   console.log(`${stars} stars.`);
 }

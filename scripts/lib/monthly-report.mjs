@@ -16,8 +16,8 @@
 
 import { fieldCheck, REASON_LABEL, FIELD_CHECK_FIELDS } from './field-checks.mjs';
 import { markdownToHtml } from './markdown.mjs';
-import { NOT_STATED } from './provider-faq.mjs';
-import { monthLabel, monthName, monthEndDate } from './state.mjs';
+import { NOT_STATED } from './not-stated.mjs';
+import { monthLabel, monthName, monthEndDate } from './dates.mjs';
 
 const ESC = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' };
 const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ESC[c]);
@@ -31,7 +31,7 @@ const table = (label, head, rows) =>
   rows.map((r) => `<tr>${r.map((v, i) => `<td${i === 0 ? ' class="name"' : ''}>${v}</td>`).join('')}</tr>`).join('\n') + `\n</tbody></table></div>`;
 
 const FLAG_WORDS = { card_required: 'card required', phone_required: 'phone required', commercial_ok: 'commercial use allowed', openai_compatible: 'OpenAI-compatible' };
-// A null flag reads "not stated", the site's one wording for an unknown value (lib/provider-faq.mjs NOT_STATED).
+// A null flag reads "not stated", the site's one wording for an unknown value (lib/not-stated.mjs NOT_STATED).
 const flagValue = (v) => (v === true ? 'yes' : v === false ? 'no' : v === 'conditional' ? 'conditional' : NOT_STATED);
 // "Not stated by the provider" / "Not stated (needs an account to check)": the reason recorded in field_checks.
 const notStatedCell = (p, field) => {
