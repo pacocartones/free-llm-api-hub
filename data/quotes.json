@@ -1419,7 +1419,7 @@
    "kind": "sentence",
    "text": "M87 Labs will not use Customer Content or Outputs to Train any model or adapter that is made generally available by M87 Labs (including the base Moondream models), or to Train any model or adapter for the benefit of any third party, except where you explicitly opt in under a separate written agreement.",
    "source_url": "https://moondream.ai/terms",
-   "read_on": "2026-11-24",
+   "read_on": "2026-11-27",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "a7c151d622c571676ef6225174ff69e6e77e071a79c55c9c88dfec0f76f1976a"
@@ -1430,7 +1430,7 @@
    "kind": "note_passage",
    "text": "your internal business or personal purposes",
    "source_url": "https://moondream.ai/terms",
-   "read_on": "2026-11-24",
+   "read_on": "2026-11-27",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "a7c151d622c571676ef6225174ff69e6e77e071a79c55c9c88dfec0f76f1976a"
@@ -1441,7 +1441,7 @@
    "kind": "note_passage",
    "text": "commercially exploit the Service or any portion of the Service",
    "source_url": "https://moondream.ai/terms",
-   "read_on": "2026-11-24",
+   "read_on": "2026-11-27",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "a7c151d622c571676ef6225174ff69e6e77e071a79c55c9c88dfec0f76f1976a"
@@ -1453,7 +1453,7 @@
    "field": "card_required",
    "text": "No credit card required.",
    "source_url": "https://moondream.ai/",
-   "read_on": "2026-11-24",
+   "read_on": "2026-11-27",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "f881da5f601fdbf94595fcb3b37cdb89ebe5c96f5abe24d8b8029dcd90ee40b8"
@@ -1666,7 +1666,7 @@
    "read_on": "2026-11-27",
    "lang": "zh",
    "method": "html-text-v1: page requested with Accept-Language zh, tags removed, character references decoded, white space collapsed",
-   "page_sha256": "52854fc6e2f1c7b81a0a7d25f749bc60341d87c1e7dc66b1c07e2025f64865e0"
+   "page_sha256": "2cfb735a1d4be3d445b282d1fc0bfb1d6de3c717516fedd998afbae927c48222"
   },
   {
    "id": "voyage-ai.sentence",
@@ -2044,10 +2044,10 @@
    "kind": "sentence",
    "text": "Conversion results are automatically deleted from Datalab servers about one day after processing completes.",
    "source_url": "https://documentation.datalab.to/platform/security",
-   "read_on": "2026-11-24",
+   "read_on": "2026-11-27",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
-   "page_sha256": "4757267bf081c58e08343c40f7ad633ef2bbbceba8bc8b54f1d8eb4367d75cee"
+   "page_sha256": "0b9a3dbede386b85159b61c95ae774c93c51db76072d1af75f148fc88726ad08"
   },
   {
    "id": "datalab.card_required.sentence",
@@ -2056,7 +2056,7 @@
    "field": "card_required",
    "text": "New accounts get a one-time credit to try the API, with no credit card required:",
    "source_url": "https://documentation.datalab.to/platform/billing",
-   "read_on": "2026-11-24",
+   "read_on": "2026-11-27",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "05c59c29514985cc6a5cc263a238194ff28d1501475fe34919bc51b94ec3f703"
@@ -2135,10 +2135,10 @@
    "kind": "sentence",
    "text": "We do not retain, log, or reuse any input or output data processed through our models.",
    "source_url": "https://regolo.ai/zero-data-retention/",
-   "read_on": "2026-11-24",
+   "read_on": "2026-11-27",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
-   "page_sha256": "9b36459d8ebb20b4bb889f0ebfde6e0b4638189fbc14e876da11d3ea660aa08c"
+   "page_sha256": "04ada92fe7acd48a90b7e0cf151add8c29a07a9aa65d2120fca103cdfaae917b"
   },
   {
    "id": "regolo.card_required.sentence",
@@ -2170,7 +2170,7 @@
    "kind": "sentence",
    "text": "Google won't use your data to train or fine-tune any AI/ML models without your prior permission or instruction.",
    "source_url": "https://docs.cloud.google.com/gemini-enterprise-agent-platform/resources/zero-data-retention",
-   "read_on": "2026-11-24",
+   "read_on": "2026-11-27",
    "lang": "en",
    "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
    "page_sha256": "2dd683f357d3dfdc36626bec354a421fc02ec2ec1977bf8da66de798d2be30a5"
