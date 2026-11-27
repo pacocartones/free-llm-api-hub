@@ -81,6 +81,8 @@ A build of `2a36069`, the commit before #844, shows both of these too:
   into cards. The fix is to underline them, like `.prov-score a` and `.req-source a`.
 - **`/models/` at 375 px:** the four-column table squeezes "Free type" and "Modalities", so words break mid-word
   ("rene / wing", "embeddin / gs"). The page does not overflow, but it reads badly.
+  **Fixed since:** under 560px each row is now a card with its column names as labels, and wider tables wrap words
+  only at spaces ([375 px](models-index-mobile/models-375.jpg), [desktop](models-index-mobile/models-desktop.jpg)).
 
 Also seen: `assets/demo.svg` (README) still uses the old green palette, and the `var()` fallbacks in
 `scripts/lib/consent.client.js` still hold the old hexes. The fallbacks never render, because the tokens are always

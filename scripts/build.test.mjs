@@ -2633,8 +2633,9 @@ test('the narrow-screen rules that keep the pages from scrolling sideways stay i
   assert.match(css, /@media \(max-width: 720px\) \{ #table td:nth-child\(1\) \{ width: 100%; \}/);
   assert.match(css, /#table td \{ min-width: 0; overflow-wrap: anywhere; \}/);
   assert.match(css, /@media \(min-width: 721px\) and \(max-width: 1000px\) \{ #table thead th \{ white-space: normal;/);
-  assert.match(css, /\.model-table th, \.model-table td \{ overflow-wrap: anywhere; \}/);
-  assert.match(css, /@media \(max-width: 480px\) \{ \.model-table th, \.model-table td \{ padding-left: 6px;/);
+  // /models/ turns into cards on phones (scripts/model-index.test.mjs pins the markup and the rules).
+  assert.match(css, /\.model-table th, \.model-table td \{ overflow-wrap: break-word; \}/);
+  assert.match(css, /@media \(max-width: 560px\) \{ \.model-table thead \{ position: absolute;/);
 });
 
 test('the home counters are one server-rendered line, in the same words as the client repaint', () => {
