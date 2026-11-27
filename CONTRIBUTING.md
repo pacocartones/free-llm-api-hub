@@ -222,7 +222,7 @@ Commit messages: AI-assisted contributions are welcome when you have verified th
 
 ## Review
 
-A human maintainer reviews and is responsible for every merge. Automated review comments (CodeRabbit) are advisory: a person makes the call, and you don't need to reply to the bot. We resolve every review conversation, from people or bots, before merging, either by changing the code or by noting why not.
+A human maintainer reviews and is responsible for every merge. Automated review comments (for example CodeQL code-scanning alerts) are advisory: a person makes the call. We resolve every review conversation, from people or bots, before merging, either by changing the code or by noting why not.
 
 If your pull request falls behind `main`, we update it before merging; you can use [Updating your branch from main](#updating-your-branch-from-main) to sync it locally. When that update only changes regenerated files, the review still holds: it is tied to the patch of the files you changed under `data/`, `scripts/` and `docs/`, and we check that this patch is exactly the one we reviewed. If any of those lines changes, the pull request is reviewed again. The *Dataset integrity* check has to be green either way.
 
