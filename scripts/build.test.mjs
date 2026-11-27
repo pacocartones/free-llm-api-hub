@@ -2,7 +2,8 @@
 // Covers: serializer round-trip, validator honesty rules, existing self-tests,
 // build idempotency, one generated README row matching the data, and the
 // generated client configs (LiteLLM + OpenAI SDK) and published JSON Schema.
-import { before, describe, test } from 'node:test';
+// test and describe come from lib/test-part.mjs: node:test's own, unless run-tests.mjs runs this file in parts.
+import { before, describe, test } from './lib/test-part.mjs';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { readFileSync, writeFileSync, existsSync, readdirSync, statSync, rmSync } from 'node:fs';
