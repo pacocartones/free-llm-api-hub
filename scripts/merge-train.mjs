@@ -14,8 +14,8 @@ import { appendFileSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs'
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
-  LABEL, LABELS, NEEDS_COORDINATOR, SOLO, TRAIN_LABEL, TRAIN_PREFIX, checksState, conflictStrategy, formatTrainState,
-  infoAttributes, lastLabeler, normalizeContexts, parkComment, parseConfig, planRun, resolveStampConflicts,
+  LABEL, LABELS, NEEDS_COORDINATOR, SOLO, TRAIN_LABEL, TRAIN_PREFIX, checksState, closedByMergeComment, conflictStrategy,
+  formatTrainState, infoAttributes, issuesToClose, lastLabeler, normalizeContexts, parkComment, parseConfig, planRun, resolveStampConflicts,
   revokeComment, safeBranch, trainBranch,
 } from './lib/merge-train.mjs';
 
@@ -25,6 +25,7 @@ const [OWNER, NAME] = REPO.split('/');
 const API = env.GITHUB_API_URL || 'https://api.github.com';
 const config = parseConfig(env);
 let calls = 0;
+let closeFailures = 0; // linked issues the manager could not close after a merge (logged; the run goes on)
 
 const summary = (text) => { if (env.GITHUB_STEP_SUMMARY) appendFileSync(env.GITHUB_STEP_SUMMARY, `${text}\n`); };
 const output = (key, value) => {
@@ -245,9 +246,41 @@ async function doSync(a) {
   console.log(`#${a.number}: merged main${res.resolved ? ` (resolved ${res.resolved.join(', ')})` : ''}`);
 }
 
+const CLOSING_QUERY = `query($owner: String!, $name: String!, $number: Int!) {
+  repository(owner: $owner, name: $name) { pullRequest(number: $number) {
+    closingIssuesReferences(first: 25) { nodes { __typename number state repository { nameWithOwner } } }
+  } }
+}`;
+
+/** Close the open issues of this repository that pull request `number` links with closing keywords. GitHub would
+ * close them on behalf of the merging account, but the App token has no Issues permission, so it silently does not;
+ * GITHUB_TOKEN (issues: write in the act job) does it here. A failure is logged and counted, never fatal: the pull
+ * request is already merged and the rest of the plan goes on. */
+async function closeLinkedIssues(number) {
+  try {
+    const res = await api(env.GH_TOKEN, 'POST', '/graphql', { query: CLOSING_QUERY, variables: { owner: OWNER, name: NAME, number } });
+    if (!res.ok || res.data?.errors) throw new Error(`reading its linked issues: ${res.status} ${JSON.stringify(res.data?.errors ?? res.data?.message ?? '')}`);
+    const nodes = res.data?.data?.repository?.pullRequest?.closingIssuesReferences?.nodes ?? [];
+    for (const issue of issuesToClose(nodes, REPO)) {
+      const c = await comment(issue, closedByMergeComment(number));
+      if (!c.ok) throw new Error(`commenting on #${issue}: ${c.status} ${c.data?.message ?? ''}`);
+      const r = await gh('PATCH', `/issues/${issue}`, { state: 'closed', state_reason: 'completed' });
+      if (!r.ok) throw new Error(`closing #${issue}: ${r.status} ${r.data?.message ?? ''}`);
+      console.log(`#${number}: closed linked issue #${issue}`);
+    }
+  } catch (err) {
+    closeFailures++;
+    console.log(`::warning title=Merge manager::#${number} is merged, but closing its linked issues failed: ${err.message}`);
+  }
+}
+
 async function mergePr(number, head) {
   const res = await app('PUT', `/pulls/${number}/merge`, { sha: head, merge_method: config.mergeMethod });
-  if (res.ok) { console.log(`merged #${number}`); return { ok: true, sha: res.data.sha }; }
+  if (res.ok) {
+    console.log(`merged #${number}`);
+    await closeLinkedIssues(number);
+    return { ok: true, sha: res.data.sha };
+  }
   const message = res.data?.message ?? `HTTP ${res.status}`;
   if (res.status === 409) { console.log(`#${number}: head changed (${message}); next run`); return { ok: false }; }
   await park(number, `GitHub refused the merge: ${message}`);
@@ -357,7 +390,8 @@ async function act() {
       gitTry(['checkout', '--quiet', '--detach', 'refs/remotes/origin/main']);
     }
   }
-  console.log(`${actions.length} action(s), ${failed} failed, ${calls} API call(s)`);
+  console.log(`${actions.length} action(s), ${failed} failed, ${closeFailures} linked-issue close(s) failed, ${calls} API call(s)`);
+  if (closeFailures) summary(`Linked issues not closed after a merge: ${closeFailures} pull request(s); see the log and close them by hand.`);
   if (failed) process.exit(1);
 }
 
