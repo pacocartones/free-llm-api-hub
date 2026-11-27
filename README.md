@@ -1,3 +1,5 @@
+# Free LLM API list: 94 providers, checked 27 Nov 2026
+
 <div align="center">
 
 <picture>

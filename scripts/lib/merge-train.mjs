@@ -334,3 +334,26 @@ export const revokeComment = (reason) => `The merge manager removed \`${LABEL}\`
 
 /** A branch name the manager is willing to pass to git (they come from GitHub, but are checked anyway). */
 export const safeBranch = (name) => typeof name === 'string' && /^[A-Za-z0-9._/-]{1,200}$/.test(name) && !name.includes('..') && !name.startsWith('-');
+
+// --- linked issues -----------------------------------------------------------------------------------------------
+
+/** GitHub closes the issues a pull request links with closing keywords on behalf of the account that merges it; an
+ * App token without the Issues permission merges fine but the close is silently skipped. So after each merge the
+ * manager closes them itself with GITHUB_TOKEN. From the `closingIssuesReferences` nodes, the issue numbers to close:
+ * issues of this repository (`repo`, owner/name) that are still open, once each. Closed issues, other repositories
+ * and anything that is not an issue are skipped, so a rerun closes nothing twice and nothing is ever reopened. */
+export function issuesToClose(nodes = [], repo = '') {
+  const seen = new Set();
+  const out = [];
+  for (const n of nodes ?? []) {
+    if (!n || (n.__typename && n.__typename !== 'Issue')) continue;
+    if (n.state !== 'OPEN' || !Number.isInteger(n.number)) continue;
+    if ((n.repository?.nameWithOwner ?? '').toLowerCase() !== repo.toLowerCase() || !repo) continue;
+    if (seen.has(n.number)) continue;
+    seen.add(n.number);
+    out.push(n.number);
+  }
+  return out;
+}
+
+export const closedByMergeComment = (pr) => `Closed by #${pr}, merged by the merge queue.`;
