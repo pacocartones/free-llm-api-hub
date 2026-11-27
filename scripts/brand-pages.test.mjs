@@ -27,7 +27,7 @@ test('provider hero: up to three published limits as numbers, the quoted receipt
   // Mutant: invent a number for a provider without free_limits, or quote without saying where it was read.
   const groq = read('site/p/groq.html');
   assert.match(groq, /<dl class="prov-nums"><div><dt>requests\/min<\/dt><dd>30<\/dd><\/div><div><dt>requests\/day<\/dt><dd>1,000<\/dd><\/div><div><dt>tokens\/day<\/dt><dd>200K<\/dd><\/div><\/dl>/);
-  assert.match(groq, /<blockquote class="prov-receipt"><p>“By default, Groq does not retain customer data for inference requests\.”<\/p><cite><a href="https:\/\/console\.groq\.com\/docs\/your-data" rel="noopener"[^>]*>console\.groq\.com\/docs\/your-data<\/a> · read 2026-11-24<\/cite><\/blockquote>/);
+  assert.match(groq, /<blockquote class="prov-receipt"><p>“By default, Groq does not retain customer data for inference requests\.”<\/p><cite><a href="https:\/\/console\.groq\.com\/docs\/your-data" rel="noopener"[^>]*>console\.groq\.com\/docs\/your-data<\/a> · read <time datetime="2026-11-24">24 Nov 2026<\/time><\/cite><\/blockquote>/);
   const without = providers.find((p) => !p.free_limits && existsSync(new URL(`../site/p/${p.slug}.html`, import.meta.url)));
   assert.ok(without, 'a provider without structured limits');
   assert.doesNotMatch(read(`site/p/${without.slug}.html`), /class="prov-nums"/, without.slug + ': no numbers without free_limits');

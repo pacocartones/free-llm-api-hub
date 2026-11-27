@@ -9,11 +9,8 @@ import { plural } from './text.mjs';
 
 export const STATE_MODALITIES = ['text', 'vision', 'image', 'audio', 'embeddings', 'rerank', 'ocr'];
 
-// Last calendar day of a YYYY-MM month, as YYYY-MM-DD.
-export const monthEndDate = (month) => {
-  const [y, m] = month.split('-').map(Number);
-  return new Date(Date.UTC(y, m, 0)).toISOString().slice(0, 10);
-};
+// Month and day helpers live in dates.mjs.
+import { monthEndDate, monthLabel, humanDate } from './dates.mjs';
 
 // month: 'YYYY-MM'. asOf: the date ages are measured at (the month end, or the
 // last revision date for the newest month in the history). snapshot: the
@@ -104,9 +101,6 @@ export const fillMonths = (monthEnd) => {
 };
 export const reportMonths = fillMonths;
 
-const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-export const monthName = (month) => MONTH_NAMES[Number(month.slice(5, 7)) - 1];
-export const monthLabel = (month) => `${monthName(month)} ${month.slice(0, 4)}`;
 export const pct = (x) => `${Math.round(x * 1000) / 10}%`;
 
 // The sentence under the title of a month, from the same figures the page shows and nothing else.
@@ -131,5 +125,5 @@ export const monthBrief = (r) => {
   if (r.fieldChanges) parts.push(plural(r.fieldChanges, 'field change', 'field changes'));
   if (r.added.length) parts.push(`${r.added.length} added`);
   const brief = parts.length ? parts.join(', ') : 'no field changes';
-  return r.inProgress ? `${brief} · in progress, data to ${r.asOf}` : brief;
+  return r.inProgress ? `${brief} · in progress, data to ${humanDate(r.asOf) || r.asOf}` : brief;
 };

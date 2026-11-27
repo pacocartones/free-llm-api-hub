@@ -36,9 +36,9 @@ test('firstUseHtml: quotes the figures, dates the oldest verification and links 
   assert.match(html, /dataset of 4 free LLM/);
   assert.match(html, /2 ongoing free tiers and 2 trial credits/);
   assert.match(html, /3 of 4 entries are verified/);
-  assert.match(html, /The dates run from <time datetime="2026-01-02">2026-01-02<\/time> to <time datetime="2026-03-10">2026-03-10<\/time>/);
+  assert.match(html, /The dates run from <time datetime="2026-01-02">2 Jan 2026<\/time> to <time datetime="2026-03-10">10 Mar 2026<\/time>/);
   assert.match(html, /1 entry could not be confirmed from an official source and is marked/);
-  assert.match(html, /Oldest verification: <time datetime="2026-01-02">2026-01-02<\/time>\. Each entry is due for a re-check 90 days after its date\./);
+  assert.match(html, /Oldest verification: <time datetime="2026-01-02">2 Jan 2026<\/time>\. Each entry is due for a re-check 90 days after its date\./);
   for (const href of ['#explorer', 'methodology/', 'api/', 'changes/']) assert.ok(html.includes(`href="${href}"`), `links ${href}`);
 });
 

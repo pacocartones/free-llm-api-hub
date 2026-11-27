@@ -8,9 +8,11 @@
 // Pure: each renderer takes the dataset and returns the page parts ({ answer, body, faq, count, featured }); build.mjs
 // adds the page shell, JSON-LD, sitemap entry and hub card. scripts/long-guides.test.mjs pins the lists to the data.
 
+import { timeHtml } from './dates.mjs';
 import { recScore, recommendedCmp, SLA_DAYS, DUE_SOON_DAYS } from './rules.mjs';
-import { fieldCheck, REASON_LABEL } from './field-checks.mjs';
 import { pythonEmbeddingsQuickstart, pythonStringLiteral, pythonChatQuickstart, curlChatQuickstart } from './quickstart.mjs';
+import { fieldCheck, REASON_LABEL, REASON_WHY } from './field-checks.mjs';
+import { NOT_STATED, capFirst } from './not-stated.mjs';
 import { CONSTRAINTS, constraintState, toHash, explorerHref } from './find.mjs';
 import { plural } from './text.mjs';
 import { escapeAttr, escapeText } from './html.mjs';
@@ -42,7 +44,7 @@ export const LONG_GUIDES = [
     card: 'Production checklist',
     blurb: 'Six checks before you ship on a free tier.',
     ogTitle: 'Free LLM API in production?',
-    ogSubtitle: 'a 6-point checklist · unknown is not no',
+    ogSubtitle: 'a 6-point checklist · not stated is not no',
   },
   {
     slug: 'free-llm-api-no-credit-card-no-phone',
@@ -194,7 +196,7 @@ const ext = (url, text) => (httpsOnly(url) ? `<a href="${escapeAttr(url)}" targe
 // points after its slashes, so it never widens a phone screen.
 export const escProse = (s) => escapeAttr(s).replace(/\S{30,}/g, (t) => t.replace(/\//g, '/<wbr>'));
 const provLink = (p, prefix) => `<a href="${prefix}p/${escapeAttr(p.slug)}">${escapeAttr(p.name)}</a>`;
-const time = (d) => (d ? `<time datetime="${escapeAttr(d)}">${escapeAttr(d)}</time>` : 'date not recorded');
+const time = (d) => (d ? timeHtml(d, escapeAttr) : 'date not stated');
 const code = (s) => `<code>${escapeAttr(s)}</code>`;
 const pre = (lang, src) => `<pre><code class="language-${lang}">${escapeText(src)}</code></pre>`;
 const p = (html) => `<p>${html}</p>`;
@@ -208,14 +210,14 @@ const related = (links) => `<p class="muted">Related: ${links.join(' · ')}</p>`
 /** "A, B and C" (already-escaped HTML parts). */
 export const andList = (parts) => (parts.length <= 1 ? parts.join('') : `${parts.slice(0, -1).join(', ')} and ${parts[parts.length - 1]}`);
 
-/** Card requirement in words, with the recorded reason when it is unknown and a phone note when one is required. */
+/** Card requirement in words, with the recorded reason when it is not stated and a phone note when one is required. */
 export function cardWords(x) {
   let w;
   if (x.card_required === false) w = 'No';
   else if (x.card_required === true) w = 'Yes';
   else {
     const c = fieldCheck(x, 'card_required');
-    w = `Unknown (${REASON_LABEL[c && c.status] || REASON_LABEL.not_checked})`;
+    w = capFirst(REASON_LABEL[c && c.status] || REASON_LABEL.not_checked);
   }
   return x.phone_required === true ? `${w} (phone required)` : w;
 }
@@ -224,7 +226,7 @@ export function commercialWords(x) {
   if (x.commercial_ok === true) return 'Yes';
   if (x.commercial_ok === false) return '<strong>No</strong>';
   if (x.commercial_ok === 'conditional') return 'Conditional';
-  return 'Not confirmed';
+  return capFirst(NOT_STATED);
 }
 
 // The source a limit was read on: the structured limits' own source, else the entry's docs page.
@@ -374,7 +376,7 @@ console.log(resp.choices[0].message.content);`;
     p('Base URLs, key variable names and model IDs are taken from each provider’s entry. Compatibility is often partial: tools, streaming, JSON mode or some endpoints may not be supported. Check the provider page before you depend on a feature.') +
     p(`Every provider page has a ready-made quickstart, and the <a href="${prefix}models/">free model index</a> lists the model IDs each provider serves for free.`) +
     h2('Chat and text generation', 'chat') +
-    p(`The tables on this page list providers in the explorer’s <a href="${prefix}#explorer">Recommended</a> order: renewing text LLMs that need no card first, then by the card, phone and commercial-use answers each provider confirms. An ongoing free tier renews; a trial credit is a one-time amount that runs out. A requirement the provider’s pages do not state is shown as not confirmed, with the reason: it is not a no.`) +
+    p(`The tables on this page list providers in the explorer’s <a href="${prefix}#explorer">Recommended</a> order: renewing text LLMs that need no card first, then by the card, phone and commercial-use answers each provider confirms. An ongoing free tier renews; a trial credit is a one-time amount that runs out. A requirement the provider’s pages do not state is shown as not stated, with the reason: it is not a no.`) +
     `<h3>Ongoing free tiers (renewing, no end date)</h3>` + tableHtml('Ongoing free chat APIs that are OpenAI-compatible', HEAD_CHAT, chatRows(s.chatOngoing)) +
     `<h3>One-time trial credits</h3>` + tableHtml('OpenAI-compatible chat APIs with one-time trial credits', HEAD_CHAT, chatRows(s.chatTrial)) +
     (s.noCalls.length ? p(`${s.noCalls.length === 1 ? 'One OpenAI-compatible entry does' : `${s.noCalls.length} OpenAI-compatible entries do`} <strong>not give free model calls</strong> despite the compatible endpoint. Per ${s.noCalls.length === 1 ? 'its entry' : 'their entries'}: ${s.noCalls.map((x) => `${L(x)}: “${escProse(x.free_tier)}”`).join('; ')}. Don’t switch to ${s.noCalls.length === 1 ? 'it' : 'them'} expecting free chat.`) : '') +
@@ -415,7 +417,7 @@ console.log(resp.choices[0].message.content);`;
   const sttAll = s.speech.filter((x) => x.card_required === false && x.category === 'ongoing');
   const stt = [sttAll.find((x) => (x.models_free || []).some((m) => /whisper/i.test(m))) || sttAll[0]].filter(Boolean);
   const faq = [
-    { q: 'Is there a free OpenAI API key?', a: `No. OpenAI’s API is prepaid; there is no ongoing free tier (checked ${escapeAttr(openai.checked || 'on a date not recorded')}).` },
+    { q: 'Is there a free OpenAI API key?', a: `No. OpenAI’s API is prepaid; there is no ongoing free tier (checked ${openai.checked ? timeHtml(openai.checked, escapeAttr) : 'on a date not stated'}).` },
     {
       q: 'What is the best free alternative to the OpenAI API?',
       a: `It depends on the job.${noCardChat.length ? ` For chat with no card, ${andList(noCardChat.map((x) => escapeAttr(x.name)))} have renewing free tiers.` : ''}${noCardEmb.length ? ` For embeddings, ${andList(noCardEmb.map((x) => escapeAttr(x.name)))}.` : ''}${stt.length ? ` For transcription, ${escapeAttr(stt[0].name)}${(stt[0].models_free || []).some((m) => /whisper/i.test(m)) ? '’s Whisper models' : ''}.` : ''} Compare the limits above against your volume.`,
@@ -556,13 +558,13 @@ function productionGuide({ providers, prefix }) {
       ['<code>true</code>', c.true, 'The provider’s terms allow commercial use of the free access.'],
       ['<code>false</code>', c.false, 'The terms limit the free access to evaluation, testing or personal use.'],
       ['<code>"conditional"</code>', c.conditional, `Allowed under a stated condition${conditional.length ? ` (${andList(conditional.map(L))})` : ''}.`],
-      ['<code>null</code>', c.null, 'Not confirmed: the provider’s pages don’t settle it (see below).'],
+      ['<code>null</code>', c.null, 'Not stated: the provider’s pages don’t settle it (see below).'],
     ]) +
     (falseQuoted.length ? p('Real examples of <code>false</code>, with the provider’s words:') + `<ul>${falseQuoted.map((x) => { const k = fieldCheck(x, 'commercial_ok'); return `<li><strong>${L(x)}:</strong> “${escProse(k.quote)}” (${ext((k.sources || [])[0], 'source')}, read ${time(k.checked)}).</li>`; }).join('')}</ul>` : '') +
     (conditional.length ? p(`Conditional means read the condition: ${conditional.map((x) => `${L(x)}: ${escapeAttr(String(x.commercial_ok_condition || 'see its page').replace(/\.$/, ''))}`).join('; ')}.`) : '') +
     p(`Also check <strong>where your users are</strong>: terms can differ by region. The provider page has the notes.`) +
     related([`<a href="${prefix}collections/commercial-use">Commercial use collection</a>`]) +
-    h2('What “null = not confirmed” means, with real examples', 'null-means') +
+    h2('What “null = not stated” means, with real examples', 'null-means') +
     p('A <code>null</code> flag is never a hidden “no” and never a hidden “yes”. Most nulls carry a reason (<code>field_checks</code>): which official pages we read, on what day, and why they don’t settle it. There are three reasons.') +
     (silent.length ? p(`<strong>The pages don’t say it (<code>source_silent</code>).</strong> We read the relevant official pages and none of them answers. <em>Example:</em> ${silent.map(exampleHtml).join(' ')}`) : '') +
     (account.length ? p(`<strong>Only an account would tell (<code>needs_account</code>).</strong> The public pages are silent and the answer appears only during signup. <em>Example:</em> ${account.map(exampleHtml).join(' ')}`) : '') +
@@ -573,7 +575,7 @@ function productionGuide({ providers, prefix }) {
     h2('2. Will the limits hold under load?', 'limits') +
     `<ul>` +
     ((limitExample(groq) || limitExample(orr)) ? `<li><strong>Look at the tightest limit, not the headline.</strong> ${[limitExample(groq), limitExample(orr)].filter(Boolean).join(' ')}</li>` : '') +
-    (unpublished.length ? `<li><strong>Unpublished means unknown.</strong> ${andList(unpublished.map(L))} publish no numeric free limit. Plan for throttling you can’t predict.</li>` : '') +
+    (unpublished.length ? `<li><strong>Unpublished means not stated.</strong> ${andList(unpublished.map(L))} publish no numeric free limit. Plan for throttling you can’t predict.</li>` : '') +
     `<li><strong>Know what happens at the limit.</strong> With no card on file, crossing a limit normally means HTTP 429, not a bill.${cardOnFile.length ? ` With a card on file (${andList(cardOnFile.map(L))}), read the billing page for what follows the free amount.` : ''}</li>` +
     (hordeSla ? `<li><strong>Volunteer and shared capacity has no SLA.</strong> ${L(horde)}’s notes: “${escProse(hordeSla.replace(/[.;]$/, ''))}”.</li>` : '') +
     `</ul>` +
@@ -588,7 +590,7 @@ function productionGuide({ providers, prefix }) {
     related([`<a href="${prefix}collections/no-training">No-training collection</a>`, `<a href="${prefix}data-policy/">Data policy, provider by provider</a>`]) +
     h2('4. Will signup work for you?', 'signup') +
     `<ul><li><strong>Card:</strong> ${F.noCard} of ${F.verified} verified providers need no card for the free access. A card on file changes what happens at the limit (check 2).</li>` +
-    `<li><strong>Phone:</strong> confirmed not required for ${F.phoneFalse}; required for ${F.phoneTrue.length}${F.phoneTrue.length ? ` (${andList(F.phoneTrue.map(L))})` : ''}; unknown for the rest.</li>` +
+    `<li><strong>Phone:</strong> confirmed not required for ${F.phoneFalse}; required for ${F.phoneTrue.length}${F.phoneTrue.length ? ` (${andList(F.phoneTrue.map(L))})` : ''}; not stated for the rest.</li>` +
     (IDENTITY.length ? `<li><strong>Region and identity:</strong> ${IDENTITY.join('; ')}.</li>` : '') +
     `</ul>` +
     related([`<a href="${prefix}guides/free-llm-api-no-credit-card-no-phone">Free LLM APIs with no credit card and no phone</a>`]) +
@@ -604,15 +606,15 @@ function productionGuide({ providers, prefix }) {
     p('You need chat for a commercial side project, no card, and you’d rather your prompts weren’t used for training.') +
     `<ol><li>Filter: commercial use <code>true</code>, card <code>false</code> → ${plural(step1.length, 'provider')}. Keep text LLMs.</li>` +
     `<li>Data policy <code>trains_on_prompts: false</code> → ${step2.length ? andList(step2.map((x) => `${L(x)} (${escProse(x.free_tier)})`)) : 'none today'}.</li>` +
-    (step2.length ? `<li>Limits: ${step2.map((x) => `${L(x)}: ${escProse(x.rate_limits)}`).join('; ')}. Anything unpublished is an unknown to test before launch.</li>` +
+    (step2.length ? `<li>Limits: ${step2.map((x) => `${L(x)}: ${escProse(x.rate_limits)}`).join('; ')}. Anything unpublished is not stated: test it before launch.</li>` +
       `<li>Freshness: ${step2.map((x) => `${escapeAttr(x.name)} checked ${time(x.last_verified)}`).join(', ')}.</li>` : '') +
     `</ol>` +
-    p(`Result: a short list of ${step2.length}, with its unknowns named, instead of a guess.`) +
+    p(`Result: a short list of ${step2.length}, with what is not stated named, instead of a guess.`) +
     (step2.length >= 2 ? related([`<a href="${prefix}compare/?compare=${step2.slice(0, 2).map((x) => escapeAttr(x.slug)).join(',')}">Compare ${andList(step2.slice(0, 2).map((x) => escapeAttr(x.name)))}</a>`]) : '');
 
   const faq = [
     { q: 'Can I use a free LLM API commercially?', a: `Sometimes. ${c.true} of ${F.verified} verified providers allow it on the free tier in their own terms; ${c.false} forbid it; ${c.conditional} allow it under a condition; for ${c.null} the docs don’t say.` },
-    { q: 'Is “unknown” safe to treat as “allowed”?', a: 'No. It means the provider’s pages don’t answer. Ask the provider, or pick one that states it.' },
+    { q: 'Is “not stated” safe to treat as “allowed”?', a: 'No. It means the provider’s pages don’t answer. Ask the provider, or pick one that states it.' },
     { q: 'Which free LLM APIs don’t train on my data?', a: `${F.trainsFalse.length} providers say so in their own words. The list, with each sentence, is in the no-training collection.` },
     { q: 'How often is this data checked?', a: `Every verified entry within ${SLA_DAYS} days, against the provider’s own pages.` },
   ];
@@ -654,7 +656,7 @@ function noCardNoPhoneGuide({ providers, prefix }) {
     if (x.phone_required === false) return `No, per its entry.${cardBit}`;
     if (x.phone_required === true) return `Yes, per its entry.${cardBit}`;
     const c = fieldCheck(x, 'phone_required');
-    return `${x.name}’s pages don’t say${c && c.note ? `: ${escapeAttr(c.note)} (read ${escapeAttr(c.checked)})` : ''}.${cardBit}`;
+    return `${x.name}’s pages don’t say${c && c.note ? `: ${escapeAttr(c.note)} (read ${timeHtml(c.checked, escapeAttr)})` : ''}.${cardBit}`;
   };
   const sourceOf = (x) => ext(x.docs_url, 'Source');
 
@@ -669,16 +671,16 @@ function noCardNoPhoneGuide({ providers, prefix }) {
     h2('The catch, provider by provider', 'the-catch') +
     p('Everything below is from each provider’s entry, which quotes its own pages.') +
     groups.map(([g, l]) => `<h3>${escapeAttr(g)}</h3><ul>${l.map((x) => `<li><strong>${L(x)}.</strong> ${escProse(x.notes)} ${sourceOf(x)}</li>`).join('')}</ul>`).join('') +
-    h2(`No card, phone not confirmed: ${phoneUnknown.length} more`, 'phone-not-confirmed') +
+    h2(`No card, phone not stated: ${phoneUnknown.length} more`, 'phone-not-confirmed') +
     p(`Another ${phoneUnknown.length} of the verified providers need no card, but their pages don’t say whether signup asks for a phone number. Among them are some of the most used free tiers: ${andList(phoneUnknown.slice(0, 7).map(L))}.`) +
-    p(`“Not confirmed” means we read their official pages and none answers the question.${gemini && fieldCheck(gemini, 'phone_required') && gemini.phone_required == null ? ` For ${escapeAttr(gemini.name)}: “${escapeAttr(fieldCheck(gemini, 'phone_required').note)}” (read ${time(fieldCheck(gemini, 'phone_required').checked)}).` : ''} It doesn’t mean they ask for a phone; it means their docs don’t say.`) +
+    p(`“Not stated” means we read their official pages and none answers the question.${gemini && fieldCheck(gemini, 'phone_required') && gemini.phone_required == null ? ` For ${escapeAttr(gemini.name)}: “${escapeAttr(fieldCheck(gemini, 'phone_required').note)}” (read ${time(fieldCheck(gemini, 'phone_required').checked)}).` : ''} It doesn’t mean they ask for a phone; it means their docs don’t say.`) +
     (phoneRequired.length ? p(`<strong>No card, but a phone is required:</strong> ${andList(phoneRequired.map((x) => { const c = fieldCheck(x, 'phone_required'); return c && c.status === 'stated' && c.quote ? `${L(x)} (“${escapeAttr(c.quote)}”)` : L(x); }))}.`) : '') +
-    related([`<a href="${prefix}coverage/">Open questions per flag</a>`, `<a href="${prefix}guides/choose-free-llm-api-for-production">what “unknown” means</a>`]) +
+    related([`<a href="${prefix}coverage/">Open questions per flag</a>`, `<a href="${prefix}guides/choose-free-llm-api-for-production">what “not stated” means</a>`]) +
     h2('No account at all', 'no-account') +
     (anon.length ? p(`${anon.length === 1 ? 'One provider' : `${anon.length} providers`} can be called with <strong>no account</strong>, each with the provider’s own sentence: ${anon.map((x) => `${L(x)} (“${escProse(x.anonymous_access.quote)}”${x.anonymous_access.note ? `; ${escProse(x.anonymous_access.note)}` : ''})`).join('; ')}.`) : p('No provider in the dataset records anonymous access today.')) +
     related([`<a href="${prefix}collections/anonymous-access">No-account collection</a>`, `<a href="${prefix}guides/free-llm-api-no-signup">Free LLM APIs with no phone and no card</a>`]) +
     h2('How sure is “no phone”?', 'how-sure') +
-    p(`For these ${list.length} providers, the dataset records “no card” and “no phone”. ${withPhoneCheck.length === 0 ? 'None of them has a provider sentence registered for the phone answer in <code>field_checks</code> yet: the answer comes from the entry’s verification.' : `${withPhoneCheck.length} of them have a recorded phone check in <code>field_checks</code> (${andList(withPhoneCheck.map(L))}); for the others the answer comes from the entry’s verification, with no provider sentence registered yet.`} When a re-check finds no current page that states an unsourced flag, the flag moves to “not confirmed”, and the provider drops off this list. Each provider page shows the current state and the date.`);
+    p(`For these ${list.length} providers, the dataset records “no card” and “no phone”. ${withPhoneCheck.length === 0 ? 'None of them has a provider sentence registered for the phone answer in <code>field_checks</code> yet: the answer comes from the entry’s verification.' : `${withPhoneCheck.length} of them have a recorded phone check in <code>field_checks</code> (${andList(withPhoneCheck.map(L))}); for the others the answer comes from the entry’s verification, with no provider sentence registered yet.`} When a re-check finds no current page that states an unsourced flag, the flag moves to “not stated”, and the provider drops off this list. Each provider page shows the current state and the date.`);
 
   const faq = [
     { q: 'Which free LLM API needs no credit card and no phone number?', a: chat.length ? `For general chat: ${andList(chat.map((x) => `${escapeAttr(x.name)} (${escapeAttr(x.free_tier)})`))}.` : 'None of the providers with an ongoing chat tier is confirmed for both today; see the list for speech, OCR and embeddings APIs.' },
@@ -686,7 +688,7 @@ function noCardNoPhoneGuide({ providers, prefix }) {
     groq && { q: 'Does Groq need a phone number?', a: phoneFaq(groq) },
     {
       q: 'Can I use these commercially?',
-      a: `${commercial.yes.length} of the ${list.length} allow it on the free tier.${commercial.no.length ? ` ${andList(commercial.no.map((x) => escapeAttr(x.name)))} ${commercial.no.length === 1 ? 'doesn’t' : 'don’t'}.` : ''}${commercial.cond.length ? ` ${andList(commercial.cond.map((x) => escapeAttr(x.name)))} allow it under a condition.` : ''}${commercial.unk.length ? ` For ${andList(commercial.unk.map((x) => escapeAttr(x.name)))} it isn’t confirmed.` : ''}`,
+      a: `${commercial.yes.length} of the ${list.length} allow it on the free tier.${commercial.no.length ? ` ${andList(commercial.no.map((x) => escapeAttr(x.name)))} ${commercial.no.length === 1 ? 'doesn’t' : 'don’t'}.` : ''}${commercial.cond.length ? ` ${andList(commercial.cond.map((x) => escapeAttr(x.name)))} allow it under a condition.` : ''}${commercial.unk.length ? ` For ${andList(commercial.unk.map((x) => escapeAttr(x.name)))} it is not stated.` : ''}`,
     },
   ].filter(Boolean);
   return { count: list.length, answer, body, faq, featured: list };
@@ -727,13 +729,14 @@ export const speechMentions = (x) => ({ stt: MENTIONS_STT.test(entryText(x)), tt
 
 const wrapCode = (t) => `<code>${escapeAttr(t).replace(/\//g, '/<wbr>')}</code>`;
 const reasonOf = (x, field) => { const c = fieldCheck(x, field); return REASON_LABEL[c && c.status] || REASON_LABEL.not_checked; };
-const flagWords = (x, field) => (x[field] === false ? 'No' : x[field] === true ? 'Yes' : `Not confirmed (${reasonOf(x, field)})`);
+const whyOf = (x, field) => { const c = fieldCheck(x, field); return REASON_WHY[c && c.status] || ''; };
+const flagWords = (x, field) => (x[field] === false ? 'No' : x[field] === true ? 'Yes' : capFirst(reasonOf(x, field)));
 // The card and phone cell, and the commercial-use cell (the flag in words, then the recorded condition, or the reason
 // it is not stated), shared by the modality tables and the OpenAI alternatives tables.
 const signupCell = (x) => `Card: ${escapeAttr(flagWords(x, 'card_required'))}<br>Phone: ${escapeAttr(flagWords(x, 'phone_required'))}`;
 const commercialCell = (x) => commercialWords(x) +
   (x.commercial_ok === 'conditional' && x.commercial_ok_condition ? `<br><span class="notes">${escapeAttr(x.commercial_ok_condition)}</span>` : '') +
-  (x.commercial_ok == null ? `<br><span class="notes">${escapeAttr(reasonOf(x, 'commercial_ok'))}</span>` : '');
+  (x.commercial_ok == null && whyOf(x, 'commercial_ok') ? `<br><span class="notes">${escapeAttr(whyOf(x, 'commercial_ok'))}</span>` : '');
 const typeLine = (x) => (x.category === 'ongoing' ? 'Ongoing free tier' : 'One-time credit');
 const names = (list) => andList(list.map((x) => escapeAttr(x.name)));
 // The verb that agrees with a list of providers: "Groq allows", "Groq and Gemini allow".
@@ -776,13 +779,13 @@ function modalityTable(label, list, L, { baseUrl = false, model = false, extra =
 }
 
 const FLAG_LABEL = { commercial_ok: 'Commercial use', card_required: 'The card requirement', phone_required: 'The phone requirement' };
-/** The gotchas of a modality guide: each entry's notes, then what the data can't confirm, with the recorded reasons. */
+/** The gotchas of a modality guide: each entry's notes, then what the data does not state, with the recorded reasons. */
 function modalityGotchas(list, L, { noCalls = [], what, catches = true }) {
   const unknowns = Object.keys(FLAG_LABEL).map((field) => {
     const nulls = list.filter((x) => x[field] == null);
     if (!nulls.length) return '';
     const ex = nulls.map((x) => ({ x, c: fieldCheck(x, field) })).find(({ c }) => c && c.note);
-    return `<li><strong>${FLAG_LABEL[field]}</strong> isn’t confirmed for ${nulls.length} of ${list.length}: ${andList(nulls.map((x) => `${L(x)} (${escapeAttr(reasonOf(x, field))})`))}.` +
+    return `<li><strong>${FLAG_LABEL[field]}</strong> is not stated for ${nulls.length} of ${list.length}: ${andList(nulls.map((x) => `${L(x)}${whyOf(x, field) ? ` (${escapeAttr(whyOf(x, field))})` : ''}`))}.` +
       (ex ? ` For example, ${L(ex.x)}: “${escProse(ex.c.note)}” (read ${time(ex.c.checked)}).` : '') + `</li>`;
   }).join('');
   const noPolicy = list.filter((x) => !x.data_policy);
@@ -791,8 +794,8 @@ function modalityGotchas(list, L, { noCalls = [], what, catches = true }) {
   const anon = list.filter((x) => x.anonymous_access && x.anonymous_access.quote);
   const watermarks = list.filter((x) => watermarkSentences(x).length);
   return h2('Gotchas', 'gotchas') +
-    p('Everything below comes from each provider’s entry, which quotes the provider’s own pages. A flag the pages don’t settle stays “not confirmed”, with the reason; it is never a hidden yes or no.') +
-    `<h3>What the data can’t confirm</h3><ul>${unknowns}` +
+    p('Everything below comes from each provider’s entry, which quotes the provider’s own pages. A flag the pages don’t settle stays “not stated”, with the reason; it is never a hidden yes or no.') +
+    `<h3>What the data does not state</h3><ul>${unknowns}` +
     (noPolicy.length ? `<li><strong>No quoted data policy</strong> is recorded for ${noPolicy.length} of ${list.length}: ${andList(noPolicy.map(L))}.</li>` : '') +
     `</ul>` +
     ((windows.length || noExpiry.length || anon.length || watermarks.length) ? `<h3>Expiry, account and output</h3><ul>` +
@@ -864,7 +867,7 @@ function embeddingsGuide({ providers, prefix }) {
     },
     {
       q: 'Can I use a free embedding API commercially?',
-      a: `${c.yes.length} of the ${list.length} allow it on the free tier, per their terms.${c.no.length ? ` ${names(c.no)} ${c.no.length === 1 ? 'doesn’t' : 'don’t'}.` : ''}${c.cond.length ? ` ${names(c.cond)} ${c.cond.length === 1 ? 'allows' : 'allow'} it under a condition.` : ''}${c.unk.length ? ` For ${c.unk.length} it isn’t confirmed.` : ''}`,
+      a: `${c.yes.length} of the ${list.length} allow it on the free tier, per their terms.${c.no.length ? ` ${names(c.no)} ${c.no.length === 1 ? 'doesn’t' : 'don’t'}.` : ''}${c.cond.length ? ` ${names(c.cond)} ${c.cond.length === 1 ? 'allows' : 'allow'} it under a condition.` : ''}${c.unk.length ? ` For ${c.unk.length} it is not stated.` : ''}`,
     },
     {
       q: 'Do free embedding APIs train on my documents?',
@@ -926,7 +929,7 @@ function speechGuide({ providers, prefix }) {
     },
     {
       q: 'Can I use free text-to-speech voices commercially?',
-      a: `Of the ${tts.length} entries that mention text-to-speech, ${cTts.yes.length} allow commercial use on the free tier.${cTts.no.length ? ` ${names(cTts.no)} ${cTts.no.length === 1 ? 'doesn’t' : 'don’t'}.` : ''}${cTts.cond.length ? ` ${names(cTts.cond)} ${cTts.cond.length === 1 ? 'allows' : 'allow'} it under a condition.` : ''}${cTts.unk.length ? ` For ${cTts.unk.length} it isn’t confirmed.` : ''}`,
+      a: `Of the ${tts.length} entries that mention text-to-speech, ${cTts.yes.length} allow commercial use on the free tier.${cTts.no.length ? ` ${names(cTts.no)} ${cTts.no.length === 1 ? 'doesn’t' : 'don’t'}.` : ''}${cTts.cond.length ? ` ${names(cTts.cond)} ${cTts.cond.length === 1 ? 'allows' : 'allow'} it under a condition.` : ''}${cTts.unk.length ? ` For ${cTts.unk.length} it is not stated.` : ''}`,
     },
     {
       q: 'Do free speech APIs train on my audio?',
@@ -979,7 +982,7 @@ function ocrGuide({ providers, prefix }) {
     },
     {
       q: 'Can I use a free OCR API commercially?',
-      a: `${c.yes.length} of the ${list.length} allow it on the free tier, per their terms.${c.cond.length ? ` ${names(c.cond)} ${c.cond.length === 1 ? 'allows' : 'allow'} it under a condition.` : ''}${c.no.length ? ` ${names(c.no)} ${c.no.length === 1 ? 'doesn’t' : 'don’t'}.` : ''}${c.unk.length ? ` For ${names(c.unk)} it isn’t confirmed.` : ''}`,
+      a: `${c.yes.length} of the ${list.length} allow it on the free tier, per their terms.${c.cond.length ? ` ${names(c.cond)} ${c.cond.length === 1 ? 'allows' : 'allow'} it under a condition.` : ''}${c.no.length ? ` ${names(c.no)} ${c.no.length === 1 ? 'doesn’t' : 'don’t'}.` : ''}${c.unk.length ? ` For ${names(c.unk)} it is not stated.` : ''}`,
     },
     {
       q: 'Does free OCR add a watermark?',
@@ -1039,7 +1042,7 @@ function imageGuide({ providers, prefix }) {
     },
     {
       q: 'Can I use free AI-generated images commercially?',
-      a: `It depends on the provider and the model. ${c.yes.length} of the ${gen.length} allow commercial use on the free access.${c.cond.length ? ` ${names(c.cond)} ${c.cond.length === 1 ? 'allows' : 'allow'} it subject to each model’s licence or another condition.` : ''}${c.no.length ? ` ${names(c.no)} ${c.no.length === 1 ? 'doesn’t' : 'don’t'}.` : ''}${c.unk.length ? ` For ${c.unk.length} it isn’t confirmed.` : ''}`,
+      a: `It depends on the provider and the model. ${c.yes.length} of the ${gen.length} allow commercial use on the free access.${c.cond.length ? ` ${names(c.cond)} ${c.cond.length === 1 ? 'allows' : 'allow'} it subject to each model’s licence or another condition.` : ''}${c.no.length ? ` ${names(c.no)} ${c.no.length === 1 ? 'doesn’t' : 'don’t'}.` : ''}${c.unk.length ? ` For ${c.unk.length} it is not stated.` : ''}`,
     },
     {
       q: 'Which free image APIs add a watermark?',
@@ -1073,9 +1076,9 @@ const rpm = (x) => (x.free_limits && Number.isFinite(x.free_limits.requests_per_
 export const topSpeed = (x) => (x.published_speed || []).filter((s) => s.metric === 'output_tokens_per_second' && Number.isFinite(s.value)).sort((a, b) => b.value - a.value)[0] || null;
 const speedWords = (s) => `${s.qualifier === 'approx' ? '~' : s.qualifier === 'at_least' ? 'at least ' : ''}${num(s.value)} ${escapeAttr(s.unit)}`;
 const speedCell = (x) => { const s = topSpeed(x); return s ? `${speedWords(s)}<br><span class="notes">${escapeAttr(s.model)} (${ext(s.source, 'provider page')})</span>` : '<span class="notes">Not published</span>'; };
-// "Not confirmed (reason)", without repeating the words when no reason is recorded.
-const notConfirmed = (x, field) => { const r = reasonOf(x, field); return r === REASON_LABEL.not_checked ? 'Not confirmed' : `Not confirmed (${r})`; };
-const compatWords = (x) => (x.openai_compatible === true ? (httpsOnly(x.openai_base_url) ? 'Yes' : 'Yes, no base URL recorded') : x.openai_compatible === false ? 'No' : notConfirmed(x, 'openai_compatible'));
+// "Not stated", with the reason when one is recorded (REASON_LABEL).
+const notStated = (x, field) => capFirst(reasonOf(x, field));
+const compatWords = (x) => (x.openai_compatible === true ? (httpsOnly(x.openai_base_url) ? 'Yes' : 'Yes, no base URL recorded') : x.openai_compatible === false ? 'No' : notStated(x, 'openai_compatible'));
 // Sentences in which an entry says free use is limited to evaluation or testing, or is non-commercial.
 export const EVALUATION_ONLY = /evaluation (purposes|only)|for (internal )?(testing and )?evaluation|non-commercial|not (in )?production/i;
 const flagsLine = (x, fields) => fields.map(([w, f]) => `${w}: ${f === 'commercial_ok' ? commercialWords(x) : escapeAttr(flagWords(x, f))}`).join('. ');
@@ -1202,7 +1205,7 @@ function codingGuide({ providers, prefix, codingToolsOwnKey }) {
     },
     { q: 'Can I use a free LLM API in my IDE or coding assistant?', a: `If the tool accepts a custom OpenAI-compatible base URL, a key and a model ID, the ${S.compat.length} providers in the tables are the ones to try. Compatibility is often partial (tool calls, streaming, JSON mode), so check the provider page.` },
     { q: 'Do free coding APIs train on my code?', a: `${t.no.length ? `${names(t.no)} ${agree(t.no, 'says it doesn’t', 'say they don’t')}.` : 'None says it doesn’t.'}${t.yes.length ? ` ${names(t.yes)} ${agree(t.yes, 'says it can', 'say they can')}.` : ''}${t.open.length ? ` For the other ${t.open.length}, no quoted policy settles it.` : ''}` },
-    { q: 'Can I use a free coding API commercially?', a: `${c.yes.length} of the ${S.compat.length} allow commercial use on the free tier, per their terms.${c.no.length ? ` ${names(c.no)} ${agree(c.no, 'doesn’t', 'don’t')}.` : ''}${c.cond.length ? ` ${names(c.cond)} ${agree(c.cond, 'allows', 'allow')} it under a condition.` : ''}${c.unk.length ? ` For ${c.unk.length} it isn’t confirmed.` : ''}` },
+    { q: 'Can I use a free coding API commercially?', a: `${c.yes.length} of the ${S.compat.length} allow commercial use on the free tier, per their terms.${c.no.length ? ` ${names(c.no)} ${agree(c.no, 'doesn’t', 'don’t')}.` : ''}${c.cond.length ? ` ${names(c.cond)} ${agree(c.cond, 'allows', 'allow')} it under a condition.` : ''}${c.unk.length ? ` For ${c.unk.length} it is not stated.` : ''}` },
   ];
   return { count: S.compat.length, answer, body, faq, featured: S.compat };
 }
@@ -1400,7 +1403,7 @@ print(resp.choices[0].message.content)` : '';
     h2('Tool calling: what the data says, and what it doesn’t', 'tool-calling') +
     `<ul>` +
     `<li><strong>Not recorded:</strong> the dataset has no field for tool or function calling, per provider or per model. A provider that lists an OpenAI-compatible API accepts the SDK’s <code>tools</code> parameter only if its docs say so; check the provider page before an agent depends on it.</li>` +
-    `<li><strong>OpenAI compatibility:</strong> ${S.compat.length} of the ${S.text.length} free text LLMs list it${S.compatStated.length ? `, ${S.compatStated.length} with the provider’s own sentence on file` : ''}; ${S.notCompat.length} use their own API${S.notCompat.length ? ` (${andList(S.notCompat.map(L))})` : ''}${S.compatUnknown.length ? `; for ${andList(S.compatUnknown.map((x) => `${L(x)}${notConfirmed(x, 'openai_compatible') === 'Not confirmed' ? '' : ` (${escapeAttr(reasonOf(x, 'openai_compatible'))})`}`))} it isn’t confirmed` : ''}.</li>` +
+    `<li><strong>OpenAI compatibility:</strong> ${S.compat.length} of the ${S.text.length} free text LLMs list it${S.compatStated.length ? `, ${S.compatStated.length} with the provider’s own sentence on file` : ''}; ${S.notCompat.length} use their own API${S.notCompat.length ? ` (${andList(S.notCompat.map(L))})` : ''}${S.compatUnknown.length ? `; for ${andList(S.compatUnknown.map((x) => `${L(x)}${whyOf(x, 'openai_compatible') ? ` (${escapeAttr(whyOf(x, 'openai_compatible'))})` : ''}`))} it is not stated` : ''}.</li>` +
     (mentionQuotes.length ? `<li><strong>Entries that mention agents or tools</strong>, in their own words: ${mentionQuotes.join('; ')}. A mention is not a statement that tool calling works on the free tier.</li>` : '') +
     `</ul>` +
     h2('Pick a stack', 'pick-a-stack') +
@@ -1425,7 +1428,7 @@ print(resp.choices[0].message.content)` : '';
     `<li><strong>At the limit:</strong> with no card on file, crossing a limit normally means HTTP 429, not a bill. Catch it and back off, or move to a second provider (the quickstart below does).${cardOnFile.length ? ` With a card on file (${andList(cardOnFile.map(L))}), read the billing page for what follows the free amount.` : ''}</li>` +
     `</ul>` +
     h2('The commercial-use caveat', 'commercial-use') +
-    p(`An agent you ship is a commercial use for most terms. Of the ${S.text.length} free text LLMs, ${c.yes.length} allow commercial use on the free tier${c.yes.length ? ` (${andList(c.yes.map(L))})` : ''}; ${c.no.length} don’t${c.no.length ? ` (${andList(c.no.map(L))})` : ''}${c.cond.length ? `; ${c.cond.map((x) => `${L(x)} allows it if ${escapeAttr(String(x.commercial_ok_condition || 'a stated condition holds').replace(/\.$/, '').replace(/^./, (m) => m.toLowerCase()))}`).join('; ')}` : ''}; for ${c.unk.length} the provider’s pages don’t settle it. Don’t ship an agent on a “not confirmed”: ask the provider in writing first.`) +
+    p(`An agent you ship is a commercial use for most terms. Of the ${S.text.length} free text LLMs, ${c.yes.length} allow commercial use on the free tier${c.yes.length ? ` (${andList(c.yes.map(L))})` : ''}; ${c.no.length} don’t${c.no.length ? ` (${andList(c.no.map(L))})` : ''}${c.cond.length ? `; ${c.cond.map((x) => `${L(x)} allows it if ${escapeAttr(String(x.commercial_ok_condition || 'a stated condition holds').replace(/\.$/, '').replace(/^./, (m) => m.toLowerCase()))}`).join('; ')}` : ''}; for ${c.unk.length} the provider’s pages don’t settle it. Don’t ship an agent on a “not stated”: ask the provider in writing first.`) +
     (evalNotes.length ? `<ul>${evalNotes.map((e) => `<li>${e}.</li>`).join('')}</ul>` : '') +
     related([`<a href="${prefix}guides/choose-free-llm-api-for-production">Can you use a free API in production?</a>`, `<a href="${prefix}collections/commercial-use">Commercial use collection</a>`]) +
     h2('Quickstart: two providers, one SDK', 'quickstart') +
@@ -1440,7 +1443,7 @@ print(resp.choices[0].message.content)` : '';
   const faq = [
     { q: 'Which free LLM APIs support tool calling?', a: `Our dataset doesn’t record tool or function calling. It records OpenAI compatibility: ${S.compat.length} of the ${S.text.length} free text LLMs list an OpenAI-compatible API, and the SDK’s tools parameter works only where the provider documents it. Check the provider page.` },
     { q: 'Is there a free LLM API for AI agents?', a: noCardOngoingCompat.length ? `Yes. ${names(noCardOngoingCompat.slice(0, 4))} ${agree(noCardOngoingCompat.slice(0, 4), 'has', 'have')} a renewing free tier, an OpenAI-compatible API and no card requirement.` : 'No provider in the data combines a renewing free tier, an OpenAI-compatible API and no card today.' },
-    { q: 'Can I run an AI agent on a free tier in production?', a: `Only where the terms allow it: ${c.yes.length} of the ${S.text.length} free text LLMs allow commercial use on the free tier, ${c.no.length} don’t, and for ${c.unk.length} it isn’t confirmed.` },
+    { q: 'Can I run an AI agent on a free tier in production?', a: `Only where the terms allow it: ${c.yes.length} of the ${S.text.length} free text LLMs allow commercial use on the free tier, ${c.no.length} don’t, and for ${c.unk.length} it is not stated.` },
     { q: 'What happens when an agent hits a free rate limit?', a: 'With no card on file, the API normally returns HTTP 429 until the limit resets. Catch it, back off, or send the call to a second free provider behind the same SDK.' },
   ];
   return { count: S.text.length, answer, body, faq, featured: S.text };
@@ -1477,7 +1480,8 @@ function chatbotGuide({ providers, prefix }) {
     if (s === 'no') return c.key === 'commercial' && x.commercial_ok === 'conditional' ? `Conditional<br><span class="notes">${escapeAttr(x.commercial_ok_condition || 'see its page')}</span>` : '<strong>No</strong>';
     if (c.key === 'commercial' && x.commercial_ok === 'conditional') return `Conditional<br><span class="notes">${escapeAttr(x.commercial_ok_condition || 'see its page')}</span>`;
     if (c.key === 'train') return `Not stated<br><span class="notes">${escapeAttr(dataUseWords(x))}</span>`;
-    return `Not confirmed<br><span class="notes">${escapeAttr(reasonOf(x, CHATBOT_REASON_FIELD[c.key]))}</span>`;
+    const why = whyOf(x, CHATBOT_REASON_FIELD[c.key]);
+    return why ? `Not stated<br><span class="notes">${escapeAttr(why)}</span>` : 'Not stated';
   };
   const unknownOf = (x) => CHATBOT_CHECKS.find((c) => st(x, c.key) === 'unknown');
   const phone = { no: S.text.filter((x) => x.phone_required === false), yes: S.text.filter((x) => x.phone_required === true), unk: S.text.filter((x) => x.phone_required == null) };
@@ -1488,7 +1492,7 @@ function chatbotGuide({ providers, prefix }) {
   const noCardCommercial = S.ranked.filter((x) => st(x, 'card') === 'yes' && st(x, 'commercial') === 'yes');
   const ANSWERS = { use: 'chat', card: 'no', phone: 'no', commercial: 'yes', train: 'yes' };
 
-  const answer = `We checked all ${S.text.length} free text LLMs in our dataset against four questions a side project asks: no card, no phone, commercial use allowed, and no training on your prompts. ${S.all.length ? `${S.all.length} ${agree(S.all, 'passes', 'pass')} all four: ${names(S.all)}.` : 'None passes all four today.'} ${S.close.length} more pass three, with the fourth not confirmed by the provider’s pages rather than failed. A check the pages don’t settle is shown as not confirmed, never as yes.`;
+  const answer = `We checked all ${S.text.length} free text LLMs in our dataset against four questions a side project asks: no card, no phone, commercial use allowed, and no training on your prompts. ${S.all.length ? `${S.all.length} ${agree(S.all, 'passes', 'pass')} all four: ${names(S.all)}.` : 'None passes all four today.'} ${S.close.length} more pass three, with the fourth not stated by the provider’s pages rather than failed. A check the pages don’t settle is shown as not stated, never as yes.`;
   const body =
     h2('Who this guide is for', 'who-its-for') +
     p('Developers building a chatbot on the side: a Discord or Telegram bot, a help widget on a website, a small assistant for a club or a shop. It may earn money later, so the terms matter now.') +
@@ -1496,7 +1500,7 @@ function chatbotGuide({ providers, prefix }) {
     `<ol>` +
     `<li><strong>No card.</strong> With no card on file, reaching a limit stops the bot instead of billing you.</li>` +
     `<li><strong>No phone.</strong> Phone verification is the least documented fact: ${phone.unk.length} of the ${S.text.length} free text LLMs don’t state it; ${phone.no.length} confirm no phone and ${phone.yes.length} require one.</li>` +
-    `<li><strong>Commercial use.</strong> A bot that takes payments or ads is commercial. Conditional terms count as not confirmed here, as in the explorer.</li>` +
+    `<li><strong>Commercial use.</strong> A bot that takes payments or ads is commercial. Conditional terms count as not stated here, as in the explorer.</li>` +
     `<li><strong>Your users’ messages.</strong> Whether the provider says it trains on prompts, quoted from its own data policy.</li>` +
     `</ol>` +
     p(`<a href="${findHref(prefix, ANSWERS)}">Find my free API</a> opens with these four answers selected, and <a href="${explorerHref(ANSWERS, prefix)}">the explorer</a> applies the same filters.`) +
@@ -1509,13 +1513,13 @@ function chatbotGuide({ providers, prefix }) {
       { need: 'No account at all, to try it out', x: S.anon[0], why: (x) => `“${escProse(x.anonymous_access.quote)}”` },
     ], L) +
     h2('Every free text LLM, checked', 'checked') +
-    p('Most checks passed first, then by our score. “Not confirmed” carries the reason recorded for the flag.') +
+    p('Most checks passed first, then by our score. “Not stated” carries the reason recorded for the flag.') +
     tableHtml('Free chatbot APIs checked for card, phone, commercial use and training', ['Provider', 'What’s free', ...CHATBOT_CHECKS.map((c) => CHECK_HEAD[c.key]), 'Confirmed', 'Checked'],
       S.ranked.map((x) => [`${L(x)}<br><small>${typeLine(x)}</small>`, `${escapeAttr(x.free_tier)}<br><span class="notes">${escapeAttr(x.rate_limits)}</span>`, ...CHATBOT_CHECKS.map((c) => checkCell(x, c)), `${chatbotPasses(x)} of ${CHATBOT_CHECKS.length}`, checkedCell(x)])) +
     related([`<a href="${prefix}collections/no-credit-card">No credit card collection</a>`, `<a href="${prefix}collections/no-phone">No phone collection</a>`, `<a href="${prefix}collections/commercial-use">Commercial use collection</a>`, `<a href="${prefix}collections/no-training">No-training collection</a>`]) +
     h2('Three of four: what is missing', 'close') +
     (S.close.length
-      ? `<ul>${S.close.map((x) => { const u = unknownOf(x); const f = CHATBOT_REASON_FIELD[u.key]; const fc = f && fieldCheck(x, f); return `<li><strong>${L(x)}:</strong> ${escapeAttr(CHECK_HEAD[u.key].toLowerCase())} isn’t confirmed${fc && fc.note ? `: “${escProse(fc.note)}” (read ${time(fc.checked)})` : u.key === 'train' ? ` (${escapeAttr(dataUseWords(x).toLowerCase())})` : ` (${escapeAttr(reasonOf(x, f))})`}.</li>`; }).join('')}</ul>` + p('Ask the provider in writing before you rely on the missing check.')
+      ? `<ul>${S.close.map((x) => { const u = unknownOf(x); const f = CHATBOT_REASON_FIELD[u.key]; const fc = f && fieldCheck(x, f); return `<li><strong>${L(x)}:</strong> ${escapeAttr(CHECK_HEAD[u.key].toLowerCase())} is not stated${fc && fc.note ? `: “${escProse(fc.note)}” (read ${time(fc.checked)})` : u.key === 'train' ? ` (${escapeAttr(dataUseWords(x).toLowerCase())})` : ` (${escapeAttr(reasonOf(x, f))})`}.</li>`; }).join('')}</ul>` + p('Ask the provider in writing before you rely on the missing check.')
       : p('No free text LLM passes three checks with the fourth only unconfirmed today.')) +
     // Fewer than two at four or three checks: compare the two that pass the most checks instead.
     (S.ranked.length >= 2 ? related([compareLink(S.all.length + S.close.length >= 2 ? [...S.all, ...S.close] : S.ranked.slice(0, 2), prefix)]) : '') +

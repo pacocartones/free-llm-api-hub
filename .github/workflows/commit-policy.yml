@@ -22,6 +22,10 @@ jobs:
     name: commit policy
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    permissions:
+      contents: read
+      # Only to strip an AI footer from a maintainer pull request's own description (step below).
+      pull-requests: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -40,9 +44,21 @@ jobs:
       - name: Check the description of a maintainer pull request
         if: github.event.pull_request.user.login == 'pacocartones'
         env:
-          PR_BODY: ${{ github.event.pull_request.body }}
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          PR: ${{ github.event.pull_request.number }}
+        # The description is read from the API, not from the event, so a re-run sees later edits.
+        # An AI footer (Generated with Claude Code, or a Claude co-author line) is removed here and
+        # the check passes; it only fails if the footer could not be removed.
         run: |
-          if printf '%s\n' "$PR_BODY" | grep -Eiq 'generated (by|with) \[?claude code|co-authored-by:[[:space:]]*claude'; then
-            echo "::error::Remove the AI footer (Generated with Claude Code, or a Claude co-author line) from the pull request description."
-            exit 1
+          pattern='generated (by|with) \[?claude code|co-authored-by:[[:space:]]*claude'
+          gh api "repos/$REPO/pulls/$PR" --jq '.body // ""' > "$RUNNER_TEMP/body.md"
+          if grep -Eiq "$pattern" "$RUNNER_TEMP/body.md"; then
+            perl -0777 -pe 's/^[ \t]*[_*]*[ \t]*(?:\xF0\x9F\xA4\x96[ \t]*)?Generated (?:by|with) \[?Claude Code\]?(?:\([^)]*\))?[_*]*[ \t]*\.?[ \t]*$//gmi; s/^[ \t]*Co-Authored-By:[ \t]*Claude[^\n]*$//gmi; s/\n{3,}/\n\n/g; s/\s+\z/\n/' "$RUNNER_TEMP/body.md" > "$RUNNER_TEMP/clean.md"
+            if grep -Eiq "$pattern" "$RUNNER_TEMP/clean.md"; then
+              echo "::error::Remove the AI footer (Generated with Claude Code, or a Claude co-author line) from the pull request description."
+              exit 1
+            fi
+            gh api -X PATCH "repos/$REPO/pulls/$PR" -F "body=@$RUNNER_TEMP/clean.md" > /dev/null
+            echo "::notice::Removed an AI footer from the pull request description."
           fi

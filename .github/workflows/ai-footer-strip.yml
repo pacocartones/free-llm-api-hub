@@ -1,0 +1,52 @@
+name: AI footer strip
+
+# Removes an AI footer ("Generated with Claude Code", or a Claude co-author line) from
+# issues and comments written by the maintainer account, right when they are posted or
+# edited. Pull request descriptions are handled by the commit policy check. It reads the
+# body from the event (through an environment variable, never interpolated into the
+# script), checks out nothing and runs no code from the repository.
+on:
+  issues:
+    types: [opened, edited]
+  issue_comment:
+    types: [created, edited]
+  pull_request_review_comment:
+    types: [created, edited]
+
+permissions: {}
+
+jobs:
+  strip:
+    name: strip AI footer
+    if: >-
+      (github.event.comment && github.event.comment.user.login == 'pacocartones') ||
+      (!github.event.comment && github.event.issue.user.login == 'pacocartones')
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    permissions:
+      issues: write
+      pull-requests: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      REPO: ${{ github.repository }}
+      EVENT: ${{ github.event_name }}
+      BODY: ${{ github.event.comment.body || github.event.issue.body }}
+      COMMENT_ID: ${{ github.event.comment.id }}
+      ISSUE: ${{ github.event.issue.number }}
+    steps:
+      - name: Remove the footer if there is one
+        run: |
+          pattern='generated (by|with) \[?claude code|co-authored-by:[[:space:]]*claude'
+          printf '%s\n' "$BODY" > "$RUNNER_TEMP/body.md"
+          if ! grep -Eiq "$pattern" "$RUNNER_TEMP/body.md"; then
+            echo "no AI footer"
+            exit 0
+          fi
+          perl -0777 -pe 's/^[ \t]*[_*]*[ \t]*(?:\xF0\x9F\xA4\x96[ \t]*)?Generated (?:by|with) \[?Claude Code\]?(?:\([^)]*\))?[_*]*[ \t]*\.?[ \t]*$//gmi; s/^[ \t]*Co-Authored-By:[ \t]*Claude[^\n]*$//gmi; s/\n{3,}/\n\n/g; s/\s+\z/\n/' "$RUNNER_TEMP/body.md" > "$RUNNER_TEMP/clean.md"
+          case "$EVENT" in
+            issues) url="repos/$REPO/issues/$ISSUE" ;;
+            issue_comment) url="repos/$REPO/issues/comments/$COMMENT_ID" ;;
+            pull_request_review_comment) url="repos/$REPO/pulls/comments/$COMMENT_ID" ;;
+          esac
+          gh api -X PATCH "$url" -F "body=@$RUNNER_TEMP/clean.md" > /dev/null
+          echo "::notice::Removed an AI footer ($EVENT)."

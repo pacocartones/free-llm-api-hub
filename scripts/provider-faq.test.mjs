@@ -6,8 +6,9 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { join } from 'node:path';
-import { answerFirst, providerFaq, providerFaqHtml, providerFaqJsonLd, flagWords, NOT_STATED } from './lib/provider-faq.mjs';
-import { shortDate } from './lib/provider-meta.mjs';
+import { answerFirst, providerFaq, providerFaqHtml, providerFaqJsonLd, flagWords } from './lib/provider-faq.mjs';
+import { NOT_STATED } from './lib/not-stated.mjs';
+import { humanDate as shortDate } from './lib/dates.mjs';
 import { privateTree } from './lib/private-tree.mjs';
 import { escapeHtml } from './lib/html.mjs';
 
@@ -83,7 +84,7 @@ test('every FAQ answer cites the day its source was read, and that day is a date
         assert.ok(recordDates.has(it.date), `${p.slug} ${it.id}: ${it.date} is in the record`);
         assert.ok(it.a.endsWith(` Source read ${shortDate(it.date)}.`), `${p.slug} ${it.id}: ends with its source date`);
       } else {
-        assert.ok(it.a.endsWith(' Source date not recorded.'), `${p.slug} ${it.id}: says the date is missing`);
+        assert.ok(it.a.endsWith(' Source date not stated.'), `${p.slug} ${it.id}: says the date is missing`);
       }
     }
   }
@@ -113,9 +114,9 @@ test('provider page: the answer is the first thing after the H1, and the visible
       const cut = text.lastIndexOf(' Source ');
       const body = escapeHtml(text.slice(0, cut));
       const item = providerFaq(p)[i];
-      const tail = item.date ? ` <span class="muted">Source read <time datetime="${item.date}">${shortDate(item.date)}</time>` : ' <span class="muted">Source date not recorded';
+      const tail = item.date ? ` <span class="muted">Source read <time datetime="${item.date}">${shortDate(item.date)}</time>` : ' <span class="muted">Source date not stated';
       assert.ok(visible[i][2].startsWith(body + tail), `${slug}: answer ${i + 1} matches`);
-      assert.equal(text.slice(cut), item.date ? ` Source read ${shortDate(item.date)}.` : ' Source date not recorded.');
+      assert.equal(text.slice(cut), item.date ? ` Source read ${shortDate(item.date)}.` : ' Source date not stated.');
     });
     assert.deepEqual(faq, JSON.parse(JSON.stringify(providerFaqJsonLd(p))));
   }

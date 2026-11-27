@@ -12,6 +12,7 @@
 
 import { escapeHtml } from './html.mjs';
 import { SLUG_RE } from './rows.mjs';
+import { timeHtml } from './dates.mjs';
 
 export const AGREEMENT_TYPES = { sponsored_block: 'Sponsored block', sponsored_section: 'Sponsored section', paid_link: 'Paid link' };
 export const DISCLOSURE_KINDS = { free_credit: 'free credit', early_access: 'early access', test_account: 'a test account', personal: 'personal' };
@@ -78,7 +79,7 @@ const date = (s) => (s ? escapeHtml(s) : 'no end date');
 /** "Agreements in force": the table, or the one sentence when it is empty. Computed from the rows. */
 export function agreementsTableHtml(file, day) {
   const rows = inForce(file, day);
-  const head = '<h2 id="agreements">Agreements in force</h2><p>Every paid relationship Free LLM API Hub has today, with its dates and what each side gets. Updated ' + escapeHtml(file.generated) + '.</p>';
+  const head = '<h2 id="agreements">Agreements in force</h2><p>Every paid relationship Free LLM API Hub has today, with its dates and what each side gets. Updated ' + timeHtml(file.generated, escapeHtml) + '.</p>';
   if (!rows.length) return head + '<p class="agreements-empty"><strong>No agreement is in force.</strong> (as of ' + escapeHtml(day) + ')</p>';
   const body = rows.map((a) => '<tr><th scope="row"><a href="' + escapeHtml(a.url) + '" rel="sponsored nofollow noopener">' + escapeHtml(a.company) + '</a></th><td>' + escapeHtml(AGREEMENT_TYPES[a.type]) + '</td><td>' + date(a.since) + '</td><td>' + date(a.until) + '</td><td>' + escapeHtml(a.receives) + '</td><td>' + escapeHtml(a.does_not_receive) + '</td><td>' + escapeHtml(a.data_checked_by) + '</td><td>' + escapeHtml(a.last_review) + '</td></tr>').join('');
   return head + '<div class="table-scroll"><table class="agreements"><thead><tr><th scope="col">Company</th><th scope="col">Type</th><th scope="col">Since</th><th scope="col">Until</th><th scope="col">What it receives</th><th scope="col">What it does not receive</th><th scope="col">Who checked its data</th><th scope="col">Last review of this row</th></tr></thead><tbody>' + body + '</tbody></table></div>';

@@ -58,13 +58,13 @@ test('only verified providers, each once with all its IDs of the family, in the 
 test('the answer comes first and carries the count, the split and the top options', () => {
   const g = familyGroup(fam('llama'), [alpha, beta]);
   const a = familyAnswer(g, '2026-11-26');
-  assert.match(a, /^As of 2026-11-26, 2 providers in the dataset, all verified, list a Llama model in their free-model sample: 1 with an ongoing free tier and 1 with one-time trial credit\./);
+  assert.match(a, /^As of 26 Nov 2026, 2 providers in the dataset, all verified, list a Llama model in their free-model sample: 1 with an ongoing free tier and 1 with one-time trial credit\./);
   assert.match(a, /top options, in the hub's recommended order, are (Alpha and Beta <b>|Beta <b> and Alpha)\.$/);
   const html = page(g);
   assert.ok(html.indexOf('<p class="answer">') < html.indexOf('<table'), 'the answer is above the table');
   assert.ok(html.includes(htmlEsc(a)), 'the answer is escaped');
   assert.doesNotMatch(html, /<b>/, 'provider names are escaped');
-  assert.equal(familyAnswer(familyGroup(fam('glm'), [alpha]), '2026-11-26'), 'As of 2026-11-26, no verified provider in the dataset lists a GLM model in its free-model sample.');
+  assert.equal(familyAnswer(familyGroup(fam('glm'), [alpha]), '2026-11-26'), 'As of 26 Nov 2026, no verified provider in the dataset lists a GLM model in its free-model sample.');
 });
 
 test('the table shows data only: limits, flags, date; a null reads "Not stated"', () => {
@@ -81,7 +81,7 @@ test('the table shows data only: limits, flags, date; a null reads "Not stated"'
   assert.equal(cells[5], 'Not stated', 'commercial use');
   // The date, then the row's "Report a mistake" link (lib/report-mistake.mjs; without a repo it points to /contributing/).
   assert.equal(cells[6], 'Not stated<br><small><a class="report-link" href="../../contributing/" aria-label="Report a mistake about Beta &lt;b&gt;">Report a mistake</a></small>', 'last verified');
-  assert.match(html, /<time datetime="2026-11-01">2026-11-01<\/time>/);
+  assert.match(html, /<time datetime="2026-11-01">1 Nov 2026<\/time>/);
   assert.doesNotMatch(html, /available on|free forever|best|fastest/i);
   const cond = page(familyGroup(fam('qwen'), [gamma]));
   assert.match(cond, /Conditional<br><span class="notes">Per-model licence<\/span>/);

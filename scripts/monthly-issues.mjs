@@ -13,7 +13,8 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { assertHistoryPlausible, mineHistoryAndSnapshots } from './lib/history.mjs';
 import { flattenFieldChanges, formatValue } from './lib/changes.mjs';
-import { monthLabel } from './lib/state.mjs';
+import { monthLabel } from './lib/dates.mjs';
+import { NOT_STATED } from './lib/not-stated.mjs';
 import { plural } from './lib/text.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -70,7 +71,7 @@ export function monthChanges({ month, historyBySlug, monthEnd, nameBySlug = {} }
 export const cell = (v) => {
   const s = formatValue(v).replace(/\s+/g, ' ').trim();
   const short = s.length > MAX_VALUE ? `${s.slice(0, MAX_VALUE - 1)}…` : s;
-  return short.replace(/\\/g, '\\\\').replace(/\|/g, '\\|').replace(/@/g, '&#64;').replace(/</g, '&lt;') || '—';
+  return short.replace(/\\/g, '\\\\').replace(/\|/g, '\\|').replace(/@/g, '&#64;').replace(/</g, '&lt;') || NOT_STATED;
 };
 
 const providerLink = (p, current) => (current.has(p.slug) ? `[${cell(p.name)}](${SITE}/p/${p.slug})` : cell(p.name));

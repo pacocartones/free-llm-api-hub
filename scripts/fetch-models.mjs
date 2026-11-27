@@ -13,6 +13,7 @@
 // (e.g. GROQ_API_KEY). Without it, that provider is left untouched — never
 // blanked. Fetched IDs are real; nothing here is guessed.
 
+import { utcToday } from './lib/dates.mjs';
 import { readFileSync, writeFileSync, realpathSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { serialize, roundTripError } from './_serialize.mjs';
@@ -281,7 +282,7 @@ async function main() {
   }
 
   if (write && changed) {
-    data.generated = new Date().toISOString().slice(0, 10);
+    data.generated = utcToday();
     const out = serialize(data);
     assertCredentialFree(out, credentials);
     writeFileSync(FILE, out);

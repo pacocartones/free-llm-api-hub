@@ -4,6 +4,7 @@
 // phrase a note puts between « » and each claim that a page says nothing about plans is backed by an entry of the register, with its
 // source page, the day it was read and how the page text was made. It does NOT prove that the page says that today, or ever did:
 // that needs a reading with the network (npm run verify-quotes). Nothing here may be described as "verified by CI".
+import { utcToday } from './dates.mjs';
 import { hasHiddenChars } from './hidden-chars.mjs';
 import { ABSENCE_TERMS, methodFor, sameLanguage, PDF_METHOD } from './page-text.mjs';
 import { publicHttpsUrlError } from './public-fetch.mjs';
@@ -26,7 +27,7 @@ export function claimsPageAbsence(note) {
 export function totalHits(hits) { return ABSENCE_TERMS.reduce((n, t) => n + (hits && Number.isInteger(hits[t]) ? hits[t] : 0), 0); }
 
 /** @returns {string[]} one line per problem; empty = the register is consistent with the data */
-export function quoteErrors(data, registry, { today = new Date().toISOString().slice(0, 10) } = {}) {
+export function quoteErrors(data, registry, { today = utcToday() } = {}) {
   const errors = [];
   const fail = (m) => errors.push(m);
   if (!registry || registry.version !== 1 || !Array.isArray(registry.entries)) return ['quotes.json: needs version 1 and an entries list'];
