@@ -30,8 +30,12 @@ test('the file covers every provider a stale figure was found for, and passes it
   assert.deepEqual(staleClaimErrors(FILE, ctx), []);
   for (const slug of COVERED) assert.ok(staleClaimsFor(FILE, slug).length >= 1, `${slug}: a claim`);
   assert.deepEqual([...new Set(FILE.claims.map((c) => c.slug))].sort(), [...COVERED].sort(), 'no provider without a claim found');
-  // A claim taken from a third-party page cites that page; the assistant-answer claims cite the baseline instead.
-  for (const c of FILE.claims.filter((x) => !/AEO baseline/.test(x.seen_in))) assert.match(c.seen_url || '', /^https:\/\//, `${c.slug}: the page it was seen on`);
+  // Third-party pages are described, never named or linked (owner's decision, 27 Nov 2026): no seen_url in the data and
+  // no owner/repository or address in seen_in.
+  for (const c of FILE.claims) {
+    assert.equal(c.seen_url, undefined, `${c.slug}: third-party pages are not linked`);
+    assert.doesNotMatch(c.seen_in, /https?:|[A-Za-z0-9-]+\/[A-Za-z0-9._-]+/, `${c.slug}: third-party pages are not named`);
+  }
   for (const c of FILE.claims) {
     assert.match(c.noted, /^\d{4}-\d{2}-\d{2}$/);
     assert.ok(c.claim && c.seen_in, `${c.slug}: claim and where it was seen`);

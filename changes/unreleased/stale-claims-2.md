@@ -10,7 +10,8 @@
   left out when the page states none, shown as "not stated"); the provider
   page links it next to the claim.
 - "What other sources get wrong" on eight more provider pages, from
-  third-party lists read on 27 Nov 2026, each linked with its own date:
+  third-party lists read on 27 Nov 2026, each described with its own date
+  (not named or linked):
   OpenRouter ("20 requests per minute and 200 requests per day"), Hugging Face
   ("$0.10 a month of free credits"), NVIDIA NIM ("40 requests per minute"),
   Jina AI ("1M free tokens"), Cloudflare Workers AI ("10K tokens per day"),
