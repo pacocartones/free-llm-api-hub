@@ -777,6 +777,12 @@ pre code { color: var(--text); }
 .faq-item { margin: 14px 0; }
 .faq-item h3 { margin: 0 0 4px; font-size: 1rem; }
 .faq-item p { margin: 0; color: var(--muted); }
+/* "Something wrong? Report a mistake" at the end of a provider page's FAQ (lib/report-mistake.mjs): one quiet line on a
+   dashed rule, the link in the accent with a pencil before it. Tokens only; nothing in the hero. */
+.report-mistake { margin: 22px 0 0; padding-top: 12px; border-top: 1px dashed var(--border-strong); font-size: .9rem; }
+.report-mistake .report-link { color: var(--accent); font-weight: 600; }
+.report-mistake .report-link::before { content: "✎ " / ""; text-decoration: none; display: inline-block; margin-right: 2px; }
+.report-mistake .report-note { color: var(--muted); }
 
 /* ---------- credit programs ---------- */
 .funds { display: inline-block; font-size: .74rem; font-family: var(--font-mono); white-space: nowrap; }
