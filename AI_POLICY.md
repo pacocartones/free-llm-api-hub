@@ -12,9 +12,17 @@ What we ask for is the same thing we ask of every contribution: **good human jud
 - **Own the change.** You are responsible for what you submit, whoever or whatever helped write it. Keep pull requests focused: one change, one reason.
 - **Keep secrets out.** Don't paste API keys, private data or anything confidential into AI tools.
 
-## Telling us is optional
+## Say when you used AI
 
-You don't have to tell us you used AI, and it never counts against you. If you'd like to, there's a checkbox in the pull request template. It simply helps reviewers know where to look more carefully. We review every pull request on its merits, by the same standard.
+If an AI tool helped with your change, add one line to the pull request description (or as a trailer in your commit message):
+
+```
+Assisted-by: <tool>/<model>
+```
+
+for example `Assisted-by: GitHub Copilot/gpt-4.1`. It never counts against you: it tells reviewers where to look more carefully, and we review every pull request on its merits, by the same standard.
+
+Don't list a tool as a co-author (`Co-authored-by:`). Authorship stays with the people who made and checked the change; when we squash-merge, AI `Co-authored-by` lines are dropped from the final message.
 
 ## How we work
 
