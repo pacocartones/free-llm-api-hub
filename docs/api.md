@@ -278,6 +278,8 @@ These fields are omitted because they are arrays, nested objects, or operational
 
 What is *not* guaranteed: the order of providers in a list, the exact contents of sampled fields such as `models_free`, and the human-facing HTML pages.
 
+**Planned for API routers (design only, not shipped).** [Router data contract](router-contract.md) describes additive fields proposed for dataset 2.17.0 that help routers and gateways respect provider terms and limits (`free_limits.applies_per`, `free_limits.reset`, `auth`, `availability`, the terms flags in `models.json` and `status.json`), and how a router must treat `null` and `true`. None of them is in the API yet.
+
 ### Fields added within v1
 
 - **`published_speed`** (unreleased, planned for dataset 2.15.0): an optional array on a provider. Each entry is a speed figure the provider publishes on its own site for a model of its `models_free`: `{ model, metric, unit, value, qualifier, conditions, plan_named, source, checked, quote }`. `metric` is `output_tokens_per_second` (`unit` `tokens/s`) or `time_to_first_token_ms` (`unit` `ms`); `qualifier` is `exact`, `approx`, `at_least` or `up_to`, as the quote words it; `plan_named: false` means the page ties the figure to no plan, so it is not stated for the free tier. These are provider claims, not measurements: figures from different providers are not a like-for-like comparison. Absent means nothing published or recorded, never "slow". No existing field changes. The CSV does not carry it. As with `field_checks`, a client validating with a copy of the published schema from before dataset 2.15.0 (which set `additionalProperties: false`) would reject the new key; fetch the current schema, which allows additional properties, or parse leniently.
