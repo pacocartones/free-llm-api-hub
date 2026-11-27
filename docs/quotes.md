@@ -25,6 +25,12 @@ CI (`npm test`, `npm run check`) checks **consistency, offline**:
 - a note may say that a whole page has none of the four words only if its `absence_check` counted zero in all four. A claim limited to the
   sentence or the clause ("the sentence names no plan") cannot be tested by a machine and is not tested;
 - dates, https addresses, hashes and hidden characters are in order.
+- the receipts rule: every `card_required`, `phone_required`, `commercial_ok` and `openai_compatible` that holds a value (true, false or
+  `"conditional"`) has a `stated` `field_checks` entry with its `quote`, and that quote has its `field_sentence`. A value that no official
+  sentence supports goes back to `null` with the reason (`source_silent`, `needs_account` or `sources_disagree`). The few official pages
+  that `quotes:add` cannot read (scripts only, or HTTP 403 to non-browser clients) are listed in `UNSOURCED_ALLOWLIST` in
+  `scripts/lib/field-checks.mjs`, each with its reason and an `until` day; an entry fails once its day has passed, or once the flag is
+  sourced or null, so the list only shrinks.
 
 CI does **not** check that the page says that today, or that it ever did. Nothing in this repository is "verified by CI" in that sense. That
 needs a reading with the network, which is a separate job (`npm run verify-quotes`) with four results: `ok`, `expired` (the page was read, in
