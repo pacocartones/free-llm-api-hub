@@ -13,7 +13,8 @@ const read = (rel) => readFileSync(join(ROOT, rel), 'utf8');
 const REPO = 'https://github.com/pacocartones/free-llm-api-hub';
 const SITE = 'https://freellmapihub.com';
 const providers = JSON.parse(read('data/providers.json')).providers;
-const unescape = (s) => s.replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&lt;/g, '<').replace(/&gt;/g, '>');
+// &amp; last, so "&amp;lt;" decodes to "&lt;" and not to "<" (no double unescaping).
+const unescape = (s) => s.replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
 
 before(() => {
   // CI regenerates site/ before the tests; locally, build once if the output predates this feature.
