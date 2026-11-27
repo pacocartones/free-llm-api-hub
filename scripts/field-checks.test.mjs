@@ -7,7 +7,7 @@ import { spawnSync } from 'node:child_process';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { makeTmpDir } from './lib/tmp.mjs';
-import { FIELD_CHECK_FIELDS, NULL_REASONS, REASON_LABEL, fieldCheckErrors, fieldCheckStatus, fieldCheckCounts } from './lib/field-checks.mjs';
+import { FIELD_CHECK_FIELDS, NULL_REASONS, REASON_LABEL, fieldCheckErrors, fieldCheckStatus, fieldCheckCounts, UNSOURCED_ALLOWLIST, hasReceipt, unsourcedFlagErrors, unsourcedAllowlistErrors } from './lib/field-checks.mjs';
 import { quoteErrors } from './lib/quotes.mjs';
 import { mergeRegistry, fieldEntriesFor } from './lib/quotes-add.mjs';
 import { triStateHtml, clientBundle } from './lib/compare.mjs';
@@ -22,13 +22,13 @@ const SCHEMA = JSON.parse(readFileSync(join(ROOT, 'data/schema.json'), 'utf8'));
 const VALIDATE = join(ROOT, 'scripts/validate.mjs');
 const TODAY = '2026-11-24';
 
-function runValidate(data) {
+function runValidate(data, env = {}) {
   const dir = makeTmpDir('flah-field-checks-');
   const providersFile = join(dir, 'providers.json');
   const reportFile = join(dir, 'probe-report.json');
   writeFileSync(providersFile, JSON.stringify(data));
   writeFileSync(reportFile, JSON.stringify({ probed_at: data.generated, count: data.providers.length, results: data.providers.map((p) => ({ slug: p.slug })) }));
-  const r = spawnSync(process.execPath, [VALIDATE, providersFile, reportFile], { cwd: ROOT, encoding: 'utf8', env: { ...process.env, VALIDATE_TODAY: '2099-01-01' } });
+  const r = spawnSync(process.execPath, [VALIDATE, providersFile, reportFile], { cwd: ROOT, encoding: 'utf8', env: { ...process.env, VALIDATE_TODAY: '2099-01-01', ...env } });
   return { status: r.status, output: `${r.stdout}${r.stderr}` };
 }
 
@@ -38,7 +38,8 @@ function withCheck(field, value, check) {
   const p = data.providers.find((x) => x.verified === true && x.slug === 'groq') || data.providers.find((x) => x.verified === true);
   p[field] = value;
   if (field === 'commercial_ok' && value !== 'conditional') delete p.commercial_ok_condition;
-  p.field_checks = { [field]: check };
+  // Merged, not replaced: the provider's other flags keep their checks (and their quotes), so only `field` is under test.
+  p.field_checks = { ...p.field_checks, [field]: check };
   return { data, p };
 }
 
@@ -55,7 +56,7 @@ test('the schema and the lib agree on the flags and the statuses', () => {
 test('validate: a reason on a null flag and a stated check on a known flag pass', () => {
   const { data } = withCheck('commercial_ok', null, silent);
   const groq = data.providers.find((x) => x.slug === 'groq');
-  groq.field_checks.card_required = { status: 'stated', checked: '2026-11-24', sources: ['https://example.com/pricing'], quote: null, note: 'The pricing page says no card is needed' };
+  groq.field_checks.card_required = { status: 'stated', checked: '2026-11-24', sources: ['https://example.com/pricing'], quote: 'No credit card required.', note: 'The pricing page says no card is needed' };
   groq.card_required = false;
   const r = runValidate(data);
   assert.equal(r.status, 0, r.output);
@@ -220,4 +221,67 @@ test('the source links under a flag are underlined, so they do not rely on colou
   assert.match(css, /\.req-source a \{[^}]*text-decoration: underline/);
   // the links are plain anchors inside the req-source block on provider and model pages alike
   assert.match(requirementsHtml({ slug: 'x', card_required: null, field_checks: { card_required: silent } }), /<div class="req-source muted">Read <a href="https:\/\/example\.com\/terms"/);
+});
+
+// ---------- the receipts rule: a flag with a value carries the provider's sentence ----------
+const quoted = { status: 'stated', checked: TODAY, sources: ['https://acme.example/pricing'], quote: 'No credit card required.' };
+
+test('receipts: a value with a stated, quoted check passes; null needs nothing', () => {
+  assert.deepEqual(unsourcedFlagErrors({ slug: 'acme', card_required: false, field_checks: { card_required: quoted } }, { today: TODAY, allowlist: [] }), []);
+  assert.deepEqual(unsourcedFlagErrors({ slug: 'acme', card_required: null, phone_required: null, commercial_ok: null, openai_compatible: null }, { today: TODAY, allowlist: [] }), []);
+  assert.equal(hasReceipt({ card_required: false, field_checks: { card_required: { ...quoted, quote: '  ' } } }, 'card_required'), false, 'a blank quote is no receipt');
+});
+
+test('receipts: a value with no check, a reason, or a stated check without a quote fails, for every flag', () => {
+  for (const field of FIELD_CHECK_FIELDS) {
+    for (const [why, fc] of [['no check', undefined], ['stated without a quote', { [field]: { ...quoted, quote: null } }], ['a reason', { [field]: silent }]]) {
+      const value = field === 'commercial_ok' ? 'conditional' : true;
+      const errors = unsourcedFlagErrors({ slug: 'acme', [field]: value, ...(fc ? { field_checks: fc } : {}) }, { today: TODAY, allowlist: [] });
+      assert.equal(errors.length, 1, `${field}, ${why}`);
+      assert.match(errors[0], new RegExp(`acme: ${field} is .* with no provider sentence: record a stated field_checks\\.${field} with its quote \\(npm run quotes:add -- acme --field ${field}\\)`));
+    }
+  }
+});
+
+test('receipts: an allowlisted flag passes until its day, then fails', () => {
+  const p = { slug: 'acme', openai_compatible: true };
+  const allowlist = [{ slug: 'acme', field: 'openai_compatible', until: '2026-12-31', reason: 'the page renders only with JavaScript' }];
+  assert.deepEqual(unsourcedFlagErrors(p, { today: '2026-12-31', allowlist }), []);
+  assert.match(unsourcedFlagErrors(p, { today: '2027-01-01', allowlist }).join('\n'), /on the unsourced allowlist until 2026-12-31, which has passed/);
+});
+
+test('receipts: the allowlist is well-formed, time-boxed and only holds flags that still need it', () => {
+  const ps = [{ slug: 'acme', card_required: true }, { slug: 'done', card_required: false, field_checks: { card_required: quoted } }, { slug: 'nul', card_required: null }];
+  const ok = { slug: 'acme', field: 'card_required', until: '2026-12-31', reason: 'the site answers HTTP 403' };
+  assert.deepEqual(unsourcedAllowlistErrors(ps, { allowlist: [ok] }), []);
+  for (const [entry, message] of [
+    [{ ...ok, field: 'free_tier' }, /names a provider slug and one of/],
+    [{ ...ok, until: 'soon' }, /until must be a date/],
+    [{ ...ok, reason: ' ' }, /says why the flag could not be sourced/],
+    [{ ...ok, slug: 'ghost' }, /no provider has that slug/],
+    [{ ...ok, slug: 'done' }, /null or sourced now, so remove the entry/],
+    [{ ...ok, slug: 'nul' }, /null or sourced now, so remove the entry/],
+  ]) assert.match(unsourcedAllowlistErrors(ps, { allowlist: [entry] }).join('\n'), message, JSON.stringify(entry));
+  assert.match(unsourcedAllowlistErrors(ps, { allowlist: [ok, ok] }).join('\n'), /listed twice/);
+});
+
+test('validate (the real script): an unsourced value fails, and an expired allowlist entry fails', () => {
+  const { data } = withCheck('card_required', true, { ...quoted, quote: null });
+  const r = runValidate(data);
+  assert.notEqual(r.status, 0, r.output);
+  assert.match(r.output, /card_required is true with no provider sentence/);
+  const [first] = UNSOURCED_ALLOWLIST;
+  if (first) {
+    const expired = runValidate(structuredClone(DATA), { VALIDATE_ALLOWLIST_TODAY: '2999-01-01' });
+    assert.notEqual(expired.status, 0, expired.output);
+    assert.match(expired.output, new RegExp(`${first.slug}: ${first.field} is on the unsourced allowlist until ${first.until}, which has passed`));
+  }
+});
+
+test('the dataset: every flag with a value has a receipt or a live allowlist entry, and every entry ends within 60 days of today', () => {
+  const today = new Date().toISOString().slice(0, 10);
+  for (const p of DATA.providers) assert.deepEqual(unsourcedFlagErrors(p, { today }), [], p.slug);
+  assert.deepEqual(unsourcedAllowlistErrors(DATA.providers), []);
+  const limit = new Date(Date.now() + 60 * 86400000).toISOString().slice(0, 10);
+  for (const a of UNSOURCED_ALLOWLIST) assert.ok(a.until <= limit, `${a.slug}.${a.field}: an allowlist entry is time-boxed (until ${a.until} is more than 60 days away)`);
 });

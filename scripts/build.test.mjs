@@ -1559,8 +1559,17 @@ describe('read-only generated output', () => {
     const months = readdirSync(join(ROOT, 'site/state')).filter((f) => /^\d{4}-\d{2}$/.test(f));
     assert.ok(months.length > 0, 'at least one monthly report');
     assertWellFormedXml(readFileSync(join(ROOT, 'site/changes.xml'), 'utf8'));
+    // The Atom twin reads the same projected weeks as api/v1/changes.json (scripts/changes-feed.test.mjs checks its shape).
+    const atom = readFileSync(join(ROOT, 'site/changes.atom'), 'utf8');
+    assertWellFormedXml(atom);
+    for (const html of ['site/index.html', 'site/changes/index.html']) {
+      assert.equal((readFileSync(join(ROOT, html), 'utf8').match(/<link rel="alternate" type="application\/atom\+xml"[^>]*changes\.atom">/g) || []).length, 1, html + ': one Atom autodiscovery link');
+    }
+    const changesIndex = readFileSync(join(ROOT, 'site/changes/index.html'), 'utf8');
+    assert.match(changesIndex, /<section id="latest" class="week-summary"><h2>(This|Latest) week<\/h2><p><strong>(This week|Latest week with changes|Latest week: not stated)/);
     const api = JSON.parse(readFileSync(join(ROOT, 'site/api/v1/changes.json'), 'utf8'));
     assert.ok(api.weeks.length > 0 && api.weeks.length <= 12);
+    assert.deepEqual((atom.match(/<id>tag:freellmapihub\.com,2026:changes:(\d{4}-W\d{2})<\/id>/g) || []).map((id) => id.slice(-13, -5)), api.weeks.map((w) => w.week), 'one Atom entry per week of changes.json');
     for (let i = 1; i < api.weeks.length; i++) assert.ok(api.weeks[i - 1].start > api.weeks[i].start, 'weeks newest first');
     for (const c of api.weeks[0].changes) assert.deepEqual(Object.keys(c), ['date', 'slug', 'name', 'field', 'from', 'to']);
     assert.equal(JSON.parse(readFileSync(join(ROOT, 'site/api/v1/index.json'), 'utf8')).endpoints.changes, 'v1/changes.json');
@@ -1569,7 +1578,7 @@ describe('read-only generated output', () => {
 
     const pins = Object.keys(JSON.parse(readFileSync(join(ROOT, 'derived-fingerprints.json'), 'utf8')));
     for (const k of pins) {
-      assert.ok(!k.startsWith('site/changes/') && !k.startsWith('site/state/') && k !== 'site/changes.xml' && k !== 'site/api/v1/changes.json',
+      assert.ok(!k.startsWith('site/changes/') && !k.startsWith('site/state/') && k !== 'site/changes.xml' && k !== 'site/changes.atom' && k !== 'site/api/v1/changes.json',
         k + ' is git-log derived and must not be pinned');
     }
     const sitemap = readFileSync(join(ROOT, 'site/sitemap.xml'), 'utf8');
@@ -2145,6 +2154,8 @@ test('active providers retain models_url from their official catalogues', () => 
     ['experiential-labs', 'https://platform.experientiallabs.ai/models'],
     ['google-cloud-tts', 'https://docs.cloud.google.com/text-to-speech/docs/list-voices-and-types'],
     ['google-cloud-vision', 'https://docs.cloud.google.com/vision/docs/features-list'],
+    ['amazon-bedrock', 'https://docs.aws.amazon.com/bedrock/latest/userguide/models-supported.html'],
+    ['oci-generative-ai', 'https://docs.oracle.com/en-us/iaas/Content/generative-ai/pretrained-models.htm'],
   ].sort(bySlug));
 });
 
@@ -3187,7 +3198,7 @@ test('data_policy lot 4: the 13 providers that say they do not train were read f
   for (const p of data.providers.filter((q) => q.data_policy && q.data_policy.trains_on_prompts !== false)) {
     // rows that say it may train were read for the plan later (lots 2, 3, 5 and the correction of the absence claims): true where the
     // clause names the free users or free usage (AssemblyAI, Voyage AI, Cohere), false where it does not
-    const READ = { assemblyai: true, 'voyage-ai': true, elevenlabs: false, cartesia: false, 'retell-ai': false, deepgram: false, 'arli-ai': false, 'sarvam-ai': false, poolside: false, typhoon: false, openrouter: false, nlpcloud: false, 'nvidia-nim': false, veryfi: false, voicegain: false, cohere: true, inception: false, 'azure-speech': false, lemonfox: false, gladia: true, 'liquid-ai': false, 'stability-ai': false, plamo: true, 'netlify-ai-gateway': false, 'rev-ai': false, 'ocr-space': false, requesty: true, 'kilo-gateway': true, 'experiential-labs': true };
+    const READ = { assemblyai: true, 'voyage-ai': true, elevenlabs: false, cartesia: false, 'retell-ai': false, deepgram: false, 'arli-ai': false, 'sarvam-ai': false, poolside: false, typhoon: false, openrouter: false, nlpcloud: false, 'nvidia-nim': false, veryfi: false, voicegain: false, cohere: true, inception: false, 'azure-speech': false, lemonfox: false, gladia: true, 'liquid-ai': false, 'stability-ai': false, plamo: true, 'netlify-ai-gateway': false, 'rev-ai': false, 'ocr-space': false, requesty: true, 'kilo-gateway': true, 'experiential-labs': true, 'amazon-bedrock': false, 'oci-generative-ai': false };
     if (p.slug in READ) assert.equal(p.data_policy.plan_named, READ[p.slug], `${p.slug}: plan_named as read`);
     else assert.equal(p.data_policy.plan_named, undefined, `${p.slug}: not read for the plan yet, so no value is written`);
   }
