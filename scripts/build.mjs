@@ -80,6 +80,7 @@ import { FAMILY_PATH, familyGroups, isFamilyIndexable, familyUrl, familyH1, fami
 import { collectionPageJsonLd as pageJsonLd, comparePageJsonLd } from './lib/page-jsonld.mjs';
 import { notFreeErrors, notFreeReadmeMd, notFreeModel, notFreeMainHtml, notFreeJsonLd, notFreeTitle, notFreeDescription, NOT_FREE_PATH } from './lib/not-free.mjs';
 import { embedMainHtml, embedTitle, embedDescription, EMBED_PATH } from './lib/embed-page.mjs';
+import { BADGES_PATH, BADGE_DIR, LISTED_SLUG, providerBadgeSvg, listedBadgeSvg, badgesMainHtml, badgesTitle, badgesDescription } from './lib/provider-badges.mjs';
 import { citationRecord, citeBlockHtml } from './lib/citation.mjs';
 import { LONG_GUIDES, longGuidePage } from './lib/long-guides.mjs';
 import { apiExamplesHtml, apiExamplesMarkdown } from './lib/api-examples.mjs';
@@ -1305,7 +1306,7 @@ const FAMILY_GROUPS = familyGroups(providers);
 const notFreeBySlug = new Map(NOT_FREE.entries.filter((e) => e.slug).map((e) => [e.slug, e]));
 const useDataHtml = (p) => {
   const nf = notFreeBySlug.get(p.slug);
-  return `<p class="muted" id="use-the-data"><a href="../embed/?p=${p.slug}#provider-badge">Embed this provider's badge</a>` +
+  return `<p class="muted" id="use-the-data"><a href="../badges/#${p.slug}">Get a badge</a> · <a href="../embed/?p=${p.slug}#provider-badge">Embed this provider's badge</a>` +
     (nf ? ` · <a href="../not-free/#${nf.id}">Why ${escapeAttr(nf.name)} is on the Not free list</a>` : '') + `</p>`;
 };
 
@@ -1480,6 +1481,30 @@ for (const p of providers) {
     }) + '\n'
   );
 }
+
+// ---------- provider badge kit: /badge/<slug>.svg (+ -dark), the generic badge, and the /badges/ page ----------
+// lib/provider-badges.mjs. The SVGs state the offer (free tier or trial credit) and the date of the last verification,
+// both from the record, so they are deterministic per dataset and pinned in derived-fingerprints.json. site/badge/ is
+// generated whole and gitignored: start it empty so a provider removed from the dataset leaves no badge behind.
+rmSync(join(ROOT, `site/${BADGE_DIR}`), { recursive: true, force: true });
+mkdirSync(join(ROOT, `site/${BADGE_DIR}`), { recursive: true });
+if (providers.some((p) => p.slug === LISTED_SLUG)) throw new Error(`a provider slug may not be "${LISTED_SLUG}": /badge/${LISTED_SLUG}.svg is the generic badge`);
+for (const theme of ['light', 'dark']) {
+  const suffix = theme === 'dark' ? '-dark' : '';
+  for (const p of providers) writeFileSync(join(ROOT, `site/${BADGE_DIR}/${p.slug}${suffix}.svg`), providerBadgeSvg(p, theme).svg);
+  writeFileSync(join(ROOT, `site/${BADGE_DIR}/${LISTED_SLUG}${suffix}.svg`), listedBadgeSvg(theme).svg);
+}
+// site/badges/ (the shields.io endpoint files above) also holds the page, so it is written after the provider loop.
+writeFileSync(join(ROOT, 'site/badges/index.html'), htmlPage({
+  title: badgesTitle(), desc: badgesDescription(providers.length), canonical: `${SITE}${BADGES_PATH}`, prefix: '../',
+  main: badgesMainHtml({ pageHero, site: SITE, prefix: '../', providers, repo: REPO, slaDays: FRESH_DAYS }),
+  jsonld: collectionPageJsonLd({
+    type: 'WebPage', name: 'Provider badges', url: `${SITE}${BADGES_PATH}`,
+    description: 'Embeddable badges that show the free tier or trial credit of each provider and the date it was last verified.',
+    about: datasetRef(SITE, DATASET_FACTS),
+    crumbs: [['Use the data', `${SITE}${EMBED_PATH}`], ['Provider badges', `${SITE}${BADGES_PATH}`]],
+  }),
+}));
 
 // ---------- legal pages (minimal, noindex) ----------
 mkdirSync(join(ROOT, 'site/legal'), { recursive: true });
@@ -2273,6 +2298,7 @@ const llmsTxt =
   `- [Full provider list expanded, markdown](${SITE}/llms-full.txt)\n` +
   `- [Data quality](${SITE}/quality/): how much of the dataset is verified, how fresh it is, and which answers are still unknown\n` +
   `- [Use the data](${SITE}/embed/): the widget, verified badges, JSON and CSV downloads, and how to cite the dataset\n` +
+  `- [Provider badges](${SITE}${BADGES_PATH}): an SVG badge per provider (free tier or trial credit, and the date last verified) with copy-paste Markdown and HTML\n` +
   `- [Methodology](${SITE}/methodology/): how entries are verified, sourced and dated\n\n` +
   `## Guides\n` +
   `- [All guides and collections](${SITE}/guides-and-collections/): every guide and filtered list on one page\n` +
@@ -2803,6 +2829,7 @@ const sitemapEntries = [
   ...CODING_TOOL_PAGES.map(({ e, generated }) => [`${SITE}/coding-tools/${e.slug}/`, generated]),
   [`${SITE}/api/`, ASOF],
   [`${SITE}${EMBED_PATH}`, ASOF],
+  [`${SITE}${BADGES_PATH}`, ASOF],
   [`${SITE}${NOT_FREE_PATH}`, ASOF],
   [`${SITE}/changes/`, ASOF],
   [`${SITE}/programs/`, programs.generated],
