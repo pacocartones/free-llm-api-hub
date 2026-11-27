@@ -2147,6 +2147,8 @@ test('active providers retain models_url from their official catalogues', () => 
     ['requesty', 'https://docs.requesty.ai/features/free-models'],
     ['kilo-gateway', 'https://kilo.ai/models'],
     ['experiential-labs', 'https://platform.experientiallabs.ai/models'],
+    ['google-cloud-tts', 'https://docs.cloud.google.com/text-to-speech/docs/list-voices-and-types'],
+    ['google-cloud-vision', 'https://docs.cloud.google.com/vision/docs/features-list'],
   ].sort(bySlug));
 });
 
