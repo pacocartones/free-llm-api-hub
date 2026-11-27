@@ -102,7 +102,7 @@ export function stalenessWorklist(providers, now = new Date()) {
   out.push(unverified.length ? unverified.map(uline).join('\n') : '_None._');
   out.push('');
   out.push('---');
-  out.push("**To clear an item:** re-check the provider's own docs, update the entry in `data/providers.json` (numbers + `last_verified` = today, or set `verified: false` with a note), run `npm run build && npm test`, and open a PR. Full ritual: [docs/update-playbook.md](../blob/main/docs/update-playbook.md).");
+  out.push("**To clear an item:** re-check the provider's own docs, update the entry in `data/providers.json` (numbers + `last_verified` = today, or set `verified: false` with a note), run `npm run validate` (and `npm run build && npm test` if you have the project set up), **commit only `data/providers.json`, `data/quotes.json` if the quote helper changed it, and a changelog fragment — the regeneration bot commits derived files after the merge**, and open a PR. Full ritual: [docs/update-playbook.md](../blob/main/docs/update-playbook.md).");
 
   return out.join('\n');
 }

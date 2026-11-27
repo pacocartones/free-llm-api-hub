@@ -9,6 +9,7 @@
 
 import { shortenProse } from './lib/short-text.mjs';
 import { measurementId, analyticsCspSources, consentScript, withAnalytics, CLOUDFLARE_WEB_ANALYTICS_CSP as CF_WA_CSP } from './lib/analytics.mjs';
+import { contentSecurityPolicy, cspMeta, REDIRECT_CSP } from './lib/csp.mjs';
 import { providerLinkTargets, tagProviderLinks } from './lib/provider-links.mjs';
 import { readFileSync, writeFileSync, mkdirSync, readdirSync, rmSync, existsSync } from 'node:fs';
 import { execSync } from 'node:child_process';
@@ -21,7 +22,7 @@ import { escapeAttr, escapeText } from './lib/html.mjs';
 import * as sortLib from './lib/sort.mjs';
 import { esc, stripTags } from './lib/escape.mjs';
 import { mineHistoryAndSnapshots, HISTORY_FIELDS } from './lib/history.mjs';
-import { flattenFieldChanges, groupChangesByWeek, changesRss, weekTitle, formatValue, beforeAfter } from './lib/changes.mjs';
+import { flattenFieldChanges, groupChangesByWeek, changesRss, changesAtom, ATOM_PATH, latestWeek, latestWeekSentence, summaryValue, BEFORE_AFTER_FIELDS, NOT_STATED as CHANGES_NOT_STATED, weekTitle, formatValue, beforeAfter } from './lib/changes.mjs';
 import { monthlyReport, reportMonths, monthEndDate, monthName, monthLabel, pct, monthSummary, monthBrief } from './lib/state.mjs';
 import { resolveBestEntries, topEntries, PODIUM_SIZE } from './lib/best.mjs';
 import { agreementsTableHtml, sponsoredBlockHtml, disclosureHtml, inForce, NOT_IN_DATA_SENTENCE, MACHINE_SENTENCE } from './lib/agreements.mjs';
@@ -58,7 +59,7 @@ import { markdownToHtml } from './lib/markdown.mjs';
 import { bestFactsHtml } from './lib/best-facts.mjs';
 import { providerFigures, expandFigures, injectInlineFigures, figureErrors } from './lib/figures.mjs';
 import { firstUseHtml } from './lib/home-first-use.mjs';
-import { homeFaq, homeFaqHtml, homeFaqJsonLd, homeMeta } from './lib/home-faq.mjs';
+import { homeFaq, homeFaqHtml, homeFaqJsonLd } from './lib/home-faq.mjs';
 import { ticketBadgeSvg } from './lib/badge-svg.mjs';
 import { providerMarkdown, llmsProviderLine } from './lib/provider-markdown.mjs';
 import { curlChatQuickstart, pythonChatQuickstart, pythonEmbeddingsQuickstart, pythonStringLiteral } from './lib/quickstart.mjs';
@@ -73,13 +74,19 @@ import { SITEMAPS as INDEXNOW_SITEMAPS } from './lib/indexnow.mjs';
 import { groupModels, modelKey } from './lib/model-keys.mjs';
 import { providerMetaDescription } from './lib/provider-meta.mjs';
 import { answerFirst, providerFaq, providerFaqHtml, providerFaqJsonLd } from './lib/provider-faq.mjs';
+import { compareVerdict, compareFaq, compareFaqHtml } from './lib/compare-faq.mjs';
+import { homeCounts, homeTitle, homeDescription, llmsCounts } from './lib/home-seo.mjs';
+import { providerDateModified } from './lib/provider-dates.mjs';
 import { isIndexable, modelPageMainHtml, modelPageTitle, modelPageDescription, modelPageJsonLd } from './lib/model-pages.mjs';
+import { modelIndexRows, modelIndexStats, modelIndexAnswerHtml, modelIndexTableHtml, modelIndexDescription } from './lib/model-index.mjs';
 import { FAMILY_PATH, familyGroups, isFamilyIndexable, familyUrl, familyH1, familyPageTitle, familyPageDescription, familyBlurb, familyPageMainHtml, familyNavHtml } from './lib/model-families.mjs';
 import { collectionPageJsonLd as pageJsonLd, comparePageJsonLd } from './lib/page-jsonld.mjs';
 import { notFreeErrors, notFreeReadmeMd, notFreeModel, notFreeMainHtml, notFreeJsonLd, notFreeTitle, notFreeDescription, NOT_FREE_PATH } from './lib/not-free.mjs';
 import { embedMainHtml, embedTitle, embedDescription, EMBED_PATH } from './lib/embed-page.mjs';
+import { BADGES_PATH, BADGE_DIR, LISTED_SLUG, providerBadgeSvg, listedBadgeSvg, badgesMainHtml, badgesTitle, badgesDescription } from './lib/provider-badges.mjs';
 import { citationRecord, citeBlockHtml } from './lib/citation.mjs';
 import { LONG_GUIDES, longGuidePage } from './lib/long-guides.mjs';
+import { apiExamplesHtml, apiExamplesMarkdown } from './lib/api-examples.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const FRESH_DAYS = SLA_DAYS; // the freshness SLA, defined once in lib/rules.mjs
@@ -174,7 +181,7 @@ const collectionPageJsonLd = (args) => pageJsonLd({ site: SITE, ...args });
 const COLLECTION_COPY = [
   {
     slug: 'no-credit-card',
-    answer: '{n} of {total} tracked providers need no payment method to start. That includes trial credits as well as permanent free tiers, so read the Type column. Each row says what is free and the catch. The list is a live filter and changes when a provider changes its terms.',
+    answer: '{n} of {total} tracked providers need no payment method to start. That includes trial credits as well as permanent free tiers, so read the Type column. Each row says what is free and the catch. This collection is a live filter and changes when a provider changes its terms.',
     metaDesc: '{n} LLM APIs you can start calling without a payment method, filtered live from a dated dataset. Dataset of {date}.',
     title: 'Free LLM APIs with no credit card',
     h1: 'Free LLM APIs with no credit card required',
@@ -184,13 +191,13 @@ const COLLECTION_COPY = [
     faq: [
       { q: 'Can I use an LLM API for free without a credit card?', a: 'Yes — every provider on this page offers a free tier with no card required, confirmed against its own docs. You are limited by rate, not billing.' },
       { q: 'Will I be charged if I go over the free limit?', a: 'Usually not. Without a payment method on file there is nothing to charge, so reaching a limit means being rate-limited (HTTP 429). Read the catch on each row, because terms change.' },
-      { q: 'How often does this list change?', a: 'It is a live filter of the dataset: it is regenerated whenever the dataset changes, and every row shows the day its source was read.' },
+      { q: 'How often does this collection change?', a: 'It is a live filter of the dataset: it is regenerated whenever the dataset changes, and every row shows the day its source was read.' },
       { q: 'How do I report a mistake?', a: 'Open an issue on GitHub with the row and the evidence; the maintainers re-read the provider’s own page.' },
     ],
   },
   {
     slug: 'no-phone',
-    answer: '{n} of {total} tracked providers do not ask for a phone number at signup. Some still require an email or a sign-in with another account. A provider whose phone rule is not known is left out rather than assumed, and the list updates when a provider changes its signup.',
+    answer: '{n} of {total} tracked providers do not ask for a phone number at signup. Some still require an email or a sign-in with another account. A provider whose phone rule is not known is left out rather than assumed, and this collection updates when a provider changes its signup.',
     metaDesc: '{n} LLM APIs whose signup needs no SMS or phone verification, filtered live from a dated dataset. Dataset of {date}.',
     title: 'Free LLM APIs with no phone verification',
     h1: 'Free LLM APIs with no phone number required',
@@ -200,7 +207,7 @@ const COLLECTION_COPY = [
     faq: [
       { q: 'Is there a free LLM API with no phone verification?', a: 'Yes — every provider on this page asks for no phone number at signup, according to its own docs. A provider whose rule is not known is not listed.' },
       { q: 'Do these APIs need any account at all?', a: 'Almost always: they ask for an email or a sign-in with an existing account, only not for a phone number.' },
-      { q: 'How often does this list change?', a: 'It is a live filter of the dataset: it is regenerated whenever the dataset changes, and every row shows the day its source was read.' },
+      { q: 'How often does this collection change?', a: 'It is a live filter of the dataset: it is regenerated whenever the dataset changes, and every row shows the day its source was read.' },
       { q: 'How do I report a mistake?', a: 'Open an issue on GitHub with the row and the evidence; the maintainers re-read the provider’s own page.' },
     ],
   },
@@ -218,7 +225,7 @@ const COLLECTION_COPY = [
     faq: [
       { q: 'Can I call an AI API with no account at all?', a: 'Yes, a few providers allow it, according to their own pages: each row on this page quotes the sentence and the day it was read. Anonymous use has the tightest limits and the lowest priority.' },
       { q: 'Is anonymous access the same as no signup form?', a: 'No. Most providers with no card and no phone still ask for an email or a sign-in; those are in the no-card and no-phone collections. This page lists only APIs that work with no account.' },
-      { q: 'How often does this list change?', a: 'It is a live filter of the dataset: it is regenerated whenever the dataset changes, and every row shows the day its source was read.' },
+      { q: 'How often does this collection change?', a: 'It is a live filter of the dataset: it is regenerated whenever the dataset changes, and every row shows the day its source was read.' },
       { q: 'How do I report a mistake?', a: 'Open an issue on GitHub with the row and the evidence; the maintainers re-read the provider’s own page.' },
     ],
   },
@@ -232,10 +239,10 @@ const COLLECTION_COPY = [
     intro: 'Free tiers that **allow commercial/production use** (`commercial_ok: true`). Evaluation-only tiers (`commercial_ok: false`) and tiers whose terms do not say are deliberately left out — read their rows in the main list for the restriction.',
     guides: ['openai-compatible-free-apis', 'free-llm-api-without-credit-card', 'choose-free-llm-api-for-production'],
     faq: [
-      { q: 'Can I use this list in a commercial product?', a: 'Yes. Free LLM API Hub and its dataset are MIT licensed, so you can reuse, fork and adapt them, including commercially. A link back is appreciated but not required. Each provider’s page has a Commercial use line that reads allowed, evaluation only or not confirmed, and the explorer on the home page marks the first two with an icon. Not confirmed means no reading of the provider’s terms has confirmed that commercial use is allowed: some terms do not clearly say so, and for other providers the question is still open. It is not a permission. The data describes other companies’ free tiers, whose terms change without notice, so confirm against the provider’s own docs before you ship. This list is independent: it is not affiliated with, endorsed by or sponsored by any provider on it, and it is not legal advice.' },
+      { q: 'Can I use this collection in a commercial product?', a: 'Yes. Free LLM API Hub and its dataset are MIT licensed, so you can reuse, fork and adapt them, including commercially. A link back is appreciated but not required. Each provider’s page has a Commercial use line that reads allowed, evaluation only or not confirmed, and the explorer on the home page marks the first two with an icon. Not confirmed means no reading of the provider’s terms has confirmed that commercial use is allowed: some terms do not clearly say so, and for other providers the question is still open. It is not a permission. The data describes other companies’ free tiers, whose terms change without notice, so confirm against the provider’s own docs before you ship. This dataset is independent: it is not affiliated with, endorsed by or sponsored by any provider on it, and it is not legal advice.' },
       { q: 'Which free LLM APIs allow commercial use?', a: 'Every provider on this page permits commercial/production use on its free tier (`commercial_ok: true`), confirmed against its own terms. Evaluation-only tiers are excluded.' },
       { q: 'Is a free tier safe to ship to production?', a: 'Check the rate limits and whether the free tier is renewing or a one-time credit — both are on each provider’s row. For steady load, a renewing free tier or a paid plan is safer than a trial credit.' },
-      { q: 'How often does this list change?', a: 'It is a live filter of the dataset: it is regenerated whenever the dataset changes, and every row shows the day its source was read.' },
+      { q: 'How often does this collection change?', a: 'It is a live filter of the dataset: it is regenerated whenever the dataset changes, and every row shows the day its source was read.' },
       { q: 'How do I report a mistake?', a: 'Open an issue on GitHub with the row and the evidence; the maintainers re-read the provider’s own page.' },
     ],
   },
@@ -252,7 +259,7 @@ const COLLECTION_COPY = [
     faq: [
       { q: 'What does OpenAI-compatible mean?', a: 'The API accepts the same request format as OpenAI’s <code>/chat/completions</code>, so the OpenAI SDK works by changing only <code>base_url</code> and the API key.' },
       { q: 'Is every feature supported?', a: 'Not necessarily: compatibility can be partial, and a feature a provider lacks fails at the provider. Read the catch on each row.' },
-      { q: 'How often does this list change?', a: 'It is a live filter of the dataset: it is regenerated whenever the dataset changes, and every row shows the day its source was read.' },
+      { q: 'How often does this collection change?', a: 'It is a live filter of the dataset: it is regenerated whenever the dataset changes, and every row shows the day its source was read.' },
       { q: 'How do I report a mistake?', a: 'Open an issue on GitHub with the row and the evidence; the maintainers re-read the provider’s own page.' },
     ],
   },
@@ -267,7 +274,7 @@ const COLLECTION_COPY = [
     faq: [
       { q: 'Are there LLM APIs that are free with no trial clock?', a: 'Yes — the providers on this page list models at $0 on a perpetual basis, according to their own pages. Rate limits still apply.' },
       { q: 'Does permanently free mean free forever?', a: 'No. It describes what the provider says today; prices and limits can change, so every row shows the day it was read.' },
-      { q: 'How often does this list change?', a: 'It is a live filter of the dataset: it is regenerated whenever the dataset changes, and every row shows the day its source was read.' },
+      { q: 'How often does this collection change?', a: 'It is a live filter of the dataset: it is regenerated whenever the dataset changes, and every row shows the day its source was read.' },
       { q: 'How do I report a mistake?', a: 'Open an issue on GitHub with the row and the evidence; the maintainers re-read the provider’s own page.' },
     ],
   },
@@ -283,7 +290,7 @@ const COLLECTION_COPY = [
     faq: [
       { q: 'Are there free APIs for images, speech and embeddings — not just text?', a: 'Yes — the providers here reach beyond text on their free tier: vision, image generation, speech (STT/TTS), embeddings or rerank. See the modality-specific guides linked above.' },
       { q: 'Can one free API cover several modalities?', a: 'Some do: a provider can span text, vision, audio and embeddings on a single free key. The What’s free column of each row says which modalities that provider offers free.' },
-      { q: 'How often does this list change?', a: 'It is a live filter of the dataset: it is regenerated whenever the dataset changes, and every row shows the day its source was read.' },
+      { q: 'How often does this collection change?', a: 'It is a live filter of the dataset: it is regenerated whenever the dataset changes, and every row shows the day its source was read.' },
       { q: 'How do I report a mistake?', a: 'Open an issue on GitHub with the row and the evidence; the maintainers re-read the provider’s own page.' },
     ],
   },
@@ -301,14 +308,14 @@ const COLLECTION_COPY = [
     guides: ['choose-free-llm-api-for-production'],
     faq: [
       { q: 'Which free LLM APIs say they do not train on my prompts?', a: 'The providers on this page, each according to its own terms or privacy page, cited with the day it was read on the provider’s page on this site. The wording differs: for some it holds only while you have not opted in to training, and a privacy notice is not a contract.' },
-      { q: 'Does a provider missing from this list train on my data?', a: 'Not necessarily. A provider is missing when its own page says it may train on prompts, says nothing we could cite, or could not be read. Check the provider before you send sensitive data.' },
-      { q: 'How often does this list change?', a: 'It is a live filter of the dataset: it is regenerated whenever the dataset changes, and every row shows the day its source was read.' },
+      { q: 'Does a provider missing from this collection train on my data?', a: 'Not necessarily. A provider is missing when its own page says it may train on prompts, says nothing we could cite, or could not be read. Check the provider before you send sensitive data.' },
+      { q: 'How often does this collection change?', a: 'It is a live filter of the dataset: it is regenerated whenever the dataset changes, and every row shows the day its source was read.' },
       { q: 'How do I report a mistake?', a: 'Open an issue on GitHub with the row and the evidence; the maintainers re-read the provider’s own page.' },
     ],
   },
   {
     slug: 'renewing-free-tier',
-    answer: '{n} of {total} tracked providers give a free allowance that renews: a daily or monthly quota or credit that resets, not a one-time balance. Renewing does not mean unlimited — limits are hard and some tiers are evaluation-only, so read the Type and catch columns. The list is a live filter.',
+    answer: '{n} of {total} tracked providers give a free allowance that renews: a daily or monthly quota or credit that resets, not a one-time balance. Renewing does not mean unlimited — limits are hard and some tiers are evaluation-only, so read the Type and catch columns. This collection is a live filter.',
     metaDesc: '{n} AI APIs whose free allowance renews instead of running out once, filtered live from a dated dataset. Dataset of {date}.',
     title: 'Free LLM APIs whose free tier renews',
     h1: 'Free LLM APIs with a renewing free allowance',
@@ -318,7 +325,7 @@ const COLLECTION_COPY = [
     faq: [
       { q: 'Which free LLM APIs reset their limits?', a: 'The providers on this page: their free allowance renews on a schedule rather than being a one-time credit.' },
       { q: 'Is a renewing allowance the same as permanently free?', a: 'No. Permanently free (see that collection) means models priced at $0 with no trial window; a renewing allowance resets and may change or carry commercial restrictions.' },
-      { q: 'How often does this list change?', a: 'It is a live filter of the dataset: it is regenerated whenever the dataset changes, and every row shows the day its source was read.' },
+      { q: 'How often does this collection change?', a: 'It is a live filter of the dataset: it is regenerated whenever the dataset changes, and every row shows the day its source was read.' },
       { q: 'How do I report a mistake?', a: 'Open an issue on GitHub with the row and the evidence; the maintainers re-read the provider’s own page.' },
     ],
   },
@@ -334,7 +341,7 @@ const COLLECTION_COPY = [
     faq: [
       { q: 'Do free signup credits expire?', a: 'Some do, with windows from 30 days to a year in the dataset; others say the credit does not expire. Each row shows the catch.' },
       { q: 'Is a signup credit the same as a free tier?', a: 'No. A credit is a balance that runs out; a free tier renews or is permanent. See the renewing and permanently free collections.' },
-      { q: 'How often does this list change?', a: 'It is a live filter of the dataset: it is regenerated whenever the dataset changes, and every row shows the day its source was read.' },
+      { q: 'How often does this collection change?', a: 'It is a live filter of the dataset: it is regenerated whenever the dataset changes, and every row shows the day its source was read.' },
       { q: 'How do I report a mistake?', a: 'Open an issue on GitHub with the row and the evidence; the maintainers re-read the provider’s own page.' },
     ],
   },
@@ -364,7 +371,7 @@ const GUIDES = [
     filter: (p) => p.card_required === false && p.category === 'ongoing',
     query: '?cat=ongoing&nocard=1#explorer',
     faq: [
-      { q: 'Can I use an LLM API for free without a credit card?', a: 'Yes. Providers such as Google Gemini, Groq and Cloudflare Workers AI give a free tier with no card required — you are limited by rate, not billing, so you cannot be charged by surprise.' },
+      { q: 'Can I use an LLM API for free without a credit card?', a: 'Yes. Providers such as Google Gemini, Cohere and Cloudflare Workers AI give a free tier with no card required — you are limited by rate, not billing, so you cannot be charged by surprise.' },
       { q: 'Will I be charged if I exceed the free limits?', a: 'No. On a no-card free tier you get rate-limited (HTTP 429) rather than billed. You would have to explicitly add a payment method before any spend is possible.' },
       { q: 'Are these free tiers okay for commercial use?', a: 'Some are, some are not — each row shows a commercial-use flag, confirmed against the provider’s own terms.' },
     ],
@@ -385,7 +392,7 @@ const GUIDES = [
     faq: [
       { q: 'What does OpenAI-compatible mean?', a: 'The API accepts the same request and response format as OpenAI’s <code>/chat/completions</code>, so the official OpenAI SDKs work by changing only <code>base_url</code> and the API key.' },
       { q: 'How do I switch my code to a free OpenAI-compatible API?', a: 'Set <code>base_url</code> to the provider’s endpoint (listed on each provider page), use its free API key, and pass one of its free model IDs as <code>model</code>.' },
-      { q: 'Do all free LLM APIs support the OpenAI format?', a: 'No — this list is only the providers confirmed to expose an OpenAI-compatible endpoint against their own documentation.' },
+      { q: 'Do all free LLM APIs support the OpenAI format?', a: 'No — this collection is only the providers confirmed to expose an OpenAI-compatible endpoint against their own documentation.' },
     ],
   },
   {
@@ -648,18 +655,22 @@ const siteFooter = (p) => `<footer class="site-footer"><div class="wrap footer-t
 // htmlPage() (every generated page) and site/index.html (injected via AUTOGEN:themeguard).
 const THEME_GUARD = `<script>(function(){try{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>`;
 
-// Content-Security-Policy (all pages, injected into index.html via AUTOGEN:csp and hard-copied
-// in 404.html). script-src pins our two inline scripts by hash — the theme guard (every page)
-// and the path read-out (404.html only) — so no other inline or injected script can run;
-// everything else is 'self' (site.js, explorer.js, shared-rules.js, widget.js). connect-src
-// allows explorer.js's data fallback (raw.githubusercontent).
-// No default-src/style-src on purpose: inline style="" attributes and the 404 <style> stay valid.
-// If you edit THEME_GUARD or 404.html's inline scripts, recompute these hashes or the page breaks silently.
+// Content-Security-Policy (all pages: generated pages, index.html via AUTOGEN:csp, and 404.html). lib/csp.mjs builds the
+// policy and documents each directive. script-src pins our two inline scripts by hash — the theme guard (every page) and
+// the path read-out (404.html only) — computed here from the exact strings the build writes, so editing either one
+// re-pins it instead of breaking the page; everything else is 'self' (site.js, explorer.js, shared-rules.js, widget.js).
 // Google Analytics (lib/analytics.mjs) adds its hosts here ONLY when GA_MEASUREMENT_ID is set at build time; its banner is
-// the first-party file consent.js ('self'), so no inline hash changes.
+// the first-party file consent.js ('self'), so no inline hash changes. Headers a meta tag cannot carry (frame-ancestors,
+// HSTS, X-Frame-Options, ...) are set in Cloudflare.
+const NOT_FOUND_PATH_SCRIPT = `<script>try{document.getElementById('path').textContent=location.pathname.replace('/free-llm-api-hub','')||'/';}catch(e){}</script>`;
 const GA_ID = measurementId();
 const GA_CSP = analyticsCspSources(GA_ID);
-const CSP = `<meta http-equiv="Content-Security-Policy" content="script-src 'self' 'sha256-ByZJaawcxAiK85qnD6nIc7iBFGzp/nf/DTzzA7Dl5Qs=' 'sha256-YzEhxvq2BwovGsg/RCjKkQdwf+LZmTjIkiQcjXCZMHc='${CF_WA_CSP.script}${GA_CSP.script}; connect-src 'self' https://raw.githubusercontent.com${CF_WA_CSP.connect}${GA_CSP.connect}; object-src 'none'; base-uri 'self'">`;
+const CSP_POLICY = contentSecurityPolicy({
+  inlineScripts: [THEME_GUARD, NOT_FOUND_PATH_SCRIPT],
+  script: `${CF_WA_CSP.script}${GA_CSP.script}`,
+  connect: `${CF_WA_CSP.connect}${GA_CSP.connect}`,
+});
+const CSP = cspMeta(CSP_POLICY);
 
 // Search engines cut a snippet around 155 characters. Every page's description goes through
 // here, so no page can ship a longer one: cut at a word boundary and end with an ellipsis.
@@ -733,6 +744,7 @@ ${canonical ? `<meta property="og:url" content="${escapeAttr(canonical)}">
 <meta name="twitter:image" content="${ogImage}">
 <link rel="alternate" type="application/rss+xml" title="Free LLM API Hub — updates" href="${prefix}feed.xml">
 <link rel="alternate" type="application/rss+xml" title="${escapeAttr(CHANGES_FEED_TITLE)}" href="${prefix}changes.xml">
+<link rel="alternate" type="application/atom+xml" title="${escapeAttr(CHANGES_FEED_TITLE)} (Atom)" href="${prefix}${ATOM_PATH.slice(1)}">
 ${feeds.map((f) => `<link rel="alternate" type="application/rss+xml" title="${escapeAttr(f.title)}" href="${prefix}${f.href}">\n`).join('')}<link rel="stylesheet" href="${prefix}styles.css">
 ${styles.map((s) => `<link rel="stylesheet" href="${prefix}${s}">\n`).join('')}${jsonld ? `<script type="application/ld+json">${jsonld.replace(/</g, '\\u003c')}</script>` : ''}
 </head>
@@ -856,6 +868,17 @@ writeFileSync(join(ROOT, 'README.md'), readme);
 
 // The field reference follows the schema, without hand-maintained descriptions.
 writeSchemaDocs();
+
+// The copy-paste examples of docs/api.md come from the same list as the /api/ page (scripts/lib/api-examples.mjs).
+const apiDocPath = join(ROOT, 'docs/api.md');
+const apiDoc = readFileSync(apiDocPath, 'utf8');
+if (!apiDoc.includes('<!-- AUTOGEN:api-examples:start -->') || !apiDoc.includes('<!-- AUTOGEN:api-examples:end -->')) {
+  throw new Error('Missing api-examples markers in docs/api.md');
+}
+writeFileSync(apiDocPath, apiDoc.replace(
+  /(<!-- AUTOGEN:api-examples:start -->)[\s\S]*?(<!-- AUTOGEN:api-examples:end -->)/,
+  (_m, start, end) => `${start}\n${apiExamplesMarkdown()}\n${end}`,
+));
 
 // Counts in the field reference follow the data, just like README tables.
 const dimensionsPath = join(ROOT, 'docs/comparison-dimensions.md');
@@ -988,17 +1011,20 @@ const homeStatsHtml = (() => {
   ].join('<span class="st-sep" aria-hidden="true"> · </span>');
 })();
 let indexHtml = readFileSync(join(ROOT, 'site/index.html'), 'utf8');
-// The home title and description answer the top search, "free llm api" (Search Console, Nov 2026): both lead with the
-// query and carry the live provider count and the verified count, plus the dataset month (Q10). og: and twitter: repeat
-// them. The build rewrites them on every run, so the numbers follow the data (lib/home-faq.mjs homeMeta). The wording
-// "N providers, M verified" is not the "N verified providers" phrasing that lib/figures.mjs guards in hand-written
-// sources: validate.mjs reads site/index.html before the build has rewritten it.
-const { title: HOME_TITLE, description: HOME_DESC } = homeMeta(providers, { month: TITLE_MONTH });
+// The home title and description (lib/home-seo.mjs): "Free LLM APIs" first (the site's top query), then the dataset
+// month and the counts, stated the one way the site states them ("84 of 85 verified"). og:/twitter: title and
+// description repeat them. The build rewrites them on every run, so the numbers follow the data. The wording is not the
+// "N verified providers" phrasing that lib/figures.mjs guards in hand-written sources: validate.mjs reads
+// site/index.html before the build has rewritten it.
+const HOME_COUNTS = homeCounts(providers);
+const HOME_TITLE = homeTitle(HOME_COUNTS, TITLE_MONTH);
+const HOME_DESC = homeDescription(HOME_COUNTS, TITLE_MONTH);
 indexHtml = indexHtml.replace(/<title>[^<]*<\/title>/, `<title>${escapeAttr(HOME_TITLE)}</title>`)
   .replace(/<meta name="description" content="[^"]*">/, `<meta name="description" content="${escapeAttr(HOME_DESC)}">`)
   .replace(/<meta property="og:title" content="[^"]*">/, `<meta property="og:title" content="${escapeAttr(HOME_TITLE)}">`)
-  .replace(/<meta property="og:description" content="[^"]*">/, `<meta property="og:description" content="${escapeAttr(HOME_DESC)}">`)
   .replace(/<meta name="twitter:title" content="[^"]*">/, `<meta name="twitter:title" content="${escapeAttr(HOME_TITLE)}">`)
+  .replace(/<meta name="description" content="[^"]*">/, `<meta name="description" content="${escapeAttr(HOME_DESC)}">`)
+  .replace(/<meta property="og:description" content="[^"]*">/, `<meta property="og:description" content="${escapeAttr(HOME_DESC)}">`)
   .replace(/<meta name="twitter:description" content="[^"]*">/, `<meta name="twitter:description" content="${escapeAttr(HOME_DESC)}">`);
 indexHtml = inject(indexHtml, 'csp', CSP);
 indexHtml = inject(indexHtml, 'themeguard', THEME_GUARD);
@@ -1025,6 +1051,11 @@ const auraFieldHtml = `<div class="aura-field" aria-hidden="true">` +
   `<ul class="aura-key-shapes">${AURA_KEY.map(([t, s, p]) => `<li>${auraHtml(p, { now: ASOF })}<span><b>${t}</b>${s}</span></li>`).join('')}</ul>` +
   `<ul class="aura-key-hues">${AURA_HUE_NAMES.map(([m, n]) => `<li><span class="hue-dot hue-${m}" aria-hidden="true"></span>${n}</li>`).join('')}</ul></div>`;
 indexHtml = inject(indexHtml, 'aurafield', auraFieldHtml);
+// The Atom twin of the change feed (lib/changes.mjs changesAtom), advertised next to its RSS link. Idempotent: the build
+// reads back its own output, so an existing Atom link is replaced, never doubled.
+indexHtml = indexHtml.replace(/<link rel="alternate" type="application\/atom\+xml"[^>]*changes\.atom">\n/g, '')
+  .replace(/(<link rel="alternate" type="application\/rss\+xml"[^>]*href="changes\.xml">\n)/,
+    `$1<link rel="alternate" type="application/atom+xml" title="${escapeAttr(CHANGES_FEED_TITLE)} (Atom)" href="${ATOM_PATH.slice(1)}">\n`);
 
 indexHtml = inject(indexHtml, 'stats', homeStatsHtml);
 // The "New here?" strip above the explorer: what the list is, what verified means, how to use it (lib/home-first-use.mjs).
@@ -1235,7 +1266,7 @@ writeFileSync(
   htmlPage({ title: 'Free LLM API guides and collections · Free LLM API Hub', desc: HUB_META, canonical: `${SITE}/guides-and-collections/`, main: hubMain, jsonld: hubJsonLd })
 );
 // The old hubs redirect here so existing links and bookmarks keep working.
-const redirectPage = (to) => `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="robots" content="noindex"><meta http-equiv="refresh" content="0; url=${to}"><link rel="canonical" href="${new URL(to, SITE + '/x/').href.replace(/#.*$/, '')}"><title>Redirecting…</title></head><body><p>Moved to <a href="${to}">${to}</a>.</p></body></html>`;
+const redirectPage = (to) => `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">${cspMeta(REDIRECT_CSP)}<meta name="robots" content="noindex"><meta http-equiv="refresh" content="0; url=${to}"><link rel="canonical" href="${new URL(to, SITE + '/x/').href.replace(/#.*$/, '')}"><title>Redirecting…</title></head><body><p>Moved to <a href="${to}">${to}</a>.</p></body></html>`;
 // Clear generated guides before writing their redirect and current pages.
 rmSync(join(ROOT, 'site/guides'), { recursive: true, force: true });
 mkdirSync(join(ROOT, 'site/guides'), { recursive: true });
@@ -1293,7 +1324,7 @@ const FAMILY_GROUPS = familyGroups(providers);
 const notFreeBySlug = new Map(NOT_FREE.entries.filter((e) => e.slug).map((e) => [e.slug, e]));
 const useDataHtml = (p) => {
   const nf = notFreeBySlug.get(p.slug);
-  return `<p class="muted" id="use-the-data"><a href="../embed/?p=${p.slug}#provider-badge">Embed this provider's badge</a>` +
+  return `<p class="muted" id="use-the-data"><a href="../badges/#${p.slug}">Get a badge</a> · <a href="../embed/?p=${p.slug}#provider-badge">Embed this provider's badge</a>` +
     (nf ? ` · <a href="../not-free/#${nf.id}">Why ${escapeAttr(nf.name)} is on the Not free list</a>` : '') + `</p>`;
 };
 
@@ -1432,7 +1463,8 @@ for (const p of providers) {
     '@graph': [
       {
         '@type': 'WebPage', name: `${p.name} — free LLM API`, description: p.free_tier, url: `${SITE}/p/${p.slug}`,
-        ...(p.last_verified ? { dateModified: isoDateTime(p.last_verified) } : {}),
+        // The newest day a fact of this provider was read: last_verified or a later field check (lib/provider-dates.mjs).
+        ...(providerDateModified(p) ? { dateModified: isoDateTime(providerDateModified(p)) } : {}),
         isPartOf: websiteRef(SITE), about: datasetRef(SITE, DATASET_FACTS),
       },
       {
@@ -1468,6 +1500,30 @@ for (const p of providers) {
   );
 }
 
+// ---------- provider badge kit: /badge/<slug>.svg (+ -dark), the generic badge, and the /badges/ page ----------
+// lib/provider-badges.mjs. The SVGs state the offer (free tier or trial credit) and the date of the last verification,
+// both from the record, so they are deterministic per dataset and pinned in derived-fingerprints.json. site/badge/ is
+// generated whole and gitignored: start it empty so a provider removed from the dataset leaves no badge behind.
+rmSync(join(ROOT, `site/${BADGE_DIR}`), { recursive: true, force: true });
+mkdirSync(join(ROOT, `site/${BADGE_DIR}`), { recursive: true });
+if (providers.some((p) => p.slug === LISTED_SLUG)) throw new Error(`a provider slug may not be "${LISTED_SLUG}": /badge/${LISTED_SLUG}.svg is the generic badge`);
+for (const theme of ['light', 'dark']) {
+  const suffix = theme === 'dark' ? '-dark' : '';
+  for (const p of providers) writeFileSync(join(ROOT, `site/${BADGE_DIR}/${p.slug}${suffix}.svg`), providerBadgeSvg(p, theme).svg);
+  writeFileSync(join(ROOT, `site/${BADGE_DIR}/${LISTED_SLUG}${suffix}.svg`), listedBadgeSvg(theme).svg);
+}
+// site/badges/ (the shields.io endpoint files above) also holds the page, so it is written after the provider loop.
+writeFileSync(join(ROOT, 'site/badges/index.html'), htmlPage({
+  title: badgesTitle(), desc: badgesDescription(providers.length), canonical: `${SITE}${BADGES_PATH}`, prefix: '../',
+  main: badgesMainHtml({ pageHero, site: SITE, prefix: '../', providers, repo: REPO, slaDays: FRESH_DAYS }),
+  jsonld: collectionPageJsonLd({
+    type: 'WebPage', name: 'Provider badges', url: `${SITE}${BADGES_PATH}`,
+    description: 'Embeddable badges that show the free tier or trial credit of each provider and the date it was last verified.',
+    about: datasetRef(SITE, DATASET_FACTS),
+    crumbs: [['Use the data', `${SITE}${EMBED_PATH}`], ['Provider badges', `${SITE}${BADGES_PATH}`]],
+  }),
+}));
+
 // ---------- legal pages (minimal, noindex) ----------
 mkdirSync(join(ROOT, 'site/legal'), { recursive: true });
 const ORG = 'Tweakeo, Inc.';
@@ -1487,11 +1543,10 @@ const legalPage = (slug, title, bodyHtml) => {
 // ---------- 404 ----------
 // GitHub Pages serves this one file for ANY missing path (/contributing/, /a/b/c), so a relative prefix would resolve against the
 // missing URL and lose the styles, the menu and the footer. It is built with the same header and footer as every page and the
-// root-absolute prefix '/'. The path read-out below is pinned by hash in the CSP: change its text and recompute the hash.
+// root-absolute prefix '/'. The path read-out (NOT_FOUND_PATH_SCRIPT, defined next to the CSP) is pinned there by hash.
 // Q16: a search box that lands on the explorer (/?q=, which explorer.js reads on load) and six popular providers: the
 // first six of The Best, the score top (lib/score.mjs), so the list follows the data. Root-absolute links like the rest.
 const NOT_FOUND_POPULAR = topList.slice(0, 6).map((e) => `<a href="/p/${e.p.slug}">${escapeAttr(e.p.name)}</a>`).join('');
-const NOT_FOUND_PATH_SCRIPT = `<script>try{document.getElementById('path').textContent=location.pathname.replace('/free-llm-api-hub','')||'/';}catch(e){}</script>`;
 writeFileSync(
   join(ROOT, 'site/404.html'),
   htmlPage({
@@ -1643,7 +1698,9 @@ const changeWeeks = groupChangesByWeek(allFieldChanges, { weeks: 12 }); // the h
 const apiV1ChangeWeeks = groupChangesByWeek(projectApiV1Changes(allFieldChanges), { weeks: 12 });
 const provLink = (slug, name, prefix) => currentSlugs.has(slug) ? `<a href="${prefix}p/${slug}">${escapeAttr(name)}</a>` : escapeAttr(name);
 
-writeFileSync(join(ROOT, 'site/changes.xml'), changesRss(changeWeeks, { site: SITE }));
+// Both feeds read the projected weeks of api/v1/changes.json, so a subscriber and an API client see the same changes.
+writeFileSync(join(ROOT, 'site/changes.xml'), changesRss(apiV1ChangeWeeks, { site: SITE }));
+writeFileSync(join(ROOT, 'site' + ATOM_PATH), changesAtom(apiV1ChangeWeeks, { site: SITE, updated: ASOF }));
 
 const changeRowHtml = (c, prefix = '../') =>
   `<tr><td class="notes">${c.date}</td><td class="name">${provLink(c.slug, c.name, prefix)}</td><td>${escapeAttr(c.label)}</td>` +
@@ -1733,9 +1790,33 @@ const monthsTable = stateReports.length
     [...monthsByYear].map(([year, list]) => list.map((r, i) => monthRowHtml(r, i === 0 ? `<th scope="rowgroup" rowspan="${list.length}">${year}</th>` : '')).join('\n')).join('\n') +
     `\n</tbody></table>`
   : `<p class="muted">No history available.</p>`;
+// The answer-first summary of the latest week (lib/changes.mjs latestWeek), from the same projected changes as the
+// feeds and api/v1/changes.json, plus the providers added that week. A null value reads "not stated".
+// The oldest revision in the history marks every provider it holds as added: that is the start of the record (or of a
+// shallow clone), not news, so its added events are left out.
+const historyStart = Object.values(historyBySlug).flat().reduce((m, e) => (!m || e.date < m ? e.date : m), '');
+const addedEvents = Object.entries(historyBySlug).flatMap(([slug, events]) => (events || [])
+  .filter((e) => e.kind === 'added' && e.date !== historyStart).map((e) => ({ date: e.date, slug, name: nameBySlug[slug] || slug })));
+const latest = latestWeek(projectApiV1Changes(allFieldChanges), addedEvents, { asOf: ASOF });
+const latestRows = latest ? [...new Map(latest.changes.map((c) => [c.slug, c])).keys()].map((slug) => {
+  const rows = latest.changes.filter((c) => c.slug === slug);
+  const parts = rows.map((c) => BEFORE_AFTER_FIELDS.includes(c.field)
+    ? `${escapeAttr(c.label)} (${escapeAttr(summaryValue(c.from))} → ${escapeAttr(summaryValue(c.to))})`
+    : escapeAttr(c.label));
+  return `<li>${provLink(slug, rows[0].name, '../')}: ${[...new Set(parts)].join(', ')}</li>`;
+}).concat(latest.addedList.map((a) => `<li>${provLink(a.slug, a.name, '../')}: added to the hub</li>`)) : [];
+const latestSection =
+  `<section id="latest" class="week-summary"><h2>${latest && latest.current ? 'This week' : 'Latest week'}</h2>` +
+  `<p><strong>${escapeAttr(latestWeekSentence(latest))}</strong></p>` +
+  // A long week folds into a disclosure, so the month table stays near the top.
+  (latestRows.length > 12 ? `<details><summary>The ${latestRows.length} changes, provider by provider</summary><ul>\n${latestRows.join('\n')}\n</ul></details>`
+    : latestRows.length ? `<ul>\n${latestRows.join('\n')}\n</ul>` : '') +
+  `<p class="muted">A free tier counts as ended when its free type moves from an ongoing shape to trial credit. A provider removed from the dataset is not counted: its removal date is ${CHANGES_NOT_STATED} in the data.</p>` +
+  `</section>`;
 const changesMain =
-  pageHero({ crumbs: `<a href="../">Home</a> / <a href="../updates">Updates</a> / What changed`, h1: `What changed`, lede: `Field-level changes to the free tiers we track (what's free, rate limits, the catch and the card, phone, commercial-use and OpenAI-compatibility flags), month by month. Mined from the git history of <a href="${REPO}/commits/main/data/providers.json">providers.json</a>. Subscribe via <a href="../changes.xml">RSS</a> or read the <a href="../api/v1/changes.json">JSON</a>.`, extra: `<div class="prov-actions subscribe"><a class="btn primary" href="../changes.xml" type="application/rss+xml">Subscribe via RSS</a><a class="btn ghost" href="../api/v1/changes.json" type="application/json">Changes as JSON</a></div>` }) +
+  pageHero({ crumbs: `<a href="../">Home</a> / <a href="../updates">Updates</a> / What changed`, h1: `What changed`, lede: `Field-level changes to the free tiers we track (what's free, rate limits, the catch and the card, phone, commercial-use and OpenAI-compatibility flags), month by month. Mined from the git history of <a href="${REPO}/commits/main/data/providers.json">providers.json</a>. Subscribe via <a href="../changes.xml">RSS</a> or <a href="..${ATOM_PATH}">Atom</a>, or read the <a href="../api/v1/changes.json">JSON</a>.`, extra: `<div class="prov-actions subscribe"><a class="btn primary" href="../changes.xml" type="application/rss+xml">Subscribe via RSS</a><a class="btn ghost" href="..${ATOM_PATH}" type="application/atom+xml">Atom feed</a><a class="btn ghost" href="../api/v1/changes.json" type="application/json">Changes as JSON</a></div>` }) +
   `<main id="main"><div class="wrap prose">` +
+  latestSection +
   `<section id="months"><h2>Month by month</h2>` +
   `<p>One report per month, from the first to the latest: provider counts by category and modality, verified share, verification age, and every field change and provider added, in the order they happened. A month with no committed revision of providers.json says so. Every figure is computed from the data and its git history.</p>` +
   monthsTable + `</section>` +
@@ -1822,25 +1903,17 @@ writeFileSync(join(ROOT, 'docs/credit-programs.md'), creditDoc);
 
 // ---------- free model index: model -> provider, searchable ----------
 mkdirSync(join(ROOT, 'site/models'), { recursive: true });
-const modelIndex = [];
-for (const p of providers) for (const m of (p.models_free || [])) modelIndex.push({ m, p });
-modelIndex.sort((a, b) => a.m.toLowerCase().localeCompare(b.m.toLowerCase()) || a.p.name.localeCompare(b.p.name));
+const modelIndex = modelIndexRows(providers);
 const modelProviderCount = providers.filter((p) => p.models_free && p.models_free.length).length;
-const modelRowHtml = ({ m, p }) =>
-  `<tr data-s="${escapeAttr((m + ' ' + p.name + ' ' + (p.modalities || []).join(' ')).toLowerCase())}">` +
-  `<td class="name">${MODEL_PAGE_KEYS.has(modelKey(m)) ? `<a href="${modelKey(m)}/"><code>${escapeAttr(m)}</code></a>` : `<code>${escapeAttr(m)}</code>`}</td>` +
-  `<td><a href="../p/${p.slug}">${escapeAttr(p.name)}</a></td>` +
-  `<td>${escapeAttr(p.free_type)}</td>` +
-  `<td class="notes">${(p.modalities || []).join(', ') || '—'}</td></tr>`;
+const MODEL_INDEX_STATS = modelIndexStats(providers, MODEL_GROUPS);
 const modelsMain =
-  pageHero({ crumbs: `<a href="../">Home</a> / Free model index`, h1: `Free model index`, lede: `Every model our verified providers expose on a free tier — <strong>${modelIndex.length}</strong> entries across <strong>${modelProviderCount}</strong> providers, pulled from each provider's own <code>/models</code> endpoint where possible. The same model can appear under more than one provider.` }) +
-  `<main id="main"><div class="wrap"><h2 class="eyebrow">Free API by model family</h2>${familyNavHtml(FAMILY_GROUPS, '../')}` +
-  `<table class="model-table"><thead><tr><th>Model</th><th>Provider</th><th>Free type</th><th>Modalities</th></tr></thead><tbody>\n` +
-  modelIndex.map(modelRowHtml).join('\n') +
-  `\n</tbody></table><p class="muted" style="margin-top:18px">Model lists are a live sample and change often — always confirm against the provider. A provider missing here usually needs an API key to list its models; <a href="${REPO}/blob/main/docs/update-playbook.md">see how the list is refreshed</a>.</p></div></main>`;
+  pageHero({ crumbs: `<a href="../">Home</a> / Free model index`, h1: `Free AI models API index`, lede: `Every model our verified providers expose on a free tier — <strong>${modelIndex.length}</strong> entries across <strong>${modelProviderCount}</strong> providers, pulled from each provider's own <code>/models</code> endpoint where possible. The same model can appear under more than one provider.` }) +
+  `<main id="main"><div class="wrap">${modelIndexAnswerHtml(MODEL_INDEX_STATS)}<h2 class="eyebrow">Free API by model family</h2>${familyNavHtml(FAMILY_GROUPS, '../')}` +
+  modelIndexTableHtml(modelIndex, { modelHref: (m) => (MODEL_PAGE_KEYS.has(modelKey(m)) ? `${modelKey(m)}/` : ''), familyPrefix: '../', families: FAMILY_GROUPS }) +
+  `<p class="muted" style="margin-top:18px">Model lists are a live sample and change often — always confirm against the provider. A provider missing here usually needs an API key to list its models; <a href="${REPO}/blob/main/docs/update-playbook.md">see how the list is refreshed</a>.</p></div></main>`;
 writeFileSync(join(ROOT, 'site/models/index.html'), htmlPage({
-  title: datedTitle('Free model index — which free API serves which model · Free LLM API Hub'),
-  desc: `Index of ${modelIndex.length} models available on free LLM & AI-model API tiers, and which provider serves each.`,
+  title: datedTitle('Free AI models API index — which free API serves which model · Free LLM API Hub'),
+  desc: modelIndexDescription(MODEL_INDEX_STATS),
   canonical: `${SITE}/models/`,
   main: modelsMain,
   ogImage: `${SITE}/og/models.png`,
@@ -1935,7 +2008,7 @@ for (const g of GUIDES) {
     faqHtml +
     (twins.length ? `<h2>Related collections</h2><nav class="colls">${twins.map((c) => `<a href="../collections/${c.slug}">${escapeAttr(c.title)}</a>`).join('')}</nav>` : '') +
     `<h2>More guides</h2><nav class="colls">${related}</nav>` +
-    `<p class="muted">Looking for OpenAI, Anthropic, Mistral or GitHub Models? <a href="../not-free/">Why they are not on this list</a>.</p>` +
+    `<p class="muted">Looking for OpenAI, Anthropic, Mistral or GitHub Models? <a href="../not-free/">Why they are not in this dataset</a>.</p>` +
     `<p class="prov-back"><a href="../guides-and-collections/">← All guides</a></p>` +
     `</div></main>`;
   const jsonld = JSON.stringify({
@@ -1975,7 +2048,7 @@ for (const g of LONG_GUIDE_PAGES) {
     `<p class="answer"><strong>${g.answer}</strong></p>` +
     g.body +
     faqHtml +
-    (g.slug === 'openai-api-alternatives' ? '' : `<p class="muted">Looking for OpenAI, Anthropic, Mistral or GitHub Models? <a href="../not-free/">Why they are not on this list</a>.</p>`) +
+    (g.slug === 'openai-api-alternatives' ? '' : `<p class="muted">Looking for OpenAI, Anthropic, Mistral or GitHub Models? <a href="../not-free/">Why they are not in this dataset</a>.</p>`) +
     `<h2>More guides</h2><nav class="colls">${related}</nav>` +
     `<p class="muted">Data from the Free LLM API Hub dataset, as of ${ASOF}. Every limit is quoted from the provider’s own page; follow the source link before relying on it.</p>` +
     `<p class="prov-back"><a href="../guides-and-collections/">← All guides</a></p>` +
@@ -2219,7 +2292,7 @@ const apiDocMain =
   `<h2>Slices (by modality)</h2><table class="model-table api-endpoints"><thead><tr><th>Endpoint</th><th>Contents</th><th>Count</th><th>curl example</th></tr></thead><tbody>` +
   API_MODS.map((m) => apiRow(`Providers with a free ${m} modality`, `modality/${m}.json`, publicProviders.filter((p) => (p.modalities || []).includes(m)).length)).join('') +
   `</tbody></table>` +
-  `<h2>Example</h2><pre><code>curl -s ${SITE}/api/v1/no-card.json | jq '.providers[].name'</code></pre>` +
+  apiExamplesHtml(escapeText, { repo: REPO }) +
   clientConfigDocs +
   `<h2>Stability</h2><p>Paths under <code>/api/v1/</code> stay put and fields are only ever added within v1; a breaking change ships as <code>/api/v2/</code>. The full policy, and how the dataset <code>version</code> relates to the path, is in <a href="${REPO}/blob/main/docs/api.md">docs/api.md</a>. The JSON Schema is published at <a href="v1/schema.json"><code>/api/v1/schema.json</code></a>.</p>` +
   `<p class="muted">Every object carries the dataset <code>version</code> and <code>generated</code> date. Prefer a stable snapshot? Pin a Git tag of <a href="${REPO}">the repo</a>. For AI agents, see <a href="../llms.txt">llms.txt</a>.</p>` +
@@ -2242,12 +2315,12 @@ writeFileSync(join(ROOT, 'site/api/index.html'), htmlPage({
 
 // llms.txt (concise index) + llms-full.txt (every provider expanded) — llmstxt.org
 const programCount = programs.startups.length + programs.research.length;
-const llmsSummary = `A continuously-verified, machine-readable dataset of free-tier and trial-credit LLM (and adjacent AI-model) APIs for developers. Every entry is dated and sourced to the provider's own docs.`;
+const llmsSummary = `A continuously-verified, machine-readable dataset of free-tier and trial-credit LLM (and adjacent AI-model) APIs for developers. Every entry is checked against the provider's own docs and dated; quoted where the docs say it; "not stated" where they don't.`;
 // llmstxt.org layout: H1, a blockquote summary, the dataset date and counts first, then H2 sections of links.
 // Each provider has one line (name, free type, one-line limits, its page and the Markdown twin at /p/<slug>.md).
 const llmsTxt =
   `# Free LLM API Hub\n\n> ${llmsSummary}\n\n` +
-  `Data of ${ASOF} · dataset v${data.version} · ${total} providers (${ongoing.length} ongoing free tiers, ${trial.length} trial credits) and ${programCount} apply-to-get credit programs. MIT-licensed. Terms change often: confirm against each provider's own docs, linked from every entry. Every provider page has a Markdown version at the same URL plus \`.md\`.\n\n` +
+  `Data of ${ASOF} · dataset v${data.version} · ${llmsCounts(HOME_COUNTS)}, and ${programCount} apply-to-get credit programs. MIT-licensed. Terms change often: confirm against each provider's own docs, linked from every entry. Every provider page has a Markdown version at the same URL plus \`.md\`.\n\n` +
   `## Start here\n` +
   `- [Find my free API](${SITE}/find/): answer a few questions (modality, card, commercial use) and get the matching providers\n` +
   `- [Top 10 by score](${SITE}/best/): the ranking and [how the score is computed](${SITE}/best/methodology/)\n` +
@@ -2258,12 +2331,13 @@ const llmsTxt =
   `- [Static JSON API](${SITE}/api/): versioned endpoints + pre-filtered slices (category, modality, no-card, commercial, OpenAI-compatible, …)\n` +
   `- [Provider status, JSON](${SITE}/api/v1/status.json): per provider, last verified, freshness against the ${DUE_SOON_DAYS}/${SLA_DAYS}-day SLA, free now, and the day of its last change\n` +
   `- [JSON Schema](${REPO}/blob/main/data/schema.json)\n` +
-  `- [Full provider list expanded, markdown](${SITE}/llms-full.txt)\n` +
+  `- [Full dataset expanded, markdown](${SITE}/llms-full.txt)\n` +
   `- [Data quality](${SITE}/quality/): how much of the dataset is verified, how fresh it is, and which answers are still unknown\n` +
   `- [Use the data](${SITE}/embed/): the widget, verified badges, JSON and CSV downloads, and how to cite the dataset\n` +
+  `- [Provider badges](${SITE}${BADGES_PATH}): an SVG badge per provider (free tier or trial credit, and the date last verified) with copy-paste Markdown and HTML\n` +
   `- [Methodology](${SITE}/methodology/): how entries are verified, sourced and dated\n\n` +
   `## Guides\n` +
-  `- [All guides and collections](${SITE}/guides-and-collections/): every guide and filtered list on one page\n` +
+  `- [All guides and collections](${SITE}/guides-and-collections/): every guide and filtered collection on one page\n` +
   [...GUIDES, ...LONG_GUIDE_PAGES].map((g) => `- [${g.h1}](${SITE}/guides/${g.slug}): ${g.blurb}`).join('\n') + `\n\n` +
   `## Free API by model family\n` +
   FAMILY_GROUPS.filter(isFamilyIndexable).map((g) => `- [${familyH1(g)}](${familyUrl(SITE, g)}): ${familyBlurb(g)}`).join('\n') + `\n\n` +
@@ -2405,9 +2479,9 @@ writeFileSync(
 // Written from docs/methodology.md and CONTRIBUTING.md with lib/markdown.mjs (no dependency; nothing of the source is passed through as HTML), so the page and
 // the file on GitHub cannot say different things. A relative link of the document becomes a link to the file on GitHub, or to the page when the file has one.
 const DOC_PAGES = [
-  { slug: 'methodology', file: 'docs/methodology.md', title: 'Methodology: how a provider gets on the list · Free LLM API Hub',
-    desc: 'How an entry gets on the list, what verified means and does not mean, and how freshness, sourcing, corrections, model tier and the score work.',
-    h1: 'Methodology', lede: 'How an entry gets on the list, what “verified” means, and what it does not.' },
+  { slug: 'methodology', file: 'docs/methodology.md', title: 'Methodology: how a provider gets into the dataset · Free LLM API Hub',
+    desc: 'How an entry gets into the dataset, what verified means and does not mean, and how freshness, sourcing, corrections, model tier and the score work.',
+    h1: 'Methodology', lede: 'How an entry gets into the dataset, what “verified” means, and what it does not.' },
   { slug: 'contributing', file: 'CONTRIBUTING.md', title: 'Contributing: add or fix a provider · Free LLM API Hub',
     desc: 'How to add or fix a provider, report a mistake without a pull request, claim an issue, and what happens to your first pull request.',
     h1: 'Contributing', lede: 'How to add or fix a provider, step by step.' },
@@ -2686,16 +2760,21 @@ for (const cp of comparePairs) {
   const { a, b } = cp;
   const title = `${a.name} vs ${b.name}`;
   const desc = `${a.name} vs ${b.name}: free tier, rate limits, card, phone and commercial-use requirements, OpenAI compatibility and docs, side by side from the verified dataset.`;
+  // Right under the H1, the verdict for "<A> vs <B> free tier" from the data alone, and after the table a short FAQ that
+  // is also the FAQPage node of the JSON-LD (lib/compare-faq.mjs). Neither appears when both records lack free-tier data.
+  const verdict = compareVerdict(a, b);
+  const faq = compareFaq(a, b);
   const main =
-    pageHero({ crumbs: `<a href="../../">Home</a> / <a href="../">Compare</a> / ${escapeAttr(title)}`, h1: `${escapeAttr(title)}`, lede: `Both offer ${escapeAttr(cp.shared.join(', '))} on their free plan. Every field below comes from the dataset and is checked against each provider's own docs; <em>not confirmed</em> means nobody has confirmed that field yet — not that the answer is no.` }) +
+    pageHero({ crumbs: `<a href="../../">Home</a> / <a href="../">Compare</a> / ${escapeAttr(title)}`, h1: `${escapeAttr(title)}`, afterTitle: verdict ? verdict.html : '', lede: `Both offer ${escapeAttr(cp.shared.join(', '))} on their free plan. Every field below comes from the dataset and is checked against each provider's own docs; <em>not confirmed</em> means nobody has confirmed that field yet — not that the answer is no.` }) +
     `<main id="main"><div class="wrap prose">` +
     tagProviderLinks(compareLib.compareTableHtml([a, b], { prefix: '../../', scores: scoreMap }), [...providerLinkTargets(a), ...providerLinkTargets(b)]) +
     `<div class="prov-actions" style="margin-top:22px"><a class="btn primary" href="../?compare=${a.slug},${b.slug}">Add a provider to this comparison →</a></div>` +
+    compareFaqHtml(a, b, faq) +
     `<h2>Other comparisons</h2><nav class="colls">${compareLinksHtml('../../', cp.path)}</nav>` +
     `<p class="muted">Expected OpenAI, Anthropic or Mistral here? <a href="../../not-free/">APIs that are not free, and why</a>.</p>` +
     `<p class="prov-back"><a href="../../#explorer">← All providers</a></p>` +
     `</div></main>`;
-  const jsonld = comparePageJsonLd({ site: SITE, path: cp.path, a, b });
+  const jsonld = comparePageJsonLd({ site: SITE, path: cp.path, a, b, faq });
   mkdirSync(join(ROOT, `site/compare/${cp.path}`), { recursive: true });
   writeFileSync(join(ROOT, `site/compare/${cp.path}/index.html`), htmlPage({
     title: `${title} — free tiers compared · Free LLM API Hub`, desc, canonical: `${SITE}/compare/${cp.path}/`, main, jsonld, prefix: '../../', ogImage: `${SITE}/og/compare.png`,
@@ -2747,10 +2826,13 @@ for (const [from, to] of redirectEntries(REDIRECTS)) {
 writeFileSync(join(ROOT, 'site/shared-find.js'), findLib.clientBundle());
 rmSync(join(ROOT, 'site/find'), { recursive: true, force: true });
 mkdirSync(join(ROOT, 'site/find'), { recursive: true });
-const findData = `<script type="application/json" id="find-data">${JSON.stringify(findLib.findPayload(publicProviders, ASOF)).replace(/</g, '\\u003c')}</script>`;
+const findPayload = findLib.findPayload(publicProviders, ASOF);
+const findData = `<script type="application/json" id="find-data">${JSON.stringify(findPayload).replace(/</g, '\\u003c')}</script>`;
+// The count the page opens with (no answers yet), the same text site/find.js writes, so the live line is filled at first paint.
+const findStart = findLib.shortlist(findPayload.providers, {});
 writeFileSync(join(ROOT, 'site/find/index.html'), htmlPage({
   title: FIND_TITLE, desc: FIND_DESC, canonical: `${SITE}${FIND_PATH}`, prefix: '../',
-  main: findMainHtml({ pageHero, total: providers.length, verified: verifiedCount }) + findData,
+  main: findMainHtml({ pageHero, total: providers.length, verified: verifiedCount, count: findLib.countText(findStart.matches.length, findStart.possible.length, false) }) + findData,
   scripts: ['shared-rules.js', 'shared-find.js', 'find.js'], ogImage: `${SITE}/og/find.png`,
   jsonld: findJsonLd({ site: SITE, asof: ASOF }),
 }));
@@ -2788,6 +2870,7 @@ const sitemapEntries = [
   ...CODING_TOOL_PAGES.map(({ e, generated }) => [`${SITE}/coding-tools/${e.slug}/`, generated]),
   [`${SITE}/api/`, ASOF],
   [`${SITE}${EMBED_PATH}`, ASOF],
+  [`${SITE}${BADGES_PATH}`, ASOF],
   [`${SITE}${NOT_FREE_PATH}`, ASOF],
   [`${SITE}/changes/`, ASOF],
   [`${SITE}/programs/`, programs.generated],
@@ -2845,7 +2928,7 @@ const isDateRelative = (rel) => rel === 'site/badge-freshness.json' || rel.start
 // monthly state reports (state/) are mined from the same git history, so they
 // are excluded for the same reason.
 const isGitLogDerived = (rel) => rel === 'site/feed.xml' || rel === 'site/api/v1/history.json' || rel === 'site/updates.html' || rel.startsWith('site/updates/') ||
-  rel === 'site/changes.xml' || rel === 'site/api/v1/changes.json' || rel === 'site/api/v1/status.json' || rel.startsWith('site/changes/') || rel.startsWith('site/state/') || rel === 'site/sitemap-state.xml';
+  rel === 'site/changes.xml' || rel === 'site' + ATOM_PATH || rel === 'site/api/v1/changes.json' || rel === 'site/api/v1/status.json' || rel.startsWith('site/changes/') || rel.startsWith('site/state/') || rel === 'site/sitemap-state.xml';
 // ---------- /.well-known/security.txt ----------
 // RFC 9116 contact file from SECURITY.md's two channels; its Expires date comes from lib/security-txt.mjs, not the clock.
 mkdirSync(join(ROOT, 'site/.well-known'), { recursive: true });

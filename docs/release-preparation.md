@@ -33,8 +33,9 @@ not a signature or a live guarantee that the remote has not changed.
    membership in main and green CI at that exact commit. A current main build is
    not verification of a historical tag.
 2. In a separate checkout of that exact commit, run `npm ci --ignore-scripts`,
-   `npm test` and `npm run check`. Review any historical failure rather than
-   replacing historical data with today's build. Do not execute an unreviewed
+   then `npm run check -- --strict` and `npm test`, in that order: the build in
+   `check` writes the pages the tests read, which push mode no longer commits.
+   Review any historical failure rather than replacing historical data with today's build. Do not execute an unreviewed
    historical workflow or grant it credentials.
 3. From the reviewed tooling checkout at the repository root, run:
 

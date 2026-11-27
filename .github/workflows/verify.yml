@@ -188,9 +188,16 @@ jobs:
           retention-days: 7
           if-no-files-found: error
 
-  windows-tests:
-    name: Windows tests
+  # The Windows suite is the longest required check, so it runs as parallel shards (scripts/run-tests.mjs, TEST_SHARD):
+  # the shards together run every test of `npm test` exactly once (scripts/test-part.test.mjs). The required check is
+  # the `windows-tests` job below, which keeps the name "Windows tests" and passes only when every shard passed.
+  windows-shards:
+    name: Windows tests (shard ${{ matrix.shard }}/3)
     runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3]
     steps:
       # Set up git as a contributor's Windows machine often is: CRLF conversion on, and every commit and tag signed by
       # a program that fails (a key behind a passphrase, or no gpg). The checkout must still be LF (.gitattributes) and
@@ -246,13 +253,32 @@ jobs:
 
       # The runner may create symlinks; a contributor without Developer Mode may not (#783). The preload refuses them
       # as Windows does there, junctions still work. A file URL, so the test processes in other folders find it too.
-      - name: Run the full test suite without symlink privileges
+      # Every shard runs the checks npm test runs before the suite (seconds), then its share of the suite.
+      - name: Run this shard of the full test suite without symlink privileges
         shell: pwsh
+        env:
+          TEST_SHARD: ${{ matrix.shard }}/3
         run: |
           $preload = ([System.Uri](Join-Path $PWD 'scripts/lib/deny-symlinks.mjs')).AbsoluteUri
           $env:NODE_OPTIONS = "--import=$preload"
           npm test
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+  # The required check "Windows tests" (ruleset): green only when every shard above succeeded. A failed, cancelled or
+  # skipped shard fails it. It checks nothing out and runs no repository code.
+  windows-tests:
+    name: Windows tests
+    needs: windows-shards
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Every Windows shard passed
+        env:
+          RESULT: ${{ needs.windows-shards.result }}
+        run: |
+          echo "Windows shards: $RESULT"
+          [ "$RESULT" = success ]
 
   # A push to main is checked again after the merge (two pull requests that pass
   # alone can fail together, e.g. a duplicate slug). A failure there used to be

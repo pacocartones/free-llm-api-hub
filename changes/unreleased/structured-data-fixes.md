@@ -11,4 +11,4 @@
   home `Dataset` no longer has an `isPartOf` pointing at the `WebSite`, and
   provider pages are now `isPartOf` the `WebSite` and `about` the `Dataset`.
   `scripts/structured-data.test.mjs` walks every built page's JSON-LD and
-  checks these rules.
+  checks these rules (#904).

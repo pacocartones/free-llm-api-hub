@@ -54,9 +54,12 @@ test('npm tarball installs a working read-only stdio CLI outside the checkout', 
     assert.equal(help, '', 'stdio stdout is reserved for protocol messages');
     client = new Client({ name: 'installed-package-test', version: '1.0.0' });
     await client.connect(new StdioClientTransport({ command: bin, cwd: consumer,
-      args: ['--data', join(root, 'test/fixtures/providers.json'), '--clients', join(root, 'test/fixtures/openai-clients.json')], stderr: 'pipe' }));
+      args: ['--data', join(root, 'test/fixtures/providers.json'), '--clients', join(root, 'test/fixtures/openai-clients.json'),
+        '--status', join(root, 'test/fixtures/status.json')], stderr: 'pipe' }));
     const { tools } = await client.listTools();
-    assert.deepEqual(tools.map((t) => t.name).sort(), ['dataset_info', 'get_provider', 'openai_client_config', 'search_providers']);
+    assert.deepEqual(tools.map((t) => t.name).sort(), [
+      'dataset_info', 'get_provider', 'get_provider_status', 'is_free', 'openai_client_config', 'search_providers',
+    ]);
     for (const tool of tools) {
       assert.equal(tool.annotations.readOnlyHint, true);
       assert.equal(tool.annotations.openWorldHint, true);
@@ -67,6 +70,12 @@ test('npm tarball installs a working read-only stdio CLI outside the checkout', 
     const config = await client.callTool({ name: 'openai_client_config', arguments: { slug: 'alpha-ai' } });
     assert.equal(config.isError, undefined);
     assert.equal(JSON.parse(config.content[0].text).env_var, 'ALPHA_PUBLISHED_KEY');
+    const status = await client.callTool({ name: 'get_provider_status', arguments: { slug: 'beta-cloud' } });
+    assert.equal(status.isError, undefined);
+    assert.equal(JSON.parse(status.content[0].text).freshness, 'stale');
+    const free = await client.callTool({ name: 'is_free', arguments: { slug: 'alpha-ai' } });
+    assert.equal(free.isError, undefined);
+    assert.match(JSON.parse(free.content[0].text).answer, /^Yes\. Alpha AI has an ongoing free tier/);
   } finally {
     if (client) await client.close();
     rmSync(temp, { recursive: true, force: true });

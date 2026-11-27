@@ -8,10 +8,3 @@
   "not stated". The same answers feed a FAQPage node in the home page's JSON-LD
   `@graph`, so the visible text and the structured data are the same string
   (`scripts/lib/home-faq.mjs`, `scripts/home-faq.test.mjs`).
-
-### Changed and fixed
-
-- Home `<title>` and meta description lead with "Free LLM API" and carry the
-  live provider count and the verified count, both built from the data
-  (title at most 60 characters, description at most 155); `og:` and `twitter:`
-  repeat them.
