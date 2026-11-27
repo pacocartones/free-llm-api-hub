@@ -36,12 +36,26 @@ const LIMIT_UNITS = [
 
 const safeUrl = (u) => (/^https?:\/\//i.test(String(u || '')) ? escapeHtml(u) : '');
 
+/**
+ * The stable anchors of the facts of a provider page (/p/<slug>#card …), so an answer engine or a reader can cite one
+ * fact and not only the page. The other facts already have theirs: #is-it-free (the answer under the H1), #whats-free,
+ * #limits, #quickstart, #models, #data-policy and #faq. Only the provider page sets them (`anchors: true`): a page that
+ * lists several providers, such as a model page, would repeat the ids. The /p/<slug>.md twin lists them all.
+ */
+export const FACT_ANCHORS = Object.freeze({
+  card_required: 'card',
+  phone_required: 'phone',
+  commercial_ok: 'commercial',
+  openai_compatible: 'openai',
+});
+
 /** What a visitor must give to start: three flags, each yes / no / "not stated" written out. */
-export function requirementsHtml(p) {
+export function requirementsHtml(p, { anchors = false } = {}) {
   const row = (icon, label, field, yes, no, extra = '') => {
     const check = fieldCheck(p, field);
     const def = FLAG_DEFS.find((d) => d.field === field);
-    return `<div class="req"><dt>${ICON(icon)}${label}</dt><dd>${flagHtml(def, p, { check, visible: triStateHtml(p[field], yes, no, check) })}${extra}${checkSourceHtml(check)}</dd></div>`;
+    const id = anchors && FACT_ANCHORS[field] ? ` id="${FACT_ANCHORS[field]}"` : '';
+    return `<div class="req"${id}><dt>${ICON(icon)}${label}</dt><dd>${flagHtml(def, p, { check, visible: triStateHtml(p[field], yes, no, check) })}${extra}${checkSourceHtml(check)}</dd></div>`;
   };
   const commercialCondition = p.commercial_ok === 'conditional' && p.commercial_ok_condition
     ? `<div class="req-condition">${escapeHtml(p.commercial_ok_condition)}</div>`
@@ -88,7 +102,7 @@ export function limitsHtml(p) {
 }
 
 /** The at-a-glance list: plain words instead of the dataset's internal labels. */
-export function glanceHtml(p, typeLabel) {
+export function glanceHtml(p, typeLabel, { anchors = false } = {}) {
   const mods = (p.modalities || []).join(', ') || NOT_STATED;
   const base = p.openai_base_url ? `<code>${escapeHtml(p.openai_base_url)}</code>` : 'Not OpenAI-compatible: see the official docs';
   const rows = [
@@ -99,7 +113,8 @@ export function glanceHtml(p, typeLabel) {
     ['OpenAI base URL', base],
     ...(p.added ? [['Added to the hub', timeHtml(p.added, escapeHtml)]] : []),
   ];
-  return `<div class="prov-meta">${rows.map(([k, v]) => `<div class="meta-row"><span class="meta-k">${k}</span><span class="meta-v">${v}</span></div>`).join('')}</div>`;
+  const idOf = (k) => (anchors && k === 'OpenAI base URL' ? ` id="${FACT_ANCHORS.openai_compatible}"` : '');
+  return `<div class="prov-meta">${rows.map(([k, v]) => `<div class="meta-row"${idOf(k)}><span class="meta-k">${k}</span><span class="meta-v">${v}</span></div>`).join('')}</div>`;
 }
 
 /**
