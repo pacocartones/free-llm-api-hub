@@ -136,9 +136,9 @@ test('MCP is_free and get_provider cover ongoing and trial entries from a two-pr
     name: 'is_free',
     arguments: { slug: 'ongoing-example' },
   })).content[0].text);
-  assert.match(ongoing.answer, /^Yes\\./);
-  assert.match(ongoing.answer, /ongoing free tier \\(a quota that renews\\)/);
-  assert.match(ongoing.answer, /100 requests\\/day/);
+  assert.ok(ongoing.answer.startsWith('Yes.'));
+  assert.ok(ongoing.answer.includes('a quota that renews'));
+  assert.ok(ongoing.answer.includes('100 requests/day'));
 
   const ongoingProvider = JSON.parse((await client.callTool({
     name: 'get_provider',
@@ -150,9 +150,9 @@ test('MCP is_free and get_provider cover ongoing and trial entries from a two-pr
     name: 'is_free',
     arguments: { slug: 'trial-example' },
   })).content[0].text);
-  assert.match(trial.answer, /^No\\./);
-  assert.match(trial.answer, /one-time trial credit, not an ongoing free tier/);
-  assert.match(trial.answer, /\\$10 credit; the credit expires after 30 days/);
+  assert.ok(trial.answer.startsWith('No.'));
+  assert.ok(trial.answer.includes('one-time trial credit, not an ongoing free tier'));
+  assert.ok(trial.answer.includes('$10 credit; the credit expires after 30 days'));
 
   const trialProvider = JSON.parse((await client.callTool({
     name: 'get_provider',
