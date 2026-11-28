@@ -1241,6 +1241,28 @@
    "page_sha256": "5b10efa2a31d278d8f8722551330f5ff8b74e4d8d95b3f210960bf8ffcb9ece6"
   },
   {
+   "id": "pollinations.sentence",
+   "slug": "pollinations",
+   "kind": "sentence",
+   "text": "Pollinations does not use your prompts or outputs to train or fine-tune models without explicit opt-in.",
+   "source_url": "https://pollinations.ai/privacy",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "33553f070f132033d3653c05cef57fedcd97d37b64c137168fe6162ab7be69d4"
+  },
+  {
+   "id": "pollinations.note_passage.1",
+   "slug": "pollinations",
+   "kind": "note_passage",
+   "text": "Community providers may follow different practices under their own policies",
+   "source_url": "https://pollinations.ai/privacy",
+   "read_on": "2026-11-27",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "33553f070f132033d3653c05cef57fedcd97d37b64c137168fe6162ab7be69d4"
+  },
+  {
    "id": "pollinations.card_required.sentence",
    "slug": "pollinations",
    "kind": "field_sentence",
