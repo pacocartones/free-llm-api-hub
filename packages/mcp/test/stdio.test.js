@@ -118,3 +118,45 @@ test('stdio server redacts local loader errors', async (t) => {
   assert.equal(res.content[0].text, 'Could not load the dataset.');
   assert.doesNotMatch(res.content[0].text, /private|missing-providers/);
 });
+
+const MCP_TOOL_FIXTURE = fileURLToPath(new URL('./fixtures/mcp-tool-providers.json', import.meta.url));
+
+test('MCP is_free and get_provider cover ongoing and trial entries from a two-provider fixture', async (t) => {
+  const transport = new StdioClientTransport({
+    command: process.execPath,
+    args: [SERVER, '--data', MCP_TOOL_FIXTURE],
+    env: { ...process.env },
+    stderr: 'pipe',
+  });
+  const client = new Client({ name: 'flah-mcp-tool-fixture-test', version: '0.0.0' });
+  await client.connect(transport);
+  t.after(() => client.close());
+
+  const ongoing = JSON.parse((await client.callTool({
+    name: 'is_free',
+    arguments: { slug: 'ongoing-example' },
+  })).content[0].text);
+  assert.ok(ongoing.answer.startsWith('Yes.'));
+  assert.ok(ongoing.answer.includes('a quota that renews'));
+  assert.ok(ongoing.answer.includes('100 requests/day'));
+
+  const ongoingProvider = JSON.parse((await client.callTool({
+    name: 'get_provider',
+    arguments: { slug: 'ongoing-example' },
+  })).content[0].text);
+  assert.equal(ongoingProvider.provider.last_verified, '2026-11-20');
+
+  const trial = JSON.parse((await client.callTool({
+    name: 'is_free',
+    arguments: { slug: 'trial-example' },
+  })).content[0].text);
+  assert.ok(trial.answer.startsWith('No.'));
+  assert.ok(trial.answer.includes('one-time trial credit, not an ongoing free tier'));
+  assert.ok(trial.answer.includes('$10 credit; the credit expires after 30 days'));
+
+  const trialProvider = JSON.parse((await client.callTool({
+    name: 'get_provider',
+    arguments: { slug: 'trial-example' },
+  })).content[0].text);
+  assert.equal(trialProvider.provider.last_verified, '2026-11-21');
+});
