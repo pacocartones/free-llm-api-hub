@@ -1,0 +1,48 @@
+{
+  "version": "1.0.0",
+  "generated": "2026-11-01",
+  "providers": [
+    {
+      "slug": "steady-ai",
+      "name": "Steady AI",
+      "category": "ongoing",
+      "free_type": "renewing-quota",
+      "free_tier": "Steady-1 chat, 500 requests/day",
+      "rate_limits": "20 req/min",
+      "notes": "Prompts may be used for training",
+      "best_for": "Daily chat",
+      "modalities": ["text"],
+      "models_free": ["steady-1"],
+      "expires": null,
+      "docs_url": "https://steady.example/docs/free-tier",
+      "phone_required": false,
+      "card_required": false,
+      "commercial_ok": false,
+      "openai_compatible": true,
+      "openai_base_url": "https://api.steady.example/v1",
+      "verified": true,
+      "last_verified": "2026-11-01"
+    },
+    {
+      "slug": "spark-trial",
+      "name": "Spark Trial",
+      "category": "trial",
+      "free_type": "trial-credit",
+      "free_tier": "$5 credit",
+      "rate_limits": "30 req/min",
+      "notes": "Credit expires after 14 days",
+      "best_for": null,
+      "modalities": ["text"],
+      "models_free": ["spark-1"],
+      "expires": "14 days",
+      "docs_url": "https://spark.example/pricing",
+      "phone_required": true,
+      "card_required": false,
+      "commercial_ok": false,
+      "openai_compatible": false,
+      "openai_base_url": null,
+      "verified": true,
+      "last_verified": "2026-10-15"
+    }
+  ]
+}
