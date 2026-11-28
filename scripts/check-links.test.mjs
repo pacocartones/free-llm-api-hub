@@ -40,8 +40,8 @@ test('local paths with queries and percent escapes are checked; non-issue parent
   assert.doesNotMatch(result.stderr, /→ ..\/a%20b/);
 });
 
-test('external links, anchors and GitHub issue shortcuts stay offline; ignored files are excluded', () => {
-  const { write, run } = fixture('README.md', '[web](https://example.invalid/)\n[mail](mailto:a@example.invalid)\n[heading](#title)\n[issue](../../issues/new?template=inaccuracy.yml)');
+test('external links, valid same-file anchors and GitHub issue shortcuts stay offline; ignored files are excluded', () => {
+  const { write, run } = fixture('README.md', '# Title\n\n[web](https://example.invalid/)\n[mail](mailto:a@example.invalid)\n[heading](#title)\n[issue](../../issues/new?template=inaccuracy.yml)');
   write('.gitignore', 'node_modules/\n');
   write('node_modules/example/README.md', '[missing](missing.md)');
   const result = run();
@@ -109,4 +109,97 @@ test('a committed Markdown file deleted but not staged is skipped, and links to 
   write('README.md', '');
   const clean = run();
   assert.equal(clean.status, 0, clean.stdout + clean.stderr);
+});
+
+test('valid heading anchors across Markdown formatting, punctuation and duplicate -1/-2 suffixes pass', () => {
+  const { write, run } = fixture(
+    'README.md',
+    [
+      '[formatted](docs/guide.md#why-field_checks-matters--bold-link)',
+      '[emdash](docs/guide.md#layer-2--the-weekly-pass)',
+      '[first](docs/guide.md#repeat)',
+      '[second](docs/guide.md#repeat-1)',
+      '[third](docs/guide.md#repeat-2)',
+      '[self](#local-section)',
+      '[external-frag](https://example.invalid/#not-checked)',
+      '[shortcut-frag](../../issues/12#issuecomment-1)',
+      '',
+      '## Local section',
+    ].join('\n'),
+  );
+  write(
+    'docs/guide.md',
+    [
+      '## Why `field_checks` matters — **bold** [link](https://example.invalid/)',
+      '### Layer 2 — the weekly pass',
+      '### Repeat',
+      '### Repeat',
+      '### Repeat',
+    ].join('\n'),
+  );
+  const result = run();
+  assert.equal(result.status, 0, result.stdout + result.stderr);
+});
+
+test('missing anchor in another Markdown file fails with file, line and anchor', () => {
+  const { write, run } = fixture(
+    'README.md',
+    '# Home\n\nSee [guide](docs/guide.md#does-not-exist).\n',
+  );
+  write('docs/guide.md', '# Guide\n\n## Actual heading\n');
+  const result = run();
+  assert.equal(result.status, 1, result.stdout + result.stderr);
+  assert.match(result.stderr, /README\.md:3 → docs\/guide\.md#does-not-exist \(missing anchor #does-not-exist\)/);
+});
+
+test('duplicate heading suffix beyond actual count fails', () => {
+  const { write, run } = fixture('README.md', '[too-many](docs/guide.md#repeat-2)\n');
+  write('docs/guide.md', '## Repeat\n\n## Repeat\n');
+  const result = run();
+  assert.equal(result.status, 1, result.stdout + result.stderr);
+  assert.match(result.stderr, /README\.md:1 → docs\/guide\.md#repeat-2 \(missing anchor #repeat-2\)/);
+});
+
+test('missing same-file #anchor fails with file, line and anchor', () => {
+  const { run } = fixture('README.md', '# Home\n\n[broken](#missing-section)\n');
+  const result = run();
+  assert.equal(result.status, 1, result.stdout + result.stderr);
+  assert.match(result.stderr, /README\.md:3 → #missing-section \(missing anchor #missing-section\)/);
+});
+
+test('comments inside fenced code blocks are ignored as headings, and links in code are ignored', () => {
+  const { write, run } = fixture(
+    'README.md',
+    [
+      '# Home',
+      '',
+      '```bash',
+      '[ignored-in-fence](missing.md#nope)',
+      '```',
+      '',
+      'Inline `[ignored-inline](#nope)` is ignored.',
+      '',
+      '[code-comment](docs/guide.md#shell-comment)',
+    ].join('\n'),
+  );
+  write(
+    'docs/guide.md',
+    [
+      '# Guide',
+      '',
+      '```bash',
+      '# shell comment',
+      'echo hi',
+      '```',
+      '',
+      '~~~sh',
+      '# tilde comment',
+      '~~~',
+    ].join('\n'),
+  );
+  const result = run();
+  assert.equal(result.status, 1, result.stdout + result.stderr);
+  assert.match(result.stderr, /README\.md:9 → docs\/guide\.md#shell-comment \(missing anchor #shell-comment\)/);
+  assert.doesNotMatch(result.stderr, /ignored-in-fence/);
+  assert.doesNotMatch(result.stderr, /ignored-inline/);
 });
