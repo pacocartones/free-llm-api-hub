@@ -83,6 +83,12 @@ Run these commands from the repository root after installing dependencies. Follo
 
 CI runs the full integrity suite on every PR, including docs-only changes. Paste your local commands and their results in the PR; a focused check is useful evidence, and a check you could not run needs an explanation. See [the first-fork checks note](#your-first-pr-from-a-fork-the-checks-may-wait) if CI is waiting for approval.
 
+### Running one test file
+
+`node --test scripts/<name>.test.mjs` runs a single test file the same way `npm test` runs all of them (`scripts/run-tests.mjs`); any `scripts/*.test.mjs` file is picked up automatically, so a new test needs no list update (`scripts/lib/test-files.mjs`).
+
+Some tests read the built site, so they need `npm run build` first; others only import `scripts/lib/*.mjs` and run on their own in a second. For example, `scripts/find.test.mjs` reads the built `site/explorer.js`, while `scripts/readme-tldr.test.mjs` tests `shortenProse` from `scripts/lib/short-text.mjs` directly. If every test fails at once, check the CRLF note `run-tests.mjs` prints and see [Windows and WSL](#windows-and-wsl).
+
 ### Updating your branch from main
 
 Commit all your work first, including new files, and check that `origin` names the repository whose `main` you intend to merge. Run `npm run sync-main` from your full clone on an attached branch. It fetches `origin/main` and merges it; conflicts confined to the shared generated-file list are rebuilt and committed locally. Any source or OG conflict aborts the merge with the conflicting files listed and restores your original local state. Already-current branches, fast-forwards and clean merges need no automatic rebuild. The helper never pushes.
