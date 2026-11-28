@@ -131,6 +131,28 @@ A few rules trip people up:
 5. **If your `data_policy` has a `quote` or a `note` with passages in «...», register them in `data/quotes.json`.** After editing the row, run `npm run quotes:add -- <slug>`; the command writes the `sentence` entry for a `quote`, and a `note_passage` entry for each passage in «...». Commit the resulting `data/quotes.json`. See [`docs/quotes.md`](quotes.md).
 6. **Build, but commit only the data**: run `npm run build && npm test` to check the entry renders, then commit the data change without the regenerated files (see [Step 6](#step-6--commit-and-open-the-pr)).
 
+#### Worked example: registering the quote
+
+Take the AI21 row shown above. After editing it, register its quote with:
+
+```bash
+npm run quotes:add -- ai21
+```
+
+The command reads the policy page and writes AI21's entries in `data/quotes.json`: the `sentence` for the quote, a `note_passage` for each phrase between «...», and the `absence_check` for the whole-page note. Then check that only AI21 changed:
+
+```bash
+git diff -- data/quotes.json
+```
+
+The diff should touch only entries whose id starts with `ai21.` — if another provider changed, something else edited the register; leave it alone and ask in the pull request. Finally, validate:
+
+```bash
+npm run validate && npm test
+```
+
+See [docs/quotes.md](quotes.md) for what each entry holds and what CI checks offline.
+
 The full definition — `source`, `checked`, `quote`, `note` and `plan_named` included — is the `data_policy` entry in [`data/schema.json`](../data/schema.json).
 
 ## Step 4 — Pass the validator
