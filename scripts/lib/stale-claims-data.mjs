@@ -10,7 +10,7 @@ const FIELDS = ['free_tier', 'rate_limits', 'free_limits'];
 export const httpsOnly = (u) => (typeof u === 'string' && /^https:\/\/[^\s"<>]+$/i.test(u) ? u : '');
 const num = (n) => Number(n).toLocaleString('en-US');
 const nonEmpty = (s) => typeof s === 'string' && s.trim() !== '';
-
+const THIRD_PARTY_REF_RE = /https?:|\bwww\.|[A-Za-z0-9-]+\/[A-Za-z0-9._-]+|\b[a-z0-9-]+\.(?:com|org|net|io|dev|ai|co|gg|me|app|xyz|info|blog)\b/i;
 /** The entries of the file for one provider, in file order. */
 export const staleClaimsFor = (file, slug) => ((file && file.claims) || []).filter((c) => c.slug === slug);
 
@@ -51,8 +51,9 @@ export function staleClaimErrors(file, { providers, quotes, today }) {
     if (!p) { errors.push(`${where}: slug is not a provider in data/providers.json`); return; }
     if (p.verified !== true) errors.push(`${where}: the provider is not verified, so there is no current value to show`);
     if (!nonEmpty(c.claim)) errors.push(`${where}: claim must be the stale figure as it is repeated`);
-    if (!nonEmpty(c.seen_in)) errors.push(`${where}: seen_in must say where the claim was seen`);
-    if (c.seen_url != null && !httpsOnly(c.seen_url)) errors.push(`${where}: seen_url must be an https URL of the page that repeats the claim`);
+   if (!nonEmpty(c.seen_in)) errors.push(`${where}: seen_in must say where the claim was seen`);
+    else if (THIRD_PARTY_REF_RE.test(c.seen_in)) errors.push(`${where}: seen_in must describe the third-party page, not name an owner/repo or address`);
+    if (c.seen_url !== undefined) errors.push(`${where}: seen_url is not allowed (describe the third-party page in seen_in instead of linking it)`);
     if (c.seen_date != null) {
       if (!c.seen_url) errors.push(`${where}: seen_date is the date of the page at seen_url, so it needs seen_url`);
       if (!DATE_RE.test(c.seen_date)) errors.push(`${where}: seen_date must be YYYY-MM-DD (leave it out when the page states no date)`);

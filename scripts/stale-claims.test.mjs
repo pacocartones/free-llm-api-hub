@@ -58,14 +58,9 @@ test('staleClaimErrors: unknown provider, missing text, bad or future date, and 
   const unverified = PROVIDERS.find((p) => p.verified !== true);
   if (unverified) assert.ok(one({ slug: unverified.slug, evidence: [{ field: 'rate_limits' }] }).some((e) => /not verified/.test(e)));
   assert.deepEqual(staleClaimErrors({}, ctx), ['stale-claims.json: claims must be an array']);
-  // A claim seen on a public page: an https URL, and the page's own date only with it, never after the day it was noted.
-  assert.deepEqual(one({ seen_url: 'https://example.com/list', seen_date: '2026-05-01' }), []);
-  assert.deepEqual(one({ seen_url: 'https://example.com/list' }), [], 'a page that states no date');
-  assert.match(one({ seen_url: 'http://example.com/list' })[0], /seen_url must be an https URL/);
-  assert.match(one({ seen_url: 'javascript:alert(1)' })[0], /seen_url must be an https URL/);
   assert.match(one({ seen_date: '2026-05-01' })[0], /needs seen_url/);
-  assert.match(one({ seen_url: 'https://example.com/list', seen_date: 'May 2026' })[0], /seen_date must be YYYY-MM-DD/);
-  assert.match(one({ seen_url: 'https://example.com/list', seen_date: '2026-11-28', noted: '2026-11-27' })[0], /after noted/);
+  assert.ok(one({ seen_url: 'https://example.com/list', seen_date: 'May 2026' }).some((e) => /seen_date must be YYYY-MM-DD/.test(e)));
+  assert.ok(one({ seen_url: 'https://example.com/list', seen_date: '2026-11-28', noted: '2026-11-27' }).some((e) => /after noted/.test(e)));
 });
 
 test('staleClaimsHtml links the page a claim was seen on, with its date or "not stated"', () => {
@@ -135,4 +130,30 @@ test('the build fails on a claim it cannot back', () => {
   } finally {
     writeFileSync(file, saved);
   }
+});
+
+test('staleClaimErrors rejects third-party links and named pages with the claim slug in the message', () => {
+  const base = { slug: 'groq', claim: 'x', seen_in: 'a third-party GitHub list, page dated March 2026', noted: '2026-11-27', evidence: [{ field: 'free_limits' }] };
+  const one = (patch) => staleClaimErrors({ claims: [{ ...clone(base), ...patch }] }, { ...ctx, today: '2026-11-27' });
+  assert.deepEqual(one({}), []);
+
+  const withUrl = one({ seen_url: 'https://example.com/list' });
+  assert.equal(withUrl.length, 1);
+  assert.match(withUrl[0], /\(groq\)/);
+  assert.match(withUrl[0], /seen_url is not allowed/);
+
+  const withRepo = one({ seen_in: 'listed in some-owner/free-llm-list' });
+  assert.equal(withRepo.length, 1);
+  assert.match(withRepo[0], /\(groq\)/);
+  assert.match(withRepo[0], /owner\/repo or address/);
+
+  const withHttps = one({ seen_in: 'see https://example.com/list for details' });
+  assert.equal(withHttps.length, 1);
+  assert.match(withHttps[0], /\(groq\)/);
+  assert.match(withHttps[0], /owner\/repo or address/);
+
+  const withDomain = one({ seen_in: 'listed on example.com' });
+  assert.equal(withDomain.length, 1);
+  assert.match(withDomain[0], /\(groq\)/);
+  assert.match(withDomain[0], /owner\/repo or address/);
 });
