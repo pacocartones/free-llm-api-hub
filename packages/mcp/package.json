@@ -15,7 +15,7 @@
   ],
   "scripts": {
     "start": "node src/index.js",
-    "test": "node --test test/tools.test.js test/status.test.js test/stdio.test.js test/forward-compat.test.js",
+    "test": "node --test test/tools.test.js test/status.test.js test/stdio.test.js test/forward-compat.test.js test/is-free-get-provider.test.js",
     "validate:server-json": "node scripts/validate-server-json.mjs",
     "test:pack": "node --test test/pack.test.js"
   },
