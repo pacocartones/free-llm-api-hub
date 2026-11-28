@@ -1,0 +1,35 @@
+{
+  "version": "9.9.9",
+  "generated": "2026-11-28",
+  "providers": [
+    {
+      "slug": "ongoing-example",
+      "name": "Ongoing Example",
+      "category": "ongoing",
+      "free_type": "renewing-quota",
+      "free_tier": "100 requests/day",
+      "docs_url": "https://ongoing.example/docs",
+      "phone_required": false,
+      "card_required": false,
+      "commercial_ok": true,
+      "openai_compatible": true,
+      "verified": true,
+      "last_verified": "2026-11-20"
+    },
+    {
+      "slug": "trial-example",
+      "name": "Trial Example",
+      "category": "trial",
+      "free_type": "trial-credit",
+      "free_tier": "$10 credit",
+      "expires": "30 days",
+      "docs_url": "https://trial.example/pricing",
+      "phone_required": null,
+      "card_required": true,
+      "commercial_ok": null,
+      "openai_compatible": false,
+      "verified": true,
+      "last_verified": "2026-11-21"
+    }
+  ]
+}
