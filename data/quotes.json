@@ -2447,6 +2447,17 @@
    "page_sha256": "567e264be4616a1ebc34cb01b6f2ef414f2b3daad41119b523c56a5a3d79552f"
   },
   {
+   "id": "public-ai.sentence",
+   "slug": "public-ai",
+   "kind": "sentence",
+   "text": "Deleted chats are removed from active systems within 30 days, subject to legal holds (duration of legal proceedings plus 1 year).",
+   "source_url": "https://publicai.co/tc",
+   "read_on": "2026-11-28",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "382f2ce203424666795e5672e832a9bdc076cb3ea62bf100f79538f4de700902"
+  },
+  {
    "id": "public-ai.openai_compatible.sentence",
    "slug": "public-ai",
    "kind": "field_sentence",

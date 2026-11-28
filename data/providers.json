@@ -2072,7 +2072,7 @@
       "added": "2026-11-25",
       "last_probed": null,
       "probe_status": null,
-      "data_policy": null
+      "data_policy": {"trains_on_prompts":null,"retention":"Chats retained until deleted by the user; deleted chats removed from active systems within 30 days","source":"https://publicai.co/tc","checked":"2026-11-28","quote":"Deleted chats are removed from active systems within 30 days, subject to legal holds (duration of legal proceedings plus 1 year).","note":"Chat data is the prompts and outputs (§2.2); the 30-day clock starts when the user deletes a chat. Technical logs are capped at 90 days. Prompts also go to the providers the user enables, independent controllers with their own retention/training (§1.5, §2.9); this sentence does not settle training.","plan_named":false}
     },
     {
       "slug": "stability-ai",
