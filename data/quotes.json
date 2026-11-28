@@ -817,6 +817,39 @@
    "page_sha256": "276878f7ae603451f58b0b2b595bb6cee43ac47f0f84ff32d86e8f4d8fb1c80b"
   },
   {
+   "id": "sambanova.sentence",
+   "slug": "sambanova",
+   "kind": "sentence",
+   "text": "Subject to the terms of this Agreement, you hereby grant to SambaNova and its Affiliates a non-exclusive, worldwide, royalty-free right to access, store and/or process the Customer Content during the Term solely to the extent necessary to provide the Service to you or as may be required by law, and for no other purposes.",
+   "source_url": "https://sambanova.ai/cloud-end-user-license-agreement",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "36871dd2544bcb509129cc7416492e879549f7785f31516430bf50bbc6d02897"
+  },
+  {
+   "id": "sambanova.note_passage.1",
+   "slug": "sambanova",
+   "kind": "note_passage",
+   "text": "but not Customer Content",
+   "source_url": "https://sambanova.ai/cloud-end-user-license-agreement",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "36871dd2544bcb509129cc7416492e879549f7785f31516430bf50bbc6d02897"
+  },
+  {
+   "id": "sambanova.note_passage.2",
+   "slug": "sambanova",
+   "kind": "note_passage",
+   "text": "develop, improve, support, and operate",
+   "source_url": "https://sambanova.ai/cloud-end-user-license-agreement",
+   "read_on": "2026-11-26",
+   "lang": "en",
+   "method": "html-text-v1: page requested in English, tags removed, character references decoded, white space collapsed",
+   "page_sha256": "36871dd2544bcb509129cc7416492e879549f7785f31516430bf50bbc6d02897"
+  },
+  {
    "id": "sambanova.commercial_ok.sentence",
    "slug": "sambanova",
    "kind": "field_sentence",

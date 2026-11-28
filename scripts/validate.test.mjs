@@ -179,7 +179,8 @@ const INTEGRITY_CASES = [
   ['duplicate name', 'distinct provider identities', (p, d) => { p.name = d.providers.find((row) => row.slug !== p.slug).name; }, 'duplicate name'],
   ['name hidden characters', 'visible provider labels', (p) => { p.name += '\u200b'; }, 'name must not contain control, bidirectional or zero-width characters'],
   ['docs_url hidden characters', 'unambiguous source links', (p) => { p.verified = false; p.last_verified = null; p.docs_url += '\u200b'; }, 'docs_url must not contain control, bidirectional or zero-width characters'],
-  ['models_free hidden characters', 'copyable model identifiers', (p) => { p.models_free = ['example-model\u200b']; }, 'models_free must not contain control, bidirectional or zero-width characters'],
+  // Replacing models_free also drops the picked provider from its published_speed sample, which would raise a second issue; clear it so this case still isolates the one rule it names.
+  ['models_free hidden characters', 'copyable model identifiers', (p) => { p.models_free = ['example-model\u200b']; p.published_speed = undefined; }, 'models_free must not contain control, bidirectional or zero-width characters'],
   ['env_key syntax', 'usable environment variable names', (p) => { p.openai_base_url = null; p.env_key = 'api-key'; }, 'env_key must be an UPPER_SNAKE env var name'],
   ['models_url public HTTPS', 'public model catalogues', (p) => { p.models_url = 'https://127.0.0.1/models'; }, "models_url must be the provider's public HTTPS model catalogue"],
   ['data_policy.source public HTTPS', 'public policy evidence', (p) => { p.data_policy.source = 'https://127.0.0.1/policy'; }, "data_policy.source must be the provider's public HTTPS page"],
